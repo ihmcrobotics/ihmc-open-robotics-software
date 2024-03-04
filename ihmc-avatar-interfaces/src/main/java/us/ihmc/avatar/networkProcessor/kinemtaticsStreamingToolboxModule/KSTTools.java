@@ -1,13 +1,10 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
-import java.util.Arrays;
-import java.util.Collections;
-
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
@@ -17,12 +14,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
@@ -30,6 +22,8 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialVectorBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -45,6 +39,9 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
+
+import java.util.Arrays;
+import java.util.Collections;
 
 public class KSTTools
 {
@@ -141,7 +138,8 @@ public class KSTTools
                                                                                                                           desiredFullRobotModel,
                                                                                                                           ikController.getDesiredReferenceFrames());
       commandInputManager.registerConversionHelper(commandConversionHelper);
-      commandConversionHelper.process(configurationCommand, parameters.getDefaultConfiguration()); // Initialize the configurationCommand from the parameters' message
+      commandConversionHelper.process(configurationCommand,
+                                      parameters.getDefaultConfiguration()); // Initialize the configurationCommand from the parameters' message
 
       ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, ikController.getDesiredReferenceFrames()));
 
@@ -555,6 +553,15 @@ public class KSTTools
       MultiBodySystemTools.copyJointsState(Arrays.asList(source.getOneDoFJoints()), Arrays.asList(destination.getOneDoFJoints()), stateSelection);
    }
 
+   public static void computeSpatialVelocity(double dt,
+                                             FramePose3DReadOnly previousPose,
+                                             FramePose3DReadOnly currentPose,
+                                             FixedFrameSpatialVectorBasics spatialVelocityToPack)
+   {
+      computeLinearVelocity(dt, previousPose.getPosition(), currentPose.getPosition(), spatialVelocityToPack.getLinearPart());
+      computeAngularVelocity(dt, previousPose.getOrientation(), currentPose.getOrientation(), spatialVelocityToPack.getAngularPart());
+   }
+
    public static void computeLinearVelocity(double dt,
                                             FramePoint3DReadOnly previousPosition,
                                             FramePoint3DReadOnly currentPosition,
@@ -591,6 +598,15 @@ public class KSTTools
       double wz = qs * qDot_z + qx * qDot_y - qy * qDot_x + qz * qDot_s;
       angularVelocityToPack.set(wx, wy, wz);
       angularVelocityToPack.scale(2.0 / dt);
+   }
+
+   public static void integrateSpatialVelocity(double dt,
+                                               FramePose3DReadOnly initialPose,
+                                               SpatialVectorReadOnly spatialVelocity,
+                                               FixedFramePose3DBasics finalPose)
+   {
+      integrateLinearVelocity(dt, initialPose.getPosition(), spatialVelocity.getLinearPart(), finalPose.getPosition());
+      integrateAngularVelocity(dt, initialPose.getOrientation(), spatialVelocity.getAngularPart(), finalPose.getOrientation());
    }
 
    public static void integrateLinearVelocity(double dt,

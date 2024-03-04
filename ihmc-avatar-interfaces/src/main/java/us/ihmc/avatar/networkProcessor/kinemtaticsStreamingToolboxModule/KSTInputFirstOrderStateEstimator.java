@@ -233,14 +233,7 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
 
       public void extrapolateInput(double integrationDT)
       {
-         YoFramePoint3D position = rawExtrapolatedInputPose.getPosition();
-         YoFrameQuaternion orientation = rawExtrapolatedInputPose.getOrientation();
-
-         YoFrameVector3D linearVelocity = decayingInputSpatialVelocity.getLinearPart();
-         YoFrameVector3D angularVelocity = decayingInputSpatialVelocity.getAngularPart();
-
-         KSTTools.integrateLinearVelocity(integrationDT, position, linearVelocity, position);
-         KSTTools.integrateAngularVelocity(integrationDT, orientation, angularVelocity, orientation);
+         KSTTools.integrateSpatialVelocity(integrationDT, rawExtrapolatedInputPose, decayingInputSpatialVelocity, rawExtrapolatedInputPose);
          filteredExtrapolatedInputPose.update();
       }
 
@@ -259,8 +252,7 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
           * update the raw input. This way, if for the next control tick we didn't get any new inputs, the IK
           * keep moving which in result should improve continuity of any motion.
           */
-         KSTTools.computeLinearVelocity(dt, previousPose.getPosition(), currentPose.getPosition(), rawInputSpatialVelocity.getLinearPart());
-         KSTTools.computeAngularVelocity(dt, previousPose.getOrientation(), currentPose.getOrientation(), rawInputSpatialVelocity.getAngularPart());
+         KSTTools.computeSpatialVelocity(dt, previousPose, currentPose, rawInputSpatialVelocity);
          decayingInputSpatialVelocity.set(rawInputSpatialVelocity);
          inputVelocityDecayFactor.set(0.0);
       }

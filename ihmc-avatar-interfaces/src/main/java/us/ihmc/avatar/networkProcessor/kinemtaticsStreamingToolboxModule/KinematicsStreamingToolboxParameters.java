@@ -9,39 +9,128 @@ public class KinematicsStreamingToolboxParameters
 {
    public enum InputStateEstimatorType
    {
-      SPLINE_FIT, FIRST_ORDER_LPF
+      /**
+       * Simple first-order estimation of the input velocities to then perform an extrapolation in the future using again first-order integration.
+       */
+      FIRST_ORDER_LPF,
+      /**
+       * Slightly more complex estimation of the input velocities based on first order finite difference plus a correction based on the error in pose. This
+       * provides a continuous estimation of the input velocities.
+       */
+      FBC_STYLE
    }
 
+   /**
+    * Safety margin to keep the center of mass within the support polygon.
+    */
    private double centerOfMassSafeMargin;
+   /**
+    * Weight used to hold the center of mass in place.
+    */
    private double centerOfMassHoldWeight;
+   /**
+    * Period at which the kinematics solution is published to the controller.
+    * The faster, the better, but it also increases the communication load.
+    */
    private double publishingSolutionPeriod;
 
+   /**
+    * Default weight for holding the arms at the robot initial configuration when no arm message is received.
+    */
    private double defaultArmMessageWeight;
+   /**
+    * Default weight for holding the neck at the robot initial configuration when no neck message is received.
+    */
    private double defaultNeckMessageWeight;
+   /**
+    * Default weight for holding the pelvis at the robot initial configuration when no pelvis message is received.
+    */
    private final Vector3D defaultPelvisMessageLinearWeight = new Vector3D();
+   /**
+    * Default weight for holding the pelvis at the robot initial configuration when no pelvis message is received.
+    */
    private final Vector3D defaultPelvisMessageAngularWeight = new Vector3D();
+   /**
+    * Default weight for holding the chest at the robot initial configuration when no chest message is received.
+    */
    private final Vector3D defaultChestMessageAngularWeight = new Vector3D();
 
+   /**
+    * Default weight for locking the pelvis at the robot initial configuration when no pelvis message is received.
+    */
    private double defaultPelvisMessageLockWeight;
+   /**
+    * Default weight for locking the chest at the robot initial configuration when no chest message is received.
+    */
    private double defaultChestMessageLockWeight;
 
+   /**
+    * Default weight for input messages for which no weight is provided.
+    */
    private double defaultLinearWeight;
+   /**
+    * Default weight for input messages for which no weight is provided.
+    */
    private double defaultAngularWeight;
 
+   /**
+    * Default rate limit for input messages for which no rate limit is provided.
+    */
    private double defaultLinearRateLimit;
+   /**
+    * Default rate limit for input messages for which no rate limit is provided.
+    */
    private double defaultAngularRateLimit;
+   /**
+    * Scale factor used to downscale the joint velocity solution before sending it to the controller.
+    */
    private double outputJointVelocityScale;
 
+   /**
+    * Whether to minimize the angular momentum in the kinematics solution.
+    * Useful to reduce fast motions with the parts of the robot and instead privilege the motion of the extremities.
+    */
    private boolean minimizeAngularMomentum;
+   /**
+    * Whether to minimize the linear momentum in the kinematics solution.
+    * Useful to reduce fast motions with the parts of the robot and instead privilege the motion of the extremities.
+    */
    private boolean minimizeLinearMomentum;
+   /**
+    * Weight used to minimize the angular momentum in the kinematics solution.
+    */
    private double angularMomentumWeight;
+   /**
+    * Weight used to minimize the linear momentum in the kinematics solution.
+    */
    private double linearMomentumWeight;
 
+   /**
+    * Duration used to smoothly initiate the streaming to the controller.
+    */
    private double defaultStreamingBlendingDuration;
 
+   /**
+    * Break frequency used for the low-pass filter used to estimate the input pose.
+    * Only used when {@link #inputStateEstimatorType} is set to {@link InputStateEstimatorType#FIRST_ORDER_LPF}.
+    */
    private double inputPoseLPFBreakFrequency;
+   /**
+    * Duration use to decay the estimated input weight.
+    * When no input is received, the weight is decayed to zero, then the control for that end-effector is disabled.
+    */
    private double inputWeightDecayDuration;
+   /**
+    * Duration use to decay the estimated input velocity.
+    * Safety used to limit the extrapolation in the future when inputs are not being received.
+    */
    private double inputVelocityDecayDuration;
+   /**
+    * Duration used to correct the input pose in the state estimator.
+    * Should be greater than the period at which inputs are received.
+    * Only used when {@link #inputStateEstimatorType} is set to {@link InputStateEstimatorType#FBC_STYLE}.
+    */
+   private double inputPoseCorrectionDuration;
    private boolean useStreamingPublisher;
    private double publishingPeriod;
 
@@ -87,6 +176,7 @@ public class KinematicsStreamingToolboxParameters
       inputPoseLPFBreakFrequency = 4.0;
       inputWeightDecayDuration = 3.0;
       inputVelocityDecayDuration = 0.5;
+      inputPoseCorrectionDuration = 0.15;
 
       useStreamingPublisher = true;
       publishingPeriod = 5.0 * 0.006;
@@ -223,6 +313,11 @@ public class KinematicsStreamingToolboxParameters
       return inputVelocityDecayDuration;
    }
 
+   public double getInputPoseCorrectionDuration()
+   {
+      return inputPoseCorrectionDuration;
+   }
+
    public boolean getUseStreamingPublisher()
    {
       return useStreamingPublisher;
@@ -351,6 +446,11 @@ public class KinematicsStreamingToolboxParameters
    public void setInputVelocityDecayDuration(double inputVelocityDecayDuration)
    {
       this.inputVelocityDecayDuration = inputVelocityDecayDuration;
+   }
+
+   public void setInputPoseCorrectionDuration(double inputPoseCorrectionDuration)
+   {
+      this.inputPoseCorrectionDuration = inputPoseCorrectionDuration;
    }
 
    public void setUseStreamingPublisher(boolean useStreamingPublisher)

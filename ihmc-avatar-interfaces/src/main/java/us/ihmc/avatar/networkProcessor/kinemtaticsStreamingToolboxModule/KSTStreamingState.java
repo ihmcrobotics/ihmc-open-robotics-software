@@ -250,7 +250,12 @@ public class KSTStreamingState implements State
       activeInputStateEstimator.set(parameters.getInputStateEstimatorType());
       inputStateEstimatorsMap.put(InputStateEstimatorType.FIRST_ORDER_LPF,
                                   new KSTInputFirstOrderStateEstimator(controllableRigidBodies, parameters, toolboxControllerPeriod, registry));
-      inputStateEstimatorsMap.put(InputStateEstimatorType.SPLINE_FIT, new KSTInputSplineFitStateEstimator(controllableRigidBodies, registry));
+      inputStateEstimatorsMap.put(InputStateEstimatorType.FBC_STYLE,
+                                  new KSTInputFBControllerStateEstimator(controllableRigidBodies,
+                                                                         parameters,
+                                                                         toolboxControllerPeriod,
+                                                                         () -> 1.0 / inputFrequency.getValue(),
+                                                                         registry));
       inputStateEstimators = inputStateEstimatorsMap.values().toArray(new KSTInputStateEstimator[0]);
 
       for (RigidBodyBasics rigidBody : controllableRigidBodies)

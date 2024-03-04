@@ -66,6 +66,11 @@ public class SplineBasedOnlinePositionFilter3D
       estimatedAcceleration.set(splineFitter.evaluateAccelerationAt(time));
    }
 
+   public void setRegularizationWeight(double regularizationWeight)
+   {
+      splineFitter.setRegularizationWeight(regularizationWeight);
+   }
+
    public void setWeightCalculator(WeightCalculator weightCalculator)
    {
       splineFitter.setWeightCalculator(weightCalculator);

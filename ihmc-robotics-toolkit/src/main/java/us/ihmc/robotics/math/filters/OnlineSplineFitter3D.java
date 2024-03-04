@@ -38,6 +38,11 @@ public class OnlineSplineFitter3D
       isSplineInitialized = false;
    }
 
+   public void setRegularizationWeight(double regularizationWeight)
+   {
+      splineFitter.setRegularizationWeight(regularizationWeight);
+   }
+
    public void setWeightCalculator(WeightCalculator weightCalculator)
    {
       this.weightCalculator = weightCalculator;
@@ -79,23 +84,13 @@ public class OnlineSplineFitter3D
 
       double oldestAcceptableTime = newestPoint.getTime() - windowTimeMax;
       splineFitter.clear();
+      newestPoint.setWeight(computeDataPointWeight(newestPoint, newestPoint, oldestPoint, 0));
       splineFitter.addPoint(newestPoint);
 
       for (int i = 1; i < buffer.size(); i++)
       {
          DataPoint3D point = buffer.getFromLast(i);
-         if (weightCalculator != null)
-         {
-            double weight = weightCalculator.calculateWeight(point, newestPoint.getTime(), oldestPoint.getTime(), i, buffer.size());
-            if (weight < 0.0 || Double.isNaN(weight))
-               point.setWeight(DEFAULT_WEIGHT);
-            else
-               point.setWeight(weight);
-         }
-         else
-         {
-            point.setWeight(DEFAULT_WEIGHT);
-         }
+         point.setWeight(computeDataPointWeight(point, newestPoint, oldestPoint, i));
 
          if (point.getWeight() == 0.0)
             continue;
@@ -108,6 +103,24 @@ public class OnlineSplineFitter3D
 
       splineFitter.fit();
       isSplineInitialized = true;
+   }
+
+   private double computeDataPointWeight(DataPoint3D point, DataPoint3D newestPoint, DataPoint3D oldestPoint, int i)
+   {
+      double newWeight;
+      if (weightCalculator != null)
+      {
+         double weight = weightCalculator.calculateWeight(point, newestPoint.getTime(), oldestPoint.getTime(), i, buffer.size());
+         if (weight < 0.0 || Double.isNaN(weight))
+            newWeight = DEFAULT_WEIGHT;
+         else
+            newWeight = weight;
+      }
+      else
+      {
+         newWeight = DEFAULT_WEIGHT;
+      }
+      return newWeight;
    }
 
    public int getNumberOfPoints()
@@ -394,6 +407,6 @@ public class OnlineSplineFitter3D
    public static WeightCalculator createExponentialWeightCalculator(DoubleProvider decayRate)
    {
       return (point3D, newestTime, oldestTime, index, numberOfPoints) -> Math.exp(
-            -decayRate.getValue() * (point3D.getTime() - oldestTime) / (newestTime - oldestTime));
+            -decayRate.getValue() * (point3D.getTime() - newestTime) / (oldestTime - newestTime));
    }
 }
