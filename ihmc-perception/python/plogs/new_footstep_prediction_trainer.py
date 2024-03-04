@@ -10,7 +10,7 @@ import os.path
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
 from plotting.height_map_tools import *
-from footstep_dataset_loader import visualize_plan
+from footstep_dataset_visualizer import visualize_plan
 from hdf5_reader import *
 import os
 

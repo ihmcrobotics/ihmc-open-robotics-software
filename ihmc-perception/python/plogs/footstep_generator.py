@@ -1,4 +1,4 @@
-from footstep_dataset_loader import visualize_plan
+from footstep_dataset_visualizer import visualize_plan
 from hdf5_reader import *
 from terrain_map_analyzer import plot_and_compute_stats
 
