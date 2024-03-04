@@ -248,8 +248,8 @@ public abstract class SwingTrajectoryParameters
     */
    public double getFractionOfSwingToPitchFootDown()
    {
-      return 0.25;
-  }
+      return 0.4;
+   }
 
    /**
     * When {@link #addFootPitchToAvoidHeelStrikeWhenSteppingDown()} is true, this specifies the amount
@@ -267,7 +267,7 @@ public abstract class SwingTrajectoryParameters
     */
    public double getMinHeightDifferenceForStepUpOrDown()
    {
-      return 0.04;
+      return 0.075;
    }
 
    /**
