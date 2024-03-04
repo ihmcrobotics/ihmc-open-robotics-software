@@ -50,9 +50,9 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
    private final File heightMapDirectory = new File(IHMCCommonPaths.USER_HOME_DIRECTORY.resolve("Downloads/HeightMap_Datasets/").toString());
    private final File[] files = heightMapDirectory.listFiles(name -> name.toString().contains(".hdf5"));
 
-   private final String logFileName = files[0].toString();
+   //private final String logFileName = files[0].toString();
    //private final String logFileName = "20230117_161540_GoodPerceptionLog.hdf5"; // Ouster
-   //private final String logFileName = "IROS_2023/20230228_201947_PerceptionLog.hdf5"; // D455
+   private final String logFileName = "IROS_2023/20230228_201947_PerceptionLog.hdf5"; // D455
 
    private final String perceptionLogFile = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString();
    private final PoseReferenceFrame cameraFrame = new PoseReferenceFrame("l515ReferenceFrame", ReferenceFrame.getWorldFrame());
@@ -111,12 +111,12 @@ public class RDXRapidRegionsExtractionDemo implements RenderableProvider
             navigationPanel = new RDXPanel("Dataset Navigation Panel");
             baseUI.getImGuiPanelManager().addPanel(navigationPanel);
 
-            //createForPerspective(720, 1280, false); // Real D455
+            createForPerspective(720, 1280, false); // Real D455
             //createForPerspective(768, 1024, false); // Real L515
             //createForPerspective(768, 1280, true); // Simulated L515
             //createForSpherical(128, 2048); // Ouster OS0-128 (2048)
             //createForSpherical(64, 2048); // Ouster OS0-128 (2048)
-            createForOrthographic(201, 201); // for extracting rapid planar regions from height maps
+            //createForOrthographic(201, 201); // for extracting rapid planar regions from height maps
 
             setupTrajectoryVisualizers();
             baseUI.getPrimaryScene().addRenderableProvider(RDXRapidRegionsExtractionDemo.this, RDXSceneLevel.VIRTUAL);
