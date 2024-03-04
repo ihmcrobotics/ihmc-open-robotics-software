@@ -76,7 +76,7 @@ public class MonteCarloFootstepPlanner
       // Debug Only
 
       statistics.stopTotalTime();
-      statistics.setLayerCountsString(MonteCarloPlannerTools.getLayerCountsString(root));
+      //statistics.setLayerCountsString(MonteCarloPlannerTools.getLayerCountsString(root));
       statistics.logToFile(true, true);
 
       if (timeSpentPlanningSoFar > request.getTimeout())
@@ -127,7 +127,7 @@ public class MonteCarloFootstepPlanner
             // Back Propagation
             statistics.startPropagationTime();
             childNode.setValue((float) score);
-            backPropagate(node, (float) score);
+            backPropagate(node, (float) score, 0);
             statistics.stopPropagationTime();
          }
       }
@@ -167,7 +167,7 @@ public class MonteCarloFootstepPlanner
             {
                MonteCarloFootstepNode existingNode = visitedNodes.get(newState);
                node.addChild(existingNode);
-               existingNode.getParents().add(node);
+               existingNode.addParent(node);
             }
             else
             {
@@ -212,19 +212,21 @@ public class MonteCarloFootstepPlanner
       return score;
    }
 
-   public void backPropagate(MonteCarloFootstepNode node, float score)
+   public void backPropagate(MonteCarloFootstepNode node, float score, int callLevel)
    {
       if (timeSpentPlanningSoFar > request.getTimeout())
          return;
 
+      //LogTools.info("Back Propagate: {} {} {}", node.getLevel(), callLevel, score);
+
       node.setValue(Math.max( (float) (score * parameters.getDecayFactor()), node.getValue()));
       node.incrementVisits();
 
-      if (!node.getParents().isEmpty())
+      if (!node.getParents().isEmpty() && node.getLevel() > 0 && callLevel < parameters.getMaxTreeDepth())
       {
          for (MonteCarloTreeNode parent : node.getParents())
          {
-            backPropagate((MonteCarloFootstepNode) parent, score);
+            backPropagate((MonteCarloFootstepNode) parent, score, callLevel + 1);
          }
       }
    }

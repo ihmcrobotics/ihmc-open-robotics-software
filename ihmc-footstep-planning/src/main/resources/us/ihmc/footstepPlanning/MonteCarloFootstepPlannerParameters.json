@@ -2,22 +2,22 @@
   "title" : "MonteCarloFootstepPlannerParameters",
   "Reset" : false,
   "Number of iterations" : {
-    "value" : 900,
+    "value" : 90,
     "lowerBound" : 1,
     "upperBound" : 400
   },
   "Number of simulations" : {
-    "value" : 4,
+    "value" : 10,
     "lowerBound" : 1,
     "upperBound" : 400
   },
   "Timeout duration" : {
-    "value" : 0.50276,
+    "value" : 0.05,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
   "Feasible Contact Reward" : {
-    "value" : 403.669715,
+    "value" : 203.669715,
     "lowerBound" : 0.0,
     "upperBound" : 1000.0
   },
@@ -32,7 +32,7 @@
     "upperBound" : 1000000
   },
   "Max number of child nodes" : {
-    "value" : 6,
+    "value" : 5,
     "lowerBound" : 5,
     "upperBound" : 1000
   },
@@ -62,7 +62,7 @@
     "upperBound" : 1000
   },
   "Max tree depth" : {
-    "value" : 5,
+    "value" : 15,
     "lowerBound" : 2,
     "upperBound" : 12
   },
