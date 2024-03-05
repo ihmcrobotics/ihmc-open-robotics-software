@@ -157,12 +157,12 @@ public class KinematicsStreamingToolboxController extends ToolboxController
 
    public void setTrajectoryMessagePublisher(WholeBodyTrajectoryMessagePublisher outputPublisher)
    {
-      streamingState.setTrajectoryMessagerPublisher(outputPublisher);
+      tools.setTrajectoryMessagerPublisher(outputPublisher);
    }
 
    public void setStreamingMessagePublisher(WholeBodyStreamingMessagePublisher outputPublisher)
    {
-      streamingState.setStreamingMessagePublisher(outputPublisher);
+      tools.setStreamingMessagePublisher(outputPublisher);
    }
 
    @Override

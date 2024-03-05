@@ -20,7 +20,7 @@ public class KSTDownscaleVelocityOutputProcessor implements KSTOutputProcessor
       this.downscaleFactor = downscaleFactor;
 
       FullHumanoidRobotModel desiredFullRobotModel = tools.getDesiredFullRobotModel();
-      outputRobotState = new YoKinematicsToolboxOutputStatus("FD", desiredFullRobotModel, registry);
+      outputRobotState = new YoKinematicsToolboxOutputStatus("downscaled", desiredFullRobotModel, registry);
    }
 
    @Override

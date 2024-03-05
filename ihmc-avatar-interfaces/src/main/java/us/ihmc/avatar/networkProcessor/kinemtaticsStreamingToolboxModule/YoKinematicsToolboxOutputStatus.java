@@ -113,6 +113,19 @@ public class YoKinematicsToolboxOutputStatus
       desiredRootJointVelocity.set(status.getDesiredRootAngularVelocity(), status.getDesiredRootLinearVelocity());
    }
 
+   public void setConfigurationOnly(KinematicsToolboxOutputStatus status)
+   {
+      if (status.getJointNameHash() != jointNameHash.getValue())
+         throw new IllegalArgumentException("Incompatible status");
+
+      for (int i = 0; i < numberOfJoints; i++)
+      {
+         desiredJointAngles[i].set(status.getDesiredJointAngles().get(i));
+      }
+
+      desiredRootJointPose.set(status.getDesiredRootPosition(), status.getDesiredRootOrientation());
+   }
+
    public void set(YoKinematicsToolboxOutputStatus other)
    {
       jointNameHash.set(other.jointNameHash.getValue());

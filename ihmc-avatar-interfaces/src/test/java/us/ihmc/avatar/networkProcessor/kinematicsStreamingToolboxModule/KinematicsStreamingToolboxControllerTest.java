@@ -428,6 +428,8 @@ public abstract class KinematicsStreamingToolboxControllerTest
                side.getCamelCaseName() + "HandDesired", worldFrame, spyRegistry));
          private final SideDependentList<YoFramePose3D> handCurrentPoses = new SideDependentList<>(side -> new YoFramePose3D(
                side.getCamelCaseName() + "HandCurrent", worldFrame, spyRegistry));
+         private final SideDependentList<YoFramePose3D> handControllerPoses = new SideDependentList<>(side -> new YoFramePose3D(
+               side.getCamelCaseName() + "HandController", worldFrame, spyRegistry));
          private final SideDependentList<YoDouble> handPositionErrors = new SideDependentList<>(side -> new YoDouble(
                side.getCamelCaseName() + "HandPositionError", spyRegistry));
          private final SideDependentList<YoDouble> handOrientationErrors = new SideDependentList<>(side -> new YoDouble(
@@ -470,6 +472,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
             {
                handDesiredPoses.values().forEach(YoFramePose3D::setToNaN);
                handCurrentPoses.values().forEach(YoFramePose3D::setToNaN);
+               handControllerPoses.values().forEach(YoFramePose3D::setToNaN);
                return;
             }
 
@@ -479,6 +482,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
             {
                handDesiredPoses.values().forEach(YoFramePose3D::setToNaN);
                handCurrentPoses.values().forEach(YoFramePose3D::setToNaN);
+               handControllerPoses.values().forEach(YoFramePose3D::setToNaN);
                return;
             }
 
@@ -486,11 +490,13 @@ public abstract class KinematicsStreamingToolboxControllerTest
             {
                YoFramePose3D handDesiredPose = handDesiredPoses.get(robotSide);
                YoFramePose3D handCurrentPose = handCurrentPoses.get(robotSide);
+               YoFramePose3D handControllerPose = handControllerPoses.get(robotSide);
                YoDouble handPositionError = handPositionErrors.get(robotSide);
                YoDouble handOrientationError = handOrientationErrors.get(robotSide);
 
                handDesiredPose.setFromReferenceFrame(desiredFullRobotModel.getHandControlFrame(robotSide));
                handCurrentPose.setFromReferenceFrame(toolboxController.getTools().getCurrentFullRobotModel().getHandControlFrame(robotSide));
+               handControllerPose.setFromReferenceFrame(simulationTestHelper.getControllerFullRobotModel().getHandControlFrame(robotSide));
                handPositionError.set(handDesiredPose.getPositionDistance(handCurrentPose));
                handOrientationError.set(handDesiredPose.getOrientationDistance(handCurrentPose));
                positionMean.increment(handPositionError.getValue());

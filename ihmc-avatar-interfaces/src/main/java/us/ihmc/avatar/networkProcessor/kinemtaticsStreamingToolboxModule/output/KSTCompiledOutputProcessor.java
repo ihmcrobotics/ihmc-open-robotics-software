@@ -5,6 +5,7 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTool
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.YoKinematicsToolboxOutputStatus;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -18,7 +19,7 @@ public class KSTCompiledOutputProcessor implements KSTOutputProcessor
    private final YoDouble solutionFilterBreakFrequency;
    private final YoDouble outputJointVelocityScale;
 
-   public KSTCompiledOutputProcessor(KSTTools tools, DoubleProvider streamingBlendingDuration, YoRegistry registry)
+   public KSTCompiledOutputProcessor(KSTTools tools, DoubleProvider streamingBlendingDuration, BooleanProvider isPublishing, YoRegistry registry)
    {
       solutionFilterBreakFrequency = new YoDouble("solutionFilterBreakFrequency", registry);
       outputJointVelocityScale = new YoDouble("outputJointVelocityScale", registry);
@@ -32,6 +33,7 @@ public class KSTCompiledOutputProcessor implements KSTOutputProcessor
       solutionFilterBreakFrequency.set(Double.POSITIVE_INFINITY);
 
       outputProcessors.add(new KSTLowPassFilteredOutputProcessor(tools, solutionFilterBreakFrequency, registry));
+      outputProcessors.add(new KSTFiniteDifferenceOutputProcessor(tools, isPublishing, registry));
       outputProcessors.add(new KSTDownscaleVelocityOutputProcessor(tools, outputJointVelocityScale, registry));
       outputProcessors.add(new KSTBlendingOutputProcessor(tools, streamingBlendingDuration, registry));
    }

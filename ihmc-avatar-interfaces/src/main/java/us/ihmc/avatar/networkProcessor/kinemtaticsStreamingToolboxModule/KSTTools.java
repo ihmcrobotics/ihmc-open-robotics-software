@@ -9,6 +9,8 @@ import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyStreamingMessagePublisher;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyTrajectoryMessagePublisher;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -96,6 +98,13 @@ public class KSTTools
 
    private final YoLong latestInputTimestamp;
 
+   private final YoBoolean useStreamingPublisher;
+
+   private WholeBodyTrajectoryMessagePublisher trajectoryMessagePublisher = m ->
+   {
+   };
+   private WholeBodyStreamingMessagePublisher streamingMessagePublisher = null;
+
    public KSTTools(CommandInputManager commandInputManager,
                    StatusMessageOutputManager statusOutputManager,
                    KinematicsStreamingToolboxParameters parameters,
@@ -173,6 +182,9 @@ public class KSTTools
       }
 
       latestInputTimestamp = new YoLong("latestInputTimestamp", registry);
+
+      useStreamingPublisher = new YoBoolean("useStreamingPublisher", registry);
+      useStreamingPublisher.set(parameters.getUseStreamingPublisher());
    }
 
    public void update()
@@ -309,6 +321,26 @@ public class KSTTools
       hasPreviousInput.set(false);
       latestInputReceivedTime.set(-1.0);
       previousInputReceivedTime.set(-1.0);
+   }
+
+   public void setTrajectoryMessagerPublisher(WholeBodyTrajectoryMessagePublisher outputPublisher)
+   {
+      this.trajectoryMessagePublisher = outputPublisher;
+   }
+
+   public void setStreamingMessagePublisher(WholeBodyStreamingMessagePublisher streamingMessagePublisher)
+   {
+      this.streamingMessagePublisher = streamingMessagePublisher;
+   }
+
+   public void streamToController(KinematicsToolboxOutputStatus outputToPublish, boolean finalizeTrajectory)
+   {
+      if (finalizeTrajectory)
+         trajectoryMessagePublisher.publish(setupFinalizeTrajectoryMessage(outputToPublish));
+      else if (streamingMessagePublisher == null || !useStreamingPublisher.getValue())
+         trajectoryMessagePublisher.publish(setupTrajectoryMessage(outputToPublish));
+      else
+         streamingMessagePublisher.publish(setupStreamingMessage(outputToPublish));
    }
 
    public WholeBodyStreamingMessage setupStreamingMessage(KinematicsToolboxOutputStatus solutionToConvert)

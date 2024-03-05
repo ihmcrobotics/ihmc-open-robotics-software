@@ -3,8 +3,6 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyStreamingMessagePublisher;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyTrajectoryMessagePublisher;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters.InputStateEstimatorType;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.input.KSTInputFBControllerStateEstimator;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.input.KSTInputFirstOrderStateEstimator;
@@ -58,15 +56,12 @@ public class KSTStreamingState implements State
    private final KSTTools tools;
    private final double toolboxControllerPeriod;
 
-   private final YoBoolean useStreamingPublisher = new YoBoolean("useStreamingPublisher", registry);
-
-   private WholeBodyTrajectoryMessagePublisher trajectoryMessagePublisher = m ->
-   {
-   };
-   private WholeBodyStreamingMessagePublisher streamingMessagePublisher = null;
    private final YoDouble timeOfLastMessageSentToController = new YoDouble("timeOfLastMessageSentToController", registry);
+   /**
+    * Allows to observe when the IK streaming actually publishes its output to the controller.
+    */
+   private final YoBoolean isPublishing = new YoBoolean("isPublishing", registry);
    private final YoDouble publishingPeriod = new YoDouble("publishingPeriod", registry);
-   private final FullHumanoidRobotModel desiredFullRobotModel;
    private final CommandInputManager ikCommandInputManager;
 
    private final List<KinematicsToolboxOneDoFJointMessage> defaultNeckJointMessages;
@@ -145,7 +140,6 @@ public class KSTStreamingState implements State
    public KSTStreamingState(KSTTools tools)
    {
       KinematicsStreamingToolboxParameters parameters = tools.getParameters();
-      useStreamingPublisher.set(parameters.getUseStreamingPublisher());
       this.tools = tools;
       toolboxControllerPeriod = tools.getToolboxControllerPeriod();
       ikController = tools.getIKController();
@@ -156,7 +150,7 @@ public class KSTStreamingState implements State
       ikController.getMomentumWeight().set(parameters.getCenterOfMassHoldWeight());
       ikController.minimizeMomentum(parameters.isMinimizeAngularMomentum(), parameters.isMinimizeLinearMomentum());
       ikController.setMomentumWeight(parameters.getAngularMomentumWeight(), parameters.getLinearMomentumWeight());
-      desiredFullRobotModel = tools.getDesiredFullRobotModel();
+      FullHumanoidRobotModel desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikCommandInputManager = tools.getIKCommandInputManager();
 
       tools.getRegistry().addChild(registry);
@@ -218,7 +212,7 @@ public class KSTStreamingState implements State
       defaultLinearRateLimit.set(parameters.getDefaultLinearRateLimit());
       defaultAngularRateLimit.set(parameters.getDefaultAngularRateLimit());
       streamingBlendingDuration.set(parameters.getDefaultStreamingBlendingDuration());
-      outputProcessor = new KSTCompiledOutputProcessor(tools, streamingBlendingDuration, registry);
+      outputProcessor = new KSTCompiledOutputProcessor(tools, streamingBlendingDuration, isPublishing, registry);
 
       { // Filter for locking
          DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(lockPoseFilterBreakFrequency.getValue(),
@@ -260,16 +254,6 @@ public class KSTStreamingState implements State
       {
          rigidBodyControlStartTimeArray[index++] = rigidBodyControlStartTimeMap.get(rigidBody);
       }
-   }
-
-   public void setTrajectoryMessagerPublisher(WholeBodyTrajectoryMessagePublisher outputPublisher)
-   {
-      this.trajectoryMessagePublisher = outputPublisher;
-   }
-
-   public void setStreamingMessagePublisher(WholeBodyStreamingMessagePublisher streamingMessagePublisher)
-   {
-      this.streamingMessagePublisher = streamingMessagePublisher;
    }
 
    @Override
@@ -580,32 +564,28 @@ public class KSTStreamingState implements State
          }
       }
 
-      outputProcessor.update(timeInState, wasStreaming.getValue(), isStreaming.getValue(), tools.getIKController().getSolution());
-
       if (isStreaming.getValue())
       {
-
-         double timeSinceLastPublished = timeInState - timeOfLastMessageSentToController.getValue();
-
-         if (timeSinceLastPublished >= publishingPeriod.getValue())
-         {
-
-            if (streamingMessagePublisher == null || !useStreamingPublisher.getValue())
-               trajectoryMessagePublisher.publish(tools.setupTrajectoryMessage(outputProcessor.getProcessedOutput()));
-            else
-               streamingMessagePublisher.publish(tools.setupStreamingMessage(outputProcessor.getProcessedOutput()));
-
+         isPublishing.set((timeInState - timeOfLastMessageSentToController.getValue()) >= publishingPeriod.getValue());
+         if (isPublishing.getValue())
             timeOfLastMessageSentToController.set(timeInState);
-         }
+      }
+      else if (wasStreaming.getValue())
+      {
+         isPublishing.set(true);
+         timeOfLastMessageSentToController.set(timeInState);
       }
       else
       {
-         if (wasStreaming.getValue())
-         {
-            trajectoryMessagePublisher.publish(tools.setupFinalizeTrajectoryMessage(outputProcessor.getProcessedOutput()));
-         }
-
+         isPublishing.set(false);
          timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);
+      }
+
+      outputProcessor.update(timeInState, wasStreaming.getValue(), isStreaming.getValue(), tools.getIKController().getSolution());
+
+      if (isPublishing.getValue())
+      {
+         tools.streamToController(outputProcessor.getProcessedOutput(), !isStreaming.getValue());
       }
 
       wasStreaming.set(isStreaming.getValue());

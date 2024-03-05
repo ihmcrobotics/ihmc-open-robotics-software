@@ -22,7 +22,7 @@ public class KSTLowPassFilteredOutputProcessor implements KSTOutputProcessor
       updateDT = tools.getToolboxControllerPeriod();
 
       FullHumanoidRobotModel desiredFullRobotModel = tools.getDesiredFullRobotModel();
-      filteredRobotState = new YoKinematicsToolboxOutputStatus("filtered", desiredFullRobotModel, registry);
+      filteredRobotState = new YoKinematicsToolboxOutputStatus("lpf", desiredFullRobotModel, registry);
    }
 
    @Override
