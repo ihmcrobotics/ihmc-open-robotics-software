@@ -67,6 +67,12 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       super.update();
 
       trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
+
+      boolean canExecute = x1KnuckleJoints.get(definition.getSide()) != null;
+      canExecute &= x2KnuckleJoints.get(definition.getSide()) != null;
+      canExecute &= syncedRobot.getSakeHandStatus().get(definition.getSide()).getIsCalibrated();
+      canExecute &= !syncedRobot.getSakeHandStatus().get(definition.getSide()).getNeedsReset();
+      state.setCanExecute(canExecute);
    }
 
    @Override
