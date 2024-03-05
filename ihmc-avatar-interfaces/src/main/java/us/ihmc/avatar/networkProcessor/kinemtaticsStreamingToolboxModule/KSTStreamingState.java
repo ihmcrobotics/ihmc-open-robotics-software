@@ -126,9 +126,9 @@ public class KSTStreamingState implements State
 
    private final YoDouble streamingBlendingDuration = new YoDouble("streamingBlendingDuration", registry);
    private final YoDouble solutionFilterBreakFrequency = new YoDouble("solutionFilterBreakFrequency", registry);
-   private final YoKinematicsToolboxOutputStatus ikRobotState, filteredRobotState, outputRobotState;
+   private final YoKinematicsToolboxOutputStatus ikRobotState, filteredRobotState;
    private final YoDouble outputJointVelocityScale = new YoDouble("outputJointVelocityScale", registry);
-   private final KSTBlendingOutputProcessor blendingOutputProcessor;
+   private final KSTOutputProcessors outputProcessors = new KSTOutputProcessors();
 
    private final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
    private final YoDouble timeSinceLastInput = new YoDouble("timeSinceLastInput", registry);
@@ -226,8 +226,8 @@ public class KSTStreamingState implements State
       OneDoFJointBasics[] oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
       ikRobotState = new YoKinematicsToolboxOutputStatus("IK", rootJoint, oneDoFJoints, registry);
       filteredRobotState = new YoKinematicsToolboxOutputStatus("Filtered", rootJoint, oneDoFJoints, registry);
-      outputRobotState = new YoKinematicsToolboxOutputStatus("FD", rootJoint, oneDoFJoints, registry);
-      blendingOutputProcessor = new KSTBlendingOutputProcessor(tools, streamingBlendingDuration, registry);
+      outputProcessors.add(new KSTDownscaleVelocityOutputProcessor(tools, outputJointVelocityScale, registry));
+      outputProcessors.add(new KSTBlendingOutputProcessor(tools, streamingBlendingDuration, registry));
 
       { // Filter for locking
          DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(lockPoseFilterBreakFrequency.getValue(),
@@ -389,8 +389,7 @@ public class KSTStreamingState implements State
 
       ikRobotState.setToNaN();
       filteredRobotState.setToNaN();
-      outputRobotState.setToNaN();
-      blendingOutputProcessor.initialize();
+      outputProcessors.initialize();
 
       timeOfLastInput.set(Double.NaN);
       timeSinceLastInput.set(Double.NaN);
@@ -609,6 +608,8 @@ public class KSTStreamingState implements State
          filteredRobotState.interpolate(ikRobotState.getStatus(), filteredRobotState.getStatus(), alphaFilter);
       }
 
+      outputProcessors.update(timeInState, wasStreaming.getValue(), isStreaming.getValue(), filteredRobotState.getStatus());
+
       if (isStreaming.getValue())
       {
 
@@ -616,15 +617,11 @@ public class KSTStreamingState implements State
 
          if (timeSinceLastPublished >= publishingPeriod.getValue())
          {
-            outputRobotState.set(filteredRobotState);
-            outputRobotState.scaleVelocities(outputJointVelocityScale.getValue());
-
-            blendingOutputProcessor.update(timeInState, wasStreaming.getValue(), isStreaming.getValue(), outputRobotState.getStatus());
 
             if (streamingMessagePublisher == null || !useStreamingPublisher.getValue())
-               trajectoryMessagePublisher.publish(tools.setupTrajectoryMessage(blendingOutputProcessor.getProcessedOutput()));
+               trajectoryMessagePublisher.publish(tools.setupTrajectoryMessage(outputProcessors.getProcessedOutput()));
             else
-               streamingMessagePublisher.publish(tools.setupStreamingMessage(blendingOutputProcessor.getProcessedOutput()));
+               streamingMessagePublisher.publish(tools.setupStreamingMessage(outputProcessors.getProcessedOutput()));
 
             timeOfLastMessageSentToController.set(timeInState);
          }
@@ -633,10 +630,7 @@ public class KSTStreamingState implements State
       {
          if (wasStreaming.getValue())
          {
-            outputRobotState.set(filteredRobotState);
-            outputRobotState.scaleVelocities(outputJointVelocityScale.getValue());
-            blendingOutputProcessor.update(timeInState, wasStreaming.getValue(), isStreaming.getValue(), outputRobotState.getStatus());
-            trajectoryMessagePublisher.publish(tools.setupFinalizeTrajectoryMessage(blendingOutputProcessor.getProcessedOutput()));
+            trajectoryMessagePublisher.publish(tools.setupFinalizeTrajectoryMessage(outputProcessors.getProcessedOutput()));
          }
 
          timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);
