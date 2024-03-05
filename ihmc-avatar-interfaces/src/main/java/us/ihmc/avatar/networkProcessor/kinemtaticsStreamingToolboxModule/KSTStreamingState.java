@@ -126,7 +126,7 @@ public class KSTStreamingState implements State
 
    private final YoDouble streamingBlendingDuration = new YoDouble("streamingBlendingDuration", registry);
    private final YoDouble solutionFilterBreakFrequency = new YoDouble("solutionFilterBreakFrequency", registry);
-   private final YoKinematicsToolboxOutputStatus ikRobotState, filteredRobotState;
+   private final YoKinematicsToolboxOutputStatus ikRobotState;
    private final YoDouble outputJointVelocityScale = new YoDouble("outputJointVelocityScale", registry);
    private final KSTOutputProcessors outputProcessors = new KSTOutputProcessors();
 
@@ -225,7 +225,7 @@ public class KSTStreamingState implements State
       FloatingJointBasics rootJoint = desiredFullRobotModel.getRootJoint();
       OneDoFJointBasics[] oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
       ikRobotState = new YoKinematicsToolboxOutputStatus("IK", rootJoint, oneDoFJoints, registry);
-      filteredRobotState = new YoKinematicsToolboxOutputStatus("Filtered", rootJoint, oneDoFJoints, registry);
+      outputProcessors.add(new KSTLowPassFilteredOutputProcessor(tools, solutionFilterBreakFrequency, registry));
       outputProcessors.add(new KSTDownscaleVelocityOutputProcessor(tools, outputJointVelocityScale, registry));
       outputProcessors.add(new KSTBlendingOutputProcessor(tools, streamingBlendingDuration, registry));
 
@@ -280,8 +280,6 @@ public class KSTStreamingState implements State
    {
       this.streamingMessagePublisher = streamingMessagePublisher;
    }
-
-   private boolean resetFilter = false;
 
    @Override
    public void onEntry()
@@ -385,10 +383,7 @@ public class KSTStreamingState implements State
          }
       }
 
-      resetFilter = true;
-
       ikRobotState.setToNaN();
-      filteredRobotState.setToNaN();
       outputProcessors.initialize();
 
       timeOfLastInput.set(Double.NaN);
@@ -596,19 +591,7 @@ public class KSTStreamingState implements State
          }
       }
 
-      if (resetFilter)
-      {
-         filteredRobotState.set(ikRobotState);
-         resetFilter = false;
-      }
-      else
-      {
-         double alphaFilter = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(solutionFilterBreakFrequency.getValue(),
-                                                                                              tools.getToolboxControllerPeriod());
-         filteredRobotState.interpolate(ikRobotState.getStatus(), filteredRobotState.getStatus(), alphaFilter);
-      }
-
-      outputProcessors.update(timeInState, wasStreaming.getValue(), isStreaming.getValue(), filteredRobotState.getStatus());
+      outputProcessors.update(timeInState, wasStreaming.getValue(), isStreaming.getValue(), ikRobotState.getStatus());
 
       if (isStreaming.getValue())
       {
