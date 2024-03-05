@@ -1,11 +1,8 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import java.util.List;
-
-import org.ejml.data.DMatrixRMaj;
-
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
@@ -31,6 +28,8 @@ import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
+
+import java.util.List;
 
 public class KinematicsToolboxHelper
 {
@@ -88,7 +87,7 @@ public class KinematicsToolboxHelper
       feedbackControlCommandToPack.setGains(gains);
       feedbackControlCommandToPack.setWeightMatrixForSolver(command.getWeightMatrix());
       feedbackControlCommandToPack.setSelectionMatrix(command.getSelectionMatrix());
-      feedbackControlCommandToPack.setInverseKinematics(command.getDesiredPose(), zeroVector6D);
+      feedbackControlCommandToPack.setInverseKinematics(command.getDesiredPose(), command.getDesiredVelocity());
       feedbackControlCommandToPack.setControlFrameFixedInEndEffector(command.getControlFramePose());
    }
 

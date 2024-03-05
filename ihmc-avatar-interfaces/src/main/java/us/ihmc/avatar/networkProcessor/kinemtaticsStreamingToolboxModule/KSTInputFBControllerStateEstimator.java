@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
@@ -114,6 +115,13 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
       return inputPoseEstimator != null ? inputPoseEstimator.getEstimatedPose() : null;
    }
 
+   @Override
+   public SpatialVectorReadOnly getEstimatedVelocity(RigidBodyReadOnly endEffector)
+   {
+      SingleEndEffectorEstimator inputPoseEstimator = inputPoseEstimators.get(endEffector);
+      return inputPoseEstimator != null ? inputPoseEstimator.getEstimatedVelocity() : null;
+   }
+
    private class SingleEndEffectorEstimator
    {
       private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -135,18 +143,18 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
          String namePrefix = endEffector.getName() + "_FBC_";
          estimatedPose = new YoFramePose3D(new YoFramePoint3D(namePrefix + "EstimatedPosition", worldFrame, registry),
                                            new YoFrameQuaternion(namePrefix + "EstimatedOrientation", worldFrame, registry));
-         estimatedVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "EstimatedLinearVelocity", worldFrame, registry),
-                                                           new YoFrameVector3D(namePrefix + "EstimatedAngularVelocity", worldFrame, registry));
+         estimatedVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "EstimatedAngularVelocity", worldFrame, registry),
+                                                           new YoFrameVector3D(namePrefix + "EstimatedLinearVelocity", worldFrame, registry));
 
-         correctiveVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "CorrectiveLinearVelocity", worldFrame, registry),
-                                                            new YoFrameVector3D(namePrefix + "CorrectiveAngularVelocity", worldFrame, registry));
+         correctiveVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "CorrectiveAngularVelocity", worldFrame, registry),
+                                                            new YoFrameVector3D(namePrefix + "CorrectiveLinearVelocity", worldFrame, registry));
 
          lastUpdateTime = new YoDouble(namePrefix + "LastUpdateTime", registry);
          lastInputTimestamp = new YoLong(namePrefix + "LastInputTimestamp", registry);
          lastInputPose = new YoFramePose3D(new YoFramePoint3D(namePrefix + "LastInputPosition", worldFrame, registry),
                                            new YoFrameQuaternion(namePrefix + "LastInputOrientation", worldFrame, registry));
-         lastInputVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "LastInputLinearVelocity", worldFrame, registry),
-                                                           new YoFrameVector3D(namePrefix + "LastInputAngularVelocity", worldFrame, registry));
+         lastInputVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "LastInputAngularVelocity", worldFrame, registry),
+                                                           new YoFrameVector3D(namePrefix + "LastInputLinearVelocity", worldFrame, registry));
 
          nextTimeTriggerForDecay = new YoDouble(namePrefix + "NextTimeTriggerForDecay", registry);
          inputVelocityDecayFactor = new YoDouble(namePrefix + "InputVelocityDecayFactor", registry);
@@ -210,6 +218,11 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
       public FramePose3DReadOnly getEstimatedPose()
       {
          return estimatedPose;
+      }
+
+      public SpatialVectorReadOnly getEstimatedVelocity()
+      {
+         return estimatedVelocity;
       }
    }
 }

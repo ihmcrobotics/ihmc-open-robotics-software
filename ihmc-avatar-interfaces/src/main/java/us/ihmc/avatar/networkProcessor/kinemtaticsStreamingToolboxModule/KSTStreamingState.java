@@ -1,6 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
@@ -20,6 +19,7 @@ import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFa
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -64,7 +64,6 @@ public class KSTStreamingState implements State
    private WholeBodyStreamingMessagePublisher streamingMessagePublisher = null;
    private final YoDouble timeOfLastMessageSentToController = new YoDouble("timeOfLastMessageSentToController", registry);
    private final YoDouble publishingPeriod = new YoDouble("publishingPeriod", registry);
-   private final KinematicsToolboxConfigurationMessage configurationMessage = new KinematicsToolboxConfigurationMessage();
    private final FullHumanoidRobotModel desiredFullRobotModel;
    private final CommandInputManager ikCommandInputManager;
 
@@ -297,9 +296,7 @@ public class KSTStreamingState implements State
       ikSolverSpatialGains.setOrientationMaxFeedbackAndFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
       ikSolverJointGains.setKp(50.0);
       ikSolverJointGains.setMaximumFeedbackAndMaximumFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
-      configurationMessage.setJointVelocityWeight(1.0);
-      configurationMessage.setEnableJointVelocityLimits(true);
-      ikCommandInputManager.submitMessage(configurationMessage);
+      ikCommandInputManager.submitMessage(tools.getParameters().getDefaultSolverConfiguration());
 
       /*
        * The desiredFullRobotModel can either be at the current configuration or at a configuration
@@ -533,10 +530,13 @@ public class KSTStreamingState implements State
          for (int i = 0; i < filteredInputs.getNumberOfInputs(); i++)
          { // Ship it
             KinematicsToolboxRigidBodyCommand filteredInput = filteredInputs.getInput(i);
-            FramePose3DReadOnly estimatedPose = inputStateEstimatorsMap.get(activeInputStateEstimator.getValue())
-                                                                       .getEstimatedPose(filteredInput.getEndEffector());
+            KSTInputStateEstimator inputStateEstimator = inputStateEstimatorsMap.get(activeInputStateEstimator.getValue());
+            FramePose3DReadOnly estimatedPose = inputStateEstimator.getEstimatedPose(filteredInput.getEndEffector());
+            SpatialVectorReadOnly estimatedVelocity = inputStateEstimator.getEstimatedVelocity(filteredInput.getEndEffector());
             if (estimatedPose != null)
                filteredInput.getDesiredPose().set(estimatedPose);
+            if (estimatedVelocity != null)
+               filteredInput.getDesiredVelocity().set(estimatedVelocity);
             ikCommandInputManager.submitCommand(filteredInput);
          }
 

@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.tools.UnitConversions;
@@ -137,6 +138,7 @@ public class KinematicsStreamingToolboxParameters
    private InputStateEstimatorType inputStateEstimatorType;
 
    private final KinematicsStreamingToolboxConfigurationMessage defaultConfiguration = new KinematicsStreamingToolboxConfigurationMessage();
+   private final KinematicsToolboxConfigurationMessage defaultSolverConfiguration = new KinematicsToolboxConfigurationMessage();
 
    public static KinematicsStreamingToolboxParameters defaultParameters()
    {
@@ -196,6 +198,9 @@ public class KinematicsStreamingToolboxParameters
       defaultConfiguration.setRightHandTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
       defaultConfiguration.setChestTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
       defaultConfiguration.setPelvisTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
+
+      defaultSolverConfiguration.setJointVelocityWeight(1.0);
+      defaultSolverConfiguration.setEnableJointVelocityLimits(true);
    }
 
    public double getCenterOfMassSafeMargin()
@@ -331,6 +336,11 @@ public class KinematicsStreamingToolboxParameters
    public KinematicsStreamingToolboxConfigurationMessage getDefaultConfiguration()
    {
       return defaultConfiguration;
+   }
+
+   public KinematicsToolboxConfigurationMessage getDefaultSolverConfiguration()
+   {
+      return defaultSolverConfiguration;
    }
 
    public void setCenterOfMassSafeMargin(double centerOfMassSafeMargin)
