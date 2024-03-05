@@ -3,6 +3,8 @@ package us.ihmc.rdx.ui.interactable;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -26,18 +28,12 @@ public class RDXSakeHandWidgets
    private static final double FREEZE_DURATION = 1.0;
 
    private final CommunicationHelper communicationHelper;
+   private final ROS2SakeHandStatus sakeHandStatus;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final String handOpenAngleSliderLabel;
    private final ImGuiSliderDouble handOpenAngleDegreesSlider;
    private final String fingertipGripForceSliderLabel;
    private final ImGuiSliderDouble fingertipGripForceSlider;
-   private boolean isCalibrated = false;
-   private boolean needsReset;
-   private double currentTemperature = Double.NaN;
-   private double currentHandOpenAngle = Double.NaN;
-   private double commandedHandOpenAngle = Double.NaN;
-   private double currentFingertipGripForce = Double.NaN;
-   private double commandedFingertipGripForceLimit = Double.NaN;
    private final RobotSide handSide;
    private final Throttler sendThrottler = new Throttler();
    private final Timer sentCommandFreezeExpiration = new Timer();
@@ -51,10 +47,12 @@ public class RDXSakeHandWidgets
    private final ImGuiFlashingText calibrateStatusText = new ImGuiFlashingText(ImGuiTools.RED);
    private final ImGuiFlashingText needResetStatusText = new ImGuiFlashingText(ImGuiTools.RED);
 
-   public RDXSakeHandWidgets(CommunicationHelper communicationhelper, RobotSide handSide)
+   public RDXSakeHandWidgets(CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot, RobotSide handSide)
    {
-      this.communicationHelper = communicationhelper;
+      this.communicationHelper = communicationHelper;
       this.handSide = handSide;
+
+      sakeHandStatus = syncedRobot.getSakeHandStatus().get(handSide);
 
       handOpenAngleSliderLabel = "Hand Open Angle";
       handOpenAngleDegreesSlider = new ImGuiSliderDouble(handOpenAngleSliderLabel, "", Double.NaN);
@@ -63,17 +61,6 @@ public class RDXSakeHandWidgets
       fingertipGripForceSlider = new ImGuiSliderDouble(fingertipGripForceSliderLabel, "%.1f N", Double.NaN);
       fingertipGripForceSlider.addWidgetAligner(widgetAligner);
 
-      communicationHelper.subscribeViaVolatileCallback(robotName -> ROS2Tools.getHandSakeStatusTopic(robotName, handSide), sakeHandStatusMessage ->
-      {
-         isCalibrated = sakeHandStatusMessage.getIsCalibrated();
-         needsReset = sakeHandStatusMessage.getNeedsReset();
-         currentTemperature = sakeHandStatusMessage.getTemperature();
-         currentHandOpenAngle = SakeHandParameters.denormalizeHandOpenAngle(sakeHandStatusMessage.getNormalizedCurrentPosition());
-         commandedHandOpenAngle = SakeHandParameters.denormalizeHandOpenAngle(sakeHandStatusMessage.getNormalizedDesiredPosition());
-         currentFingertipGripForce = SakeHandParameters.denormalizeFingertipGripForceLimit(sakeHandStatusMessage.getNormalizedCurrentTorque());
-         commandedFingertipGripForceLimit = SakeHandParameters.denormalizeFingertipGripForceLimit(sakeHandStatusMessage.getNormalizedTorqueLimit());
-      });
-
       sakeHandDesiredCommandMessage.setRobotSide(handSide.toByte());
    }
 
@@ -81,8 +68,8 @@ public class RDXSakeHandWidgets
    {
       if (!sentCommandFreezeExpiration.isRunning(FREEZE_DURATION))
       {
-         handOpenAngleDegreesSlider.setDoubleValue(Math.toDegrees(commandedHandOpenAngle));
-         fingertipGripForceSlider.setDoubleValue(commandedFingertipGripForceLimit);
+         handOpenAngleDegreesSlider.setDoubleValue(Math.toDegrees(sakeHandStatus.getCommandedHandOpenAngle()));
+         fingertipGripForceSlider.setDoubleValue(sakeHandStatus.getCommandedFingertipGripForceLimit());
       }
 
       if (sendThrottler.run(SEND_PERIOD))
@@ -154,11 +141,11 @@ public class RDXSakeHandWidgets
          resetErrorsRequested.set();
       }
 
-      calibrateStatusText.renderText("Is Calibrated: %b ".formatted(isCalibrated), !isCalibrated);
+      calibrateStatusText.renderText("Is Calibrated: %b ".formatted(sakeHandStatus.getIsCalibrated()), !sakeHandStatus.getIsCalibrated());
       ImGui.sameLine();
-      needResetStatusText.renderText("Needs Reset: %b ".formatted(needsReset), needsReset);
+      needResetStatusText.renderText("Needs Reset: %b ".formatted(sakeHandStatus.getNeedsReset()), sakeHandStatus.getNeedsReset());
 
-      double currentHandOpenAngleNotchNormal = Math.abs(SakeHandParameters.normalizeHandOpenAngle(currentHandOpenAngle));
+      double currentHandOpenAngleNotchNormal = Math.abs(SakeHandParameters.normalizeHandOpenAngle(sakeHandStatus.getCurrentHandOpenAngle()));
 
       float sliderStart = widgetAligner.getCursorMaxX() + ImGui.getStyle().getItemSpacingX();
       float sliderEnd = ImGui.getColumnWidth();
@@ -174,7 +161,7 @@ public class RDXSakeHandWidgets
          sentCommandFreezeExpiration.reset();
       }
 
-      double currentForceNotchNormal = Math.abs(SakeHandParameters.normalizeFingertipGripForceLimit(currentFingertipGripForce));
+      double currentForceNotchNormal = Math.abs(SakeHandParameters.normalizeFingertipGripForceLimit(sakeHandStatus.getCurrentFingertipGripForce()));
       double moderateForceNotchNormal = SakeHandParameters.normalizeFingertipGripForceLimit(SakeHandParameters.FINGERTIP_GRIP_FORCE_MODERATE_THRESHOLD);
       double highForceNotchNormal = SakeHandParameters.normalizeFingertipGripForceLimit(SakeHandParameters.FINGERTIP_GRIP_FORCE_HIGH_THRESHOLD);
 
@@ -200,7 +187,8 @@ public class RDXSakeHandWidgets
          styled = true;
       }
 
-      fingertipGripForceSlider.setWidgetText("%+.1f / %.1f N".formatted(currentFingertipGripForce, fingertipGripForceSlider.getDoubleValue()));
+      fingertipGripForceSlider.setWidgetText("%+.1f / %.1f N".formatted(sakeHandStatus.getCurrentFingertipGripForce(),
+                                                                        fingertipGripForceSlider.getDoubleValue()));
 
       if (fingertipGripForceSlider.render(0.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT))
       {
@@ -211,29 +199,29 @@ public class RDXSakeHandWidgets
       if (styled)
          ImGui.popStyleColor(2);
 
-      if (currentTemperature >= SakeHandParameters.ERROR_TEMPERATURE_CELCIUS)
+      if (sakeHandStatus.getCurrentTemperature() >= SakeHandParameters.ERROR_TEMPERATURE_CELCIUS)
          ImGui.pushStyleColor(ImGuiCol.PlotHistogram, ImGuiTools.RED);
-      else if (currentTemperature >= SakeHandParameters.WARNING_TEMPERATURE_CELCIUS)
+      else if (sakeHandStatus.getCurrentTemperature() >= SakeHandParameters.WARNING_TEMPERATURE_CELCIUS)
          ImGui.pushStyleColor(ImGuiCol.PlotHistogram, ImGuiTools.YELLOW);
       else
          ImGui.pushStyleColor(ImGuiCol.PlotHistogram, ImGuiTools.LIGHT_GRAY);
 
       widgetAligner.text("Temperature");
-      ImGui.progressBar((float) (currentTemperature / SakeHandParameters.DYNAMIXEL_FAILURE_TEMPERATURE_CELCIUS),
+      ImGui.progressBar((float) (sakeHandStatus.getCurrentTemperature() / SakeHandParameters.DYNAMIXEL_FAILURE_TEMPERATURE_CELCIUS),
                         ImGui.getColumnWidth(),
                         ImGui.getFrameHeight(),
-                        "%.1f %sC".formatted(currentTemperature, EuclidCoreMissingTools.DEGREE_SYMBOL));
+                        "%.1f %sC".formatted(sakeHandStatus.getCurrentTemperature(), EuclidCoreMissingTools.DEGREE_SYMBOL));
 
       ImGui.popStyleColor();
    }
 
    public boolean getCalibrated()
    {
-      return isCalibrated;
+      return sakeHandStatus.getIsCalibrated();
    }
 
    public boolean getNeedsReset()
    {
-      return needsReset;
+      return sakeHandStatus.getNeedsReset();
    }
 }
