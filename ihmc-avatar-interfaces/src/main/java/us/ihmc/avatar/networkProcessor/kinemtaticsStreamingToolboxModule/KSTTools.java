@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
@@ -22,6 +23,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialVectorBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
@@ -42,6 +44,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 public class KSTTools
 {
@@ -524,6 +527,23 @@ public class KSTTools
    public double getToolboxControllerPeriod()
    {
       return toolboxControllerPeriod;
+   }
+
+   /**
+    * [Unsafe] Copies the joint positions from the given array of joints to the given list of messages.
+    * <p>
+    * This method assumes that the given list of messages is ordered to match the given array of joints.
+    * </p>
+    *
+    * @param joints           the array of joints to copy the positions from. Not modified.
+    * @param messagesToUpdate the list of messages to update with the joint positions. Modified.
+    */
+   public static void copyJointDesiredPositions(OneDoFJointReadOnly[] joints, List<KinematicsToolboxOneDoFJointMessage> messagesToUpdate)
+   {
+      for (int i = 0; i < joints.length; i++)
+      {
+         messagesToUpdate.get(i).setDesiredPosition(joints[i].getQ());
+      }
    }
 
    public static void updateFullRobotModel(RobotConfigurationData robotConfigurationData, FullHumanoidRobotModel fullRobotModelToUpdate)

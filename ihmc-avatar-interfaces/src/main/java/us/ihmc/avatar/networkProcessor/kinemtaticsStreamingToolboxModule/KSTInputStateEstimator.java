@@ -5,6 +5,13 @@ import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.Kine
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 
+/**
+ * Interface for the state estimation of the different end-effectors desired state controlled by the user inputs.
+ * <p>
+ * The state estimator is responsible for estimating the pose and velocity of the end-effectors based on the user inputs.
+ * It is responsible for smoothing the user inputs.
+ * </p>
+ */
 public interface KSTInputStateEstimator
 {
    void reset();

@@ -124,11 +124,11 @@ public class KSTStreamingState implements State
    private final YoDouble defaultLinearWeight = new YoDouble("defaultLinearWeight", registry);
    private final YoDouble defaultAngularWeight = new YoDouble("defaultAngularWeight", registry);
 
-   private final YoDouble streamingStartTime = new YoDouble("streamingStartTime", registry);
    private final YoDouble streamingBlendingDuration = new YoDouble("streamingBlendingDuration", registry);
    private final YoDouble solutionFilterBreakFrequency = new YoDouble("solutionFilterBreakFrequency", registry);
-   private final YoKinematicsToolboxOutputStatus ikRobotState, initialRobotState, blendedRobotState, filteredRobotState, outputRobotState;
+   private final YoKinematicsToolboxOutputStatus ikRobotState, filteredRobotState, outputRobotState;
    private final YoDouble outputJointVelocityScale = new YoDouble("outputJointVelocityScale", registry);
+   private final KSTBlendingOutputProcessor blendingOutputProcessor;
 
    private final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
    private final YoDouble timeSinceLastInput = new YoDouble("timeSinceLastInput", registry);
@@ -225,10 +225,9 @@ public class KSTStreamingState implements State
       FloatingJointBasics rootJoint = desiredFullRobotModel.getRootJoint();
       OneDoFJointBasics[] oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
       ikRobotState = new YoKinematicsToolboxOutputStatus("IK", rootJoint, oneDoFJoints, registry);
-      initialRobotState = new YoKinematicsToolboxOutputStatus("Initial", rootJoint, oneDoFJoints, registry);
-      blendedRobotState = new YoKinematicsToolboxOutputStatus("Blended", rootJoint, oneDoFJoints, registry);
       filteredRobotState = new YoKinematicsToolboxOutputStatus("Filtered", rootJoint, oneDoFJoints, registry);
       outputRobotState = new YoKinematicsToolboxOutputStatus("FD", rootJoint, oneDoFJoints, registry);
+      blendingOutputProcessor = new KSTBlendingOutputProcessor(tools, streamingBlendingDuration, registry);
 
       { // Filter for locking
          DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(lockPoseFilterBreakFrequency.getValue(),
@@ -386,30 +385,12 @@ public class KSTStreamingState implements State
          }
       }
 
-      //      TObjectDoubleHashMap<OneDoFJointBasics> initialRobotConfigurationMap = ikController.getInitialRobotConfigurationMap();
-      //
-      //      if (initialRobotConfigurationMap != null)
-      //      {
-      //         for (RobotSide robotSide : RobotSide.values)
-      //         {
-      //            OneDoFJointBasics[] joints = armJoints.get(robotSide);
-      //            List<KinematicsToolboxOneDoFJointMessage> preferredMessages = preferredArmJointMessages.get(robotSide);
-      //
-      //            for (int i = 0; i < joints.length; i++)
-      //            {
-      //               OneDoFJointBasics joint = joints[i];
-      //               preferredMessages.get(i).setDesiredPosition(initialRobotConfigurationMap.get(joint.getName()));
-      //            }
-      //         }
-      //      }
       resetFilter = true;
-      streamingStartTime.set(Double.NaN);
 
       ikRobotState.setToNaN();
-      initialRobotState.setToNaN();
-      blendedRobotState.setToNaN();
       filteredRobotState.setToNaN();
       outputRobotState.setToNaN();
+      blendingOutputProcessor.initialize();
 
       timeOfLastInput.set(Double.NaN);
       timeSinceLastInput.set(Double.NaN);
@@ -462,6 +443,12 @@ public class KSTStreamingState implements State
 
       if (latestInput != null)
       {
+         isStreaming.set(latestInput.getStreamToController());
+         if (latestInput.getStreamInitialBlendDuration() > 0.0)
+            streamingBlendingDuration.set(latestInput.getStreamInitialBlendDuration());
+         else
+            streamingBlendingDuration.set(tools.getParameters().getDefaultStreamingBlendingDuration());
+
          // Reset the list to keep track of the bodies that are not controlled
          uncontrolledRigidBodies.clear();
          List<? extends RigidBodyBasics> controllableRigidBodies = tools.getIKController().getControllableRigidBodies();
@@ -553,23 +540,8 @@ public class KSTStreamingState implements State
             {
                ikCommandInputManager.submitMessages(defaultArmJointMessages.get(robotSide));
             }
-            //            else
-            //            {
-            //               List<KinematicsToolboxOneDoFJointMessage> preferredMessages = preferredArmJointMessages.get(robotSide);
-            //               for (int i = 0; i < preferredMessages.size(); i++)
-            //               {
-            //                  KinematicsToolboxOneDoFJointMessage preferredMessage = preferredMessages.get(i);
-            //                  preferredMessage.setWeight(preferredArmConfigWeight.getValue());
-            //                  ikCommandInputManager.submitMessage(preferredMessage);
-            //               }
-            //            }
          }
 
-         isStreaming.set(latestInput.getStreamToController());
-         if (latestInput.getStreamInitialBlendDuration() > 0.0)
-            streamingBlendingDuration.set(latestInput.getStreamInitialBlendDuration());
-         else
-            streamingBlendingDuration.set(tools.getParameters().getDefaultStreamingBlendingDuration());
          if (latestInput.getAngularRateLimitation() > 0.0)
             angularRateLimit.set(latestInput.getAngularRateLimitation());
          else
@@ -616,21 +588,12 @@ public class KSTStreamingState implements State
       if (latestInput != null)
       {
          if (latestInput.hasInputFor(head))
-         {
-            for (int i = 0; i < neckJoints.length; i++)
-               defaultNeckJointMessages.get(i).setDesiredPosition(neckJoints[i].getQ());
-         }
+            KSTTools.copyJointDesiredPositions(neckJoints, defaultNeckJointMessages);
 
          for (RobotSide robotSide : RobotSide.values)
          {
             if (latestInput.hasInputFor(hands.get(robotSide)))
-            {
-               OneDoFJointBasics[] joints = armJoints.get(robotSide);
-               List<KinematicsToolboxOneDoFJointMessage> messages = defaultArmJointMessages.get(robotSide);
-
-               for (int i = 0; i < joints.length; i++)
-                  messages.get(i).setDesiredPosition(joints[i].getQ());
-            }
+               KSTTools.copyJointDesiredPositions(armJoints.get(robotSide), defaultArmJointMessages.get(robotSide));
          }
       }
 
@@ -648,13 +611,6 @@ public class KSTStreamingState implements State
 
       if (isStreaming.getValue())
       {
-         if (!wasStreaming.getValue())
-         {
-            tools.getCurrentState(initialRobotState);
-            streamingStartTime.set(timeInState);
-         }
-
-         double timeInBlending = timeInState - streamingStartTime.getValue();
 
          double timeSinceLastPublished = timeInState - timeOfLastMessageSentToController.getValue();
 
@@ -663,23 +619,12 @@ public class KSTStreamingState implements State
             outputRobotState.set(filteredRobotState);
             outputRobotState.scaleVelocities(outputJointVelocityScale.getValue());
 
-            if (timeInBlending < streamingBlendingDuration.getValue())
-            {
-               double alpha = MathTools.clamp(timeInBlending / streamingBlendingDuration.getValue(), 0.0, 1.0);
-               double alphaDot = 1.0 / streamingBlendingDuration.getValue();
-               blendedRobotState.interpolate(initialRobotState.getStatus(), outputRobotState.getStatus(), alpha, alphaDot);
-               if (streamingMessagePublisher == null || !useStreamingPublisher.getValue())
-                  trajectoryMessagePublisher.publish(tools.setupTrajectoryMessage(blendedRobotState.getStatus()));
-               else
-                  streamingMessagePublisher.publish(tools.setupStreamingMessage(blendedRobotState.getStatus()));
-            }
+            blendingOutputProcessor.update(timeInState, wasStreaming.getValue(), isStreaming.getValue(), outputRobotState.getStatus());
+
+            if (streamingMessagePublisher == null || !useStreamingPublisher.getValue())
+               trajectoryMessagePublisher.publish(tools.setupTrajectoryMessage(blendingOutputProcessor.getProcessedOutput()));
             else
-            {
-               if (streamingMessagePublisher == null || !useStreamingPublisher.getValue())
-                  trajectoryMessagePublisher.publish(tools.setupTrajectoryMessage(outputRobotState.getStatus()));
-               else
-                  streamingMessagePublisher.publish(tools.setupStreamingMessage(outputRobotState.getStatus()));
-            }
+               streamingMessagePublisher.publish(tools.setupStreamingMessage(blendingOutputProcessor.getProcessedOutput()));
 
             timeOfLastMessageSentToController.set(timeInState);
          }
@@ -690,7 +635,8 @@ public class KSTStreamingState implements State
          {
             outputRobotState.set(filteredRobotState);
             outputRobotState.scaleVelocities(outputJointVelocityScale.getValue());
-            trajectoryMessagePublisher.publish(tools.setupFinalizeTrajectoryMessage(outputRobotState.getStatus()));
+            blendingOutputProcessor.update(timeInState, wasStreaming.getValue(), isStreaming.getValue(), outputRobotState.getStatus());
+            trajectoryMessagePublisher.publish(tools.setupFinalizeTrajectoryMessage(blendingOutputProcessor.getProcessedOutput()));
          }
 
          timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);
