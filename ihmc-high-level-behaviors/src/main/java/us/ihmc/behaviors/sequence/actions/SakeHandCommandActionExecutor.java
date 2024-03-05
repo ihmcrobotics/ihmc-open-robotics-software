@@ -53,8 +53,11 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
 
       for (RobotSide side : RobotSide.values)
       {
-         x1KnuckleJoints.put(side, (RevoluteJoint) syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(0));
-         x2KnuckleJoints.put(side, (RevoluteJoint) syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(1));
+         if (syncedRobot.getRobotModel().getRobotVersion().hasSakeGripperJoints(side))
+         {
+            x1KnuckleJoints.put(side, (RevoluteJoint) syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(0));
+            x2KnuckleJoints.put(side, (RevoluteJoint) syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(1));
+         }
       }
    }
 
