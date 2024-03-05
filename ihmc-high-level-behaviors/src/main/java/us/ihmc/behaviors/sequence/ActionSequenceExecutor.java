@@ -120,22 +120,19 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
    {
       ActionNodeExecutor<?, ?> actionToExecute = executorChildren.get(getState().getExecutionNextIndex());
 
-      // If automatic execution, we want to ensure it's able to execute before we perform the execution.
-      // If it's unable to execute, disable automatic execution.
-      if (getState().getAutomaticExecution())
+      if (actionToExecute.getState().getCanExecute())
       {
-         if (!actionToExecute.getState().getCanExecute())
-         {
-            getState().setAutomaticExecution(false);
-            // Early return
-            return;
-         }
+         actionToExecute.update();
+         actionToExecute.triggerActionExecution();
+         actionToExecute.updateCurrentlyExecuting();
+         currentlyExecutingActions.add(actionToExecute);
+         state.stepForwardNextExecutionIndex();
       }
-      actionToExecute.update();
-      actionToExecute.triggerActionExecution();
-      actionToExecute.updateCurrentlyExecuting();
-      currentlyExecutingActions.add(actionToExecute);
-      getState().stepForwardNextExecutionIndex();
+      else
+      {
+         LogTools.error("Cannot execute action: %s".formatted(actionToExecute.getDefinition().getName()));
+         state.setAutomaticExecution(false);
+      }
    }
 
    private ActionNodeExecutor<?, ?> getLastExecutingAction()
