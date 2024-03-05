@@ -37,14 +37,16 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
    {
       super.update();
 
-      // TODO: Go through next for execution concurrent children and set chest action's goal pelvis frames
-      //   and the hand pose actions chest frames
-
       executorChildren.clear();
       currentlyExecutingActions.clear();
       updateActionSubtree(this);
 
-      lastIndexOfConcurrentSetToExecute = findLastIndexOfConcurrentSetToExecute(executorChildren, state.getExecutionNextIndex());
+      lastIndexOfConcurrentSetToExecute = state.getExecutionNextIndex();
+      while (lastIndexOfConcurrentSetToExecute < executorChildren.size()
+             && executorChildren.get(lastIndexOfConcurrentSetToExecute).getDefinition().getExecuteWithNextAction())
+      {
+         ++lastIndexOfConcurrentSetToExecute;
+      }
       for (int i = 0; i < executorChildren.size(); i++)
       {
          boolean isNextForExecution = i >= state.getExecutionNextIndex() && i <= lastIndexOfConcurrentSetToExecute;
@@ -105,17 +107,6 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
             updateActionSubtree(child);
          }
       }
-   }
-
-   public static int findLastIndexOfConcurrentSetToExecute(List<ActionNodeExecutor<?, ?>> actionSequence, int executionNextIndex)
-   {
-      int lastIndexOfConcurrentSetToExecute = executionNextIndex;
-      while (lastIndexOfConcurrentSetToExecute < actionSequence.size()
-             && actionSequence.get(lastIndexOfConcurrentSetToExecute).getDefinition().getExecuteWithNextAction())
-      {
-         ++lastIndexOfConcurrentSetToExecute;
-      }
-      return lastIndexOfConcurrentSetToExecute;
    }
 
    private void executeNextAction()
