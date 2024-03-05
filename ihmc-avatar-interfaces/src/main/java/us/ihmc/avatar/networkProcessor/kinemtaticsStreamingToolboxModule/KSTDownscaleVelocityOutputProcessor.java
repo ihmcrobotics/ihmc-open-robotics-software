@@ -1,10 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -21,9 +18,7 @@ public class KSTDownscaleVelocityOutputProcessor implements KSTOutputProcessor
       this.downscaleFactor = downscaleFactor;
 
       FullHumanoidRobotModel desiredFullRobotModel = tools.getDesiredFullRobotModel();
-      FloatingJointBasics rootJoint = desiredFullRobotModel.getRootJoint();
-      OneDoFJointBasics[] oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
-      outputRobotState = new YoKinematicsToolboxOutputStatus("FD", rootJoint, oneDoFJoints, registry);
+      outputRobotState = new YoKinematicsToolboxOutputStatus("FD", desiredFullRobotModel, registry);
    }
 
    @Override

@@ -2,10 +2,7 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.commons.MathTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -30,10 +27,8 @@ public class KSTBlendingOutputProcessor implements KSTOutputProcessor
       this.streamingBlendingDuration = streamingBlendingDuration;
 
       FullHumanoidRobotModel desiredFullRobotModel = tools.getDesiredFullRobotModel();
-      FloatingJointBasics rootJoint = desiredFullRobotModel.getRootJoint();
-      OneDoFJointBasics[] oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
-      initialRobotState = new YoKinematicsToolboxOutputStatus("initial", rootJoint, oneDoFJoints, registry);
-      blendedRobotState = new YoKinematicsToolboxOutputStatus("blended", rootJoint, oneDoFJoints, registry);
+      initialRobotState = new YoKinematicsToolboxOutputStatus("initial", desiredFullRobotModel, registry);
+      blendedRobotState = new YoKinematicsToolboxOutputStatus("blended", desiredFullRobotModel, registry);
    }
 
    @Override

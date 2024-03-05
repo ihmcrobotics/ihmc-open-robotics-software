@@ -16,13 +16,11 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePose3D;
@@ -125,10 +123,7 @@ public class KSTStreamingState implements State
    private final YoDouble defaultAngularWeight = new YoDouble("defaultAngularWeight", registry);
 
    private final YoDouble streamingBlendingDuration = new YoDouble("streamingBlendingDuration", registry);
-   private final YoDouble solutionFilterBreakFrequency = new YoDouble("solutionFilterBreakFrequency", registry);
-   private final YoKinematicsToolboxOutputStatus ikRobotState;
-   private final YoDouble outputJointVelocityScale = new YoDouble("outputJointVelocityScale", registry);
-   private final KSTOutputProcessors outputProcessors = new KSTOutputProcessors();
+   private final KSTCompiledOutputProcessor outputProcessor;
 
    private final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
    private final YoDouble timeSinceLastInput = new YoDouble("timeSinceLastInput", registry);
@@ -218,16 +213,8 @@ public class KSTStreamingState implements State
 
       defaultLinearRateLimit.set(parameters.getDefaultLinearRateLimit());
       defaultAngularRateLimit.set(parameters.getDefaultAngularRateLimit());
-      outputJointVelocityScale.set(parameters.getOutputJointVelocityScale());
-
       streamingBlendingDuration.set(parameters.getDefaultStreamingBlendingDuration());
-      solutionFilterBreakFrequency.set(Double.POSITIVE_INFINITY);
-      FloatingJointBasics rootJoint = desiredFullRobotModel.getRootJoint();
-      OneDoFJointBasics[] oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
-      ikRobotState = new YoKinematicsToolboxOutputStatus("IK", rootJoint, oneDoFJoints, registry);
-      outputProcessors.add(new KSTLowPassFilteredOutputProcessor(tools, solutionFilterBreakFrequency, registry));
-      outputProcessors.add(new KSTDownscaleVelocityOutputProcessor(tools, outputJointVelocityScale, registry));
-      outputProcessors.add(new KSTBlendingOutputProcessor(tools, streamingBlendingDuration, registry));
+      outputProcessor = new KSTCompiledOutputProcessor(tools, streamingBlendingDuration, registry);
 
       { // Filter for locking
          DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(lockPoseFilterBreakFrequency.getValue(),
@@ -383,8 +370,7 @@ public class KSTStreamingState implements State
          }
       }
 
-      ikRobotState.setToNaN();
-      outputProcessors.initialize();
+      outputProcessor.initialize();
 
       timeOfLastInput.set(Double.NaN);
       timeSinceLastInput.set(Double.NaN);
@@ -572,7 +558,6 @@ public class KSTStreamingState implements State
       ikSolverSpatialGains.setOrientationMaxFeedbackAndFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
       ikSolverJointGains.setMaximumFeedbackAndMaximumFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
       tools.getIKController().updateInternal();
-      ikRobotState.set(tools.getIKController().getSolution());
 
       /*
        * Updating the desired default position for the arms and/or neck only if the corresponding
@@ -591,7 +576,7 @@ public class KSTStreamingState implements State
          }
       }
 
-      outputProcessors.update(timeInState, wasStreaming.getValue(), isStreaming.getValue(), ikRobotState.getStatus());
+      outputProcessor.update(timeInState, wasStreaming.getValue(), isStreaming.getValue(), tools.getIKController().getSolution());
 
       if (isStreaming.getValue())
       {
@@ -602,9 +587,9 @@ public class KSTStreamingState implements State
          {
 
             if (streamingMessagePublisher == null || !useStreamingPublisher.getValue())
-               trajectoryMessagePublisher.publish(tools.setupTrajectoryMessage(outputProcessors.getProcessedOutput()));
+               trajectoryMessagePublisher.publish(tools.setupTrajectoryMessage(outputProcessor.getProcessedOutput()));
             else
-               streamingMessagePublisher.publish(tools.setupStreamingMessage(outputProcessors.getProcessedOutput()));
+               streamingMessagePublisher.publish(tools.setupStreamingMessage(outputProcessor.getProcessedOutput()));
 
             timeOfLastMessageSentToController.set(timeInState);
          }
@@ -613,7 +598,7 @@ public class KSTStreamingState implements State
       {
          if (wasStreaming.getValue())
          {
-            trajectoryMessagePublisher.publish(tools.setupFinalizeTrajectoryMessage(outputProcessors.getProcessedOutput()));
+            trajectoryMessagePublisher.publish(tools.setupFinalizeTrajectoryMessage(outputProcessor.getProcessedOutput()));
          }
 
          timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);

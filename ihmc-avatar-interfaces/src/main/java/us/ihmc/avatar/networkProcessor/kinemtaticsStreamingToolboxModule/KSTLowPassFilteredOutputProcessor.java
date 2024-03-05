@@ -1,10 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -23,9 +20,7 @@ public class KSTLowPassFilteredOutputProcessor implements KSTOutputProcessor
       updateDT = tools.getToolboxControllerPeriod();
 
       FullHumanoidRobotModel desiredFullRobotModel = tools.getDesiredFullRobotModel();
-      FloatingJointBasics rootJoint = desiredFullRobotModel.getRootJoint();
-      OneDoFJointBasics[] oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
-      filteredRobotState = new YoKinematicsToolboxOutputStatus("filtered", rootJoint, oneDoFJoints, registry);
+      filteredRobotState = new YoKinematicsToolboxOutputStatus("filtered", desiredFullRobotModel, registry);
    }
 
    @Override
