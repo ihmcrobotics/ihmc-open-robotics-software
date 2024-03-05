@@ -13,7 +13,7 @@ import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.opticalFlow.OpenCVOpticalFlowProcessor;
+import us.ihmc.perception.opticalFlow.OpenCVDenseOpticalFlowProcessor;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -31,7 +31,7 @@ public class RDXOpticalFlowDemo
 
    private final ZEDColorDepthImageRetriever imageRetriever;
    private final ZEDColorDepthImagePublisher imagePublisher;
-   private OpenCVOpticalFlowProcessor opticalFlow;
+   private OpenCVDenseOpticalFlowProcessor opticalFlow;
 
    private final RDXBaseUI baseUI = new RDXBaseUI("Optical Flow Demo");
    private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
@@ -64,7 +64,7 @@ public class RDXOpticalFlowDemo
       RawImage colorImage = imageRetriever.getLatestRawColorImage(RobotSide.LEFT);
 
       if (opticalFlow == null)
-         opticalFlow = new OpenCVOpticalFlowProcessor(colorImage);
+         opticalFlow = new OpenCVDenseOpticalFlowProcessor(colorImage);
 
       opticalFlow.setNewImage(colorImage);
       try (GpuMat flowMat = opticalFlow.calculateFlow();

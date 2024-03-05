@@ -9,14 +9,14 @@ import org.bytedeco.opencv.opencv_core.Stream;
 import org.bytedeco.opencv.opencv_cudaoptflow.NvidiaOpticalFlow_2_0;
 import us.ihmc.perception.RawImage;
 
-public class OpenCVOpticalFlowProcessor
+public class OpenCVDenseOpticalFlowProcessor
 {
    private final NvidiaOpticalFlow_2_0 opticalFlow;
    private GpuMat firstImageGray = new GpuMat();
    private final GpuMat secondImageGray = new GpuMat();
    private final int gridSize;
 
-   public OpenCVOpticalFlowProcessor(RawImage initialImage)
+   public OpenCVDenseOpticalFlowProcessor(RawImage initialImage)
    {
       Size imageSize = new Size(initialImage.getImageWidth(), initialImage.getImageHeight());
       opticalFlow = NvidiaOpticalFlow_2_0.create(imageSize,
