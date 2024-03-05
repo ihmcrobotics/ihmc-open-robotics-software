@@ -30,9 +30,13 @@ public class KSTOutputProcessors implements KSTOutputProcessor
    @Override
    public void update(double time, boolean wasStreaming, boolean isStreaming, KinematicsToolboxOutputStatus latestOutput)
    {
+      KinematicsToolboxOutputStatus previousOutput = latestOutput;
+
       for (int i = 0; i < outputProcessors.size(); i++)
       {
-         outputProcessors.get(i).update(time, wasStreaming, isStreaming, latestOutput);
+         KSTOutputProcessor outputProcessor = outputProcessors.get(i);
+         outputProcessor.update(time, wasStreaming, isStreaming, previousOutput);
+         previousOutput = outputProcessor.getProcessedOutput();
       }
    }
 
