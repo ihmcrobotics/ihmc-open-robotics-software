@@ -1,5 +1,7 @@
-package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
+package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.input;
 
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTools;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;

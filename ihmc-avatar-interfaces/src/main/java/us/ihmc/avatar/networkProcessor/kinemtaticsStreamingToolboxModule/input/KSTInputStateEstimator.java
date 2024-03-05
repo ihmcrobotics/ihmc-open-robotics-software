@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
+package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.input;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;

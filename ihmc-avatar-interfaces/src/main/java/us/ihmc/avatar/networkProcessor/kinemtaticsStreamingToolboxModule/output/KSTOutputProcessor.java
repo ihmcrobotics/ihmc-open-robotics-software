@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
+package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output;
 
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 
