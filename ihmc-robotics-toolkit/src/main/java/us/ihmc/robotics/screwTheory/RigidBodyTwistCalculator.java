@@ -158,6 +158,9 @@ public class RigidBodyTwistCalculator implements RigidBodyTwistProvider
 
       public TwistReadOnly getTwist()
       {
+         if (jointVelocityAccessor == null)
+            throw new IllegalStateException("Joint velocity accessor has not been set.");
+
          if (dirty)
          {
             if (parent == null)

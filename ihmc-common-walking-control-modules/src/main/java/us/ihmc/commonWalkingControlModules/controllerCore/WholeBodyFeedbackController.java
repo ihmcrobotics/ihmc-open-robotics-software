@@ -1,18 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
@@ -30,6 +19,11 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class WholeBodyFeedbackController implements SCS2YoGraphicHolder
 {
@@ -268,6 +262,20 @@ public class WholeBodyFeedbackController implements SCS2YoGraphicHolder
       achievedComputationTimer.stopMeasurement();
    }
 
+   public void computeAchievedVelocities()
+   {
+      achievedComputationTimer.startMeasurement();
+      for (int i = 0; i < allControllers.size(); i++)
+      {
+         FeedbackControllerInterface controller = allControllers.get(i);
+         if (controller.isEnabled())
+         {
+            controller.computeAchievedVelocity();
+         }
+      }
+      achievedComputationTimer.stopMeasurement();
+   }
+
    public void submitFeedbackControlCommandList(WholeBodyControllerCoreMode activeControlMode, FeedbackControlCommandList feedbackControlCommandList)
    {
       for (int commandIndex = 0; commandIndex < feedbackControlCommandList.getNumberOfCommands(); commandIndex++)
@@ -339,8 +347,9 @@ public class WholeBodyFeedbackController implements SCS2YoGraphicHolder
       {
          if (!dynamicControllerConstructionEnabled.getValue())
          {
-            throw new FeedbackControllerException("Could not find a controller available for the end-effector: " + endEffector.getName()
-                                                  + ", number of controllers: " + endEffectorControllers.size());
+            throw new FeedbackControllerException(
+                  "Could not find a controller available for the end-effector: " + endEffector.getName() + ", number of controllers: "
+                  + endEffectorControllers.size());
          }
          else
          {
@@ -406,8 +415,9 @@ public class WholeBodyFeedbackController implements SCS2YoGraphicHolder
       {
          if (!dynamicControllerConstructionEnabled.getValue())
          {
-            throw new FeedbackControllerException("Could not find a controller available for the end-effector: " + endEffector.getName()
-                                                  + ", number of controllers: " + endEffectorControllers.size());
+            throw new FeedbackControllerException(
+                  "Could not find a controller available for the end-effector: " + endEffector.getName() + ", number of controllers: "
+                  + endEffectorControllers.size());
          }
          else
          {
@@ -467,8 +477,9 @@ public class WholeBodyFeedbackController implements SCS2YoGraphicHolder
       {
          if (!dynamicControllerConstructionEnabled.getValue())
          {
-            throw new FeedbackControllerException("Could not find a controller available for the end-effector: " + endEffector.getName()
-                                                  + ", number of controllers: " + endEffectorControllers.size());
+            throw new FeedbackControllerException(
+                  "Could not find a controller available for the end-effector: " + endEffector.getName() + ", number of controllers: "
+                  + endEffectorControllers.size());
          }
          else
          {
@@ -546,8 +557,8 @@ public class WholeBodyFeedbackController implements SCS2YoGraphicHolder
 
       if (controller.isEnabled())
       {
-         throw new FeedbackControllerException("Cannot submit more than one feedback control command to the same controller. Controller joint: "
-                                               + joint.getName());
+         throw new FeedbackControllerException(
+               "Cannot submit more than one feedback control command to the same controller. Controller joint: " + joint.getName());
       }
 
       controller.submitFeedbackControlCommand(feedbackControlCommand);
@@ -574,8 +585,8 @@ public class WholeBodyFeedbackController implements SCS2YoGraphicHolder
    private static void checkRequestedControlMode(WholeBodyControllerCoreMode activeControlMode, WholeBodyControllerCoreMode requestedControlMode)
    {
       if (activeControlMode != requestedControlMode)
-         throw new FeedbackControllerException("Incompatible feedback control command: command requires: " + requestedControlMode + ", current mode: "
-                                               + activeControlMode);
+         throw new FeedbackControllerException(
+               "Incompatible feedback control command: command requires: " + requestedControlMode + ", current mode: " + activeControlMode);
    }
 
    public InverseDynamicsCommandList getInverseDynamicsOutput()
