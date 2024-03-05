@@ -43,7 +43,6 @@ public class SwingTrajectoryCalculator
 
    private final MovingReferenceFrame pelvisFrame;
    private final MovingReferenceFrame soleFrame;
-   private final MovingReferenceFrame midZUpFrame;
    private final ReferenceFrame oppositeSoleFrame;
    private final ReferenceFrame oppositeSoleZUpFrame;
 
@@ -69,6 +68,9 @@ public class SwingTrajectoryCalculator
    private final FrameVector3D finalLinearVelocity = new FrameVector3D();
    private final FrameQuaternion finalOrientation = new FrameQuaternion();
    private final FrameVector3D finalAngularVelocity = new FrameVector3D();
+
+   private final FramePoint3D deepCopyInitialPosition = new FramePoint3D();
+   private final FramePoint3D deepCopyFinalPosition = new FramePoint3D();
 
    private final FramePoint3D stanceFootPosition = new FramePoint3D();
 
@@ -104,7 +106,6 @@ public class SwingTrajectoryCalculator
 
       pelvisFrame = controllerToolbox.getReferenceFrames().getPelvisFrame();
       soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide);
-      midZUpFrame = controllerToolbox.getReferenceFrames().getMidFeetZUpFrame();
       oppositeSoleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide.getOppositeSide());
       oppositeSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide.getOppositeSide());
 
@@ -519,16 +520,17 @@ public class SwingTrajectoryCalculator
       swingTrajectory.appendOrientationWaypoint(swingDuration.getDoubleValue(), finalOrientation, finalAngularVelocity);
    }
 
-   // Return true if the next step is both forward and down
-   FramePoint3D deepCopyInitialPosition = new FramePoint3D();
-   FramePoint3D deepCopyFinalPosition = new FramePoint3D();
+   /**
+    * Checks whether the next step is both forward and down
+    * @return true if the step is forward and the step is down
+    */
    private boolean isSteppingForwardAndDown()
    {
       deepCopyInitialPosition.set(initialPosition);
-      deepCopyInitialPosition.changeFrame(midZUpFrame);
+      deepCopyInitialPosition.changeFrame(soleFrame);
 
       deepCopyFinalPosition.set(finalPosition);
-      deepCopyFinalPosition.changeFrame(midZUpFrame);
+      deepCopyFinalPosition.changeFrame(soleFrame);
 
       boolean isSteppingDown = swingTrajectoryOptimizer.isSteppingDown();
       boolean isSteppingForward = deepCopyFinalPosition.getX() - deepCopyInitialPosition.getX() > 0;
