@@ -65,8 +65,14 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
 
       if (state.getAutomaticExecution())
       {
-         if (isEndOfSequence() || anyActionExecutionFailed)
+         if (isEndOfSequence())
          {
+            LogTools.info("End of sequence.");
+            state.setAutomaticExecution(false);
+         }
+         else if (anyActionExecutionFailed)
+         {
+            LogTools.error("An action failed. Disabling automatic execution.");
             state.setAutomaticExecution(false);
          }
          else if (currentlyExecutingActions.isEmpty())
@@ -115,6 +121,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
 
       if (actionToExecute.getState().getCanExecute())
       {
+         LogTools.info("Triggering action execution: %s".formatted(actionToExecute.getDefinition().getName()));
          actionToExecute.update();
          actionToExecute.triggerActionExecution();
          actionToExecute.updateCurrentlyExecuting();
