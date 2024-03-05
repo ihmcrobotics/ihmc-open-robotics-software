@@ -237,13 +237,13 @@ public abstract class SwingTrajectoryParameters
    /**
     * Specifies whether or not to pitch the foot down to help avoid heel strike when stepping down.
     */
-   public boolean addFootPitchToAvoidHeelStrikeWhenSteppingDown()
+   public boolean addFootPitchToAvoidHeelStrikeWhenSteppingForwardAndDown()
    {
       return false;
    }
 
    /**
-    * When {@link #addFootPitchToAvoidHeelStrikeWhenSteppingDown()} is true, this specifies the fraction
+    * When {@link #addFootPitchToAvoidHeelStrikeWhenSteppingForwardAndDown()} is true, this specifies the fraction
     * through swing to add the additional foot pitch waypoint
     */
    public double getFractionOfSwingToPitchFootDown()
@@ -252,7 +252,7 @@ public abstract class SwingTrajectoryParameters
    }
 
    /**
-    * When {@link #addFootPitchToAvoidHeelStrikeWhenSteppingDown()} is true, this specifies the amount
+    * When {@link #addFootPitchToAvoidHeelStrikeWhenSteppingForwardAndDown()} is true, this specifies the amount
     * of angle to pitch the foot down
     */
    public double getFootPitchAngleToAvoidHeelStrike()

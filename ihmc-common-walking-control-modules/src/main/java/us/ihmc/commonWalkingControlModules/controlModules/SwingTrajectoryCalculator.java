@@ -31,6 +31,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -42,6 +43,7 @@ public class SwingTrajectoryCalculator
 
    private final MovingReferenceFrame pelvisFrame;
    private final MovingReferenceFrame soleFrame;
+   private final MovingReferenceFrame midZUpFrame;
    private final ReferenceFrame oppositeSoleFrame;
    private final ReferenceFrame oppositeSoleZUpFrame;
 
@@ -53,6 +55,7 @@ public class SwingTrajectoryCalculator
 
    private final YoDouble swingDuration;
    private final YoDouble swingHeight;
+   private final YoBoolean isSteppingForward;
 
    private final YoSwingTrajectoryParameters swingTrajectoryParameters;
 
@@ -101,6 +104,7 @@ public class SwingTrajectoryCalculator
 
       pelvisFrame = controllerToolbox.getReferenceFrames().getPelvisFrame();
       soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide);
+      midZUpFrame = controllerToolbox.getReferenceFrames().getMidFeetZUpFrame();
       oppositeSoleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide.getOppositeSide());
       oppositeSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(robotSide.getOppositeSide());
 
@@ -112,6 +116,7 @@ public class SwingTrajectoryCalculator
 
       swingHeight = new YoDouble(namePrefix + "Height", registry);
       swingDuration = new YoDouble(namePrefix + "Duration", registry);
+      isSteppingForward = new YoBoolean(namePrefix + "IsSteppingForward", registry);
 
       swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix, Footstep.maxNumberOfSwingWaypoints + 2, registry);
 
@@ -480,8 +485,8 @@ public class SwingTrajectoryCalculator
          swingTrajectory.appendPositionWaypoint(tempPositionTrajectoryPoint);
       }
 
-      boolean isSteppingDown = swingTrajectoryOptimizer.isSteppingDown();
-      if (swingTrajectoryParameters.addFootPitchToAvoidHeelStrikeWhenSteppingDown() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE && isSteppingDown)
+      boolean isObstacleClearance = activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE;
+      if (swingTrajectoryParameters.addFootPitchToAvoidHeelStrikeWhenSteppingForwardAndDown() && isObstacleClearance && isSteppingForwardAndDown())
       {
          tmpOrientation.setToZero(worldFrame);
          tmpVector.setToZero(worldFrame);
@@ -501,7 +506,7 @@ public class SwingTrajectoryCalculator
          }
       }
       // make the foot orientation better for avoidance
-      else if (swingTrajectoryParameters.addOrientationMidpointForObstacleClearance() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
+      else if (swingTrajectoryParameters.addOrientationMidpointForObstacleClearance() && isObstacleClearance)
       {
          tmpOrientation.setToZero(worldFrame);
          tmpVector.setToZero(worldFrame);
@@ -512,6 +517,28 @@ public class SwingTrajectoryCalculator
       swingTrajectoryOptimizer.getFinalVelocity(finalLinearVelocity);
       swingTrajectory.appendPositionWaypoint(swingDuration.getDoubleValue(), finalPosition, finalLinearVelocity);
       swingTrajectory.appendOrientationWaypoint(swingDuration.getDoubleValue(), finalOrientation, finalAngularVelocity);
+   }
+
+   // Return true if the next step is both forward and down
+   FramePoint3D deepCopyInitialPosition = new FramePoint3D();
+   FramePoint3D deepCopyFinalPosition = new FramePoint3D();
+   private boolean isSteppingForwardAndDown()
+   {
+      deepCopyInitialPosition.set(initialPosition);
+      deepCopyInitialPosition.changeFrame(midZUpFrame);
+
+      deepCopyFinalPosition.set(finalPosition);
+      deepCopyFinalPosition.changeFrame(midZUpFrame);
+
+      boolean isSteppingDown = swingTrajectoryOptimizer.isSteppingDown();
+      boolean isSteppingForward = deepCopyFinalPosition.getX() - deepCopyInitialPosition.getX() > 0;
+      this.isSteppingForward.set(isSteppingForward);
+
+      // Clear properly for the next step
+      deepCopyInitialPosition.setToZero(ReferenceFrame.getWorldFrame());
+      deepCopyFinalPosition.setToZero(ReferenceFrame.getWorldFrame());
+
+      return isSteppingForward && isSteppingDown;
    }
 
    public YoGraphicDefinition getSCS2YoGraphics()
