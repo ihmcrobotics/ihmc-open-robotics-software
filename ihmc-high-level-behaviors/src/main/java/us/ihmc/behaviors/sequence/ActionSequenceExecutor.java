@@ -72,7 +72,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
                LogTools.info("Automatically executing action: {}", executorChildren.get(getState().getExecutionNextIndex()).getClass().getSimpleName());
                executeNextAction();
             }
-            while (!isEndOfSequence() && getLastExecutingAction().getDefinition().getExecuteWithNextAction());
+            while (!isEndOfSequence() && isLastExecutingActionExecuteWithNext());
          }
       }
       else if (getState().pollManualExecutionRequested())
@@ -82,7 +82,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
             LogTools.info("Manually executing action: {}", executorChildren.get(getState().getExecutionNextIndex()).getClass().getSimpleName());
             executeNextAction();
          }
-         while (!isEndOfSequence() && getLastExecutingAction().getDefinition().getExecuteWithNextAction());
+         while (!isEndOfSequence() && isLastExecutingActionExecuteWithNext());
       }
    }
 
@@ -135,9 +135,10 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       }
    }
 
-   private ActionNodeExecutor<?, ?> getLastExecutingAction()
+   private boolean isLastExecutingActionExecuteWithNext()
    {
-      return currentlyExecutingActions.get(currentlyExecutingActions.size() - 1);
+      return !currentlyExecutingActions.isEmpty()
+             && currentlyExecutingActions.get(currentlyExecutingActions.size() - 1).getDefinition().getExecuteWithNextAction();
    }
 
    private boolean isEndOfSequence()
