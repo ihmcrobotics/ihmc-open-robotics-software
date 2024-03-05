@@ -44,7 +44,7 @@ public class RDXHandConfigurationManager
             Runnable resetHand = () -> publishHandCommand(side, null, false, true);
             handQuickAccessButtons.put(side, new RDXHandQuickAccessButtons(baseUI, side, openHand, closeHand, calibrateHand, resetHand));
 
-            sakeHandWidgets.put(side, new RDXSakeHandWidgets(communicationHelper, side));
+            sakeHandWidgets.put(side, new RDXSakeHandWidgets(communicationHelper, syncedRobotModel, side));
          }
       }
    }

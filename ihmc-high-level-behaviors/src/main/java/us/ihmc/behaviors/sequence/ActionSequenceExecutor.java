@@ -74,7 +74,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
                LogTools.info("Automatically executing action: {}", executorChildren.get(state.getExecutionNextIndex()).getClass().getSimpleName());
                executeNextAction();
             }
-            while (!isEndOfSequence() && getLastExecutingAction().getDefinition().getExecuteWithNextAction());
+            while (!isEndOfSequence() && isLastExecutingActionExecuteWithNext());
          }
       }
       else if (state.pollManualExecutionRequested())
@@ -84,7 +84,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
             LogTools.info("Manually executing action: {}", executorChildren.get(state.getExecutionNextIndex()).getClass().getSimpleName());
             executeNextAction();
          }
-         while (!isEndOfSequence() && getLastExecutingAction().getDefinition().getExecuteWithNextAction());
+         while (!isEndOfSequence() && isLastExecutingActionExecuteWithNext());
       }
    }
 
@@ -122,27 +122,25 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
    {
       ActionNodeExecutor<?, ?> actionToExecute = executorChildren.get(state.getExecutionNextIndex());
 
-      // If automatic execution, we want to ensure it's able to execute before we perform the execution.
-      // If it's unable to execute, disable automatic execution.
-      if (state.getAutomaticExecution())
+      if (actionToExecute.getState().getCanExecute())
       {
-         if (!actionToExecute.getState().getCanExecute())
-         {
-            state.setAutomaticExecution(false);
-            // Early return
-            return;
-         }
+         actionToExecute.update();
+         actionToExecute.triggerActionExecution();
+         actionToExecute.updateCurrentlyExecuting();
+         currentlyExecutingActions.add(actionToExecute);
+         state.stepForwardNextExecutionIndex();
       }
-      actionToExecute.update();
-      actionToExecute.triggerActionExecution();
-      actionToExecute.updateCurrentlyExecuting();
-      currentlyExecutingActions.add(actionToExecute);
-      state.stepForwardNextExecutionIndex();
+      else
+      {
+         LogTools.error("Cannot execute action: %s".formatted(actionToExecute.getDefinition().getName()));
+         state.setAutomaticExecution(false);
+      }
    }
 
-   private ActionNodeExecutor<?, ?> getLastExecutingAction()
+   private boolean isLastExecutingActionExecuteWithNext()
    {
-      return currentlyExecutingActions.get(currentlyExecutingActions.size() - 1);
+      return !currentlyExecutingActions.isEmpty()
+             && currentlyExecutingActions.get(currentlyExecutingActions.size() - 1).getDefinition().getExecuteWithNextAction();
    }
 
    private boolean isEndOfSequence()
