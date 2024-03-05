@@ -86,7 +86,7 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
       onDiskSide = side.getValue();
       onDiskTrajectoryDuration = trajectoryDuration.getValue();
       for (int i = 0; i < jointAngles.getLength(); i++)
-         onDiskJointAngles[i] = jointAngles.getValue()[i];
+         onDiskJointAngles[i] = jointAngles.getValueReadOnly(i);
    }
 
    @Override
@@ -109,8 +109,9 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
       unchanged &= preset.getValue() == onDiskPreset;
       unchanged &= side.getValue() == onDiskSide;
       unchanged &= trajectoryDuration.getValue() == onDiskTrajectoryDuration;
-      for (int i = 0; i < jointAngles.getLength(); i++)
-         unchanged &= jointAngles.getValueReadOnly(i) == onDiskJointAngles[i];
+      if (preset.getValue() == null)
+         for (int i = 0; i < jointAngles.getLength(); i++)
+            unchanged &= jointAngles.getValueReadOnly(i) == onDiskJointAngles[i];
 
       return !unchanged;
    }
@@ -119,7 +120,7 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
-      message.setPreset(preset == null ? -1 : preset.toMessage().ordinal());
+      message.setPreset(preset.toMessage() == null ? -1 : preset.toMessage().ordinal());
       message.setRobotSide(side.toMessage().toByte());
       message.setTrajectoryDuration(trajectoryDuration.toMessage());
       jointAngles.toMessage(message.getJointAngles());
