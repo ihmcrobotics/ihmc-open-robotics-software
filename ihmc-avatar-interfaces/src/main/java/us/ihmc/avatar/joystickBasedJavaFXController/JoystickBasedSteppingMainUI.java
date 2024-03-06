@@ -1,16 +1,12 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
-import java.io.IOException;
-
 import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.AmbientLight;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
 import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
@@ -37,6 +33,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2NodeInterface;
 
+import java.io.IOException;
+
 public class JoystickBasedSteppingMainUI
 {
    private final Stage primaryStage;
@@ -60,8 +58,7 @@ public class JoystickBasedSteppingMainUI
                                       HumanoidRobotKickMessenger kickMessenger,
                                       HumanoidRobotPunchMessenger punchMessenger,
                                       RobotLowLevelMessenger lowLevelMessenger,
-                                      SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
-         throws Exception
+                                      SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons) throws Exception
    {
       this(robotName,
            primaryStage,
@@ -84,8 +81,7 @@ public class JoystickBasedSteppingMainUI
                                       HumanoidRobotKickMessenger kickMessenger,
                                       HumanoidRobotPunchMessenger punchMessenger,
                                       RobotLowLevelMessenger lowLevelMessenger,
-                                      SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons)
-         throws Exception
+                                      SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons) throws Exception
    {
       this.primaryStage = primaryStage;
       xBoxOneJavaFXController = new XBoxOneJavaFXController(messager);
@@ -97,7 +93,7 @@ public class JoystickBasedSteppingMainUI
       mainPane = loader.load();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
-      setupSceneLighting(view3dFactory);
+      view3dFactory.addDefaultLighting();
       FocusBasedCameraMouseEventHandler cameraController = view3dFactory.addCameraController(true);
       view3dFactory.addWorldCoordinateSystem(0.3);
       Pane subScene = view3dFactory.getSubSceneWrappedInsidePane();
@@ -162,21 +158,6 @@ public class JoystickBasedSteppingMainUI
    public FullHumanoidRobotModel getFullRobotModel()
    {
       return robotVisualizer.getFullRobotModel();
-   }
-
-   private void setupSceneLighting(View3DFactory view3dFactory)
-   {
-      // TODO: Replace with View3DFactory.addDefaultLighting() when javafx-toolkit 0.12.8+ i
-      double ambientValue = 0.7;
-      double pointValue = 0.2;
-      double pointDistance = 1000.0;
-      Color ambientColor = Color.color(ambientValue, ambientValue, ambientValue);
-      view3dFactory.addNodeToView(new AmbientLight(ambientColor));
-      Color indoorColor = Color.color(pointValue, pointValue, pointValue);
-      view3dFactory.addPointLight(pointDistance, pointDistance, pointDistance, indoorColor);
-      view3dFactory.addPointLight(-pointDistance, pointDistance, pointDistance, indoorColor);
-      view3dFactory.addPointLight(-pointDistance, -pointDistance, pointDistance, indoorColor);
-      view3dFactory.addPointLight(pointDistance, -pointDistance, pointDistance, indoorColor);
    }
 
    public void setActiveSecondaryControlOption(SecondaryControlOption activeSecondaryControlOption)
