@@ -47,6 +47,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * This the main class of the IK streaming.
+ * <p>
+ * TODO The IK streaming toolbox is a mess. This class should really be {@link KinematicsStreamingToolboxController} and the state machine removed. That'd be simpler.
+ * </p>
+ */
 public class KSTStreamingState implements State
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
