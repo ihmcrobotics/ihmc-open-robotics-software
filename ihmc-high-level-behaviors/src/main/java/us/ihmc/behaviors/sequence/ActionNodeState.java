@@ -31,6 +31,8 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    private final CRDTUnidirectionalDouble positionDistanceToGoalTolerance;
    private final CRDTUnidirectionalDouble orientationDistanceToGoalTolerance;
 
+   private ActionNodeState<?> executeAfterNode;
+
    public ActionNodeState(long id, D definition, CRDTInfo crdtInfo)
    {
       super(id, definition, crdtInfo);
@@ -209,5 +211,15 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    public boolean getIsExecuting()
    {
       return isExecuting.getValue();
+   }
+
+   public void setExecuteAfterNode(ActionNodeState<?> executeAfterNode)
+   {
+      this.executeAfterNode = executeAfterNode;
+   }
+
+   public ActionNodeState<?> getExecuteAfterNode()
+   {
+      return executeAfterNode;
    }
 }

@@ -41,12 +41,17 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       currentlyExecutingActions.clear();
       updateActionSubtree(this);
 
-      lastIndexOfConcurrentSetToExecute = state.getExecutionNextIndex();
-      while (lastIndexOfConcurrentSetToExecute < executorChildren.size()
-             && executorChildren.get(lastIndexOfConcurrentSetToExecute).getDefinition().getExecuteAfterAction())
+      for (int i = 0; i < executorChildren.size(); i++)
       {
-         ++lastIndexOfConcurrentSetToExecute;
+
       }
+
+      lastIndexOfConcurrentSetToExecute = state.getExecutionNextIndex();
+//      while (lastIndexOfConcurrentSetToExecute < executorChildren.size()
+//             && executorChildren.get(lastIndexOfConcurrentSetToExecute).getDefinition().getExecuteAfterAction())
+//      {
+//         ++lastIndexOfConcurrentSetToExecute;
+//      }
       for (int i = 0; i < executorChildren.size(); i++)
       {
          boolean isNextForExecution = i >= state.getExecutionNextIndex() && i <= lastIndexOfConcurrentSetToExecute;
@@ -137,8 +142,9 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
 
    private boolean isLastExecutingActionExecuteWithNext()
    {
-      return !currentlyExecutingActions.isEmpty()
-             && currentlyExecutingActions.get(currentlyExecutingActions.size() - 1).getDefinition().getExecuteAfterAction();
+      return false;
+//      return !currentlyExecutingActions.isEmpty()
+//             && currentlyExecutingActions.get(currentlyExecutingActions.size() - 1).getDefinition().getExecuteAfterAction();
    }
 
    private boolean isEndOfSequence()
