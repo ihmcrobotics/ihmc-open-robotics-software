@@ -118,6 +118,8 @@ public class RDXSakeHandWidgets
 
    public void renderImGuiWidgets()
    {
+      ImGui.beginDisabled(sakeHandStatus.getNeedsReset() || !sakeHandStatus.getIsCalibrated());
+
       for (SakeHandPreset preset : presetButtons)
       {
          if (ImGui.button(labels.get(preset.getPascalCasedName())))
@@ -131,10 +133,16 @@ public class RDXSakeHandWidgets
          ImGui.sameLine();
       }
 
+      ImGui.endDisabled();
+      ImGui.beginDisabled(sakeHandStatus.getNeedsReset());
+
       if (ImGui.button(labels.get("Calibrate")))
       {
          calibrateRequested.set();
       }
+
+      ImGui.endDisabled();
+
       ImGui.sameLine();
       if (ImGui.button(labels.get("Reset Errors")))
       {
@@ -144,6 +152,8 @@ public class RDXSakeHandWidgets
       calibrateStatusText.renderText("Is Calibrated: %b ".formatted(sakeHandStatus.getIsCalibrated()), !sakeHandStatus.getIsCalibrated());
       ImGui.sameLine();
       needResetStatusText.renderText("Needs Reset: %b ".formatted(sakeHandStatus.getNeedsReset()), sakeHandStatus.getNeedsReset());
+
+      ImGui.beginDisabled(sakeHandStatus.getNeedsReset() || !sakeHandStatus.getIsCalibrated());
 
       double currentHandOpenAngleNotchNormal = Math.abs(SakeHandParameters.normalizeHandOpenAngle(sakeHandStatus.getCurrentHandOpenAngle()));
 
@@ -198,6 +208,8 @@ public class RDXSakeHandWidgets
 
       if (styled)
          ImGui.popStyleColor(2);
+
+      ImGui.endDisabled();
 
       if (sakeHandStatus.getCurrentTemperature() >= SakeHandParameters.ERROR_TEMPERATURE_CELCIUS)
          ImGui.pushStyleColor(ImGuiCol.PlotHistogram, ImGuiTools.RED);

@@ -32,9 +32,9 @@ public class RDXHandConfigurationManager
 
       robotName = syncedRobotModel.getRobotModel().getSimpleRobotName();
 
-      if (syncedRobotModel.getRobotModel().getHandModels().toString().contains("SakeHand"))
+      for (RobotSide side : RobotSide.values)
       {
-         for (RobotSide side : RobotSide.values)
+         if (syncedRobotModel.getRobotModel().getRobotVersion().hasSakeGripperJoints(side))
          {
             handIcons.put(side, new RDXIconTexture("icons/" + side.getLowerCaseName() + "Hand.png"));
 
