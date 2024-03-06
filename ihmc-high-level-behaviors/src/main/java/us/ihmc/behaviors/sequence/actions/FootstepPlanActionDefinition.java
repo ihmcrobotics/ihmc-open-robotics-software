@@ -10,6 +10,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
@@ -24,6 +25,16 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private final CRDTUnidirectionalRecyclingArrayList<FootstepPlanActionFootstepDefinition> footsteps;
    private final CRDTUnidirectionalRigidBodyTransform goalToParentTransform;
    private final SideDependentList<CRDTUnidirectionalRigidBodyTransform> goalFootstepToGoalTransforms;
+
+   // On disk fields
+   private double onDiskSwingDuration;
+   private double onDiskTransferDuration;
+   private String onDiskParentFrameName;
+   private boolean onDiskIsManuallyPlaced;
+   private int onDiskNumberOfFootsteps;
+   private final RigidBodyTransform onDiskGoalToParentTransform = new RigidBodyTransform();
+   private final SideDependentList<RigidBodyTransform> onDiskGoalFootstepToGoalTransforms
+         = new SideDependentList<>(() -> new RigidBodyTransform());
 
    public FootstepPlanActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -93,6 +104,67 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             JSONTools.toEuclid(goalFootNode, goalFootstepToGoalTransforms.get(side).getValue());
          }
       }
+   }
+
+   @Override
+   public void setOnDiskFields()
+   {
+      super.setOnDiskFields();
+
+      onDiskSwingDuration = swingDuration.getValue();
+      onDiskTransferDuration = transferDuration.getValue();
+      onDiskParentFrameName = parentFrameName.getValue();
+      onDiskIsManuallyPlaced = isManuallyPlaced.getValue();
+      onDiskNumberOfFootsteps = footsteps.getSize();
+      onDiskGoalToParentTransform.set(goalToParentTransform.getValueReadOnly());
+      for (RobotSide side : goalFootstepToGoalTransforms.sides())
+         onDiskGoalFootstepToGoalTransforms.put(side, goalFootstepToGoalTransforms.get(side).getValue());
+
+      for (int i = 0; i < footsteps.getSize(); i++)
+         footsteps.getValueReadOnly(i).setOnDiskFields();
+   }
+
+   @Override
+   public void undoAllNontopologicalChanges()
+   {
+      super.undoAllNontopologicalChanges();
+
+      swingDuration.setValue(onDiskSwingDuration);
+      transferDuration.setValue(onDiskTransferDuration);
+      parentFrameName.setValue(onDiskParentFrameName);
+      isManuallyPlaced.setValue(onDiskIsManuallyPlaced);
+      footsteps.getValue().clear();
+      for (int i = 0; i < onDiskNumberOfFootsteps; i++)
+         footsteps.getValue().add();
+      goalToParentTransform.getValue().set(onDiskGoalToParentTransform);
+      for (RobotSide side : goalFootstepToGoalTransforms.sides())
+         goalFootstepToGoalTransforms.get(side).getValue().set(onDiskGoalFootstepToGoalTransforms.get(side));
+
+      for (int i = 0; i < footsteps.getSize(); i++)
+         footsteps.getValue().get(i).undoAllNontopologicalChanges();
+   }
+
+   @Override
+   public boolean hasChanges()
+   {
+      boolean unchanged = !super.hasChanges();
+
+      unchanged &= swingDuration.getValue() == onDiskSwingDuration;
+      unchanged &= transferDuration.getValue() == onDiskTransferDuration;
+      unchanged &= parentFrameName.getValue().equals(onDiskParentFrameName);
+      unchanged &= isManuallyPlaced.getValue() == onDiskIsManuallyPlaced;
+      unchanged &= goalToParentTransform.getValueReadOnly().equals(onDiskGoalToParentTransform);
+      for (RobotSide side : goalFootstepToGoalTransforms.sides())
+         unchanged &= goalFootstepToGoalTransforms.get(side).getValueReadOnly().equals(onDiskGoalFootstepToGoalTransforms.get(side));
+
+      boolean sameNumberOfFootsteps = footsteps.getSize() == onDiskNumberOfFootsteps;
+      unchanged &= sameNumberOfFootsteps;
+
+      if (sameNumberOfFootsteps)
+         for (int i = 0; i < footsteps.getSize(); i++)
+            unchanged &= !footsteps.getValueReadOnly(i).hasChanges();
+
+      return !unchanged;
    }
 
    public void toMessage(FootstepPlanActionDefinitionMessage message)

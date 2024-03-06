@@ -23,6 +23,9 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    // TODO: Is every action concurrent-able?
    private final CRDTUnidirectionalBoolean executeWithNextAction;
 
+   // On disk fields
+   private boolean onDiskExecuteWithNextAction;
+
    public ActionNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
@@ -46,6 +49,32 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
          executeWithNextAction.setValue(executeWithNextActionNode.asBoolean());
       else
          executeWithNextAction.setValue(false);
+   }
+
+   @Override
+   public void setOnDiskFields()
+   {
+      super.setOnDiskFields();
+
+      onDiskExecuteWithNextAction = executeWithNextAction.getValue();
+   }
+
+   @Override
+   public void undoAllNontopologicalChanges()
+   {
+      super.undoAllNontopologicalChanges();
+
+      executeWithNextAction.setValue(onDiskExecuteWithNextAction);
+   }
+
+   @Override
+   public boolean hasChanges()
+   {
+      boolean unchanged = !super.hasChanges();
+
+      unchanged &= executeWithNextAction.getValue() == onDiskExecuteWithNextAction;
+
+      return !unchanged;
    }
 
    public void toMessage(ActionNodeDefinitionMessage message)
