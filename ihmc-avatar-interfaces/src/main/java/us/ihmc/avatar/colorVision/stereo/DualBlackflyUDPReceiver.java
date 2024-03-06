@@ -1,25 +1,34 @@
-package us.ihmc.avatar.colorVision;
+package us.ihmc.avatar.colorVision.stereo;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.ImageDimensions;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 
-import static us.ihmc.avatar.colorVision.DualBlackflyUDPSender.DATAGRAM_MAX_LENGTH;
+import static us.ihmc.avatar.colorVision.stereo.DualBlackflyUDPSender.DATAGRAM_MAX_LENGTH;
 
 public class DualBlackflyUDPReceiver
 {
    private final SideDependentList<Thread> receiveThreads = new SideDependentList<>();
-   private volatile boolean running;
+   private volatile boolean running = false;
+   private volatile boolean connected = false;
 
    private final SideDependentList<byte[]> imageBuffers = new SideDependentList<>();
    private final SideDependentList<ImageDimensions> imageDimensions = new SideDependentList<>(ImageDimensions::new);
+
+   public boolean connected()
+   {
+      return connected;
+   }
 
    public void start()
    {
@@ -29,7 +38,7 @@ public class DualBlackflyUDPReceiver
       {
          Thread receiveThread = new Thread(() ->
          {
-            SocketAddress socketAddress = new InetSocketAddress(side == RobotSide.LEFT ? "192.1.0.1" : "192.1.0.1",
+            SocketAddress socketAddress = new InetSocketAddress(side == RobotSide.LEFT ? "127.0.0.1" : "127.0.0.1",
                                                                 side == RobotSide.LEFT ?
                                                                       DualBlackflyUDPSender.LEFT_UDP_PORT :
                                                                       DualBlackflyUDPSender.RIGHT_UDP_PORT);
@@ -41,7 +50,7 @@ public class DualBlackflyUDPReceiver
             }
             catch (SocketException e)
             {
-               LogTools.error("Unable to bind to address for blackfly UDP streaming: "  + socketAddress);
+               LogTools.error("Unable to bind to address for Blackfly UDP streaming: "  + socketAddress);
                return;
             }
 
@@ -54,11 +63,14 @@ public class DualBlackflyUDPReceiver
             {
                try
                {
+                  socket.setSoTimeout(1000);
                   socket.receive(packet);
+                  connected = true;
                }
                catch (IOException e)
                {
                   LogTools.error(e);
+                  return;
                }
 
                ByteBuffer datagramBuffer = ByteBuffer.wrap(buffer);
@@ -93,6 +105,8 @@ public class DualBlackflyUDPReceiver
 
             socket.disconnect();
             socket.close();
+
+            connected = false;
          });
 
          receiveThreads.put(side, receiveThread);
@@ -107,6 +121,11 @@ public class DualBlackflyUDPReceiver
 
       for (Thread receiveThread : receiveThreads)
       {
+         if (receiveThread == null)
+         {
+            continue;
+         }
+
          try
          {
             receiveThread.join();

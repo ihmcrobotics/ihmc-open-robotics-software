@@ -83,7 +83,7 @@ public class PerceptionAndAutonomyProcess
 
    private static final ROS2Topic<ImageMessage> OUSTER_DEPTH_TOPIC = PerceptionAPI.OUSTER_DEPTH_IMAGE;
 
-   private static final String LEFT_BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "00000000");
+   private static final String LEFT_BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "17403057");
    private static final String RIGHT_BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
    private static final BlackflyLensProperties BLACKFLY_LENS = BlackflyLensProperties.BFS_U3_27S5C_FE185C086HA_1;
    private static final ROS2Topic<ImageMessage> BLACKFLY_IMAGE_TOPIC = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT);
@@ -145,6 +145,7 @@ public class PerceptionAndAutonomyProcess
    private ROS2Heartbeat ousterHeartbeat;
    private ROS2Heartbeat leftBlackflyHeartbeat;
    private ROS2Heartbeat rightBlackflyHeartbeat;
+   private ROS2Heartbeat stereoBlackflyHeartbeat;
 
    public PerceptionAndAutonomyProcess(ROS2Helper ros2Helper,
                                        Supplier<ReferenceFrame> zedFrameSupplier,
@@ -152,8 +153,7 @@ public class PerceptionAndAutonomyProcess
                                        Supplier<ReferenceFrame> ousterFrameSupplier,
                                        Supplier<ReferenceFrame> leftBlackflyFrameSupplier,
                                        Supplier<ReferenceFrame> rightBlackflyFrameSupplier,
-                                       Supplier<ReferenceFrame> robotPelvisFrameSupplier,
-                                       ReferenceFrame zed2iLeftCameraFrame)
+                                       Supplier<ReferenceFrame> robotPelvisFrameSupplier)
    {
       initializeDependencyGraph(ros2Helper);
 
@@ -288,6 +288,8 @@ public class PerceptionAndAutonomyProcess
          leftBlackflyHeartbeat.destroy();
       if (rightBlackflyHeartbeat != null)
          rightBlackflyHeartbeat.destroy();
+      if (stereoBlackflyHeartbeat != null)
+         stereoBlackflyHeartbeat.destroy();
 
       LogTools.info("Destroyed {}", getClass().getSimpleName());
    }
@@ -494,6 +496,9 @@ public class PerceptionAndAutonomyProcess
 
       rightBlackflyHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.RIGHT));
       rightBlackflyHeartbeat.setAlive(true);
+
+      stereoBlackflyHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_BLACKFLY_STEREO);
+      stereoBlackflyHeartbeat.setAlive(true);
    }
 
    public static void main(String[] args)
@@ -507,8 +512,7 @@ public class PerceptionAndAutonomyProcess
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
-                                                                                                   ReferenceFrame::getWorldFrame,
-                                                                                                   ReferenceFrame.getWorldFrame());
+                                                                                                   ReferenceFrame::getWorldFrame);
       perceptionAndAutonomyProcess.startAutonomyThread();
 
       // To run a sensor without the UI, uncomment the below line.

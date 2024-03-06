@@ -3,6 +3,7 @@ package us.ihmc.rdx.vr;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.flag.ImGuiTableFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -15,14 +16,14 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
-/** This class should manage VR as part of the ImGuiBasedUI. */
 public class RDXVRManager
 {
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+
    private final RDXVRContext context = new RDXVRContext();
    private Notification contextCreatedNotification;
    private boolean contextInitialized = false;
@@ -31,7 +32,6 @@ public class RDXVRManager
    private final Object syncObject = new Object();
    private final ImBoolean showScenePoseGizmo = new ImBoolean(false);
    private RDXPose3DGizmo scenePoseGizmo;
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean vrEnabled = new ImBoolean(false);
    private final Notification posesReady = new Notification();
    private volatile boolean waitingOnPoses = false;
@@ -92,9 +92,9 @@ public class RDXVRManager
             contextCreatedNotification = new Notification();
             MissingThreadTools.startAsDaemon(getClass().getSimpleName() + "-initSystem", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
             {
-               initSystemCount++;
                synchronized (syncObject)
                {
+                  initSystemCount++;
                   context.initSystem();
                }
                contextCreatedNotification.set();
@@ -103,9 +103,10 @@ public class RDXVRManager
          if (contextCreatedNotification != null && contextCreatedNotification.poll())
          {
             initializing = false;
-            setupEyesCount++;
+
             synchronized (syncObject)
             {
+               setupEyesCount++;
                context.setupEyes();
             }
 
@@ -180,25 +181,73 @@ public class RDXVRManager
       }
    }
 
-   public void renderImGuiEnableWidget()
+   public void renderMenuBar()
+   {
+      ImGui.setNextWindowSize(350.0f, 250.0f);
+      if (ImGui.beginMenu(labels.get("VR")))
+      {
+         ImGui.text("Connected headset: " + (isVRReady() ? context.getHeadset().getModelName() : "None"));
+         if (ImGui.beginTable(labels.get("vrTable"), 2, ImGuiTableFlags.None))
+         {
+            // First row (libgdx log level)
+            ImGui.tableNextRow();
+            ImGui.tableSetColumnIndex(0);
+            ImGui.alignTextToFramePadding();
+            renderEnableCheckbox();
+            ImGui.tableSetColumnIndex(1);
+
+            // Second row (theme)
+            ImGui.tableNextRow();
+            ImGui.tableSetColumnIndex(0);
+            ImGui.alignTextToFramePadding();
+            ImGui.checkbox(labels.get("Controllers only"), new ImBoolean());
+            ImGui.tableSetColumnIndex(1);
+
+            ImGui.endTable();
+         }
+         if (ImGui.collapsingHeader(labels.get("Debug")))
+         {
+            renderDebugPlots();
+         }
+         ImGui.endMenu();
+      }
+   }
+
+   public void renderEnableCheckbox()
    {
       if (ImGui.checkbox(labels.get("VR Enabled"), vrEnabled))
       {
          if (vrEnabled.get())
-            LogTools.info("Enabling VR");
+         {
+            RDXBaseUI.pushNotification("Enabling VR...");
+
+            ThreadTools.startAThread(() ->
+            {
+               ThreadTools.sleep(5000);
+
+               if (isVRReady())
+               {
+                  RDXBaseUI.pushNotification("VR enabled.");
+               }
+               else
+               {
+                  RDXBaseUI.pushNotification("Unable to enable VR.");
+                  vrEnabled.set(false);
+               }
+            }, getClass().getName() + "VREnableMonitor");
+         }
          else
-            LogTools.info("Disabling VR");
+         {
+            RDXBaseUI.pushNotification("VR disabled");
+         }
       }
       if (ImGui.isItemHovered())
       {
-         float right = ImGui.getWindowPosX() + ImGui.getWindowSizeX();
-         float y = ImGui.getItemRectMaxY();
-         ImGui.setNextWindowPos(right - 600, y); // prevent the tooltip from creating a new window
-         ImGui.setTooltip("It is recommended to start SteamVR and power on the VR controllers before clicking this button.");
+         ImGui.setTooltip("Start SteamVR and turn on controllers before enabling.");
       }
    }
 
-   public void renderImGuiDebugWidgets()
+   public void renderDebugPlots()
    {
       ImGui.checkbox(labels.get("Show scene pose gizmo"), showScenePoseGizmo);
       contextInitializedPlot.render(contextInitialized ? 1.0 : 0.0);
@@ -277,11 +326,6 @@ public class RDXVRManager
    public RDXVRContext getContext()
    {
       return context;
-   }
-
-   public ImBoolean getVREnabled()
-   {
-      return vrEnabled;
    }
 
    public RDXVRTeleporter getTeleporter()

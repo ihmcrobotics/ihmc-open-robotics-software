@@ -1,16 +1,34 @@
 package us.ihmc.communication;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
+import controller_msgs.msg.dds.ConcaveHullFactoryParametersStringMessage;
+import controller_msgs.msg.dds.RigidBodyTransformMessage;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
-import perception_msgs.msg.dds.*;
+import perception_msgs.msg.dds.ArUcoMarkerPoses;
+import perception_msgs.msg.dds.BigVideoPacket;
+import perception_msgs.msg.dds.DetectedObjectPacket;
+import perception_msgs.msg.dds.DoorLocationPacket;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
+import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapStateRequestMessage;
+import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.msg.dds.IterativeClosestPointRequest;
+import perception_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PolygonizerParametersStringMessage;
+import perception_msgs.msg.dds.REAStateRequestMessage;
+import perception_msgs.msg.dds.SceneGraphMessage;
+import perception_msgs.msg.dds.VideoPacket;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.*;
+import us.ihmc.ros2.ROS2Topic;
 
 public class PerceptionAPI
 {
@@ -115,6 +133,7 @@ public class PerceptionAPI
    public static final SideDependentList<ROS2Topic<Empty>> REQUEST_BLACKFLY_COLOR_IMAGE
          = new SideDependentList<>(PERCEPTION_MODULE.withSuffix("request_left_blackfly_color").withType(Empty.class),
                                    PERCEPTION_MODULE.withSuffix("request_right_blackfly_color").withType(Empty.class));
+   public static final ROS2Topic<Empty> REQUEST_BLACKFLY_STEREO = PERCEPTION_MODULE.withSuffix("request_blackfly_stereo").withType(Empty.class);
 
    public static final ROS2Topic<BigVideoPacket> OUSTER_DEPTH_LARGE = IHMC_ROOT.withModule("ouster").withType(BigVideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<VideoPacket> OUSTER_DEPTH = IHMC_ROOT.withModule("ouster").withType(VideoPacket.class).withSuffix("depth");

@@ -5,10 +5,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.motionRetargeting.DefaultRetargetingParameters;
@@ -29,29 +27,20 @@ import java.util.Set;
  */
 public class RDXVRModeManager
 {
+   private RDXVRMode mode = RDXVRMode.INPUTS_DISABLED;
    private RDXVRHandPlacedFootstepMode handPlacedFootstepMode;
    private RDXVRKinematicsStreamingMode kinematicsStreamingMode;
    private RDXJoystickBasedStepping joystickBasedStepping;
    private RDX3DSituatedImGuiPanel leftHandPanel;
    private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private RDXVRMode mode = RDXVRMode.INPUTS_DISABLED;
-   private RDXVRPanelPlacementMode panelPlacementMode = RDXVRPanelPlacementMode.MANUAL_PLACEMENT;
-   private boolean renderPanel;
-   private final ImBoolean showFloatingVideoPanel = new ImBoolean(false);
-   private final Notification showFloatVideoPanelNotification = new Notification();
 
-   public void create(RDXBaseUI baseUI,
-                      ROS2SyncedRobotModel syncedRobot,
-                      ROS2ControllerHelper controllerHelper)
+   public void create(RDXBaseUI baseUI, ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper controllerHelper)
    {
       create(baseUI, syncedRobot, controllerHelper, new DefaultRetargetingParameters(), new SceneGraph());
    }
 
-   public void create(RDXBaseUI baseUI,
-                      ROS2SyncedRobotModel syncedRobot,
-                      ROS2ControllerHelper controllerHelper,
-                      RetargetingParameters retargetingParameters)
+   public void create(RDXBaseUI baseUI, ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper controllerHelper, RetargetingParameters retargetingParameters)
    {
       create(baseUI, syncedRobot, controllerHelper, retargetingParameters, new SceneGraph());
    }
@@ -74,9 +63,11 @@ public class RDXVRModeManager
       joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
       joystickBasedStepping.create(baseUI, controllerHelper, syncedRobot);
 
-      baseUI.getImGuiPanelManager().addPanel("VR Mode Manager", this::renderImGuiWidgets);
+      // 2D panel
+      baseUI.getImGuiPanelManager().addPanel("VR Manager", this::renderImGuiWidgets);
 
-      leftHandPanel = new RDX3DSituatedImGuiPanel("VR Mode Manager", this::renderImGuiWidgets);
+      // Panel in VR
+      leftHandPanel = new RDX3DSituatedImGuiPanel("VR Manager", this::renderImGuiWidgets);
       leftHandPanel.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5, 10);
       leftHandPanel.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
       baseUI.getVRManager().getContext().addVRPickCalculator(leftHandPanel::calculateVRPick);
@@ -85,8 +76,6 @@ public class RDXVRModeManager
 
    public void processVRInput(RDXVRContext vrContext)
    {
-      renderPanel = vrContext.getHeadset().isConnected() && vrContext.getController(RobotSide.LEFT).isConnected();
-
       for (RobotSide side : RobotSide.values)
       {
          vrContext.getController(side).runIfConnected(controller ->
@@ -129,24 +118,24 @@ public class RDXVRModeManager
       ImGui.text("Teleport: Right B button");
       ImGui.text("Adjust user Z height: Right touchpad up/down");
       ImGui.text("ImGui panels: Point and use right trigger to click and drag");
-      if (ImGui.checkbox(labels.get("Floating video panel"), showFloatingVideoPanel))
-      {
-         if (showFloatingVideoPanel.get())
-            showFloatVideoPanelNotification.set();
-      }
-      if (showFloatingVideoPanel.get())
-      {
-         ImGui.sameLine();
-         if (ImGui.radioButton(labels.get("Manually place"), panelPlacementMode == RDXVRPanelPlacementMode.MANUAL_PLACEMENT))
-         {
-            panelPlacementMode = RDXVRPanelPlacementMode.MANUAL_PLACEMENT;
-         }
-         ImGui.sameLine();
-         if (ImGui.radioButton(labels.get("Follow headset"), panelPlacementMode == RDXVRPanelPlacementMode.FOLLOW_HEADSET))
-         {
-            panelPlacementMode = RDXVRPanelPlacementMode.FOLLOW_HEADSET;
-         }
-      }
+      //      if (ImGui.checkbox(labels.get("Floating video panel"), showFloatingVideoPanel))
+      //      {
+      //         if (showFloatingVideoPanel.get())
+      //            showFloatVideoPanelNotification.set();
+      //      }
+      //      if (showFloatingVideoPanel.get())
+      //      {
+      //         ImGui.sameLine();
+      //         if (ImGui.radioButton(labels.get("Manually place"), panelPlacementMode == RDXVRPanelPlacementMode.MANUAL_PLACEMENT))
+      //         {
+      //            panelPlacementMode = RDXVRPanelPlacementMode.MANUAL_PLACEMENT;
+      //         }
+      //         ImGui.sameLine();
+      //         if (ImGui.radioButton(labels.get("Follow headset"), panelPlacementMode == RDXVRPanelPlacementMode.FOLLOW_HEADSET))
+      //         {
+      //            panelPlacementMode = RDXVRPanelPlacementMode.FOLLOW_HEADSET;
+      //         }
+      //      }
 
       if (ImGui.radioButton(labels.get("Inputs disabled"), mode == RDXVRMode.INPUTS_DISABLED))
       {
@@ -207,11 +196,6 @@ public class RDXVRModeManager
                joystickBasedStepping.getRenderables(renderables, pool);
             }
          }
-
-         if (renderPanel)
-         {
-            leftHandPanel.getRenderables(renderables, pool);
-         }
       }
    }
 
@@ -223,33 +207,28 @@ public class RDXVRModeManager
       joystickBasedStepping.destroy();
    }
 
-   public RDXVRKinematicsStreamingMode getKinematicsStreamingMode()
+   public RDXVRMode getMode()
    {
-      return kinematicsStreamingMode;
-   }
-
-   public ImBoolean getShowFloatingVideoPanel()
-   {
-      return showFloatingVideoPanel;
-   }
-
-   public Notification getShowFloatVideoPanelNotification()
-   {
-      return showFloatVideoPanelNotification;
-   }
-
-   public RDXVRPanelPlacementMode getVideoPanelPlacementMode()
-   {
-      return panelPlacementMode;
-   }
-
-   public void setVideoPanelPlacementMode(RDXVRPanelPlacementMode panelPlacementMode)
-   {
-      this.panelPlacementMode = panelPlacementMode;
+      return mode;
    }
 
    public RDXVRHandPlacedFootstepMode getHandPlacedFootstepMode()
    {
       return handPlacedFootstepMode;
+   }
+
+   public RDXVRKinematicsStreamingMode getKinematicsStreamingMode()
+   {
+      return kinematicsStreamingMode;
+   }
+
+   public RDXJoystickBasedStepping getJoystickBasedStepping()
+   {
+      return joystickBasedStepping;
+   }
+
+   public RDX3DSituatedImGuiPanel getLeftHandPanel()
+   {
+      return leftHandPanel;
    }
 }

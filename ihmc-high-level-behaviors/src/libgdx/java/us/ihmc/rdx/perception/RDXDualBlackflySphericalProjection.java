@@ -12,8 +12,10 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.avatar.colorVision.DualBlackflyUDPReceiver;
+import us.ihmc.avatar.colorVision.stereo.DualBlackflyUDPReceiver;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.ImageDimensions;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -37,6 +39,9 @@ public class RDXDualBlackflySphericalProjection
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
+   private volatile boolean reconnecting = false;
+   private Thread reconnectThread;
+
    public RDXDualBlackflySphericalProjection(RDXBaseUI baseUI)
    {
       baseUI.getImGuiPanelManager().addPanel("Projection", () ->
@@ -59,15 +64,55 @@ public class RDXDualBlackflySphericalProjection
       });
    }
 
-   public void create() throws Exception
+   private void startReconnectThread()
    {
+      stopReconnectThread();
+
+      reconnecting = true;
+
+      reconnectThread = new Thread(() -> {
+         do {
+            RDXBaseUI.pushNotification("Dual Blackfly stereo client reconnecting...");
+
+            dualBlackflyUDPReceiver.stop();
+            dualBlackflyUDPReceiver.start();
+
+            ThreadTools.sleep(5000);
+         } while (reconnecting && !dualBlackflyUDPReceiver.connected());
+      }, getClass().getName() + "-ReconnectThread");
+
+      reconnectThread.start();
+   }
+
+   private void stopReconnectThread()
+   {
+      if (reconnectThread != null)
+      {
+         reconnecting = false;
+
+         try
+         {
+            reconnectThread.join();
+         }
+         catch (InterruptedException e)
+         {
+            LogTools.error(e);
+         }
+      }
+   }
+
+   public void create()
+   {
+      startReconnectThread();
+
       projectionSpheres.get(RobotSide.LEFT).create();
       projectionSpheres.get(RobotSide.RIGHT).create();
-      dualBlackflyUDPReceiver.start();
    }
 
    public void shutdown()
    {
+      stopReconnectThread();
+
       dualBlackflyUDPReceiver.stop();
    }
 

@@ -12,7 +12,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.avatar.colorVision.DualBlackflyUDPReceiver;
+import us.ihmc.avatar.colorVision.stereo.DualBlackflyUDPReceiver;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.ImageDimensions;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;

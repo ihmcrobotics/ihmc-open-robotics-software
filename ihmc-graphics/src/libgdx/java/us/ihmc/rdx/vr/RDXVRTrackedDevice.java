@@ -68,9 +68,7 @@ public abstract class RDXVRTrackedDevice
 
             if (modelInstance == null)
             {
-               String renderModelName = VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex,
-                                                                                         VR.ETrackedDeviceProperty_Prop_RenderModelName_String,
-                                                                                         errorCode);
+               String renderModelName = getModelName();
                Model model = new Model();
                if (renderModelName.contains("controller"))
                {
@@ -102,6 +100,14 @@ public abstract class RDXVRTrackedDevice
             LibGDXTools.toLibGDX(tempOpenVRToWorldTransform, modelInstance.transform);
          }
       }
+   }
+
+   public String getModelName()
+   {
+      String modelName = VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex,
+                                                                                VR.ETrackedDeviceProperty_Prop_RenderModelName_String,
+                                                                                errorCode);
+      return modelName;
    }
 
    public ReferenceFrame getDeviceYUpZBackFrame()

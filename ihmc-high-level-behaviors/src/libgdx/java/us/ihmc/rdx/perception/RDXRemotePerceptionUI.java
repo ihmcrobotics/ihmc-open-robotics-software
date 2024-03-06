@@ -1,9 +1,6 @@
 package us.ihmc.rdx.perception;
 
-import imgui.ImGui;
-import imgui.type.ImBoolean;
-import imgui.type.ImFloat;
-import us.ihmc.avatar.colorVision.DualBlackflyComms;
+import us.ihmc.avatar.colorVision.BlackflyComms;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
@@ -63,7 +60,7 @@ public class RDXRemotePerceptionUI
    public void setBlackflyLensProperties(BlackflyLensProperties blackflyLensCombo)
    {
       ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(blackflyLensCombo);
-      remotePropertySets.registerRemotePropertySet(ousterFisheyeColoringIntrinsics, DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS);
+      remotePropertySets.registerRemotePropertySet(ousterFisheyeColoringIntrinsics, BlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS);
    }
 
    public void renderImGuiWidgets()

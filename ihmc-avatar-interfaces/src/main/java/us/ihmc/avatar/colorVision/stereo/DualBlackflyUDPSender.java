@@ -1,4 +1,4 @@
-package us.ihmc.avatar.colorVision;
+package us.ihmc.avatar.colorVision.stereo;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
@@ -11,15 +11,19 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 public class DualBlackflyUDPSender
 {
-   private static final String LEFT_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "00000000");
-   private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
-   private static final String LEFT_DESTINATION_IP_ADDRESS = System.getProperty("blackfly.left.udp.dest.address", "192.1.0.1");
-   private static final String RIGHT_DESTINATION_IP_ADDRESS = System.getProperty("blackfly.right.udp.dest.address", "192.1.0.1");
+   private static final String LEFT_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "17403057");
+   private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "17372478");
+   private static final String LEFT_DESTINATION_IP_ADDRESS = System.getProperty("blackfly.left.udp.dest.address", "127.0.0.1");
+   private static final String RIGHT_DESTINATION_IP_ADDRESS = System.getProperty("blackfly.right.udp.dest.address", "127.0.0.1");
    public static final int LEFT_UDP_PORT = 9200;
    public static final int RIGHT_UDP_PORT = 9201;
    public static final int IPV4_HEADER_LENGTH = 28;
