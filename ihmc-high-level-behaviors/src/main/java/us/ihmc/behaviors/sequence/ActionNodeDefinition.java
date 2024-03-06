@@ -20,7 +20,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
  */
 public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
 {
-   public static final String EXECUTE_AFTER_DEFAULT = "Previous";
+   public static final String EXECUTE_AFTER_PREVIOUS = "Previous";
    public static final String EXECUTE_AFTER_BEGINNING = "Beginning";
 
    // TODO: Is every action concurrent-able?
@@ -29,11 +29,13 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    // On disk fields
    private String onDiskExecuteAfterAction;
 
+   public boolean executeWithNext = false;
+
    public ActionNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 
-      executeAfterAction = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, EXECUTE_AFTER_DEFAULT);
+      executeAfterAction = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, EXECUTE_AFTER_PREVIOUS);
    }
 
    public void saveToFile(ObjectNode jsonNode)
@@ -48,10 +50,12 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
       super.loadFromFile(jsonNode);
 
       JsonNode executeWithNextActionNode = jsonNode.get("executeWithNextAction");
-      if (executeWithNextActionNode.asBoolean())
-      {
-         executeAfterAction.setValue(EXECUTE_AFTER_DEFAULT);
-      }
+      if (executeWithNextActionNode != null)
+         executeWithNext = executeWithNextActionNode.asBoolean();
+//      if (executeWithNextActionNode.asBoolean())
+//      {
+//         executeAfterAction.setValue(EXECUTE_AFTER_DEFAULT);
+//      }
    }
 
    @Override
