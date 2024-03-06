@@ -3,6 +3,6 @@
 behavior_msgs/BehaviorTreeNodeDefinitionMessage definition
 
 # Execute with next action
-bool execute_with_next_action
+string execute_after_action
 
 

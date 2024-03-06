@@ -19,7 +19,7 @@ module behavior_msgs
         /**
          * Execute with next action
          */
-        boolean execute_with_next_action;
+        string execute_after_action;
       };
     };
   };

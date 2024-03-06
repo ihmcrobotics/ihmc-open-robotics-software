@@ -15,7 +15,7 @@ public class ActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "dd3c3c08b27f65ff8c7e5066a495ada748696979e7c0607758294e44288911ee";
+   		return "7b704c5750db652eb16fca1937e03b9a849d16e9ea1b6ca9ff0d0780b64d9d18";
    }
    
    @Override
@@ -54,8 +54,7 @@ public class ActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
       return current_alignment - initial_alignment;
    }
@@ -71,8 +70,7 @@ public class ActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getExecuteAfterAction().length() + 1;
 
 
       return current_alignment - initial_alignment;
@@ -81,15 +79,16 @@ public class ActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    public static void write(behavior_msgs.msg.dds.ActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
-      cdr.write_type_7(data.getExecuteWithNextAction());
+      if(data.getExecuteAfterAction().length() <= 255)
+      cdr.write_type_d(data.getExecuteAfterAction());else
+          throw new RuntimeException("execute_after_action field exceeds the maximum length");
 
    }
 
    public static void read(behavior_msgs.msg.dds.ActionNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
-      data.setExecuteWithNextAction(cdr.read_type_7());
-      	
+      cdr.read_type_d(data.getExecuteAfterAction());	
 
    }
 
@@ -98,7 +97,7 @@ public class ActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       ser.write_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
 
-      ser.write_type_7("execute_with_next_action", data.getExecuteWithNextAction());
+      ser.write_type_d("execute_after_action", data.getExecuteAfterAction());
    }
 
    @Override
@@ -106,7 +105,7 @@ public class ActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    {
       ser.read_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
 
-      data.setExecuteWithNextAction(ser.read_type_7("execute_with_next_action"));
+      ser.read_type_d("execute_after_action", data.getExecuteAfterAction());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ActionNodeDefinitionMessage src, behavior_msgs.msg.dds.ActionNodeDefinitionMessage dest)
