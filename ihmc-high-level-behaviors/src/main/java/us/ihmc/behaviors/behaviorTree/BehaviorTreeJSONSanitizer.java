@@ -41,7 +41,7 @@ public class BehaviorTreeJSONSanitizer
                loadedRootNode.setValue(loadFromFile(jsonNode, null));
             });
 
-            performConversionExecuteWithNextToExecuteAfter(loadedRootNode);
+//            performConversionExecuteWithNextToExecuteAfter(loadedRootNode);
 
             loadedRootNode.getValue().saveToFile();
          }
@@ -68,10 +68,10 @@ public class BehaviorTreeJSONSanitizer
             {
                currentAction.setExecuteAfterAction(executeAfter);
             }
-            if (!currentAction.executeWithNext)
-            {
-               executeAfter = currentAction.getName();
-            }
+//            if (!currentAction.executeWithNext)
+//            {
+//               executeAfter = currentAction.getName();
+//            }
          }
       }
    }
