@@ -158,6 +158,11 @@ public enum RobotSide implements RobotSegment<RobotSide>
       return value;
    }
 
+   public <T> T select(T leftValue, T rightValue)
+   {
+      return this == LEFT ? leftValue : rightValue;
+   }
+
    public void checkRobotSideMatch(RobotSide other)
    {
       if (!(this == other))
@@ -180,7 +185,7 @@ public enum RobotSide implements RobotSegment<RobotSide>
    {
       RobotSide[] sides = RobotSide.values;
 
-      for(RobotSide side : sides)
+      for (RobotSide side : sides)
       {
          if (robotSideName.equals(side.getSideNameFirstLetter()))
             return side;
@@ -221,13 +226,13 @@ public enum RobotSide implements RobotSegment<RobotSide>
    {
       switch (var)
       {
-      case RIGHT:
-         return "refers to the RIGHT side of a robot";
-      case LEFT:
-         return "refers to the LEFT side of a robot";
+         case RIGHT:
+            return "refers to the RIGHT side of a robot";
+         case LEFT:
+            return "refers to the LEFT side of a robot";
 
-      default:
-         return "no documentation available";
+         default:
+            return "no documentation available";
       }
    }
 
