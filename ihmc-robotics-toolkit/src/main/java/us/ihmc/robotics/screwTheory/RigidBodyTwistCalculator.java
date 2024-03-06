@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
@@ -15,6 +16,15 @@ import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 
 import java.util.*;
 
+/**
+ * This class is used to calculate the twist of each rigid-body in a multi-body system.
+ * <p>
+ * TODO This class should migrate to the Mecano library.
+ * </p>
+ * <p>
+ * Unlike {@link TwistCalculator} or {@link MovingReferenceFrame}, this class allows to use any type of data for the joint velocities through the interface {@link JointVelocityAccessor}.
+ * </p>
+ */
 public class RigidBodyTwistCalculator implements RigidBodyTwistProvider
 {
 
@@ -28,7 +38,6 @@ public class RigidBodyTwistCalculator implements RigidBodyTwistProvider
 
    public RigidBodyTwistCalculator(MultiBodySystemReadOnly input)
    {
-      // TODO Woohoo! This is a stub!
       this.input = input;
       root = new RigidBodyTwistHolder(null, input.getRootBody());
       rigidBodyTwistHolders.put(input.getRootBody(), root);

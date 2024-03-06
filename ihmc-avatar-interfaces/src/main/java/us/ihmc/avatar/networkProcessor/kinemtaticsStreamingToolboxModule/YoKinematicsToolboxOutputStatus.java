@@ -45,8 +45,6 @@ public class YoKinematicsToolboxOutputStatus
       }
    }
 
-   ;
-
    private int numberOfJoints;
    private final YoEnum<Status> currentToolboxState;
    private final YoInteger jointNameHash;
