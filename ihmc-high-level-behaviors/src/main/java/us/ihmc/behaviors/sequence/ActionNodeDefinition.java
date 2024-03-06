@@ -29,6 +29,10 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    // On disk fields
    private String onDiskExecuteAfterAction;
 
+   // TODO: Remove
+   public boolean executeWithNext = false;
+   public boolean hasExecuterAfter = false;
+
    public ActionNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
@@ -47,7 +51,14 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.loadFromFile(jsonNode);
 
-      executeAfterAction.setValue(jsonNode.get("executeAfter").textValue());
+//      if (jsonNode.get("executeWithNextAction") != null)
+//         executeWithNext = jsonNode.get("executeWithNextAction").asBoolean();
+//
+      if (jsonNode.get("executeAfterAction") != null)
+//      {
+//         hasExecuterAfter = true;
+         executeAfterAction.setValue(jsonNode.get("executeAfterAction").textValue());
+//      }
    }
 
    @Override

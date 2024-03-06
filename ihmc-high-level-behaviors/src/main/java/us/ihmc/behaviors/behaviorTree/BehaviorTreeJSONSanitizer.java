@@ -62,16 +62,18 @@ public class BehaviorTreeJSONSanitizer
 
             if (i == 0 || executeAfter.equals(actionList.get(i - 1).getName()))
             {
-               currentAction.setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
+               if (!currentAction.hasExecuterAfter)
+                  currentAction.setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
             }
             else
             {
-               currentAction.setExecuteAfterAction(executeAfter);
+               if (!currentAction.hasExecuterAfter)
+                  currentAction.setExecuteAfterAction(executeAfter);
             }
-//            if (!currentAction.executeWithNext)
-//            {
-//               executeAfter = currentAction.getName();
-//            }
+            if (!currentAction.executeWithNext)
+            {
+               executeAfter = currentAction.getName();
+            }
          }
       }
    }
