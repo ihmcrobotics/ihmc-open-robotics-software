@@ -1,11 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Blue;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.DarkRed;
-import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.HeuristicICPController;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPController;
@@ -43,7 +37,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -52,7 +45,6 @@ import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic;
@@ -67,6 +59,9 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicPoint2D;
 
 public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
 {
@@ -97,10 +92,8 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private FeedbackControlCommand<?> heightControlCommand;
 
    private double omega0;
-   private double totalMass;
-   private double gravityZ;
-
-   private final RigidBodyReadOnly elevator;
+   private final DoubleProvider totalMassProvider;
+   private final double gravityZ;
 
    private final ReferenceFrame centerOfMassFrame;
    private final FramePoint3D centerOfMass;
@@ -171,6 +164,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
            controllerToolbox.getContactableFeet(),
            controllerToolbox.getFullRobotModel().getElevator(),
            walkingControllerParameters,
+           controllerToolbox.getTotalMassProvider(),
            controllerToolbox.getGravityZ(),
            controllerToolbox.getControlDT(),
            parentRegistry,
@@ -182,15 +176,14 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
                                           SideDependentList<ContactableFoot> contactableFeet,
                                           RigidBodyBasics elevator,
                                           WalkingControllerParameters walkingControllerParameters,
+                                          DoubleProvider totalMassProvider,
                                           double gravityZ,
                                           double controlDT,
                                           YoRegistry parentRegistry,
                                           YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this.totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
+      this.totalMassProvider = totalMassProvider;
       this.gravityZ = gravityZ;
-
-      this.elevator = elevator;
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
@@ -369,8 +362,6 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
     */
    public boolean computeControllerCoreCommands()
    {
-      totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
-
       capturePointCalculator.compute(capturePoint, omega0);
       capturePointVelocity.update(capturePoint);
 
@@ -429,7 +420,7 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
       centerOfMass2d.changeFrame(worldFrame);
 
       achievedCoMAcceleration2d.setIncludingFrame(achievedLinearMomentumRate);
-      achievedCoMAcceleration2d.scale(1.0 / totalMass);
+      achievedCoMAcceleration2d.scale(1.0 / totalMassProvider.getValue());
       achievedCoMAcceleration2d.changeFrame(worldFrame);
 
       achievedCMP.set(achievedCoMAcceleration2d);
@@ -464,7 +455,6 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
             break;
          default:
             throw new IllegalArgumentException("This command type has not been set up for height control.");
-
       }
    }
 
@@ -515,7 +505,6 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
 
       desiredCMP.set(icpController.getDesiredCMP());
       desiredCoP.set(icpController.getDesiredCoP());
-
    }
 
    private void checkAndPackOutputs()
@@ -550,6 +539,8 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private boolean computeDesiredLinearMomentumRateOfChange()
    {
       boolean success = true;
+
+      double totalMass = totalMassProvider.getValue();
 
       double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
       centerOfMass.setToZero(centerOfMassFrame);

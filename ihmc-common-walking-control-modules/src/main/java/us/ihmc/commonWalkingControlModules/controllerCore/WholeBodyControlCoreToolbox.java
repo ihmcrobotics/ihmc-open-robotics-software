@@ -1,10 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
-
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.DesiredExternalWrenchHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
@@ -34,11 +29,8 @@ import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
@@ -46,7 +38,13 @@ import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 {
@@ -56,8 +54,9 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 
    private final double controlDT;
    private final double gravityZ;
+   private DoubleProvider totalMassProvider;
    private final FloatingJointBasics rootJoint;
-   private RigidBodyBasics elevator;
+   private final RigidBodyBasics elevator;
    private final List<KinematicLoopFunction> kinematicLoopFunctions = new ArrayList<>();
    private final ReferenceFrame centerOfMassFrame;
    private final ControllerCoreOptimizationSettings optimizationSettings;
@@ -176,7 +175,6 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
          System.arraycopy(controlledJoints, 0, controlledJointsWithRoot, 1, controlledJoints.length);
          controlledJointsWithRoot[0] = rootJoint;
          controlledJoints = controlledJointsWithRoot;
-         
       }
 
       elevator = rootJoint.getPredecessor();
@@ -190,12 +188,14 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
       inverseDynamicsCalculator.setGravitionalAcceleration(-gravityZ); // Watch out for the sign here, it changed with the switch to Mecano.
       rigidBodyAccelerationProvider = inverseDynamicsCalculator.getAccelerationProvider();
 
+      totalMassProvider = () -> TotalMassCalculator.computeSubTreeMass(elevator);
+
       parentRegistry.addChild(registry);
    }
 
    /**
     * Registers an new function for handling a kinematic loop in the multi-body system.
-    * 
+    *
     * @param function the constraint function for one kinematic loop.
     */
    public void addKinematicLoopFunction(KinematicLoopFunction function)
@@ -209,7 +209,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
     * The list of inactive joints can be modified at runtime via
     * {@link InverseDynamicsOptimizationSettingsCommand}.
     * </p>
-    * 
+    *
     * @param inactiveJoint the joint to be registered as inactive.
     */
    public void addInactiveJoint(OneDoFJointBasics inactiveJoint)
@@ -237,11 +237,24 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
    }
 
    /**
+    * Sets the {@code DoubleProvider} that provides the total robot mass, for downstream classes that rely on this toolbox.
+    * <p>
+    * The total robot mass is normally assumed static after initialization, but can be time-varying if significant inertial changes occur on the robot.
+    * </p>
+    *
+    * @param totalMassProvider the {@code DoubleProvider} that provides the total robot mass.
+    */
+   public void setTotalMassProvider(DoubleProvider totalMassProvider)
+   {
+      this.totalMassProvider = totalMassProvider;
+   }
+
+   /**
     * Provides the settings to use for configuring the {@code WholeBodyFeedbackController}.
     * <p>
     * This has to be provided before creating the controller core.
     * </p>
-    * 
+    *
     * @param feedbackControllerSettings the settings to use.
     */
    public void setFeedbackControllerSettings(FeedbackControllerSettings feedbackControllerSettings)
@@ -524,6 +537,16 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
    public double getGravityZ()
    {
       return gravityZ;
+   }
+
+   public double getTotalMass()
+   {
+      return totalMassProvider.getValue();
+   }
+
+   public DoubleProvider getTotalMassProvider()
+   {
+      return totalMassProvider;
    }
 
    public YoGraphicsListRegistry getYoGraphicsListRegistry()

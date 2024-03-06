@@ -108,9 +108,9 @@ public class VirtualModelControlOptimizationControlModule implements SCS2YoGraph
       qpSolver.setUseWarmStart(optimizationSettings.useWarmStartInSolver());
       qpSolver.setMaxNumberOfIterations(optimizationSettings.getMaxNumberOfSolverIterations());
 
-      externalWrenchHandler = new ExternalWrenchHandler(toolbox.getRootBody(),
-                                                        toolbox.getGravityZ(),
+      externalWrenchHandler = new ExternalWrenchHandler(toolbox.getGravityZ(),
                                                         centerOfMassFrame,
+                                                        toolbox.getTotalMassProvider(),
                                                         toolbox.getContactablePlaneBodies());
 
       useWarmStart.set(optimizationSettings.useWarmStartInSolver());
