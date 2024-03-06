@@ -75,8 +75,8 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
       poseGizmo.create(panel3D);
 
       // TODO: Can all this be condensed?
-      executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
-                                                          getDefinition()::setExecuteWithNextAction,
+      executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteAfterAction,
+                                                          getDefinition()::setExecuteAfterAction,
                                                           imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
       holdPoseInWorldLaterWrapper = new ImBooleanWrapper(getDefinition()::getHoldPoseInWorldLater,
                                                          getDefinition()::setHoldPoseInWorldLater,

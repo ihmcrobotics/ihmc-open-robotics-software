@@ -34,7 +34,7 @@ public class RDXActionSequenceLayering
             RDXActionSequenceLayeredNode layeredNode = layeredNodes.add();
             layeredNode.reset();
 
-            boolean executeWithNextAction = actionNode.getState().getDefinition().getExecuteWithNextAction();
+            boolean executeWithNextAction = actionNode.getState().getDefinition().getExecuteAfterAction();
 
             if (!previousWasExecuteWithNext)
             {
@@ -67,7 +67,7 @@ public class RDXActionSequenceLayering
          {
             if (actionNode.getState().getActionIndex() > actionIndex)
             {
-               if (actionNode.getState().getDefinition().getExecuteWithNextAction())
+               if (actionNode.getState().getDefinition().getExecuteAfterAction())
                {
                   ++count;
                }

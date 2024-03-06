@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
+import us.ihmc.communication.crdt.CRDTUnidirectionalString;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -20,24 +20,27 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
  */
 public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
 {
+   public static final String EXECUTE_AFTER_DEFAULT = "Previous";
+   public static final String EXECUTE_AFTER_BEGINNING = "Beginning";
+
    // TODO: Is every action concurrent-able?
-   private final CRDTUnidirectionalBoolean executeWithNextAction;
+   private final CRDTUnidirectionalString executeAfterAction;
 
    // On disk fields
-   private boolean onDiskExecuteWithNextAction;
+   private String onDiskExecuteAfterAction;
 
    public ActionNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 
-      executeWithNextAction = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, false);
+      executeAfterAction = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, EXECUTE_AFTER_DEFAULT);
    }
 
    public void saveToFile(ObjectNode jsonNode)
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("executeWithNextAction", executeWithNextAction.getValue());
+      jsonNode.put("executeAfterAction", executeAfterAction.getValue());
    }
 
    public void loadFromFile(JsonNode jsonNode)
@@ -45,10 +48,10 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
       super.loadFromFile(jsonNode);
 
       JsonNode executeWithNextActionNode = jsonNode.get("executeWithNextAction");
-      if (executeWithNextActionNode != null)
-         executeWithNextAction.setValue(executeWithNextActionNode.asBoolean());
-      else
-         executeWithNextAction.setValue(false);
+      if (executeWithNextActionNode.asBoolean())
+      {
+         executeAfterAction.setValue(EXECUTE_AFTER_DEFAULT);
+      }
    }
 
    @Override
@@ -56,7 +59,7 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.setOnDiskFields();
 
-      onDiskExecuteWithNextAction = executeWithNextAction.getValue();
+      onDiskExecuteAfterAction = executeAfterAction.getValue();
    }
 
    @Override
@@ -64,7 +67,7 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.undoAllNontopologicalChanges();
 
-      executeWithNextAction.setValue(onDiskExecuteWithNextAction);
+      executeAfterAction.setValue(onDiskExecuteAfterAction);
    }
 
    @Override
@@ -72,7 +75,7 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       boolean unchanged = !super.hasChanges();
 
-      unchanged &= executeWithNextAction.getValue() == onDiskExecuteWithNextAction;
+      unchanged &= executeAfterAction.getValue().equals(onDiskExecuteAfterAction);
 
       return !unchanged;
    }
@@ -81,23 +84,23 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
-      message.setExecuteWithNextAction(executeWithNextAction.toMessage());
+      message.setExecuteAfterAction(executeAfterAction.toMessage());
    }
 
    public void fromMessage(ActionNodeDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 
-      executeWithNextAction.fromMessage(message.getExecuteWithNextAction());
+      executeAfterAction.fromMessage(message.getExecuteAfterActionAsString());
    }
 
-   public void setExecuteWithNextAction(boolean executeWitNextAction)
+   public void setExecuteAfterAction(String executeAfterAction)
    {
-      this.executeWithNextAction.setValue(executeWitNextAction);
+      this.executeAfterAction.setValue(executeAfterAction);
    }
 
-   public boolean getExecuteWithNextAction()
+   public String getExecuteAfterAction()
    {
-      return executeWithNextAction.getValue();
+      return executeAfterAction.getValue();
    }
 }

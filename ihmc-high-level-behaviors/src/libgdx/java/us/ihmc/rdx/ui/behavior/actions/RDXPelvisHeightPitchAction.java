@@ -88,8 +88,8 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
       trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
                                                      getDefinition()::setTrajectoryDuration,
                                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
-      executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
-                                                          getDefinition()::setExecuteWithNextAction,
+      executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteAfterAction,
+                                                          getDefinition()::setExecuteAfterAction,
                                                           imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
 
       String pelvisBodyName = syncedFullRobotModel.getPelvis().getName();

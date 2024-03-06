@@ -44,8 +44,8 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
                                                               definition::getFingertipGripForceLimit,
                                                               definition::setFingertipGripForceLimit);
       fingertipGripForceSlider.addWidgetAligner(widgetAligner);
-      executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
-                                                          definition::setExecuteWithNextAction,
+      executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteAfterAction,
+                                                          definition::setExecuteAfterAction,
                                                           imBoolean -> imgui.ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
    }
 

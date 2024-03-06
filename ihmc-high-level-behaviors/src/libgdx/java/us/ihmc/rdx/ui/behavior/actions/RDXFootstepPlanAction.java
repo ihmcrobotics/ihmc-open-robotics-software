@@ -81,8 +81,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                                                                 referenceFrameLibrary,
                                                                 getDefinition()::getParentFrameName,
                                                                 this::changeParentFrame);
-      executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
-                                                          getDefinition()::setExecuteWithNextAction,
+      executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteAfterAction,
+                                                          getDefinition()::setExecuteAfterAction,
                                                           imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
       manuallyPlaceStepsWrapper = new ImBooleanWrapper(getDefinition()::getIsManuallyPlaced,
                                                        getDefinition()::setIsManuallyPlaced,

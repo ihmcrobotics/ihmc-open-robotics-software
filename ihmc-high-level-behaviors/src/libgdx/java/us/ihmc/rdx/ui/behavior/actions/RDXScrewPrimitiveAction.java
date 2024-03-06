@@ -77,8 +77,8 @@ public class RDXScrewPrimitiveAction extends RDXActionNode<ScrewPrimitiveActionS
       screwAxisGizmo = new RDXSelectablePose3DGizmo(definition.getScrewAxisPoseInObjectFrame().getValue(), ReferenceFrame.getWorldFrame());
       screwAxisGizmo.create(panel3D);
 
-      executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
-                                                          definition::setExecuteWithNextAction,
+      executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteAfterAction,
+                                                          definition::setExecuteAfterAction,
                                                           imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
       objectFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Object frame",
                                                                 referenceFrameLibrary,
