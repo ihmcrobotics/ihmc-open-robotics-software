@@ -132,6 +132,7 @@ public class PerceptionAndAutonomyProcess
    private final ROS2SceneGraph sceneGraph;
    private final RestartableThrottledThread sceneGraphUpdateThread;
    private ROS2DemandGraphNode arUcoDetectionDemandNode;
+   private long sceneGraphUpdateIndex = 0;
 
    private final CenterposeDetectionManager centerposeDetectionManager;
    private ROS2DemandGraphNode centerposeDemandNode;
@@ -432,7 +433,9 @@ public class PerceptionAndAutonomyProcess
       sceneGraph.updateOnRobotOnly(robotPelvisFrameSupplier.get());
       sceneGraph.updatePublication();
 
-      if (behaviorTreeExecutor != null)
+      ++sceneGraphUpdateIndex;
+
+      if (behaviorTreeExecutor != null && sceneGraphUpdateIndex % 2 == 1)
       {
          behaviorTreeSyncedRobot.update();
          behaviorTreeExecutor.update();
@@ -455,7 +458,7 @@ public class PerceptionAndAutonomyProcess
                                                              RobotSide.RIGHT,
                                                              blackflyFrameSuppliers.get(side),
                                                              blackflyImageDemandNodes.get(side)));
-      blackflyImagePublishers.put(side, new BlackflyImagePublisher(BLACKFLY_LENS, BLACKFLY_IMAGE_TOPIC));
+      blackflyImagePublishers.put(side, new BlackflyImagePublisher(BLACKFLY_LENS, BLACKFLY_IMAGE_TOPIC, 0.5f));
    }
 
    private void initializeDependencyGraph(ROS2PublishSubscribeAPI ros2)

@@ -99,6 +99,12 @@ public class RDXBehaviorTreeNodeCreationMenu
          {
             ImGui.beginTooltip();
 
+            if (!indexedTreeFile.getNotes().isEmpty())
+            {
+               ImGui.text(indexedTreeFile.getNotes());
+               ImGui.spacing();
+            }
+
             ImGui.text("Reference frames:");
 
             if (indexedTreeFile.getReferenceFrameNames().isEmpty())
@@ -124,11 +130,6 @@ public class RDXBehaviorTreeNodeCreationMenu
       }
       ImGui.unindent();
       ImGui.spacing();
-
-      if (ImGui.button(labels.get("Refresh File List")))
-      {
-         reindexDirectory();
-      }
 
       ImGui.separator();
 
@@ -229,7 +230,7 @@ public class RDXBehaviorTreeNodeCreationMenu
       insertionDefinition.getNodeToInsert().setTreeWidgetExpanded(true);
    }
 
-   private void reindexDirectory()
+   public void reindexDirectory()
    {
       indexedTreeFiles.clear();
       for (WorkspaceResourceFile queryContainedFile : treeFilesDirectory.queryContainedFiles())

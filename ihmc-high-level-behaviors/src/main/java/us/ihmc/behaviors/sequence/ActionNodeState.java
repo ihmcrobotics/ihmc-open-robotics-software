@@ -123,6 +123,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       this.canExecute.setValue(canExecute);
    }
 
+   /** @return whether this action is valid for execution. This is checked before triggering the action. */
    public boolean getCanExecute()
    {
       return canExecute.getValue();

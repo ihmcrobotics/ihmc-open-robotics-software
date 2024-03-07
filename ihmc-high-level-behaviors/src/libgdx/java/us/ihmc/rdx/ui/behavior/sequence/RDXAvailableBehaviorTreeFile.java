@@ -19,6 +19,7 @@ public class RDXAvailableBehaviorTreeFile
    private final WorkspaceResourceFile treeFile;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private String name;
+   private String notes;
    private final SortedSet<String> referenceFrameNames = new TreeSet<>();
    private final Set<String> referenceFramesInWorld = new HashSet<>();
 
@@ -44,7 +45,8 @@ public class RDXAvailableBehaviorTreeFile
 
    private void loadFromFile(JsonNode jsonNode)
    {
-      name = jsonNode.get("description").asText();
+      name = jsonNode.get("name").asText();
+      notes = jsonNode.get("notes").asText();
 
       loadChildrenData(jsonNode);
    }
@@ -66,6 +68,11 @@ public class RDXAvailableBehaviorTreeFile
    public String getName()
    {
       return name;
+   }
+
+   public String getNotes()
+   {
+      return notes;
    }
 
    public WorkspaceResourceFile getTreeFile()
