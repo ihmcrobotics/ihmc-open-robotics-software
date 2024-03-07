@@ -5,16 +5,34 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
+/**
+ * This class is used to calculate a constant approximation to the offset seen in {@link  InertialParameterManager} estimation residuals on the real robot.
+ * <p>
+ * The filters used inside {@link InertialParameterManager} assume that the residuals in the estimation process (see {@code residual} in that class) are
+ * zero-mean. This is not the case in practice due to various inertial parameter non-idealities. The bias compensator is used to calculate a constant
+ * approximation to the offset by storing samples of the residuals over a window into the past and then averaging them. This is a simple, constant
+ * approximation to a bias that is in reality state-dependent and time-varying.
+ * </p>
+ *
+ * @author James Foster
+ */
 public class InertialBiasCompensator
 {
+   /** Keeps track of the progress through the measurement window, is updated after each new set of measurements. */
    private int counter;
+   /** The number of measurements to be used to calculate the bias. */
    private final int windowSize;
+   /**
+    * Where the measurements used to calculate the bias ae stored, the first index is the considered degree of freedom, the second index is the tick in the
+    * measurement window.
+    */
    private final double[][] measurements;
+   /** Where the bias for each degree of freedom is stored after it is calculated. */
    private final YoMatrix bias;
 
-   private final DMatrixRMaj zeroMatrix;
+   /** If we choose to temporarily exclude the bias, but not overwrite its value,  we need an appropriately sized zero matrix as a placeholder. */
+   private static DMatrixRMaj ZERO_MATRIX;
 
    public InertialBiasCompensator(int nDoFs, int windowSize, String[] rowNames, YoRegistry parentRegistry)
    {
@@ -26,10 +44,15 @@ public class InertialBiasCompensator
       measurements = new double[nDoFs][windowSize];
       bias = new YoMatrix("bias", nDoFs, 1, rowNames, null, registry);
 
-      zeroMatrix = new DMatrixRMaj(nDoFs, 1);
-      zeroMatrix.zero();
+      ZERO_MATRIX = new DMatrixRMaj(nDoFs, 1);
+      ZERO_MATRIX.zero();  // Just to make sure
    }
 
+   /**
+    * Updates the measurements with the new measurement, if the window is not full. If the window is full, the measurement is not stored.
+    *
+    * @param measurement the new measurement to be stored.
+    */
    public void update(DMatrix measurement)
    {
       if (counter < windowSize)
@@ -39,6 +62,9 @@ public class InertialBiasCompensator
          LogTools.info("InertialBiasCompensator: window size exceeded, measurement not stored");
    }
 
+   /**
+    * Calculates the bias for each degree of freedom by averaging the measurements in the window. If the window is not full, the bias is not calculated.
+    */
    public void calculateBias()
    {
       if (isWindowFilled())
@@ -58,14 +84,12 @@ public class InertialBiasCompensator
       }
    }
 
+   /**
+    * It is the responsibility of external callers to increment the counter, this class only tracks whether the window has been filled or not.
+    */
    public void incrementCounter()
    {
       counter++;
-   }
-
-   public void resetCounter()
-   {
-      counter = 0;
    }
 
    public void reset()
@@ -91,6 +115,6 @@ public class InertialBiasCompensator
 
    public DMatrixRMaj getZero()
    {
-      return zeroMatrix;
+      return ZERO_MATRIX;
    }
 }
