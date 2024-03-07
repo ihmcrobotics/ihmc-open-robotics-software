@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.referenceFrames;
 
 import org.ejml.data.DMatrixRMaj;
-
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commons.MathTools;
@@ -63,17 +62,17 @@ import us.ihmc.yoVariables.variable.YoEnum;
  * the reference frame ID.
  * </ul>
  * </p>
- * 
+ *
  * @author Sylvain Bertrand
  */
 public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
 {
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final String WALKING_TRAJECTORY_PATH_FRAME_NAME = "walkingTrajectoryPathFrame";
    public static final String WALKING_TRAJECTORY_FRAME_NAMEID = worldFrame.getNameId() + ReferenceFrame.SEPARATOR + WALKING_TRAJECTORY_PATH_FRAME_NAME;
-   public static final int WALKING_TRAJECTORY_FRAME_ID = WALKING_TRAJECTORY_PATH_FRAME_NAME.hashCode();
+   public static final int WALKING_TRAJECTORY_FRAME_ID = WALKING_TRAJECTORY_PATH_FRAME_NAME.hashCode(); // 1675694152
 
    private static final int MAX_NUMBER_OF_FOOTSTEPS = 2;
 
