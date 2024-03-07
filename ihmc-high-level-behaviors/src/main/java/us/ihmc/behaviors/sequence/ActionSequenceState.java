@@ -5,6 +5,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -41,6 +42,34 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       actionIndex.setValue(0);
       actionChildren.clear();
       updateActionSubtree(this, actionIndex);
+
+      for (int i = 0; i < actionChildren.size(); i++)
+      {
+         if (actionChildren.get(i).getDefinition().getExecuteAfterBeginning()
+          || actionChildren.get(i).getDefinition().getExecuteAfterPrevious())
+         {
+            actionChildren.get(i).setExecuteAfterNode(null);
+         }
+         else
+         {
+            int j = 0;
+            for (; j < i; j++)
+            {
+               if (actionChildren.get(i).getDefinition().getExecuteAfterAction().equals(actionChildren.get(i).getDefinition().getName()))
+               {
+                  actionChildren.get(i).setExecuteAfterNode(actionChildren.get(i));
+                  break;
+               }
+            }
+
+            if (j == i)
+            {
+               LogTools.error("No executeAfterMatch found. Defaulting to previous.");
+               actionChildren.get(i).getDefinition().setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
+               actionChildren.get(i).setExecuteAfterNode(null);
+            }
+         }
+      }
    }
 
    public void updateActionSubtree(BehaviorTreeNodeState<?> node, MutableInt actionIndex)

@@ -110,4 +110,14 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       return executeAfterAction.getValue();
    }
+
+   public boolean getExecuteAfterBeginning()
+   {
+      return executeAfterAction.getValue().equals(EXECUTE_AFTER_BEGINNING);
+   }
+
+   public boolean getExecuteAfterPrevious()
+   {
+      return executeAfterAction.getValue().equals(EXECUTE_AFTER_PREVIOUS);
+   }
 }
