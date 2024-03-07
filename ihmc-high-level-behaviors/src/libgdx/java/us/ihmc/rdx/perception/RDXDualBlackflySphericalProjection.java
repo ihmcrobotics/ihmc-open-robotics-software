@@ -63,7 +63,17 @@ public class RDXDualBlackflySphericalProjection
 
    public boolean isConnectingOrConnected()
    {
-      return reconnecting || dualBlackflyUDPReceiver.connected();
+      return isReconnecting() || isConnected();
+   }
+
+   public boolean isReconnecting()
+   {
+      return reconnecting;
+   }
+
+   public boolean isConnected()
+   {
+      return dualBlackflyUDPReceiver.connected();
    }
 
    private void startReconnectThread()
@@ -115,6 +125,8 @@ public class RDXDualBlackflySphericalProjection
    {
       // Disable on a thread, so we don't hang the UI
       ThreadTools.startAThread(this::stopReconnectThread, getClass().getSimpleName() + "StopReconnect");
+
+      dualBlackflyUDPReceiver.stop();
    }
 
    public void shutdown()
@@ -184,6 +196,11 @@ public class RDXDualBlackflySphericalProjection
             projectionSpheres.get(RobotSide.LEFT).getRenderables(renderables, pool);
          }
       }
+   }
+
+   public DualBlackflyUDPReceiver getDualBlackflyUDPReceiver()
+   {
+      return dualBlackflyUDPReceiver;
    }
 
    public SideDependentList<RDXProjectionSphere> getProjectionSpheres()

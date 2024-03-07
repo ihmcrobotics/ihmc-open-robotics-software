@@ -5,6 +5,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.ImageDimensions;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -22,8 +23,20 @@ public class DualBlackflyUDPReceiver
    private volatile boolean running = false;
    private volatile boolean connected = false;
 
+   private final SideDependentList<String> addresses = new SideDependentList<>();
    private final SideDependentList<byte[]> imageBuffers = new SideDependentList<>();
    private final SideDependentList<ImageDimensions> imageDimensions = new SideDependentList<>(ImageDimensions::new);
+   private final SideDependentList<FrequencyCalculator> frequencyCalculators;
+
+   public DualBlackflyUDPReceiver()
+   {
+      frequencyCalculators = new SideDependentList<>();
+      frequencyCalculators.put(RobotSide.LEFT, new FrequencyCalculator(10));
+      frequencyCalculators.put(RobotSide.RIGHT, new FrequencyCalculator(10));
+
+      addresses.put(RobotSide.LEFT, "127.0.0.1");
+      addresses.put(RobotSide.RIGHT, "127.0.0.1");
+   }
 
    public boolean connected()
    {
@@ -38,7 +51,7 @@ public class DualBlackflyUDPReceiver
       {
          Thread receiveThread = new Thread(() ->
          {
-            SocketAddress socketAddress = new InetSocketAddress(side == RobotSide.LEFT ? "127.0.0.1" : "127.0.0.1",
+            SocketAddress socketAddress = new InetSocketAddress(addresses.get(side),
                                                                 side == RobotSide.LEFT ?
                                                                       DualBlackflyUDPSender.LEFT_UDP_PORT :
                                                                       DualBlackflyUDPSender.RIGHT_UDP_PORT);
@@ -70,7 +83,9 @@ public class DualBlackflyUDPReceiver
                catch (IOException e)
                {
                   LogTools.error(e);
-                  return;
+                  connected = false;
+                  running = false;
+                  break;
                }
 
                ByteBuffer datagramBuffer = ByteBuffer.wrap(buffer);
@@ -101,6 +116,8 @@ public class DualBlackflyUDPReceiver
                {
                   imageBuffer[fragmentDataOffset + i] = datagramBuffer.get(fragmentHeaderLength + i);
                }
+
+               frequencyCalculators.get(side).ping();
             }
 
             socket.disconnect();
@@ -137,6 +154,16 @@ public class DualBlackflyUDPReceiver
       }
    }
 
+   public void setAddress(RobotSide side, String address)
+   {
+      addresses.put(side, address);
+   }
+
+   public SideDependentList<String> getAddresses()
+   {
+      return addresses;
+   }
+
    public SideDependentList<byte[]> getImageBuffers()
    {
       return imageBuffers;
@@ -145,6 +172,11 @@ public class DualBlackflyUDPReceiver
    public SideDependentList<ImageDimensions> getImageDimensions()
    {
       return imageDimensions;
+   }
+
+   public SideDependentList<FrequencyCalculator> getFrequencyCalculators()
+   {
+      return frequencyCalculators;
    }
 
    public static void main(String[] args)

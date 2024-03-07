@@ -3,7 +3,6 @@ package us.ihmc.rdx.vr;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.flag.ImGuiTableFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -11,6 +10,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.imgui.ImGuiPlot;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
@@ -33,6 +33,7 @@ public class RDXVRManager
    private final ImBoolean showScenePoseGizmo = new ImBoolean(false);
    private RDXPose3DGizmo scenePoseGizmo;
    private final ImBoolean vrEnabled = new ImBoolean(false);
+   private final ImBoolean controllersOnly = new ImBoolean(false);
    private final Notification posesReady = new Notification();
    private volatile boolean waitingOnPoses = false;
    private ImGuiPlot vrFPSPlot = new ImGuiPlot(labels.get("VR FPS Hz"), 1000, 180, 50);
@@ -186,36 +187,26 @@ public class RDXVRManager
       ImGui.setNextWindowSize(350.0f, 250.0f);
       if (ImGui.beginMenu(labels.get("VR")))
       {
+         ImGuiTools.separatorText("Controls");
+         renderEnableCheckbox();
+         ImGui.menuItem(labels.get("Controllers only"), "", controllersOnly);
+
+         ImGuiTools.separatorText("Status");
          ImGui.text("Connected headset: " + (isVRReady() ? context.getHeadset().getModelName() : "None"));
-         if (ImGui.beginTable(labels.get("vrTable"), 2, ImGuiTableFlags.None))
-         {
-            // First row (libgdx log level)
-            ImGui.tableNextRow();
-            ImGui.tableSetColumnIndex(0);
-            ImGui.alignTextToFramePadding();
-            renderEnableCheckbox();
-            ImGui.tableSetColumnIndex(1);
+         ImGui.text("Connected controllers: " + (isVRReady() ?
+               context.getController(RobotSide.LEFT).getModelName() + " " + context.getController(RobotSide.RIGHT).getModelName() :
+               "None"));
 
-            // Second row (theme)
-            ImGui.tableNextRow();
-            ImGui.tableSetColumnIndex(0);
-            ImGui.alignTextToFramePadding();
-            ImGui.checkbox(labels.get("Controllers only"), new ImBoolean());
-            ImGui.tableSetColumnIndex(1);
-
-            ImGui.endTable();
-         }
          if (ImGui.collapsingHeader(labels.get("Debug")))
-         {
             renderDebugPlots();
-         }
+
          ImGui.endMenu();
       }
    }
 
    public void renderEnableCheckbox()
    {
-      if (ImGui.checkbox(labels.get("VR Enabled"), vrEnabled))
+      if (ImGui.menuItem(labels.get("VR Enabled"), "", vrEnabled))
       {
          if (vrEnabled.get())
          {
