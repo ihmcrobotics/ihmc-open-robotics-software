@@ -1,9 +1,5 @@
 package us.ihmc.javafx;
 
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.ToDoubleFunction;
-import java.util.zip.CRC32;
-
 import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
@@ -23,6 +19,10 @@ import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
+
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.ToDoubleFunction;
+import java.util.zip.CRC32;
 
 public class JavaFXRobotVisualizer
 {
@@ -49,15 +49,19 @@ public class JavaFXRobotVisualizer
 
    public JavaFXRobotVisualizer(FullHumanoidRobotModelFactory fullRobotModelFactory, boolean checkJointNameHash)
    {
-      fullRobotModel = fullRobotModelFactory.createFullRobotModel(false);
+      this(fullRobotModelFactory.createFullRobotModel(false), fullRobotModelFactory.getRobotDefinition(), checkJointNameHash);
+   }
 
+   public JavaFXRobotVisualizer(FullHumanoidRobotModel fullRobotModel, RobotDefinition robotDefinition, boolean checkJointNameHash)
+   {
+      this.fullRobotModel = fullRobotModel;
       allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
 
       jointNameHash = calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
       this.checkJointNameHash = checkJointNameHash;
       this.numberOfJoints = allJoints.length;
 
-      new Thread(() -> loadRobotModelAndGraphics(fullRobotModelFactory), "RobotVisualizerLoading").start();
+      new Thread(() -> loadRobotModelAndGraphics(robotDefinition), "RobotVisualizerLoading").start();
 
       animationTimer = new AnimationTimer()
       {
@@ -112,9 +116,8 @@ public class JavaFXRobotVisualizer
       return (int) crc.getValue();
    }
 
-   private void loadRobotModelAndGraphics(FullHumanoidRobotModelFactory fullRobotModelFactory)
+   private void loadRobotModelAndGraphics(RobotDefinition robotDefinition)
    {
-      RobotDefinition robotDefinition = fullRobotModelFactory.getRobotDefinition();
       graphicsRobot = new GraphicsIDRobot(robotDefinition.getName(),
                                           fullRobotModel.getElevator(),
                                           RobotDefinitionConverter.toGraphicsObjectsHolder(robotDefinition));
