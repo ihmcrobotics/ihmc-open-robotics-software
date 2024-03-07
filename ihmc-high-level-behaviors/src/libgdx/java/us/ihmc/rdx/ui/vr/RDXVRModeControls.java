@@ -10,9 +10,10 @@ import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
 
 public class RDXVRModeControls
 {
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+
    private final RDX3DPanel panel;
    private final RDXVRModeManager vrModeManager;
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    public RDXVRModeControls(RDX3DPanel panel, RDXVRModeManager vrModeManager)
    {
@@ -20,7 +21,7 @@ public class RDXVRModeControls
       this.vrModeManager = vrModeManager;
    }
 
-   public void render()
+   public void renderPanelOverlay()
    {
       float panelWidth = 400;
       float panelHeight = 300;
@@ -33,7 +34,10 @@ public class RDXVRModeControls
       int windowFlags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoTitleBar; // undecorated
       ImGui.begin(labels.get("VRModeControls"), windowFlags);
 
-      ImGuiTools.textBold("VR");
+      ImGuiTools.textBold("VR Robot Controls");
+      ImGuiTools.separatorText("Stereo vision");
+      vrModeManager.getStereoVision().renderControls();
+
       ImGuiTools.separatorText("Mode");
       vrModeManager.renderImGuiWidgets();
 
@@ -46,13 +50,13 @@ public class RDXVRModeControls
          case JOYSTICK_WALKING -> RDXBaseUI.getInstance().getKeyBindings().renderKeybindingsSection(RDXJoystickBasedStepping.class.getSimpleName());
       }
 
-      if (vrModeManager.getMode() != RDXVRMode.INPUTS_DISABLED)
+      // Render options for VR modes that have options
+      if (vrModeManager.getMode() == RDXVRMode.WHOLE_BODY_IK_STREAMING || vrModeManager.getMode() == RDXVRMode.JOYSTICK_WALKING)
       {
          ImGuiTools.separatorText(vrModeManager.getMode().getReadableName() + " options");
 
          switch (vrModeManager.getMode())
          {
-            case FOOTSTEP_PLACEMENT -> vrModeManager.getHandPlacedFootstepMode().renderImGuiWidgets();
             case WHOLE_BODY_IK_STREAMING -> vrModeManager.getKinematicsStreamingMode().renderImGuiWidgets();
             case JOYSTICK_WALKING -> vrModeManager.getJoystickBasedStepping().renderImGuiWidgets();
          }

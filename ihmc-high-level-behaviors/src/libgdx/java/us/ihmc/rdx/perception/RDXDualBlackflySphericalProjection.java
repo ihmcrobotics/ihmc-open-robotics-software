@@ -42,26 +42,28 @@ public class RDXDualBlackflySphericalProjection
    private volatile boolean reconnecting = false;
    private Thread reconnectThread;
 
-   public RDXDualBlackflySphericalProjection(RDXBaseUI baseUI)
+   public void renderControls()
    {
-      baseUI.getImGuiPanelManager().addPanel("Projection", () ->
+      if (ImGuiTools.sliderDouble(labels.get("Pupillary distance"), pupillaryDistance, -15, 15))
       {
-         if (ImGuiTools.sliderDouble(labels.get("Pupillary distance"), pupillaryDistance, -15, 15))
-         {
 
-         }
-         ImGui.separator();
-         ImGuiTools.textBold("Left:");
-         ImGui.indent();
-         projectionSpheres.get(RobotSide.LEFT).renderImGuiWidgets();
-         ImGui.unindent();
-         ImGui.separator();
-         ImGuiTools.textBold("Right:");
-         ImGui.indent();
-         projectionSpheres.get(RobotSide.RIGHT).renderImGuiWidgets();
-         ImGui.unindent();
-         ImGui.separator();
-      });
+      }
+      ImGui.separator();
+      ImGuiTools.textBold("Left:");
+      ImGui.indent();
+      projectionSpheres.get(RobotSide.LEFT).renderImGuiWidgets();
+      ImGui.unindent();
+      ImGui.separator();
+      ImGuiTools.textBold("Right:");
+      ImGui.indent();
+      projectionSpheres.get(RobotSide.RIGHT).renderImGuiWidgets();
+      ImGui.unindent();
+      ImGui.separator();
+   }
+
+   public boolean isConnectingOrConnected()
+   {
+      return reconnecting || dualBlackflyUDPReceiver.connected();
    }
 
    private void startReconnectThread()
@@ -101,12 +103,18 @@ public class RDXDualBlackflySphericalProjection
       }
    }
 
-   public void create()
+   public void enable()
    {
       startReconnectThread();
 
       projectionSpheres.get(RobotSide.LEFT).create();
       projectionSpheres.get(RobotSide.RIGHT).create();
+   }
+
+   public void disable()
+   {
+      // Disable on a thread, so we don't hang the UI
+      ThreadTools.startAThread(this::stopReconnectThread, getClass().getSimpleName() + "StopReconnect");
    }
 
    public void shutdown()
@@ -118,6 +126,8 @@ public class RDXDualBlackflySphericalProjection
 
    public void render()
    {
+      boolean updatedTexture = false;
+
       for (RobotSide side : RobotSide.values)
       {
          byte[] imageData = dualBlackflyUDPReceiver.getImageBuffers().get(side);
@@ -142,13 +152,18 @@ public class RDXDualBlackflySphericalProjection
             pixmap.dispose();
             mat.close();
             imageDataPointer.close();
+
+            updatedTexture = true;
          }
       }
 
-      leftEyePose.getTranslation().setY(pupillaryDistance.get() / 2);
-      rightEyePose.getTranslation().setY(-pupillaryDistance.get() / 2);
-      LibGDXTools.toLibGDX(leftEyePose, projectionSpheres.get(RobotSide.LEFT).getModelInstance().transform);
-      LibGDXTools.toLibGDX(rightEyePose, projectionSpheres.get(RobotSide.RIGHT).getModelInstance().transform);
+      if (updatedTexture)
+      {
+         leftEyePose.getTranslation().setY(pupillaryDistance.get() / 2);
+         rightEyePose.getTranslation().setY(-pupillaryDistance.get() / 2);
+         LibGDXTools.toLibGDX(leftEyePose, projectionSpheres.get(RobotSide.LEFT).getModelInstance().transform);
+         LibGDXTools.toLibGDX(rightEyePose, projectionSpheres.get(RobotSide.RIGHT).getModelInstance().transform);
+      }
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
@@ -169,5 +184,10 @@ public class RDXDualBlackflySphericalProjection
             projectionSpheres.get(RobotSide.LEFT).getRenderables(renderables, pool);
          }
       }
+   }
+
+   public SideDependentList<RDXProjectionSphere> getProjectionSpheres()
+   {
+      return projectionSpheres;
    }
 }

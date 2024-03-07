@@ -32,6 +32,7 @@ public class RDXVRModeManager
    private RDXVRKinematicsStreamingMode kinematicsStreamingMode;
    private RDXJoystickBasedStepping joystickBasedStepping;
    private RDX3DSituatedImGuiPanel leftHandPanel;
+   private final RDXVRStereoVision stereoVision = new RDXVRStereoVision();
    private RDXVRModeControls vrModeControls;
    private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -72,7 +73,7 @@ public class RDXVRModeManager
       baseUI.getVRManager().getContext().addVRInputProcessor(leftHandPanel::processVRInput);
 
       vrModeControls = new RDXVRModeControls(baseUI.getPrimary3DPanel(), this);
-      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() -> vrModeControls.render());
+      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() -> vrModeControls.renderPanelOverlay());
 
       RDXBaseUI.getInstance().getKeyBindings().register("Teleport", "Right B button");
       RDXBaseUI.getInstance().getKeyBindings().register("Adjust camera Z height", "Right touchpad scroll");
@@ -120,41 +121,27 @@ public class RDXVRModeManager
 
    public void renderImGuiWidgets()
    {
-      //      if (ImGui.checkbox(labels.get("Floating video panel"), showFloatingVideoPanel))
-      //      {
-      //         if (showFloatingVideoPanel.get())
-      //            showFloatVideoPanelNotification.set();
-      //      }
-      //      if (showFloatingVideoPanel.get())
-      //      {
-      //         ImGui.sameLine();
-      //         if (ImGui.radioButton(labels.get("Manually place"), panelPlacementMode == RDXVRPanelPlacementMode.MANUAL_PLACEMENT))
-      //         {
-      //            panelPlacementMode = RDXVRPanelPlacementMode.MANUAL_PLACEMENT;
-      //         }
-      //         ImGui.sameLine();
-      //         if (ImGui.radioButton(labels.get("Follow headset"), panelPlacementMode == RDXVRPanelPlacementMode.FOLLOW_HEADSET))
-      //         {
-      //            panelPlacementMode = RDXVRPanelPlacementMode.FOLLOW_HEADSET;
-      //         }
-      //      }
-
-      if (ImGui.radioButton(labels.get("Inputs disabled"), mode == RDXVRMode.INPUTS_DISABLED))
+      if (ImGui.radioButton(labels.get(RDXVRMode.INPUTS_DISABLED.getReadableName()), mode == RDXVRMode.INPUTS_DISABLED))
       {
          mode = RDXVRMode.INPUTS_DISABLED;
       }
-      if (ImGui.radioButton(labels.get("Footstep placement"), mode == RDXVRMode.FOOTSTEP_PLACEMENT))
+      if (ImGui.radioButton(labels.get(RDXVRMode.FOOTSTEP_PLACEMENT.getReadableName()), mode == RDXVRMode.FOOTSTEP_PLACEMENT))
       {
          mode = RDXVRMode.FOOTSTEP_PLACEMENT;
       }
-      if (ImGui.radioButton(labels.get("Whole body IK streaming"), mode == RDXVRMode.WHOLE_BODY_IK_STREAMING))
+      if (ImGui.radioButton(labels.get(RDXVRMode.WHOLE_BODY_IK_STREAMING.getReadableName()), mode == RDXVRMode.WHOLE_BODY_IK_STREAMING))
       {
          mode = RDXVRMode.WHOLE_BODY_IK_STREAMING;
       }
-      if (ImGui.radioButton(labels.get("Joystick walking"), mode == RDXVRMode.JOYSTICK_WALKING))
+      if (ImGui.radioButton(labels.get(RDXVRMode.JOYSTICK_WALKING.getReadableName()), mode == RDXVRMode.JOYSTICK_WALKING))
       {
          mode = RDXVRMode.JOYSTICK_WALKING;
       }
+   }
+
+   public void render()
+   {
+      stereoVision.renderProjection();
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
@@ -163,21 +150,18 @@ public class RDXVRModeManager
       {
          switch (mode)
          {
-            case FOOTSTEP_PLACEMENT ->
-            {
-               handPlacedFootstepMode.getRenderables(renderables, pool);
-            }
+            case FOOTSTEP_PLACEMENT -> handPlacedFootstepMode.getRenderables(renderables, pool);
             case WHOLE_BODY_IK_STREAMING ->
             {
                if (kinematicsStreamingMode != null)
                   kinematicsStreamingMode.getVirtualRenderables(renderables, pool, sceneLevels);
             }
-            case JOYSTICK_WALKING ->
-            {
-               joystickBasedStepping.getRenderables(renderables, pool);
-            }
+            case JOYSTICK_WALKING -> joystickBasedStepping.getRenderables(renderables, pool);
          }
       }
+
+      if (stereoVision.isEnabled())
+         stereoVision.getDualBlackflySphericalProjection().getRenderables(renderables, pool, sceneLevels);
    }
 
    public void destroy()
@@ -186,6 +170,7 @@ public class RDXVRModeManager
       if (kinematicsStreamingMode != null)
          kinematicsStreamingMode.destroy();
       joystickBasedStepping.destroy();
+      stereoVision.getDualBlackflySphericalProjection().shutdown();
    }
 
    public RDXVRMode getMode()
@@ -206,6 +191,11 @@ public class RDXVRModeManager
    public RDXJoystickBasedStepping getJoystickBasedStepping()
    {
       return joystickBasedStepping;
+   }
+
+   public RDXVRStereoVision getStereoVision()
+   {
+      return stereoVision;
    }
 
    public RDX3DSituatedImGuiPanel getLeftHandPanel()
