@@ -124,12 +124,6 @@ public class RDXArmManager
    {
       panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator(baseUI.getPrimary3DPanel());
 
-      baseUI.getPrimary3DPanel().addOverlayPanel("Hand wrenches", () ->
-      {
-         if (indicateWrenchOnScreen.get())
-            panelHandWrenchIndicator.renderImGuiOverlay();
-      });
-
       handManager.create(baseUI, communicationHelper, syncedRobot);
    }
 
@@ -262,7 +256,13 @@ public class RDXArmManager
          taskspaceTrajectoryFrame = syncedRobot.getReferenceFrames().getChestFrame();
       }
 
-      ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen);
+      if (ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen))
+      {
+         if (indicateWrenchOnScreen.get())
+            RDXBaseUI.getInstance().getPrimary3DPanel().addOverlayPanel("Hand wrenches", () -> panelHandWrenchIndicator.renderImGuiOverlay());
+         else
+            RDXBaseUI.getInstance().getPrimary3DPanel().removeOverlayPanel("Hand wrenches");
+      }
 
       // Pop up warning if notification is set
       if (showWarningNotification.peekHasValue() && showWarningNotification.poll())
