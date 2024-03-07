@@ -38,6 +38,6 @@ public class InertialParameterManagerFactory
 
    public enum EstimatorType
    {
-      KF, CONSTRAINED_KF, PHYSICALLY_CONSISTENT_EKF
+      KF, PHYSICALLY_CONSISTENT_EKF
    }
 }

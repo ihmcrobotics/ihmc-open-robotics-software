@@ -383,19 +383,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
             createProcessCovariances(RigidBodyInertialParametersTools.getNamesForPiBasis(), defaultProcessCovariances);
             filter.setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
          }
-         case CONSTRAINED_KF ->
-         {
-            filter = new InertialConstrainedKalmanFilter(estimateRobotModel,
-                                                         basisSets,
-                                                         parameters,
-                                                         parameters.getURDFParameters(basisSets),
-                                                         CommonOps_DDRM.identity(nParameters),
-                                                         CommonOps_DDRM.identity(nParameters),
-                                                         CommonOps_DDRM.identity(nDoFs), defaultPostProcessingAlpha,
-                                                         registry);
-            createProcessCovariances(RigidBodyInertialParametersTools.getNamesForPiBasis(), defaultProcessCovariances);
-            filter.setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
-         }
          case PHYSICALLY_CONSISTENT_EKF ->
          {
             filter = new InertialPhysicallyConsistentKalmanFilter(estimateRobotModel,
@@ -625,11 +612,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                filter.getMeasurementCovariance().set(floatingBaseIndex, floatingBaseIndex, floatingBaseMeasurementCovariance[floatingBaseIndex].getValue());
             }
          else if (joint.getName().contains("HIP") || joint.getName().contains("KNEE") || joint.getName().contains("ANKLE"))
-            MatrixMissingTools.setMatrixDiagonal(indices, legsMeasurementCovariance.getValue(), filter.getMeasurementCovariance());
+            MatrixMissingTools.setSelectedMatrixDiagonals(indices, legsMeasurementCovariance.getValue(), filter.getMeasurementCovariance());
          else if (joint.getName().contains("SHOULDER") || joint.getName().contains("ELBOW") || joint.getName().contains("WRIST"))
-            MatrixMissingTools.setMatrixDiagonal(indices, armsMeasurementCovariance.getValue(), filter.getMeasurementCovariance());
+            MatrixMissingTools.setSelectedMatrixDiagonals(indices, armsMeasurementCovariance.getValue(), filter.getMeasurementCovariance());
          else if (joint.getName().contains("SPINE"))
-            MatrixMissingTools.setMatrixDiagonal(indices, spineMeasurementCovariance.getValue(), filter.getMeasurementCovariance());
+            MatrixMissingTools.setSelectedMatrixDiagonals(indices, spineMeasurementCovariance.getValue(), filter.getMeasurementCovariance());
          else
             LogTools.info("Joint " + joint.getName() + " not found for measurement covariance");
       }

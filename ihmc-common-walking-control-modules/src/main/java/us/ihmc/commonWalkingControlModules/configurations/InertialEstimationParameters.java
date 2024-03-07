@@ -8,35 +8,28 @@ import java.util.Set;
 
 public interface InertialEstimationParameters
 {
-   public abstract InertialParameterManagerFactory.EstimatorType getTypeOfEstimatorToUse();
+   InertialParameterManagerFactory.EstimatorType getTypeOfEstimatorToUse();
 
-   public abstract Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] getParametersToEstimate();
+   Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] getParametersToEstimate();
 
-   public abstract DMatrixRMaj getURDFParameters(Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets);
+   DMatrixRMaj getURDFParameters(Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets);
 
-   public abstract double getBreakFrequencyForPostProcessing();
-   public abstract double getBreakFrequencyForEstimateFiltering();
+   double getBreakFrequencyForPostProcessing();
+   double getBreakFrequencyForEstimateFiltering();
 
-   public abstract double getBreakFrequencyForAccelerationCalculation();
+   double getBreakFrequencyForAccelerationCalculation();
 
-   public abstract double getBiasCompensationWindowSizeInSeconds();
+   double getBiasCompensationWindowSizeInSeconds();
 
-   public abstract double getProcessModelCovariance();
-   public double[] getProcessModelCovarianceForBody();
-   public abstract double getProcessCovarianceMultiplierForWalking();
+   double getProcessModelCovariance();
+   double[] getProcessModelCovarianceForBody();
+   double getProcessCovarianceMultiplierForWalking();
 
 
-   public abstract double[] getFloatingBaseMeasurementCovariance();
-   public abstract double getLegMeasurementCovariance();
-   public abstract double getArmMeasurementCovariance();
-   public abstract double getSpineMeasurementCovariance();
+   double[] getFloatingBaseMeasurementCovariance();
+   double getLegMeasurementCovariance();
+   double getArmMeasurementCovariance();
+   double getSpineMeasurementCovariance();
 
-   public abstract double getNormalizedInnovationThreshold();
-
-   /** CONSTRAINED_KF */
-
-   public abstract int getMaxNumberOfIterationsForQP();
-
-   public abstract double getMinimumMassMultiplier();
-   public abstract double getMinimumDiagonalInertiaMultiplier();
+   double getNormalizedInnovationThreshold();
 }
