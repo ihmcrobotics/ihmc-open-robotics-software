@@ -72,8 +72,7 @@ public class RDXVRModeManager
       baseUI.getVRManager().getContext().addVRPickCalculator(leftHandPanel::calculateVRPick);
       baseUI.getVRManager().getContext().addVRInputProcessor(leftHandPanel::processVRInput);
 
-      vrModeControls = new RDXVRModeControls(baseUI.getPrimary3DPanel(), this);
-      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() -> vrModeControls.renderPanelOverlay());
+      vrModeControls = new RDXVRModeControls(baseUI, this);
 
       RDXBaseUI.getInstance().getKeyBindings().register("Teleport", "Right B button");
       RDXBaseUI.getInstance().getKeyBindings().register("Adjust camera Z height", "Right touchpad scroll");

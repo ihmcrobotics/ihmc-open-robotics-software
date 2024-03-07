@@ -54,6 +54,7 @@ public class RDX3DPanel extends RDXPanel
    private final Map<Object, Consumer<ImGui3DViewInput>> imgui3DViewInputProcessorOwnerKeyMap = new HashMap<>();
    private final RDX3DPanelToolbar toolbar = new RDX3DPanelToolbar();
    private final ArrayList<Runnable> imGuiOverlayAdditions = new ArrayList<>();
+   private final Map<String, RDX3DOverlayPanel> overlayPanels = new HashMap<>();
    private final Map<Object, Runnable> imGuiOverlayAdditionOwnerKeyMap = new HashMap<>();
    private InputMultiplexer inputMultiplexer;
    private RDXFocusBasedCamera camera3D;
@@ -221,9 +222,11 @@ public class RDX3DPanel extends RDXPanel
          ImGui.getWindowDrawList().addImage(textureID, windowDrawMinX, windowDrawMinY, windowDrawMaxX, windowDrawMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
 
          for (Runnable imguiOverlayAddition : imGuiOverlayAdditions)
-         {
             imguiOverlayAddition.run();
-         }
+         int panelIndex = 0;
+         float previousActiveWindowLerp = 0.0f;
+         for (RDX3DOverlayPanel overlayPanel : overlayPanels.values())
+            previousActiveWindowLerp = overlayPanel.render(panelIndex++, previousActiveWindowLerp);
          toolbar.render(windowSizeX, windowPositionX, windowPositionY);
 
          if (ImGui.isWindowHovered() && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Right))
@@ -368,6 +371,17 @@ public class RDX3DPanel extends RDXPanel
    public void addImGuiOverlayAddition(Runnable imGuiOverlayAddition)
    {
       imGuiOverlayAdditions.add(imGuiOverlayAddition);
+   }
+
+   public void addOverlayPanel(String panelName, Runnable imGuiRender)
+   {
+      RDX3DOverlayPanel panel = new RDX3DOverlayPanel(panelName, imGuiRender, this);
+      overlayPanels.put(panelName, panel);
+   }
+
+   public void removeOverlayPanel(String panelName)
+   {
+      overlayPanels.remove(panelName);
    }
 
    public void addImGui3DViewPickCalculator(Object ownerKey, Consumer<ImGui3DViewInput> calculate3DViewPick)
