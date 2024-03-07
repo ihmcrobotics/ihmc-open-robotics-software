@@ -36,8 +36,8 @@ kernel void removeDepthOverlap(read_only image2d_t slaveImage,
    float pitch = -angle(1.0f, 0.0f, masterFramePoint.x, masterFramePoint.z);
    int masterImagePixelRow = round(parameters[MASTER_PRINCIPAL_POINT_Y] + parameters[MASTER_FOCAL_LENGTH_Y] * tan(pitch));
 
-   bool isOverlapping = intervalContains(masterImagePixelColumn, 0, parameters[MASTER_IMAGE_WIDTH])
-                        && intervalContains(masterImagePixelRow, 0, parameters[MASTER_IMAGE_HEIGHT]);
+   bool isOverlapping = intervalContains(masterImagePixelColumn, 10, parameters[MASTER_IMAGE_WIDTH] - 10)
+                        && intervalContains(masterImagePixelRow, 10, parameters[MASTER_IMAGE_HEIGHT] - 10);
 
    if (isOverlapping)
    {
