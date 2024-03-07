@@ -218,31 +218,15 @@ public class MatrixMissingTools
       }
    }
 
-   public static void setMatrixDiagonal(int[] indices, double[] values, DMatrixRMaj matrix)
+   public static void setSelectedMatrixDiagonals(int[] indices, double value, DMatrixRMaj matrix)
    {
-      if (indices.length != values.length)
-         throw new IllegalArgumentException("indices and values must have the same length, was: [indices: " + indices.length + ", values: " + values.length + "]");
+      if (matrix.getNumRows() < indices.length || matrix.getNumCols() < indices.length)
+         throw new IllegalArgumentException(
+               "matrix is too small, min size: [rows: " + indices.length + ", cols: " + indices.length + "], was: [rows: " + matrix.getNumRows() + ", cols: "
+               + matrix.getNumCols() + "]");
 
-      for (int i = 0; i < indices.length; i++)
-      {
-         matrix.unsafe_set(indices[i], indices[i], values[i]);
-      }
-   }
-
-   public static void setMatrixDiagonal(int[] indices, double value, DMatrixRMaj matrix)
-   {
       for (int index : indices)
-      {
          matrix.unsafe_set(index, index, value);
-      }
-   }
-
-   public static void scaleMatrixDiagonal(int[] indices, double scale, DMatrixRMaj matrix)
-   {
-      for (int i = 0; i < indices.length; i++)
-      {
-         matrix.unsafe_set(indices[i], indices[i], matrix.unsafe_get(indices[i], indices[i]) * scale);
-      }
    }
 
    public static DMatrixRMaj createVector(int size, double fillValue)
@@ -479,13 +463,5 @@ public class MatrixMissingTools
    public static void negate(DMatrixRMaj matrix)
    {
       CommonOps_DDRM.scale(-1.0, matrix);
-   }
-
-   /**
-    * Slide the bottom numberOfRows up to the top of the matrix, making room for src.numRows - numberOfRows rows at the bottom of the matrix.
-    */
-   public static void slideBottomNRowsToTop(DMatrixRMaj src, int numberOfRows)
-   {
-      setMatrixBlock(src, 0, 0, src, src.numRows - numberOfRows, 0, numberOfRows, src.numCols, 1.0);
    }
 }
