@@ -1,19 +1,6 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
-import java.net.BindException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.google.common.base.CaseFormat;
-
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.factory.AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
@@ -38,15 +25,19 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.ros2.*;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.net.BindException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * This is a base class for any toolbox in the network manager. See the KinematicsToolboxModule as
@@ -205,51 +196,52 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       DataServerSettings yoVariableServerSettings = createYoVariableServerSettings();
 
       new Thread(() ->
-      {
-         for (int tentative = 0; tentative < 10; tentative++)
-         {
-            try
-            {
-               LogTools.info("{}: Trying to start YoVariableServer using port: {}.", name, yoVariableServerSettings.getPort());
-               yoVariableServer = new YoVariableServer(getClass(), modelProvider, yoVariableServerSettings, YO_VARIABLE_SERVER_DT);
-               yoVariableServer.setMainRegistry(registry,
-                                                AvatarSimulationFactory.createYoVariableServerJointList(fullRobotModel.getElevator()),
-                                                yoGraphicsListRegistry);
-               yoVariableServer.start();
-               break;
-            }
-            catch (RuntimeException e)
-            {
-               if (e.getCause() instanceof BindException)
-               {
-                  // There's another YoVariableServer running on the same port.
-                  // Trying the next port
-                  yoVariableServer = null;
-                  LogTools.warn("{}: Failed to start YoVariableServer, port {} is busy. Trying next port number", name, yoVariableServerSettings.getPort());
-                  yoVariableServerSettings.setPort(yoVariableServerSettings.getPort() + 1);
-               }
-               else
-               {
-                  throw e;
-               }
-            }
-         }
+                 {
+                    for (int tentative = 0; tentative < 10; tentative++)
+                    {
+                       try
+                       {
+                          LogTools.info("{}: Trying to start YoVariableServer using port: {}.", name, yoVariableServerSettings.getPort());
+                          yoVariableServer = new YoVariableServer(getClass(), modelProvider, yoVariableServerSettings, YO_VARIABLE_SERVER_DT);
+                          yoVariableServer.setMainRegistry(registry,
+                                                           AvatarSimulationFactory.createYoVariableServerJointList(fullRobotModel.getElevator()),
+                                                           yoGraphicsListRegistry);
+                          yoVariableServer.start();
+                          break;
+                       }
+                       catch (RuntimeException e)
+                       {
+                          if (e.getCause() instanceof BindException)
+                          {
+                             // There's another YoVariableServer running on the same port.
+                             // Trying the next port
+                             yoVariableServer = null;
+                             LogTools.warn("{}: Failed to start YoVariableServer, port {} is busy. Trying next port number",
+                                           name,
+                                           yoVariableServerSettings.getPort());
+                             yoVariableServerSettings.setPort(yoVariableServerSettings.getPort() + 1);
+                          }
+                          else
+                          {
+                             throw e;
+                          }
+                       }
+                    }
 
-         if (yoVariableServer == null)
-         {
-            LogTools.error("{}: Failed to start the YoVariableServer.", name);
-            return;
-         }
-         else
-         {
-            LogTools.info("{}: Successfully started YoVariableServer on port: {}.", name, yoVariableServerSettings.getPort());
-            yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(yoVariableServer),
-                                                                            0,
-                                                                            updatePeriodMilliseconds,
-                                                                            TimeUnit.MILLISECONDS);
-         }
-
-      }, name + "ToolboxYoVariableServer").start();
+                    if (yoVariableServer == null)
+                    {
+                       LogTools.error("{}: Failed to start the YoVariableServer.", name);
+                       return;
+                    }
+                    else
+                    {
+                       LogTools.info("{}: Successfully started YoVariableServer on port: {}.", name, yoVariableServerSettings.getPort());
+                       yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(yoVariableServer),
+                                                                                       0,
+                                                                                       updatePeriodMilliseconds,
+                                                                                       TimeUnit.MILLISECONDS);
+                    }
+                 }, name + "ToolboxYoVariableServer").start();
    }
 
    public DataServerSettings createYoVariableServerSettings()
@@ -301,39 +293,15 @@ public abstract class ToolboxModule implements CloseableAndDisposable
          @Override
          public boolean isMessageValid(Object message)
          {
-            if (exceptions.contains(message.getClass()))
+            if (toolboxTaskScheduled == null)
             {
-               if (toolboxTaskScheduled == null)
+               if (exceptions.contains(message.getClass()))
                {
-                  if (DEBUG)
-                     LogTools.info(name + " is sleeping: " + message.getClass().getSimpleName() + " is ignored.");
-                  return false;
-               }
-               else
-               {
+                  wakeUp();
                   return true;
                }
+               return false;
             }
-
-            // FIXME
-            //            if (message.getDestination() != thisDesitination)
-            //            {
-            //               if (DEBUG)
-            //                  PrintTools.error(ToolboxModule.this, name + ": isMessageValid " + message.getDestination() + "!=" + thisDesitination);
-            //               return false;
-            //            }
-            //
-            //            if (toolboxTaskScheduled == null)
-            //            {
-            //               wakeUp(message.getSource());
-            //            }
-            //            else if (activeMessageSource.getOrdinal() != message.getSource())
-            //            {
-            //               if (DEBUG)
-            //                  PrintTools.error(ToolboxModule.this, "Expecting messages from " + activeMessageSource.getEnumValue() + " received message from: "
-            //                        + PacketDestination.values[message.getSource()]);
-            //               return false;
-            //            }
 
             return true;
          }
