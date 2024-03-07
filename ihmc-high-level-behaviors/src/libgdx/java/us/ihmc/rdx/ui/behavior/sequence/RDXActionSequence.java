@@ -30,7 +30,6 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    private final List<RDXActionNode<?, ?>> nextForExecutionActions = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> currentlyExecutingActions = new ArrayList<>();
    private final RDXActionProgressWidgetsManager progressWidgetsManager = new RDXActionProgressWidgetsManager();
-   private final RDXActionSequenceLayering layering = new RDXActionSequenceLayering(this);
 
    public RDXActionSequence(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -96,9 +95,6 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
             }
          }
       }
-
-
-      layering.update();
    }
 
    public void updateActionSubtree(RDXBehaviorTreeNode<?, ?> node)
@@ -242,10 +238,5 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
 
       super.renderNodeSettingsWidgets();
-   }
-
-   public RDXActionSequenceLayering getLayering()
-   {
-      return layering;
    }
 }
