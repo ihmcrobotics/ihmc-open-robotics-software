@@ -27,4 +27,9 @@ public interface CommonHumanoidReferenceFrames extends CommonLeggedReferenceFram
    MovingReferenceFrame getABodyAttachedZUpFrame();
 
    MovingReferenceFrame getMidFootZUpGroundFrame();
+
+   default MovingReferenceFrame getMidHandControlFrame()
+   {
+      return null;
+   }
 }
