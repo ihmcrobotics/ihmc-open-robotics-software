@@ -12,6 +12,15 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class is used to mutate the mass, center of mass offset, and moment of inertia of a robot's rigid bodies in SCS2, simulating the effects of time-varying
+ * inertial parameters.
+ * <p>
+ * The mutators are themselves thin wrappers around {@link YoFunctionGenerator}s, which provide a simple way to mutate the inertial parameters during a simulation.
+ * </p>
+ *
+ * @author James Foster
+ */
 public class SCS2RobotRigidBodyMutator implements Controller
 {
    private final List<RigidBodyMutator> rigidBodyMutators = new ArrayList<>();
