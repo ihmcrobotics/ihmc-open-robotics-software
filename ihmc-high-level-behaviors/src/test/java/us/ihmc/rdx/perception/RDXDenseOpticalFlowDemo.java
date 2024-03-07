@@ -24,7 +24,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 
-public class RDXOpticalFlowDemo
+public class RDXDenseOpticalFlowDemo
 {
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "optical_flow_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
@@ -38,7 +38,7 @@ public class RDXOpticalFlowDemo
 
    private boolean done = false;
 
-   public RDXOpticalFlowDemo()
+   public RDXDenseOpticalFlowDemo()
    {
       imageRetriever = new ZEDColorDepthImageRetriever(0,
                                                        ReferenceFrame::getWorldFrame,
@@ -180,6 +180,6 @@ public class RDXOpticalFlowDemo
 
    public static void main(String[] args)
    {
-      new RDXOpticalFlowDemo();
+      new RDXDenseOpticalFlowDemo();
    }
 }

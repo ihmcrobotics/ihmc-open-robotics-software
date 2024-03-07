@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 public class RDXYOLOv8SparseOpticalFlowDemo
 {
    private static final YOLOv8DetectableObject OBJECT_TYPE = YOLOv8DetectableObject.CUP;
+   private final Mat translationMat = new Mat(2, 3, opencv_core.CV_32FC1);
 
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "yolov8_optical_flow_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
@@ -82,10 +83,6 @@ public class RDXYOLOv8SparseOpticalFlowDemo
    private GpuMat lastMask = null;
    private boolean done = false;
 
-   private final Vector2D totalTranslation = new Vector2D(0.0f, 0.0f);
-
-   private int erosionKernelRadius = 2;
-
    public RDXYOLOv8SparseOpticalFlowDemo()
    {
       imageRetriever = new ZEDColorDepthImageRetriever(0,
@@ -93,6 +90,13 @@ public class RDXYOLOv8SparseOpticalFlowDemo
                                                        new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_DEPTH),
                                                        new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_COLOR));
       imagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH);
+
+      translationMat.data().putFloat(0L * Float.BYTES, 1.0f);
+      translationMat.data().putFloat(1L * Float.BYTES, 0.0f);
+      translationMat.data().putFloat(2L * Float.BYTES, 0.0f);
+      translationMat.data().putFloat(3L * Float.BYTES, 0.0f);
+      translationMat.data().putFloat(4L * Float.BYTES, 1.0f);
+      translationMat.data().putFloat(5L * Float.BYTES, 0.0f);
 
       imageRetriever.start();
 
@@ -142,21 +146,18 @@ public class RDXYOLOv8SparseOpticalFlowDemo
             opencv_imgproc.erode(objectMask.getCpuImageMat(),
                                  objectMask.getCpuImageMat(),
                                  opencv_imgproc.getStructuringElement(opencv_imgproc.CV_SHAPE_RECT,
-                                                                      new Size(2 * erosionKernelRadius + 1, 2 * erosionKernelRadius + 1),
-                                                                      new Point(erosionKernelRadius, erosionKernelRadius)));
-         }
-         opticalFlowProcessor.setNewImage(compressedColorImage, objectMask);
-         if (objectMask != null)
-         {
+                                                                      new Size(2 * erosionValue.get() + 1, 2 * erosionValue.get() + 1),
+                                                                      new Point(erosionValue.get(), erosionValue.get())));
+            opticalFlowProcessor.setNewImage(compressedColorImage, objectMask);
+
             lastMask = objectMask.getGpuImageMat();
-            totalTranslation.setToZero();
          }
       }
       else if (objectMask != null)
       {
          opticalFlowProcessor.setNewImage(compressedColorImage, null);
 
-         Vector2D averageShift = opticalFlowProcessor.calculateFlow();
+         Scalar averageShift = opticalFlowProcessor.calculateFlow();
 
          if (averageShift != null)
          {
@@ -174,6 +175,7 @@ public class RDXYOLOv8SparseOpticalFlowDemo
                                            objectMask.getPrincipalPointY(),
                                            objectMask.getPosition(),
                                            objectMask.getOrientation());
+
             lastMask = opticalFlowMask.getGpuImageMat();
          }
       }
@@ -220,52 +222,33 @@ public class RDXYOLOv8SparseOpticalFlowDemo
       return compressedColor;
    }
 
-   private GpuMat getShiftedMask(Vector2D averageShift, GpuMat originalMask)
+   private GpuMat getShiftedMask(Scalar averageShift, GpuMat originalMask)
    {
-//      if (averageShift.norm() > 0.05)
-      {
-         GpuMat newMask = new GpuMat(originalMask.size(), originalMask.type());
+      GpuMat newMask = new GpuMat(originalMask.size(), originalMask.type());
 
-         totalTranslation.add(averageShift);
-         System.out.println("Translate = " + totalTranslation.getX() + "," + totalTranslation.getY());
+      translationMat.data().putFloat(2L * Float.BYTES, (float) averageShift.get(0));
+      translationMat.data().putFloat(5L * Float.BYTES, (float) averageShift.get(1));
+      opencv_cudawarping.warpAffine(originalMask, newMask, translationMat, originalMask.size());
 
-         Mat cpuTranformMat = new Mat(new Size(3, 2), opencv_core.CV_32FC1);
-         cpuTranformMat.data().putFloat(0L * Float.BYTES, 1.0f);
-         cpuTranformMat.data().putFloat(1L * Float.BYTES, 0.0f);
-         cpuTranformMat.data().putFloat(2L * Float.BYTES, averageShift.getX32()/*0.0f*/);
-         cpuTranformMat.data().putFloat(3L * Float.BYTES, 0.0f);
-         cpuTranformMat.data().putFloat(4L * Float.BYTES, 1.0f);
-         cpuTranformMat.data().putFloat(5L * Float.BYTES, averageShift.getY32()/*0.0f*/);
-         opencv_cudawarping.warpAffine(originalMask,
-                                       newMask,
-                                       cpuTranformMat,
-                                       originalMask.size(),
-                                       opencv_imgproc.INTER_LINEAR,
-                                       opencv_core.BORDER_CONSTANT,
-                                       new Scalar(),
-                                       Stream.Null());
-         opencv_cudaarithm.threshold(newMask, newMask, 0.5, 1.0, opencv_imgproc.THRESH_BINARY);
+      opencv_cudaarithm.threshold(newMask, newMask, 0.5, 1.0, opencv_imgproc.THRESH_BINARY);
 
-         Mat cpuOriginalMask = new Mat();
-         originalMask.download(cpuOriginalMask);
-         PerceptionDebugTools.display("Original Mask", cpuOriginalMask, 1);
+//      Mat cpuOriginalMask = new Mat();
+//      originalMask.download(cpuOriginalMask);
+//      PerceptionDebugTools.display("Original Mask", cpuOriginalMask, 1);
+//
+//      Mat cpuNewMask = new Mat();
+//      newMask.download(cpuNewMask);
+//      PerceptionDebugTools.display("New Mask", cpuNewMask, 1);
+//
+//      cpuNewMask.close();
+//      cpuOriginalMask.close();
 
-         Mat cpuNewMask = new Mat();
-         newMask.download(cpuNewMask);
-         PerceptionDebugTools.display("New Mask", cpuNewMask, 1);
-
-         cpuTranformMat.release();
-         cpuNewMask.close();
-         cpuOriginalMask.close();
-
-         return newMask;
-      }
-
-      //return originalMask;
+      return newMask;
    }
 
    private void destroy()
    {
+      translationMat.release();
       imageRetriever.destroy();
       imagePublisher.destroy();
       opticalFlowProcessor.destroy();

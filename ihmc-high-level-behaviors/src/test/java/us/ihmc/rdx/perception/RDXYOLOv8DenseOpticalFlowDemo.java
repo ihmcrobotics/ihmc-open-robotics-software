@@ -46,9 +46,10 @@ import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class RDXYOLOv8OpticalFlowDemo
+public class RDXYOLOv8DenseOpticalFlowDemo
 {
    private static final YOLOv8DetectableObject OBJECT_TYPE = YOLOv8DetectableObject.CUP;
+   private GpuMat indexMat;
 
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "yolov8_optical_flow_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
@@ -79,10 +80,7 @@ public class RDXYOLOv8OpticalFlowDemo
    private RawImage opticalFlowMask = null;
    private boolean done = false;
 
-   private GpuMat indexMat;
-   private int erosionKernelRadius = 2;
-
-   public RDXYOLOv8OpticalFlowDemo()
+   public RDXYOLOv8DenseOpticalFlowDemo()
    {
       imageRetriever = new ZEDColorDepthImageRetriever(0,
                                                        ReferenceFrame::getWorldFrame,
@@ -141,8 +139,9 @@ public class RDXYOLOv8OpticalFlowDemo
          opencv_imgproc.erode(objectMask.getCpuImageMat(),
                               objectMask.getCpuImageMat(),
                               opencv_imgproc.getStructuringElement(opencv_imgproc.CV_SHAPE_RECT,
-                                                                   new Size(2 * erosionKernelRadius + 1, 2 * erosionKernelRadius + 1),
-                                                                   new Point(erosionKernelRadius, erosionKernelRadius)));
+                                                                   new Size(2 * erosionValue.get() + 1, 2 * erosionValue.get() + 1),
+                                                                   new Point(erosionValue.get(), erosionValue.get())));
+
          opticalFlowProcessor.setSecondImage(compressedColorImage);
          try (GpuMat flow = opticalFlowProcessor.calculateFlow())
          {
@@ -169,11 +168,11 @@ public class RDXYOLOv8OpticalFlowDemo
       RawImage segmentedDepth = null;
       if (opticalFlowMask != null)
       {
-         segmentedDepth = segmenter.removeBackground(depthImage, opticalFlowMask, erosionValue.get());
+         segmentedDepth = segmenter.removeBackground(depthImage, opticalFlowMask, 0);
       }
       else if (objectMask != null)
       {
-         segmentedDepth = segmenter.removeBackground(depthImage, objectMask, erosionValue.get());
+         segmentedDepth = segmenter.removeBackground(depthImage, objectMask, 0);
       }
 
       if (segmentedDepth != null)
@@ -236,16 +235,16 @@ public class RDXYOLOv8OpticalFlowDemo
 
       opencv_cudawarping.remap(originalMask, newMask, splitMap.get(0), splitMap.get(1), opencv_imgproc.INTER_NEAREST);
 
-      Mat cpuOriginalMask = new Mat();
-      originalMask.download(cpuOriginalMask);
-      PerceptionDebugTools.display("Original Mask", cpuOriginalMask, 1);
-
-      Mat cpuNewMask = new Mat();
-      newMask.download(cpuNewMask);
-      PerceptionDebugTools.display("New Mask", cpuNewMask, 1);
-
-      cpuNewMask.close();
-      cpuOriginalMask.close();
+//      Mat cpuOriginalMask = new Mat();
+//      originalMask.download(cpuOriginalMask);
+//      PerceptionDebugTools.display("Original Mask", cpuOriginalMask, 1);
+//
+//      Mat cpuNewMask = new Mat();
+//      newMask.download(cpuNewMask);
+//      PerceptionDebugTools.display("New Mask", cpuNewMask, 1);
+//
+//      cpuNewMask.close();
+//      cpuOriginalMask.close();
 
       return newMask;
    }
@@ -336,6 +335,6 @@ public class RDXYOLOv8OpticalFlowDemo
 
    public static void main(String[] args)
    {
-      new RDXYOLOv8OpticalFlowDemo();
+      new RDXYOLOv8DenseOpticalFlowDemo();
    }
 }
