@@ -32,6 +32,7 @@ public class RDXVRModeManager
    private RDXVRKinematicsStreamingMode kinematicsStreamingMode;
    private RDXJoystickBasedStepping joystickBasedStepping;
    private RDX3DSituatedImGuiPanel leftHandPanel;
+   private RDXVRModeControls vrModeControls;
    private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
@@ -63,15 +64,19 @@ public class RDXVRModeManager
       joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
       joystickBasedStepping.create(baseUI, controllerHelper, syncedRobot);
 
-      // 2D panel
-      baseUI.getImGuiPanelManager().addPanel("VR Manager", this::renderImGuiWidgets);
-
       // Panel in VR
-      leftHandPanel = new RDX3DSituatedImGuiPanel("VR Manager", this::renderImGuiWidgets);
+      leftHandPanel = new RDX3DSituatedImGuiPanel("VR Mode Manager", this::renderImGuiWidgets);
       leftHandPanel.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5, 10);
       leftHandPanel.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
       baseUI.getVRManager().getContext().addVRPickCalculator(leftHandPanel::calculateVRPick);
       baseUI.getVRManager().getContext().addVRInputProcessor(leftHandPanel::processVRInput);
+
+      vrModeControls = new RDXVRModeControls(baseUI.getPrimary3DPanel(), this);
+      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() -> vrModeControls.render());
+
+      RDXBaseUI.getInstance().getKeyBindings().register("Teleport", "Right B button");
+      RDXBaseUI.getInstance().getKeyBindings().register("Adjust camera Z height", "Right touchpad scroll");
+      RDXBaseUI.getInstance().getKeyBindings().register("Move 3D panels", "Right trigger click & drag");
    }
 
    public void processVRInput(RDXVRContext vrContext)
@@ -113,11 +118,8 @@ public class RDXVRModeManager
       joystickBasedStepping.update(mode == RDXVRMode.JOYSTICK_WALKING);
    }
 
-   private void renderImGuiWidgets()
+   public void renderImGuiWidgets()
    {
-      ImGui.text("Teleport: Right B button");
-      ImGui.text("Adjust user Z height: Right touchpad up/down");
-      ImGui.text("ImGui panels: Point and use right trigger to click and drag");
       //      if (ImGui.checkbox(labels.get("Floating video panel"), showFloatingVideoPanel))
       //      {
       //         if (showFloatingVideoPanel.get())
@@ -152,27 +154,6 @@ public class RDXVRModeManager
       if (ImGui.radioButton(labels.get("Joystick walking"), mode == RDXVRMode.JOYSTICK_WALKING))
       {
          mode = RDXVRMode.JOYSTICK_WALKING;
-      }
-
-      switch (mode)
-      {
-         case INPUTS_DISABLED ->
-         {
-            ImGui.text("Press right joystick button to teleport the playspace to the robot's location.");
-         }
-         case FOOTSTEP_PLACEMENT ->
-         {
-            handPlacedFootstepMode.renderImGuiWidgets();
-         }
-         case WHOLE_BODY_IK_STREAMING ->
-         {
-            if (kinematicsStreamingMode != null)
-               kinematicsStreamingMode.renderImGuiWidgets();
-         }
-         case JOYSTICK_WALKING ->
-         {
-            joystickBasedStepping.renderImGuiWidgets();
-         }
       }
    }
 

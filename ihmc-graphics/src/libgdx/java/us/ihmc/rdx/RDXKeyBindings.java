@@ -195,6 +195,22 @@ public class RDXKeyBindings
       }
    }
 
+   public void renderKeybindingsSection(String sectionName)
+   {
+      KeyBindingsSection section = sections.get(sectionName);
+
+      if (section != null)
+      {
+         if (ImGui.beginTable("##keyBindingsTable_" + section.description, 2))
+         {
+            ImGui.tableSetupColumn(section.description);
+            ImGui.tableSetupColumn("Key");
+            section.renderSection(new ImString(section.description));
+            ImGui.endTable();
+         }
+      }
+   }
+
    public void showKeybindings()
    {
       forceActive = true;

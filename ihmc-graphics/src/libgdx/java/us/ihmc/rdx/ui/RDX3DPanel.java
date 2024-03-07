@@ -129,7 +129,7 @@ public class RDX3DPanel extends RDXPanel
 
    public void render()
    {
-      if (getIsShowing().get())
+      if (getIsShowing().get() && ImGuiTools.getCurrentContext() != 0)
       {
          view3DPanelSizeHandler.handleSizeBeforeBegin();
          ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
