@@ -20,6 +20,8 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
                                     D extends ActionNodeDefinition>
       extends RDXBehaviorTreeNode<S, D>
 {
+   private final S state;
+   private final D definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString rejectionTooltip = new ImString();
    private final RDXActionProgressWidgets progressWidgets = new RDXActionProgressWidgets(this);
@@ -30,6 +32,9 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    public RDXActionNode(S state)
    {
       super(state);
+
+      this.state = state;
+      definition = getDefinition();
    }
 
    @Override
@@ -37,11 +42,11 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    {
       super.update();
 
-      if (!wasFailed && getState().getFailed())
+      if (!wasFailed && state.getFailed())
       {
-         RDXBaseUI.pushNotification("%s failed".formatted(getDefinition().getName()));
+         RDXBaseUI.pushNotification("%s failed".formatted(definition.getName()));
       }
-      wasFailed = getState().getFailed();
+      wasFailed = state.getFailed();
    }
 
    @Override
@@ -50,12 +55,12 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
       RDXActionSequence actionSequence = RDXBehaviorTreeTools.findActionSequenceAncestor(this);
       if (actionSequence != null)
       {
-         actionSequence.getLayering().renderPipelineIconForChild(getState().getActionIndex());
+         actionSequence.getLayering().renderPipelineIconForChild(state.getActionIndex());
 
-         if (hollowArrowRenderer.render(getState().getIsNextForExecution(), ImGui.getFrameHeight()))
+         if (hollowArrowRenderer.render(state.getIsNextForExecution(), ImGui.getFrameHeight()))
          {
             setSpecificWidgetOnRowClicked();
-            actionSequence.getState().setExecutionNextIndex(getState().getActionIndex());
+            actionSequence.getState().setExecutionNextIndex(state.getActionIndex());
          }
          ImGui.sameLine();
       }
@@ -64,7 +69,38 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    @Override
    public void renderNodeSettingsWidgets()
    {
-      ImGui.text("Type: %s   Index: %d".formatted(getActionTypeTitle(), getState().getActionIndex()));
+      ImGui.text("Type: %s   Index: %d".formatted(getActionTypeTitle(), state.getActionIndex()));
+
+      if (ImGui.beginCombo(labels.get("Execute after"), definition.getExecuteAfterAction()))
+      {
+         if (ImGui.selectable(labels.get("Previous"), definition.getExecuteAfterPrevious()))
+         {
+            definition.setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
+            state.setExecuteAfterNode(null);
+         }
+         if (ImGui.selectable(labels.get("Beginning"), definition.getExecuteAfterBeginning()))
+         {
+            definition.setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_BEGINNING);
+            state.setExecuteAfterNode(null);
+         }
+
+         RDXActionSequence actionSequence = RDXBehaviorTreeTools.findActionSequenceAncestor(this);
+         if (actionSequence != null)
+         {
+            for (ActionNodeState<?> actionChild : actionSequence.getState().getActionChildren())
+            {
+               if (ImGui.selectable(labels.get(actionChild.getDefinition().getName()), actionChild == state.getExecuteAfterNode()))
+               {
+                  definition.setExecuteAfterAction(actionChild.getDefinition().getName());
+                  state.setExecuteAfterNode(actionChild);
+               }
+            }
+         }
+
+         ImGui.endCombo();
+      }
+
+
       renderImGuiWidgetsInternal();
 
       super.renderNodeSettingsWidgets();
@@ -80,7 +116,7 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    @Override
    public int getNameColor()
    {
-      return flashingDescriptionColor.getTextColor(getState().getFailed());
+      return flashingDescriptionColor.getTextColor(state.getFailed());
    }
 
    public ImString getRejectionTooltip()

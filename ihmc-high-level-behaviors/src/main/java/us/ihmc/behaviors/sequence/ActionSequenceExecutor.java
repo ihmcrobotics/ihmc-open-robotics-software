@@ -41,14 +41,6 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       currentlyExecutingActions.clear();
       updateActionSubtree(this);
 
-      for (ActionNodeExecutor<?, ?> executorChild : executorChildren)
-      {
-
-      }
-
-      for (int i = 0; i < executorChildren.size(); i++)
-      {
-      }
 
       lastIndexOfConcurrentSetToExecute = state.getExecutionNextIndex();
 //      while (lastIndexOfConcurrentSetToExecute < executorChildren.size()

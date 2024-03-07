@@ -43,30 +43,27 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       actionChildren.clear();
       updateActionSubtree(this, actionIndex);
 
+      // This block just updates the reference to the execute after node if it's null
       for (int i = 0; i < actionChildren.size(); i++)
       {
-         if (actionChildren.get(i).getDefinition().getExecuteAfterBeginning()
-          || actionChildren.get(i).getDefinition().getExecuteAfterPrevious())
+         if (actionChildren.get(i).getExecuteAfterNode() == null)
          {
-            actionChildren.get(i).setExecuteAfterNode(null);
-         }
-         else
-         {
-            int j = 0;
-            for (; j < i; j++)
+            if (actionChildren.get(i).getDefinition().getExecuteAfterBeginning()
+             || actionChildren.get(i).getDefinition().getExecuteAfterPrevious())
             {
-               if (actionChildren.get(i).getDefinition().getExecuteAfterAction().equals(actionChildren.get(i).getDefinition().getName()))
-               {
-                  actionChildren.get(i).setExecuteAfterNode(actionChildren.get(i));
-                  break;
-               }
+               // This is an acceptable state
             }
-
-            if (j == i)
-            {
-               LogTools.error("No executeAfterMatch found. Defaulting to previous.");
-               actionChildren.get(i).getDefinition().setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
-               actionChildren.get(i).setExecuteAfterNode(null);
+            else // We need to search for the action reference to match the definition
+            {    // Typically only needed on initial loading
+               int j = 0;
+               for (; j < i; j++) // Search only up to our index for the node to execute after
+               {
+                  if (actionChildren.get(i).getDefinition().getExecuteAfterAction().equals(actionChildren.get(j).getDefinition().getName()))
+                  {
+                     actionChildren.get(i).setExecuteAfterNode(actionChildren.get(j));
+                     break;
+                  }
+               }
             }
          }
       }
