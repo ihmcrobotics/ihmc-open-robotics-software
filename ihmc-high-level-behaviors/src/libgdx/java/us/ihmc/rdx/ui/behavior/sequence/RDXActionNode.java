@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui.behavior.sequence;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import imgui.type.ImString;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;
@@ -55,7 +56,10 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
       RDXActionSequence actionSequence = RDXBehaviorTreeTools.findActionSequenceAncestor(this);
       if (actionSequence != null)
       {
-         actionSequence.getLayering().renderPipelineIconForChild(state.getActionIndex());
+         ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
+         ImGui.text(state.getConcurrencyRank() > 1 ? String.valueOf(state.getConcurrencyRank()) : " ");
+         ImGui.popStyleColor();
+         ImGui.sameLine();
 
          if (hollowArrowRenderer.render(state.getIsNextForExecution(), ImGui.getFrameHeight()))
          {

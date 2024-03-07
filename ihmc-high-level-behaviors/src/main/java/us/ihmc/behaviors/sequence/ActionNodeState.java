@@ -6,6 +6,7 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
 import us.ihmc.communication.crdt.CRDTUnidirectionalDoubleArray;
+import us.ihmc.communication.crdt.CRDTUnidirectionalInteger;
 import us.ihmc.communication.crdt.CRDTUnidirectionalOneDoFJointTrajectoryList;
 import us.ihmc.communication.crdt.CRDTUnidirectionalPose3D;
 import us.ihmc.communication.crdt.CRDTUnidirectionalSE3Trajectory;
@@ -18,7 +19,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    /** The index is not CRDT synced because it's a simple local calculation. */
    private int actionIndex = -1;
    private final CRDTUnidirectionalBoolean isNextForExecution;
-   private final CRDTUnidirectionalBoolean isToBeExecutedConcurrently;
+   private final CRDTUnidirectionalInteger concurrencyRank;
    private final CRDTUnidirectionalBoolean canExecute;
    private final CRDTUnidirectionalBoolean isExecuting;
    private final CRDTUnidirectionalBoolean failed;
@@ -38,7 +39,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       super(id, definition, crdtInfo);
 
       isNextForExecution = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
-      isToBeExecutedConcurrently = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
+      concurrencyRank = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 1);
       canExecute = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, true);
       isExecuting = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
       failed = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
@@ -57,7 +58,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       super.toMessage(message.getState());
 
       message.setIsNextForExecution(isNextForExecution.toMessage());
-      message.setIsToBeExecutedConcurrently(isToBeExecutedConcurrently.toMessage());
+      message.setConcurrencyRank(concurrencyRank.toMessage());
       message.setCanExecute(canExecute.toMessage());
       message.setIsExecuting(isExecuting.toMessage());
       message.setFailed(failed.toMessage());
@@ -76,7 +77,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       super.fromMessage(message.getState());
 
       isNextForExecution.fromMessage(message.getIsNextForExecution());
-      isToBeExecutedConcurrently.fromMessage(message.getIsToBeExecutedConcurrently());
+      concurrencyRank.fromMessage(message.getConcurrencyRank());
       canExecute.fromMessage(message.getCanExecute());
       isExecuting.fromMessage(message.getIsExecuting());
       failed.fromMessage(message.getFailed());
@@ -110,14 +111,19 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       return isNextForExecution.getValue();
    }
 
-   public void setIsToBeExecutedConcurrently(boolean isToBeExecutedConcurrently)
+   public void setConcurrencyRank(int concurrencyRank)
    {
-      this.isToBeExecutedConcurrently.setValue(isToBeExecutedConcurrently);
+      this.concurrencyRank.setValue(concurrencyRank);
+   }
+
+   public int getConcurrencyRank()
+   {
+      return concurrencyRank.getValue();
    }
 
    public boolean getIsToBeExecutedConcurrently()
    {
-      return isToBeExecutedConcurrently.getValue();
+      return concurrencyRank.getValue() > 1;
    }
 
    public void setCanExecute(boolean canExecute)

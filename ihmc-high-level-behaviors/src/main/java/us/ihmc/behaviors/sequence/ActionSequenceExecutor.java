@@ -41,6 +41,33 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       currentlyExecutingActions.clear();
       updateActionSubtree(this);
 
+      // Update concurrency ranks
+      for (int i = 0; i < getState().getActionChildren().size(); i++)
+      {
+         ActionNodeState<?> actionChild = getState().getActionChildren().get(i);
+
+         int concurrencyRank = 1; // Always include self
+
+         if (i > 0 && actionChild.getDefinition().getExecuteAfterBeginning())
+            ++concurrencyRank;
+
+         if (actionChild.getExecuteAfterNode() != null && actionChild.getExecuteAfterNode().getActionIndex() < i - 1)
+            ++concurrencyRank;
+
+         int j = i + 1; // Add for any later actions executing after and prior actions
+         for (; j < getState().getActionChildren().size(); j++)
+         {
+            ActionNodeState<?> childToCheck = getState().getActionChildren().get(j);
+
+            if (childToCheck.getDefinition().getExecuteAfterBeginning())
+               ++concurrencyRank;
+
+            if (childToCheck.getExecuteAfterNode() != null && childToCheck.getExecuteAfterNode().getActionIndex() < i)
+               ++concurrencyRank;
+         }
+
+         actionChild.setConcurrencyRank(concurrencyRank);
+      }
 
       lastIndexOfConcurrentSetToExecute = state.getExecutionNextIndex();
 //      while (lastIndexOfConcurrentSetToExecute < executorChildren.size()
@@ -54,7 +81,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
          boolean isToBeExecutedConcurrently = isNextForExecution && state.getExecutionNextIndex() != lastIndexOfConcurrentSetToExecute;
 
          executorChildren.get(i).getState().setIsNextForExecution(isNextForExecution);
-         executorChildren.get(i).getState().setIsToBeExecutedConcurrently(isToBeExecutedConcurrently);
+//         executorChildren.get(i).getState().setConcurrencyRank(isToBeExecutedConcurrently);
       }
 
       boolean anyActionExecutionFailed = false;
