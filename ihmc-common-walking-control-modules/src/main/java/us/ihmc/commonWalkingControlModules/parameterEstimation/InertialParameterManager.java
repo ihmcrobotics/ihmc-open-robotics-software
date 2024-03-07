@@ -19,6 +19,7 @@ import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.mecano.yoVariables.spatial.YoSpatialInertia;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParametersTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -133,7 +134,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final YoBoolean tare;
    private final SpatialInertiaReadOnly[] urdfSpatialInertias;
-   private final YoSpatialInertiaTemporary[] tareSpatialInertias;
+   private final YoSpatialInertia[] tareSpatialInertias;
 
    private final SpatialInertiaBasisOption[] processBasisOptions;
 
@@ -324,11 +325,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       tare = new YoBoolean("tare", registry);
       tare.set(false);
-      tareSpatialInertias = new YoSpatialInertiaTemporary[estimateModelBodies.length];
+      tareSpatialInertias = new YoSpatialInertia[estimateModelBodies.length];
       urdfSpatialInertias = new SpatialInertiaBasics[estimateModelBodies.length];
       for (int i = 0; i < estimateModelBodies.length; i++)
       {
-         tareSpatialInertias[i] = new YoSpatialInertiaTemporary(estimateModelBodies[i].getInertia(), "_tare", registry);
+         tareSpatialInertias[i] = new YoSpatialInertia(estimateModelBodies[i].getInertia(), "_tare", registry);
          urdfSpatialInertias[i] = new SpatialInertia(estimateModelBodies[i].getInertia());
       }
 
