@@ -5,15 +5,16 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
-import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_cudaarithm;
 import org.bytedeco.opencv.global.opencv_cudawarping;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.opencv.opencv_core.GpuMatVector;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
+import org.bytedeco.opencv.opencv_core.Stream;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
@@ -21,6 +22,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.OpenCLPointCloudExtractor;
@@ -29,7 +31,7 @@ import us.ihmc.perception.YOLOv8.YOLOv8DetectableObject;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionResults;
 import us.ihmc.perception.YOLOv8.YOLOv8ObjectDetector;
 import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.opticalFlow.OpenCVDenseOpticalFlowProcessor;
+import us.ihmc.perception.opticalFlow.OpenCVSparseOpticalFlowProcessor;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -56,7 +58,7 @@ public class RDXYOLOv8SparseOpticalFlowDemo
    private final ZEDColorDepthImageRetriever imageRetriever;
    private final ZEDColorDepthImagePublisher imagePublisher;
 
-   private OpenCVDenseOpticalFlowProcessor opticalFlowProcessor;
+   private OpenCVSparseOpticalFlowProcessor opticalFlowProcessor;
    private final YOLOv8ObjectDetector objectDetector = new YOLOv8ObjectDetector();
 
    private final OpenCLManager openCLManager = new OpenCLManager();
@@ -77,9 +79,11 @@ public class RDXYOLOv8SparseOpticalFlowDemo
 
    private RawImage objectMask = null;
    private RawImage opticalFlowMask = null;
+   private GpuMat lastMask = null;
    private boolean done = false;
 
-   private GpuMat indexMat;
+   private final Vector2D totalTranslation = new Vector2D(0.0f, 0.0f);
+
    private int erosionKernelRadius = 2;
 
    public RDXYOLOv8SparseOpticalFlowDemo()
@@ -125,36 +129,44 @@ public class RDXYOLOv8SparseOpticalFlowDemo
                                                    colorImage.getOrientation());
 
       if (opticalFlowProcessor == null)
-         opticalFlowProcessor = new OpenCVSparseOpticalFlowProcessor(compressedColorImage);
+         opticalFlowProcessor = new OpenCVSparseOpticalFlowProcessor();
 
       if (runYOLONotification.poll() || (keepRunningYOLO.get() && colorImage.getSequenceNumber() % 5 == 0))
       {
-         opticalFlowProcessor.setFirstImage(compressedColorImage);
          YOLOv8DetectionResults yoloResults = objectDetector.runOnImage(colorImage, confidenceThreshold.get(), nmsThreshold.get());
          if (objectMask != null)
             objectMask.release();
          objectMask = yoloResults.getSegmentationMatrixForObject(OBJECT_TYPE, maskThreshold.get());
-
+         if (objectMask != null)
+         {
+            opencv_imgproc.erode(objectMask.getCpuImageMat(),
+                                 objectMask.getCpuImageMat(),
+                                 opencv_imgproc.getStructuringElement(opencv_imgproc.CV_SHAPE_RECT,
+                                                                      new Size(2 * erosionKernelRadius + 1, 2 * erosionKernelRadius + 1),
+                                                                      new Point(erosionKernelRadius, erosionKernelRadius)));
+         }
+         opticalFlowProcessor.setNewImage(compressedColorImage, objectMask);
+         if (objectMask != null)
+         {
+            lastMask = objectMask.getGpuImageMat();
+            totalTranslation.setToZero();
+         }
       }
       else if (objectMask != null)
       {
-         opencv_imgproc.erode(objectMask.getCpuImageMat(),
-                              objectMask.getCpuImageMat(),
-                              opencv_imgproc.getStructuringElement(opencv_imgproc.CV_SHAPE_RECT,
-                                                                   new Size(2 * erosionKernelRadius + 1, 2 * erosionKernelRadius + 1),
-                                                                   new Point(erosionKernelRadius, erosionKernelRadius)));
-         opticalFlowProcessor.setSecondImage(compressedColorImage);
-         try (GpuMat flow = opticalFlowProcessor.calculateFlow())
+         opticalFlowProcessor.setNewImage(compressedColorImage, null);
+
+         Vector2D averageShift = opticalFlowProcessor.calculateFlow();
+
+         if (averageShift != null)
          {
-            if (opticalFlowMask != null)
-               opticalFlowMask.release();
             opticalFlowMask = new RawImage(objectMask.getSequenceNumber(),
                                            objectMask.getAcquisitionTime(),
                                            objectMask.getImageWidth(),
                                            objectMask.getImageHeight(),
                                            objectMask.getDepthDiscretization(),
                                            null,
-                                           getShiftedMask(flow, objectMask.getGpuImageMat()),
+                                           getShiftedMask(averageShift, lastMask),
                                            objectMask.getOpenCVType(),
                                            objectMask.getFocalLengthX(),
                                            objectMask.getFocalLengthY(),
@@ -162,6 +174,7 @@ public class RDXYOLOv8SparseOpticalFlowDemo
                                            objectMask.getPrincipalPointY(),
                                            objectMask.getPosition(),
                                            objectMask.getOrientation());
+            lastMask = opticalFlowMask.getGpuImageMat();
          }
       }
 
@@ -207,47 +220,48 @@ public class RDXYOLOv8SparseOpticalFlowDemo
       return compressedColor;
    }
 
-   private GpuMat getShiftedMask(GpuMat flow, GpuMat originalMask)
+   private GpuMat getShiftedMask(Vector2D averageShift, GpuMat originalMask)
    {
-      if (indexMat == null)
+//      if (averageShift.norm() > 0.05)
       {
-         Mat cpuIndexMat = new Mat(flow.size(), flow.type());
+         GpuMat newMask = new GpuMat(originalMask.size(), originalMask.type());
 
-         for (int y = 0; y < cpuIndexMat.rows(); ++y)
-         {
-            for (int x = 0; x < cpuIndexMat.cols(); ++x)
-            {
-               BytePointer mapPointer = cpuIndexMat.ptr(y, x);
-               mapPointer.putFloat((float) x);
-               mapPointer.putFloat(Float.BYTES, (float) y);
-            }
-         }
+         totalTranslation.add(averageShift);
+         System.out.println("Translate = " + totalTranslation.getX() + "," + totalTranslation.getY());
 
-         indexMat = new GpuMat(flow.size(), flow.type());
-         indexMat.upload(cpuIndexMat);
+         Mat cpuTranformMat = new Mat(new Size(3, 2), opencv_core.CV_32FC1);
+         cpuTranformMat.data().putFloat(0L * Float.BYTES, 1.0f);
+         cpuTranformMat.data().putFloat(1L * Float.BYTES, 0.0f);
+         cpuTranformMat.data().putFloat(2L * Float.BYTES, averageShift.getX32()/*0.0f*/);
+         cpuTranformMat.data().putFloat(3L * Float.BYTES, 0.0f);
+         cpuTranformMat.data().putFloat(4L * Float.BYTES, 1.0f);
+         cpuTranformMat.data().putFloat(5L * Float.BYTES, averageShift.getY32()/*0.0f*/);
+         opencv_cudawarping.warpAffine(originalMask,
+                                       newMask,
+                                       cpuTranformMat,
+                                       originalMask.size(),
+                                       opencv_imgproc.INTER_LINEAR,
+                                       opencv_core.BORDER_CONSTANT,
+                                       new Scalar(),
+                                       Stream.Null());
+         opencv_cudaarithm.threshold(newMask, newMask, 0.5, 1.0, opencv_imgproc.THRESH_BINARY);
+
+         Mat cpuOriginalMask = new Mat();
+         originalMask.download(cpuOriginalMask);
+         PerceptionDebugTools.display("Original Mask", cpuOriginalMask, 1);
+
+         Mat cpuNewMask = new Mat();
+         newMask.download(cpuNewMask);
+         PerceptionDebugTools.display("New Mask", cpuNewMask, 1);
+
+         cpuTranformMat.release();
+         cpuNewMask.close();
+         cpuOriginalMask.close();
+
+         return newMask;
       }
 
-      GpuMat newMask = new GpuMat(originalMask.size(), originalMask.type());
-      GpuMat map = new GpuMat(flow.size(), flow.type());
-
-      opencv_cudaarithm.scaleAdd(flow, -1.0, indexMat, map);
-      GpuMatVector splitMap = new GpuMatVector();
-      opencv_cudaarithm.split(map, splitMap);
-
-      opencv_cudawarping.remap(originalMask, newMask, splitMap.get(0), splitMap.get(1), opencv_imgproc.INTER_NEAREST);
-
-      Mat cpuOriginalMask = new Mat();
-      originalMask.download(cpuOriginalMask);
-      PerceptionDebugTools.display("Original Mask", cpuOriginalMask, 1);
-
-      Mat cpuNewMask = new Mat();
-      newMask.download(cpuNewMask);
-      PerceptionDebugTools.display("New Mask", cpuNewMask, 1);
-
-      cpuNewMask.close();
-      cpuOriginalMask.close();
-
-      return newMask;
+      //return originalMask;
    }
 
    private void destroy()
@@ -256,7 +270,6 @@ public class RDXYOLOv8SparseOpticalFlowDemo
       imagePublisher.destroy();
       opticalFlowProcessor.destroy();
       objectDetector.destroy();
-      indexMat.release();
    }
 
    private void runUI()
@@ -336,6 +349,6 @@ public class RDXYOLOv8SparseOpticalFlowDemo
 
    public static void main(String[] args)
    {
-      new RDXYOLOv8OpticalFlowDemo();
+      new RDXYOLOv8SparseOpticalFlowDemo();
    }
 }
