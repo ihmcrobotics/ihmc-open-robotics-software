@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 
 public class RDX3DPanel extends RDXPanel
@@ -54,7 +55,7 @@ public class RDX3DPanel extends RDXPanel
    private final Map<Object, Consumer<ImGui3DViewInput>> imgui3DViewInputProcessorOwnerKeyMap = new HashMap<>();
    private final RDX3DPanelToolbar toolbar = new RDX3DPanelToolbar();
    private final ArrayList<Runnable> imGuiOverlayAdditions = new ArrayList<>();
-   private final Map<String, RDX3DOverlayPanel> overlayPanels = new HashMap<>();
+   private final TreeMap<String, RDX3DOverlayPanel> overlayPanels = new TreeMap<>();
    private final Map<Object, Runnable> imGuiOverlayAdditionOwnerKeyMap = new HashMap<>();
    private InputMultiplexer inputMultiplexer;
    private RDXFocusBasedCamera camera3D;
@@ -223,10 +224,17 @@ public class RDX3DPanel extends RDXPanel
 
          for (Runnable imguiOverlayAddition : imGuiOverlayAdditions)
             imguiOverlayAddition.run();
-         int panelIndex = 0;
-         float previousActiveWindowLerp = 0.0f;
-         for (RDX3DOverlayPanel overlayPanel : overlayPanels.values())
-            previousActiveWindowLerp = overlayPanel.render(panelIndex++, previousActiveWindowLerp);
+
+         // Render overlay panels
+         {
+            float previousActiveWindowY = (getWindowPositionY() + 10);
+            for (String overlayPanelName : overlayPanels.keySet())
+            {
+               RDX3DOverlayPanel overlayPanel = overlayPanels.get(overlayPanelName);
+               previousActiveWindowY = overlayPanel.render(previousActiveWindowY);
+            }
+         }
+
          toolbar.render(windowSizeX, windowPositionX, windowPositionY);
 
          if (ImGui.isWindowHovered() && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Right))

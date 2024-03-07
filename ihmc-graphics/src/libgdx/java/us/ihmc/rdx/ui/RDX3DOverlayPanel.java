@@ -21,14 +21,14 @@ public class RDX3DOverlayPanel
       this.parent = parent;
    }
 
-   public float render(int panelIndex, float previousActiveWindowLerp)
+   public float render(float previousActiveWindowY)
    {
       float panelWidth = 400;
       float panelHeight = 300 * windowActiveLerp;
 
       ImGui.setNextWindowSize(panelWidth, panelHeight);
       float startX = parent.getWindowPositionX() + (parent.getWindowSizeX() - panelWidth - 5);
-      float startY = (parent.getWindowPositionY() + 10) + (panelIndex * 310 * previousActiveWindowLerp);
+      float startY = previousActiveWindowY;
       ImGui.setNextWindowPos(startX, startY);
       ImGui.setNextWindowBgAlpha(windowActiveLerp);
       int windowFlags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse;
@@ -40,14 +40,14 @@ public class RDX3DOverlayPanel
       }
       else
       {
-         windowActiveLerp = (float) InterpolationTools.linearInterpolate(windowActiveLerp, 0.2f, 0.01f);
+         windowActiveLerp = (float) InterpolationTools.linearInterpolate(windowActiveLerp, 0.2f, 0.02f);
       }
 
       imGuiRender.run();
 
       ImGui.end();
 
-      return windowActiveLerp;
+      return startY + panelHeight;
    }
 
    public String getPanelName()

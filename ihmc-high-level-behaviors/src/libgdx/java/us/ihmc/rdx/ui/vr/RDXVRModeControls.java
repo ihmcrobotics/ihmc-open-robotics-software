@@ -12,6 +12,8 @@ public class RDXVRModeControls
    {
       this.vrModeManager = vrModeManager;
       baseUI.getPrimary3DPanel().addOverlayPanel("VR mode controls", this::render);
+      baseUI.getPrimary3DPanel().addOverlayPanel("VR mode controls 2", this::render);
+      baseUI.getPrimary3DPanel().addOverlayPanel("VR mode controls 3", this::render);
    }
 
    private void render()
