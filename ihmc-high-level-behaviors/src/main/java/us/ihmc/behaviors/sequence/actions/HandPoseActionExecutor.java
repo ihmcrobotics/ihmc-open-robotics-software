@@ -93,8 +93,8 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
             {
                List<ActionNodeState<?>> actionChildren = actionSequenceExecutor.getState().getActionChildren();
 
-               for (int i = actionSequenceExecutor.getExecutionNextIndex();
-                    i < actionChildren.size() && actionChildren.get(i).getConcurrencyRank() < 2; i++)
+               for (int i = actionSequenceExecutor.getState().getExecutionNextIndex();
+                    i < actionChildren.size() && actionChildren.get(i).getIsToBeExecutedConcurrently(); i++)
                {
                   if (actionChildren.get(i) instanceof ChestOrientationActionState chestOrientationAction)
                   {
