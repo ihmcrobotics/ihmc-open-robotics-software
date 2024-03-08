@@ -1,21 +1,6 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.appendIndex;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.ANGULAR_ACCELERATION;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.ANGULAR_TORQUE;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.ANGULAR_VELOCITY;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.ROTATION_VECTOR;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ACHIEVED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.CURRENT;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.DESIRED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_CUMULATED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_INTEGRATED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDBACK;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDFORWARD;
-
 import us.ihmc.commonWalkingControlModules.controlModules.YoOrientationFrame;
-import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -36,6 +21,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
+import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
@@ -44,6 +30,10 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.appendIndex;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.*;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.*;
 
 public class OrientationFeedbackController implements FeedbackControllerInterface
 {
@@ -70,6 +60,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final FBVector3D yoFeedForwardAngularVelocity;
    private final FBVector3D yoFeedbackAngularVelocity;
    private final FBRateLimitedVector3D rateLimitedFeedbackAngularVelocity;
+   private final FBVector3D yoAchievedAngularVelocity;
 
    private final FBVector3D yoDesiredAngularAcceleration;
    private final FBVector3D yoFeedForwardAngularAcceleration;
@@ -107,6 +98,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final YoPID3DGains gains;
    private final Matrix3D tempGainMatrix = new Matrix3D();
 
+   private final RigidBodyTwistProvider rigidBodyTwistProvider;
    private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
 
    private RigidBodyBasics base;
@@ -157,6 +149,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          rootBody = null;
       }
 
+      rigidBodyTwistProvider = ccToolbox.getRigidBodyTwistCalculator();
       rigidBodyAccelerationProvider = ccToolbox.getRigidBodyAccelerationProvider();
 
       String endEffectorName = endEffector.getName();
@@ -279,7 +272,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       if (ccToolbox.isEnableInverseKinematicsModule())
       {
          yoFeedbackAngularVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, FEEDBACK, ANGULAR_VELOCITY, isEnabled, false);
-         yoFeedForwardAngularVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, FEEDFORWARD, ANGULAR_ACCELERATION, isEnabled, false);
+         yoFeedForwardAngularVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, FEEDFORWARD, ANGULAR_VELOCITY, isEnabled, false);
          rateLimitedFeedbackAngularVelocity = fbToolbox.getOrCreateRateLimitedVectorData3D(endEffector,
                                                                                            controllerIndex,
                                                                                            FEEDBACK,
@@ -288,12 +281,14 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
                                                                                            maximumRate,
                                                                                            isEnabled,
                                                                                            false);
+         yoAchievedAngularVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ACHIEVED, ANGULAR_VELOCITY, isEnabled, true);
       }
       else
       {
          yoFeedbackAngularVelocity = null;
          yoFeedForwardAngularVelocity = null;
          rateLimitedFeedbackAngularVelocity = null;
+         yoAchievedAngularVelocity = null;
       }
    }
 
@@ -497,6 +492,18 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       achievedAngularAcceleration.setIncludingFrame(rigidBodyAccelerationProvider.getRelativeAcceleration(base, endEffector).getAngularPart());
       yoAchievedAngularAcceleration.setIncludingFrame(achievedAngularAcceleration);
       yoAchievedAngularAcceleration.changeFrame(yoDesiredOrientation.getReferenceFrame());
+      yoAchievedAngularAcceleration.setCommandId(currentCommandId);
+   }
+
+   @Override
+   public void computeAchievedVelocity()
+   {
+      if (yoAchievedAngularVelocity == null)
+         return;
+
+      yoAchievedAngularVelocity.setIncludingFrame(rigidBodyTwistProvider.getRelativeTwist(base, endEffector).getAngularPart());
+      yoAchievedAngularVelocity.changeFrame(yoDesiredOrientation.getReferenceFrame());
+      yoAchievedAngularVelocity.setCommandId(currentCommandId);
    }
 
    /**
