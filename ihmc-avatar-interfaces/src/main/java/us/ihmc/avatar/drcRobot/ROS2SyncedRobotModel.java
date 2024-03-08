@@ -2,6 +2,7 @@ package us.ihmc.avatar.drcRobot;
 
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -16,6 +17,7 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
 {
    private final ROS2Input<RobotConfigurationData> robotConfigurationDataInput;
    private final SideDependentList<ROS2Input<HandJointAnglePacket>> handJointAnglePacketInputs = new SideDependentList<>();
+   private final SideDependentList<ROS2SakeHandStatus> sakeHandStatus = new SideDependentList<>();
 
    public ROS2SyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
@@ -43,6 +45,7 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
                                                                    ROS2Tools.getHandJointAnglesTopic(robotModel.getSimpleRobotName()),
                                                                    null,
                                                                    message -> robotSide.toByte() == message.getRobotSide()));
+         sakeHandStatus.put(robotSide, new ROS2SakeHandStatus(ros2Node, robotModel.getSimpleRobotName(), robotSide));
       }
    }
 
@@ -56,6 +59,11 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
    public HandJointAnglePacket getLatestHandJointAnglePacket(RobotSide robotSide)
    {
       return handJointAnglePacketInputs.get(robotSide).getLatest();
+   }
+
+   public SideDependentList<ROS2SakeHandStatus> getSakeHandStatus()
+   {
+      return sakeHandStatus;
    }
 
    public boolean hasReceivedFirstMessage()

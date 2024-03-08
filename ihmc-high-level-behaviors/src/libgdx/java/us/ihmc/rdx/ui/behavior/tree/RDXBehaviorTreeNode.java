@@ -30,6 +30,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       implements BehaviorTreeNodeLayer<RDXBehaviorTreeNode<?, ?>, S, S, D>
 {
    private final S state;
+   private final D definition;
    private final List<RDXBehaviorTreeNode<?, ?>> children = new ArrayList<>();
    private transient RDXBehaviorTreeNode<?, ?> parent;
 
@@ -43,7 +44,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private boolean treeWidgetExpanded = false;
    private boolean isNameBeingEdited = false;
    private transient final ImString imNodeNameText = new ImString();
-   private transient final ImString notesText = new ImString();
+   private transient final ImString notesText = new ImString(1500);
    private final String nodePopupID = labels.get("Node popup");
    private String modalPopupID = labels.get("Create node");
    private final ImGuiVerticalAligner childrenDescriptionAligner = new ImGuiVerticalAligner();
@@ -52,16 +53,17 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public RDXBehaviorTreeNode(S state)
    {
       this.state = state;
+      definition = state.getDefinition();
    }
 
    /** For creating a basic node. */
    @SuppressWarnings("unchecked")
    public RDXBehaviorTreeNode(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      D definition = (D) new BehaviorTreeNodeDefinition(crdtInfo, saveFileDirectory);
-      this.state = (S) new BehaviorTreeNodeState<D>(id, definition, crdtInfo);
+      definition = (D) new BehaviorTreeNodeDefinition(crdtInfo, saveFileDirectory);
+      state = (S) new BehaviorTreeNodeState<D>(id, definition, crdtInfo);
 
-      getDefinition().setName("Basic node");
+      definition.setName("Basic node");
    }
 
    @Override
@@ -130,7 +132,11 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    public void renderNodeName()
    {
-      String nameText = getDefinition().getName();
+      String nameText = definition.getName();
+
+      if (definition.hasChanges())
+         nameText += "*";
+
       boolean textHovered = ImGuiTools.isItemHovered(ImGuiTools.calcTextSizeX(nameText), ImGui.getFrameHeight());
 
       if (selected.get())
@@ -144,14 +150,14 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
          RDXBehaviorTreeTools.runForEntireTree(this, RDXBehaviorTreeNode::clearSelections);
          selected.set(true);
          isNameBeingEdited = true;
-         imNodeNameText.set(getDefinition().getName());
+         imNodeNameText.set(definition.getName());
       }
 
       if (isNameBeingEdited)
       {
          if (ImGuiTools.inputText(labels.getHidden("name"), imNodeNameText))
          {
-            getDefinition().setName(imNodeNameText.get());
+            definition.setName(imNodeNameText.get());
             isNameBeingEdited = false;
          }
       }
@@ -183,28 +189,28 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       {
          RDXBehaviorTreeTools.runForEntireTree(this, node -> node.setNameBeingEdited(false));
          isNameBeingEdited = true;
-         imNodeNameText.set(getDefinition().getName());
+         imNodeNameText.set(definition.getName());
       }
 
       ImGui.separator();
 
-      if (getDefinition().isJSONRoot())
+      if (definition.isJSONRoot())
       {
          if (ImGui.menuItem(labels.get("Save to File")))
          {
-            RDXBaseUI.pushNotification("Saving %s".formatted(getDefinition().getName()));
-            getDefinition().saveToFile();
+            RDXBaseUI.pushNotification("Saving %s".formatted(definition.getName()));
+            definition.saveToFile();
          }
          if (ImGui.menuItem(labels.get("Unlink from JSON File")))
          {
-            getDefinition().setName(getDefinition().getName().replace(".json", ""));
+            definition.setName(definition.getName().replace(".json", ""));
          }
       }
       else
       {
          if (ImGui.menuItem(labels.get("Convert to JSON Root")))
          {
-            getDefinition().setName(getDefinition().getName() + ".json");
+            definition.setName(definition.getName() + ".json");
          }
       }
    }
@@ -212,11 +218,11 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public void renderNodeSettingsWidgets()
    {
       ImGui.text("Notes:");
-      notesText.set(getDefinition().getNotes());
+      notesText.set(definition.getNotes());
       ImGui.setNextItemWidth(ImGui.getColumnWidth());
       if (ImGui.inputTextMultiline(labels.getHidden("Notes"), notesText))
       {
-         getDefinition().setNotes(notesText.get());
+         definition.setNotes(notesText.get());
       }
    }
 
@@ -234,8 +240,8 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    @Override
    public void destroy()
    {
-      LogTools.info("Destroying node: {}:{}", getState().getDefinition().getName(), getState().getID());
-      getState().destroy();
+      LogTools.info("Destroying node: {}:{}", definition.getName(), state.getID());
+      state.destroy();
    }
 
    public boolean getSelected()
@@ -314,13 +320,13 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    @Override
    public S getNextLowerLayer()
    {
-      return getState();
+      return state;
    }
 
    @Override
    public D getDefinition()
    {
-      return getState().getDefinition();
+      return definition;
    }
 
    @Override
