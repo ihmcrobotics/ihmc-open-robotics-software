@@ -46,8 +46,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private static final int WRENCH_DIMENSION = 6;
 
    private final YoBoolean enableFilter;
-   private final YoBoolean resetFilter;
-   private final YoBoolean resetConfig;
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final int nDoFs;
@@ -151,10 +150,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       enableFilter = new YoBoolean("enableFilter", registry);
       enableFilter.set(false);
-      resetFilter = new YoBoolean("resetFilter", registry);
-      resetFilter.set(false);
-      resetConfig = new YoBoolean("resetConfig", registry);
-      resetConfig.set(false);
 
       actualRobotModel = toolbox.getFullRobotModel();
       actualModelBodies = actualRobotModel.getRootBody().subtreeArray();
@@ -408,80 +403,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       }
    }
 
-   public void reset()
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         fullContactJacobians.get(side).zero();
-         contactWrenches.get(side).zero();
-      }
-
-      wholeSystemTorques.zero();
-      rootJointVelocity.zero();
-      rootJointAcceleration.zero();
-      for (int i = 0; i < WRENCH_DIMENSION; i++)
-      {
-         rootJointVelocities[i].set(0.0);
-         rootJointAccelerations[i].set(0.0);
-         rootJointAccelerations[i].reset();
-      }
-
-      for (int i = 0; i < jointVelocities.length; i++)
-      {
-         jointVelocities[i].set(0.0);
-         jointAccelerations[i].set(0.0);
-         jointAccelerations[i].reset();
-      }
-
-      estimate.zero();
-      filteredEstimate.zero();
-      doubleFilteredEstimate.zero();
-
-      residual.zero();
-      bias.zero();
-
-      filter.reset();
-   }
-
-   public void resetConfig()
-   {
-      for (int i = 0; i < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; ++i)
-         processCovariancesForSingleBody[i].set(defaultProcessCovariances[i]);
-
-      for (int j = 0; j < WRENCH_DIMENSION; ++j)
-         floatingBaseMeasurementCovariance[j].set(parameters.getFloatingBaseMeasurementCovariance()[j]);
-
-      legsMeasurementCovariance.set(parameters.getLegMeasurementCovariance());
-      armsMeasurementCovariance.set(parameters.getArmMeasurementCovariance());
-      spineMeasurementCovariance.set(parameters.getSpineMeasurementCovariance());
-
-      filter.setPostProcessingAlpha(defaultPostProcessingAlpha);
-      filteredEstimate.setAlpha(defaultAccelerationCalculationAlpha);
-      doubleFilteredEstimate.setAlpha(defaultAccelerationCalculationAlpha);
-
-      for (int i = 0; i < WRENCH_DIMENSION; i++)
-         rootJointAccelerations[i].setAlpha(accelerationCalculationAlpha.getValue());
-
-      for (int i = 0; i < jointAccelerations.length; i++)
-         jointAccelerations[i].setAlpha(accelerationCalculationAlpha.getValue());
-
-   }
-
    public void update()
    {
-      if (resetFilter.getValue())
-      {
-         reset();
-         resetFilter.set(false);
-         enableFilter.set(false);  // Also turn off the estimator if we reset
-      }
-
-      if (resetConfig.getValue())
-      {
-         resetConfig();
-         resetConfig.set(false);
-      }
-
       if (calculateBias.getValue())
       {
          if (biasCompensator.isWindowFilled())

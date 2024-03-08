@@ -246,26 +246,4 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
          inertialParametersThetaBasisWatchers.get(i).set(inertialParameters.get(i).getParameterVectorThetaBasis());
       }
    }
-
-   @Override
-   public void reset()
-   {
-      super.reset();
-
-      for (int i = 0; i < inertialParameters.size(); ++i)
-      {
-         inertialParameters.get(i).reset();
-         inertialParametersPiBasisWatchers.get(i).zero();
-         inertialParametersThetaBasisWatchers.get(i).zero();
-      }
-
-      measurementJacobianBlock.zero();
-      measurementJacobianContainer.zero();
-
-      regressorBlock.zero();
-      torqueContributionFromBody.zero();
-
-      parameterThetaBasisContainer.zero();
-      kalmanGainBlockContainer.zero();
-   }
 }

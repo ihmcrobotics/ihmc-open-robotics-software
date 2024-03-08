@@ -283,43 +283,4 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
 
       return names.toArray(new String[0]);
    }
-
-   @Override
-   public void reset()
-   {
-      super.reset();
-
-      torqueFromNominal.zero();
-      torqueFromEstimates.zero();
-      torqueFromContactWrenches.zero();
-      torqueFromContactWrenches.zero();
-
-      regressorForEstimates.zero();
-
-      for (RobotSide side : RobotSide.values)
-      {
-         contactJacobians.get(side).zero();
-         contactWrenches.get(side).zero();
-      }
-
-      measurement.zero();
-
-      filteredWholeSystemTorques.zero();
-      doubleFilteredWholeSystemTorques.zero();
-      filteredMeasurement.zero();
-      doubleFilteredMeasurement.zero();
-
-      if (MORE_YOVARIABLES)
-      {
-         yoTorqueFromNominal.zero();
-         yoTorqueFromEstimates.zero();
-         yoTorqueFromContactWrenches.zero();
-         yoTorqueFromBias.zero();
-      }
-
-      kalmanGainContributionContainer.zero();
-
-      for (YoMatrix kalmanGainContribution : kalmanGainContributions)
-         kalmanGainContribution.zero();
-   }
 }
