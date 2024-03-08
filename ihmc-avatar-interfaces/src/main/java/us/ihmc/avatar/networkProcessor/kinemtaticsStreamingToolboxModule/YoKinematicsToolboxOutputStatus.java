@@ -177,17 +177,30 @@ public class YoKinematicsToolboxOutputStatus
       for (int i = 0; i < numberOfJoints; i++)
       {
          double qd = (current.getDesiredJointAngles().get(i) - previous.getDesiredJointAngles().get(i)) / duration;
+         if (!Double.isFinite(qd))
+            qd = 0.0;
          desiredJointVelocities[i].set(qd);
       }
 
       desiredRootJointVelocity.getLinearPart().sub(current.getDesiredRootPosition(), current.getDesiredRootPosition());
       desiredRootJointVelocity.getLinearPart().scale(1.0 / duration);
-      desiredRootJointPose.getOrientation().inverseTransform(desiredRootJointVelocity.getLinearPart());
+      if (desiredRootJointVelocity.containsNaN())
+         desiredRootJointVelocity.setToZero();
+      else
+         desiredRootJointPose.getOrientation().inverseTransform(desiredRootJointVelocity.getLinearPart());
       quaternionDot.sub(current.getDesiredRootOrientation(), previous.getDesiredRootOrientation());
       quaternionDot.scale(1.0 / duration);
-      quaternionCalculus.computeAngularVelocityInBodyFixedFrame(desiredRootJointPose.getOrientation(),
-                                                                quaternionDot,
-                                                                desiredRootJointVelocity.getAngularPart());
+      if (quaternionDot.containsNaN())
+      {
+         quaternionDot.setToZero();
+         desiredRootJointVelocity.setToZero();
+      }
+      else
+      {
+         quaternionCalculus.computeAngularVelocityInBodyFixedFrame(desiredRootJointPose.getOrientation(),
+                                                                   quaternionDot,
+                                                                   desiredRootJointVelocity.getAngularPart());
+      }
    }
 
    private final KinematicsToolboxOutputStatus status = new KinematicsToolboxOutputStatus();
