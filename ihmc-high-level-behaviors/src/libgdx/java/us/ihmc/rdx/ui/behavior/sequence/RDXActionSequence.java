@@ -67,10 +67,27 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
             state.updateExecuteAfterNodeReferences();
          }
 
-         if (!actionState.getDefinition().getExecuteAfterBeginning() && !actionState.getDefinition().getExecuteAfterPrevious())
+         // If first node references beginning, make it previous for consistency
+         if (i == 0 && actionState.getDefinition().getExecuteAfterBeginning())
          {
-            // Make sure definition is up to date with any changes for saving
-            actionState.getDefinition().setExecuteAfterAction(actionState.getExecuteAfterNode().getDefinition().getName());
+            actionState.getDefinition().setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
+         }
+
+         if (actionState.getExecuteAfterNode() != null)
+         {
+            // Correct the definition to be "Previous" for the previous action
+            if (!actionState.getDefinition().getExecuteAfterPrevious()
+             && actionState.getExecuteAfterNode() == state.getActionChildren().get(i - 1))
+            {
+               actionState.getDefinition().setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
+               actionState.setExecuteAfterNode(state.getActionChildren().get(i - 1));
+            }
+
+            if (!actionState.getDefinition().getExecuteAfterBeginning() && !actionState.getDefinition().getExecuteAfterPrevious())
+            {
+               // Make sure definition is up to date with any changes for saving
+               actionState.getDefinition().setExecuteAfterAction(actionState.getExecuteAfterNode().getDefinition().getName());
+            }
          }
       }
    }

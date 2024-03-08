@@ -43,18 +43,26 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       // Update concurrency ranks
       for (int i = 0; i < state.getActionChildren().size(); i++)
       {
-         int concurrencyRank = 1; // Always at least 1
+         int concurrencyRank = 0;
 
          // For the rest of the actions, add to the rank for any executing after
          // something earlier than the previous.
-         // The first node can't execute after anything before the beginning, so we
-         // start at at least index 1.
-         for (int j = Math.max(1, i); j < state.getActionChildren().size(); j++)
+         for (int j = i; j < state.getActionChildren().size(); j++)
          {
             ActionNodeState<?> childToCheck = state.getActionChildren().get(j);
 
-            if (childToCheck.getDefinition().getExecuteAfterBeginning() || childToCheck.getExecuteAfterNode().getActionIndex() < i - 1)
+            if (j == 0)
+            {
                ++concurrencyRank;
+            }
+            else
+            {
+               ActionNodeState<?> executeAfterNode = childToCheck.getExecuteAfterNode();
+               int executeAfterNodeIndex = executeAfterNode.getActionIndex();
+//               int executeAfterNodeIndex = childToCheck.getExecuteAfterNodeIndex();
+               if (executeAfterNodeIndex < i)
+                  ++concurrencyRank;
+            }
          }
 
          state.getActionChildren().get(i).setConcurrencyRank(concurrencyRank);
@@ -67,7 +75,8 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
          state.getActionChildren().get(executionNextIndex).setIsNextForExecution(true);
 
          for (int i = executionNextIndex + 1;
-              i < state.getActionChildren().size() && state.getActionChildren().get(i).getIsToBeExecutedConcurrently(); i++)
+              i < state.getActionChildren().size()
+              && state.getActionChildren().get(i).getExecuteAfterNodeIndex() < executionNextIndex; i++)
          {
             state.getActionChildren().get(i).setIsNextForExecution(true);
          }

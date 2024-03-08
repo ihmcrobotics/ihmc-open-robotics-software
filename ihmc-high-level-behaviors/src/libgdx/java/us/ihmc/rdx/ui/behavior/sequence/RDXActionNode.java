@@ -59,7 +59,7 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
       if (actionSequence != null)
       {
          ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
-         ImGui.text(state.getConcurrencyRank() > 1 ? String.valueOf(state.getConcurrencyRank()) : " ");
+         ImGui.text(state.getConcurrencyRank() == 1 ? " " : String.valueOf(state.getConcurrencyRank()));
          ImGui.popStyleColor();
          ImGui.sameLine();
 
@@ -84,6 +84,7 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
          if (ImGui.selectable(labels.get("Previous"), definition.getExecuteAfterPrevious()))
          {
             definition.setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
+            state.setExecuteAfterNode(null);
 
             if (actionSequence != null)
                actionSequence.updateExecuteAfterNodeReferences();
@@ -91,6 +92,7 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
          if (ImGui.selectable(labels.get("Beginning"), definition.getExecuteAfterBeginning()))
          {
             definition.setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_BEGINNING);
+            state.setExecuteAfterNode(null);
 
             if (actionSequence != null)
                actionSequence.updateExecuteAfterNodeReferences();
@@ -103,13 +105,16 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
                if (ImGui.selectable(labels.get(actionChild.getDefinition().getName()), actionChild == state.getExecuteAfterNode()))
                {
                   definition.setExecuteAfterAction(actionChild.getDefinition().getName());
-                  actionSequence.updateExecuteAfterNodeReferences();
+                  state.setExecuteAfterNode(actionChild);
                }
             }
          }
 
          ImGui.endCombo();
       }
+
+      ImGui.text("Execute after reference: " + (state.getExecuteAfterNode() == null ?
+                       "null" : String.valueOf(state.getExecuteAfterNodeIndex()) + " " + state.getExecuteAfterNode().getDefinition().getName()));
 
       renderImGuiWidgetsInternal();
 

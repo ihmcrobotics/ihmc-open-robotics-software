@@ -50,16 +50,39 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       for (int i = 0; i < actionChildren.size(); i++)
       {
          ActionNodeState<?> actionState = actionChildren.get(i);
-         actionState.setExecuteAfterNode(null);
+         ActionNodeState<?> executeAfterNode = actionState.getExecuteAfterNode();
 
-         // Search backward for matching node
-         for (int j = i - 1; j >= 0; j--)
+         // Remove non-existent nodes from being referenced
+         if (executeAfterNode != null && !actionChildren.contains(executeAfterNode))
+            actionState.setExecuteAfterNode(null);
+
+         if (executeAfterNode != null)
          {
-            if (actionState.getDefinition().getExecuteAfterPrevious() // Will break on the first iteration in this case
-             || actionState.getDefinition().getExecuteAfterAction().equals(actionChildren.get(j).getDefinition().getName()))
+            if (actionState.getDefinition().getExecuteAfterBeginning())
+               actionState.setExecuteAfterNode(null);
+
+            // Remove reference to previous node if it's no longer immediately previous
+            if (actionState.getDefinition().getExecuteAfterPrevious() && executeAfterNode.getActionIndex() != actionState.getActionIndex() - 1)
+               actionState.setExecuteAfterNode(null);
+
+            // If the name in the definition doesn't match the name of the referenced action we need to research
+            if (!actionState.getDefinition().getExecuteAfterBeginning()
+             && !actionState.getDefinition().getExecuteAfterPrevious()
+             && !executeAfterNode.getDefinition().getName().equals(actionState.getDefinition().getExecuteAfterAction()))
+               actionState.setExecuteAfterNode(null);
+         }
+
+         // Search backward for matching node only if we don't have it already
+         if (executeAfterNode == null)
+         {
+            for (int j = i - 1; j >= 0; j--)
             {
-               actionChildren.get(i).setExecuteAfterNode(actionChildren.get(j));
-               break;
+               if (actionState.getDefinition().getExecuteAfterPrevious() // Will break on the first iteration in this case
+                || actionState.getDefinition().getExecuteAfterAction().equals(actionChildren.get(j).getDefinition().getName()))
+               {
+                  actionChildren.get(i).setExecuteAfterNode(actionChildren.get(j));
+                  break;
+               }
             }
          }
       }

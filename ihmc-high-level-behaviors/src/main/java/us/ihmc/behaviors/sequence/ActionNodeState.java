@@ -233,4 +233,9 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    {
       return executeAfterNode;
    }
+
+   public int getExecuteAfterNodeIndex()
+   {
+      return getDefinition().getExecuteAfterBeginning() ? 0 : getExecuteAfterNode().getActionIndex();
+   }
 }
