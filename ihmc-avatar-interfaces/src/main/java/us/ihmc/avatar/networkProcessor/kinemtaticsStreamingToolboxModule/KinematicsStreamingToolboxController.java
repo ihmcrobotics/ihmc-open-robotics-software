@@ -50,8 +50,6 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       }
    }
 
-   ;
-
    private final KSTTools tools;
 
    private KSTTimeProvider timeProvider = KSTTimeProvider.createCPUClockBased();
