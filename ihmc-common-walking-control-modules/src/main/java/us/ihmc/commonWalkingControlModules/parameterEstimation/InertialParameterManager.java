@@ -104,8 +104,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoDouble armsMeasurementCovariance;
    private final YoDouble spineMeasurementCovariance;
 
-   private final YoBoolean reduceProcessCovarianceWhileWalking;
-   private final YoDouble processCovarianceWalkingMultiplier;
    private final YoMatrix processCovariancePassedToFilter;
 
    private final YoMatrix residual;
@@ -282,9 +280,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       spineMeasurementCovariance = new YoDouble("spineMeasurementCovariance", registry);
       spineMeasurementCovariance.set(parameters.getSpineMeasurementCovariance());
 
-      reduceProcessCovarianceWhileWalking = new YoBoolean("reduceProcessCovarianceWhileWalking", registry);
-      processCovarianceWalkingMultiplier = new YoDouble("processCovarianceWalkingMultiplier", registry);
-      processCovarianceWalkingMultiplier.set(parameters.getProcessCovarianceMultiplierForWalking());
       processCovariancePassedToFilter = new YoMatrix("processCovariancePassedToFilter", nParameters, nParameters, registry);
 
       String[] rowNames = getRowNamesForJoints(nDoFs);
@@ -505,13 +500,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          processCovariance.set(i, i, processCovariancesForSingleBody[processBasisOptions[i % RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY].ordinal()].getValue());
       }
 
-      if (reduceProcessCovarianceWhileWalking.getValue())
-      {
-         // If process covariance modification while walking is enabled, we need to see if the robot is walking by inspecting the foot switches
-         // NOTE: the XOR on the foot switches
-         if (footSwitches.get(RobotSide.LEFT).hasFootHitGroundFiltered() ^ footSwitches.get(RobotSide.RIGHT).hasFootHitGroundFiltered())
-            CommonOps_DDRM.scale(processCovarianceWalkingMultiplier.getValue(), processCovariance);
-      }
       processCovariancePassedToFilter.set(processCovariance);
 
       // Set diagonal entries of measurement covariance according to the part of the body
