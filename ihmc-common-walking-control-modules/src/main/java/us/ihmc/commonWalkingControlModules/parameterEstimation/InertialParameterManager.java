@@ -96,7 +96,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoMatrix estimate;
 
    private final AlphaFilteredYoMatrix filteredEstimate;
-   private final AlphaFilteredYoMatrix doubleFilteredEstimate;
 
    /** We specify the process covariances for every parameter in a rigid body, then use the same for all bodies */
    private YoDouble[] processCovariancesForSingleBody;
@@ -113,7 +112,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final YoBoolean calculateBias;
    private final InertialBiasCompensator biasCompensator;
-   private final YoMatrix bias;
    private final YoBoolean excludeBias;
    private final YoBoolean eraseBias;
 
@@ -254,7 +252,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       defaultPostProcessingAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt);
 
-      estimate = new YoMatrix("inertialParameterEstimate", nParameters,
+      estimate = new YoMatrix("", nParameters,
                               1,
                               getRowNamesForEstimates(basisSets, estimateModelBodies),
                               null,
@@ -262,16 +260,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       double defaultEstimateFilteringAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(),
                                                                                                              dt);
-      filteredEstimate = new AlphaFilteredYoMatrix("filteredInertialParameterEstimate", this.defaultAccelerationCalculationAlpha, nParameters,
+      filteredEstimate = new AlphaFilteredYoMatrix("filtered_", this.defaultAccelerationCalculationAlpha, nParameters,
                                                    1,
                                                    getRowNamesForEstimates(basisSets, estimateModelBodies),
                                                    null,
                                                    registry);
-      doubleFilteredEstimate = new AlphaFilteredYoMatrix("doubleFilteredInertialParameterEstimate", this.defaultAccelerationCalculationAlpha, nParameters,
-                                                         1,
-                                                         getRowNamesForEstimates(basisSets, estimateModelBodies),
-                                                         null,
-                                                         registry);
 
       // Process covariances are initialized here, but actually set later depending on the type of filter used
       // (and thus on the type of parameter -- which will require different covariances for different units)
@@ -300,7 +293,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       int windowSizeInTicks = (int) (parameters.getBiasCompensationWindowSizeInSeconds() / dt);
       calculateBias = new YoBoolean("calculateBias", registry);
       biasCompensator = new InertialBiasCompensator(nDoFs, windowSizeInTicks, getRowNamesForJoints(nDoFs), registry);
-      bias = new YoMatrix("bias", nDoFs, 1, rowNames, null, registry);
       excludeBias = new YoBoolean("excludeBias", registry);
       excludeBias.set(false);
       eraseBias = new YoBoolean("eraseBias", registry);
@@ -469,12 +461,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          filter.getMeasurementResidual(residual);
 
          filteredEstimate.setAndSolve(estimate);
-         doubleFilteredEstimate.setAndSolve(filteredEstimate);
 
          normalizedInnovation.set(filter.calculateNormalizedInnovation());
 
          // Pack smoothed estimate back into estimate robot bodies
-         RegressorTools.packRigidBodies(basisSets, doubleFilteredEstimate, estimateModelBodies);
+         RegressorTools.packRigidBodies(basisSets, filteredEstimate, estimateModelBodies);
 
          // Check physical consistency
          checkPhysicalConsistency();
