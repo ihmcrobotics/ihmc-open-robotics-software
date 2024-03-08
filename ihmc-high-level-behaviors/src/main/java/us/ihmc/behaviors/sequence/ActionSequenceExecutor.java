@@ -100,24 +100,22 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
             LogTools.error("An action failed. Disabling automatic execution.");
             state.setAutomaticExecution(false);
          }
-         else if (currentlyExecutingActions.isEmpty())
+         else
          {
-            do
+            while (shouldExecuteNextAction())
             {
                LogTools.info("Automatically executing action: {}", executorChildren.get(state.getExecutionNextIndex()).getClass().getSimpleName());
                executeNextAction();
             }
-            while (!isEndOfSequence() && isLastExecutingActionExecuteWithNext());
          }
       }
       else if (state.pollManualExecutionRequested())
       {
-         do
+         while (shouldExecuteNextAction())
          {
             LogTools.info("Manually executing action: {}", executorChildren.get(state.getExecutionNextIndex()).getClass().getSimpleName());
             executeNextAction();
          }
-         while (!isEndOfSequence() && isLastExecutingActionExecuteWithNext());
       }
    }
 
@@ -161,11 +159,20 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       }
    }
 
-   private boolean isLastExecutingActionExecuteWithNext()
+   private boolean shouldExecuteNextAction()
    {
-      return false;
-//      return !currentlyExecutingActions.isEmpty()
-//             && currentlyExecutingActions.get(currentlyExecutingActions.size() - 1).getDefinition().getExecuteAfterAction();
+      if (isEndOfSequence())
+      {
+         return false;
+      }
+      else if (executorChildren.get(state.getExecutionNextIndex()).getDefinition().getExecuteAfterBeginning())
+      {
+         return true;
+      }
+      else
+      {
+         return !executorChildren.get(state.getExecutionNextIndex()).getState().getExecuteAfterNode().getIsExecuting();
+      }
    }
 
    private boolean isEndOfSequence()
