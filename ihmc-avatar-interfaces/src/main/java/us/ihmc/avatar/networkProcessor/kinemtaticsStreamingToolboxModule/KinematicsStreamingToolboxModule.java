@@ -159,7 +159,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    @Override
    public Set<Class<? extends Settable<?>>> filterExceptions()
    {
-      return Collections.singleton(KinematicsStreamingToolboxInputMessage.class);
+      return Set.of(KinematicsStreamingToolboxInputMessage.class, KinematicsStreamingToolboxConfigurationCommand.class);
    }
 
    @Override
