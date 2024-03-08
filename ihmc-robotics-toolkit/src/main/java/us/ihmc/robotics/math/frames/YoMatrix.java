@@ -71,7 +71,7 @@ public class YoMatrix implements DMatrix, ReshapeMatrix
             {
                case NONE:
                {
-                  variables[row][column] = new YoDouble(name + "_" + row + "_" + column, description, registry);  // names are simply the row and column indices
+                  variables[row][column] = new YoDouble(name  + row  + column, description, registry);  // names are simply the row and column indices
                   break;
                }
                case ROWS:
@@ -80,14 +80,12 @@ public class YoMatrix implements DMatrix, ReshapeMatrix
                      throw new IllegalArgumentException(
                            "The YoMatrix must be a column vector if only row names are provided, else unique names cannot be generated.");
 
-                  variables[row][column] = new YoDouble(name + "_" + rowNames[row], description, registry);  // names are the row names, no column identifier
+                  variables[row][column] = new YoDouble(name + rowNames[row], description, registry);  // names are the row names, no column identifier
                   break;
                }
                case ROWS_AND_COLUMNS:
                {
-                  variables[row][column] = new YoDouble(name + "_" + rowNames[row] + "_" + columnNames[column],
-                                                        description,
-                                                        registry);  // names are the row and column names
+                  variables[row][column] = new YoDouble(name + rowNames[row] + columnNames[column], description, registry);  // names are the row and column names
                   break;
                }
             }
