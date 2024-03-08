@@ -43,7 +43,7 @@ public class IHMCROS2Callback<T>
 
    public IHMCROS2Callback(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName, Consumer<T> messageCallback)
    {
-      this(ros2Node, messageType, topicName, ROS2QosProfile.DEFAULT(), messageCallback);
+      this(ros2Node, messageType, topicName, ROS2QosProfile.BEST_EFFORT(), messageCallback);
    }
 
    public IHMCROS2Callback(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName, ROS2QosProfile qosProfile, Consumer<T> messageCallback)

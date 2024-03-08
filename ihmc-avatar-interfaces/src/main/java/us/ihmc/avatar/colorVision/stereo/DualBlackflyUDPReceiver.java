@@ -120,6 +120,7 @@ public class DualBlackflyUDPReceiver
                }
 
                frequencyCalculators.get(side).ping();
+               System.out.println(frequencyCalculators.get(side).getFrequency());
             }
 
             socket.disconnect();

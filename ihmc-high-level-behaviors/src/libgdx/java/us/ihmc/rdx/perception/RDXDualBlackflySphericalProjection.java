@@ -46,17 +46,15 @@ public class RDXDualBlackflySphericalProjection
    private volatile boolean reconnecting = false;
    private Thread reconnectThread;
 
-   public RDXDualBlackflySphericalProjection(ReferenceFrame originFrame)
+   public RDXDualBlackflySphericalProjection(ReferenceFrame robotZUpFrame, ReferenceFrame headsetFrame)
    {
       offsetFrame = new ReferenceFrame("sphericalProjectionOrigin", ReferenceFrame.getWorldFrame())
       {
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            transformToParent.getTranslation().set(originFrame.getTransformToRoot().getTranslation());
-            transformToParent.getRotation().set(originFrame.getTransformToParent().getRotation());
-            transformToParent.getRotation().appendYawRotation(-0.5 * Math.PI);
-            transformToParent.getRotation().appendRollRotation(0.5 * Math.PI);
+            transformToParent.getTranslation().set(headsetFrame.getTransformToRoot().getTranslation());
+            transformToParent.getRotation().setToYawOrientation(robotZUpFrame.getTransformToRoot().getRotation().getYaw());
          }
       };
       leftEyePose.setReferenceFrame(offsetFrame);
@@ -195,10 +193,10 @@ public class RDXDualBlackflySphericalProjection
          offsetFrame.update();
          leftEyePose.getTranslation().setY(pupillaryDistance.get() / 2);
          rightEyePose.getTranslation().setY(-pupillaryDistance.get() / 2);
-         leftEyePose.getTranslation().setZ(0.2);
-         rightEyePose.getTranslation().setZ(0.2);
-         leftEyePose.getTranslation().setX(0.2);
-         rightEyePose.getTranslation().setX(0.2);
+//         leftEyePose.getTranslation().setZ(0.2);
+//         rightEyePose.getTranslation().setZ(0.2);
+//         leftEyePose.getTranslation().setX(0.2);
+//         rightEyePose.getTranslation().setX(0.2);
 
          RigidBodyTransform leftEyePoseWorld = new RigidBodyTransform(leftEyePose);
          leftEyePoseWorld.preMultiply(leftEyePose.getReferenceFrame().getTransformToRoot());

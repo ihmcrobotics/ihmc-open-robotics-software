@@ -157,16 +157,31 @@ public class RDXVRKinematicsStreamingMode
 
       KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
       parameters.setDefault();
-      parameters.setPublishingPeriod(0.030); // Publishing period in seconds.
-      parameters.setDefaultChestMessageAngularWeight(0.15, 0.15, 0.02);
-      parameters.setDefaultLinearRateLimit(3.0);
-      parameters.setDefaultAngularRateLimit(30.0);
+      parameters.setPublishingPeriod(0.015); // Publishing period in seconds.
+      parameters.setDefaultChestMessageAngularWeight(1.0, 1.0, 0.5);
+      parameters.setDefaultPelvisMessageLinearWeight(10.0, 10.0, 15.0);
+      parameters.setDefaultLinearRateLimit(10.0);
+      parameters.setDefaultAngularRateLimit(100.0);
+      parameters.setDefaultLinearWeight(10.0);
+      parameters.setDefaultAngularWeight(0.1);
+      parameters.setInputPoseLPFBreakFrequency(15.0);
+      parameters.setInputPoseCorrectionDuration(0.05); // Need to send inputs at 30Hz.
+      parameters.setInputStateEstimatorType(KinematicsStreamingToolboxParameters.InputStateEstimatorType.FBC_STYLE);
+
+      parameters.setMinimizeAngularMomentum(true);
+      parameters.setMinimizeLinearMomentum(true);
+      parameters.setAngularMomentumWeight(0.25);
+      parameters.setLinearMomentumWeight(0.25);
+
       parameters.getDefaultConfiguration().setEnableLeftHandTaskspace(false);
       parameters.getDefaultConfiguration().setEnableRightHandTaskspace(false);
       parameters.getDefaultConfiguration().setEnableNeckJointspace(false);
+      parameters.getDefaultSolverConfiguration().setJointVelocityWeight(0.05);
+      parameters.getDefaultSolverConfiguration().setEnableJointVelocityLimits(false);
       parameters.setUseStreamingPublisher(true);
 
-      boolean startYoVariableServer = false;
+      boolean startYoVariableServer = true;
+
       toolbox = new KinematicsStreamingToolboxModule(robotModel, parameters, startYoVariableServer, PubSubImplementation.FAST_RTPS);
       ((KinematicsStreamingToolboxController) toolbox.getToolboxController()).setInitialRobotConfigurationNamedMap(createInitialConfiguration(robotModel));
 
