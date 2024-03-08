@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.vr;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -14,12 +15,17 @@ public class RDXVRStereoVision
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    private final ImBoolean enabled = new ImBoolean(false);
-   private final RDXDualBlackflySphericalProjection dualBlackflySphericalProjection = new RDXDualBlackflySphericalProjection();
+   private final RDXDualBlackflySphericalProjection dualBlackflySphericalProjection;
    private final ImGuiFlashingText reconnectingText = new ImGuiFlashingText(ImGuiTools.DARK_ORANGE);
    private final ImGuiFlashingText leftConnectedStatusCircle = new ImGuiFlashingText(ImGuiTools.DARK_GREEN);
    private final ImGuiFlashingText rightConnectedStatusCircle = new ImGuiFlashingText(ImGuiTools.DARK_GREEN);
    private final ImString leftConnectionAddress = new ImString();
    private final ImString rightConnectionAddress = new ImString();
+
+   public RDXVRStereoVision(ReferenceFrame parentProjectionFrame)
+   {
+      dualBlackflySphericalProjection =new RDXDualBlackflySphericalProjection(parentProjectionFrame);
+   }
 
    public boolean isEnabled()
    {

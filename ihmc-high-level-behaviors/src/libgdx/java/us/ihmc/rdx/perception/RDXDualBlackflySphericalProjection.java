@@ -14,6 +14,8 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.colorVision.stereo.DualBlackflyUDPReceiver;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.ImageDimensions;
@@ -22,6 +24,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -33,14 +36,32 @@ public class RDXDualBlackflySphericalProjection
    // As you approach infinite distance, pupillary distance needs to be 1
    // Close up things look good with a pupillary distance of ~2.0
    private final ImDouble pupillaryDistance = new ImDouble(0.050000);
-   private final RigidBodyTransform leftEyePose = new RigidBodyTransform();
-   private final RigidBodyTransform rightEyePose = new RigidBodyTransform();
+   private final FramePose3D leftEyePose = new FramePose3D();
+   private final FramePose3D rightEyePose = new FramePose3D();
+   private final ReferenceFrame offsetFrame;
    private final DualBlackflyUDPReceiver dualBlackflyUDPReceiver = new DualBlackflyUDPReceiver();
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    private volatile boolean reconnecting = false;
    private Thread reconnectThread;
+
+   public RDXDualBlackflySphericalProjection(ReferenceFrame originFrame)
+   {
+      offsetFrame = new ReferenceFrame("sphericalProjectionOrigin", ReferenceFrame.getWorldFrame())
+      {
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.getTranslation().set(originFrame.getTransformToRoot().getTranslation());
+            transformToParent.getRotation().set(originFrame.getTransformToParent().getRotation());
+            transformToParent.getRotation().appendYawRotation(-0.5 * Math.PI);
+            transformToParent.getRotation().appendRollRotation(0.5 * Math.PI);
+         }
+      };
+      leftEyePose.setReferenceFrame(offsetFrame);
+      rightEyePose.setReferenceFrame(offsetFrame);
+   }
 
    public void renderControls()
    {
@@ -171,14 +192,21 @@ public class RDXDualBlackflySphericalProjection
 
       if (updatedTexture)
       {
+         offsetFrame.update();
          leftEyePose.getTranslation().setY(pupillaryDistance.get() / 2);
          rightEyePose.getTranslation().setY(-pupillaryDistance.get() / 2);
-         leftEyePose.getTranslation().setZ(0.7);
-         rightEyePose.getTranslation().setZ(0.7);
+         leftEyePose.getTranslation().setZ(0.2);
+         rightEyePose.getTranslation().setZ(0.2);
          leftEyePose.getTranslation().setX(0.2);
          rightEyePose.getTranslation().setX(0.2);
-         LibGDXTools.toLibGDX(leftEyePose, projectionSpheres.get(RobotSide.LEFT).getModelInstance().transform);
-         LibGDXTools.toLibGDX(rightEyePose, projectionSpheres.get(RobotSide.RIGHT).getModelInstance().transform);
+
+         RigidBodyTransform leftEyePoseWorld = new RigidBodyTransform(leftEyePose);
+         leftEyePoseWorld.preMultiply(leftEyePose.getReferenceFrame().getTransformToRoot());
+         RigidBodyTransform rightEyePoseWorld = new RigidBodyTransform(rightEyePose);
+         rightEyePoseWorld.preMultiply(rightEyePose.getReferenceFrame().getTransformToRoot());
+
+         LibGDXTools.toLibGDX(leftEyePoseWorld, projectionSpheres.get(RobotSide.LEFT).getModelInstance().transform);
+         LibGDXTools.toLibGDX(rightEyePoseWorld, projectionSpheres.get(RobotSide.RIGHT).getModelInstance().transform);
       }
    }
 

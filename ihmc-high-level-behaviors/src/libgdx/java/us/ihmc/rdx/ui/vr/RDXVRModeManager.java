@@ -32,7 +32,7 @@ public class RDXVRModeManager
    private RDXVRKinematicsStreamingMode kinematicsStreamingMode;
    private RDXJoystickBasedStepping joystickBasedStepping;
    private RDX3DSituatedImGuiPanel leftHandPanel;
-   private final RDXVRStereoVision stereoVision = new RDXVRStereoVision();
+   private RDXVRStereoVision stereoVision;
    private RDXVRModeControls vrModeControls;
    private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -71,6 +71,8 @@ public class RDXVRModeManager
       leftHandPanel.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
       baseUI.getVRManager().getContext().addVRPickCalculator(leftHandPanel::calculateVRPick);
       baseUI.getVRManager().getContext().addVRInputProcessor(leftHandPanel::processVRInput);
+
+      stereoVision = new RDXVRStereoVision(baseUI.getVRManager().getContext().getHeadset().getXForwardZUpHeadsetFrame());
 
       vrModeControls = new RDXVRModeControls(baseUI, this);
 

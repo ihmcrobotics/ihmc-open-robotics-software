@@ -39,7 +39,7 @@ public class DualBlackflyUDPSender
          Thread publishThread = new Thread(() ->
          {
           SpinnakerBlackfly spinnakerBlackfly = spinnakerBlackflyManager.createSpinnakerBlackfly(
-                side == RobotSide.LEFT ? LEFT_SERIAL_NUMBER : RIGHT_SERIAL_NUMBER, 1936, 1464, 0, 1464 / 2);
+                side == RobotSide.LEFT ? LEFT_SERIAL_NUMBER : RIGHT_SERIAL_NUMBER, 1936, 1464, 0, 0);
 
             DatagramSocket socket;
             try
