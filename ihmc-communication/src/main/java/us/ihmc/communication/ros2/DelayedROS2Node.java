@@ -97,7 +97,7 @@ public class DelayedROS2Node implements ROS2NodeInterface
    @Override
    public <T> ROS2PublisherBasics<T> createPublisher(TopicDataType<T> topicDataType, String topicName) throws IOException
    {
-      return createDelayedPublisher(ros2Node.createPublisher(topicDataType, topicName));
+      return createDelayedPublisher(ros2Node.createPublisher(topicDataType, topicName, ROS2QosProfile.BEST_EFFORT()));
    }
 
    @Override
@@ -142,7 +142,7 @@ public class DelayedROS2Node implements ROS2NodeInterface
    public <T> ROS2Subscription<T> createSubscription(TopicDataType<T> topicDataType, NewMessageListener<T> newMessageListener, String topicName)
          throws IOException
    {
-      return ros2Node.createSubscription(topicDataType, new DelayedROS2Listener<>(topicDataType, newMessageListener, delayedSubExecutor), topicName);
+      return ros2Node.createSubscription(topicDataType, new DelayedROS2Listener<>(topicDataType, newMessageListener, delayedSubExecutor), topicName, ROS2QosProfile.BEST_EFFORT());
    }
 
    @Override
