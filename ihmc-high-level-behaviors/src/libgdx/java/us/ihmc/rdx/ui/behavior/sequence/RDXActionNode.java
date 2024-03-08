@@ -104,7 +104,6 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
          ImGui.endCombo();
       }
 
-
       renderImGuiWidgetsInternal();
 
       super.renderNodeSettingsWidgets();
