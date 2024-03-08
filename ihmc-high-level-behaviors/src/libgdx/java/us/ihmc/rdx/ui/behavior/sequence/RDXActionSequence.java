@@ -57,42 +57,20 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       // the operator side is allowed to change the definition
       for (int i = 0; i < state.getActionChildren().size(); i++)
       {
-         ActionNodeState<?> actionNodeState = state.getActionChildren().get(i);
+         ActionNodeState<?> actionState = state.getActionChildren().get(i);
 
-         if (actionNodeState.getExecuteAfterNode() == null)
+         if (actionState.getExecuteAfterNode() == null && !actionState.getDefinition().getExecuteAfterBeginning())
          {
-            if (!actionNodeState.getDefinition().getExecuteAfterBeginning() && !actionNodeState.getDefinition().getExecuteAfterPrevious())
-            {
-               // If the reference is null, then it wasn't found by string and we need to reset to the default
-               LogTools.error("No executeAfterMatch found. Defaulting to previous.");
-               actionNodeState.getDefinition().setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
-            }
+            // If the reference is null, then it wasn't found by string and we need to reset to the default
+            LogTools.error("No executeAfterMatch found. Defaulting to previous.");
+            actionState.getDefinition().setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
+            state.updateExecuteAfterNodeReferences();
          }
-         else
+
+         if (!actionState.getDefinition().getExecuteAfterBeginning() && !actionState.getDefinition().getExecuteAfterPrevious())
          {
-            boolean referencedNodeIsInvalid = false;
-
-            if (!state.getActionChildren().contains(actionNodeState.getExecuteAfterNode()))
-            {
-               LogTools.error("The reference to the node to execute after isn't in the sequence. Defaulting to previous.");
-               referencedNodeIsInvalid = true;
-            }
-            if (actionNodeState.getActionIndex() <= actionNodeState.getExecuteAfterNode().getActionIndex())
-            {
-               LogTools.error("The reference to the node to execute after comes after this action. Defaulting to previous.");
-               referencedNodeIsInvalid = true;
-            }
-
-            if (referencedNodeIsInvalid)
-            {
-               actionNodeState.getDefinition().setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
-               actionNodeState.setExecuteAfterNode(null);
-            }
-            else
-            {
-               // Make sure definition is up to date with any changes for saving
-               actionNodeState.getDefinition().setExecuteAfterAction(actionNodeState.getExecuteAfterNode().getDefinition().getName());
-            }
+            // Make sure definition is up to date with any changes for saving
+            actionState.getDefinition().setExecuteAfterAction(actionState.getExecuteAfterNode().getDefinition().getName());
          }
       }
    }

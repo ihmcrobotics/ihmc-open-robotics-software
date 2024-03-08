@@ -43,26 +43,27 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       actionChildren.clear();
       updateActionSubtree(this, actionIndex);
 
-      // This block just updates the reference to the execute after node if it's null
+      updateExecuteAfterNodeReferences();
+   }
+
+   public void updateExecuteAfterNodeReferences()
+   {
       for (int i = 0; i < actionChildren.size(); i++)
       {
-         if (actionChildren.get(i).getExecuteAfterNode() == null)
+         ActionNodeState<?> actionState = actionChildren.get(i);
+         actionState.setExecuteAfterNode(null);
+
+         // The reference is expected to be null is it's pointing to the beginning
+         if (!actionState.getDefinition().getExecuteAfterBeginning())
          {
-            if (actionChildren.get(i).getDefinition().getExecuteAfterBeginning()
-             || actionChildren.get(i).getDefinition().getExecuteAfterPrevious())
+            // Search backward for matching node
+            for (int j = i - 1; j > 0; j--)
             {
-               // This is an acceptable state
-            }
-            else // We need to search for the action reference to match the definition
-            {    // Typically only needed on initial loading
-               int j = 0;
-               for (; j < i; j++) // Search only up to our index for the node to execute after
+               if (actionState.getDefinition().getExecuteAfterPrevious() // Will break on the first iteration in this case
+                || actionState.getDefinition().getExecuteAfterAction().equals(actionChildren.get(j).getDefinition().getName()))
                {
-                  if (actionChildren.get(i).getDefinition().getExecuteAfterAction().equals(actionChildren.get(j).getDefinition().getName()))
-                  {
-                     actionChildren.get(i).setExecuteAfterNode(actionChildren.get(j));
-                     break;
-                  }
+                  actionChildren.get(i).setExecuteAfterNode(actionChildren.get(j));
+                  break;
                }
             }
          }

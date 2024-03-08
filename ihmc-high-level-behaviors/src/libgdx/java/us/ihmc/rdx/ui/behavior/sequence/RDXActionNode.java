@@ -3,8 +3,10 @@ package us.ihmc.rdx.ui.behavior.sequence;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImString;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiHollowArrowRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -75,28 +77,33 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    {
       ImGui.text("Type: %s   Index: %d".formatted(getActionTypeTitle(), state.getActionIndex()));
 
+      ActionSequenceState actionSequence = BehaviorTreeTools.findActionSequenceAncestor(state);
+
       if (ImGui.beginCombo(labels.get("Execute after"), definition.getExecuteAfterAction()))
       {
          if (ImGui.selectable(labels.get("Previous"), definition.getExecuteAfterPrevious()))
          {
             definition.setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
-            state.setExecuteAfterNode(null);
+
+            if (actionSequence != null)
+               actionSequence.updateExecuteAfterNodeReferences();
          }
          if (ImGui.selectable(labels.get("Beginning"), definition.getExecuteAfterBeginning()))
          {
             definition.setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_BEGINNING);
-            state.setExecuteAfterNode(null);
+
+            if (actionSequence != null)
+               actionSequence.updateExecuteAfterNodeReferences();
          }
 
-         RDXActionSequence actionSequence = RDXBehaviorTreeTools.findActionSequenceAncestor(this);
          if (actionSequence != null)
          {
-            for (ActionNodeState<?> actionChild : actionSequence.getState().getActionChildren())
+            for (ActionNodeState<?> actionChild : actionSequence.getActionChildren())
             {
                if (ImGui.selectable(labels.get(actionChild.getDefinition().getName()), actionChild == state.getExecuteAfterNode()))
                {
                   definition.setExecuteAfterAction(actionChild.getDefinition().getName());
-                  state.setExecuteAfterNode(actionChild);
+                  actionSequence.updateExecuteAfterNodeReferences();
                }
             }
          }
