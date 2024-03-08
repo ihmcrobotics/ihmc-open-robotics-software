@@ -6,6 +6,7 @@ import us.ihmc.perception.ImageDimensions;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.time.FrequencyCalculator;
+import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -34,8 +35,8 @@ public class DualBlackflyUDPReceiver
       frequencyCalculators.put(RobotSide.LEFT, new FrequencyCalculator(10));
       frequencyCalculators.put(RobotSide.RIGHT, new FrequencyCalculator(10));
 
-      addresses.put(RobotSide.LEFT, "127.0.0.1");
-      addresses.put(RobotSide.RIGHT, "127.0.0.1");
+      addresses.put(RobotSide.LEFT, "172.16.66.230");
+      addresses.put(RobotSide.RIGHT, "172.16.66.230");
    }
 
    public boolean connected()
@@ -63,6 +64,7 @@ public class DualBlackflyUDPReceiver
             }
             catch (SocketException e)
             {
+               e.printStackTrace();
                LogTools.error("Unable to bind to address for Blackfly UDP streaming: "  + socketAddress);
                return;
             }

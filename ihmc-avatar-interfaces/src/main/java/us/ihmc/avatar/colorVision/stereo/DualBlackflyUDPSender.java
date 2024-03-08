@@ -11,11 +11,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.nio.ByteBuffer;
 
 public class DualBlackflyUDPSender
@@ -43,11 +39,7 @@ public class DualBlackflyUDPSender
          Thread publishThread = new Thread(() ->
          {
           SpinnakerBlackfly spinnakerBlackfly = spinnakerBlackflyManager.createSpinnakerBlackfly(
-                side == RobotSide.LEFT ? LEFT_SERIAL_NUMBER : RIGHT_SERIAL_NUMBER,
-                1936 - 600,
-                (1464 / 2) + 200,
-                600 / 2,
-                (1464 / 2) + (200 / 2) + 100); // +100 for getting rid of the realsense
+                side == RobotSide.LEFT ? LEFT_SERIAL_NUMBER : RIGHT_SERIAL_NUMBER, 1936, 1464, 0, 1464 / 2);
 
             DatagramSocket socket;
             try

@@ -32,7 +32,7 @@ public class RDXDualBlackflySphericalProjection
    private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(RDXProjectionSphere::new);
    // As you approach infinite distance, pupillary distance needs to be 1
    // Close up things look good with a pupillary distance of ~2.0
-   private final ImDouble pupillaryDistance = new ImDouble(1.666667);
+   private final ImDouble pupillaryDistance = new ImDouble(0.050000);
    private final RigidBodyTransform leftEyePose = new RigidBodyTransform();
    private final RigidBodyTransform rightEyePose = new RigidBodyTransform();
    private final DualBlackflyUDPReceiver dualBlackflyUDPReceiver = new DualBlackflyUDPReceiver();
@@ -173,6 +173,10 @@ public class RDXDualBlackflySphericalProjection
       {
          leftEyePose.getTranslation().setY(pupillaryDistance.get() / 2);
          rightEyePose.getTranslation().setY(-pupillaryDistance.get() / 2);
+         leftEyePose.getTranslation().setZ(0.7);
+         rightEyePose.getTranslation().setZ(0.7);
+         leftEyePose.getTranslation().setX(0.2);
+         rightEyePose.getTranslation().setX(0.2);
          LibGDXTools.toLibGDX(leftEyePose, projectionSpheres.get(RobotSide.LEFT).getModelInstance().transform);
          LibGDXTools.toLibGDX(rightEyePose, projectionSpheres.get(RobotSide.RIGHT).getModelInstance().transform);
       }

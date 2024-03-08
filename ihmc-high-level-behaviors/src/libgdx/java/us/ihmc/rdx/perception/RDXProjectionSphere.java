@@ -31,12 +31,12 @@ public class RDXProjectionSphere
 {
    private ModelInstance modelInstance;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDouble sphereRadius = new ImDouble(20.0);
+   private final ImDouble sphereRadius = new ImDouble(0.5);
    private final ImInt sphereLatitudeVertices = new ImInt(100);
    private final ImInt sphereLongitudeVertices = new ImInt(100);
    private final ImBoolean syncProjectionScales = new ImBoolean(false);
    private final ImDouble focalLengthX = new ImDouble(0.560838);
-   private final ImDouble focalLengthY = new ImDouble(1.0);
+   private final ImDouble focalLengthY = new ImDouble(0.770406);
    private final ImDouble principlePointX = new ImDouble(0.0);
    private final ImDouble principlePointY = new ImDouble(0.0);
    private final ImBoolean renderSphereIfNoTexture = new ImBoolean(true);
