@@ -7,6 +7,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_core.Stream;
 import org.bytedeco.opencv.opencv_cudaoptflow.NvidiaOpticalFlow_2_0;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.perception.RawImage;
 
 public class OpenCVDenseOpticalFlowProcessor
@@ -15,6 +16,9 @@ public class OpenCVDenseOpticalFlowProcessor
    private GpuMat firstImageGray = new GpuMat();
    private final GpuMat secondImageGray = new GpuMat();
    private final int gridSize;
+
+   private final Stopwatch calculationTimer = new Stopwatch();
+   private double lastCalculationTime = 0.0;
 
    public OpenCVDenseOpticalFlowProcessor(RawImage initialImage)
    {
@@ -31,6 +35,9 @@ public class OpenCVDenseOpticalFlowProcessor
                                                  Stream.Null());
       gridSize = opticalFlow.getGridSize();
       imageSize.close();
+
+      calculationTimer.start();
+      calculationTimer.suspend();
    }
 
    public void setFirstImage(RawImage firstImage)
@@ -58,6 +65,8 @@ public class OpenCVDenseOpticalFlowProcessor
 
    public GpuMat calculateFlow()
    {
+      calculationTimer.resume();
+
       GpuMat flow = new GpuMat(firstImageGray.size().width() / gridSize, firstImageGray.size().height() / gridSize, opencv_core.CV_16SC2);
       GpuMat floatFlow = new GpuMat(flow.size().width(), flow.size().height(), opencv_core.CV_32FC2);
 
@@ -65,7 +74,20 @@ public class OpenCVDenseOpticalFlowProcessor
       opticalFlow.convertToFloat(flow, floatFlow);
       flow.release();
 
+      lastCalculationTime = calculationTimer.lap();
+      calculationTimer.suspend();
+
       return floatFlow;
+   }
+
+   public double getLastCalculationTime()
+   {
+      return lastCalculationTime;
+   }
+
+   public double getAverageCalculationTime()
+   {
+      return calculationTimer.averageLap();
    }
 
    public void destroy()

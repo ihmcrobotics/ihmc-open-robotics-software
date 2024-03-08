@@ -13,6 +13,7 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Stream;
 import org.bytedeco.opencv.opencv_cudaimgproc.CornersDetector;
 import org.bytedeco.opencv.opencv_cudaoptflow.SparsePyrLKOpticalFlow;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.perception.RawImage;
 
@@ -27,10 +28,16 @@ public class OpenCVSparseOpticalFlowProcessor
    private GpuMat mask = new GpuMat();
    private boolean findNewFeatures = false;
 
+   private final Stopwatch calculationTimer = new Stopwatch();
+   private double lastCalculationTime = 0.0;
+
    public OpenCVSparseOpticalFlowProcessor()
    {
       goodFeatureDetector = opencv_cudaimgproc.createGoodFeaturesToTrackDetector(opencv_core.CV_8UC1);
       opticalFlow = SparsePyrLKOpticalFlow.create();
+
+      calculationTimer.start();
+      calculationTimer.suspend();
    }
 
    public void setNewImage(RawImage newImage, RawImage newMaskImage)
@@ -59,6 +66,8 @@ public class OpenCVSparseOpticalFlowProcessor
 
    public Scalar calculateFlow()
    {
+      calculationTimer.resume();
+
       Scalar averageTranslationXY = null;
 
       if (findNewFeatures)
@@ -85,7 +94,20 @@ public class OpenCVSparseOpticalFlowProcessor
          }
       }
 
+      lastCalculationTime = calculationTimer.lap();
+      calculationTimer.suspend();
+
       return averageTranslationXY;
+   }
+
+   public double getLastCalculationTime()
+   {
+      return lastCalculationTime;
+   }
+
+   public double getAverageCalculationTime()
+   {
+      return calculationTimer.averageLap();
    }
 
    public void destroy()

@@ -1,6 +1,7 @@
 package us.ihmc.rdx.perception;
 
 import com.badlogic.gdx.graphics.Color;
+import com.google.common.util.concurrent.AtomicDouble;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
@@ -17,6 +18,7 @@ import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_core.Stream;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
@@ -36,6 +38,8 @@ import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.imgui.ImGuiPlot;
+import us.ihmc.rdx.imgui.ImPlotDoublePlot;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
@@ -66,17 +70,27 @@ public class RDXYOLOv8SparseOpticalFlowDemo
    private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor(openCLManager);
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter(openCLManager);
 
-   private final RDXBaseUI baseUI = new RDXBaseUI("YOLOv8 Optical Flow Demo");
+   private final RDXBaseUI baseUI = new RDXBaseUI("YOLOv8 Sparse Optical Flow Demo");
    private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
    private final RDXPointCloudRenderer segmentedPointCloudRenderer = new RDXPointCloudRenderer();
    private final Notification runYOLONotification = new Notification();
 
-   private final ImBoolean keepRunningYOLO = new ImBoolean(false);
+   private final ImBoolean keepRunningYOLO = new ImBoolean(true);
    private final ImFloat confidenceThreshold = new ImFloat(0.5f);
    private final ImFloat nmsThreshold = new ImFloat(0.1f);
    private final ImFloat maskThreshold = new ImFloat(0.0f);
    private final ImFloat outlierRejectionThreshold = new ImFloat(10.0f);
    private final ImInt erosionValue = new ImInt(3);
+
+   private final ImGuiPlot calculationTimePlot = new ImGuiPlot("Calculation Time", 500, 0, 20);
+   private double lastCalculationTime = Double.NaN;
+   private final AtomicDouble newCalculationTime = new AtomicDouble(-1.0);
+   private double averageCalculationTime = Double.NaN;
+
+   private final ImGuiPlot processTimePlot = new ImGuiPlot("Total Time", 500, 0, 20);
+   private double lastProcessTime = Double.NaN;
+   private final AtomicDouble newProcessTime = new AtomicDouble(-1.0);
+   private final Stopwatch processTimer = new Stopwatch();
 
    private RawImage objectMask = null;
    private RawImage opticalFlowMask = null;
@@ -102,6 +116,10 @@ public class RDXYOLOv8SparseOpticalFlowDemo
 
       ThreadTools.startAThread(this::runUI, getClass().getSimpleName() + "UI");
 
+      runYOLONotification.set();
+
+      processTimer.start();
+      processTimer.suspend();
       while (!done)
       {
          runStuff();
@@ -114,6 +132,8 @@ public class RDXYOLOv8SparseOpticalFlowDemo
    {
       RawImage depthImage = imageRetriever.getLatestRawDepthImage();
       RawImage colorImage = imageRetriever.getLatestRawColorImage(RobotSide.LEFT);
+
+      processTimer.resume();
 
       GpuMat compressedColor = getResizedColor(colorImage);
 
@@ -135,7 +155,7 @@ public class RDXYOLOv8SparseOpticalFlowDemo
       if (opticalFlowProcessor == null)
          opticalFlowProcessor = new OpenCVSparseOpticalFlowProcessor();
 
-      if (runYOLONotification.poll() || (keepRunningYOLO.get() && colorImage.getSequenceNumber() % 5 == 0))
+      if (runYOLONotification.poll() || (keepRunningYOLO.get() && colorImage.getSequenceNumber() % 2 == 0))
       {
          YOLOv8DetectionResults yoloResults = objectDetector.runOnImage(colorImage, confidenceThreshold.get(), nmsThreshold.get());
          if (objectMask != null)
@@ -158,6 +178,9 @@ public class RDXYOLOv8SparseOpticalFlowDemo
          opticalFlowProcessor.setNewImage(compressedColorImage, null);
 
          Scalar averageShift = opticalFlowProcessor.calculateFlow();
+
+         newCalculationTime.set(opticalFlowProcessor.getLastCalculationTime());
+         averageCalculationTime = opticalFlowProcessor.getAverageCalculationTime();
 
          if (averageShift != null)
          {
@@ -208,6 +231,9 @@ public class RDXYOLOv8SparseOpticalFlowDemo
       imagePublisher.setNextColorImage(colorImage.get(), RobotSide.LEFT);
       imagePublisher.setNextColorImage(compressedColorImage.get(), RobotSide.RIGHT);
       imagePublisher.setNextGpuDepthImage(depthImage.get());
+
+      newProcessTime.set(processTimer.lap());
+      processTimer.suspend();
 
       compressedColorImage.release();
       depthImage.release();
@@ -275,16 +301,11 @@ public class RDXYOLOv8SparseOpticalFlowDemo
                                                                                                    PerceptionAPI.ZED2_DEPTH);
             perceptionVisualizerPanel.addVisualizer(depthImageVisualizer, PerceptionAPI.REQUEST_ZED_DEPTH);
 
-            RDXROS2ImageMessageVisualizer opticalFlowImageVisualizer = new RDXROS2ImageMessageVisualizer("Optical Flow",
-                                                                                                         PubSubImplementation.FAST_RTPS,
-                                                                                                         PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT));
-            perceptionVisualizerPanel.addVisualizer(opticalFlowImageVisualizer, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
-
             RDXROS2ColoredPointCloudVisualizer pointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("Point Cloud",
                                                                                                              PubSubImplementation.FAST_RTPS,
                                                                                                              PerceptionAPI.ZED2_DEPTH,
                                                                                                              PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-            perceptionVisualizerPanel.addVisualizer(pointCloudVisualizer);
+            perceptionVisualizerPanel.addVisualizer(pointCloudVisualizer, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
 
             perceptionVisualizerPanel.create();
             baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
@@ -317,6 +338,19 @@ public class RDXYOLOv8SparseOpticalFlowDemo
             ImGui.sliderFloat("maskThreshold", maskThreshold.getData(), -1.0f, 1.0f);
             ImGui.sliderFloat("outlierRejectionThreshold", outlierRejectionThreshold.getData(), 0.0f, 50.0f);
             ImGui.sliderInt("erosionValue", erosionValue.getData(), 0, 20);
+
+            ImGui.separator();
+            double calculationTime = newCalculationTime.getAndSet(-1.0);
+            if (calculationTime >= 0.0)
+               lastCalculationTime = calculationTime;
+            calculationTimePlot.render(lastCalculationTime);
+            ImGui.text(String.format("Average Calc Time: %.9f", averageCalculationTime));
+
+            double processTime = newProcessTime.getAndSet(-1.0);
+            if (processTime >= 0.0)
+               lastProcessTime = processTime;
+            processTimePlot.render(lastProcessTime);
+            ImGui.text(String.format("Average Process Time: %.9f", processTimer.averageLap()));
          }
 
          @Override
