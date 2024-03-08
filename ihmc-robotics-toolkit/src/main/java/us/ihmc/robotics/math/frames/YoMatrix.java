@@ -311,4 +311,9 @@ public class YoMatrix implements DMatrix, ReshapeMatrix
          }
       }
    }
+
+   public YoDouble getYoDouble(int row, int col)
+   {
+      return variables[row][col];
+   }
 }

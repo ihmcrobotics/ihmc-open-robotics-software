@@ -137,7 +137,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final YoBoolean areParametersFullyPhysicallyConsistent;
 
-   private final YoDouble[][] parameterDeltas;
+   private final YoMatrix[] parameterDeltas;
    private final RateLimitedYoVariable[][] rateLimitedParameterDeltas;
    private final YoDouble maxParameterDeltaRate;
 
@@ -338,15 +338,14 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       maxParameterDeltaRate = new YoDouble("maxParameterDeltaRate", registry);
       maxParameterDeltaRate.set(3.0);  // TODO: make parameter
-      parameterDeltas = new YoDouble[estimateModelBodies.length][RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
+      parameterDeltas = new YoMatrix[estimateModelBodies.length];
       rateLimitedParameterDeltas = new RateLimitedYoVariable[estimateModelBodies.length][RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
       for (int i = 0; i < estimateModelBodies.length; i++)
       {
+         parameterDeltas[i] = new YoMatrix("parameterDelta_" + estimateModelBodies[i].getName(), RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1, RigidBodyInertialParametersTools.getNamesForPiBasis(), registry);
          for (int j = 0; j < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; j++)
          {
-            parameterDeltas[i][j] = new YoDouble("parameterDelta_" + estimateModelBodies[i].getName() + "_" + RigidBodyInertialParametersTools.getNamesForPiBasis()[j], registry);
-            parameterDeltas[i][j].set(0.0);
-            rateLimitedParameterDeltas[i][j] = new RateLimitedYoVariable("rateLimitedParameterDelta_" + estimateModelBodies[i].getName() + "_" + RigidBodyInertialParametersTools.getNamesForPiBasis()[j], registry, maxParameterDeltaRate, parameterDeltas[i][j], dt);
+            rateLimitedParameterDeltas[i][j] = new RateLimitedYoVariable("rateLimitedParameterDelta_" + estimateModelBodies[i].getName() + "_" + RigidBodyInertialParametersTools.getNamesForPiBasis()[j], registry, maxParameterDeltaRate, parameterDeltas[i].getYoDouble(j, 0), dt);
             rateLimitedParameterDeltas[i][j].update();
          }
       }
@@ -692,34 +691,12 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
             SpatialInertiaBasics actualBodyInertia = actualModelBodies[i].getInertia();
 
-            // TODO: put some safety checks here so we don't send nutty stuff to the robot maybe innovation gating?
-            // Calculate the current differences from the tare value, these deltas are what we send to the controller
-            parameterDeltas[i][0].set(estimateBodyInertia.getMass() - tareBodyInertia.getMass());
-            rateLimitedParameterDeltas[i][0].update(parameterDeltas[i][0].getValue());
-            actualBodyInertia.setMass(urdfBodyInertia.getMass() + rateLimitedParameterDeltas[i][0].getValue());
+            RigidBodyInertialParametersTools.calculateParameterDelta(estimateBodyInertia, tareBodyInertia, parameterDeltas[i]);
+            for (RateLimitedYoVariable delta : rateLimitedParameterDeltas[i])
+               delta.update();
 
-            parameterDeltas[i][1].set(estimateBodyInertia.getCenterOfMassOffset().getX() - tareBodyInertia.getCenterOfMassOffset().getX());
-            parameterDeltas[i][2].set(estimateBodyInertia.getCenterOfMassOffset().getY() - tareBodyInertia.getCenterOfMassOffset().getY());
-            parameterDeltas[i][3].set(estimateBodyInertia.getCenterOfMassOffset().getZ() - tareBodyInertia.getCenterOfMassOffset().getZ());
-            rateLimitedParameterDeltas[i][1].update(parameterDeltas[i][1].getValue());
-            rateLimitedParameterDeltas[i][2].update(parameterDeltas[i][2].getValue());
-            rateLimitedParameterDeltas[i][3].update(parameterDeltas[i][3].getValue());
-            actualBodyInertia.setCenterOfMassOffset(urdfBodyInertia.getCenterOfMassOffset().getX() + rateLimitedParameterDeltas[i][1].getValue(),
-                                                   urdfBodyInertia.getCenterOfMassOffset().getY() + rateLimitedParameterDeltas[i][2].getValue(),
-                                                   urdfBodyInertia.getCenterOfMassOffset().getZ() + rateLimitedParameterDeltas[i][3].getValue());
-
-            parameterDeltas[i][4].set(estimateBodyInertia.getMomentOfInertia().getM00() - tareBodyInertia.getMomentOfInertia().getM00());
-            parameterDeltas[i][5].set(estimateBodyInertia.getMomentOfInertia().getM01() - tareBodyInertia.getMomentOfInertia().getM01());
-            parameterDeltas[i][6].set(estimateBodyInertia.getMomentOfInertia().getM02() - tareBodyInertia.getMomentOfInertia().getM02());
-            parameterDeltas[i][7].set(estimateBodyInertia.getMomentOfInertia().getM11() - tareBodyInertia.getMomentOfInertia().getM11());
-            parameterDeltas[i][8].set(estimateBodyInertia.getMomentOfInertia().getM12() - tareBodyInertia.getMomentOfInertia().getM12());
-            parameterDeltas[i][9].set(estimateBodyInertia.getMomentOfInertia().getM22() - tareBodyInertia.getMomentOfInertia().getM22());
-            actualBodyInertia.setMomentOfInertia(urdfBodyInertia.getMomentOfInertia().getM00() + rateLimitedParameterDeltas[i][4].getValue(),
-                                               urdfBodyInertia.getMomentOfInertia().getM01() + rateLimitedParameterDeltas[i][5].getValue(),
-                                               urdfBodyInertia.getMomentOfInertia().getM02() + rateLimitedParameterDeltas[i][6].getValue(),
-                                               urdfBodyInertia.getMomentOfInertia().getM11() + rateLimitedParameterDeltas[i][7].getValue(),
-                                               urdfBodyInertia.getMomentOfInertia().getM12() + rateLimitedParameterDeltas[i][8].getValue(),
-                                               urdfBodyInertia.getMomentOfInertia().getM22() + rateLimitedParameterDeltas[i][9].getValue());
+            // Add the deltas from the tare value to the urdf value -- these are what we send to the controller
+            RigidBodyInertialParametersTools.addParameterDelta(urdfBodyInertia, parameterDeltas[i], actualBodyInertia);
          }
       }
    }
