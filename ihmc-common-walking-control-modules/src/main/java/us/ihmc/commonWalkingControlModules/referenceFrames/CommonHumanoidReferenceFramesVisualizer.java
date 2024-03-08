@@ -8,8 +8,10 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CommonHumanoidReferenceFramesVisualizer extends ReferenceFramesVisualizer
 {
-   public CommonHumanoidReferenceFramesVisualizer(CommonHumanoidReferenceFrames referenceFrames, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                                  YoRegistry parentRegistry, ReferenceFrame... additionalFramesToVisualize)
+   public CommonHumanoidReferenceFramesVisualizer(CommonHumanoidReferenceFrames referenceFrames,
+                                                  YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                  YoRegistry parentRegistry,
+                                                  ReferenceFrame... additionalFramesToVisualize)
    {
       super(referenceFrames.getClass().getSimpleName(), yoGraphicsListRegistry, parentRegistry);
 
@@ -19,6 +21,7 @@ public class CommonHumanoidReferenceFramesVisualizer extends ReferenceFramesVisu
          addReferenceFrame(referenceFrames.getSoleFrame(robotSide));
       }
 
+      addReferenceFrame(referenceFrames.getMidHandControlFrame());
       addReferenceFrame(referenceFrames.getMidFeetZUpFrame());
       addReferenceFrame(referenceFrames.getMidFootZUpGroundFrame());
       addReferenceFrame(referenceFrames.getCenterOfMassFrame());
