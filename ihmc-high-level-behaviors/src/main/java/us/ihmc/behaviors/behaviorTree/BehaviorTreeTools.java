@@ -2,6 +2,8 @@ package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
+import us.ihmc.behaviors.sequence.ActionSequenceExecutor;
+import us.ihmc.behaviors.sequence.ActionSequenceState;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +41,38 @@ public class BehaviorTreeTools
          return null;
       }
       else if (node.getParent() instanceof ActionSequenceDefinition actionSequence)
+      {
+         return actionSequence;
+      }
+      else
+      {
+         return findActionSequenceAncestor(node.getParent());
+      }
+   }
+
+   public static ActionSequenceState findActionSequenceAncestor(BehaviorTreeNodeState node)
+   {
+      if (node.getParent() == null)
+      {
+         return null;
+      }
+      else if (node.getParent() instanceof ActionSequenceState actionSequence)
+      {
+         return actionSequence;
+      }
+      else
+      {
+         return findActionSequenceAncestor(node.getParent());
+      }
+   }
+
+   public static ActionSequenceExecutor findActionSequenceAncestor(BehaviorTreeNodeExecutor node)
+   {
+      if (node.getParent() == null)
+      {
+         return null;
+      }
+      else if (node.getParent() instanceof ActionSequenceExecutor actionSequence)
       {
          return actionSequence;
       }
