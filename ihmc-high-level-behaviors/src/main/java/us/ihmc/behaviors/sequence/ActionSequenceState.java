@@ -5,7 +5,6 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -53,18 +52,14 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
          ActionNodeState<?> actionState = actionChildren.get(i);
          actionState.setExecuteAfterNode(null);
 
-         // The reference is expected to be null is it's pointing to the beginning
-         if (!actionState.getDefinition().getExecuteAfterBeginning())
+         // Search backward for matching node
+         for (int j = i - 1; j >= 0; j--)
          {
-            // Search backward for matching node
-            for (int j = i - 1; j > 0; j--)
+            if (actionState.getDefinition().getExecuteAfterPrevious() // Will break on the first iteration in this case
+             || actionState.getDefinition().getExecuteAfterAction().equals(actionChildren.get(j).getDefinition().getName()))
             {
-               if (actionState.getDefinition().getExecuteAfterPrevious() // Will break on the first iteration in this case
-                || actionState.getDefinition().getExecuteAfterAction().equals(actionChildren.get(j).getDefinition().getName()))
-               {
-                  actionChildren.get(i).setExecuteAfterNode(actionChildren.get(j));
-                  break;
-               }
+               actionChildren.get(i).setExecuteAfterNode(actionChildren.get(j));
+               break;
             }
          }
       }

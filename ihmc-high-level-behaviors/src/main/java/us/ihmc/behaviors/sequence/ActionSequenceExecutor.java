@@ -43,29 +43,21 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       // Update concurrency ranks
       for (int i = 0; i < state.getActionChildren().size(); i++)
       {
-         ActionNodeState<?> actionChild = state.getActionChildren().get(i);
+         int concurrencyRank = 1; // Always at least 1
 
-         int concurrencyRank = 1; // Always include self
-
-         if (i > 0 && actionChild.getDefinition().getExecuteAfterBeginning())
-            ++concurrencyRank;
-
-         if (actionChild.getExecuteAfterNode() != null && actionChild.getExecuteAfterNode().getActionIndex() < i - 1)
-            ++concurrencyRank;
-
-         int j = i + 1; // Add for any later actions executing after and prior actions
-         for (; j < state.getActionChildren().size(); j++)
+         // For the rest of the actions, add to the rank for any executing after
+         // something earlier than the previous.
+         // The first node can't execute after anything before the beginning, so we
+         // start at at least index 1.
+         for (int j = Math.max(1, i); j < state.getActionChildren().size(); j++)
          {
             ActionNodeState<?> childToCheck = state.getActionChildren().get(j);
 
-            if (childToCheck.getDefinition().getExecuteAfterBeginning())
-               ++concurrencyRank;
-
-            if (childToCheck.getExecuteAfterNode() != null && childToCheck.getExecuteAfterNode().getActionIndex() < i)
+            if (childToCheck.getDefinition().getExecuteAfterBeginning() || childToCheck.getExecuteAfterNode().getActionIndex() < i - 1)
                ++concurrencyRank;
          }
 
-         actionChild.setConcurrencyRank(concurrencyRank);
+         state.getActionChildren().get(i).setConcurrencyRank(concurrencyRank);
       }
 
       // Update is next for execution
@@ -165,7 +157,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       {
          return false;
       }
-      else if (executorChildren.get(state.getExecutionNextIndex()).getDefinition().getExecuteAfterBeginning())
+      else if (executorChildren.get(state.getExecutionNextIndex()).getState().getEffectivelyExecuteAfterBeginning())
       {
          return true;
       }

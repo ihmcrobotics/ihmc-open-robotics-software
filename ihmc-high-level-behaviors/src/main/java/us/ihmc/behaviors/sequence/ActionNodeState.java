@@ -16,8 +16,6 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 {
    public static final int SUPPORTED_NUMBER_OF_JOINTS = 7;
 
-   /** The index is not CRDT synced because it's a simple local calculation. */
-   private int actionIndex = -1;
    private final CRDTUnidirectionalBoolean isNextForExecution;
    private final CRDTUnidirectionalInteger concurrencyRank;
    private final CRDTUnidirectionalBoolean canExecute;
@@ -32,6 +30,8 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    private final CRDTUnidirectionalDouble positionDistanceToGoalTolerance;
    private final CRDTUnidirectionalDouble orientationDistanceToGoalTolerance;
 
+   /** The index is not CRDT synced because it's a simple local calculation. */
+   private int actionIndex = -1;
    private ActionNodeState<?> executeAfterNode;
 
    public ActionNodeState(long id, D definition, CRDTInfo crdtInfo)
@@ -222,6 +222,11 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    public void setExecuteAfterNode(ActionNodeState<?> executeAfterNode)
    {
       this.executeAfterNode = executeAfterNode;
+   }
+
+   public boolean getEffectivelyExecuteAfterBeginning()
+   {
+      return getDefinition().getExecuteAfterBeginning() || (actionIndex == 0 && getDefinition().getExecuteAfterPrevious());
    }
 
    public ActionNodeState<?> getExecuteAfterNode()

@@ -59,7 +59,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       {
          ActionNodeState<?> actionState = state.getActionChildren().get(i);
 
-         if (actionState.getExecuteAfterNode() == null && !actionState.getDefinition().getExecuteAfterBeginning())
+         if (actionState.getExecuteAfterNode() == null && !actionState.getEffectivelyExecuteAfterBeginning())
          {
             // If the reference is null, then it wasn't found by string and we need to reset to the default
             LogTools.error("No executeAfterMatch found. Defaulting to previous.");
