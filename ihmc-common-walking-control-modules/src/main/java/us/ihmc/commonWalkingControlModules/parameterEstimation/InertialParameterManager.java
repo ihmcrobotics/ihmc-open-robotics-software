@@ -135,7 +135,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final SpatialInertiaBasisOption[] processBasisOptions;
 
-   private final YoBoolean areParametersFullyPhysicallyConsistent;
+   private final YoBoolean areParametersPhysicallyConsistent;
 
    private final YoMatrix[] parameterDeltas;
    private final RateLimitedYoVariable[][] rateLimitedParameterDeltas;
@@ -334,7 +334,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          }
       }
 
-      areParametersFullyPhysicallyConsistent = new YoBoolean("areParametersFullyPhysicallyConsistent", registry);
+      areParametersPhysicallyConsistent = new YoBoolean("areParametersPhysicallyConsistent", registry);
 
       maxParameterDeltaRate = new YoDouble("maxParameterDeltaRate", registry);
       maxParameterDeltaRate.set(3.0);  // TODO: make parameter
@@ -477,19 +477,20 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       }
    }
 
+   /**
+    * We can only check for physical consistency online, and not *full* physical consistency as the latter requires an expensive eigendecomposition to find the
+    * principal moments of inertia.
+    */
    private void checkPhysicalConsistency()
    {
-      for (int i = 0; i < estimateModelBodies.length; ++i)
+      areParametersPhysicallyConsistent.set(true);
+      for (RigidBodyBasics estimateModelBody : estimateModelBodies)
       {
-         if (!RigidBodyInertialParametersTools.isFullyPhysicallyConsistent(estimateModelBodies[i].getInertia()))
+         if (!RigidBodyInertialParametersTools.isPhysicallyConsistent(estimateModelBody.getInertia()))
          {
-            LogTools.error("Inertial parameter estimate for " + estimateModelBodies[i].getName() + " is not fully physically consistent");
-            areParametersFullyPhysicallyConsistent.set(false);
+            LogTools.error("Inertial parameter estimate for " + estimateModelBody.getName() + " is not physically consistent");
+            areParametersPhysicallyConsistent.set(false);
             break;
-         }
-         else
-         {
-            areParametersFullyPhysicallyConsistent.set(true);
          }
       }
    }
@@ -544,12 +545,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          jointAccelerations[i].setAlpha(accelerationCalculationAlpha.getValue());
    }
 
-   private void updateContactWrenches()
-   {
-      for (RobotSide side : RobotSide.values)
-         footSwitches.get(side).getMeasuredWrench().get(contactWrenches.get(side));
-   }
-
    private void updateRegressorModelJointStates()
    {
       MultiBodySystemTools.copyJointsState(actualModelJoints, regressorModelJoints, JointStateType.CONFIGURATION);
@@ -596,6 +591,12 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          compactContactJacobians.get(side).compute();
          jointIndexHandler.compactBlockToFullBlock(legJoints.get(side), compactContactJacobians.get(side).getJacobianMatrix(), fullContactJacobians.get(side));
       }
+   }
+
+   private void updateContactWrenches()
+   {
+      for (RobotSide side : RobotSide.values)
+         footSwitches.get(side).getMeasuredWrench().get(contactWrenches.get(side));
    }
 
    private void calculateRootJointAccelerations()
