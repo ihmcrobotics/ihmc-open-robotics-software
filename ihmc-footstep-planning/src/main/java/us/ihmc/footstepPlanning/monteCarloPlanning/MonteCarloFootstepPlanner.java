@@ -76,7 +76,7 @@ public class MonteCarloFootstepPlanner
       // Debug Only
 
       statistics.stopTotalTime();
-      //statistics.setLayerCountsString(MonteCarloPlannerTools.getLayerCountsString(root));
+      statistics.setLayerCountsString(MonteCarloPlannerTools.getLayerCountsString(root));
       statistics.logToFile(true, true);
 
       if (timeSpentPlanningSoFar > request.getTimeout())
@@ -165,9 +165,7 @@ public class MonteCarloFootstepPlanner
             // Create node if not previously visited, or pull from visited node map
             if (visitedNodes.getOrDefault(newState, null) != null)
             {
-               MonteCarloFootstepNode existingNode = visitedNodes.get(newState);
-               node.addChild(existingNode);
-               existingNode.addParent(node);
+               visitedNodes.get(newState).setValue(Math.max((float) score, visitedNodes.get(newState).getValue()));
             }
             else
             {
