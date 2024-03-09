@@ -5,12 +5,15 @@ import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationPara
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.InertialParameterManagerFactory.EstimatorType;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParametersTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.math.YoMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.HashMap;
@@ -20,107 +23,38 @@ public class HumanoidModelCovarianceHelper
 {
    private final YoRegistry registry;
 
-//   private final List<String> legJointNames;
-//   private final List<String> spineJointNames;
-//   private final List<String> armJointNames;
-//
-//   private final String[] trunkBodyNames;
+   private final int[] floatingBaseJointIndices;
+   private final SideDependentList<int[]> legJointIndices = new SideDependentList<>();
+   private final int[] spineJointIndices;
+   private final SideDependentList<int[]> armJointIndices = new SideDependentList<>();
 
-   private final Map<RigidBodyReadOnly, RobotSection> bodyToSectionMap = new HashMap<>();
-   private final Map<JointReadOnly, MeasurementChannel> jointToChannelMap = new HashMap<>();
-
-   private final Map<RobotSection, YoMatrix> sectionToProcessCovarianceMap = new HashMap<>();
-   private final Map<MeasurementChannel, YoDouble> channelToMeasurementCovarianceMap = new HashMap<>();
+   private final YoDouble floatingBaseMeasurementCovariance;
+   private final SideDependentList<YoDouble> legMeasurementCovariances;
+   private final YoDouble spineMeasurementCovariance;
+   private final SideDependentList<YoDouble> armMeasurementCovariances;
+   private final YoMatrix measurementCovarianceDiagonal;
 
    HumanoidModelCovarianceHelper(FullHumanoidRobotModel model, InertialEstimationParameters parameters, YoRegistry parentRegistry)
    {
       registry = new YoRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
-      createSectionToProcessCovarianceMap(parameters);
-      createChannelToMeasurementCovarianceMap(parameters);
-   }
-
-   private void createChannelToMeasurementCovarianceMap(InertialEstimationParameters parameters)
-   {
-      for (MeasurementChannel channel : MeasurementChannel.values())
+      floatingBaseJointIndices = parameters.getFloatingBaseJointIndices();
+      spineJointIndices = parameters.getSpineJointIndices();
+      for (RobotSide side : RobotSide.values)
       {
-         channelToMeasurementCovarianceMap.put(channel, new YoDouble(channel.name() + "MeasurementCovariance", registry));
-         switch (channel)
-         {
-            case FLOATING_BASE:
-               channelToMeasurementCovarianceMap.get(channel).set(parameters.getFloatingBaseMeasurementCovariance());
-               break;
-            case SPINE:
-               channelToMeasurementCovarianceMap.get(channel).set(parameters.getSpineMeasurementCovariance());
-               break;
-            case ARM:
-               channelToMeasurementCovarianceMap.get(channel).set(parameters.getArmMeasurementCovariance());
-               break;
-            case LEG:
-               channelToMeasurementCovarianceMap.get(channel).set(parameters.getLegMeasurementCovariance());
-               break;
-         }
-      }
-   }
-
-   private void createSectionToProcessCovarianceMap(InertialEstimationParameters parameters)
-   {
-      String[] rowNames;
-      if (parameters.getTypeOfEstimatorToUse() == EstimatorType.PHYSICALLY_CONSISTENT_EKF)
-         rowNames = RigidBodyInertialParametersTools.getNamesForThetaBasis();
-      else
-         rowNames = RigidBodyInertialParametersTools.getNamesForPiBasis();
-      for (RobotSection section : RobotSection.values())
-      {
-         sectionToProcessCovarianceMap.put(section, new YoMatrix(section.name() + "ProcessCovariance",
-                                                                 RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1,
-                                                                 rowNames, null,
-                                                                 registry));
-         double[] defaultProcessCovariance = parameters.getProcessModelCovarianceForBody();
-         for (int i = 0; i < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; i++)
-            sectionToProcessCovarianceMap.get(section).set(i, 0, defaultProcessCovariance[i]);
-      }
-   }
-
-   public DMatrix getProcessCovarianceForBody(RigidBodyReadOnly body)
-   {
-      return sectionToProcessCovarianceMap.get(bodyToSectionMap.get(body));
-   }
-
-   public double getMeasurementCovarianceForJoint(JointReadOnly joint)
-   {
-      return channelToMeasurementCovarianceMap.get(jointToChannelMap.get(joint)).getValue();
-   }
-
-   private enum RobotSection
-   {
-      TRUNK,
-      LEFT_ARM, LEFT_LEG,
-      RIGHT_ARM, RIGHT_LEG;
-
-      public static RobotSection getLeg(RobotSide side)
-      {
-         if (side == RobotSide.LEFT)
-            return LEFT_LEG;
-         else
-            return RIGHT_LEG;
+         legJointIndices.put(side, parameters.getLegJointIndices(side));
+         armJointIndices.put(side, parameters.getArmJointIndices(side));
       }
 
-      public static RobotSection getArm(RobotSide side)
-      {
-         if (side == RobotSide.LEFT)
-            return LEFT_ARM;
-         else
-            return RIGHT_ARM;
-      }
+      int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(model.getRootJoint().subtreeArray());
+
+      // TODO: add name
+      measurementCovarianceDiagonal = new YoMatrix("measurementCovarianceDiagonal", nDoFs, 1, registry);
    }
 
-   private enum MeasurementChannel
+   public void set(int index, double value)
    {
-      FLOATING_BASE,
-      SPINE,
-      ARM,
-      LEG;
+      measurementCovarianceDiagonal.set(covarianceDiagonal);
    }
 }

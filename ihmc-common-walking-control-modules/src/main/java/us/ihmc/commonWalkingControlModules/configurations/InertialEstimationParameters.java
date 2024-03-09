@@ -9,20 +9,13 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelWrapper;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.Set;
 
 public interface InertialEstimationParameters
 {
-   String[] getTrunkBodies();
-   SideDependentList<String[]> getArmBodies();
-   SideDependentList<String[]> getLegBodies();
-
-   String[] getSpineJoints();
-   SideDependentList<String[]> getArmJoints();
-   SideDependentList<String[]> getLegJoints();
-
    InertialParameterManagerFactory.EstimatorType getTypeOfEstimatorToUse();
 
    Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] getParametersToEstimate();
