@@ -52,21 +52,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final int nDoFs;
    private final int nParameters;
 
-   private final FullHumanoidRobotModel actualRobotModel;
-   private final RigidBodyBasics[] actualModelBodies;
-   private final List<? extends JointBasics> actualModelJoints;
-
-   private final FullHumanoidRobotModel estimateRobotModel;
-   private final RigidBodyBasics[] estimateModelBodies;
    private final ArrayList<YoInertiaEllipsoid> yoInertiaEllipsoids;
    private final YoGraphicDefinition ellipsoidGraphicGroup;
 
-   private final FullHumanoidRobotModel inverseDynamicsRobotModel;
-   private final List<? extends JointBasics> inverseDynamicsModelJoints;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
-   private final FullHumanoidRobotModel regressorRobotModel;
-   private final List<? extends JointBasics> regressorModelJoints;
    private final JointTorqueRegressorCalculator regressorCalculator;
 
    private final SideDependentList<? extends FootSwitchInterface> footSwitches;
@@ -79,12 +69,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final DMatrixRMaj wholeSystemTorques;
 
-   private final DMatrixRMaj rootJointVelocity;
-   private final YoDouble[] rootJointVelocities;
-   private final FilteredVelocityYoVariable[] rootJointAccelerations;
-   private final DMatrixRMaj rootJointAcceleration;
-
-   private final YoDouble[] jointVelocities;
+   private final DMatrixRMaj jointVelocitiesContainer;
    private final FilteredVelocityYoVariable[] jointAccelerations;
 
    private final Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets;
@@ -114,14 +99,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoBoolean eraseBias;
 
    private final InertialEstimationParameters parameters;
-   private final double defaultPostProcessingAlpha;
-   private final double defaultAccelerationCalculationAlpha;
    private final YoDouble accelerationCalculationAlpha;  // useful to have a master setting, we want to filter all DoFs equally
 
    private final YoDouble normalizedInnovation;
    private final YoDouble normalizedInnovationThreshold;
-
-   private final ExecutionTimer regressorTimer = new ExecutionTimer("RegressorTimer", registry);
 
    private double[] defaultProcessCovariances;  // keep track for resetting purposes
 
@@ -139,48 +120,46 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final RateLimitedYoVariable[][] rateLimitedParameterDeltas;
    private final YoDouble maxParameterDeltaRate;
 
+   private final MultipleHumanoidModelHandler<Task> modelHandler;
+   int nBodies;
+
    public InertialParameterManager(InertialParameterManagerFactory.EstimatorType type, HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       this.parameters = inertialEstimationParameters;
+      basisSets = parameters.getParametersToEstimate();
 
       enableFilter = new YoBoolean("enableFilter", registry);
       enableFilter.set(false);
 
-      actualRobotModel = toolbox.getFullRobotModel();
-      actualModelBodies = actualRobotModel.getRootBody().subtreeArray();
-      actualModelJoints = actualRobotModel.getRootJoint().subtreeList();
+      modelHandler = new MultipleHumanoidModelHandler<>(Task.class);
+      FullHumanoidRobotModel actualRobotModel = toolbox.getFullRobotModel();
+      modelHandler.addRobotModel(Task.ACTUAL, actualRobotModel);
 
-      RigidBodyBasics clonedElevatorForEstimates = MultiBodySystemFactories.cloneMultiBodySystem(actualRobotModel.getElevator(),
-                                                                                     actualRobotModel.getModelStationaryFrame(),
-                                                                                     "_estimate");
-      estimateRobotModel = new FullHumanoidRobotModelWrapper(clonedElevatorForEstimates, false);
-      estimateModelBodies = estimateRobotModel.getRootBody().subtreeArray();
+      for (Task task : Task.values)
+      {
+         if (task == Task.ACTUAL)
+            continue;
+
+         RigidBodyBasics clonedElevator = MultiBodySystemFactories.cloneMultiBodySystem(actualRobotModel.getElevator(),
+                                                                                       actualRobotModel.getModelStationaryFrame(),
+                                                                                       "_" + task.name());
+         FullHumanoidRobotModel clonedRobotModel = new FullHumanoidRobotModelWrapper(clonedElevator, false);
+         modelHandler.addRobotModel(task, clonedRobotModel);
+      }
+
       yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(actualRobotModel.getRootBody(), registry);
       ellipsoidGraphicGroup = InertiaVisualizationTools.getInertiaEllipsoidGroup(yoInertiaEllipsoids);
 
-      RigidBodyBasics clonedElevatorForInverseDynamics = MultiBodySystemFactories.cloneMultiBodySystem(actualRobotModel.getElevator(),
-                                                                                                 actualRobotModel.getModelStationaryFrame(),
-                                                                                                 "_inverseDynamics");
-      inverseDynamicsRobotModel = new FullHumanoidRobotModelWrapper(clonedElevatorForInverseDynamics, false);
-      RigidBodyBasics[] inverseDynamicsModelBodies = inverseDynamicsRobotModel.getRootBody().subtreeArray();
-      inverseDynamicsModelJoints = inverseDynamicsRobotModel.getRootJoint().subtreeList();
-      inverseDynamicsCalculator = new InverseDynamicsCalculator(inverseDynamicsRobotModel.getElevator());
+      inverseDynamicsCalculator = new InverseDynamicsCalculator(modelHandler.getRobotModel(Task.INVERSE_DYNAMICS).getElevator());
       inverseDynamicsCalculator.setGravitationalAcceleration(-toolbox.getGravityZ());
-
-      RigidBodyBasics clonedElevatorForRegressor = MultiBodySystemFactories.cloneMultiBodySystem(actualRobotModel.getElevator(),
-                                                                                                 actualRobotModel.getModelStationaryFrame(),
-                                                                                                 "_regressor");
-      regressorRobotModel = new FullHumanoidRobotModelWrapper(clonedElevatorForRegressor, false);
-      RigidBodyBasics[] regressorModelBodies = regressorRobotModel.getRootBody().subtreeArray();
-      regressorModelJoints = regressorRobotModel.getRootJoint().subtreeList();
-      regressorCalculator = new JointTorqueRegressorCalculator(regressorRobotModel.getElevator());
+      zeroInverseDynamicsParameters(basisSets);
+      regressorCalculator = new JointTorqueRegressorCalculator(modelHandler.getRobotModel(Task.REGRESSOR).getElevator());
       regressorCalculator.setGravitationalAcceleration(-toolbox.getGravityZ());
 
-      int nOneDoFJoints = estimateRobotModel.getOneDoFJoints().length;
-      nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(estimateRobotModel.getRootJoint().subtreeArray());
-      basisSets = parameters.getParametersToEstimate();
       int[] sizes = RegressorTools.sizePartitions(basisSets);
+      nBodies = actualRobotModel.getRootBody().subtreeArray().length;
+      nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(actualRobotModel.getRootJoint().subtreeArray());
       nParameters = sizes[0];
       int nNonEmptyBasisSets = 0;
       for (Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption> basisSet : basisSets)
@@ -191,16 +170,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       for (int i = 0; i < nNonEmptyBasisSets; i++)
          regressorBlocks[i] = new DMatrixRMaj(nDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
       regressor = new DMatrixRMaj(nDoFs, nParameters);
-
-      zeroInverseDynamicsParameters(inverseDynamicsModelBodies, basisSets);
-
       regressorModelBodiesToProcess = new RigidBodyBasics[nNonEmptyBasisSets];
       int regressorIndex = 0;
       for (int i = 0; i < basisSets.length; ++i)
       {
          if (!basisSets[i].isEmpty())
          {
-            regressorModelBodiesToProcess[regressorIndex] = regressorModelBodies[i];
+            regressorModelBodiesToProcess[regressorIndex] = modelHandler.getBodyArray(Task.REGRESSOR)[i];
             regressorIndex++;
          }
       }
@@ -211,7 +187,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       legJoints = new SideDependentList<>();
       compactContactJacobians = new SideDependentList<>();
       fullContactJacobians = new SideDependentList<>();
-
       // NOTE: for the leg joints and compact jacobians, we use the actual robot model because it has the full model information, including all joint names
       for (RobotSide side : RobotSide.values)
       {
@@ -225,44 +200,31 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       double dt = toolbox.getControlDT();
 
-      rootJointVelocity = new DMatrixRMaj(WRENCH_DIMENSION, 1);
-      rootJointVelocities = new YoDouble[WRENCH_DIMENSION];
-      rootJointAccelerations = new FilteredVelocityYoVariable[WRENCH_DIMENSION];
-      rootJointAcceleration = new DMatrixRMaj(WRENCH_DIMENSION, 1);
-      defaultAccelerationCalculationAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForAccelerationCalculation(), dt);
+      double defaultAccelerationCalculationAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForAccelerationCalculation(), dt);
       accelerationCalculationAlpha = new YoDouble("accelerationCalculationAlpha", registry);
-      accelerationCalculationAlpha.set(defaultAccelerationCalculationAlpha);
-      for (int i = 0; i < WRENCH_DIMENSION; i++)
+      accelerationCalculationAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForAccelerationCalculation(), dt));
+      jointVelocitiesContainer = new DMatrixRMaj(nDoFs, 1);
+      jointAccelerations = new FilteredVelocityYoVariable[nDoFs];
+      for (JointReadOnly joint : modelHandler.getJointList(Task.ACTUAL))
       {
-         rootJointVelocities[i] = new YoDouble("rootJointVelocity_" + getNameForRootJoint(i), registry);
-         rootJointAccelerations[i] = new FilteredVelocityYoVariable("rootJointAcceleration_" + getNameForRootJoint(i), "",
-                                                                    defaultAccelerationCalculationAlpha, rootJointVelocities[i], dt, registry);
+         if (joint instanceof OneDoFJointReadOnly)
+         {
+            int jointIndex = jointIndexHandler.getOneDoFJointIndex((OneDoFJointReadOnly) joint);
+            jointAccelerations[jointIndex] = new FilteredVelocityYoVariable("jointAcceleration_" + joint.getName(), "", defaultAccelerationCalculationAlpha, dt, registry);
+         }
+         else
+         {
+            int[] jointIndices = jointIndexHandler.getJointIndices(joint);
+            for (int jointIndex : jointIndices)
+               jointAccelerations[jointIndex] = new FilteredVelocityYoVariable("jointAcceleration_" + getNameForRootJoint(jointIndex), "", defaultAccelerationCalculationAlpha, dt, registry);
+         }
       }
 
-      jointVelocities = new YoDouble[nOneDoFJoints];
-      jointAccelerations = new FilteredVelocityYoVariable[nOneDoFJoints];
-      for (int i = 0; i < nOneDoFJoints; i++)
-      {
-         jointVelocities[i] = new YoDouble("jointVelocity_" + actualRobotModel.getOneDoFJoints()[i].getName(), registry);
-         jointAccelerations[i] = new FilteredVelocityYoVariable("jointAcceleration_" + actualRobotModel.getOneDoFJoints()[i].getName(), "",
-                                                                defaultAccelerationCalculationAlpha, jointVelocities[i], dt, registry);
-      }
+      double defaultPostProcessingAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt);
 
-      defaultPostProcessingAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt);
-
-      estimate = new YoMatrix("", nParameters,
-                              1,
-                              getRowNamesForEstimates(basisSets, estimateModelBodies),
-                              null,
-                              registry);
-
-      double defaultEstimateFilteringAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(),
-                                                                                                             dt);
-      filteredEstimate = new AlphaFilteredYoMatrix("filtered_", this.defaultAccelerationCalculationAlpha, nParameters,
-                                                   1,
-                                                   getRowNamesForEstimates(basisSets, estimateModelBodies),
-                                                   null,
-                                                   registry);
+      estimate = new YoMatrix("", nParameters, 1, getRowNamesForEstimates(basisSets, modelHandler.getBodyArray(Task.ESTIMATE)), null, registry);
+      double defaultEstimateFilteringAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(), dt);
+      filteredEstimate = new AlphaFilteredYoMatrix("filtered_", defaultEstimateFilteringAlpha, nParameters, 1, getRowNamesForEstimates(basisSets, modelHandler.getBodyArray(Task.ESTIMATE)), null, registry);
 
       // Process covariances are initialized here, but actually set later depending on the type of filter used
       // (and thus on the type of parameter -- which will require different covariances for different units)
@@ -271,7 +233,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       for (int i = 0; i < WRENCH_DIMENSION; ++i)
       {
           floatingBaseMeasurementCovariance[i] = new YoDouble("floatingBaseMeasurementCovariance_" + getNameForRootJoint(i), registry);
-            floatingBaseMeasurementCovariance[i].set(parameters.getFloatingBaseMeasurementCovariance()[i]);
+            floatingBaseMeasurementCovariance[i].set(parameters.getFloatingBaseMeasurementCovariance());
       }
       legsMeasurementCovariance = new YoDouble("legsMeasurementCovariance", registry);
       legsMeasurementCovariance.set(parameters.getLegMeasurementCovariance());
@@ -295,7 +257,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       normalizedInnovation = new YoDouble("normalizedInnovation", registry);
       normalizedInnovation.set(0.0);
-
       normalizedInnovationThreshold = new YoDouble("normalizedInnovationThreshold", registry);
       normalizedInnovationThreshold.set(parameters.getNormalizedInnovationThreshold());
 
@@ -307,9 +268,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       tare = new YoBoolean("tare", registry);
       tare.set(false);
-      tareSpatialInertias = new YoSpatialInertia[estimateModelBodies.length];
-      urdfSpatialInertias = new SpatialInertiaBasics[estimateModelBodies.length];
-      for (int i = 0; i < estimateModelBodies.length; i++)
+      tareSpatialInertias = new YoSpatialInertia[nBodies];
+      urdfSpatialInertias = new SpatialInertiaBasics[nBodies];
+      RigidBodyBasics[] estimateModelBodies = modelHandler.getBodyArray(Task.ESTIMATE);
+      for (int i = 0; i < nBodies; i++)
       {
          tareSpatialInertias[i] = new YoSpatialInertia(estimateModelBodies[i].getInertia(), "_tare", registry);
          urdfSpatialInertias[i] = new SpatialInertia(estimateModelBodies[i].getInertia());
@@ -346,6 +308,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       }
    }
 
+   private enum Task
+   {
+      ACTUAL, ESTIMATE, INVERSE_DYNAMICS, REGRESSOR;
+
+      public static final Task[] values = values();
+   }
+
    private void setFilter(InertialParameterManagerFactory.EstimatorType type)
    {
       defaultProcessCovariances = parameters.getProcessModelCovarianceForBody();
@@ -353,26 +322,26 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       {
          case KF ->
          {
-            filter = new InertialKalmanFilter(estimateRobotModel,
+            filter = new InertialKalmanFilter(modelHandler.getRobotModel(Task.ESTIMATE),
                                               basisSets,
                                               parameters,
                                               parameters.getURDFParameters(basisSets),
                                               CommonOps_DDRM.identity(nParameters),
                                               CommonOps_DDRM.identity(nParameters),
-                                              CommonOps_DDRM.identity(nDoFs), defaultPostProcessingAlpha,
+                                              CommonOps_DDRM.identity(nDoFs),
                                               registry);
             createProcessCovariances(RigidBodyInertialParametersTools.getNamesForPiBasis(), defaultProcessCovariances);
             filter.setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
          }
          case PHYSICALLY_CONSISTENT_EKF ->
          {
-            filter = new InertialPhysicallyConsistentKalmanFilter(estimateRobotModel,
+            filter = new InertialPhysicallyConsistentKalmanFilter(modelHandler.getRobotModel(Task.ESTIMATE),
                                                                   basisSets,
                                                                   parameters,
                                                                   parameters.getURDFParameters(basisSets),
                                                                   CommonOps_DDRM.identity(nParameters),
                                                                   CommonOps_DDRM.identity(nParameters),
-                                                                  CommonOps_DDRM.identity(nDoFs), defaultPostProcessingAlpha,
+                                                                  CommonOps_DDRM.identity(nDoFs),
                                                                   registry);
             createProcessCovariances(RigidBodyInertialParametersTools.getNamesForThetaBasis(), defaultProcessCovariances);
             filter.setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
@@ -424,16 +393,14 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
          updateAccelerationCalculationFilterAlphas();
 
-         updateRegressorModelJointStates();
+         updateModelJointStates();
 
          updateContactJacobians();
          updateContactWrenches();
          updateWholeSystemTorques();
 
-         regressorTimer.startMeasurement();
          inverseDynamicsCalculator.compute();
          regressorCalculator.compute(regressorModelBodiesToProcess);
-         regressorTimer.stopMeasurement();
 
          for (int i = 0; i < regressorModelBodiesToProcess.length; i++)
             regressorBlocks[i].set(regressorCalculator.getJointTorqueRegressorMatrixBlock(regressorModelBodiesToProcess[i]));
@@ -453,13 +420,12 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
          estimate.set(filter.calculateEstimate(wholeSystemTorques));
          filter.getMeasurementResidual(residual);
-
          filteredEstimate.setAndSolve(estimate);
 
          normalizedInnovation.set(filter.calculateNormalizedInnovation());
 
          // Pack smoothed estimate back into estimate robot bodies
-         RegressorTools.packRigidBodies(basisSets, filteredEstimate, estimateModelBodies);
+         RegressorTools.packRigidBodies(basisSets, filteredEstimate, modelHandler.getBodyArray(Task.ESTIMATE));
 
          // Check physical consistency
          checkPhysicalConsistency();
@@ -479,7 +445,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private void checkPhysicalConsistency()
    {
       areParametersPhysicallyConsistent.set(true);
-      for (RigidBodyBasics estimateModelBody : estimateModelBodies)
+      for (RigidBodyBasics estimateModelBody : modelHandler.getBodyArray(Task.ESTIMATE))
       {
          if (!RigidBodyInertialParametersTools.isPhysicallyConsistent(estimateModelBody.getInertia()))
          {
@@ -503,6 +469,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       processCovariancePassedToFilter.set(processCovariance);
 
       // Set diagonal entries of measurement covariance according to the part of the body
+      // TODO: change
+      List<? extends JointBasics> actualModelJoints = modelHandler.getJointList(Task.ACTUAL);
       for (int j = 0; j < actualModelJoints.size(); ++j)
       {
          JointReadOnly joint = actualModelJoints.get(j);
@@ -526,50 +494,36 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private void updateAccelerationCalculationFilterAlphas()
    {
-      for (int i = 0; i < WRENCH_DIMENSION; i++)
-         rootJointAccelerations[i].setAlpha(accelerationCalculationAlpha.getValue());
-
       for (int i = 0; i < jointAccelerations.length; i++)
          jointAccelerations[i].setAlpha(accelerationCalculationAlpha.getValue());
    }
 
-   private void updateRegressorModelJointStates()
+   private void updateModelJointStates()
    {
-      MultiBodySystemTools.copyJointsState(actualModelJoints, regressorModelJoints, JointStateType.CONFIGURATION);
-      MultiBodySystemTools.copyJointsState(actualModelJoints, regressorModelJoints, JointStateType.VELOCITY);
+      modelHandler.copyJointsState(Task.ACTUAL, Task.REGRESSOR, JointStateType.CONFIGURATION);
+      modelHandler.copyJointsState(Task.ACTUAL, Task.REGRESSOR, JointStateType.VELOCITY);
 
-      MultiBodySystemTools.copyJointsState(actualModelJoints, inverseDynamicsModelJoints, JointStateType.CONFIGURATION);
-      MultiBodySystemTools.copyJointsState(actualModelJoints, inverseDynamicsModelJoints, JointStateType.VELOCITY);
+      modelHandler.copyJointsState(Task.ACTUAL, Task.INVERSE_DYNAMICS, JointStateType.CONFIGURATION);
+      modelHandler.copyJointsState(Task.ACTUAL, Task.INVERSE_DYNAMICS, JointStateType.VELOCITY);
 
       // Update joint accelerations by processing joint velocities
-      calculateJointAccelerations();
-      OneDoFJointBasics[] regressorOneDoFJoints = regressorRobotModel.getOneDoFJoints();
-      OneDoFJointBasics[] inverseDynamicsOneDoFJoints = inverseDynamicsRobotModel.getOneDoFJoints();
-      for (int i = 0; i < jointAccelerations.length; i++)
+      modelHandler.extractJointsState(Task.ACTUAL, JointStateType.VELOCITY, jointVelocitiesContainer);
+      for (int i = 0; i < jointAccelerations.length; ++i)
       {
-         regressorOneDoFJoints[i].setQdd(jointAccelerations[i].getValue());
-         inverseDynamicsOneDoFJoints[i].setQdd(jointAccelerations[i].getValue());
+         jointAccelerations[i].update(jointVelocitiesContainer.get(i));
+         // Reuse the joint velocities container to store the joint accelerations
+         jointVelocitiesContainer.set(i ,0, jointAccelerations[i].getValue());
       }
+      modelHandler.insertJointsState(Task.REGRESSOR, JointStateType.ACCELERATION, jointVelocitiesContainer);
+      modelHandler.insertJointsState(Task.INVERSE_DYNAMICS, JointStateType.ACCELERATION, jointVelocitiesContainer);
 
-      // Update root joint acceleration, which is not populated by default
-      calculateRootJointAccelerations();
-      regressorRobotModel.getRootJoint().setJointAcceleration(0, rootJointAcceleration);
-      inverseDynamicsRobotModel.getRootJoint().setJointAcceleration(0, rootJointAcceleration);
-
-      regressorRobotModel.updateFrames();
-      inverseDynamicsRobotModel.updateFrames();
+      modelHandler.getRobotModel(Task.REGRESSOR).updateFrames();
+      modelHandler.getRobotModel(Task.INVERSE_DYNAMICS).updateFrames();
    }
 
    private void updateWholeSystemTorques()
    {
-      actualRobotModel.getRootJoint().getJointTau(0, wholeSystemTorques);
-      OneDoFJointBasics[] actualOneDoFJoints = actualRobotModel.getOneDoFJoints();
-      for (int i = 0; i < actualOneDoFJoints.length; ++i)
-      {
-         OneDoFJointReadOnly joint = actualOneDoFJoints[i];
-         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
-         joint.getJointTau(jointIndex, wholeSystemTorques);
-      }
+      modelHandler.extractJointsState(Task.ACTUAL, JointStateType.EFFORT, wholeSystemTorques);
    }
 
    private void updateContactJacobians()
@@ -587,29 +541,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          footSwitches.get(side).getMeasuredWrench().get(contactWrenches.get(side));
    }
 
-   private void calculateRootJointAccelerations()
+   private void zeroInverseDynamicsParameters(Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets)
    {
-      actualRobotModel.getRootJoint().getJointVelocity(0, rootJointVelocity);
-      for (int i = 0; i < WRENCH_DIMENSION; i++)
-      {
-         rootJointVelocities[i].set(rootJointVelocity.get(i, 0));
-         rootJointAccelerations[i].update(rootJointVelocities[i].getValue());
-         rootJointAcceleration.set(i, 0, rootJointAccelerations[i].getValue());
-      }
-   }
-
-   private void calculateJointAccelerations()
-   {
-      OneDoFJointBasics[] actualOneDoFJoints = actualRobotModel.getOneDoFJoints();
-      for (int i = 0; i < jointVelocities.length; i++)
-      {
-         jointVelocities[i].set(actualOneDoFJoints[i].getQd());
-         jointAccelerations[i].update(jointVelocities[i].getValue());
-      }
-   }
-
-   private void zeroInverseDynamicsParameters(RigidBodyBasics[] bodies, Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets)
-   {
+      RigidBodyBasics[] bodies = modelHandler.getBodyArray(Task.INVERSE_DYNAMICS);
       if (bodies.length != basisSets.length)
          throw new RuntimeException("Mismatch between bodies and basis sets");
 
@@ -670,7 +604,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private void updateActualRobotModel()
    {
-      for (int i = 0; i < estimateModelBodies.length; i++)
+      RigidBodyBasics[] actualModelBodies = modelHandler.getBodyArray(Task.ACTUAL);
+      RigidBodyBasics[] estimateModelBodies = modelHandler.getBodyArray(Task.ESTIMATE);
+      for (int i = 0; i < nBodies; i++)
       {
          if (!basisSets[i].isEmpty())  // Only update the bodies we're estimating
          {
@@ -692,14 +628,17 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private void updateTareSpatialInertias()
    {
-      for (int i = 0; i < estimateModelBodies.length; i++)
+      RigidBodyBasics[] estimateModelBodies = modelHandler.getBodyArray(Task.ESTIMATE);
+      for (int i = 0; i < nBodies; i++)
          if (!basisSets[i].isEmpty())  // Only tare the bodies we're estimating
             tareSpatialInertias[i].set(estimateModelBodies[i].getInertia());
    }
 
    private void updateVisuals()
    {
-      for (int i = 0; i < estimateModelBodies.length; i++)
+      RigidBodyBasics[] estimateModelBodies = modelHandler.getBodyArray(Task.ESTIMATE);
+      RigidBodyReadOnly[] actualModelBodies = modelHandler.getBodyArray(Task.ACTUAL);
+      for (int i = 0; i < nBodies; i++)
       {
          RigidBodyReadOnly actualBody = actualModelBodies[i];
          RigidBodyReadOnly estimateBody = estimateModelBodies[i];
@@ -737,6 +676,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private String[] getRowNamesForJoints(int nDoFs)
    {
+      List<? extends JointBasics> actualModelJoints = modelHandler.getJointList(Task.ACTUAL);  // TODO: probably shouldn't be herer
       String[] rowNames = new String[nDoFs];
       int index = 0;
       for (JointReadOnly joint : actualModelJoints)

@@ -10,6 +10,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.parameterEstimation.ExtendedKalmanFilter;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoMatrix;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -60,7 +61,7 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
                                InertialEstimationParameters parameters,
                                DMatrixRMaj initialParametersForEstimate, DMatrixRMaj initialParameterCovariance,
                                DMatrixRMaj processCovariance, DMatrixRMaj measurementCovariance,
-                               double postProcessingAlpha, YoRegistry parentRegistry)
+                               YoRegistry parentRegistry)
    {
       super(initialParametersForEstimate, initialParameterCovariance, processCovariance, measurementCovariance);
 
@@ -88,6 +89,8 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
       registry = new YoRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
+      // TODO: change
+      double postProcessingAlpha = 0.0;
       filteredWholeSystemTorques = new AlphaFilteredYoMatrix("filteredWholeSystemTorques", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
       doubleFilteredWholeSystemTorques = new AlphaFilteredYoMatrix("doubleFilteredWholeSystemTorques", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
       filteredMeasurement = new AlphaFilteredYoMatrix("filteredMeasurement", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);

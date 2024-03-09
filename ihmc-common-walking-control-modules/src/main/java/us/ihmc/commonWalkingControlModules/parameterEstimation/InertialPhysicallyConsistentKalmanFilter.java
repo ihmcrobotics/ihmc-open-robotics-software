@@ -43,7 +43,6 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
                                                    DMatrixRMaj initialParameterCovariance,
                                                    DMatrixRMaj processCovariance,
                                                    DMatrixRMaj measurementCovariance,
-                                                   double postProcessingAlpha,
                                                    YoRegistry parentRegistry)
    {
       super(model,
@@ -53,7 +52,6 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
             initialParameterCovariance,
             processCovariance,
             measurementCovariance,
-            postProcessingAlpha,
             parentRegistry);
 
       nBodies = 0;
