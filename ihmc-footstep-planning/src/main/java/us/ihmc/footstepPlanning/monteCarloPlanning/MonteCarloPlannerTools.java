@@ -52,8 +52,8 @@ public class MonteCarloPlannerTools
 
    public static void printTree(MonteCarloWaypointNode node, int level)
    {
-      // TODO: Make this write to a string and then print the combined string with LogTools.info()
-      LogTools.info(String.format("ID: %d\tLevel: %d\tNode: %s\tChildren: %d%n", node.getId(), level, node.getState().toString(), node.getChildren().size()));
+      // TODO: Make this write to a string and then print the combined string with LogTools.debug()
+      LogTools.debug(String.format("ID: %d\tLevel: %d\tNode: %s\tChildren: %d%n", node.getId(), level, node.getState().toString(), node.getChildren().size()));
 
       for (MonteCarloTreeNode child : node.getChildren())
       {
@@ -260,6 +260,23 @@ public class MonteCarloPlannerTools
       }
    }
 
+   public static void getOptimalPathByDepth(MonteCarloTreeNode root, List<MonteCarloTreeNode> path)
+   {
+      if (root.getChildren().isEmpty() && root.getLevel() > path.size())
+      {
+         path.add(root);
+      }
+      else if (root.getChildren().isEmpty() && root.getLevel() < path.size())
+      {
+         path.remove(path.size() - 1);
+      }
+
+      for (MonteCarloTreeNode node : root.getChildren())
+      {
+         getOptimalPathByDepth(node, path);
+      }
+   }
+
    public static void plotPath(List<MonteCarloTreeNode> path, Mat gridColor)
    {
       for (MonteCarloTreeNode node : path)
@@ -298,7 +315,7 @@ public class MonteCarloPlannerTools
          output.append(", ");
       }
 
-      LogTools.info("Layer Counts: {}", output.toString());
+      LogTools.debug("Layer Counts: {}", output.toString());
    }
 
    public static String getLayerCountsString(MonteCarloTreeNode root)
@@ -321,8 +338,8 @@ public class MonteCarloPlannerTools
                                                       SideDependentList<ConvexPolygon2D> footPolygons)
    {
       List<MonteCarloTreeNode> path = new ArrayList<>();
-      MonteCarloPlannerTools.getOptimalPath(root, path);
-      LogTools.info("Optimal Path Size: {}", path.size());
+      MonteCarloPlannerTools.getOptimalPathByDepth(root, path);
+      LogTools.debug("Optimal Path Size: {}", path.size());
 
       HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
 
@@ -538,7 +555,7 @@ public class MonteCarloPlannerTools
       score = goalReward + contactReward;
 
       if (debug)
-         LogTools.info(String.format("Rewards -> Goal: %.2f, Contact: %.2f, Total: %.2f (%d)", goalReward, contactReward, score, plannerParameters.getInitialValueCutoff()));
+         LogTools.debug(String.format("Rewards -> Goal: %.2f, Contact: %.2f, Total: %.2f (%d)", goalReward, contactReward, score, plannerParameters.getInitialValueCutoff()));
 
       return score;
    }

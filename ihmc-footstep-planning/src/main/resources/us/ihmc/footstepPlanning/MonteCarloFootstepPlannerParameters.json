@@ -7,7 +7,7 @@
     "upperBound" : 400
   },
   "Number of simulations" : {
-    "value" : 10,
+    "value" : 31,
     "lowerBound" : 1,
     "upperBound" : 400
   },
@@ -17,22 +17,22 @@
     "upperBound" : 1.0
   },
   "Feasible Contact Reward" : {
-    "value" : 203.669715,
+    "value" : 329.787225,
     "lowerBound" : 0.0,
     "upperBound" : 1000.0
   },
   "Goal Reward" : {
-    "value" : 90.909094,
+    "value" : 70.186335,
     "lowerBound" : 0.0,
     "upperBound" : 100.0
   },
   "Max number of visited nodes" : {
-    "value" : 4000,
+    "value" : 30382,
     "lowerBound" : 1000,
     "upperBound" : 1000000
   },
   "Max number of child nodes" : {
-    "value" : 5,
+    "value" : 131,
     "lowerBound" : 5,
     "upperBound" : 1000
   },
@@ -57,47 +57,47 @@
     "upperBound" : 5.0
   },
   "Initial value cutoff" : {
-    "value" : 200,
+    "value" : 143,
     "lowerBound" : -1000,
     "upperBound" : 1000
   },
   "Max tree depth" : {
-    "value" : 15,
+    "value" : 10,
     "lowerBound" : 2,
     "upperBound" : 12
   },
   "Search inner radius" : {
-    "value" : 0.3,
+    "value" : 0.234146,
     "lowerBound" : 0.0,
     "upperBound" : 0.3
   },
   "Search outer radius" : {
-    "value" : 0.606796,
+    "value" : 0.639344,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },
   "Search skip size" : {
-    "value" : 2,
+    "value" : 1,
     "lowerBound" : 0,
     "upperBound" : 10
   },
   "Maximum step width" : {
-    "value" : 0.5,
+    "value" : 0.425,
     "lowerBound" : 0.2,
     "upperBound" : 0.5
   },
   "Maximum step length" : {
-    "value" : 0.65,
+    "value" : 0.474775,
     "lowerBound" : 0.2,
     "upperBound" : 0.7
   },
   "Minimum step width" : {
-    "value" : 0.2,
+    "value" : 0.115,
     "lowerBound" : 0.1,
     "upperBound" : 0.3
   },
   "Minimum step length" : {
-    "value" : 0.0,
+    "value" : 0.117391,
     "lowerBound" : 0.1,
     "upperBound" : 0.3
   },

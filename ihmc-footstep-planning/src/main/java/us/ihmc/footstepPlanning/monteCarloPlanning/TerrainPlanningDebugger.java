@@ -227,7 +227,7 @@ public class TerrainPlanningDebugger
 
       // time now
       ArrayList<MonteCarloTreeNode> optimalPath = new ArrayList<>();
-      MonteCarloPlannerTools.getOptimalPath(root, optimalPath);
+      MonteCarloPlannerTools.getOptimalPathByDepth(root, optimalPath);
 
       double totalScore = 0;
       for (int i = 1; i<optimalPath.size(); i++)

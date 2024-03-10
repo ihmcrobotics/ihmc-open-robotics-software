@@ -76,6 +76,7 @@ public class MonteCarloFootstepPlanner
       // Debug Only
 
       statistics.stopTotalTime();
+      statistics.setNumberOfNodesVisited(visitedNodes.size());
       statistics.setLayerCountsString(MonteCarloPlannerTools.getLayerCountsString(root));
       statistics.logToFile(true, true);
 
@@ -88,17 +89,14 @@ public class MonteCarloFootstepPlanner
 
    public void updateTree(MonteCarloFootstepNode node, MonteCarloFootstepPlannerRequest request)
    {
+      LogTools.debug("Update: Level: {}", node.getLevel());
       timeSpentPlanningSoFar = System.nanoTime() / 1e9 - startTime;
-      if (timeSpentPlanningSoFar > request.getTimeout())
-      {
-         return;
-      }
 
-      if (node == null)
-      {
-         LogTools.debug("Node is null");
-         return;
-      }
+      //if (timeSpentPlanningSoFar > request.getTimeout())
+      //{
+      //   LogTools.debug("Timeout Reached: {}", timeSpentPlanningSoFar);
+      //   return;
+      //}
 
       // Pruning and Sorting
       statistics.startPruningTime();
@@ -106,24 +104,32 @@ public class MonteCarloFootstepPlanner
       node.prune(parameters.getMaxNumberOfChildNodes());
       statistics.stopPruningTime();
 
+      LogTools.debug("Update: Children: {}", node.getChildren().size());
       if (node.getChildren().isEmpty())
       {
          MonteCarloFootstepNode childNode = node;
          if (node.getLevel() < parameters.getMaxTreeDepth())
          {
+            LogTools.debug("Expanding: {}", node.getLevel());
             // Expansion and Random Selection
             statistics.startExpansionTime();
             childNode = expand(node, request);
             statistics.stopExpansionTime();
          }
+         else
+         {
+            LogTools.debug("Max Depth Reached: {}", node.getLevel());
+         }
 
          if (childNode != null)
          {
+            LogTools.debug("Simulating: {}", childNode.getLevel());
             // Simulation
             statistics.startSimulationTime();
             double score = simulate(childNode, request);
             statistics.stopSimulationTime();
 
+            LogTools.debug("Back Propagating: {}", childNode.getLevel());
             // Back Propagation
             statistics.startPropagationTime();
             childNode.setValue((float) score);
@@ -148,6 +154,7 @@ public class MonteCarloFootstepPlanner
          }
          statistics.stopSearchTime();
 
+         LogTools.debug("Recursing: {}", bestNode.getLevel());
          // Recursion into highest UCB node
          updateTree(bestNode, request);
       }
@@ -156,12 +163,14 @@ public class MonteCarloFootstepPlanner
    public MonteCarloFootstepNode expand(MonteCarloFootstepNode node, MonteCarloFootstepPlannerRequest request)
    {
       ArrayList<?> availableStates = node.getAvailableStates(request, parameters);
+      LogTools.debug("Total Available States: {} at Level: {}", availableStates.size(), node.level);
       for (Object newStateObj : availableStates)
       {
          MonteCarloFootstepNode newState = (MonteCarloFootstepNode) newStateObj;
          double score = MonteCarloPlannerTools.scoreFootstepNode(node, newState, request, parameters, false);
          if (score > parameters.getInitialValueCutoff())
          {
+            statistics.incrementNumberOfNodesExpanded();
             // Create node if not previously visited, or pull from visited node map
             if (visitedNodes.getOrDefault(newState, null) != null)
             {
@@ -215,7 +224,7 @@ public class MonteCarloFootstepPlanner
       if (timeSpentPlanningSoFar > request.getTimeout())
          return;
 
-      //LogTools.info("Back Propagate: {} {} {}", node.getLevel(), callLevel, score);
+      //LogTools.debug("Back Propagate: {} {} {}", node.getLevel(), callLevel, score);
 
       node.setValue(Math.max( (float) (score * parameters.getDecayFactor()), node.getValue()));
       node.incrementVisits();

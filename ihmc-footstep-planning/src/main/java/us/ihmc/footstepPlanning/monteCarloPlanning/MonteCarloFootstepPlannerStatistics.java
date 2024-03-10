@@ -18,6 +18,7 @@ public class MonteCarloFootstepPlannerStatistics
 
    private String nodesPerLayerString;
 
+   private int numberOfNodesExpanded;
    private int numberOfNodesVisited;
    private int numberOfNodesPruned;
 
@@ -92,6 +93,7 @@ public class MonteCarloFootstepPlannerStatistics
          log.append("SearchTime: ").append(lastSearchTime).append(", ");
          log.append("Visited: ").append(numberOfNodesVisited).append(", ");
          log.append("Pruned: ").append(numberOfNodesPruned).append(", ");
+         log.append("Expanded: ").append(numberOfNodesExpanded).append(", ");
          log.append("TotalReward: ").append(totalReward).append(", ");
          log.append("ContactReward: ").append(contactReward).append(", ");
          log.append("GoalReward: ").append(goalReward).append(", ");
@@ -227,6 +229,11 @@ public class MonteCarloFootstepPlannerStatistics
    public void setNumberOfNodesVisited(int numberOfNodesVisited)
    {
       this.numberOfNodesVisited = numberOfNodesVisited;
+   }
+
+   public void incrementNumberOfNodesExpanded()
+   {
+      numberOfNodesExpanded++;
    }
 
    public void setNumberOfNodesPruned(int numberOfNodesPruned)
