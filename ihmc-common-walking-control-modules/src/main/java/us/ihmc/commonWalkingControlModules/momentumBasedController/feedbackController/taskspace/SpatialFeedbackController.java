@@ -1,24 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.appendIndex;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.POSITION;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.ROTATION_VECTOR;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.ACCELERATION;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.FORCE;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.POSE;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.VELOCITY;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ACHIEVED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.CURRENT;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.DESIRED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.D_FEEDBACK;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_CUMULATED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_INTEGRATED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDBACK;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDFORWARD;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.I_FEEDBACK;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.P_FEEDBACK;
-
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -29,21 +10,13 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBAlphaFilteredVector6D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPose3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector6D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector6D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
+import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
@@ -55,6 +28,12 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.appendIndex;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.POSITION;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.ROTATION_VECTOR;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D.*;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.*;
 
 public class SpatialFeedbackController implements FeedbackControllerInterface
 {
@@ -79,6 +58,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final FBVector6D yoFeedForwardVelocity;
    protected final FBVector6D yoFeedbackVelocity;
    protected final FBRateLimitedVector6D rateLimitedFeedbackVelocity;
+   protected final FBVector6D yoAchievedVelocity;
 
    protected final FBVector6D yoDesiredAcceleration;
    protected final FBVector6D yoFeedForwardAcceleration;
@@ -109,6 +89,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final FrameVector3D currentAngularVelocity = new FrameVector3D();
    protected final FrameVector3D feedForwardLinearVelocity = new FrameVector3D();
    protected final FrameVector3D feedForwardAngularVelocity = new FrameVector3D();
+   protected final FrameVector3D achievedAngularVelocity = new FrameVector3D();
+   protected final FrameVector3D achievedLinearVelocity = new FrameVector3D();
 
    protected final FrameVector3D desiredLinearAcceleration = new FrameVector3D();
    protected final FrameVector3D desiredAngularAcceleration = new FrameVector3D();
@@ -122,6 +104,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final FrameVector3D desiredAngularTorque = new FrameVector3D();
 
    protected final Twist currentTwist = new Twist();
+   protected final Twist endEffectorAchievedTwist = new Twist();
    protected final SpatialAcceleration endEffectorAchievedAcceleration = new SpatialAcceleration();
 
    protected final SpatialAccelerationCommand inverseDynamicsOutput = new SpatialAccelerationCommand();
@@ -135,6 +118,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final YoPID3DGains orientationGains;
    protected final Matrix3D tempGainMatrix = new Matrix3D();
 
+   protected final RigidBodyTwistProvider rigidBodyTwistProvider;
    protected final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
 
    protected final RigidBodyBasics rootBody;
@@ -186,6 +170,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          rootBody = null;
       }
 
+      rigidBodyTwistProvider = ccToolbox.getRigidBodyTwistCalculator();
       rigidBodyAccelerationProvider = ccToolbox.getRigidBodyAccelerationProvider();
 
       String endEffectorName = endEffector.getName();
@@ -254,13 +239,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
             yoFeedForwardAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDFORWARD, ACCELERATION, isEnabled, true);
             yoProportionalFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, P_FEEDBACK, ACCELERATION, isEnabled, false);
             yoDerivativeFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, D_FEEDBACK, ACCELERATION, isEnabled, false);
-            yoIntegralFeedbackAcceleration = computeIntegralTerm ? fbToolbox.getOrCreateVectorData6D(endEffector,
-                                                                                                     controllerIndex,
-                                                                                                     I_FEEDBACK,
-                                                                                                     ACCELERATION,
-                                                                                                     isEnabled,
-                                                                                                     false)
-                                                                 : null;
+            yoIntegralFeedbackAcceleration = computeIntegralTerm ?
+                  fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, I_FEEDBACK, ACCELERATION, isEnabled, false) :
+                  null;
             yoFeedbackAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, FEEDBACK, ACCELERATION, isEnabled, false);
             rateLimitedFeedbackAcceleration = fbToolbox.getOrCreateRateLimitedVectorData6D(endEffector,
                                                                                            controllerIndex,
@@ -342,12 +323,14 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
                                                                                     maximumLinearRate,
                                                                                     isEnabled,
                                                                                     false);
+         yoAchievedVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, ACHIEVED, VELOCITY, isEnabled, true);
       }
       else
       {
          yoFeedbackVelocity = null;
          yoFeedForwardVelocity = null;
          rateLimitedFeedbackVelocity = null;
+         yoAchievedVelocity = null;
       }
    }
 
@@ -635,6 +618,23 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       yoAchievedAcceleration.getAngularPart().setMatchingFrame(achievedAngularAcceleration);
       yoAchievedAcceleration.getLinearPart().setMatchingFrame(achievedLinearAcceleration);
       yoAchievedAcceleration.setCommandId(currentCommandId);
+   }
+
+   @Override
+   public void computeAchievedVelocity()
+   {
+      if (yoAchievedVelocity == null)
+         return;
+
+      endEffectorAchievedTwist.setIncludingFrame(rigidBodyTwistProvider.getRelativeTwist(base, endEffector));
+      endEffectorAchievedTwist.changeFrame(controlFrame);
+      achievedAngularVelocity.setIncludingFrame(endEffectorAchievedTwist.getAngularPart());
+      achievedLinearVelocity.setIncludingFrame(endEffectorAchievedTwist.getLinearPart());
+
+      yoAchievedVelocity.setReferenceFrame(yoDesiredPose.getReferenceFrame());
+      yoAchievedVelocity.getAngularPart().setMatchingFrame(achievedAngularVelocity);
+      yoAchievedVelocity.getLinearPart().setMatchingFrame(achievedLinearVelocity);
+      yoAchievedVelocity.setCommandId(currentCommandId);
    }
 
    /**
@@ -963,7 +963,7 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
     * This function can add post-processing to the desired accelerations from the inverse dynamics
     * calculator. This is done before the coriolis acceleration is calculated. The default
     * implementation is a no-op.
-    * 
+    *
     * @param controlFrame
     * @param desiredAngularAcceleration
     * @param desiredLinearAcceleration
