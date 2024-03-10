@@ -1,0 +1,110 @@
+240310 16:16:02:385 [INFO] (FootstepPlanningModule.java:178): Handling footstep planner request...
+240310 16:16:02:550 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816403207648011, Iteration: 1, Total Score: 140.582
+240310 16:16:02:595 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816403252275022, Iteration: 2, Total Score: 239.773
+240310 16:16:02:626 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816403283840879, Iteration: 3, Total Score: 508.134
+240310 16:16:02:664 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816403321088388, Iteration: 4, Total Score: 508.134
+240310 16:16:02:703 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816403360494602, Iteration: 5, Total Score: 508.134
+240310 16:16:02:770 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816403427167287, Iteration: 6, Total Score: 508.134
+240310 16:16:02:801 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816403458368075, Iteration: 7, Total Score: 508.134
+240310 16:16:02:841 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816403498403507, Iteration: 8, Total Score: 508.134
+240310 16:16:02:886 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816403543924747, Iteration: 9, Total Score: 599.750
+240310 16:16:02:943 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816403600507761, Iteration: 10, Total Score: 599.750
+240310 16:16:02:990 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816403647603682, Iteration: 11, Total Score: 736.924
+240310 16:16:03:043 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816403700631880, Iteration: 12, Total Score: 946.873
+240310 16:16:03:103 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816403760592134, Iteration: 13, Total Score: 1116.838
+240310 16:16:03:177 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816403834658414, Iteration: 14, Total Score: 1116.838
+240310 16:16:03:232 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816403889148677, Iteration: 15, Total Score: 1116.838
+240310 16:16:03:297 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816403954690999, Iteration: 16, Total Score: 1116.838
+240310 16:16:03:356 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816404013716859, Iteration: 17, Total Score: 1116.838
+240310 16:16:03:424 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816404080959216, Iteration: 18, Total Score: 1116.838
+240310 16:16:04:255 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816404912698877, Iteration: 19, Total Score: 1116.838
+240310 16:16:04:288 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816404945151184, Iteration: 20, Total Score: 1116.838
+240310 16:16:04:361 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405018539221, Iteration: 21, Total Score: 1116.838
+240310 16:16:04:427 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405084030975, Iteration: 22, Total Score: 1116.838
+240310 16:16:04:484 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405141218075, Iteration: 23, Total Score: 1116.838
+240310 16:16:04:536 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405193431505, Iteration: 24, Total Score: 1116.838
+240310 16:16:04:589 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405246829253, Iteration: 25, Total Score: 1116.838
+240310 16:16:04:664 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405321660729, Iteration: 26, Total Score: 1116.838
+240310 16:16:04:725 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405381948223, Iteration: 27, Total Score: 1116.838
+240310 16:16:04:793 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405450454130, Iteration: 28, Total Score: 1116.838
+240310 16:16:04:847 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405504198391, Iteration: 29, Total Score: 1116.838
+240310 16:16:04:902 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405559324147, Iteration: 30, Total Score: 1116.838
+240310 16:16:04:903 [WARN] (NadiaRDXTerrainPlanningUI.java:802): Footstep Planner Result: TIMED_OUT_BEFORE_SOLUTION
+240310 16:16:04:924 [INFO] (FootstepPlanningModule.java:178): Handling footstep planner request...
+240310 16:16:04:955 [WARN] (RDXSwingTrajectoryGraphic.java:67): Swing trajectory type: DEFAULT, number of waypoints: 0, number of polynomials: 3
+240310 16:16:04:957 [WARN] (RDXSwingTrajectoryGraphic.java:67): Swing trajectory type: DEFAULT, number of waypoints: 0, number of polynomials: 3
+240310 16:16:04:959 [WARN] (RDXSwingTrajectoryGraphic.java:67): Swing trajectory type: DEFAULT, number of waypoints: 0, number of polynomials: 3
+240310 16:16:04:960 [WARN] (RDXSwingTrajectoryGraphic.java:67): Swing trajectory type: DEFAULT, number of waypoints: 0, number of polynomials: 3
+240310 16:16:04:962 [WARN] (RDXSwingTrajectoryGraphic.java:67): Swing trajectory type: DEFAULT, number of waypoints: 0, number of polynomials: 3
+240310 16:16:04:964 [WARN] (RDXSwingTrajectoryGraphic.java:67): Swing trajectory type: DEFAULT, number of waypoints: 0, number of polynomials: 3
+240310 16:16:04:982 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405639072438, Iteration: 1, Total Score: 140.582
+240310 16:16:05:013 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405670505556, Iteration: 2, Total Score: 239.773
+240310 16:16:05:042 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405699653376, Iteration: 3, Total Score: 508.134
+240310 16:16:05:079 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405736108490, Iteration: 4, Total Score: 508.134
+240310 16:16:05:118 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405775125969, Iteration: 5, Total Score: 508.134
+240310 16:16:05:182 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405839597563, Iteration: 6, Total Score: 508.134
+240310 16:16:05:211 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405868142234, Iteration: 7, Total Score: 508.134
+240310 16:16:05:246 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405903331738, Iteration: 8, Total Score: 508.134
+240310 16:16:05:285 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405942551884, Iteration: 9, Total Score: 599.750
+240310 16:16:05:339 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816405996009455, Iteration: 10, Total Score: 599.750
+240310 16:16:05:385 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816406042943779, Iteration: 11, Total Score: 736.924
+240310 16:16:05:439 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816406096154391, Iteration: 12, Total Score: 946.873
+240310 16:16:05:500 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816406157617752, Iteration: 13, Total Score: 1116.838
+240310 16:16:05:575 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816406232395133, Iteration: 14, Total Score: 1116.838
+240310 16:16:05:630 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816406287878094, Iteration: 15, Total Score: 1116.838
+240310 16:16:05:701 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816406358375602, Iteration: 16, Total Score: 1116.838
+240310 16:16:05:754 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816406411931978, Iteration: 17, Total Score: 1116.838
+240310 16:16:05:817 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816406474160478, Iteration: 18, Total Score: 1116.838
+240310 16:16:05:877 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816406534304389, Iteration: 19, Total Score: 1116.838
+240310 16:16:05:910 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816406567049356, Iteration: 20, Total Score: 1116.838
+240310 16:16:05:990 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816406647447080, Iteration: 21, Total Score: 1116.838
+240310 16:16:06:825 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816407482439598, Iteration: 22, Total Score: 1116.838
+240310 16:16:06:883 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816407540724621, Iteration: 23, Total Score: 1116.838
+240310 16:16:06:940 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816407597334847, Iteration: 24, Total Score: 1116.838
+240310 16:16:06:997 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816407654829924, Iteration: 25, Total Score: 1116.838
+240310 16:16:07:074 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816407731782105, Iteration: 26, Total Score: 1116.838
+240310 16:16:07:134 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816407791468294, Iteration: 27, Total Score: 1116.838
+240310 16:16:07:203 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816407860333423, Iteration: 28, Total Score: 1116.838
+240310 16:16:07:260 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816407917731674, Iteration: 29, Total Score: 1116.838
+240310 16:16:07:323 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816407980711125, Iteration: 30, Total Score: 1116.838
+240310 16:16:07:391 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408048712189, Iteration: 31, Total Score: 1116.838
+240310 16:16:07:449 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408106458697, Iteration: 32, Total Score: 1116.838
+240310 16:16:07:450 [WARN] (NadiaRDXTerrainPlanningUI.java:802): Footstep Planner Result: TIMED_OUT_BEFORE_SOLUTION
+240310 16:16:07:501 [INFO] (FootstepPlanningModule.java:178): Handling footstep planner request...
+240310 16:16:07:543 [WARN] (RDXSwingTrajectoryGraphic.java:67): Swing trajectory type: DEFAULT, number of waypoints: 0, number of polynomials: 3
+240310 16:16:07:548 [WARN] (RDXSwingTrajectoryGraphic.java:67): Swing trajectory type: DEFAULT, number of waypoints: 0, number of polynomials: 3
+240310 16:16:07:551 [WARN] (RDXSwingTrajectoryGraphic.java:67): Swing trajectory type: DEFAULT, number of waypoints: 0, number of polynomials: 3
+240310 16:16:07:554 [WARN] (RDXSwingTrajectoryGraphic.java:67): Swing trajectory type: DEFAULT, number of waypoints: 0, number of polynomials: 3
+240310 16:16:07:556 [WARN] (RDXSwingTrajectoryGraphic.java:67): Swing trajectory type: DEFAULT, number of waypoints: 0, number of polynomials: 3
+240310 16:16:07:559 [WARN] (RDXSwingTrajectoryGraphic.java:67): Swing trajectory type: DEFAULT, number of waypoints: 0, number of polynomials: 3
+240310 16:16:07:559 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408216532340, Iteration: 1, Total Score: 140.582
+240310 16:16:07:592 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408249262523, Iteration: 2, Total Score: 239.773
+240310 16:16:07:621 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408278419964, Iteration: 3, Total Score: 508.134
+240310 16:16:07:657 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408314525966, Iteration: 4, Total Score: 508.134
+240310 16:16:07:693 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408350655831, Iteration: 5, Total Score: 508.134
+240310 16:16:07:756 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408413358358, Iteration: 6, Total Score: 508.134
+240310 16:16:07:785 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408442987645, Iteration: 7, Total Score: 508.134
+240310 16:16:07:822 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408479417477, Iteration: 8, Total Score: 508.134
+240310 16:16:07:863 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408520862451, Iteration: 9, Total Score: 599.750
+240310 16:16:07:925 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408582235530, Iteration: 10, Total Score: 599.750
+240310 16:16:07:971 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408628276355, Iteration: 11, Total Score: 736.924
+240310 16:16:08:026 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408683536240, Iteration: 12, Total Score: 946.873
+240310 16:16:08:086 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408743120932, Iteration: 13, Total Score: 1116.838
+240310 16:16:08:162 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408819222091, Iteration: 14, Total Score: 1116.838
+240310 16:16:08:218 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408875498350, Iteration: 15, Total Score: 1116.838
+240310 16:16:08:296 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816408953663440, Iteration: 16, Total Score: 1116.838
+240310 16:16:08:357 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816409014227481, Iteration: 17, Total Score: 1116.838
+240310 16:16:08:433 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816409090225529, Iteration: 18, Total Score: 1116.838
+240310 16:16:08:498 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816409155185931, Iteration: 19, Total Score: 1116.838
+240310 16:16:08:531 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816409188252327, Iteration: 20, Total Score: 1116.838
+240310 16:16:09:424 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816410081797330, Iteration: 21, Total Score: 1116.838
+240310 16:16:09:493 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816410150369033, Iteration: 22, Total Score: 1116.838
+240310 16:16:09:553 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816410210067158, Iteration: 23, Total Score: 1116.838
+240310 16:16:09:607 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816410264932368, Iteration: 24, Total Score: 1116.838
+240310 16:16:09:664 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816410321039436, Iteration: 25, Total Score: 1116.838
+240310 16:16:09:740 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816410397607958, Iteration: 26, Total Score: 1116.838
+240310 16:16:09:799 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816410456726708, Iteration: 27, Total Score: 1116.838
+240310 16:16:09:874 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816410531205650, Iteration: 28, Total Score: 1116.838
+240310 16:16:09:930 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816410587307076, Iteration: 29, Total Score: 1116.838
+240310 16:16:09:987 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816410644536717, Iteration: 30, Total Score: 1116.838
+240310 16:16:10:060 [WARN] (AStarFootstepPlanner.java:253): [ASFP] Time: 816410717675242, Iteration: 31, Total Score: 1116.838

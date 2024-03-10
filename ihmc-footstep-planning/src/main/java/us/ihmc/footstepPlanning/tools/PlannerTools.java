@@ -14,14 +14,21 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlannerRequest;
+import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepNode;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlannerRequest;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -35,6 +42,7 @@ import java.util.List;
 
 public class PlannerTools
 {
+   private static final MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters = new MonteCarloFootstepPlannerParameters();
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    public static final double footLength = 0.2;
@@ -119,7 +127,7 @@ public class PlannerTools
       goalOrientation.changeFrame(worldFrame);
       YoFrameVector3D yoGoalOrientation = new YoFrameVector3D("GoalVector", worldFrame, registry);
       yoGoalOrientation.set(goalOrientation);
-//      graphicsListRegistry.registerYoGraphic("vizOrientation", new YoGraphicVector("GoalOrientationViz", yoGoal, yoGoalOrientation, 1.0, YoAppearance.White()));
+      //      graphicsListRegistry.registerYoGraphic("vizOrientation", new YoGraphicVector("GoalOrientationViz", yoGoal, yoGoalOrientation, 1.0, YoAppearance.White()));
    }
 
    public static boolean isGoalNextToLastStep(FramePose3D goalPose, FootstepPlan footstepPlan)
@@ -204,11 +212,7 @@ public class PlannerTools
                                                        FootstepPlannerParametersReadOnly parameters,
                                                        double horizonDistanceToCheck)
    {
-      BodyCollisionData collisionData = detectCollisionsAlongBodyPath(robotPose,
-                                                                      bodyPathWaypoints,
-                                                                      planarRegionsList,
-                                                                      parameters,
-                                                                      horizonDistanceToCheck);
+      BodyCollisionData collisionData = detectCollisionsAlongBodyPath(robotPose, bodyPathWaypoints, planarRegionsList, parameters, horizonDistanceToCheck);
       return collisionData != null && collisionData.isCollisionDetected();
    }
 
@@ -339,5 +343,31 @@ public class PlannerTools
       }
       planExecutionTime += finalTransferDuration;
       return planExecutionTime;
+   }
+
+   public static double computeTotalScore(FootstepPlannerRequest aStarRequest, List<FootstepGraphNode> nodes, TerrainMapData terrainMapData)
+   {
+      MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
+      request.setStartFootPose(RobotSide.LEFT, aStarRequest.getStartFootPoses().get(RobotSide.LEFT));
+      request.setStartFootPose(RobotSide.RIGHT, aStarRequest.getStartFootPoses().get(RobotSide.RIGHT));
+      request.setGoalFootPose(RobotSide.LEFT, aStarRequest.getGoalFootPoses().get(RobotSide.LEFT));
+      request.setGoalFootPose(RobotSide.RIGHT, aStarRequest.getGoalFootPoses().get(RobotSide.RIGHT));
+      request.setTerrainMapData(terrainMapData);
+
+      double totalScore = 0.0;
+
+      for (FootstepGraphNode node : nodes)
+      {
+         MonteCarloFootstepNode previousNode = new MonteCarloFootstepNode(new Point3D(node.getFirstStep().getX() * 50,
+                                                                                      node.getFirstStep().getY() * 50,
+                                                                                      node.getFirstStep().getYaw()), null, node.getFirstStepSide(), 0);
+         MonteCarloFootstepNode footstepNode = new MonteCarloFootstepNode(new Point3D(node.getSecondStep().getX() * 50,
+                                                                                      node.getSecondStep().getY() * 50,
+                                                                                      node.getSecondStep().getYaw()), null, node.getSecondStepSide(), 0);
+         double score = MonteCarloPlannerTools.scoreFootstepNode(previousNode, footstepNode, request, monteCarloFootstepPlannerParameters, false);
+         totalScore += score;
+      }
+
+      return totalScore;
    }
 }

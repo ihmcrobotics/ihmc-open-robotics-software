@@ -2,26 +2,44 @@ import numpy as np
 import re
 from matplotlib import pyplot as plt
 
-# Read the text file
-f = open("data/mcfp_console_1.txt", "r")
+
 
 # Initialize empty lists to store the extracted data
 data = []
 blocks = []
+block_size = 90
+planner = "ASFP"
+
 # Regular expression pattern to match the desired lines
-pattern = r"\d+ \d+:\d+:\d+:\d+ \[WARN\] \(TerrainPlanningDebugger\.java:\d+\): \[MCFP\] Time: (\d+), Iteration: (\d+), Total Score: (\d+\.\d+)"
+mcfp_pattern = r"\d+ \d+:\d+:\d+:\d+ \[WARN\] \(TerrainPlanningDebugger\.java:\d+\): \[MCFP\] Time: (\d+), Iteration: (\d+), Total Score: (\d+\.\d+)"
+asfp_pattern = r"\d+ \d+:\d+:\d+:\d+ \[WARN\] \(AStarFootstepPlanner\.java:\d+\): \[ASFP\] Time: (\d+), Iteration: (\d+), Total Score: (\d+\.\d+)"
+
+file_name = "data/asfp_console_1.txt"
+
+if planner == "MCFP":
+    pattern = mcfp_pattern
+    file_name = "data/mcfp_console_1.txt"
+    block_size = 90
+else:
+    pattern = asfp_pattern
+    file_name = "data/asfp_console_1.txt"
+    block_size = 20
+
+# Read the text file
+f = open(file_name, "r")
 
 # Iterate over each line in the file
 for line in f:
+
     # Match the pattern in the line
     match = re.match(pattern, line)
     if match:
 
-        # print(match.group(1), match.group(2), match.group(3))
+        print(match.group(1), match.group(2), match.group(3))
 
         # Extract the relevant data from the matched groups
         time = int(match.group(1))
-        iteration = int(match.group(2))
+        iteration = int(match.group(2)) - 1
         score = float(match.group(3))
 
         if iteration == 0:
@@ -53,7 +71,7 @@ for block in blocks:
 
     data_block = np.array(block)
 
-    if data_block.shape[0] < 90:
+    if data_block.shape[0] < block_size:
         continue
 
     block_array.append(data_block)
@@ -66,14 +84,13 @@ total_blocks = len(blocks)
 
 print("Total blocks: ", total_blocks)
 
-plot_size = 40
+plot_size = int(block_size)
 score_aggregate = np.zeros((plot_size,))
 
 for i in range(total_blocks):
-    start = (i)*90
-    end = (i)*90 + plot_size
+    start = (i)*block_size
+    end = (i)*block_size + plot_size
     plt.plot(block_array[start:end, 1], block_array[start:end, 2], label="Plan " + str(i))
-
 
     if block_array[start:end, 1].shape != score_aggregate.shape:
         print("Shapes not equal: ", block_array[start:end, 1].shape, score_aggregate.shape)
@@ -81,7 +98,6 @@ for i in range(total_blocks):
 
     print("Shapes: ", block_array[start:end, 1].shape, block_array[start:end, 2].shape, score_aggregate.shape)
     score_aggregate += block_array[start:end, 2]
-
 
 score_aggregate /= total_blocks
 plt.plot(block_array[:plot_size, 1], score_aggregate, label="Aggregate")

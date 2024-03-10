@@ -29,6 +29,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -245,6 +246,11 @@ public class AStarFootstepPlanner
          AStarIterationData<FootstepGraphNode> iterationData = iterationConductor.doPlanningIteration(nodeToExpand, performIterativeExpansion);
          recordIterationData(iterationData);
          iterationCallbacks.forEach(callback -> callback.accept(iterationData));
+
+         List<FootstepGraphNode> path = iterationConductor.getGraph().getPathFromStart(completionChecker.getEndNode());
+         double score = PlannerTools.computeTotalScore(request, path, request.getTerrainMapData());
+         long nanoTime = System.nanoTime();
+         LogTools.warn(String.format("[ASFP] Time: %d, Iteration: %d, Total Score: %.3f", nanoTime, iterations, score));
 
          FootstepGraphNode achievedGoalNode = completionChecker.checkIfGoalIsReached(iterationData);
          if (achievedGoalNode != null)

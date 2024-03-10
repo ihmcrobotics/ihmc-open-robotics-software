@@ -10,6 +10,7 @@ import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -99,6 +100,7 @@ public class FootstepPlannerRequest
     * Height map. May be null to enable flat ground mode.
     */
    private HeightMapData heightMapData;
+   private TerrainMapData terrianMapData;
 
    /**
     * If true, will ignore planar regions and plan on flat ground.
@@ -553,5 +555,15 @@ public class FootstepPlannerRequest
 
       builder.append("]\n");
       return builder.toString();
+   }
+
+   public void setTerrainMapData(TerrainMapData terrainMapData)
+   {
+      this.terrianMapData = terrainMapData;
+   }
+
+   public TerrainMapData getTerrainMapData()
+   {
+      return terrianMapData;
    }
 }
