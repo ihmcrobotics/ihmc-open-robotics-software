@@ -145,7 +145,6 @@ public class PerceptionAndAutonomyProcess
    private ROS2Heartbeat ousterHeartbeat;
    private ROS2Heartbeat leftBlackflyHeartbeat;
    private ROS2Heartbeat rightBlackflyHeartbeat;
-   private ROS2Heartbeat stereoBlackflyHeartbeat;
 
    public PerceptionAndAutonomyProcess(ROS2Helper ros2Helper,
                                        Supplier<ReferenceFrame> zedFrameSupplier,
@@ -288,8 +287,6 @@ public class PerceptionAndAutonomyProcess
          leftBlackflyHeartbeat.destroy();
       if (rightBlackflyHeartbeat != null)
          rightBlackflyHeartbeat.destroy();
-      if (stereoBlackflyHeartbeat != null)
-         stereoBlackflyHeartbeat.destroy();
 
       LogTools.info("Destroyed {}", getClass().getSimpleName());
    }
@@ -496,9 +493,6 @@ public class PerceptionAndAutonomyProcess
 
       rightBlackflyHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.RIGHT));
       rightBlackflyHeartbeat.setAlive(true);
-
-      stereoBlackflyHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_BLACKFLY_STEREO);
-      stereoBlackflyHeartbeat.setAlive(true);
    }
 
    public static void main(String[] args)
