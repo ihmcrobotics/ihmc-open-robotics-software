@@ -253,7 +253,7 @@ public class ROS2Tools
    public static ROS2QosProfile getSystemServiceStatusQosProfile()
    {
       ROS2QosProfile profile = new ROS2QosProfile();
-      profile.setReliability(ReliabilityQosKindType.BEST_EFFORT);
+      profile.setReliability(ReliabilityQosKindType.RELIABLE);
       return profile;
    }
 
@@ -367,7 +367,7 @@ public class ROS2Tools
                                                                              ROS2Topic<?> topicName,
                                                                              NewMessageListener<T> newMessageListener)
    {
-      return createCallbackSubscriptionTypeNamed(ros2Node, messageType, topicName, newMessageListener, ROS2QosProfile.BEST_EFFORT());
+      return createCallbackSubscriptionTypeNamed(ros2Node, messageType, topicName, newMessageListener, ROS2QosProfile.DEFAULT());
    }
 
    public static <T> ROS2Subscription<T> createCallbackSubscriptionTypeNamed(ROS2NodeInterface ros2Node,
@@ -376,12 +376,12 @@ public class ROS2Tools
                                                                              NewMessageListener<T> newMessageListener,
                                                                              ROS2QosProfile qosProfile)
    {
-      return createCallbackSubscription(ros2Node, typeNamedTopic(messageType).withTopic(topicName), newMessageListener, ROS2QosProfile.BEST_EFFORT());
+      return createCallbackSubscription(ros2Node, typeNamedTopic(messageType).withTopic(topicName), newMessageListener, qosProfile);
    }
 
    public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, NewMessageListener<T> newMessageListener)
    {
-      return createCallbackSubscription(ros2Node, topic, newMessageListener, ROS2QosProfile.BEST_EFFORT());
+      return createCallbackSubscription(ros2Node, topic, newMessageListener, ROS2QosProfile.DEFAULT());
    }
 
    public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
@@ -389,7 +389,7 @@ public class ROS2Tools
                                                                     NewMessageListener<T> newMessageListener,
                                                                     ROS2QosProfile qosProfile)
    {
-      return createCallbackSubscription(ros2Node, topic.getType(), topic.getName(), newMessageListener, ROS2QosProfile.BEST_EFFORT());
+      return createCallbackSubscription(ros2Node, topic.getType(), topic.getName(), newMessageListener, qosProfile);
    }
 
    public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
@@ -405,7 +405,7 @@ public class ROS2Tools
                                                                     String topicName,
                                                                     NewMessageListener<T> newMessageListener)
    {
-      return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, ROS2QosProfile.BEST_EFFORT());
+      return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, ROS2QosProfile.DEFAULT());
    }
 
    public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
@@ -414,7 +414,7 @@ public class ROS2Tools
                                                                     NewMessageListener<T> newMessageListener,
                                                                     ROS2QosProfile qosProfile)
    {
-      return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, ROS2QosProfile.BEST_EFFORT(), RUNTIME_EXCEPTION);
+      return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, qosProfile, RUNTIME_EXCEPTION);
    }
 
    public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
@@ -423,7 +423,7 @@ public class ROS2Tools
                                                                     NewMessageListener<T> newMessageListener,
                                                                     ExceptionHandler exceptionHandler)
    {
-      return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, ROS2QosProfile.BEST_EFFORT(), exceptionHandler);
+      return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, ROS2QosProfile.DEFAULT(), exceptionHandler);
    }
 
    public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
@@ -436,7 +436,7 @@ public class ROS2Tools
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return ros2Node.createSubscription(topicDataType, newMessageListener, topicName, ROS2QosProfile.BEST_EFFORT());
+         return ros2Node.createSubscription(topicDataType, newMessageListener, topicName, qosProfile);
       }
       catch (IOException e)
       {
@@ -463,7 +463,7 @@ public class ROS2Tools
                                                      ROS2QosProfile qosProfile,
                                                      NewMessageListener<T> newMessageListener)
    {
-      createCallbackSubscription(realtimeROS2Node, topic.getType(), topic.getName(), newMessageListener, ROS2QosProfile.BEST_EFFORT(), RUNTIME_EXCEPTION);
+      createCallbackSubscription(realtimeROS2Node, topic.getType(), topic.getName(), newMessageListener, qosProfile, RUNTIME_EXCEPTION);
    }
 
    public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node,
@@ -488,7 +488,7 @@ public class ROS2Tools
                                                      NewMessageListener<T> newMessageListener,
                                                      ExceptionHandler exceptionHandler)
    {
-      createCallbackSubscription(realtimeROS2Node, messageType, topicName, newMessageListener, ROS2QosProfile.BEST_EFFORT(), exceptionHandler);
+      createCallbackSubscription(realtimeROS2Node, messageType, topicName, newMessageListener, ROS2QosProfile.DEFAULT(), exceptionHandler);
    }
 
    public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node,
@@ -501,7 +501,7 @@ public class ROS2Tools
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         realtimeROS2Node.createSubscription(topicDataType, newMessageListener, topicName, ROS2QosProfile.BEST_EFFORT());
+         realtimeROS2Node.createSubscription(topicDataType, newMessageListener, topicName, qosProfile);
       }
       catch (IOException e)
       {
@@ -536,7 +536,7 @@ public class ROS2Tools
             {
                callback.accept(data);
             }
-         }, topic.getName(), ROS2QosProfile.BEST_EFFORT());
+         }, topic.getName(), ROS2QosProfile.DEFAULT());
       }
       catch (IOException e)
       {
@@ -558,7 +558,7 @@ public class ROS2Tools
                swapReference.swap();
                callback.set();
             }
-         }, topic.getName(), ROS2QosProfile.BEST_EFFORT());
+         }, topic.getName(), ROS2QosProfile.DEFAULT());
          return swapReference;
       }
       catch (IOException e)
@@ -597,7 +597,7 @@ public class ROS2Tools
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return realtimeROS2Node.createQueuedSubscription(topicDataType, topicName, ROS2QosProfile.BEST_EFFORT(), 10);
+         return realtimeROS2Node.createQueuedSubscription(topicDataType, topicName, ROS2QosProfile.DEFAULT(), 10);
       }
       catch (IOException e)
       {
@@ -628,7 +628,7 @@ public class ROS2Tools
 
    public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeROS2Node realtimeROS2Node, ROS2Topic<T> topic, ROS2QosProfile qosProfile)
    {
-      return createPublisher(realtimeROS2Node, topic.getType(), topic.getName(), ROS2QosProfile.BEST_EFFORT(), RUNTIME_EXCEPTION);
+      return createPublisher(realtimeROS2Node, topic.getType(), topic.getName(), qosProfile, RUNTIME_EXCEPTION);
    }
 
    public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeROS2Node realtimeROS2Node,
@@ -636,7 +636,7 @@ public class ROS2Tools
                                                                   String topicName,
                                                                   ExceptionHandler exceptionHandler)
    {
-      return createPublisher(realtimeROS2Node, messageType, topicName, ROS2QosProfile.BEST_EFFORT(), exceptionHandler);
+      return createPublisher(realtimeROS2Node, messageType, topicName, ROS2QosProfile.DEFAULT(), exceptionHandler);
    }
 
    public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeROS2Node realtimeROS2Node,
@@ -648,7 +648,7 @@ public class ROS2Tools
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return new IHMCRealtimeROS2Publisher<T>(realtimeROS2Node.createPublisher(topicDataType, topicName, ROS2QosProfile.BEST_EFFORT(), 10));
+         return new IHMCRealtimeROS2Publisher<T>(realtimeROS2Node.createPublisher(topicDataType, topicName, qosProfile, 10));
       }
       catch (IOException e)
       {
@@ -669,7 +669,7 @@ public class ROS2Tools
 
    public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, ROS2QosProfile qosProfile)
    {
-      return createPublisher(ros2Node, topic.getType(), topic.getName(), ROS2QosProfile.BEST_EFFORT(), RUNTIME_EXCEPTION);
+      return createPublisher(ros2Node, topic.getType(), topic.getName(), qosProfile, RUNTIME_EXCEPTION);
    }
 
    public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic<?> topicName)
@@ -684,7 +684,7 @@ public class ROS2Tools
 
    public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
    {
-      return createPublisher(ros2Node, messageType, topicName, ROS2QosProfile.BEST_EFFORT(), exceptionHandler);
+      return createPublisher(ros2Node, messageType, topicName, ROS2QosProfile.DEFAULT(), exceptionHandler);
    }
 
    public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node,
@@ -696,7 +696,7 @@ public class ROS2Tools
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return new IHMCROS2Publisher<T>(ros2Node.createPublisher(topicDataType, topicName, ROS2QosProfile.BEST_EFFORT()));
+         return new IHMCROS2Publisher<T>(ros2Node.createPublisher(topicDataType, topicName, qosProfile));
       }
       catch (IOException e)
       {
