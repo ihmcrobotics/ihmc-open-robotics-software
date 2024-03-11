@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalString;
+import us.ihmc.communication.crdt.CRDTUnidirectionalInteger;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -23,8 +23,9 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    public static final String EXECUTE_AFTER_PREVIOUS = "Previous";
    public static final String EXECUTE_AFTER_BEGINNING = "Beginning";
 
-   // TODO: Is every action concurrent-able?
-   private final CRDTUnidirectionalString executeAfterAction;
+   private CRDTUnidirectionalInteger distanceToExecuteAfter;
+   /** We use this to save the node name to file instead of the number for human readability. */
+   private String executeAfterNodeName = EXECUTE_AFTER_PREVIOUS;
 
    // On disk fields
    private String onDiskExecuteAfterAction;
@@ -37,14 +38,14 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super(crdtInfo, saveFileDirectory);
 
-      executeAfterAction = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, EXECUTE_AFTER_PREVIOUS);
+      distanceToExecuteAfter = new CRDTUnidirectionalInteger(ROS2ActorDesignation.OPERATOR, crdtInfo, 1); // Default to previous
    }
 
    public void saveToFile(ObjectNode jsonNode)
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("executeAfterAction", executeAfterAction.getValue());
+      jsonNode.put("executeAfterAction", distanceToExecuteAfter.getValue());
    }
 
    public void loadFromFile(JsonNode jsonNode)
@@ -54,10 +55,12 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
 //      if (jsonNode.get("executeWithNextAction") != null)
 //         executeWithNext = jsonNode.get("executeWithNextAction").asBoolean();
 //
-      if (jsonNode.get("executeAfterAction") != null)
+//      if (jsonNode.get("executeAfterAction") != null)
 //      {
 //         hasExecuterAfter = true;
-         executeAfterAction.setValue(jsonNode.get("executeAfterAction").textValue());
+         executeAfterNodeName = jsonNode.get("executeAfterAction").textValue();
+         distanceToExecuteAfter.setValue(0); // Invalidate until we can find it
+
 //      }
    }
 
@@ -66,7 +69,7 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.setOnDiskFields();
 
-      onDiskExecuteAfterAction = executeAfterAction.getValue();
+      onDiskExecuteAfterAction = executeAfterNodeName;
    }
 
    @Override
@@ -74,7 +77,8 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.undoAllNontopologicalChanges();
 
-      executeAfterAction.setValue(onDiskExecuteAfterAction);
+      executeAfterNodeName = onDiskExecuteAfterAction;
+      distanceToExecuteAfter.setValue(0); // Invalidate until we can find it
    }
 
    @Override
@@ -82,7 +86,7 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       boolean unchanged = !super.hasChanges();
 
-      unchanged &= executeAfterAction.getValue().equals(onDiskExecuteAfterAction);
+      unchanged &= executeAfterNodeName.equals(onDiskExecuteAfterAction);
 
       return !unchanged;
    }
@@ -91,33 +95,23 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
-      message.setExecuteAfterAction(executeAfterAction.toMessage());
+      message.setDistanceToExecuteAfter(distanceToExecuteAfter.toMessage());
    }
 
    public void fromMessage(ActionNodeDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 
-      executeAfterAction.fromMessage(message.getExecuteAfterActionAsString());
+      distanceToExecuteAfter.fromMessage(message.getDistanceToExecuteAfter());
    }
 
-   public void setExecuteAfterAction(String executeAfterAction)
+   public CRDTUnidirectionalInteger getDistanceToExecuteAfter()
    {
-      this.executeAfterAction.setValue(executeAfterAction);
+      return distanceToExecuteAfter;
    }
 
-   public String getExecuteAfterAction()
+   public void setExecuteAfterNodeName(String executeAfterNodeName)
    {
-      return executeAfterAction.getValue();
-   }
-
-   public boolean getExecuteAfterBeginning()
-   {
-      return executeAfterAction.getValue().equals(EXECUTE_AFTER_BEGINNING);
-   }
-
-   public boolean getExecuteAfterPrevious()
-   {
-      return executeAfterAction.getValue().equals(EXECUTE_AFTER_PREVIOUS);
+      this.executeAfterNodeName = executeAfterNodeName;
    }
 }

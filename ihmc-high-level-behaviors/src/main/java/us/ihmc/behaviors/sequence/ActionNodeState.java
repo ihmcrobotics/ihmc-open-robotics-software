@@ -32,7 +32,6 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 
    /** The index is not CRDT synced because it's a simple local calculation. */
    private int actionIndex = -1;
-   private ActionNodeState<?> executeAfterNode;
 
    public ActionNodeState(long id, D definition, CRDTInfo crdtInfo)
    {
@@ -217,25 +216,5 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    public boolean getIsExecuting()
    {
       return isExecuting.getValue();
-   }
-
-   public void setExecuteAfterNode(ActionNodeState<?> executeAfterNode)
-   {
-      this.executeAfterNode = executeAfterNode;
-   }
-
-   public boolean getEffectivelyExecuteAfterBeginning()
-   {
-      return getDefinition().getExecuteAfterBeginning() || (actionIndex == 0 && getDefinition().getExecuteAfterPrevious());
-   }
-
-   public ActionNodeState<?> getExecuteAfterNode()
-   {
-      return executeAfterNode;
-   }
-
-   public int getExecuteAfterNodeIndex()
-   {
-      return getDefinition().getExecuteAfterBeginning() ? 0 : getExecuteAfterNode().getActionIndex();
    }
 }
