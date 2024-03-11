@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.behavior.sequence;
 import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
@@ -51,26 +52,48 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       currentlyExecutingActions.clear();
       updateActionSubtree(this);
 
-      // This block updates the definition executeAfter string since only
-      // the operator side is allowed to change the definition
+      // This block updates the definition executeAfterActionName string for
+      // saving an up to date human readable name in the JSON.
+      // It also finds the correct node upon loading the name from JSON.
+      // We do it here because only the operator side is allowed to change the definition.
       for (int i = 0; i < state.getActionChildren().size(); i++)
       {
          ActionNodeState<?> actionState = state.getActionChildren().get(i);
+         ActionNodeDefinition actionDefinition = actionState.getDefinition();
 
          String executeAfterActionName = null;
-         long executeAfterID = actionState.getDefinition().getExecuteAfterNodeID().getValue();
-         if (executeAfterID > 0)
+
+         if (!actionDefinition.getExecuteAfterPrevious().getValue()
+          && !actionDefinition.getExecuteAfterBeginning().getValue())
          {
-            for (int j = i - 1; j >= 0; j--)
+            // We need to find the node by name
+            // This happens when we load from JSON
+            if (actionDefinition.getExecuteAfterNodeID().getValue() == 0)
             {
-               ActionNodeState<?> actionStateToCompare = state.getActionChildren().get(j);
-               if (actionStateToCompare.getID() == executeAfterID)
+               for (int j = i - 1; j >= 0; j--)
                {
-                  executeAfterActionName = actionStateToCompare.getDefinition().getName();
+                  ActionNodeState<?> actionStateToCompare = state.getActionChildren().get(j);
+                  if (actionStateToCompare.getDefinition().getName().equals(actionDefinition.getExecuteAfterActionName()))
+                  {
+                     executeAfterActionName = actionStateToCompare.getDefinition().getName();
+                  }
+               }
+            }
+            else // Update the node's name for saving in human readable format
+            {
+               long executeAfterID = actionDefinition.getExecuteAfterNodeID().getValue();
+               for (int j = i - 1; j >= 0; j--)
+               {
+                  ActionNodeState<?> actionStateToCompare = state.getActionChildren().get(j);
+                  if (actionStateToCompare.getID() == executeAfterID)
+                  {
+                     executeAfterActionName = actionStateToCompare.getDefinition().getName();
+                  }
                }
             }
          }
-         actionState.getDefinition().updateExecuteAfterActionName(executeAfterActionName);
+
+         actionDefinition.updateAndSanitizeExecuteAfterFields(executeAfterActionName);
       }
    }
 

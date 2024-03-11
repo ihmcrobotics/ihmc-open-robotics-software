@@ -136,20 +136,28 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
    }
 
    /** Needs to be updated every tick on the operator side only. */
-   public void updateExecuteAfterActionName(@Nullable String executeAfterActionName)
+   public void updateAndSanitizeExecuteAfterFields(@Nullable String executeAfterActionName)
    {
       if (executeAfterBeginning.getValue())
       {
          this.executeAfterActionName = EXECUTE_AFTER_BEGINNING;
+         executeAfterNodeID.setValue(0);
       }
       else if (executeAfterActionName != null)
       {
          this.executeAfterActionName = executeAfterActionName;
       }
-      else
+      else // Default to previous
       {
          executeAfterPrevious.setValue(true);
          this.executeAfterActionName = EXECUTE_AFTER_PREVIOUS;
+         executeAfterNodeID.setValue(0);
       }
+   }
+
+   /** Only used for finding the ID after loading */
+   public String getExecuteAfterActionName()
+   {
+      return executeAfterActionName;
    }
 }

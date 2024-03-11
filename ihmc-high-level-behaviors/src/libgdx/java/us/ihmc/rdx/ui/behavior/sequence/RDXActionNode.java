@@ -103,15 +103,13 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
          {
             definition.getExecuteAfterPrevious().setValue(true);
             definition.getExecuteAfterBeginning().setValue(false);
-            definition.getExecuteAfterNodeID().setValue(0);
-            definition.updateExecuteAfterActionName(null);
+            definition.updateAndSanitizeExecuteAfterFields(null);
          }
          if (ImGui.selectable(labels.get("Beginning"), definition.getExecuteAfterBeginning().getValue()))
          {
             definition.getExecuteAfterPrevious().setValue(false);
             definition.getExecuteAfterBeginning().setValue(true);
-            definition.getExecuteAfterNodeID().setValue(0);
-            definition.updateExecuteAfterActionName(null);
+            definition.updateAndSanitizeExecuteAfterFields(null);
          }
 
          if (actionSequence != null)
@@ -123,7 +121,7 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
                   definition.getExecuteAfterPrevious().setValue(false);
                   definition.getExecuteAfterBeginning().setValue(false);
                   definition.getExecuteAfterNodeID().setValue((int) actionChild.getID());
-                  definition.updateExecuteAfterActionName(actionChild.getDefinition().getName());
+                  definition.updateAndSanitizeExecuteAfterFields(actionChild.getDefinition().getName());
                }
             }
          }
