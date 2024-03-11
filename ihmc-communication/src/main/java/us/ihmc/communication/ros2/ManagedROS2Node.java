@@ -41,7 +41,7 @@ public class ManagedROS2Node implements ROS2NodeInterface
    @Override
    public <T> ROS2PublisherBasics<T> createPublisher(TopicDataType<T> topicDataType, String topicName) throws IOException
    {
-      return createManagedPublisher(ros2Node.createPublisher(topicDataType, topicName, ROS2QosProfile.BEST_EFFORT()));
+      return createManagedPublisher(ros2Node.createPublisher(topicDataType, topicName));
    }
 
    @Override
@@ -80,14 +80,14 @@ public class ManagedROS2Node implements ROS2NodeInterface
          throws IOException
    {
       throw new RuntimeException("This funtionality is so far unimplemented. Implement me!");
-//      return ros2Node.createQueuedSubscription(topicDataType, topicName, qosProfile, queueSize);
+      //      return ros2Node.createQueuedSubscription(topicDataType, topicName, qosProfile, queueSize);
    }
 
    @Override
    public <T> ROS2Subscription<T> createSubscription(TopicDataType<T> topicDataType, NewMessageListener<T> newMessageListener, String topicName)
          throws IOException
    {
-      return ros2Node.createSubscription(topicDataType, createManagedListener(newMessageListener), topicName, ROS2QosProfile.BEST_EFFORT());
+      return ros2Node.createSubscription(topicDataType, createManagedListener(newMessageListener), topicName);
    }
 
    @Override
