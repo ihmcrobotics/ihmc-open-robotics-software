@@ -1,38 +1,27 @@
 package us.ihmc.commonWalkingControlModules.parameterEstimation;
 
-import org.ejml.data.DMatrix;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.InertialParameterManagerFactory.EstimatorType;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
-import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParametersTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.math.YoMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class HumanoidModelCovarianceHelper
 {
    private final YoRegistry registry;
 
    private final int[] floatingBaseJointIndices;
-   private final SideDependentList<int[]> legJointIndices = new SideDependentList<>();
+   private final SideDependentList<int[]> legJointIndices;
    private final int[] spineJointIndices;
-   private final SideDependentList<int[]> armJointIndices = new SideDependentList<>();
-
-   private final YoDouble floatingBaseMeasurementCovariance;
+   private final SideDependentList<int[]> armJointIndices;
+   private final YoDouble[] floatingBaseMeasurementCovariance;
    private final SideDependentList<YoDouble> legMeasurementCovariances;
    private final YoDouble spineMeasurementCovariance;
    private final SideDependentList<YoDouble> armMeasurementCovariances;
-   private final YoMatrix measurementCovarianceDiagonal;
+   private final DMatrixRMaj measurementCovariance;
 
    HumanoidModelCovarianceHelper(FullHumanoidRobotModel model, InertialEstimationParameters parameters, YoRegistry parentRegistry)
    {
@@ -41,20 +30,57 @@ public class HumanoidModelCovarianceHelper
 
       floatingBaseJointIndices = parameters.getFloatingBaseJointIndices();
       spineJointIndices = parameters.getSpineJointIndices();
-      for (RobotSide side : RobotSide.values)
+      legJointIndices = parameters.getLegJointIndices();
+      armJointIndices = parameters.getArmJointIndices();
+
+      String prefix = "floatingBaseMeasurementCovariance";
+      String[] suffixes = new String[] {"wX", "wY", "wZ", "x", "y", "z"};
+      floatingBaseMeasurementCovariance = new YoDouble[model.getRootJoint().getDegreesOfFreedom()];
+      for (int i = 0; i < floatingBaseMeasurementCovariance.length; i++)
       {
-         legJointIndices.put(side, parameters.getLegJointIndices(side));
-         armJointIndices.put(side, parameters.getArmJointIndices(side));
+         floatingBaseMeasurementCovariance[i] = new YoDouble(prefix + "_" + suffixes[i], registry);
+         floatingBaseMeasurementCovariance[i].set(parameters.getFloatingBaseMeasurementCovariance());
+      }
+      spineMeasurementCovariance = new YoDouble("spineMeasurementCovariance", registry);
+      spineMeasurementCovariance.set(parameters.getSpineMeasurementCovariance());
+      legMeasurementCovariances = new SideDependentList<>();
+      armMeasurementCovariances = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         legMeasurementCovariances.put(robotSide, new YoDouble(robotSide.getCamelCaseNameForStartOfExpression() + "LegMeasurementCovariance", registry));
+         legMeasurementCovariances.get(robotSide).set(parameters.getLegMeasurementCovariance());
+         armMeasurementCovariances.put(robotSide, new YoDouble(robotSide.getCamelCaseNameForStartOfExpression() + "ArmMeasurementCovariance", registry));
+         armMeasurementCovariances.get(robotSide).set(parameters.getArmMeasurementCovariance());
       }
 
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(model.getRootJoint().subtreeArray());
-
-      // TODO: add name
-      measurementCovarianceDiagonal = new YoMatrix("measurementCovarianceDiagonal", nDoFs, 1, registry);
+      measurementCovariance = new DMatrixRMaj(nDoFs, nDoFs);
    }
 
-   public void set(int index, double value)
+   /**
+    * TODO: note this method will only modify the diagonals and will leave all other elements untouched, be careful about them
+    * @param
+    * @param
+    */
+   public DMatrixRMaj getMeasurementCovariance()
    {
-      measurementCovarianceDiagonal.set(covarianceDiagonal);
+      for (int floatingBaseJointIndex : floatingBaseJointIndices)
+         measurementCovariance.set(floatingBaseJointIndex, floatingBaseJointIndex, floatingBaseMeasurementCovariance[floatingBaseJointIndex].getValue());
+
+      for (int spineJointIndex : spineJointIndices)
+         measurementCovariance.set(spineJointIndex, spineJointIndex, spineMeasurementCovariance.getValue());
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         int[] legIndices = legJointIndices.get(robotSide);
+         for (int legJointIndex : legIndices)
+            measurementCovariance.set(legJointIndex, legJointIndex, legMeasurementCovariances.get(robotSide).getValue());
+
+         int[] armIndices = armJointIndices.get(robotSide);
+         for (int armJointIndex : armIndices)
+            measurementCovariance.set(armJointIndex, armJointIndex, armMeasurementCovariances.get(robotSide).getValue());
+      }
+
+      return measurementCovariance;
    }
 }

@@ -10,7 +10,6 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.parameterEstimation.ExtendedKalmanFilter;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoMatrix;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -254,6 +253,11 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
    public DMatrixRMaj getMeasurementCovariance()
    {
       return measurementCovariance;
+   }
+
+   public void setMeasurementCovariance(DMatrixRMaj measurementCovariance)
+   {
+      this.measurementCovariance.set(measurementCovariance);
    }
 
    private String[] getRowNames(FullRobotModel model)

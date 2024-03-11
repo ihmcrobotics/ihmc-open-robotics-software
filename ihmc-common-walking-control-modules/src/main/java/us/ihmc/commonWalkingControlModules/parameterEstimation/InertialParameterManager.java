@@ -32,7 +32,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -84,10 +83,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    /** We specify the process covariances for every parameter in a rigid body, then use the same for all bodies */
    private YoDouble[] processCovariancesForSingleBody;
-   private final YoDouble[] floatingBaseMeasurementCovariance;
-   private final YoDouble legsMeasurementCovariance;
-   private final YoDouble armsMeasurementCovariance;
-   private final YoDouble spineMeasurementCovariance;
 
    private final YoMatrix processCovariancePassedToFilter;
 
@@ -121,6 +116,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoDouble maxParameterDeltaRate;
 
    private final MultipleHumanoidModelHandler<Task> modelHandler;
+   private final HumanoidModelCovarianceHelper covarianceHelper;
    int nBodies;
 
    public InertialParameterManager(InertialParameterManagerFactory.EstimatorType type, HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
@@ -131,6 +127,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       enableFilter = new YoBoolean("enableFilter", registry);
       enableFilter.set(false);
+
 
       modelHandler = new MultipleHumanoidModelHandler<>(Task.class);
       FullHumanoidRobotModel actualRobotModel = toolbox.getFullRobotModel();
@@ -147,6 +144,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          FullHumanoidRobotModel clonedRobotModel = new FullHumanoidRobotModelWrapper(clonedElevator, false);
          modelHandler.addRobotModel(task, clonedRobotModel);
       }
+
+      covarianceHelper = new HumanoidModelCovarianceHelper(actualRobotModel, parameters, registry);
 
       yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(actualRobotModel.getRootBody(), registry);
       ellipsoidGraphicGroup = InertiaVisualizationTools.getInertiaEllipsoidGroup(yoInertiaEllipsoids);
@@ -183,7 +182,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       this.footSwitches = toolbox.getFootSwitches();
       contactWrenches = new SideDependentList<>();
-      jointIndexHandler = new JointIndexHandler(actualRobotModel.getElevator().subtreeJointStream().toArray(JointBasics[]::new));
+      jointIndexHandler = new JointIndexHandler(actualRobotModel.getRootJoint().subtreeArray());
       legJoints = new SideDependentList<>();
       compactContactJacobians = new SideDependentList<>();
       fullContactJacobians = new SideDependentList<>();
@@ -215,8 +214,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          else
          {
             int[] jointIndices = jointIndexHandler.getJointIndices(joint);
+            String[] rootJointNames = getNamesForRootJoint((SixDoFJointReadOnly) joint);
             for (int jointIndex : jointIndices)
-               jointAccelerations[jointIndex] = new FilteredVelocityYoVariable("jointAcceleration_" + getNameForRootJoint(jointIndex), "", defaultAccelerationCalculationAlpha, dt, registry);
+               jointAccelerations[jointIndex] = new FilteredVelocityYoVariable("jointAcceleration_" + rootJointNames[jointIndex], "", defaultAccelerationCalculationAlpha, dt, registry);
          }
       }
 
@@ -229,18 +229,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       // Process covariances are initialized here, but actually set later depending on the type of filter used
       // (and thus on the type of parameter -- which will require different covariances for different units)
       processCovariancesForSingleBody = new YoDouble[RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
-      floatingBaseMeasurementCovariance = new YoDouble[WRENCH_DIMENSION];
-      for (int i = 0; i < WRENCH_DIMENSION; ++i)
-      {
-          floatingBaseMeasurementCovariance[i] = new YoDouble("floatingBaseMeasurementCovariance_" + getNameForRootJoint(i), registry);
-            floatingBaseMeasurementCovariance[i].set(parameters.getFloatingBaseMeasurementCovariance());
-      }
-      legsMeasurementCovariance = new YoDouble("legsMeasurementCovariance", registry);
-      legsMeasurementCovariance.set(parameters.getLegMeasurementCovariance());
-      armsMeasurementCovariance = new YoDouble("armsMeasurementCovariance", registry);
-      armsMeasurementCovariance.set(parameters.getArmMeasurementCovariance());
-      spineMeasurementCovariance = new YoDouble("spineMeasurementCovariance", registry);
-      spineMeasurementCovariance.set(parameters.getSpineMeasurementCovariance());
 
       processCovariancePassedToFilter = new YoMatrix("processCovariancePassedToFilter", nParameters, nParameters, registry);
 
@@ -468,28 +456,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       processCovariancePassedToFilter.set(processCovariance);
 
-      // Set diagonal entries of measurement covariance according to the part of the body
-      // TODO: change
-      List<? extends JointBasics> actualModelJoints = modelHandler.getJointList(Task.ACTUAL);
-      for (int j = 0; j < actualModelJoints.size(); ++j)
-      {
-         JointReadOnly joint = actualModelJoints.get(j);
-         int[] indices = jointIndexHandler.getJointIndices(joint);
-
-         if (joint.getName().contains("PELVIS"))
-            for (int floatingBaseIndex : indices)
-            {
-               filter.getMeasurementCovariance().set(floatingBaseIndex, floatingBaseIndex, floatingBaseMeasurementCovariance[floatingBaseIndex].getValue());
-            }
-         else if (joint.getName().contains("HIP") || joint.getName().contains("KNEE") || joint.getName().contains("ANKLE"))
-            MatrixMissingTools.setSelectedMatrixDiagonals(indices, legsMeasurementCovariance.getValue(), filter.getMeasurementCovariance());
-         else if (joint.getName().contains("SHOULDER") || joint.getName().contains("ELBOW") || joint.getName().contains("WRIST"))
-            MatrixMissingTools.setSelectedMatrixDiagonals(indices, armsMeasurementCovariance.getValue(), filter.getMeasurementCovariance());
-         else if (joint.getName().contains("SPINE"))
-            MatrixMissingTools.setSelectedMatrixDiagonals(indices, spineMeasurementCovariance.getValue(), filter.getMeasurementCovariance());
-         else
-            LogTools.info("Joint " + joint.getName() + " not found for measurement covariance");
-      }
+      filter.setMeasurementCovariance(covarianceHelper.getMeasurementCovariance());
    }
 
    private void updateAccelerationCalculationFilterAlphas()
@@ -610,11 +577,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       {
          if (!basisSets[i].isEmpty())  // Only update the bodies we're estimating
          {
+            SpatialInertiaBasics actualBodyInertia = actualModelBodies[i].getInertia();
             SpatialInertiaReadOnly estimateBodyInertia = estimateModelBodies[i].getInertia();
             SpatialInertiaReadOnly tareBodyInertia = tareSpatialInertias[i];
             SpatialInertiaReadOnly urdfBodyInertia = urdfSpatialInertias[i];
-
-            SpatialInertiaBasics actualBodyInertia = actualModelBodies[i].getInertia();
 
             RigidBodyInertialParametersTools.calculateParameterDelta(estimateBodyInertia, tareBodyInertia, parameterDeltas[i]);
             for (RateLimitedYoVariable delta : rateLimitedParameterDeltas[i])
@@ -660,18 +626,15 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       return group;
    }
 
-   private String getNameForRootJoint(int i)
+   private String[] getNamesForRootJoint(SixDoFJointReadOnly rootJoint)
    {
-      return switch (i)
-      {
-         case 0 -> "wX";
-         case 1 -> "wY";
-         case 2 -> "wZ";
-         case 3 -> "x";
-         case 4 -> "y";
-         case 5 -> "z";
-         default -> throw new RuntimeException("Unhandled case: " + i);
-      };
+      List<String> jointNames = new ArrayList<>();
+      String name = rootJoint.getName();
+      String[] suffixes = new String[] {"wX", "wY", "wZ", "x", "y", "z"};
+      for (String suffix : suffixes)
+         jointNames.add(name + "_" + suffix);
+
+      return jointNames.toArray(new String[0]);
    }
 
    private String[] getRowNamesForJoints(int nDoFs)
@@ -683,8 +646,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       {
          if (joint.getDegreesOfFreedom() > 1)
          {
+            String[] rootJointNames = getNamesForRootJoint((SixDoFJointReadOnly) joint);
             for (int i = 0; i < joint.getDegreesOfFreedom(); i++)
-               rowNames[index + i] = joint.getName() + "_" + getNameForRootJoint(i);
+               rowNames[index + i] = joint.getName() + "_" + rootJointNames[i];
          }
          else
          {
