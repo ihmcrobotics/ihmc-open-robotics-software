@@ -188,8 +188,11 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
    private void unsubscribe()
    {
       subscribed = false;
-      realtimeROS2Node.destroy();
-      realtimeROS2Node = null;
+      if (realtimeROS2Node != null)
+      {
+         realtimeROS2Node.destroy();
+         realtimeROS2Node = null;
+      }
    }
 
    public boolean isSubscribed()
