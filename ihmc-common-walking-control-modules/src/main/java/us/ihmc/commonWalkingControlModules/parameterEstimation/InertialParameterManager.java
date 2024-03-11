@@ -78,13 +78,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private InertialKalmanFilter filter;
    private final YoMatrix estimate;
-
    private final AlphaFilteredYoMatrix filteredEstimate;
-
-   /** We specify the process covariances for every parameter in a rigid body, then use the same for all bodies */
-   private YoDouble[] processCovariancesForSingleBody;
-
-   private final YoMatrix processCovariancePassedToFilter;
 
    private final YoMatrix residual;
 
@@ -99,15 +93,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoDouble normalizedInnovation;
    private final YoDouble normalizedInnovationThreshold;
 
-   private double[] defaultProcessCovariances;  // keep track for resetting purposes
-
    private final YoBoolean passThroughEstimatesToController;
 
    private final YoBoolean tare;
    private final SpatialInertiaReadOnly[] urdfSpatialInertias;
    private final YoSpatialInertia[] tareSpatialInertias;
-
-   private final SpatialInertiaBasisOption[] processBasisOptions;
 
    private final YoBoolean areParametersPhysicallyConsistent;
 
@@ -123,7 +113,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    {
       parentRegistry.addChild(registry);
       this.parameters = inertialEstimationParameters;
-      basisSets = parameters.getParametersToEstimate();
+      basisSets = parameters.getBasisSets();
 
       enableFilter = new YoBoolean("enableFilter", registry);
       enableFilter.set(false);
@@ -226,12 +216,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       double defaultEstimateFilteringAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForEstimateFiltering(), dt);
       filteredEstimate = new AlphaFilteredYoMatrix("filtered_", defaultEstimateFilteringAlpha, nParameters, 1, getRowNamesForEstimates(basisSets, modelHandler.getBodyArray(Task.ESTIMATE)), null, registry);
 
-      // Process covariances are initialized here, but actually set later depending on the type of filter used
-      // (and thus on the type of parameter -- which will require different covariances for different units)
-      processCovariancesForSingleBody = new YoDouble[RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
-
-      processCovariancePassedToFilter = new YoMatrix("processCovariancePassedToFilter", nParameters, nParameters, registry);
-
       String[] rowNames = getRowNamesForJoints(nDoFs);
       residual = new YoMatrix("residual", nDoFs, 1, rowNames, registry);
 
@@ -265,20 +249,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          urdfSpatialInertias[i] = new SpatialInertia(estimateModelBodies[i].getInertia());
       }
 
-      processBasisOptions = new SpatialInertiaBasisOption[nParameters];
-      int index = 0;
-      for (Set<SpatialInertiaBasisOption> basisSet : basisSets)
-      {
-         for (SpatialInertiaBasisOption basisOption : SpatialInertiaBasisOption.values)
-         {
-            if (basisSet.contains(basisOption))
-            {
-               processBasisOptions[index] = basisOption;
-               index++;
-            }
-         }
-      }
-
       areParametersPhysicallyConsistent = new YoBoolean("areParametersPhysicallyConsistent", registry);
 
       maxParameterDeltaRate = new YoDouble("maxParameterDeltaRate", registry);
@@ -305,7 +275,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private void setFilter(InertialParameterManagerFactory.EstimatorType type)
    {
-      defaultProcessCovariances = parameters.getProcessModelCovarianceForBody();
       switch (type)
       {
          case KF ->
@@ -318,7 +287,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                               CommonOps_DDRM.identity(nParameters),
                                               CommonOps_DDRM.identity(nDoFs),
                                               registry);
-            createProcessCovariances(RigidBodyInertialParametersTools.getNamesForPiBasis(), defaultProcessCovariances);
             filter.setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
          }
          case PHYSICALLY_CONSISTENT_EKF ->
@@ -331,18 +299,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                                   CommonOps_DDRM.identity(nParameters),
                                                                   CommonOps_DDRM.identity(nDoFs),
                                                                   registry);
-            createProcessCovariances(RigidBodyInertialParametersTools.getNamesForThetaBasis(), defaultProcessCovariances);
             filter.setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
          }
-      }
-   }
-
-   private void createProcessCovariances(String[] names, double[] defaults)
-   {
-      for (int i = 0; i < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; ++i)
-      {
-         processCovariancesForSingleBody[i] = new YoDouble("processCovariance_" + names[i], registry);
-         processCovariancesForSingleBody[i].set(defaults[i]);
       }
    }
 
@@ -446,16 +404,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private void updateFilterCovariances()
    {
-      // Set diagonal of process covariance
-      DMatrixRMaj processCovariance = filter.getProcessCovariance();
-      for (int i = 0; i < processCovariance.getNumRows(); ++i)  // we'll set the diagonals
-      {
-         // Mod by the number of parameters per rigid body to cycle through the parameters
-         processCovariance.set(i, i, processCovariancesForSingleBody[processBasisOptions[i % RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY].ordinal()].getValue());
-      }
-
-      processCovariancePassedToFilter.set(processCovariance);
-
+      filter.setProcessCovariance(covarianceHelper.getProcessCovariance());
       filter.setMeasurementCovariance(covarianceHelper.getMeasurementCovariance());
    }
 

@@ -250,6 +250,11 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter
       return processCovariance;
    }
 
+   public void setProcessCovariance(DMatrixRMaj processCovariance)
+   {
+      this.processCovariance.set(processCovariance);
+   }
+
    public DMatrixRMaj getMeasurementCovariance()
    {
       return measurementCovariance;
