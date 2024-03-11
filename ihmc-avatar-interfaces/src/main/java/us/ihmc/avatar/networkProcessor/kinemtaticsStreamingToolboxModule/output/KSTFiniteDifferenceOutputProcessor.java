@@ -1,6 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTools;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.YoKinematicsToolboxOutputStatus;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -34,25 +33,25 @@ public class KSTFiniteDifferenceOutputProcessor implements KSTOutputProcessor
    }
 
    @Override
-   public void update(double time, boolean wasStreaming, boolean isStreaming, KinematicsToolboxOutputStatus latestOutput)
+   public void update(double time, boolean wasStreaming, boolean isStreaming, KSTOutputDataReadOnly latestOutput)
    {
       if (computeSignal.getValue())
       {
          double dt = time - previousTime.getDoubleValue();
          outputRobotState.set(latestOutput);
-         outputRobotState.setDesiredVelocitiesByFiniteDifference(previousRobotState.getStatus(), latestOutput, dt);
+         outputRobotState.setDesiredVelocitiesByFiniteDifference(previousRobotState, latestOutput, dt);
          previousTime.set(time);
          previousRobotState.set(latestOutput);
       }
       else
       {
-         outputRobotState.setConfigurationOnly(latestOutput);
+         outputRobotState.setConfiguration(latestOutput);
       }
    }
 
    @Override
-   public KinematicsToolboxOutputStatus getProcessedOutput()
+   public KSTOutputDataReadOnly getProcessedOutput()
    {
-      return outputRobotState.getStatus();
+      return outputRobotState;
    }
 }

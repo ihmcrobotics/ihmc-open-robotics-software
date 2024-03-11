@@ -1,10 +1,10 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import controller_msgs.msg.dds.JointspaceStreamingMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import ihmc_common_msgs.msg.dds.SE3StreamingMessage;
 import ihmc_common_msgs.msg.dds.SO3StreamingMessage;
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -31,6 +31,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.function.BiConsumer;
 
 public class KSTStreamingMessageFactory
 {
@@ -64,6 +66,12 @@ public class KSTStreamingMessageFactory
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          armJoints.put(robotSide, MultiBodySystemTools.createOneDoFJointPath(chest, hand));
       }
+   }
+
+   public void updateFullRobotModel(BiConsumer<FloatingJointBasics, OneDoFJointBasics[]> robotUpdater)
+   {
+      robotUpdater.accept(rootJoint, oneDoFJoints);
+      referenceFrames.updateFrames();
    }
 
    public void updateFullRobotModel(KinematicsToolboxOutputStatus solution)
