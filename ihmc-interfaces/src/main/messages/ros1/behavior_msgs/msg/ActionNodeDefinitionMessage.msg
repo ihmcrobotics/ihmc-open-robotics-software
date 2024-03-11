@@ -9,6 +9,6 @@ bool execute_after_previous
 bool execute_after_beginning
 
 # The ID of the node to execute after
-uint16 execute_after_node_id
+uint32 execute_after_node_id
 
 

@@ -23,7 +23,7 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
    /**
             * The ID of the node to execute after
             */
-   public int execute_after_node_id_;
+   public long execute_after_node_id_;
 
    public ActionNodeDefinitionMessage()
    {
@@ -89,14 +89,14 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
    /**
             * The ID of the node to execute after
             */
-   public void setExecuteAfterNodeId(int execute_after_node_id)
+   public void setExecuteAfterNodeId(long execute_after_node_id)
    {
       execute_after_node_id_ = execute_after_node_id;
    }
    /**
             * The ID of the node to execute after
             */
-   public int getExecuteAfterNodeId()
+   public long getExecuteAfterNodeId()
    {
       return execute_after_node_id_;
    }

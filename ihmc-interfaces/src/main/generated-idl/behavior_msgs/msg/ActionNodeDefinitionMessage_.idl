@@ -27,7 +27,7 @@ module behavior_msgs
         /**
          * The ID of the node to execute after
          */
-        unsigned short execute_after_node_id;
+        unsigned long execute_after_node_id;
       };
     };
   };
