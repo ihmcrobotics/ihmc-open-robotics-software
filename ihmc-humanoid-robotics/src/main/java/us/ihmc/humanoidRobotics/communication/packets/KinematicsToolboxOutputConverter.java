@@ -1,20 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.FootTrajectoryMessage;
-import controller_msgs.msg.dds.HandTrajectoryMessage;
-import controller_msgs.msg.dds.HeadTrajectoryMessage;
-import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
+import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.*;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryMessage;
-import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
-import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -43,6 +31,8 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.function.BiConsumer;
 
 public class KinematicsToolboxOutputConverter
 {
@@ -76,6 +66,12 @@ public class KinematicsToolboxOutputConverter
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          armJoints.put(robotSide, MultiBodySystemTools.createOneDoFJointPath(chest, hand));
       }
+   }
+
+   public void updateFullRobotModel(BiConsumer<FloatingJointBasics, OneDoFJointBasics[]> robotUpdater)
+   {
+      robotUpdater.accept(rootJoint, oneDoFJoints);
+      referenceFrames.updateFrames();
    }
 
    public void updateFullRobotModel(KinematicsToolboxOutputStatus solution)

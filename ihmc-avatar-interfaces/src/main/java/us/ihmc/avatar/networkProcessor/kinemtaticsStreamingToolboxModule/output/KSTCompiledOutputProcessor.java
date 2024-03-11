@@ -1,6 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTools;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.YoKinematicsToolboxOutputStatus;
@@ -47,7 +46,7 @@ public class KSTCompiledOutputProcessor implements KSTOutputProcessor
    }
 
    @Override
-   public void update(double time, boolean wasStreaming, boolean isStreaming, KinematicsToolboxOutputStatus latestOutput)
+   public void update(double time, boolean wasStreaming, boolean isStreaming, KSTOutputDataReadOnly latestOutput)
    {
       ikRobotState.set(latestOutput);
       outputProcessors.update(time, wasStreaming, isStreaming, latestOutput);
@@ -55,8 +54,8 @@ public class KSTCompiledOutputProcessor implements KSTOutputProcessor
    }
 
    @Override
-   public KinematicsToolboxOutputStatus getProcessedOutput()
+   public KSTOutputDataReadOnly getProcessedOutput()
    {
-      return outputRobotState.getStatus();
+      return outputRobotState;
    }
 }

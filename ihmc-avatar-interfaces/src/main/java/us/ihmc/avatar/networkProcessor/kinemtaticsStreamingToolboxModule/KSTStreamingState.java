@@ -8,6 +8,7 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.input.K
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.input.KSTInputFirstOrderStateEstimator;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.input.KSTInputStateEstimator;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output.KSTCompiledOutputProcessor;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output.KSTOutputDataReadOnly;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -128,6 +129,7 @@ public class KSTStreamingState implements State
    private final YoDouble defaultAngularWeight = new YoDouble("defaultAngularWeight", registry);
 
    private final YoDouble streamingBlendingDuration = new YoDouble("streamingBlendingDuration", registry);
+   private final KSTOutputDataReadOnly ikSolution;
    private final KSTCompiledOutputProcessor outputProcessor;
 
    private final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
@@ -215,6 +217,7 @@ public class KSTStreamingState implements State
 
       publishingPeriod.set(parameters.getPublishingPeriod());
 
+      ikSolution = KSTOutputDataReadOnly.wrap(ikController.getSolution());
       defaultLinearRateLimit.set(parameters.getDefaultLinearRateLimit());
       defaultAngularRateLimit.set(parameters.getDefaultAngularRateLimit());
       streamingBlendingDuration.set(parameters.getDefaultStreamingBlendingDuration());
@@ -587,7 +590,7 @@ public class KSTStreamingState implements State
          timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);
       }
 
-      outputProcessor.update(timeInState, wasStreaming.getValue(), isStreaming.getValue(), tools.getIKController().getSolution());
+      outputProcessor.update(timeInState, wasStreaming.getValue(), isStreaming.getValue(), ikSolution);
 
       if (isPublishing.getValue())
       {

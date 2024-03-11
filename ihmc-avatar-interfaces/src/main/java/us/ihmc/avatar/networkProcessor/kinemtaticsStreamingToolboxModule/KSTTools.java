@@ -5,16 +5,16 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyStreamingMessagePublisher;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyTrajectoryMessagePublisher;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output.KSTOutputDataBasics;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output.KSTOutputDataReadOnly;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
@@ -249,16 +249,9 @@ public class KSTTools
       return configurationCommand;
    }
 
-   public void getCurrentState(KinematicsToolboxOutputStatus currentStateToPack)
+   public void getCurrentState(KSTOutputDataBasics currentStateToPack)
    {
-      MessageTools.packDesiredJointState(currentStateToPack, currentFullRobotModel.getRootJoint(), currentOneDoFJoint);
-   }
-
-   public void getCurrentState(YoKinematicsToolboxOutputStatus currentStateToPack)
-   {
-      KinematicsToolboxOutputStatus status = currentStateToPack.getStatus();
-      MessageTools.packDesiredJointState(status, currentFullRobotModel.getRootJoint(), currentOneDoFJoint);
-      currentStateToPack.set(status);
+      currentStateToPack.setFromRobot(currentRootJoint, currentOneDoFJoint);
    }
 
    public void pollInputCommand()
@@ -333,7 +326,7 @@ public class KSTTools
       this.streamingMessagePublisher = streamingMessagePublisher;
    }
 
-   public void streamToController(KinematicsToolboxOutputStatus outputToPublish, boolean finalizeTrajectory)
+   public void streamToController(KSTOutputDataReadOnly outputToPublish, boolean finalizeTrajectory)
    {
       if (finalizeTrajectory)
          trajectoryMessagePublisher.publish(setupFinalizeTrajectoryMessage(outputToPublish));
@@ -343,10 +336,10 @@ public class KSTTools
          streamingMessagePublisher.publish(setupStreamingMessage(outputToPublish));
    }
 
-   public WholeBodyStreamingMessage setupStreamingMessage(KinematicsToolboxOutputStatus solutionToConvert)
+   public WholeBodyStreamingMessage setupStreamingMessage(KSTOutputDataReadOnly solutionToConvert)
    {
       HumanoidMessageTools.resetWholeBodyStreamingMessage(wholeBodyStreamingMessage);
-      streamingMessageFactory.updateFullRobotModel(solutionToConvert);
+      streamingMessageFactory.updateFullRobotModel(solutionToConvert::updateRobot);
       streamingMessageFactory.setMessageToCreate(wholeBodyStreamingMessage);
       streamingMessageFactory.setEnableVelocity(true);
 
@@ -374,10 +367,10 @@ public class KSTTools
       return wholeBodyStreamingMessage;
    }
 
-   public WholeBodyTrajectoryMessage setupTrajectoryMessage(KinematicsToolboxOutputStatus solutionToConvert)
+   public WholeBodyTrajectoryMessage setupTrajectoryMessage(KSTOutputDataReadOnly solutionToConvert)
    {
       HumanoidMessageTools.resetWholeBodyTrajectoryToolboxMessage(wholeBodyTrajectoryMessage);
-      trajectoryMessageFactory.updateFullRobotModel(solutionToConvert);
+      trajectoryMessageFactory.updateFullRobotModel(solutionToConvert::updateRobot);
       trajectoryMessageFactory.setMessageToCreate(wholeBodyTrajectoryMessage);
       trajectoryMessageFactory.setTrajectoryTime(0.0);
       trajectoryMessageFactory.setEnableVelocity(true);
@@ -406,10 +399,10 @@ public class KSTTools
       return wholeBodyTrajectoryMessage;
    }
 
-   public WholeBodyTrajectoryMessage setupFinalizeTrajectoryMessage(KinematicsToolboxOutputStatus solutionToConvert)
+   public WholeBodyTrajectoryMessage setupFinalizeTrajectoryMessage(KSTOutputDataReadOnly solutionToConvert)
    {
       HumanoidMessageTools.resetWholeBodyTrajectoryToolboxMessage(wholeBodyTrajectoryMessage);
-      trajectoryMessageFactory.updateFullRobotModel(solutionToConvert);
+      trajectoryMessageFactory.updateFullRobotModel(solutionToConvert::updateRobot);
       trajectoryMessageFactory.setMessageToCreate(wholeBodyTrajectoryMessage);
       trajectoryMessageFactory.setTrajectoryTime(0.5);
 
