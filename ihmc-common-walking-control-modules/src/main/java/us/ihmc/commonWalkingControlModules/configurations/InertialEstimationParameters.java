@@ -4,7 +4,6 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.InertialParameterManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.InertialParameterManagerFactory.EstimatorType;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
-import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParametersTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -28,6 +27,17 @@ public interface InertialEstimationParameters
    {
       return getTypeOfEstimatorToUse() == EstimatorType.PHYSICALLY_CONSISTENT_EKF ?
             RigidBodyInertialParametersTools.getNamesForThetaBasis() : RigidBodyInertialParametersTools.getNamesForPiBasis();
+   }
+
+   default int getNumberOfNonEmptyBasisSets()
+   {
+      int numberOfNonEmptyBasisSets = 0;
+      for (Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption> basisSet : getBasisSets())
+      {
+         if (!basisSet.isEmpty())
+            numberOfNonEmptyBasisSets++;
+      }
+      return numberOfNonEmptyBasisSets;
    }
 
    default int getNumberOfParameters()

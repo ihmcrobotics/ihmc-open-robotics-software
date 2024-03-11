@@ -16,8 +16,6 @@ import java.util.Set;
 
 public class HumanoidModelCovarianceHelper
 {
-   private final YoRegistry registry;
-
    private final Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets;
    private final YoDouble[] processCovariances;
    private final DMatrixRMaj processCovariance;
@@ -34,7 +32,7 @@ public class HumanoidModelCovarianceHelper
 
    HumanoidModelCovarianceHelper(FullHumanoidRobotModel model, InertialEstimationParameters parameters, YoRegistry parentRegistry)
    {
-      registry = new YoRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       basisSets = parameters.getBasisSets();
