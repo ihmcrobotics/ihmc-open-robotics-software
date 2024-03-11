@@ -1,10 +1,7 @@
 package us.ihmc.commonWalkingControlModules.parameterEstimation;
 
-import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.InertialParameterManagerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -54,7 +51,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final JointTorqueRegressorCalculator regressorCalculator;
 
    private final SideDependentList<? extends FootSwitchInterface> footSwitches;
-   private final SideDependentList<DMatrix> contactWrenches;
+   private final SideDependentList<DMatrixRMaj> contactWrenches;
    private final JointIndexHandler jointIndexHandler;
    private final SideDependentList<JointBasics[]> legJoints;
    private final SideDependentList<GeometricJacobian> compactContactJacobians;
@@ -70,7 +67,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final DMatrixRMaj[] regressorBlocks;
    private final DMatrixRMaj regressor;
 
-   private InertialKalmanFilter filter;
+   private OnlineInertialEstimator filter;
    private final YoMatrix estimate;
    private final AlphaFilteredYoMatrix filteredEstimate;
 
@@ -97,7 +94,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final HumanoidModelCovarianceHelper covarianceHelper;
    private final InertialBaselineCalculator baselineCalculator;
 
-   public InertialParameterManager(InertialParameterManagerFactory.EstimatorType type, HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
+   public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       this.parameters = inertialEstimationParameters;
@@ -110,11 +107,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       FullHumanoidRobotModel actualRobotModel = toolbox.getFullRobotModel();
       modelHandler.addRobotModel(Task.ACTUAL, actualRobotModel);
 
-      for (Task task : Task.values)
+      for (Task task : new Task[] {Task.ESTIMATE, Task.INVERSE_DYNAMICS, Task.REGRESSOR})
       {
-         if (task == Task.ACTUAL)
-            continue;
-
          RigidBodyBasics clonedElevator = MultiBodySystemFactories.cloneMultiBodySystem(actualRobotModel.getElevator(),
                                                                                        actualRobotModel.getModelStationaryFrame(),
                                                                                        "_" + task.name());
@@ -163,7 +157,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       // NOTE: for the leg joints and compact jacobians, we use the actual robot model because it has the full model information, including all joint names
       for (RobotSide side : RobotSide.values)
       {
-         contactWrenches.put(side, new YoMatrix("wrench" + side.getPascalCaseName(), WRENCH_DIMENSION, 1, null, null, registry));
+         contactWrenches.put(side, new DMatrixRMaj(WRENCH_DIMENSION, 1));
          legJoints.put(side, MultiBodySystemTools.createJointPath(actualRobotModel.getElevator(), actualRobotModel.getFoot(side)));
          compactContactJacobians.put(side, new GeometricJacobian(legJoints.get(side), footSwitches.get(side).getMeasurementFrame()));
          fullContactJacobians.put(side, new DMatrixRMaj(WRENCH_DIMENSION, nDoFs));
@@ -214,7 +208,11 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       normalizedInnovationThreshold.set(parameters.getNormalizedInnovationThreshold());
 
       // Construct the type of filter used based on enum value
-      setFilter(type);
+      switch (parameters.getTypeOfEstimatorToUse())
+      {
+         case KF -> filter = new InertialKalmanFilter(modelHandler.getRobotModel(Task.ESTIMATE), parameters, registry);
+         case PHYSICALLY_CONSISTENT_EKF -> filter = new InertialPhysicallyConsistentKalmanFilter(modelHandler.getRobotModel(Task.ESTIMATE), parameters, registry);
+      }
 
       passThroughEstimatesToController = new YoBoolean("passThroughEstimatesToController", registry);
       passThroughEstimatesToController.set(false);
@@ -230,37 +228,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       ACTUAL, ESTIMATE, INVERSE_DYNAMICS, REGRESSOR;
 
       public static final Task[] values = values();
-   }
-
-   private void setFilter(InertialParameterManagerFactory.EstimatorType type)
-   {
-      switch (type)
-      {
-         case KF ->
-         {
-            filter = new InertialKalmanFilter(modelHandler.getRobotModel(Task.ESTIMATE),
-                                              basisSets,
-                                              parameters,
-                                              parameters.getURDFParameters(basisSets),
-                                              CommonOps_DDRM.identity(nParameters),
-                                              CommonOps_DDRM.identity(nParameters),
-                                              CommonOps_DDRM.identity(nDoFs),
-                                              registry);
-            filter.setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
-         }
-         case PHYSICALLY_CONSISTENT_EKF ->
-         {
-            filter = new InertialPhysicallyConsistentKalmanFilter(modelHandler.getRobotModel(Task.ESTIMATE),
-                                                                  basisSets,
-                                                                  parameters,
-                                                                  parameters.getURDFParameters(basisSets),
-                                                                  CommonOps_DDRM.identity(nParameters),
-                                                                  CommonOps_DDRM.identity(nParameters),
-                                                                  CommonOps_DDRM.identity(nDoFs),
-                                                                  registry);
-            filter.setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
-         }
-      }
    }
 
    public void update()
@@ -317,17 +284,17 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          filter.setContactWrenches(contactWrenches);
 
          if (excludeBias.getValue())
-            filter.setBias(biasCompensator.getZero());
+            filter.setTorqueFromBias(biasCompensator.getZero());
          else
-            filter.setBias(biasCompensator.getBias());
+            filter.setTorqueFromBias(biasCompensator.getBias());
 
          filter.setNormalizedInnovationThreshold(normalizedInnovationThreshold.getValue());
 
          estimate.set(filter.calculateEstimate(wholeSystemTorques));
-         filter.getMeasurementResidual(residual);
+         residual.set(filter.getMeasurementResidual());
          filteredEstimate.setAndSolve(estimate);
 
-         normalizedInnovation.set(filter.calculateNormalizedInnovation());
+         normalizedInnovation.set(filter.getNormalizedInnovation());
 
          // Pack smoothed estimate back into estimate robot bodies
          RegressorTools.packRigidBodies(basisSets, filteredEstimate, modelHandler.getBodyArray(Task.ESTIMATE));

@@ -5,22 +5,26 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.SpatialInertiaBasisOption;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.parameterEstimation.ExtendedKalmanFilter;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParametersTools;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
+class InertialPhysicallyConsistentKalmanFilter extends ExtendedKalmanFilter implements OnlineInertialEstimator
 {
+   private static final int WRENCH_DIMENSION = 6;
+
    private final List<RigidBodyInertialParameters> inertialParameters = new ArrayList<>();
    private final List<YoMatrix> inertialParametersPiBasisWatchers = new ArrayList<>();
    private final List<YoMatrix> inertialParametersThetaBasisWatchers = new ArrayList<>();
@@ -36,23 +40,36 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
 
    private int nBodies;
 
-   public InertialPhysicallyConsistentKalmanFilter(FullRobotModel model,
-                                                   Set<SpatialInertiaBasisOption>[] basisSets,
-                                                   InertialEstimationParameters parameters,
-                                                   DMatrixRMaj initialParametersForEstimate,
-                                                   DMatrixRMaj initialParameterCovariance,
-                                                   DMatrixRMaj processCovariance,
-                                                   DMatrixRMaj measurementCovariance,
-                                                   YoRegistry parentRegistry)
+   private final DMatrixRMaj torqueFromNominal;
+
+   private final DMatrixRMaj torqueFromContactWrenches;
+
+   private final DMatrixRMaj torqueFromBias;
+
+   private final DMatrixRMaj regressor;
+
+   private final DMatrixRMaj measurementJacobian;
+
+   private final DMatrixRMaj identity;
+
+   private final DMatrixRMaj measurement;
+
+   private final SideDependentList<DMatrixRMaj> contactJacobians = new SideDependentList<>();
+
+   private final SideDependentList<DMatrixRMaj> contactWrenches = new SideDependentList<>();
+
+   public InertialPhysicallyConsistentKalmanFilter(FullRobotModel model, InertialEstimationParameters parameters, YoRegistry parentRegistry)
    {
-      super(model,
-            basisSets,
-            parameters,
-            initialParametersForEstimate,
-            initialParameterCovariance,
-            processCovariance,
-            measurementCovariance,
-            parentRegistry);
+      super(parameters.getURDFParameters(parameters.getBasisSets()),
+            CommonOps_DDRM.identity(parameters.getNumberOfParameters()),
+            CommonOps_DDRM.identity(parameters.getNumberOfParameters()),
+            CommonOps_DDRM.identity(MultiBodySystemTools.computeDegreesOfFreedom(model.getRootJoint().subtreeArray())));
+
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+      parentRegistry.addChild(registry);
+
+      Set<SpatialInertiaBasisOption>[] basisSets = parameters.getBasisSets();
+
 
       nBodies = 0;
       RigidBodyReadOnly[] modelBodies = model.getRootBody().subtreeArray();
@@ -74,6 +91,23 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
          }
       }
 
+      int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(model.getRootJoint().subtreeArray());
+      int[] partitionSizes = RegressorTools.sizePartitions(basisSets);
+
+      for (RobotSide side : RobotSide.values)
+      {
+         contactJacobians.put(side, new DMatrixRMaj(WRENCH_DIMENSION, nDoFs));
+         contactWrenches.put(side, new DMatrixRMaj(WRENCH_DIMENSION, 1));
+      }
+
+      torqueFromNominal = new DMatrixRMaj(nDoFs, 1);
+      torqueFromContactWrenches = new DMatrixRMaj(nDoFs, 1);
+      torqueFromBias = new DMatrixRMaj(nDoFs, 1);
+      regressor = new DMatrixRMaj(nDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+      measurementJacobian = new DMatrixRMaj(nDoFs, RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
+      identity = CommonOps_DDRM.identity(partitionSizes[0]);
+      measurement = new DMatrixRMaj(nDoFs, 1);
+
       measurementJacobianBlock = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
                                                  RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
       measurementJacobianContainer = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY * nBodies,
@@ -84,83 +118,57 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
 
       parameterThetaBasisContainer = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1);
       kalmanGainBlockContainer = new DMatrixRMaj(RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, measurementCovariance.getNumRows());
+
+      setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
    }
 
    @Override
-   protected void updateStep(DMatrix actual)
+   public void preUpdateHook()
    {
-      calculateMeasurementResidual(actual);
 
-      measurementJacobian.set(linearizeMeasurementModel(predictedState));  // NOTE: measurement model linearization occurs at x_(k|k-1)
-
-      calculateResidualCovarianceAndInverse();
-
-      calculateKalmanGain();
-
-      gateMeasurementWithNormalizationThreshold();
    }
 
    @Override
-   public void gateMeasurementWithNormalizationThreshold()
+   public void updateStep()
    {
-      if (calculateNormalizedInnovation() > normalizedInnovationThreshold)
+      // Here, we deviate from the supeclass and add the Kalman gain on bodywise, because we only have access to the Jacobian of the measurement model
+      // in that way
+      for (int i = 0; i < nBodies; ++i)
       {
-         // If the normalized innovation is too large, the measurement is likely an outlier. Do not update the state.
-         updatedState.set(predictedState);
-         updatedCovariance.set(predictedCovariance);
+         // For each body, get the Kalman gain block corresponding to it, and update the theta basis parameter vector with the residual
+         MatrixMissingTools.setMatrixBlock(kalmanGainBlockContainer,
+                                           0,
+                                           0,
+                                           kalmanGain,
+                                           i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                           0,
+                                           RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                           measurementCovariance.getNumRows(),
+                                           1.0);
+         parameterThetaBasisContainer.set(inertialParameters.get(i).getParameterVectorThetaBasis());
+         CommonOps_DDRM.multAdd(kalmanGainBlockContainer, getMeasurementResidual(), parameterThetaBasisContainer);
+
+         // Update inertial parameters
+         inertialParameters.get(i).setParameterVectorThetaBasis(parameterThetaBasisContainer);
+         inertialParameters.get(i).update();
+
+         // Pack updated pi basis into state for the next iteration
+         MatrixMissingTools.setMatrixRows(updatedState,
+                                          i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
+                                          inertialParameters.get(i).getParameterVectorPiBasis(),
+                                          0,
+                                          RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
       }
-      else
-      {
-         // Here, we deviate from the supeclass and add the Kalman gain on bodywise, because we only have access to the Jacobian of the measurement model
-         // in that way
-         for (int i = 0; i < nBodies; ++i)
-         {
-            // For each body, get the Kalman gain block corresponding to it, and update the theta basis parameter vector with the residual
-            MatrixMissingTools.setMatrixBlock(kalmanGainBlockContainer,
-                                              0,
-                                              0,
-                                              kalmanGain,
-                                              i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
-                                              0,
-                                              RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
-                                              measurementCovariance.getNumRows(),
-                                              1.0);
-            parameterThetaBasisContainer.set(inertialParameters.get(i).getParameterVectorThetaBasis());
-            CommonOps_DDRM.multAdd(kalmanGainBlockContainer, measurementResidual, parameterThetaBasisContainer);
+      calculateUpdatedCovariance();
 
-            // Update inertial parameters
-            inertialParameters.get(i).setParameterVectorThetaBasis(parameterThetaBasisContainer);
-            inertialParameters.get(i).update();
-
-            // Pack updated pi basis into state for the next iteration
-            MatrixMissingTools.setMatrixRows(updatedState,
-                                             i * RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
-                                             inertialParameters.get(i).getParameterVectorPiBasis(),
-                                             0,
-                                             RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY);
-
-         }
-         // Pack the individual contributions of the update step: K * y for visualisation
-         for (int i = 0; i < kalmanGainContributions.length; i++)
-         {
-            CommonOps_DDRM.extractRow(kalmanGain, i, kalmanGainContributionContainer);
-            CommonOps_DDRM.elementMult(kalmanGainContributionContainer, measurementResidual);
-            kalmanGainContributions[i].set(kalmanGainContributionContainer);
-         }
-      }
+      state.set(updatedState);
+      covariance.set(updatedCovariance);
    }
 
    @Override
-   public DMatrixRMaj calculateEstimate(DMatrix wholeSystemTorques)
+   protected DMatrixRMaj linearizeProcessModel(DMatrixRMaj previousState)
    {
-      filterTorques(wholeSystemTorques);
-      predictionStep();
-      updateStep(doubleFilteredWholeSystemTorques);
-      cleanupStep();
-
-      updateWatchers();
-
-      return updatedState;
+      return identity;
    }
 
    @Override
@@ -176,7 +184,7 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
          MatrixMissingTools.setMatrixBlock(regressorBlock,
                                            0,
                                            0,
-                                           regressorForEstimates,
+                                           regressor,
                                            0,
                                            i * regressorBlock.getNumCols(),
                                            regressorBlock.getNumRows(),
@@ -197,18 +205,6 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
 
       // Torque from bias
       CommonOps_DDRM.addEquals(measurement, torqueFromBias);
-
-      filter(measurement, filteredMeasurement);
-      filter(filteredMeasurement, doubleFilteredMeasurement);
-      measurement.set(doubleFilteredMeasurement);
-
-      if (MORE_YOVARIABLES)
-      {
-         yoTorqueFromNominal.set(torqueFromNominal);
-         yoTorqueFromEstimates.set(torqueFromEstimates);
-         yoTorqueFromContactWrenches.set(torqueFromContactWrenches);
-         yoTorqueFromBias.set(torqueFromBias);
-      }
 
       return measurement;
    }
@@ -232,8 +228,64 @@ class InertialPhysicallyConsistentKalmanFilter extends InertialKalmanFilter
       }
 
       // Jacobian is Y * G(theta)
-      CommonOps_DDRM.mult(regressorForEstimates, measurementJacobianContainer, measurementJacobian);
+      CommonOps_DDRM.mult(regressor, measurementJacobianContainer, measurementJacobian);
       return measurementJacobian;
+   }
+
+   @Override
+   protected DMatrixRMaj processModel(DMatrixRMaj state)
+   {
+      return state;
+   }
+
+   @Override
+   public void setRegressor(DMatrix regressor)
+   {
+      this.regressor.set(regressor);
+   }
+
+   @Override
+   public void setTorqueFromNominal(DMatrix torqueFromNominal)
+   {
+      this.torqueFromNominal.set(torqueFromNominal);
+   }
+
+   @Override
+   public void setTorqueFromBias(DMatrix torqueFromBias)
+   {
+      this.torqueFromBias.set(torqueFromBias);
+   }
+
+   @Override
+   public void setContactJacobians(SideDependentList<DMatrixRMaj> jacobians)
+   {
+      for (RobotSide side : RobotSide.values)
+         contactJacobians.get(side).set(jacobians.get(side));
+   }
+
+   @Override
+   public void setContactWrenches(SideDependentList<DMatrixRMaj> wrenches)
+   {
+      for (RobotSide side : RobotSide.values)
+         contactWrenches.get(side).set(wrenches.get(side));
+   }
+
+   @Override
+   public void setProcessCovariance(DMatrix processCovariance)
+   {
+      this.processCovariance.set(processCovariance);
+   }
+
+   @Override
+   public void setMeasurementCovariance(DMatrix measurementCovariance)
+   {
+      this.measurementCovariance.set(measurementCovariance);
+   }
+
+   @Override
+   public double getNormalizedInnovation()
+   {
+      return calculateNormalizedInnovation();
    }
 
    private void updateWatchers()

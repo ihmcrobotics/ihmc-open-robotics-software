@@ -8,16 +8,14 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class InertialParameterManagerFactory
 {
    private final YoRegistry registry;
+   private final InertialEstimationParameters parameters;
    private HighLevelHumanoidControllerToolbox toolbox;
-   private InertialEstimationParameters parameters;
-   private EstimatorType type;
 
-   InertialParameterManagerFactory(YoRegistry registry)
+   InertialParameterManagerFactory(InertialEstimationParameters parameters, YoRegistry registry)
    {
       this.registry =  registry;
+      this.parameters = parameters;
       this.toolbox = null;
-      this.parameters = null;
-      this.type = null;
    }
 
    public void setControllerToolbox(HighLevelHumanoidControllerToolbox controllerToolbox)
@@ -25,19 +23,9 @@ public class InertialParameterManagerFactory
       this.toolbox = controllerToolbox;
    }
 
-   public void setInertialParameterManagerProperties(InertialEstimationParameters properties)
-   {
-      this.parameters = properties;
-      this.type = properties.getTypeOfEstimatorToUse();
-   }
 
    public InertialParameterManager createInertialParameterManager()
    {
-      return new InertialParameterManager(type, toolbox, parameters, registry);
-   }
-
-   public enum EstimatorType
-   {
-      KF, PHYSICALLY_CONSISTENT_EKF
+      return new InertialParameterManager(toolbox, parameters, registry);
    }
 }

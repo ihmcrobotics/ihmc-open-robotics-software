@@ -188,8 +188,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public void createInertialParameterManager(InertialEstimationParameters parameters)
    {
-      inertialParameterManagerFactory = new InertialParameterManagerFactory(registry);
-      inertialParameterManagerFactory.setInertialParameterManagerProperties(parameters);
+      inertialParameterManagerFactory = new InertialParameterManagerFactory(parameters, registry);
    }
 
    private ComponentBasedFootstepDataMessageGeneratorFactory componentBasedFootstepDataMessageGeneratorFactory;
