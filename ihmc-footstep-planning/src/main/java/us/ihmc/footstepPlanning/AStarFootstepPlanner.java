@@ -214,8 +214,15 @@ public class AStarFootstepPlanner
          referenceBasedIdealStepCalculator.setReferenceFootstepPlan(request.getReferencePlan());
       }
 
+      long nanoTime = System.nanoTime();
+      LogTools.warn(String.format("[ASFP] Time: %d, Iteration: %d, Total Score: %.3f", nanoTime, 0, 0.0f));
       while (true)
       {
+         List<FootstepGraphNode> path = iterationConductor.getGraph().getPathFromStart(completionChecker.getEndNode());
+         double score = PlannerTools.computeTotalScore(request, path, request.getTerrainMapData());
+         nanoTime = System.nanoTime();
+         LogTools.warn(String.format("[ASFP] Time: %d, Iteration: %d, Total Score: %.3f", nanoTime, iterations + 1, score));
+
          iterations++;
          outputToPack.getPlannerTimings().setStepPlanningIterations(iterations);
 
@@ -247,10 +254,7 @@ public class AStarFootstepPlanner
          recordIterationData(iterationData);
          iterationCallbacks.forEach(callback -> callback.accept(iterationData));
 
-         List<FootstepGraphNode> path = iterationConductor.getGraph().getPathFromStart(completionChecker.getEndNode());
-         double score = PlannerTools.computeTotalScore(request, path, request.getTerrainMapData());
-         long nanoTime = System.nanoTime();
-         LogTools.warn(String.format("[ASFP] Time: %d, Iteration: %d, Total Score: %.3f", nanoTime, iterations, score));
+
 
          FootstepGraphNode achievedGoalNode = completionChecker.checkIfGoalIsReached(iterationData);
          if (achievedGoalNode != null)
