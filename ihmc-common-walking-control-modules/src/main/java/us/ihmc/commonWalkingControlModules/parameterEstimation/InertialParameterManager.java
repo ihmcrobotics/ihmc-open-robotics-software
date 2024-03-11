@@ -12,13 +12,9 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
-import us.ihmc.mecano.spatial.SpatialInertia;
-import us.ihmc.mecano.spatial.interfaces.SpatialInertiaBasics;
-import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.mecano.yoVariables.spatial.YoSpatialInertia;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParameters;
 import us.ihmc.parameterEstimation.inertial.RigidBodyInertialParametersTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -94,17 +90,12 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoBoolean passThroughEstimatesToController;
 
    private final YoBoolean tare;
-   private final SpatialInertiaReadOnly[] urdfSpatialInertias;
-   private final YoSpatialInertia[] tareSpatialInertias;
 
    private final YoBoolean areParametersPhysicallyConsistent;
 
-   private final YoMatrix[] parameterDeltas;
-   private final RateLimitedYoVariable[][] rateLimitedParameterDeltas;
-   private final YoDouble maxParameterDeltaRate;
-
    private final MultipleHumanoidModelHandler<Task> modelHandler;
    private final HumanoidModelCovarianceHelper covarianceHelper;
+   private final InertialBaselineCalculator baselineCalculator;
 
    public InertialParameterManager(InertialParameterManagerFactory.EstimatorType type, HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
    {
@@ -132,6 +123,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       }
 
       covarianceHelper = new HumanoidModelCovarianceHelper(actualRobotModel, parameters, registry);
+      baselineCalculator = new InertialBaselineCalculator(modelHandler.getRobotModel(Task.ESTIMATE), parameters, 1.0, registry);
 
       yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(actualRobotModel.getRootBody(), registry);
       ellipsoidGraphicGroup = InertiaVisualizationTools.getInertiaEllipsoidGroup(yoInertiaEllipsoids);
@@ -180,7 +172,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       wholeSystemTorques = new DMatrixRMaj(nDoFs, 1);
 
       double dt = toolbox.getControlDT();
-
       double defaultAccelerationCalculationAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForAccelerationCalculation(), dt);
       accelerationCalculationAlpha = new YoDouble("accelerationCalculationAlpha", registry);
       accelerationCalculationAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForAccelerationCalculation(), dt));
@@ -230,30 +221,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       tare = new YoBoolean("tare", registry);
       tare.set(false);
-      tareSpatialInertias = new YoSpatialInertia[nBodies];
-      urdfSpatialInertias = new SpatialInertiaBasics[nBodies];
-      RigidBodyBasics[] estimateModelBodies = modelHandler.getBodyArray(Task.ESTIMATE);
-      for (int i = 0; i < nBodies; i++)
-      {
-         tareSpatialInertias[i] = new YoSpatialInertia(estimateModelBodies[i].getInertia(), "_tare", registry);
-         urdfSpatialInertias[i] = new SpatialInertia(estimateModelBodies[i].getInertia());
-      }
 
       areParametersPhysicallyConsistent = new YoBoolean("areParametersPhysicallyConsistent", registry);
-
-      maxParameterDeltaRate = new YoDouble("maxParameterDeltaRate", registry);
-      maxParameterDeltaRate.set(3.0);  // TODO: make parameter
-      parameterDeltas = new YoMatrix[estimateModelBodies.length];
-      rateLimitedParameterDeltas = new RateLimitedYoVariable[estimateModelBodies.length][RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
-      for (int i = 0; i < estimateModelBodies.length; i++)
-      {
-         parameterDeltas[i] = new YoMatrix("parameterDelta_" + estimateModelBodies[i].getName(), RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY, 1, RigidBodyInertialParametersTools.getNamesForPiBasis(), registry);
-         for (int j = 0; j < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; j++)
-         {
-            rateLimitedParameterDeltas[i][j] = new RateLimitedYoVariable("rateLimitedParameterDelta_" + estimateModelBodies[i].getName() + "_" + RigidBodyInertialParametersTools.getNamesForPiBasis()[j], registry, maxParameterDeltaRate, parameterDeltas[i].getYoDouble(j, 0), dt);
-            rateLimitedParameterDeltas[i][j].update();
-         }
-      }
    }
 
    private enum Task
@@ -400,8 +369,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private void updateAccelerationCalculationFilterAlphas()
    {
-      for (int i = 0; i < jointAccelerations.length; i++)
-         jointAccelerations[i].setAlpha(accelerationCalculationAlpha.getValue());
+      for (FilteredVelocityYoVariable jointAcceleration : jointAccelerations)
+         jointAcceleration.setAlpha(accelerationCalculationAlpha.getValue());
    }
 
    private void updateModelJointStates()
@@ -483,33 +452,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private void updateActualRobotModel()
    {
-      RigidBodyBasics[] actualModelBodies = modelHandler.getBodyArray(Task.ACTUAL);
-      RigidBodyBasics[] estimateModelBodies = modelHandler.getBodyArray(Task.ESTIMATE);
-      for (int i = 0; i < nBodies; i++)
-      {
-         if (basisSets[i].isEmpty())  // Only update the bodies we're estimating
-            continue;
-
-         SpatialInertiaBasics actualBodyInertia = actualModelBodies[i].getInertia();
-         SpatialInertiaReadOnly estimateBodyInertia = estimateModelBodies[i].getInertia();
-         SpatialInertiaReadOnly tareBodyInertia = tareSpatialInertias[i];
-         SpatialInertiaReadOnly urdfBodyInertia = urdfSpatialInertias[i];
-
-         RigidBodyInertialParametersTools.calculateParameterDelta(estimateBodyInertia, tareBodyInertia, parameterDeltas[i]);
-         for (RateLimitedYoVariable delta : rateLimitedParameterDeltas[i])
-            delta.update();
-
-         // Add the deltas from the tare value to the urdf value -- these are what we send to the controller
-         RigidBodyInertialParametersTools.addParameterDelta(urdfBodyInertia, parameterDeltas[i], actualBodyInertia);
-      }
+      baselineCalculator.calculateRateLimitedParameterDeltas(modelHandler.getBodyArray(Task.ESTIMATE));
+      baselineCalculator.addRateLimitedParameterDeltas(modelHandler.getBodyArray(Task.ACTUAL));
    }
 
    private void updateTareSpatialInertias()
    {
-      RigidBodyBasics[] estimateModelBodies = modelHandler.getBodyArray(Task.ESTIMATE);
-      for (int i = 0; i < nBodies; i++)
-         if (!basisSets[i].isEmpty())  // Only tare the bodies we're estimating
-            tareSpatialInertias[i].set(estimateModelBodies[i].getInertia());
+      baselineCalculator.updateTareSpatialInertias(modelHandler.getBodyArray(Task.ESTIMATE));
    }
 
    private void updateVisuals()

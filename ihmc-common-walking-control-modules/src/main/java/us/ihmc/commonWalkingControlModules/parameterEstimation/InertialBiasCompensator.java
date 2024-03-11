@@ -36,7 +36,7 @@ public class InertialBiasCompensator
 
    public InertialBiasCompensator(int nDoFs, int windowSize, String[] rowNames, YoRegistry parentRegistry)
    {
-      YoRegistry registry = new YoRegistry("InertialBiasCompensator");
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       counter = 0;

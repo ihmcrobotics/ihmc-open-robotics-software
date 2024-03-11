@@ -67,4 +67,6 @@ public interface InertialEstimationParameters
    double getSpineMeasurementCovariance();
 
    double getNormalizedInnovationThreshold();
+
+   double[] getMaxParameterDeltaRates();
 }
