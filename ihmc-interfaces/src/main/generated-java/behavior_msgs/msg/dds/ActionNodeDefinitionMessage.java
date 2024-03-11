@@ -13,11 +13,17 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
             */
    public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage definition_;
    /**
-            * Distance backward to the node to execute after.
-            * For example, 1 is for the previous action, 2 is for the action before that.
-            * Must be 1 or greater.
+            * If the node is set to execute after the previous node
             */
-   public int distance_to_execute_after_;
+   public boolean execute_after_previous_;
+   /**
+            * If the node is set to execute after the beginning
+            */
+   public boolean execute_after_beginning_;
+   /**
+            * The ID of the node to execute after
+            */
+   public int execute_after_node_id_;
 
    public ActionNodeDefinitionMessage()
    {
@@ -33,7 +39,11 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
    public void set(ActionNodeDefinitionMessage other)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
-      distance_to_execute_after_ = other.distance_to_execute_after_;
+      execute_after_previous_ = other.execute_after_previous_;
+
+      execute_after_beginning_ = other.execute_after_beginning_;
+
+      execute_after_node_id_ = other.execute_after_node_id_;
 
    }
 
@@ -47,22 +57,48 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
    }
 
    /**
-            * Distance backward to the node to execute after.
-            * For example, 1 is for the previous action, 2 is for the action before that.
-            * Must be 1 or greater.
+            * If the node is set to execute after the previous node
             */
-   public void setDistanceToExecuteAfter(int distance_to_execute_after)
+   public void setExecuteAfterPrevious(boolean execute_after_previous)
    {
-      distance_to_execute_after_ = distance_to_execute_after;
+      execute_after_previous_ = execute_after_previous;
    }
    /**
-            * Distance backward to the node to execute after.
-            * For example, 1 is for the previous action, 2 is for the action before that.
-            * Must be 1 or greater.
+            * If the node is set to execute after the previous node
             */
-   public int getDistanceToExecuteAfter()
+   public boolean getExecuteAfterPrevious()
    {
-      return distance_to_execute_after_;
+      return execute_after_previous_;
+   }
+
+   /**
+            * If the node is set to execute after the beginning
+            */
+   public void setExecuteAfterBeginning(boolean execute_after_beginning)
+   {
+      execute_after_beginning_ = execute_after_beginning;
+   }
+   /**
+            * If the node is set to execute after the beginning
+            */
+   public boolean getExecuteAfterBeginning()
+   {
+      return execute_after_beginning_;
+   }
+
+   /**
+            * The ID of the node to execute after
+            */
+   public void setExecuteAfterNodeId(int execute_after_node_id)
+   {
+      execute_after_node_id_ = execute_after_node_id;
+   }
+   /**
+            * The ID of the node to execute after
+            */
+   public int getExecuteAfterNodeId()
+   {
+      return execute_after_node_id_;
    }
 
 
@@ -84,7 +120,11 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_to_execute_after_, other.distance_to_execute_after_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.execute_after_previous_, other.execute_after_previous_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.execute_after_beginning_, other.execute_after_beginning_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execute_after_node_id_, other.execute_after_node_id_, epsilon)) return false;
 
 
       return true;
@@ -100,7 +140,11 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
       ActionNodeDefinitionMessage otherMyClass = (ActionNodeDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
-      if(this.distance_to_execute_after_ != otherMyClass.distance_to_execute_after_) return false;
+      if(this.execute_after_previous_ != otherMyClass.execute_after_previous_) return false;
+
+      if(this.execute_after_beginning_ != otherMyClass.execute_after_beginning_) return false;
+
+      if(this.execute_after_node_id_ != otherMyClass.execute_after_node_id_) return false;
 
 
       return true;
@@ -114,8 +158,12 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
       builder.append("ActionNodeDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
-      builder.append("distance_to_execute_after=");
-      builder.append(this.distance_to_execute_after_);
+      builder.append("execute_after_previous=");
+      builder.append(this.execute_after_previous_);      builder.append(", ");
+      builder.append("execute_after_beginning=");
+      builder.append(this.execute_after_beginning_);      builder.append(", ");
+      builder.append("execute_after_node_id=");
+      builder.append(this.execute_after_node_id_);
       builder.append("}");
       return builder.toString();
    }

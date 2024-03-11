@@ -17,11 +17,17 @@ module behavior_msgs
          */
         behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
         /**
-         * Distance backward to the node to execute after.
-         * For example, 1 is for the previous action, 2 is for the action before that.
-         * Must be 1 or greater.
+         * If the node is set to execute after the previous node
          */
-        unsigned short distance_to_execute_after;
+        boolean execute_after_previous;
+        /**
+         * If the node is set to execute after the beginning
+         */
+        boolean execute_after_beginning;
+        /**
+         * The ID of the node to execute after
+         */
+        unsigned short execute_after_node_id;
       };
     };
   };

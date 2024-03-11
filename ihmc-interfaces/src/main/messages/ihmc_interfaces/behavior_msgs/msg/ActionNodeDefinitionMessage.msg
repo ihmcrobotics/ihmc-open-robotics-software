@@ -1,7 +1,11 @@
 # Parent definition fields
 behavior_msgs/BehaviorTreeNodeDefinitionMessage definition
 
-# Distance backward to the node to execute after.
-# For example, 1 is for the previous action, 2 is for the action before that.
-# Must be 1 or greater.
-uint16 distance_to_execute_after
+# If the node is set to execute after the previous node
+bool execute_after_previous
+
+# If the node is set to execute after the beginning
+bool execute_after_beginning
+
+# The ID of the node to execute after
+uint16 execute_after_node_id

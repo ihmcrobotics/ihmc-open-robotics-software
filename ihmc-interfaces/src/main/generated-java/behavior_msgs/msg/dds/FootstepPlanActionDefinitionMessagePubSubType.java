@@ -15,7 +15,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "3656d3e38d7eca6512ff5a7a04d3189d7feca442fada18f11c836500daa61714";
+   		return "2c7fae7141fd1c973b87d697f351063831e6d73ee254307f4f1cea44e64fefd2";
    }
    
    @Override
