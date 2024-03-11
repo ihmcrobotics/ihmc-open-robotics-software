@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.sequence;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -51,17 +52,23 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
          {
             ActionNodeState<?> childToCheck = state.getActionChildren().get(j);
 
-            if (j == 0)
+            if (j == i)
             {
                ++concurrencyRank;
             }
             else
             {
-               ActionNodeState<?> executeAfterNode = childToCheck.getExecuteAfterNode();
-               int executeAfterNodeIndex = executeAfterNode.getActionIndex();
-//               int executeAfterNodeIndex = childToCheck.getExecuteAfterNodeIndex();
-               if (executeAfterNodeIndex < i)
+               if (childToCheck.getDefinition().getExecuteAfterBeginning().getValue())
+               {
                   ++concurrencyRank;
+               }
+               else if (!childToCheck.getDefinition().getExecuteAfterPrevious().getValue())
+               {
+                  ActionNodeState<?> executeAfterNode = BehaviorTreeTools.findActionToExecuteAfter(childToCheck, state.getActionChildren());
+
+                  if (executeAfterNode.getActionIndex() < i)
+                     ++concurrencyRank;
+               }
             }
          }
 
@@ -76,7 +83,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
 
          for (int i = executionNextIndex + 1;
               i < state.getActionChildren().size()
-              && state.getActionChildren().get(i).getExecuteAfterNodeIndex() < executionNextIndex; i++)
+              && state.getActionChildren().get(i).calculateExecuteAfterActionIndex(state.getActionChildren()) < executionNextIndex; i++)
          {
             state.getActionChildren().get(i).setIsNextForExecution(true);
          }
@@ -166,13 +173,17 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       {
          return false;
       }
-      else if (executorChildren.get(state.getExecutionNextIndex()).getState().getEffectivelyExecuteAfterBeginning())
+
+      int executeAfterActionIndex
+            = executorChildren.get(state.getExecutionNextIndex()).getState().calculateExecuteAfterActionIndex(getState().getActionChildren());
+
+      if (executeAfterActionIndex < 0)
       {
          return true;
       }
       else
       {
-         return !executorChildren.get(state.getExecutionNextIndex()).getState().getExecuteAfterNode().getIsExecuting();
+         return executorChildren.get(executeAfterActionIndex).getState().getIsExecuting();
       }
    }
 

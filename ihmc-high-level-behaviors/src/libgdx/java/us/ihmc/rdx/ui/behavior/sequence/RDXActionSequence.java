@@ -3,12 +3,10 @@ package us.ihmc.rdx.ui.behavior.sequence;
 import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
-import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -59,36 +57,20 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       {
          ActionNodeState<?> actionState = state.getActionChildren().get(i);
 
-         if (actionState.getExecuteAfterNode() == null && !actionState.getEffectivelyExecuteAfterBeginning())
+         String executeAfterActionName = null;
+         int executeAfterID = actionState.getDefinition().getExecuteAfterNodeID().getValue();
+         if (executeAfterID > 0)
          {
-            // If the reference is null, then it wasn't found by string and we need to reset to the default
-            LogTools.error("No executeAfterMatch found. Defaulting to previous.");
-            actionState.getDefinition().setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
-            state.updateExecuteAfterNodeReferences();
-         }
-
-         // If first node references beginning, make it previous for consistency
-         if (i == 0 && actionState.getDefinition().getExecuteAfterBeginning())
-         {
-            actionState.getDefinition().setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
-         }
-
-         if (actionState.getExecuteAfterNode() != null)
-         {
-            // Correct the definition to be "Previous" for the previous action
-            if (!actionState.getDefinition().getExecuteAfterPrevious()
-             && actionState.getExecuteAfterNode() == state.getActionChildren().get(i - 1))
+            for (int j = i - 1; j >= 0; j--)
             {
-               actionState.getDefinition().setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
-               actionState.setExecuteAfterNode(state.getActionChildren().get(i - 1));
-            }
-
-            if (!actionState.getDefinition().getExecuteAfterBeginning() && !actionState.getDefinition().getExecuteAfterPrevious())
-            {
-               // Make sure definition is up to date with any changes for saving
-               actionState.getDefinition().setExecuteAfterAction(actionState.getExecuteAfterNode().getDefinition().getName());
+               ActionNodeState<?> actionStateToCompare = state.getActionChildren().get(j);
+               if (actionStateToCompare.getID() == executeAfterID)
+               {
+                  executeAfterActionName = actionStateToCompare.getDefinition().getName();
+               }
             }
          }
+         actionState.getDefinition().updateExecuteAfterActionName(executeAfterActionName);
       }
    }
 

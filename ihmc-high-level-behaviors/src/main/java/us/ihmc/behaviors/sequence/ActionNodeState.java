@@ -2,6 +2,7 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
@@ -11,6 +12,8 @@ import us.ihmc.communication.crdt.CRDTUnidirectionalOneDoFJointTrajectoryList;
 import us.ihmc.communication.crdt.CRDTUnidirectionalPose3D;
 import us.ihmc.communication.crdt.CRDTUnidirectionalSE3Trajectory;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+
+import java.util.List;
 
 public abstract class ActionNodeState<D extends ActionNodeDefinition> extends BehaviorTreeNodeState<D>
 {
@@ -216,5 +219,21 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    public boolean getIsExecuting()
    {
       return isExecuting.getValue();
+   }
+
+   public int calculateExecuteAfterActionIndex(List<ActionNodeState<?>> actionStateChildren)
+   {
+      if (getDefinition().getExecuteAfterBeginning().getValue())
+      {
+         return -1;
+      }
+      else if (getDefinition().getExecuteAfterPrevious().getValue())
+      {
+         return actionIndex - 1;
+      }
+      else
+      {
+         return BehaviorTreeTools.findActionToExecuteAfter(this, actionStateChildren).getActionIndex();
+      }
    }
 }

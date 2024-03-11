@@ -60,20 +60,20 @@ public class BehaviorTreeJSONSanitizer
          {
             ActionNodeDefinition currentAction = actionList.get(i);
 
-            if (i == 0 || executeAfter.equals(actionList.get(i - 1).getName()))
-            {
-               if (!currentAction.hasExecuterAfter)
-                  currentAction.setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
-            }
-            else
-            {
-               if (!currentAction.hasExecuterAfter)
-                  currentAction.setExecuteAfterAction(executeAfter);
-            }
-            if (!currentAction.executeWithNext)
-            {
-               executeAfter = currentAction.getName();
-            }
+//            if (i == 0 || executeAfter.equals(actionList.get(i - 1).getName()))
+//            {
+//               if (!currentAction.hasExecuterAfter)
+//                  currentAction.setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
+//            }
+//            else
+//            {
+//               if (!currentAction.hasExecuterAfter)
+//                  currentAction.setExecuteAfterAction(executeAfter);
+//            }
+//            if (!currentAction.executeWithNext)
+//            {
+//               executeAfter = currentAction.getName();
+//            }
          }
       }
    }
