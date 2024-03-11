@@ -29,7 +29,7 @@ import us.ihmc.ros2.SubscriptionMatchedListener;
  * This node allows to artificially introduce delay to simulate communication delays on an actual
  * network.
  * </p>
- *
+ * 
  * @author Sylvain Bertrand
  */
 public class DelayedROS2Node implements ROS2NodeInterface
@@ -45,7 +45,7 @@ public class DelayedROS2Node implements ROS2NodeInterface
       this.ros2Node = ros2Node;
 
       ScheduledExecutorService scheduledPubExecutor = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedDaemonThreadFactory(ros2Node.getName()
-                                                                                                                                            + " - PubDelay"));
+            + " - PubDelay"));
 
       delayedPubExecutor = task ->
       {
@@ -58,7 +58,7 @@ public class DelayedROS2Node implements ROS2NodeInterface
       };
 
       ScheduledExecutorService scheduledSubExecutor = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedDaemonThreadFactory(ros2Node.getName()
-                                                                                                                                            + " - SubDelay"));
+            + " - SubDelay"));
 
       delayedSubExecutor = task ->
       {
@@ -325,9 +325,9 @@ public class DelayedROS2Node implements ROS2NodeInterface
       public boolean publish(T data)
       {
          delayedExecutor.execute(() ->
-                                 {
-                                    publisher.publish(data);
-                                 });
+         {
+            publisher.publish(data);
+         });
          return true;
       }
 

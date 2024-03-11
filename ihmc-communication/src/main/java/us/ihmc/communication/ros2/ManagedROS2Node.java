@@ -80,7 +80,7 @@ public class ManagedROS2Node implements ROS2NodeInterface
          throws IOException
    {
       throw new RuntimeException("This funtionality is so far unimplemented. Implement me!");
-      //      return ros2Node.createQueuedSubscription(topicDataType, topicName, qosProfile, queueSize);
+//      return ros2Node.createQueuedSubscription(topicDataType, topicName, qosProfile, queueSize);
    }
 
    @Override
