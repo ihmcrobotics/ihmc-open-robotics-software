@@ -13,14 +13,15 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
             */
    public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage definition_;
    /**
-            * Execute with next action
+            * Distance backward to the node to execute after.
+            * For example, 1 is for the previous action, 2 is for the action before that.
+            * Must be 1 or greater.
             */
-   public java.lang.StringBuilder execute_after_action_;
+   public int distance_to_execute_after_;
 
    public ActionNodeDefinitionMessage()
    {
       definition_ = new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage();
-      execute_after_action_ = new java.lang.StringBuilder(255);
    }
 
    public ActionNodeDefinitionMessage(ActionNodeDefinitionMessage other)
@@ -32,8 +33,7 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
    public void set(ActionNodeDefinitionMessage other)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
-      execute_after_action_.setLength(0);
-      execute_after_action_.append(other.execute_after_action_);
+      distance_to_execute_after_ = other.distance_to_execute_after_;
 
    }
 
@@ -47,27 +47,22 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
    }
 
    /**
-            * Execute with next action
+            * Distance backward to the node to execute after.
+            * For example, 1 is for the previous action, 2 is for the action before that.
+            * Must be 1 or greater.
             */
-   public void setExecuteAfterAction(java.lang.String execute_after_action)
+   public void setDistanceToExecuteAfter(int distance_to_execute_after)
    {
-      execute_after_action_.setLength(0);
-      execute_after_action_.append(execute_after_action);
-   }
-
-   /**
-            * Execute with next action
-            */
-   public java.lang.String getExecuteAfterActionAsString()
-   {
-      return getExecuteAfterAction().toString();
+      distance_to_execute_after_ = distance_to_execute_after;
    }
    /**
-            * Execute with next action
+            * Distance backward to the node to execute after.
+            * For example, 1 is for the previous action, 2 is for the action before that.
+            * Must be 1 or greater.
             */
-   public java.lang.StringBuilder getExecuteAfterAction()
+   public int getDistanceToExecuteAfter()
    {
-      return execute_after_action_;
+      return distance_to_execute_after_;
    }
 
 
@@ -89,7 +84,7 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.execute_after_action_, other.execute_after_action_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_to_execute_after_, other.distance_to_execute_after_, epsilon)) return false;
 
 
       return true;
@@ -105,7 +100,7 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
       ActionNodeDefinitionMessage otherMyClass = (ActionNodeDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
-      if (!us.ihmc.idl.IDLTools.equals(this.execute_after_action_, otherMyClass.execute_after_action_)) return false;
+      if(this.distance_to_execute_after_ != otherMyClass.distance_to_execute_after_) return false;
 
 
       return true;
@@ -119,8 +114,8 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
       builder.append("ActionNodeDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
-      builder.append("execute_after_action=");
-      builder.append(this.execute_after_action_);
+      builder.append("distance_to_execute_after=");
+      builder.append(this.distance_to_execute_after_);
       builder.append("}");
       return builder.toString();
    }
