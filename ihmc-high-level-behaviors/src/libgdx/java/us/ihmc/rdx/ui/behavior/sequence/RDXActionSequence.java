@@ -58,7 +58,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
          ActionNodeState<?> actionState = state.getActionChildren().get(i);
 
          String executeAfterActionName = null;
-         int executeAfterID = actionState.getDefinition().getExecuteAfterNodeID().getValue();
+         long executeAfterID = actionState.getDefinition().getExecuteAfterNodeID().getValue();
          if (executeAfterID > 0)
          {
             for (int j = i - 1; j >= 0; j--)

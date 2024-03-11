@@ -85,7 +85,7 @@ public class BehaviorTreeTools
 
    public static ActionNodeState<?> findActionToExecuteAfter(ActionNodeState<?> actionState, List<ActionNodeState<?>> actionStateChildren)
    {
-      int executeAfterID = actionState.getDefinition().getExecuteAfterNodeID().getValue();
+      long executeAfterID = actionState.getDefinition().getExecuteAfterNodeID().getValue();
       for (int j = actionState.getActionIndex() - 1; j >= 0; j--)
       {
          ActionNodeState<?> actionStateToCompare = actionStateChildren.get(j);

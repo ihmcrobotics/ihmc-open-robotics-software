@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
-import us.ihmc.communication.crdt.CRDTUnidirectionalInteger;
+import us.ihmc.communication.crdt.CRDTUnidirectionalLong;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -28,7 +28,7 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
 
    private final CRDTUnidirectionalBoolean executeAfterPrevious;
    private final CRDTUnidirectionalBoolean executeAfterBeginning;
-   private final CRDTUnidirectionalInteger executeAfterNodeID;
+   private final CRDTUnidirectionalLong executeAfterNodeID;
    /** We use this to save the action name to file instead of the number for human readability. */
    private String executeAfterActionName = EXECUTE_AFTER_PREVIOUS;
 
@@ -45,7 +45,7 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
 
       executeAfterPrevious = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, true);
       executeAfterBeginning = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, false);
-      executeAfterNodeID = new CRDTUnidirectionalInteger(ROS2ActorDesignation.OPERATOR, crdtInfo, 0);
+      executeAfterNodeID = new CRDTUnidirectionalLong(ROS2ActorDesignation.OPERATOR, crdtInfo, 0);
    }
 
    public void saveToFile(ObjectNode jsonNode)
@@ -130,7 +130,7 @@ public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
       return executeAfterBeginning;
    }
 
-   public CRDTUnidirectionalInteger getExecuteAfterNodeID()
+   public CRDTUnidirectionalLong getExecuteAfterNodeID()
    {
       return executeAfterNodeID;
    }
