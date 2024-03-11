@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
-import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceExecutor;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
@@ -81,21 +80,6 @@ public class BehaviorTreeTools
       {
          return findActionSequenceAncestor(node.getParent());
       }
-   }
-
-   public static ActionNodeState<?> findActionToExecuteAfter(ActionNodeState<?> actionState, List<ActionNodeState<?>> actionStateChildren)
-   {
-      long executeAfterID = actionState.getDefinition().getExecuteAfterNodeID().getValue();
-      for (int j = actionState.getActionIndex() - 1; j >= 0; j--)
-      {
-         ActionNodeState<?> actionStateToCompare = actionStateChildren.get(j);
-         if (actionStateToCompare.getID() == executeAfterID)
-         {
-            return actionStateToCompare;
-         }
-      }
-
-      throw new RuntimeException("Should not get here");
    }
 
    public static List<ActionNodeDefinition> buildListOfActionDefinitions(BehaviorTreeNodeDefinition rootNode)

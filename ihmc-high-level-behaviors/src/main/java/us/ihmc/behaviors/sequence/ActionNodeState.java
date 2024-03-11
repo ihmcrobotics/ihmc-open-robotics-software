@@ -19,6 +19,8 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 {
    public static final int SUPPORTED_NUMBER_OF_JOINTS = 7;
 
+   private final D definition;
+
    private final CRDTUnidirectionalBoolean isNextForExecution;
    private final CRDTUnidirectionalInteger concurrencyRank;
    private final CRDTUnidirectionalBoolean canExecute;
@@ -39,6 +41,8 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    public ActionNodeState(long id, D definition, CRDTInfo crdtInfo)
    {
       super(id, definition, crdtInfo);
+
+      this.definition = definition;
 
       isNextForExecution = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
       concurrencyRank = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 1);
@@ -223,17 +227,33 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 
    public int calculateExecuteAfterActionIndex(List<ActionNodeState<?>> actionStateChildren)
    {
-      if (getDefinition().getExecuteAfterBeginning().getValue())
+      if (definition.getExecuteAfterBeginning().getValue())
       {
          return -1;
       }
-      else if (getDefinition().getExecuteAfterPrevious().getValue())
+      else if (definition.getExecuteAfterPrevious().getValue())
       {
          return actionIndex - 1;
       }
       else
       {
-         return BehaviorTreeTools.findActionToExecuteAfter(this, actionStateChildren).getActionIndex();
+         return findActionToExecuteAfter(actionStateChildren).getActionIndex();
       }
+   }
+
+   /** Assumes execute after node ID matches a valid action. */
+   public ActionNodeState<?> findActionToExecuteAfter(List<ActionNodeState<?>> actionStateChildren)
+   {
+      long executeAfterID = definition.getExecuteAfterNodeID().getValue();
+      for (int j = actionIndex - 1; j >= 0; j--)
+      {
+         ActionNodeState<?> actionStateToCompare = actionStateChildren.get(j);
+         if (actionStateToCompare.getID() == executeAfterID)
+         {
+            return actionStateToCompare;
+         }
+      }
+
+      throw new RuntimeException("Should not get here");
    }
 }

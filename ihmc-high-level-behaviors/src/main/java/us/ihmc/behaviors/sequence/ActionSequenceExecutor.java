@@ -64,7 +64,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
                }
                else if (!childToCheck.getDefinition().getExecuteAfterPrevious().getValue())
                {
-                  ActionNodeState<?> executeAfterNode = BehaviorTreeTools.findActionToExecuteAfter(childToCheck, state.getActionChildren());
+                  ActionNodeState<?> executeAfterNode = childToCheck.findActionToExecuteAfter(state.getActionChildren());
 
                   if (executeAfterNode.getActionIndex() < i)
                      ++concurrencyRank;
