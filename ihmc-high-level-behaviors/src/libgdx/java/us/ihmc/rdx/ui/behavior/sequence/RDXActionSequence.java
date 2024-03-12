@@ -3,8 +3,6 @@ package us.ihmc.rdx.ui.behavior.sequence;
 import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
-import us.ihmc.behaviors.sequence.ActionNodeDefinition;
-import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -26,6 +24,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    private final ImBooleanWrapper automaticExecutionCheckbox;
    private final Timer manualExecutionOverrideTimer = new Timer();
    private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
+   private final List<RDXActionNode<?, ?>> actionChildren = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> nextForExecutionActions = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> currentlyExecutingActions = new ArrayList<>();
    private final RDXActionProgressWidgetsManager progressWidgetsManager = new RDXActionProgressWidgetsManager();
@@ -48,53 +47,14 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    {
       super.update();
 
+      actionChildren.clear();
       nextForExecutionActions.clear();
       currentlyExecutingActions.clear();
       updateActionSubtree(this);
 
-      // This block updates the definition executeAfterActionName string for
-      // saving an up to date human readable name in the JSON.
-      // It also finds the correct node upon loading the name from JSON.
-      // We do it here because only the operator side is allowed to change the definition.
-      for (int i = 0; i < state.getActionChildren().size(); i++)
+      for (RDXActionNode<?, ?> actionChild : actionChildren)
       {
-         ActionNodeState<?> actionState = state.getActionChildren().get(i);
-         ActionNodeDefinition actionDefinition = actionState.getDefinition();
-
-         String executeAfterActionName = null;
-
-         if (!actionDefinition.getExecuteAfterPrevious().getValue()
-          && !actionDefinition.getExecuteAfterBeginning().getValue())
-         {
-            // We need to find the node by name
-            // This happens when we load from JSON
-            if (actionDefinition.getExecuteAfterNodeID().getValue() == 0)
-            {
-               for (int j = i - 1; j >= 0; j--)
-               {
-                  ActionNodeState<?> actionStateToCompare = state.getActionChildren().get(j);
-                  if (actionStateToCompare.getDefinition().getName().equals(actionDefinition.getExecuteAfterActionName()))
-                  {
-                     executeAfterActionName = actionStateToCompare.getDefinition().getName();
-                     actionDefinition.getExecuteAfterNodeID().setValue(actionStateToCompare.getID());
-                  }
-               }
-            }
-            else // Update the node's name for saving in human readable format
-            {
-               long executeAfterID = actionDefinition.getExecuteAfterNodeID().getValue();
-               for (int j = i - 1; j >= 0; j--)
-               {
-                  ActionNodeState<?> actionStateToCompare = state.getActionChildren().get(j);
-                  if (actionStateToCompare.getID() == executeAfterID)
-                  {
-                     executeAfterActionName = actionStateToCompare.getDefinition().getName();
-                  }
-               }
-            }
-         }
-
-         actionDefinition.updateAndSanitizeExecuteAfterFields(executeAfterActionName);
+         actionChild.updateAndValidateExecuteAfter(state.getActionChildren());
       }
    }
 
@@ -104,6 +64,8 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       {
          if (child instanceof RDXActionNode<?, ?> actionNode)
          {
+            actionChildren.add(actionNode);
+
             if (actionNode.getState().getIsNextForExecution())
             {
                nextForExecutionActions.add(actionNode);

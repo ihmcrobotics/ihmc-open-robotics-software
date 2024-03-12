@@ -15,6 +15,8 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeTools;
 
+import java.util.List;
+
 /**
  * The UI representation of a robot behavior action. It provides a base
  * template for implementing an interactable action.
@@ -81,6 +83,10 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
 
       if (actionSequence != null)
       {
+         // Validate state case something earlier in this UI tick messed with things.
+         // This happens with the Undo non-topological changes button.
+         updateAndValidateExecuteAfter(actionSequence.getActionChildren());
+
          String selectedText;
          if (definition.getExecuteAfterPrevious().getValue())
          {
@@ -130,6 +136,49 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
       renderImGuiWidgetsInternal();
 
       super.renderNodeSettingsWidgets();
+   }
+
+   /**
+    * Updates the definition executeAfterActionName string for
+    * saving an up to date human readable name in the JSON.
+    * It also finds the correct node upon loading the name from JSON.
+    * We do it here because only the operator side is allowed to change the definition.
+    */
+   public void updateAndValidateExecuteAfter(List<ActionNodeState<?>> actionStateChildren)
+   {
+      String executeAfterActionName = null;
+
+      if (!definition.getExecuteAfterPrevious().getValue() && !definition.getExecuteAfterBeginning().getValue())
+      {
+         // We need to find the node by name
+         // This happens when we load from JSON
+         if (definition.getExecuteAfterNodeID().getValue() == 0)
+         {
+            for (int j = state.getActionIndex() - 1; j >= 0; j--)
+            {
+               ActionNodeState<?> actionStateToCompare = actionStateChildren.get(j);
+               if (actionStateToCompare.getDefinition().getName().equals(definition.getExecuteAfterActionName()))
+               {
+                  executeAfterActionName = actionStateToCompare.getDefinition().getName();
+                  definition.getExecuteAfterNodeID().setValue(actionStateToCompare.getID());
+               }
+            }
+         }
+         else // Update the node's name for saving in human readable format
+         {
+            long executeAfterID = definition.getExecuteAfterNodeID().getValue();
+            for (int j = state.getActionIndex() - 1; j >= 0; j--)
+            {
+               ActionNodeState<?> actionStateToCompare = actionStateChildren.get(j);
+               if (actionStateToCompare.getID() == executeAfterID)
+               {
+                  executeAfterActionName = actionStateToCompare.getDefinition().getName();
+               }
+            }
+         }
+      }
+
+      definition.updateAndSanitizeExecuteAfterFields(executeAfterActionName);
    }
 
    protected void renderImGuiWidgetsInternal()
