@@ -91,12 +91,12 @@ public class SimulationSceneObjectRobotBuilders
       };
    }
 
-   public static Function<ReferenceFrame, Robot> getBoxBuilder(double mass, Vector3D size, Pose3D pose3D)
+   public static Function<ReferenceFrame, Robot> getBoxBuilder(double mass, Vector3D size, Pose3D pose3D, double radiusOfGyrationPercent)
    {
       return inertialFrame ->
       {
          BoxDefinition boxDefinition = new BoxDefinition();
-         boxDefinition.build(mass, size);
+         boxDefinition.build(mass, size, radiusOfGyrationPercent);
          boxDefinition.getInitialSixDoFState().setConfiguration(pose3D.getOrientation(),
                                                                 pose3D.getPosition());
          boxDefinition.getInitialSixDoFState().setVelocity(new Vector3D(), new Vector3D());

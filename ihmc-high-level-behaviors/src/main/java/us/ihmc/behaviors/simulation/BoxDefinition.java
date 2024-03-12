@@ -21,7 +21,7 @@ public class BoxDefinition extends RobotDefinition
       super("Box");
    }
 
-   public void build(double mass, Vector3D size)
+   public void build(double mass, Vector3D size, double radiusOfGyrationPercent)
    {
       SixDoFJointDefinition rootJointDefinition = new SixDoFJointDefinition("boxRootJoint");
 
@@ -42,7 +42,6 @@ public class BoxDefinition extends RobotDefinition
       boxBody.addCollisionShapeDefinition(collisionShapeDefinition);
 
       boxBody.setMass(mass);
-      double radiusOfGyrationPercent = 0.8;
       boxBody.setMomentOfInertia(MomentOfInertiaFactory.fromMassAndRadiiOfGyration(boxBody.getMass(),
                                                                                    radiusOfGyrationPercent * size.getX(),
                                                                                    radiusOfGyrationPercent * size.getY(),
