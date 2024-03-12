@@ -38,8 +38,8 @@ public class KSTFiniteDifferenceOutputProcessor implements KSTOutputProcessor
       if (computeSignal.getValue())
       {
          double dt = time - previousTime.getDoubleValue();
-         outputRobotState.set(latestOutput);
-         outputRobotState.setDesiredVelocitiesByFiniteDifference(previousRobotState, latestOutput, dt);
+         outputRobotState.setConfiguration(latestOutput);
+         outputRobotState.setVelocitiesByFiniteDifference(previousRobotState, latestOutput, dt);
          previousTime.set(time);
          previousRobotState.set(latestOutput);
       }

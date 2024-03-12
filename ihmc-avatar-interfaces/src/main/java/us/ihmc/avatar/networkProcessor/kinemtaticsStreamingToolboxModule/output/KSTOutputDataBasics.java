@@ -8,6 +8,8 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 
+import java.util.Arrays;
+
 public interface KSTOutputDataBasics extends KSTOutputDataReadOnly
 {
    @Override
@@ -52,11 +54,7 @@ public interface KSTOutputDataBasics extends KSTOutputDataReadOnly
 
    default void set(KSTOutputDataReadOnly other)
    {
-      if (getJointNameHash() != other.getJointNameHash())
-         throw new IllegalArgumentException("Joint name hash does not match, cannot set data from different robot.");
-
-      if (getNumberOfJoints() != other.getNumberOfJoints())
-         throw new IllegalArgumentException("Number of joints does not match, cannot set data from different robot.");
+      checkCompatibility(other);
 
       getRootJointPosition().set(other.getRootJointPosition());
       getRootJointOrientation().set(other.getRootJointOrientation());
@@ -90,11 +88,7 @@ public interface KSTOutputDataBasics extends KSTOutputDataReadOnly
 
    default void setConfiguration(KSTOutputDataReadOnly other)
    {
-      if (getJointNameHash() != other.getJointNameHash())
-         throw new IllegalArgumentException("Joint name hash does not match, cannot set data from different robot.");
-
-      if (getNumberOfJoints() != other.getNumberOfJoints())
-         throw new IllegalArgumentException("Number of joints does not match, cannot set data from different robot.");
+      checkCompatibility(other);
 
       getRootJointPosition().set(other.getRootJointPosition());
       getRootJointOrientation().set(other.getRootJointOrientation());
@@ -112,11 +106,8 @@ public interface KSTOutputDataBasics extends KSTOutputDataReadOnly
 
    default void interpolate(KSTOutputDataReadOnly start, KSTOutputDataReadOnly end, double alpha)
    {
-      if (getJointNameHash() != start.getJointNameHash() || getJointNameHash() != end.getJointNameHash())
-         throw new IllegalArgumentException("Joint name hash does not match, cannot interpolate data from different robot.");
-
-      if (getNumberOfJoints() != start.getNumberOfJoints() || getNumberOfJoints() != end.getNumberOfJoints())
-         throw new IllegalArgumentException("Number of joints does not match, cannot interpolate data from different robot.");
+      checkCompatibility(start);
+      checkCompatibility(end);
 
       getRootJointPosition().interpolate(start.getRootJointPosition(), end.getRootJointPosition(), alpha);
       getRootJointOrientation().interpolate(start.getRootJointOrientation(), end.getRootJointOrientation(), alpha);
@@ -161,7 +152,7 @@ public interface KSTOutputDataBasics extends KSTOutputDataReadOnly
 
    default void setFromRobot(FloatingJointReadOnly rootJoint, OneDoFJointReadOnly[] joints)
    {
-      if (getJointNameHash() != rootJoint.getName().hashCode())
+      if (getJointNameHash() != Arrays.hashCode(joints))
          throw new IllegalArgumentException("Joint name hash does not match, cannot set data from different robot.");
 
       getRootJointPosition().set(rootJoint.getJointPose().getPosition());
