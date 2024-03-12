@@ -1,5 +1,11 @@
 package us.ihmc.behaviors.sequence;
 
+import gnu.trove.iterator.TIntIterator;
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
+import gnu.trove.set.TIntSet;
+import gnu.trove.set.hash.TIntHashSet;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
@@ -14,6 +20,10 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
    private final ActionSequenceDefinition definition;
    private final List<ActionNodeExecutor<?, ?>> executorChildren = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> currentlyExecutingActions = new ArrayList<>();
+
+   // Fields used only for concurrency rank calculation.
+   private final TIntObjectMap<ActionNodeState<?>> actionsThatCouldBeExecuting = new TIntObjectHashMap<>();
+   private final TIntSet actionsToRemove = new TIntHashSet();
 
    public ActionSequenceExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -41,72 +51,31 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       updateActionSubtree(this);
 
       // Update concurrency ranks
-      int latestExecuteAfterIndex = 0;
-      int maxConcurrencyAtThisPoint = 1;
-      ArrayList<ActionNodeState<?>> actionsThatCouldBeExecuting = new ArrayList<>();
+      actionsThatCouldBeExecuting.clear();
       for (int i = 0; i < state.getActionChildren().size(); i++)
       {
-         
+         actionsThatCouldBeExecuting.put(i, state.getActionChildren().get(i));
 
+         for (int j = i + 1;
+              j < state.getActionChildren().size()
+              && state.getActionChildren().get(j).calculateExecuteAfterActionIndex(state.getActionChildren()) < i; j++)
+         {
+            actionsThatCouldBeExecuting.put(j, state.getActionChildren().get(j));
+         }
 
-//         =================
-//         int concurrencyRank = 0;
-//
-//         int startIndex = Math.max(state.getActionChildren().get(i).calculateExecuteAfterActionIndex(state.getActionChildren()), 1);
-//
-//         // For the rest of the actions, add to the rank for any executing after
-//         // something earlier than this action
-//         for (int j = startIndex; j < state.getActionChildren().size(); j++)
-//         {
-//            if (state.getActionChildren().get(j).calculateExecuteAfterActionIndex(state.getActionChildren()) < startIndex)
-//               ++concurrencyRank;
-//         }
-//
-//         for (int j = startIndex; j < i; j++)
-//         {
-//            if (state.getActionChildren().get(j).calculateExecuteAfterActionIndex(state.getActionChildren()) > startIndex)
-//               --concurrencyRank;
-//         }
-//
-//         state.getActionChildren().get(i).setConcurrencyRank(concurrencyRank);
-////       ===================
+         actionsToRemove.clear();
+         for (TIntObjectIterator<ActionNodeState<?>> iterator = actionsThatCouldBeExecuting.iterator(); iterator.hasNext(); )
+         {
+            iterator.advance();
+            actionsToRemove.add(iterator.value().calculateExecuteAfterActionIndex(state.getActionChildren()));
+         }
 
-//         int executeAfterIndex = state.getActionChildren().get(i).calculateExecuteAfterActionIndex(state.getActionChildren());
-//
-//         if (executeAfterIndex > latestExecuteAfterIndex)
-//         {
-//
-//            for (int j = i )
-//
-//            latestExecuteAfterIndex = executeAfterIndex;
-//            maxConcurrencyAtThisPoint = state.getActionChildren().get(executeAfterIndex).getConcurrencyRank();
-//         }
-//
-//         state.getActionChildren().get(i).setConcurrencyRank(maxConcurrencyAtThisPoint);
-//
-//         for (int j = i - 1; j > i - maxConcurrencyAtThisPoint; j--)
-//            state.getActionChildren().get(j).setConcurrencyRank(maxConcurrencyAtThisPoint);
-//
-//         ++maxConcurrencyAtThisPoint;
+         for (TIntIterator iterator = actionsToRemove.iterator(); iterator.hasNext(); )
+         {
+            actionsThatCouldBeExecuting.remove(iterator.next());
+         }
 
-//         int concurrencyRank = 1; // They all are at least 1
-//
-//         // For the rest of the actions, add to the rank for any executing after
-//         // something earlier than this action
-//         for (int j = i + 1; j < state.getActionChildren().size(); j++)
-//            if (state.getActionChildren().get(j).calculateExecuteAfterActionIndex(state.getActionChildren()) < i)
-//               ++concurrencyRank;
-//
-//         state.getActionChildren().get(i).setConcurrencyRank(concurrencyRank);
-//
-//         int k = i;
-//         for (; k < state.getActionChildren().size()
-//             && state.getActionChildren().get(k).calculateExecuteAfterActionIndex(state.getActionChildren()) < i; k++);
-//
-//         int m = k - i;
-//
-//         for (int n = i; n < i + m; n++)
-//            state.getActionChildren().get(n).setConcurrencyRank(Math.max(state.getActionChildren().get(n).getConcurrencyRank(), m));
+         state.getActionChildren().get(i).setConcurrencyRank(actionsThatCouldBeExecuting.size());
       }
 
       // Update is next for execution
