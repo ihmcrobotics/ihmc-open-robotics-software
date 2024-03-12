@@ -6,16 +6,13 @@ import java.util.Collection;
 
 public interface URDFParameters
 {
-   /**
-    * @deprecated Use getSdfModelPath()
-    */
-   Collection<String> getURDFFileType();
-
    Collection<Path> getURDFModelPath();
 
    String getURDFModelName();
 
    String[] getResourceDirectories();
+
+   String getResourceDirectory();
 
    default Collection<InputStream> getURDFAsInputStreamList()
    {
