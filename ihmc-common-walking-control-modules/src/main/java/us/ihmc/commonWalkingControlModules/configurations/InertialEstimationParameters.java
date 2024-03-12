@@ -18,6 +18,10 @@ public interface InertialEstimationParameters
 
    SideDependentList<int[]> getArmJointIndices();
 
+   String[] getMeasurementNames();
+
+   String[] getEstimateNames();
+
    InertialEstimatorType getTypeOfEstimatorToUse();
 
    Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] getBasisSets();
@@ -25,7 +29,8 @@ public interface InertialEstimationParameters
    default String[] getBasisNames()
    {
       return getTypeOfEstimatorToUse() == InertialEstimatorType.PHYSICALLY_CONSISTENT_EKF ?
-            RigidBodyInertialParametersTools.getNamesForThetaBasis() : RigidBodyInertialParametersTools.getNamesForPiBasis();
+            RigidBodyInertialParametersTools.getNamesForThetaBasis() :
+            RigidBodyInertialParametersTools.getNamesForPiBasis();
    }
 
    default int getNumberOfNonEmptyBasisSets()
@@ -52,6 +57,7 @@ public interface InertialEstimationParameters
    DMatrixRMaj getURDFParameters(Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets);
 
    double getBreakFrequencyForPostProcessing();
+
    double getBreakFrequencyForEstimateFiltering();
 
    double getBreakFrequencyForAccelerationCalculation();
@@ -61,8 +67,11 @@ public interface InertialEstimationParameters
    double[] getProcessCovariance();
 
    double getFloatingBaseMeasurementCovariance();
+
    double getLegMeasurementCovariance();
+
    double getArmMeasurementCovariance();
+
    double getSpineMeasurementCovariance();
 
    double getNormalizedInnovationThreshold();
