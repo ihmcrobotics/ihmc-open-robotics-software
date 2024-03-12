@@ -66,8 +66,11 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
                {
                   ActionNodeState<?> executeAfterNode = childToCheck.findActionToExecuteAfter(state.getActionChildren());
 
-                  if (executeAfterNode.getActionIndex() < i)
-                     ++concurrencyRank;
+                  if (executeAfterNode == null)
+                     LogTools.error("Why is this null?");
+                  else
+                     if (executeAfterNode.getActionIndex() < i)
+                        ++concurrencyRank;
                }
             }
          }
@@ -151,20 +154,12 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
    {
       ActionNodeExecutor<?, ?> actionToExecute = executorChildren.get(state.getExecutionNextIndex());
 
-      if (actionToExecute.getState().getCanExecute())
-      {
-         LogTools.info("Triggering action execution: %s".formatted(actionToExecute.getDefinition().getName()));
-         actionToExecute.update();
-         actionToExecute.triggerActionExecution();
-         actionToExecute.updateCurrentlyExecuting();
-         currentlyExecutingActions.add(actionToExecute);
-         state.stepForwardNextExecutionIndex();
-      }
-      else
-      {
-         LogTools.error("Cannot execute action: %s".formatted(actionToExecute.getDefinition().getName()));
-         state.setAutomaticExecution(false);
-      }
+      LogTools.info("Triggering action execution: %s".formatted(actionToExecute.getDefinition().getName()));
+      actionToExecute.update();
+      actionToExecute.triggerActionExecution();
+      actionToExecute.updateCurrentlyExecuting();
+      currentlyExecutingActions.add(actionToExecute);
+      state.stepForwardNextExecutionIndex();
    }
 
    private boolean shouldExecuteNextAction()
@@ -174,16 +169,24 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
          return false;
       }
 
-      int executeAfterActionIndex
-            = executorChildren.get(state.getExecutionNextIndex()).getState().calculateExecuteAfterActionIndex(getState().getActionChildren());
+      ActionNodeState<?> nextNodeToExecute = executorChildren.get(state.getExecutionNextIndex()).getState();
 
-      if (executeAfterActionIndex < 0)
+      if (!nextNodeToExecute.getCanExecute())
+      {
+         LogTools.error("Cannot execute action: %s".formatted(nextNodeToExecute.getDefinition().getName()));
+         state.setAutomaticExecution(false);
+         return false;
+      }
+
+      int executeAfterActionIndex = nextNodeToExecute.calculateExecuteAfterActionIndex(getState().getActionChildren());
+
+      if (executeAfterActionIndex < 0) // Execute after beginning
       {
          return true;
       }
       else
       {
-         return executorChildren.get(executeAfterActionIndex).getState().getIsExecuting();
+         return !executorChildren.get(executeAfterActionIndex).getState().getIsExecuting();
       }
    }
 

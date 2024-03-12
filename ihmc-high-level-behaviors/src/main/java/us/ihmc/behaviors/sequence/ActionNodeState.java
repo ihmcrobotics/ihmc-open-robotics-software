@@ -12,6 +12,7 @@ import us.ihmc.communication.crdt.CRDTUnidirectionalOneDoFJointTrajectoryList;
 import us.ihmc.communication.crdt.CRDTUnidirectionalPose3D;
 import us.ihmc.communication.crdt.CRDTUnidirectionalSE3Trajectory;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.log.LogTools;
 
 import java.util.List;
 
@@ -237,7 +238,15 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       }
       else
       {
-         return findActionToExecuteAfter(actionStateChildren).getActionIndex();
+         ActionNodeState<?> actionToExecuteAfter = findActionToExecuteAfter(actionStateChildren);
+
+         if (actionToExecuteAfter == null)
+         {
+            LogTools.error("Why is this null?");
+            return 0;
+         }
+
+         return actionToExecuteAfter.getActionIndex();
       }
    }
 
@@ -254,6 +263,6 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
          }
       }
 
-      throw new RuntimeException("Should not get here");
+      return null;
    }
 }
