@@ -76,6 +76,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
                   if (actionStateToCompare.getDefinition().getName().equals(actionDefinition.getExecuteAfterActionName()))
                   {
                      executeAfterActionName = actionStateToCompare.getDefinition().getName();
+                     actionDefinition.getExecuteAfterNodeID().setValue(actionStateToCompare.getID());
                   }
                }
             }
