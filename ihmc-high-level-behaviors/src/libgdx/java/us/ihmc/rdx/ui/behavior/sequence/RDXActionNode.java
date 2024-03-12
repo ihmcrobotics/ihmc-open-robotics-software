@@ -60,10 +60,17 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
       RDXActionSequence actionSequence = RDXBehaviorTreeTools.findActionSequenceAncestor(this);
       if (actionSequence != null)
       {
-         ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
-         ImGui.text(state.getConcurrencyRank() == 1 ? " " : String.valueOf(state.getConcurrencyRank()));
-         ImGui.popStyleColor();
-         ImGui.sameLine();
+         if (state.getConcurrencyRank() != 1)
+         {
+            ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
+            ImGui.text(state.getConcurrencyRank() == 1 ? " " : String.valueOf(state.getConcurrencyRank()));
+            ImGui.popStyleColor();
+            ImGui.sameLine();
+         }
+         else
+         {
+            ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGuiTools.calcTextSizeX("2") + ImGui.getStyle().getItemSpacingX());
+         }
 
          if (hollowArrowRenderer.render(state.getIsNextForExecution(), ImGui.getFrameHeight()))
          {
