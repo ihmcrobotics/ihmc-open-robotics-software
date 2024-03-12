@@ -19,10 +19,22 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Set;
 
+/**
+ * This class is used to calculate the differences ("deltas") in inertial parameters between a set of rigid bodies and a set of corresponding tare values, as
+ * well as adding the calculated deltas to another set of rigid bodies actually used by the controller.
+ * <p>
+ * The tare values are by default the values of the inertial parameters as they are defined in the URDF file, but can be overwritten in case of drift on the
+ * robot. The deltas are fed to the controller's rigid bodies in a rate-limited manner to avoid large jumps in the inertial parameters.
+ * </p>
+ *
+ * @author James Foster
+ */
 public class InertialBaselineCalculator
 {
    private final Set<SpatialInertiaBasisOption>[] basisSets;
+   /** The spatial inertias of the {@code model} as they are defined in the URDF file and controller, and what the parameter deltas are added to. */
    private final SpatialInertiaReadOnly[] urdfSpatialInertias;
+   /** The tare values of the spatial inertias, that any inertial parameter deltas are calculated from. */
    private final YoSpatialInertia[] tareSpatialInertias;
 
    private final YoMatrix[] parameterDeltas;
@@ -42,6 +54,9 @@ public class InertialBaselineCalculator
       RigidBodyBasics[] bodies = model.getRootBody().subtreeArray();
       for (int i = 0; i < nBodies; i++)
       {
+         if (basisSets[i].isEmpty())  // Only create objects for bodies we're estimating
+            continue;
+
          tareSpatialInertias[i] = new YoSpatialInertia(bodies[i].getInertia(), "_tare", registry);
          urdfSpatialInertias[i] = new SpatialInertia(bodies[i].getInertia());
       }
@@ -51,21 +66,24 @@ public class InertialBaselineCalculator
       YoDouble[] maxParameterDeltaRates = new YoDouble[RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
       for (int i = 0; i < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; i++)
       {
-         maxParameterDeltaRates[i] = new YoDouble("maxParameterDeltaRate_" + basisNames[i], registry);
+         maxParameterDeltaRates[i] = new YoDouble("maxDeltaRate_" + basisNames[i], registry);
          maxParameterDeltaRates[i].set(defaultMaxParameterDeltaRates[i]);
       }
       parameterDeltas = new YoMatrix[nBodies];
       rateLimitedParameterDeltas = new RateLimitedYoVariable[nBodies][RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY];
       for (int i = 0; i < nBodies; i++)
       {
-         parameterDeltas[i] = new YoMatrix("parameterDelta_" + bodies[i].getName(),
+         if (basisSets[i].isEmpty())  // Only create objects for bodies we're estimating
+            continue;
+
+         parameterDeltas[i] = new YoMatrix("delta_" + bodies[i].getName() + "_",
                                            RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY,
                                            1,
                                            RigidBodyInertialParametersTools.getNamesForPiBasis(),
                                            registry);
          for (int j = 0; j < RigidBodyInertialParameters.PARAMETERS_PER_RIGID_BODY; j++)
          {
-            rateLimitedParameterDeltas[i][j] = new RateLimitedYoVariable("rateLimitedParameterDelta_" + bodies[i].getName() + "_" + basisNames[j],
+            rateLimitedParameterDeltas[i][j] = new RateLimitedYoVariable("rateLimitedDelta_" + bodies[i].getName() + "_" + basisNames[j],
                                                                          registry,
                                                                          maxParameterDeltaRates[j],
                                                                          parameterDeltas[i].getYoDouble(j, 0),
@@ -77,17 +95,18 @@ public class InertialBaselineCalculator
    }
 
    /**
-    * TODO: doc me
-    * @param bodies
+    * Update the tare spatial inertias with the current spatial inertias of the bodies.
+    *
+    * @param bodies the list of bodies to update the tare spatial inertias with. Not modified.
     */
-   public void updateTareSpatialInertias(RigidBodyBasics[] bodies)
+   public void updateTareSpatialInertias(RigidBodyReadOnly[] bodies)
    {
       if (bodies.length != tareSpatialInertias.length)
          throw new RuntimeException("The number of bodies does not match the number of tare spatial inertias.");
 
       for (int i = 0; i < bodies.length; i++)
       {
-         if (!basisSets[i].isEmpty())  // Only tare the bodies we're estimating
+         if (basisSets[i].isEmpty())  // Only tare the bodies we're estimating
             continue;
 
          tareSpatialInertias[i].set(bodies[i].getInertia());
@@ -95,8 +114,9 @@ public class InertialBaselineCalculator
    }
 
    /**
-    * TODO: doc me
-    * @param bodies
+    * Calculate the rate-limited inertial parameter deltas from tare for the bodies that are being estimated.
+    *
+    * @param bodies the list of bodies to calculate the rate-limited inertial parameter deltas from tare for. Not modified.
     */
    public void calculateRateLimitedParameterDeltas(RigidBodyReadOnly[] bodies)
    {
@@ -112,8 +132,9 @@ public class InertialBaselineCalculator
    }
 
    /**
-    * TODO: doc me
-    * @param bodies
+    * Add the rate-limited inertial parameter deltas to the URDF spatial inertias.
+    *
+    * @param bodies the list of bodies to add and pack the inertial parameter deltas into. Modified.
     */
    public void addRateLimitedParameterDeltas(RigidBodyBasics[] bodies)
    {
