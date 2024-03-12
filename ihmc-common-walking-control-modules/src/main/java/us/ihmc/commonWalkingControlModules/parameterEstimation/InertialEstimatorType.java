@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.parameterEstimation;
 
 /**
- * TODO: doc me
+ * This enum represents the types of inertial parameter estimators currently implemented.
  */
 public enum InertialEstimatorType
 {
