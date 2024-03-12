@@ -7,8 +7,8 @@ uint32 id
 # If the action is next for execution
 bool is_next_for_execution
 
-# If the action is to be executed concurrently
-bool is_to_be_executed_concurrently
+# The maximum number of actions that might be executing while this one is
+uint16 concurrency_rank
 
 # If the node is able to execution
 bool can_execute

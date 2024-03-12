@@ -43,7 +43,6 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
    private final ImDoubleWrapper trajectoryDurationWidget;
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
-   private final ImBooleanWrapper executeWithNextActionWrapper;
    private final MutableReferenceFrame graphicFrame = new MutableReferenceFrame();
    private final MutableReferenceFrame collisionShapeFrame = new MutableReferenceFrame();
    private boolean isMouseHovering = false;
@@ -88,9 +87,6 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
       trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
                                                      getDefinition()::setTrajectoryDuration,
                                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
-      executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
-                                                          getDefinition()::setExecuteWithNextAction,
-                                                          imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
 
       String pelvisBodyName = syncedFullRobotModel.getPelvis().getName();
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(pelvisBodyName));
@@ -159,8 +155,6 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
    protected void renderImGuiWidgetsInternal()
    {
       ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());
-      ImGui.sameLine();
-      executeWithNextActionWrapper.renderImGuiWidget();
       parentFrameComboBox.render();
       ImGui.pushItemWidth(80.0f);
       heightWidget.renderImGuiWidget();

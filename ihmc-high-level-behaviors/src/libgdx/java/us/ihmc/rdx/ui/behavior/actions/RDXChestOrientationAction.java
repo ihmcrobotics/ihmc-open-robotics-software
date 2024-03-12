@@ -38,7 +38,6 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    private final ChestOrientationActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean adjustGoalPose = new ImBoolean();
-   private final ImBooleanWrapper executeWithNextActionWrapper;
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImDoubleWrapper yawWidget;
@@ -75,9 +74,6 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
       poseGizmo.create(panel3D);
 
       // TODO: Can all this be condensed?
-      executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
-                                                          getDefinition()::setExecuteWithNextAction,
-                                                          imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
       holdPoseInWorldLaterWrapper = new ImBooleanWrapper(getDefinition()::getHoldPoseInWorldLater,
                                                          getDefinition()::setHoldPoseInWorldLater,
                                                          imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
@@ -154,8 +150,6 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    protected void renderImGuiWidgetsInternal()
    {
       ImGui.checkbox(labels.get("Adjust Goal Pose"), adjustGoalPose);
-      ImGui.sameLine();
-      executeWithNextActionWrapper.renderImGuiWidget();
       holdPoseInWorldLaterWrapper.renderImGuiWidget();
       parentFrameComboBox.render();
       ImGui.pushItemWidth(80.0f);
