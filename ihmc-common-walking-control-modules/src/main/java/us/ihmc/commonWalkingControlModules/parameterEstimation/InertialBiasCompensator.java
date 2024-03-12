@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.parameterEstimation;
 
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -31,7 +30,7 @@ public class InertialBiasCompensator
    /** Where the bias for each degree of freedom is stored after it is calculated. */
    private final YoMatrix bias;
 
-   /** If we choose to temporarily exclude the bias, but not overwrite its value,  we need an appropriately sized zero matrix as a placeholder. */
+   /** If we choose to temporarily exclude the bias, but not overwrite its value, we need an appropriately sized zero matrix as a placeholder. */
    private static DMatrixRMaj ZERO_MATRIX;
 
    public InertialBiasCompensator(int nDoFs, int windowSize, String[] rowNames, YoRegistry parentRegistry)
@@ -42,54 +41,49 @@ public class InertialBiasCompensator
       counter = 0;
       this.windowSize = windowSize;
       measurements = new double[nDoFs][windowSize];
-      bias = new YoMatrix("bias", nDoFs, 1, rowNames, null, registry);
+      bias = new YoMatrix("bias_", nDoFs, 1, rowNames, null, registry);
 
       ZERO_MATRIX = new DMatrixRMaj(nDoFs, 1);
-      ZERO_MATRIX.zero();  // Just to make sure
    }
 
    /**
-    * Updates the measurements with the new measurement, if the window is not full. If the window is full, the measurement is not stored.
+    * Updates the measurements with the new measurement, if the window is not full. If the window is full, the bias is calculated.
     *
     * @param measurement the new measurement to be stored.
+    * @return whether the window is full.
     */
-   public void update(DMatrix measurement)
+   public boolean update(DMatrix measurement)
    {
-      if (counter < windowSize)
+      boolean isWindowFilled = counter == windowSize;
+
+      if (isWindowFilled)
+      {
+         calculateBias();
+      }
+      else
+      {
          for (int index = 0; index < measurement.getNumRows(); ++index)
             measurements[index][counter] = measurement.get(index, 0);
-      else
-         LogTools.info("InertialBiasCompensator: window size exceeded, measurement not stored");
+
+         counter++;
+      }
+
+      return isWindowFilled;
    }
 
    /**
-    * Calculates the bias for each degree of freedom by averaging the measurements in the window. If the window is not full, the bias is not calculated.
+    * Calculates the bias for each degree of freedom by averaging the measurements in the window.
     */
    public void calculateBias()
    {
-      if (isWindowFilled())
+      for (int i = 0; i < measurements.length; ++i)
       {
-         for (int i = 0; i < measurements.length; ++i)
-         {
-            double sum = 0;
-            for (int j = 0; j < windowSize; ++j)
-               sum += measurements[i][j];
+         double sum = 0;
+         for (int j = 0; j < windowSize; ++j)
+            sum += measurements[i][j];
 
-            bias.set(i, 0, sum / windowSize);
-         }
+         bias.set(i, 0, sum / windowSize);
       }
-      else
-      {
-         LogTools.info("InertialBiasCompensator: window not filled, bias not calculated");
-      }
-   }
-
-   /**
-    * It is the responsibility of external callers to increment the counter, this class only tracks whether the window has been filled or not.
-    */
-   public void incrementCounter()
-   {
-      counter++;
    }
 
    public void reset()
@@ -99,13 +93,6 @@ public class InertialBiasCompensator
       for (int i = 0; i < measurements.length; ++i)
          for (int j = 0; j < windowSize; ++j)
             measurements[i][j] = 0;
-
-      bias.zero();
-   }
-
-   public boolean isWindowFilled()
-   {
-      return counter == windowSize;
    }
 
    public DMatrix getBias()
