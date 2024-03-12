@@ -14,17 +14,31 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class HandWrenchActionDefinition extends ActionNodeDefinition implements SidedObject
 {
+   public static final double DEFAULT_FORCE = 5.0;
+   public static final double DEFAULT_TORQUE = 5.0;
+
    private final CRDTUnidirectionalEnumField<RobotSide> side;
    private final CRDTUnidirectionalDouble trajectoryDuration;
-   private final CRDTUnidirectionalDouble force;
+   private final CRDTUnidirectionalDouble forceX;
+   private final CRDTUnidirectionalDouble forceY;
+   private final CRDTUnidirectionalDouble forceZ;
+   private final CRDTUnidirectionalDouble torqueX;
+   private final CRDTUnidirectionalDouble torqueY;
+   private final CRDTUnidirectionalDouble torqueZ;
+
 
    public HandWrenchActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 
       side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
-      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1000.0);
-      force = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 20.0);
+      trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.0);
+      forceX = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_FORCE);
+      forceY = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_FORCE);
+      forceZ = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_FORCE);
+      torqueX = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_TORQUE);
+      torqueY = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_TORQUE);
+      torqueZ = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_TORQUE);
    }
 
    @Override
@@ -34,7 +48,12 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
 
       jsonNode.put("side", side.getValue().getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration.getValue());
-      jsonNode.put("force", force.getValue());
+      jsonNode.put("forceX", forceX.getValue());
+      jsonNode.put("forceY", forceY.getValue());
+      jsonNode.put("forceZ", forceZ.getValue());
+      jsonNode.put("torqueX", torqueX.getValue());
+      jsonNode.put("torqueY", torqueY.getValue());
+      jsonNode.put("torqueZ", torqueZ.getValue());
    }
 
    @Override
@@ -44,7 +63,12 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
 
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
-      force.setValue(jsonNode.get("force").asDouble());
+      forceX.setValue(jsonNode.get("forceX").asDouble());
+      forceY.setValue(jsonNode.get("forceY").asDouble());
+      forceZ.setValue(jsonNode.get("forceZ").asDouble());
+      torqueX.setValue(jsonNode.get("torqueX").asDouble());
+      torqueY.setValue(jsonNode.get("torqueY").asDouble());
+      torqueZ.setValue(jsonNode.get("torqueZ").asDouble());
    }
 
    public void toMessage(HandWrenchActionDefinitionMessage message)
@@ -53,7 +77,12 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
 
       message.setRobotSide(side.toMessage().toByte());
       message.setTrajectoryDuration(trajectoryDuration.toMessage());
-      message.setForce(force.toMessage());
+      message.setForceX(forceX.toMessage());
+      message.setForceY(forceY.toMessage());
+      message.setForceZ(forceZ.toMessage());
+      message.setTorqueX(torqueX.toMessage());
+      message.setTorqueY(torqueY.toMessage());
+      message.setTorqueZ(torqueZ.toMessage());
    }
 
    public void fromMessage(HandWrenchActionDefinitionMessage message)
@@ -62,24 +91,19 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
 
       side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
       trajectoryDuration.fromMessage(message.getTrajectoryDuration());
-      force.fromMessage(message.getForce());
+      forceX.fromMessage(message.getForceX());
+      forceY.fromMessage(message.getForceY());
+      forceZ.fromMessage(message.getForceZ());
+      torqueX.fromMessage(message.getTorqueX());
+      torqueY.fromMessage(message.getTorqueY());
+      torqueZ.fromMessage(message.getTorqueZ());
    }
 
    public double getTrajectoryDuration()
    {
       return trajectoryDuration.getValue();
    }
-
-   public double getForce()
-   {
-      return force.getValue();
-   }
-
-   public void setForce(double force)
-   {
-      this.force.setValue(force);
-   }
-
+   
    @Override
    public RobotSide getSide()
    {
@@ -94,5 +118,65 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
    public void setSide(RobotSide side)
    {
       this.side.setValue(side);
+   }
+
+   public double getForceX()
+   {
+      return forceX.getValue();
+   }
+
+   public void setForceX(double force)
+   {
+      this.forceX.setValue(force);
+   }
+
+   public double getForceY()
+   {
+      return forceY.getValue();
+   }
+
+   public void setForceY(double force)
+   {
+      this.forceY.setValue(force);
+   }
+
+   public double getForceZ()
+   {
+      return forceZ.getValue();
+   }
+
+   public void setForceZ(double force)
+   {
+      this.forceZ.setValue(force);
+   }
+
+   public double getTorqueX()
+   {
+      return torqueX.getValue();
+   }
+
+   public void setTorqueX(double force)
+   {
+      this.torqueX.setValue(force);
+   }
+
+   public double getTorqueY()
+   {
+      return torqueY.getValue();
+   }
+
+   public void setTorqueY(double force)
+   {
+      this.torqueY.setValue(force);
+   }
+
+   public double getTorqueZ()
+   {
+      return torqueZ.getValue();
+   }
+
+   public void setTorqueZ(double force)
+   {
+      this.torqueZ.setValue(force);
    }
 }

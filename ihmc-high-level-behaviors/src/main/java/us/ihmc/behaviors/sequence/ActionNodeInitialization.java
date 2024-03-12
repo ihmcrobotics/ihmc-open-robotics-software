@@ -45,6 +45,13 @@ public class ActionNodeInitialization
          }
          handPoseAction.update();
       }
+      else if (newAction instanceof HandWrenchActionState handWrenchAction)
+      {
+         handWrenchAction.getDefinition().setSide(sideOfNewAction);
+//         handWrenchAction.getDefinition()
+//                             .setObjectFrameName(findConvenientParentFrameName(actionSequence, HandWrenchActionState.class, indexOfInsertion, sideOfNewAction));
+         handWrenchAction.getState().update();
+      }
       else if (newAction instanceof ScrewPrimitiveActionState screwPrimitiveAction)
       {
          screwPrimitiveAction.getDefinition().setSide(sideOfNewAction);

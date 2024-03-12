@@ -22,13 +22,37 @@ module behavior_msgs
         @defaultValue(value=255)
         octet robot_side;
         /**
+         * Name of the frame the this action is expressed in
+         */
+        string parent_frame_name;
+        /**
          * The trajectory duration
          */
         double trajectory_duration;
         /**
-         * Amount of force to use
+         * Amount of force to use along X
          */
-        double force;
+        double force_x;
+        /**
+         * Amount of force to use along Y
+         */
+        double force_y;
+        /**
+         * Amount of force to use along Z
+         */
+        double force_z;
+        /**
+         * Amount of torque to use along X
+         */
+        double torque_x;
+        /**
+         * Amount of torque to use along Y
+         */
+        double torque_y;
+        /**
+         * Amount of torque to use along Z
+         */
+        double torque_z;
       };
     };
   };

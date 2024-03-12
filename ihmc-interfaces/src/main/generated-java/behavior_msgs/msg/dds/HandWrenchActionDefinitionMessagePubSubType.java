@@ -15,7 +15,7 @@ public class HandWrenchActionDefinitionMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "21f0be9357ac4fe890b79899384646285e350c0238d220d39fa3284e15a268eb";
+   		return "db19194024d4878b5feb63ef3c5268d9d18503a1cd7e2b588b23ac7bd2e9df0e";
    }
    
    @Override
@@ -56,6 +56,17 @@ public class HandWrenchActionDefinitionMessagePubSubType implements us.ihmc.pubs
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -78,6 +89,23 @@ public class HandWrenchActionDefinitionMessagePubSubType implements us.ihmc.pubs
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParentFrameName().length() + 1;
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -93,9 +121,23 @@ public class HandWrenchActionDefinitionMessagePubSubType implements us.ihmc.pubs
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       cdr.write_type_9(data.getRobotSide());
 
+      if(data.getParentFrameName().length() <= 255)
+      cdr.write_type_d(data.getParentFrameName());else
+          throw new RuntimeException("parent_frame_name field exceeds the maximum length");
+
       cdr.write_type_6(data.getTrajectoryDuration());
 
-      cdr.write_type_6(data.getForce());
+      cdr.write_type_6(data.getForceX());
+
+      cdr.write_type_6(data.getForceY());
+
+      cdr.write_type_6(data.getForceZ());
+
+      cdr.write_type_6(data.getTorqueX());
+
+      cdr.write_type_6(data.getTorqueY());
+
+      cdr.write_type_6(data.getTorqueZ());
 
    }
 
@@ -104,9 +146,20 @@ public class HandWrenchActionDefinitionMessagePubSubType implements us.ihmc.pubs
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       data.setRobotSide(cdr.read_type_9());
       	
+      cdr.read_type_d(data.getParentFrameName());	
       data.setTrajectoryDuration(cdr.read_type_6());
       	
-      data.setForce(cdr.read_type_6());
+      data.setForceX(cdr.read_type_6());
+      	
+      data.setForceY(cdr.read_type_6());
+      	
+      data.setForceZ(cdr.read_type_6());
+      	
+      data.setTorqueX(cdr.read_type_6());
+      	
+      data.setTorqueY(cdr.read_type_6());
+      	
+      data.setTorqueZ(cdr.read_type_6());
       	
 
    }
@@ -117,8 +170,14 @@ public class HandWrenchActionDefinitionMessagePubSubType implements us.ihmc.pubs
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_9("robot_side", data.getRobotSide());
+      ser.write_type_d("parent_frame_name", data.getParentFrameName());
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
-      ser.write_type_6("force", data.getForce());
+      ser.write_type_6("force_x", data.getForceX());
+      ser.write_type_6("force_y", data.getForceY());
+      ser.write_type_6("force_z", data.getForceZ());
+      ser.write_type_6("torque_x", data.getTorqueX());
+      ser.write_type_6("torque_y", data.getTorqueY());
+      ser.write_type_6("torque_z", data.getTorqueZ());
    }
 
    @Override
@@ -127,8 +186,14 @@ public class HandWrenchActionDefinitionMessagePubSubType implements us.ihmc.pubs
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
       data.setRobotSide(ser.read_type_9("robot_side"));
+      ser.read_type_d("parent_frame_name", data.getParentFrameName());
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
-      data.setForce(ser.read_type_6("force"));
+      data.setForceX(ser.read_type_6("force_x"));
+      data.setForceY(ser.read_type_6("force_y"));
+      data.setForceZ(ser.read_type_6("force_z"));
+      data.setTorqueX(ser.read_type_6("torque_x"));
+      data.setTorqueY(ser.read_type_6("torque_y"));
+      data.setTorqueZ(ser.read_type_6("torque_z"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.HandWrenchActionDefinitionMessage src, behavior_msgs.msg.dds.HandWrenchActionDefinitionMessage dest)
