@@ -11,10 +11,20 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class is used to handle multiple {@link FullHumanoidRobotModel}s and easily copy state between them.
+ *
+ * @param <T> the type of the enum used to identify the purpose of the different robot models.
+ *
+ * @author James Foster
+ */
 public class MultipleHumanoidModelHandler<T extends Enum<T>>
 {
+   /** The map from the enum to the robot model. */
    private final Map<T, FullHumanoidRobotModel> modelMap;
+   /** The map from the enum to the array of rigid bodies in each robot model. */
    private final Map<T, RigidBodyBasics[]> bodyArrayMap;
+   /** The map from the enum to the list of joints in each robot model. */
    private final Map<T, List<? extends JointBasics>> jointListMap;
 
    MultipleHumanoidModelHandler(Class<T> enumClass)
@@ -36,21 +46,6 @@ public class MultipleHumanoidModelHandler<T extends Enum<T>>
       MultiBodySystemTools.copyJointsState(jointListMap.get(source), jointListMap.get(destination), type);
    }
 
-   public FullHumanoidRobotModel getRobotModel(T key)
-   {
-      return modelMap.get(key);
-   }
-
-   public RigidBodyBasics[] getBodyArray(T key)
-   {
-      return bodyArrayMap.get(key);
-   }
-
-   public List<? extends JointBasics> getJointList(T key)
-   {
-      return jointListMap.get(key);
-   }
-
    public void extractJointsState(T key, JointStateType type, DMatrix matrixToPack)
    {
       MultiBodySystemTools.extractJointsState(jointListMap.get(key), type, matrixToPack);
@@ -59,5 +54,15 @@ public class MultipleHumanoidModelHandler<T extends Enum<T>>
    public void insertJointsState(T key, JointStateType type, DMatrix matrix)
    {
       MultiBodySystemTools.insertJointsState(jointListMap.get(key), type, matrix);
+   }
+
+   public FullHumanoidRobotModel getRobotModel(T key)
+   {
+      return modelMap.get(key);
+   }
+
+   public RigidBodyBasics[] getBodyArray(T key)
+   {
+      return bodyArrayMap.get(key);
    }
 }
