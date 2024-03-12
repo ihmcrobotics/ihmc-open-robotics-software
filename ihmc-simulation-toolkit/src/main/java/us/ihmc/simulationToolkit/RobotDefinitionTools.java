@@ -193,7 +193,7 @@ public class RobotDefinitionTools
    // RobotDefinitionLoader redirections:
    // --------------------------------------------------------
 
-   public static RobotDefinition loadURDFModel(InputStream stream,
+   public static RobotDefinition loadURDFModel(Collection<InputStream> stream,
                                                Collection<String> resourceDirectories,
                                                ClassLoader classLoader,
                                                String modelName,

@@ -40,7 +40,7 @@ public class RobotDefinitionLoader
 {
    public static final String DEFAULT_ROOT_BODY_NAME = "elevator";
 
-   public static RobotDefinition loadURDFModel(InputStream stream,
+   public static RobotDefinition loadURDFModel(Collection<InputStream> stream,
                                                Collection<String> resourceDirectories,
                                                ClassLoader classLoader,
                                                String modelName,
@@ -58,7 +58,7 @@ public class RobotDefinitionLoader
                            URDFTools.DEFAULT_URDF_PARSER_PROPERTIES);
    }
 
-   public static RobotDefinition loadURDFModel(InputStream stream,
+   public static RobotDefinition loadURDFModel(Collection<InputStream> stream,
                                                Collection<String> resourceDirectories,
                                                ClassLoader classLoader,
                                                String modelName,
