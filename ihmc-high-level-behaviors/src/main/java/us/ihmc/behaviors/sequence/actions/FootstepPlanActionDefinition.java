@@ -23,7 +23,9 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private final CRDTUnidirectionalString parentFrameName;
    private final CRDTUnidirectionalBoolean isManuallyPlaced;
    private final CRDTUnidirectionalRecyclingArrayList<FootstepPlanActionFootstepDefinition> footsteps;
-   private final CRDTUnidirectionalRigidBodyTransform goalToParentTransform;
+   private final CRDTUnidirectionalDouble goalX;
+   private final CRDTUnidirectionalDouble goalY;
+   private final CRDTUnidirectionalDouble goalYaw;
    private final SideDependentList<CRDTUnidirectionalRigidBodyTransform> goalFootstepToGoalTransforms;
 
    // On disk fields
@@ -47,7 +49,9 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       footsteps = new CRDTUnidirectionalRecyclingArrayList<>(ROS2ActorDesignation.OPERATOR,
                                                              crdtInfo,
                                                              () -> new RecyclingArrayList<>(() -> new FootstepPlanActionFootstepDefinition(crdtInfo)));
-      goalToParentTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo);
+      goalX = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0);
+      goalY = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0);
+      goalYaw = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0);
       goalFootstepToGoalTransforms = new SideDependentList<>(() -> new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo));
    }
 
