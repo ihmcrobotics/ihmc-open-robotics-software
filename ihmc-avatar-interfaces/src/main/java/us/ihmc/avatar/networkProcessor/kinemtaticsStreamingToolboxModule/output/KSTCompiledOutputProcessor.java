@@ -32,8 +32,9 @@ public class KSTCompiledOutputProcessor implements KSTOutputProcessor
       solutionFilterBreakFrequency.set(Double.POSITIVE_INFINITY);
 
       outputProcessors.add(new KSTLowPassFilteredOutputProcessor(tools, solutionFilterBreakFrequency, registry));
-      outputProcessors.add(new KSTFiniteDifferenceOutputProcessor(tools, isPublishing, registry));
+      //      outputProcessors.add(new KSTFiniteDifferenceOutputProcessor(tools, isPublishing, registry));
       outputProcessors.add(new KSTDownscaleVelocityOutputProcessor(tools, outputJointVelocityScale, registry));
+      outputProcessors.add(new KSTFBOutputProcessor(tools, registry));
       outputProcessors.add(new KSTBlendingOutputProcessor(tools, streamingBlendingDuration, registry));
    }
 

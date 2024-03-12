@@ -19,6 +19,7 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -52,6 +53,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
 
    private final KSTTools tools;
 
+   private final ExecutionTimer executionTimer = new ExecutionTimer("IKStreamingTimer", registry);
    private KSTTimeProvider timeProvider = KSTTimeProvider.createCPUClockBased();
    private final YoDouble time = new YoDouble("time", registry);
    private final StateMachine<KSTState, State> stateMachine;
@@ -177,6 +179,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    {
       try
       {
+         executionTimer.startMeasurement();
          timeProvider.update();
          time.set(timeProvider.getTime());
 
@@ -201,6 +204,10 @@ public class KinematicsStreamingToolboxController extends ToolboxController
          }
 
          isDone.set(true);
+      }
+      finally
+      {
+         executionTimer.stopMeasurement();
       }
    }
 

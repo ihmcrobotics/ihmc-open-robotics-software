@@ -15,30 +15,65 @@ public interface KSTOutputDataReadOnly
 
    boolean hasAccelerationData();
 
+   /**
+    * Returns the position of the root joint expressed in world frame.
+    *
+    * @return the position of the root joint.
+    */
    Point3DReadOnly getRootJointPosition();
 
+   /**
+    * Returns the orientation of the root joint expressed in world frame.
+    *
+    * @return the orientation of the root joint.
+    */
    QuaternionReadOnly getRootJointOrientation();
 
+   /**
+    * Returns the linear velocity of the root joint expressed in the local frame of the root joint.
+    *
+    * @return the linear velocity of the root joint.
+    */
    default Vector3DReadOnly getRootJointLinearVelocity()
    {
       return null;
    }
 
+   /**
+    * Returns the angular velocity of the root joint expressed in the local frame of the root joint.
+    *
+    * @return the angular velocity of the root joint.
+    */
    default Vector3DReadOnly getRootJointAngularVelocity()
    {
       return null;
    }
 
+   /**
+    * Returns the linear acceleration of the root joint expressed in the local frame of the root joint.
+    *
+    * @return the linear acceleration of the root joint.
+    */
    default Vector3DReadOnly getRootJointLinearAcceleration()
    {
       return null;
    }
 
+   /**
+    * Returns the angular acceleration of the root joint expressed in the local frame of the root joint.
+    *
+    * @return the angular acceleration of the root joint.
+    */
    default Vector3DReadOnly getRootJointAngularAcceleration()
    {
       return null;
    }
 
+   /**
+    * Returns the number of 1-DoF joints in the robot.
+    *
+    * @return the number of 1-DoF joints.
+    */
    int getNumberOfJoints();
 
    double getJointPosition(int jointIndex);
@@ -55,9 +90,8 @@ public interface KSTOutputDataReadOnly
 
    default void updateRobot(FloatingJointBasics rootJointToUpdate, OneDoFJointBasics[] jointsToUpdate)
    {
-      int jointNameHash = Arrays.hashCode(jointsToUpdate);
 
-      if (jointNameHash != getJointNameHash())
+      if (getJointNameHash() != Arrays.hashCode(jointsToUpdate))
          throw new RuntimeException("The robots are different.");
 
       rootJointToUpdate.getJointPose().getPosition().set(getRootJointPosition());
@@ -81,6 +115,15 @@ public interface KSTOutputDataReadOnly
             jointsToUpdate[i].setQdd(getJointAcceleration(i));
          }
       }
+   }
+
+   default void checkCompatibility(KSTOutputDataReadOnly other)
+   {
+      if (getJointNameHash() != other.getJointNameHash())
+         throw new IllegalArgumentException("Joint name hash does not match, cannot set data from different robot.");
+
+      if (getNumberOfJoints() != other.getNumberOfJoints())
+         throw new IllegalArgumentException("Number of joints does not match, cannot set data from different robot.");
    }
 
    static KSTOutputDataReadOnly wrap(KinematicsToolboxOutputStatus outputStatus)
