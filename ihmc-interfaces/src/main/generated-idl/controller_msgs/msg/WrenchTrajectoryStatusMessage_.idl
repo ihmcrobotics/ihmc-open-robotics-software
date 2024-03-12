@@ -1,0 +1,52 @@
+#ifndef __controller_msgs__msg__WrenchTrajectoryStatusMessage__idl__
+#define __controller_msgs__msg__WrenchTrajectoryStatusMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      /**
+       * The trajectory input was received and accepted, the execution just started.
+       */
+      const octet TRAJECTORY_EXECUTION_STATUS_STARTED =
+      0;
+
+      /**
+       * The trajectory input was received, accepted, and its execution just finished.
+       */
+      const octet TRAJECTORY_EXECUTION_STATUS_COMPLETED =
+      1;
+
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * The walking controller uses this message to report when it completed the execution of a trajectory message.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::WrenchTrajectoryStatusMessage_")
+      struct WrenchTrajectoryStatusMessage
+      {
+        /**
+         * Unique ID of the trajectory message this status refers to.
+         */
+        unsigned long sequence_id;
+        /**
+         * Refers to the name of the end-effector that executed the trajectory.
+         */
+        string end_effector_name;
+        /**
+         * The current status for the trajectory execution.
+         */
+        @defaultValue(value=255)
+        octet trajectory_execution_status;
+        /**
+         * Time in trajectory in seconds.
+         */
+        double timestamp;
+      };
+    };
+  };
+};
+
+#endif
