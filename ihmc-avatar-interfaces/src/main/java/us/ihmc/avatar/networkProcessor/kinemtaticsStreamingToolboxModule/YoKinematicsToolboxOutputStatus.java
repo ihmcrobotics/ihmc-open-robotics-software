@@ -359,4 +359,14 @@ public class YoKinematicsToolboxOutputStatus implements KSTOutputDataBasics
          return;
       jointAccelerations[jointIndex].set(acceleration);
    }
+
+   public FloatingJointBasics getRootJoint()
+   {
+      return rootJoint;
+   }
+
+   public OneDoFJointBasics[] getOneDoFJoints()
+   {
+      return oneDoFJoints;
+   }
 }
