@@ -48,7 +48,7 @@ public class YoInertiaEllipsoid
       int rgbInt = ColorDefinitions.toRGBA(rgbColor[0], rgbColor[1], rgbColor[2], opacityAlpha);
       this.setColor(rgbInt);
 
-      /* Set up the inerial properties of the YoInertiaELlipsoid and the Ellipsoid3DDefinition */
+      /* Set up the inertial properties of the YoInertiaEllipsoid and the Ellipsoid3DDefinition */
       RigidBodyDefinition rigidBodyDefinition = convertRigidBodyToRigidBodyDefinition(rigidBody);
       ellipsoidDefinition = convertRobotMassPropertiesToInertiaEllipsoid(rigidBodyDefinition);
    }
@@ -63,7 +63,6 @@ public class YoInertiaEllipsoid
     */
    public void update(double scale)
    {
-      //TODO: Add more functionality to the update for radii and COM offset
       int[] rgbColor = InertiaVisualizationTools.getRGBForCoolwarmColorMap(scale);
       int opacityAlpha = (int) (0.6 * 255);
       int rgbInt = ColorDefinitions.toRGBA(rgbColor[0], rgbColor[1], rgbColor[2], opacityAlpha);
@@ -136,7 +135,6 @@ public class YoInertiaEllipsoid
       return ellipsoid;
    }
 
-   //TODO: Extract the important parts of the RigidBodyReadOnly in a smarter way and remove this method
    private static RigidBodyDefinition convertRigidBodyToRigidBodyDefinition(RigidBodyReadOnly rigidBody)
    {
       RigidBodyDefinition rigidBodyDefinition = new RigidBodyDefinition(rigidBody.getName());
