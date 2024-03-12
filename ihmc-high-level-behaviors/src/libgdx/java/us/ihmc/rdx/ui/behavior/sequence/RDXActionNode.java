@@ -120,12 +120,15 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
 
             for (ActionNodeState<?> actionChild : actionSequence.getActionChildren())
             {
-               if (ImGui.selectable(labels.get(actionChild.getDefinition().getName()), definition.getExecuteAfterNodeID().getValue() == actionChild.getID()))
+               if (actionChild.getActionIndex() < state.getActionIndex())
                {
-                  definition.getExecuteAfterPrevious().setValue(false);
-                  definition.getExecuteAfterBeginning().setValue(false);
-                  definition.getExecuteAfterNodeID().setValue((int) actionChild.getID());
-                  definition.updateAndSanitizeExecuteAfterFields(actionChild.getDefinition().getName());
+                  if (ImGui.selectable(labels.get(actionChild.getDefinition().getName()), definition.getExecuteAfterNodeID().getValue() == actionChild.getID()))
+                  {
+                     definition.getExecuteAfterPrevious().setValue(false);
+                     definition.getExecuteAfterBeginning().setValue(false);
+                     definition.getExecuteAfterNodeID().setValue((int) actionChild.getID());
+                     definition.updateAndSanitizeExecuteAfterFields(actionChild.getDefinition().getName());
+                  }
                }
             }
 
