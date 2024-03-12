@@ -3,7 +3,6 @@ package us.ihmc.behaviors.behaviorTree;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperations;
-import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.log.LogTools;
@@ -11,8 +10,6 @@ import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
-
-import java.util.List;
 
 /**
  * Tool to load all JSON files and resave them all in order to perform
@@ -41,39 +38,7 @@ public class BehaviorTreeJSONSanitizer
                loadedRootNode.setValue(loadFromFile(jsonNode, null));
             });
 
-//            performConversionExecuteWithNextToExecuteAfter(loadedRootNode);
-
             loadedRootNode.getValue().saveToFile();
-         }
-      }
-   }
-
-   private static void performConversionExecuteWithNextToExecuteAfter(MutableObject<BehaviorTreeNodeDefinition> loadedRootNode)
-   {
-      List<ActionNodeDefinition> actionList = BehaviorTreeTools.buildListOfActionDefinitions(loadedRootNode.getValue());
-
-      String executeAfter = ActionNodeDefinition.EXECUTE_AFTER_BEGINNING;
-
-      if (!actionList.isEmpty())
-      {
-         for (int i = 0; i < actionList.size(); i++)
-         {
-            ActionNodeDefinition currentAction = actionList.get(i);
-
-//            if (i == 0 || executeAfter.equals(actionList.get(i - 1).getName()))
-//            {
-//               if (!currentAction.hasExecuterAfter)
-//                  currentAction.setExecuteAfterAction(ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS);
-//            }
-//            else
-//            {
-//               if (!currentAction.hasExecuterAfter)
-//                  currentAction.setExecuteAfterAction(executeAfter);
-//            }
-//            if (!currentAction.executeWithNext)
-//            {
-//               executeAfter = currentAction.getName();
-//            }
          }
       }
    }
