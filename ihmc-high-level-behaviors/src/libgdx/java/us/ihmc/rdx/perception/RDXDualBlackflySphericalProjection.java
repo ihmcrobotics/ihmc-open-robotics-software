@@ -24,7 +24,6 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -33,9 +32,7 @@ import java.util.Set;
 public class RDXDualBlackflySphericalProjection
 {
    private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(RDXProjectionSphere::new);
-   // As you approach infinite distance, pupillary distance needs to be 1
-   // Close up things look good with a pupillary distance of ~2.0
-   private final ImDouble pupillaryDistance = new ImDouble(0.050000);
+   private final ImDouble pupillaryDistance = new ImDouble(0.0);
    private final FramePose3D leftEyePose = new FramePose3D();
    private final FramePose3D rightEyePose = new FramePose3D();
    private final ReferenceFrame offsetFrame;
@@ -63,21 +60,16 @@ public class RDXDualBlackflySphericalProjection
 
    public void renderControls()
    {
-      if (ImGuiTools.sliderDouble(labels.get("Pupillary distance"), pupillaryDistance, -15, 15))
+      if (ImGuiTools.sliderDouble(labels.get("Pupillary distance"), pupillaryDistance, -2, 2))
       {
 
       }
       ImGui.separator();
-      ImGuiTools.textBold("Left:");
-      ImGui.indent();
       projectionSpheres.get(RobotSide.LEFT).renderImGuiWidgets();
-      ImGui.unindent();
-      ImGui.separator();
-      ImGuiTools.textBold("Right:");
-      ImGui.indent();
-      projectionSpheres.get(RobotSide.RIGHT).renderImGuiWidgets();
-      ImGui.unindent();
-      ImGui.separator();
+
+      projectionSpheres.get(RobotSide.RIGHT).setProjectionScaleX(projectionSpheres.get(RobotSide.LEFT).getProjectionScaleX());
+      projectionSpheres.get(RobotSide.RIGHT).setProjectionScaleY(projectionSpheres.get(RobotSide.LEFT).getProjectionScaleY());
+      projectionSpheres.get(RobotSide.RIGHT).setRadius(projectionSpheres.get(RobotSide.LEFT).getRadius());
    }
 
    public boolean isConnectingOrConnected()
@@ -193,10 +185,9 @@ public class RDXDualBlackflySphericalProjection
          offsetFrame.update();
          leftEyePose.getTranslation().setY(pupillaryDistance.get() / 2);
          rightEyePose.getTranslation().setY(-pupillaryDistance.get() / 2);
-//         leftEyePose.getTranslation().setZ(0.2);
-//         rightEyePose.getTranslation().setZ(0.2);
-//         leftEyePose.getTranslation().setX(0.2);
-//         rightEyePose.getTranslation().setX(0.2);
+
+         leftEyePose.getTranslation().setZ(0.2);
+         rightEyePose.getTranslation().setZ(0.2);
 
          RigidBodyTransform leftEyePoseWorld = new RigidBodyTransform(leftEyePose);
          leftEyePoseWorld.preMultiply(leftEyePose.getReferenceFrame().getTransformToRoot());

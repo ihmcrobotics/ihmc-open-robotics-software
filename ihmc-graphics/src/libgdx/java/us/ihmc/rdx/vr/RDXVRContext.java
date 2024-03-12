@@ -1,30 +1,46 @@
 package us.ihmc.rdx.vr;
 
-import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
-import static org.lwjgl.openvr.VRSystem.VRSystem_GetStringTrackedDeviceProperty;
-
-import java.nio.IntBuffer;
-import java.nio.LongBuffer;
-import java.util.*;
-import java.util.function.Consumer;
-
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.*;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.BufferUtils;
+import com.badlogic.gdx.utils.GdxRuntimeException;
+import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL41;
-import org.lwjgl.openvr.*;
-
+import org.lwjgl.openvr.OpenVR;
+import org.lwjgl.openvr.TrackedDevicePose;
+import org.lwjgl.openvr.VR;
+import org.lwjgl.openvr.VRActiveActionSet;
+import org.lwjgl.openvr.VRCompositor;
+import org.lwjgl.openvr.VREvent;
+import org.lwjgl.openvr.VRInput;
+import org.lwjgl.openvr.VRSystem;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.io.*;
+import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.JSONTools;
+import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.io.WorkspaceResourceFile;
+
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Consumer;
+
+import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
+import static org.lwjgl.openvr.VRSystem.VRSystem_GetStringTrackedDeviceProperty;
 
 /**
  * Responsible for initializing the VR system, managing rendering surfaces,
@@ -97,8 +113,8 @@ public class RDXVRContext
                                                                            openVRYUpToIHMCZUpSpace);
    private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
    private final RDXVRHeadset headset = new RDXVRHeadset(vrPlayAreaYUpZBackFrame);
-   private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RobotSide.LEFT, vrPlayAreaYUpZBackFrame),
-                                                                                          new RDXVRController(RobotSide.RIGHT, vrPlayAreaYUpZBackFrame));
+   private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RDXVRControllerModel.UNKNOWN, RobotSide.LEFT, vrPlayAreaYUpZBackFrame),
+                                                                                          new RDXVRController(RDXVRControllerModel.UNKNOWN, RobotSide.RIGHT, vrPlayAreaYUpZBackFrame));
    private final Map<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
    private final Map<String, RDXVRTracker> trackers = new HashMap<>();
 
@@ -143,9 +159,10 @@ public class RDXVRContext
 
       VRInput.VRInput_GetActionSetHandle("/actions/main", mainActionSetHandle);
       headset.initSystem();
-      for (RobotSide side : RobotSide.values)
+      for (RDXVRController controller : controllers)
       {
-         controllers.get(side).initSystem();
+         controller.setModel(controllerModel);
+         controller.initSystem();
       }
       // TODO: Bindings for /user/gamepad
       int[] deviceIndices = new int[TRACKER_SERIAL_MAP.size()];
@@ -244,6 +261,11 @@ public class RDXVRContext
    {
       String serialNumber = VRSystem_GetStringTrackedDeviceProperty(index, VR.ETrackedDeviceProperty_Prop_SerialNumber_String, null);
       return serialNumber;
+   }
+
+   public SideDependentList<RDXVRController> getControllers()
+   {
+      return controllers;
    }
 
    private String getTrackedBodySegment(String serialNumber)
@@ -395,7 +417,7 @@ public class RDXVRContext
       return eyes;
    }
 
-   public ReferenceFrame getOpenVRPlayAreaYUpFrame()
+   public ReferenceFrame getPlayAreaYUpFrame()
    {
       return vrPlayAreaYUpZBackFrame;
    }

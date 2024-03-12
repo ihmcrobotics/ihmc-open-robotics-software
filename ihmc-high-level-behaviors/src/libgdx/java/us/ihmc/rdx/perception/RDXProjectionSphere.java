@@ -1,11 +1,13 @@
 package us.ihmc.rdx.perception;
 
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -31,19 +33,20 @@ public class RDXProjectionSphere
 {
    private ModelInstance modelInstance;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImDouble sphereRadius = new ImDouble(0.4);
+   private final ImDouble sphereRadius = new ImDouble(1);
    private final ImInt sphereLatitudeVertices = new ImInt(100);
    private final ImInt sphereLongitudeVertices = new ImInt(100);
    private final ImBoolean syncProjectionScales = new ImBoolean(false);
-   private final ImDouble focalLengthX = new ImDouble(1.021179);
-   private final ImDouble focalLengthY = new ImDouble(0.851301);
-   private final ImDouble principlePointX = new ImDouble(-0.800000);
+   private final ImDouble focalLengthX = new ImDouble(0.438740);
+   private final ImDouble focalLengthY = new ImDouble(0.600528);
+   private final ImDouble principlePointX = new ImDouble(0.0);
    private final ImDouble principlePointY = new ImDouble(0.0);
    private final ImBoolean renderSphereIfNoTexture = new ImBoolean(true);
    private Model model;
    private final Vector3D vertexRay = new Vector3D();
    private Mesh mesh;
    private Texture latestTexture;
+   private boolean rebuildMesh = false;
 
    public void create()
    {
@@ -52,8 +55,7 @@ public class RDXProjectionSphere
 
    public void renderImGuiWidgets()
    {
-      boolean rebuildMesh = false;
-      rebuildMesh |= ImGuiTools.volatileInputDouble(labels.get("Sphere radius"), sphereRadius);
+      rebuildMesh |= ImGuiTools.sliderDouble(labels.get("Sphere radius"), sphereRadius, 0.2, 5);
       rebuildMesh |= ImGuiTools.volatileInputInt(labels.get("Sphere latitude vertices"), sphereLatitudeVertices);
       rebuildMesh |= ImGuiTools.volatileInputInt(labels.get("Sphere longitude vertices"), sphereLongitudeVertices);
       rebuildMesh |= ImGui.checkbox(labels.get("Sync projection scales"), syncProjectionScales);
@@ -74,6 +76,8 @@ public class RDXProjectionSphere
 
       if (rebuildMesh)
          rebuildUVSphereMesh();
+
+      rebuildMesh = false;
    }
 
    /** Only needs to be done when parameters change, not the texture.*/
@@ -126,6 +130,7 @@ public class RDXProjectionSphere
          this.latestTexture.dispose();
       this.latestTexture = texture;
       Material material = model.nodes.get(0).parts.get(0).material;
+      material.set(new BlendingAttribute(0.7f));
       material.set(TextureAttribute.createDiffuse(texture));
       modelInstance = new ModelInstance(model);
    }
@@ -143,5 +148,38 @@ public class RDXProjectionSphere
    public ModelInstance getModelInstance()
    {
       return modelInstance;
+   }
+
+   public double getProjectionScaleX()
+   {
+      return this.focalLengthX.get();
+   }
+
+   public void setProjectionScaleX(double projectionScaleX)
+   {
+      this.focalLengthX.set(projectionScaleX);
+      rebuildMesh = true;
+   }
+
+   public double getProjectionScaleY()
+   {
+      return this.focalLengthY.get();
+   }
+
+   public void setProjectionScaleY(double projectionScaleY)
+   {
+      this.focalLengthY.set(projectionScaleY);
+      rebuildMesh = true;
+   }
+
+   public double getRadius()
+   {
+      return this.sphereRadius.get();
+   }
+
+   public void setRadius(double radius)
+   {
+      this.sphereRadius.set(radius);
+      rebuildMesh = true;
    }
 }

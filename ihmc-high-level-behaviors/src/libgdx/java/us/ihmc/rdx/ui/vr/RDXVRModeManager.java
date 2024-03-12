@@ -87,9 +87,6 @@ public class RDXVRModeManager
       {
          vrContext.getController(side).runIfConnected(controller ->
          {
-            // During kinematic streaming, the only way to get out of it is the left hand panel.
-            controller.setExclusiveAccess(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING ? leftHandPanel : null);
-
             if (side == RobotSide.LEFT)
             {
                leftHandPanelPose.setToZero(controller.getXForwardZUpControllerFrame());
@@ -118,6 +115,7 @@ public class RDXVRModeManager
          kinematicsStreamingMode.update(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING);
       leftHandPanel.update();
       joystickBasedStepping.update(mode == RDXVRMode.JOYSTICK_WALKING);
+      vrModeControls.update();
    }
 
    public void renderImGuiWidgets()

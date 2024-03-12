@@ -57,6 +57,7 @@ public class RDXVRController extends RDXVRTrackedDevice
    public static final double JOYSTICK_ZERO_THRESHOLD = 0.3;
 
    private final RobotSide side;
+   private RDXVRControllerModel model;
 
    private final LongBuffer inputSourceHandle = BufferUtils.newLongBuffer(1);
    private InputOriginInfo.Buffer inputOriginInfo;
@@ -117,7 +118,6 @@ public class RDXVRController extends RDXVRTrackedDevice
    private final ImGuiRigidBodyTransformTuner pickPoseTransformTuner;
    private final ArrayList<RDXVRPickResult> pickResults = new ArrayList<>();
    private RDXVRPickResult selectedPick;
-   private Object exclusiveAccess = null;
    private final FrameLine3D pickRay = new FrameLine3D();
    private final FramePoint3D pickCollisionPoint = new FramePoint3D();
    private RDXModelInstance pickPoseSphere;
@@ -130,9 +130,10 @@ public class RDXVRController extends RDXVRTrackedDevice
    private final RDXVRDragData triggerDragData;
    private final RDXVRDragData gripDragData;
 
-   public RDXVRController(RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
+   public RDXVRController(RDXVRControllerModel model, RobotSide side, ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
       super(vrPlayAreaYUpZBackFrame);
+      this.model = model;
       this.side = side;
 
       xForwardZUpControllerFrame
@@ -269,18 +270,13 @@ public class RDXVRController extends RDXVRTrackedDevice
 
       for (RDXVRPickResult pickResult : pickResults)
       {
-         // This is done so certain things in the UI can operate without accidental interactions
-         // with other stuff.
-         if (exclusiveAccess == null || pickResult.getObjectBeingPicked() == exclusiveAccess)
+         if (selectedPick == null)
          {
-            if (selectedPick == null)
-            {
-               selectedPick = pickResult;
-            }
-            else if (pickResult.getDistanceToControllerPickPoint() < selectedPick.getDistanceToControllerPickPoint())
-            {
-               selectedPick = pickResult;
-            }
+            selectedPick = pickResult;
+         }
+         else if (pickResult.getDistanceToControllerPickPoint() < selectedPick.getDistanceToControllerPickPoint())
+         {
+            selectedPick = pickResult;
          }
       }
 
@@ -359,6 +355,16 @@ public class RDXVRController extends RDXVRTrackedDevice
    public void setPickPointColliding(Point3DReadOnly closestPointOnSurface)
    {
       LibGDXTools.toLibGDX(closestPointOnSurface, pickRayCollisionPointGraphic.transform);
+   }
+
+   public RDXVRControllerModel getModel()
+   {
+      return model;
+   }
+
+   public void setModel(RDXVRControllerModel model)
+   {
+      this.model = model;
    }
 
    public RDXModelInstance getPickPoseSphere()
@@ -507,21 +513,6 @@ public class RDXVRController extends RDXVRTrackedDevice
       return anythingElseBeingDragged;
    }
 
-   /**
-    * Use to declare exclusive access to this controller.
-    * This is useful to prevent unwanted actions from happening
-    * when using the controller for specific functions.
-    */
-   public void setExclusiveAccess(Object exclusiveAccess)
-   {
-      this.exclusiveAccess = exclusiveAccess;
-   }
-
-   public Object getExclusiveAccess()
-   {
-      return exclusiveAccess;
-   }
-
    public FramePose3DReadOnly getPickPointPose()
    {
       return pickPoseFramePose;
@@ -550,5 +541,11 @@ public class RDXVRController extends RDXVRTrackedDevice
    public RDXVRControllerRadialMenu getRadialMenu()
    {
       return radialMenu;
+   }
+
+   @Override
+   public String toString()
+   {
+      return side.getSideNameFirstLetter() + ":" + getModel();
    }
 }

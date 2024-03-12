@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
@@ -193,9 +194,7 @@ public class RDXVRManager
 
          ImGuiTools.separatorText("Status");
          ImGui.text("Connected headset: " + (isVRReady() ? context.getHeadset().getModelName() : "None"));
-         ImGui.text("Connected controllers: " + (isVRReady() ?
-               context.getController(RobotSide.LEFT).getModelName() + " " + context.getController(RobotSide.RIGHT).getModelName() :
-               "None"));
+         ImGui.text("Connected controllers: " + (isVRReady() ? StringUtils.join(context.getControllers(), ", ") : "None"));
 
          if (ImGui.collapsingHeader(labels.get("Debug")))
             renderDebugPlots();
@@ -214,15 +213,15 @@ public class RDXVRManager
 
             ThreadTools.startAThread(() ->
             {
-               ThreadTools.sleep(5000);
+               ThreadTools.sleep(3000);
 
                if (isVRReady())
                {
-                  RDXBaseUI.pushNotification("VR enabled.");
+                  RDXBaseUI.pushNotification("VR enabled");
                }
                else
                {
-                  RDXBaseUI.pushNotification("Unable to enable VR.");
+                  RDXBaseUI.pushNotification("Unable to enable VR");
                   vrEnabled.set(false);
                }
             }, getClass().getName() + "VREnableMonitor");

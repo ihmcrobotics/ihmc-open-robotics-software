@@ -1,6 +1,7 @@
 package us.ihmc.rdx.ui;
 
 import imgui.ImGui;
+import imgui.flag.ImGuiHoveredFlags;
 import imgui.flag.ImGuiWindowFlags;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -28,19 +29,19 @@ public class RDX3DOverlayPanel
 
       ImGui.setNextWindowSize(panelWidth, panelHeight);
       float startX = parent.getWindowPositionX() + (parent.getWindowSizeX() - panelWidth - 5);
-      float startY = previousActiveWindowY;
+      float startY = previousActiveWindowY + 10;
       ImGui.setNextWindowPos(startX, startY);
       ImGui.setNextWindowBgAlpha(windowActiveLerp);
       int windowFlags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse;
       ImGui.begin(labels.get(panelName), windowFlags);
 
-      if (ImGui.isWindowHovered())
+      if (ImGui.isWindowHovered(ImGuiHoveredFlags.ChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem | ImGuiHoveredFlags.AllowWhenBlockedByPopup))
       {
-         windowActiveLerp = 1.0f;
+         windowActiveLerp = 0.9f;
       }
       else
       {
-         windowActiveLerp = (float) InterpolationTools.linearInterpolate(windowActiveLerp, 0.2f, 0.02f);
+         windowActiveLerp = (float) InterpolationTools.linearInterpolate(windowActiveLerp, 0.2f, 0.05f);
       }
 
       imGuiRender.run();

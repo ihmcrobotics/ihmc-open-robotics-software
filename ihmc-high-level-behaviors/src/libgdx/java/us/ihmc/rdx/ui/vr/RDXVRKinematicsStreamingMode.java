@@ -136,7 +136,7 @@ public class RDXVRKinematicsStreamingMode
       {
          handFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          controllerFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
-         handDesiredControlFrames.put(side, new MutableReferenceFrame(vrContext.getController(side).getXForwardZUpControllerFrame()));
+         handDesiredControlFrames.put(side, new MutableReferenceFrame(vrContext.getPlayAreaYUpFrame()));
          Pose3D ikControlFramePose = new Pose3D();
          if (side == RobotSide.LEFT)
          {
