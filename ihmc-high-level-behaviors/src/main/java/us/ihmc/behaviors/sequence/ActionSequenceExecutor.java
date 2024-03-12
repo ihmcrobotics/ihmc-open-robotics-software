@@ -41,37 +41,72 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       updateActionSubtree(this);
 
       // Update concurrency ranks
+      int latestExecuteAfterIndex = 0;
+      int maxConcurrencyAtThisPoint = 1;
+      ArrayList<ActionNodeState<?>> actionsThatCouldBeExecuting = new ArrayList<>();
       for (int i = 0; i < state.getActionChildren().size(); i++)
       {
-         int concurrencyRank = 0;
+         
 
-         // For the rest of the actions, add to the rank for any executing after
-         // something earlier than the previous.
-         for (int j = i; j < state.getActionChildren().size(); j++)
-         {
-            ActionNodeState<?> childToCheck = state.getActionChildren().get(j);
 
-            if (j == i)
-            {
-               ++concurrencyRank;
-            }
-            else
-            {
-               if (childToCheck.getDefinition().getExecuteAfterBeginning().getValue())
-               {
-                  ++concurrencyRank;
-               }
-               else if (!childToCheck.getDefinition().getExecuteAfterPrevious().getValue())
-               {
-                  ActionNodeState<?> executeAfterNode = childToCheck.findActionToExecuteAfter(state.getActionChildren());
+//         =================
+//         int concurrencyRank = 0;
+//
+//         int startIndex = Math.max(state.getActionChildren().get(i).calculateExecuteAfterActionIndex(state.getActionChildren()), 1);
+//
+//         // For the rest of the actions, add to the rank for any executing after
+//         // something earlier than this action
+//         for (int j = startIndex; j < state.getActionChildren().size(); j++)
+//         {
+//            if (state.getActionChildren().get(j).calculateExecuteAfterActionIndex(state.getActionChildren()) < startIndex)
+//               ++concurrencyRank;
+//         }
+//
+//         for (int j = startIndex; j < i; j++)
+//         {
+//            if (state.getActionChildren().get(j).calculateExecuteAfterActionIndex(state.getActionChildren()) > startIndex)
+//               --concurrencyRank;
+//         }
+//
+//         state.getActionChildren().get(i).setConcurrencyRank(concurrencyRank);
+////       ===================
 
-                  if (executeAfterNode.getActionIndex() < i)
-                     ++concurrencyRank;
-               }
-            }
-         }
+//         int executeAfterIndex = state.getActionChildren().get(i).calculateExecuteAfterActionIndex(state.getActionChildren());
+//
+//         if (executeAfterIndex > latestExecuteAfterIndex)
+//         {
+//
+//            for (int j = i )
+//
+//            latestExecuteAfterIndex = executeAfterIndex;
+//            maxConcurrencyAtThisPoint = state.getActionChildren().get(executeAfterIndex).getConcurrencyRank();
+//         }
+//
+//         state.getActionChildren().get(i).setConcurrencyRank(maxConcurrencyAtThisPoint);
+//
+//         for (int j = i - 1; j > i - maxConcurrencyAtThisPoint; j--)
+//            state.getActionChildren().get(j).setConcurrencyRank(maxConcurrencyAtThisPoint);
+//
+//         ++maxConcurrencyAtThisPoint;
 
-         state.getActionChildren().get(i).setConcurrencyRank(concurrencyRank);
+//         int concurrencyRank = 1; // They all are at least 1
+//
+//         // For the rest of the actions, add to the rank for any executing after
+//         // something earlier than this action
+//         for (int j = i + 1; j < state.getActionChildren().size(); j++)
+//            if (state.getActionChildren().get(j).calculateExecuteAfterActionIndex(state.getActionChildren()) < i)
+//               ++concurrencyRank;
+//
+//         state.getActionChildren().get(i).setConcurrencyRank(concurrencyRank);
+//
+//         int k = i;
+//         for (; k < state.getActionChildren().size()
+//             && state.getActionChildren().get(k).calculateExecuteAfterActionIndex(state.getActionChildren()) < i; k++);
+//
+//         int m = k - i;
+//
+//         for (int n = i; n < i + m; n++)
+//            state.getActionChildren().get(n).setConcurrencyRank(Math.max(state.getActionChildren().get(n).getConcurrencyRank(), m));
       }
 
       // Update is next for execution
