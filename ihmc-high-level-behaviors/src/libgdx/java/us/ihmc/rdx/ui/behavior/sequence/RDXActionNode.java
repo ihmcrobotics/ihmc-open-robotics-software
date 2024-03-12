@@ -7,6 +7,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
+import us.ihmc.rdx.imgui.ImGuiFlashingColors;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiHollowArrowRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -30,6 +31,7 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImString rejectionTooltip = new ImString();
    private final RDXActionProgressWidgets progressWidgets = new RDXActionProgressWidgets(this);
+   private final ImGuiFlashingColors isExecutingFlashingColor = new ImGuiFlashingColors(0.1, ImGuiTools.PURPLE, ImGuiTools.DARK_PURPLE);
    private final ImGuiHollowArrowRenderer hollowArrowRenderer = new ImGuiHollowArrowRenderer();
    private final ImGuiFlashingText flashingDescriptionColor = new ImGuiFlashingText(ImGuiTools.RED);
    private boolean wasFailed = false;
@@ -72,7 +74,9 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
             ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGuiTools.calcTextSizeX("2") + ImGui.getStyle().getItemSpacingX());
          }
 
-         if (hollowArrowRenderer.render(state.getIsNextForExecution(), ImGui.getFrameHeight()))
+         boolean colorArrow = state.getIsNextForExecution() || state.getIsExecuting();
+         int arrowColor = state.getIsNextForExecution() ? ImGuiTools.GREEN : isExecutingFlashingColor.getColor(state.getIsExecuting());
+         if (hollowArrowRenderer.render(colorArrow, arrowColor, ImGui.getFrameHeight()))
          {
             setSpecificWidgetOnRowClicked();
             actionSequence.getState().setExecutionNextIndex(state.getActionIndex());
