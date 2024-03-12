@@ -1,11 +1,5 @@
 package us.ihmc.behaviors.sequence;
 
-import gnu.trove.iterator.TIntIterator;
-import gnu.trove.iterator.TIntObjectIterator;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
@@ -20,10 +14,6 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
    private final ActionSequenceDefinition definition;
    private final List<ActionNodeExecutor<?, ?>> executorChildren = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> currentlyExecutingActions = new ArrayList<>();
-
-   // Fields used only for concurrency rank calculation.
-   private final TIntObjectMap<ActionNodeState<?>> actionsThatCouldBeExecuting = new TIntObjectHashMap<>();
-   private final TIntSet actionsToRemove = new TIntHashSet();
 
    public ActionSequenceExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -51,31 +41,13 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       updateActionSubtree(this);
 
       // Update concurrency ranks
-      actionsThatCouldBeExecuting.clear();
       for (int i = 0; i < state.getActionChildren().size(); i++)
       {
-         actionsThatCouldBeExecuting.put(i, state.getActionChildren().get(i));
+         int j = i + 1;
+         for (; j < state.getActionChildren().size()
+              && state.getActionChildren().get(j).calculateExecuteAfterActionIndex(state.getActionChildren()) < i; j++);
 
-         for (int j = i + 1;
-              j < state.getActionChildren().size()
-              && state.getActionChildren().get(j).calculateExecuteAfterActionIndex(state.getActionChildren()) < i; j++)
-         {
-            actionsThatCouldBeExecuting.put(j, state.getActionChildren().get(j));
-         }
-
-         actionsToRemove.clear();
-         for (TIntObjectIterator<ActionNodeState<?>> iterator = actionsThatCouldBeExecuting.iterator(); iterator.hasNext(); )
-         {
-            iterator.advance();
-            actionsToRemove.add(iterator.value().calculateExecuteAfterActionIndex(state.getActionChildren()));
-         }
-
-         for (TIntIterator iterator = actionsToRemove.iterator(); iterator.hasNext(); )
-         {
-            actionsThatCouldBeExecuting.remove(iterator.next());
-         }
-
-         state.getActionChildren().get(i).setConcurrencyRank(actionsThatCouldBeExecuting.size());
+         state.getActionChildren().get(i).setConcurrencyRank(j - i);
       }
 
       // Update is next for execution

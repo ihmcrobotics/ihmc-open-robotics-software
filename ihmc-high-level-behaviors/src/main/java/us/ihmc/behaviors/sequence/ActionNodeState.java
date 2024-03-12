@@ -125,7 +125,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 
    /**
     * Gives an idea how many actions will be executing all together with this one.
-    * Also how many actions will be started when the execute next index is set to this action.
+    * How many actions will be started when the execute next index is set to this action.
     */
    public int getConcurrencyRank()
    {
