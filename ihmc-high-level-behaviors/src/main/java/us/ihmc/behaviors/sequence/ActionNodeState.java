@@ -238,15 +238,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       }
       else
       {
-         ActionNodeState<?> actionToExecuteAfter = findActionToExecuteAfter(actionStateChildren);
-
-         if (actionToExecuteAfter == null)
-         {
-            LogTools.error("Why is this null?");
-            return 0;
-         }
-
-         return actionToExecuteAfter.getActionIndex();
+         return findActionToExecuteAfter(actionStateChildren).getActionIndex();
       }
    }
 

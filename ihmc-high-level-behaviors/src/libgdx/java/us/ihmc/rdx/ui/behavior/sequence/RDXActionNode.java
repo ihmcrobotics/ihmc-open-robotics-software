@@ -7,7 +7,6 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiHollowArrowRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -80,46 +79,39 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
 
       ActionSequenceState actionSequence = BehaviorTreeTools.findActionSequenceAncestor(state);
 
-      String selectedText;
-      if (definition.getExecuteAfterPrevious().getValue())
+      if (actionSequence != null)
       {
-         selectedText = ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS;
-      }
-      else if (definition.getExecuteAfterBeginning().getValue())
-      {
-         selectedText = ActionNodeDefinition.EXECUTE_AFTER_BEGINNING;
-      }
-      else if (actionSequence != null)
-      {
-         int executeAfterActionIndex = state.calculateExecuteAfterActionIndex(actionSequence.getActionChildren());
-         if (executeAfterActionIndex < 0)
-            LogTools.error("Bad");
-         ActionNodeState<?> executeAfterAction = actionSequence.getActionChildren().get(executeAfterActionIndex);
-         selectedText = executeAfterAction.getDefinition().getName();
-      }
-      else
-      {
-         LogTools.error("Probably shouldn't get here.");
-         selectedText = "ID: %d".formatted(definition.getExecuteAfterNodeID().getValue());
-      }
-
-      if (ImGui.beginCombo(labels.get("Execute after"), selectedText))
-      {
-         if (ImGui.selectable(labels.get("Previous"), definition.getExecuteAfterPrevious().getValue()))
+         String selectedText;
+         if (definition.getExecuteAfterPrevious().getValue())
          {
-            definition.getExecuteAfterPrevious().setValue(true);
-            definition.getExecuteAfterBeginning().setValue(false);
-            definition.updateAndSanitizeExecuteAfterFields(null);
+            selectedText = ActionNodeDefinition.EXECUTE_AFTER_PREVIOUS;
          }
-         if (ImGui.selectable(labels.get("Beginning"), definition.getExecuteAfterBeginning().getValue()))
+         else if (definition.getExecuteAfterBeginning().getValue())
          {
-            definition.getExecuteAfterPrevious().setValue(false);
-            definition.getExecuteAfterBeginning().setValue(true);
-            definition.updateAndSanitizeExecuteAfterFields(null);
+            selectedText = ActionNodeDefinition.EXECUTE_AFTER_BEGINNING;
+         }
+         else
+         {
+            int executeAfterActionIndex = state.calculateExecuteAfterActionIndex(actionSequence.getActionChildren());
+            ActionNodeState<?> executeAfterAction = actionSequence.getActionChildren().get(executeAfterActionIndex);
+            selectedText = executeAfterAction.getDefinition().getName();
          }
 
-         if (actionSequence != null)
+         if (ImGui.beginCombo(labels.get("Execute after"), selectedText))
          {
+            if (ImGui.selectable(labels.get("Previous"), definition.getExecuteAfterPrevious().getValue()))
+            {
+               definition.getExecuteAfterPrevious().setValue(true);
+               definition.getExecuteAfterBeginning().setValue(false);
+               definition.updateAndSanitizeExecuteAfterFields(null);
+            }
+            if (ImGui.selectable(labels.get("Beginning"), definition.getExecuteAfterBeginning().getValue()))
+            {
+               definition.getExecuteAfterPrevious().setValue(false);
+               definition.getExecuteAfterBeginning().setValue(true);
+               definition.updateAndSanitizeExecuteAfterFields(null);
+            }
+
             for (ActionNodeState<?> actionChild : actionSequence.getActionChildren())
             {
                if (ImGui.selectable(labels.get(actionChild.getDefinition().getName()), definition.getExecuteAfterNodeID().getValue() == actionChild.getID()))
@@ -130,14 +122,10 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
                   definition.updateAndSanitizeExecuteAfterFields(actionChild.getDefinition().getName());
                }
             }
+
+            ImGui.endCombo();
          }
-
-         ImGui.endCombo();
       }
-
-      ImGui.text("Prev: %b  Begin: %b  ID: %b".formatted(definition.getExecuteAfterPrevious().getValue(),
-                                                         definition.getExecuteAfterBeginning().getValue(),
-                                                         definition.getExecuteAfterNodeID().getValue()));
 
       renderImGuiWidgetsInternal();
 

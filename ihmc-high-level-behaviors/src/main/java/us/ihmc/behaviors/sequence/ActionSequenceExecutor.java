@@ -66,11 +66,8 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
                {
                   ActionNodeState<?> executeAfterNode = childToCheck.findActionToExecuteAfter(state.getActionChildren());
 
-                  if (executeAfterNode == null)
-                     LogTools.error("Why is this null?");
-                  else
-                     if (executeAfterNode.getActionIndex() < i)
-                        ++concurrencyRank;
+                  if (executeAfterNode.getActionIndex() < i)
+                     ++concurrencyRank;
                }
             }
          }
