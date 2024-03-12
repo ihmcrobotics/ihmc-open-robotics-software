@@ -219,9 +219,9 @@ public class AStarFootstepPlanner
       while (true)
       {
          List<FootstepGraphNode> path = iterationConductor.getGraph().getPathFromStart(completionChecker.getEndNode());
-         double score = PlannerTools.computeTotalScore(request, path, request.getTerrainMapData());
-         nanoTime = System.nanoTime();
-         LogTools.warn(String.format("[ASFP] Time: %d, Iteration: %d, Total Score: %.3f", nanoTime, iterations + 1, score));
+         //double score = PlannerTools.computeTotalScore(request, path, request.getTerrainMapData());
+         //nanoTime = System.nanoTime();
+         //LogTools.warn(String.format("[ASFP] Time: %d, Iteration: %d, Total Score: %.3f", nanoTime, iterations + 1, score));
 
          iterations++;
          outputToPack.getPlannerTimings().setStepPlanningIterations(iterations);
