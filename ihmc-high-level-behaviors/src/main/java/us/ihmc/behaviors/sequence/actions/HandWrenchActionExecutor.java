@@ -1,8 +1,10 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import controller_msgs.msg.dds.HandWrenchTrajectoryMessage;
+import controller_msgs.msg.dds.WrenchTrajectoryMessage;
 import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.FrameInformation;
+import ihmc_common_msgs.msg.dds.QueueableMessage;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -39,40 +41,36 @@ public class HandWrenchActionExecutor extends ActionNodeExecutor<HandWrenchActio
    {
       super.triggerActionExecution();
 
-      System.out.println(definition.getForceY());
-
       HandWrenchTrajectoryMessage handWrenchTrajectoryMessage = new HandWrenchTrajectoryMessage();
       handWrenchTrajectoryMessage.setRobotSide(getDefinition().getSide().toByte());
-      //      double force = 4.2; // For 0.5 kg box
-      if (definition.getForceY() > 0.0)
-      {
-         IDLSequence.Object<WrenchTrajectoryPointMessage> wrenchTrajectoryPoints
-               = handWrenchTrajectoryMessage.getWrenchTrajectory().getWrenchTrajectoryPoints();
+      handWrenchTrajectoryMessage.setForceExecution(true);
 
-         double time0 = 0.0;
-         Vector3D torque0 = new Vector3D(getDefinition().getSide() == RobotSide.RIGHT ? definition.getTorqueX() : -definition.getTorqueX(),
-                                         getDefinition().getSide() == RobotSide.RIGHT ? definition.getTorqueY() : -definition.getTorqueY(),
-                                         getDefinition().getSide() == RobotSide.RIGHT ? definition.getTorqueZ() : -definition.getTorqueZ());
-         Vector3D force0 = new Vector3D(getDefinition().getSide() == RobotSide.RIGHT ? definition.getForceX() : -definition.getForceX(),
-                                        getDefinition().getSide() == RobotSide.RIGHT ? definition.getForceY() : -definition.getForceY(),
-                                        getDefinition().getSide() == RobotSide.RIGHT ? definition.getForceZ() : -definition.getForceZ());
-         wrenchTrajectoryPoints.add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(time0, torque0, force0));
+      WrenchTrajectoryMessage wrenchTrajectory = handWrenchTrajectoryMessage.getWrenchTrajectory();
 
-         double time1 = getDefinition().getTrajectoryDuration();
-         Vector3D torque1 = new Vector3D(getDefinition().getSide() == RobotSide.RIGHT ? definition.getTorqueX() : -definition.getTorqueX(),
-                                         getDefinition().getSide() == RobotSide.RIGHT ? definition.getTorqueY() : -definition.getTorqueY(),
-                                         getDefinition().getSide() == RobotSide.RIGHT ? definition.getTorqueZ() : -definition.getTorqueZ());
-         Vector3D force1 = new Vector3D(getDefinition().getSide() == RobotSide.RIGHT ? definition.getForceX() : -definition.getForceX(),
-                                        getDefinition().getSide() == RobotSide.RIGHT ? definition.getForceY() : -definition.getForceY(),
-                                        getDefinition().getSide() == RobotSide.RIGHT ? definition.getForceZ() : -definition.getForceZ());
-         wrenchTrajectoryPoints.add().set(HumanoidMessageTools.createWrenchTrajectoryPointMessage(time1, torque1, force1));
-      }
-      handWrenchTrajectoryMessage.getWrenchTrajectory().getFrameInformation().setTrajectoryReferenceFrameId(FrameInformation.CHEST_FRAME);
-      handWrenchTrajectoryMessage.getWrenchTrajectory().setUseCustomControlFrame(true);
+      IDLSequence.Object<WrenchTrajectoryPointMessage> wrenchTrajectoryPoints
+            = wrenchTrajectory.getWrenchTrajectoryPoints();
+
+      double time0 = 0.0;
+      Vector3D torque0 = new Vector3D(getDefinition().getSide() == RobotSide.RIGHT ? definition.getTorqueX() : -definition.getTorqueX(),
+                                      getDefinition().getSide() == RobotSide.RIGHT ? definition.getTorqueY() : -definition.getTorqueY(),
+                                      getDefinition().getSide() == RobotSide.RIGHT ? definition.getTorqueZ() : -definition.getTorqueZ());
+      Vector3D force0 = new Vector3D(getDefinition().getSide() == RobotSide.RIGHT ? definition.getForceX() : -definition.getForceX(),
+                                     getDefinition().getSide() == RobotSide.RIGHT ? definition.getForceY() : -definition.getForceY(),
+                                     getDefinition().getSide() == RobotSide.RIGHT ? definition.getForceZ() : -definition.getForceZ());
+
+      WrenchTrajectoryPointMessage trajectoryPoint = HumanoidMessageTools.createWrenchTrajectoryPointMessage(time0, torque0, force0);
+      wrenchTrajectoryPoints.add().set(trajectoryPoint);
+
+      trajectoryPoint.setTime(getDefinition().getTrajectoryDuration());
+      wrenchTrajectoryPoints.add().set(trajectoryPoint);
+
+      wrenchTrajectory.getFrameInformation().setTrajectoryReferenceFrameId(FrameInformation.CHEST_FRAME);
+      wrenchTrajectory.setUseCustomControlFrame(true);
+      wrenchTrajectory.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+
       double handCenterOffset = 0.05;
-      handWrenchTrajectoryMessage.getWrenchTrajectory()
-                                 .getControlFramePose()
-                                 .setY(getDefinition().getSide() == RobotSide.RIGHT ? -handCenterOffset : handCenterOffset);
+      wrenchTrajectory.getControlFramePose()
+                      .setY(getDefinition().getSide() == RobotSide.RIGHT ? -handCenterOffset : handCenterOffset);
 
       ros2ControllerHelper.publishToController(handWrenchTrajectoryMessage);
    }
