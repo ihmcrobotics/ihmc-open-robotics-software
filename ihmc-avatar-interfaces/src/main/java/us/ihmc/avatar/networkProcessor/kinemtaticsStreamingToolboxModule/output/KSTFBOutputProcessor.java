@@ -75,6 +75,23 @@ public class KSTFBOutputProcessor implements KSTOutputProcessor
          double qd_err = latestOutput.getJointVelocity(i) - outputRobotState.getJointVelocity(i);
          double qdd = gains.getKp() * q_err + gains.getKd() * qd_err;
 
+         double qMin = outputRobotState.getOneDoFJoints()[i].getJointLimitLower();
+         double qMax = outputRobotState.getOneDoFJoints()[i].getJointLimitUpper();
+
+         if (!Double.isInfinite(qMin))
+         {
+            double qDotMin = (qMin - outputRobotState.getJointPosition(i)) / updateDT;
+            double qDDotMin = 2.0 * (qDotMin - outputRobotState.getJointVelocity(i)) / updateDT;
+            qdd = Math.max(qdd, qDDotMin);
+         }
+
+         if (!Double.isInfinite(qMax))
+         {
+            double qDotMax = (qMax - outputRobotState.getJointPosition(i)) / updateDT;
+            double qDDotMax = 2.0 * (qDotMax - outputRobotState.getJointVelocity(i)) / updateDT;
+            qdd = Math.min(qdd, qDDotMax);
+         }
+
          outputRobotState.setJointAcceleration(i, qdd);
       }
 
