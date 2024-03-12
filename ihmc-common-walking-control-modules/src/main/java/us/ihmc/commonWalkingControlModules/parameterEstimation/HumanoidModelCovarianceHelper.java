@@ -14,20 +14,44 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Set;
 
+/**
+ * This class is used to manage construction and updating the covariance matrices for a {@link FullHumanoidRobotModel} when performing inertial estimation.
+ * <p>
+ * In inertial estimation, one must specify process covariances encoding the belief on how the inertial parameters of the rigid bodies being estimated are
+ * expected to vary over time, and measurement covariances encoding the belief on the variance of the torque measurements from each joint (including the
+ * floating base, which the contact wrenches are mapped to).
+ * </p>
+ *
+ * @author James Foster
+ */
 public class HumanoidModelCovarianceHelper
 {
    private final Set<JointTorqueRegressorCalculator.SpatialInertiaBasisOption>[] basisSets;
+
+   /**
+    * YoDoubles for the process covariances. The same covariances are used for each rigid body being estimated, so this YoDouble is 10-dimensional
+    * (the size of the inertial parameter vector for one rigid body).
+    */
    private final YoDouble[] processCovariances;
+   /** Final container for the process covariances, which can be used elsewhere. */
    private final DMatrixRMaj processCovariance;
 
    private final int[] floatingBaseJointIndices;
    private final SideDependentList<int[]> legJointIndices;
    private final int[] spineJointIndices;
    private final SideDependentList<int[]> armJointIndices;
+   /**
+    * YoDoubles for the measurement covariances of the floating base joint. Notably, contact wrenches are mapped to this joint through
+    * {@link us.ihmc.robotics.screwTheory.GeometricJacobian}
+    */
    private final YoDouble[] floatingBaseMeasurementCovariance;
+   /** Side-dependent YoDoubles for the measurement covariance of the leg joints. The same covariance is used for each joint in the given side's leg. */
    private final SideDependentList<YoDouble> legMeasurementCovariances;
+   /** YoDouble for the measurement covariance of the spine joints. The same covariance is used for each joint in the spine. */
    private final YoDouble spineMeasurementCovariance;
+   /** Side-dependent YoDouble arrays for the measurement covariance of the arm joints. The same covariance is used for each joint in the given side's arm. */
    private final SideDependentList<YoDouble> armMeasurementCovariances;
+   /** Final container for the measurement covariances, which can be used elsewhere. */
    private final DMatrixRMaj measurementCovariance;
 
    HumanoidModelCovarianceHelper(FullHumanoidRobotModel model, InertialEstimationParameters parameters, YoRegistry parentRegistry)
@@ -86,6 +110,11 @@ public class HumanoidModelCovarianceHelper
       measurementCovariance = new DMatrixRMaj(nDoFs, nDoFs);
    }
 
+   /**
+    * Pack and return the process covariance matrix from the associated YoVariables.
+    *
+    * @return the process covariance matrix.
+    */
    public DMatrixRMaj getProcessCovariance()
    {
       int i = 0;
@@ -107,9 +136,9 @@ public class HumanoidModelCovarianceHelper
    }
 
    /**
-    * TODO: note this method will only modify the diagonals and will leave all other elements untouched, be careful about them
-    * @param
-    * @param
+    * Pack and return the measurement covariance matrix from the associated YoVariables.
+    *
+    * @return the measurement covariance matrix.
     */
    public DMatrixRMaj getMeasurementCovariance()
    {
