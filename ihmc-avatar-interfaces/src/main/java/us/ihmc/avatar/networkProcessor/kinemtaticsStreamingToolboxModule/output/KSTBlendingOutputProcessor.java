@@ -57,8 +57,7 @@ public class KSTBlendingOutputProcessor implements KSTOutputProcessor
          if (timeInBlending < streamingBlendingDuration.getValue())
          {
             double alpha = MathTools.clamp(timeInBlending / streamingBlendingDuration.getValue(), 0.0, 1.0);
-            double alphaDot = 1.0 / streamingBlendingDuration.getValue();
-            blendedRobotState.interpolate(initialRobotState, latestOutput, alpha, alphaDot);
+            blendedRobotState.interpolate(initialRobotState, latestOutput, alpha);
          }
          else
          {
