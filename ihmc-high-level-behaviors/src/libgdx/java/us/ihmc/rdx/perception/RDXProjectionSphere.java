@@ -1,6 +1,5 @@
 package us.ihmc.rdx.perception;
 
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
@@ -36,11 +35,11 @@ public class RDXProjectionSphere
    private final ImDouble sphereRadius = new ImDouble(1);
    private final ImInt sphereLatitudeVertices = new ImInt(100);
    private final ImInt sphereLongitudeVertices = new ImInt(100);
-   private final ImBoolean syncProjectionScales = new ImBoolean(false);
-   private final ImDouble focalLengthX = new ImDouble(0.438740);
-   private final ImDouble focalLengthY = new ImDouble(0.600528);
+   private final ImBoolean syncProjectionScales = new ImBoolean(true);
+   private final ImDouble focalLengthX = new ImDouble(0.466206);
+   private final ImDouble focalLengthY = new ImDouble(0.466206);
    private final ImDouble principlePointX = new ImDouble(0.0);
-   private final ImDouble principlePointY = new ImDouble(0.0);
+   private final ImDouble principlePointY = new ImDouble(0.5);
    private final ImBoolean renderSphereIfNoTexture = new ImBoolean(true);
    private Model model;
    private final Vector3D vertexRay = new Vector3D();
@@ -70,8 +69,8 @@ public class RDXProjectionSphere
       {
          ImGui.endDisabled();
       }
-      rebuildMesh |= ImGuiTools.volatileInputDouble(labels.get("Principle point X (Cx)"), principlePointX);
-      rebuildMesh |= ImGuiTools.volatileInputDouble(labels.get("Principle point Y (Cy)"), principlePointY);
+      rebuildMesh |= ImGuiTools.sliderDouble(labels.get("Principle point X (Cx)"), principlePointX, -0.1, 0.1);
+      rebuildMesh |= ImGuiTools.sliderDouble(labels.get("Principle point Y (Cy)"), principlePointY, -0.5, 0.5);
       rebuildMesh |= ImGui.checkbox(labels.get("Render sphere if no texture"), renderSphereIfNoTexture);
 
       if (rebuildMesh)
@@ -80,7 +79,7 @@ public class RDXProjectionSphere
       rebuildMesh = false;
    }
 
-   /** Only needs to be done when parameters change, not the texture.*/
+   /** Only needs to be done when parameters change, not the texture. */
    public void rebuildUVSphereMesh()
    {
       MeshDataHolder sphereMeshDataHolder = MeshDataGeneratorMissing.InvertedSphere(sphereRadius.get(),
@@ -96,7 +95,6 @@ public class RDXProjectionSphere
 
          double angleOfIncidence = EuclidCoreMissingTools.angleFromFirstToSecondVector3D(Axis3D.X, vertexRay);
          double azimuthalAngle = Math.atan2(-vertex.getZ(), -vertex.getY());
-
 
          double imageX = principlePointX.get() + focalLengthX.get() * angleOfIncidence * Math.cos(azimuthalAngle);
          double imageY = principlePointY.get() + focalLengthY.get() * angleOfIncidence * Math.sin(azimuthalAngle);
@@ -124,13 +122,13 @@ public class RDXProjectionSphere
       modelInstance = new ModelInstance(model);
    }
 
-   public void updateTexture(Texture texture)
+   public void updateTexture(Texture texture, float opacity)
    {
       if (this.latestTexture != null)
          this.latestTexture.dispose();
       this.latestTexture = texture;
       Material material = model.nodes.get(0).parts.get(0).material;
-      material.set(new BlendingAttribute(0.7f));
+      material.set(new BlendingAttribute(opacity));
       material.set(TextureAttribute.createDiffuse(texture));
       modelInstance = new ModelInstance(model);
    }
@@ -157,8 +155,11 @@ public class RDXProjectionSphere
 
    public void setProjectionScaleX(double projectionScaleX)
    {
-      this.focalLengthX.set(projectionScaleX);
-      rebuildMesh = true;
+      if (this.focalLengthX.get() != projectionScaleX)
+      {
+         this.focalLengthX.set(projectionScaleX);
+         rebuildMesh = true;
+      }
    }
 
    public double getProjectionScaleY()
@@ -168,8 +169,21 @@ public class RDXProjectionSphere
 
    public void setProjectionScaleY(double projectionScaleY)
    {
-      this.focalLengthY.set(projectionScaleY);
-      rebuildMesh = true;
+      if (this.focalLengthY.get() != projectionScaleY)
+      {
+         this.focalLengthY.set(projectionScaleY);
+         rebuildMesh = true;
+      }
+   }
+
+   public void setSyncProjectionScales(boolean syncProjectionScales)
+   {
+      this.syncProjectionScales.set(syncProjectionScales);
+   }
+
+   public boolean getSyncProjectionScales()
+   {
+      return syncProjectionScales.get();
    }
 
    public double getRadius()
@@ -179,7 +193,39 @@ public class RDXProjectionSphere
 
    public void setRadius(double radius)
    {
-      this.sphereRadius.set(radius);
-      rebuildMesh = true;
+
+      if (this.sphereRadius.get() != radius)
+      {
+         this.sphereRadius.set(radius);
+         rebuildMesh = true;
+      }
+   }
+
+   public double getPrinciplePointX()
+   {
+      return principlePointX.get();
+   }
+
+   public void setPrinciplePointX(double principlePointX)
+   {
+      if (this.principlePointX.get() != principlePointX)
+      {
+         this.principlePointX.set(principlePointX);
+         rebuildMesh = true;
+      }
+   }
+
+   public double getPrinciplePointY()
+   {
+      return principlePointY.get();
+   }
+
+   public void setPrinciplePointY(double principlePointY)
+   {
+      if (this.principlePointY.get() != principlePointY)
+      {
+         this.principlePointY.set(principlePointY);
+         rebuildMesh = true;
+      }
    }
 }

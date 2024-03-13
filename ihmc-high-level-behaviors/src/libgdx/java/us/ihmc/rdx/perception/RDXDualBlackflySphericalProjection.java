@@ -24,6 +24,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -31,11 +32,12 @@ import java.util.Set;
 
 public class RDXDualBlackflySphericalProjection
 {
+   private final RDXBaseUI baseUI;
    private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(RDXProjectionSphere::new);
    private final ImDouble pupillaryDistance = new ImDouble(0.0);
    private final FramePose3D leftEyePose = new FramePose3D();
    private final FramePose3D rightEyePose = new FramePose3D();
-   private final ReferenceFrame offsetFrame;
+   private final ReferenceFrame projectionOriginFrame;
    private final DualBlackflyUDPReceiver dualBlackflyUDPReceiver = new DualBlackflyUDPReceiver();
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -43,9 +45,16 @@ public class RDXDualBlackflySphericalProjection
    private volatile boolean reconnecting = false;
    private Thread reconnectThread;
 
+   private final ImDouble projectionZOffset = new ImDouble(1.701657);
+   private final SideDependentList<RDXReferenceFrameGraphic> eyeFrameGraphics = new SideDependentList<>();
+
+   private long lastFrameUpdateTime;
+
    public RDXDualBlackflySphericalProjection(ReferenceFrame robotZUpFrame, ReferenceFrame headsetFrame)
    {
-      offsetFrame = new ReferenceFrame("sphericalProjectionOrigin", ReferenceFrame.getWorldFrame())
+      this.baseUI = RDXBaseUI.getInstance();
+
+      projectionOriginFrame = new ReferenceFrame("sphericalProjectionOrigin", ReferenceFrame.getWorldFrame())
       {
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
@@ -54,13 +63,15 @@ public class RDXDualBlackflySphericalProjection
             transformToParent.getRotation().setToYawOrientation(robotZUpFrame.getTransformToRoot().getRotation().getYaw());
          }
       };
-      leftEyePose.setReferenceFrame(offsetFrame);
-      rightEyePose.setReferenceFrame(offsetFrame);
+      leftEyePose.setReferenceFrame(projectionOriginFrame);
+      rightEyePose.setReferenceFrame(projectionOriginFrame);
    }
 
    public void renderControls()
    {
-      if (ImGuiTools.sliderDouble(labels.get("Pupillary distance"), pupillaryDistance, -2, 2))
+      ImGuiTools.sliderDouble("Projection Z offset", projectionZOffset, -4, 4);
+
+      if (ImGuiTools.sliderDouble(labels.get("Pupillary distance"), pupillaryDistance, -0.1, 0.1))
       {
 
       }
@@ -93,15 +104,18 @@ public class RDXDualBlackflySphericalProjection
 
       reconnecting = true;
 
-      reconnectThread = new Thread(() -> {
-         do {
+      reconnectThread = new Thread(() ->
+      {
+         do
+         {
             RDXBaseUI.pushNotification("Dual Blackfly stereo client reconnecting...");
 
             dualBlackflyUDPReceiver.stop();
             dualBlackflyUDPReceiver.start();
 
             ThreadTools.sleep(5000);
-         } while (reconnecting && !dualBlackflyUDPReceiver.connected());
+         }
+         while (reconnecting && !dualBlackflyUDPReceiver.connected());
       }, getClass().getName() + "-ReconnectThread");
 
       reconnectThread.start();
@@ -149,72 +163,104 @@ public class RDXDualBlackflySphericalProjection
 
    public void render()
    {
-      boolean updatedTexture = false;
+      boolean hadNewFrame = false;
 
-      for (RobotSide side : RobotSide.values)
+      if (System.currentTimeMillis() - lastFrameUpdateTime > 20)
       {
-         byte[] imageData = dualBlackflyUDPReceiver.getImageBuffers().get(side);
+         lastFrameUpdateTime = System.currentTimeMillis();
 
-         if (imageData != null)
+         for (RobotSide side : RobotSide.values)
          {
-            ImageDimensions imageDimensions = dualBlackflyUDPReceiver.getImageDimensions().get(side);
-            BytePointer imageDataPointer = new BytePointer(imageData);
+            byte[] imageData = dualBlackflyUDPReceiver.getImageBuffers().get(side);
 
-            Mat mat = new Mat(imageDimensions.getImageHeight(), imageDimensions.getImageWidth(), opencv_core.CV_8UC1);
-            mat.data(imageDataPointer);
+            if (imageData != null)
+            {
+               ImageDimensions imageDimensions = dualBlackflyUDPReceiver.getImageDimensions().get(side);
+               BytePointer imageDataPointer = new BytePointer(imageData);
 
-            Pixmap pixmap = new Pixmap(mat.cols(), mat.rows(), Pixmap.Format.RGBA8888);
-            BytePointer rgba8888BytePointer = new BytePointer(pixmap.getPixels());
-            Mat rgba8Mat = new Mat(mat.rows(), mat.cols(), opencv_core.CV_8UC4, rgba8888BytePointer);
-            opencv_imgproc.cvtColor(mat, rgba8Mat, opencv_imgproc.COLOR_BayerBG2RGBA);
-            Texture texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
+               Mat mat = new Mat(imageDimensions.getImageHeight(), imageDimensions.getImageWidth(), opencv_core.CV_8UC1);
+               mat.data(imageDataPointer);
 
-            projectionSpheres.get(side).updateTexture(texture);
+               Pixmap pixmap = new Pixmap(mat.cols(), mat.rows(), Pixmap.Format.RGBA8888);
+               BytePointer rgba8888BytePointer = new BytePointer(pixmap.getPixels());
+               Mat rgba8Mat = new Mat(mat.rows(), mat.cols(), opencv_core.CV_8UC4, rgba8888BytePointer);
+               opencv_imgproc.cvtColor(mat, rgba8Mat, opencv_imgproc.COLOR_BayerBG2RGBA);
+               Texture texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
 
-            rgba8Mat.close();
-            pixmap.dispose();
-            mat.close();
-            imageDataPointer.close();
+               projectionSpheres.get(side).updateTexture(texture, 1.0f);
 
-            updatedTexture = true;
+               rgba8Mat.close();
+               pixmap.dispose();
+               mat.close();
+               imageDataPointer.close();
+
+               hadNewFrame = true;
+            }
          }
       }
 
-      if (updatedTexture)
-      {
-         offsetFrame.update();
-         leftEyePose.getTranslation().setY(pupillaryDistance.get() / 2);
-         rightEyePose.getTranslation().setY(-pupillaryDistance.get() / 2);
+      if (baseUI.getVRManager().isVRReady())
+         for (RDXReferenceFrameGraphic eyeFrameGraphic : eyeFrameGraphics)
+            if (eyeFrameGraphic != null)
+               eyeFrameGraphic.updateFromLastGivenFrame();
 
-         leftEyePose.getTranslation().setZ(0.2);
-         rightEyePose.getTranslation().setZ(0.2);
+      // Sync (or mirror settings)
+      double principlePointX = projectionSpheres.get(RobotSide.LEFT).getPrinciplePointX();
+      double principlePointY = projectionSpheres.get(RobotSide.LEFT).getPrinciplePointY();
+      projectionSpheres.get(RobotSide.RIGHT).setPrinciplePointX(-principlePointX);
+      projectionSpheres.get(RobotSide.RIGHT).setPrinciplePointY(principlePointY);
+
+      if (baseUI.getVRManager().isVRReady() && hadNewFrame)
+      {
+         for (RDXReferenceFrameGraphic eyeFrameGraphic : eyeFrameGraphics)
+            if (eyeFrameGraphic != null)
+               eyeFrameGraphic.updateFromLastGivenFrame();
+
+         leftEyePose.setToZero(baseUI.getVRManager().getContext().getEyes().get(RobotSide.LEFT).getEyeXForwardZUpFrame());
+         rightEyePose.setToZero(baseUI.getVRManager().getContext().getEyes().get(RobotSide.RIGHT).getEyeXForwardZUpFrame());
 
          RigidBodyTransform leftEyePoseWorld = new RigidBodyTransform(leftEyePose);
          leftEyePoseWorld.preMultiply(leftEyePose.getReferenceFrame().getTransformToRoot());
          RigidBodyTransform rightEyePoseWorld = new RigidBodyTransform(rightEyePose);
          rightEyePoseWorld.preMultiply(rightEyePose.getReferenceFrame().getTransformToRoot());
-
          LibGDXTools.toLibGDX(leftEyePoseWorld, projectionSpheres.get(RobotSide.LEFT).getModelInstance().transform);
          LibGDXTools.toLibGDX(rightEyePoseWorld, projectionSpheres.get(RobotSide.RIGHT).getModelInstance().transform);
       }
+
+      baseUI.renderBeforeOnScreenUI();
+      baseUI.renderEnd();
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (sceneLevels.contains(RDXSceneLevel.VR_EYE_RIGHT))
       {
-         // Only show the renderables if there is an image frame in the buffer
-         if (dualBlackflyUDPReceiver.getImageBuffers().get(RobotSide.RIGHT) != null)
-         {
-            projectionSpheres.get(RobotSide.RIGHT).getRenderables(renderables, pool);
-         }
+         projectionSpheres.get(RobotSide.RIGHT).getRenderables(renderables, pool);
+      }
+      else if (sceneLevels.contains(RDXSceneLevel.VR_EYE_LEFT))
+      {
+         projectionSpheres.get(RobotSide.LEFT).getRenderables(renderables, pool);
       }
       else
       {
-         // Only show the renderables if there is an image frame in the buffer
-         if (dualBlackflyUDPReceiver.getImageBuffers().get(RobotSide.LEFT) != null)
+         projectionSpheres.get(RobotSide.RIGHT).getRenderables(renderables, pool);
+         projectionSpheres.get(RobotSide.LEFT).getRenderables(renderables, pool);
+
+         if (baseUI.getVRManager().isVRReady())
          {
-            projectionSpheres.get(RobotSide.LEFT).getRenderables(renderables, pool);
+            for (RobotSide side : RobotSide.values)
+            {
+               if (eyeFrameGraphics.get(side) != null)
+               {
+                  eyeFrameGraphics.get(side).getRenderables(renderables, pool);
+               }
+               else
+               {
+                  RDXReferenceFrameGraphic eyeFrameGraphic = new RDXReferenceFrameGraphic(0.5);
+                  eyeFrameGraphic.setToReferenceFrame(baseUI.getVRManager().getContext().getEyes().get(side).getEyeXForwardZUpFrame());
+                  eyeFrameGraphics.put(side, eyeFrameGraphic);
+               }
+            }
          }
       }
    }

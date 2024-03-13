@@ -112,7 +112,7 @@ public class RDXDualBlackflySphericalProjectionDemo
                   opencv_imgproc.cvtColor(mat, rgba8Mat, opencv_imgproc.COLOR_BayerBG2RGBA);
                   Texture texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
 
-                  projectionSpheres.get(side).updateTexture(texture);
+                  projectionSpheres.get(side).updateTexture(texture, 1.0f);
 
                   rgba8Mat.close();
                   pixmap.dispose();
