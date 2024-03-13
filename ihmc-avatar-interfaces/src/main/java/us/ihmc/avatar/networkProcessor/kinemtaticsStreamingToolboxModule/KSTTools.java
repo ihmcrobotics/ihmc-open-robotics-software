@@ -10,6 +10,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyStreamingMessagePublisher;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyTrajectoryMessagePublisher;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.input.KSTInputFilter;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output.KSTOutputDataBasics;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output.KSTOutputDataReadOnly;
 import us.ihmc.commons.Conversions;
@@ -86,7 +87,7 @@ public class KSTTools
    private final YoBoolean hasNewInputCommand, hasPreviousInput;
    private final YoDouble latestInputReceivedTime, previousInputReceivedTime;
    private KinematicsStreamingToolboxInputCommand latestInput = null;
-   private KinematicsStreamingToolboxInputCommand previousInput = new KinematicsStreamingToolboxInputCommand();
+   private KinematicsStreamingToolboxInputCommand previousInput = null;
 
    private final KinematicsStreamingToolboxConfigurationCommand configurationCommand = new KinematicsStreamingToolboxConfigurationCommand();
    private final YoBoolean isNeckJointspaceOutputEnabled;
@@ -96,8 +97,8 @@ public class KSTTools
    private final SideDependentList<YoBoolean> areArmJointspaceOutputsEnabled = new SideDependentList<>();
 
    private final YoLong latestInputTimestamp;
-
    private final YoBoolean useStreamingPublisher;
+   private final KSTInputFilter inputFilter;
 
    private WholeBodyTrajectoryMessagePublisher trajectoryMessagePublisher = m ->
    {
@@ -156,6 +157,8 @@ public class KSTTools
 
       ikController.setPreserveUserCommandHistory(false);
 
+      inputFilter = new KSTInputFilter(currentFullRobotModel, parameters);
+
       currentMessageId = new YoLong("currentMessageId", registry);
       currentMessageId.set(1L);
       streamingMessageFactory = new KSTStreamingMessageFactory(fullRobotModelFactory, registry);
@@ -192,6 +195,8 @@ public class KSTTools
 
    public void update()
    {
+      inputFilter.update();
+
       if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxConfigurationCommand.class))
       {
          configurationCommand.set(commandInputManager.pollNewestCommand(KinematicsStreamingToolboxConfigurationCommand.class));
@@ -235,6 +240,41 @@ public class KSTTools
          rootJointPose.set(robotConfigurationDataInternal.getRootPosition(), robotConfigurationDataInternal.getRootOrientation());
          currentFullRobotModel.updateFrames();
       }
+
+      if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxInputCommand.class))
+      {
+         if (latestInput != null)
+         {
+            if (previousInput == null)
+               previousInput = new KinematicsStreamingToolboxInputCommand();
+
+            previousInput.set(latestInput);
+            previousInputReceivedTime.set(latestInputReceivedTime.getValue());
+            hasPreviousInput.set(true);
+         }
+
+         if (latestInput == null)
+            latestInput = new KinematicsStreamingToolboxInputCommand();
+
+         latestInput.set(commandInputManager.pollNewestCommand(KinematicsStreamingToolboxInputCommand.class));
+
+         for (int i = latestInput.getNumberOfInputs() - 1; i >= 0; i--)
+         {
+            if (!inputFilter.isInputValid(latestInput.getInput(i)))
+               latestInput.removeInput(i);
+         }
+
+         if (latestInput.getTimestamp() <= 0)
+            latestInput.setTimestamp(Conversions.secondsToNanoseconds(time.getValue()));
+
+         latestInputTimestamp.set(latestInput.getTimestamp());
+         latestInputReceivedTime.set(time.getValue());
+         hasNewInputCommand.set(true);
+      }
+      else
+      {
+         hasNewInputCommand.set(false);
+      }
    }
 
    public KinematicsStreamingToolboxParameters getParameters()
@@ -255,28 +295,6 @@ public class KSTTools
    public void getCurrentState(KSTOutputDataBasics currentStateToPack)
    {
       currentStateToPack.setFromRobot(currentRootJoint, currentOneDoFJoint);
-   }
-
-   public void pollInputCommand()
-   {
-      hasNewInputCommand.set(commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxInputCommand.class));
-
-      if (hasNewInputCommand.getValue())
-      {
-         if (latestInput != null)
-         {
-            previousInput.set(latestInput);
-            previousInputReceivedTime.set(latestInputReceivedTime.getValue());
-            hasPreviousInput.set(true);
-         }
-         latestInput = commandInputManager.pollNewestCommand(KinematicsStreamingToolboxInputCommand.class);
-
-         if (latestInput.getTimestamp() <= 0)
-            latestInput.setTimestamp(Conversions.secondsToNanoseconds(time.getValue()));
-
-         latestInputTimestamp.set(latestInput.getTimestamp());
-         latestInputReceivedTime.set(time.getValue());
-      }
    }
 
    public boolean hasNewInputCommand()
