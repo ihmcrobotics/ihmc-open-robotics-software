@@ -67,7 +67,6 @@ public class KSTTools
    private final HumanoidKinematicsToolboxController ikController;
    private final KSTStreamingMessageFactory streamingMessageFactory;
    private final KinematicsToolboxOutputConverter trajectoryMessageFactory;
-   private final WholeBodyStreamingMessage wholeBodyStreamingMessage = new WholeBodyStreamingMessage();
    private final WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
    private final YoDouble streamIntegrationDuration;
 
@@ -82,7 +81,7 @@ public class KSTTools
    private final double toolboxControllerPeriod;
    private final YoDouble walkingControllerMonotonicTime, walkingControllerWallTime;
 
-   private long currentMessageId = 1L;
+   private final YoLong currentMessageId;
 
    private final YoBoolean hasNewInputCommand, hasPreviousInput;
    private final YoDouble latestInputReceivedTime, previousInputReceivedTime;
@@ -157,7 +156,9 @@ public class KSTTools
 
       ikController.setPreserveUserCommandHistory(false);
 
-      streamingMessageFactory = new KSTStreamingMessageFactory(fullRobotModelFactory);
+      currentMessageId = new YoLong("currentMessageId", registry);
+      currentMessageId.set(1L);
+      streamingMessageFactory = new KSTStreamingMessageFactory(fullRobotModelFactory, registry);
       trajectoryMessageFactory = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
       streamIntegrationDuration = new YoDouble("streamIntegrationDuration", registry);
@@ -338,10 +339,12 @@ public class KSTTools
 
    public WholeBodyStreamingMessage setupStreamingMessage(KSTOutputDataReadOnly solutionToConvert)
    {
-      HumanoidMessageTools.resetWholeBodyStreamingMessage(wholeBodyStreamingMessage);
-      streamingMessageFactory.updateFullRobotModel(solutionToConvert::updateRobot);
-      streamingMessageFactory.setMessageToCreate(wholeBodyStreamingMessage);
+      streamingMessageFactory.update(currentMessageId.getValue(),
+                                     Conversions.secondsToNanoseconds(time.getValue()),
+                                     streamIntegrationDuration.getValue(),
+                                     solutionToConvert::updateRobot);
       streamingMessageFactory.setEnableVelocity(true);
+      streamingMessageFactory.setEnableAcceleration(true);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -359,12 +362,8 @@ public class KSTTools
       if (isPelvisTaskspaceOutputEnabled.getValue())
          streamingMessageFactory.computePelvisStreamingMessage(configurationCommand.getPelvisTrajectoryFrame());
 
-      wholeBodyStreamingMessage.setEnableUserPelvisControl(true);
-      wholeBodyStreamingMessage.setStreamIntegrationDuration((float) streamIntegrationDuration.getValue());
-      wholeBodyStreamingMessage.setTimestamp(Conversions.secondsToNanoseconds(time.getValue()));
-      wholeBodyStreamingMessage.setSequenceId(currentMessageId++);
-      wholeBodyStreamingMessage.setUniqueId(currentMessageId++);
-      return wholeBodyStreamingMessage;
+      currentMessageId.increment();
+      return streamingMessageFactory.getOutput();
    }
 
    public WholeBodyTrajectoryMessage setupTrajectoryMessage(KSTOutputDataReadOnly solutionToConvert)
@@ -395,7 +394,8 @@ public class KSTTools
       HumanoidMessageTools.configureForStreaming(wholeBodyTrajectoryMessage,
                                                  streamIntegrationDuration.getValue(),
                                                  Conversions.secondsToNanoseconds(time.getValue()));
-      setAllIDs(wholeBodyTrajectoryMessage, currentMessageId++);
+      setAllIDs(wholeBodyTrajectoryMessage, currentMessageId.getValue());
+      currentMessageId.increment();
       return wholeBodyTrajectoryMessage;
    }
 
@@ -424,7 +424,8 @@ public class KSTTools
 
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(false);
       HumanoidMessageTools.configureForOverriding(wholeBodyTrajectoryMessage);
-      setAllIDs(wholeBodyTrajectoryMessage, currentMessageId++);
+      setAllIDs(wholeBodyTrajectoryMessage, currentMessageId.getValue());
+      currentMessageId.increment();
 
       return wholeBodyTrajectoryMessage;
    }
