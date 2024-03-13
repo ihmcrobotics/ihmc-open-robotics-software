@@ -86,6 +86,10 @@ public class KinematicsStreamingToolboxParameters
     * Scale factor used to downscale the joint velocity solution before sending it to the controller.
     */
    private double outputJointVelocityScale;
+   /**
+    * Break frequency used for the low-pass filter used to filter the output of the IK solver.
+    */
+   private double outputPoseLPFBreakFrequency;
 
    /**
     * Whether to minimize the angular momentum in the kinematics solution.
@@ -182,6 +186,7 @@ public class KinematicsStreamingToolboxParameters
       defaultLinearRateLimit = 1.5;
       defaultAngularRateLimit = 10.0;
       outputJointVelocityScale = 0.75;
+      outputPoseLPFBreakFrequency = Double.POSITIVE_INFINITY;
 
       minimizeAngularMomentum = true;
       minimizeLinearMomentum = false;
@@ -296,6 +301,11 @@ public class KinematicsStreamingToolboxParameters
    public double getOutputJointVelocityScale()
    {
       return outputJointVelocityScale;
+   }
+
+   public double getOutputLPFBreakFrequency()
+   {
+      return outputPoseLPFBreakFrequency;
    }
 
    public boolean isMinimizeAngularMomentum()
@@ -456,6 +466,11 @@ public class KinematicsStreamingToolboxParameters
    public void setOutputJointVelocityScale(double outputJointVelocityScale)
    {
       this.outputJointVelocityScale = outputJointVelocityScale;
+   }
+
+   public void setOutputPoseLPFBreakFrequency(double outputPoseLPFBreakFrequency)
+   {
+      this.outputPoseLPFBreakFrequency = outputPoseLPFBreakFrequency;
    }
 
    public void setMinimizeAngularMomentum(boolean minimizeAngularMomentum)
