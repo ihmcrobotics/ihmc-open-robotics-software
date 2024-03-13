@@ -208,7 +208,7 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       super.getRenderables(renderables, pool, sceneLevels);
-      if (sceneLevelCheck(sceneLevels) && !super.isGraphicsHidden())
+      if (sceneLevelCheck(sceneLevels))
       {
          if (boundingBoxModelInstance != null)
          {

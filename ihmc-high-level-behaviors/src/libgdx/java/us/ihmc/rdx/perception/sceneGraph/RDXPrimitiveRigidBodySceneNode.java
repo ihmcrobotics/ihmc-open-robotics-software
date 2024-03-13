@@ -207,13 +207,10 @@ public class RDXPrimitiveRigidBodySceneNode extends RDXRigidBodySceneNode
    {
       super.getRenderables(renderables, pool, sceneLevels);
 
-      if (!super.isGraphicsHidden())
-      {
-         if (sceneLevels.contains(RDXSceneLevel.MODEL))
-            modelInstance.getRenderables(renderables, pool);
+      if (sceneLevels.contains(RDXSceneLevel.MODEL))
+         modelInstance.getRenderables(renderables, pool);
 
-         icpOptions.getRenderables(renderables, pool);
-      }
+      icpOptions.getRenderables(renderables, pool);
    }
 
    @Override
