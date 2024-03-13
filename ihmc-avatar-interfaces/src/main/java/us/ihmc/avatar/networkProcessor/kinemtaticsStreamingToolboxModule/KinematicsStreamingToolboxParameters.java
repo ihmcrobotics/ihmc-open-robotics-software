@@ -105,7 +105,22 @@ public class KinematicsStreamingToolboxParameters
     * Weight used to minimize the linear momentum in the kinematics solution.
     */
    private double linearMomentumWeight;
-
+   /**
+    * Whether to minimize the rate of change of the angular momentum in the kinematics solution.
+    */
+   private boolean minimizeAngularMomentumRate;
+   /**
+    * Whether to minimize the rate of change of the linear momentum in the kinematics solution.
+    */
+   private boolean minimizeLinearMomentumRate;
+   /**
+    * Weight used to minimize the rate of change of the angular momentum in the kinematics solution.
+    */
+   private double angularMomentumRateWeight;
+   /**
+    * Weight used to minimize the rate of change of the linear momentum in the kinematics solution.
+    */
+   private double linearMomentumRateWeight;
    /**
     * Duration used to smoothly initiate the streaming to the controller.
     */
@@ -172,6 +187,11 @@ public class KinematicsStreamingToolboxParameters
       minimizeLinearMomentum = false;
       angularMomentumWeight = 0.125;
       linearMomentumWeight = 0.0;
+
+      minimizeAngularMomentumRate = false;
+      minimizeLinearMomentumRate = false;
+      angularMomentumRateWeight = 0.0;
+      linearMomentumRateWeight = 0.0;
 
       defaultStreamingBlendingDuration = 2.0;
 
@@ -296,6 +316,26 @@ public class KinematicsStreamingToolboxParameters
    public double getLinearMomentumWeight()
    {
       return linearMomentumWeight;
+   }
+
+   public boolean isMinimizeAngularMomentumRate()
+   {
+      return minimizeAngularMomentumRate;
+   }
+
+   public boolean isMinimizeLinearMomentumRate()
+   {
+      return minimizeLinearMomentumRate;
+   }
+
+   public double getAngularMomentumRateWeight()
+   {
+      return angularMomentumRateWeight;
+   }
+
+   public double getLinearMomentumRateWeight()
+   {
+      return linearMomentumRateWeight;
    }
 
    public double getDefaultStreamingBlendingDuration()
@@ -436,6 +476,26 @@ public class KinematicsStreamingToolboxParameters
    public void setLinearMomentumWeight(double linearMomentumWeight)
    {
       this.linearMomentumWeight = linearMomentumWeight;
+   }
+
+   public void setMinimizeAngularMomentumRate(boolean minimizeAngularMomentumRate)
+   {
+      this.minimizeAngularMomentumRate = minimizeAngularMomentumRate;
+   }
+
+   public void setMinimizeLinearMomentumRate(boolean minimizeLinearMomentumRate)
+   {
+      this.minimizeLinearMomentumRate = minimizeLinearMomentumRate;
+   }
+
+   public void setAngularMomentumRateWeight(double angularMomentumRateWeight)
+   {
+      this.angularMomentumRateWeight = angularMomentumRateWeight;
+   }
+
+   public void setLinearMomentumRateWeight(double linearMomentumRateWeight)
+   {
+      this.linearMomentumRateWeight = linearMomentumRateWeight;
    }
 
    public void setDefaultStreamingBlendingDuration(double defaultStreamingBlendingDuration)
