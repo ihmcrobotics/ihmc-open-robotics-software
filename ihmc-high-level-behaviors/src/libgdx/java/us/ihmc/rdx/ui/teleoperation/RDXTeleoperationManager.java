@@ -110,6 +110,7 @@ public class RDXTeleoperationManager extends RDXPanel
    private final boolean interactablesAvailable;
    private final RDXWholeBodyIKManager wholeBodyIKManager;
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
+   private RDXHumanoidDemoPoses demoPoses;
 
    /** This tracker should be shared with the sub-managers to keep the state consistent. */
    private final ControllerStatusTracker controllerStatusTracker;
@@ -334,6 +335,9 @@ public class RDXTeleoperationManager extends RDXPanel
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::process3DViewInput);
          baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltipsAndContextMenus);
          interactablesEnabled.set(true);
+
+         demoPoses = new RDXHumanoidDemoPoses(robotModel, syncedRobot, ros2Helper, teleoperationParameters);
+         addChild(demoPoses);
       }
 
       RDX3DPanelToolbarButton standPrepButton = baseUI.getPrimary3DPanel().addToolbarButton();
