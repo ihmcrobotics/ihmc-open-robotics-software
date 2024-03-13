@@ -38,7 +38,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadHybridJo
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
@@ -51,8 +50,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3Trajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationsCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintRegionCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintsListCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
@@ -342,7 +339,7 @@ public class WalkingCommandConsumer
          if (command.getRequest(HumanoidBodyPart.PELVIS))
          {
             pelvisOrientationManager.goToHomeFromCurrentDesired(command.getTrajectoryTime());
-            balanceManager.goHome();
+            balanceManager.goHome(command.getTrajectoryTime());
             comHeightManager.goHome(command.getTrajectoryTime());
          }
 
@@ -529,16 +526,14 @@ public class WalkingCommandConsumer
          RobotSide robotSide = command.getRobotSide();
          if (handManagers.get(robotSide) != null)
          {
-            JointspaceTrajectoryCommand jointspaceTrajectory = null;
-            if (command.isUseJointspaceCommand())
+            if (command.getLoad())
             {
-               jointspaceTrajectory = command.getJointspaceTrajectory();
-               jointspaceTrajectory.setSequenceId(command.getSequenceId());
+               handManagers.get(robotSide).load(command.getCoefficientOfFriction(), command.getContactPointInBodyFrame(), command.getContactNormalInWorldFrame());
             }
-
-            LoadBearingCommand loadBearingCommand = command.getLoadBearingCommand();
-            loadBearingCommand.setSequenceId(command.getSequenceId());
-            handManagers.get(robotSide).handleLoadBearingCommand(loadBearingCommand, jointspaceTrajectory);
+            else
+            {
+               handManagers.get(robotSide).unload();
+            }
          }
       }
    }

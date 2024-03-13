@@ -2,6 +2,7 @@
 #define __behavior_msgs__msg__ActionNodeStateMessage__idl__
 
 #include "behavior_msgs/msg/./BehaviorTreeNodeStateMessage_.idl"
+#include "controller_msgs/msg/./OneDoFJointTrajectoryMessage_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
 #include "ihmc_common_msgs/msg/./SE3TrajectoryPointMessage_.idl"
 module behavior_msgs
@@ -27,9 +28,9 @@ module behavior_msgs
          */
         boolean is_next_for_execution;
         /**
-         * If the action is to be executed concurrently
+         * The maximum number of actions that might be executing while this one is
          */
-        boolean is_to_be_executed_concurrently;
+        unsigned short concurrency_rank;
         /**
          * If the node is able to execution
          */
@@ -53,11 +54,19 @@ module behavior_msgs
         /**
          * Desired trajectory
          */
-        sequence<ihmc_common_msgs::msg::dds::SE3TrajectoryPointMessage, 500> desired_trajectory;
+        sequence<ihmc_common_msgs::msg::dds::SE3TrajectoryPointMessage, 500> commanded_trajectory;
         /**
          * Current pose
          */
         geometry_msgs::msg::dds::Pose current_pose;
+        /**
+         * Desired jointspace trajectories
+         */
+        sequence<controller_msgs::msg::dds::OneDoFJointTrajectoryMessage, 7> commanded_joint_trajectories;
+        /**
+         * Current joint angles for tracking jointspace trajectories
+         */
+        double current_joint_angles[7];
         /**
          * Position distance to goal tolerance
          */

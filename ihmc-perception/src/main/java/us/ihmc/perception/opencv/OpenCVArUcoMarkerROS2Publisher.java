@@ -10,6 +10,7 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.filters.DetectionFilter;
+import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.util.function.Function;
 
@@ -35,6 +36,7 @@ public class OpenCVArUcoMarkerROS2Publisher
    private final ReferenceFrame sensorFrame;
    private final TIntObjectMap<DetectionFilter> detectionFilters = new TIntObjectHashMap<>();
    private final TIntHashSet stableIDs = new TIntHashSet();
+   private final FrequencyCalculator updateFrequencyCalculator = new FrequencyCalculator();
 
    public OpenCVArUcoMarkerROS2Publisher(OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults,
                                          ROS2PublishSubscribeAPI ros2,
@@ -49,6 +51,8 @@ public class OpenCVArUcoMarkerROS2Publisher
 
    public void update()
    {
+      updateFrequencyCalculator.ping();
+
       Mat ids = arUcoMarkerDetectionResults.getIDs();
       arUcoMarkerPoses.getMarkerId().clear();
       arUcoMarkerPoses.getOrientation().clear();
@@ -64,6 +68,10 @@ public class OpenCVArUcoMarkerROS2Publisher
             detectionFilter = new DetectionFilter();
             detectionFilters.put(markerID, detectionFilter);
          }
+
+         // FIXME: Edge case if updateFrequencyCalculator has 0 or 1 pings.
+         detectionFilter.setHistoryLength((int) updateFrequencyCalculator.getFrequency());
+         detectionFilter.registerDetection();
 
          if (detectionFilter.isStableDetectionResult())
          {

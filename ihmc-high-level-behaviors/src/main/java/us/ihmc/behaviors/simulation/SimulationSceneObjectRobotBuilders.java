@@ -3,7 +3,7 @@ package us.ihmc.behaviors.simulation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.perception.sceneGraph.multiBodies.door.DoorDefinition;
+import us.ihmc.behaviors.simulation.door.DoorDefinition;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.TableModelParameters;
 import us.ihmc.scs2.simulation.robot.Robot;
@@ -37,7 +37,6 @@ public class SimulationSceneObjectRobotBuilders
          // Rotate the door so the push side is facing
          doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(Math.PI, 0.0, 0.0), new Point3D(1.3, 0.5, 0.01));
          Robot robot = new Robot(doorDefinition, inertialFrame);
-         DoorDefinition.applyPDController(robot);
          return robot;
       };
    }
@@ -49,7 +48,6 @@ public class SimulationSceneObjectRobotBuilders
          DoorDefinition doorDefinition = getDoorWithArUcoMarkersDefinition();
          doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0), new Point3D(1.0, -0.5, 0.01));
          Robot robot = new Robot(doorDefinition, inertialFrame);
-         DoorDefinition.applyPDController(robot);
          return robot;
       };
    }

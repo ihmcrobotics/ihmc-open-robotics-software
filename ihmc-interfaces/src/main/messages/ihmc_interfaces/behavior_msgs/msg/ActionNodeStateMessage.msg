@@ -7,8 +7,8 @@ uint32 id
 # If the action is next for execution
 bool is_next_for_execution
 
-# If the action is to be executed concurrently
-bool is_to_be_executed_concurrently
+# The maximum number of actions that might be executing while this one is
+uint16 concurrency_rank
 
 # If the node is able to execution
 bool can_execute
@@ -26,10 +26,16 @@ float64 nominal_execution_duration
 float64 elapsed_execution_time
 
 # Desired trajectory
-ihmc_common_msgs/SE3TrajectoryPointMessage[<=500] desired_trajectory
+ihmc_common_msgs/SE3TrajectoryPointMessage[<=500] commanded_trajectory
 
 # Current pose
 geometry_msgs/Pose current_pose
+
+# Desired jointspace trajectories
+controller_msgs/OneDoFJointTrajectoryMessage[<=7] commanded_joint_trajectories
+
+# Current joint angles for tracking jointspace trajectories
+float64[7] current_joint_angles
 
 # Position distance to goal tolerance
 float64 position_distance_to_goal_tolerance

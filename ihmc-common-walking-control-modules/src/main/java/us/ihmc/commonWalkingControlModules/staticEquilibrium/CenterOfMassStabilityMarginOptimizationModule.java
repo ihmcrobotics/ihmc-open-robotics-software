@@ -26,32 +26,37 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * This is an implementation of "Testing Static Equilibrium for Legged Robots", Bretl et al, 2008
- * {@see http://lall.stanford.edu/papers/bretl_eqmcut_ieee_tro_projection_2008_08_01_01/pubdata/entry.pdf}
- *
+ * This is an implementation of
+ * <a href="https://lall.stanford.edu/papers/bretl_eqmcut_ieee_tro_projection_2008_08_01_01/pubdata/entry.pdf">
+ *    Testing Static Equilibrium for Legged Robots</a>.
  * and
- *
- * "Feasible Region: an Actuation-Aware Extension of the Support Region", Orsolino et al, 2018
- * {@see https://arxiv.org/pdf/1903.07999.pdf}
- *
+ * <a href="https://arxiv.org/abs/1903.07999">
+ *    Feasible Region: an Actuation-Aware Extension of the Support Region</a>.
+ * <br>
+ * The input is a query direction <tt>c</tt> and the output is a point <tt>x</tt> representing the maximum CoM displacement in the direction
+ * of <tt>c</tt> given friction and actuation constraints.
+ * <br>
  * Solves the LP:
+ * <br>
  *
- * max_{x,f} c dot x                   (max com displacement)
- *    s.t.  mg + sum(f) = 0            (lin static equilibrium)
- *    s.t.  sum (x x f + x x mg) = 0   (ang static equilibrium)
+ * <pre>
+ * max<sub>x,f</sub> c · x                           (max com displacement)
+ *    s.t.  mg + &Sigma f = 0                  (lin static equilibrium)
+ *          &Sigma x × f + x × mg = 0          (ang static equilibrium)
  *          f is friction constrained
- *          tau_min <= G - J^T f <= tau_max  (f is actuation constrained)
- *
- * x is com position, c is a direction to optimize
- * Notation taken from EoM:
- * M qdd + C qd + G = tau + J^T f
+ *          &tau<sub>min</sub> <= G - J^T f <= &tau<sub>max</sub>      (actuation constraints)
+ * </pre>
+ * Where:
+ * <ul>
+ *    <li>c is the query direction in R<sup>2</sup></li>
+ *    <li>x is CoM position in R<sup>2</sup></li>
+ * </ul>
  */
 public class CenterOfMassStabilityMarginOptimizationModule
 {
+   private static final boolean DEBUG = false;
    static final double GRAVITY = 9.81;
    static final int NUM_BASIS_VECTORS = 4;
-   static final double COEFFICIENT_OF_FRICTION = 0.7;
-   static final double BASIS_VEC_ANGLE = Math.atan(COEFFICIENT_OF_FRICTION);
    static final int MAX_CONTACT_POINTS = 12;
 
    static final int CoM_DIMENSIONS = 2;
@@ -133,7 +138,7 @@ public class CenterOfMassStabilityMarginOptimizationModule
          }
       }
 
-      if (graphicsListRegistry != null)
+      if (DEBUG && graphicsListRegistry != null)
       {
          YoGraphicsList graphicsList = new YoGraphicsList(getClass().getSimpleName());
          for (int contactIdx = 0; contactIdx < MAX_CONTACT_POINTS; contactIdx++)
@@ -147,6 +152,7 @@ public class CenterOfMassStabilityMarginOptimizationModule
                graphicsList.add(basisVectorGraphic);
             }
          }
+
          graphicsList.add(new YoGraphicPosition("optimizedCoMGraphic", yoOptimizedCoM, 0.03, YoAppearance.Red()));
          graphicsListRegistry.registerYoGraphicsList(graphicsList);
       }
@@ -170,12 +176,13 @@ public class CenterOfMassStabilityMarginOptimizationModule
          tempPoint.setToZero(contactFrame);
          tempPoint.changeFrame(ReferenceFrame.getWorldFrame());
          contactPointPositions.get(contactIdx).set(tempPoint);
+         double basisVectorAngle = Math.atan(contactState.getCoefficientOfFriction(contactIdx));
 
          for (int basisIdx = 0; basisIdx < NUM_BASIS_VECTORS; basisIdx++)
          {
             tempVector.setIncludingFrame(contactFrame, Axis3D.Z);
             double axisPolarCoordinate = basisIdx * 2.0 * Math.PI / NUM_BASIS_VECTORS;
-            tempAxisAngle.set(Math.cos(axisPolarCoordinate), Math.sin(axisPolarCoordinate), 0.0, BASIS_VEC_ANGLE);
+            tempAxisAngle.set(Math.cos(axisPolarCoordinate), Math.sin(axisPolarCoordinate), 0.0, basisVectorAngle);
             tempAxisAngle.transform(tempVector);
 
             tempVector.changeFrame(ReferenceFrame.getWorldFrame());

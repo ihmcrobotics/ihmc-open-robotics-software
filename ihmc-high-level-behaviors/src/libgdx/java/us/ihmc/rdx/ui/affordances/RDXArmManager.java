@@ -33,6 +33,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.MissingThreadTools;
 
+import java.util.function.BooleanSupplier;
+
 /**
  * This class manages the UI for operating the arms of a humanoid robot.
  * This includes sending the arms to predefined joint angles poses and
@@ -61,6 +63,7 @@ public class RDXArmManager
 
    private final RDXTeleoperationParameters teleoperationParameters;
    private final SideDependentList<RDXInteractableHand> interactableHands;
+   private final BooleanSupplier enableWholeBodyIK;
 
    private final SideDependentList<ArmJointName[]> armJointNames = new SideDependentList<>();
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINTSPACE;
@@ -86,7 +89,8 @@ public class RDXArmManager
                         ROS2SyncedRobotModel syncedRobot,
                         RDXDesiredRobot desiredRobot,
                         RDXTeleoperationParameters teleoperationParameters,
-                        SideDependentList<RDXInteractableHand> interactableHands)
+                        SideDependentList<RDXInteractableHand> interactableHands,
+                        BooleanSupplier enableWholeBodyIK)
    {
       this.communicationHelper = communicationHelper;
       this.robotModel = robotModel;
@@ -94,10 +98,11 @@ public class RDXArmManager
       this.desiredRobot = desiredRobot;
       this.teleoperationParameters = teleoperationParameters;
       this.interactableHands = interactableHands;
+      this.enableWholeBodyIK = enableWholeBodyIK;
 
       for (RobotSide side : RobotSide.values)
       {
-         armIKSolvers.put(side, new ArmIKSolver(side, robotModel, syncedRobot.getFullRobotModel()));
+         armIKSolvers.put(side, new ArmIKSolver(side, robotModel.getJointMap(), syncedRobot.getFullRobotModel()));
          ArmJointName[] armJointNames = robotModel.getJointMap().getArmJointNames(side);
          desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot.getDesiredFullRobotModel(), side, armJointNames));
          this.armJointNames.put(side, armJointNames);
@@ -123,30 +128,14 @@ public class RDXArmManager
       handManager.create(baseUI, communicationHelper, syncedRobot);
    }
 
-   public void update()
+   public void update(boolean interactablesEnabled)
    {
       handManager.update();
 
-      boolean desiredHandPoseChanged = false;
+      boolean showWrench = indicateWrenchOnScreen.get();
+
       for (RobotSide side : interactableHands.sides())
       {
-         armIKSolvers.get(side).update(syncedRobot.getReferenceFrames().getChestFrame(),
-                                       interactableHands.get(side).getControlReferenceFrame());
-
-         // wrench expressed in wrist pitch body fixed-frame
-         boolean showWrench = indicateWrenchOnScreen.get();
-         if (interactableHands.get(side).getEstimatedHandWrenchArrows().getShow() != showWrench)
-            interactableHands.get(side).getEstimatedHandWrenchArrows().setShow(showWrench);
-         interactableHands.get(side).updateEstimatedWrench(syncedRobot.getHandWrenchCalculators().get(side).getFilteredWrench());
-
-         // Check if the desired hand pose changed and we need to run the solver again.
-         // We only want to evaluate this when we are going to take action on it
-         // Otherwise, we will not notice the desired changed while the solver was still solving
-         if (readyToSolve)
-         {
-            desiredHandPoseChanged |= armIKSolvers.get(side).getDesiredHandControlPoseChanged();
-         }
-
          if (showWrench)
          {
             panelHandWrenchIndicator.update(side,
@@ -155,44 +144,69 @@ public class RDXArmManager
          }
       }
 
-      // The following puts the solver on a thread as to not slow down the UI
-      if (readyToSolve && desiredHandPoseChanged)
+      if (!enableWholeBodyIK.getAsBoolean() && interactablesEnabled)
       {
-         readyToSolve = false;
+         boolean desiredHandPoseChanged = false;
          for (RobotSide side : interactableHands.sides())
          {
-            armIKSolvers.get(side).copySourceToWork();
-         }
+            // wrench expressed in wrist pitch body fixed-frame
+            if (interactableHands.get(side).getEstimatedHandWrenchArrows().getShow() != showWrench)
+               interactableHands.get(side).getEstimatedHandWrenchArrows().setShow(showWrench);
+            interactableHands.get(side).updateEstimatedWrench(syncedRobot.getHandWrenchCalculators().get(side).getFilteredWrench());
 
-         MissingThreadTools.startAThread("IKSolver", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
-         {
-            try
+            if (!interactableHands.get(side).isDeleted())
             {
-               for (RobotSide side : interactableHands.sides())
+               armIKSolvers.get(side).update(syncedRobot.getReferenceFrames().getChestFrame(), interactableHands.get(side).getControlReferenceFrame());
+
+               // Check if the desired hand pose changed and we need to run the solver again.
+               // We only want to evaluate this when we are going to take action on it
+               // Otherwise, we will not notice the desired changed while the solver was still solving
+               if (readyToSolve)
                {
-                  armIKSolvers.get(side).solve();
+                  desiredHandPoseChanged |= armIKSolvers.get(side).getDesiredHandControlPoseChanged();
                }
             }
-            finally
-            {
-               readyToCopySolution = true;
-            }
-         });
-      }
-
-      if (readyToCopySolution)
-      {
-         readyToCopySolution = false;
-         for (RobotSide side : interactableHands.sides())
-         {
-            MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(armIKSolvers.get(side).getSolutionOneDoFJoints(), desiredRobotArmJoints.get(side));
          }
 
-         readyToSolve = true;
-      }
+         // The following puts the solver on a thread as to not slow down the UI
+         if (readyToSolve && desiredHandPoseChanged)
+         {
+            readyToSolve = false;
+            for (RobotSide side : interactableHands.sides())
+            {
+               armIKSolvers.get(side).copySourceToWork();
+            }
 
-      desiredRobot.getDesiredFullRobotModel().getRootJoint().setJointConfiguration(syncedRobot.getFullRobotModel().getRootJoint().getJointPose());
-      desiredRobot.getDesiredFullRobotModel().updateFrames();
+            MissingThreadTools.startAThread("IKSolver", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
+            {
+               try
+               {
+                  for (RobotSide side : interactableHands.sides())
+                  {
+                     armIKSolvers.get(side).solve();
+                  }
+               }
+               finally
+               {
+                  readyToCopySolution = true;
+               }
+            });
+         }
+
+         if (readyToCopySolution)
+         {
+            readyToCopySolution = false;
+            for (RobotSide side : interactableHands.sides())
+            {
+               MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(armIKSolvers.get(side).getSolutionOneDoFJoints(), desiredRobotArmJoints.get(side));
+            }
+
+            readyToSolve = true;
+         }
+
+         desiredRobot.getDesiredFullRobotModel().getRootJoint().setJointConfiguration(syncedRobot.getFullRobotModel().getRootJoint().getJointPose());
+         desiredRobot.getDesiredFullRobotModel().updateFrames();
+      }
    }
 
    public void renderImGuiWidgets()
@@ -307,6 +321,7 @@ public class RDXArmManager
 
    public void executeArmAngles(RobotSide side, PresetArmConfiguration presetArmConfiguration, double trajectoryTime)
    {
+      RDXBaseUI.pushNotification("Commanding arm trajectory...");
       double[] jointAngles = robotModel.getPresetArmConfiguration(side, presetArmConfiguration);
       ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
                                                                                                   trajectoryTime,
@@ -314,68 +329,65 @@ public class RDXArmManager
       communicationHelper.publishToController(armTrajectoryMessage);
    }
 
-   public Runnable getSubmitDesiredArmSetpointsCallback(RobotSide robotSide)
+   public void executeDesiredArmCommand(RobotSide robotSide)
    {
-      return () ->
+      JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
+      jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+      for (ArmJointName armJoint : armJointNames.get(robotSide))
       {
-         JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
-         jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
-         for (ArmJointName armJoint : armJointNames.get(robotSide))
+         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().add();
+         oneDoFJointTrajectoryMessage.setWeight(-1.0); // Use default weight
+
+         TrajectoryPoint1DMessage trajectoryPoint1DMessage = oneDoFJointTrajectoryMessage.getTrajectoryPoints().add();
+         trajectoryPoint1DMessage.setTime(teleoperationParameters.getTrajectoryTime());
+         trajectoryPoint1DMessage.setPosition(desiredRobot.getDesiredFullRobotModel().getArmJoint(robotSide, armJoint).getQ());
+         trajectoryPoint1DMessage.setVelocity(0.0);
+      }
+
+      long trajectoryReferenceFrameID = MessageTools.toFrameId(taskspaceTrajectoryFrame);
+      FramePose3D desiredControlFramePose = new FramePose3D(interactableHands.get(robotSide).getControlReferenceFrame());
+      desiredControlFramePose.changeFrame(taskspaceTrajectoryFrame);
+
+      SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
+      se3TrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
+      // Select all axes and use default weights
+      SE3TrajectoryPointMessage se3TrajectoryPointMessage = se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add();
+      se3TrajectoryPointMessage.setTime(teleoperationParameters.getTrajectoryTime());
+      se3TrajectoryPointMessage.getPosition().set(desiredControlFramePose.getPosition());
+      se3TrajectoryPointMessage.getOrientation().set(desiredControlFramePose.getOrientation());
+      se3TrajectoryPointMessage.getLinearVelocity().setToZero();
+      se3TrajectoryPointMessage.getAngularVelocity().setToZero();
+      se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryReferenceFrameID);
+
+      switch (armControlMode)
+      {
+         case JOINTSPACE ->
          {
-            OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointspaceTrajectoryMessage.getJointTrajectoryMessages().add();
-            oneDoFJointTrajectoryMessage.setWeight(-1.0); // Use default weight
-
-            TrajectoryPoint1DMessage trajectoryPoint1DMessage = oneDoFJointTrajectoryMessage.getTrajectoryPoints().add();
-            trajectoryPoint1DMessage.setTime(teleoperationParameters.getTrajectoryTime());
-            trajectoryPoint1DMessage.setPosition(desiredRobot.getDesiredFullRobotModel().getArmJoint(robotSide, armJoint).getQ());
-            trajectoryPoint1DMessage.setVelocity(0.0);
+            ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
+            armTrajectoryMessage.setRobotSide(robotSide.toByte());
+            armTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
+            RDXBaseUI.pushNotification("Commanding arm jointspace trajectory...");
+            communicationHelper.publishToController(armTrajectoryMessage);
          }
-
-         long trajectoryReferenceFrameID = MessageTools.toFrameId(taskspaceTrajectoryFrame);
-         FramePose3D desiredControlFramePose = new FramePose3D(interactableHands.get(robotSide).getControlReferenceFrame());
-         desiredControlFramePose.changeFrame(taskspaceTrajectoryFrame);
-
-         SE3TrajectoryMessage se3TrajectoryMessage = new SE3TrajectoryMessage();
-         se3TrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
-         // Select all axes and use default weights
-         SE3TrajectoryPointMessage se3TrajectoryPointMessage = se3TrajectoryMessage.getTaskspaceTrajectoryPoints().add();
-         se3TrajectoryPointMessage.setTime(teleoperationParameters.getTrajectoryTime());
-         se3TrajectoryPointMessage.getPosition().set(desiredControlFramePose.getPosition());
-         se3TrajectoryPointMessage.getOrientation().set(desiredControlFramePose.getOrientation());
-         se3TrajectoryPointMessage.getLinearVelocity().setToZero();
-         se3TrajectoryPointMessage.getAngularVelocity().setToZero();
-         se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryReferenceFrameID);
-
-         switch (armControlMode)
+         case TASKSPACE ->
          {
-            case JOINTSPACE ->
-            {
-               ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
-               armTrajectoryMessage.setRobotSide(robotSide.toByte());
-               armTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
-               LogTools.info("Sending Jointspace ArmTrajectoryMessage");
-               communicationHelper.publishToController(armTrajectoryMessage);
-            }
-            case TASKSPACE ->
-            {
-               HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
-               handTrajectoryMessage.setRobotSide(robotSide.toByte());
-               handTrajectoryMessage.getSe3Trajectory().set(se3TrajectoryMessage);
-               LogTools.info("Sending Taskspace %s frame HandTrajectoryMessage".formatted(taskspaceTrajectoryFrame.getName()));
-               communicationHelper.publishToController(handTrajectoryMessage);
-            }
-            case HYBRID ->
-            {
-               HandHybridJointspaceTaskspaceTrajectoryMessage handHybridJointspaceTaskspaceTrajectoryMessage
-                     = new HandHybridJointspaceTaskspaceTrajectoryMessage();
-               handHybridJointspaceTaskspaceTrajectoryMessage.setRobotSide(robotSide.toByte());
-               handHybridJointspaceTaskspaceTrajectoryMessage.getTaskspaceTrajectoryMessage().set(se3TrajectoryMessage);
-               handHybridJointspaceTaskspaceTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
-               LogTools.info("Publishing arm hybrid jointspace taskpace");
-               communicationHelper.publishToController(handHybridJointspaceTaskspaceTrajectoryMessage);
-            }
+            HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
+            handTrajectoryMessage.setRobotSide(robotSide.toByte());
+            handTrajectoryMessage.getSe3Trajectory().set(se3TrajectoryMessage);
+            RDXBaseUI.pushNotification("Commanding taskspace %s frame trajectory...".formatted(taskspaceTrajectoryFrame.getName()));
+            communicationHelper.publishToController(handTrajectoryMessage);
          }
-      };
+         case HYBRID ->
+         {
+            HandHybridJointspaceTaskspaceTrajectoryMessage handHybridJointspaceTaskspaceTrajectoryMessage
+                  = new HandHybridJointspaceTaskspaceTrajectoryMessage();
+            handHybridJointspaceTaskspaceTrajectoryMessage.setRobotSide(robotSide.toByte());
+            handHybridJointspaceTaskspaceTrajectoryMessage.getTaskspaceTrajectoryMessage().set(se3TrajectoryMessage);
+            handHybridJointspaceTaskspaceTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
+            RDXBaseUI.pushNotification("Commanding arm hybrid jointspace taskpace trajectory...");
+            communicationHelper.publishToController(handHybridJointspaceTaskspaceTrajectoryMessage);
+         }
+      }
    }
 
    public RDXHandConfigurationManager getHandManager()

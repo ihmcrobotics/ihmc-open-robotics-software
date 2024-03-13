@@ -15,7 +15,7 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ddeb17a10efdeeef69dc81c3b5491a0acb9af7a49bcf477e6f22a09471d964e9";
+   		return "2702287f770d3992565d62e2d618da1f177ca11fd6f0d6dcf28bcee91888e8b5";
    }
    
    @Override
@@ -67,6 +67,14 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -94,6 +102,18 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getScrewAxisPose(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -133,9 +153,17 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
 
       cdr.write_type_6(data.getMaxAngularVelocity());
 
+      cdr.write_type_7(data.getJointspaceOnly());
+
       cdr.write_type_6(data.getLinearPositionWeight());
 
       cdr.write_type_6(data.getAngularPositionWeight());
+
+      cdr.write_type_6(data.getJointspaceWeight());
+
+      cdr.write_type_6(data.getPositionErrorTolerance());
+
+      cdr.write_type_6(data.getOrientationErrorTolerance());
 
    }
 
@@ -154,9 +182,17 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
       	
       data.setMaxAngularVelocity(cdr.read_type_6());
       	
+      data.setJointspaceOnly(cdr.read_type_7());
+      	
       data.setLinearPositionWeight(cdr.read_type_6());
       	
       data.setAngularPositionWeight(cdr.read_type_6());
+      	
+      data.setJointspaceWeight(cdr.read_type_6());
+      	
+      data.setPositionErrorTolerance(cdr.read_type_6());
+      	
+      data.setOrientationErrorTolerance(cdr.read_type_6());
       	
 
    }
@@ -174,8 +210,12 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
       ser.write_type_6("rotation", data.getRotation());
       ser.write_type_6("max_linear_velocity", data.getMaxLinearVelocity());
       ser.write_type_6("max_angular_velocity", data.getMaxAngularVelocity());
+      ser.write_type_7("jointspace_only", data.getJointspaceOnly());
       ser.write_type_6("linear_position_weight", data.getLinearPositionWeight());
       ser.write_type_6("angular_position_weight", data.getAngularPositionWeight());
+      ser.write_type_6("jointspace_weight", data.getJointspaceWeight());
+      ser.write_type_6("position_error_tolerance", data.getPositionErrorTolerance());
+      ser.write_type_6("orientation_error_tolerance", data.getOrientationErrorTolerance());
    }
 
    @Override
@@ -191,8 +231,12 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
       data.setRotation(ser.read_type_6("rotation"));
       data.setMaxLinearVelocity(ser.read_type_6("max_linear_velocity"));
       data.setMaxAngularVelocity(ser.read_type_6("max_angular_velocity"));
+      data.setJointspaceOnly(ser.read_type_7("jointspace_only"));
       data.setLinearPositionWeight(ser.read_type_6("linear_position_weight"));
       data.setAngularPositionWeight(ser.read_type_6("angular_position_weight"));
+      data.setJointspaceWeight(ser.read_type_6("jointspace_weight"));
+      data.setPositionErrorTolerance(ser.read_type_6("position_error_tolerance"));
+      data.setOrientationErrorTolerance(ser.read_type_6("orientation_error_tolerance"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessage src, behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessage dest)

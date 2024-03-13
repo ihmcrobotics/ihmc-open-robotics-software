@@ -15,7 +15,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6debb479d1972eb680f40f4ca3513be3f7e209b30b8e36aef2ac6368571afb72";
+   		return "b4090473736dff8d01632ea313a7fd287efec24070aa241760543fff270af515";
    }
    
    @Override

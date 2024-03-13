@@ -15,7 +15,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c145717a33db0320a723daa494936b7b4c0bee98476caae10e8ada577d1e83f9";
+   		return "ae56056286fd79953a861b7481fa18d7e8e99c68e73f15c892963f054666224d";
    }
    
    @Override
@@ -58,7 +58,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -74,6 +74,11 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
       {
           current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 7; ++i0)
+      {
+          current_alignment += controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += ((7) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -100,7 +105,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -119,12 +124,18 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getDesiredTrajectory().size(); ++i0)
+      for(int i0 = 0; i0 < data.getCommandedTrajectory().size(); ++i0)
       {
-          current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getCdrSerializedSize(data.getDesiredTrajectory().get(i0), current_alignment);}
+          current_alignment += ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType.getCdrSerializedSize(data.getCommandedTrajectory().get(i0), current_alignment);}
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getCurrentPose(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getCommandedJointTrajectories().size(); ++i0)
+      {
+          current_alignment += controller_msgs.msg.dds.OneDoFJointTrajectoryMessagePubSubType.getCdrSerializedSize(data.getCommandedJointTrajectories().get(i0), current_alignment);}
+
+      current_alignment += ((7) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -142,7 +153,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       cdr.write_type_7(data.getIsNextForExecution());
 
-      cdr.write_type_7(data.getIsToBeExecutedConcurrently());
+      cdr.write_type_3(data.getConcurrencyRank());
 
       cdr.write_type_7(data.getCanExecute());
 
@@ -154,11 +165,20 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       cdr.write_type_6(data.getElapsedExecutionTime());
 
-      if(data.getDesiredTrajectory().size() <= 500)
-      cdr.write_type_e(data.getDesiredTrajectory());else
-          throw new RuntimeException("desired_trajectory field exceeds the maximum length");
+      if(data.getCommandedTrajectory().size() <= 500)
+      cdr.write_type_e(data.getCommandedTrajectory());else
+          throw new RuntimeException("commanded_trajectory field exceeds the maximum length");
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getCurrentPose(), cdr);
+      if(data.getCommandedJointTrajectories().size() <= 7)
+      cdr.write_type_e(data.getCommandedJointTrajectories());else
+          throw new RuntimeException("commanded_joint_trajectories field exceeds the maximum length");
+
+      for(int i0 = 0; i0 < data.getCurrentJointAngles().length; ++i0)
+      {
+        	cdr.write_type_6(data.getCurrentJointAngles()[i0]);	
+      }
+
       cdr.write_type_6(data.getPositionDistanceToGoalTolerance());
 
       cdr.write_type_6(data.getOrientationDistanceToGoalTolerance());
@@ -172,7 +192,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
       	
       data.setIsNextForExecution(cdr.read_type_7());
       	
-      data.setIsToBeExecutedConcurrently(cdr.read_type_7());
+      data.setConcurrencyRank(cdr.read_type_3());
       	
       data.setCanExecute(cdr.read_type_7());
       	
@@ -184,8 +204,15 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
       	
       data.setElapsedExecutionTime(cdr.read_type_6());
       	
-      cdr.read_type_e(data.getDesiredTrajectory());	
+      cdr.read_type_e(data.getCommandedTrajectory());	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getCurrentPose(), cdr);	
+      cdr.read_type_e(data.getCommandedJointTrajectories());	
+      for(int i0 = 0; i0 < data.getCurrentJointAngles().length; ++i0)
+      {
+        	data.getCurrentJointAngles()[i0] = cdr.read_type_6();
+        	
+      }
+      	
       data.setPositionDistanceToGoalTolerance(cdr.read_type_6());
       	
       data.setOrientationDistanceToGoalTolerance(cdr.read_type_6());
@@ -200,15 +227,17 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       ser.write_type_4("id", data.getId());
       ser.write_type_7("is_next_for_execution", data.getIsNextForExecution());
-      ser.write_type_7("is_to_be_executed_concurrently", data.getIsToBeExecutedConcurrently());
+      ser.write_type_3("concurrency_rank", data.getConcurrencyRank());
       ser.write_type_7("can_execute", data.getCanExecute());
       ser.write_type_7("is_executing", data.getIsExecuting());
       ser.write_type_7("failed", data.getFailed());
       ser.write_type_6("nominal_execution_duration", data.getNominalExecutionDuration());
       ser.write_type_6("elapsed_execution_time", data.getElapsedExecutionTime());
-      ser.write_type_e("desired_trajectory", data.getDesiredTrajectory());
+      ser.write_type_e("commanded_trajectory", data.getCommandedTrajectory());
       ser.write_type_a("current_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getCurrentPose());
 
+      ser.write_type_e("commanded_joint_trajectories", data.getCommandedJointTrajectories());
+      ser.write_type_f("current_joint_angles", data.getCurrentJointAngles());
       ser.write_type_6("position_distance_to_goal_tolerance", data.getPositionDistanceToGoalTolerance());
       ser.write_type_6("orientation_distance_to_goal_tolerance", data.getOrientationDistanceToGoalTolerance());
    }
@@ -220,15 +249,17 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       data.setId(ser.read_type_4("id"));
       data.setIsNextForExecution(ser.read_type_7("is_next_for_execution"));
-      data.setIsToBeExecutedConcurrently(ser.read_type_7("is_to_be_executed_concurrently"));
+      data.setConcurrencyRank(ser.read_type_3("concurrency_rank"));
       data.setCanExecute(ser.read_type_7("can_execute"));
       data.setIsExecuting(ser.read_type_7("is_executing"));
       data.setFailed(ser.read_type_7("failed"));
       data.setNominalExecutionDuration(ser.read_type_6("nominal_execution_duration"));
       data.setElapsedExecutionTime(ser.read_type_6("elapsed_execution_time"));
-      ser.read_type_e("desired_trajectory", data.getDesiredTrajectory());
+      ser.read_type_e("commanded_trajectory", data.getCommandedTrajectory());
       ser.read_type_a("current_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getCurrentPose());
 
+      ser.read_type_e("commanded_joint_trajectories", data.getCommandedJointTrajectories());
+      ser.read_type_f("current_joint_angles", data.getCurrentJointAngles());
       data.setPositionDistanceToGoalTolerance(ser.read_type_6("position_distance_to_goal_tolerance"));
       data.setOrientationDistanceToGoalTolerance(ser.read_type_6("orientation_distance_to_goal_tolerance"));
    }

@@ -372,7 +372,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(QueueableMessagePubSubType.class);
       registerPacketField(IlluminancePubSubType.class);
       registerPacketField(NeckDesiredAccelerationsMessagePubSubType.class);
-      registerPacketField(LoadBearingMessagePubSubType.class);
       registerPacketField(PilotInterfaceActionPacketPubSubType.class);
       registerPacketField(Int8PubSubType.class);
       registerPacketField(Float32PubSubType.class);
@@ -567,7 +566,7 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketClass(FootLoadBearingMessage.class);
       registerPacketClass(HandLoadBearingMessage.class);
       registerPacketField(LoadBearingRequest.class);
-      registerPacketField(LoadBearingMessage.class);
+      registerPacketField(HandLoadBearingMessage.class);
 
       // User control mode
       registerPacketClass(ArmDesiredAccelerationsMessage.class);

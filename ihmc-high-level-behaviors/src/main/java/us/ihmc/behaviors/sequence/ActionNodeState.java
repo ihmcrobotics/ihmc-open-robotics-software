@@ -2,42 +2,60 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
+import us.ihmc.communication.crdt.CRDTUnidirectionalDoubleArray;
+import us.ihmc.communication.crdt.CRDTUnidirectionalInteger;
+import us.ihmc.communication.crdt.CRDTUnidirectionalOneDoFJointTrajectoryList;
 import us.ihmc.communication.crdt.CRDTUnidirectionalPose3D;
 import us.ihmc.communication.crdt.CRDTUnidirectionalSE3Trajectory;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.log.LogTools;
+
+import java.util.List;
 
 public abstract class ActionNodeState<D extends ActionNodeDefinition> extends BehaviorTreeNodeState<D>
 {
-   /** The index is not CRDT synced because it's a simple local calculation. */
-   private int actionIndex = -1;
+   public static final int SUPPORTED_NUMBER_OF_JOINTS = 7;
+
+   private final D definition;
+
    private final CRDTUnidirectionalBoolean isNextForExecution;
-   private final CRDTUnidirectionalBoolean isToBeExecutedConcurrently;
+   private final CRDTUnidirectionalInteger concurrencyRank;
    private final CRDTUnidirectionalBoolean canExecute;
    private final CRDTUnidirectionalBoolean isExecuting;
    private final CRDTUnidirectionalBoolean failed;
    private final CRDTUnidirectionalDouble nominalExecutionDuration;
    private final CRDTUnidirectionalDouble elapsedExecutionTime;
-   private final CRDTUnidirectionalSE3Trajectory desiredTrajectory;
+   private final CRDTUnidirectionalSE3Trajectory commandedTrajectory;
    private final CRDTUnidirectionalPose3D currentPose;
+   private final CRDTUnidirectionalOneDoFJointTrajectoryList commandedJointTrajectories;
+   private final CRDTUnidirectionalDoubleArray currentJointAngles;
    private final CRDTUnidirectionalDouble positionDistanceToGoalTolerance;
    private final CRDTUnidirectionalDouble orientationDistanceToGoalTolerance;
+
+   /** The index is not CRDT synced because it's a simple local calculation. */
+   private int actionIndex = -1;
 
    public ActionNodeState(long id, D definition, CRDTInfo crdtInfo)
    {
       super(id, definition, crdtInfo);
 
+      this.definition = definition;
+
       isNextForExecution = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
-      isToBeExecutedConcurrently = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
+      concurrencyRank = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 1);
       canExecute = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, true);
       isExecuting = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
       failed = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
       nominalExecutionDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
       elapsedExecutionTime = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
-      desiredTrajectory = new CRDTUnidirectionalSE3Trajectory(ROS2ActorDesignation.ROBOT, crdtInfo);
+      commandedTrajectory = new CRDTUnidirectionalSE3Trajectory(ROS2ActorDesignation.ROBOT, crdtInfo);
       currentPose = new CRDTUnidirectionalPose3D(ROS2ActorDesignation.ROBOT, crdtInfo);
+      commandedJointTrajectories = new CRDTUnidirectionalOneDoFJointTrajectoryList(ROS2ActorDesignation.ROBOT, crdtInfo);
+      currentJointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, SUPPORTED_NUMBER_OF_JOINTS);
       positionDistanceToGoalTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
       orientationDistanceToGoalTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
    }
@@ -47,14 +65,16 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       super.toMessage(message.getState());
 
       message.setIsNextForExecution(isNextForExecution.toMessage());
-      message.setIsToBeExecutedConcurrently(isToBeExecutedConcurrently.toMessage());
+      message.setConcurrencyRank(concurrencyRank.toMessage());
       message.setCanExecute(canExecute.toMessage());
       message.setIsExecuting(isExecuting.toMessage());
       message.setFailed(failed.toMessage());
       message.setNominalExecutionDuration(nominalExecutionDuration.toMessage());
       message.setElapsedExecutionTime(elapsedExecutionTime.toMessage());
-      desiredTrajectory.toMessage(message.getDesiredTrajectory());
+      commandedTrajectory.toMessage(message.getCommandedTrajectory());
       currentPose.toMessage(message.getCurrentPose());
+      commandedJointTrajectories.toMessage(message.getCommandedJointTrajectories());
+      currentJointAngles.toMessage(message.getCurrentJointAngles());
       message.setPositionDistanceToGoalTolerance(positionDistanceToGoalTolerance.toMessage());
       message.setOrientationDistanceToGoalTolerance(orientationDistanceToGoalTolerance.toMessage());
    }
@@ -64,14 +84,16 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       super.fromMessage(message.getState());
 
       isNextForExecution.fromMessage(message.getIsNextForExecution());
-      isToBeExecutedConcurrently.fromMessage(message.getIsToBeExecutedConcurrently());
+      concurrencyRank.fromMessage(message.getConcurrencyRank());
       canExecute.fromMessage(message.getCanExecute());
       isExecuting.fromMessage(message.getIsExecuting());
       failed.fromMessage(message.getFailed());
       nominalExecutionDuration.fromMessage(message.getNominalExecutionDuration());
       elapsedExecutionTime.fromMessage(message.getElapsedExecutionTime());
-      desiredTrajectory.fromMessage(message.getDesiredTrajectory());
+      commandedTrajectory.fromMessage(message.getCommandedTrajectory());
       currentPose.fromMessage(message.getCurrentPose());
+      commandedJointTrajectories.fromMessage(message.getCommandedJointTrajectories());
+      currentJointAngles.fromMessage(message.getCurrentJointAngles());
       positionDistanceToGoalTolerance.fromMessage(message.getPositionDistanceToGoalTolerance());
       orientationDistanceToGoalTolerance.fromMessage(message.getOrientationDistanceToGoalTolerance());
    }
@@ -96,14 +118,23 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       return isNextForExecution.getValue();
    }
 
-   public void setIsToBeExecutedConcurrently(boolean isToBeExecutedConcurrently)
+   public void setConcurrencyRank(int concurrencyRank)
    {
-      this.isToBeExecutedConcurrently.setValue(isToBeExecutedConcurrently);
+      this.concurrencyRank.setValue(concurrencyRank);
+   }
+
+   /**
+    * Gives an idea how many actions will be executing all together with this one.
+    * How many actions will be started when the execute next index is set to this action.
+    */
+   public int getConcurrencyRank()
+   {
+      return concurrencyRank.getValue();
    }
 
    public boolean getIsToBeExecutedConcurrently()
    {
-      return isToBeExecutedConcurrently.getValue();
+      return concurrencyRank.getValue() > 1;
    }
 
    public void setCanExecute(boolean canExecute)
@@ -111,6 +142,7 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       this.canExecute.setValue(canExecute);
    }
 
+   /** @return whether this action is valid for execution. This is checked before triggering the action. */
    public boolean getCanExecute()
    {
       return canExecute.getValue();
@@ -152,14 +184,24 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
       return elapsedExecutionTime.getValue();
    }
 
-   public CRDTUnidirectionalSE3Trajectory getDesiredTrajectory()
+   public CRDTUnidirectionalSE3Trajectory getCommandedTrajectory()
    {
-      return desiredTrajectory;
+      return commandedTrajectory;
    }
 
    public CRDTUnidirectionalPose3D getCurrentPose()
    {
       return currentPose;
+   }
+
+   public CRDTUnidirectionalOneDoFJointTrajectoryList getCommandedJointTrajectories()
+   {
+      return commandedJointTrajectories;
+   }
+
+   public CRDTUnidirectionalDoubleArray getCurrentJointAngles()
+   {
+      return currentJointAngles;
    }
 
    public double getPositionDistanceToGoalTolerance()
@@ -186,5 +228,37 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
    public boolean getIsExecuting()
    {
       return isExecuting.getValue();
+   }
+
+   public int calculateExecuteAfterActionIndex(List<ActionNodeState<?>> actionStateChildren)
+   {
+      if (definition.getExecuteAfterBeginning().getValue())
+      {
+         return -1;
+      }
+      else if (definition.getExecuteAfterPrevious().getValue())
+      {
+         return actionIndex - 1;
+      }
+      else
+      {
+         return findActionToExecuteAfter(actionStateChildren).getActionIndex();
+      }
+   }
+
+   /** Assumes execute after node ID matches a valid action. */
+   public ActionNodeState<?> findActionToExecuteAfter(List<ActionNodeState<?>> actionStateChildren)
+   {
+      long executeAfterID = definition.getExecuteAfterNodeID().getValue();
+      for (int j = actionIndex - 1; j >= 0; j--)
+      {
+         ActionNodeState<?> actionStateToCompare = actionStateChildren.get(j);
+         if (actionStateToCompare.getID() == executeAfterID)
+         {
+            return actionStateToCompare;
+         }
+      }
+
+      return null;
    }
 }

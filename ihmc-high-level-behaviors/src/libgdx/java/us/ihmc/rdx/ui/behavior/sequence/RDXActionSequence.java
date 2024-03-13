@@ -24,6 +24,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    private final ImBooleanWrapper automaticExecutionCheckbox;
    private final Timer manualExecutionOverrideTimer = new Timer();
    private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
+   private final List<RDXActionNode<?, ?>> actionChildren = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> nextForExecutionActions = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> currentlyExecutingActions = new ArrayList<>();
    private final RDXActionProgressWidgetsManager progressWidgetsManager = new RDXActionProgressWidgetsManager();
@@ -34,7 +35,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
 
       state = getState();
 
-      getDefinition().setDescription("ActionSequence");
+      getDefinition().setName("Action sequence");
 
       automaticExecutionCheckbox = new ImBooleanWrapper(state::getAutomaticExecution,
                                                         state::setAutomaticExecution,
@@ -46,9 +47,15 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    {
       super.update();
 
+      actionChildren.clear();
       nextForExecutionActions.clear();
       currentlyExecutingActions.clear();
       updateActionSubtree(this);
+
+      for (RDXActionNode<?, ?> actionChild : actionChildren)
+      {
+         actionChild.updateAndValidateExecuteAfter(state.getActionChildren());
+      }
    }
 
    public void updateActionSubtree(RDXBehaviorTreeNode<?, ?> node)
@@ -57,6 +64,8 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       {
          if (child instanceof RDXActionNode<?, ?> actionNode)
          {
+            actionChildren.add(actionNode);
+
             if (actionNode.getState().getIsNextForExecution())
             {
                nextForExecutionActions.add(actionNode);
@@ -82,8 +91,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
          progressWidgetsManager.setRenderAsPlots(!progressWidgetsManager.getRenderAsPlots());
    }
 
-   @Override
-   public void renderImGuiWidgets()
+   public void renderExecutionControlAndProgressWidgets()
    {
       if (ImGui.button(labels.get("<")))
       {
@@ -167,7 +175,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
          for (RDXActionNode<?, ?> currentlyExecutingAction : currentlyExecutingActions)
          {
             ImGui.sameLine();
-            ImGui.text("%s (%s)".formatted(currentlyExecutingAction.getDefinition().getDescription(),
+            ImGui.text("%s (%s)".formatted(currentlyExecutingAction.getDefinition().getName(),
                                            currentlyExecutingAction.getActionTypeTitle()));
          }
       }
@@ -185,5 +193,13 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
             progressWidgetsManager.getActionNodesToRender().add(nextForExecutionAction);
       }
       progressWidgetsManager.render();
+   }
+
+   @Override
+   public void renderNodeSettingsWidgets()
+   {
+      ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
+
+      super.renderNodeSettingsWidgets();
    }
 }

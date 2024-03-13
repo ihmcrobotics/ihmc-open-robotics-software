@@ -15,7 +15,7 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5416513dbc729b33b11814397bea9c39eb3d2c155ae1ca1880c04616df26205c";
+   		return "834cfc5ecc703172dfcdd40180554295f0e564314e74b50e34cf56e2a4795a18";
    }
    
    @Override
@@ -65,6 +65,16 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -96,6 +106,21 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -116,6 +141,16 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       cdr.write_type_7(data.getJointSpaceControl());
 
+      cdr.write_type_6(data.getLinearPositionWeight());
+
+      cdr.write_type_6(data.getAngularPositionWeight());
+
+      cdr.write_type_6(data.getJointspaceWeight());
+
+      cdr.write_type_6(data.getPositionErrorTolerance());
+
+      cdr.write_type_6(data.getOrientationErrorTolerance());
+
    }
 
    public static void read(behavior_msgs.msg.dds.HandPoseActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -130,6 +165,16 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       data.setHoldPoseInWorld(cdr.read_type_7());
       	
       data.setJointSpaceControl(cdr.read_type_7());
+      	
+      data.setLinearPositionWeight(cdr.read_type_6());
+      	
+      data.setAngularPositionWeight(cdr.read_type_6());
+      	
+      data.setJointspaceWeight(cdr.read_type_6());
+      	
+      data.setPositionErrorTolerance(cdr.read_type_6());
+      	
+      data.setOrientationErrorTolerance(cdr.read_type_6());
       	
 
    }
@@ -146,6 +191,11 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
       ser.write_type_7("hold_pose_in_world", data.getHoldPoseInWorld());
       ser.write_type_7("joint_space_control", data.getJointSpaceControl());
+      ser.write_type_6("linear_position_weight", data.getLinearPositionWeight());
+      ser.write_type_6("angular_position_weight", data.getAngularPositionWeight());
+      ser.write_type_6("jointspace_weight", data.getJointspaceWeight());
+      ser.write_type_6("position_error_tolerance", data.getPositionErrorTolerance());
+      ser.write_type_6("orientation_error_tolerance", data.getOrientationErrorTolerance());
    }
 
    @Override
@@ -160,6 +210,11 @@ public class HandPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
       data.setHoldPoseInWorld(ser.read_type_7("hold_pose_in_world"));
       data.setJointSpaceControl(ser.read_type_7("joint_space_control"));
+      data.setLinearPositionWeight(ser.read_type_6("linear_position_weight"));
+      data.setAngularPositionWeight(ser.read_type_6("angular_position_weight"));
+      data.setJointspaceWeight(ser.read_type_6("jointspace_weight"));
+      data.setPositionErrorTolerance(ser.read_type_6("position_error_tolerance"));
+      data.setOrientationErrorTolerance(ser.read_type_6("orientation_error_tolerance"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.HandPoseActionDefinitionMessage src, behavior_msgs.msg.dds.HandPoseActionDefinitionMessage dest)

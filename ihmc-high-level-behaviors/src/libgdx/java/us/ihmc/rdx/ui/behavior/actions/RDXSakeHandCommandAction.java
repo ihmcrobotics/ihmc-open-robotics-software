@@ -1,58 +1,48 @@
 package us.ihmc.rdx.ui.behavior.actions;
 
-import imgui.internal.ImGui;
-import us.ihmc.avatar.sakeGripper.SakeHandCommandOption;
+import imgui.ImGui;
+import us.ihmc.avatar.sakeGripper.SakeHandParameters;
+import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.rdx.imgui.*;
+import us.ihmc.rdx.imgui.ImBooleanWrapper;
+import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
+import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.rdx.ui.widgets.ImGuiGripperWidget;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
-
-import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_ANGLE_BETWEEN_FINGERS;
-import static us.ihmc.avatar.sakeGripper.SakeHandParameters.MAX_TORQUE_NEWTONS;
 
 public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActionState, SakeHandCommandActionDefinition>
 {
+   private final SakeHandCommandActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImIntegerWrapper sideWidget;
-
-   private final String[] handConfigurationNames = new String[SakeHandCommandOption.values.length];
-   private final ImIntegerWrapper handCommandEnumWidget;
-   private final ImDoubleWrapper positionWidget;
-   private final ImDoubleWrapper torqueWidget;
-
-   private final ImBooleanWrapper executeWithNextActionWrapper;
+   private final ImGuiSliderDoubleWrapper handOpenAngleSlider;
+   private final ImGuiSliderDoubleWrapper fingertipGripForceSlider;
+   private final ImGuiGripperWidget gripperWidget = new ImGuiGripperWidget();
 
    public RDXSakeHandCommandAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new SakeHandCommandActionState(id, crdtInfo, saveFileDirectory));
 
-      getDefinition().setDescription("Hand configuration");
+      definition = getDefinition();
 
-      sideWidget = new ImIntegerWrapper(getDefinition()::getSide, getDefinition()::setSide, labels.get("Side"));
-      handCommandEnumWidget = new ImIntegerWrapper(getDefinition()::getHandConfigurationIndex,
-                                                   getDefinition()::setHandConfigurationIndex,
-                                                    imInt -> ImGui.combo(labels.get("Predefined Options"),
-                                                                         imInt,
-                                                                         handConfigurationNames));
-      positionWidget = new ImDoubleWrapper(getDefinition()::getGoalPosition,
-                                           getDefinition()::setGoalPosition,
-                                           imDouble -> ImGuiTools.sliderDouble(labels.get("Position"), imDouble, 0.0, 1.0,
-                                                          "%.1f deg".formatted(getDefinition().getGoalPosition() * MAX_ANGLE_BETWEEN_FINGERS)));
-      torqueWidget = new ImDoubleWrapper(getDefinition()::getGoalTorque,
-                                           getDefinition()::setGoalTorque,
-                                           imDouble -> ImGuiTools.sliderDouble(labels.get("Torque"), imDouble, 0.0, 1.0,
-                                                          "%.1f N".formatted(getDefinition().getGoalTorque() * MAX_TORQUE_NEWTONS)));
-      executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
-                                                          getDefinition()::setExecuteWithNextAction,
-                                                          imBoolean -> imgui.ImGui.checkbox(labels.get("Execute with next action"),
-                                                                                            imBoolean));
+      definition.setName("Hand configuration");
 
-      for (int i = 0; i < SakeHandCommandOption.values.length; ++i)
-      {
-         handConfigurationNames[i] = SakeHandCommandOption.values[i].name();
-      }
+      sideWidget = new ImIntegerWrapper(definition::getSide, definition::setSide, labels.get("Side"));
+      ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
+      handOpenAngleSlider = new ImGuiSliderDoubleWrapper("Hand Open Angle", "", 0.0, Math.toRadians(SakeHandParameters.MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES),
+                                                         definition::getHandOpenAngle,
+                                                         definition::setHandOpenAngle);
+      handOpenAngleSlider.addWidgetAligner(widgetAligner);
+      fingertipGripForceSlider = new ImGuiSliderDoubleWrapper("Fingertip Torque Limit", "%.1f N", 0.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT,
+                                                              definition::getFingertipGripForceLimit,
+                                                              definition::setFingertipGripForceLimit);
+      fingertipGripForceSlider.addWidgetAligner(widgetAligner);
    }
 
    @Override
@@ -64,29 +54,32 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      imgui.ImGui.sameLine();
-      executeWithNextActionWrapper.renderImGuiWidget();
-      
       ImGui.pushItemWidth(100.0f);
       sideWidget.renderImGuiWidget();
+
+      for (SakeHandPreset preset : SakeHandPreset.values)
+      {
+         ImGui.sameLine();
+         if (ImGui.button(labels.get(preset.getPascalCasedName())))
+         {
+            definition.setHandOpenAngle(preset.getHandOpenAngle());
+            definition.setFingertipGripForceLimit(preset.getFingertipGripForceLimit());
+         }
+      }
+
+      handOpenAngleSlider.setWidgetText("%.1f%s".formatted(Math.toDegrees(definition.getHandOpenAngle()), EuclidCoreMissingTools.DEGREE_SYMBOL));
+
+      handOpenAngleSlider.renderImGuiWidget();
+      fingertipGripForceSlider.renderImGuiWidget();
+   }
+
+   @Override
+   public void renderTreeViewIconArea()
+   {
+      super.renderTreeViewIconArea();
+
+      gripperWidget.render(definition.getSide(), ImGui.getFrameHeight());
       ImGui.sameLine();
-      handCommandEnumWidget.renderImGuiWidget();
-      ImGui.popItemWidth();
-
-      SakeHandCommandOption sakeCommandOption = getDefinition().getSakeCommandOption();
-      if (sakeCommandOption != SakeHandCommandOption.GOTO)
-      {
-         getDefinition().setGoalPosition(sakeCommandOption.getGoalPosition());
-         getDefinition().setGoalTorque(sakeCommandOption.getGoalTorque());
-      }
-
-      positionWidget.renderImGuiWidget();
-      torqueWidget.renderImGuiWidget();
-
-      if (positionWidget.changed() || torqueWidget.changed())
-      {
-         getDefinition().setHandConfigurationIndex(SakeHandCommandOption.GOTO.ordinal());
-      }
    }
 
    @Override

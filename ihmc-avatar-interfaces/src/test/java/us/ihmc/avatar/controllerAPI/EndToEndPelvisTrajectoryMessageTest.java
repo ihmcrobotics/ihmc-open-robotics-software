@@ -8,20 +8,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.StopAllTrajectoryMessage;
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import ihmc_common_msgs.msg.dds.FrameInformation;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
+import us.ihmc.avatar.testTools.AvatarRandomTestMessages;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
@@ -42,11 +41,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -60,6 +55,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
+import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
@@ -85,6 +81,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -338,6 +335,61 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       int timeWalking = numberOfSteps;
       double timeToCompleteWalking = stepTime * timeWalking;
       return timeToCompleteWalking;
+   }
+
+   @Test
+   public void testPelvisTranslationContinuityForResetting() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+      Random random = new Random(564574L);
+
+      DRCRobotModel robotModel = getRobotModel();
+      simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(robotModel,
+                                                                                            new FlatGroundEnvironment(),
+                                                                                            simulationTestingParameters);
+      simulationTestHelper.start();
+
+      ThreadTools.sleep(1000);
+      boolean success = simulationTestHelper.simulateNow(1.0);
+      assertTrue(success);
+
+      FullHumanoidRobotModel fullRobotModel = simulationTestHelper.getControllerFullRobotModel();
+      double trajectoryTime = 1.0;
+      PelvisTrajectoryMessage pelvisTrajectoryMessage = AvatarRandomTestMessages.nextPelvisTrajectoryMessage(random, trajectoryTime, fullRobotModel, 0.1, Math.toRadians(30.0));
+      pelvisTrajectoryMessage.setForceExecution(true);
+      simulationTestHelper.publishToController(pelvisTrajectoryMessage);
+      success = simulationTestHelper.simulateNow(1.0);
+      assertTrue(success);
+
+      String namespace = PelvisICPBasedTranslationManager.class.getSimpleName();
+      YoFrameVector2D desiredICPOffset = EndToEndTestTools.findYoFrameVector2D(namespace, "desiredICPOffset", simulationTestHelper);
+      FrameVector2D previousICPOffset = new FrameVector2D(desiredICPOffset);
+      GoHomeMessage goHomeMessage = new GoHomeMessage();
+      goHomeMessage.setTrajectoryTime(1.0);
+      goHomeMessage.setHumanoidBodyPart(HumanoidBodyPart.PELVIS.toByte());
+      simulationTestHelper.publishToController(goHomeMessage);
+
+      for (int i = 0; i < 30; i++)
+      {
+         simulationTestHelper.simulateNow(robotModel.getControllerDT());
+
+         FrameVector2D icpOffsetDelta = new FrameVector2D();
+         icpOffsetDelta.sub(previousICPOffset, desiredICPOffset);
+         Assertions.assertTrue(icpOffsetDelta.norm() < 1.0e-3, "ICP Offset is not continuous when entering reset state");
+         previousICPOffset.set(desiredICPOffset);
+      }
+
+      simulationTestHelper.publishToController(AvatarRandomTestMessages.nextPelvisTrajectoryMessage(random, trajectoryTime, fullRobotModel, 0.1, Math.toRadians(30.0)));
+
+      for (int i = 0; i < 30; i++)
+      {
+         simulationTestHelper.simulateNow(robotModel.getControllerDT());
+
+         FrameVector2D icpOffsetDelta = new FrameVector2D();
+         icpOffsetDelta.sub(previousICPOffset, desiredICPOffset);
+         Assertions.assertTrue(icpOffsetDelta.norm() < 1.0e-3, "ICP Offset is not continuous when exiting reset state");
+         previousICPOffset.set(desiredICPOffset);
+      }
    }
 
    public static FootstepDataListMessage computeNextFootsteps(int numberOfFootsteps,

@@ -11,36 +11,39 @@ import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
-import javax.annotation.Nullable;
-
 /**
  * Tool to load all JSON files and resave them all in order to perform
  * schema changes.
  */
 public class BehaviorTreeJSONSanitizer
 {
-   private final WorkspaceResourceDirectory treeFilesDirectory;
+   private WorkspaceResourceDirectory treeFilesDirectory;
    private final CRDTInfo crdtInfo = new CRDTInfo(ROS2ActorDesignation.OPERATOR, 1);
 
    public BehaviorTreeJSONSanitizer(Class<?> classForFindingSourceSetDirectory)
    {
-      treeFilesDirectory = new WorkspaceResourceDirectory(classForFindingSourceSetDirectory, "/behaviorTrees");
+      String[] directories = new String[] { "/behaviorTrees" }; // "/affordances"
 
-      for (WorkspaceResourceFile fileToLoad : treeFilesDirectory.queryContainedFiles())
+      for (String directory : directories)
       {
-         MutableObject<BehaviorTreeNodeDefinition> loadedRootNode = new MutableObject<>();
+         treeFilesDirectory = new WorkspaceResourceDirectory(classForFindingSourceSetDirectory, directory);
 
-         LogTools.info("Loading {}", fileToLoad.getFilesystemFile());
-         JSONFileTools.load(fileToLoad, jsonNode ->
+         for (WorkspaceResourceFile fileToLoad : treeFilesDirectory.queryContainedFiles())
          {
-            loadedRootNode.setValue(loadFromFile(jsonNode, null, fileToLoad.getFileName()));
-         });
+            MutableObject<BehaviorTreeNodeDefinition> loadedRootNode = new MutableObject<>();
 
-         loadedRootNode.getValue().saveToFile();
+            LogTools.info("Loading {}", fileToLoad.getFilesystemFile());
+            JSONFileTools.load(fileToLoad, jsonNode ->
+            {
+               loadedRootNode.setValue(loadFromFile(jsonNode, null));
+            });
+
+            loadedRootNode.getValue().saveToFile();
+         }
       }
    }
 
-   private BehaviorTreeNodeDefinition loadFromFile(JsonNode jsonNode, BehaviorTreeNodeDefinition parentNode, @Nullable String jsonFileName)
+   private BehaviorTreeNodeDefinition loadFromFile(JsonNode jsonNode, BehaviorTreeNodeDefinition parentNode)
    {
       String typeName = jsonNode.get("type").textValue();
 
@@ -48,8 +51,6 @@ public class BehaviorTreeJSONSanitizer
 
       BehaviorTreeNodeDefinition node = BehaviorTreeDefinitionBuilder.createNode(definitionType, crdtInfo, treeFilesDirectory);
 
-      if (jsonFileName != null)
-         node.setJSONFileName(jsonFileName);
       node.loadFromFile(jsonNode);
 
       if (parentNode != null)
@@ -60,13 +61,13 @@ public class BehaviorTreeJSONSanitizer
          JsonNode fileNode = childJsonNode.get("file");
          if (fileNode == null)
          {
-            loadFromFile(childJsonNode, node, null);
+            loadFromFile(childJsonNode, node);
          }
          else
          {
             WorkspaceResourceFile childFile = new WorkspaceResourceFile(treeFilesDirectory, fileNode.asText());
             LogTools.info("Loading {}", childFile.getFilesystemFile());
-            JSONFileTools.load(childFile, childJSONNode -> loadFromFile(childJSONNode, node, childFile.getFileName()));
+            JSONFileTools.load(childFile, childJSONNode -> loadFromFile(childJSONNode, node));
          }
       });
 
