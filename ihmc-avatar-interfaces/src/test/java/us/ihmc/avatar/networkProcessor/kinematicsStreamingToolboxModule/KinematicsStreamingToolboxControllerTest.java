@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import javafx.application.Platform;
 import javafx.scene.control.Button;
@@ -21,6 +22,7 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.Kinemat
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -141,6 +143,10 @@ public abstract class KinematicsStreamingToolboxControllerTest
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.addSecondaryRobot(ghost);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
+      YoBoolean isAutomaticManipulationAbortEnabled = (YoBoolean) simulationTestHelper.getControllerRegistry()
+                                                                                      .findVariable(WalkingCommandConsumer.class.getSimpleName(),
+                                                                                                    "isAutomaticManipulationAbortEnabled");
+      isAutomaticManipulationAbortEnabled.set(false); // TODO This is a hack to prevent the walking controller from aborting the manipulation task.
       createToolboxController(robotModel, useCPUClock, toolboxParameters, collisionModel);
       simulationTestHelper.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
@@ -153,10 +159,14 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       RealtimeROS2Node toolboxROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
       new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxROS2Node);
-      IHMCROS2Publisher<WholeBodyTrajectoryMessage> outputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                                                         WholeBodyTrajectoryMessage.class,
-                                                                                                         controllerInputTopic);
-      toolboxController.setTrajectoryMessagePublisher(outputPublisher::publish);
+      IHMCROS2Publisher<WholeBodyTrajectoryMessage> trajectoryOutputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                                                                                   WholeBodyTrajectoryMessage.class,
+                                                                                                                   controllerInputTopic);
+      toolboxController.setTrajectoryMessagePublisher(trajectoryOutputPublisher::publish);
+      IHMCROS2Publisher<WholeBodyStreamingMessage> streamingOutputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                                                                                 WholeBodyStreamingMessage.class,
+                                                                                                                 controllerInputTopic);
+      toolboxController.setStreamingMessagePublisher(streamingOutputPublisher::publish);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,
