@@ -29,7 +29,7 @@ public class KSTCompiledOutputProcessor implements KSTOutputProcessor
 
       KinematicsStreamingToolboxParameters parameters = tools.getParameters();
       outputJointVelocityScale.set(parameters.getOutputJointVelocityScale());
-      solutionFilterBreakFrequency.set(Double.POSITIVE_INFINITY);
+      solutionFilterBreakFrequency.set(parameters.getOutputLPFBreakFrequency());
 
       outputProcessors.add(new KSTLowPassFilteredOutputProcessor(tools, solutionFilterBreakFrequency, registry));
       //      outputProcessors.add(new KSTFiniteDifferenceOutputProcessor(tools, isPublishing, registry));
