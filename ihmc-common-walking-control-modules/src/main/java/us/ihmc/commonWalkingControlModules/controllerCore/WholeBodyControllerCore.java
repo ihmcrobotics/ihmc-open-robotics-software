@@ -314,6 +314,8 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
       jointDesiredOutputList.completeWith(inverseKinematicsSolver.getOutput());
       if (rootJointDesiredConfigurationData != null)
          rootJointDesiredConfigurationData.completeWith(inverseKinematicsSolver.getOutputForRootJoint());
+      controllerCoreOutput.setLinearMomentum(inverseKinematicsSolver.getAchievedMomentumLinear());
+      controllerCoreOutput.setAngularMomentum(inverseKinematicsSolver.getAchievedMomentumAngular());
    }
 
    private void doVirtualModelControl()
