@@ -158,6 +158,8 @@ public class KSTStreamingState implements State
       ikController.getMomentumWeight().set(parameters.getCenterOfMassHoldWeight());
       ikController.minimizeMomentum(parameters.isMinimizeAngularMomentum(), parameters.isMinimizeLinearMomentum());
       ikController.setMomentumWeight(parameters.getAngularMomentumWeight(), parameters.getLinearMomentumWeight());
+      ikController.minimizeMomentumRate(parameters.isMinimizeAngularMomentumRate(), parameters.isMinimizeLinearMomentumRate());
+      ikController.setMomentumRateWeight(parameters.getAngularMomentumRateWeight(), parameters.getLinearMomentumRateWeight());
       FullHumanoidRobotModel desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikCommandInputManager = tools.getIKCommandInputManager();
 
