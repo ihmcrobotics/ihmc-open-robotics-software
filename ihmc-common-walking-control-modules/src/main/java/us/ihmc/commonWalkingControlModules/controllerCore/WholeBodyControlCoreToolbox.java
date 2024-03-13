@@ -23,7 +23,6 @@ import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
 import us.ihmc.robotics.screwTheory.RigidBodyTwistCalculator;
-import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -181,7 +180,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
       inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator);
       inverseDynamicsCalculator.setGravitionalAcceleration(-gravityZ); // Watch out for the sign here, it changed with the switch to Mecano.
       rigidBodyAccelerationProvider = inverseDynamicsCalculator.getAccelerationProvider();
-      rigidBodyTwistCalculator = new RigidBodyTwistCalculator(multiBodySystemInput);
+      rigidBodyTwistCalculator = new RigidBodyTwistCalculator(MultiBodySystemReadOnly.toMultiBodySystemInput(elevator));
 
       parentRegistry.addChild(registry);
    }
