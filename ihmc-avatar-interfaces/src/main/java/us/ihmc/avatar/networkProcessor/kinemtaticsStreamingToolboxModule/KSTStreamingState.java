@@ -390,8 +390,6 @@ public class KSTStreamingState implements State
    @Override
    public void doAction(double timeInState)
    {
-      tools.pollInputCommand();
-
       FullHumanoidRobotModel controllerFullRobotModel = tools.getCurrentFullRobotModel();
 
       if (lockPelvis.getValue() && !tools.getConfigurationCommand().isPelvisTaskspaceEnabled())
