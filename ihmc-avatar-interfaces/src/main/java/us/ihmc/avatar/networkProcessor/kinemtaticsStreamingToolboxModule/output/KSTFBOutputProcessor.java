@@ -37,6 +37,10 @@ public class KSTFBOutputProcessor implements KSTOutputProcessor
       firstTick = true;
    }
 
+   private final Quaternion diff = new Quaternion();
+   private final SpatialVector feedbackPosition = new SpatialVector();
+   private final SpatialVector feedbackVelocity = new SpatialVector();
+
    @Override
    public void update(double time, boolean wasStreaming, boolean isStreaming, KSTOutputDataReadOnly latestOutput)
    {
@@ -48,9 +52,6 @@ public class KSTFBOutputProcessor implements KSTOutputProcessor
       }
 
       outputRobotState.checkCompatibility(latestOutput);
-      Quaternion diff = new Quaternion();
-      SpatialVector feedbackPosition = new SpatialVector();
-      SpatialVector feedbackVelocity = new SpatialVector();
 
       feedbackPosition.getLinearPart().sub(latestOutput.getRootJointPosition(), outputRobotState.getRootJointPosition());
       outputRobotState.getRootJointOrientation().inverseTransform(feedbackPosition.getLinearPart());
