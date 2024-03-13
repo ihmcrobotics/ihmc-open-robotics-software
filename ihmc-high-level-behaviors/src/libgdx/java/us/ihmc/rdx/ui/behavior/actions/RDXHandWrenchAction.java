@@ -23,7 +23,6 @@ public class RDXHandWrenchAction extends RDXActionNode<HandWrenchActionState, Ha
    private final ImGuiSliderDoubleWrapper torqueXWidget;
    private final ImGuiSliderDoubleWrapper torqueYWidget;
    private final ImGuiSliderDoubleWrapper torqueZWidget;
-   private final ImBooleanWrapper executeWithNextActionWrapper;
 
    public RDXHandWrenchAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -33,11 +32,6 @@ public class RDXHandWrenchAction extends RDXActionNode<HandWrenchActionState, Ha
       definition = getDefinition();
 
       definition.setName("Hand wrench");
-
-
-      executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
-                                                          definition::setExecuteWithNextAction,
-                                                          imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
 
       ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
 
@@ -80,7 +74,6 @@ public class RDXHandWrenchAction extends RDXActionNode<HandWrenchActionState, Ha
    protected void renderImGuiWidgetsInternal()
    {
       ImGui.pushItemWidth(80.0f);
-      executeWithNextActionWrapper.renderImGuiWidget();
       forceXWidget.renderImGuiWidget();
       forceYWidget.renderImGuiWidget();
       forceZWidget.renderImGuiWidget();

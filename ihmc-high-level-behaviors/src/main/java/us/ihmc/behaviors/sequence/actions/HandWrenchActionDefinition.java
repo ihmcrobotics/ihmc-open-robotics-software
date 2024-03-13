@@ -30,7 +30,12 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
    // On disk fields
    private RobotSide onDiskSide;
    private double onDiskTrajectoryDuration;
-   private double onDiskForce;
+   private double onDiskForceX;
+   private double onDiskForceY;
+   private double onDiskForceZ;
+   private double onDiskTorqueX;
+   private double onDiskTorqueY;
+   private double onDiskTorqueZ;
 
    public HandWrenchActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -83,7 +88,12 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
 
       onDiskSide = side.getValue();
       onDiskTrajectoryDuration = trajectoryDuration.getValue();
-      onDiskForce = force.getValue();
+      onDiskForceX = forceX.getValue();
+      onDiskForceY = forceY.getValue();
+      onDiskForceZ = forceZ.getValue();
+      onDiskTorqueX = torqueX.getValue();
+      onDiskTorqueY = torqueY.getValue();
+      onDiskTorqueZ = torqueZ.getValue();
    }
 
    @Override
@@ -93,7 +103,12 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
 
       side.setValue(onDiskSide);
       trajectoryDuration.setValue(onDiskTrajectoryDuration);
-      force.setValue(onDiskForce);
+      forceX.setValue(onDiskForceX);
+      forceY.setValue(onDiskForceY);
+      forceZ.setValue(onDiskForceZ);
+      torqueX.setValue(onDiskTorqueX);
+      torqueY.setValue(onDiskTorqueY);
+      torqueZ.setValue(onDiskTorqueZ);
    }
 
    @Override
@@ -103,7 +118,12 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
 
       unchanged &= side.getValue() == onDiskSide;
       unchanged &= trajectoryDuration.getValue() == onDiskTrajectoryDuration;
-      unchanged &= force.getValue() == onDiskForce;
+      unchanged &= forceX.getValue() == onDiskForceX;
+      unchanged &= forceY.getValue() == onDiskForceY;
+      unchanged &= forceZ.getValue() == onDiskForceZ;
+      unchanged &= torqueX.getValue() == onDiskTorqueX;
+      unchanged &= torqueY.getValue() == onDiskTorqueY;
+      unchanged &= torqueZ.getValue() == onDiskTorqueZ;
 
       return !unchanged;
    }
