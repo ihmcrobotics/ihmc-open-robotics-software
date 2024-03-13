@@ -37,7 +37,6 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -95,8 +94,6 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    private double omega0;
    private final DoubleProvider totalMassProvider;
    private final double gravityZ;
-
-   private final RigidBodyReadOnly elevator;
 
    private final ReferenceFrame centerOfMassFrame;
    private final FramePoint3D centerOfMass;
@@ -187,8 +184,6 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
    {
       this.totalMassProvider = totalMassProvider;
       this.gravityZ = gravityZ;
-
-      this.elevator = elevator;
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
@@ -367,8 +362,6 @@ public class LinearMomentumRateControlModule implements SCS2YoGraphicHolder
     */
    public boolean computeControllerCoreCommands()
    {
-      totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
-
       capturePointCalculator.compute(capturePoint, omega0);
       capturePointVelocity.update(capturePoint);
 
