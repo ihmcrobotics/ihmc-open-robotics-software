@@ -50,7 +50,7 @@ public class RDXHumanoidDemoPoses extends RDXPanel
       armsConfiguration.put(RobotSide.LEFT, robotModel.getPresetArmConfiguration(RobotSide.LEFT, PresetArmConfiguration.HOME));
       armsConfiguration.put(RobotSide.RIGHT, robotModel.getPresetArmConfiguration(RobotSide.RIGHT, PresetArmConfiguration.HOME));
       chestOrientation = new YawPitchRoll(0.0, 0.0, 0.0);
-      pelvisPosition = new Point3D(0.0, 0.0, 0.90);
+      pelvisPosition = new Point3D(0.0, 0.0, 0.99);
    }
 
    private void renderImGuiWidgets()
@@ -93,14 +93,14 @@ public class RDXHumanoidDemoPoses extends RDXPanel
             armsConfiguration.replace(RobotSide.LEFT, robotModel.getPresetArmConfiguration(RobotSide.LEFT, PresetArmConfiguration.HOME));
             armsConfiguration.replace(RobotSide.RIGHT, robotModel.getPresetArmConfiguration(RobotSide.RIGHT, PresetArmConfiguration.HOME));
             chestOrientation = new YawPitchRoll(0.0, 0.0, 0.0);
-            pelvisPosition = new Point3D(0.0, 0.0, 1.0);
+            pelvisPosition = new Point3D(0.0, 0.0, 0.95);
          }
          else
          {
             armsConfiguration.put(RobotSide.LEFT, new double[] {-0.7, 0.8, 0.53, -1.9});
             armsConfiguration.replace(RobotSide.RIGHT, new double[] {-0.7, -0.8, -0.53, -1.9});
-            chestOrientation = new YawPitchRoll(0.0, Math.toRadians(30), 0.0);
-            pelvisPosition = new Point3D(0.0, 0.0, 0.65);
+            chestOrientation = new YawPitchRoll(0.0, Math.toRadians(10), 0.0);
+            pelvisPosition = new Point3D(0.0, 0.0, 0.75);
          }
          executePose(teleoperationParameters.getTrajectoryTime());
          usedFirstMode = !usedFirstMode;
@@ -119,8 +119,8 @@ public class RDXHumanoidDemoPoses extends RDXPanel
          {
             armsConfiguration.put(RobotSide.LEFT, new double[] {0.02, 1.1, -0.96, -2.32});
             armsConfiguration.replace(RobotSide.RIGHT, new double[] {0.02, -1.1, 0.96, -2.32});
-            chestOrientation = new YawPitchRoll(0.0, Math.toRadians(45), 0.0);
-            pelvisPosition = new Point3D(0.0, 0.0, 0.90);
+            chestOrientation = new YawPitchRoll(0.0, Math.toRadians(35), 0.0);
+            pelvisPosition = new Point3D(0.0, 0.0, 0.98);
          }
          executePose(teleoperationParameters.getTrajectoryTime());
          usedFirstMode = !usedFirstMode;
@@ -139,7 +139,7 @@ public class RDXHumanoidDemoPoses extends RDXPanel
          {
             armsConfiguration.put(RobotSide.LEFT, new double[] {0.6, 0.8, -0.91, -1.84});
             armsConfiguration.replace(RobotSide.RIGHT, new double[] {-0.56, -0.31, -0.53, -2.24});
-            chestOrientation = new YawPitchRoll(0.0, Math.toRadians(45), 0.0);
+            chestOrientation = new YawPitchRoll(0.0, Math.toRadians(30), 0.0);
             pelvisPosition = new Point3D(0.0, 0.0, 0.90);
          }
          executePose(teleoperationParameters.getTrajectoryTime());
@@ -172,15 +172,15 @@ public class RDXHumanoidDemoPoses extends RDXPanel
       ros2ControllerHelper.publishToController(chestTrajectoryMessage);
 
       FramePose3D syncedPose = new FramePose3D(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
-      syncedPose.changeFrame(ReferenceFrame.getWorldFrame());
-      syncedPose.getTranslation().set(pelvisPosition);
+      syncedPose.changeFrame(syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame());
+      syncedPose.getTranslation().setZ(pelvisPosition.getZ());
 
       PelvisTrajectoryMessage message = new PelvisTrajectoryMessage();
       message.getSe3Trajectory()
              .set(HumanoidMessageTools.createSE3TrajectoryMessage(trajectoryTime,
                                                                   syncedPose.getPosition(),
                                                                   syncedPose.getOrientation(),
-                                                                  ReferenceFrame.getWorldFrame()));
+                                                                  syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame()));
       long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
       message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
       message.getSe3Trajectory().getLinearSelectionMatrix().setXSelected(false);
