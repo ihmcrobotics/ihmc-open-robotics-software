@@ -31,6 +31,7 @@ public class KSTBlendingOutputProcessor implements KSTOutputProcessor
       FullHumanoidRobotModel desiredFullRobotModel = tools.getDesiredFullRobotModel();
       initialRobotState = new YoKinematicsToolboxOutputStatus("initial", desiredFullRobotModel, registry);
       blendedRobotState = new YoKinematicsToolboxOutputStatus("blended", desiredFullRobotModel, registry);
+      blendedRobotState.createAccelerationState();
    }
 
    @Override

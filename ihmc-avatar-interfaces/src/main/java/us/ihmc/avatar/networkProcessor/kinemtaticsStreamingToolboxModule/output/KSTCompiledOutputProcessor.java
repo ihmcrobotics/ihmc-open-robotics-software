@@ -26,15 +26,16 @@ public class KSTCompiledOutputProcessor implements KSTOutputProcessor
       FullHumanoidRobotModel desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikRobotState = new YoKinematicsToolboxOutputStatus("IK", desiredFullRobotModel, registry);
       outputRobotState = new YoKinematicsToolboxOutputStatus("output", desiredFullRobotModel, registry);
+      outputRobotState.createAccelerationState();
 
       KinematicsStreamingToolboxParameters parameters = tools.getParameters();
       outputJointVelocityScale.set(parameters.getOutputJointVelocityScale());
       solutionFilterBreakFrequency.set(parameters.getOutputLPFBreakFrequency());
 
-      outputProcessors.add(new KSTLowPassFilteredOutputProcessor(tools, solutionFilterBreakFrequency, registry));
       //      outputProcessors.add(new KSTFiniteDifferenceOutputProcessor(tools, isPublishing, registry));
       outputProcessors.add(new KSTDownscaleVelocityOutputProcessor(tools, outputJointVelocityScale, registry));
       outputProcessors.add(new KSTFBOutputProcessor(tools, registry));
+      outputProcessors.add(new KSTLowPassFilteredOutputProcessor(tools, solutionFilterBreakFrequency, registry));
       outputProcessors.add(new KSTBlendingOutputProcessor(tools, streamingBlendingDuration, registry));
    }
 
