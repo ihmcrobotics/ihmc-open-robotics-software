@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.teleoperation;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.GoHomeMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import imgui.ImGui;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
@@ -101,7 +102,7 @@ public class RDXHumanoidDemoPoses extends RDXPanel
             armsConfiguration.put(RobotSide.LEFT, new double[] {-0.7, 0.8, 0.53, -1.9});
             armsConfiguration.replace(RobotSide.RIGHT, new double[] {-0.7, -0.8, -0.53, -1.9});
             chestOrientation = new YawPitchRoll(0.0, Math.toRadians(10), 0.0);
-            pelvisPosition = new Point3D(0.0, 0.0, 0.75);
+            pelvisPosition = new Point3D(0.0, 0.0, 0.78);
          }
          executePose(teleoperationParameters.getTrajectoryTime());
          usedFirstMode = !usedFirstMode;
@@ -172,16 +173,17 @@ public class RDXHumanoidDemoPoses extends RDXPanel
       chestTrajectoryMessage.getSo3Trajectory().getSelectionMatrix().setZSelected(true);
       ros2ControllerHelper.publishToController(chestTrajectoryMessage);
 
-      FramePose3D syncedPose = new FramePose3D(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
-      syncedPose.changeFrame(syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame());
-      syncedPose.getTranslation().setZ(pelvisPosition.getZ());
-      syncedPose.changeFrame(ReferenceFrame.getWorldFrame());
+      FramePose3D pelvisPose = new FramePose3D(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
+      pelvisPose.changeFrame(syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame());
+      pelvisPose.getTranslation().setZ(pelvisPosition.getZ());
+      pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
+      pelvisPose.getRotation().set(syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame().getTransformToWorldFrame().getRotation());
 
       PelvisTrajectoryMessage message = new PelvisTrajectoryMessage();
       message.getSe3Trajectory()
              .set(HumanoidMessageTools.createSE3TrajectoryMessage(trajectoryTime,
-                                                                  syncedPose.getPosition(),
-                                                                  syncedPose.getOrientation(),
+                                                                  pelvisPose.getPosition(),
+                                                                  pelvisPose.getOrientation(),
                                                                   ReferenceFrame.getWorldFrame()));
       long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
       message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
