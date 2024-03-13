@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.type.ImBoolean;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
@@ -19,6 +21,7 @@ public class RDXSceneNode
    private final RDXReferenceFrameGraphic referenceFrameGraphic;
    private final String detailsText;
    private boolean removed = false;
+   private ImBoolean hideGraphics = new ImBoolean(false);
 
    public RDXSceneNode(SceneNode sceneNode)
    {
@@ -42,13 +45,24 @@ public class RDXSceneNode
          {
             removed = true;
          }
+         if (!(this instanceof RDXArUcoMarkerNode))
+         {
+            ImGui.sameLine();
+            if (ImGui.checkbox("Hide Graphics", hideGraphics))
+            {
+               LogTools.info(hideGraphics.get());
+            }
+         }
       }
+
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (sceneLevels.contains(RDXSceneLevel.VIRTUAL))
+      if (sceneLevels.contains(RDXSceneLevel.VIRTUAL) && !hideGraphics.get())
+      {
          referenceFrameGraphic.getRenderables(renderables, pool);
+      }
    }
 
    public void destroy()
@@ -64,5 +78,10 @@ public class RDXSceneNode
    public boolean isRemoved()
    {
       return removed;
+   }
+
+   public boolean isGraphicsHidden()
+   {
+      return hideGraphics.get();
    }
 }

@@ -28,7 +28,7 @@ public class RDXPredefinedRigidBodySceneNode extends RDXRigidBodySceneNode
    {
       super.getRenderables(renderables, pool, sceneLevels);
 
-      if (sceneLevels.contains(RDXSceneLevel.MODEL))
+      if (sceneLevels.contains(RDXSceneLevel.MODEL) && !super.isGraphicsHidden())
          modelInstance.getRenderables(renderables, pool);
    }
 
