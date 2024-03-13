@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
@@ -48,10 +47,7 @@ public class RDXSceneNode
          if (!(this instanceof RDXArUcoMarkerNode))
          {
             ImGui.sameLine();
-            if (ImGui.checkbox("Hide Graphics", hideGraphics))
-            {
-               LogTools.info(hideGraphics.get());
-            }
+            ImGui.checkbox("Hide Graphics", hideGraphics);
          }
       }
 
