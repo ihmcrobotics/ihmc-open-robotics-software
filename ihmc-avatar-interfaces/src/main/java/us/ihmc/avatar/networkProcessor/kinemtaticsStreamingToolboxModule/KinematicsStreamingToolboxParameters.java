@@ -3,6 +3,7 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.tools.UnitConversions;
 
@@ -21,6 +22,16 @@ public class KinematicsStreamingToolboxParameters
       FBC_STYLE
    }
 
+   /**
+    * Period at which the toolbox will update its internal state.
+    * It's best to shoot for a multiple of the controller update period.
+    */
+   private double toolboxUpdatePeriod;
+
+   /**
+    * Upon reception of a new streaming message from the IK, the controller will extrapolate the solution to the future to avoid discontinuities.
+    */
+   private double streamIntegrationDuration;
    /**
     * Safety margin to keep the center of mass within the support polygon.
     */
@@ -89,7 +100,7 @@ public class KinematicsStreamingToolboxParameters
    /**
     * Break frequency used for the low-pass filter used to filter the output of the IK solver.
     */
-   private double outputPoseLPFBreakFrequency;
+   private double outputLPFBreakFrequency;
 
    /**
     * Whether to minimize the angular momentum in the kinematics solution.
@@ -151,6 +162,19 @@ public class KinematicsStreamingToolboxParameters
     * Only used when {@link #inputStateEstimatorType} is set to {@link InputStateEstimatorType#FBC_STYLE}.
     */
    private double inputPoseCorrectionDuration;
+   /**
+    * When {@code true}, a bounding box filter is used to reject input poses that are too far from the current pose.
+    * The bottom center of the bounding box is set to line up with the robot's mid-foot z-up frame.
+    */
+   private boolean useBBXInputFilter;
+   /**
+    * Size of the bounding box filter used to reject input poses that are too far from the current pose.
+    */
+   private Vector3D inputFilterBBXSize;
+   /**
+    * Center of the bounding box with respect to the robot's mid-foot z-up frame.
+    */
+   private Point3D inputFilterBBXCenter;
    private boolean useStreamingPublisher;
    private double publishingPeriod;
 
@@ -168,6 +192,9 @@ public class KinematicsStreamingToolboxParameters
 
    public void setDefault()
    {
+      toolboxUpdatePeriod = 0.005;
+      streamIntegrationDuration = 0.3;
+
       centerOfMassSafeMargin = 0.05;
       centerOfMassHoldWeight = 0.001;
       publishingSolutionPeriod = UnitConversions.hertzToSeconds(60.0);
@@ -186,7 +213,7 @@ public class KinematicsStreamingToolboxParameters
       defaultLinearRateLimit = 1.5;
       defaultAngularRateLimit = 10.0;
       outputJointVelocityScale = 0.75;
-      outputPoseLPFBreakFrequency = Double.POSITIVE_INFINITY;
+      outputLPFBreakFrequency = Double.POSITIVE_INFINITY;
 
       minimizeAngularMomentum = true;
       minimizeLinearMomentum = false;
@@ -204,6 +231,7 @@ public class KinematicsStreamingToolboxParameters
       inputWeightDecayDuration = 3.0;
       inputVelocityDecayDuration = 0.5;
       inputPoseCorrectionDuration = 0.15;
+      useBBXInputFilter = false;
 
       useStreamingPublisher = true;
       publishingPeriod = 5.0 * 0.006;
@@ -226,6 +254,16 @@ public class KinematicsStreamingToolboxParameters
 
       defaultSolverConfiguration.setJointVelocityWeight(1.0);
       defaultSolverConfiguration.setEnableJointVelocityLimits(true);
+   }
+
+   public double getToolboxUpdatePeriod()
+   {
+      return toolboxUpdatePeriod;
+   }
+
+   public double getStreamIntegrationDuration()
+   {
+      return streamIntegrationDuration;
    }
 
    public double getCenterOfMassSafeMargin()
@@ -305,7 +343,7 @@ public class KinematicsStreamingToolboxParameters
 
    public double getOutputLPFBreakFrequency()
    {
-      return outputPoseLPFBreakFrequency;
+      return outputLPFBreakFrequency;
    }
 
    public boolean isMinimizeAngularMomentum()
@@ -373,6 +411,21 @@ public class KinematicsStreamingToolboxParameters
       return inputPoseCorrectionDuration;
    }
 
+   public boolean isUseBBXInputFilter()
+   {
+      return useBBXInputFilter;
+   }
+
+   public Vector3D getInputFilterBBXSize()
+   {
+      return inputFilterBBXSize;
+   }
+
+   public Point3D getInputFilterBBXCenter()
+   {
+      return inputFilterBBXCenter;
+   }
+
    public boolean getUseStreamingPublisher()
    {
       return useStreamingPublisher;
@@ -391,6 +444,16 @@ public class KinematicsStreamingToolboxParameters
    public KinematicsToolboxConfigurationMessage getDefaultSolverConfiguration()
    {
       return defaultSolverConfiguration;
+   }
+
+   public void setToolboxUpdatePeriod(double toolboxUpdatePeriod)
+   {
+      this.toolboxUpdatePeriod = toolboxUpdatePeriod;
+   }
+
+   public void setStreamIntegrationDuration(double streamIntegrationDuration)
+   {
+      this.streamIntegrationDuration = streamIntegrationDuration;
    }
 
    public void setCenterOfMassSafeMargin(double centerOfMassSafeMargin)
@@ -468,9 +531,9 @@ public class KinematicsStreamingToolboxParameters
       this.outputJointVelocityScale = outputJointVelocityScale;
    }
 
-   public void setOutputPoseLPFBreakFrequency(double outputPoseLPFBreakFrequency)
+   public void setOutputLPFBreakFrequency(double outputLPFBreakFrequency)
    {
-      this.outputPoseLPFBreakFrequency = outputPoseLPFBreakFrequency;
+      this.outputLPFBreakFrequency = outputLPFBreakFrequency;
    }
 
    public void setMinimizeAngularMomentum(boolean minimizeAngularMomentum)
@@ -536,6 +599,35 @@ public class KinematicsStreamingToolboxParameters
    public void setInputPoseCorrectionDuration(double inputPoseCorrectionDuration)
    {
       this.inputPoseCorrectionDuration = inputPoseCorrectionDuration;
+   }
+
+   public void setUseBBXInputFilter(boolean useBBXInputFilter)
+   {
+      this.useBBXInputFilter = useBBXInputFilter;
+   }
+
+   public void setInputBBXFilterCenter(double x, double y, double z)
+   {
+      if (inputFilterBBXCenter == null)
+         inputFilterBBXCenter = new Point3D();
+      inputFilterBBXCenter.set(x, y, z);
+   }
+
+   public void setInputFilterBBXCenter(Point3D inputFilterBBXCenter)
+   {
+      this.inputFilterBBXCenter = inputFilterBBXCenter;
+   }
+
+   public void setInputBBXFilterSize(double x, double y, double z)
+   {
+      if (inputFilterBBXSize == null)
+         inputFilterBBXSize = new Vector3D();
+      inputFilterBBXSize.set(x, y, z);
+   }
+
+   public void setInputFilterBBXSize(Vector3D inputFilterBBXSize)
+   {
+      this.inputFilterBBXSize = inputFilterBBXSize;
    }
 
    public void setUseStreamingPublisher(boolean useStreamingPublisher)

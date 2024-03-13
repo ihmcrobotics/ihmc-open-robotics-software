@@ -159,10 +159,12 @@ public class KSTTools
       currentMessageId = new YoLong("currentMessageId", registry);
       currentMessageId.set(1L);
       streamingMessageFactory = new KSTStreamingMessageFactory(fullRobotModelFactory, registry);
+      streamingMessageFactory.setEnableVelocity(true);
+      streamingMessageFactory.setEnableAcceleration(true);
       trajectoryMessageFactory = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
       streamIntegrationDuration = new YoDouble("streamIntegrationDuration", registry);
-      streamIntegrationDuration.set(0.3);
+      streamIntegrationDuration.set(parameters.getStreamIntegrationDuration());
 
       hasNewInputCommand = new YoBoolean("hasNewInputCommand", registry);
       hasPreviousInput = new YoBoolean("hasPreviousInput", registry);
@@ -343,8 +345,6 @@ public class KSTTools
                                      Conversions.secondsToNanoseconds(time.getValue()),
                                      streamIntegrationDuration.getValue(),
                                      solutionToConvert::updateRobot);
-      streamingMessageFactory.setEnableVelocity(true);
-      streamingMessageFactory.setEnableAcceleration(true);
 
       for (RobotSide robotSide : RobotSide.values)
       {

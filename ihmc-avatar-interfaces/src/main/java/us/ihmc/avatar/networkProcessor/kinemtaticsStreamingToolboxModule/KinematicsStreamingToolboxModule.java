@@ -1,20 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.*;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -34,10 +21,13 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class KinematicsStreamingToolboxModule extends ToolboxModule
 {
-   private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 5;
-
    protected final KinematicsStreamingToolboxController controller;
    private IHMCROS2Publisher<WholeBodyTrajectoryMessage> trajectoryMessagePublisher;
    private IHMCROS2Publisher<WholeBodyStreamingMessage> streamingMessagePublisher;
@@ -52,8 +42,12 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                            boolean startYoVariableServer,
                                            PubSubImplementation pubSubImplementation)
    {
-      super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
-            DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
+      super(robotModel.getSimpleRobotName(),
+            robotModel.createFullRobotModel(),
+            robotModel.getLogModelProvider(),
+            startYoVariableServer,
+            (int) (parameters.getToolboxUpdatePeriod() * 1000),
+            pubSubImplementation);
 
       setTimeWithoutInputsBeforeGoingToSleep(3.0);
       controller = new KinematicsStreamingToolboxController(commandInputManager,
