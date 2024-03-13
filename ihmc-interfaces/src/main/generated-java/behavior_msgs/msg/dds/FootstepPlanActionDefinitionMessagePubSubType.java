@@ -15,7 +15,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2aa48e50c20528978c2cce6f066f4b2e2346e15d4f9faba01c3b57cc4055426f";
+   		return "758d79cde5e47b5c6d1ebab612c851a3f436a42608c7045da6c7a5c7ed6a1e20";
    }
    
    @Override
@@ -64,11 +64,23 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       return current_alignment - initial_alignment;
@@ -101,11 +113,32 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       {
           current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType.getCdrSerializedSize(data.getFootsteps().get(i0), current_alignment);}
 
-      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getGoalTransformToParent(), current_alignment);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getLeftGoalFootTransformToGizmo(), current_alignment);
 
-      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getRightGoalFootTransformToGizmo(), current_alignment);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       return current_alignment - initial_alignment;
@@ -128,9 +161,24 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       cdr.write_type_e(data.getFootsteps());else
           throw new RuntimeException("footsteps field exceeds the maximum length");
 
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getGoalTransformToParent(), cdr);
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getLeftGoalFootTransformToGizmo(), cdr);
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getRightGoalFootTransformToGizmo(), cdr);
+      cdr.write_type_6(data.getGoalXInParent());
+
+      cdr.write_type_6(data.getGoalYInParent());
+
+      cdr.write_type_6(data.getGoalYawInParent());
+
+      cdr.write_type_6(data.getLeftGoalFootXToGizmo());
+
+      cdr.write_type_6(data.getLeftGoalFootYToGizmo());
+
+      cdr.write_type_6(data.getLeftGoalFootYawToGizmo());
+
+      cdr.write_type_6(data.getRightGoalFootXToGizmo());
+
+      cdr.write_type_6(data.getRightGoalFootYToGizmo());
+
+      cdr.write_type_6(data.getRightGoalFootYawToGizmo());
+
    }
 
    public static void read(behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -144,9 +192,24 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       data.setIsManuallyPlaced(cdr.read_type_7());
       	
       cdr.read_type_e(data.getFootsteps());	
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getGoalTransformToParent(), cdr);	
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getLeftGoalFootTransformToGizmo(), cdr);	
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getRightGoalFootTransformToGizmo(), cdr);	
+      data.setGoalXInParent(cdr.read_type_6());
+      	
+      data.setGoalYInParent(cdr.read_type_6());
+      	
+      data.setGoalYawInParent(cdr.read_type_6());
+      	
+      data.setLeftGoalFootXToGizmo(cdr.read_type_6());
+      	
+      data.setLeftGoalFootYToGizmo(cdr.read_type_6());
+      	
+      data.setLeftGoalFootYawToGizmo(cdr.read_type_6());
+      	
+      data.setRightGoalFootXToGizmo(cdr.read_type_6());
+      	
+      data.setRightGoalFootYToGizmo(cdr.read_type_6());
+      	
+      data.setRightGoalFootYawToGizmo(cdr.read_type_6());
+      	
 
    }
 
@@ -160,12 +223,15 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       ser.write_type_6("transfer_duration", data.getTransferDuration());
       ser.write_type_7("is_manually_placed", data.getIsManuallyPlaced());
       ser.write_type_e("footsteps", data.getFootsteps());
-      ser.write_type_a("goal_transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getGoalTransformToParent());
-
-      ser.write_type_a("left_goal_foot_transform_to_gizmo", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getLeftGoalFootTransformToGizmo());
-
-      ser.write_type_a("right_goal_foot_transform_to_gizmo", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getRightGoalFootTransformToGizmo());
-
+      ser.write_type_6("goal_x_in_parent", data.getGoalXInParent());
+      ser.write_type_6("goal_y_in_parent", data.getGoalYInParent());
+      ser.write_type_6("goal_yaw_in_parent", data.getGoalYawInParent());
+      ser.write_type_6("left_goal_foot_x_to_gizmo", data.getLeftGoalFootXToGizmo());
+      ser.write_type_6("left_goal_foot_y_to_gizmo", data.getLeftGoalFootYToGizmo());
+      ser.write_type_6("left_goal_foot_yaw_to_gizmo", data.getLeftGoalFootYawToGizmo());
+      ser.write_type_6("right_goal_foot_x_to_gizmo", data.getRightGoalFootXToGizmo());
+      ser.write_type_6("right_goal_foot_y_to_gizmo", data.getRightGoalFootYToGizmo());
+      ser.write_type_6("right_goal_foot_yaw_to_gizmo", data.getRightGoalFootYawToGizmo());
    }
 
    @Override
@@ -178,12 +244,15 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       data.setTransferDuration(ser.read_type_6("transfer_duration"));
       data.setIsManuallyPlaced(ser.read_type_7("is_manually_placed"));
       ser.read_type_e("footsteps", data.getFootsteps());
-      ser.read_type_a("goal_transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getGoalTransformToParent());
-
-      ser.read_type_a("left_goal_foot_transform_to_gizmo", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getLeftGoalFootTransformToGizmo());
-
-      ser.read_type_a("right_goal_foot_transform_to_gizmo", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getRightGoalFootTransformToGizmo());
-
+      data.setGoalXInParent(ser.read_type_6("goal_x_in_parent"));
+      data.setGoalYInParent(ser.read_type_6("goal_y_in_parent"));
+      data.setGoalYawInParent(ser.read_type_6("goal_yaw_in_parent"));
+      data.setLeftGoalFootXToGizmo(ser.read_type_6("left_goal_foot_x_to_gizmo"));
+      data.setLeftGoalFootYToGizmo(ser.read_type_6("left_goal_foot_y_to_gizmo"));
+      data.setLeftGoalFootYawToGizmo(ser.read_type_6("left_goal_foot_yaw_to_gizmo"));
+      data.setRightGoalFootXToGizmo(ser.read_type_6("right_goal_foot_x_to_gizmo"));
+      data.setRightGoalFootYToGizmo(ser.read_type_6("right_goal_foot_y_to_gizmo"));
+      data.setRightGoalFootYawToGizmo(ser.read_type_6("right_goal_foot_yaw_to_gizmo"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage src, behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage dest)

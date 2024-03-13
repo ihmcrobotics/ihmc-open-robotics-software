@@ -33,26 +33,47 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
             */
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage>  footsteps_;
    /**
-            * Transform that expresses the planning goal pose in the parent frame
+            * Planning goal pose X in the parent frame
             */
-   public controller_msgs.msg.dds.RigidBodyTransformMessage goal_transform_to_parent_;
+   public double goal_x_in_parent_;
    /**
-            * Left goal foot transform to the goal pose
+            * Planning goal pose Y in the parent frame
             */
-   public controller_msgs.msg.dds.RigidBodyTransformMessage left_goal_foot_transform_to_gizmo_;
+   public double goal_y_in_parent_;
    /**
-            * Right goal foot transform to the goal pose
+            * Planning goal pose Yaw in the parent frame
             */
-   public controller_msgs.msg.dds.RigidBodyTransformMessage right_goal_foot_transform_to_gizmo_;
+   public double goal_yaw_in_parent_;
+   /**
+            * Left goal foot X to the goal pose
+            */
+   public double left_goal_foot_x_to_gizmo_;
+   /**
+            * Left goal foot Y to the goal pose
+            */
+   public double left_goal_foot_y_to_gizmo_;
+   /**
+            * Left goal foot Yaw to the goal pose
+            */
+   public double left_goal_foot_yaw_to_gizmo_;
+   /**
+            * Right goal foot X to the goal pose
+            */
+   public double right_goal_foot_x_to_gizmo_;
+   /**
+            * Right goal foot Y to the goal pose
+            */
+   public double right_goal_foot_y_to_gizmo_;
+   /**
+            * Right goal foot Yaw to the goal pose
+            */
+   public double right_goal_foot_yaw_to_gizmo_;
 
    public FootstepPlanActionDefinitionMessage()
    {
       definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       parent_frame_name_ = new java.lang.StringBuilder(255);
       footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage> (50, new behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType());
-      goal_transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
-      left_goal_foot_transform_to_gizmo_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
-      right_goal_foot_transform_to_gizmo_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
 
    }
 
@@ -75,9 +96,24 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       is_manually_placed_ = other.is_manually_placed_;
 
       footsteps_.set(other.footsteps_);
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.goal_transform_to_parent_, goal_transform_to_parent_);
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.left_goal_foot_transform_to_gizmo_, left_goal_foot_transform_to_gizmo_);
-      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.right_goal_foot_transform_to_gizmo_, right_goal_foot_transform_to_gizmo_);
+      goal_x_in_parent_ = other.goal_x_in_parent_;
+
+      goal_y_in_parent_ = other.goal_y_in_parent_;
+
+      goal_yaw_in_parent_ = other.goal_yaw_in_parent_;
+
+      left_goal_foot_x_to_gizmo_ = other.left_goal_foot_x_to_gizmo_;
+
+      left_goal_foot_y_to_gizmo_ = other.left_goal_foot_y_to_gizmo_;
+
+      left_goal_foot_yaw_to_gizmo_ = other.left_goal_foot_yaw_to_gizmo_;
+
+      right_goal_foot_x_to_gizmo_ = other.right_goal_foot_x_to_gizmo_;
+
+      right_goal_foot_y_to_gizmo_ = other.right_goal_foot_y_to_gizmo_;
+
+      right_goal_foot_yaw_to_gizmo_ = other.right_goal_foot_yaw_to_gizmo_;
+
    }
 
 
@@ -167,31 +203,139 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       return footsteps_;
    }
 
-
    /**
-            * Transform that expresses the planning goal pose in the parent frame
+            * Planning goal pose X in the parent frame
             */
-   public controller_msgs.msg.dds.RigidBodyTransformMessage getGoalTransformToParent()
+   public void setGoalXInParent(double goal_x_in_parent)
    {
-      return goal_transform_to_parent_;
+      goal_x_in_parent_ = goal_x_in_parent;
+   }
+   /**
+            * Planning goal pose X in the parent frame
+            */
+   public double getGoalXInParent()
+   {
+      return goal_x_in_parent_;
    }
 
-
    /**
-            * Left goal foot transform to the goal pose
+            * Planning goal pose Y in the parent frame
             */
-   public controller_msgs.msg.dds.RigidBodyTransformMessage getLeftGoalFootTransformToGizmo()
+   public void setGoalYInParent(double goal_y_in_parent)
    {
-      return left_goal_foot_transform_to_gizmo_;
+      goal_y_in_parent_ = goal_y_in_parent;
+   }
+   /**
+            * Planning goal pose Y in the parent frame
+            */
+   public double getGoalYInParent()
+   {
+      return goal_y_in_parent_;
    }
 
+   /**
+            * Planning goal pose Yaw in the parent frame
+            */
+   public void setGoalYawInParent(double goal_yaw_in_parent)
+   {
+      goal_yaw_in_parent_ = goal_yaw_in_parent;
+   }
+   /**
+            * Planning goal pose Yaw in the parent frame
+            */
+   public double getGoalYawInParent()
+   {
+      return goal_yaw_in_parent_;
+   }
 
    /**
-            * Right goal foot transform to the goal pose
+            * Left goal foot X to the goal pose
             */
-   public controller_msgs.msg.dds.RigidBodyTransformMessage getRightGoalFootTransformToGizmo()
+   public void setLeftGoalFootXToGizmo(double left_goal_foot_x_to_gizmo)
    {
-      return right_goal_foot_transform_to_gizmo_;
+      left_goal_foot_x_to_gizmo_ = left_goal_foot_x_to_gizmo;
+   }
+   /**
+            * Left goal foot X to the goal pose
+            */
+   public double getLeftGoalFootXToGizmo()
+   {
+      return left_goal_foot_x_to_gizmo_;
+   }
+
+   /**
+            * Left goal foot Y to the goal pose
+            */
+   public void setLeftGoalFootYToGizmo(double left_goal_foot_y_to_gizmo)
+   {
+      left_goal_foot_y_to_gizmo_ = left_goal_foot_y_to_gizmo;
+   }
+   /**
+            * Left goal foot Y to the goal pose
+            */
+   public double getLeftGoalFootYToGizmo()
+   {
+      return left_goal_foot_y_to_gizmo_;
+   }
+
+   /**
+            * Left goal foot Yaw to the goal pose
+            */
+   public void setLeftGoalFootYawToGizmo(double left_goal_foot_yaw_to_gizmo)
+   {
+      left_goal_foot_yaw_to_gizmo_ = left_goal_foot_yaw_to_gizmo;
+   }
+   /**
+            * Left goal foot Yaw to the goal pose
+            */
+   public double getLeftGoalFootYawToGizmo()
+   {
+      return left_goal_foot_yaw_to_gizmo_;
+   }
+
+   /**
+            * Right goal foot X to the goal pose
+            */
+   public void setRightGoalFootXToGizmo(double right_goal_foot_x_to_gizmo)
+   {
+      right_goal_foot_x_to_gizmo_ = right_goal_foot_x_to_gizmo;
+   }
+   /**
+            * Right goal foot X to the goal pose
+            */
+   public double getRightGoalFootXToGizmo()
+   {
+      return right_goal_foot_x_to_gizmo_;
+   }
+
+   /**
+            * Right goal foot Y to the goal pose
+            */
+   public void setRightGoalFootYToGizmo(double right_goal_foot_y_to_gizmo)
+   {
+      right_goal_foot_y_to_gizmo_ = right_goal_foot_y_to_gizmo;
+   }
+   /**
+            * Right goal foot Y to the goal pose
+            */
+   public double getRightGoalFootYToGizmo()
+   {
+      return right_goal_foot_y_to_gizmo_;
+   }
+
+   /**
+            * Right goal foot Yaw to the goal pose
+            */
+   public void setRightGoalFootYawToGizmo(double right_goal_foot_yaw_to_gizmo)
+   {
+      right_goal_foot_yaw_to_gizmo_ = right_goal_foot_yaw_to_gizmo;
+   }
+   /**
+            * Right goal foot Yaw to the goal pose
+            */
+   public double getRightGoalFootYawToGizmo()
+   {
+      return right_goal_foot_yaw_to_gizmo_;
    }
 
 
@@ -228,9 +372,24 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
          {  if (!this.footsteps_.get(i).epsilonEquals(other.footsteps_.get(i), epsilon)) return false; }
       }
 
-      if (!this.goal_transform_to_parent_.epsilonEquals(other.goal_transform_to_parent_, epsilon)) return false;
-      if (!this.left_goal_foot_transform_to_gizmo_.epsilonEquals(other.left_goal_foot_transform_to_gizmo_, epsilon)) return false;
-      if (!this.right_goal_foot_transform_to_gizmo_.epsilonEquals(other.right_goal_foot_transform_to_gizmo_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_x_in_parent_, other.goal_x_in_parent_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_y_in_parent_, other.goal_y_in_parent_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_yaw_in_parent_, other.goal_yaw_in_parent_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.left_goal_foot_x_to_gizmo_, other.left_goal_foot_x_to_gizmo_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.left_goal_foot_y_to_gizmo_, other.left_goal_foot_y_to_gizmo_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.left_goal_foot_yaw_to_gizmo_, other.left_goal_foot_yaw_to_gizmo_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.right_goal_foot_x_to_gizmo_, other.right_goal_foot_x_to_gizmo_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.right_goal_foot_y_to_gizmo_, other.right_goal_foot_y_to_gizmo_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.right_goal_foot_yaw_to_gizmo_, other.right_goal_foot_yaw_to_gizmo_, epsilon)) return false;
+
 
       return true;
    }
@@ -254,9 +413,24 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       if(this.is_manually_placed_ != otherMyClass.is_manually_placed_) return false;
 
       if (!this.footsteps_.equals(otherMyClass.footsteps_)) return false;
-      if (!this.goal_transform_to_parent_.equals(otherMyClass.goal_transform_to_parent_)) return false;
-      if (!this.left_goal_foot_transform_to_gizmo_.equals(otherMyClass.left_goal_foot_transform_to_gizmo_)) return false;
-      if (!this.right_goal_foot_transform_to_gizmo_.equals(otherMyClass.right_goal_foot_transform_to_gizmo_)) return false;
+      if(this.goal_x_in_parent_ != otherMyClass.goal_x_in_parent_) return false;
+
+      if(this.goal_y_in_parent_ != otherMyClass.goal_y_in_parent_) return false;
+
+      if(this.goal_yaw_in_parent_ != otherMyClass.goal_yaw_in_parent_) return false;
+
+      if(this.left_goal_foot_x_to_gizmo_ != otherMyClass.left_goal_foot_x_to_gizmo_) return false;
+
+      if(this.left_goal_foot_y_to_gizmo_ != otherMyClass.left_goal_foot_y_to_gizmo_) return false;
+
+      if(this.left_goal_foot_yaw_to_gizmo_ != otherMyClass.left_goal_foot_yaw_to_gizmo_) return false;
+
+      if(this.right_goal_foot_x_to_gizmo_ != otherMyClass.right_goal_foot_x_to_gizmo_) return false;
+
+      if(this.right_goal_foot_y_to_gizmo_ != otherMyClass.right_goal_foot_y_to_gizmo_) return false;
+
+      if(this.right_goal_foot_yaw_to_gizmo_ != otherMyClass.right_goal_foot_yaw_to_gizmo_) return false;
+
 
       return true;
    }
@@ -279,12 +453,24 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       builder.append(this.is_manually_placed_);      builder.append(", ");
       builder.append("footsteps=");
       builder.append(this.footsteps_);      builder.append(", ");
-      builder.append("goal_transform_to_parent=");
-      builder.append(this.goal_transform_to_parent_);      builder.append(", ");
-      builder.append("left_goal_foot_transform_to_gizmo=");
-      builder.append(this.left_goal_foot_transform_to_gizmo_);      builder.append(", ");
-      builder.append("right_goal_foot_transform_to_gizmo=");
-      builder.append(this.right_goal_foot_transform_to_gizmo_);
+      builder.append("goal_x_in_parent=");
+      builder.append(this.goal_x_in_parent_);      builder.append(", ");
+      builder.append("goal_y_in_parent=");
+      builder.append(this.goal_y_in_parent_);      builder.append(", ");
+      builder.append("goal_yaw_in_parent=");
+      builder.append(this.goal_yaw_in_parent_);      builder.append(", ");
+      builder.append("left_goal_foot_x_to_gizmo=");
+      builder.append(this.left_goal_foot_x_to_gizmo_);      builder.append(", ");
+      builder.append("left_goal_foot_y_to_gizmo=");
+      builder.append(this.left_goal_foot_y_to_gizmo_);      builder.append(", ");
+      builder.append("left_goal_foot_yaw_to_gizmo=");
+      builder.append(this.left_goal_foot_yaw_to_gizmo_);      builder.append(", ");
+      builder.append("right_goal_foot_x_to_gizmo=");
+      builder.append(this.right_goal_foot_x_to_gizmo_);      builder.append(", ");
+      builder.append("right_goal_foot_y_to_gizmo=");
+      builder.append(this.right_goal_foot_y_to_gizmo_);      builder.append(", ");
+      builder.append("right_goal_foot_yaw_to_gizmo=");
+      builder.append(this.right_goal_foot_yaw_to_gizmo_);
       builder.append("}");
       return builder.toString();
    }

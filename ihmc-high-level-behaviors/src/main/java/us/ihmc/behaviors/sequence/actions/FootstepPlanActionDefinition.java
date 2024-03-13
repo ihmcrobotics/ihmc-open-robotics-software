@@ -23,10 +23,12 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private final CRDTUnidirectionalString parentFrameName;
    private final CRDTUnidirectionalBoolean isManuallyPlaced;
    private final CRDTUnidirectionalRecyclingArrayList<FootstepPlanActionFootstepDefinition> footsteps;
-   private final CRDTUnidirectionalDouble goalX;
-   private final CRDTUnidirectionalDouble goalY;
-   private final CRDTUnidirectionalDouble goalYaw;
-   private final SideDependentList<CRDTUnidirectionalRigidBodyTransform> goalFootstepToGoalTransforms;
+   private final CRDTUnidirectionalDouble goalToParentX;
+   private final CRDTUnidirectionalDouble goalToParentY;
+   private final CRDTUnidirectionalDouble goalToParentYaw;
+   private final SideDependentList<CRDTUnidirectionalDouble> goalFootstepToGoalXs;
+   private final SideDependentList<CRDTUnidirectionalDouble> goalFootstepToGoalYs;
+   private final SideDependentList<CRDTUnidirectionalDouble> goalFootstepToGoalYaws;
 
    // On disk fields
    private double onDiskSwingDuration;
@@ -34,9 +36,12 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private String onDiskParentFrameName;
    private boolean onDiskIsManuallyPlaced;
    private int onDiskNumberOfFootsteps;
-   private final RigidBodyTransform onDiskGoalToParentTransform = new RigidBodyTransform();
-   private final SideDependentList<RigidBodyTransform> onDiskGoalFootstepToGoalTransforms
-         = new SideDependentList<>(() -> new RigidBodyTransform());
+   private double onDiskGoalToParentX;
+   private double onDiskGoalToParentY;
+   private double onDiskGoalToParentYaw;
+   private final SideDependentList<Double> onDiskGoalFootstepToGoalXs = new SideDependentList<>(() -> 0.0);
+   private final SideDependentList<Double> onDiskGoalFootstepToGoalYs = new SideDependentList<>(() -> 0.0);
+   private final SideDependentList<Double> onDiskGoalFootstepToGoalYaws = new SideDependentList<>(() -> 0.0);
 
    public FootstepPlanActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -49,10 +54,12 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       footsteps = new CRDTUnidirectionalRecyclingArrayList<>(ROS2ActorDesignation.OPERATOR,
                                                              crdtInfo,
                                                              () -> new RecyclingArrayList<>(() -> new FootstepPlanActionFootstepDefinition(crdtInfo)));
-      goalX = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0);
-      goalY = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0);
-      goalYaw = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0);
-      goalFootstepToGoalTransforms = new SideDependentList<>(() -> new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo));
+      goalToParentX = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0);
+      goalToParentY = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0);
+      goalToParentYaw = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0);
+      goalFootstepToGoalXs = new SideDependentList<>(() -> new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0));
+      goalFootstepToGoalYs = new SideDependentList<>(() -> new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0));
+      goalFootstepToGoalYaws = new SideDependentList<>(() -> new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0));
    }
 
    @Override
@@ -75,11 +82,15 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       }
       else
       {
-         JSONTools.toJSON(jsonNode, "goalToParentTransform", goalToParentTransform.getValueReadOnly());
+         jsonNode.put("goalToParentX", goalToParentX.getValue());
+         jsonNode.put("goalToParentY", goalToParentY.getValue());
+         jsonNode.put("goalToParentYaw", goalToParentYaw.getValue());
          for (RobotSide side : RobotSide.values)
          {
             ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "GoalFootTransform");
-            JSONTools.toJSON(goalFootNode, goalFootstepToGoalTransforms.get(side).getValueReadOnly());
+            goalFootNode.put("goalToParentX", goalFootstepToGoalXs.get(side).getValue());
+            goalFootNode.put("goalToParentY", goalFootstepToGoalYs.get(side).getValue());
+            goalFootNode.put("goalToParentYaw", goalFootstepToGoalYaws.get(side).getValue());
          }
       }
    }
@@ -101,11 +112,22 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       }
       else
       {
-         JSONTools.toEuclid(jsonNode, "goalToParentTransform", goalToParentTransform.getValue());
+         RigidBodyTransform goalToParentTransform = new RigidBodyTransform();
+         JSONTools.toEuclid(jsonNode, "goalToParentTransform", goalToParentTransform);
+
+         goalToParentX.setValue(goalToParentTransform.getTranslationX());
+         goalToParentY.setValue(goalToParentTransform.getTranslationY());
+         goalToParentYaw.setValue(goalToParentTransform.getRotation().getYaw());
+
          for (RobotSide side : RobotSide.values)
          {
             JsonNode goalFootNode = jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
-            JSONTools.toEuclid(goalFootNode, goalFootstepToGoalTransforms.get(side).getValue());
+            RigidBodyTransform goalFootstepToGoalTransform = new RigidBodyTransform();
+            JSONTools.toEuclid(goalFootNode, goalFootstepToGoalTransform);
+
+            goalFootstepToGoalXs.get(side).setValue(goalFootstepToGoalTransform.getTranslationX());
+            goalFootstepToGoalYs.get(side).setValue(goalFootstepToGoalTransform.getTranslationY());
+            goalFootstepToGoalYaws.get(side).setValue(goalFootstepToGoalTransform.getRotation().getYaw());
          }
       }
    }
@@ -120,9 +142,15 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       onDiskParentFrameName = parentFrameName.getValue();
       onDiskIsManuallyPlaced = isManuallyPlaced.getValue();
       onDiskNumberOfFootsteps = footsteps.getSize();
-      onDiskGoalToParentTransform.set(goalToParentTransform.getValueReadOnly());
-      for (RobotSide side : goalFootstepToGoalTransforms.sides())
-         onDiskGoalFootstepToGoalTransforms.put(side, goalFootstepToGoalTransforms.get(side).getValue());
+      onDiskGoalToParentX = goalToParentX.getValue();
+      onDiskGoalToParentY = goalToParentY.getValue();
+      onDiskGoalToParentYaw = goalToParentYaw.getValue();
+      for (RobotSide side : goalFootstepToGoalXs.sides())
+      {
+         onDiskGoalFootstepToGoalXs.put(side, goalFootstepToGoalXs.get(side).getValue());
+         onDiskGoalFootstepToGoalYs.put(side, goalFootstepToGoalYs.get(side).getValue());
+         onDiskGoalFootstepToGoalYaws.put(side, goalFootstepToGoalYaws.get(side).getValue());
+      }
 
       for (int i = 0; i < footsteps.getSize(); i++)
          footsteps.getValueReadOnly(i).setOnDiskFields();
@@ -140,9 +168,15 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       footsteps.getValue().clear();
       for (int i = 0; i < onDiskNumberOfFootsteps; i++)
          footsteps.getValue().add();
-      goalToParentTransform.getValue().set(onDiskGoalToParentTransform);
-      for (RobotSide side : goalFootstepToGoalTransforms.sides())
-         goalFootstepToGoalTransforms.get(side).getValue().set(onDiskGoalFootstepToGoalTransforms.get(side));
+      goalToParentX.setValue(onDiskGoalToParentX);
+      goalToParentY.setValue(onDiskGoalToParentY);
+      goalToParentYaw.setValue(onDiskGoalToParentYaw);
+      for (RobotSide side : onDiskGoalFootstepToGoalXs.sides())
+      {
+         goalFootstepToGoalXs.get(side).setValue(onDiskGoalFootstepToGoalXs.get(side));
+         goalFootstepToGoalYs.get(side).setValue(onDiskGoalFootstepToGoalYs.get(side));
+         goalFootstepToGoalYaws.get(side).setValue(onDiskGoalFootstepToGoalYaws.get(side));
+      }
 
       for (int i = 0; i < footsteps.getSize(); i++)
          footsteps.getValue().get(i).undoAllNontopologicalChanges();
@@ -157,9 +191,15 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       unchanged &= transferDuration.getValue() == onDiskTransferDuration;
       unchanged &= parentFrameName.getValue().equals(onDiskParentFrameName);
       unchanged &= isManuallyPlaced.getValue() == onDiskIsManuallyPlaced;
-      unchanged &= goalToParentTransform.getValueReadOnly().equals(onDiskGoalToParentTransform);
-      for (RobotSide side : goalFootstepToGoalTransforms.sides())
-         unchanged &= goalFootstepToGoalTransforms.get(side).getValueReadOnly().equals(onDiskGoalFootstepToGoalTransforms.get(side));
+      unchanged &= goalToParentX.getValue() == onDiskGoalToParentX;
+      unchanged &= goalToParentY.getValue() == onDiskGoalToParentY;
+      unchanged &= goalToParentYaw.getValue() == onDiskGoalToParentYaw;
+      for (RobotSide side : goalFootstepToGoalXs.sides())
+      {
+         unchanged &= goalFootstepToGoalXs.get(side).getValue() == onDiskGoalFootstepToGoalXs.get(side);
+         unchanged &= goalFootstepToGoalYs.get(side).getValue() == onDiskGoalFootstepToGoalYs.get(side);
+         unchanged &= goalFootstepToGoalYaws.get(side).getValue() == onDiskGoalFootstepToGoalYaws.get(side);
+      }
 
       boolean sameNumberOfFootsteps = footsteps.getSize() == onDiskNumberOfFootsteps;
       unchanged &= sameNumberOfFootsteps;

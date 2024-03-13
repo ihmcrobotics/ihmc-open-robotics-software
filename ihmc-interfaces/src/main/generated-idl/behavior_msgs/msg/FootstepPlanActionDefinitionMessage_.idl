@@ -3,7 +3,6 @@
 
 #include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionFootstepDefinitionMessage_.idl"
-#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -39,17 +38,41 @@ module behavior_msgs
          */
         sequence<behavior_msgs::msg::dds::FootstepPlanActionFootstepDefinitionMessage, 50> footsteps;
         /**
-         * Transform that expresses the planning goal pose in the parent frame
+         * Planning goal pose X in the parent frame
          */
-        controller_msgs::msg::dds::RigidBodyTransformMessage goal_transform_to_parent;
+        double goal_x_in_parent;
         /**
-         * Left goal foot transform to the goal pose
+         * Planning goal pose Y in the parent frame
          */
-        controller_msgs::msg::dds::RigidBodyTransformMessage left_goal_foot_transform_to_gizmo;
+        double goal_y_in_parent;
         /**
-         * Right goal foot transform to the goal pose
+         * Planning goal pose Yaw in the parent frame
          */
-        controller_msgs::msg::dds::RigidBodyTransformMessage right_goal_foot_transform_to_gizmo;
+        double goal_yaw_in_parent;
+        /**
+         * Left goal foot X to the goal pose
+         */
+        double left_goal_foot_x_to_gizmo;
+        /**
+         * Left goal foot Y to the goal pose
+         */
+        double left_goal_foot_y_to_gizmo;
+        /**
+         * Left goal foot Yaw to the goal pose
+         */
+        double left_goal_foot_yaw_to_gizmo;
+        /**
+         * Right goal foot X to the goal pose
+         */
+        double right_goal_foot_x_to_gizmo;
+        /**
+         * Right goal foot Y to the goal pose
+         */
+        double right_goal_foot_y_to_gizmo;
+        /**
+         * Right goal foot Yaw to the goal pose
+         */
+        double right_goal_foot_yaw_to_gizmo;
       };
     };
   };

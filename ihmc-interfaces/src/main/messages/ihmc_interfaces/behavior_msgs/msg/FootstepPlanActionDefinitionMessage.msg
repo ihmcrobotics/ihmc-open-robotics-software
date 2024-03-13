@@ -25,8 +25,20 @@ float64 goal_y_in_parent
 # Planning goal pose Yaw in the parent frame
 float64 goal_yaw_in_parent
 
-# Left goal foot transform to the goal pose
-controller_msgs/RigidBodyTransformMessage left_goal_foot_transform_to_gizmo
+# Left goal foot X to the goal pose
+float64 left_goal_foot_x_to_gizmo
 
-# Right goal foot transform to the goal pose
-controller_msgs/RigidBodyTransformMessage right_goal_foot_transform_to_gizmo
+# Left goal foot Y to the goal pose
+float64 left_goal_foot_y_to_gizmo
+
+# Left goal foot Yaw to the goal pose
+float64 left_goal_foot_yaw_to_gizmo
+
+# Right goal foot X to the goal pose
+float64 right_goal_foot_x_to_gizmo
+
+# Right goal foot Y to the goal pose
+float64 right_goal_foot_y_to_gizmo
+
+# Right goal foot Yaw to the goal pose
+float64 right_goal_foot_yaw_to_gizmo
