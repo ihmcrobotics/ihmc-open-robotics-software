@@ -1,21 +1,16 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.io.IOException;
-import java.io.InputStream;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Tag;
-
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Tag;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotConfigurationDataInitialSetup;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxMessageReplay;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
@@ -48,6 +43,11 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("humanoid-toolbox")
 public abstract class KinematicsStreamingToolboxEndToEndTest
@@ -147,7 +147,8 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
 
    private double getGroundHeight(RobotConfigurationData initialRobotConfigurationData)
    {
-      FullHumanoidRobotModel fullRobotModel = newRobotModel().createFullRobotModel();;
+      FullHumanoidRobotModel fullRobotModel = newRobotModel().createFullRobotModel();
+      ;
       RobotInitialSetup<HumanoidFloatingRootJointRobot> robotConfigurationData = new RobotConfigurationDataInitialSetup(initialRobotConfigurationData,
                                                                                                                         fullRobotModel);
 
@@ -180,12 +181,15 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
 
       new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxROS2Node);
 
+      KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
+      parameters.setDefault();
+      parameters.setToolboxUpdatePeriod(toolboxControllerPeriod);
+
       toolboxController = new KinematicsStreamingToolboxController(commandInputManager,
                                                                    statusOutputManager,
+                                                                   parameters,
                                                                    desiredFullRobotModel,
                                                                    robotModel,
-                                                                   robotModel.getControllerDT(),
-                                                                   toolboxControllerPeriod,
                                                                    yoGraphicsListRegistry,
                                                                    toolboxRegistry);
       toolboxController.setTrajectoryMessagePublisher(simulationTestHelper::publishToController);

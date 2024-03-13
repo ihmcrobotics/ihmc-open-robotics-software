@@ -6,7 +6,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
-import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -55,8 +54,6 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                                             parameters,
                                                             fullRobotModel,
                                                             robotModel,
-                                                            robotModel.getControllerDT(),
-                                                            Conversions.millisecondsToSeconds(updatePeriodMilliseconds),
                                                             yoGraphicsListRegistry,
                                                             registry);
       controller.setCollisionModel(robotModel.getHumanoidRobotKinematicsCollisionModel());
