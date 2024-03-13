@@ -2,7 +2,6 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output
 
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTools;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.YoKinematicsToolboxOutputStatus;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.providers.DoubleProvider;

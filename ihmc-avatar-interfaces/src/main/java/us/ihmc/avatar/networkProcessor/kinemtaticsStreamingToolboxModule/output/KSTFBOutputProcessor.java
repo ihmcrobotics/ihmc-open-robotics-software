@@ -1,7 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output;
 
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTools;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.YoKinematicsToolboxOutputStatus;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.spatial.SpatialVector;
