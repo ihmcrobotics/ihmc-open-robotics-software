@@ -14,12 +14,12 @@ public class KSTCompiledOutputProcessor implements KSTOutputProcessor
    private final YoKinematicsToolboxOutputStatus outputRobotState;
    private final KSTOutputProcessors outputProcessors = new KSTOutputProcessors();
 
-   private final YoDouble solutionFilterBreakFrequency;
+   private final YoDouble outputLPFBreakFrequency;
    private final YoDouble outputJointVelocityScale;
 
    public KSTCompiledOutputProcessor(KSTTools tools, DoubleProvider streamingBlendingDuration, BooleanProvider isPublishing, YoRegistry registry)
    {
-      solutionFilterBreakFrequency = new YoDouble("solutionFilterBreakFrequency", registry);
+      outputLPFBreakFrequency = new YoDouble("outputLPFBreakFrequency", registry);
       outputJointVelocityScale = new YoDouble("outputJointVelocityScale", registry);
 
       FullHumanoidRobotModel desiredFullRobotModel = tools.getDesiredFullRobotModel();
@@ -29,12 +29,12 @@ public class KSTCompiledOutputProcessor implements KSTOutputProcessor
 
       KinematicsStreamingToolboxParameters parameters = tools.getParameters();
       outputJointVelocityScale.set(parameters.getOutputJointVelocityScale());
-      solutionFilterBreakFrequency.set(parameters.getOutputLPFBreakFrequency());
+      outputLPFBreakFrequency.set(parameters.getOutputLPFBreakFrequency());
 
       //      outputProcessors.add(new KSTFiniteDifferenceOutputProcessor(tools, isPublishing, registry));
       outputProcessors.add(new KSTDownscaleVelocityOutputProcessor(tools, outputJointVelocityScale, registry));
       outputProcessors.add(new KSTFBOutputProcessor(tools, registry));
-      outputProcessors.add(new KSTLowPassFilteredOutputProcessor(tools, solutionFilterBreakFrequency, registry));
+      outputProcessors.add(new KSTLowPassFilteredOutputProcessor(tools, outputLPFBreakFrequency, registry));
       outputProcessors.add(new KSTBlendingOutputProcessor(tools, streamingBlendingDuration, registry));
    }
 
