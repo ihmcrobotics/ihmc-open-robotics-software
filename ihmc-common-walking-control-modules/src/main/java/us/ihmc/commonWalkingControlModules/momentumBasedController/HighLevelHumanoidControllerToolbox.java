@@ -1,13 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
-import static us.ihmc.robotics.lists.FrameTuple2dArrayList.createFramePoint2dArrayList;
-
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
@@ -71,10 +63,21 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
-import us.ihmc.yoVariables.euclid.referenceFrame.*;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+
+import static us.ihmc.robotics.lists.FrameTuple2dArrayList.createFramePoint2dArrayList;
 
 public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProvider, SCS2YoGraphicHolder
 {
@@ -229,7 +232,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       this.contactableBodies = contactableBodies;
 
       RigidBodyBasics elevator = fullRobotModel.getElevator();
-      double totalMass = TotalMassCalculator.computeSubTreeMass(elevator);
+      this.totalMass.set(TotalMassCalculator.computeSubTreeMass(elevator));
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -279,7 +282,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       yoCoPError = new SideDependentList<YoFrameVector2D>();
 
-      minZForceForCoPControlScaling = 0.20 * totalMass * gravityZ;
+      minZForceForCoPControlScaling = 0.20 * totalMass.getValue() * gravityZ;
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -342,7 +345,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          }
       }
 
-      multiContactRegionCalculator = new CenterOfMassStaticStabilityRegionCalculator(fullRobotModel.getTotalMass(), registry, yoGraphicsListRegistry);
+      multiContactRegionCalculator = new CenterOfMassStaticStabilityRegionCalculator(totalMass.getValue(), registry, yoGraphicsListRegistry);
       wholeBodyContactState = new WholeBodyContactState(controlledOneDoFJoints, fullRobotModel.getRootJoint());
 
       String graphicListName = getClass().getSimpleName();
@@ -358,7 +361,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       }
       yoCenterOfPressure.setToNaN();
 
-      this.totalMass.set(totalMass);
       angularExcursionCalculator = new AngularExcursionCalculator(centerOfMassFrame, fullRobotModel.getElevator(), controlDT, registry, null);
       yoAngularMomentum = new YoFrameVector3D("AngularMomentum", centerOfMassFrame, registry);
       yoLinearMomentum = new YoFrameVector3D("LinearMomentum", centerOfMassFrame, registry);
@@ -792,6 +794,16 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public YoDouble getYoTime()
    {
       return yoTime;
+   }
+
+   public double getTotalMass()
+   {
+      return totalMass.getDoubleValue();
+   }
+
+   public YoDouble getTotalMassProvider()
+   {
+      return totalMass;
    }
 
    public double getGravityZ()
