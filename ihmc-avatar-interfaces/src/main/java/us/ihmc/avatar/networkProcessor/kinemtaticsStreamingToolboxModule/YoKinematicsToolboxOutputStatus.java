@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
-import java.util.Arrays;
-
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -9,12 +7,16 @@ import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.Arrays;
 
 public class YoKinematicsToolboxOutputStatus
 {
@@ -41,7 +43,7 @@ public class YoKinematicsToolboxOutputStatus
          else
             return (byte) status.ordinal();
       }
-   };
+   }
 
    private int numberOfJoints;
    private final YoEnum<Status> currentToolboxState;
@@ -50,6 +52,11 @@ public class YoKinematicsToolboxOutputStatus
    private final YoDouble[] desiredJointVelocities;
    private final YoFramePose3D desiredRootJointPose;
    private final YoFixedFrameSpatialVector desiredRootJointVelocity;
+
+   public YoKinematicsToolboxOutputStatus(String namePrefix, FullHumanoidRobotModel fullRobotModel, YoRegistry parentRegistry)
+   {
+      this(namePrefix, fullRobotModel.getRootJoint(), FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel), parentRegistry);
+   }
 
    public YoKinematicsToolboxOutputStatus(String namePrefix, FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints, YoRegistry parentRegistry)
    {
@@ -102,6 +109,19 @@ public class YoKinematicsToolboxOutputStatus
 
       desiredRootJointPose.set(status.getDesiredRootPosition(), status.getDesiredRootOrientation());
       desiredRootJointVelocity.set(status.getDesiredRootAngularVelocity(), status.getDesiredRootLinearVelocity());
+   }
+
+   public void setConfigurationOnly(KinematicsToolboxOutputStatus status)
+   {
+      if (status.getJointNameHash() != jointNameHash.getValue())
+         throw new IllegalArgumentException("Incompatible status");
+
+      for (int i = 0; i < numberOfJoints; i++)
+      {
+         desiredJointAngles[i].set(status.getDesiredJointAngles().get(i));
+      }
+
+      desiredRootJointPose.set(status.getDesiredRootPosition(), status.getDesiredRootOrientation());
    }
 
    public void set(YoKinematicsToolboxOutputStatus other)
@@ -157,17 +177,30 @@ public class YoKinematicsToolboxOutputStatus
       for (int i = 0; i < numberOfJoints; i++)
       {
          double qd = (current.getDesiredJointAngles().get(i) - previous.getDesiredJointAngles().get(i)) / duration;
+         if (!Double.isFinite(qd))
+            qd = 0.0;
          desiredJointVelocities[i].set(qd);
       }
 
       desiredRootJointVelocity.getLinearPart().sub(current.getDesiredRootPosition(), current.getDesiredRootPosition());
       desiredRootJointVelocity.getLinearPart().scale(1.0 / duration);
-      desiredRootJointPose.getOrientation().inverseTransform(desiredRootJointVelocity.getLinearPart());
+      if (desiredRootJointVelocity.containsNaN())
+         desiredRootJointVelocity.setToZero();
+      else
+         desiredRootJointPose.getOrientation().inverseTransform(desiredRootJointVelocity.getLinearPart());
       quaternionDot.sub(current.getDesiredRootOrientation(), previous.getDesiredRootOrientation());
       quaternionDot.scale(1.0 / duration);
-      quaternionCalculus.computeAngularVelocityInBodyFixedFrame(desiredRootJointPose.getOrientation(),
-                                                                quaternionDot,
-                                                                desiredRootJointVelocity.getAngularPart());
+      if (quaternionDot.containsNaN())
+      {
+         quaternionDot.setToZero();
+         desiredRootJointVelocity.setToZero();
+      }
+      else
+      {
+         quaternionCalculus.computeAngularVelocityInBodyFixedFrame(desiredRootJointPose.getOrientation(),
+                                                                   quaternionDot,
+                                                                   desiredRootJointVelocity.getAngularPart());
+      }
    }
 
    private final KinematicsToolboxOutputStatus status = new KinematicsToolboxOutputStatus();

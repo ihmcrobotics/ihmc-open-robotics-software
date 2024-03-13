@@ -21,9 +21,9 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
             */
    public boolean is_next_for_execution_;
    /**
-            * If the action is to be executed concurrently
+            * The maximum number of actions that might be executing while this one is
             */
-   public boolean is_to_be_executed_concurrently_;
+   public int concurrency_rank_;
    /**
             * If the node is able to execution
             */
@@ -93,7 +93,7 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
 
       is_next_for_execution_ = other.is_next_for_execution_;
 
-      is_to_be_executed_concurrently_ = other.is_to_be_executed_concurrently_;
+      concurrency_rank_ = other.concurrency_rank_;
 
       can_execute_ = other.can_execute_;
 
@@ -160,18 +160,18 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
    }
 
    /**
-            * If the action is to be executed concurrently
+            * The maximum number of actions that might be executing while this one is
             */
-   public void setIsToBeExecutedConcurrently(boolean is_to_be_executed_concurrently)
+   public void setConcurrencyRank(int concurrency_rank)
    {
-      is_to_be_executed_concurrently_ = is_to_be_executed_concurrently;
+      concurrency_rank_ = concurrency_rank;
    }
    /**
-            * If the action is to be executed concurrently
+            * The maximum number of actions that might be executing while this one is
             */
-   public boolean getIsToBeExecutedConcurrently()
+   public int getConcurrencyRank()
    {
-      return is_to_be_executed_concurrently_;
+      return concurrency_rank_;
    }
 
    /**
@@ -338,7 +338,7 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_next_for_execution_, other.is_next_for_execution_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_to_be_executed_concurrently_, other.is_to_be_executed_concurrently_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.concurrency_rank_, other.concurrency_rank_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.can_execute_, other.can_execute_, epsilon)) return false;
 
@@ -392,7 +392,7 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
 
       if(this.is_next_for_execution_ != otherMyClass.is_next_for_execution_) return false;
 
-      if(this.is_to_be_executed_concurrently_ != otherMyClass.is_to_be_executed_concurrently_) return false;
+      if(this.concurrency_rank_ != otherMyClass.concurrency_rank_) return false;
 
       if(this.can_execute_ != otherMyClass.can_execute_) return false;
 
@@ -432,8 +432,8 @@ public class ActionNodeStateMessage extends Packet<ActionNodeStateMessage> imple
       builder.append(this.id_);      builder.append(", ");
       builder.append("is_next_for_execution=");
       builder.append(this.is_next_for_execution_);      builder.append(", ");
-      builder.append("is_to_be_executed_concurrently=");
-      builder.append(this.is_to_be_executed_concurrently_);      builder.append(", ");
+      builder.append("concurrency_rank=");
+      builder.append(this.concurrency_rank_);      builder.append(", ");
       builder.append("can_execute=");
       builder.append(this.can_execute_);      builder.append(", ");
       builder.append("is_executing=");

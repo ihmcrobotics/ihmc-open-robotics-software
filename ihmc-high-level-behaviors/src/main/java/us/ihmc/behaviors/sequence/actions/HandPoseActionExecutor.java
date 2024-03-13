@@ -13,6 +13,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -26,6 +27,8 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+
+import java.util.List;
 
 public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionState, HandPoseActionDefinition>
 {
@@ -80,36 +83,37 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
       if (state.getPalmFrame().isChildOfWorld() && state.getIsNextForExecution())
       {
-         ChestOrientationActionExecutor concurrentChestOrientationAction = null;
-         PelvisHeightPitchActionExecutor concurrentPelvisHeightPitchAction = null;
+         ChestOrientationActionState concurrentChestOrientationAction = null;
+         PelvisHeightPitchActionState concurrentPelvisHeightPitchAction = null;
 
-         if (getParent() instanceof ActionSequenceExecutor parentSequence)
+         ActionSequenceExecutor actionSequenceExecutor = BehaviorTreeTools.findActionSequenceAncestor(this);
+         if (actionSequenceExecutor != null)
          {
             if (state.getIsToBeExecutedConcurrently())
             {
-               int concurrentSetIndex = parentSequence.getState().getExecutionNextIndex();
+               List<ActionNodeState<?>> actionChildren = actionSequenceExecutor.getState().getActionChildren();
 
-               while (concurrentSetIndex <= parentSequence.getLastIndexOfConcurrentSetToExecute())
+               for (int i = actionSequenceExecutor.getState().getExecutionNextIndex();
+                    i < actionChildren.size() && actionChildren.get(i).getIsToBeExecutedConcurrently(); i++)
                {
-                  if (parentSequence.getExecutorChildren().get(concurrentSetIndex) instanceof ChestOrientationActionExecutor chestOrientationAction)
+                  if (actionChildren.get(i) instanceof ChestOrientationActionState chestOrientationAction)
                   {
                      concurrentChestOrientationAction = chestOrientationAction;
                   }
-                  if (parentSequence.getExecutorChildren().get(concurrentSetIndex) instanceof PelvisHeightPitchActionExecutor pelvisHeightPitchAction)
+                  if (actionChildren.get(i) instanceof PelvisHeightPitchActionState pelvisHeightPitchAction)
                   {
                      concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
                   }
-                  ++concurrentSetIndex;
                }
             }
 
-            for (ActionNodeExecutor<?, ?> currentlyExecutingAction : parentSequence.getCurrentlyExecutingActions())
+            for (ActionNodeExecutor<?, ?> currentlyExecutingAction : actionSequenceExecutor.getCurrentlyExecutingActions())
             {
-               if (currentlyExecutingAction instanceof ChestOrientationActionExecutor chestOrientationAction)
+               if (currentlyExecutingAction.getState() instanceof ChestOrientationActionState chestOrientationAction)
                {
                   concurrentChestOrientationAction = chestOrientationAction;
                }
-               if (currentlyExecutingAction instanceof PelvisHeightPitchActionExecutor pelvisHeightPitchAction)
+               if (currentlyExecutingAction.getState() instanceof PelvisHeightPitchActionState pelvisHeightPitchAction)
                {
                   concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
                }
@@ -122,9 +126,9 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          }
          else if (concurrentPelvisHeightPitchAction == null)
          {
-            concurrentChestOrientationAction.getState().update(); // Ensure state's frames are initialized
+            concurrentChestOrientationAction.update(); // Ensure state's frames are initialized
             state.getGoalChestToWorldTransform().getValue()
-                 .set(concurrentChestOrientationAction.getState().getChestFrame().getReferenceFrame().getTransformToRoot());
+                 .set(concurrentChestOrientationAction.getChestFrame().getReferenceFrame().getTransformToRoot());
          }
          else if (concurrentChestOrientationAction == null)
          {
@@ -134,11 +138,11 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          }
          else // Combined case
          {
-            concurrentChestOrientationAction.getState().update(); // Ensure state's frames are initialized
-            concurrentPelvisHeightPitchAction.getState().update(); // Ensure state's frames are initialized
+            concurrentChestOrientationAction.update(); // Ensure state's frames are initialized
+            concurrentPelvisHeightPitchAction.update(); // Ensure state's frames are initialized
 
-            ReferenceFrame chestActionFrame = concurrentChestOrientationAction.getState().getChestFrame().getReferenceFrame();
-            ReferenceFrame pelvisActionFrame = concurrentPelvisHeightPitchAction.getState().getPelvisFrame().getReferenceFrame();
+            ReferenceFrame chestActionFrame = concurrentChestOrientationAction.getChestFrame().getReferenceFrame();
+            ReferenceFrame pelvisActionFrame = concurrentPelvisHeightPitchAction.getPelvisFrame().getReferenceFrame();
 
             chestInPelvis.setToZero(chestActionFrame);
             chestInPelvis.changeFrame(pelvisActionFrame);

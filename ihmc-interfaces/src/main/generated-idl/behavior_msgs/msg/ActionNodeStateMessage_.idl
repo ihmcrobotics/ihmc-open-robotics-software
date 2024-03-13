@@ -28,9 +28,9 @@ module behavior_msgs
          */
         boolean is_next_for_execution;
         /**
-         * If the action is to be executed concurrently
+         * The maximum number of actions that might be executing while this one is
          */
-        boolean is_to_be_executed_concurrently;
+        unsigned short concurrency_rank;
         /**
          * If the node is able to execution
          */
