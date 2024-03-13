@@ -317,8 +317,9 @@ public class KSTStreamingMessageFactory
 
       for (OneDoFJointReadOnly joint : joints)
       {
-         double qMin = joint.getJointLimitLower() + 1.0e-3;
-         double qMax = joint.getJointLimitUpper() - 1.0e-3;
+         double epsilon = 1.0e-5;
+         double qMin = joint.getJointLimitLower() + epsilon;
+         double qMax = joint.getJointLimitUpper() - epsilon;
          double q = MathTools.clamp(joint.getQ(), qMin, qMax);
          double qd;
          double qdd;
@@ -538,6 +539,7 @@ public class KSTStreamingMessageFactory
    private class YoSO3StreamingMessage
    {
       private final YoQuaternion orientation;
+      private final YoVector3D rotationVector;
       private final YoVector3D angularVelocity;
       private final YoVector3D angularAcceleration;
 
@@ -545,6 +547,7 @@ public class KSTStreamingMessageFactory
       {
          String prefix = endEffector.getName();
          orientation = new YoQuaternion(prefix + "OrientationMSG", registry);
+         rotationVector = new YoVector3D(prefix + "RotactionVectorMSG", registry);
          angularVelocity = new YoVector3D(prefix + "AngularVelocityMSG", registry);
          angularAcceleration = new YoVector3D(prefix + "AngularAccelerationMSG", registry);
       }
@@ -552,6 +555,7 @@ public class KSTStreamingMessageFactory
       public void setFromMessage(SO3StreamingMessage message)
       {
          orientation.set(message.getOrientation());
+         orientation.getRotationVector(rotationVector);
          angularVelocity.set(message.getAngularVelocity());
          angularAcceleration.set(message.getAngularAcceleration());
       }
@@ -561,6 +565,7 @@ public class KSTStreamingMessageFactory
    {
       private final YoVector3D position;
       private final YoQuaternion orientation;
+      private final YoVector3D rotationVector;
       private final YoVector3D linearVelocity;
       private final YoVector3D angularVelocity;
       private final YoVector3D linearAcceleration;
@@ -571,6 +576,7 @@ public class KSTStreamingMessageFactory
          String prefix = endEffector.getName();
          position = new YoVector3D(prefix + "PositionMSG", registry);
          orientation = new YoQuaternion(prefix + "OrientationMSG", registry);
+         rotationVector = new YoVector3D(prefix + "RotactionVectorMSG", registry);
          linearVelocity = new YoVector3D(prefix + "LinearVelocityMSG", registry);
          angularVelocity = new YoVector3D(prefix + "AngularVelocityMSG", registry);
          linearAcceleration = new YoVector3D(prefix + "LinearAccelerationMSG", registry);
@@ -581,6 +587,7 @@ public class KSTStreamingMessageFactory
       {
          position.set(message.getPosition());
          orientation.set(message.getOrientation());
+         orientation.getRotationVector(rotationVector);
          linearVelocity.set(message.getLinearVelocity());
          angularVelocity.set(message.getAngularVelocity());
          linearAcceleration.set(message.getLinearAcceleration());
