@@ -26,6 +26,12 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
    private final CRDTUnidirectionalDouble trajectoryDuration;
    private final CRDTUnidirectionalDoubleArray jointAngles;
 
+   // On disk fields
+   private PresetArmConfiguration onDiskPreset;
+   private RobotSide onDiskSide;
+   private double onDiskTrajectoryDuration;
+   private final double[] onDiskJointAngles = new double[NUMBER_OF_JOINTS];
+
    public ArmJointAnglesActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
@@ -71,11 +77,50 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
       }
    }
 
+   @Override
+   public void setOnDiskFields()
+   {
+      super.setOnDiskFields();
+
+      onDiskPreset = preset.getValue();
+      onDiskSide = side.getValue();
+      onDiskTrajectoryDuration = trajectoryDuration.getValue();
+      for (int i = 0; i < jointAngles.getLength(); i++)
+         onDiskJointAngles[i] = jointAngles.getValueReadOnly(i);
+   }
+
+   @Override
+   public void undoAllNontopologicalChanges()
+   {
+      super.undoAllNontopologicalChanges();
+
+      preset.setValue(onDiskPreset);
+      side.setValue(onDiskSide);
+      trajectoryDuration.setValue(onDiskTrajectoryDuration);
+      for (int i = 0; i < jointAngles.getLength(); i++)
+         jointAngles.getValue()[i] = onDiskJointAngles[i];
+   }
+
+   @Override
+   public boolean hasChanges()
+   {
+      boolean unchanged = !super.hasChanges();
+
+      unchanged &= preset.getValue() == onDiskPreset;
+      unchanged &= side.getValue() == onDiskSide;
+      unchanged &= trajectoryDuration.getValue() == onDiskTrajectoryDuration;
+      if (preset.getValue() == null)
+         for (int i = 0; i < jointAngles.getLength(); i++)
+            unchanged &= jointAngles.getValueReadOnly(i) == onDiskJointAngles[i];
+
+      return !unchanged;
+   }
+
    public void toMessage(ArmJointAnglesActionDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
 
-      message.setPreset(preset == null ? -1 : preset.toMessage().ordinal());
+      message.setPreset(preset.toMessage() == null ? -1 : preset.toMessage().ordinal());
       message.setRobotSide(side.toMessage().toByte());
       message.setTrajectoryDuration(trajectoryDuration.toMessage());
       jointAngles.toMessage(message.getJointAngles());

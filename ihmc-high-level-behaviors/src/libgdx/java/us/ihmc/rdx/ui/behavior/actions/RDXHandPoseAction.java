@@ -73,7 +73,6 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final ImGuiSliderDoubleWrapper linearPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper angularPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper jointspaceWeightWidget;
-   private final ImBooleanWrapper executeWithNextActionWrapper;
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
    private final ImBooleanWrapper jointSpaceControlWrapper;
    private final ImDoubleWrapper positionErrorToleranceInput;
@@ -106,9 +105,6 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
                                                      definition::setTrajectoryDuration,
                                                      imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
-      executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
-                                                          definition::setExecuteWithNextAction,
-                                                          imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
       holdPoseInWorldLaterWrapper = new ImBooleanWrapper(definition::getHoldPoseInWorldLater,
                                                          definition::setHoldPoseInWorldLater,
                                                          imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
@@ -273,8 +269,6 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    protected void renderImGuiWidgetsInternal()
    {
       ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());
-      ImGui.sameLine();
-      executeWithNextActionWrapper.renderImGuiWidget();
       jointSpaceControlWrapper.renderImGuiWidget();
       if (!definition.getJointspaceOnly())
       {

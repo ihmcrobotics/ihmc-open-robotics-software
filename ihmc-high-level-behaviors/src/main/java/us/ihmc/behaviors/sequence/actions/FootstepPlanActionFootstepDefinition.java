@@ -7,6 +7,7 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.JSONTools;
@@ -15,6 +16,10 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
 {
    private final CRDTUnidirectionalEnumField<RobotSide> side;
    private final CRDTUnidirectionalRigidBodyTransform soleToPlanFrameTransform;
+
+   // On disk fields
+   private RobotSide onDiskSide;
+   private final RigidBodyTransform onDiskSoleToPlanFrameTransform = new RigidBodyTransform();
 
    public FootstepPlanActionFootstepDefinition(CRDTInfo crdtInfo)
    {
@@ -48,6 +53,28 @@ public class FootstepPlanActionFootstepDefinition implements SidedObject
    {
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       JSONTools.toEuclid(jsonNode, soleToPlanFrameTransform.getValue());
+   }
+
+   public void setOnDiskFields()
+   {
+      onDiskSide = side.getValue();
+      onDiskSoleToPlanFrameTransform.set(soleToPlanFrameTransform.getValueReadOnly());
+   }
+
+   public void undoAllNontopologicalChanges()
+   {
+      side.setValue(onDiskSide);
+      soleToPlanFrameTransform.getValue().set(onDiskSoleToPlanFrameTransform);
+   }
+
+   public boolean hasChanges()
+   {
+      boolean unchanged = true;
+
+      unchanged &= side.getValue() == onDiskSide;
+      unchanged &= soleToPlanFrameTransform.getValueReadOnly().equals(onDiskSoleToPlanFrameTransform);
+
+      return !unchanged;
    }
 
    public void toMessage(FootstepPlanActionFootstepDefinitionMessage message)

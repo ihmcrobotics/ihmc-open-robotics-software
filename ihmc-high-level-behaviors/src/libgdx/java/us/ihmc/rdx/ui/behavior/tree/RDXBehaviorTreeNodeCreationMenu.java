@@ -126,11 +126,6 @@ public class RDXBehaviorTreeNodeCreationMenu
       ImGui.unindent();
       ImGui.spacing();
 
-      if (ImGui.button(labels.get("Refresh File List")))
-      {
-         reindexDirectory();
-      }
-
       ImGui.separator();
 
       ImGui.pushFont(ImGuiTools.getSmallBoldFont());
@@ -251,7 +246,7 @@ public class RDXBehaviorTreeNodeCreationMenu
       insertionDefinition.getNodeToInsert().setTreeWidgetExpanded(true);
    }
 
-   private void reindexDirectory()
+   public void reindexDirectory()
    {
       indexedTreeFiles.clear();
       for (WorkspaceResourceFile queryContainedFile : treeFilesDirectory.queryContainedFiles())

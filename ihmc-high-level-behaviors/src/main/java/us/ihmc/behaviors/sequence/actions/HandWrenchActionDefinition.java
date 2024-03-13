@@ -27,6 +27,11 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
    private final CRDTUnidirectionalDouble torqueZ;
 
 
+   // On disk fields
+   private RobotSide onDiskSide;
+   private double onDiskTrajectoryDuration;
+   private double onDiskForce;
+
    public HandWrenchActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
@@ -69,6 +74,38 @@ public class HandWrenchActionDefinition extends ActionNodeDefinition implements 
       torqueX.setValue(jsonNode.get("torqueX").asDouble());
       torqueY.setValue(jsonNode.get("torqueY").asDouble());
       torqueZ.setValue(jsonNode.get("torqueZ").asDouble());
+   }
+
+   @Override
+   public void setOnDiskFields()
+   {
+      super.setOnDiskFields();
+
+      onDiskSide = side.getValue();
+      onDiskTrajectoryDuration = trajectoryDuration.getValue();
+      onDiskForce = force.getValue();
+   }
+
+   @Override
+   public void undoAllNontopologicalChanges()
+   {
+      super.undoAllNontopologicalChanges();
+
+      side.setValue(onDiskSide);
+      trajectoryDuration.setValue(onDiskTrajectoryDuration);
+      force.setValue(onDiskForce);
+   }
+
+   @Override
+   public boolean hasChanges()
+   {
+      boolean unchanged = !super.hasChanges();
+
+      unchanged &= side.getValue() == onDiskSide;
+      unchanged &= trajectoryDuration.getValue() == onDiskTrajectoryDuration;
+      unchanged &= force.getValue() == onDiskForce;
+
+      return !unchanged;
    }
 
    public void toMessage(HandWrenchActionDefinitionMessage message)

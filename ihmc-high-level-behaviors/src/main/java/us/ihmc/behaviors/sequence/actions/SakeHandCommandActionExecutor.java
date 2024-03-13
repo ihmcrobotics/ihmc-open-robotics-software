@@ -53,8 +53,11 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
 
       for (RobotSide side : RobotSide.values)
       {
-         x1KnuckleJoints.put(side, (RevoluteJoint) syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(0));
-         x2KnuckleJoints.put(side, (RevoluteJoint) syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(1));
+         if (syncedRobot.getRobotModel().getRobotVersion().hasSakeGripperJoints(side))
+         {
+            x1KnuckleJoints.put(side, (RevoluteJoint) syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(0));
+            x2KnuckleJoints.put(side, (RevoluteJoint) syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(1));
+         }
       }
    }
 
@@ -64,6 +67,12 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       super.update();
 
       trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
+
+      boolean canExecute = x1KnuckleJoints.get(definition.getSide()) != null;
+      canExecute &= x2KnuckleJoints.get(definition.getSide()) != null;
+      canExecute &= syncedRobot.getSakeHandStatus().get(definition.getSide()).getIsCalibrated();
+      canExecute &= !syncedRobot.getSakeHandStatus().get(definition.getSide()).getNeedsReset();
+      state.setCanExecute(canExecute);
    }
 
    @Override

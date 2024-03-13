@@ -6,8 +6,11 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
+import us.ihmc.communication.crdt.CRDTUnidirectionalLong;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+
+import javax.annotation.Nullable;
 
 /**
  * Interface for a definition of an action with
@@ -20,55 +23,129 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
  */
 public class ActionNodeDefinition extends BehaviorTreeNodeDefinition
 {
-   // TODO: Is every action concurrent-able?
-   private final CRDTUnidirectionalBoolean executeWithNextAction;
+   public static final String EXECUTE_AFTER_PREVIOUS = "Previous";
+   public static final String EXECUTE_AFTER_BEGINNING = "Beginning";
+
+   private final CRDTUnidirectionalBoolean executeAfterPrevious;
+   private final CRDTUnidirectionalBoolean executeAfterBeginning;
+   private final CRDTUnidirectionalLong executeAfterNodeID;
+   /** We use this to save the action name to file instead of the number for human readability. */
+   private String executeAfterActionName = EXECUTE_AFTER_PREVIOUS;
+
+   // On disk fields
+   private String onDiskExecuteAfterActionName;
 
    public ActionNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 
-      executeWithNextAction = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, false);
+      executeAfterPrevious = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, true);
+      executeAfterBeginning = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, false);
+      executeAfterNodeID = new CRDTUnidirectionalLong(ROS2ActorDesignation.OPERATOR, crdtInfo, 0);
    }
 
    public void saveToFile(ObjectNode jsonNode)
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("executeWithNextAction", executeWithNextAction.getValue());
+      jsonNode.put("executeAfterAction", executeAfterActionName);
    }
 
    public void loadFromFile(JsonNode jsonNode)
    {
       super.loadFromFile(jsonNode);
 
-      JsonNode executeWithNextActionNode = jsonNode.get("executeWithNextAction");
-      if (executeWithNextActionNode != null)
-         executeWithNextAction.setValue(executeWithNextActionNode.asBoolean());
-      else
-         executeWithNextAction.setValue(false);
+      executeAfterActionName = jsonNode.get("executeAfterAction").textValue();
+      executeAfterPrevious.setValue(executeAfterActionName.equals(EXECUTE_AFTER_PREVIOUS));
+      executeAfterBeginning.setValue(executeAfterActionName.equals(EXECUTE_AFTER_BEGINNING));
+      executeAfterNodeID.setValue(0); // Invalidate until we can find it
+   }
+
+   @Override
+   public void setOnDiskFields()
+   {
+      super.setOnDiskFields();
+
+      onDiskExecuteAfterActionName = executeAfterActionName;
+   }
+
+   @Override
+   public void undoAllNontopologicalChanges()
+   {
+      super.undoAllNontopologicalChanges();
+
+      executeAfterActionName = onDiskExecuteAfterActionName;
+      executeAfterPrevious.setValue(onDiskExecuteAfterActionName.equals(EXECUTE_AFTER_PREVIOUS));
+      executeAfterBeginning.setValue(onDiskExecuteAfterActionName.equals(EXECUTE_AFTER_BEGINNING));
+      executeAfterNodeID.setValue(0); // Invalidate until we can find it
+   }
+
+   @Override
+   public boolean hasChanges()
+   {
+      boolean unchanged = !super.hasChanges();
+
+      unchanged &= executeAfterActionName.equals(onDiskExecuteAfterActionName);
+
+      return !unchanged;
    }
 
    public void toMessage(ActionNodeDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
 
-      message.setExecuteWithNextAction(executeWithNextAction.toMessage());
+      message.setExecuteAfterPrevious(executeAfterPrevious.toMessage());
+      message.setExecuteAfterBeginning(executeAfterBeginning.toMessage());
+      message.setExecuteAfterNodeId(executeAfterNodeID.toMessage());
    }
 
    public void fromMessage(ActionNodeDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 
-      executeWithNextAction.fromMessage(message.getExecuteWithNextAction());
+      executeAfterPrevious.fromMessage(message.getExecuteAfterPrevious());
+      executeAfterBeginning.fromMessage(message.getExecuteAfterBeginning());
+      executeAfterNodeID.fromMessage(message.getExecuteAfterNodeId());
    }
 
-   public void setExecuteWithNextAction(boolean executeWitNextAction)
+   public CRDTUnidirectionalBoolean getExecuteAfterPrevious()
    {
-      this.executeWithNextAction.setValue(executeWitNextAction);
+      return executeAfterPrevious;
    }
 
-   public boolean getExecuteWithNextAction()
+   public CRDTUnidirectionalBoolean getExecuteAfterBeginning()
    {
-      return executeWithNextAction.getValue();
+      return executeAfterBeginning;
+   }
+
+   public CRDTUnidirectionalLong getExecuteAfterNodeID()
+   {
+      return executeAfterNodeID;
+   }
+
+   /** Needs to be updated every tick on the operator side only. */
+   public void updateAndSanitizeExecuteAfterFields(@Nullable String executeAfterActionName)
+   {
+      if (executeAfterBeginning.getValue())
+      {
+         this.executeAfterActionName = EXECUTE_AFTER_BEGINNING;
+         executeAfterNodeID.setValue(0);
+      }
+      else if (executeAfterActionName != null)
+      {
+         this.executeAfterActionName = executeAfterActionName;
+      }
+      else // Default to previous
+      {
+         executeAfterPrevious.setValue(true);
+         this.executeAfterActionName = EXECUTE_AFTER_PREVIOUS;
+         executeAfterNodeID.setValue(0);
+      }
+   }
+
+   /** Only used for finding the ID after loading */
+   public String getExecuteAfterActionName()
+   {
+      return executeAfterActionName;
    }
 }
