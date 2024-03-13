@@ -4,26 +4,36 @@ import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
-import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.SpatialInertiaBasisOption;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.parameterEstimation.ExtendedKalmanFilter;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoMatrix;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 
+/**
+ * An implementation of the {@link ExtendedKalmanFilter} for estimating inertial parameters of a robot, where the nonlinear features of the
+ * extended Kalman filter are not actually used, making this a vanilla Kalman filter.
+ * <p>
+ * Features of the filter:
+ * <li> The process model of the filter is how the inertial parameters are expected to change over time. As we cannot predict this, we consider the inertial
+ * parameters to be constant and therefore process model is the identity mapping.
+ * <li> The measurement of the filter is the torque contribution from the inertial parameters being estimated. We form a model of this by totaling up the other
+ * torque contributions: the contribution from the current estimate of the inertial parameters, the contribution from the nominal inertial parameters that are
+ * considered known and fixed, the contribution from the contact wrenches, and the contribution from a bias that approximates model mismatch.
+ * </p>
+ *
+ * @author James Foster
+ */
 public class InertialKalmanFilter extends ExtendedKalmanFilter implements OnlineInertialEstimator
 {
    private static final int WRENCH_DIMENSION = 6;
-
-   private final DMatrixRMaj identity;
+   private final DMatrixRMaj IDENTITY;
 
    private final DMatrixRMaj torqueFromNominal;
    private final DMatrixRMaj torqueFromEstimates;
@@ -35,23 +45,25 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
    private final SideDependentList<DMatrixRMaj> contactJacobians = new SideDependentList<>();
    private final SideDependentList<DMatrixRMaj> contactWrenches = new SideDependentList<>();
 
-   /** This is used as a container to build up a measurement from different contributions, see {@link #measurementModel(DMatrixRMaj)}. */
    private final DMatrixRMaj measurement;
 
    private final AlphaFilteredYoMatrix filteredResidual;
 
-   public InertialKalmanFilter(FullRobotModel model, InertialEstimationParameters parameters, YoRegistry parentRegistry)
+   public InertialKalmanFilter(FullRobotModel model, InertialEstimationParameters parameters, double dt, YoRegistry parentRegistry)
    {
       super(parameters.getURDFParameters(parameters.getBasisSets()),
             CommonOps_DDRM.identity(parameters.getNumberOfParameters()),
             CommonOps_DDRM.identity(parameters.getNumberOfParameters()),
             CommonOps_DDRM.identity(MultiBodySystemTools.computeDegreesOfFreedom(model.getRootJoint().subtreeArray())));
 
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+      parentRegistry.addChild(registry);
+
       int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(model.getRootJoint().subtreeArray());
       Set<SpatialInertiaBasisOption>[] basisSets = parameters.getBasisSets();
       int[] partitionSizes = RegressorTools.sizePartitions(basisSets);
 
-      identity = CommonOps_DDRM.identity(partitionSizes[0]);
+      IDENTITY = CommonOps_DDRM.identity(partitionSizes[0]);
 
       torqueFromNominal = new DMatrixRMaj(nDoFs, 1);
       torqueFromEstimates = new DMatrixRMaj(nDoFs, 1);
@@ -68,28 +80,10 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
 
       measurement = new DMatrixRMaj(nDoFs, 1);
 
-      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-      parentRegistry.addChild(registry);
-
-      // TODO: change
-      double postProcessingAlpha = 0.0;
-      filteredResidual = new AlphaFilteredYoMatrix("filteredResidual_", postProcessingAlpha, nDoFs, 1, getRowNames(model), null, registry);
+      double postProcessingAlpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(parameters.getBreakFrequencyForPostProcessing(), dt);
+      filteredResidual = new AlphaFilteredYoMatrix("filteredResidual_", postProcessingAlpha, nDoFs, 1, parameters.getMeasurementNames(), null, registry);
 
       setNormalizedInnovationThreshold(parameters.getNormalizedInnovationThreshold());
-   }
-
-   /** For inertial parameters, the process Jacobian is the identity matrix. */
-   @Override
-   protected DMatrixRMaj linearizeProcessModel(DMatrixRMaj previousParametersToEstimate)
-   {
-      return identity;
-   }
-
-   /** For inertial parameters, the measurement Jacobian is the regressor corresponding to the parameters one is estimating. */
-   @Override
-   protected DMatrixRMaj linearizeMeasurementModel(DMatrixRMaj predictedParametersToEstimate)
-   {
-      return regressor;
    }
 
    /** For inertial parameters, the process model is the identity mapping -- we assume that the parameters are constant. */
@@ -99,7 +93,8 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
       return parametersToEstimate;
    }
 
-   /** For inertial parameters, the measurement model is the sum of:
+   /**
+    * For inertial parameters, the measurement model is the sum of:
     * <li> the regressor contribution from the parameters that are being estimated
     * <li> the regressor contribution from the nominal parameters
     * <li> the contribution from the contact wrenches mapped through the contact Jacobians
@@ -129,16 +124,26 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
       return measurement;
    }
 
+   /** For inertial parameters, the process Jacobian is the identity matrix. */
+   @Override
+   protected DMatrixRMaj linearizeProcessModel(DMatrixRMaj previousParametersToEstimate)
+   {
+      return IDENTITY;
+   }
+
+   /** For inertial parameters, the measurement Jacobian is the regressor corresponding to the parameters one is estimating. */
+   @Override
+   protected DMatrixRMaj linearizeMeasurementModel(DMatrixRMaj predictedParametersToEstimate)
+   {
+      return regressor;
+   }
+
+   /** Before the update step, low-pass filter the measurement residual to reduce the effect of contact impulses on acceleration, wrench, and joint torques. */
    @Override
    public void preUpdateHook()
    {
       filter(getMeasurementResidual(), filteredResidual);
       getMeasurementResidual().set(filteredResidual);
-   }
-
-   protected void filter(DMatrix matrixToFilter, AlphaFilteredYoMatrix filterContainer)
-   {
-      filterContainer.setAndSolve(matrixToFilter);
    }
 
    @Override
@@ -154,31 +159,6 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
    }
 
    @Override
-   public void setContactWrenches(SideDependentList<DMatrixRMaj> contactWrenches)
-   {
-      for (RobotSide side : RobotSide.values)
-         this.contactWrenches.get(side).set(contactWrenches.get(side));
-   }
-
-   @Override
-   public void setProcessCovariance(DMatrix processCovariance)
-   {
-      this.processCovariance.set(processCovariance);
-   }
-
-   @Override
-   public void setMeasurementCovariance(DMatrix measurementCovariance)
-   {
-      this.measurementCovariance.set(measurementCovariance);
-   }
-
-   @Override
-   public double getNormalizedInnovation()
-   {
-      return 0;
-   }
-
-   @Override
    public void setTorqueFromBias(DMatrix bias)
    {
       this.torqueFromBias.set(bias);
@@ -191,59 +171,15 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
          contactJacobians.get(side).set(jacobians.get(side));
    }
 
-   public void setPostProcessingAlpha(double postProcessingAlpha)
+   @Override
+   public void setContactWrenches(SideDependentList<DMatrixRMaj> contactWrenches)
    {
-      filteredResidual.setAlpha(postProcessingAlpha);
+      for (RobotSide side : RobotSide.values)
+         this.contactWrenches.get(side).set(contactWrenches.get(side));
    }
 
-   public DMatrixRMaj getProcessCovariance()
+   private void filter(DMatrix matrixToFilter, AlphaFilteredYoMatrix filterContainer)
    {
-      return processCovariance;
-   }
-
-   public void setProcessCovariance(DMatrixRMaj processCovariance)
-   {
-      this.processCovariance.set(processCovariance);
-   }
-
-   public DMatrixRMaj getMeasurementCovariance()
-   {
-      return measurementCovariance;
-   }
-
-   public void setMeasurementCovariance(DMatrixRMaj measurementCovariance)
-   {
-      this.measurementCovariance.set(measurementCovariance);
-   }
-
-   private String[] getRowNames(FullRobotModel model)
-   {
-      List<String> names = new ArrayList<>();
-
-      // Root joint is handled specially
-      for (int i = 0; i < model.getRootJoint().getDegreesOfFreedom(); i++)
-      {
-         String suffix;
-         switch(i)
-         {
-            case 0 -> suffix = "wX";
-            case 1 -> suffix = "wY";
-            case 2 -> suffix = "wZ";
-            case 3 -> suffix = "x";
-            case 4 -> suffix = "y";
-            case 5 -> suffix = "z";
-            default -> throw new RuntimeException("Unhandled case: " + i);
-         }
-         names.add(model.getRootJoint().getName() + "_" + suffix);
-      }
-
-      // One DoF joints
-      OneDoFJointReadOnly[] oneDoFJoints = model.getOneDoFJoints();
-      for (OneDoFJointReadOnly joint : oneDoFJoints)
-      {
-         names.add(joint.getName());
-      }
-
-      return names.toArray(new String[0]);
+      filterContainer.setAndSolve(matrixToFilter);
    }
 }
