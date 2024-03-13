@@ -1,9 +1,6 @@
-package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
+package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output;
 
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output.KSTOutputDataBasics;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output.KSTOutputDataReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Vector4D;
@@ -147,45 +144,6 @@ public class YoKinematicsToolboxOutputStatus implements KSTOutputDataBasics
       }
       rootJointPose.set(other.rootJointPose);
       rootJointVelocity.set(other.rootJointVelocity);
-   }
-
-   public void interpolate(KSTOutputDataReadOnly start, KSTOutputDataReadOnly end, double alpha, double alphaDot)
-   {
-      if (getJointNameHash() != start.getJointNameHash() || getJointNameHash() != end.getJointNameHash())
-         throw new IllegalArgumentException("Joint name hash does not match, cannot interpolate data from different robot.");
-
-      if (getNumberOfJoints() != start.getNumberOfJoints() || getNumberOfJoints() != end.getNumberOfJoints())
-         throw new IllegalArgumentException("Number of joints does not match, cannot interpolate data from different robot.");
-
-      // 1-DoF joints:
-
-      for (int i = 0; i < getNumberOfJoints(); i++)
-      {
-         double q = EuclidCoreTools.interpolate(start.getJointPosition(i), end.getJointPosition(i), alpha);
-         double qDot = alphaDot * (end.getJointPosition(i) - start.getJointPosition(i));
-         qDot += EuclidCoreTools.interpolate(start.getJointVelocity(i), end.getJointVelocity(i), alpha);
-
-         setJointPosition(i, q);
-         setJointVelocity(i, qDot);
-      }
-
-      // Root joint:
-      // Do configuration
-      getRootJointOrientation().interpolate(start.getRootJointOrientation(), end.getRootJointOrientation(), alpha);
-      getRootJointPosition().interpolate(start.getRootJointPosition(), end.getRootJointPosition(), alpha);
-
-      // Root joint velocity
-      quaternionDot.sub(end.getRootJointOrientation(), start.getRootJointOrientation());
-      quaternionDot.scale(alphaDot);
-      quaternionCalculus.computeAngularVelocityInBodyFixedFrame(getRootJointOrientation(), quaternionDot, getRootJointAngularVelocity());
-      getRootJointAngularVelocity().scaleAdd(1.0 - alpha, start.getRootJointAngularVelocity(), getRootJointAngularVelocity());
-      getRootJointAngularVelocity().scaleAdd(alpha, end.getRootJointAngularVelocity(), getRootJointAngularVelocity());
-
-      getRootJointLinearVelocity().sub(end.getRootJointPosition(), start.getRootJointPosition());
-      getRootJointLinearVelocity().scale(alphaDot);
-      getRootJointOrientation().inverseTransform(getRootJointLinearVelocity());
-      getRootJointLinearVelocity().scaleAdd(1.0 - alpha, start.getRootJointLinearVelocity(), getRootJointLinearVelocity());
-      getRootJointLinearVelocity().scaleAdd(alpha, end.getRootJointLinearVelocity(), getRootJointLinearVelocity());
    }
 
    public void scaleVelocities(double scaleFactor)
