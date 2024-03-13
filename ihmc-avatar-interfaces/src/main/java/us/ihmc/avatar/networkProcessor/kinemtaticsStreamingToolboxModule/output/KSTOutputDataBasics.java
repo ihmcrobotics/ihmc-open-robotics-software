@@ -4,6 +4,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
@@ -122,24 +123,36 @@ public interface KSTOutputDataBasics extends KSTOutputDataReadOnly
 
       if (hasAccelerationData())
       {
-         if (start.hasAccelerationData() && end.hasAccelerationData())
-         {
-            getRootJointLinearAcceleration().interpolate(start.getRootJointLinearAcceleration(), end.getRootJointLinearAcceleration(), alpha);
-            getRootJointAngularAcceleration().interpolate(start.getRootJointAngularAcceleration(), end.getRootJointAngularAcceleration(), alpha);
+         boolean hasStartAcceleration = start.hasAccelerationData();
+         boolean hasEndAcceleration = end.hasAccelerationData();
 
-            for (int i = 0; i < getNumberOfJoints(); i++)
-            {
-               setJointAcceleration(i, EuclidCoreTools.interpolate(start.getJointAcceleration(i), end.getJointAcceleration(i), alpha));
-            }
+         if (!hasStartAcceleration && !hasEndAcceleration)
+         {
+            setAccelerationToZero();
          }
          else
          {
-            setAccelerationToZero();
+            Vector3DReadOnly startLinearRootAcceleration = hasStartAcceleration ? start.getRootJointLinearAcceleration() : EuclidCoreTools.zeroVector3D;
+            Vector3DReadOnly startAngularRootAcceleration = hasStartAcceleration ? start.getRootJointAngularAcceleration() : EuclidCoreTools.zeroVector3D;
+
+            Vector3DReadOnly endLinearRootAcceleration = hasEndAcceleration ? end.getRootJointLinearAcceleration() : EuclidCoreTools.zeroVector3D;
+            Vector3DReadOnly endAngularRootAcceleration = hasEndAcceleration ? end.getRootJointAngularAcceleration() : EuclidCoreTools.zeroVector3D;
+
+            getRootJointLinearAcceleration().interpolate(startLinearRootAcceleration, endLinearRootAcceleration, alpha);
+            getRootJointAngularAcceleration().interpolate(startAngularRootAcceleration, endAngularRootAcceleration, alpha);
+
+            for (int i = 0; i < getNumberOfJoints(); i++)
+            {
+               double qdd_start = hasStartAcceleration ? start.getJointAcceleration(i) : 0.0;
+               double qdd_end = hasEndAcceleration ? end.getJointAcceleration(i) : 0.0;
+               double qdd = EuclidCoreTools.interpolate(qdd_start, qdd_end, alpha);
+               setJointAcceleration(i, qdd);
+            }
          }
       }
    }
 
-   private void setAccelerationToZero()
+   default void setAccelerationToZero()
    {
       getRootJointLinearAcceleration().setToZero();
       getRootJointAngularAcceleration().setToZero();
