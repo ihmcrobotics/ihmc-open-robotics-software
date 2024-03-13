@@ -1,10 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
-
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.DesiredExternalWrenchHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
@@ -12,11 +7,7 @@ import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConf
 import us.ihmc.commonWalkingControlModules.momentumBasedController.PlaneContactWrenchProcessor;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ContactWrenchMatrixCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointTorqueMinimizationWeightCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.*;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchMatrixCalculator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -24,29 +15,24 @@ import us.ihmc.graphicsDescription.plotting.artifact.Artifact;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.mecano.algorithms.CentroidalMomentumCalculator;
-import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
-import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
-import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
-import us.ihmc.mecano.algorithms.MultiBodyGravityGradientCalculator;
+import us.ihmc.mecano.algorithms.*;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.KinematicLoopFunction;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
+import us.ihmc.robotics.screwTheory.RigidBodyTwistCalculator;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 {
@@ -71,7 +57,14 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
    // TODO The mass-matrix calculator (when created) should be used for computing the momentum stuff. Probably need some interface and API improvements.
    private CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
+   /**
+    * Used with the inverse dynamics module to compute the achieved accelerations from the QP solution.
+    */
    private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
+   /**
+    * Used with the inverse kinematics module to compute the achieved velocities from the QP solution.
+    */
+   private final RigidBodyTwistCalculator rigidBodyTwistCalculator;
    private JointTorqueMinimizationWeightCalculator jointTorqueMinimizationWeightCalculator;
    /**
     * Calculator used to formulate minimization of the joint torques due to gravity compensation.
@@ -132,7 +125,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
     * sufficient to run the inverse kinematics module. Not that at the moment this method is empty, it
     * should be called wherever the inverse kinematics module is called in case in the future new
     * parameters are added.
-    * <li>{@link #setupForVirtualModelControlSolver(RigidBodyBasics)} to complete the parameters
+    * <li>{@link #setupForVirtualModelControlSolver(RigidBodyBasics, List)} to complete the parameters
     * necessary and sufficient to run the virtual model control module.
     * </ul>
     * Calling these methods will also notice the {@link WholeBodyControllerCore} at construction time
@@ -176,7 +169,6 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
          System.arraycopy(controlledJoints, 0, controlledJointsWithRoot, 1, controlledJoints.length);
          controlledJointsWithRoot[0] = rootJoint;
          controlledJoints = controlledJointsWithRoot;
-         
       }
 
       elevator = rootJoint.getPredecessor();
@@ -189,13 +181,14 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
       inverseDynamicsCalculator = new InverseDynamicsCalculator(elevator);
       inverseDynamicsCalculator.setGravitionalAcceleration(-gravityZ); // Watch out for the sign here, it changed with the switch to Mecano.
       rigidBodyAccelerationProvider = inverseDynamicsCalculator.getAccelerationProvider();
+      rigidBodyTwistCalculator = new RigidBodyTwistCalculator(multiBodySystemInput);
 
       parentRegistry.addChild(registry);
    }
 
    /**
     * Registers an new function for handling a kinematic loop in the multi-body system.
-    * 
+    *
     * @param function the constraint function for one kinematic loop.
     */
    public void addKinematicLoopFunction(KinematicLoopFunction function)
@@ -209,7 +202,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
     * The list of inactive joints can be modified at runtime via
     * {@link InverseDynamicsOptimizationSettingsCommand}.
     * </p>
-    * 
+    *
     * @param inactiveJoint the joint to be registered as inactive.
     */
    public void addInactiveJoint(OneDoFJointBasics inactiveJoint)
@@ -241,7 +234,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
     * <p>
     * This has to be provided before creating the controller core.
     * </p>
-    * 
+    *
     * @param feedbackControllerSettings the settings to use.
     */
    public void setFeedbackControllerSettings(FeedbackControllerSettings feedbackControllerSettings)
@@ -312,7 +305,6 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
     * </p>
     *
     * @param vmcMainBody            the main rigid-body of the robot.
-    * @param controlledBodies       the set of rigid-bodies that are to be controllable.
     * @param contactablePlaneBodies the list of rigid-body which can be used to bear the robot weight.
     */
    public void setupForVirtualModelControlSolver(RigidBodyBasics vmcMainBody, List<? extends ContactablePlaneBody> contactablePlaneBodies)
@@ -421,6 +413,11 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
    public JointPrivilegedConfigurationParameters getJointPrivilegedConfigurationParameters()
    {
       return jointPrivilegedConfigurationParameters;
+   }
+
+   public RigidBodyTwistCalculator getRigidBodyTwistCalculator()
+   {
+      return rigidBodyTwistCalculator;
    }
 
    public RigidBodyAccelerationProvider getRigidBodyAccelerationProvider()

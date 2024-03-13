@@ -1,24 +1,10 @@
 package us.ihmc.avatar.testTools.scs2;
 
-import static us.ihmc.robotics.Assert.assertTrue;
-import static us.ihmc.robotics.Assert.fail;
-
-import java.io.File;
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BooleanSupplier;
-
-import org.apache.commons.lang3.mutable.MutableInt;
-
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
 import javafx.stage.Window;
+import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
@@ -62,6 +48,19 @@ import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
+import java.io.File;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
+
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
+
 public class SCS2AvatarTestingSimulation implements YoVariableHolder
 {
    private final SCS2AvatarSimulation avatarSimulation;
@@ -85,7 +84,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    /**
     * Constructors for setting up a custom simulation environment for which the default factory isn't
     * suited.
-    * 
+    *
     * @param simulationConstructionSet the simulation to wrap.
     * @param robotModel                the robot model for enabling convenience methods. Can be
     *                                  {@code null}.
@@ -101,6 +100,10 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    {
       this(new SCS2AvatarSimulation());
       avatarSimulation.setSimulationConstructionSet(simulationConstructionSet);
+      // Necessary to be able to restart the GUI during a series of tests.
+      avatarSimulation.setSystemExitOnDestroy(false);
+      avatarSimulation.setJavaFXThreadImplicitExit(false);
+
       avatarSimulation.setRobot(simulationConstructionSet.getPhysicsEngine().getRobots().get(0));
       if (robotModel != null)
          avatarSimulation.setRobotModel(robotModel);
@@ -120,12 +123,15 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    /**
     * Constructor used by the factory {@link SCS2AvatarTestingSimulationFactory}.
-    * 
+    *
     * @param avatarSimulation the simulation setup.
     */
    public SCS2AvatarTestingSimulation(SCS2AvatarSimulation avatarSimulation)
    {
       this.avatarSimulation = avatarSimulation;
+      // Necessary to be able to restart the GUI during a series of tests.
+      avatarSimulation.setSystemExitOnDestroy(false);
+      avatarSimulation.setJavaFXThreadImplicitExit(false);
    }
 
    public void setCreateVideo(boolean createVideo)
@@ -147,10 +153,6 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    {
       getSimulationConstructionSet().addSimulationThrowableListener(lastThrowable::set);
       enableExceptionControllerFailure();
-
-      // Necessary to be able to restart the GUI during a series of tests.
-      avatarSimulation.setSystemExitOnDestroy(false);
-      avatarSimulation.setJavaFXThreadImplicitExit(false);
 
       avatarSimulation.start();
 
@@ -181,10 +183,11 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    }
 
    // Simulation controls:
+
    /**
     * Adds a terminal condition that will be used in the subsequent simulations to determine when to
     * stop the simulation.
-    * 
+    *
     * @param terminalCondition the new condition used to terminate future simulation.
     */
    public void addSimulationTerminalCondition(BooleanSupplier terminalCondition)
@@ -199,7 +202,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     * The condition can be removed with
     * {@link #removeSimulationTerminalCondition(SimulationTerminalCondition)}.
     * </p>
-    * 
+    *
     * @param terminalCondition the new condition used to terminate future simulation.
     */
    public void addSimulationTerminalCondition(SimulationTerminalCondition terminalCondition)
@@ -209,7 +212,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    /**
     * Removes a terminal simulation condition that was previously registered.
-    * 
+    *
     * @param terminalCondition the condition to remove.
     */
    public void removeSimulationTerminalCondition(SimulationTerminalCondition terminalCondition)
@@ -226,9 +229,9 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     * If an exception is thrown during the simulation, it can be retrieved via
     * {@link #getLastThrownException()}.
     * </p>
-    * 
+    *
     * @return {@code true} if the simulation was successful, {@code false} if the simulation failed or
-    *         the controller threw an exception.
+    *       the controller threw an exception.
     */
    public boolean simulateOneTickNow()
    {
@@ -244,9 +247,9 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     * If an exception is thrown during the simulation, it can be retrieved via
     * {@link #getLastThrownException()}.
     * </p>
-    * 
+    *
     * @return {@code true} if the simulation was successful, {@code false} if the simulation failed or
-    *         the controller threw an exception.
+    *       the controller threw an exception.
     */
    public boolean simulateOneBufferRecordPeriodNow()
    {
@@ -262,10 +265,10 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     * If an exception is thrown during the simulation, it can be retrieved via
     * {@link #getLastThrownException()}.
     * </p>
-    * 
+    *
     * @param duration desired simulation duration in seconds.
     * @return {@code true} if the simulation was successful, {@code false} if the simulation failed or
-    *         the controller threw an exception.
+    *       the controller threw an exception.
     */
    public boolean simulateNow(double duration)
    {
@@ -283,10 +286,10 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     * If an exception is thrown during the simulation, it can be retrieved via
     * {@link #getLastThrownException()}.
     * </p>
-    * 
+    *
     * @param numberOfSimulationTicks desired number of simulation ticks.
     * @return {@code true} if the simulation was successful, {@code false} if the simulation failed or
-    *         the controller threw an exception.
+    *       the controller threw an exception.
     */
    public boolean simulateNow(long numberOfSimulationTicks)
    {
@@ -308,10 +311,10 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     * If an exception is thrown during the simulation, it can be retrieved via
     * {@link #getLastThrownException()}.
     * </p>
-    * 
+    *
     * @param duration desired simulation duration in seconds.
     * @return {@code true} if the simulation was successful, {@code false} if the simulation failed or
-    *         the controller threw an exception.
+    *       the controller threw an exception.
     * @see #addSimulationTerminalCondition(BooleanSupplier)
     */
    public boolean simulateNow()
@@ -323,7 +326,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    /**
     * Gets the throwable (if any) that was thrown during the last simulation.
-    * 
+    *
     * @return the exception thrown during the last simulation, or {@code null} if none was thrown.
     */
    public Throwable getLastThrownException()
@@ -417,7 +420,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     * <p>
     * Note that calling this method will cancel the camera tracking of a node.
     * </p>
-    * 
+    *
     * @param focus the new focus position.
     */
    public void setCameraFocusPosition(Point3DReadOnly focus)
@@ -448,7 +451,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     * <p>
     * The camera is rotated during this operation such that the focus point remains unchanged.
     * </p>
-    * 
+    *
     * @param position the new camera position.
     */
    public void setCameraPosition(Point3DReadOnly position)
@@ -461,7 +464,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     * <p>
     * The camera is rotated during this operation such that the focus point remains unchanged.
     * </p>
-    * 
+    *
     * @param x the x-coordinate of the new camera location.
     * @param y the y-coordinate of the new camera location.
     * @param z the z-coordinate of the new camera location.
@@ -476,7 +479,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
     * <p>
     * Note that calling this method will cancel the camera tracking of a node.
     * </p>
-    * 
+    *
     * @param cameraFocus    the new focus position (where the camera is looking at).
     * @param cameraPosition the new camera position.
     */
@@ -534,7 +537,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    public void finishTest(boolean waitUntilGUIIsDone)
    {
       if (waitUntilGUIIsDone && getSimulationConstructionSet() != null && getSimulationConstructionSet().isVisualizerEnabled()
-            && !avatarSimulation.hasBeenDestroyed())
+          && getSimulationConstructionSet().getPrimaryGUIWindow() != null && !avatarSimulation.hasBeenDestroyed())
       {
          getSimulationConstructionSet().pause();
          getSimulationConstructionSet().startSimulationThread();

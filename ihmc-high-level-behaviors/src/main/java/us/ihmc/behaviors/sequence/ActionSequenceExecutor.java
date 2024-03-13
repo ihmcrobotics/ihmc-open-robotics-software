@@ -11,15 +11,16 @@ import java.util.List;
 public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSequenceState, ActionSequenceDefinition>
 {
    private final ActionSequenceState state;
+   private final ActionSequenceDefinition definition;
    private final List<ActionNodeExecutor<?, ?>> executorChildren = new ArrayList<>();
    private final List<ActionNodeExecutor<?, ?>> currentlyExecutingActions = new ArrayList<>();
-   private int lastIndexOfConcurrentSetToExecute;
 
    public ActionSequenceExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(new ActionSequenceState(id, crdtInfo, saveFileDirectory));
 
       state = getState();
+      definition = getDefinition();
    }
 
    @Override
@@ -35,21 +36,32 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
    {
       super.update();
 
-      // TODO: Go through next for execution concurrent children and set chest action's goal pelvis frames
-      //   and the hand pose actions chest frames
-
       executorChildren.clear();
       currentlyExecutingActions.clear();
       updateActionSubtree(this);
 
-      lastIndexOfConcurrentSetToExecute = findLastIndexOfConcurrentSetToExecute(executorChildren, getState().getExecutionNextIndex());
-      for (int i = 0; i < executorChildren.size(); i++)
+      // Update concurrency ranks
+      for (int i = 0; i < state.getActionChildren().size(); i++)
       {
-         boolean isNextForExecution = i >= getState().getExecutionNextIndex() && i <= lastIndexOfConcurrentSetToExecute;
-         boolean isToBeExecutedConcurrently = isNextForExecution && getState().getExecutionNextIndex() != lastIndexOfConcurrentSetToExecute;
+         int j = i + 1;
+         for (; j < state.getActionChildren().size()
+              && state.getActionChildren().get(j).calculateExecuteAfterActionIndex(state.getActionChildren()) < i; j++);
 
-         executorChildren.get(i).getState().setIsNextForExecution(isNextForExecution);
-         executorChildren.get(i).getState().setIsToBeExecutedConcurrently(isToBeExecutedConcurrently);
+         state.getActionChildren().get(i).setConcurrencyRank(j - i);
+      }
+
+      // Update is next for execution
+      int executionNextIndex = state.getExecutionNextIndex();
+      if (executionNextIndex < state.getActionChildren().size())
+      {
+         state.getActionChildren().get(executionNextIndex).setIsNextForExecution(true);
+
+         for (int i = executionNextIndex + 1;
+              i < state.getActionChildren().size()
+              && state.getActionChildren().get(i).calculateExecuteAfterActionIndex(state.getActionChildren()) < executionNextIndex; i++)
+         {
+            state.getActionChildren().get(i).setIsNextForExecution(true);
+         }
       }
 
       boolean anyActionExecutionFailed = false;
@@ -59,30 +71,34 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
          anyActionExecutionFailed |= currentlyExecutingAction.getState().getFailed();
       }
 
-      if (getState().getAutomaticExecution())
+      if (state.getAutomaticExecution())
       {
-         if (isEndOfSequence() || anyActionExecutionFailed)
+         if (isEndOfSequence())
          {
-            getState().setAutomaticExecution(false);
+            LogTools.info("End of sequence.");
+            state.setAutomaticExecution(false);
          }
-         else if (currentlyExecutingActions.isEmpty())
+         else if (anyActionExecutionFailed)
          {
-            do
+            LogTools.error("An action failed. Disabling automatic execution.");
+            state.setAutomaticExecution(false);
+         }
+         else
+         {
+            while (shouldExecuteNextAction())
             {
-               LogTools.info("Automatically executing action: {}", executorChildren.get(getState().getExecutionNextIndex()).getClass().getSimpleName());
+               LogTools.info("Automatically executing action: {}", executorChildren.get(state.getExecutionNextIndex()).getClass().getSimpleName());
                executeNextAction();
             }
-            while (!isEndOfSequence() && isLastExecutingActionExecuteWithNext());
          }
       }
-      else if (getState().pollManualExecutionRequested())
+      else if (state.pollManualExecutionRequested())
       {
-         do
+         while (shouldExecuteNextAction())
          {
-            LogTools.info("Manually executing action: {}", executorChildren.get(getState().getExecutionNextIndex()).getClass().getSimpleName());
+            LogTools.info("Manually executing action: {}", executorChildren.get(state.getExecutionNextIndex()).getClass().getSimpleName());
             executeNextAction();
          }
-         while (!isEndOfSequence() && isLastExecutingActionExecuteWithNext());
       }
    }
 
@@ -97,6 +113,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
             {
                currentlyExecutingActions.add(actionNode);
             }
+            actionNode.getState().setIsNextForExecution(false);
          }
          else
          {
@@ -105,45 +122,49 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       }
    }
 
-   public static int findLastIndexOfConcurrentSetToExecute(List<ActionNodeExecutor<?, ?>> actionSequence, int executionNextIndex)
-   {
-      int lastIndexOfConcurrentSetToExecute = executionNextIndex;
-      while (lastIndexOfConcurrentSetToExecute < actionSequence.size()
-             && actionSequence.get(lastIndexOfConcurrentSetToExecute).getDefinition().getExecuteWithNextAction())
-      {
-         ++lastIndexOfConcurrentSetToExecute;
-      }
-      return lastIndexOfConcurrentSetToExecute;
-   }
-
    private void executeNextAction()
    {
-      ActionNodeExecutor<?, ?> actionToExecute = executorChildren.get(getState().getExecutionNextIndex());
+      ActionNodeExecutor<?, ?> actionToExecute = executorChildren.get(state.getExecutionNextIndex());
 
-      if (actionToExecute.getState().getCanExecute())
+      LogTools.info("Triggering action execution: %s".formatted(actionToExecute.getDefinition().getName()));
+      actionToExecute.update();
+      actionToExecute.triggerActionExecution();
+      actionToExecute.updateCurrentlyExecuting();
+      currentlyExecutingActions.add(actionToExecute);
+      state.stepForwardNextExecutionIndex();
+   }
+
+   private boolean shouldExecuteNextAction()
+   {
+      if (isEndOfSequence())
       {
-         actionToExecute.update();
-         actionToExecute.triggerActionExecution();
-         actionToExecute.updateCurrentlyExecuting();
-         currentlyExecutingActions.add(actionToExecute);
-         state.stepForwardNextExecutionIndex();
+         return false;
+      }
+
+      ActionNodeState<?> nextNodeToExecute = executorChildren.get(state.getExecutionNextIndex()).getState();
+
+      if (!nextNodeToExecute.getCanExecute())
+      {
+         LogTools.error("Cannot execute action: %s".formatted(nextNodeToExecute.getDefinition().getName()));
+         state.setAutomaticExecution(false);
+         return false;
+      }
+
+      int executeAfterActionIndex = nextNodeToExecute.calculateExecuteAfterActionIndex(getState().getActionChildren());
+
+      if (executeAfterActionIndex < 0) // Execute after beginning
+      {
+         return true;
       }
       else
       {
-         LogTools.error("Cannot execute action: %s".formatted(actionToExecute.getDefinition().getName()));
-         state.setAutomaticExecution(false);
+         return !executorChildren.get(executeAfterActionIndex).getState().getIsExecuting();
       }
-   }
-
-   private boolean isLastExecutingActionExecuteWithNext()
-   {
-      return !currentlyExecutingActions.isEmpty()
-             && currentlyExecutingActions.get(currentlyExecutingActions.size() - 1).getDefinition().getExecuteWithNextAction();
    }
 
    private boolean isEndOfSequence()
    {
-      return getState().getExecutionNextIndex() >= executorChildren.size();
+      return state.getExecutionNextIndex() >= executorChildren.size();
    }
 
    public List<ActionNodeExecutor<?, ?>> getExecutorChildren()
@@ -154,10 +175,5 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
    public List<ActionNodeExecutor<?, ?>> getCurrentlyExecutingActions()
    {
       return currentlyExecutingActions;
-   }
-
-   public int getLastIndexOfConcurrentSetToExecute()
-   {
-      return lastIndexOfConcurrentSetToExecute;
    }
 }

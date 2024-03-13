@@ -13,9 +13,17 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
             */
    public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage definition_;
    /**
-            * Execute with next action
+            * If the node is set to execute after the previous node
             */
-   public boolean execute_with_next_action_;
+   public boolean execute_after_previous_;
+   /**
+            * If the node is set to execute after the beginning
+            */
+   public boolean execute_after_beginning_;
+   /**
+            * The ID of the node to execute after
+            */
+   public long execute_after_node_id_;
 
    public ActionNodeDefinitionMessage()
    {
@@ -31,7 +39,11 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
    public void set(ActionNodeDefinitionMessage other)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
-      execute_with_next_action_ = other.execute_with_next_action_;
+      execute_after_previous_ = other.execute_after_previous_;
+
+      execute_after_beginning_ = other.execute_after_beginning_;
+
+      execute_after_node_id_ = other.execute_after_node_id_;
 
    }
 
@@ -45,18 +57,48 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
    }
 
    /**
-            * Execute with next action
+            * If the node is set to execute after the previous node
             */
-   public void setExecuteWithNextAction(boolean execute_with_next_action)
+   public void setExecuteAfterPrevious(boolean execute_after_previous)
    {
-      execute_with_next_action_ = execute_with_next_action;
+      execute_after_previous_ = execute_after_previous;
    }
    /**
-            * Execute with next action
+            * If the node is set to execute after the previous node
             */
-   public boolean getExecuteWithNextAction()
+   public boolean getExecuteAfterPrevious()
    {
-      return execute_with_next_action_;
+      return execute_after_previous_;
+   }
+
+   /**
+            * If the node is set to execute after the beginning
+            */
+   public void setExecuteAfterBeginning(boolean execute_after_beginning)
+   {
+      execute_after_beginning_ = execute_after_beginning;
+   }
+   /**
+            * If the node is set to execute after the beginning
+            */
+   public boolean getExecuteAfterBeginning()
+   {
+      return execute_after_beginning_;
+   }
+
+   /**
+            * The ID of the node to execute after
+            */
+   public void setExecuteAfterNodeId(long execute_after_node_id)
+   {
+      execute_after_node_id_ = execute_after_node_id;
+   }
+   /**
+            * The ID of the node to execute after
+            */
+   public long getExecuteAfterNodeId()
+   {
+      return execute_after_node_id_;
    }
 
 
@@ -78,7 +120,11 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.execute_with_next_action_, other.execute_with_next_action_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.execute_after_previous_, other.execute_after_previous_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.execute_after_beginning_, other.execute_after_beginning_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execute_after_node_id_, other.execute_after_node_id_, epsilon)) return false;
 
 
       return true;
@@ -94,7 +140,11 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
       ActionNodeDefinitionMessage otherMyClass = (ActionNodeDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
-      if(this.execute_with_next_action_ != otherMyClass.execute_with_next_action_) return false;
+      if(this.execute_after_previous_ != otherMyClass.execute_after_previous_) return false;
+
+      if(this.execute_after_beginning_ != otherMyClass.execute_after_beginning_) return false;
+
+      if(this.execute_after_node_id_ != otherMyClass.execute_after_node_id_) return false;
 
 
       return true;
@@ -108,8 +158,12 @@ public class ActionNodeDefinitionMessage extends Packet<ActionNodeDefinitionMess
       builder.append("ActionNodeDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
-      builder.append("execute_with_next_action=");
-      builder.append(this.execute_with_next_action_);
+      builder.append("execute_after_previous=");
+      builder.append(this.execute_after_previous_);      builder.append(", ");
+      builder.append("execute_after_beginning=");
+      builder.append(this.execute_after_beginning_);      builder.append(", ");
+      builder.append("execute_after_node_id=");
+      builder.append(this.execute_after_node_id_);
       builder.append("}");
       return builder.toString();
    }

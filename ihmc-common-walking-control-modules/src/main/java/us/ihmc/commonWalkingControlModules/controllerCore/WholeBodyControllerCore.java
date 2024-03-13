@@ -1,17 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandInterface;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.DesiredExternalWrenchHolder;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataBasics;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoLowLevelOneDoFJointDesiredDataHolder;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.YoRootJointDesiredConfigurationData;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -183,7 +174,7 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
 
    /**
     * @deprecated Use {@link #compute(ControllerCoreCommandInterface)} instead, note that it also makes
-    *             {@link #compute()} obsolete.
+    *       {@link #compute()} obsolete.
     */
    public void submitControllerCoreCommand(ControllerCoreCommandInterface controllerCoreCommand)
    {
@@ -220,7 +211,7 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
 
    /**
     * @deprecated Use {@link #compute(ControllerCoreCommandInterface)} instead, note that it also makes
-    *             {@link #submitControllerCoreCommand(ControllerCoreCommandInterface)} obsolete.
+    *       {@link #submitControllerCoreCommand(ControllerCoreCommandInterface)} obsolete.
     */
    public void compute()
    {
@@ -318,6 +309,7 @@ public class WholeBodyControllerCore implements SCS2YoGraphicHolder
       inverseKinematicsSolver.submitInverseKinematicsCommandList(internalCommandInput.getInverseKinematicsCommandList());
       controllerCoreSubmissionTimer.stopMeasurement();
       inverseKinematicsSolver.compute();
+      feedbackController.computeAchievedVelocities();
 
       jointDesiredOutputList.completeWith(inverseKinematicsSolver.getOutput());
       if (rootJointDesiredConfigurationData != null)
