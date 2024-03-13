@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.parameterEstimation;
 
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.MatrixMissingTools;
 
@@ -261,7 +260,7 @@ public class RegressorTools
                      bodies[i].getInertia().setMass(vector.get(vectorIndex, 0));
                      break;
                   default:
-                     LogTools.info("Unhandled basis option: " + option);
+                     // TODO: pass through other inertial parameters
                      break;
                }
                vectorIndex += 1;
