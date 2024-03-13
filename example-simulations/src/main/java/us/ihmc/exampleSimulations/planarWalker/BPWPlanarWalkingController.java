@@ -38,6 +38,10 @@ public class BPWPlanarWalkingController implements Controller
     private final SideDependentList<StateMachine<LegStateName, State>> legStateMachines = new SideDependentList<>();
     private final SideDependentList<YoBoolean> hasFootHitGround = new SideDependentList<>();
 
+    private YoDouble desiredWalkingSpeed = new YoDouble("desiredWalkingSpeed", registry);
+
+    private static SideDependentList<YoDouble> desiredHipPosition = new SideDependentList<>();
+
 
 
     public BPWPlanarWalkingController( BPWPLanarWalkingRobot controllerRobot, RobotSide initialSwingSide)
@@ -55,6 +59,12 @@ public class BPWPlanarWalkingController implements Controller
         desiredSupportLegLength.set((BPWPlanarWalkingRobotDefinition.shinLength + BPWPlanarWalkingRobotDefinition.thighLength) / 2.0);
         desiredSwingHeight.set(0.1);
         desiredSwingDuration.set(0.5);
+
+        swingHipPitchKp.set(500.0);
+        swingHipPitchKd.set(25.0);
+
+        // Setting desired Walking Speed to zero for now
+        desiredWalkingSpeed.set(0.0);
 
         // Setting up the leg length controllers
         for( RobotSide robotSide : RobotSide.values)
@@ -74,6 +84,9 @@ public class BPWPlanarWalkingController implements Controller
 
             LegStateName initialState = robotSide == initialSwingSide ? LegStateName.Swing : LegStateName.Support;
             legStateMachines.put(robotSide, stateMachine.build(initialState));
+
+            YoDouble desiredPosition = new YoDouble(robotSide.getLowerCaseName() + "desired_position", registry);
+            desiredHipPosition.put(robotSide, desiredPosition);
         }
 
         registry.addChild(controllerRobot.getYoRegistry());
@@ -159,12 +172,6 @@ public class BPWPlanarWalkingController implements Controller
         @Override
         public void doAction(double timeInState) {
 
-            // Calculate Center of Mass Position
-            FramePoint3D centerOfMassPoint = new FramePoint3D(controllerRobot.getCenterOfMassFrame());
-            centerOfMassPoint.changeFrame(controllerRobot.getWorldFrame());
-            double centerOfMassHeight = centerOfMassPoint.getZ();
-            double gravity = 9.81;
-
             swingFootHeightTraj.compute(timeInState);
 
             FramePoint3D footPosition = new FramePoint3D(controllerRobot.getFootFrame(swingSide));
@@ -183,15 +190,23 @@ public class BPWPlanarWalkingController implements Controller
             controllerRobot.getKneeJoint(swingSide).setTau(legForce);
 
 
-            double desiredFootPositionX = 0.0;
-//                    Math.sqrt(centerOfMassHeight/gravity) * controllerRobot.getCenterOfMassVelocity().getX();
+            // Calculate Center of Mass Position
+            FramePoint3D centerOfMassPoint = new FramePoint3D(controllerRobot.getCenterOfMassFrame());
+            centerOfMassPoint.changeFrame(controllerRobot.getWorldFrame());
+            double centerOfMassHeight = centerOfMassPoint.getZ();
+            double gravity = 9.81;
+
+//            double desiredFootPositionX = Math.sqrt(centerOfMassHeight/gravity) * controllerRobot.getCenterOfMassVelocity().getX();
+            double desiredFootPositionX = Math.sqrt(centerOfMassHeight/gravity) * (desiredWalkingSpeed.getDoubleValue() - controllerRobot.getCenterOfMassVelocity().getX()) ;
+//            double desiredFootPositionX = 0.0;
             double desiredFootVelocityX = 0.0;
 
             footPosition.changeFrame(controllerRobot.getCenterOfMassFrame());
+            desiredHipPosition.get(swingSide).set(desiredFootPositionX);
             double currentFootPositionX = footPosition.getX();
             double currentFootVelocityX = -controllerRobot.getHipJoint(swingSide).getQd(); // FIXME make this have some actual value
-            double hipForce = -swingHipPitchController.compute(currentFootPositionX, desiredFootPositionX, currentFootVelocityX, desiredFootVelocityX);
-            swingLegForce.set(legForce);
+            double hipForce = swingHipPitchController.compute(currentFootPositionX, desiredFootPositionX, currentFootVelocityX, desiredFootVelocityX);
+            swingHipForce.set(hipForce);
 
             controllerRobot.getHipJoint(swingSide).setTau(hipForce);
 
@@ -240,6 +255,8 @@ public class BPWPlanarWalkingController implements Controller
             double torque = supportLegLengthController.compute(legLength, desiredLegLength, legLengthVel, desiredKneeVelocity);
 
             controllerRobot.getKneeJoint(supportSide).setTau(-torque);
+
+            controllerRobot.getHipJoint(supportSide).setTau(0.0);
         }
 
         @Override

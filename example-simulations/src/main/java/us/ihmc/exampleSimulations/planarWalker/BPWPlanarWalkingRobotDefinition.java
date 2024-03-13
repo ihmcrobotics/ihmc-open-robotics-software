@@ -5,11 +5,14 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.geometry.Ellipsoid3DDefinition;
 import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.robot.*;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
+import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.awt.*;
 
@@ -17,7 +20,7 @@ public class BPWPlanarWalkingRobotDefinition extends RobotDefinition {
 
 
     public static final String baseJointName = "floatingBase";
-    private static final String torsoName = "torso";
+    public static final String torsoName = "torso";
     private static final String leftHipPitchName = "left_hip_pitch";
     private static final String rightHipPitchName = "right_hip_pitch";
     private static final String leftKneeName = "left_knee_pitch";
@@ -62,6 +65,8 @@ public class BPWPlanarWalkingRobotDefinition extends RobotDefinition {
             // Add the hip to the tree
             Vector3D hipPitchOffsetInTorso = new Vector3D(0.0, robotside.negateIfRightSide(0.05), -torsoHeight/2.0);
             RevoluteJointDefinition hipPitchJD = new RevoluteJointDefinition(hipPitchNames.get(robotside), hipPitchOffsetInTorso, Axis3D.Y);
+            hipPitchJD.setPositionLowerLimit(-Math.PI);
+            hipPitchJD.setPositionUpperLimit(Math.PI);
 
             torsoBodyDef.addChildJoint(hipPitchJD);
             hipPitchJointDefinitions.put(robotside, hipPitchJD);
@@ -74,6 +79,9 @@ public class BPWPlanarWalkingRobotDefinition extends RobotDefinition {
             // Now add the knee which is a type of a prismatic joint
             Vector3D kneeOffsetInThigh = new Vector3D(0.0, 0.0, -thighLength/2.0);
             PrismaticJointDefinition kneeJD = new PrismaticJointDefinition(kneeNames.get(robotside), kneeOffsetInThigh, Axis3D.Z );
+            kneeJD.setPositionLowerLimit(-shinLength/2.0);
+            kneeJD.setPositionUpperLimit(shinLength/2.0);
+
             thighLink.addChildJoint(kneeJD);
 
             // Now add the lower leg

@@ -9,9 +9,12 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimPrismaticJoint;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRigidBody;
+import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -22,6 +25,8 @@ public class BPWPLanarWalkingRobot
 {
     private final SideDependentList<SimPrismaticJoint> kneeJoints;
     private final SideDependentList<SimRevoluteJoint> hipJoints;
+
+//    private final SimRigidBody torso;
 
     private final SideDependentList<YoDouble> legLengths = new SideDependentList<YoDouble>();
     private final SideDependentList<ReferenceFrame> footFrames = new SideDependentList<>();
@@ -59,9 +64,13 @@ public class BPWPLanarWalkingRobot
 
         }
         kneeJoints.get(RobotSide.LEFT).setQ(0.25);
+//        hipJoints.get(RobotSide.LEFT).setQ(-0.3);
+//        hipJoints.get(RobotSide.RIGHT).setQ(0.3);
+//        torso = (SimRigidBody) robot.getJoint(BPWPlanarWalkingRobotDefinition.baseJointName);
+
 
     }
-
+    
     public YoRegistry getYoRegistry()
     {
         return registry;
@@ -109,6 +118,11 @@ public class BPWPLanarWalkingRobot
     {
         return hipJoints.get(robotSide);
     }
+
+//    public SimRigidBody getTorso()
+//    {
+//        return torso;
+//    }
 
     public ReferenceFrame getCenterOfMassFrame()
     {
