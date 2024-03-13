@@ -286,15 +286,16 @@ public abstract class KinematicsStreamingToolboxControllerTest
       statusOutputManager = new StatusMessageOutputManager(KinematicsStreamingToolboxModule.supportedStatus());
 
       if (toolboxParameters == null)
+      {
          toolboxParameters = KinematicsStreamingToolboxParameters.defaultParameters();
+         toolboxParameters.setToolboxUpdatePeriod(toolboxControllerPeriod);
+      }
 
       toolboxController = new KinematicsStreamingToolboxController(commandInputManager,
                                                                    statusOutputManager,
                                                                    toolboxParameters,
                                                                    desiredFullRobotModel,
                                                                    robotModel,
-                                                                   robotModel.getControllerDT(),
-                                                                   toolboxControllerPeriod,
                                                                    yoGraphicsListRegistry,
                                                                    toolboxRegistry);
       if (!useCPUClock)

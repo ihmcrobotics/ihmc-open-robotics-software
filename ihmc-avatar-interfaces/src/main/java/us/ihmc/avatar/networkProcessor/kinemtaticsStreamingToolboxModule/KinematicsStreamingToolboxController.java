@@ -65,31 +65,9 @@ public class KinematicsStreamingToolboxController extends ToolboxController
 
    public KinematicsStreamingToolboxController(CommandInputManager commandInputManager,
                                                StatusMessageOutputManager statusOutputManager,
-                                               FullHumanoidRobotModel desiredFullRobotModel,
-                                               FullHumanoidRobotModelFactory fullRobotModelFactory,
-                                               double walkingControllerPeriod,
-                                               double toolboxControllerPeriod,
-                                               YoGraphicsListRegistry yoGraphicsListRegistry,
-                                               YoRegistry parentRegistry)
-   {
-      this(commandInputManager,
-           statusOutputManager,
-           KinematicsStreamingToolboxParameters.defaultParameters(),
-           desiredFullRobotModel,
-           fullRobotModelFactory,
-           walkingControllerPeriod,
-           toolboxControllerPeriod,
-           yoGraphicsListRegistry,
-           parentRegistry);
-   }
-
-   public KinematicsStreamingToolboxController(CommandInputManager commandInputManager,
-                                               StatusMessageOutputManager statusOutputManager,
                                                KinematicsStreamingToolboxParameters parameters,
                                                FullHumanoidRobotModel desiredFullRobotModel,
                                                FullHumanoidRobotModelFactory fullRobotModelFactory,
-                                               double walkingControllerPeriod,
-                                               double toolboxControllerPeriod,
                                                YoGraphicsListRegistry yoGraphicsListRegistry,
                                                YoRegistry parentRegistry)
    {
@@ -100,8 +78,6 @@ public class KinematicsStreamingToolboxController extends ToolboxController
                            parameters,
                            desiredFullRobotModel,
                            fullRobotModelFactory,
-                           walkingControllerPeriod,
-                           toolboxControllerPeriod,
                            time,
                            yoGraphicsListRegistry,
                            registry);

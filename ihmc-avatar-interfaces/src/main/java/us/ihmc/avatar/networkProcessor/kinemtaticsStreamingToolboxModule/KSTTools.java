@@ -78,7 +78,6 @@ public class KSTTools
    private boolean hasCapturabilityBasedStatus = false;
    private final CapturabilityBasedStatus capturabilityBasedStatusInternal = new CapturabilityBasedStatus();
 
-   private final double walkingControllerPeriod;
    private final double toolboxControllerPeriod;
    private final YoDouble walkingControllerMonotonicTime, walkingControllerWallTime;
 
@@ -110,8 +109,6 @@ public class KSTTools
                    KinematicsStreamingToolboxParameters parameters,
                    FullHumanoidRobotModel desiredFullRobotModel,
                    FullHumanoidRobotModelFactory fullRobotModelFactory,
-                   double walkingControllerPeriod,
-                   double toolboxControllerPeriod,
                    DoubleProvider time,
                    YoGraphicsListRegistry yoGraphicsListRegistry,
                    YoRegistry registry)
@@ -121,8 +118,7 @@ public class KSTTools
       this.parameters = parameters;
       this.desiredFullRobotModel = desiredFullRobotModel;
       this.fullRobotModelFactory = fullRobotModelFactory;
-      this.walkingControllerPeriod = walkingControllerPeriod;
-      this.toolboxControllerPeriod = toolboxControllerPeriod;
+      this.toolboxControllerPeriod = parameters.getToolboxUpdatePeriod();
       this.time = time;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       this.registry = registry;
@@ -561,11 +557,6 @@ public class KSTTools
    public CapturabilityBasedStatus getCapturabilityBasedStatus()
    {
       return hasCapturabilityBasedStatus ? capturabilityBasedStatusInternal : null;
-   }
-
-   public double getWalkingControllerPeriod()
-   {
-      return walkingControllerPeriod;
    }
 
    public double getToolboxControllerPeriod()

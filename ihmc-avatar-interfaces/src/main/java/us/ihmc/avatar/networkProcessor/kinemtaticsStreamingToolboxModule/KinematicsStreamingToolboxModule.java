@@ -57,8 +57,6 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                                             parameters,
                                                             fullRobotModel,
                                                             robotModel,
-                                                            robotModel.getControllerDT(),
-                                                            Conversions.millisecondsToSeconds(updatePeriodMilliseconds),
                                                             yoGraphicsListRegistry,
                                                             registry);
       controller.setCollisionModel(robotModel.getHumanoidRobotKinematicsCollisionModel());
