@@ -59,14 +59,12 @@ public class KSTFBOutputProcessor implements KSTOutputProcessor
       diff.getRotationVector(feedbackPosition.getAngularPart());
       feedbackPosition.scale(gains.getKp());
 
-
       feedbackVelocity.getLinearPart().sub(latestOutput.getRootJointLinearVelocity(), outputRobotState.getRootJointLinearVelocity());
       feedbackVelocity.getAngularPart().sub(latestOutput.getRootJointAngularVelocity(), outputRobotState.getRootJointAngularVelocity());
       feedbackVelocity.scale(gains.getKd());
 
       outputRobotState.getRootJointLinearAcceleration().add(feedbackPosition.getLinearPart(), feedbackVelocity.getLinearPart());
       outputRobotState.getRootJointAngularAcceleration().add(feedbackPosition.getAngularPart(), feedbackVelocity.getAngularPart());
-
 
       for (int i = 0; i < outputRobotState.getNumberOfJoints(); i++)
       {
@@ -79,15 +77,13 @@ public class KSTFBOutputProcessor implements KSTOutputProcessor
 
          if (!Double.isInfinite(qMin))
          {
-            double qDotMin = (qMin - outputRobotState.getJointPosition(i)) / updateDT;
-            double qDDotMin = 2.0 * (qDotMin - outputRobotState.getJointVelocity(i)) / updateDT;
+            double qDDotMin = KSTTools.computeJointMinAcceleration(qMin, outputRobotState.getJointPosition(i), outputRobotState.getJointVelocity(i), updateDT);
             qdd = Math.max(qdd, qDDotMin);
          }
 
          if (!Double.isInfinite(qMax))
          {
-            double qDotMax = (qMax - outputRobotState.getJointPosition(i)) / updateDT;
-            double qDDotMax = 2.0 * (qDotMax - outputRobotState.getJointVelocity(i)) / updateDT;
+            double qDDotMax = KSTTools.computeJointMaxAcceleration(qMax, outputRobotState.getJointPosition(i), outputRobotState.getJointVelocity(i), updateDT);
             qdd = Math.min(qdd, qDDotMax);
          }
 
