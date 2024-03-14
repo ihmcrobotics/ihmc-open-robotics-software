@@ -34,7 +34,7 @@ public class RDXDualBlackflySphericalProjection
 {
    private final RDXBaseUI baseUI;
    private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(RDXProjectionSphere::new);
-   private final ImDouble pupillaryDistance = new ImDouble(0.0);
+   private final ImDouble pupillaryDistance = new ImDouble(0.100000);
    private final FramePose3D leftEyePose = new FramePose3D();
    private final FramePose3D rightEyePose = new FramePose3D();
    private final ReferenceFrame robotZUpFrame;
@@ -46,7 +46,7 @@ public class RDXDualBlackflySphericalProjection
    private volatile boolean reconnecting = false;
    private Thread reconnectThread;
 
-   private final ImDouble projectionZOffset = new ImDouble(1.701657);
+   private final ImDouble projectionZOffset = new ImDouble(1.040650);
    private final SideDependentList<RDXReferenceFrameGraphic> eyeFrameGraphics = new SideDependentList<>();
 
    private long lastFrameUpdateTime;
@@ -55,6 +55,8 @@ public class RDXDualBlackflySphericalProjection
    {
       this.baseUI = RDXBaseUI.getInstance();
       this.robotZUpFrame = robotZUpFrame;
+
+      projectionSpheres.get(RobotSide.LEFT).setPrinciplePointX(-0.072358);
    }
 
    public void renderControls()
@@ -63,6 +65,7 @@ public class RDXDualBlackflySphericalProjection
       ImGuiTools.sliderDouble(labels.get("Pupillary distance"), pupillaryDistance, -0.1, 0.1);
       ImGui.separator();
       projectionSpheres.get(RobotSide.LEFT).renderImGuiWidgets();
+      projectionSpheres.get(RobotSide.RIGHT).renderImGuiWidgets();
 
       // Sync (or mirror settings)
       projectionSpheres.get(RobotSide.RIGHT).setProjectionScaleX(projectionSpheres.get(RobotSide.LEFT).getProjectionScaleX());
@@ -96,18 +99,18 @@ public class RDXDualBlackflySphericalProjection
       reconnecting = true;
 
       reconnectThread = new Thread(() ->
-                                   {
-                                      do
-                                      {
-                                         RDXBaseUI.pushNotification("Dual Blackfly stereo client reconnecting...");
+      {
+         do
+         {
+            RDXBaseUI.pushNotification("Dual Blackfly stereo client reconnecting...");
 
-                                         dualBlackflyUDPReceiver.stop();
-                                         dualBlackflyUDPReceiver.start();
+            dualBlackflyUDPReceiver.stop();
+            dualBlackflyUDPReceiver.start();
 
-                                         ThreadTools.sleep(5000);
-                                      }
-                                      while (reconnecting && !dualBlackflyUDPReceiver.connected());
-                                   }, getClass().getName() + "-ReconnectThread");
+            ThreadTools.sleep(5000);
+         }
+         while (reconnecting && !dualBlackflyUDPReceiver.connected());
+      }, getClass().getName() + "-ReconnectThread");
 
       reconnectThread.start();
    }
@@ -178,7 +181,7 @@ public class RDXDualBlackflySphericalProjection
                opencv_imgproc.cvtColor(mat, rgba8Mat, opencv_imgproc.COLOR_BayerBG2RGBA);
                Texture texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
 
-               projectionSpheres.get(side).updateTexture(texture, 0.8f);
+               projectionSpheres.get(side).updateTexture(texture, 0.5f);
 
                rgba8Mat.close();
                pixmap.dispose();
@@ -212,6 +215,7 @@ public class RDXDualBlackflySphericalProjection
 
                      transformToParent.getTranslation().set(eyeFrame.getTransformToRoot().getTranslation());
                      transformToParent.getRotation().setToYawOrientation(robotZUpFrame.getTransformToRoot().getRotation().getYaw());
+                     transformToParent.getTranslation().setZ(projectionZOffset.get());
                   }
                };
 
@@ -223,6 +227,9 @@ public class RDXDualBlackflySphericalProjection
 
          leftEyePose.setToZero(projectionOriginFrames.get(RobotSide.LEFT));
          rightEyePose.setToZero(projectionOriginFrames.get(RobotSide.RIGHT));
+
+         leftEyePose.getTranslation().setY(pupillaryDistance.get() / 2);
+         rightEyePose.getTranslation().setY(-pupillaryDistance.get() / 2);
 
          RigidBodyTransform leftEyePoseWorld = new RigidBodyTransform(leftEyePose);
          leftEyePoseWorld.preMultiply(leftEyePose.getReferenceFrame().getTransformToRoot());
