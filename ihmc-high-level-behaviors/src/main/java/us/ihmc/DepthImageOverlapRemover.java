@@ -40,6 +40,7 @@ public class DepthImageOverlapRemover
 
    /**
     * Sets the master image (the unmodified image)
+    *
     * @param masterImage the master image
     */
    public void setMasterImage(RawImage masterImage)
@@ -57,6 +58,7 @@ public class DepthImageOverlapRemover
    /**
     * Removes the overlapping region between the master and slave image from the slave image.
     * The master image will not be modified, while the slave image will have the overlapping portion cut out.
+    *
     * @param slaveImage the slave image which will have the overlapping portion cut out
     * @return A new RawImage object which is the provided slave image without the overlapping section.
     */
@@ -105,15 +107,14 @@ public class DepthImageOverlapRemover
       bytedecoZEDOutput = new BytedecoImage(this.slaveImage.getImageWidth(), this.slaveImage.getImageHeight(), this.slaveImage.getOpenCVType());
       bytedecoZEDOutput.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
 
+      openCLManager.setKernelArgument(kernel, 0, bytedecoSlaveImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(kernel, 1, bytedecoZEDOutput.getOpenCLImageObject());
+      openCLManager.setKernelArgument(kernel, 2, parameters.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(kernel, 3, zedToRealsenseTransformParameter.getOpenCLBufferObject());
 
-         openCLManager.setKernelArgument(kernel, 0, bytedecoSlaveImage.getOpenCLImageObject());
-         openCLManager.setKernelArgument(kernel, 1, bytedecoZEDOutput.getOpenCLImageObject());
-         openCLManager.setKernelArgument(kernel, 2, parameters.getOpenCLBufferObject());
-         openCLManager.setKernelArgument(kernel, 3, zedToRealsenseTransformParameter.getOpenCLBufferObject());
+      openCLManager.execute2D(kernel, this.slaveImage.getImageWidth(), this.slaveImage.getImageHeight());
 
-         openCLManager.execute2D(kernel, this.slaveImage.getImageWidth(), this.slaveImage.getImageHeight());
-
-         bytedecoZEDOutput.readOpenCLImage(openCLManager);
+      bytedecoZEDOutput.readOpenCLImage(openCLManager);
 
       slaveImage.release();
 
