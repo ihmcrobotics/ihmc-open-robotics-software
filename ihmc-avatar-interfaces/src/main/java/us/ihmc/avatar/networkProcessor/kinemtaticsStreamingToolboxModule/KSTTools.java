@@ -146,7 +146,7 @@ public class KSTTools
 
       ikController.setPreserveUserCommandHistory(false);
 
-      inputFilter = new KSTInputFilter(currentFullRobotModel, parameters);
+      inputFilter = new KSTInputFilter(currentFullRobotModel, parameters, registry);
 
       currentMessageId = new YoLong("currentMessageId", registry);
       currentMessageId.set(1L);
