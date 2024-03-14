@@ -178,6 +178,11 @@ public class KSTStreamingMessageFactory
 
    public void computeHandStreamingMessage(RobotSide robotSide, ReferenceFrame trajectoryFrame)
    {
+      computeHandStreamingMessage(robotSide, trajectoryFrame.getFrameNameHashCode());
+   }
+
+   public void computeHandStreamingMessage(RobotSide robotSide, long trajectoryFrameId)
+   {
       checkIfDataHasBeenSet();
 
       // TODO Add the option to define the control frame in the API instead of hard-coding it here.
@@ -197,7 +202,7 @@ public class KSTStreamingMessageFactory
 
       SE3StreamingMessage handStreamingMessage = select(robotSide, output.getLeftHandStreamingMessage(), output.getRightHandStreamingMessage());
       packCustomControlFrame(handBodyFixedFrame, handControlFrame, handStreamingMessage);
-      handStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.getFrameNameHashCode());
+      handStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrameId);
       handStreamingMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
       packSE3TrajectoryPointMessage(desiredPose, desiredSpatialVelocity, desiredSpatialAcceleration, handStreamingMessage);
@@ -237,6 +242,11 @@ public class KSTStreamingMessageFactory
 
    public void computeChestStreamingMessage(ReferenceFrame trajectoryFrame)
    {
+      computeChestStreamingMessage(trajectoryFrame.getFrameNameHashCode());
+   }
+
+   public void computeChestStreamingMessage(long trajectoryFrameId)
+   {
       checkIfDataHasBeenSet();
 
       RigidBodyBasics chest = fullRobotModel.getChest();
@@ -252,7 +262,7 @@ public class KSTStreamingMessageFactory
          clampMaxAngularVelocity(desiredAngularVelocity, output.getStreamIntegrationDuration());
 
       SO3StreamingMessage chestStreamingMessage = output.getChestStreamingMessage();
-      chestStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.getFrameNameHashCode());
+      chestStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrameId);
       chestStreamingMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
       packSO3TrajectoryPointMessage(desiredOrientation, desiredAngularVelocity, desiredAngularAcceleration, chestStreamingMessage);
@@ -267,6 +277,11 @@ public class KSTStreamingMessageFactory
    }
 
    public void computePelvisStreamingMessage(ReferenceFrame trajectoryFrame)
+   {
+      computePelvisStreamingMessage(trajectoryFrame.getFrameNameHashCode());
+   }
+
+   public void computePelvisStreamingMessage(long trajectoryFrameId)
    {
       checkIfDataHasBeenSet();
 
@@ -291,7 +306,7 @@ public class KSTStreamingMessageFactory
          clampMaxAngularVelocity(desiredSpatialVelocity.getAngularPart(), output.getStreamIntegrationDuration());
 
       SE3StreamingMessage pelvisStreamingMessage = output.getPelvisStreamingMessage();
-      pelvisStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.getFrameNameHashCode());
+      pelvisStreamingMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrameId);
       pelvisStreamingMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
       packSE3TrajectoryPointMessage(desiredPose, desiredSpatialVelocity, desiredSpatialAcceleration, pelvisStreamingMessage);

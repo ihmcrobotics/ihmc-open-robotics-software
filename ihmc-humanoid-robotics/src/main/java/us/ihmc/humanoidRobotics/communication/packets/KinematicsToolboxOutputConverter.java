@@ -148,6 +148,11 @@ public class KinematicsToolboxOutputConverter
 
    public void computeHandTrajectoryMessage(RobotSide robotSide, ReferenceFrame trajectoryFrame)
    {
+      computeHandTrajectoryMessage(robotSide, trajectoryFrame.getFrameNameHashCode());
+   }
+
+   public void computeHandTrajectoryMessage(RobotSide robotSide, long trajectoryFrameId)
+   {
       checkIfDataHasBeenSet();
 
       // TODO Add the option to define the control frame in the API instead of hardcoding it here.
@@ -159,7 +164,7 @@ public class KinematicsToolboxOutputConverter
       handTrajectoryMessage.setRobotSide(robotSide.toByte());
       SE3TrajectoryMessage se3TrajectoryMessage = handTrajectoryMessage.getSe3Trajectory();
       packCustomControlFrame(fullRobotModel.getHand(robotSide).getBodyFixedFrame(), handControlFrame, se3TrajectoryMessage);
-      se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.getFrameNameHashCode());
+      se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrameId);
       se3TrajectoryMessage.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
       Object<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3TrajectoryMessage.getTaskspaceTrajectoryPoints();
@@ -216,6 +221,11 @@ public class KinematicsToolboxOutputConverter
 
    public void computeChestTrajectoryMessage(ReferenceFrame trajectoryFrame)
    {
+      computeChestTrajectoryMessage(trajectoryFrame.getFrameNameHashCode());
+   }
+
+   public void computeChestTrajectoryMessage(long trajectoryFrameId)
+   {
       checkIfDataHasBeenSet();
 
       MovingReferenceFrame chestFrame = fullRobotModel.getChest().getBodyFixedFrame();
@@ -225,7 +235,7 @@ public class KinematicsToolboxOutputConverter
 
       ChestTrajectoryMessage chestTrajectoryMessage = output.getChestTrajectoryMessage();
       SO3TrajectoryMessage so3Trajectory = chestTrajectoryMessage.getSo3Trajectory();
-      so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.getFrameNameHashCode());
+      so3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrameId);
       so3Trajectory.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
       Object<SO3TrajectoryPointMessage> taskspaceTrajectoryPoints = so3Trajectory.getTaskspaceTrajectoryPoints();
@@ -240,6 +250,11 @@ public class KinematicsToolboxOutputConverter
 
    public void computePelvisTrajectoryMessage(ReferenceFrame trajectoryFrame)
    {
+      computePelvisTrajectoryMessage(trajectoryFrame.getFrameNameHashCode());
+   }
+
+   public void computePelvisTrajectoryMessage(long trajectoryFrameId)
+   {
       checkIfDataHasBeenSet();
 
       MovingReferenceFrame pelvisFrame = fullRobotModel.getRootJoint().getFrameAfterJoint();
@@ -249,7 +264,7 @@ public class KinematicsToolboxOutputConverter
 
       PelvisTrajectoryMessage pelvisTrajectoryMessage = output.getPelvisTrajectoryMessage();
       SE3TrajectoryMessage se3Trajectory = pelvisTrajectoryMessage.getSe3Trajectory();
-      se3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrame.getFrameNameHashCode());
+      se3Trajectory.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryFrameId);
       se3Trajectory.getFrameInformation().setDataReferenceFrameId(worldFrame.getFrameNameHashCode());
 
       Object<SE3TrajectoryPointMessage> taskspaceTrajectoryPoints = se3Trajectory.getTaskspaceTrajectoryPoints();
