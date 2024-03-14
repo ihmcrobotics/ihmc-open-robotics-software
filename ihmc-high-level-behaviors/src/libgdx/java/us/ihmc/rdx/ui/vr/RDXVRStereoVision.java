@@ -22,9 +22,9 @@ public class RDXVRStereoVision
    private final ImString leftConnectionAddress = new ImString();
    private final ImString rightConnectionAddress = new ImString();
 
-   public RDXVRStereoVision(ReferenceFrame robotzUpFrame, ReferenceFrame headsetFrame)
+   public RDXVRStereoVision(ReferenceFrame robotzUpFrame)
    {
-      dualBlackflySphericalProjection = new RDXDualBlackflySphericalProjection(robotzUpFrame, headsetFrame);
+      dualBlackflySphericalProjection = new RDXDualBlackflySphericalProjection(robotzUpFrame);
    }
 
    public boolean isEnabled()

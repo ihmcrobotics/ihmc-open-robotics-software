@@ -72,7 +72,7 @@ public class RDXVRModeManager
       baseUI.getVRManager().getContext().addVRPickCalculator(leftHandPanel::calculateVRPick);
       baseUI.getVRManager().getContext().addVRInputProcessor(leftHandPanel::processVRInput);
 
-      stereoVision = new RDXVRStereoVision(syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame(), baseUI.getVRManager().getContext().getHeadset().getXForwardZUpHeadsetFrame());
+      stereoVision = new RDXVRStereoVision(syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame());
 
       vrModeControls = new RDXVRModeControls(baseUI, this);
 
