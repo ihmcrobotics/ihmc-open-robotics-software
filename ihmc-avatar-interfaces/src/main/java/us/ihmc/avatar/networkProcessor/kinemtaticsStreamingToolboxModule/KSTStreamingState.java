@@ -381,7 +381,7 @@ public class KSTStreamingState implements State
       for (YoDouble rigidBodyControlStartTime : rigidBodyControlStartTimeArray)
          rigidBodyControlStartTime.setToNaN();
 
-      System.gc(); // TODO This needs to be removed.
+//      System.gc(); // TODO This needs to be removed.
    }
 
    private final KinematicsStreamingToolboxInputCommand filteredInputs = new KinematicsStreamingToolboxInputCommand();

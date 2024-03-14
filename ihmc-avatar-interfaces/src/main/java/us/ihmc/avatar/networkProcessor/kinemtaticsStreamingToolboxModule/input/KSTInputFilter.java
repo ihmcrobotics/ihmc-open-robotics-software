@@ -24,12 +24,14 @@ public class KSTInputFilter
    private final YoFrameQuaternion bbxOrientation = new YoFrameQuaternion("inputFilterBBXOrientation", worldFrame, registry);
    private final MidFootZUpGroundFrame midFeetZUpFrame;
 
-   public KSTInputFilter(FullHumanoidRobotModel fullRobotModel, KinematicsStreamingToolboxParameters parameters)
+   public KSTInputFilter(FullHumanoidRobotModel fullRobotModel, KinematicsStreamingToolboxParameters parameters, YoRegistry parentRegistry)
    {
       midFeetZUpFrame = new MidFootZUpGroundFrame("midFeetZUpFrame", fullRobotModel.getSoleFrame(RobotSide.LEFT), fullRobotModel.getSoleFrame(RobotSide.RIGHT));
       bbxSize.set(parameters.getInputFilterBBXSize());
       bbxOffset = new YoFramePoint3D("inputFilterBBXCenter", midFeetZUpFrame, registry);
       bbxOffset.set(parameters.getInputFilterBBXCenter());
+
+      parentRegistry.addChild(registry);
    }
 
    private final Box3D boundingBox = new Box3D();
