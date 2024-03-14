@@ -225,9 +225,15 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       {
          footsteps.getValueReadOnly(i).toMessage(message.getFootsteps().add());
       }
-      goalToParentTransform.toMessage(message.getGoalTransformToParent());
-      goalFootstepToGoalTransforms.get(RobotSide.LEFT).toMessage(message.getLeftGoalFootTransformToGizmo());
-      goalFootstepToGoalTransforms.get(RobotSide.RIGHT).toMessage(message.getRightGoalFootTransformToGizmo());
+      message.setGoalXInParent(goalToParentX.getValue());
+      message.setGoalYInParent(goalToParentY.getValue());
+      message.setGoalYawInParent(goalToParentYaw.getValue());
+      message.setLeftGoalFootXToGizmo(goalFootstepToGoalXs.get(RobotSide.LEFT).getValue());
+      message.setLeftGoalFootYToGizmo(goalFootstepToGoalYs.get(RobotSide.LEFT).getValue());
+      message.setLeftGoalFootYawToGizmo(goalFootstepToGoalYaws.get(RobotSide.LEFT).getValue());
+      message.setRightGoalFootXToGizmo(goalFootstepToGoalXs.get(RobotSide.RIGHT).getValue());
+      message.setRightGoalFootYToGizmo(goalFootstepToGoalYs.get(RobotSide.RIGHT).getValue());
+      message.setRightGoalFootYawToGizmo(goalFootstepToGoalYaws.get(RobotSide.RIGHT).getValue());
    }
 
    public void fromMessage(FootstepPlanActionDefinitionMessage message)
@@ -247,9 +253,15 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             writableList.add().fromMessage(footstepMessage);
          }
       });
-      goalToParentTransform.fromMessage(message.getGoalTransformToParent());
-      goalFootstepToGoalTransforms.get(RobotSide.LEFT).fromMessage(message.getLeftGoalFootTransformToGizmo());
-      goalFootstepToGoalTransforms.get(RobotSide.RIGHT).fromMessage(message.getRightGoalFootTransformToGizmo());
+      goalToParentX.setValue(message.getGoalXInParent());
+      goalToParentY.setValue(message.getGoalYInParent());
+      goalToParentYaw.setValue(message.getGoalYawInParent());
+      goalFootstepToGoalXs.get(RobotSide.LEFT).setValue(message.getLeftGoalFootXToGizmo());
+      goalFootstepToGoalYs.get(RobotSide.LEFT).setValue(message.getLeftGoalFootYToGizmo());
+      goalFootstepToGoalYaws.get(RobotSide.LEFT).setValue(message.getLeftGoalFootYawToGizmo());
+      goalFootstepToGoalXs.get(RobotSide.RIGHT).setValue(message.getRightGoalFootXToGizmo());
+      goalFootstepToGoalYs.get(RobotSide.RIGHT).setValue(message.getRightGoalFootYToGizmo());
+      goalFootstepToGoalYaws.get(RobotSide.RIGHT).setValue(message.getRightGoalFootYawToGizmo());
    }
 
    public double getSwingDuration()
@@ -302,13 +314,33 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       return footsteps;
    }
 
-   public CRDTUnidirectionalRigidBodyTransform getGoalToParentTransform()
+   public CRDTUnidirectionalDouble getGoalToParentX()
    {
-      return goalToParentTransform;
+      return goalToParentX;
    }
 
-   public CRDTUnidirectionalRigidBodyTransform getGoalFootstepToGoalTransform(RobotSide side)
+   public CRDTUnidirectionalDouble getGoalToParentY()
    {
-      return goalFootstepToGoalTransforms.get(side);
+      return goalToParentY;
+   }
+
+   public CRDTUnidirectionalDouble getGoalToParentYaw()
+   {
+      return goalToParentYaw;
+   }
+
+   public CRDTUnidirectionalDouble getGoalFootstepToGoalX(RobotSide side)
+   {
+      return goalFootstepToGoalXs.get(side);
+   }
+
+   public CRDTUnidirectionalDouble getGoalFootstepToGoalY(RobotSide side)
+   {
+      return goalFootstepToGoalYs.get(side);
+   }
+
+   public CRDTUnidirectionalDouble getGoalFootstepToGoalYaw(RobotSide side)
+   {
+      return goalFootstepToGoalYaws.get(side);
    }
 }
