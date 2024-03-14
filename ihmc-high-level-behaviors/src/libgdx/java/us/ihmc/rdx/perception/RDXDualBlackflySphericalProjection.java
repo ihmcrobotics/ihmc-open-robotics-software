@@ -36,7 +36,7 @@ public class RDXDualBlackflySphericalProjection
 {
    private final RDXBaseUI baseUI;
    private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(RDXProjectionSphere::new);
-   private final ImDouble pupillaryDistance = new ImDouble(-0.039024);
+   private final ImDouble pupillaryDistance = new ImDouble(-0.032520);
    private final FramePose3D leftEyePose = new FramePose3D();
    private final FramePose3D rightEyePose = new FramePose3D();
    private final ReferenceFrame robotZUpFrame;
@@ -57,12 +57,15 @@ public class RDXDualBlackflySphericalProjection
    {
       this.baseUI = RDXBaseUI.getInstance();
       this.robotZUpFrame = robotZUpFrame;
+
+      projectionSpheres.get(RobotSide.LEFT).setProjectionScaleX(0.713780);
+      projectionSpheres.get(RobotSide.LEFT).setProjectionScaleY(0.891748);
    }
 
    public void renderControls()
    {
       ImGuiTools.sliderDouble("Projection Z offset", projectionZOffset, -4, 4);
-      ImGuiTools.sliderDouble(labels.get("Pupillary distance"), pupillaryDistance, -0.1, 0.1);
+      ImGuiTools.sliderDouble(labels.get("Pupillary distance"), pupillaryDistance, -0.5, 0.5);
       ImGui.separator();
       projectionSpheres.get(RobotSide.LEFT).renderImGuiWidgets();
       projectionSpheres.get(RobotSide.RIGHT).renderImGuiWidgets();
