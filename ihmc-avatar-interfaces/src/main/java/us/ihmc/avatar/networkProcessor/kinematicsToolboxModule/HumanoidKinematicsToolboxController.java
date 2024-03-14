@@ -32,7 +32,6 @@ import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -153,7 +152,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
                                               StatusMessageOutputManager statusOutputManager,
                                               FullHumanoidRobotModel desiredFullRobotModel,
-                                              FullHumanoidRobotModelFactory fullRobotModelFactory,
                                               double updateDT,
                                               YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoRegistry parentRegistry)
@@ -162,7 +160,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
            statusOutputManager,
            desiredFullRobotModel,
            createListOfControllableRigidBodies(desiredFullRobotModel),
-           fullRobotModelFactory,
            updateDT,
            yoGraphicsListRegistry,
            parentRegistry);
@@ -175,7 +172,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     * @param statusOutputManager     the status output manager used to send status messages to the network/direct API.
     * @param desiredFullRobotModel   the robot model the solver will be working on and storing the latest solution.
     * @param controllableRigidBodies the list of rigid-bodies that can be controlled by the solver. Mostly used for visualization.
-    * @param fullRobotModelFactory   factory used to create the initial robot model. TODO Overkill, shouldn't be necessary.
     * @param updateDT                the time step used by the solver.
     * @param yoGraphicsListRegistry  the registry used to store the graphics for visualization.
     * @param parentRegistry          the parent registry for this controller.
@@ -184,7 +180,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
                                               StatusMessageOutputManager statusOutputManager,
                                               FullHumanoidRobotModel desiredFullRobotModel,
                                               Collection<? extends RigidBodyBasics> controllableRigidBodies,
-                                              FullHumanoidRobotModelFactory fullRobotModelFactory,
                                               double updateDT,
                                               YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoRegistry parentRegistry)

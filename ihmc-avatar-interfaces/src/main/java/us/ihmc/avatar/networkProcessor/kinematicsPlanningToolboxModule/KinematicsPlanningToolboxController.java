@@ -129,7 +129,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       ikController = new HumanoidKinematicsToolboxController(ikCommandInputManager,
                                                              statusOutputManager,
                                                              fullRobotModel,
-                                                             drcRobotModel,
                                                              updateDT,
                                                              yoGraphicsListRegistry,
                                                              parentRegistry);
