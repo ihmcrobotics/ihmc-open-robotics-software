@@ -19,6 +19,11 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
    private final CRDTUnidirectionalDouble handOpenAngle;
    private final CRDTUnidirectionalDouble fingertipGripForceLimit;
 
+   // On disk fields
+   private RobotSide onDiskSide;
+   private double onDiskHandOpenAngle;
+   private double onDiskFingertipGripForceLimit;
+
    public SakeHandCommandActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
@@ -46,6 +51,38 @@ public class SakeHandCommandActionDefinition extends ActionNodeDefinition
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       handOpenAngle.setValue(Math.toRadians(jsonNode.get("handOpenAngleDegrees").asDouble()));
       fingertipGripForceLimit.setValue(jsonNode.get("fingertipGripForceLimit").asDouble());
+   }
+
+   @Override
+   public void setOnDiskFields()
+   {
+      super.setOnDiskFields();
+
+      onDiskSide = side.getValue();
+      onDiskHandOpenAngle = handOpenAngle.getValue();
+      onDiskFingertipGripForceLimit = fingertipGripForceLimit.getValue();
+   }
+
+   @Override
+   public void undoAllNontopologicalChanges()
+   {
+      super.undoAllNontopologicalChanges();
+
+      side.setValue(onDiskSide);
+      handOpenAngle.setValue(onDiskHandOpenAngle);
+      fingertipGripForceLimit.setValue(onDiskFingertipGripForceLimit);
+   }
+
+   @Override
+   public boolean hasChanges()
+   {
+      boolean unchanged = !super.hasChanges();
+
+      unchanged &= side.getValue() == onDiskSide;
+      unchanged &= handOpenAngle.getValue() == onDiskHandOpenAngle;
+      unchanged &= fingertipGripForceLimit.getValue() == onDiskFingertipGripForceLimit;
+
+      return !unchanged;
    }
 
    public void toMessage(SakeHandCommandActionDefinitionMessage message)

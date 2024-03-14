@@ -1,18 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.appendIndex;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.LINEAR_ACCELERATION;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.LINEAR_FORCE;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.LINEAR_VELOCITY;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.POSITION;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.CURRENT;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.DESIRED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_INTEGRATED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDBACK;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDFORWARD;
-
-import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controlModules.YoTranslationFrame;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -23,11 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBAlphaFilteredVector3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPoint3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector3D;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -35,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
+import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
@@ -44,6 +28,10 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import static us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox.appendIndex;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.*;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.*;
 
 public class PointFeedbackController implements FeedbackControllerInterface
 {
@@ -64,6 +52,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final FBVector3D yoFeedForwardLinearVelocity;
    private final FBVector3D yoFeedbackLinearVelocity;
    private final FBRateLimitedVector3D rateLimitedFeedbackLinearVelocity;
+   private final FBVector3D yoAchievedLinearVelocity;
 
    private final FBVector3D yoDesiredLinearAcceleration;
    private final FBVector3D yoFeedForwardLinearAcceleration;
@@ -103,6 +92,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final Matrix3D tempGainMatrix = new Matrix3D();
    private final YoTranslationFrame controlFrame;
 
+   private final RigidBodyTwistProvider rigidBodyTwistProvider;
    private final RigidBodyAccelerationProvider rigidBodyAccelerationProvider;
 
    private RigidBodyBasics base;
@@ -152,6 +142,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
          rootBody = null;
       }
 
+      rigidBodyTwistProvider = ccToolbox.getRigidBodyTwistCalculator();
       rigidBodyAccelerationProvider = ccToolbox.getRigidBodyAccelerationProvider();
 
       String endEffectorName = endEffector.getName();
@@ -282,12 +273,14 @@ public class PointFeedbackController implements FeedbackControllerInterface
                                                                                           maximumRate,
                                                                                           isEnabled,
                                                                                           false);
+         yoAchievedLinearVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, Type.ACHIEVED, LINEAR_VELOCITY, isEnabled, true);
       }
       else
       {
          yoFeedbackLinearVelocity = null;
          yoFeedForwardLinearVelocity = null;
          rateLimitedFeedbackLinearVelocity = null;
+         yoAchievedLinearVelocity = null;
       }
    }
 
@@ -499,6 +492,21 @@ public class PointFeedbackController implements FeedbackControllerInterface
       yoAchievedLinearAcceleration.setIncludingFrame(achievedLinearAcceleration);
       yoAchievedLinearAcceleration.changeFrame(yoDesiredPosition.getReferenceFrame());
       yoAchievedLinearAcceleration.setCommandId(currentCommandId);
+   }
+
+   private final Twist achievedTwist = new Twist();
+
+   @Override
+   public void computeAchievedVelocity()
+   {
+      if (yoAchievedLinearVelocity == null)
+         return;
+
+      achievedTwist.setIncludingFrame(rigidBodyTwistProvider.getRelativeTwist(base, endEffector));
+      achievedTwist.changeFrame(controlFrame);
+      yoAchievedLinearVelocity.setIncludingFrame(achievedTwist.getLinearPart());
+      yoAchievedLinearVelocity.changeFrame(yoDesiredPosition.getReferenceFrame());
+      yoAchievedLinearVelocity.setCommandId(currentCommandId);
    }
 
    /**

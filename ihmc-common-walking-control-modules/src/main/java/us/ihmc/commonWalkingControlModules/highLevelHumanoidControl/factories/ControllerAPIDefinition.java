@@ -121,6 +121,7 @@ public class ControllerAPIDefinition
       statusMessages.add(RobotDesiredConfigurationData.class);
       statusMessages.add(FootstepQueueStatusMessage.class);
       statusMessages.add(QueuedFootstepStatusMessage.class);
+      statusMessages.add(WrenchTrajectoryStatusMessage.class);
 
       /** Statuses supported by multi-contact controller, not in this repo */
       statusMessages.add(MultiContactBalanceStatus.class);

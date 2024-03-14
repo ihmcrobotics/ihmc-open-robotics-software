@@ -13,6 +13,9 @@ public class WaitDurationActionDefinition extends ActionNodeDefinition
 {
    private final CRDTUnidirectionalDouble waitDuration;
 
+   // On disk fields
+   private double onDiskWaitDuration;
+
    public WaitDurationActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
@@ -34,6 +37,32 @@ public class WaitDurationActionDefinition extends ActionNodeDefinition
       super.loadFromFile(jsonNode);
 
       waitDuration.setValue(jsonNode.get("waitDuration").asDouble());
+   }
+
+   @Override
+   public void setOnDiskFields()
+   {
+      super.setOnDiskFields();
+
+      onDiskWaitDuration = waitDuration.getValue();
+   }
+
+   @Override
+   public void undoAllNontopologicalChanges()
+   {
+      super.undoAllNontopologicalChanges();
+
+      waitDuration.setValue(onDiskWaitDuration);
+   }
+
+   @Override
+   public boolean hasChanges()
+   {
+      boolean unchanged = !super.hasChanges();
+
+      unchanged &= waitDuration.getValue() == onDiskWaitDuration;
+
+      return !unchanged;
    }
 
    public void toMessage(WaitDurationActionDefinitionMessage message)
