@@ -18,6 +18,11 @@ public interface FeedbackControllerInterface
 
    void computeAchievedAcceleration();
 
+   default void computeAchievedVelocity()
+   {
+      // Empty default implementation to avoid breaking existing implementations.
+   }
+
    boolean isEnabled();
 
    InverseDynamicsCommand<?> getInverseDynamicsOutput();

@@ -31,6 +31,7 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.YoPoint3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -53,6 +54,7 @@ public class SwingTrajectoryCalculator
 
    private final YoDouble swingDuration;
    private final YoDouble swingHeight;
+   private final YoBoolean isSteppingForward;
 
    private final YoSwingTrajectoryParameters swingTrajectoryParameters;
 
@@ -66,6 +68,9 @@ public class SwingTrajectoryCalculator
    private final FrameVector3D finalLinearVelocity = new FrameVector3D();
    private final FrameQuaternion finalOrientation = new FrameQuaternion();
    private final FrameVector3D finalAngularVelocity = new FrameVector3D();
+
+   private final FramePoint3D deepCopyInitialPosition = new FramePoint3D();
+   private final FramePoint3D deepCopyFinalPosition = new FramePoint3D();
 
    private final FramePoint3D stanceFootPosition = new FramePoint3D();
 
@@ -112,6 +117,7 @@ public class SwingTrajectoryCalculator
 
       swingHeight = new YoDouble(namePrefix + "Height", registry);
       swingDuration = new YoDouble(namePrefix + "Duration", registry);
+      isSteppingForward = new YoBoolean(namePrefix + "IsSteppingForward", registry);
 
       swingTrajectory = new MultipleWaypointsPoseTrajectoryGenerator(namePrefix, Footstep.maxNumberOfSwingWaypoints + 2, registry);
 
@@ -480,8 +486,8 @@ public class SwingTrajectoryCalculator
          swingTrajectory.appendPositionWaypoint(tempPositionTrajectoryPoint);
       }
 
-      boolean isSteppingDown = swingTrajectoryOptimizer.isSteppingDown();
-      if (swingTrajectoryParameters.addFootPitchToAvoidHeelStrikeWhenSteppingDown() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE && isSteppingDown)
+      boolean isObstacleClearance = activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE;
+      if (swingTrajectoryParameters.addFootPitchToAvoidHeelStrikeWhenSteppingForwardAndDown() && isObstacleClearance && isSteppingForwardAndDown())
       {
          tmpOrientation.setToZero(worldFrame);
          tmpVector.setToZero(worldFrame);
@@ -501,7 +507,7 @@ public class SwingTrajectoryCalculator
          }
       }
       // make the foot orientation better for avoidance
-      else if (swingTrajectoryParameters.addOrientationMidpointForObstacleClearance() && activeTrajectoryType.getEnumValue() == TrajectoryType.OBSTACLE_CLEARANCE)
+      else if (swingTrajectoryParameters.addOrientationMidpointForObstacleClearance() && isObstacleClearance)
       {
          tmpOrientation.setToZero(worldFrame);
          tmpVector.setToZero(worldFrame);
@@ -512,6 +518,29 @@ public class SwingTrajectoryCalculator
       swingTrajectoryOptimizer.getFinalVelocity(finalLinearVelocity);
       swingTrajectory.appendPositionWaypoint(swingDuration.getDoubleValue(), finalPosition, finalLinearVelocity);
       swingTrajectory.appendOrientationWaypoint(swingDuration.getDoubleValue(), finalOrientation, finalAngularVelocity);
+   }
+
+   /**
+    * Checks whether the next step is both forward and down
+    * @return true if the step is forward and the step is down
+    */
+   private boolean isSteppingForwardAndDown()
+   {
+      deepCopyInitialPosition.set(initialPosition);
+      deepCopyInitialPosition.changeFrame(soleFrame);
+
+      deepCopyFinalPosition.set(finalPosition);
+      deepCopyFinalPosition.changeFrame(soleFrame);
+
+      boolean isSteppingDown = swingTrajectoryOptimizer.isSteppingDown();
+      boolean isSteppingForward = deepCopyFinalPosition.getX() - deepCopyInitialPosition.getX() > 0;
+      this.isSteppingForward.set(isSteppingForward);
+
+      // Clear properly for the next step
+      deepCopyInitialPosition.setToZero(ReferenceFrame.getWorldFrame());
+      deepCopyFinalPosition.setToZero(ReferenceFrame.getWorldFrame());
+
+      return isSteppingForward && isSteppingDown;
    }
 
    public YoGraphicDefinition getSCS2YoGraphics()

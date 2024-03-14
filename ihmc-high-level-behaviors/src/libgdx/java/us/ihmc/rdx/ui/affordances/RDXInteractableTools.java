@@ -17,7 +17,7 @@ public class RDXInteractableTools
             modelFileGeometryDefinition = (ModelFileGeometryDefinition) visualDefinition.getGeometryDefinition();
          }
       }
-      if (modelFileGeometryDefinition == null)
+      if (modelFileGeometryDefinition == null || modelFileGeometryDefinition.getFileName() == null)
       {
          LogTools.error("Interactables need a model file or implementation of shape visuals");
       }

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
+import controller_msgs.msg.dds.WrenchTrajectoryStatusMessage;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -662,6 +663,11 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    public Object pollStatusToReport()
    {
       return stateMachine.getCurrentState().pollStatusToReport();
+   }
+
+   public Object pollWrenchStatusToReport()
+   {
+      return externalWrenchManager.pollStatusToReport();
    }
 
    public RigidBodyTaskspaceControlState getTaskspaceControlState()

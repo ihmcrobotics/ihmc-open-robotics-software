@@ -44,7 +44,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImBoolean showAdjustmentInteractables = new ImBoolean();
-   private final ImBooleanWrapper executeWithNextActionWrapper;
    private final ImBooleanWrapper manuallyPlaceStepsWrapper;
    private final ImDoubleWrapper swingDurationWidget;
    private final ImDoubleWrapper transferDurationWidget;
@@ -81,9 +80,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                                                                 referenceFrameLibrary,
                                                                 getDefinition()::getParentFrameName,
                                                                 this::changeParentFrame);
-      executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
-                                                          getDefinition()::setExecuteWithNextAction,
-                                                          imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
       manuallyPlaceStepsWrapper = new ImBooleanWrapper(getDefinition()::getIsManuallyPlaced,
                                                        getDefinition()::setIsManuallyPlaced,
                                                        imBoolean -> ImGui.checkbox(labels.get("Manually place steps"), imBoolean));
@@ -303,8 +299,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    protected void renderImGuiWidgetsInternal()
    {
       ImGui.checkbox(labels.get("Show Adjustment Interactables"), showAdjustmentInteractables);
-      ImGui.sameLine();
-      executeWithNextActionWrapper.renderImGuiWidget();
       parentFrameComboBox.render();
 
       ImGui.pushItemWidth(80.0f);

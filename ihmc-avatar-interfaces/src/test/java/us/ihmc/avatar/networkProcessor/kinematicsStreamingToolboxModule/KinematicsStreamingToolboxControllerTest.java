@@ -1,39 +1,27 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.createCapturabilityBasedStatus;
-import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.createFullRobotModelAtInitialConfiguration;
-import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.extractRobotConfigurationData;
-import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.RelativeEndEffectorControlTest.circlePositionAt;
-
-import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.DoubleFunction;
-
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import javafx.application.Platform;
+import javafx.scene.control.Button;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -72,6 +60,9 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
+import us.ihmc.scs2.session.Session;
+import us.ihmc.scs2.session.Session.SessionModeChangeListener;
+import us.ihmc.scs2.session.SessionMode;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -84,6 +75,17 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
+
+import java.lang.reflect.Method;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxControllerTest.*;
+import static us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.RelativeEndEffectorControlTest.circlePositionAt;
+import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTTimeProvider.createFixedDT;
 
 @Tag("humanoid-toolbox")
 public abstract class KinematicsStreamingToolboxControllerTest
@@ -111,7 +113,6 @@ public abstract class KinematicsStreamingToolboxControllerTest
    protected ROS2Topic<?> controllerOutputTopic;
    protected ROS2Topic<?> toolboxInputTopic;
    protected ROS2Topic<?> toolboxOutputTopic;
-   protected ScheduledExecutorService executor;
 
    /**
     * Returns a <b>new</b> instance of the robot model that will be modified in this test to create
@@ -119,7 +120,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
     */
    public abstract DRCRobotModel newRobotModel();
 
-   public void setupWithWalkingController(Controller... additionalGhostControllers)
+   public void setupWithWalkingController(boolean useCPUClock, KinematicsStreamingToolboxParameters toolboxParameters, Controller... additionalGhostControllers)
    {
       DRCRobotModel robotModel = newRobotModel();
       RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
@@ -140,7 +141,8 @@ public abstract class KinematicsStreamingToolboxControllerTest
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.addSecondaryRobot(ghost);
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
-      createToolboxController(robotModel, collisionModel);
+      createToolboxController(robotModel, useCPUClock, toolboxParameters, collisionModel);
+      simulationTestHelper.addYoGraphicsListRegistry(yoGraphicsListRegistry);
 
       ros2Node = simulationTestHelper.getROS2Node();
 
@@ -179,11 +181,18 @@ public abstract class KinematicsStreamingToolboxControllerTest
          @Override
          public void doControl()
          {
-            toolboxController.update();
-
-            for (JointReadOnly joint : desiredJoints)
+            try
             {
-               scsInput.getJointOutput(joint).setConfiguration(joint);
+               toolboxController.update();
+
+               for (JointReadOnly joint : desiredJoints)
+               {
+                  scsInput.getJointOutput(joint).setConfiguration(joint);
+               }
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
             }
          }
 
@@ -202,7 +211,6 @@ public abstract class KinematicsStreamingToolboxControllerTest
       }
 
       toolboxROS2Node.spin();
-      simulationTestHelper.start();
    }
 
    public void setupNoWalkingController(RobotCollisionModel collisionModel)
@@ -216,7 +224,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       robotDefinition.ignoreAllJoints();
       addCollisionVisuals(robotModel, collisionModel, robotDefinition);
       robot = new Robot(robotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
-      createToolboxController(robotModel, collisionModel);
+      createToolboxController(robotModel, false, null, collisionModel);
 
       RobotDefinition ghostDefinition = new RobotDefinition(robotModel.getRobotDefinition());
       RobotDefinitionTools.setRobotDefinitionMaterial(ghostDefinition, ghostMaterial);
@@ -257,7 +265,10 @@ public abstract class KinematicsStreamingToolboxControllerTest
       }
    }
 
-   private void createToolboxController(DRCRobotModel robotModel, RobotCollisionModel collisionModel)
+   private void createToolboxController(DRCRobotModel robotModel,
+                                        boolean useCPUClock,
+                                        KinematicsStreamingToolboxParameters toolboxParameters,
+                                        RobotCollisionModel collisionModel)
    {
       desiredFullRobotModel = robotModel.createFullRobotModel();
       toolboxRegistry = new YoRegistry("toolboxMain");
@@ -265,14 +276,20 @@ public abstract class KinematicsStreamingToolboxControllerTest
       commandInputManager = new CommandInputManager(KinematicsStreamingToolboxModule.supportedCommands());
       statusOutputManager = new StatusMessageOutputManager(KinematicsStreamingToolboxModule.supportedStatus());
 
+      if (toolboxParameters == null)
+         toolboxParameters = KinematicsStreamingToolboxParameters.defaultParameters();
+
       toolboxController = new KinematicsStreamingToolboxController(commandInputManager,
                                                                    statusOutputManager,
+                                                                   toolboxParameters,
                                                                    desiredFullRobotModel,
                                                                    robotModel,
                                                                    robotModel.getControllerDT(),
                                                                    toolboxControllerPeriod,
                                                                    yoGraphicsListRegistry,
                                                                    toolboxRegistry);
+      if (!useCPUClock)
+         toolboxController.setTimeProvider(createFixedDT(toolboxControllerPeriod));
       toolboxController.setCollisionModel(collisionModel);
    }
 
@@ -281,7 +298,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
    {
       if (simulationTestHelper != null)
       {
-         simulationTestHelper.finishTest();
+         simulationTestHelper.finishTest(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
          simulationTestHelper = null;
       }
 
@@ -319,8 +336,9 @@ public abstract class KinematicsStreamingToolboxControllerTest
       double circleRadius = 0.25;
       double circleFrequency = 0.25;
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(side -> new Point3D(0.2, side.negateIfRightSide(0.225), 1.0));
-      SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ? new Vector3D(0.0, 0.0, 0.0)
-            : new Vector3D());
+      SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ?
+            new Vector3D(0.0, 0.0, 0.0) :
+            new Vector3D());
 
       double toolboxControllerPeriod = toolboxController.getTools().getToolboxControllerPeriod();
 
@@ -382,43 +400,40 @@ public abstract class KinematicsStreamingToolboxControllerTest
       statePublisher.publish(wakeupMessage);
    }
 
-   protected ScheduledFuture<?> scheduleMessageGenerator(double dt, DoubleFunction<KinematicsStreamingToolboxInputMessage> messageGenerator)
-   {
-      if (executor == null)
-         executor = ThreadTools.newSingleDaemonThreadScheduledExecutor("inputs-generator");
-
-      return executor.scheduleAtFixedRate(new Runnable()
-      {
-         double time = 0.0;
-
-         @Override
-         public void run()
-         {
-            if (Thread.interrupted())
-               return;
-            inputPublisher.publish(messageGenerator.apply(time));
-            time += dt;
-         }
-      }, 0, (int) (dt * 1000), TimeUnit.MILLISECONDS);
-   }
-
    @Test
    public void testStreamingToController()
+   {
+      testStreamingToController(0.15, 0.25);
+   }
+
+   public void testStreamingToController(double handPositionMeanErrorThreshold, double handOrientationMeanErrorThreshold)
+   {
+      IKStreamingTestRunParameters testRunParameters = new IKStreamingTestRunParameters();
+      testRunParameters.setHandPositionMeanErrorThreshold(handPositionMeanErrorThreshold);
+      testRunParameters.setHandOrientationMeanErrorThreshold(handOrientationMeanErrorThreshold);
+      testRunParameters.setMessageGeneratorDT(0.01);
+      testRunParameters.setMessageGenerator(circleMessageGenerator(newRobotModel().createFullRobotModel(), true, 0.125));
+      testStreamingToController(testRunParameters);
+   }
+
+   public void testStreamingToController(IKStreamingTestRunParameters ikStreamingTestRunParameters)
    {
       YoRegistry spyRegistry = new YoRegistry("spy");
       YoDouble handPositionMeanError = new YoDouble("HandsPositionMeanError", spyRegistry);
       YoDouble handOrientationMeanError = new YoDouble("HandsOrientationMeanError", spyRegistry);
 
-      setupWithWalkingController(new Controller()
+      setupWithWalkingController(ikStreamingTestRunParameters.isUseCPUClock(), ikStreamingTestRunParameters.toolboxParameters(), new Controller()
       {
-         private final SideDependentList<YoFramePose3D> handDesiredPoses = new SideDependentList<>(side -> new YoFramePose3D(side.getCamelCaseName()
-               + "HandDesired", worldFrame, spyRegistry));
-         private final SideDependentList<YoFramePose3D> handCurrentPoses = new SideDependentList<>(side -> new YoFramePose3D(side.getCamelCaseName()
-               + "HandCurrent", worldFrame, spyRegistry));
-         private final SideDependentList<YoDouble> handPositionErrors = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseName()
-               + "HandPositionError", spyRegistry));
-         private final SideDependentList<YoDouble> handOrientationErrors = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseName()
-               + "HandOrientationError", spyRegistry));
+         private final SideDependentList<YoFramePose3D> handDesiredPoses = new SideDependentList<>(side -> new YoFramePose3D(
+               side.getCamelCaseName() + "HandDesired", worldFrame, spyRegistry));
+         private final SideDependentList<YoFramePose3D> handCurrentPoses = new SideDependentList<>(side -> new YoFramePose3D(
+               side.getCamelCaseName() + "HandCurrent", worldFrame, spyRegistry));
+         private final SideDependentList<YoFramePose3D> handControllerPoses = new SideDependentList<>(side -> new YoFramePose3D(
+               side.getCamelCaseName() + "HandController", worldFrame, spyRegistry));
+         private final SideDependentList<YoDouble> handPositionErrors = new SideDependentList<>(side -> new YoDouble(
+               side.getCamelCaseName() + "HandPositionError", spyRegistry));
+         private final SideDependentList<YoDouble> handOrientationErrors = new SideDependentList<>(side -> new YoDouble(
+               side.getCamelCaseName() + "HandOrientationError", spyRegistry));
          private YoDouble time;
          private YoBoolean isStreaming;
          private YoDouble streamingStartTime;
@@ -457,6 +472,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
             {
                handDesiredPoses.values().forEach(YoFramePose3D::setToNaN);
                handCurrentPoses.values().forEach(YoFramePose3D::setToNaN);
+               handControllerPoses.values().forEach(YoFramePose3D::setToNaN);
                return;
             }
 
@@ -466,6 +482,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
             {
                handDesiredPoses.values().forEach(YoFramePose3D::setToNaN);
                handCurrentPoses.values().forEach(YoFramePose3D::setToNaN);
+               handControllerPoses.values().forEach(YoFramePose3D::setToNaN);
                return;
             }
 
@@ -473,11 +490,13 @@ public abstract class KinematicsStreamingToolboxControllerTest
             {
                YoFramePose3D handDesiredPose = handDesiredPoses.get(robotSide);
                YoFramePose3D handCurrentPose = handCurrentPoses.get(robotSide);
+               YoFramePose3D handControllerPose = handControllerPoses.get(robotSide);
                YoDouble handPositionError = handPositionErrors.get(robotSide);
                YoDouble handOrientationError = handOrientationErrors.get(robotSide);
 
                handDesiredPose.setFromReferenceFrame(desiredFullRobotModel.getHandControlFrame(robotSide));
                handCurrentPose.setFromReferenceFrame(toolboxController.getTools().getCurrentFullRobotModel().getHandControlFrame(robotSide));
+               handControllerPose.setFromReferenceFrame(simulationTestHelper.getControllerFullRobotModel().getHandControlFrame(robotSide));
                handPositionError.set(handDesiredPose.getPositionDistance(handCurrentPose));
                handOrientationError.set(handDesiredPose.getOrientationDistance(handCurrentPose));
                positionMean.increment(handPositionError.getValue());
@@ -495,17 +514,59 @@ public abstract class KinematicsStreamingToolboxControllerTest
          }
       });
 
-      boolean success = simulationTestHelper.simulateNow(0.5);
-      assertTrue(success);
+      if (ikStreamingTestRunParameters.getRegistry() != null)
+         simulationTestHelper.addRegistry(ikStreamingTestRunParameters.getRegistry());
 
+      IKStreamingMessageGenerator ikStreamingMessageGenerator = ikStreamingTestRunParameters.messageGenerator();
+
+      ghost.addThrottledController(new Controller()
+      {
+         @Override
+         public void initialize()
+         {
+            try
+            {
+               ikStreamingMessageGenerator.initialize();
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+            }
+         }
+
+         @Override
+         public void doControl()
+         {
+            try
+            {
+               double time = simulationTestHelper.getSimulationTime();
+               KinematicsStreamingToolboxInputMessage message = ikStreamingMessageGenerator.update(time);
+               if (message != null)
+                  inputPublisher.publish(message);
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+            }
+         }
+      }, ikStreamingTestRunParameters.messageGeneratorDT());
+
+      simulationTestHelper.start();
+      SimRunner simRunner = new SimRunner(simulationTestHelper);
+
+      SimulationConstructionSet2 scs = simulationTestHelper.getSimulationConstructionSet();
+      scs.waitUntilVisualizerFullyUp();
+      Platform.runLater(() ->
+                        {
+                           Button restart = new Button("Restart");
+                           restart.setOnAction(event -> simRunner.reset());
+                           scs.addCustomGUIControl(restart);
+                        });
+
+      assertTrue(simRunner.simulateNow(0.5));
       wakeupToolbox();
 
-      ScheduledFuture<?> scheduleMessageGenerator = scheduleMessageGenerator(0.01, circleMessageGenerator(newRobotModel().createFullRobotModel(), true, 0.125));
-
-      success = simulationTestHelper.simulateNow(10.0);
-      assertTrue(success);
-
-      scheduleMessageGenerator.cancel(true);
+      assertTrue(simRunner.simulateNow(ikStreamingTestRunParameters.simulationDuration()));
 
       KinematicsStreamingToolboxInputMessage message = new KinematicsStreamingToolboxInputMessage();
       message.setStreamToController(false);
@@ -513,46 +574,191 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       sleepToolbox();
 
-      executor.shutdownNow();
-
       // Asserts that the spy did run and that the toolbox or something did not just hang
       assertNotEquals(0.0, handPositionMeanError.getValue());
       assertNotEquals(0.0, handOrientationMeanError.getValue());
       // TODO Pretty bad assertions here, need to figure out how to improve this test later.
       System.out.println("Position error avg: " + handPositionMeanError.getValue() + ", orientation error avg: " + handOrientationMeanError.getValue());
-      assertTrue(handPositionMeanError.getValue() < 0.15, "Mean position error is: " + handPositionMeanError.getValue());
-      assertTrue(handOrientationMeanError.getValue() < 0.25, "Mean orientation error is: " + handOrientationMeanError.getValue());
+      assertTrue(handPositionMeanError.getValue() < ikStreamingTestRunParameters.handPositionMeanErrorThreshold(),
+                 "Mean position error is: " + handPositionMeanError.getValue());
+      assertTrue(handOrientationMeanError.getValue() < ikStreamingTestRunParameters.handOrientationMeanErrorThreshold(),
+                 "Mean orientation error is: " + handOrientationMeanError.getValue());
    }
 
-   public static DoubleFunction<KinematicsStreamingToolboxInputMessage> circleMessageGenerator(FullHumanoidRobotModel fullRobotModel,
-                                                                                               boolean streamToController,
-                                                                                               double frequency)
+   private class SimRunner
+   {
+      private SCS2AvatarTestingSimulation simulationTestHelper;
+
+      public SimRunner(SCS2AvatarTestingSimulation simulationTestHelper)
+      {
+         this.simulationTestHelper = simulationTestHelper;
+      }
+
+      private final AtomicBoolean resetSimulation = new AtomicBoolean(false);
+
+      public void reset()
+      {
+         resetSimulation.set(true);
+      }
+
+      public boolean simulateNow(double duration)
+      {
+         return simulateNow((int) (duration / simulationTestHelper.getSimulationDT()));
+      }
+
+      public boolean simulateNow(long numberOfTicks)
+      {
+         SimulationConstructionSet2 scs = simulationTestHelper.getSimulationConstructionSet();
+         SimulationSession session = scs.getSimulationSession();
+
+         if (session.isSessionShutdown())
+            return false;
+
+         boolean sessionStartedInitialValue = scs.isSimulationThreadRunning();
+
+         if (sessionStartedInitialValue)
+         {
+            if (!scs.stopSimulationThread())
+               return false;
+         }
+
+         SessionMode activeModeInitialValue = session.getActiveMode();
+         long maxDurationInitialValue = session.getRunMaxDuration();
+         session.submitRunMaxDuration(-1L); // Make sure the max duration does not interfere with the number of ticks.
+
+         try
+         {
+            session.setSessionMode(SessionMode.RUNNING);
+
+            boolean success = true;
+
+            if (numberOfTicks == -1L || numberOfTicks == Long.MAX_VALUE)
+            {
+               return scs.simulateNow(numberOfTicks);
+            }
+            else
+            {
+               for (long tick = 0; tick < numberOfTicks; tick++)
+               {
+                  if (session.isSessionShutdown())
+                     return false;
+
+                  if (!handleVisualizerSessionModeRequests())
+                     break;
+
+                  if (resetSimulation.getAndSet(false))
+                  {
+                     scs.reinitializeSimulation();
+                     tick = 0;
+                  }
+
+                  success = session.runTick();
+
+                  if (!success)
+                     break;
+               }
+            }
+
+            return success;
+         }
+         finally
+         {
+            // This ensures that the controller is being pause.
+            session.getPhysicsEngine().pause();
+            session.submitRunMaxDuration(maxDurationInitialValue); // Restore the max duration.
+            session.requestBufferListenerForceUpdate();
+
+            if (sessionStartedInitialValue)
+               session.startSessionThread();
+            session.setSessionMode(activeModeInitialValue);
+         }
+      }
+
+      private boolean handleVisualizerSessionModeRequests()
+      {
+         SimulationConstructionSet2 scs = simulationTestHelper.getSimulationConstructionSet();
+         SimulationSession session = scs.getSimulationSession();
+
+         if (scs.isSimulating() || !session.hasWrittenBufferInLastRunTick())
+            return true; // Make sure we stop running when the buffer was just updated.
+
+         // The GUI requested a mode change, we pause the simulation until the GUI request RUNNING again.
+         CountDownLatch latch = new CountDownLatch(1);
+
+         SessionModeChangeListener listener = (prevMode, newMode) ->
+         {
+            if (newMode != prevMode && newMode == SessionMode.RUNNING)
+            {
+               scs.stopSimulationThread();
+               if (scs.getBufferCurrentIndex() != scs.getBufferOutPoint())
+               { // We make sure to go back to the out-point
+                  scs.gotoBufferOutPoint();
+                  finalizePauseTick();
+               }
+               latch.countDown();
+            }
+         };
+         session.addPreSessionModeChangeListener(listener);
+
+         session.startSessionThread();
+
+         try
+         {
+            latch.await();
+         }
+         catch (InterruptedException e)
+         {
+            return false;
+         }
+         finally
+         {
+            session.removePreSessionModeChangeListener(listener);
+         }
+
+         return true;
+      }
+
+      private void finalizePauseTick()
+      {
+         SimulationConstructionSet2 scs = simulationTestHelper.getSimulationConstructionSet();
+         SimulationSession session = scs.getSimulationSession();
+         try
+         {
+            Method finalizePauseTick = Session.class.getDeclaredMethod("finalizePauseTick", boolean.class);
+            finalizePauseTick.setAccessible(true);
+            finalizePauseTick.invoke(session, true);
+         }
+         catch (Exception e)
+         {
+            throw new RuntimeException(e);
+         }
+      }
+   }
+
+   public static IKStreamingMessageGenerator circleMessageGenerator(FullHumanoidRobotModel fullRobotModel, boolean streamToController, double frequency)
    {
       double circleRadius = 0.25;
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(side -> new Point3D(0.3, side.negateIfRightSide(0.225), 1.0));
-      SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ? new Vector3D(0.0, 0.0, 0.0)
-            : new Vector3D());
+      SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ?
+            new Vector3D(0.0, 0.0, 0.0) :
+            new Vector3D());
 
-      return new DoubleFunction<KinematicsStreamingToolboxInputMessage>()
+      return time ->
       {
-         @Override
-         public KinematicsStreamingToolboxInputMessage apply(double time)
-         {
-            KinematicsStreamingToolboxInputMessage input = new KinematicsStreamingToolboxInputMessage();
-            input.setStreamToController(streamToController);
+         KinematicsStreamingToolboxInputMessage input = new KinematicsStreamingToolboxInputMessage();
+         input.setStreamToController(streamToController);
 
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               FramePoint3D position = circlePositionAt(time,
-                                                        robotSide.negateIfRightSide(frequency),
-                                                        circleRadius,
-                                                        circleCenters.get(robotSide),
-                                                        circleCenterVelocities.get(robotSide));
-               KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(fullRobotModel.getHand(robotSide), position);
-               input.getInputs().add().set(message);
-            }
-            return input;
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            FramePoint3D position = circlePositionAt(time,
+                                                     robotSide.negateIfRightSide(frequency),
+                                                     circleRadius,
+                                                     circleCenters.get(robotSide),
+                                                     circleCenterVelocities.get(robotSide));
+            KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(fullRobotModel.getHand(robotSide), position);
+            input.getInputs().add().set(message);
          }
+         return input;
       };
    }
 
@@ -578,12 +784,131 @@ public abstract class KinematicsStreamingToolboxControllerTest
    public static List<VisualDefinition> getCollisionVisuals(Collidable collidable)
    {
       Shape3DReadOnly shape = collidable.getShape();
-      RigidBodyTransform transformToParentJoint = collidable.getShape().getReferenceFrame()
+      RigidBodyTransform transformToParentJoint = collidable.getShape()
+                                                            .getReferenceFrame()
                                                             .getTransformToDesiredFrame(collidable.getRigidBody().getParentJoint().getFrameAfterJoint());
       VisualDefinitionFactory visualFactory = new VisualDefinitionFactory();
       visualFactory.appendTransform(transformToParentJoint);
       visualFactory.setDefaultMaterial(ColorDefinitions.DarkGreen().derive(0, 1, 1, 0.5));
       visualFactory.addShape(shape);
       return visualFactory.getVisualDefinitions();
+   }
+
+   public static final class IKStreamingTestRunParameters
+   {
+      private KinematicsStreamingToolboxParameters toolboxParameters = KinematicsStreamingToolboxParameters.defaultParameters();
+      private double handPositionMeanErrorThreshold = 0.15;
+      private double handOrientationMeanErrorThreshold = 0.25;
+      private double messageGeneratorDT = 0.01;
+      private IKStreamingMessageGenerator messageGenerator;
+      private double simulationDuration = 10.0;
+      private boolean useCPUClock = false;
+
+      private YoRegistry registry;
+
+      public IKStreamingTestRunParameters()
+      {
+      }
+
+      public void setToolboxParameters(KinematicsStreamingToolboxParameters toolboxParameters)
+      {
+         this.toolboxParameters = toolboxParameters;
+      }
+
+      public KinematicsStreamingToolboxParameters toolboxParameters()
+      {
+         return toolboxParameters;
+      }
+
+      public void setHandPositionMeanErrorThreshold(double handPositionMeanErrorThreshold)
+      {
+         this.handPositionMeanErrorThreshold = handPositionMeanErrorThreshold;
+      }
+
+      public double handPositionMeanErrorThreshold()
+      {
+         return handPositionMeanErrorThreshold;
+      }
+
+      public void setHandOrientationMeanErrorThreshold(double handOrientationMeanErrorThreshold)
+      {
+         this.handOrientationMeanErrorThreshold = handOrientationMeanErrorThreshold;
+      }
+
+      public double handOrientationMeanErrorThreshold()
+      {
+         return handOrientationMeanErrorThreshold;
+      }
+
+      public void setMessageGeneratorDT(double messageGeneratorDT)
+      {
+         this.messageGeneratorDT = messageGeneratorDT;
+      }
+
+      public double messageGeneratorDT()
+      {
+         return messageGeneratorDT;
+      }
+
+      public void setMessageGenerator(IKStreamingMessageGenerator messageGenerator)
+      {
+         this.messageGenerator = messageGenerator;
+      }
+
+      public IKStreamingMessageGenerator messageGenerator()
+      {
+         return messageGenerator;
+      }
+
+      public void setSimulationDuration(double simulationDuration)
+      {
+         this.simulationDuration = simulationDuration;
+      }
+
+      public double simulationDuration()
+      {
+         return simulationDuration;
+      }
+
+      public void setUseCPUClock(boolean useCPUClock)
+      {
+         this.useCPUClock = useCPUClock;
+      }
+
+      public boolean isUseCPUClock()
+      {
+         return useCPUClock;
+      }
+
+      public void setRegistry(YoRegistry registry)
+      {
+         this.registry = registry;
+      }
+
+      public YoRegistry getRegistry()
+      {
+         return registry;
+      }
+
+      @Override
+      public String toString()
+      {
+         return "[toolboxParameters=%s, handPositionMeanErrorThreshold=%s, handOrientationMeanErrorThreshold=%s, messageGeneratorDT=%s, messageGenerator=%s, simulationDuration=%s]".formatted(
+               toolboxParameters,
+               handPositionMeanErrorThreshold,
+               handOrientationMeanErrorThreshold,
+               messageGeneratorDT,
+               messageGenerator,
+               simulationDuration);
+      }
+   }
+
+   public interface IKStreamingMessageGenerator
+   {
+      default void initialize()
+      {
+      }
+
+      KinematicsStreamingToolboxInputMessage update(double time);
    }
 }
