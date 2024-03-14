@@ -168,7 +168,6 @@ public abstract class HumanoidStepReachabilityCalculator
       toolboxController = new HumanoidKinematicsToolboxController(commandInputManager,
                                                                   statusOutputManager,
                                                                   desiredFullRobotModel,
-                                                                  robotModel,
                                                                   updateDT,
                                                                   yoGraphicsListRegistry,
                                                                   mainRegistry);

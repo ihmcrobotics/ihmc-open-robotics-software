@@ -63,7 +63,6 @@ public class HumanoidKinematicsSolver
       controller = new HumanoidKinematicsToolboxController(commandInputManager,
                                                            statusOutputManager,
                                                            desiredFullRobotModel,
-                                                           fullRobotModelFactory,
                                                            updateDT,
                                                            yoGraphicsListRegistry,
                                                            registry);

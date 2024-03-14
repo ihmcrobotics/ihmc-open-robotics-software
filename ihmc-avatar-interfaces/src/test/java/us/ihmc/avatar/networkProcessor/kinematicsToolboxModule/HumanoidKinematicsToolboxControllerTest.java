@@ -138,7 +138,6 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       toolboxController = new HumanoidKinematicsToolboxController(commandInputManager,
                                                                   statusOutputManager,
                                                                   desiredFullRobotModel,
-                                                                  getRobotModel(),
                                                                   updateDT,
                                                                   yoGraphicsListRegistry,
                                                                   mainRegistry);

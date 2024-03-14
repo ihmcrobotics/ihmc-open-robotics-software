@@ -71,7 +71,6 @@ public class KinematicsToolboxModule extends ToolboxModule
       kinematicsToolBoxController = new HumanoidKinematicsToolboxController(commandInputManager,
                                                                             statusOutputManager,
                                                                             fullRobotModel,
-                                                                            robotModel,
                                                                             0.001,
                                                                             yoGraphicsListRegistry,
                                                                             registry);
