@@ -22,11 +22,30 @@ public class KinematicsStreamingToolboxParameters
       FBC_STYLE
    }
 
+   public enum ClockType
+   {
+      /**
+       * Compute the time based on the system clock, i.e. {@code System.nanoTime()}.
+       * Helpful when the toolbox is running in a non-real-time environment.
+       */
+      CPU_CLOCK,
+      /**
+       * Compute the time based on the toolbox internal clock.
+       * Helpful when the toolbox is running in a real-time environment or for test purposes.
+       */
+      FIXED_DT;
+   }
+
+   private ClockType clockType;
    /**
     * Period at which the toolbox will update its internal state.
     * It's best to shoot for a multiple of the controller update period.
     */
    private double toolboxUpdatePeriod;
+   /**
+    * Duration after which the controller will go to sleep if no input is received.
+    */
+   private double timeThresholdForSleeping;
 
    /**
     * Upon reception of a new streaming message from the IK, the controller will extrapolate the solution to the future to avoid discontinuities.
@@ -192,7 +211,9 @@ public class KinematicsStreamingToolboxParameters
 
    public void setDefault()
    {
+      clockType = ClockType.CPU_CLOCK;
       toolboxUpdatePeriod = 0.005;
+      timeThresholdForSleeping = 3.0;
       streamIntegrationDuration = 0.3;
 
       centerOfMassSafeMargin = 0.05;
@@ -256,9 +277,19 @@ public class KinematicsStreamingToolboxParameters
       defaultSolverConfiguration.setEnableJointVelocityLimits(true);
    }
 
+   public ClockType getClockType()
+   {
+      return clockType;
+   }
+
    public double getToolboxUpdatePeriod()
    {
       return toolboxUpdatePeriod;
+   }
+
+   public double getTimeThresholdForSleeping()
+   {
+      return timeThresholdForSleeping;
    }
 
    public double getStreamIntegrationDuration()
@@ -446,9 +477,19 @@ public class KinematicsStreamingToolboxParameters
       return defaultSolverConfiguration;
    }
 
+   public void setClockType(ClockType clockType)
+   {
+      this.clockType = clockType;
+   }
+
    public void setToolboxUpdatePeriod(double toolboxUpdatePeriod)
    {
       this.toolboxUpdatePeriod = toolboxUpdatePeriod;
+   }
+
+   public void setTimeThresholdForSleeping(double timeThresholdForSleeping)
+   {
+      this.timeThresholdForSleeping = timeThresholdForSleeping;
    }
 
    public void setStreamIntegrationDuration(double streamIntegrationDuration)

@@ -1,7 +1,15 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
-import controller_msgs.msg.dds.*;
-import toolbox_msgs.msg.dds.*;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.WholeBodyStreamingMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -51,7 +59,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
             (int) (parameters.getToolboxUpdatePeriod() * 1000),
             pubSubImplementation);
 
-      setTimeWithoutInputsBeforeGoingToSleep(3.0);
+      setTimeWithoutInputsBeforeGoingToSleep(parameters.getTimeThresholdForSleeping());
       controller = new KinematicsStreamingToolboxController(commandInputManager,
                                                             statusOutputManager,
                                                             parameters,
