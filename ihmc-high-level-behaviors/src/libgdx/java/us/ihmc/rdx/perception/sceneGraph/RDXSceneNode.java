@@ -20,7 +20,7 @@ public class RDXSceneNode
    private final RDXReferenceFrameGraphic referenceFrameGraphic;
    private final String detailsText;
    private boolean removed = false;
-   private ImBoolean hideGraphics = new ImBoolean(false);
+   private final ImBoolean hideGraphics = new ImBoolean(false);
 
    public RDXSceneNode(SceneNode sceneNode)
    {
