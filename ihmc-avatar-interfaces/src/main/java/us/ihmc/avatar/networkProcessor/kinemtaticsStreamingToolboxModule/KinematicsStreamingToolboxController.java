@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters.ClockType;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -54,7 +55,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    private final KSTTools tools;
 
    private final ExecutionTimer executionTimer = new ExecutionTimer("IKStreamingTimer", registry);
-   private KSTTimeProvider timeProvider = KSTTimeProvider.createCPUClockBased();
+   private KSTTimeProvider timeProvider;
    private final YoDouble time = new YoDouble("time", registry);
    private final StateMachine<KSTState, State> stateMachine;
 
@@ -72,6 +73,13 @@ public class KinematicsStreamingToolboxController extends ToolboxController
                                                YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
+
+      if (parameters.getClockType() == ClockType.CPU_CLOCK)
+         timeProvider = KSTTimeProvider.createCPUClockBased();
+      else if (parameters.getClockType() == ClockType.FIXED_DT)
+         timeProvider = KSTTimeProvider.createFixedDT(parameters.getToolboxUpdatePeriod());
+      else
+         throw new RuntimeException("Unknown clock type: " + parameters.getClockType());
 
       tools = new KSTTools(commandInputManager,
                            statusOutputManager,
