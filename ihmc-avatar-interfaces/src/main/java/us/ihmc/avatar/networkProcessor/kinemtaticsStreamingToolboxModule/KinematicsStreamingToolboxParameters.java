@@ -7,6 +7,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.tools.UnitConversions;
 
+import java.util.Map;
+
 public class KinematicsStreamingToolboxParameters
 {
    public enum InputStateEstimatorType
@@ -199,6 +201,10 @@ public class KinematicsStreamingToolboxParameters
 
    private InputStateEstimatorType inputStateEstimatorType;
 
+   /**
+    * Map from joint name to initial 1-DoF joint position.
+    */
+   private Map<String, Double> initialConfigurationMap;
    private final KinematicsStreamingToolboxConfigurationMessage defaultConfiguration = new KinematicsStreamingToolboxConfigurationMessage();
    private final KinematicsToolboxConfigurationMessage defaultSolverConfiguration = new KinematicsToolboxConfigurationMessage();
 
@@ -258,6 +264,8 @@ public class KinematicsStreamingToolboxParameters
       publishingPeriod = 5.0 * 0.006;
 
       inputStateEstimatorType = InputStateEstimatorType.FIRST_ORDER_LPF;
+
+      initialConfigurationMap.clear();
 
       defaultConfiguration.setLockPelvis(false);
       defaultConfiguration.setLockChest(false);
@@ -462,9 +470,19 @@ public class KinematicsStreamingToolboxParameters
       return useStreamingPublisher;
    }
 
+   public double getPublishingPeriod()
+   {
+      return publishingPeriod;
+   }
+
    public InputStateEstimatorType getInputStateEstimatorType()
    {
       return inputStateEstimatorType;
+   }
+
+   public Map<String, Double> getInitialConfigurationMap()
+   {
+      return initialConfigurationMap;
    }
 
    public KinematicsStreamingToolboxConfigurationMessage getDefaultConfiguration()
@@ -681,13 +699,13 @@ public class KinematicsStreamingToolboxParameters
       this.publishingPeriod = publishingPeriod;
    }
 
-   public double getPublishingPeriod()
-   {
-      return publishingPeriod;
-   }
-
    public void setInputStateEstimatorType(InputStateEstimatorType inputStateEstimatorType)
    {
       this.inputStateEstimatorType = inputStateEstimatorType;
+   }
+
+   public void setInitialConfigurationMap(Map<String, Double> initialConfigurationMap)
+   {
+      this.initialConfigurationMap = initialConfigurationMap;
    }
 }
