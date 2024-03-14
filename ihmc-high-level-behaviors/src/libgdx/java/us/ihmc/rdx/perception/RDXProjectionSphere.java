@@ -41,6 +41,7 @@ public class RDXProjectionSphere
    private final ImDouble principlePointX = new ImDouble(0.0);
    private final ImDouble principlePointY = new ImDouble(0.5);
    private final ImBoolean renderSphereIfNoTexture = new ImBoolean(true);
+   private final ImBoolean hidden = new ImBoolean(false);
    private Model model;
    private final Vector3D vertexRay = new Vector3D();
    private Mesh mesh;
@@ -69,9 +70,10 @@ public class RDXProjectionSphere
       {
          ImGui.endDisabled();
       }
-      rebuildMesh |= ImGuiTools.sliderDouble(labels.get("Principle point X (Cx)"), principlePointX, -0.1, 0.1);
+      rebuildMesh |= ImGuiTools.sliderDouble(labels.get("Principle point X (Cx)"), principlePointX, -0.5, 0.5);
       rebuildMesh |= ImGuiTools.sliderDouble(labels.get("Principle point Y (Cy)"), principlePointY, -0.5, 0.5);
       rebuildMesh |= ImGui.checkbox(labels.get("Render sphere if no texture"), renderSphereIfNoTexture);
+      rebuildMesh |= ImGui.checkbox(labels.get("Hidden"), hidden);
 
       if (rebuildMesh)
          rebuildUVSphereMesh();
@@ -137,6 +139,8 @@ public class RDXProjectionSphere
    {
       boolean skipRenderables = false;
       if (!renderSphereIfNoTexture.get() && latestTexture == null)
+         skipRenderables = true;
+      if (hidden.get())
          skipRenderables = true;
 
       if (modelInstance != null && !skipRenderables)

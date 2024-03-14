@@ -12,6 +12,8 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Point;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.avatar.colorVision.stereo.DualBlackflyUDPReceiver;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -34,7 +36,7 @@ public class RDXDualBlackflySphericalProjection
 {
    private final RDXBaseUI baseUI;
    private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(RDXProjectionSphere::new);
-   private final ImDouble pupillaryDistance = new ImDouble(0.100000);
+   private final ImDouble pupillaryDistance = new ImDouble(-0.039024);
    private final FramePose3D leftEyePose = new FramePose3D();
    private final FramePose3D rightEyePose = new FramePose3D();
    private final ReferenceFrame robotZUpFrame;
@@ -46,7 +48,7 @@ public class RDXDualBlackflySphericalProjection
    private volatile boolean reconnecting = false;
    private Thread reconnectThread;
 
-   private final ImDouble projectionZOffset = new ImDouble(1.040650);
+   private final ImDouble projectionZOffset = new ImDouble(0.422764);
    private final SideDependentList<RDXReferenceFrameGraphic> eyeFrameGraphics = new SideDependentList<>();
 
    private long lastFrameUpdateTime;
@@ -55,8 +57,6 @@ public class RDXDualBlackflySphericalProjection
    {
       this.baseUI = RDXBaseUI.getInstance();
       this.robotZUpFrame = robotZUpFrame;
-
-      projectionSpheres.get(RobotSide.LEFT).setPrinciplePointX(-0.072358);
    }
 
    public void renderControls()
@@ -71,10 +71,10 @@ public class RDXDualBlackflySphericalProjection
       projectionSpheres.get(RobotSide.RIGHT).setProjectionScaleX(projectionSpheres.get(RobotSide.LEFT).getProjectionScaleX());
       projectionSpheres.get(RobotSide.RIGHT).setProjectionScaleY(projectionSpheres.get(RobotSide.LEFT).getProjectionScaleY());
       projectionSpheres.get(RobotSide.RIGHT).setRadius(projectionSpheres.get(RobotSide.LEFT).getRadius());
-      double principlePointX = projectionSpheres.get(RobotSide.LEFT).getPrinciplePointX();
-      double principlePointY = projectionSpheres.get(RobotSide.LEFT).getPrinciplePointY();
-      projectionSpheres.get(RobotSide.RIGHT).setPrinciplePointX(-principlePointX);
-      projectionSpheres.get(RobotSide.RIGHT).setPrinciplePointY(principlePointY);
+//      double principlePointX = projectionSpheres.get(RobotSide.LEFT).getPrinciplePointX();
+//      double principlePointY = projectionSpheres.get(RobotSide.LEFT).getPrinciplePointY();
+//      projectionSpheres.get(RobotSide.RIGHT).setPrinciplePointX(-principlePointX);
+//      projectionSpheres.get(RobotSide.RIGHT).setPrinciplePointY(principlePointY);
    }
 
    public boolean isConnectingOrConnected()
@@ -179,6 +179,13 @@ public class RDXDualBlackflySphericalProjection
                BytePointer rgba8888BytePointer = new BytePointer(pixmap.getPixels());
                Mat rgba8Mat = new Mat(mat.rows(), mat.cols(), opencv_core.CV_8UC4, rgba8888BytePointer);
                opencv_imgproc.cvtColor(mat, rgba8Mat, opencv_imgproc.COLOR_BayerBG2RGBA);
+
+               // Draw a circle in the center
+               int centerX = mat.cols() / 2;
+               int centerY = mat.rows() / 2;
+               int radius = 16;
+               opencv_imgproc.circle(rgba8Mat, new Point(centerX, centerY), radius, new Scalar(0, 255, 0, 255), opencv_imgproc.CV_FILLED, 8, 0);
+
                Texture texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
 
                projectionSpheres.get(side).updateTexture(texture, 0.5f);
@@ -268,7 +275,7 @@ public class RDXDualBlackflySphericalProjection
                }
                else
                {
-                  RDXReferenceFrameGraphic eyeFrameGraphic = new RDXReferenceFrameGraphic(0.5);
+                  RDXReferenceFrameGraphic eyeFrameGraphic = new RDXReferenceFrameGraphic(0.8);
                   eyeFrameGraphic.setToReferenceFrame(baseUI.getVRManager().getContext().getEyes().get(side).getEyeXForwardZUpFrame());
                   eyeFrameGraphics.put(side, eyeFrameGraphic);
                }
