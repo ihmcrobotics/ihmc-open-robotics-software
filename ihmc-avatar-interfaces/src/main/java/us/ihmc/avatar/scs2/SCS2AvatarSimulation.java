@@ -8,7 +8,7 @@ import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.DisposableRobotController;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingRealTimePluginFactory.IKStreamingRTControllerThread;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.IKStreamingRTPluginFactory.IKStreamingRTThread;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
@@ -49,7 +49,7 @@ public class SCS2AvatarSimulation
    private AvatarEstimatorThread estimatorThread;
    private AvatarControllerThread controllerThread;
    private AvatarStepGeneratorThread stepGeneratorThread;
-   private IKStreamingRTControllerThread ikStreamingRTThread;
+   private IKStreamingRTThread ikStreamingRTThread;
    private JointDesiredOutputWriter outputWriter;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private FullHumanoidRobotModel controllerFullRobotModel;
@@ -434,12 +434,12 @@ public class SCS2AvatarSimulation
       return stepGeneratorThread;
    }
 
-   public void setIKStreamingRTThread(IKStreamingRTControllerThread ikStreamingRTThread)
+   public void setIKStreamingRTThread(IKStreamingRTThread ikStreamingRTThread)
    {
       this.ikStreamingRTThread = ikStreamingRTThread;
    }
 
-   public IKStreamingRTControllerThread getIKStreamingRTThread()
+   public IKStreamingRTThread getIKStreamingRTThread()
    {
       return ikStreamingRTThread;
    }
