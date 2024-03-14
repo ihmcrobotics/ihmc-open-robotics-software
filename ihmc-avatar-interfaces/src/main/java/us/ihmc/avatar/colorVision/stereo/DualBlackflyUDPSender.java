@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.spinnaker.BlackflyModelProperties;
 import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerBlackflyManager;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -11,7 +12,11 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 
 public class DualBlackflyUDPSender
@@ -28,18 +33,29 @@ public class DualBlackflyUDPSender
    private final SideDependentList<Thread> publishThreads = new SideDependentList<>();
    private volatile boolean running;
 
-   public void start()
+   public void start(BlackflyModelProperties blackflyModelProperties)
    {
       running = true;
 
       SpinnakerBlackflyManager spinnakerBlackflyManager = new SpinnakerBlackflyManager();
 
+      double originalWidth = blackflyModelProperties.getImageWidthPixels();
+      double originalHeight = blackflyModelProperties.getImageHeightPixels();
+      double aspectRatio = originalWidth / originalHeight;
+
+      double croppedHeight = 960f;
+      double croppedWidth = croppedHeight * aspectRatio;
+
+      double xOffset = (originalWidth - croppedHeight) / 2;
+      double yOffset = (originalHeight - croppedHeight) / 2;
+
       for (RobotSide side : RobotSide.values())
       {
+
          Thread publishThread = new Thread(() ->
          {
-          SpinnakerBlackfly spinnakerBlackfly = spinnakerBlackflyManager.createSpinnakerBlackfly(
-                side == RobotSide.LEFT ? LEFT_SERIAL_NUMBER : RIGHT_SERIAL_NUMBER, 1920, 1200, 0, 0);
+            SpinnakerBlackfly spinnakerBlackfly = spinnakerBlackflyManager.createSpinnakerBlackfly(
+                  side == RobotSide.LEFT ? LEFT_SERIAL_NUMBER : RIGHT_SERIAL_NUMBER, (int) croppedWidth, (int) croppedHeight, (int) xOffset, (int) yOffset);
 
             DatagramSocket socket;
             try
@@ -169,7 +185,7 @@ public class DualBlackflyUDPSender
    {
       DualBlackflyUDPSender dualBlackflyUDPSender = new DualBlackflyUDPSender();
 
-      dualBlackflyUDPSender.start();
+      dualBlackflyUDPSender.start(BlackflyModelProperties.BFLY_U3_23S6C);
 
       Runtime.getRuntime().addShutdownHook(new Thread(dualBlackflyUDPSender::stop));
 
