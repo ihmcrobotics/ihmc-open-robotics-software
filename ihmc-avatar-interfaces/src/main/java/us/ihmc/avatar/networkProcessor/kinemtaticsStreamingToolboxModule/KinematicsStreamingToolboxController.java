@@ -95,6 +95,9 @@ public class KinematicsStreamingToolboxController extends ToolboxController
 
       stateMachine = createStateMachine(time);
       isDone.set(false);
+
+      if (parameters.getInitialConfigurationMap() != null)
+         setInitialRobotConfigurationNamedMap(parameters.getInitialConfigurationMap());
    }
 
    /**
