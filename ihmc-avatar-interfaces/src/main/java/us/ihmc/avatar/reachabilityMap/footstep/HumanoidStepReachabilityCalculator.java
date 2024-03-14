@@ -1,24 +1,8 @@
 package us.ihmc.avatar.reachabilityMap.footstep;
 
-import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyAtTargetFrame;
-import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
-import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyFreeYaw;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.stream.Collectors;
-
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.avatar.multiContact.CenterOfMassMotionControlAnchorDescription;
@@ -30,6 +14,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.SolutionQ
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
@@ -48,11 +33,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
-import us.ihmc.euclid.shape.primitives.interfaces.Capsule3DReadOnly;
-import us.ihmc.euclid.shape.primitives.interfaces.PointShape3DReadOnly;
-import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
-import us.ihmc.euclid.shape.primitives.interfaces.Sphere3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.*;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -106,6 +87,15 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.Collectors;
+
+import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.*;
 
 /**
  * Pattern matched off of HumanoidKinematicsToolboxControllerTest. Check there for reference if needed.
@@ -257,7 +247,8 @@ public abstract class HumanoidStepReachabilityCalculator
                }
             }
 
-            String filePath = getResourcesDirectory().replace('/', File.separatorChar) + File.separator + robotModel.getStepReachabilityResourceName().replace('/', File.separatorChar);
+            String filePath = getResourcesDirectory().replace('/', File.separatorChar) + File.separator + robotModel.getStepReachabilityResourceName()
+                                                                                                                    .replace('/', File.separatorChar);
             File reachabilityFile = new File(filePath);
             StepReachabilityIOHelper.writeToFile(reachabilityFile, snapshotDescriptions, spacingXYZ, yawDivisions, maximumOffsetYaw - minimumOffsetYaw);
 
@@ -269,7 +260,8 @@ public abstract class HumanoidStepReachabilityCalculator
             break;
 
          case TEST_WRITE_SCRIPT:
-            filePath = getResourcesDirectory().replace('/', File.separatorChar) + File.separator + robotModel.getStepReachabilityResourceName().replace('/', File.separatorChar);
+            filePath = getResourcesDirectory().replace('/', File.separatorChar) + File.separator + robotModel.getStepReachabilityResourceName()
+                                                                                                             .replace('/', File.separatorChar);
             reachabilityFile = new File(filePath);
 
             snapshotDescriptions = new ArrayList<>();
@@ -351,7 +343,7 @@ public abstract class HumanoidStepReachabilityCalculator
          commandInputManager.submitMessage(configurationMessage);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
-         toolboxController.updateRobotConfigurationData(robotConfigurationData);
+         toolboxController.setDesiredRobotStateUpdater(IKRobotStateUpdater.wrap(robotConfigurationData));
 
          // holds the feet at current configuration
          toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(randomizedFullRobotModel, getRobotModel(), true, true));
@@ -463,7 +455,7 @@ public abstract class HumanoidStepReachabilityCalculator
       commandInputManager.submitMessage(configurationMessage);
 
       //      snapGhostToFullRobotModel(targetFullRobotModel);
-      toolboxController.updateRobotConfigurationData(robotConfigurationData);
+      toolboxController.setDesiredRobotStateUpdater(IKRobotStateUpdater.wrap(robotConfigurationData));
 
       runKinematicsToolboxController();
 

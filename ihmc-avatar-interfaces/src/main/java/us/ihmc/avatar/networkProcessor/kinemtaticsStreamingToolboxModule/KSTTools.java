@@ -7,6 +7,8 @@ import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyStreamingMessagePublisher;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyTrajectoryMessagePublisher;
@@ -71,9 +73,7 @@ public class KSTTools
    private final WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
    private final YoDouble streamIntegrationDuration;
 
-   private final ConcurrentCopier<RobotConfigurationData> concurrentRobotConfigurationDataCopier = new ConcurrentCopier<>(RobotConfigurationData::new);
-   private boolean hasRobotDataConfiguration = false;
-   private final RobotConfigurationData robotConfigurationDataInternal = new RobotConfigurationData();
+   private IKRobotStateUpdater robotStateUpdater;
    private final ConcurrentCopier<CapturabilityBasedStatus> concurrentCapturabilityBasedStatusCopier = new ConcurrentCopier<>(CapturabilityBasedStatus::new);
    private boolean hasCapturabilityBasedStatus = false;
    private final CapturabilityBasedStatus capturabilityBasedStatusInternal = new CapturabilityBasedStatus();
@@ -141,8 +141,8 @@ public class KSTTools
                                                              yoGraphicsListRegistry,
                                                              registry);
 
-      KinematicsStreamingToolboxCommandConverter commandConversionHelper = new KinematicsStreamingToolboxCommandConverter(ikController.getCurrentFullRobotModel(),
-                                                                                                                          ikController.getCurrentReferenceFrames(),
+      KinematicsStreamingToolboxCommandConverter commandConversionHelper = new KinematicsStreamingToolboxCommandConverter(ikController.getInitialFullRobotModel(),
+                                                                                                                          ikController.getInitialReferenceFrames(),
                                                                                                                           desiredFullRobotModel,
                                                                                                                           ikController.getDesiredReferenceFrames());
       commandInputManager.registerConversionHelper(commandConversionHelper);
@@ -208,12 +208,7 @@ public class KSTTools
          areArmJointspaceOutputsEnabled.get(robotSide).set(configurationCommand.isArmJointspaceEnabled(robotSide));
       }
 
-      RobotConfigurationData newRobotConfigurationData = concurrentRobotConfigurationDataCopier.getCopyForReading();
-      if (newRobotConfigurationData != null)
-      {
-         robotConfigurationDataInternal.set(newRobotConfigurationData);
-         hasRobotDataConfiguration = true;
-      }
+      boolean wasRobotUpdated = robotStateUpdater.updateRobotConfiguration(currentRootJoint, currentOneDoFJoint);
 
       CapturabilityBasedStatus newCapturabilityBasedStatus = concurrentCapturabilityBasedStatusCopier.getCopyForReading();
       if (newCapturabilityBasedStatus != null)
@@ -222,18 +217,15 @@ public class KSTTools
          hasCapturabilityBasedStatus = true;
       }
 
-      if (hasRobotDataConfiguration)
+      if (wasRobotUpdated)
       {
-         walkingControllerMonotonicTime.set(Conversions.nanosecondsToSeconds(robotConfigurationDataInternal.getMonotonicTime()));
-         walkingControllerWallTime.set(Conversions.nanosecondsToSeconds(robotConfigurationDataInternal.getWallTime()));
-
-         for (int jointIndex = 0; jointIndex < currentOneDoFJoint.length; jointIndex++)
+         if (robotStateUpdater instanceof RobotConfigurationDataBasedUpdater rcdBasedUpdater)
          {
-            currentOneDoFJoint[jointIndex].setQ(robotConfigurationDataInternal.getJointAngles().get(jointIndex));
+            RobotConfigurationData lastRobotConfigurationData = rcdBasedUpdater.getLastRobotConfigurationData();
+            walkingControllerMonotonicTime.set(Conversions.nanosecondsToSeconds(lastRobotConfigurationData.getMonotonicTime()));
+            walkingControllerWallTime.set(Conversions.nanosecondsToSeconds(lastRobotConfigurationData.getWallTime()));
          }
 
-         Pose3DBasics rootJointPose = currentRootJoint.getJointPose();
-         rootJointPose.set(robotConfigurationDataInternal.getRootPosition(), robotConfigurationDataInternal.getRootOrientation());
          currentFullRobotModel.updateFrames();
       }
 
@@ -485,11 +477,10 @@ public class KSTTools
       message.getHeadTrajectoryMessage().getSo3Trajectory().getQueueingProperties().setMessageId(id);
    }
 
-   public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
+   public void setRobotStateUpdater(IKRobotStateUpdater robotStateUpdater)
    {
-      concurrentRobotConfigurationDataCopier.getCopyForWriting().set(newConfigurationData);
-      concurrentRobotConfigurationDataCopier.commit();
-      ikController.updateRobotConfigurationData(newConfigurationData);
+      this.robotStateUpdater = robotStateUpdater;
+      ikController.setDesiredRobotStateUpdater(robotStateUpdater);
    }
 
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
@@ -547,11 +538,6 @@ public class KSTTools
    public HumanoidKinematicsToolboxController getIKController()
    {
       return ikController;
-   }
-
-   public RobotConfigurationData getRobotConfigurationData()
-   {
-      return hasRobotDataConfiguration ? robotConfigurationDataInternal : null;
    }
 
    public CapturabilityBasedStatus getCapturabilityBasedStatus()

@@ -3,24 +3,10 @@ package us.ihmc.avatar.scs2;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
-import us.ihmc.avatar.AvatarControllerThread;
-import us.ihmc.avatar.AvatarEstimatorThread;
-import us.ihmc.avatar.AvatarEstimatorThreadFactory;
-import us.ihmc.avatar.AvatarSimulatedHandControlThread;
-import us.ihmc.avatar.AvatarStepGeneratorThread;
-import us.ihmc.avatar.ControllerTask;
-import us.ihmc.avatar.EstimatorTask;
-import us.ihmc.avatar.HumanoidSteppingPluginEnvironmentalConstraints;
-import us.ihmc.avatar.StepGeneratorTask;
+import us.ihmc.avatar.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
-import us.ihmc.avatar.factory.BarrierScheduledRobotController;
-import us.ihmc.avatar.factory.DisposableRobotController;
-import us.ihmc.avatar.factory.HumanoidRobotControlTask;
-import us.ihmc.avatar.factory.SimulatedHandControlTask;
-import us.ihmc.avatar.factory.SimulatedHandOutputWriter;
-import us.ihmc.avatar.factory.SimulatedHandSensorReader;
-import us.ihmc.avatar.factory.SingleThreadedRobotController;
+import us.ihmc.avatar.factory.*;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
@@ -34,11 +20,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeightMapBasedFootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ExternalControllerStateFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ExternalTransitionControllerStateFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StandReadyControllerStateFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
@@ -54,11 +36,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.dataBuffers.RegistrySendBufferBuilder;
@@ -489,6 +467,8 @@ public class SCS2AvatarSimulationFactory
       if (!createIKStreamingRealTimeController.get())
          return;
 
+      HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
+
       ikStreamingRealTimePluginFactory = new KinematicsStreamingRealTimePluginFactory();
       ikStreamingRealTimePluginFactory.setParameters(ikStreamingParameters.get());
       ikStreamingRTThread = ikStreamingRealTimePluginFactory.createRTController(robotModel.get().getSimpleRobotName(),
@@ -496,6 +476,7 @@ public class SCS2AvatarSimulationFactory
                                                                                 highLevelHumanoidControllerFactory.get().getCommandInputManager(),
                                                                                 highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
                                                                                 robotModel.get(),
+                                                                                contextDataFactory,
                                                                                 robotModel.get().getHumanoidRobotKinematicsCollisionModel());
       if (enableSCS1YoGraphics.get())
          simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(ikStreamingRTThread.getSCS1YoGraphicsListRegistry()));
@@ -908,7 +889,9 @@ public class SCS2AvatarSimulationFactory
       this.simulationDataBufferSize.set(simulationDataBufferSize);
    }
 
-   /** Must be set after record tick period in order to be correct. */
+   /**
+    * Must be set after record tick period in order to be correct.
+    */
    public void setSimulationDataBufferDuration(double bufferDuration)
    {
       this.simulationDataBufferSize.set((int) (bufferDuration / simulationDT.get() / simulationDataRecordTickPeriod.get()));

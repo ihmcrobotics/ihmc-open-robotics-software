@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Tag;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotConfigurationDataInitialSetup;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxMessageReplay;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
@@ -196,6 +197,8 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       toolboxController.setTrajectoryMessagePublisher(simulationTestHelper::publishToController);
       toolboxController.setStreamingMessagePublisher(simulationTestHelper::publishToController);
 
+      RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
+      toolboxController.setRobotStateUpdater(robotStateUpdater);
       toolboxROS2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class),
                                          s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
       toolboxROS2Node.createSubscription(controllerOutputTopic.withTypeName(CapturabilityBasedStatus.class),
