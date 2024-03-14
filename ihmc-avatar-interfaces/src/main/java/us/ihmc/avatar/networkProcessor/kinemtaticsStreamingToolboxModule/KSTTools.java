@@ -18,7 +18,6 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output.
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -74,9 +73,6 @@ public class KSTTools
    private final YoDouble streamIntegrationDuration;
 
    private IKRobotStateUpdater robotStateUpdater;
-   private final ConcurrentCopier<CapturabilityBasedStatus> concurrentCapturabilityBasedStatusCopier = new ConcurrentCopier<>(CapturabilityBasedStatus::new);
-   private boolean hasCapturabilityBasedStatus = false;
-   private final CapturabilityBasedStatus capturabilityBasedStatusInternal = new CapturabilityBasedStatus();
 
    private final double toolboxControllerPeriod;
    private final YoDouble walkingControllerMonotonicTime, walkingControllerWallTime;
@@ -209,13 +205,6 @@ public class KSTTools
       }
 
       boolean wasRobotUpdated = robotStateUpdater.updateRobotConfiguration(currentRootJoint, currentOneDoFJoint);
-
-      CapturabilityBasedStatus newCapturabilityBasedStatus = concurrentCapturabilityBasedStatusCopier.getCopyForReading();
-      if (newCapturabilityBasedStatus != null)
-      {
-         capturabilityBasedStatusInternal.set(newCapturabilityBasedStatus);
-         hasCapturabilityBasedStatus = true;
-      }
 
       if (wasRobotUpdated)
       {
@@ -485,8 +474,6 @@ public class KSTTools
 
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
    {
-      concurrentCapturabilityBasedStatusCopier.getCopyForWriting().set(newStatus);
-      concurrentCapturabilityBasedStatusCopier.commit();
       ikController.updateCapturabilityBasedStatus(newStatus);
    }
 
@@ -538,11 +525,6 @@ public class KSTTools
    public HumanoidKinematicsToolboxController getIKController()
    {
       return ikController;
-   }
-
-   public CapturabilityBasedStatus getCapturabilityBasedStatus()
-   {
-      return hasCapturabilityBasedStatus ? capturabilityBasedStatusInternal : null;
    }
 
    public double getToolboxControllerPeriod()
