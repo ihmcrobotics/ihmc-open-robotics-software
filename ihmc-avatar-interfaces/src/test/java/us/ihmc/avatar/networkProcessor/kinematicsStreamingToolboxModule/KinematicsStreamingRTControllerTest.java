@@ -9,6 +9,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxControllerTest.IKStreamingMessageGenerator;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxControllerTest.IKStreamingTestRunParameters;
 import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxControllerTest.SimRunner;
+import us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule.KinematicsStreamingToolboxControllerTest.SpyTrackingController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters.ClockType;
@@ -45,7 +46,7 @@ public abstract class KinematicsStreamingRTControllerTest
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    protected static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   protected static final MaterialDefinition ghostMaterial = new MaterialDefinition(ColorDefinitions.Yellow().derive(0, 1, 1, 0.25));
+   protected static final MaterialDefinition ghostMaterial = new MaterialDefinition(ColorDefinitions.Yellow().derive(0, 1, 0.2, 0.25));
    protected static final boolean visualize = simulationTestingParameters.getCreateGUI();
 
    protected YoRegistry toolboxRegistry;
@@ -79,6 +80,7 @@ public abstract class KinematicsStreamingRTControllerTest
                                                                                                                                              testEnvironment,
                                                                                                                                              simulationTestingParameters);
       simulationTestHelperFactory.addSecondaryRobot(ghost);
+      simulationTestHelperFactory.setRunMultiThreaded(false); // This is for the SpyController.
 
       simulationTestHelperFactory.createIKStreamingRealTimeController(true);
       toolboxParameters.setClockType(ClockType.FIXED_DT);
@@ -88,6 +90,8 @@ public abstract class KinematicsStreamingRTControllerTest
                                                                                       .findVariable(WalkingCommandConsumer.class.getSimpleName(),
                                                                                                     "isAutomaticManipulationAbortEnabled");
       isAutomaticManipulationAbortEnabled.set(false); // TODO This is a hack to prevent the walking controller from aborting the manipulation task.
+
+      toolboxRegistry = simulationTestHelper.getAvatarSimulation().getIKStreamingRTThread().getYoVariableRegistry();
 
       ROS2Node ros2Node = simulationTestHelper.getROS2Node();
       ROS2Topic<?> toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
@@ -148,10 +152,11 @@ public abstract class KinematicsStreamingRTControllerTest
    public void testStreamingToController(IKStreamingTestRunParameters ikStreamingTestRunParameters)
    {
       setupWithWalkingController(ikStreamingTestRunParameters.toolboxParameters());
-      //      SpyTrackingController spyController = new SpyTrackingController(toolboxRegistry,
-      //                                                                      simulationTestHelper.getAvatarSimulation().getIKStreamingRTThread().getFullRobotModel(),
-      //                                                                      simulationTestHelper.getControllerFullRobotModel());
-      //      simulationTestHelper.addRobotControllerOnControllerThread(spyController);
+      SpyTrackingController spyController = new SpyTrackingController(toolboxRegistry,
+                                                                      simulationTestHelper.getAvatarSimulation().getIKStreamingRTThread().getFullRobotModel(),
+                                                                      simulationTestHelper.getControllerFullRobotModel());
+      if (ghost != null)
+         ghost.addThrottledController(spyController, ikStreamingTestRunParameters.toolboxParameters().getToolboxUpdatePeriod());
 
       if (ikStreamingTestRunParameters.getRegistry() != null)
          simulationTestHelper.addRegistry(ikStreamingTestRunParameters.getRegistry());
