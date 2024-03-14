@@ -265,8 +265,6 @@ public class KinematicsStreamingToolboxParameters
 
       inputStateEstimatorType = InputStateEstimatorType.FIRST_ORDER_LPF;
 
-      initialConfigurationMap.clear();
-
       defaultConfiguration.setLockPelvis(false);
       defaultConfiguration.setLockChest(false);
       defaultConfiguration.setEnableLeftArmJointspace(true);

@@ -252,7 +252,7 @@ public class KinematicsToolboxController extends ToolboxController
     * This updater is used to initialize the state of the desired robot to the initial configuration.
     * This should be used only once at initialization.
     */
-   private IKRobotStateUpdater desiredRobotStateUpdater;
+   protected IKRobotStateUpdater desiredRobotStateUpdater;
 
    /**
     * Command buffer used to keep track of the current commands submitted by the user.
@@ -368,7 +368,7 @@ public class KinematicsToolboxController extends ToolboxController
    /**
     * Timer to debug computational load.
     */
-   private final ThreadTimer threadTimer;
+   protected final ThreadTimer threadTimer;
 
    /**
     * When {@code true}, the solver will add an objective to minimize the overall angular momentum generated.
@@ -766,15 +766,12 @@ public class KinematicsToolboxController extends ToolboxController
       return success;
    }
 
-   private boolean firstTick = true;
+   protected boolean firstTick = true;
 
    protected boolean initializeInternal()
    {
       firstTick = true;
-      threadTimer.clear();
-      userFBCommands.clear();
-      previousUserFBCommands.clear();
-      isUserProvidingSupportPolygon.set(false);
+      resetInternalData();
 
       boolean wasRobotUpdated = desiredRobotStateUpdater.updateRobotConfiguration(rootJoint, desiredOneDoFJoints);
       if (!wasRobotUpdated)
@@ -783,28 +780,40 @@ public class KinematicsToolboxController extends ToolboxController
       }
       else
       {
-         if (initialRobotConfigurationMap != null)
-         {
-            initialRobotConfigurationMap.forEachEntry((joint, q_priv) ->
-                                                      {
-                                                         joint.setQ(q_priv);
-                                                         return true;
-                                                      });
-         }
-
-         // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
-         snapPrivilegedConfigurationToCurrent();
-         privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
-         privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
+         initializePrivilegedConfiguration();
          // It is required to update the tools now as it is only done at the end of each iteration.
          updateTools();
       }
 
+      return wasRobotUpdated;
+   }
+
+   protected void initializePrivilegedConfiguration()
+   {
+      if (initialRobotConfigurationMap != null)
+      {
+         initialRobotConfigurationMap.forEachEntry((joint, q_priv) ->
+                                                   {
+                                                      joint.setQ(q_priv);
+                                                      return true;
+                                                   });
+      }
+
+      // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
+      snapPrivilegedConfigurationToCurrent();
+   }
+
+   protected void resetInternalData()
+   {
+      threadTimer.clear();
+      userFBCommands.clear();
+      previousUserFBCommands.clear();
+      isUserProvidingSupportPolygon.set(false);
       // By default, always constrain the center of mass according to the current support polygon (if defined).
       enableSupportPolygonConstraint.set(true);
       inverseKinematicsSolution.getSupportRegion().clear();
-
-      return wasRobotUpdated;
+      privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
+      privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
    }
 
    /**
@@ -1507,7 +1516,7 @@ public class KinematicsToolboxController extends ToolboxController
     * Creates a {@code PrivilegedConfigurationCommand} to update the privileged joint angles to match
     * the current state of {@link #desiredOneDoFJoints}.
     */
-   private void snapPrivilegedConfigurationToCurrent()
+   protected void snapPrivilegedConfigurationToCurrent()
    {
       privilegedConfigurationCommand.clear();
       for (int i = 0; i < desiredOneDoFJoints.length; i++)
