@@ -35,8 +35,8 @@ public class DualBlackflyUDPReceiver
       frequencyCalculators.put(RobotSide.LEFT, new FrequencyCalculator(10));
       frequencyCalculators.put(RobotSide.RIGHT, new FrequencyCalculator(10));
 
-      addresses.put(RobotSide.LEFT, "127.0.0.1");
-      addresses.put(RobotSide.RIGHT, "127.0.0.1");
+      addresses.put(RobotSide.LEFT, "172.16.66.230");
+      addresses.put(RobotSide.RIGHT, "172.16.66.230");
    }
 
    public boolean connected()
