@@ -1,28 +1,20 @@
 package us.ihmc.perception.opticalFlow;
 
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_cudaarithm;
 import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.global.opencv_cudawarping;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.opencv.opencv_core.GpuMatVector;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Point2f;
 import org.bytedeco.opencv.opencv_core.SVD;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_core.Stream;
 import org.bytedeco.opencv.opencv_cudaimgproc.CornersDetector;
 import org.bytedeco.opencv.opencv_cudaoptflow.SparsePyrLKOpticalFlow;
+import org.bytedeco.opencv.opencv_tracking.TrackerKCF;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.log.LogTools;
-import us.ihmc.motionRetargeting.VRTrackedSegmentType;
 import us.ihmc.perception.RawImage;
-
-import static org.bytedeco.opencv.global.opencv_imgproc.getRotationMatrix2D;
 
 public class OpenCVSparseOpticalFlowProcessor
 {
@@ -139,8 +131,9 @@ public class OpenCVSparseOpticalFlowProcessor
             oldPointCentroid = oldPointCentroid.mul(averageScalar);
 
             // Get 2D versions of the point lists
-            GpuMat oldPoints2D = goodOldPoints.reshape(1, statusMat.cols());
-            GpuMat newPoints2D = goodNewPoints.reshape(1, 2);
+            GpuMat oldPoints2D = goodOldPoints.reshape(1, 2);
+            opencv_cudaarithm.transpose(oldPoints2D, oldPoints2D);         // 2 cols
+            GpuMat newPoints2D = goodNewPoints.reshape(1, 2);     // 2 rows
 
             // Get centroid subtracted points
             GpuMat oldCentroidSubtractedPoints = new GpuMat(oldPoints2D.size(), oldPoints2D.type());
@@ -152,18 +145,26 @@ public class OpenCVSparseOpticalFlowProcessor
             newPoints2D.row(1).convertTo(newCentroidSubtractedPoints.row(1), newPoints2D.type(), 1.0, -oldPointCentroid.get(1));
 
             // Multiply new and old points to get H
-            opencv_cudaarithm.gemm(newCentroidSubtractedPoints, oldCentroidSubtractedPoints, 1.0, new GpuMat(), 0.0, A);
+            opencv_cudaarithm.gemm(newPoints2D, oldPoints2D, 1.0, new GpuMat(), 0.0, A);
             // Perform SVD on H and find rotation matrix
             A.download(cpuA);
-            SVD.compute(cpuA, singularValues, U, VTransposed, SVD.MODIFY_A + SVD.FULL_UV);
-
+            SVD.compute(cpuA, singularValues, U, VTransposed, /*SVD.MODIFY_A + */SVD.FULL_UV);
+            
             opencv_core.gemm(U, VTransposed, 1.0, new Mat(), 0.0, rotation);
             // Ensure determinant of rotation is positive
             if (opencv_core.determinant(rotation) < 0.0)
             {
-               rotation.col(1).convertTo(rotation.col(1), rotation.type(), -1.0, 0.0);
+               System.out.println("NEGATIVE");
+               printMat(rotation, "rotation before: ");
+
+               VTransposed.row(1).convertTo(VTransposed.row(1), VTransposed.type(), -1.0, 0.0);
+               SVD.compute(cpuA, singularValues, U, VTransposed, /*SVD.MODIFY_A + */SVD.FULL_UV);
+               VTransposed.row(1).convertTo(VTransposed.row(1), VTransposed.type(), -1.0, 0.0);
+               opencv_core.gemm(U, VTransposed, 1.0, new Mat(), 0.0, rotation);
+
+               /*rotation.convertTo(rotation, rotation.type(), -1.0, 0.0);*/
+               printMat(rotation, "rotation after: " + opencv_core.determinant(rotation));
             }
-            printMat(rotation, "rotation");
 
             // Get translations
             opencv_cudaarithm.subtract(goodNewPoints, goodOldPoints, translations);
@@ -178,23 +179,18 @@ public class OpenCVSparseOpticalFlowProcessor
             float centroidY = (float) oldPointCentroid.get(1);
             float cosTheta = rotation.data().getFloat();
             float sinTheta = rotation.data().getFloat(Float.BYTES);
-            float dX = centroidX * (1.0f - cosTheta) - centroidY * sinTheta + averageTranslationX * cosTheta + averageTranslationY * sinTheta;
-            float dY = centroidX * sinTheta + centroidY * (1.0f - cosTheta) - averageTranslationX * sinTheta + averageTranslationY * cosTheta;
+//            float dX = centroidX * (1.0f - cosTheta) - centroidY * sinTheta + averageTranslationX * cosTheta + averageTranslationY * sinTheta;
+//            float dY = centroidX * sinTheta + centroidY * (1.0f - cosTheta) - averageTranslationX * sinTheta + averageTranslationY * cosTheta;
+            float dX = (1.0f - cosTheta) * centroidX - sinTheta * centroidY;
+            float dY = sinTheta * centroidX + (1.0f - cosTheta) * centroidY;
 
             affineTransformMat = new Mat(2, 3, opencv_core.CV_32FC1);
-//            affineTransformMat.data().putFloat(0L * Float.BYTES, cosTheta);
-//            affineTransformMat.data().putFloat(1L * Float.BYTES, sinTheta);
-//            affineTransformMat.data().putFloat(2L * Float.BYTES, dX);
-//            affineTransformMat.data().putFloat(3L * Float.BYTES, -sinTheta);
-//            affineTransformMat.data().putFloat(4L * Float.BYTES, cosTheta);
-//            affineTransformMat.data().putFloat(5L * Float.BYTES, dY);
-
             affineTransformMat.data().putFloat(0L * Float.BYTES, rotation.data().getFloat(0L * Float.BYTES));
             affineTransformMat.data().putFloat(1L * Float.BYTES, rotation.data().getFloat(1L * Float.BYTES));
-            affineTransformMat.data().putFloat(2L * Float.BYTES, /*averageTranslationX*/ dX);
+            affineTransformMat.data().putFloat(2L * Float.BYTES, dX);
             affineTransformMat.data().putFloat(3L * Float.BYTES, rotation.data().getFloat(2L * Float.BYTES));
             affineTransformMat.data().putFloat(4L * Float.BYTES, rotation.data().getFloat(3L * Float.BYTES));
-            affineTransformMat.data().putFloat(5L * Float.BYTES, /*averageTranslationY*/ dY);
+            affineTransformMat.data().putFloat(5L * Float.BYTES, dY);
 
             // Clean up
             oldPoints2D.release();
@@ -240,7 +236,7 @@ public class OpenCVSparseOpticalFlowProcessor
 
    private void printMat(Mat mat, String name)
    {
-      LogTools.info("Mat: " + name);
+      System.out.println("Mat: " + name);
       for (int i = 0; i < mat.rows(); ++i)
       {
          if (i == 0)
