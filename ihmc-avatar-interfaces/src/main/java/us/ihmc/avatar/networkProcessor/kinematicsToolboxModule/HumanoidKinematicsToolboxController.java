@@ -263,9 +263,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       double defaultHipJointReduction = 0.05;
       for (RobotSide robotSide : RobotSide.values)
       {
-         setJointLimitReductionFactor(initialFullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH).getName(), defaultHipJointReduction);
-         setJointLimitReductionFactor(initialFullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL).getName(), defaultHipJointReduction);
-         setJointLimitReductionFactor(initialFullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW).getName(), defaultHipJointReduction);
+         setJointLimitReductionFactor(desiredFullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH).getName(), defaultHipJointReduction);
+         setJointLimitReductionFactor(desiredFullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL).getName(), defaultHipJointReduction);
+         setJointLimitReductionFactor(desiredFullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW).getName(), defaultHipJointReduction);
       }
    }
 
