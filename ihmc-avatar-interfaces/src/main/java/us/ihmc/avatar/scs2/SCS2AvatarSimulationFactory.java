@@ -10,8 +10,8 @@ import us.ihmc.avatar.factory.*;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingRealTimePluginFactory;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingRealTimePluginFactory.IKStreamingRTControllerThread;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.IKStreamingRTPluginFactory;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.IKStreamingRTPluginFactory.IKStreamingRTThread;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
@@ -155,7 +155,7 @@ public class SCS2AvatarSimulationFactory
    protected AvatarEstimatorThread estimatorThread;
    protected AvatarControllerThread controllerThread;
    protected AvatarStepGeneratorThread stepGeneratorThread;
-   protected IKStreamingRTControllerThread ikStreamingRTThread;
+   protected IKStreamingRTThread ikStreamingRTThread;
    protected DisposableRobotController robotController;
    protected SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    protected PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
@@ -164,7 +164,7 @@ public class SCS2AvatarSimulationFactory
    protected final String robotCollisionName = "robot";
    protected final String terrainCollisionName = "terrain";
 
-   private KinematicsStreamingRealTimePluginFactory ikStreamingRealTimePluginFactory;
+   private IKStreamingRTPluginFactory ikStreamingRealTimePluginFactory;
 
    public SCS2AvatarSimulation createAvatarSimulation()
    {
@@ -470,15 +470,15 @@ public class SCS2AvatarSimulationFactory
 
       HumanoidRobotContextDataFactory contextDataFactory = new HumanoidRobotContextDataFactory();
 
-      ikStreamingRealTimePluginFactory = new KinematicsStreamingRealTimePluginFactory();
-      ikStreamingRealTimePluginFactory.setParameters(ikStreamingParameters.get());
-      ikStreamingRTThread = ikStreamingRealTimePluginFactory.createRTController(robotModel.get().getSimpleRobotName(),
-                                                                                realtimeROS2Node.get(),
-                                                                                highLevelHumanoidControllerFactory.get().getCommandInputManager(),
-                                                                                highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
-                                                                                robotModel.get(),
-                                                                                contextDataFactory,
-                                                                                robotModel.get().getHumanoidRobotKinematicsCollisionModel());
+      ikStreamingRealTimePluginFactory = new IKStreamingRTPluginFactory();
+      ikStreamingRTThread = ikStreamingRealTimePluginFactory.createRTThread(robotModel.get().getSimpleRobotName(),
+                                                                            realtimeROS2Node.get(),
+                                                                            highLevelHumanoidControllerFactory.get().getCommandInputManager(),
+                                                                            highLevelHumanoidControllerFactory.get().getStatusOutputManager(),
+                                                                            robotModel.get(),
+                                                                            contextDataFactory,
+                                                                            robotModel.get().getHumanoidRobotKinematicsCollisionModel(),
+                                                                            ikStreamingParameters.get());
       if (enableSCS1YoGraphics.get())
          simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(ikStreamingRTThread.getSCS1YoGraphicsListRegistry()));
       if (enableSCS2YoGraphics.get())
@@ -508,7 +508,7 @@ public class SCS2AvatarSimulationFactory
                                                                          masterFullRobotModel);
       HumanoidRobotControlTask ikStreamingRTTask;
       if (createIKStreamingRealTimeController.get())
-         ikStreamingRTTask = ikStreamingRealTimePluginFactory.createRTTask("IKStreaming", simulationDT.get(), masterFullRobotModel);
+         ikStreamingRTTask = ikStreamingRealTimePluginFactory.createRTTask(simulationDT.get());
       else
          ikStreamingRTTask = null;
 

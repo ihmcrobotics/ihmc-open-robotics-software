@@ -52,63 +52,64 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * This class is meant to wrap an instance of the {@link KinematicsStreamingToolboxController} into a real-time plugin that can be used on the control computer.
  */
-public class KinematicsStreamingRealTimePluginFactory
+public class IKStreamingRTPluginFactory
 {
-   private KinematicsStreamingToolboxParameters parameters;
-   private IKStreamingRTControllerThread ikStreamingRTController;
+   private IKStreamingRTThread ikStreamingRTThread;
    private IKStreamingRTTask ikStreamingRTTask;
 
-   public KinematicsStreamingRealTimePluginFactory()
+   public IKStreamingRTPluginFactory()
    {
 
    }
 
-   public void setParameters(KinematicsStreamingToolboxParameters parameters)
+   public IKStreamingRTThread createRTThread(String robotName,
+                                             ROS2NodeInterface ros2Node,
+                                             CommandInputManager walkingInputManager,
+                                             StatusMessageOutputManager walkingOutputManager,
+                                             FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                             HumanoidRobotContextDataFactory contextDataFactory,
+                                             RobotCollisionModel collisionModel,
+                                             KinematicsStreamingToolboxParameters parameters)
    {
-      this.parameters = parameters;
+      if (ikStreamingRTThread == null)
+         ikStreamingRTThread = new IKStreamingRTThread(robotName,
+                                                       ros2Node,
+                                                       walkingInputManager,
+                                                       walkingOutputManager,
+                                                       fullRobotModelFactory,
+                                                       contextDataFactory,
+                                                       collisionModel,
+                                                       parameters);
+      return ikStreamingRTThread;
    }
 
-   public IKStreamingRTControllerThread createRTController(String robotName,
-                                                           ROS2NodeInterface ros2Node,
-                                                           CommandInputManager walkingInputManager,
-                                                           StatusMessageOutputManager walkingOutputManager,
-                                                           FullHumanoidRobotModelFactory fullRobotModelFactory,
-                                                           HumanoidRobotContextDataFactory contextDataFactory,
-                                                           RobotCollisionModel collisionModel)
+   public IKStreamingRTTask createRTTask(double schedulerDt)
    {
-      if (ikStreamingRTController == null)
-         ikStreamingRTController = new IKStreamingRTControllerThread(robotName,
-                                                                     ros2Node,
-                                                                     walkingInputManager,
-                                                                     walkingOutputManager,
-                                                                     fullRobotModelFactory,
-                                                                     contextDataFactory,
-                                                                     collisionModel,
-                                                                     parameters);
-      return ikStreamingRTController;
-   }
-
-   public IKStreamingRTTask createRTTask(String prefix, double schedulerDt, FullHumanoidRobotModel masterFullRobotModel)
-   {
-      if (ikStreamingRTController == null)
+      if (ikStreamingRTThread == null)
          throw new RuntimeException("Controller has not been created yet.");
       if (ikStreamingRTTask == null)
       {
-         long divisor = Math.round(parameters.getToolboxUpdatePeriod() / schedulerDt);
-         if (!EuclidCoreTools.epsilonEquals(divisor * schedulerDt, parameters.getToolboxUpdatePeriod(), 1.0e-7) || divisor < 1)
-         {
-            throw new IllegalArgumentException("The schedulerDt (%s) does not divide the toolbox update period (%s).".formatted(schedulerDt,
-                                                                                                                                parameters.getToolboxUpdatePeriod()));
-         }
-         ikStreamingRTTask = new IKStreamingRTTask(prefix, ikStreamingRTController, divisor, schedulerDt, masterFullRobotModel);
+         ikStreamingRTTask = createIKStreamingRTTask(ikStreamingRTThread, schedulerDt);
       }
       return ikStreamingRTTask;
+   }
+
+   public static IKStreamingRTTask createIKStreamingRTTask(IKStreamingRTThread ikStreamingRTThread, double schedulerDT)
+   {
+      KinematicsStreamingToolboxParameters parameters = ikStreamingRTThread.kinematicsStreamingToolboxController.getTools().getParameters();
+      long divisor = Math.round(parameters.getToolboxUpdatePeriod() / schedulerDT);
+      if (!EuclidCoreTools.epsilonEquals(divisor * schedulerDT, parameters.getToolboxUpdatePeriod(), 1.0e-7) || divisor < 1)
+      {
+         throw new IllegalArgumentException("The schedulerDT (%s) does not divide the toolbox update period (%s).".formatted(schedulerDT,
+                                                                                                                             parameters.getToolboxUpdatePeriod()));
+      }
+      return new IKStreamingRTTask(ikStreamingRTThread, divisor, schedulerDT);
    }
 
    public static class IKStreamingRTTask extends HumanoidRobotControlTask
    {
       private final CrossRobotCommandResolver controllerResolver;
-      private final IKStreamingRTControllerThread ikStreamingThread;
+      private final IKStreamingRTThread ikStreamingThread;
 
       private final long divisor;
       private final ThreadTimer timer;
@@ -117,11 +118,7 @@ public class KinematicsStreamingRealTimePluginFactory
       private final List<Runnable> postControllerCallbacks = new ArrayList<>();
       private final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
 
-      public IKStreamingRTTask(String prefix,
-                               IKStreamingRTControllerThread ikStreamingThread,
-                               long divisor,
-                               double schedulerDt,
-                               FullHumanoidRobotModel masterFullRobotModel)
+      public IKStreamingRTTask(IKStreamingRTThread ikStreamingThread, long divisor, double schedulerDt)
       {
          super(divisor);
          this.divisor = divisor;
@@ -129,7 +126,7 @@ public class KinematicsStreamingRealTimePluginFactory
 
          controllerResolver = new CrossRobotCommandResolver(ikStreamingThread.getFullRobotModel());
 
-         //      String prefix = "Controller";
+         String prefix = "IKStreaming";
          timer = new ThreadTimer(prefix, schedulerDt * divisor, ikStreamingThread.getYoVariableRegistry());
          ticksBehindScheduled = new YoLong(prefix + "TicksBehindScheduled", ikStreamingThread.getYoVariableRegistry());
       }
@@ -179,7 +176,7 @@ public class KinematicsStreamingRealTimePluginFactory
       }
    }
 
-   public static class IKStreamingRTControllerThread implements AvatarControllerThreadInterface
+   public static class IKStreamingRTThread implements AvatarControllerThreadInterface
    {
       private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -194,14 +191,14 @@ public class KinematicsStreamingRealTimePluginFactory
       private final YoEnum<ToolboxState> toolboxState = new YoEnum<>("toolboxState", registry, ToolboxState.class);
       private final HumanoidRobotContextData humanoidRobotContextData;
 
-      public IKStreamingRTControllerThread(String robotName,
-                                           ROS2NodeInterface ros2Node,
-                                           CommandInputManager walkingInputManager,
-                                           StatusMessageOutputManager walkingOutputManager,
-                                           FullHumanoidRobotModelFactory fullRobotModelFactory,
-                                           HumanoidRobotContextDataFactory contextDataFactory,
-                                           RobotCollisionModel collisionModel,
-                                           KinematicsStreamingToolboxParameters parameters)
+      public IKStreamingRTThread(String robotName,
+                                 ROS2NodeInterface ros2Node,
+                                 CommandInputManager walkingInputManager,
+                                 StatusMessageOutputManager walkingOutputManager,
+                                 FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                 HumanoidRobotContextDataFactory contextDataFactory,
+                                 RobotCollisionModel collisionModel,
+                                 KinematicsStreamingToolboxParameters parameters)
       {
          timeOfLastInput.set(Double.NEGATIVE_INFINITY);
          timeWithoutInputsBeforeGoingToSleep.set(parameters.getTimeThresholdForSleeping());
