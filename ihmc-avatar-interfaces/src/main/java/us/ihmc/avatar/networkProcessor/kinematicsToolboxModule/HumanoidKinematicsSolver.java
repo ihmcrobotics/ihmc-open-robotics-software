@@ -1,10 +1,11 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -49,6 +50,8 @@ public class HumanoidKinematicsSolver
    private final YoDouble computationTime = new YoDouble("computationTime", registry);
    private final YoDouble solutionQuality = new YoDouble("solutionQuality", registry);
 
+   private final RobotConfigurationDataBasedUpdater desiredRobotStateUpdater = new RobotConfigurationDataBasedUpdater();
+
    public HumanoidKinematicsSolver(FullHumanoidRobotModelFactory fullRobotModelFactory,
                                    YoGraphicsListRegistry yoGraphicsListRegistry,
                                    YoRegistry parentRegistry)
@@ -64,6 +67,7 @@ public class HumanoidKinematicsSolver
                                                            updateDT,
                                                            yoGraphicsListRegistry,
                                                            registry);
+      controller.setDesiredRobotStateUpdater(desiredRobotStateUpdater);
 
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel, controller.getDesiredReferenceFrames()));
 
@@ -87,7 +91,7 @@ public class HumanoidKinematicsSolver
 
    public void setInitialConfiguration(RobotConfigurationData robotConfigurationData)
    {
-      controller.updateRobotConfigurationData(robotConfigurationData);
+      desiredRobotStateUpdater.setRobotConfigurationData(robotConfigurationData);
    }
 
    public void setCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)

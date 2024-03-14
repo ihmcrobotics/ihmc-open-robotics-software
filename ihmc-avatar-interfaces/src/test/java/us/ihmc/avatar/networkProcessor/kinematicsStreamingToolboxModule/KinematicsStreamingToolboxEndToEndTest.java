@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Tag;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotConfigurationDataInitialSetup;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxMessageReplay;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
@@ -195,10 +196,12 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       toolboxController.setTrajectoryMessagePublisher(simulationTestHelper::publishToController);
       toolboxController.setStreamingMessagePublisher(simulationTestHelper::publishToController);
 
+      RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
+      toolboxController.setRobotStateUpdater(robotStateUpdater);
       ROS2Tools.createCallbackSubscriptionTypeNamed(toolboxROS2Node,
                                                     RobotConfigurationData.class,
                                                     controllerOutputTopic,
-                                                    s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
+                                                    s -> robotStateUpdater.setRobotConfigurationData(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(toolboxROS2Node,
                                                     CapturabilityBasedStatus.class,
                                                     controllerOutputTopic,

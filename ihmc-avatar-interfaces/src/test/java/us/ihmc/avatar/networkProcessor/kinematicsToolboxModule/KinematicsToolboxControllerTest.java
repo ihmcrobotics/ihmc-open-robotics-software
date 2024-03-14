@@ -1,25 +1,13 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import controller_msgs.msg.dds.RobotConfigurationData;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import toolbox_msgs.msg.dds.KinematicsToolboxInputCollectionMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobotsSCS2.KinematicsToolboxTestRobot;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobotsSCS2.SevenDoFArm;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTestRobotsSCS2.UpperBodyWithTwoManipulators;
@@ -39,11 +27,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.graphicsDescription.conversion.YoGraphicConversionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.physics.Collidable;
@@ -58,11 +42,7 @@ import us.ihmc.scs2.definition.controller.interfaces.Controller;
 import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.visual.ColorDefinition;
-import us.ihmc.scs2.definition.visual.ColorDefinitions;
-import us.ihmc.scs2.definition.visual.MaterialDefinition;
-import us.ihmc.scs2.definition.visual.VisualDefinition;
-import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
+import us.ihmc.scs2.definition.visual.*;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.tools.MemoryTools;
@@ -70,6 +50,17 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
 
 public final class KinematicsToolboxControllerTest
 {
@@ -211,7 +202,7 @@ public final class KinematicsToolboxControllerTest
       commandInputManager.submitMessage(holdRigidBodyCurrentPose(hand));
 
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
-      toolboxController.updateRobotConfigurationData(robotConfigurationData);
+      toolboxController.setDesiredRobotStateUpdater(IKRobotStateUpdater.wrap(robotConfigurationData));
 
       int numberOfIterations = 250;
 
@@ -249,7 +240,7 @@ public final class KinematicsToolboxControllerTest
          commandInputManager.submitMessage(message);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
-         toolboxController.updateRobotConfigurationData(robotConfigurationData);
+         toolboxController.setDesiredRobotStateUpdater(IKRobotStateUpdater.wrap(robotConfigurationData));
 
          int numberOfIterations = 100;
 
@@ -295,7 +286,7 @@ public final class KinematicsToolboxControllerTest
          commandInputManager.submitMessage(inputCollectionMessage);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
-         toolboxController.updateRobotConfigurationData(robotConfigurationData);
+         toolboxController.setDesiredRobotStateUpdater(IKRobotStateUpdater.wrap(robotConfigurationData));
 
          int numberOfIterations = 100;
 
@@ -342,7 +333,7 @@ public final class KinematicsToolboxControllerTest
          commandInputManager.submitMessage(message);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
-         toolboxController.updateRobotConfigurationData(robotConfigurationData);
+         toolboxController.setDesiredRobotStateUpdater(IKRobotStateUpdater.wrap(robotConfigurationData));
 
          int numberOfIterations = 150;
 
@@ -395,7 +386,7 @@ public final class KinematicsToolboxControllerTest
          }
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
-         toolboxController.updateRobotConfigurationData(robotConfigurationData);
+         toolboxController.setDesiredRobotStateUpdater(IKRobotStateUpdater.wrap(robotConfigurationData));
 
          int numberOfIterations = 100;
 
@@ -420,15 +411,15 @@ public final class KinematicsToolboxControllerTest
       handCollisionShape.getPosition().addZ(0.05);
 
       RigidBodyDefinition torsoLinkDescription = robotDescription.getRigidBodyDefinition("torsoLink");
-      SideDependentList<RigidBodyDefinition> handLinkDescriptions = new SideDependentList<>(side -> robotDescription.getRigidBodyDefinition(side.getCamelCaseName()
-            + "HandLink"));
+      SideDependentList<RigidBodyDefinition> handLinkDescriptions = new SideDependentList<>(side -> robotDescription.getRigidBodyDefinition(
+            side.getCamelCaseName() + "HandLink"));
 
       ColorDefinition collisionGraphicAppearance = ColorDefinitions.SpringGreen().derive(0, 1.0, 0.5, 0.15);
 
       VisualDefinitionFactory torsoCollisionGraphic = new VisualDefinitionFactory();
       torsoCollisionGraphic.appendTranslation(torsoCollisionShape.getPosition());
-      torsoCollisionGraphic.addCapsule(torsoCollisionShape.getLength() + 2.0 * torsoCollisionShape.getRadius(),
-                                       torsoCollisionShape.getRadius(), // the 2nd term is removed internally.
+      torsoCollisionGraphic.addCapsule(torsoCollisionShape.getLength() + 2.0 * torsoCollisionShape.getRadius(), torsoCollisionShape.getRadius(),
+                                       // the 2nd term is removed internally.
                                        collisionGraphicAppearance);
       torsoLinkDescription.getVisualDefinitions().addAll(torsoCollisionGraphic.getVisualDefinitions());
       VisualDefinitionFactory handCollisionGraphic = new VisualDefinitionFactory();
@@ -445,18 +436,22 @@ public final class KinematicsToolboxControllerTest
       SideDependentList<RigidBodyBasics> hands = new SideDependentList<>(side -> rigidBodies.stream()
                                                                                             .filter(body -> body.getName()
                                                                                                                 .equals(side.getCamelCaseName() + "HandLink"))
-                                                                                            .findFirst().get());
+                                                                                            .findFirst()
+                                                                                            .get());
 
       Collidable torsoCollidable = new Collidable(torso, 0b001, 0b110, new FrameCapsule3D(torso.getParentJoint().getFrameAfterJoint(), torsoCollisionShape));
 
       SideDependentList<Collidable> handCollidables = new SideDependentList<>(side ->
-      {
-         RigidBodyBasics hand = hands.get(side);
-         int collisionMask = side == RobotSide.LEFT ? 0b010 : 0b100;
-         int collisionGroup = 0b001;
-         ReferenceFrame shapeFrame = hand.getParentJoint().getFrameAfterJoint();
-         return new Collidable(hand, collisionMask, collisionGroup, new FrameSphere3D(shapeFrame, handCollisionShape));
-      });
+                                                                              {
+                                                                                 RigidBodyBasics hand = hands.get(side);
+                                                                                 int collisionMask = side == RobotSide.LEFT ? 0b010 : 0b100;
+                                                                                 int collisionGroup = 0b001;
+                                                                                 ReferenceFrame shapeFrame = hand.getParentJoint().getFrameAfterJoint();
+                                                                                 return new Collidable(hand,
+                                                                                                       collisionMask,
+                                                                                                       collisionGroup,
+                                                                                                       new FrameSphere3D(shapeFrame, handCollisionShape));
+                                                                              });
 
       toolboxController.registerRobotCollidable(torsoCollidable);
       toolboxController.registerRobotCollidables(handCollidables);
@@ -484,7 +479,7 @@ public final class KinematicsToolboxControllerTest
             commandInputManager.submitMessage(message);
          }
 
-         toolboxController.updateRobotConfigurationData(robotConfigurationData);
+         toolboxController.setDesiredRobotStateUpdater(IKRobotStateUpdater.wrap(robotConfigurationData));
 
          int numberOfIterations = 250;
 
@@ -513,8 +508,8 @@ public final class KinematicsToolboxControllerTest
       Sphere3D handCollisionShape = new Sphere3D(0.1);
       handCollisionShape.getPosition().addZ(0.05);
 
-      SideDependentList<RigidBodyDefinition> handLinkDescriptions = new SideDependentList<>(side -> robotDefinition.getRigidBodyDefinition(side.getCamelCaseName()
-            + "HandLink"));
+      SideDependentList<RigidBodyDefinition> handLinkDescriptions = new SideDependentList<>(side -> robotDefinition.getRigidBodyDefinition(
+            side.getCamelCaseName() + "HandLink"));
 
       ColorDefinition collisionGraphicAppearance = ColorDefinitions.SpringGreen().derive(0, 1.0, 0.5, 0.15);
 
@@ -531,16 +526,20 @@ public final class KinematicsToolboxControllerTest
       SideDependentList<RigidBodyBasics> hands = new SideDependentList<>(side -> rigidBodies.stream()
                                                                                             .filter(body -> body.getName()
                                                                                                                 .equals(side.getCamelCaseName() + "HandLink"))
-                                                                                            .findFirst().get());
+                                                                                            .findFirst()
+                                                                                            .get());
 
       SideDependentList<Collidable> handCollidables = new SideDependentList<>(side ->
-      {
-         RigidBodyBasics hand = hands.get(side);
-         int collisionMask = side == RobotSide.LEFT ? 0b010 : 0b100;
-         int collisionGroup = 0b001;
-         ReferenceFrame shapeFrame = hand.getParentJoint().getFrameAfterJoint();
-         return new Collidable(hand, collisionMask, collisionGroup, new FrameSphere3D(shapeFrame, handCollisionShape));
-      });
+                                                                              {
+                                                                                 RigidBodyBasics hand = hands.get(side);
+                                                                                 int collisionMask = side == RobotSide.LEFT ? 0b010 : 0b100;
+                                                                                 int collisionGroup = 0b001;
+                                                                                 ReferenceFrame shapeFrame = hand.getParentJoint().getFrameAfterJoint();
+                                                                                 return new Collidable(hand,
+                                                                                                       collisionMask,
+                                                                                                       collisionGroup,
+                                                                                                       new FrameSphere3D(shapeFrame, handCollisionShape));
+                                                                              });
 
       toolboxController.registerRobotCollidables(handCollidables);
 
@@ -575,7 +574,7 @@ public final class KinematicsToolboxControllerTest
          message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(1.0));
          commandInputManager.submitMessage(message);
 
-         toolboxController.updateRobotConfigurationData(robotConfigurationData);
+         toolboxController.setDesiredRobotStateUpdater(IKRobotStateUpdater.wrap(robotConfigurationData));
 
          int numberOfIterations = 250;
 

@@ -249,11 +249,10 @@ public class KinematicsToolboxController extends ToolboxController
    protected final YoGraphicPosition desiredCenterOfMassGraphic, currentCenterOfMassGraphic;
 
    /**
-    * Reference to the most recent robot configuration received from the controller. It is used for
-    * initializing the {@link #desiredOneDoFJoints} before starting the optimization process.
+    * This updater is used to initialize the state of the desired robot to the initial configuration.
+    * This should be used only once at initialization.
     */
-   private final ConcurrentCopier<RobotConfigurationData> concurrentRobotConfigurationDataCopier = new ConcurrentCopier<>(RobotConfigurationData::new);
-   protected final RobotConfigurationData robotConfigurationDataInternal = new RobotConfigurationData();
+   private IKRobotStateUpdater desiredRobotStateUpdater;
 
    /**
     * Command buffer used to keep track of the current commands submitted by the user.
@@ -777,19 +776,13 @@ public class KinematicsToolboxController extends ToolboxController
       previousUserFBCommands.clear();
       isUserProvidingSupportPolygon.set(false);
 
-      RobotConfigurationData robotConfigurationData = concurrentRobotConfigurationDataCopier.getCopyForReading();
-      boolean hasRobotConfigurationData = robotConfigurationData != null;
-
-      if (!hasRobotConfigurationData)
+      boolean wasRobotUpdated = desiredRobotStateUpdater.updateRobotConfiguration(rootJoint, desiredOneDoFJoints);
+      if (!wasRobotUpdated)
       {
          commandInputManager.clearAllCommands();
       }
       else
       {
-         robotConfigurationDataInternal.set(robotConfigurationData);
-
-         // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
-         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationDataInternal, rootJoint, desiredOneDoFJoints);
          if (initialRobotConfigurationMap != null)
          {
             initialRobotConfigurationMap.forEachEntry((joint, q_priv) ->
@@ -811,7 +804,7 @@ public class KinematicsToolboxController extends ToolboxController
       enableSupportPolygonConstraint.set(true);
       inverseKinematicsSolution.getSupportRegion().clear();
 
-      return hasRobotConfigurationData;
+      return wasRobotUpdated;
    }
 
    /**
@@ -1527,10 +1520,9 @@ public class KinematicsToolboxController extends ToolboxController
       submitPrivilegedConfigurationCommand = true;
    }
 
-   public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
+   public void setDesiredRobotStateUpdater(IKRobotStateUpdater desiredRobotStateUpdater)
    {
-      concurrentRobotConfigurationDataCopier.getCopyForWriting().set(newConfigurationData);
-      concurrentRobotConfigurationDataCopier.commit();
+      this.desiredRobotStateUpdater = desiredRobotStateUpdater;
    }
 
    public boolean isUserControllingRigidBody(RigidBodyBasics rigidBody)
@@ -1743,5 +1735,78 @@ public class KinematicsToolboxController extends ToolboxController
    public TObjectDoubleHashMap<OneDoFJointBasics> getInitialRobotConfigurationMap()
    {
       return initialRobotConfigurationMap;
+   }
+
+   public interface IKRobotStateUpdater
+   {
+      /**
+       * Updates the configuration of the joints passed as arguments.
+       *
+       * @param rootJoint    the root joint of the robot. Maybe be {@code null}.
+       * @param oneDoFJoints the 1-DoF of the robot.
+       * @return {@code true} if the configuration was updated, {@code false} otherwise.
+       */
+      boolean updateRobotConfiguration(FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints);
+
+      /**
+       * Wraps a single robot configuration data to be used to update the IK internal robot.
+       * Good for test purposes.
+       *
+       * @param robotConfigurationData
+       * @return
+       */
+      static IKRobotStateUpdater wrap(RobotConfigurationData robotConfigurationData)
+      {
+         return (rootJoint, oneDoFJoints) ->
+         {
+            KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, oneDoFJoints);
+            return true;
+         };
+      }
+   }
+
+   public static class RobotConfigurationDataBasedUpdater implements IKRobotStateUpdater
+   {
+      /**
+       * Reference to the most recent robot configuration received from the controller. It is used for
+       * initializing the {@link #desiredOneDoFJoints} before starting the optimization process.
+       */
+      private final ConcurrentCopier<RobotConfigurationData> concurrentRobotConfigurationDataCopier = new ConcurrentCopier<>(RobotConfigurationData::new);
+      protected final RobotConfigurationData robotConfigurationDataInternal = new RobotConfigurationData();
+
+      public RobotConfigurationDataBasedUpdater()
+      {
+      }
+
+      @Override
+      public boolean updateRobotConfiguration(FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints)
+      {
+         RobotConfigurationData robotConfigurationData = concurrentRobotConfigurationDataCopier.getCopyForReading();
+
+         if (robotConfigurationData == null)
+            return false;
+
+         robotConfigurationDataInternal.set(robotConfigurationData);
+         // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
+         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationDataInternal, rootJoint, oneDoFJoints);
+         return true;
+      }
+
+      public void setRobotConfigurationData(RobotConfigurationData newConfigurationData)
+      {
+         concurrentRobotConfigurationDataCopier.getCopyForWriting().set(newConfigurationData);
+         concurrentRobotConfigurationDataCopier.commit();
+      }
+
+      public RobotConfigurationData getLastRobotConfigurationData()
+      {
+         RobotConfigurationData robotConfigurationData = concurrentRobotConfigurationDataCopier.getCopyForReading();
+
+         if (robotConfigurationData == null)
+            return null;
+
+         robotConfigurationDataInternal.set(robotConfigurationData);
+         return robotConfigurationDataInternal;
+      }
    }
 }

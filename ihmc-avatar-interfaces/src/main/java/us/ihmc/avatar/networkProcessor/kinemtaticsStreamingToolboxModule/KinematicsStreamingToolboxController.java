@@ -1,10 +1,10 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters.ClockType;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.Conversions;
@@ -223,9 +223,9 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       return stateMachine.getCurrentStateKey();
    }
 
-   public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
+   public void setRobotStateUpdater(IKRobotStateUpdater robotStateUpdater)
    {
-      tools.updateRobotConfigurationData(newConfigurationData);
+      tools.setRobotStateUpdater(robotStateUpdater);
    }
 
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)

@@ -1,36 +1,31 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.MultiContactBalanceStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.HumanoidKinematicsToolboxConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxSupportRegionCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInputCollectionCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.*;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class KinematicsToolboxModule extends ToolboxModule
 {
    private static final boolean DEFAULT_SETUP_INITIAL_CONFIGURATION = true;
 
    private final HumanoidKinematicsToolboxController kinematicsToolBoxController;
+   private final RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
 
    public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, RealtimeROS2Node realtimeROS2Node)
    {
@@ -42,33 +37,49 @@ public class KinematicsToolboxModule extends ToolboxModule
       this(robotModel, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
    }
 
-   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, int updatePeriodMilliseconds,
+   public KinematicsToolboxModule(DRCRobotModel robotModel,
+                                  boolean startYoVariableServer,
+                                  int updatePeriodMilliseconds,
                                   PubSubImplementation pubSubImplementation)
    {
       this(robotModel, startYoVariableServer, updatePeriodMilliseconds, DEFAULT_SETUP_INITIAL_CONFIGURATION, pubSubImplementation);
    }
 
-   public KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, int updatePeriodMilliseconds, boolean setupInitialConfiguration,
+   public KinematicsToolboxModule(DRCRobotModel robotModel,
+                                  boolean startYoVariableServer,
+                                  int updatePeriodMilliseconds,
+                                  boolean setupInitialConfiguration,
                                   PubSubImplementation pubSubImplementation)
    {
       this(robotModel, startYoVariableServer, updatePeriodMilliseconds, setupInitialConfiguration, null, pubSubImplementation);
    }
 
-   private KinematicsToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, int updatePeriodMilliseconds, boolean setupInitialConfiguration,
-                                   RealtimeROS2Node realtimeROS2Node, PubSubImplementation pubSubImplementation)
+   private KinematicsToolboxModule(DRCRobotModel robotModel,
+                                   boolean startYoVariableServer,
+                                   int updatePeriodMilliseconds,
+                                   boolean setupInitialConfiguration,
+                                   RealtimeROS2Node realtimeROS2Node,
+                                   PubSubImplementation pubSubImplementation)
    {
-      super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer,
-            updatePeriodMilliseconds, realtimeROS2Node, pubSubImplementation);
+      super(robotModel.getSimpleRobotName(),
+            robotModel.createFullRobotModel(),
+            robotModel.getLogModelProvider(),
+            startYoVariableServer,
+            updatePeriodMilliseconds,
+            realtimeROS2Node,
+            pubSubImplementation);
       kinematicsToolBoxController = new HumanoidKinematicsToolboxController(commandInputManager,
                                                                             statusOutputManager,
                                                                             fullRobotModel,
                                                                             robotModel,
-                                                                            0.001, // Note that the gains of the solver depend on this dt, it shouldn't change based on the actual thread scheduled period.
+                                                                            0.001,
                                                                             yoGraphicsListRegistry,
                                                                             registry);
+      kinematicsToolBoxController.setDesiredRobotStateUpdater(robotStateUpdater);
       if (setupInitialConfiguration)
          kinematicsToolBoxController.setInitialRobotConfiguration(robotModel);
-      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel, kinematicsToolBoxController.getDesiredReferenceFrames()));
+      commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel,
+                                                                                         kinematicsToolBoxController.getDesiredReferenceFrames()));
       startYoVariableServer();
    }
 
@@ -84,7 +95,7 @@ public class KinematicsToolboxModule extends ToolboxModule
          if (kinematicsToolBoxController != null)
          {
             s.takeNextData(robotConfigurationData, null);
-            kinematicsToolBoxController.updateRobotConfigurationData(robotConfigurationData);
+            robotStateUpdater.setRobotConfigurationData(robotConfigurationData);
          }
       });
 

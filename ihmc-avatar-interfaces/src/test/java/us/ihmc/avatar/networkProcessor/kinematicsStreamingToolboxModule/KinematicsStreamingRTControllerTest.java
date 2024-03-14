@@ -20,14 +20,20 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
+import us.ihmc.scs2.definition.controller.interfaces.ControllerOutputBasics;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.simulation.SimulationSession;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationToolkit.RobotDefinitionTools;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -47,6 +53,8 @@ public abstract class KinematicsStreamingRTControllerTest
    private IHMCROS2Publisher<KinematicsStreamingToolboxInputMessage> inputPublisher;
    private IHMCROS2Publisher<ToolboxStateMessage> statePublisher;
 
+   private Robot ghost;
+
    /**
     * Returns a <b>new</b> instance of the robot model that will be modified in this test to create
     * ghost robots.
@@ -56,14 +64,22 @@ public abstract class KinematicsStreamingRTControllerTest
    public void setupWithWalkingController(KinematicsStreamingToolboxParameters toolboxParameters)
    {
       DRCRobotModel robotModel = newRobotModel();
-      RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
 
       String robotName = robotModel.getSimpleRobotName();
+
+      RobotDefinition ghostDefinition = new RobotDefinition(robotModel.getRobotDefinition());
+      RobotDefinitionTools.setRobotDefinitionMaterial(ghostDefinition, ghostMaterial);
+      ghostDefinition.ignoreAllJoints();
+      ghostDefinition.setName("ghost");
+      ghost = new Robot(ghostDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
+      KinematicsStreamingToolboxControllerTest.hideRobot(ghost);
 
       FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
       SCS2AvatarTestingSimulationFactory simulationTestHelperFactory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
                                                                                                                                              testEnvironment,
                                                                                                                                              simulationTestingParameters);
+      simulationTestHelperFactory.addSecondaryRobot(ghost);
+
       simulationTestHelperFactory.createIKStreamingRealTimeController(true);
       toolboxParameters.setClockType(ClockType.FIXED_DT);
       simulationTestHelperFactory.setIKStreamingParameters(toolboxParameters);
@@ -81,6 +97,38 @@ public abstract class KinematicsStreamingRTControllerTest
       statePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxInputTopic);
 
       // TODO Maybe add the ghost robot again?
+
+      Controller toolboxUpdater = new Controller()
+      {
+         private final JointReadOnly[] desiredJoints = MultiBodySystemTools.collectSubtreeJoints(simulationTestHelper.getAvatarSimulation()
+                                                                                                                     .getIKStreamingRTThread()
+                                                                                                                     .getFullRobotModel()
+                                                                                                                     .getElevator());
+         private final ControllerOutputBasics scsInput = ghost.getControllerOutput();
+
+         @Override
+         public void doControl()
+         {
+            try
+            {
+               for (JointReadOnly joint : desiredJoints)
+               {
+                  scsInput.getJointOutput(joint).setConfiguration(joint);
+               }
+            }
+            catch (Exception e)
+            {
+               e.printStackTrace();
+            }
+         }
+
+         @Override
+         public YoRegistry getYoRegistry()
+         {
+            return toolboxRegistry;
+         }
+      };
+      ghost.addThrottledController(toolboxUpdater, toolboxParameters.getToolboxUpdatePeriod());
    }
 
    @AfterEach

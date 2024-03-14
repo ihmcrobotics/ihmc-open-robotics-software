@@ -15,6 +15,8 @@ import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
@@ -167,10 +169,12 @@ public abstract class KinematicsStreamingToolboxControllerTest
                                                                                                                  controllerInputTopic);
       toolboxController.setStreamingMessagePublisher(streamingOutputPublisher::publish);
 
+      RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
+      toolboxController.setRobotStateUpdater(robotStateUpdater);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,
                                                     controllerOutputTopic,
-                                                    s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
+                                                    s -> robotStateUpdater.setRobotConfigurationData(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     CapturabilityBasedStatus.class,
                                                     controllerOutputTopic,
@@ -253,7 +257,9 @@ public abstract class KinematicsStreamingToolboxControllerTest
       }
    }
 
-   private void addCollisionVisuals(FullHumanoidRobotModelFactory fullRobotModelFactory, RobotCollisionModel collisionModel, RobotDefinition robotDefinition)
+   public static void addCollisionVisuals(FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                          RobotCollisionModel collisionModel,
+                                          RobotDefinition robotDefinition)
    {
       if (collisionModel != null)
       {
@@ -320,7 +326,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       DRCRobotModel robotModel = newRobotModel();
       setupNoWalkingController(robotModel.getHumanoidRobotKinematicsCollisionModel());
       FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelAtInitialConfiguration(robotModel);
-      toolboxController.updateRobotConfigurationData(extractRobotConfigurationData(fullRobotModelAtInitialConfiguration));
+      toolboxController.setRobotStateUpdater(IKRobotStateUpdater.wrap(extractRobotConfigurationData(fullRobotModelAtInitialConfiguration)));
       toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(fullRobotModelAtInitialConfiguration, robotModel, true, true));
 
       List<Collidable> collidables = robotModel.getHumanoidRobotKinematicsCollisionModel().getRobotCollidables(desiredFullRobotModel.getElevator());

@@ -66,12 +66,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private final FullHumanoidRobotModel desiredFullRobotModel;
    private final CommonHumanoidReferenceFrames desiredReferenceFrames;
    /**
-    * Robot model used to represent the current robot configuration as measured from
+    * Robot model used to represent the initial robot configuration as measured from
     * {@link RobotConfigurationData}.
+    * TODO This is overkill, only used to initialize the robot configuration for the desired robot.
     */
-   private final FullHumanoidRobotModel currentFullRobotModel;
-   private final CommonHumanoidReferenceFrames currentReferenceFrames;
-   private final OneDoFJointBasics[] currentOneDoFJoints;
+   private final FullHumanoidRobotModel initialFullRobotModel;
+   private final CommonHumanoidReferenceFrames initialReferenceFrames;
+   private final OneDoFJointBasics[] initialOneDoFJoints;
    private final TIntObjectHashMap<RigidBodyBasics> rigidBodyHashCodeMap = new TIntObjectHashMap<>();
    private final TIntObjectHashMap<OneDoFJointBasics> jointHashCodeMap = new TIntObjectHashMap<>();
 
@@ -165,30 +166,59 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
                                               YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoRegistry parentRegistry)
    {
-      this(commandInputManager, statusOutputManager, desiredFullRobotModel, createListOfControllableRigidBodies(desiredFullRobotModel), fullRobotModelFactory,
-           updateDT, yoGraphicsListRegistry, parentRegistry);
+      this(commandInputManager,
+           statusOutputManager,
+           desiredFullRobotModel,
+           createListOfControllableRigidBodies(desiredFullRobotModel),
+           fullRobotModelFactory,
+           updateDT,
+           yoGraphicsListRegistry,
+           parentRegistry);
    }
 
+   /**
+    * Creates a new instance of the IK solver as a controller.
+    *
+    * @param commandInputManager     the command input manager used to receive commands from the network/direct API.
+    * @param statusOutputManager     the status output manager used to send status messages to the network/direct API.
+    * @param desiredFullRobotModel   the robot model the solver will be working on and storing the latest solution.
+    * @param controllableRigidBodies the list of rigid-bodies that can be controlled by the solver. Mostly used for visualization.
+    * @param fullRobotModelFactory   factory used to create the initial robot model. TODO Overkill, shouldn't be necessary.
+    * @param updateDT                the time step used by the solver.
+    * @param yoGraphicsListRegistry  the registry used to store the graphics for visualization.
+    * @param parentRegistry          the parent registry for this controller.
+    */
    public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
                                               StatusMessageOutputManager statusOutputManager,
                                               FullHumanoidRobotModel desiredFullRobotModel,
-                                              Collection<? extends RigidBodyBasics> controllableRigidBodyies,
+                                              Collection<? extends RigidBodyBasics> controllableRigidBodies,
                                               FullHumanoidRobotModelFactory fullRobotModelFactory,
                                               double updateDT,
                                               YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoRegistry parentRegistry)
    {
-      super(commandInputManager, statusOutputManager, desiredFullRobotModel.getRootJoint(), getAllJointsExcludingHands(desiredFullRobotModel),
-            controllableRigidBodyies, updateDT, yoGraphicsListRegistry, parentRegistry);
+      super(commandInputManager,
+            statusOutputManager,
+            desiredFullRobotModel.getRootJoint(),
+            getAllJointsExcludingHands(desiredFullRobotModel),
+            controllableRigidBodies,
+            updateDT,
+            yoGraphicsListRegistry,
+            parentRegistry);
 
       this.desiredFullRobotModel = desiredFullRobotModel;
       desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
-      currentFullRobotModel = fullRobotModelFactory.createFullRobotModel();
-      currentOneDoFJoints = getAllJointsExcludingHands(currentFullRobotModel);
-      currentReferenceFrames = new HumanoidReferenceFrames(currentFullRobotModel);
+      this.initialFullRobotModel = fullRobotModelFactory.createFullRobotModel();
+      initialOneDoFJoints = getAllJointsExcludingHands(initialFullRobotModel);
+      initialReferenceFrames = new HumanoidReferenceFrames(initialFullRobotModel);
       desiredFullRobotModel.getElevator().subtreeStream().forEach(rigidBody -> rigidBodyHashCodeMap.put(rigidBody.hashCode(), rigidBody));
-      desiredFullRobotModel.getRootBody().subtreeStream().forEach(rigidBody -> rootJacobians.put(rigidBody, new GeometricJacobian(desiredFullRobotModel.getElevator(), rigidBody, ReferenceFrame.getWorldFrame())));
-      Arrays.stream(currentOneDoFJoints).forEach(joint -> jointHashCodeMap.put(joint.hashCode(), joint));
+      desiredFullRobotModel.getRootBody()
+                           .subtreeStream()
+                           .forEach(rigidBody -> rootJacobians.put(rigidBody,
+                                                                   new GeometricJacobian(desiredFullRobotModel.getElevator(),
+                                                                                         rigidBody,
+                                                                                         ReferenceFrame.getWorldFrame())));
+      Arrays.stream(initialOneDoFJoints).forEach(joint -> jointHashCodeMap.put(joint.hashCode(), joint));
 
       supportRigidBodyWeight.set(200.0);
       momentumWeight.set(0.001);
@@ -223,9 +253,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private void populateDefaultJointLimitReductionFactors()
    {
-      for (int i = 0; i < currentOneDoFJoints.length; i++)
+      for (int i = 0; i < initialOneDoFJoints.length; i++)
       {
-         OneDoFJointBasics joint = currentOneDoFJoints[i];
+         OneDoFJointBasics joint = initialOneDoFJoints[i];
          YoDouble limitReductionFactor = new YoDouble(joint.getName() + "LimitReductionFactor", registry);
          jointLimitReductionFactors.put(joint.getName(), limitReductionFactor);
       }
@@ -233,16 +263,16 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       double defaultHipJointReduction = 0.05;
       for (RobotSide robotSide : RobotSide.values)
       {
-         setJointLimitReductionFactor(currentFullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH).getName(), defaultHipJointReduction);
-         setJointLimitReductionFactor(currentFullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL).getName(), defaultHipJointReduction);
-         setJointLimitReductionFactor(currentFullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW).getName(), defaultHipJointReduction);
+         setJointLimitReductionFactor(initialFullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH).getName(), defaultHipJointReduction);
+         setJointLimitReductionFactor(initialFullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL).getName(), defaultHipJointReduction);
+         setJointLimitReductionFactor(initialFullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW).getName(), defaultHipJointReduction);
       }
    }
-   
+
    private void setJointLimitReductionFactor(String jointName, double jointLimitReductionFactor)
    {
       if (jointLimitReductionFactors.containsKey(jointName))
-         jointLimitReductionFactors.get(jointName).set(jointLimitReductionFactor);      
+         jointLimitReductionFactors.get(jointName).set(jointLimitReductionFactor);
    }
 
    private static Collection<RigidBodyBasics> createListOfControllableRigidBodies(FullHumanoidRobotModel desiredFullRobotModel)
@@ -342,10 +372,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
           * recompute the pose of the root joint such that our initial configuration has its support feet as
           * close as possible to the current robot support feet. This affects the CoM task.
           */
-         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationDataInternal,
-                                                                         currentFullRobotModel.getRootJoint(),
-                                                                         currentOneDoFJoints);
-         currentReferenceFrames.updateFrames();
+         initialFullRobotModel.getRootJoint().setJointConfiguration(rootJoint);
+         for (int i = 0; i < initialOneDoFJoints.length; i++)
+         {
+            initialOneDoFJoints[i].setQ(desiredOneDoFJoints[i].getQ());
+         }
+
+         initialReferenceFrames.updateFrames();
          rootJoint.getJointPose().setToZero();
          desiredReferenceFrames.updateFrames();
 
@@ -355,18 +388,18 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          {
             if (isFootInSupport.get(RobotSide.RIGHT).getValue())
             {
-               currentFrame = currentReferenceFrames.getMidFootZUpGroundFrame();
+               currentFrame = initialReferenceFrames.getMidFootZUpGroundFrame();
                desiredFrame = desiredReferenceFrames.getMidFootZUpGroundFrame();
             }
             else
             {
-               currentFrame = currentReferenceFrames.getSoleZUpFrame(RobotSide.LEFT);
+               currentFrame = initialReferenceFrames.getSoleZUpFrame(RobotSide.LEFT);
                desiredFrame = desiredReferenceFrames.getSoleZUpFrame(RobotSide.LEFT);
             }
          }
          else if (isFootInSupport.get(RobotSide.RIGHT).getValue())
          {
-            currentFrame = currentReferenceFrames.getSoleZUpFrame(RobotSide.RIGHT);
+            currentFrame = initialReferenceFrames.getSoleZUpFrame(RobotSide.RIGHT);
             desiredFrame = desiredReferenceFrames.getSoleZUpFrame(RobotSide.RIGHT);
          }
          else
@@ -410,15 +443,15 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          holdCenterOfMassXYPosition.set(command.holdCurrentCenterOfMassXYPosition());
          holdSupportRigidBodies.set(command.holdSupportRigidBodies());
          enableJointLimitReduction.set(command.enableJointLimitReduction());
-         
+
          if (command.hasCustomJointRestrictionLimits())
          {
             // Clear joint limit restrictions
-            for (int i = 0; i < currentOneDoFJoints.length; i++)
+            for (int i = 0; i < initialOneDoFJoints.length; i++)
             {
-               jointLimitReductionFactors.get(currentOneDoFJoints[i].getName()).set(0.0);
+               jointLimitReductionFactors.get(initialOneDoFJoints[i].getName()).set(0.0);
             }
-            
+
             // Update joint limit restrictions
             for (int i = 0; i < command.getNumberOfCustomJointRestrictionLimits(); i++)
             {
@@ -581,7 +614,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    {
       if (!enableJointLimitReduction.getValue())
          return;
-      
+
       JointLimitReductionCommand jointLimitReductionCommand = bufferToPack.addJointLimitReductionCommand();
       jointLimitReductionCommand.clear();
 
@@ -710,14 +743,14 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       return desiredReferenceFrames;
    }
 
-   public FullHumanoidRobotModel getCurrentFullRobotModel()
+   public FullHumanoidRobotModel getInitialFullRobotModel()
    {
-      return currentFullRobotModel;
+      return initialFullRobotModel;
    }
 
-   public CommonHumanoidReferenceFrames getCurrentReferenceFrames()
+   public CommonHumanoidReferenceFrames getInitialReferenceFrames()
    {
-      return currentReferenceFrames;
+      return initialReferenceFrames;
    }
 
    private static class ContactingRigidBody

@@ -1,12 +1,16 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.AvatarControllerThreadInterface;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -14,19 +18,25 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
+import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
+import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoLong;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -55,6 +65,7 @@ public class KinematicsStreamingRealTimePluginFactory
                                                            CommandInputManager walkingInputManager,
                                                            StatusMessageOutputManager walkingOutputManager,
                                                            FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                                           HumanoidRobotContextDataFactory contextDataFactory,
                                                            RobotCollisionModel collisionModel)
    {
       if (ikStreamingRTController == null)
@@ -63,6 +74,7 @@ public class KinematicsStreamingRealTimePluginFactory
                                                                      walkingInputManager,
                                                                      walkingOutputManager,
                                                                      fullRobotModelFactory,
+                                                                     contextDataFactory,
                                                                      collisionModel,
                                                                      parameters);
       return ikStreamingRTController;
@@ -87,6 +99,7 @@ public class KinematicsStreamingRealTimePluginFactory
 
    public static class IKStreamingRTTask extends HumanoidRobotControlTask
    {
+      private final CrossRobotCommandResolver controllerResolver;
       private final IKStreamingRTControllerThread ikStreamingThread;
 
       private final long divisor;
@@ -95,7 +108,6 @@ public class KinematicsStreamingRealTimePluginFactory
 
       private final List<Runnable> postControllerCallbacks = new ArrayList<>();
       private final List<Runnable> schedulerThreadRunnables = new ArrayList<>();
-      private long timestamp = 0;
 
       public IKStreamingRTTask(String prefix,
                                IKStreamingRTControllerThread ikStreamingThread,
@@ -106,6 +118,8 @@ public class KinematicsStreamingRealTimePluginFactory
          super(divisor);
          this.divisor = divisor;
          this.ikStreamingThread = ikStreamingThread;
+
+         controllerResolver = new CrossRobotCommandResolver(ikStreamingThread.getFullRobotModel());
 
          //      String prefix = "Controller";
          timer = new ThreadTimer(prefix, schedulerDt * divisor, ikStreamingThread.getYoVariableRegistry());
@@ -121,29 +135,27 @@ public class KinematicsStreamingRealTimePluginFactory
          return super.initialize();
       }
 
-      private long schedulerTick = -1L;
-
       @Override
       protected void execute()
       {
          timer.start();
-         ticksBehindScheduled.set(schedulerTick - timer.getTickCount() * divisor);
+         ticksBehindScheduled.set(ikStreamingThread.getHumanoidRobotContextData().getSchedulerTick() - timer.getTickCount() * divisor);
          ikStreamingThread.run();
          runAll(postControllerCallbacks);
          timer.stop();
       }
 
       @Override
-      protected void updateMasterContext(HumanoidRobotContextData context)
+      protected void updateMasterContext(HumanoidRobotContextData masterContext)
       {
          runAll(schedulerThreadRunnables);
       }
 
       @Override
-      protected void updateLocalContext(HumanoidRobotContextData context)
+      protected void updateLocalContext(HumanoidRobotContextData masterContext)
       {
-         schedulerTick = context.getSchedulerTick();
-         timestamp = context.getTimestamp();
+         controllerResolver.resolveHumanoidRobotContextDataScheduler(masterContext, ikStreamingThread.getHumanoidRobotContextData());
+         controllerResolver.resolveHumanoidRobotContextDataEstimator(masterContext, ikStreamingThread.getHumanoidRobotContextData());
       }
 
       @Override
@@ -172,12 +184,14 @@ public class KinematicsStreamingRealTimePluginFactory
       private final YoDouble timeOfLastInput = new YoDouble("timeOfLastInput", registry);
       private final AtomicReference<ToolboxState> newToolboxStateRequestedRef = new AtomicReference<>();
       private final YoEnum<ToolboxState> toolboxState = new YoEnum<>("toolboxState", registry, ToolboxState.class);
+      private final HumanoidRobotContextData humanoidRobotContextData;
 
       public IKStreamingRTControllerThread(String robotName,
                                            ROS2NodeInterface ros2Node,
                                            CommandInputManager walkingInputManager,
                                            StatusMessageOutputManager walkingOutputManager,
                                            FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                           HumanoidRobotContextDataFactory contextDataFactory,
                                            RobotCollisionModel collisionModel,
                                            KinematicsStreamingToolboxParameters parameters)
       {
@@ -207,7 +221,6 @@ public class KinematicsStreamingRealTimePluginFactory
          kinematicsStreamingToolboxController.setCollisionModel(collisionModel);
          kinematicsStreamingToolboxController.setStreamingMessagePublisher(walkingInputManager::submitMessage);
          kinematicsStreamingToolboxController.setTrajectoryMessagePublisher(walkingInputManager::submitMessage);
-         walkingOutputManager.attachStatusMessageListener(RobotConfigurationData.class, kinematicsStreamingToolboxController::updateRobotConfigurationData);
          walkingOutputManager.attachStatusMessageListener(CapturabilityBasedStatus.class, kinematicsStreamingToolboxController::updateCapturabilityBasedStatus);
 
          ToolboxStateMessage message = new ToolboxStateMessage();
@@ -218,6 +231,30 @@ public class KinematicsStreamingRealTimePluginFactory
          });
 
          toolboxState.set(ToolboxState.SLEEP);
+
+         HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(desiredFullRobotModel.getOneDoFJoints().length);
+         ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(desiredFullRobotModel.getForceSensorDefinitions()));
+         CenterOfMassDataHolder centerOfMassDataHolderForController = new CenterOfMassDataHolder();
+         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(desiredFullRobotModel);
+         LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(desiredFullRobotModel.getControllableOneDoFJoints());
+         RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
+         contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);
+         contextDataFactory.setCenterOfMassDataHolder(centerOfMassDataHolderForController);
+         contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForEstimator);
+         contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
+         contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
+         contextDataFactory.setProcessedJointData(processedJointData);
+         contextDataFactory.setSensorDataContext(new SensorDataContext(desiredFullRobotModel));
+         humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
+
+         kinematicsStreamingToolboxController.setRobotStateUpdater((rootJoint, oneDoFJoints) ->
+                                                                   {
+                                                                      if (!humanoidRobotContextData.getEstimatorRan())
+                                                                         return false;
+                                                                      HumanoidRobotContextTools.updateRobot(desiredFullRobotModel,
+                                                                                                            humanoidRobotContextData.getProcessedJointData());
+                                                                      return true;
+                                                                   });
       }
 
       private long initialTime = -1L;
@@ -260,14 +297,16 @@ public class KinematicsStreamingRealTimePluginFactory
 
          double timeSinceLastInput = Conversions.nanosecondsToSeconds(currentMonotonicClockTime) - timeOfLastInput.getValue();
 
-         if (timeSinceLastInput > timeWithoutInputsBeforeGoingToSleep.getDoubleValue())
-         {
-            toolboxState.set(ToolboxState.SLEEP);
-            kinematicsStreamingToolboxController.notifyToolboxStateChange(ToolboxState.SLEEP);
-         }
-
          if (toolboxState.getValue() == ToolboxState.WAKE_UP)
+         {
+            if (timeSinceLastInput > timeWithoutInputsBeforeGoingToSleep.getDoubleValue())
+            {
+               toolboxState.set(ToolboxState.SLEEP);
+               kinematicsStreamingToolboxController.notifyToolboxStateChange(ToolboxState.SLEEP);
+            }
+
             kinematicsStreamingToolboxController.update();
+         }
       }
 
       @Override
@@ -285,7 +324,7 @@ public class KinematicsStreamingRealTimePluginFactory
       @Override
       public HumanoidRobotContextData getHumanoidRobotContextData()
       {
-         return null;
+         return humanoidRobotContextData;
       }
 
       public YoGraphicsListRegistry getSCS1YoGraphicsListRegistry()

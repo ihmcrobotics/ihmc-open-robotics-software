@@ -1,16 +1,9 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WholeBodyStreamingMessage;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import controller_msgs.msg.dds.*;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
@@ -39,6 +32,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    private IHMCROS2Publisher<WholeBodyTrajectoryMessage> trajectoryMessagePublisher;
    private IHMCROS2Publisher<WholeBodyStreamingMessage> streamingMessagePublisher;
 
+   RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
+
    public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
       this(robotModel, KinematicsStreamingToolboxParameters.defaultParameters(), startYoVariableServer, pubSubImplementation);
@@ -64,6 +59,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
                                                             robotModel,
                                                             yoGraphicsListRegistry,
                                                             registry);
+      controller.setRobotStateUpdater(robotStateUpdater);
       controller.setCollisionModel(robotModel.getHumanoidRobotKinematicsCollisionModel());
       Map<String, Double> initialConfiguration = fromStandPrep(robotModel);
       if (initialConfiguration != null)
@@ -108,11 +104,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
       {
-         if (controller != null)
-         {
-            s.takeNextData(robotConfigurationData, null);
-            controller.updateRobotConfigurationData(robotConfigurationData);
-         }
+         s.takeNextData(robotConfigurationData, null);
+         robotStateUpdater.setRobotConfigurationData(robotConfigurationData);
       });
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
