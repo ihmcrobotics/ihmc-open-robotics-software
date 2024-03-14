@@ -1,24 +1,32 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.WholeBodyStreamingMessage;
+import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.AvatarControllerThreadInterface;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
-import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
+import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextRootJointData;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
+import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -219,8 +227,27 @@ public class KinematicsStreamingRealTimePluginFactory
                                                                                               yoGraphicsListRegistry,
                                                                                               registry);
          kinematicsStreamingToolboxController.setCollisionModel(collisionModel);
-         kinematicsStreamingToolboxController.setStreamingMessagePublisher(walkingInputManager::submitMessage);
-         kinematicsStreamingToolboxController.setTrajectoryMessagePublisher(walkingInputManager::submitMessage);
+
+         MessageUnpacker<WholeBodyStreamingMessage> wholeBodyStreamingMessageUnpacker = MessageUnpackingTools.createWholeBodyStreamingMessageUnpacker();
+         List<Settable<?>> unpackedMessages = new ArrayList<>();
+
+         kinematicsStreamingToolboxController.setStreamingMessagePublisher(streamingMessage ->
+                                                                           {
+                                                                              wholeBodyStreamingMessageUnpacker.unpackMessage(streamingMessage,
+                                                                                                                              unpackedMessages);
+                                                                              walkingInputManager.submitMessages(unpackedMessages);
+                                                                              unpackedMessages.clear();
+                                                                           });
+
+         MessageUnpacker<WholeBodyTrajectoryMessage> wholeBodyTrajectoryMessageUnpacker = MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker();
+         kinematicsStreamingToolboxController.setTrajectoryMessagePublisher(trajectoryMessage ->
+                                                                            {
+                                                                               wholeBodyTrajectoryMessageUnpacker.unpackMessage(trajectoryMessage,
+                                                                                                                                unpackedMessages);
+                                                                               walkingInputManager.submitMessages(unpackedMessages);
+                                                                               unpackedMessages.clear();
+                                                                            });
+
          walkingOutputManager.attachStatusMessageListener(CapturabilityBasedStatus.class, kinematicsStreamingToolboxController::updateCapturabilityBasedStatus);
 
          ToolboxStateMessage message = new ToolboxStateMessage();
@@ -247,14 +274,11 @@ public class KinematicsStreamingRealTimePluginFactory
          contextDataFactory.setSensorDataContext(new SensorDataContext(desiredFullRobotModel));
          humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
-         kinematicsStreamingToolboxController.setRobotStateUpdater((rootJoint, oneDoFJoints) ->
-                                                                   {
-                                                                      if (!humanoidRobotContextData.getEstimatorRan())
-                                                                         return false;
-                                                                      HumanoidRobotContextTools.updateRobot(desiredFullRobotModel,
-                                                                                                            humanoidRobotContextData.getProcessedJointData());
-                                                                      return true;
-                                                                   });
+         kinematicsStreamingToolboxController.setRobotStateUpdater(new ContextBasedRobotStateUpdater(humanoidRobotContextData,
+                                                                                                     desiredFullRobotModel,
+                                                                                                     kinematicsStreamingToolboxController.getTools()
+                                                                                                                                         .getIKController()
+                                                                                                                                         .getDesiredOneDoFJoints()));
       }
 
       private long initialTime = -1L;
@@ -336,6 +360,46 @@ public class KinematicsStreamingRealTimePluginFactory
       public YoGraphicGroupDefinition getSCS2YoGraphics()
       {
          return null;
+      }
+   }
+
+   private static class ContextBasedRobotStateUpdater implements IKRobotStateUpdater
+   {
+      private final HumanoidRobotContextData contextData;
+      private final int[] jointIndicesInContext;
+
+      public ContextBasedRobotStateUpdater(HumanoidRobotContextData contextData, FullHumanoidRobotModel fullRobotModel, OneDoFJointBasics[] ikOrderedJoints)
+      {
+         this.contextData = contextData;
+
+         List<OneDoFJointBasics> contextOrderedJoints = Arrays.asList(fullRobotModel.getOneDoFJoints());
+         List<OneDoFJointBasics> ikOrderedJointList = Arrays.asList(ikOrderedJoints);
+
+         jointIndicesInContext = new int[ikOrderedJointList.size()];
+         for (int i = 0; i < ikOrderedJointList.size(); i++)
+         {
+            jointIndicesInContext[i] = contextOrderedJoints.indexOf(ikOrderedJointList.get(i));
+         }
+      }
+
+      @Override
+      public boolean updateRobotConfiguration(FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints)
+      {
+         if (!contextData.getEstimatorRan())
+            return false;
+
+         HumanoidRobotContextJointData jointData = contextData.getProcessedJointData();
+         HumanoidRobotContextRootJointData rootJointData = jointData.getRootJointData();
+         rootJoint.setJointOrientation(rootJointData.getRootJointOrientation());
+         rootJoint.setJointPosition(rootJointData.getRootJointLocation());
+         rootJoint.updateFrame();
+
+         for (int i = 0; i < oneDoFJoints.length; i++)
+         {
+            oneDoFJoints[i].setQ(jointData.getJointQForIndex(jointIndicesInContext[i]));
+            oneDoFJoints[i].updateFrame();
+         }
+         return true;
       }
    }
 }
