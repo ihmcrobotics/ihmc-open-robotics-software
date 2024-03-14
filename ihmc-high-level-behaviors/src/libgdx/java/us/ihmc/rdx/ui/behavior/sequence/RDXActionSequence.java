@@ -24,6 +24,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    private final ImBooleanWrapper automaticExecutionCheckbox;
    private final Timer manualExecutionOverrideTimer = new Timer();
    private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
+   private final List<RDXActionNode<?, ?>> actionChildren = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> nextForExecutionActions = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> currentlyExecutingActions = new ArrayList<>();
    private final RDXActionProgressWidgetsManager progressWidgetsManager = new RDXActionProgressWidgetsManager();
@@ -46,9 +47,15 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    {
       super.update();
 
+      actionChildren.clear();
       nextForExecutionActions.clear();
       currentlyExecutingActions.clear();
       updateActionSubtree(this);
+
+      for (RDXActionNode<?, ?> actionChild : actionChildren)
+      {
+         actionChild.updateAndValidateExecuteAfter(state.getActionChildren());
+      }
    }
 
    public void updateActionSubtree(RDXBehaviorTreeNode<?, ?> node)
@@ -57,6 +64,8 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       {
          if (child instanceof RDXActionNode<?, ?> actionNode)
          {
+            actionChildren.add(actionNode);
+
             if (actionNode.getState().getIsNextForExecution())
             {
                nextForExecutionActions.add(actionNode);

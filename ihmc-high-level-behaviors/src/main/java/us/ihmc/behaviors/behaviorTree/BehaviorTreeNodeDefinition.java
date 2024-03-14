@@ -40,6 +40,11 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    private transient BehaviorTreeNodeDefinition parent;
    private final WorkspaceResourceDirectory saveFileDirectory;
 
+   // Used to compare with saved version and provide unsaved status (*) to the operator
+   private String onDiskName;
+   private String onDiskNotes;
+   private final List<String> onDiskChildrenNames = new ArrayList<>();
+
    public BehaviorTreeNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       this.saveFileDirectory = saveFileDirectory;
@@ -56,7 +61,10 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
 
       WorkspaceResourceFile saveFile = new WorkspaceResourceFile(saveFileDirectory, name.getValue());
       LogTools.info("Saving behavior tree: {}", saveFile.getFilesystemFile());
-      JSONFileTools.save(saveFile, this::saveToFile);
+      if (JSONFileTools.save(saveFile, this::saveToFile)) // Success
+      {
+         BehaviorTreeTools.runForSubtreeNodes(this, BehaviorTreeNodeDefinition::setOnDiskFields);
+      }
    }
 
    /**
@@ -92,6 +100,45 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    {
       name.setValue(jsonNode.get("name").textValue());
       notes.setValue(jsonNode.get("notes").textValue());
+   }
+
+   public void setOnDiskFields()
+   {
+      onDiskName = name.getValue();
+      onDiskNotes = notes.getValue();
+
+      onDiskChildrenNames.clear();
+      for (BehaviorTreeNodeDefinition child : children)
+         onDiskChildrenNames.add(child.getName());
+   }
+
+   public void undoAllNontopologicalChanges()
+   {
+      name.setValue(onDiskName);
+      notes.setValue(onDiskNotes);
+
+      // We are not able to undo changes to children topology.
+      // The user must delete and reload the entire tree.
+
+      for (BehaviorTreeNodeDefinition child : children)
+      {
+         child.undoAllNontopologicalChanges();
+      }
+   }
+
+   public boolean hasChanges()
+   {
+      boolean unchanged = true;
+      unchanged &= name.getValue().equals(onDiskName);
+      unchanged &= notes.getValue().equals(onDiskNotes);
+
+      boolean childrenSizeEquals = onDiskChildrenNames.size() == children.size();
+      unchanged &= childrenSizeEquals;
+      if (childrenSizeEquals)
+         for (int i = 0; i < children.size(); i++)
+            unchanged &= children.get(i).getName().equals(onDiskChildrenNames.get(i));
+
+      return !unchanged;
    }
 
    public void toMessage(BehaviorTreeNodeDefinitionMessage message)
