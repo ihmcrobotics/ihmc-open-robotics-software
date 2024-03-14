@@ -643,11 +643,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       latestCapturabilityBasedStatusReference.set(newStatus);
    }
 
-   public CommonHumanoidReferenceFrames getCurrentReferenceFrames()
-   {
-      return ikController.getInitialReferenceFrames();
-   }
-
    public CommonHumanoidReferenceFrames getDesiredReferenceFrames()
    {
       return ikController.getDesiredReferenceFrames();

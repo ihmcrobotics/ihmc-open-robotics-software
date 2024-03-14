@@ -2,7 +2,6 @@ package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.MultiContactBalanceStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
@@ -21,6 +20,7 @@ import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -29,11 +29,11 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Integer;
 import us.ihmc.idl.IDLSequence.Object;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -65,14 +65,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private final FullHumanoidRobotModel desiredFullRobotModel;
    private final CommonHumanoidReferenceFrames desiredReferenceFrames;
-   /**
-    * Robot model used to represent the initial robot configuration as measured from
-    * {@link RobotConfigurationData}.
-    * TODO This is overkill, only used to initialize the robot configuration for the desired robot.
-    */
-   private final FullHumanoidRobotModel initialFullRobotModel;
-   private final CommonHumanoidReferenceFrames initialReferenceFrames;
-   private final OneDoFJointBasics[] initialOneDoFJoints;
    private final TIntObjectHashMap<RigidBodyBasics> rigidBodyHashCodeMap = new TIntObjectHashMap<>();
    private final TIntObjectHashMap<OneDoFJointBasics> jointHashCodeMap = new TIntObjectHashMap<>();
 
@@ -207,10 +199,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
             parentRegistry);
 
       this.desiredFullRobotModel = desiredFullRobotModel;
-      desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel);
-      this.initialFullRobotModel = fullRobotModelFactory.createFullRobotModel();
-      initialOneDoFJoints = getAllJointsExcludingHands(initialFullRobotModel);
-      initialReferenceFrames = new HumanoidReferenceFrames(initialFullRobotModel);
+      desiredReferenceFrames = new HumanoidReferenceFrames(desiredFullRobotModel, centerOfMassFrame, null);
+
       desiredFullRobotModel.getElevator().subtreeStream().forEach(rigidBody -> rigidBodyHashCodeMap.put(rigidBody.hashCode(), rigidBody));
       desiredFullRobotModel.getRootBody()
                            .subtreeStream()
@@ -218,7 +208,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
                                                                    new GeometricJacobian(desiredFullRobotModel.getElevator(),
                                                                                          rigidBody,
                                                                                          ReferenceFrame.getWorldFrame())));
-      Arrays.stream(initialOneDoFJoints).forEach(joint -> jointHashCodeMap.put(joint.hashCode(), joint));
+      Arrays.stream(desiredOneDoFJoints).forEach(joint -> jointHashCodeMap.put(joint.hashCode(), joint));
 
       supportRigidBodyWeight.set(200.0);
       momentumWeight.set(0.001);
@@ -253,9 +243,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
     */
    private void populateDefaultJointLimitReductionFactors()
    {
-      for (int i = 0; i < initialOneDoFJoints.length; i++)
+      for (int i = 0; i < desiredOneDoFJoints.length; i++)
       {
-         OneDoFJointBasics joint = initialOneDoFJoints[i];
+         OneDoFJointBasics joint = desiredOneDoFJoints[i];
          YoDouble limitReductionFactor = new YoDouble(joint.getName() + "LimitReductionFactor", registry);
          jointLimitReductionFactors.put(joint.getName(), limitReductionFactor);
       }
@@ -325,15 +315,25 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          registerRobotCollidables(collisionModel.getRobotCollidables(getDesiredFullRobotModel().getElevator()));
    }
 
+   private final RigidBodyTransform rootJointTransform = new RigidBodyTransform();
+   private final RigidBodyTransform rotationRelocation = new RigidBodyTransform();
+   private final RigidBodyTransform initialTransform = new RigidBodyTransform();
+   private final RigidBodyTransform desiredTransform = new RigidBodyTransform();
+
    @Override
    public boolean initialize()
    {
+      firstTick = true;
       KinematicsToolboxOutputStatus status = new KinematicsToolboxOutputStatus();
       status.setJointNameHash(-1);
       status.setSolutionQuality(Double.NaN);
 
-      if (!super.initializeInternal())
+      resetInternalData();
+
+      boolean wasRobotUpdated = desiredRobotStateUpdater.updateRobotConfiguration(rootJoint, desiredOneDoFJoints);
+      if (!wasRobotUpdated)
       {
+         commandInputManager.clearAllCommands();
          status.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD);
          reportMessage(status);
          return false;
@@ -367,53 +367,22 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          if (hasMultiContactBalanceStatus)
             throw new UnsupportedOperationException("Initial robot configuration is not supported with multi-contact context.");
 
-         /*
-          * Default initial configuration was provided and is set in the super class. The goal here, is to
-          * recompute the pose of the root joint such that our initial configuration has its support feet as
-          * close as possible to the current robot support feet. This affects the CoM task.
-          */
-         initialFullRobotModel.getRootJoint().setJointConfiguration(rootJoint);
-         for (int i = 0; i < initialOneDoFJoints.length; i++)
-         {
-            initialOneDoFJoints[i].setQ(desiredOneDoFJoints[i].getQ());
-         }
+         computeSupportZUpTransform(desiredFullRobotModel, initialTransform); // The robot is at the current initial configuration.
 
-         initialReferenceFrames.updateFrames();
+         initializePrivilegedConfiguration(); // The robot is now at the privileged configuration.
          rootJoint.getJointPose().setToZero();
-         desiredReferenceFrames.updateFrames();
+         desiredFullRobotModel.updateFrames();
+         computeSupportZUpTransform(desiredFullRobotModel, desiredTransform); // The robot is at the privileged configuration.
 
-         MovingReferenceFrame currentFrame, desiredFrame;
-
-         if (isFootInSupport.get(RobotSide.LEFT).getValue())
-         {
-            if (isFootInSupport.get(RobotSide.RIGHT).getValue())
-            {
-               currentFrame = initialReferenceFrames.getMidFootZUpGroundFrame();
-               desiredFrame = desiredReferenceFrames.getMidFootZUpGroundFrame();
-            }
-            else
-            {
-               currentFrame = initialReferenceFrames.getSoleZUpFrame(RobotSide.LEFT);
-               desiredFrame = desiredReferenceFrames.getSoleZUpFrame(RobotSide.LEFT);
-            }
-         }
-         else if (isFootInSupport.get(RobotSide.RIGHT).getValue())
-         {
-            currentFrame = initialReferenceFrames.getSoleZUpFrame(RobotSide.RIGHT);
-            desiredFrame = desiredReferenceFrames.getSoleZUpFrame(RobotSide.RIGHT);
-         }
-         else
-         {
-            throw new IllegalArgumentException("We have a flying robot here, such scenario is not handled.");
-         }
-         RigidBodyTransform rootJointTransform = currentFrame.getTransformToDesiredFrame(desiredFrame);
+         rootJointTransform.setAndInvert(desiredTransform);
+         rootJointTransform.multiply(initialTransform);
          // Any yaw-rotation needs to be applied at the desiredFrame's origin. rotationRelocation is used to relocate where the rotation is happening.
-         RigidBodyTransform rotationRelocation = desiredFrame.getTransformToDesiredFrame(rootJoint.getFrameAfterJoint());
+         rotationRelocation.setAndInvert(rootJoint.getJointPose());
+         rotationRelocation.multiply(desiredTransform);
+
          rootJointTransform.multiplyInvertOther(rotationRelocation);
          rootJointTransform.preMultiply(rotationRelocation);
          rootJoint.getJointPose().set(rootJointTransform);
-         updateTools();
-         desiredReferenceFrames.updateFrames();
       }
 
       // Initialize the initialCenterOfMassPosition and initialFootPoses to match the current state of the robot.
@@ -429,6 +398,46 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       reportMessage(status);
 
       return true;
+   }
+
+   private void computeSupportZUpTransform(FullHumanoidRobotModel fullRobotModel, RigidBodyTransform transformToPack)
+   {
+
+      if (isFootInSupport.get(RobotSide.LEFT).getValue())
+      {
+         if (isFootInSupport.get(RobotSide.RIGHT).getValue())
+         {
+            computeMidZUpTransform(fullRobotModel.getSoleFrame(RobotSide.LEFT), fullRobotModel.getSoleFrame(RobotSide.RIGHT), transformToPack);
+         }
+         else
+         {
+            computeZUpTransform(fullRobotModel.getSoleFrame(RobotSide.LEFT), transformToPack);
+         }
+      }
+      else if (isFootInSupport.get(RobotSide.RIGHT).getValue())
+      {
+         computeZUpTransform(fullRobotModel.getSoleFrame(RobotSide.RIGHT), transformToPack);
+      }
+      else
+      {
+         throw new IllegalArgumentException("We have a flying robot here, such scenario is not handled.");
+      }
+   }
+
+   private static void computeMidZUpTransform(ReferenceFrame frameA, ReferenceFrame frameB, RigidBodyTransformBasics transformToPack)
+   {
+      RigidBodyTransform transformA = frameA.getTransformToRoot();
+      RigidBodyTransform transformB = frameB.getTransformToRoot();
+
+      transformToPack.getTranslation().interpolate(transformA.getTranslation(), transformB.getTranslation(), 0.5);
+      transformToPack.getRotation().setToYawOrientation(AngleTools.computeAngleAverage(transformA.getRotation().getYaw(), transformB.getRotation().getYaw()));
+   }
+
+   private static void computeZUpTransform(ReferenceFrame frame, RigidBodyTransformBasics transformToPack)
+   {
+      RigidBodyTransform transform = frame.getTransformToRoot();
+      transformToPack.getTranslation().set(transform.getTranslation());
+      transformToPack.getRotation().setToYawOrientation(transform.getRotation().getYaw());
    }
 
    @Override
@@ -447,9 +456,9 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          if (command.hasCustomJointRestrictionLimits())
          {
             // Clear joint limit restrictions
-            for (int i = 0; i < initialOneDoFJoints.length; i++)
+            for (int i = 0; i < desiredOneDoFJoints.length; i++)
             {
-               jointLimitReductionFactors.get(initialOneDoFJoints[i].getName()).set(0.0);
+               jointLimitReductionFactors.get(desiredOneDoFJoints[i].getName()).set(0.0);
             }
 
             // Update joint limit restrictions
@@ -477,11 +486,18 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       executionTimer.stopMeasurement();
    }
 
+   @Override
+   protected void updateTools()
+   {
+      // Overriding the default implementation to reduce the number of times the reference frames are updated.
+      desiredReferenceFrames.updateFrames();
+   }
+
    /**
     * Sets the {@link #initialCenterOfMassPosition} and {@link #initialFootPoses} to match the current
     * state of {@link #desiredFullRobotModel}.
     */
-   private void updateCoMPositionAndFootPoses()
+   protected void updateCoMPositionAndFootPoses()
    {
       updateTools();
 
@@ -546,7 +562,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       if (contactingRigidBodies.isEmpty())
          return;
 
-      Set<RigidBodyBasics> controlledBodies = new HashSet<RigidBodyBasics>();
+      Set<RigidBodyBasics> controlledBodies = new HashSet<>();
 
       for (int i = 0; i < contactingRigidBodies.size(); i++)
       {
@@ -741,16 +757,6 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    public CommonHumanoidReferenceFrames getDesiredReferenceFrames()
    {
       return desiredReferenceFrames;
-   }
-
-   public FullHumanoidRobotModel getInitialFullRobotModel()
-   {
-      return initialFullRobotModel;
-   }
-
-   public CommonHumanoidReferenceFrames getInitialReferenceFrames()
-   {
-      return initialReferenceFrames;
    }
 
    private static class ContactingRigidBody
