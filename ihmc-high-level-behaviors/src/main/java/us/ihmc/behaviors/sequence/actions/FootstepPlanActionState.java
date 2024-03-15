@@ -62,7 +62,16 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    @Override
    public void update()
    {
-      updateGoalFrame();
+      // Make sure there's no pitch or roll
+      goalToParentTransform.getRotation().setYawPitchRoll(goalToParentTransform.getRotation().getYaw(), 0.0, 0.0);
+
+      for (RobotSide side : RobotSide.values)
+      {
+         goalFootstepToGoalTransforms.get(side).getTranslation().setZ(0.0);
+         goalFootstepToGoalTransforms.get(side).getRotation().setYawPitchRoll(goalFootstepToGoalTransforms.get(side).getRotation().getYaw(), 0.0, 0.0);
+      }
+
+      goalFrame.update(definition.getParentFrameName());
 
       RecyclingArrayListTools.synchronizeSize(footsteps, definition.getFootsteps().getSize());
 
@@ -73,22 +82,34 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       }
    }
 
-   public void updateGoalFrame()
+   public void copyDefinitionToGoalFrame()
    {
-      goalToParentTransform.setToZero();
-      goalToParentTransform.getTranslation().set(definition.getGoalToParentX().getValue(),
-                                                 definition.getGoalToParentY().getValue(),
-                                                 goalToParentZ.getValue());
+      goalToParentTransform.getTranslation().setX(definition.getGoalToParentX().getValue());
+      goalToParentTransform.getTranslation().setY(definition.getGoalToParentY().getValue());
       goalToParentTransform.getRotation().setToYawOrientation(definition.getGoalToParentYaw().getValue());
-      goalFrame.update(definition.getParentFrameName());
+      goalFrame.getReferenceFrame().update();
+   }
 
-      for (RobotSide side : RobotSide.values)
-      {
-         goalFootstepToGoalTransforms.get(side).setToZero();
-         goalFootstepToGoalTransforms.get(side).getTranslation().setX(definition.getGoalFootstepToGoalX(side).getValue());
-         goalFootstepToGoalTransforms.get(side).getTranslation().setY(definition.getGoalFootstepToGoalY(side).getValue());
-         goalFootstepToGoalTransforms.get(side).getRotation().setToYawOrientation(definition.getGoalFootstepToGoalYaw(side).getValue());
-      }
+   public void copyDefinitionToGoalFoostepToGoalTransform(RobotSide side)
+   {
+      goalFootstepToGoalTransforms.get(side).setToZero();
+      goalFootstepToGoalTransforms.get(side).getTranslation().setX(definition.getGoalFootstepToGoalX(side).getValue());
+      goalFootstepToGoalTransforms.get(side).getTranslation().setY(definition.getGoalFootstepToGoalY(side).getValue());
+      goalFootstepToGoalTransforms.get(side).getRotation().setToYawOrientation(definition.getGoalFootstepToGoalYaw(side).getValue());
+   }
+
+   public void copyGoalFrameToDefinition()
+   {
+      definition.getGoalToParentX().setValue(goalToParentTransform.getTranslation().getX());
+      definition.getGoalToParentY().setValue(goalToParentTransform.getTranslation().getY());
+      definition.getGoalToParentYaw().setValue(goalToParentTransform.getRotation().getYaw());
+   }
+
+   public void copyGoalFootstepToGoalTransformToDefinition(RobotSide side)
+   {
+      definition.getGoalFootstepToGoalX(side).setValue(goalFootstepToGoalTransforms.get(side).getTranslation().getX());
+      definition.getGoalFootstepToGoalY(side).setValue(goalFootstepToGoalTransforms.get(side).getTranslation().getY());
+      definition.getGoalFootstepToGoalYaw(side).setValue(goalFootstepToGoalTransforms.get(side).getRotation().getYaw());
    }
 
    public void toMessage(FootstepPlanActionStateMessage message)

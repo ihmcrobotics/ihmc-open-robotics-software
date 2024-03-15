@@ -129,15 +129,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void update()
    {
-      // Set the definition from what we adjusted by the gizmo
-      // However, we check the goal frame is not null, which will be the case
-      if (state.getGoalFrame().getReferenceFrame() != null)
-      {
-         definition.getGoalToParentX().setValue(state.getGoalToParentTransform().getTranslation().getX());
-         definition.getGoalToParentY().setValue(state.getGoalToParentTransform().getTranslation().getY());
-         definition.getGoalToParentYaw().setValue(state.getGoalToParentTransform().getRotation().getYaw());
-      }
-
       super.update();
 
       RecyclingArrayListTools.synchronizeSize(manuallyPlacedFootsteps, state.getFootsteps());
@@ -203,6 +194,20 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
          if (!showAdjustmentInteractables.get())
             goalFeetPosesSelected.forEach(imBoolean -> imBoolean.set(false));
+
+         if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getGizmoModifiedByUser().poll())
+            state.copyGoalFrameToDefinition();
+         else
+            state.copyDefinitionToGoalFrame();
+
+         for (RobotSide side : RobotSide.values)
+            if (goalFeetGizmos.get(side).getGizmoModifiedByUser().poll())
+               state.copyGoalFootstepToGoalTransformToDefinition(side);
+            else
+               state.copyDefinitionToGoalFoostepToGoalTransform(side);
+
+         state.getGoalToParentTransform().getTranslation().setZ(state.getGoalToParentZ().getValue());
+         state.getGoalFrame().getReferenceFrame().update();
 
          footstepPlannerGoalGizmo.getPathControlRingGizmo().update();
 
