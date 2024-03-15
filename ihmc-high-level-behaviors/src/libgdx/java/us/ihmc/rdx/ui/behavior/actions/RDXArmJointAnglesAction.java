@@ -21,7 +21,7 @@ public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionS
    private final ImIntegerWrapper sideWidget;
    private final String[] configurations = new String[PresetArmConfiguration.values().length + 1];
    private final ImInt currentConfiguration = new ImInt(PresetArmConfiguration.HOME.ordinal() + 1);
-   private final ImDoubleWrapper[] jointAngleWidgets = new ImDoubleWrapper[ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS];
+   private final ImDoubleWrapper[] jointAngleWidgets = new ImDoubleWrapper[ArmJointAnglesActionDefinition.MAX_NUMBER_OF_JOINTS];
    private final ImDoubleWrapper trajectoryDurationWidget;
 
    public RDXArmJointAnglesAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, DRCRobotModel robotModel)
@@ -46,7 +46,7 @@ public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionS
          configurations[c++] = preset.name();
       }
 
-      for (int i = 0; i < ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS; i++)
+      for (int i = 0; i < ArmJointAnglesActionDefinition.MAX_NUMBER_OF_JOINTS; i++)
       {
          int jointIndex = i;
          jointAngleWidgets[i] = new ImDoubleWrapper(() -> getDefinition().getJointAngles().getValue()[jointIndex],
@@ -94,7 +94,7 @@ public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionS
       if (getDefinition().getPreset() == null)
       {
          ImGui.pushItemWidth(80.0f);
-         for (int i = 0; i < ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS; i++)
+         for (int i = 0; i < ArmJointAnglesActionDefinition.MAX_NUMBER_OF_JOINTS; i++)
          {
             jointAngleWidgets[i].renderImGuiWidget();
          }
