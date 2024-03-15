@@ -51,8 +51,9 @@ public class ArmJointAnglesActionExecutor extends ActionNodeExecutor<ArmJointAng
       double[] jointAngleArray;
       if (state.getDefinition().getPreset() == null)
       {
-         jointAngleArray = new double[ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS];
-         for (int i = 0; i < ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS; i++)
+         int currentArmNumberOfJoints = syncedRobot.getRobotModel().getJointMap().getArmJointNames(getDefinition().getSide()).length;
+         jointAngleArray = new double[currentArmNumberOfJoints];
+         for (int i = 0; i < currentArmNumberOfJoints; i++)
          {
             jointAngleArray[i] = getDefinition().getJointAngles().getValueReadOnly(i);
          }
