@@ -3,6 +3,8 @@ package us.ihmc.exampleSimulations.planarWalker;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
+import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
+import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 
@@ -12,7 +14,13 @@ public class BWCPlanarWalkerSimulation
    {
       int simTicksPerControlTick = 3;
 
-      SimulationConstructionSet2 scs = new SimulationConstructionSet2();
+
+      ContactPointBasedContactParameters contactParameters = ContactPointBasedContactParameters.defaultParameters();
+//      contactParameters.setKxy(5000.0);
+//      contactParameters.setBxy(500.0);
+      PhysicsEngineFactory physicsEngineFactory = PhysicsEngineFactory.newContactPointBasedPhysicsEngineFactory(contactParameters);
+//      PhysicsEngineFactory physicsEngineFactory = PhysicsEngineFactory.newContactPointBasedPhysicsEngineFactory();
+      SimulationConstructionSet2 scs = new SimulationConstructionSet2("bloop", physicsEngineFactory);
       scs.setBufferRecordTickPeriod(simTicksPerControlTick);
 //      scs.getGravity().setToZero();
 

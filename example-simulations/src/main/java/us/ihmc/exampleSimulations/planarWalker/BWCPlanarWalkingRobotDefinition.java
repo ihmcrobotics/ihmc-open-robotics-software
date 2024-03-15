@@ -124,7 +124,7 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 
    private static RigidBodyDefinition createShin(String name)
    {
-      double shinMass = 1.0;
+      double shinMass = 3.0;
       MomentOfInertiaDefinition shinMomentOfInertia = new MomentOfInertiaDefinition(0.1, 0.1, 0.01);
 
       RigidBodyDefinition shinDefinition = new RigidBodyDefinition(name);

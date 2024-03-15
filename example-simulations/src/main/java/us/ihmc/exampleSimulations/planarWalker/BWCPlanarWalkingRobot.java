@@ -2,12 +2,21 @@ package us.ihmc.exampleSimulations.planarWalker;
 
 import us.ihmc.euclid.referenceFrame.FixedReferenceFrame;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.mecano.frames.FixedMovingReferenceFrame;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimPrismaticJoint;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
+import us.ihmc.scs2.simulation.robot.trackers.GroundContactPoint;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -20,21 +29,29 @@ public class BWCPlanarWalkingRobot
    private final SideDependentList<YoDouble> legLengths = new SideDependentList<YoDouble>();
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final SideDependentList<ReferenceFrame> footFrames = new SideDependentList<>();
+   private final SideDependentList<MovingReferenceFrame> footFrames = new SideDependentList<>();
 
+   private final double mass;
    private final DoubleProvider time;
    private final ReferenceFrame worldFrame;
 
-   private final ReferenceFrame centerOfMassFrame;
+   private final MovingReferenceFrame centerOfMassFrame;
+   private final YoFramePoint3D centerOfMassPosition;
+   private final YoFrameVector3D centerOfMassVelocity;
+   private final SideDependentList<YoFrameVector3D> footVelocity = new SideDependentList<>();
 
    public BWCPlanarWalkingRobot(Robot robot, DoubleProvider time)
    {
       this.time = time;
       robot.getFloatingRootJoint().setJointPosition(new Vector3D(0.0, 0.0, 0.75));
+      mass = TotalMassCalculator.computeSubTreeMass(robot.getRootBody());
 
       worldFrame = robot.getInertialFrame();
       kneeJoints = new SideDependentList<>();
       hipJoints = new SideDependentList<>();
+
+      centerOfMassPosition = new YoFramePoint3D("centerOfMassPosition", worldFrame, registry);
+      centerOfMassVelocity = new YoFrameVector3D("centerOfMassVelocity", worldFrame, registry);
 
       // FIXME use the center of mass jacobian calculator for this.
       centerOfMassFrame = robot.getJoint(BWCPlanarWalkingRobotDefinition.baseJointName).getFrameAfterJoint();
@@ -46,12 +63,14 @@ public class BWCPlanarWalkingRobot
          kneeJoints.put(robotSide, kneeJoint);
          hipJoints.put(robotSide, hipJoint);
 
+         footVelocity.put(robotSide,  new YoFrameVector3D(robotSide.getLowerCaseName() + "FootVelocity", centerOfMassFrame, registry));
+
          YoDouble legLength = new YoDouble(robotSide.getLowerCaseName() + "LegLength", registry);
          legLengths.put(robotSide, legLength);
 
          Vector3D footTranslationFromKnee = new Vector3D();
          footTranslationFromKnee.setZ(-BWCPlanarWalkingRobotDefinition.shinLength / 2.0);
-         ReferenceFrame footFrame = new FixedReferenceFrame(robotSide.getLowerCaseName() + "FootFrame", kneeJoint.getFrameAfterJoint(), footTranslationFromKnee);
+         MovingReferenceFrame footFrame = new FixedMovingReferenceFrame(robotSide.getLowerCaseName() + "FootFrame", kneeJoint.getFrameAfterJoint(), footTranslationFromKnee);
          footFrames.put(robotSide, footFrame);
       }
       kneeJoints.get(RobotSide.LEFT).setQ(0.25);
@@ -67,9 +86,19 @@ public class BWCPlanarWalkingRobot
       return registry;
    }
 
+   public GroundContactPoint getGroundContactPoint(RobotSide robotSide)
+   {
+      return kneeJoints.get(robotSide).getAuxiliaryData().getGroundContactPoints().get(0);
+   }
+
    public DoubleProvider getTime()
    {
       return time;
+   }
+
+   public double getMass()
+   {
+      return mass;
    }
 
    public double getLegLength(RobotSide robotSide)
@@ -92,9 +121,24 @@ public class BWCPlanarWalkingRobot
       return hipJoints.get(robotSide);
    }
 
-   public ReferenceFrame getCenterOfMassFrame()
+   public MovingReferenceFrame getCenterOfMassFrame()
    {
       return centerOfMassFrame;
+   }
+
+   public FramePoint3DReadOnly getCenterOfMassPosition()
+   {
+      return centerOfMassPosition;
+   }
+
+   public FrameVector3DReadOnly getCenterOfMassVelocity()
+   {
+      return centerOfMassVelocity;
+   }
+
+   public FrameVector3DReadOnly getVelocityOfFootRelativeToCoM(RobotSide robotSide)
+   {
+      return footVelocity.get(robotSide);
    }
 
    public void update()
@@ -108,6 +152,13 @@ public class BWCPlanarWalkingRobot
          legLengths.get(robotSide).set(currentLegLength);
 
          footFrames.get(robotSide).update();
+
+         Twist footTwist = new Twist();
+         footFrames.get(robotSide).getTwistRelativeToOther(centerOfMassFrame, footTwist);
+         footVelocity.get(robotSide).setMatchingFrame(footTwist.getLinearPart());
       }
+
+      centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
+      centerOfMassVelocity.setMatchingFrame(centerOfMassFrame.getTwistOfFrame().getLinearPart());
    }
 }
