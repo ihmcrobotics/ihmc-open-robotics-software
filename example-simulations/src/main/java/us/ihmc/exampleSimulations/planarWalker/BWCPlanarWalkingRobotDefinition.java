@@ -57,6 +57,9 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
       torsoBodyDefinition = createTorso();
       floatingBaseDefinition.setSuccessor(torsoBodyDefinition);
 
+      KinematicPointDefinition basePoseDefintion = new KinematicPointDefinition("_base");
+      floatingBaseDefinition.addKinematicPointDefinition(basePoseDefintion);
+
       for (RobotSide robotSide : RobotSide.values)
       {
          // create the hip pitch joints and add them to the tree
@@ -70,6 +73,9 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
          RigidBodyDefinition thighLink = createThigh(thighNames.get(robotSide));
          hipPitchJointDefinition.setSuccessor(thighLink);
 
+         KinematicPointDefinition hipPoseDefintion = new KinematicPointDefinition(robotSide.getLowerCaseName() + "_hip");
+         hipPitchJointDefinition.addKinematicPointDefinition(hipPoseDefintion);
+
          // create the knee joints and add them to the tree
          Vector3D leftKneeOffsetInThigh = new Vector3D(0.0, 0.0, -thighLength / 2.0);
          PrismaticJointDefinition kneeJointDefinition = new PrismaticJointDefinition(kneeNames.get(robotSide), leftKneeOffsetInThigh, Axis3D.Z);
@@ -79,6 +85,9 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
          // FIXME we probably need to add an offset from the joint attachment to the origin of the link.
          RigidBodyDefinition lowerLeg = createShin(shinNames.get(robotSide));
          kneeJointDefinition.setSuccessor(lowerLeg);
+
+         KinematicPointDefinition kneePoseDefintion = new KinematicPointDefinition(robotSide.getLowerCaseName() + "_knee");
+         kneeJointDefinition.addKinematicPointDefinition(kneePoseDefintion);
 
          // create the contact points for the feet.
          GroundContactPointDefinition footContactPoint = new GroundContactPointDefinition(robotSide.getLowerCaseName() + "_gc_point", new Vector3D(0.0, 0.0, -shinLength / 2.0));

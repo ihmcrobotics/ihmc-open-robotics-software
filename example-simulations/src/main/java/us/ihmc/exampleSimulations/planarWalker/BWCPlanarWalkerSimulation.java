@@ -18,6 +18,11 @@ public class BWCPlanarWalkerSimulation
       ContactPointBasedContactParameters contactParameters = ContactPointBasedContactParameters.defaultParameters();
 //      contactParameters.setKxy(5000.0);
 //      contactParameters.setBxy(500.0);
+      contactParameters.setKz(1500.0);
+      contactParameters.setBz(1000.0);
+      contactParameters.setKxy(30000);
+      contactParameters.setBxy(1500);
+
       PhysicsEngineFactory physicsEngineFactory = PhysicsEngineFactory.newContactPointBasedPhysicsEngineFactory(contactParameters);
 //      PhysicsEngineFactory physicsEngineFactory = PhysicsEngineFactory.newContactPointBasedPhysicsEngineFactory();
       SimulationConstructionSet2 scs = new SimulationConstructionSet2("bloop", physicsEngineFactory);
@@ -31,6 +36,8 @@ public class BWCPlanarWalkerSimulation
 
       // set up the controller robot that has convenience methods for us to do control things with.
       BWCPlanarWalkingRobot controllerRobot = new BWCPlanarWalkingRobot(robot, scs.getTime());
+      scs.addYoGraphic(controllerRobot.getSCS2YoGraphics());
+
       // create the robot controller
       BWCPlanarWalkingController controller = new BWCPlanarWalkingController(controllerRobot, RobotSide.LEFT);
       // set the controller to control the robot.

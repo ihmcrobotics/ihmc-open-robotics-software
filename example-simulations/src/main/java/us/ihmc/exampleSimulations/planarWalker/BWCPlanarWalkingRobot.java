@@ -8,12 +8,16 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.FixedMovingReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimPrismaticJoint;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimFloatingJointBasics;
 import us.ihmc.scs2.simulation.robot.trackers.GroundContactPoint;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -21,8 +25,13 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class BWCPlanarWalkingRobot
+import static us.ihmc.scs2.definition.visual.ColorDefinitions.*;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.*;
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint2DGraphic.CIRCLE_PLUS;
+
+public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
 {
+   private final SimFloatingJointBasics floatingJOint;
    private final SideDependentList<SimPrismaticJoint> kneeJoints;
    private final SideDependentList<SimRevoluteJoint> hipJoints;
 
@@ -43,7 +52,8 @@ public class BWCPlanarWalkingRobot
    public BWCPlanarWalkingRobot(Robot robot, DoubleProvider time)
    {
       this.time = time;
-      robot.getFloatingRootJoint().setJointPosition(new Vector3D(0.0, 0.0, 0.75));
+      floatingJOint = robot.getFloatingRootJoint();
+      floatingJOint.setJointPosition(new Vector3D(0.0, 0.0, 0.75));
       mass = TotalMassCalculator.computeSubTreeMass(robot.getRootBody());
 
       worldFrame = robot.getInertialFrame();
@@ -160,5 +170,21 @@ public class BWCPlanarWalkingRobot
 
       centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
       centerOfMassVelocity.setMatchingFrame(centerOfMassFrame.getTwistOfFrame().getLinearPart());
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(newYoGraphicCoordinateSystem3D("BasePoint", floatingJOint.getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.25));
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         group.addChild(newYoGraphicPoint3D(robotSide.getLowerCaseName() + "GroundPoint", kneeJoints.get(robotSide).getAuxiliaryData().getGroundContactPoints().get(0).getPose().getPosition(), 0.01, DarkOrange()));
+         group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "KneeFrame", kneeJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
+         group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "HipFrame", hipJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
+      }
+      group.setVisible(true);
+      return group;
+
    }
 }
