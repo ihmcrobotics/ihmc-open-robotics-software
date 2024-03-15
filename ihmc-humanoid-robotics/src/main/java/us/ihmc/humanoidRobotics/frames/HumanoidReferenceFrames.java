@@ -16,6 +16,7 @@ import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingMidFootZUpGroundFrame;
+import us.ihmc.robotics.screwTheory.MovingMidFrame;
 import us.ihmc.robotics.screwTheory.MovingMidFrameZUpFrame;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -48,6 +49,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private final SideDependentList<MovingReferenceFrame> footReferenceFrames = new SideDependentList<>();
    private final SideDependentList<MovingReferenceFrame> soleFrames = new SideDependentList<>();
    private final SideDependentList<MovingReferenceFrame> soleZUpFrames = new SideDependentList<>();
+   private final MovingMidFrame midHandControlFrame;
    private final MovingMidFrameZUpFrame midFeetZUpFrame;
    private final MovingMidFootZUpGroundFrame midFootZUpGroundFrame;
    private final MovingReferenceFrame midFeetUnderPelvisWalkDirectionFrame;
@@ -212,6 +214,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          soleZUpFrames.put(robotSide, soleZUpFrame);
       }
 
+      midHandControlFrame = new MovingMidFrame("midHandControlFrame", fullRobotModel.getHandControlFrame(RobotSide.LEFT), fullRobotModel.getHandControlFrame(RobotSide.RIGHT));
       midFeetZUpFrame = new MovingMidFrameZUpFrame("midFeetZUp", getSoleFrame(RobotSide.LEFT), getSoleFrame(RobotSide.RIGHT), modelStationaryFrame);
       midFootZUpGroundFrame = new MovingMidFootZUpGroundFrame("midFeetZUpAverageYaw",
                                                               localSoleZUpFrames.get(RobotSide.LEFT),
@@ -229,6 +232,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.CENTER_OF_MASS_FRAME, getCenterOfMassFrame());
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.LEFT_SOLE_FRAME, getSoleFrame(RobotSide.LEFT));
       addDefaultIDToReferenceFrame(CommonReferenceFrameIds.RIGHT_SOLE_FRAME, getSoleFrame(RobotSide.RIGHT));
+      addDefaultIDToReferenceFrame(CommonReferenceFrameIds.MID_HAND_CONTROL_FRAME, getMidHandControlFrame());
       RigidBodyBasics chest = fullRobotModel.getChest();
       if (chest != null)
       {
@@ -340,6 +344,11 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       return ankleZUpFrames.get(robotSide);
    }
 
+   public MovingMidFrame getMidHandControlFrame()
+   {
+      return midHandControlFrame;
+   }
+
    @Override
    public MovingReferenceFrame getMidFeetZUpFrame()
    {
@@ -397,6 +406,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          soleZUpFrames.get(robotSide).update();
       }
 
+      midHandControlFrame.update();
       midFeetZUpFrame.update();
       midFootZUpGroundFrame.update();
       midFeetUnderPelvisWalkDirectionFrame.update();

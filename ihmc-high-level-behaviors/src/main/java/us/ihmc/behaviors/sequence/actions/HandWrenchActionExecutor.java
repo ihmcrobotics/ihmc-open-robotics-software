@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class HandWrenchActionExecutor extends ActionNodeExecutor<HandWrenchActionState, HandWrenchActionDefinition>
@@ -72,6 +73,7 @@ public class HandWrenchActionExecutor extends ActionNodeExecutor<HandWrenchActio
       wrenchTrajectoryPoints.add().set(trajectoryPoint);
 
       wrenchTrajectory.getFrameInformation().setTrajectoryReferenceFrameId(FrameInformation.CHEST_FRAME);
+      wrenchTrajectory.getFrameInformation().setTrajectoryReferenceFrameId(CommonReferenceFrameIds.MID_HAND_CONTROL_FRAME.getHashId());
       wrenchTrajectory.setUseCustomControlFrame(true);
       wrenchTrajectory.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
 
