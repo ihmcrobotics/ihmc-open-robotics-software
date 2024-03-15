@@ -25,6 +25,10 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
             */
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage>  footsteps_;
    /**
+            * Goal to parent frame Z
+            */
+   public double goal_to_parent_z_;
+   /**
             * Execution state
             */
    public byte execution_state_;
@@ -76,6 +80,8 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       footsteps_.set(other.footsteps_);
+      goal_to_parent_z_ = other.goal_to_parent_z_;
+
       execution_state_ = other.execution_state_;
 
       total_number_of_footsteps_ = other.total_number_of_footsteps_;
@@ -113,6 +119,21 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage>  getFootsteps()
    {
       return footsteps_;
+   }
+
+   /**
+            * Goal to parent frame Z
+            */
+   public void setGoalToParentZ(double goal_to_parent_z)
+   {
+      goal_to_parent_z_ = goal_to_parent_z;
+   }
+   /**
+            * Goal to parent frame Z
+            */
+   public double getGoalToParentZ()
+   {
+      return goal_to_parent_z_;
    }
 
    /**
@@ -223,6 +244,8 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
          {  if (!this.footsteps_.get(i).epsilonEquals(other.footsteps_.get(i), epsilon)) return false; }
       }
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_to_parent_z_, other.goal_to_parent_z_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_state_, other.execution_state_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.total_number_of_footsteps_, other.total_number_of_footsteps_, epsilon)) return false;
@@ -261,6 +284,8 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if (!this.footsteps_.equals(otherMyClass.footsteps_)) return false;
+      if(this.goal_to_parent_z_ != otherMyClass.goal_to_parent_z_) return false;
+
       if(this.execution_state_ != otherMyClass.execution_state_) return false;
 
       if(this.total_number_of_footsteps_ != otherMyClass.total_number_of_footsteps_) return false;
@@ -287,6 +312,8 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       builder.append(this.definition_);      builder.append(", ");
       builder.append("footsteps=");
       builder.append(this.footsteps_);      builder.append(", ");
+      builder.append("goal_to_parent_z=");
+      builder.append(this.goal_to_parent_z_);      builder.append(", ");
       builder.append("execution_state=");
       builder.append(this.execution_state_);      builder.append(", ");
       builder.append("total_number_of_footsteps=");

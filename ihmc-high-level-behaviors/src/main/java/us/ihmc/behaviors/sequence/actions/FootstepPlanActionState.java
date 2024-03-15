@@ -118,6 +118,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
       super.toMessage(message.getState());
 
+      message.setGoalToParentZ(goalToParentZ.toMessage());
       message.setTotalNumberOfFootsteps(totalNumberOfFootsteps.toMessage());
       message.setNumberOfIncompleteFootsteps(numberOfIncompleteFootsteps.toMessage());
       desiredFootPoses.get(RobotSide.LEFT).toMessage(message.getDesiredLeftFootsteps());
@@ -140,6 +141,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
       definition.fromMessage(message.getDefinition());
 
+      goalToParentZ.fromMessage(message.getGoalToParentZ());
       totalNumberOfFootsteps.fromMessage(message.getTotalNumberOfFootsteps());
       numberOfIncompleteFootsteps.fromMessage(message.getNumberOfIncompleteFootsteps());
       desiredFootPoses.get(RobotSide.LEFT).fromMessage(message.getDesiredLeftFootsteps());

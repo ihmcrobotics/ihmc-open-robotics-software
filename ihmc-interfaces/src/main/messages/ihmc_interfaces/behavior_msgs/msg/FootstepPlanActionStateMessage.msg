@@ -12,6 +12,9 @@ behavior_msgs/FootstepPlanActionDefinitionMessage definition
 # The footsteps, with a maximum of 50
 behavior_msgs/FootstepPlanActionFootstepStateMessage[<=50] footsteps
 
+# Goal to parent frame Z
+float64 goal_to_parent_z
+
 # Execution state
 byte execution_state
 

@@ -41,6 +41,10 @@ module behavior_msgs
          */
         sequence<behavior_msgs::msg::dds::FootstepPlanActionFootstepStateMessage, 50> footsteps;
         /**
+         * Goal to parent frame Z
+         */
+        double goal_to_parent_z;
+        /**
          * Execution state
          */
         octet execution_state;
