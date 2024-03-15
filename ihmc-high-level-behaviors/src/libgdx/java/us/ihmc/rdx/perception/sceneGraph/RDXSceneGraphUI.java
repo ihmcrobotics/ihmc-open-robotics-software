@@ -390,7 +390,11 @@ public class RDXSceneGraphUI
    {
       if (showGraphics.get())
       {
-         uiSceneNodes.values().forEach(node -> node.getRenderables(renderables, pool, sceneLevels));
+         uiSceneNodes.values().forEach(node ->
+         {
+            if (!node.isGraphicsHidden())
+               node.getRenderables(renderables, pool, sceneLevels);
+         });
       }
    }
 

@@ -62,7 +62,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private final RecyclingArrayList<FrameVector3D> angularVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final TDoubleArrayList trajectoryTimes = new TDoubleArrayList();
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
-   private final int numberOfJoints = ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS;
+   private final int numberOfJoints = ArmJointAnglesActionDefinition.MAX_NUMBER_OF_JOINTS;
    private int numberOfPoints;
    private double rotationRadius;
    private double signedTotalRotation;
