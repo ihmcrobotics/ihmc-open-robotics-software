@@ -32,7 +32,7 @@ public class RDXVRModeManager
    private RDXVRKinematicsStreamingMode kinematicsStreamingMode;
    private RDXJoystickBasedStepping joystickBasedStepping;
    private RDX3DSituatedImGuiPanel leftHandPanel;
-   private RDXVRStereoVision stereoVision;
+//   private RDXVRStereoVision stereoVision;
    private RDXVRModeControls vrModeControls;
    private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -72,7 +72,7 @@ public class RDXVRModeManager
       baseUI.getVRManager().getContext().addVRPickCalculator(leftHandPanel::calculateVRPick);
       baseUI.getVRManager().getContext().addVRInputProcessor(leftHandPanel::processVRInput);
 
-      stereoVision = new RDXVRStereoVision(syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame());
+//      stereoVision = new RDXVRStereoVision(syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame());
 
       vrModeControls = new RDXVRModeControls(baseUI, this);
 
@@ -140,7 +140,7 @@ public class RDXVRModeManager
 
    public void render()
    {
-      stereoVision.renderProjection();
+//      stereoVision.renderProjection();
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
@@ -159,8 +159,8 @@ public class RDXVRModeManager
          }
       }
 
-      if (stereoVision.isEnabled())
-         stereoVision.getDualBlackflySphericalProjection().getRenderables(renderables, pool, sceneLevels);
+//      if (stereoVision.isEnabled())
+//         stereoVision.getDualBlackflySphericalProjection().getRenderables(renderables, pool, sceneLevels);
    }
 
    public void destroy()
@@ -169,7 +169,7 @@ public class RDXVRModeManager
       if (kinematicsStreamingMode != null)
          kinematicsStreamingMode.destroy();
       joystickBasedStepping.destroy();
-      stereoVision.getDualBlackflySphericalProjection().shutdown();
+//      stereoVision.getDualBlackflySphericalProjection().shutdown();
    }
 
    public RDXVRMode getMode()
@@ -192,10 +192,10 @@ public class RDXVRModeManager
       return joystickBasedStepping;
    }
 
-   public RDXVRStereoVision getStereoVision()
-   {
-      return stereoVision;
-   }
+//   public RDXVRStereoVision getStereoVision()
+//   {
+//      return stereoVision;
+//   }
 
    public RDX3DSituatedImGuiPanel getLeftHandPanel()
    {
