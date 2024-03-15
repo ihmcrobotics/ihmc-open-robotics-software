@@ -16,6 +16,8 @@ import java.awt.*;
 
 public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 {
+   private static final double damping = 0.1;
+
    public static final String baseJointName = "floatingBase";
    public static final String torsoName = "torso";
    public static final String leftHipPitchName = "l_hip_pitch";
@@ -65,6 +67,7 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
          // create the hip pitch joints and add them to the tree
          Vector3D hipPitchOffsetInTorso = new Vector3D(0.0, robotSide.negateIfRightSide(0.05), -torsoHeight / 2.0);
          RevoluteJointDefinition hipPitchJointDefinition = new RevoluteJointDefinition(hipPitchNames.get(robotSide), hipPitchOffsetInTorso, Axis3D.Y);
+         hipPitchJointDefinition.setDamping(damping);
          torsoBodyDefinition.addChildJoint(hipPitchJointDefinition);
          hipPitchJointDefinitions.put(robotSide, hipPitchJointDefinition);
 
@@ -79,6 +82,7 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
          // create the knee joints and add them to the tree
          Vector3D leftKneeOffsetInThigh = new Vector3D(0.0, 0.0, -thighLength / 2.0);
          PrismaticJointDefinition kneeJointDefinition = new PrismaticJointDefinition(kneeNames.get(robotSide), leftKneeOffsetInThigh, Axis3D.Z);
+         kneeJointDefinition.setDamping(damping);
          thighLink.addChildJoint(kneeJointDefinition);
 
          // create the shin links and add them to the tree
