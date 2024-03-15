@@ -5,9 +5,11 @@ import controller_msgs.msg.dds.WrenchTrajectoryMessage;
 import controller_msgs.msg.dds.WrenchTrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.FrameInformation;
 import ihmc_common_msgs.msg.dds.QueueableMessage;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.TaskspaceTrajectoryTrackingErrorCalculator;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -21,13 +23,15 @@ public class HandWrenchActionExecutor extends ActionNodeExecutor<HandWrenchActio
    private final HandWrenchActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
+   private final ROS2SyncedRobotModel syncedRobot;
 
-   public HandWrenchActionExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2ControllerHelper ros2ControllerHelper)
+   public HandWrenchActionExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2ControllerHelper ros2ControllerHelper, ROS2SyncedRobotModel syncedRobot)
    {
       super(new HandWrenchActionState(id, crdtInfo, saveFileDirectory));
 
       state = getState();
       definition = getDefinition();
+      this.syncedRobot = syncedRobot;
 
       this.ros2ControllerHelper = ros2ControllerHelper;
    }
@@ -36,6 +40,7 @@ public class HandWrenchActionExecutor extends ActionNodeExecutor<HandWrenchActio
    public void update()
    {
       super.update();
+      trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
    }
 
    @Override
@@ -75,6 +80,9 @@ public class HandWrenchActionExecutor extends ActionNodeExecutor<HandWrenchActio
                       .setY(getDefinition().getSide() == RobotSide.RIGHT ? -handCenterOffset : handCenterOffset);
 
       ros2ControllerHelper.publishToController(handWrenchTrajectoryMessage);
+
+      trackingCalculator.reset();
+      state.setNominalExecutionDuration(definition.getTrajectoryDuration());
    }
 
    @Override

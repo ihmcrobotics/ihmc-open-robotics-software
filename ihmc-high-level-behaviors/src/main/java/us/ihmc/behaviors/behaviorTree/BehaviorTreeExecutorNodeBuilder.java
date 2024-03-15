@@ -84,7 +84,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       }
       if (nodeType == HandWrenchActionDefinition.class)
       {
-         return new HandWrenchActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper);
+         return new HandWrenchActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot);
       }
       if (nodeType == ScrewPrimitiveActionDefinition.class)
       {
