@@ -41,6 +41,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final FootstepPlanActionState state;
+   private final FootstepPlanActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImBoolean showAdjustmentInteractables = new ImBoolean();
@@ -70,24 +71,25 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
       state = getState();
+      definition = getDefinition();
 
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
 
-      getDefinition().setName("Footstep plan");
+      definition.setName("Footstep plan");
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
-                                                                getDefinition()::getParentFrameName,
+                                                                definition::getParentFrameName,
                                                                 this::changeParentFrame);
-      manuallyPlaceStepsWrapper = new ImBooleanWrapper(getDefinition()::getIsManuallyPlaced,
-                                                       getDefinition()::setIsManuallyPlaced,
+      manuallyPlaceStepsWrapper = new ImBooleanWrapper(definition::getIsManuallyPlaced,
+                                                       definition::setIsManuallyPlaced,
                                                        imBoolean -> ImGui.checkbox(labels.get("Manually place steps"), imBoolean));
-      swingDurationWidget = new ImDoubleWrapper(getDefinition()::getSwingDuration,
-                                                getDefinition()::setSwingDuration,
+      swingDurationWidget = new ImDoubleWrapper(definition::getSwingDuration,
+                                                definition::setSwingDuration,
                                                 imDouble -> ImGui.inputDouble(labels.get("Swing duration"), imDouble));
-      transferDurationWidget = new ImDoubleWrapper(getDefinition()::getTransferDuration,
-                                                   getDefinition()::setTransferDuration,
+      transferDurationWidget = new ImDoubleWrapper(definition::getTransferDuration,
+                                                   definition::setTransferDuration,
                                                    imDouble -> ImGui.inputDouble(labels.get("Transfer duration"), imDouble));
 
       manuallyPlacedFootsteps = new RecyclingArrayList<>(() ->
@@ -98,12 +100,11 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
       for (RobotSide side : RobotSide.values)
       {
-         getDefinition().getGoalFootstepToGoalTransform(side).getValue()
-                        .getTranslation().addY(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
+         definition.getGoalFootstepToGoalY(side).setValue(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
       }
 
       footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo(ReferenceFrame.getWorldFrame(),
-                                                                       getDefinition().getGoalToParentTransform().getValue(),
+                                                                       state.getGoalToParentTransform(),
                                                                        showAdjustmentInteractables);
       footstepPlannerGoalGizmo.create(baseUI.getPrimary3DPanel());
 
@@ -112,7 +113,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          goalFeetPosesSelected.put(side, new ImBoolean(false));
 
          RDXPose3DGizmo footGizmo = new RDXPose3DGizmo(ReferenceFrame.getWorldFrame(),
-                                                       getDefinition().getGoalFootstepToGoalTransform(side).getValue());
+                                                       state.getGoalFootstepToGoalTransform(side));
          footGizmo.create(baseUI.getPrimary3DPanel());
          goalFeetGizmos.put(side, footGizmo);
 
@@ -128,6 +129,15 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void update()
    {
+      // Set the definition from what we adjusted by the gizmo
+      // However, we check the goal frame is not null, which will be the case
+      if (state.getGoalFrame().getReferenceFrame() != null)
+      {
+         definition.getGoalToParentX().setValue(state.getGoalToParentTransform().getTranslation().getX());
+         definition.getGoalToParentY().setValue(state.getGoalToParentTransform().getTranslation().getY());
+         definition.getGoalToParentYaw().setValue(state.getGoalToParentTransform().getRotation().getYaw());
+      }
+
       super.update();
 
       RecyclingArrayListTools.synchronizeSize(manuallyPlacedFootsteps, state.getFootsteps());
@@ -138,7 +148,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          if (userAddedFootstep.poll())
          {
             RobotSide newSide = userAddedFootstep.read();
-            RecyclingArrayListTools.addToAll(getDefinition().getFootsteps().getValue(), state.getFootsteps());
+            RecyclingArrayListTools.addToAll(definition.getFootsteps().getValue(), state.getFootsteps());
             RDXFootstepPlanActionFootstep addedFootstep = manuallyPlacedFootsteps.add();
             addedFootstep.getDefinition().setSide(newSide);
             addedFootstep.getState().update();
@@ -170,7 +180,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          {
             RecyclingArrayListTools.removeLast(manuallyPlacedFootsteps);
             RecyclingArrayListTools.removeLast(state.getFootsteps());
-            RecyclingArrayListTools.removeLast(getDefinition().getFootsteps().getValue());
+            RecyclingArrayListTools.removeLast(definition.getFootsteps().getValue());
          }
 
          for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
@@ -195,6 +205,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             goalFeetPosesSelected.forEach(imBoolean -> imBoolean.set(false));
 
          footstepPlannerGoalGizmo.getPathControlRingGizmo().update();
+
          for (RobotSide side : RobotSide.values)
          {
             goalFeetGizmos.get(side).update();
@@ -217,7 +228,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    {
       if (state.getGoalFrame().isChildOfWorld())
       {
-         if (!getDefinition().getIsManuallyPlaced())
+         if (!definition.getIsManuallyPlaced())
          {
             footstepPlannerGoalGizmo.calculateVRPick(vrContext);
          }
@@ -229,7 +240,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    {
       if (state.getGoalFrame().isChildOfWorld())
       {
-         if (!getDefinition().getIsManuallyPlaced())
+         if (!definition.getIsManuallyPlaced())
          {
             footstepPlannerGoalGizmo.processVRInput(vrContext);
          }
@@ -241,7 +252,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    {
       if (state.areFramesInWorld())
       {
-         if (getDefinition().getIsManuallyPlaced())
+         if (definition.getIsManuallyPlaced())
          {
             for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
             {
@@ -270,7 +281,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    {
       if (state.areFramesInWorld())
       {
-         if (getDefinition().getIsManuallyPlaced())
+         if (definition.getIsManuallyPlaced())
          {
             for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
             {
@@ -310,7 +321,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
       if (state.areFramesInWorld()) // Not allowing modification if not renderable
       {
-         if (getDefinition().getIsManuallyPlaced())
+         if (definition.getIsManuallyPlaced())
          {
             ImGui.text("Number of footsteps: %d".formatted(manuallyPlacedFootsteps.size()));
             ImGui.text("Add:");
@@ -345,11 +356,11 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
    public void render3DPanelImGuiOverlays()
    {
-      if (!getDefinition().getIsManuallyPlaced())
+      if (!definition.getIsManuallyPlaced())
       {
          if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getRingHovered())
          {
-            tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getActionTypeTitle(), state.getActionIndex(), getDefinition().getName()));
+            tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getActionTypeTitle(), state.getActionIndex(), definition.getName()));
          }
       }
    }
@@ -359,7 +370,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    {
       if (state.areFramesInWorld())
       {
-         if (getDefinition().getIsManuallyPlaced())
+         if (definition.getIsManuallyPlaced())
          {
             for (RDXFootstepPlanActionFootstep footstep : manuallyPlacedFootsteps)
             {
@@ -396,7 +407,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
    public void changeParentFrame(String newParentFrameName)
    {
-      getDefinition().setParentFrameName(newParentFrameName);
+      definition.setParentFrameName(newParentFrameName);
       for (FootstepPlanActionFootstepState footstepState : getState().getFootsteps())
       {
          footstepState.getSoleFrame().changeFrame(newParentFrameName);

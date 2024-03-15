@@ -225,15 +225,15 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       {
          footsteps.getValueReadOnly(i).toMessage(message.getFootsteps().add());
       }
-      message.setGoalXInParent(goalToParentX.getValue());
-      message.setGoalYInParent(goalToParentY.getValue());
-      message.setGoalYawInParent(goalToParentYaw.getValue());
-      message.setLeftGoalFootXToGizmo(goalFootstepToGoalXs.get(RobotSide.LEFT).getValue());
-      message.setLeftGoalFootYToGizmo(goalFootstepToGoalYs.get(RobotSide.LEFT).getValue());
-      message.setLeftGoalFootYawToGizmo(goalFootstepToGoalYaws.get(RobotSide.LEFT).getValue());
-      message.setRightGoalFootXToGizmo(goalFootstepToGoalXs.get(RobotSide.RIGHT).getValue());
-      message.setRightGoalFootYToGizmo(goalFootstepToGoalYs.get(RobotSide.RIGHT).getValue());
-      message.setRightGoalFootYawToGizmo(goalFootstepToGoalYaws.get(RobotSide.RIGHT).getValue());
+      message.setGoalXInParent(goalToParentX.toMessage());
+      message.setGoalYInParent(goalToParentY.toMessage());
+      message.setGoalYawInParent(goalToParentYaw.toMessage());
+      message.setLeftGoalFootXToGizmo(goalFootstepToGoalXs.get(RobotSide.LEFT).toMessage());
+      message.setLeftGoalFootYToGizmo(goalFootstepToGoalYs.get(RobotSide.LEFT).toMessage());
+      message.setLeftGoalFootYawToGizmo(goalFootstepToGoalYaws.get(RobotSide.LEFT).toMessage());
+      message.setRightGoalFootXToGizmo(goalFootstepToGoalXs.get(RobotSide.RIGHT).toMessage());
+      message.setRightGoalFootYToGizmo(goalFootstepToGoalYs.get(RobotSide.RIGHT).toMessage());
+      message.setRightGoalFootYawToGizmo(goalFootstepToGoalYaws.get(RobotSide.RIGHT).toMessage());
    }
 
    public void fromMessage(FootstepPlanActionDefinitionMessage message)
@@ -253,15 +253,15 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             writableList.add().fromMessage(footstepMessage);
          }
       });
-      goalToParentX.setValue(message.getGoalXInParent());
-      goalToParentY.setValue(message.getGoalYInParent());
-      goalToParentYaw.setValue(message.getGoalYawInParent());
-      goalFootstepToGoalXs.get(RobotSide.LEFT).setValue(message.getLeftGoalFootXToGizmo());
-      goalFootstepToGoalYs.get(RobotSide.LEFT).setValue(message.getLeftGoalFootYToGizmo());
-      goalFootstepToGoalYaws.get(RobotSide.LEFT).setValue(message.getLeftGoalFootYawToGizmo());
-      goalFootstepToGoalXs.get(RobotSide.RIGHT).setValue(message.getRightGoalFootXToGizmo());
-      goalFootstepToGoalYs.get(RobotSide.RIGHT).setValue(message.getRightGoalFootYToGizmo());
-      goalFootstepToGoalYaws.get(RobotSide.RIGHT).setValue(message.getRightGoalFootYawToGizmo());
+      goalToParentX.fromMessage(message.getGoalXInParent());
+      goalToParentY.fromMessage(message.getGoalYInParent());
+      goalToParentYaw.fromMessage(message.getGoalYawInParent());
+      goalFootstepToGoalXs.get(RobotSide.LEFT).fromMessage(message.getLeftGoalFootXToGizmo());
+      goalFootstepToGoalYs.get(RobotSide.LEFT).fromMessage(message.getLeftGoalFootYToGizmo());
+      goalFootstepToGoalYaws.get(RobotSide.LEFT).fromMessage(message.getLeftGoalFootYawToGizmo());
+      goalFootstepToGoalXs.get(RobotSide.RIGHT).fromMessage(message.getRightGoalFootXToGizmo());
+      goalFootstepToGoalYs.get(RobotSide.RIGHT).fromMessage(message.getRightGoalFootYToGizmo());
+      goalFootstepToGoalYaws.get(RobotSide.RIGHT).fromMessage(message.getRightGoalFootYawToGizmo());
    }
 
    public double getSwingDuration()

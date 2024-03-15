@@ -62,6 +62,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    private final SideDependentList<FramePose3D> liveGoalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
    private final SideDependentList<FramePose3D> startFootPosesForThread = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<FramePose3D> goalFootPosesForThread = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private final FramePose3D walkingFramePose = new FramePose3D();
 
    public FootstepPlanActionExecutor(long id,
                                      CRDTInfo crdtInfo,
@@ -92,23 +93,29 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    {
       super.update();
 
+      state.setCanExecute(state.areFramesInWorld());
+      if (state.getCanExecute() && !definition.getIsManuallyPlaced())
+      {
+         walkingFramePose.setToZero(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame());
+         walkingFramePose.changeFrame(state.getGoalFrame().getReferenceFrame());
+         state.getGoalToParentZ().setValue(walkingFramePose.getZ());
+         state.updateGoalFrame();
+
+         for (RobotSide side : RobotSide.values)
+         {
+            liveGoalFeetPoses.get(side)
+                             .setIncludingFrame(state.getGoalFrame().getReferenceFrame(),
+                                                state.getGoalFootstepToGoalTransform(side));
+            liveGoalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+         }
+      }
+
       for (RobotSide side : RobotSide.values)
       {
          trackingCalculators.get(side).update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
       }
 
-      state.setCanExecute(state.areFramesInWorld());
-      if (state.getCanExecute() && !definition.getIsManuallyPlaced())
-      {
-         for (RobotSide side : RobotSide.values)
-         {
-            liveGoalFeetPoses.get(side)
-                             .setIncludingFrame(state.getGoalFrame().getReferenceFrame(),
-                                                getDefinition().getGoalFootstepToGoalTransform(side).getValueReadOnly());
-            liveGoalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
-         }
-      }
    }
 
    @Override
