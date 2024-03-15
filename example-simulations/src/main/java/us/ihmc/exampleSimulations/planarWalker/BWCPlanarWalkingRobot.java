@@ -96,6 +96,11 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
       return registry;
    }
 
+   public SimFloatingJointBasics getFloatingJOint()
+   {
+      return floatingJOint;
+   }
+
    public GroundContactPoint getGroundContactPoint(RobotSide robotSide)
    {
       return kneeJoints.get(robotSide).getAuxiliaryData().getGroundContactPoints().get(0);

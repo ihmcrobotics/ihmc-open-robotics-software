@@ -1,6 +1,7 @@
 package us.ihmc.exampleSimulations.planarWalker;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.controllers.PDController;
@@ -30,6 +31,8 @@ public class BWCPlanarWalkingController implements Controller
 
    private final YoDouble supportLegLengthKp = new YoDouble("supportLegLengthKp", registry);
    private final YoDouble supportLegLengthKd = new YoDouble("supportLegLengthKd", registry);
+   private final YoDouble supportPitchKp = new YoDouble("supportPitchKp", registry);
+   private final YoDouble supportPitchKd = new YoDouble("supportPitchKd", registry);
 
    private final YoDouble swingFootStepAdjustmentGain = new YoDouble("swingFootStepAdjustmentGain", registry);
    private final YoDouble swingFootHeightKp = new YoDouble("swingFootHeightKp", registry);
@@ -58,7 +61,10 @@ public class BWCPlanarWalkingController implements Controller
       swingHipPitchKp.set(200.0);
       swingHipPitchKd.set(1.0);
 
-      swingFootStepAdjustmentGain.set(1.5);
+      supportPitchKp.set(250.0);
+      supportPitchKd.set(100.0);
+
+      swingFootStepAdjustmentGain.set(0.85);
 
       desiredBodyHeight.set(0.75);
       desiredSwingHeight.set(0.1);
@@ -240,6 +246,7 @@ public class BWCPlanarWalkingController implements Controller
       private final RobotSide supportSide;
 
       private final PDController supportLegLengthController;
+      private final PDController supportPostureController;
       private final YoDouble supportLegDesiredKneeForce;
       private final YoDouble supportLegFeedbackKneeForce;
 
@@ -250,6 +257,7 @@ public class BWCPlanarWalkingController implements Controller
          supportLegDesiredKneeForce = new YoDouble(supportSide.getLowerCaseName() + "SupportLegDesiredKneeForce", registry);
          supportLegFeedbackKneeForce = new YoDouble(supportSide.getLowerCaseName() + "SupportLegFeedbackKneeForce", registry);
          supportLegLengthController = new PDController(supportLegLengthKp, supportLegLengthKd, supportSide.getLowerCaseName() + "SupportLegLengthController", registry);
+         supportPostureController = new PDController(supportPitchKp, supportPitchKd, supportSide.getLowerCaseName() + "SupportPostureController", registry);
       }
 
       @Override
@@ -283,7 +291,12 @@ public class BWCPlanarWalkingController implements Controller
 
          // set the desired torque to the knee joint to hold the leg at the desired length
          controllerRobot.getKneeJoint(supportSide).setTau(-supportLegDesiredKneeForce.getDoubleValue());
-         controllerRobot.getHipJoint(supportSide).setTau(0.0);
+
+
+         FrameQuaternion baseOrientation = new FrameQuaternion(controllerRobot.getFloatingJOint().getFrameAfterJoint());
+         baseOrientation.changeFrame(controllerRobot.getWorldFrame());
+         torque = supportPostureController.compute(baseOrientation.getPitch(), 0.0, controllerRobot.getFloatingJOint().getFrameAfterJoint().getTwistOfFrame().getAngularPartY(), 0.0);
+         controllerRobot.getHipJoint(supportSide).setTau(-torque);
       }
 
       @Override
