@@ -72,7 +72,8 @@ public class HandWrenchActionExecutor extends ActionNodeExecutor<HandWrenchActio
       trajectoryPoint.setTime(getDefinition().getTrajectoryDuration());
       wrenchTrajectoryPoints.add().set(trajectoryPoint);
 
-      wrenchTrajectory.getFrameInformation().setTrajectoryReferenceFrameId(FrameInformation.CHEST_FRAME);
+      wrenchTrajectory.getFrameInformation().setDataReferenceFrameId(FrameInformation.CHEST_FRAME);
+//      wrenchTrajectory.getFrameInformation().setTrajectoryReferenceFrameId(FrameInformation.CHEST_FRAME);
       wrenchTrajectory.getFrameInformation().setTrajectoryReferenceFrameId(CommonReferenceFrameIds.MID_HAND_CONTROL_FRAME.getHashId());
       wrenchTrajectory.setUseCustomControlFrame(true);
       wrenchTrajectory.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
