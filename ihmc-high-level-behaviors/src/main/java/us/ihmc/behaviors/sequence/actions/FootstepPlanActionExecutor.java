@@ -97,7 +97,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       if (state.getCanExecute() && !definition.getIsManuallyPlaced())
       {
          walkingFramePose.setToZero(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame());
-         walkingFramePose.changeFrame(state.getGoalFrame().getReferenceFrame());
+         walkingFramePose.changeFrame(state.getGoalFrame().getReferenceFrame().getParent());
          state.getGoalToParentZ().setValue(walkingFramePose.getZ());
 
          state.copyDefinitionToGoalFrame();
