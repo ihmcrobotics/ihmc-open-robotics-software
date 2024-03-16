@@ -58,7 +58,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final SideDependentList<RDXPose3DGizmo> goalFeetGizmos = new SideDependentList<>();
    private final RDX3DPanelTooltip tooltip;
    private final ImGuiFootstepsWidget footstepsWidget = new ImGuiFootstepsWidget();
-   private final FramePose3D walkingFramePose = new FramePose3D();
 
    public RDXFootstepPlanAction(long id,
                                 CRDTInfo crdtInfo,
