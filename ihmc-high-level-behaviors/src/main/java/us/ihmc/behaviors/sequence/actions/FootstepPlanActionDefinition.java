@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
@@ -82,15 +83,17 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       }
       else
       {
-         jsonNode.put("goalToParentX", goalToParentX.getValue());
-         jsonNode.put("goalToParentY", goalToParentY.getValue());
-         jsonNode.put("goalToParentYaw", goalToParentYaw.getValue());
+         ObjectNode goalToParentNode = jsonNode.putObject("goalToParent");
+         goalToParentNode.put("x", (float) MathTools.roundToPrecision(goalToParentX.getValue(), 0.0005));
+         goalToParentNode.put("y", (float) MathTools.roundToPrecision(goalToParentY.getValue(), 0.0005));
+         goalToParentNode.put("yawInDegrees", (float) MathTools.roundToPrecision(Math.toDegrees(goalToParentYaw.getValue()), 0.02));
+
          for (RobotSide side : RobotSide.values)
          {
             ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "GoalFootTransform");
-            goalFootNode.put("goalToParentX", goalFootstepToGoalXs.get(side).getValue());
-            goalFootNode.put("goalToParentY", goalFootstepToGoalYs.get(side).getValue());
-            goalFootNode.put("goalToParentYaw", goalFootstepToGoalYaws.get(side).getValue());
+            goalFootNode.put("x", (float) MathTools.roundToPrecision(goalFootstepToGoalXs.get(side).getValue(), 0.0005));
+            goalFootNode.put("y", (float) MathTools.roundToPrecision(goalFootstepToGoalYs.get(side).getValue(), 0.0005));
+            goalFootNode.put("yawInDegrees", (float) MathTools.roundToPrecision(Math.toDegrees(goalFootstepToGoalYaws.get(side).getValue()), 0.02));
          }
       }
    }
@@ -112,22 +115,17 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       }
       else
       {
-         RigidBodyTransform goalToParentTransform = new RigidBodyTransform();
-         JSONTools.toEuclid(jsonNode, "goalToParentTransform", goalToParentTransform);
-
-         goalToParentX.setValue(goalToParentTransform.getTranslationX());
-         goalToParentY.setValue(goalToParentTransform.getTranslationY());
-         goalToParentYaw.setValue(goalToParentTransform.getRotation().getYaw());
+         ObjectNode goalToParentNode = (ObjectNode) jsonNode.get("goalToParent");
+         goalToParentX.setValue(goalToParentNode.get("x").asDouble());
+         goalToParentY.setValue(goalToParentNode.get("y").asDouble());
+         goalToParentYaw.setValue(Math.toRadians(goalToParentNode.get("yawInDegrees").asDouble()));
 
          for (RobotSide side : RobotSide.values)
          {
-            JsonNode goalFootNode = jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
-            RigidBodyTransform goalFootstepToGoalTransform = new RigidBodyTransform();
-            JSONTools.toEuclid(goalFootNode, goalFootstepToGoalTransform);
-
-            goalFootstepToGoalXs.get(side).setValue(goalFootstepToGoalTransform.getTranslationX());
-            goalFootstepToGoalYs.get(side).setValue(goalFootstepToGoalTransform.getTranslationY());
-            goalFootstepToGoalYaws.get(side).setValue(goalFootstepToGoalTransform.getRotation().getYaw());
+            ObjectNode goalFootNode = (ObjectNode) jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
+            goalFootstepToGoalXs.get(side).setValue(goalFootNode.get("x").asDouble());
+            goalFootstepToGoalYs.get(side).setValue(goalFootNode.get("y").asDouble());
+            goalFootstepToGoalYaws.get(side).setValue(Math.toRadians(goalFootNode.get("yawInDegrees").asDouble()));
          }
       }
    }
