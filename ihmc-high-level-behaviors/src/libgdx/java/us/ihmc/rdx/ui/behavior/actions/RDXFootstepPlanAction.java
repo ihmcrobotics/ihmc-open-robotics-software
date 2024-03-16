@@ -16,9 +16,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
@@ -209,15 +207,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             else
                state.copyDefinitionToGoalFoostepToGoalTransform(side);
 
-         if (!state.isFrozen())
-         {
+         if (!state.isFrozen()) // Prevent the frame from glitching when changing frames
             state.getGoalToParentTransform().getTranslation().setZ(state.getGoalToParentZ().getValue());
-
-            walkingFramePose.setToZero(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame());
-            walkingFramePose.changeFrame(state.getGoalFrame().getReferenceFrame().getParent());
-            if (!EuclidCoreTools.epsilonEquals(walkingFramePose.getZ(), state.getGoalToParentZ().getValue(), 1e-3))
-               LogTools.error("Z is too different. %.6f != %.6f".formatted(walkingFramePose.getZ(), state.getGoalToParentZ().getValue()));
-         }
          state.getGoalFrame().getReferenceFrame().update();
 
          footstepPlannerGoalGizmo.getPathControlRingGizmo().update();
@@ -420,7 +411,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       definition.setParentFrameName(newParentFrameName);
       state.getGoalFrame().changeFrame(newParentFrameName, state.getGoalToParentTransform());
       state.copyGoalFrameToDefinition();
-      state.freeze();
+      state.freeze(); // Prevent the frame from glitching when changing frames
 
       for (FootstepPlanActionFootstepState footstepState : getState().getFootsteps())
       {
