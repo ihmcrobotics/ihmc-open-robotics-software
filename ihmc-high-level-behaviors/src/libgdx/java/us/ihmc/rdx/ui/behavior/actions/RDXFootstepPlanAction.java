@@ -192,22 +192,32 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             }
          }
 
-         // In this section, we want to update the definition when the gizmos are moved,
-         // however, on loading and otherwise we want to make sure the current state
-         // reflects the definition because the definition can change.
+         // In this section, we want to update the definition when the gizmos are moved
+         // and/or the parent frame is changed. However, on loading and otherwise we want
+         // to make sure the current state reflects the definition because the definition
+         // can change. We do this by freezing the node so user changes can propagate.
          if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getGizmoModifiedByUser().poll())
-            state.copyGoalFrameToDefinition();
-         else
-            state.copyDefinitionToGoalFrame();
+            state.freeze();
 
          for (RobotSide side : RobotSide.values)
             if (goalFeetGizmos.get(side).getGizmoModifiedByUser().poll())
-               state.copyGoalFootstepToGoalTransformToDefinition(side);
-            else
-               state.copyDefinitionToGoalFoostepToGoalTransform(side);
+               state.freeze();
 
-         if (!state.isFrozen()) // Prevent the frame from glitching when changing frames
+         if (state.isFrozen())
+         {
+            state.copyGoalFrameToDefinition();
+
+            for (RobotSide side : RobotSide.values)
+               state.copyGoalFootstepToGoalTransformToDefinition(side);
+         }
+         else
+         {
+            state.copyDefinitionToGoalFrame();
             state.getGoalToParentTransform().getTranslation().setZ(state.getGoalToParentZ().getValue());
+
+            for (RobotSide side : RobotSide.values)
+               state.copyDefinitionToGoalFoostepToGoalTransform(side);
+         }
          state.getGoalFrame().getReferenceFrame().update();
 
          footstepPlannerGoalGizmo.getPathControlRingGizmo().update();
