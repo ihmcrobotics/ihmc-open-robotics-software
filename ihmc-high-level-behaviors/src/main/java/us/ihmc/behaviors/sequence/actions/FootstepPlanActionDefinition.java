@@ -90,7 +90,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
 
          for (RobotSide side : RobotSide.values)
          {
-            ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "GoalFootTransform");
+            ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "GoalFootToGoal");
             goalFootNode.put("x", (float) MathTools.roundToPrecision(goalFootstepToGoalXs.get(side).getValue(), 0.0005));
             goalFootNode.put("y", (float) MathTools.roundToPrecision(goalFootstepToGoalYs.get(side).getValue(), 0.0005));
             goalFootNode.put("yawInDegrees", (float) MathTools.roundToPrecision(Math.toDegrees(goalFootstepToGoalYaws.get(side).getValue()), 0.02));
@@ -122,7 +122,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
 
          for (RobotSide side : RobotSide.values)
          {
-            ObjectNode goalFootNode = (ObjectNode) jsonNode.get(side.getCamelCaseName() + "GoalFootTransform");
+            ObjectNode goalFootNode = (ObjectNode) jsonNode.get(side.getCamelCaseName() + "GoalFootToGoal");
             goalFootstepToGoalXs.get(side).setValue(goalFootNode.get("x").asDouble());
             goalFootstepToGoalYs.get(side).setValue(goalFootNode.get("y").asDouble());
             goalFootstepToGoalYaws.get(side).setValue(Math.toRadians(goalFootNode.get("yawInDegrees").asDouble()));
