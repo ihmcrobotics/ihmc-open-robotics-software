@@ -44,7 +44,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final FootstepPlanActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
-   private final ImBoolean showAdjustmentInteractables = new ImBoolean();
+   private final ImBoolean editManuallyPlacedSteps = new ImBoolean();
    private final ImBooleanWrapper manuallyPlaceStepsWrapper;
    private final ImDoubleWrapper swingDurationWidget;
    private final ImDoubleWrapper transferDurationWidget;
@@ -104,9 +104,9 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       }
 
       footstepPlannerGoalGizmo = new RDXSelectablePathControlRingGizmo(ReferenceFrame.getWorldFrame(),
-                                                                       state.getGoalToParentTransform(),
-                                                                       showAdjustmentInteractables);
+                                                                       state.getGoalToParentTransform());
       footstepPlannerGoalGizmo.create(baseUI.getPrimary3DPanel());
+      footstepPlannerGoalGizmo.setSelectable(false); // It's too cluttered to have these be selectable
 
       for (RobotSide side : RobotSide.values)
       {
@@ -192,9 +192,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             }
          }
 
-         if (!showAdjustmentInteractables.get())
-            goalFeetPosesSelected.forEach(imBoolean -> imBoolean.set(false));
-
          if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getGizmoModifiedByUser().poll())
             state.copyGoalFrameToDefinition();
          else
@@ -231,7 +228,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void calculateVRPick(RDXVRContext vrContext)
    {
-      if (state.getGoalFrame().isChildOfWorld())
+      if (state.areFramesInWorld())
       {
          if (!definition.getIsManuallyPlaced())
          {
@@ -243,7 +240,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    public void processVRInput(RDXVRContext vrContext)
    {
-      if (state.getGoalFrame().isChildOfWorld())
+      if (state.areFramesInWorld())
       {
          if (!definition.getIsManuallyPlaced())
          {
@@ -267,14 +264,11 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          else
          {
             footstepPlannerGoalGizmo.calculate3DViewPick(input);
-            if (showAdjustmentInteractables.get())
+            for (RobotSide side : RobotSide.values)
             {
-               for (RobotSide side : RobotSide.values)
+               if (goalFeetPosesSelected.get(side).get())
                {
-                  if (goalFeetPosesSelected.get(side).get())
-                  {
-                     goalFeetGizmos.get(side).calculate3DViewPick(input);
-                  }
+                  goalFeetGizmos.get(side).calculate3DViewPick(input);
                }
             }
          }
@@ -297,14 +291,11 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          {
             footstepPlannerGoalGizmo.process3DViewInput(input);
             tooltip.setInput(input);
-            if (showAdjustmentInteractables.get())
+            for (RobotSide side : RobotSide.values)
             {
-               for (RobotSide side : RobotSide.values)
+               if (goalFeetPosesSelected.get(side).get())
                {
-                  if (goalFeetPosesSelected.get(side).get())
-                  {
-                     goalFeetGizmos.get(side).process3DViewInput(input);
-                  }
+                  goalFeetGizmos.get(side).process3DViewInput(input);
                }
             }
          }
@@ -314,7 +305,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      ImGui.checkbox(labels.get("Show Adjustment Interactables"), showAdjustmentInteractables);
       parentFrameComboBox.render();
 
       ImGui.pushItemWidth(80.0f);
@@ -323,11 +313,15 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       ImGui.popItemWidth();
 
       manuallyPlaceStepsWrapper.renderImGuiWidget();
+      
+      if (!definition.getIsManuallyPlaced())
+         ImGui.checkbox(labels.get("Show Goal Gizmo"), footstepPlannerGoalGizmo.getImSelected());
 
       if (state.areFramesInWorld()) // Not allowing modification if not renderable
       {
          if (definition.getIsManuallyPlaced())
          {
+            ImGui.checkbox(labels.get("Edit Manually Placed Steps"), editManuallyPlacedSteps);
             ImGui.text("Number of footsteps: %d".formatted(manuallyPlacedFootsteps.size()));
             ImGui.text("Add:");
             for (RobotSide side : RobotSide.values)
@@ -385,14 +379,11 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          else
          {
             footstepPlannerGoalGizmo.getVirtualRenderables(renderables, pool);
-            if (showAdjustmentInteractables.get())
+            for (RobotSide side : RobotSide.values)
             {
-               for (RobotSide side : RobotSide.values)
+               if (goalFeetPosesSelected.get(side).get())
                {
-                  if (goalFeetPosesSelected.get(side).get())
-                  {
-                     goalFeetGizmos.get(side).getRenderables(renderables, pool);
-                  }
+                  goalFeetGizmos.get(side).getRenderables(renderables, pool);
                }
             }
             for (RobotSide side : RobotSide.values)
@@ -422,8 +413,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       }
    }
 
-   public ImBoolean getShowAdjustmentInteractables()
+   public ImBoolean getEditManuallyPlacedSteps()
    {
-      return showAdjustmentInteractables;
+      return editManuallyPlacedSteps;
    }
 }
