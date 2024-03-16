@@ -192,6 +192,9 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             }
          }
 
+         // In this section, we want to update the definition when the gizmos are moved,
+         // however, on loading and otherwise we want to make sure the current state
+         // reflects the definition because the definition can change.
          if (footstepPlannerGoalGizmo.getPathControlRingGizmo().getGizmoModifiedByUser().poll())
             state.copyGoalFrameToDefinition();
          else
