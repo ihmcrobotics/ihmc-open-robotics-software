@@ -15,7 +15,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "25b2a0d4c7659f37e9ee1a463e399e17aa103128665206c3ad98fad8b1ef2a54";
+   		return "6521d7b0c2a8aa17a6cae237470bb3a0327eca1d955f82be1e7bb16701814040";
    }
    
    @Override
@@ -61,6 +61,10 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
           current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
@@ -102,6 +106,12 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -139,6 +149,10 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
 
       cdr.write_type_6(data.getGoalToParentZ());
 
+      cdr.write_type_6(data.getGoalToParentPitch());
+
+      cdr.write_type_6(data.getGoalToParentRoll());
+
       cdr.write_type_9(data.getExecutionState());
 
       cdr.write_type_3(data.getTotalNumberOfFootsteps());
@@ -164,6 +178,10 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       cdr.read_type_e(data.getFootsteps());	
       data.setGoalToParentZ(cdr.read_type_6());
       	
+      data.setGoalToParentPitch(cdr.read_type_6());
+      	
+      data.setGoalToParentRoll(cdr.read_type_6());
+      	
       data.setExecutionState(cdr.read_type_9());
       	
       data.setTotalNumberOfFootsteps(cdr.read_type_3());
@@ -186,6 +204,8 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
 
       ser.write_type_e("footsteps", data.getFootsteps());
       ser.write_type_6("goal_to_parent_z", data.getGoalToParentZ());
+      ser.write_type_6("goal_to_parent_pitch", data.getGoalToParentPitch());
+      ser.write_type_6("goal_to_parent_roll", data.getGoalToParentRoll());
       ser.write_type_9("execution_state", data.getExecutionState());
       ser.write_type_3("total_number_of_footsteps", data.getTotalNumberOfFootsteps());
       ser.write_type_3("number_of_incomplete_footsteps", data.getNumberOfIncompleteFootsteps());
@@ -206,6 +226,8 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
 
       ser.read_type_e("footsteps", data.getFootsteps());
       data.setGoalToParentZ(ser.read_type_6("goal_to_parent_z"));
+      data.setGoalToParentPitch(ser.read_type_6("goal_to_parent_pitch"));
+      data.setGoalToParentRoll(ser.read_type_6("goal_to_parent_roll"));
       data.setExecutionState(ser.read_type_9("execution_state"));
       data.setTotalNumberOfFootsteps(ser.read_type_3("total_number_of_footsteps"));
       data.setNumberOfIncompleteFootsteps(ser.read_type_3("number_of_incomplete_footsteps"));

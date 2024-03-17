@@ -29,6 +29,14 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
             */
    public double goal_to_parent_z_;
    /**
+            * Goal to parent frame Pitch
+            */
+   public double goal_to_parent_pitch_;
+   /**
+            * Goal to parent frame Roll
+            */
+   public double goal_to_parent_roll_;
+   /**
             * Execution state
             */
    public byte execution_state_;
@@ -82,6 +90,10 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       footsteps_.set(other.footsteps_);
       goal_to_parent_z_ = other.goal_to_parent_z_;
 
+      goal_to_parent_pitch_ = other.goal_to_parent_pitch_;
+
+      goal_to_parent_roll_ = other.goal_to_parent_roll_;
+
       execution_state_ = other.execution_state_;
 
       total_number_of_footsteps_ = other.total_number_of_footsteps_;
@@ -134,6 +146,36 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
    public double getGoalToParentZ()
    {
       return goal_to_parent_z_;
+   }
+
+   /**
+            * Goal to parent frame Pitch
+            */
+   public void setGoalToParentPitch(double goal_to_parent_pitch)
+   {
+      goal_to_parent_pitch_ = goal_to_parent_pitch;
+   }
+   /**
+            * Goal to parent frame Pitch
+            */
+   public double getGoalToParentPitch()
+   {
+      return goal_to_parent_pitch_;
+   }
+
+   /**
+            * Goal to parent frame Roll
+            */
+   public void setGoalToParentRoll(double goal_to_parent_roll)
+   {
+      goal_to_parent_roll_ = goal_to_parent_roll;
+   }
+   /**
+            * Goal to parent frame Roll
+            */
+   public double getGoalToParentRoll()
+   {
+      return goal_to_parent_roll_;
    }
 
    /**
@@ -246,6 +288,10 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_to_parent_z_, other.goal_to_parent_z_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_to_parent_pitch_, other.goal_to_parent_pitch_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_to_parent_roll_, other.goal_to_parent_roll_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_state_, other.execution_state_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.total_number_of_footsteps_, other.total_number_of_footsteps_, epsilon)) return false;
@@ -286,6 +332,10 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       if (!this.footsteps_.equals(otherMyClass.footsteps_)) return false;
       if(this.goal_to_parent_z_ != otherMyClass.goal_to_parent_z_) return false;
 
+      if(this.goal_to_parent_pitch_ != otherMyClass.goal_to_parent_pitch_) return false;
+
+      if(this.goal_to_parent_roll_ != otherMyClass.goal_to_parent_roll_) return false;
+
       if(this.execution_state_ != otherMyClass.execution_state_) return false;
 
       if(this.total_number_of_footsteps_ != otherMyClass.total_number_of_footsteps_) return false;
@@ -314,6 +364,10 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       builder.append(this.footsteps_);      builder.append(", ");
       builder.append("goal_to_parent_z=");
       builder.append(this.goal_to_parent_z_);      builder.append(", ");
+      builder.append("goal_to_parent_pitch=");
+      builder.append(this.goal_to_parent_pitch_);      builder.append(", ");
+      builder.append("goal_to_parent_roll=");
+      builder.append(this.goal_to_parent_roll_);      builder.append(", ");
       builder.append("execution_state=");
       builder.append(this.execution_state_);      builder.append(", ");
       builder.append("total_number_of_footsteps=");

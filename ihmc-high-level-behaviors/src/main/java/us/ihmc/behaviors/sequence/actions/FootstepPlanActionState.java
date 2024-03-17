@@ -26,6 +26,8 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<FootstepPlanActionFootstepState> footsteps;
    private final CRDTUnidirectionalDouble goalToParentZ;
+   private final CRDTUnidirectionalDouble goalToParentPitch;
+   private final CRDTUnidirectionalDouble goalToParentRoll;
    private final RigidBodyTransform goalToParentTransform = new RigidBodyTransform();
    private final SideDependentList<RigidBodyTransform> goalFootstepToGoalTransforms = new SideDependentList<>(() -> new RigidBodyTransform());
    private final DetachableReferenceFrame goalFrame;
@@ -44,6 +46,8 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       this.referenceFrameLibrary = referenceFrameLibrary;
 
       goalToParentZ = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, 0.0);
+      goalToParentPitch = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, 0.0);
+      goalToParentRoll = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, 0.0);
       goalFrame = new DetachableReferenceFrame(referenceFrameLibrary, goalToParentTransform);
       footsteps = new RecyclingArrayList<>(() ->
          new FootstepPlanActionFootstepState(referenceFrameLibrary,
@@ -62,9 +66,6 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    @Override
    public void update()
    {
-      // Make sure there's no pitch or roll
-      goalToParentTransform.getRotation().setYawPitchRoll(goalToParentTransform.getRotation().getYaw(), 0.0, 0.0);
-
       for (RobotSide side : RobotSide.values)
       {
          goalFootstepToGoalTransforms.get(side).getTranslation().setZ(0.0);
@@ -119,6 +120,8 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       super.toMessage(message.getState());
 
       message.setGoalToParentZ(goalToParentZ.toMessage());
+      message.setGoalToParentPitch(goalToParentPitch.toMessage());
+      message.setGoalToParentRoll(goalToParentRoll.toMessage());
       message.setTotalNumberOfFootsteps(totalNumberOfFootsteps.toMessage());
       message.setNumberOfIncompleteFootsteps(numberOfIncompleteFootsteps.toMessage());
       desiredFootPoses.get(RobotSide.LEFT).toMessage(message.getDesiredLeftFootsteps());
@@ -142,6 +145,8 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       definition.fromMessage(message.getDefinition());
 
       goalToParentZ.fromMessage(message.getGoalToParentZ());
+      goalToParentPitch.fromMessage(message.getGoalToParentPitch());
+      goalToParentRoll.fromMessage(message.getGoalToParentRoll());
       totalNumberOfFootsteps.fromMessage(message.getTotalNumberOfFootsteps());
       numberOfIncompleteFootsteps.fromMessage(message.getNumberOfIncompleteFootsteps());
       desiredFootPoses.get(RobotSide.LEFT).fromMessage(message.getDesiredLeftFootsteps());
@@ -161,6 +166,16 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    public CRDTUnidirectionalDouble getGoalToParentZ()
    {
       return goalToParentZ;
+   }
+
+   public CRDTUnidirectionalDouble getGoalToParentPitch()
+   {
+      return goalToParentPitch;
+   }
+
+   public CRDTUnidirectionalDouble getGoalToParentRoll()
+   {
+      return goalToParentRoll;
    }
 
    public RigidBodyTransform getGoalToParentTransform()

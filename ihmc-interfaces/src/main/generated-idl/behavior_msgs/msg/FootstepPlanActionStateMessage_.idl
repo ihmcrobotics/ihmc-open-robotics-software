@@ -45,6 +45,14 @@ module behavior_msgs
          */
         double goal_to_parent_z;
         /**
+         * Goal to parent frame Pitch
+         */
+        double goal_to_parent_pitch;
+        /**
+         * Goal to parent frame Roll
+         */
+        double goal_to_parent_roll;
+        /**
          * Execution state
          */
         octet execution_state;

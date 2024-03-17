@@ -99,9 +99,14 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          walkingFramePose.setToZero(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame());
          walkingFramePose.changeFrame(state.getGoalFrame().getReferenceFrame().getParent());
          state.getGoalToParentZ().setValue(walkingFramePose.getZ());
+         state.getGoalToParentPitch().setValue(walkingFramePose.getPitch());
+         state.getGoalToParentRoll().setValue(walkingFramePose.getRoll());
 
          state.copyDefinitionToGoalFrame();
          state.getGoalToParentTransform().getTranslation().setZ(state.getGoalToParentZ().getValue());
+         state.getGoalToParentTransform().getRotation().setYawPitchRoll(state.getGoalToParentTransform().getRotation().getYaw(),
+                                                                        state.getGoalToParentPitch().getValue(),
+                                                                        state.getGoalToParentRoll().getValue());
          state.getGoalFrame().getReferenceFrame().update();
 
          for (RobotSide side : RobotSide.values)

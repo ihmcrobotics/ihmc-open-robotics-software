@@ -19,6 +19,12 @@ behavior_msgs/FootstepPlanActionFootstepStateMessage[] footsteps
 # Goal to parent frame Z
 float64 goal_to_parent_z
 
+# Goal to parent frame Pitch
+float64 goal_to_parent_pitch
+
+# Goal to parent frame Roll
+float64 goal_to_parent_roll
+
 # Execution state
 int8 execution_state
 

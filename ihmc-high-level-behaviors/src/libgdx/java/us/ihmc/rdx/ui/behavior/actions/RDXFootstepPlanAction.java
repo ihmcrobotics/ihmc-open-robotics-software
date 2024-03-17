@@ -52,6 +52,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final RecyclingArrayList<RDXFootstepPlanActionFootstep> manuallyPlacedFootsteps;
    private final TypedNotification<RobotSide> userAddedFootstep = new TypedNotification<>();
    private final Notification userRemovedFootstep = new Notification();
+//   private final RDXBall
    private final SideDependentList<RDXFootstepGraphic> goalFeetGraphics = new SideDependentList<>();
    private final RDXSelectablePathControlRingGizmo footstepPlannerGoalGizmo;
    private final SideDependentList<ImBoolean> goalFeetPosesSelected = new SideDependentList<>();
@@ -212,8 +213,14 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          }
          else
          {
-            state.copyDefinitionToGoalFrame();
+//            state.copyDefinitionToGoalFrame();
+            state.getGoalToParentTransform().getTranslation().setX(definition.getGoalToParentX().getValue());
+            state.getGoalToParentTransform().getTranslation().setY(definition.getGoalToParentY().getValue());
             state.getGoalToParentTransform().getTranslation().setZ(state.getGoalToParentZ().getValue());
+            state.getGoalToParentTransform().getRotation().setYawPitchRoll(definition.getGoalToParentYaw().getValue(),
+                                                                           state.getGoalToParentPitch().getValue(),
+                                                                           state.getGoalToParentRoll().getValue());
+            state.getGoalFrame().getReferenceFrame().update();
 
             for (RobotSide side : RobotSide.values)
                state.copyDefinitionToGoalFoostepToGoalTransform(side);
