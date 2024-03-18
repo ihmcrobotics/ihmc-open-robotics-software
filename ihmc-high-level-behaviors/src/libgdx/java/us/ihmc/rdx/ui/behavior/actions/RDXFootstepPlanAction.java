@@ -107,6 +107,11 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          definition.getGoalFootstepToGoalY(side).setValue(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
       }
 
+      definition.getApproachFocus().getValue().set(0.1, 0.0, 0.0);
+
+      approachPointGizmo.create(baseUI.getPrimary3DPanel());
+      approachFocusGizmo.create(baseUI.getPrimary3DPanel());
+
       for (RobotSide side : RobotSide.values)
       {
          goalFeetPosesSelected.put(side, new ImBoolean(false));
@@ -210,7 +215,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          {
             approachPointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getApproachPoint().getValueReadOnly());
             approachFocusGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getApproachFocus().getValueReadOnly());
-            state.getGoalFrame().getReferenceFrame().update();
 
             for (RobotSide side : RobotSide.values)
                state.copyDefinitionToGoalFoostepToGoalTransform(side);
