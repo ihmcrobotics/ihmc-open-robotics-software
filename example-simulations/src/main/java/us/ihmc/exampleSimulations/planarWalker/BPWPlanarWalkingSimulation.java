@@ -10,35 +10,38 @@ public class BPWPlanarWalkingSimulation {
 
     public BPWPlanarWalkingSimulation()
     {
-        int simTicksPerControlTick = 1;
+        int simTicksPerControlTick = 3;
 
         SimulationConstructionSet2 scs = new SimulationConstructionSet2();
         scs.setBufferRecordTickPeriod(simTicksPerControlTick);
 //        scs.getGravity().setToZero();
 
-        // Todo create a robot and add it to scs
+        // Creating a robot and adding it to zero
         BPWPlanarWalkingRobotDefinition robotDefinition = new BPWPlanarWalkingRobotDefinition();
         Robot robot = new Robot(robotDefinition, scs.getInertialFrame());
         scs.addRobot(robot);
 
+        // Setting a Slope ground definition
         scs.addTerrainObject(new SlopeGroundDefinition(0.0));
 
-
-        ContactPointBasedPhysicsEngine physicsEngine = (ContactPointBasedPhysicsEngine) scs.getSimulationSession().getPhysicsEngine();
-        ContactPointBasedContactParameters parameters = ContactPointBasedContactParameters.defaultParameters();
-        parameters.setKz(125.0);
-        parameters.setBz(300.0);
-        parameters.setKxy(1e4);
-        parameters.setBxy(1e2);
-        physicsEngine.setGroundContactParameters(parameters);
+        // Adding the Ground Contact Parameters.
+//        ContactPointBasedPhysicsEngine physicsEngine = (ContactPointBasedPhysicsEngine) scs.getSimulationSession().getPhysicsEngine();
+//        ContactPointBasedContactParameters parameters = ContactPointBasedContactParameters.defaultParameters();
+//        parameters.setKz(650.0);
+//        parameters.setBz(500.0);
+//        parameters.setKxy(15000.0);
+//        parameters.setBxy(600.0);
+//        physicsEngine.setGroundContactParameters(parameters);
 
 
 
         // Set up the controller robot with some convenience method
         BPWPLanarWalkingRobot controllerRobot = new BPWPLanarWalkingRobot(robot, scs.getTime());
+
+        scs.addYoGraphic(controllerRobot.getSCS2YoGraphics());
         // controller
         BPWPlanarWalkingController controller = new BPWPlanarWalkingController(controllerRobot, RobotSide.LEFT);
-        // add the controller
+//         add the controller
 //        robot.addController(controller);
         robot.addThrottledController(controller, scs.getDT() * simTicksPerControlTick);
         

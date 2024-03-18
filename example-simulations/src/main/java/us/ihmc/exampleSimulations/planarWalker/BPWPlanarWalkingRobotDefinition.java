@@ -35,10 +35,9 @@ public class BPWPlanarWalkingRobotDefinition extends RobotDefinition {
     public static final double thighLength = 0.5;
     public static final double shinLength = 0.5;
 
-    private final SideDependentList<String> hipPitchNames = new SideDependentList<>(leftHipPitchName, rightHipPitchName);
+    public static final SideDependentList<String> hipPitchNames = new SideDependentList<>(leftHipPitchName, rightHipPitchName);
     private final SideDependentList<String> thighNames = new SideDependentList<>(leftThighName, rightThighName);
     public static final SideDependentList<String> kneeNames = new SideDependentList<>(leftKneeName, rightKneeName);
-    public static final SideDependentList<String> hipNames = new SideDependentList<>(leftHipPitchName, rightHipPitchName);
     private final SideDependentList<String> shinNames = new SideDependentList<>(leftShinName, rightShinName);
 
 
@@ -60,33 +59,40 @@ public class BPWPlanarWalkingRobotDefinition extends RobotDefinition {
         torsoBodyDef = createTorso();
         floatingBaseDefinition.setSuccessor(torsoBodyDef);
 
+        KinematicPointDefinition basePoseDefinition = new KinematicPointDefinition("_base");
+        floatingBaseDefinition.addKinematicPointDefinition(basePoseDefinition);
+
         for(RobotSide robotside : RobotSide.values)
         {
             // Add the hip to the tree
             Vector3D hipPitchOffsetInTorso = new Vector3D(0.0, robotside.negateIfRightSide(0.05), -torsoHeight/2.0);
             RevoluteJointDefinition hipPitchJD = new RevoluteJointDefinition(hipPitchNames.get(robotside), hipPitchOffsetInTorso, Axis3D.Y);
-            hipPitchJD.setPositionLowerLimit(-Math.PI);
-            hipPitchJD.setPositionUpperLimit(Math.PI);
+            hipPitchJD.setPositionLimits(-Math.PI/2.0, Math.PI/2.0 );
 
             torsoBodyDef.addChildJoint(hipPitchJD);
             hipPitchJointDefinitions.put(robotside, hipPitchJD);
 
-            // Now add the thigh links
+             // Now add the thigh links
             // Todo - Attached ment from the center of the link which is usually the middle
             RigidBodyDefinition thighLink = createThigh(thighNames.get(robotside));
             hipPitchJD.setSuccessor(thighLink);
 
+            KinematicPointDefinition hipPoseDefinition = new KinematicPointDefinition(robotside.getLowerCaseName() + "_hip");
+            hipPitchJD.addKinematicPointDefinition(hipPoseDefinition);
+
             // Now add the knee which is a type of a prismatic joint
             Vector3D kneeOffsetInThigh = new Vector3D(0.0, 0.0, -thighLength/2.0);
             PrismaticJointDefinition kneeJD = new PrismaticJointDefinition(kneeNames.get(robotside), kneeOffsetInThigh, Axis3D.Z );
-            kneeJD.setPositionLowerLimit(-shinLength/2.0);
-            kneeJD.setPositionUpperLimit(shinLength/2.0);
+            kneeJD.setPositionLimits(-shinLength/2.0, shinLength/2.0 );
 
             thighLink.addChildJoint(kneeJD);
 
             // Now add the lower leg
             RigidBodyDefinition lowerLeg = createShin(shinNames.get(robotside));
             kneeJD.setSuccessor(lowerLeg);
+
+            KinematicPointDefinition kneePoseDefinition = new KinematicPointDefinition(robotside.getLowerCaseName() + "_knee");
+            kneeJD.addKinematicPointDefinition(kneePoseDefinition);
 
             // Create the contact points for the feet
             GroundContactPointDefinition footContactPoint = new GroundContactPointDefinition(robotside.getShortLowerCaseName() + "_gc_point", new Vector3D(0.0,0.0, -shinLength/2.0));
@@ -133,7 +139,7 @@ public class BPWPlanarWalkingRobotDefinition extends RobotDefinition {
 
     private static RigidBodyDefinition createShin(String name)
     {
-        double shinMass = 1.0;
+        double shinMass = 3.0;
         MomentOfInertiaDefinition shinInertia= new MomentOfInertiaDefinition(0.1,0.1,0.01);
 
         RigidBodyDefinition shinBodyDefinition = new RigidBodyDefinition(name);
