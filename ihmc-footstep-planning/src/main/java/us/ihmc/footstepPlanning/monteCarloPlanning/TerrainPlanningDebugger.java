@@ -10,6 +10,7 @@ import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -85,6 +86,20 @@ public class TerrainPlanningDebugger
       refresh(request.getTerrainMapData());
    }
 
+   public void renderInTheLoop(MonteCarloFootstepNode root,
+                               MonteCarloFootstepPlannerRequest request,
+                               SideDependentList<ConvexPolygon2D> footPolygons)
+   {
+      if (!enabled)
+         return;
+
+      FootstepPlan plan = MonteCarloPlannerTools.getFootstepPlanFromTree(root, request, footPolygons);
+      refresh(request.getTerrainMapData());
+      plotMonteCarloFootstepPlan(plan);
+      plotTree(root);
+      display(100);
+   }
+
    public void refresh(TerrainMapData terrainMapData)
    {
       if (!enabled)
@@ -158,10 +173,32 @@ public class TerrainPlanningDebugger
       plotFootPoses(heightMapColorImage, request.getStartFootPoses(), 2);
       plotFootstepPlan(heightMapColorImage, plan);
       plotFootPoses(heightMapColorImage, request.getGoalFootPoses(), 3);
-      
+
       plotFootPoses(contactHeatMapColorImage, request.getStartFootPoses(), 2);
       plotFootstepPlan(contactHeatMapColorImage, plan);
       plotFootPoses(contactHeatMapColorImage, request.getGoalFootPoses(), 3);
+   }
+
+   public void plotTree(MonteCarloFootstepNode root)
+   {
+      if (!enabled)
+         return;
+
+      plotNodeRecursive(root);
+   }
+
+   public void plotNodeRecursive(MonteCarloFootstepNode node)
+   {
+      for (MonteCarloTreeNode child : node.getChildren())
+      {
+         MonteCarloFootstepNode childNode = (MonteCarloFootstepNode) child;
+         PerceptionDebugTools.plotLine(contactHeatMapColorImage,
+                                       new Point2D((int) (node.getState().getX() + height/2) * scale, (int) (node.getState().getY() + height/2) * scale),
+                                       new Point2D((int) (childNode.getState().getX() + height/2) * scale, (int) (childNode.getState().getY() + height/2) * scale),
+                                       PerceptionDebugTools.COLOR_PURPLE);
+
+         plotNodeRecursive(childNode);
+      }
    }
 
    public void plotAStarPlan(FootstepPlan plan)
@@ -220,7 +257,10 @@ public class TerrainPlanningDebugger
       }
    }
 
-   public void printScoreStats(MonteCarloFootstepNode root, MonteCarloFootstepPlannerRequest request, MonteCarloFootstepPlannerParameters parameters, int iteration)
+   public void printScoreStats(MonteCarloFootstepNode root,
+                               MonteCarloFootstepPlannerRequest request,
+                               MonteCarloFootstepPlannerParameters parameters,
+                               int iteration)
    {
       if (!enabled)
          return;
@@ -230,13 +270,12 @@ public class TerrainPlanningDebugger
       MonteCarloPlannerTools.getOptimalPathByDepth(root, optimalPath);
 
       double totalScore = 0;
-      for (int i = 1; i<optimalPath.size(); i++)
+      for (int i = 1; i < optimalPath.size(); i++)
       {
          MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) optimalPath.get(i);
-         MonteCarloFootstepNode previousNode = (MonteCarloFootstepNode) optimalPath.get(i-1);
+         MonteCarloFootstepNode previousNode = (MonteCarloFootstepNode) optimalPath.get(i - 1);
          double score = MonteCarloPlannerTools.scoreFootstepNode(previousNode, footstepNode, request, parameters, false);
          totalScore += score;
-
       }
       long nanoTime = System.nanoTime();
       LogTools.warn(String.format("[MCFP] Time: %d, Iteration: %d, Total Score: %.3f", nanoTime, iteration, totalScore));

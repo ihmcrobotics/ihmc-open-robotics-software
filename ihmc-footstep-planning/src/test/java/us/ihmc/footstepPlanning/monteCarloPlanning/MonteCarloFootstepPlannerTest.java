@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -17,6 +18,7 @@ import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.tools.PerceptionDataTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -57,16 +59,16 @@ public class MonteCarloFootstepPlannerTest
       return terrainMapData;
    }
 
-   public void outputDebugInfo(long timeStart, long timeEnd, TerrainMapData terrainMapData, FootstepPlan plan)
+   public void outputDebugInfo(long timeStart, long timeEnd, MonteCarloFootstepPlannerRequest request, FootstepPlan plan, boolean display)
    {
       LogTools.info(String.format("Total Time: %.3f ms, Plan Size: %d, Visited: %d",
                                   (timeEnd - timeStart) / 1e6,
                                   plan.getNumberOfSteps(),
                                   planner.getVisitedNodes().size()));
 
-      if (displayPlots)
+      if (display)
       {
-         debugger.refresh(terrainMapData);
+         debugger.refresh(request.getTerrainMapData());
          debugger.plotMonteCarloFootstepPlan(plan);
          debugger.display(0);
       }
@@ -96,7 +98,7 @@ public class MonteCarloFootstepPlannerTest
       request.setGoalFootPose(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), goalRight, new Quaternion()));
       request.setTerrainMapData(terrainMapData);
       request.setHeightMapData(heightMapData);
-      request.setTimeout(plannerParameters.getTimeoutDuration());
+      request.setTimeout(4.0f);
       return request;
    }
 
@@ -104,10 +106,8 @@ public class MonteCarloFootstepPlannerTest
    @Test
    public void testMonteCarloFootstepPlanning()
    {
-
       initialize();
 
-      // height map is 8x8 meters, with a resolution of 0.02 meters, and a 50x50 patch in the center is set to 1m
       Mat heightMap = heightMapExtractor.getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
       HeightMapTerrainGeneratorTools.fillWithSteppingStones(heightMap, 0.4f, 0.4f, 0.3f, 0.25f, 3);
       TerrainMapData terrainMapData = generateTerrainMapData();
@@ -118,11 +118,36 @@ public class MonteCarloFootstepPlannerTest
                                                                              new Point3D(1.5, -0.1, 0.0),
                                                                              new Point3D(1.5, -0.3, 0.0));
 
-      long timeStart = System.nanoTime();
-      FootstepPlan plan = planner.generateFootstepPlan(plannerRequest);
-      long timeEnd = System.nanoTime();
-      outputDebugInfo(timeStart, timeEnd, terrainMapData, plan);
-
+      FootstepPlan plan = handleRequest(plannerRequest);
       Assertions.assertTrue(plan.getNumberOfSteps() > 0);
+   }
+
+   @Disabled
+   @Test
+   public void testObstacleAvoidance()
+   {
+      initialize();
+
+      Mat heightMap = heightMapExtractor.getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
+      PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(0.0f, 0.0f), new Point2D(1.0f, 1.0f), 1.5f, false);
+      TerrainMapData terrainMapData = generateTerrainMapData();
+
+      MonteCarloFootstepPlannerRequest plannerRequest = createPlannerRequest(terrainMapData,
+                                                                             new Point3D(-1.5, -0.1, 0.0),
+                                                                             new Point3D(-1.5, -0.3, 0.0),
+                                                                             new Point3D(1.5, -0.1, 0.0),
+                                                                             new Point3D(1.5, -0.3, 0.0));
+
+      FootstepPlan plan = handleRequest(plannerRequest);
+      Assertions.assertTrue(plan.getNumberOfSteps() > 0);
+   }
+
+   public FootstepPlan handleRequest(MonteCarloFootstepPlannerRequest request)
+   {
+      long timeStart = System.nanoTime();
+      FootstepPlan plan = planner.generateFootstepPlan(request);
+      long timeEnd = System.nanoTime();
+      outputDebugInfo(timeStart, timeEnd, request, plan, false);
+      return plan;
    }
 }

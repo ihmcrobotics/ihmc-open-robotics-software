@@ -2,12 +2,12 @@
   "title" : "MonteCarloFootstepPlannerParameters",
   "Reset" : false,
   "Number of iterations" : {
-    "value" : 90,
+    "value" : 900,
     "lowerBound" : 1,
     "upperBound" : 400
   },
   "Number of simulations" : {
-    "value" : 31,
+    "value" : 40,
     "lowerBound" : 1,
     "upperBound" : 400
   },
@@ -52,7 +52,7 @@
     "upperBound" : 1.0
   },
   "Exploration constant" : {
-    "value" : 0.301508,
+    "value" : 0.1501508,
     "lowerBound" : 0.0,
     "upperBound" : 5.0
   },
@@ -77,7 +77,7 @@
     "upperBound" : 1.0
   },
   "Search skip size" : {
-    "value" : 1,
+    "value" : 2,
     "lowerBound" : 0,
     "upperBound" : 10
   },

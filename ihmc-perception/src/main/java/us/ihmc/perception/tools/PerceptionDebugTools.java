@@ -541,6 +541,13 @@ public class PerceptionDebugTools
       opencv_imgproc.circle(displayImage, new Point((int) positionOnMap.getX(), (int) positionOnMap.getY()), radius, color, -1, opencv_imgproc.LINE_4, 0);
    }
 
+   public static void plotLine(Mat displayImage, Point2D start, Point2D end, Scalar color)
+   {
+      Point2D startOnMap = new Point2D(start.getY(), start.getX());
+      Point2D endOnMap = new Point2D(end.getY(), end.getX());
+      opencv_imgproc.line(displayImage, new Point((int) startOnMap.getX(), (int) startOnMap.getY()), new Point((int) endOnMap.getX(), (int) endOnMap.getY()), color, 2, opencv_imgproc.LINE_4, 0);
+   }
+
    public static void convertDepthCopyToColor(Mat depthImage16UC1Copy, Mat colorImage8UC3)
    {
       opencv_core.convertScaleAbs(depthImage16UC1Copy, depthImage16UC1Copy, 255.0 / 65535.0, 0);

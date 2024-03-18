@@ -339,7 +339,7 @@ public class MonteCarloPlannerTools
    {
       List<MonteCarloTreeNode> path = new ArrayList<>();
       MonteCarloPlannerTools.getOptimalPathByDepth(root, path);
-      LogTools.debug("Optimal Path Size: {}", path.size());
+      LogTools.info("Optimal Path Size: {}", path.size());
 
       HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
 
@@ -347,6 +347,8 @@ public class MonteCarloPlannerTools
       for (MonteCarloTreeNode node : path)
       {
          MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) node;
+
+         LogTools.info("Footstep Node -> Position: {}", footstepNode.getState());
 
          float nodeX = footstepNode.getState().getX32() / 50.0f;
          float nodeY = footstepNode.getState().getY32() / 50.0f;
@@ -452,9 +454,9 @@ public class MonteCarloPlannerTools
             if (radius >= minRadius && radius <= maxRadius && dotProduct > 0 && stanceSide * dotProductLeft > 0 && orthogonalDistanceToMidline <= maxWidth
                 && orthogonalDistanceToMidline >= minWidth && orthogonalDistanceToBaseLine <= maxLength && orthogonalDistanceToBaseLine >= minLength)
             {
-               actions.add(new Vector3D(i, j, -0.1));
+               //actions.add(new Vector3D(i, j, -0.4));
                actions.add(new Vector3D(i, j, 0));
-               actions.add(new Vector3D(i, j, 0.1));
+               //actions.add(new Vector3D(i, j, 0.4));
             }
          }
       }
