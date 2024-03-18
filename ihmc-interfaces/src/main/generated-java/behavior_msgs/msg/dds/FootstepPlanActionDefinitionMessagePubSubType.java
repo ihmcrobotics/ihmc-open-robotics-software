@@ -15,7 +15,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "758d79cde5e47b5c6d1ebab612c851a3f436a42608c7045da6c7a5c7ed6a1e20";
+   		return "2422307f49c14959dfdd499f51793b442a3d25f8a36e4a90b6e929c2f0fec639";
    }
    
    @Override
@@ -64,11 +64,9 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -113,14 +111,9 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       {
           current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType.getCdrSerializedSize(data.getFootsteps().get(i0), current_alignment);}
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getApproachPoint(), current_alignment);
 
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getApproachFocus(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -161,12 +154,8 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       cdr.write_type_e(data.getFootsteps());else
           throw new RuntimeException("footsteps field exceeds the maximum length");
 
-      cdr.write_type_6(data.getGoalXInParent());
-
-      cdr.write_type_6(data.getGoalYInParent());
-
-      cdr.write_type_6(data.getGoalYawInParent());
-
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getApproachPoint(), cdr);
+      geometry_msgs.msg.dds.PointPubSubType.write(data.getApproachFocus(), cdr);
       cdr.write_type_6(data.getLeftGoalFootXToGizmo());
 
       cdr.write_type_6(data.getLeftGoalFootYToGizmo());
@@ -192,12 +181,8 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       data.setIsManuallyPlaced(cdr.read_type_7());
       	
       cdr.read_type_e(data.getFootsteps());	
-      data.setGoalXInParent(cdr.read_type_6());
-      	
-      data.setGoalYInParent(cdr.read_type_6());
-      	
-      data.setGoalYawInParent(cdr.read_type_6());
-      	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getApproachPoint(), cdr);	
+      geometry_msgs.msg.dds.PointPubSubType.read(data.getApproachFocus(), cdr);	
       data.setLeftGoalFootXToGizmo(cdr.read_type_6());
       	
       data.setLeftGoalFootYToGizmo(cdr.read_type_6());
@@ -223,9 +208,10 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       ser.write_type_6("transfer_duration", data.getTransferDuration());
       ser.write_type_7("is_manually_placed", data.getIsManuallyPlaced());
       ser.write_type_e("footsteps", data.getFootsteps());
-      ser.write_type_6("goal_x_in_parent", data.getGoalXInParent());
-      ser.write_type_6("goal_y_in_parent", data.getGoalYInParent());
-      ser.write_type_6("goal_yaw_in_parent", data.getGoalYawInParent());
+      ser.write_type_a("approach_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getApproachPoint());
+
+      ser.write_type_a("approach_focus", new geometry_msgs.msg.dds.PointPubSubType(), data.getApproachFocus());
+
       ser.write_type_6("left_goal_foot_x_to_gizmo", data.getLeftGoalFootXToGizmo());
       ser.write_type_6("left_goal_foot_y_to_gizmo", data.getLeftGoalFootYToGizmo());
       ser.write_type_6("left_goal_foot_yaw_to_gizmo", data.getLeftGoalFootYawToGizmo());
@@ -244,9 +230,10 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       data.setTransferDuration(ser.read_type_6("transfer_duration"));
       data.setIsManuallyPlaced(ser.read_type_7("is_manually_placed"));
       ser.read_type_e("footsteps", data.getFootsteps());
-      data.setGoalXInParent(ser.read_type_6("goal_x_in_parent"));
-      data.setGoalYInParent(ser.read_type_6("goal_y_in_parent"));
-      data.setGoalYawInParent(ser.read_type_6("goal_yaw_in_parent"));
+      ser.read_type_a("approach_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getApproachPoint());
+
+      ser.read_type_a("approach_focus", new geometry_msgs.msg.dds.PointPubSubType(), data.getApproachFocus());
+
       data.setLeftGoalFootXToGizmo(ser.read_type_6("left_goal_foot_x_to_gizmo"));
       data.setLeftGoalFootYToGizmo(ser.read_type_6("left_goal_foot_y_to_gizmo"));
       data.setLeftGoalFootYawToGizmo(ser.read_type_6("left_goal_foot_yaw_to_gizmo"));

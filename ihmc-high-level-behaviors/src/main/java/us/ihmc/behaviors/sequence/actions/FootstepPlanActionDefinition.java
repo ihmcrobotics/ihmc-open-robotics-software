@@ -11,7 +11,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
@@ -24,9 +24,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private final CRDTUnidirectionalString parentFrameName;
    private final CRDTUnidirectionalBoolean isManuallyPlaced;
    private final CRDTUnidirectionalRecyclingArrayList<FootstepPlanActionFootstepDefinition> footsteps;
-   private final CRDTUnidirectionalDouble goalToParentX;
-   private final CRDTUnidirectionalDouble goalToParentY;
-   private final CRDTUnidirectionalDouble goalToParentYaw;
+   private final CRDTUnidirectionalPoint3D approachPoint;
+   private final CRDTUnidirectionalPoint3D approachFocus;
    private final SideDependentList<CRDTUnidirectionalDouble> goalFootstepToGoalXs;
    private final SideDependentList<CRDTUnidirectionalDouble> goalFootstepToGoalYs;
    private final SideDependentList<CRDTUnidirectionalDouble> goalFootstepToGoalYaws;
@@ -37,9 +36,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    private String onDiskParentFrameName;
    private boolean onDiskIsManuallyPlaced;
    private int onDiskNumberOfFootsteps;
-   private double onDiskGoalToParentX;
-   private double onDiskGoalToParentY;
-   private double onDiskGoalToParentYaw;
+   private final Point3D onDiskApproachPoint = new Point3D();
+   private final Point3D onDiskApproachFocus = new Point3D();
    private final SideDependentList<Double> onDiskGoalFootstepToGoalXs = new SideDependentList<>(() -> 0.0);
    private final SideDependentList<Double> onDiskGoalFootstepToGoalYs = new SideDependentList<>(() -> 0.0);
    private final SideDependentList<Double> onDiskGoalFootstepToGoalYaws = new SideDependentList<>(() -> 0.0);
@@ -55,9 +53,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       footsteps = new CRDTUnidirectionalRecyclingArrayList<>(ROS2ActorDesignation.OPERATOR,
                                                              crdtInfo,
                                                              () -> new RecyclingArrayList<>(() -> new FootstepPlanActionFootstepDefinition(crdtInfo)));
-      goalToParentX = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0);
-      goalToParentY = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0);
-      goalToParentYaw = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0);
+      approachPoint = new CRDTUnidirectionalPoint3D(ROS2ActorDesignation.OPERATOR, crdtInfo);
+      approachFocus = new CRDTUnidirectionalPoint3D(ROS2ActorDesignation.OPERATOR, crdtInfo);
       goalFootstepToGoalXs = new SideDependentList<>(() -> new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0));
       goalFootstepToGoalYs = new SideDependentList<>(() -> new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0));
       goalFootstepToGoalYaws = new SideDependentList<>(() -> new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0));
@@ -83,10 +80,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       }
       else
       {
-         ObjectNode goalToParentNode = jsonNode.putObject("goalToParent");
-         goalToParentNode.put("x", (float) MathTools.roundToPrecision(goalToParentX.getValue(), 0.0005));
-         goalToParentNode.put("y", (float) MathTools.roundToPrecision(goalToParentY.getValue(), 0.0005));
-         goalToParentNode.put("yawInDegrees", (float) MathTools.roundToPrecision(Math.toDegrees(goalToParentYaw.getValue()), 0.02));
+         JSONTools.toJSON(jsonNode, "approachPoint", approachPoint.getValueReadOnly());
+         JSONTools.toJSON(jsonNode, "approachFocus", approachFocus.getValueReadOnly());
 
          for (RobotSide side : RobotSide.values)
          {
@@ -115,10 +110,10 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       }
       else
       {
-         ObjectNode goalToParentNode = (ObjectNode) jsonNode.get("goalToParent");
-         goalToParentX.setValue(goalToParentNode.get("x").asDouble());
-         goalToParentY.setValue(goalToParentNode.get("y").asDouble());
-         goalToParentYaw.setValue(Math.toRadians(goalToParentNode.get("yawInDegrees").asDouble()));
+//         ObjectNode goalToParentNode = (ObjectNode) jsonNode.get("goalToParent");
+//         goalToParentX.setValue(goalToParentNode.get("x").asDouble());
+//         goalToParentY.setValue(goalToParentNode.get("y").asDouble());
+//         goalToParentYaw.setValue(Math.toRadians(goalToParentNode.get("yawInDegrees").asDouble()));
 
          for (RobotSide side : RobotSide.values)
          {
@@ -140,9 +135,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       onDiskParentFrameName = parentFrameName.getValue();
       onDiskIsManuallyPlaced = isManuallyPlaced.getValue();
       onDiskNumberOfFootsteps = footsteps.getSize();
-      onDiskGoalToParentX = goalToParentX.getValue();
-      onDiskGoalToParentY = goalToParentY.getValue();
-      onDiskGoalToParentYaw = goalToParentYaw.getValue();
+      onDiskApproachPoint.set(approachPoint.getValueReadOnly());
+      onDiskApproachFocus.set(approachFocus.getValueReadOnly());
       for (RobotSide side : goalFootstepToGoalXs.sides())
       {
          onDiskGoalFootstepToGoalXs.put(side, goalFootstepToGoalXs.get(side).getValue());
@@ -166,9 +160,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       footsteps.getValue().clear();
       for (int i = 0; i < onDiskNumberOfFootsteps; i++)
          footsteps.getValue().add();
-      goalToParentX.setValue(onDiskGoalToParentX);
-      goalToParentY.setValue(onDiskGoalToParentY);
-      goalToParentYaw.setValue(onDiskGoalToParentYaw);
+      approachPoint.getValue().set(onDiskApproachPoint);
+      approachFocus.getValue().set(onDiskApproachFocus);
       for (RobotSide side : onDiskGoalFootstepToGoalXs.sides())
       {
          goalFootstepToGoalXs.get(side).setValue(onDiskGoalFootstepToGoalXs.get(side));
@@ -189,9 +182,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       unchanged &= transferDuration.getValue() == onDiskTransferDuration;
       unchanged &= parentFrameName.getValue().equals(onDiskParentFrameName);
       unchanged &= isManuallyPlaced.getValue() == onDiskIsManuallyPlaced;
-      unchanged &= goalToParentX.getValue() == onDiskGoalToParentX;
-      unchanged &= goalToParentY.getValue() == onDiskGoalToParentY;
-      unchanged &= goalToParentYaw.getValue() == onDiskGoalToParentYaw;
+      unchanged &= approachPoint.getValueReadOnly().equals(onDiskApproachPoint);
+      unchanged &= approachFocus.getValueReadOnly().equals(onDiskApproachFocus);
       for (RobotSide side : goalFootstepToGoalXs.sides())
       {
          unchanged &= goalFootstepToGoalXs.get(side).getValue() == onDiskGoalFootstepToGoalXs.get(side);
@@ -223,9 +215,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       {
          footsteps.getValueReadOnly(i).toMessage(message.getFootsteps().add());
       }
-      message.setGoalXInParent(goalToParentX.toMessage());
-      message.setGoalYInParent(goalToParentY.toMessage());
-      message.setGoalYawInParent(goalToParentYaw.toMessage());
+      approachPoint.toMessage(message.getApproachPoint());
+      approachFocus.toMessage(message.getApproachFocus());
       message.setLeftGoalFootXToGizmo(goalFootstepToGoalXs.get(RobotSide.LEFT).toMessage());
       message.setLeftGoalFootYToGizmo(goalFootstepToGoalYs.get(RobotSide.LEFT).toMessage());
       message.setLeftGoalFootYawToGizmo(goalFootstepToGoalYaws.get(RobotSide.LEFT).toMessage());
@@ -251,9 +242,8 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
             writableList.add().fromMessage(footstepMessage);
          }
       });
-      goalToParentX.fromMessage(message.getGoalXInParent());
-      goalToParentY.fromMessage(message.getGoalYInParent());
-      goalToParentYaw.fromMessage(message.getGoalYawInParent());
+      approachPoint.fromMessage(message.getApproachPoint());
+      approachFocus.fromMessage(message.getApproachFocus());
       goalFootstepToGoalXs.get(RobotSide.LEFT).fromMessage(message.getLeftGoalFootXToGizmo());
       goalFootstepToGoalYs.get(RobotSide.LEFT).fromMessage(message.getLeftGoalFootYToGizmo());
       goalFootstepToGoalYaws.get(RobotSide.LEFT).fromMessage(message.getLeftGoalFootYawToGizmo());
@@ -312,19 +302,14 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       return footsteps;
    }
 
-   public CRDTUnidirectionalDouble getGoalToParentX()
+   public CRDTUnidirectionalPoint3D getApproachPoint()
    {
-      return goalToParentX;
+      return approachPoint;
    }
 
-   public CRDTUnidirectionalDouble getGoalToParentY()
+   public CRDTUnidirectionalPoint3D getApproachFocus()
    {
-      return goalToParentY;
-   }
-
-   public CRDTUnidirectionalDouble getGoalToParentYaw()
-   {
-      return goalToParentYaw;
+      return approachFocus;
    }
 
    public CRDTUnidirectionalDouble getGoalFootstepToGoalX(RobotSide side)

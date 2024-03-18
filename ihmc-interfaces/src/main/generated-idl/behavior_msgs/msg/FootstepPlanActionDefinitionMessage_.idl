@@ -3,6 +3,7 @@
 
 #include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionFootstepDefinitionMessage_.idl"
+#include "geometry_msgs/msg/./Point_.idl"
 module behavior_msgs
 {
   module msg
@@ -38,17 +39,13 @@ module behavior_msgs
          */
         sequence<behavior_msgs::msg::dds::FootstepPlanActionFootstepDefinitionMessage, 50> footsteps;
         /**
-         * Planning goal pose X in the parent frame
+         * The position to which the approach stance is aligned
          */
-        double goal_x_in_parent;
+        geometry_msgs::msg::dds::Point approach_point;
         /**
-         * Planning goal pose Y in the parent frame
+         * The point that the robot should be facing in the approach stance
          */
-        double goal_y_in_parent;
-        /**
-         * Planning goal pose Yaw in the parent frame
-         */
-        double goal_yaw_in_parent;
+        geometry_msgs::msg::dds::Point approach_focus;
         /**
          * Left goal foot X to the goal pose
          */

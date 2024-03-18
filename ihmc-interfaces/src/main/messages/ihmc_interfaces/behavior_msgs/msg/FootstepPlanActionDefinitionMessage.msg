@@ -16,14 +16,11 @@ bool is_manually_placed
 # The footsteps, with a maximum of 50
 behavior_msgs/FootstepPlanActionFootstepDefinitionMessage[<=50] footsteps
 
-# Planning goal pose X in the parent frame
-float64 goal_x_in_parent
+# The position to which the approach stance is aligned
+geometry_msgs/Point approach_point
 
-# Planning goal pose Y in the parent frame
-float64 goal_y_in_parent
-
-# Planning goal pose Yaw in the parent frame
-float64 goal_yaw_in_parent
+# The point that the robot should be facing in the approach stance
+geometry_msgs/Point approach_focus
 
 # Left goal foot X to the goal pose
 float64 left_goal_foot_x_to_gizmo
