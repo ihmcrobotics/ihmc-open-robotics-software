@@ -25,17 +25,9 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
             */
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage>  footsteps_;
    /**
-            * Goal to parent frame Z
+            * Transform from the planning goal to the action's parent frame
             */
-   public double goal_to_parent_z_;
-   /**
-            * Goal to parent frame Pitch
-            */
-   public double goal_to_parent_pitch_;
-   /**
-            * Goal to parent frame Roll
-            */
-   public double goal_to_parent_roll_;
+   public controller_msgs.msg.dds.RigidBodyTransformMessage goal_transform_to_parent_;
    /**
             * Execution state
             */
@@ -70,6 +62,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessage();
       footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage> (50, new behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessagePubSubType());
+      goal_transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
       desired_left_footsteps_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage> (50, new ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
       desired_right_footsteps_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage> (50, new ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
       current_left_foot_pose_ = new us.ihmc.euclid.geometry.Pose3D();
@@ -88,12 +81,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       footsteps_.set(other.footsteps_);
-      goal_to_parent_z_ = other.goal_to_parent_z_;
-
-      goal_to_parent_pitch_ = other.goal_to_parent_pitch_;
-
-      goal_to_parent_roll_ = other.goal_to_parent_roll_;
-
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.goal_transform_to_parent_, goal_transform_to_parent_);
       execution_state_ = other.execution_state_;
 
       total_number_of_footsteps_ = other.total_number_of_footsteps_;
@@ -133,49 +121,13 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       return footsteps_;
    }
 
-   /**
-            * Goal to parent frame Z
-            */
-   public void setGoalToParentZ(double goal_to_parent_z)
-   {
-      goal_to_parent_z_ = goal_to_parent_z;
-   }
-   /**
-            * Goal to parent frame Z
-            */
-   public double getGoalToParentZ()
-   {
-      return goal_to_parent_z_;
-   }
 
    /**
-            * Goal to parent frame Pitch
+            * Transform from the planning goal to the action's parent frame
             */
-   public void setGoalToParentPitch(double goal_to_parent_pitch)
+   public controller_msgs.msg.dds.RigidBodyTransformMessage getGoalTransformToParent()
    {
-      goal_to_parent_pitch_ = goal_to_parent_pitch;
-   }
-   /**
-            * Goal to parent frame Pitch
-            */
-   public double getGoalToParentPitch()
-   {
-      return goal_to_parent_pitch_;
-   }
-
-   /**
-            * Goal to parent frame Roll
-            */
-   public void setGoalToParentRoll(double goal_to_parent_roll)
-   {
-      goal_to_parent_roll_ = goal_to_parent_roll;
-   }
-   /**
-            * Goal to parent frame Roll
-            */
-   public double getGoalToParentRoll()
-   {
-      return goal_to_parent_roll_;
+      return goal_transform_to_parent_;
    }
 
    /**
@@ -286,12 +238,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
          {  if (!this.footsteps_.get(i).epsilonEquals(other.footsteps_.get(i), epsilon)) return false; }
       }
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_to_parent_z_, other.goal_to_parent_z_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_to_parent_pitch_, other.goal_to_parent_pitch_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.goal_to_parent_roll_, other.goal_to_parent_roll_, epsilon)) return false;
-
+      if (!this.goal_transform_to_parent_.epsilonEquals(other.goal_transform_to_parent_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_state_, other.execution_state_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.total_number_of_footsteps_, other.total_number_of_footsteps_, epsilon)) return false;
@@ -330,12 +277,7 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if (!this.footsteps_.equals(otherMyClass.footsteps_)) return false;
-      if(this.goal_to_parent_z_ != otherMyClass.goal_to_parent_z_) return false;
-
-      if(this.goal_to_parent_pitch_ != otherMyClass.goal_to_parent_pitch_) return false;
-
-      if(this.goal_to_parent_roll_ != otherMyClass.goal_to_parent_roll_) return false;
-
+      if (!this.goal_transform_to_parent_.equals(otherMyClass.goal_transform_to_parent_)) return false;
       if(this.execution_state_ != otherMyClass.execution_state_) return false;
 
       if(this.total_number_of_footsteps_ != otherMyClass.total_number_of_footsteps_) return false;
@@ -362,12 +304,8 @@ public class FootstepPlanActionStateMessage extends Packet<FootstepPlanActionSta
       builder.append(this.definition_);      builder.append(", ");
       builder.append("footsteps=");
       builder.append(this.footsteps_);      builder.append(", ");
-      builder.append("goal_to_parent_z=");
-      builder.append(this.goal_to_parent_z_);      builder.append(", ");
-      builder.append("goal_to_parent_pitch=");
-      builder.append(this.goal_to_parent_pitch_);      builder.append(", ");
-      builder.append("goal_to_parent_roll=");
-      builder.append(this.goal_to_parent_roll_);      builder.append(", ");
+      builder.append("goal_transform_to_parent=");
+      builder.append(this.goal_transform_to_parent_);      builder.append(", ");
       builder.append("execution_state=");
       builder.append(this.execution_state_);      builder.append(", ");
       builder.append("total_number_of_footsteps=");

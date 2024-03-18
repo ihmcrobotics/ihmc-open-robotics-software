@@ -4,6 +4,7 @@
 #include "behavior_msgs/msg/./ActionNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionFootstepStateMessage_.idl"
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
 #include "ihmc_common_msgs/msg/./SE3TrajectoryPointMessage_.idl"
 module behavior_msgs
@@ -41,17 +42,9 @@ module behavior_msgs
          */
         sequence<behavior_msgs::msg::dds::FootstepPlanActionFootstepStateMessage, 50> footsteps;
         /**
-         * Goal to parent frame Z
+         * Transform from the planning goal to the action's parent frame
          */
-        double goal_to_parent_z;
-        /**
-         * Goal to parent frame Pitch
-         */
-        double goal_to_parent_pitch;
-        /**
-         * Goal to parent frame Roll
-         */
-        double goal_to_parent_roll;
+        controller_msgs::msg::dds::RigidBodyTransformMessage goal_transform_to_parent;
         /**
          * Execution state
          */

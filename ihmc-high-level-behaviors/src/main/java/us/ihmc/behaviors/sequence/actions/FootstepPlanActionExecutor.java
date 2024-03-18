@@ -13,8 +13,13 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.TupleTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -26,6 +31,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -62,7 +68,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    private final SideDependentList<FramePose3D> liveGoalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
    private final SideDependentList<FramePose3D> startFootPosesForThread = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<FramePose3D> goalFootPosesForThread = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-   private final FramePose3D walkingFramePose = new FramePose3D();
 
    public FootstepPlanActionExecutor(long id,
                                      CRDTInfo crdtInfo,
@@ -96,17 +101,53 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       state.setCanExecute(state.areFramesInWorld());
       if (state.getCanExecute() && !definition.getIsManuallyPlaced())
       {
-         walkingFramePose.setToZero(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame());
-         walkingFramePose.changeFrame(state.getGoalFrame().getReferenceFrame().getParent());
-         state.getGoalToParentZ().setValue(walkingFramePose.getZ());
-         state.getGoalToParentPitch().setValue(walkingFramePose.getPitch());
-         state.getGoalToParentRoll().setValue(walkingFramePose.getRoll());
+         ReferenceFrame actionParentFrame = state.getGoalFrame().getReferenceFrame().getParent();
 
-         state.copyDefinitionToGoalFrame();
-         state.getGoalToParentTransform().getTranslation().setZ(state.getGoalToParentZ().getValue());
-         state.getGoalToParentTransform().getRotation().setYawPitchRoll(state.getGoalToParentTransform().getRotation().getYaw(),
-                                                                        state.getGoalToParentPitch().getValue(),
-                                                                        state.getGoalToParentRoll().getValue());
+         FramePoint3D frameApproachPoint = new FramePoint3D();
+         frameApproachPoint.setIncludingFrame(actionParentFrame, definition.getApproachPoint().getValueReadOnly());
+         frameApproachPoint.changeFrame(ReferenceFrame.getWorldFrame());
+
+         FramePoint3D frameApproachFocus = new FramePoint3D();
+         frameApproachFocus.setIncludingFrame(actionParentFrame, definition.getApproachFocus().getValueReadOnly());
+         frameApproachFocus.changeFrame(ReferenceFrame.getWorldFrame());
+
+         double approachPointToFocusDistance = frameApproachPoint.distance(frameApproachFocus);
+
+         Plane3D zUpPlane = new Plane3D();
+         zUpPlane.getPoint().set(frameApproachFocus);
+         zUpPlane.getNormal().set(Axis3D.Z);
+
+         Vector3D approachPointVector = new Vector3D();
+         approachPointVector.sub(frameApproachPoint, frameApproachFocus);
+         approachPointVector.normalize();
+         if (Math.abs(approachPointVector.getZ()) == 1.0) // This would be undefined
+            frameApproachPoint.set(frameApproachPoint.getZ(), 0.0, 0.0); // Flip to a random direction so we don't crash
+
+         // Project so we can find the horizon level approach point
+         zUpPlane.orthogonalProjection(frameApproachPoint);
+
+         Vector3D snappedApproachPointVector = new Vector3D();
+         snappedApproachPointVector.sub(frameApproachPoint, frameApproachFocus);
+         snappedApproachPointVector.normalize();
+         snappedApproachPointVector.scale(approachPointToFocusDistance);
+
+         Vector3D snappedApproachFocusVector = new Vector3D();
+         snappedApproachFocusVector.set(snappedApproachPointVector);
+         snappedApproachFocusVector.negate();
+
+         double yawInWorld = TupleTools.angle(Axis3D.X, snappedApproachFocusVector);
+
+         FramePoint3D frameSnappedApproachPoint = new FramePoint3D();
+         frameSnappedApproachPoint.setIncludingFrame(frameApproachFocus);
+         frameSnappedApproachPoint.add(snappedApproachPointVector);
+
+         FramePose3D snappedApproachPose = new FramePose3D();
+         snappedApproachPose.getTranslation().set(frameSnappedApproachPoint);
+         snappedApproachPose.getTranslation().setZ(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getZ());
+         snappedApproachPose.getRotation().setToYawOrientation(yawInWorld);
+         snappedApproachPose.changeFrame(actionParentFrame);
+
+         state.getGoalToParentTransform().getValue().set(snappedApproachPose);
          state.getGoalFrame().getReferenceFrame().update();
 
          for (RobotSide side : RobotSide.values)

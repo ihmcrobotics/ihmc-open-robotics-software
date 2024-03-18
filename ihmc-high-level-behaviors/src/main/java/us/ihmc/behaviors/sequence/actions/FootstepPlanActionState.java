@@ -4,8 +4,8 @@ import behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage;
 import behavior_msgs.msg.dds.FootstepPlanActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.communication.crdt.CRDTBidirectionalRigidBodyTransform;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
 import us.ihmc.communication.crdt.CRDTUnidirectionalEnumField;
 import us.ihmc.communication.crdt.CRDTUnidirectionalInteger;
 import us.ihmc.communication.crdt.CRDTUnidirectionalPose3D;
@@ -25,10 +25,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private int numberOfAllocatedFootsteps = 0;
    private final RecyclingArrayList<FootstepPlanActionFootstepState> footsteps;
-   private final CRDTUnidirectionalDouble goalToParentZ;
-   private final CRDTUnidirectionalDouble goalToParentPitch;
-   private final CRDTUnidirectionalDouble goalToParentRoll;
-   private final RigidBodyTransform goalToParentTransform = new RigidBodyTransform();
+   private final CRDTBidirectionalRigidBodyTransform goalToParentTransform;
    private final SideDependentList<RigidBodyTransform> goalFootstepToGoalTransforms = new SideDependentList<>(() -> new RigidBodyTransform());
    private final DetachableReferenceFrame goalFrame;
    private final CRDTUnidirectionalInteger totalNumberOfFootsteps;
@@ -45,10 +42,8 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
       this.referenceFrameLibrary = referenceFrameLibrary;
 
-      goalToParentZ = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, 0.0);
-      goalToParentPitch = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, 0.0);
-      goalToParentRoll = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, 0.0);
-      goalFrame = new DetachableReferenceFrame(referenceFrameLibrary, goalToParentTransform);
+      goalToParentTransform = new CRDTBidirectionalRigidBodyTransform(this);
+      goalFrame = new DetachableReferenceFrame(referenceFrameLibrary, goalToParentTransform.getValueReadOnly());
       footsteps = new RecyclingArrayList<>(() ->
          new FootstepPlanActionFootstepState(referenceFrameLibrary,
                                              definition.getCRDTParentFrameName(),
@@ -83,27 +78,12 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       }
    }
 
-   public void copyDefinitionToGoalFrame()
-   {
-      goalToParentTransform.getTranslation().setX(definition.getGoalToParentX().getValue());
-      goalToParentTransform.getTranslation().setY(definition.getGoalToParentY().getValue());
-      goalToParentTransform.getRotation().setToYawOrientation(definition.getGoalToParentYaw().getValue());
-      goalFrame.getReferenceFrame().update();
-   }
-
    public void copyDefinitionToGoalFoostepToGoalTransform(RobotSide side)
    {
       goalFootstepToGoalTransforms.get(side).setToZero();
       goalFootstepToGoalTransforms.get(side).getTranslation().setX(definition.getGoalFootstepToGoalX(side).getValue());
       goalFootstepToGoalTransforms.get(side).getTranslation().setY(definition.getGoalFootstepToGoalY(side).getValue());
       goalFootstepToGoalTransforms.get(side).getRotation().setToYawOrientation(definition.getGoalFootstepToGoalYaw(side).getValue());
-   }
-
-   public void copyGoalFrameToDefinition()
-   {
-      definition.getGoalToParentX().setValue(goalToParentTransform.getTranslation().getX());
-      definition.getGoalToParentY().setValue(goalToParentTransform.getTranslation().getY());
-      definition.getGoalToParentYaw().setValue(goalToParentTransform.getRotation().getYaw());
    }
 
    public void copyGoalFootstepToGoalTransformToDefinition(RobotSide side)
@@ -119,9 +99,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
       super.toMessage(message.getState());
 
-      message.setGoalToParentZ(goalToParentZ.toMessage());
-      message.setGoalToParentPitch(goalToParentPitch.toMessage());
-      message.setGoalToParentRoll(goalToParentRoll.toMessage());
+      goalToParentTransform.toMessage(message.getGoalTransformToParent());
       message.setTotalNumberOfFootsteps(totalNumberOfFootsteps.toMessage());
       message.setNumberOfIncompleteFootsteps(numberOfIncompleteFootsteps.toMessage());
       desiredFootPoses.get(RobotSide.LEFT).toMessage(message.getDesiredLeftFootsteps());
@@ -144,9 +122,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
 
       definition.fromMessage(message.getDefinition());
 
-      goalToParentZ.fromMessage(message.getGoalToParentZ());
-      goalToParentPitch.fromMessage(message.getGoalToParentPitch());
-      goalToParentRoll.fromMessage(message.getGoalToParentRoll());
+      goalToParentTransform.fromMessage(message.getGoalTransformToParent());
       totalNumberOfFootsteps.fromMessage(message.getTotalNumberOfFootsteps());
       numberOfIncompleteFootsteps.fromMessage(message.getNumberOfIncompleteFootsteps());
       desiredFootPoses.get(RobotSide.LEFT).fromMessage(message.getDesiredLeftFootsteps());
@@ -163,22 +139,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       executionState.fromMessage(FootstepPlanActionExecutionState.fromByte(message.getExecutionState()));
    }
 
-   public CRDTUnidirectionalDouble getGoalToParentZ()
-   {
-      return goalToParentZ;
-   }
-
-   public CRDTUnidirectionalDouble getGoalToParentPitch()
-   {
-      return goalToParentPitch;
-   }
-
-   public CRDTUnidirectionalDouble getGoalToParentRoll()
-   {
-      return goalToParentRoll;
-   }
-
-   public RigidBodyTransform getGoalToParentTransform()
+   public CRDTBidirectionalRigidBodyTransform getGoalToParentTransform()
    {
       return goalToParentTransform;
    }
