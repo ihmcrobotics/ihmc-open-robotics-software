@@ -1,11 +1,14 @@
 package us.ihmc.avatar.stereoVision.net.packet;
 
+import us.ihmc.avatar.stereoVision.net.udp.StereoVisionUDPPacketUtil;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.nio.ByteBuffer;
 
 public class StereoVisionImageFragmentPacket extends StereoVisionPacket
 {
+   public static final int MAX_FRAGMENT_DATA_LENGTH = StereoVisionUDPPacketUtil.STEREO_VISION_MAX_PACKET_DATA_LENGTH - 128;
+
    private RobotSide robotSide;
    private int imageWidth;
    private int imageHeight;
@@ -96,16 +99,27 @@ public class StereoVisionImageFragmentPacket extends StereoVisionPacket
    }
 
    @Override
-   public void serialize(ByteBuffer buffer)
+   public int serialize(ByteBuffer buffer)
    {
+      int length = 0;
       buffer.put(robotSide.toByte());
+      length += 1;
       buffer.putInt(imageWidth);
+      length += 4;
       buffer.putInt(imageHeight);
+      length += 4;
       buffer.putInt(imageDataLength);
+      length += 4;
       buffer.putInt(frameNumber);
+      length += 4;
       buffer.putInt(fragmentNumber);
+      length += 4;
       buffer.putInt(fragmentDataLength);
-      buffer.put(data);
+      length += 4;
+      for (int i = 0; i < data.length; i++)
+         buffer.put(data[i]);
+      length += data.length;
+      return length;
    }
 
    @Override
@@ -121,5 +135,11 @@ public class StereoVisionImageFragmentPacket extends StereoVisionPacket
       data = new byte[fragmentDataLength];
       for (int i = 0; i < fragmentDataLength; i++)
          data[i] = buffer.get();
+   }
+
+   @Override
+   public byte getPacketID()
+   {
+      return StereoVisionPacket.PACKET_ID_IMAGE_FRAGMENT;
    }
 }
