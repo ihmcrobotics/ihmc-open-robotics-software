@@ -17,6 +17,21 @@ public class StereoVisionReceiver
       udpServer.start("127.0.0.1");
    }
 
+   public void stop()
+   {
+      udpServer.stop();
+   }
+
+   public boolean isConnected()
+   {
+      return udpServer.isConnected();
+   }
+
+   public StereoVisionUDPServer getUDPServer()
+   {
+      return udpServer;
+   }
+
    public static void main(String[] args)
    {
       StereoVisionReceiver stereoVisionReceiver = new StereoVisionReceiver();
