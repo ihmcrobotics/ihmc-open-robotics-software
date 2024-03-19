@@ -1,6 +1,8 @@
 package us.ihmc.footstepPlanning.tools;
 
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
@@ -15,17 +17,34 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 public class FootstepPlannerRequestFactory
 {
    public static MonteCarloFootstepPlannerRequest createMCFPRequest(FootstepPlannerLog footstepPlannerLog,
-                                                                    TerrainMapData loadedTerrainMapData,
+                                                                    TerrainMapData terrainMapData,
                                                                     HeightMapData latestHeightMapData)
    {
+      return createMCFPRequest(terrainMapData,
+                               latestHeightMapData,
+                               new FramePose3D(footstepPlannerLog.getRequestPacket().getStartLeftFootPose()),
+                               new FramePose3D(footstepPlannerLog.getRequestPacket().getStartRightFootPose()),
+                               new FramePose3D(footstepPlannerLog.getRequestPacket().getGoalLeftFootPose()),
+                               new FramePose3D(footstepPlannerLog.getRequestPacket().getGoalRightFootPose()),
+                               RobotSide.fromByte(footstepPlannerLog.getRequestPacket().getRequestedInitialStanceSide()));
+   }
+
+   public static MonteCarloFootstepPlannerRequest createMCFPRequest(TerrainMapData terrainMapData,
+                                                                    HeightMapData heightMapData,
+                                                                    FramePose3D leftStartPose,
+                                                                    FramePose3D rightStartPose,
+                                                                    FramePose3D leftGoalPose,
+                                                                    FramePose3D rightGoalPose,
+                                                                    RobotSide initialSide)
+   {
       MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
-      request.setTerrainMapData(loadedTerrainMapData);
-      request.setHeightMapData(latestHeightMapData);
-      request.setStartFootPose(RobotSide.LEFT, footstepPlannerLog.getRequestPacket().getStartLeftFootPose());
-      request.setStartFootPose(RobotSide.RIGHT, footstepPlannerLog.getRequestPacket().getStartRightFootPose());
-      request.setGoalFootPose(RobotSide.LEFT, footstepPlannerLog.getRequestPacket().getGoalLeftFootPose());
-      request.setGoalFootPose(RobotSide.RIGHT, footstepPlannerLog.getRequestPacket().getGoalRightFootPose());
-      request.setRequestedInitialStanceSide(RobotSide.fromByte(footstepPlannerLog.getRequestPacket().getRequestedInitialStanceSide()));
+      request.setTerrainMapData(terrainMapData);
+      request.setHeightMapData(heightMapData);
+      request.setStartFootPose(RobotSide.LEFT, leftStartPose);
+      request.setStartFootPose(RobotSide.RIGHT, rightStartPose);
+      request.setGoalFootPose(RobotSide.LEFT, leftGoalPose);
+      request.setGoalFootPose(RobotSide.RIGHT, rightGoalPose);
+      request.setRequestedInitialStanceSide(initialSide);
       request.setTimeout(0.05);
 
       LogTools.debug("Start: {}, Goal: {}, Origin: {}",
@@ -37,9 +56,9 @@ public class FootstepPlannerRequestFactory
    }
 
    public static FootstepPlannerRequest createASFPRequest(TerrainMapData terrainMapData,
-                                                              HeightMapData heightMapData,
-                                                              FootstepPlannerLog footstepPlannerLog,
-                                                              FootstepPlan referencePlan)
+                                                          HeightMapData heightMapData,
+                                                          FootstepPlannerLog footstepPlannerLog,
+                                                          FootstepPlan referencePlan)
    {
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setHeightMapData(heightMapData);
@@ -61,37 +80,42 @@ public class FootstepPlannerRequestFactory
       return request;
    }
 
-   public static MonteCarloFootstepPlannerRequest createMCFPRequest(DataSet dataset,
-                                                                    TerrainMapData loadedTerrainMapData,
-                                                                    HeightMapData latestHeightMapData)
+   public static MonteCarloFootstepPlannerRequest createMCFPRequest(DataSet dataset, TerrainMapData loadedTerrainMapData, HeightMapData latestHeightMapData)
    {
       MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
       request.setTerrainMapData(loadedTerrainMapData);
       request.setHeightMapData(latestHeightMapData);
-      request.setStartFootPose(RobotSide.LEFT, new Pose3D(dataset.getPlannerInput().getStartPosition().getX(),
-                                                          dataset.getPlannerInput().getStartPosition().getY(),
-                                                          dataset.getPlannerInput().getStartPosition().getZ(),
-                                                          dataset.getPlannerInput().getStartYaw(),
-                                                          0.0, 0.0));
+      request.setStartFootPose(RobotSide.LEFT,
+                               new Pose3D(dataset.getPlannerInput().getStartPosition().getX(),
+                                          dataset.getPlannerInput().getStartPosition().getY(),
+                                          dataset.getPlannerInput().getStartPosition().getZ(),
+                                          dataset.getPlannerInput().getStartYaw(),
+                                          0.0,
+                                          0.0));
 
-      request.setStartFootPose(RobotSide.RIGHT, new Pose3D(dataset.getPlannerInput().getStartPosition().getX(),
-                                                           dataset.getPlannerInput().getStartPosition().getY(),
-                                                           dataset.getPlannerInput().getStartPosition().getZ(),
-                                                           dataset.getPlannerInput().getStartYaw(),
-                                                           0.0, 0.0));
+      request.setStartFootPose(RobotSide.RIGHT,
+                               new Pose3D(dataset.getPlannerInput().getStartPosition().getX(),
+                                          dataset.getPlannerInput().getStartPosition().getY(),
+                                          dataset.getPlannerInput().getStartPosition().getZ(),
+                                          dataset.getPlannerInput().getStartYaw(),
+                                          0.0,
+                                          0.0));
 
-      request.setGoalFootPose(RobotSide.LEFT, new Pose3D(dataset.getPlannerInput().getGoalPosition().getX(),
-                                                         dataset.getPlannerInput().getGoalPosition().getY(),
-                                                         dataset.getPlannerInput().getGoalPosition().getZ(),
-                                                         dataset.getPlannerInput().getGoalYaw(),
-                                                         0.0, 0.0));
+      request.setGoalFootPose(RobotSide.LEFT,
+                              new Pose3D(dataset.getPlannerInput().getGoalPosition().getX(),
+                                         dataset.getPlannerInput().getGoalPosition().getY(),
+                                         dataset.getPlannerInput().getGoalPosition().getZ(),
+                                         dataset.getPlannerInput().getGoalYaw(),
+                                         0.0,
+                                         0.0));
 
-      request.setGoalFootPose(RobotSide.RIGHT, new Pose3D(dataset.getPlannerInput().getGoalPosition().getX(),
-                                                          dataset.getPlannerInput().getGoalPosition().getY(),
-                                                          dataset.getPlannerInput().getGoalPosition().getZ(),
-                                                          dataset.getPlannerInput().getGoalYaw(),
-                                                          0.0, 0.0));
-
+      request.setGoalFootPose(RobotSide.RIGHT,
+                              new Pose3D(dataset.getPlannerInput().getGoalPosition().getX(),
+                                         dataset.getPlannerInput().getGoalPosition().getY(),
+                                         dataset.getPlannerInput().getGoalPosition().getZ(),
+                                         dataset.getPlannerInput().getGoalYaw(),
+                                         0.0,
+                                         0.0));
 
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
       request.setTimeout(0.05);
@@ -112,29 +136,37 @@ public class FootstepPlannerRequestFactory
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setHeightMapData(heightMapData);
       request.setTerrainMapData(terrainMapData);
-      request.setStartFootPose(RobotSide.LEFT, new Pose3D(dataset.getPlannerInput().getStartPosition().getX(),
-                                                          dataset.getPlannerInput().getStartPosition().getY(),
-                                                          dataset.getPlannerInput().getStartPosition().getZ(),
-                                                          dataset.getPlannerInput().getStartYaw(),
-                                                          0.0, 0.0));
+      request.setStartFootPose(RobotSide.LEFT,
+                               new Pose3D(dataset.getPlannerInput().getStartPosition().getX(),
+                                          dataset.getPlannerInput().getStartPosition().getY(),
+                                          dataset.getPlannerInput().getStartPosition().getZ(),
+                                          dataset.getPlannerInput().getStartYaw(),
+                                          0.0,
+                                          0.0));
 
-      request.setStartFootPose(RobotSide.RIGHT, new Pose3D(dataset.getPlannerInput().getStartPosition().getX(),
-                                                           dataset.getPlannerInput().getStartPosition().getY(),
-                                                           dataset.getPlannerInput().getStartPosition().getZ(),
-                                                           dataset.getPlannerInput().getStartYaw(),
-                                                           0.0, 0.0));
+      request.setStartFootPose(RobotSide.RIGHT,
+                               new Pose3D(dataset.getPlannerInput().getStartPosition().getX(),
+                                          dataset.getPlannerInput().getStartPosition().getY(),
+                                          dataset.getPlannerInput().getStartPosition().getZ(),
+                                          dataset.getPlannerInput().getStartYaw(),
+                                          0.0,
+                                          0.0));
 
-      request.setGoalFootPose(RobotSide.LEFT, new Pose3D(dataset.getPlannerInput().getGoalPosition().getX(),
-                                                         dataset.getPlannerInput().getGoalPosition().getY(),
-                                                         dataset.getPlannerInput().getGoalPosition().getZ(),
-                                                         dataset.getPlannerInput().getGoalYaw(),
-                                                         0.0, 0.0));
+      request.setGoalFootPose(RobotSide.LEFT,
+                              new Pose3D(dataset.getPlannerInput().getGoalPosition().getX(),
+                                         dataset.getPlannerInput().getGoalPosition().getY(),
+                                         dataset.getPlannerInput().getGoalPosition().getZ(),
+                                         dataset.getPlannerInput().getGoalYaw(),
+                                         0.0,
+                                         0.0));
 
-      request.setGoalFootPose(RobotSide.RIGHT, new Pose3D(dataset.getPlannerInput().getGoalPosition().getX(),
-                                                          dataset.getPlannerInput().getGoalPosition().getY(),
-                                                          dataset.getPlannerInput().getGoalPosition().getZ(),
-                                                          dataset.getPlannerInput().getGoalYaw(),
-                                                          0.0, 0.0));
+      request.setGoalFootPose(RobotSide.RIGHT,
+                              new Pose3D(dataset.getPlannerInput().getGoalPosition().getX(),
+                                         dataset.getPlannerInput().getGoalPosition().getY(),
+                                         dataset.getPlannerInput().getGoalPosition().getZ(),
+                                         dataset.getPlannerInput().getGoalYaw(),
+                                         0.0,
+                                         0.0));
 
       request.setTimeout(2.5);
       request.setPlanBodyPath(false);
@@ -148,5 +180,4 @@ public class FootstepPlannerRequestFactory
 
       return request;
    }
-
 }

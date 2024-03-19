@@ -1,0 +1,30 @@
+{
+  "dockspacePanels" : { },
+  "windows" : {
+    "3D View" : true,
+    "Dataset Navigation Panel" : true,
+    "Perception Panel" : false,
+    "Contact Map Image" : true,
+    "Cropped Height Map" : false,
+    "Depth Image" : false,
+    "GPU Planar Region Extraction" : false,
+    "Blurred Depth" : false,
+    "Filtered Depth" : false,
+    "Gx Image" : false,
+    "Gy Image" : false,
+    "Gz Image" : false,
+    "Nx Image" : false,
+    "Ny Image" : false,
+    "Nz Image" : false,
+    "Planar Region Extraction Image" : false,
+    "Local Height Map" : false,
+    "Monte-Carlo Tuner" : true,
+    "Normal Z" : false,
+    "Region Assignment" : false,
+    "Region Borders" : false,
+    "Region Connections" : false,
+    "Terrain Cost Image" : false,
+    "VR Settings" : false,
+    "VR Thread Debugger" : false
+  }
+}
