@@ -16,6 +16,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -210,7 +211,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          {
             definition.getApproachPoint().getValue().set(approachPointGizmo.getPoseGizmo().getTransformToParent().getTranslation());
             definition.getApproachFocus().getValue().set(approachFocusGizmo.getPoseGizmo().getTransformToParent().getTranslation());
-
 
             for (RobotSide side : RobotSide.values)
                state.copyGoalFootstepToGoalTransformToDefinition(side);
@@ -441,9 +441,25 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
    public void changeParentFrame(String newParentFrameName)
    {
+      FramePoint3D frameApproachPoint = new FramePoint3D(state.getParentFrame(), definition.getApproachPoint().getValueReadOnly());
+      FramePoint3D frameApproachFocus = new FramePoint3D(state.getParentFrame(), definition.getApproachFocus().getValueReadOnly());
+
       definition.setParentFrameName(newParentFrameName);
       // Freeze to prevent the frame from glitching when changing frames
       state.getGoalFrame().changeFrame(newParentFrameName, state.getGoalToParentTransform().getValueAndFreeze());
+
+      // Keep the points in the same place w.r.t common ancestor frames
+      ReferenceFrame newParent = state.getGoalFrame().getReferenceFrame().getParent();
+      frameApproachPoint.changeFrame(newParent);
+      frameApproachFocus.changeFrame(newParent);
+      definition.getApproachPoint().getValue().set(frameApproachPoint);
+      definition.getApproachFocus().getValue().set(frameApproachFocus);
+      approachPointGizmo.getPoseGizmo().setParentFrame(newParent);
+      approachFocusGizmo.getPoseGizmo().setParentFrame(newParent);
+      approachPointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getApproachPoint().getValueReadOnly());
+      approachFocusGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getApproachFocus().getValueReadOnly());
+      approachPointGizmo.getPoseGizmo().update();
+      approachFocusGizmo.getPoseGizmo().update();
 
       for (FootstepPlanActionFootstepState footstepState : getState().getFootsteps())
       {
