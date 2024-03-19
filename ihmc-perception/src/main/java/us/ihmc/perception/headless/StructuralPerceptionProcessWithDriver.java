@@ -18,6 +18,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.comms.ImageMessageFormat;
@@ -61,7 +62,7 @@ public class StructuralPerceptionProcessWithDriver
    private final RealtimeROS2Node realtimeROS2Node;
    private final OusterDepthPublisher depthPublisher;
    private final ROS2HeartbeatMonitor publishLidarScanMonitor;
-   private final Supplier<ReferenceFrame> sensorFrameUpdater;
+   private final HumanoidReferenceFrames referenceFrames;
    private final FramePose3D cameraPose = new FramePose3D();
    private final ResettableExceptionHandlingExecutorService extractCompressAndPublishThread;
    private final OusterNetServer ouster;
@@ -82,15 +83,18 @@ public class StructuralPerceptionProcessWithDriver
    private ROS2Topic<ImageMessage> depthTopic;
    private ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic;
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
+   private final Runnable syncedRobotUpdater;
 
    public StructuralPerceptionProcessWithDriver(ROS2ControllerPublishSubscribeAPI ros2,
                                                 ROS2Topic<ImageMessage> depthTopic,
                                                 ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic,
-                                                Supplier<ReferenceFrame> sensorFrameUpdater)
+                                                HumanoidReferenceFrames referenceFrames,
+                                                Runnable syncedRobotUpdater)
    {
       this.depthTopic = depthTopic;
       this.frameRegionsTopic = frameRegionsTopic;
-      this.sensorFrameUpdater = sensorFrameUpdater;
+      this.referenceFrames = referenceFrames;
+      this.syncedRobotUpdater = syncedRobotUpdater;
 
       ouster = new OusterNetServer();
       ouster.start();
@@ -173,8 +177,10 @@ public class StructuralPerceptionProcessWithDriver
    {
       ros2PropertySetGroup.update();
 
+
       // Important not to store as a field, as update() needs to be called each frame
-      ReferenceFrame cameraFrame = sensorFrameUpdater.get();
+      syncedRobotUpdater.run();
+      ReferenceFrame cameraFrame = referenceFrames.getOusterLidarFrame();
 
       depthExtractionKernel.runKernel(new RigidBodyTransform());
       // Encode as PNG which is lossless and handles single channel images.
@@ -199,9 +205,7 @@ public class StructuralPerceptionProcessWithDriver
 
       FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
 
-
-
-      extractFramePlanarRegionsList(depthImage, ReferenceFrame.getWorldFrame(), framePlanarRegionsList);
+      extractFramePlanarRegionsList(depthImage, cameraFrame, framePlanarRegionsList);
       PlanarRegionsList planarRegionsList = framePlanarRegionsList.getPlanarRegionsList();
 
       LogTools.info("Extracted {} planar regions", planarRegionsList.getNumberOfPlanarRegions());
