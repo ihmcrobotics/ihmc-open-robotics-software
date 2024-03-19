@@ -95,10 +95,13 @@ public class RDXOpenCVFeatureMatchingDemo
    {
       RawImage colorImage = imageRetriever.getLatestRawColorImage(RobotSide.LEFT);
 
+      // Capture frame button pressed; set the first image using the current image
       if (captureFrame.poll())
       {
          capturedFrame = new RawImage(colorImage);
+         // feature matching uses gray scale images
          opencv_cudaimgproc.cvtColor(capturedFrame.getGpuImageMat(), capturedFrame.getGpuImageMat(), opencv_imgproc.CV_BGR2GRAY);
+         // remove the ROI, use entire frame
          if (regionOfInterestMask != null)
          {
             regionOfInterestMask.release();
@@ -106,17 +109,21 @@ public class RDXOpenCVFeatureMatchingDemo
          }
       }
 
+      // Select ROI button pressed; set the first image using the current image & allow user to select the ROI
       if (selectRegionOfInterest.poll())
       {
          capturedFrame = new RawImage(colorImage);
+         // feature matching uses gray scale images
          opencv_cudaimgproc.cvtColor(capturedFrame.getGpuImageMat(), capturedFrame.getGpuImageMat(), opencv_imgproc.CV_BGR2GRAY);
 
+         // allow user to select ROI
          Rect regionOfInterest = opencv_highgui.selectROI(capturedFrame.getCpuImageMat());
          opencv_highgui.destroyAllWindows();
          selectingRegionOfInterest.set(false);
 
          if (!regionOfInterest.empty() && !(regionOfInterest.width() == 0 || regionOfInterest.height() == 0))
          {
+            // create the ROI mask
             if (regionOfInterestMask != null)
                regionOfInterestMask.release();
             regionOfInterestMask = new Mat(colorImage.getImageHeight(), colorImage.getImageWidth(), opencv_core.CV_8UC1, new Scalar(0.0));
@@ -135,23 +142,29 @@ public class RDXOpenCVFeatureMatchingDemo
          {
             Mat mask = regionOfInterestMask == null ? new Mat() : regionOfInterestMask.clone();
 
-            orb.setMaxFeatures((int) (maxFeature.get() * 0.2));
+            if (regionOfInterestMask != null)
+               orb.setMaxFeatures((int) (maxFeature.get() * 0.2)); // reduce number of feature points if a mask is used (smaller ares; don't need as many points)
+            // find the first feature points & descriptors
             orb.detectAndCompute(capturedFrame.getCpuImageMat(), mask, keyPoints1, descriptor1);
 
+            // ensure we're using gray scale images
             opencv_imgproc.cvtColor(colorImage.getCpuImageMat(), grayImage, opencv_imgproc.COLOR_BGR2GRAY);
+            // find the second feature points & descriptors
             orb.setMaxFeatures(maxFeature.get());
             orb.detectAndCompute(grayImage, new Mat(), keyPoints2, descriptor2);
 
+            // compute the matches (2 sets; used for Lowe's ratio test)
             featureMatcher.knnMatch(descriptor1, descriptor2, matches, 2);
 
+            // create a mask for only the good matches (matches that pass Lowe's ratio test)
             byte[][] matchesMask = Arrays.stream(matches.get()).parallel().map(match ->
-                                                                               {
-                                                                                  boolean good = match.size() >= 2 && match.get(0).distance() < 0.7 * match.get(1).distance();
-                                                                                  return new byte[]{(byte) (good ? 1 : 0), 0};
-                                                                               }).toArray(byte[][]::new);
+            {
+               boolean good = match.size() >= 2 && match.get(0).distance() < 0.7 * match.get(1).distance();
+               return new byte[]{(byte) (good ? 1 : 0), 0};
+            }).toArray(byte[][]::new);
 
+            // draw the matches on an image
             Mat matchImageMat = new Mat(colorImage.getImageHeight(), 2 * colorImage.getImageWidth(), opencv_core.CV_8UC3);
-
             opencv_features2d.drawMatchesKnn(capturedFrame.getCpuImageMat(),
                                              keyPoints1,
                                              grayImage,
@@ -163,6 +176,7 @@ public class RDXOpenCVFeatureMatchingDemo
                                              new ByteVectorVector(matchesMask),
                                              0);
 
+            // send the image to be displayed
             RawImage matchImage = new RawImage(colorImage.getSequenceNumber(),
                                                colorImage.getAcquisitionTime(),
                                                colorImage.getImageWidth() * 2,
