@@ -15,10 +15,11 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
@@ -141,7 +142,8 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          snappedApproachFocusVector.set(snappedApproachPointVector);
          snappedApproachFocusVector.negate();
 
-         double yawInWorld = TupleTools.angle(Axis3D.X, snappedApproachFocusVector);
+         RotationMatrix stanceOrientation = new RotationMatrix();
+         EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X, snappedApproachFocusVector, stanceOrientation);
 
          FramePoint3D frameSnappedApproachPoint = new FramePoint3D();
          frameSnappedApproachPoint.setIncludingFrame(frameApproachFocus);
@@ -150,7 +152,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          FramePose3D snappedApproachPose = new FramePose3D();
          snappedApproachPose.getTranslation().set(frameSnappedApproachPoint);
          snappedApproachPose.getTranslation().setZ(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getZ());
-         snappedApproachPose.getRotation().setToYawOrientation(yawInWorld);
+         snappedApproachPose.getRotation().set(stanceOrientation);
          snappedApproachPose.changeFrame(state.getParentFrame());
 
          state.getGoalToParentTransform().getValue().set(snappedApproachPose);
