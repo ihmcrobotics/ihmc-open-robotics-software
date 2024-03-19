@@ -1,5 +1,7 @@
 package us.ihmc.exampleSimulations.planarWalker;
 
+import javafx.geometry.Side;
+import org.opencv.features2d.SIFT;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -14,6 +16,8 @@ import java.awt.*;
 
 public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 {
+   private static final double damping = 0.1;
+
    public static final String baseJointName = "floatingBase";
    public static final String torsoName = "torso";
    public static final String leftHipPitchName = "l_hip_pitch";
@@ -24,6 +28,7 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
    public static final String rightThighName = "r_thigh";
    public static final String leftShinName = "l_shin";
    public static final String rightShinName = "r_shin";
+
 
    private static final double torsoHeight = 0.5;
    public static final double thighLength = 0.5;
@@ -54,11 +59,15 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
       torsoBodyDefinition = createTorso();
       floatingBaseDefinition.setSuccessor(torsoBodyDefinition);
 
+      KinematicPointDefinition basePoseDefintion = new KinematicPointDefinition("_base");
+      floatingBaseDefinition.addKinematicPointDefinition(basePoseDefintion);
+
       for (RobotSide robotSide : RobotSide.values)
       {
          // create the hip pitch joints and add them to the tree
          Vector3D hipPitchOffsetInTorso = new Vector3D(0.0, robotSide.negateIfRightSide(0.05), -torsoHeight / 2.0);
          RevoluteJointDefinition hipPitchJointDefinition = new RevoluteJointDefinition(hipPitchNames.get(robotSide), hipPitchOffsetInTorso, Axis3D.Y);
+         hipPitchJointDefinition.setDamping(damping);
          torsoBodyDefinition.addChildJoint(hipPitchJointDefinition);
          hipPitchJointDefinitions.put(robotSide, hipPitchJointDefinition);
 
@@ -67,9 +76,13 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
          RigidBodyDefinition thighLink = createThigh(thighNames.get(robotSide));
          hipPitchJointDefinition.setSuccessor(thighLink);
 
+         KinematicPointDefinition hipPoseDefintion = new KinematicPointDefinition(robotSide.getLowerCaseName() + "_hip");
+         hipPitchJointDefinition.addKinematicPointDefinition(hipPoseDefintion);
+
          // create the knee joints and add them to the tree
          Vector3D leftKneeOffsetInThigh = new Vector3D(0.0, 0.0, -thighLength / 2.0);
          PrismaticJointDefinition kneeJointDefinition = new PrismaticJointDefinition(kneeNames.get(robotSide), leftKneeOffsetInThigh, Axis3D.Z);
+         kneeJointDefinition.setDamping(damping);
          thighLink.addChildJoint(kneeJointDefinition);
 
          // create the shin links and add them to the tree
@@ -77,9 +90,11 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
          RigidBodyDefinition lowerLeg = createShin(shinNames.get(robotSide));
          kneeJointDefinition.setSuccessor(lowerLeg);
 
+         KinematicPointDefinition kneePoseDefintion = new KinematicPointDefinition(robotSide.getLowerCaseName() + "_knee");
+         kneeJointDefinition.addKinematicPointDefinition(kneePoseDefintion);
+
          // create the contact points for the feet.
-         GroundContactPointDefinition footContactPoint = new GroundContactPointDefinition(robotSide.getLowerCaseName() + "_gc_point",
-                                                                                          new Vector3D(0.0, 0.0, -shinLength / 2.0));
+         GroundContactPointDefinition footContactPoint = new GroundContactPointDefinition(robotSide.getLowerCaseName() + "_gc_point", new Vector3D(0.0, 0.0, -shinLength / 2.0));
          kneeJointDefinition.addGroundContactPointDefinition(footContactPoint);
       }
 
@@ -88,7 +103,7 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 
    private static RigidBodyDefinition createTorso()
    {
-      double torsoMass = 100.0;
+      double torsoMass = 10.0;
       MomentOfInertiaDefinition torsoMomentOfInertia = new MomentOfInertiaDefinition(0.75, 0.75, 1.0);
 
       RigidBodyDefinition torsoBodyDefinition = new RigidBodyDefinition(torsoName);
@@ -122,7 +137,7 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 
    private static RigidBodyDefinition createShin(String name)
    {
-      double shinMass = 1.0;
+      double shinMass = 3.0;
       MomentOfInertiaDefinition shinMomentOfInertia = new MomentOfInertiaDefinition(0.1, 0.1, 0.01);
 
       RigidBodyDefinition shinDefinition = new RigidBodyDefinition(name);
