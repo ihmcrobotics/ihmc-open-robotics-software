@@ -185,8 +185,9 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
          approachArrowGraphic.update(1.0, Color.WHITE);
 
-         approachPointGizmo.getPoseGizmo().setGizmoFrame(state.getGoalFrame().getReferenceFrame());
-         approachFocusGizmo.getPoseGizmo().setGizmoFrame(state.getGoalFrame().getReferenceFrame());
+         ReferenceFrame parentFrame = state.getParentFrame();
+         approachPointGizmo.getPoseGizmo().setParentFrame(parentFrame);
+         approachFocusGizmo.getPoseGizmo().setParentFrame(parentFrame);
 
          for (RobotSide side : RobotSide.values)
             goalFeetGizmos.get(side).setParentFrame(state.getGoalFrame().getReferenceFrame());

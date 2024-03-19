@@ -11,6 +11,7 @@ import us.ihmc.communication.crdt.CRDTUnidirectionalInteger;
 import us.ihmc.communication.crdt.CRDTUnidirectionalPose3D;
 import us.ihmc.communication.crdt.CRDTUnidirectionalSE3Trajectory;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.lists.RecyclingArrayListTools;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
@@ -28,6 +29,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    private final CRDTBidirectionalRigidBodyTransform goalToParentTransform;
    private final SideDependentList<RigidBodyTransform> goalFootstepToGoalTransforms = new SideDependentList<>(() -> new RigidBodyTransform());
    private final DetachableReferenceFrame goalFrame;
+   private ReferenceFrame parentFrame;
    private final CRDTUnidirectionalInteger totalNumberOfFootsteps;
    private final CRDTUnidirectionalInteger numberOfIncompleteFootsteps;
    private final SideDependentList<CRDTUnidirectionalSE3Trajectory> desiredFootPoses = new SideDependentList<>();
@@ -68,6 +70,7 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
       }
 
       goalFrame.update(definition.getParentFrameName());
+      parentFrame = goalFrame.getReferenceFrame().getParent();
 
       RecyclingArrayListTools.synchronizeSize(footsteps, definition.getFootsteps().getSize());
 
@@ -152,6 +155,11 @@ public class FootstepPlanActionState extends ActionNodeState<FootstepPlanActionD
    public boolean areFramesInWorld()
    {
       return referenceFrameLibrary.containsFrame(definition.getParentFrameName()) && goalFrame.isChildOfWorld();
+   }
+
+   public ReferenceFrame getParentFrame()
+   {
+      return parentFrame;
    }
 
    public DetachableReferenceFrame getGoalFrame()

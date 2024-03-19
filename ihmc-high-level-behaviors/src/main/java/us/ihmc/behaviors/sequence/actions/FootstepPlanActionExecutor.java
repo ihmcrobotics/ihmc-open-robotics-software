@@ -20,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -98,17 +99,22 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    {
       super.update();
 
-      state.setCanExecute(state.areFramesInWorld());
+      Point3DReadOnly definitionApproachPoint = definition.getApproachPoint().getValueReadOnly();
+      Point3DReadOnly definitionApproachFocus = definition.getApproachFocus().getValueReadOnly();
+      boolean invalidDefinition = definitionApproachPoint.geometricallyEquals(definitionApproachFocus, 1e-4);
+
+      if (invalidDefinition)
+         LogTools.error("Approach point can not be in the same place as the focus point.");
+
+      state.setCanExecute(state.areFramesInWorld() && !invalidDefinition);
       if (state.getCanExecute() && !definition.getIsManuallyPlaced())
       {
-         ReferenceFrame actionParentFrame = state.getGoalFrame().getReferenceFrame().getParent();
-
          FramePoint3D frameApproachPoint = new FramePoint3D();
-         frameApproachPoint.setIncludingFrame(actionParentFrame, definition.getApproachPoint().getValueReadOnly());
+         frameApproachPoint.setIncludingFrame(state.getParentFrame(), definitionApproachPoint);
          frameApproachPoint.changeFrame(ReferenceFrame.getWorldFrame());
 
          FramePoint3D frameApproachFocus = new FramePoint3D();
-         frameApproachFocus.setIncludingFrame(actionParentFrame, definition.getApproachFocus().getValueReadOnly());
+         frameApproachFocus.setIncludingFrame(state.getParentFrame(), definitionApproachFocus);
          frameApproachFocus.changeFrame(ReferenceFrame.getWorldFrame());
 
          double approachPointToFocusDistance = frameApproachPoint.distance(frameApproachFocus);
@@ -145,7 +151,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          snappedApproachPose.getTranslation().set(frameSnappedApproachPoint);
          snappedApproachPose.getTranslation().setZ(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getZ());
          snappedApproachPose.getRotation().setToYawOrientation(yawInWorld);
-         snappedApproachPose.changeFrame(actionParentFrame);
+         snappedApproachPose.changeFrame(state.getParentFrame());
 
          state.getGoalToParentTransform().getValue().set(snappedApproachPose);
          state.getGoalFrame().getReferenceFrame().update();
