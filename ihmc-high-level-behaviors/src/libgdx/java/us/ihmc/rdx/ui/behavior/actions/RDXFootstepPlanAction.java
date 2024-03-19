@@ -15,8 +15,10 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
@@ -54,6 +56,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final RecyclingArrayList<RDXFootstepPlanActionFootstep> manuallyPlacedFootsteps;
    private final TypedNotification<RobotSide> userAddedFootstep = new TypedNotification<>();
    private final Notification userRemovedFootstep = new Notification();
+   private final FramePose3D approachArrowPose = new FramePose3D();
+   private final Vector3D approachFocusVector = new Vector3D();
    private final RDXMutableArrowModel approachArrowGraphic = new RDXMutableArrowModel();
    private final RDXSelectablePose3DGizmo approachPointGizmo = new RDXSelectablePose3DGizmo();
    private final RDXSelectablePose3DGizmo approachFocusGizmo = new RDXSelectablePose3DGizmo();
@@ -183,8 +187,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
             footstep.update();
          }
 
-         approachArrowGraphic.update(1.0, Color.WHITE);
-
          ReferenceFrame parentFrame = state.getParentFrame();
          approachPointGizmo.getPoseGizmo().setParentFrame(parentFrame);
          approachFocusGizmo.getPoseGizmo().setParentFrame(parentFrame);
@@ -222,6 +224,18 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                state.copyDefinitionToGoalFoostepToGoalTransform(side);
          }
          state.getGoalFrame().getReferenceFrame().update();
+
+         approachArrowPose.setToZero(state.getParentFrame());
+         approachArrowPose.getTranslation().set(definition.getApproachPoint().getValueReadOnly());
+         approachFocusVector.sub(definition.getApproachFocus().getValueReadOnly(), definition.getApproachPoint().getValueReadOnly());
+         EuclidGeometryTools.orientation3DFromZUpToVector3D(approachFocusVector, approachArrowPose.getOrientation());
+         approachArrowPose.changeFrame(ReferenceFrame.getWorldFrame());
+         approachArrowGraphic.update(approachFocusVector.norm(), Color.WHITE);
+         approachArrowGraphic.accessModelIfExists(modelInstance ->
+         {
+            modelInstance.setPoseInWorldFrame(approachArrowPose);
+            modelInstance.setOpacity(0.6f);
+         });
 
          for (RobotSide side : RobotSide.values)
          {
