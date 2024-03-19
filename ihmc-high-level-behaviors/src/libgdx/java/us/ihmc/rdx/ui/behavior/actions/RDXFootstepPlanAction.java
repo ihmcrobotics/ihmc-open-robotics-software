@@ -206,8 +206,9 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
          if (state.isFrozen())
          {
-            definition.getApproachPoint().getValue().set(approachPointGizmo.getPoseGizmo().getPose().getTranslation());
-            definition.getApproachFocus().getValue().set(approachFocusGizmo.getPoseGizmo().getPose().getTranslation());
+            definition.getApproachPoint().getValue().set(approachPointGizmo.getPoseGizmo().getTransformToParent().getTranslation());
+            definition.getApproachFocus().getValue().set(approachFocusGizmo.getPoseGizmo().getTransformToParent().getTranslation());
+
 
             for (RobotSide side : RobotSide.values)
                state.copyGoalFootstepToGoalTransformToDefinition(side);
@@ -221,9 +222,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                state.copyDefinitionToGoalFoostepToGoalTransform(side);
          }
          state.getGoalFrame().getReferenceFrame().update();
-
-         approachPointGizmo.getPoseGizmo().update();
-         approachFocusGizmo.getPoseGizmo().update();
 
          for (RobotSide side : RobotSide.values)
          {
