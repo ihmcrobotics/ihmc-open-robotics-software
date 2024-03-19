@@ -2,6 +2,8 @@ package us.ihmc.avatar.stereoVision.net.udp;
 
 import us.ihmc.avatar.stereoVision.net.packet.StereoVisionImageFragmentPacket;
 import us.ihmc.avatar.stereoVision.net.packet.StereoVisionPacket;
+import us.ihmc.avatar.stereoVision.net.packet.StereoVisionPacketListener;
+import us.ihmc.avatar.stereoVision.net.packet.StereoVisionSetupPacket;
 import us.ihmc.avatar.stereoVision.sensor.StereoVisionSensorReaderListener;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -13,12 +15,15 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 
 // On-robot process
-public class StereoVisionUDPClient implements StereoVisionSensorReaderListener
+public class StereoVisionUDPClient implements StereoVisionSensorReaderListener, StereoVisionPacketListener
 {
    @Nullable
    private DatagramSocket socket;
    @Nullable
    private InetAddress sendAddress;
+   @Nullable
+   private Thread receiveThread;
+
    private volatile boolean running;
 
    public boolean start(String sendAddress)
@@ -31,8 +36,10 @@ public class StereoVisionUDPClient implements StereoVisionSensorReaderListener
       try
       {
          socket = new DatagramSocket();
+         socket.connect(InetAddress.getByName(sendAddress), StereoVisionUDPPacketUtil.UDP_PORT);
+         socket.setSoTimeout(1000);
       }
-      catch (SocketException e)
+      catch (SocketException | UnknownHostException e)
       {
          LogTools.error(e);
          return false;
@@ -48,15 +55,41 @@ public class StereoVisionUDPClient implements StereoVisionSensorReaderListener
          return false;
       }
 
-      return running = true;
+      running = true;
+
+      receiveThread = new Thread(() ->
+      {
+         while (running && !socket.isClosed())
+            StereoVisionUDPPacketUtil.socketReceive(socket, this);
+      }, getClass().getSimpleName() + "UDPReceiveThread");
+      receiveThread.start();
+
+      return running;
    }
 
    public void stop()
    {
       running = false;
-      sendAddress = null;
+
       if (socket != null)
+      {
          socket.close();
+      }
+
+      if (receiveThread != null)
+      {
+         try
+         {
+            receiveThread.join();
+         }
+         catch (InterruptedException e)
+         {
+            LogTools.error(e);
+         }
+      }
+
+      receiveThread = null;
+      sendAddress = null;
       socket = null;
    }
 
@@ -64,6 +97,12 @@ public class StereoVisionUDPClient implements StereoVisionSensorReaderListener
    {
       if (socket != null && sendAddress != null && running)
          StereoVisionUDPPacketUtil.send(packet, socket, sendAddress);
+   }
+
+   @Override
+   public void onSetupPacket(StereoVisionSetupPacket setupPacket)
+   {
+      System.out.println("Setup packet received");
    }
 
    @Override
