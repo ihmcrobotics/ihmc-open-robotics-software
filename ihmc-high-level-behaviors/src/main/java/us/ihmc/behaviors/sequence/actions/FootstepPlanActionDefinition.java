@@ -10,12 +10,8 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.JSONTools;
@@ -114,26 +110,6 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
       }
       else
       {
-//         ObjectNode goalToParentNode = (ObjectNode) jsonNode.get("goalToParent");
-//         double goalToParentX = goalToParentNode.get("x").asDouble();
-//         double goalToParentY = goalToParentNode.get("y").asDouble();
-//         double goalToParentYaw = Math.toRadians(goalToParentNode.get("yawInDegrees").asDouble());
-//
-//         Vector3D focusVector = new Vector3D(Axis3D.X);
-//         focusVector.scale(0.30);
-//
-//         RotationMatrix yawRotation = new RotationMatrix();
-//         yawRotation.setToYawOrientation(goalToParentYaw);
-//
-//         yawRotation.transform(focusVector);
-//
-//         goalStancePoint.getValue().setX(goalToParentX);
-//         goalStancePoint.getValue().setY(goalToParentY);
-//
-//
-//         goalFocalPoint.getValue().set(goalStancePoint.getValueReadOnly());
-//         goalFocalPoint.getValue().add(focusVector);
-
          JSONTools.toEuclid(jsonNode, "goalStancePoint", goalStancePoint.getValue());
          JSONTools.toEuclid(jsonNode, "goalFocalPoint", goalFocalPoint.getValue());
 
