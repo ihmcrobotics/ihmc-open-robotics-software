@@ -346,15 +346,6 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       ImGui.popItemWidth();
 
       manuallyPlaceStepsWrapper.renderImGuiWidget();
-      
-      if (!definition.getIsManuallyPlaced())
-      {
-         ImGui.text("Adjust:");
-         ImGui.sameLine();
-         ImGui.checkbox(labels.get("Stance Point"), goalStancePointGizmo.getSelected());
-         ImGui.sameLine();
-         ImGui.checkbox(labels.get("Focal Point"), goalFocalPointGizmo.getSelected());
-      }
 
       if (state.areFramesInWorld()) // Not allowing modification if not renderable
       {
@@ -382,9 +373,13 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          }
          else
          {
+            ImGui.text("Planning goal gizmo adjustment:");
+            ImGui.checkbox(labels.get("Stance Point"), goalStancePointGizmo.getSelected());
+            ImGui.sameLine();
+            ImGui.checkbox(labels.get("Focal Point"), goalFocalPointGizmo.getSelected());
             for (RobotSide side : RobotSide.values)
             {
-               ImGui.checkbox(labels.get("Edit Goal " + side.getPascalCaseName()), goalFeetPosesSelected.get(side));
+               ImGui.checkbox(labels.get(side.getPascalCaseName() + " Foot to Goal"), goalFeetPosesSelected.get(side));
                if (side == RobotSide.LEFT)
                   ImGui.sameLine();
             }
