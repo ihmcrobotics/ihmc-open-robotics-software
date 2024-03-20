@@ -17,13 +17,28 @@ bool is_manually_placed
 # The footsteps, with a maximum of 50
 behavior_msgs/FootstepPlanActionFootstepDefinitionMessage[] footsteps
 
-# Transform that expresses the planning goal pose in the parent frame
-controller_msgs/RigidBodyTransformMessage goal_transform_to_parent
+# The position to which the goal stance is aligned
+geometry_msgs/Point goal_stance_point
 
-# Left goal foot transform to the goal pose
-controller_msgs/RigidBodyTransformMessage left_goal_foot_transform_to_gizmo
+# The point that the robot should be facing in the goal stance
+geometry_msgs/Point goal_focal_point
 
-# Right goal foot transform to the goal pose
-controller_msgs/RigidBodyTransformMessage right_goal_foot_transform_to_gizmo
+# Left goal foot X to the goal pose
+float64 left_goal_foot_x_to_gizmo
+
+# Left goal foot Y to the goal pose
+float64 left_goal_foot_y_to_gizmo
+
+# Left goal foot Yaw to the goal pose
+float64 left_goal_foot_yaw_to_gizmo
+
+# Right goal foot X to the goal pose
+float64 right_goal_foot_x_to_gizmo
+
+# Right goal foot Y to the goal pose
+float64 right_goal_foot_y_to_gizmo
+
+# Right goal foot Yaw to the goal pose
+float64 right_goal_foot_yaw_to_gizmo
 
 

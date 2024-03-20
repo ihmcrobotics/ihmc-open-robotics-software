@@ -15,7 +15,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b4090473736dff8d01632ea313a7fd287efec24070aa241760543fff270af515";
+   		return "c6b317d00321ba3883d9d1c8ee89ffeea8ad6c2c03e0d62592545f80b5833d98";
    }
    
    @Override
@@ -59,6 +59,8 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
@@ -97,6 +99,8 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       {
           current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessagePubSubType.getCdrSerializedSize(data.getFootsteps().get(i0), current_alignment);}
 
+      current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getGoalTransformToParent(), current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -132,6 +136,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       cdr.write_type_e(data.getFootsteps());else
           throw new RuntimeException("footsteps field exceeds the maximum length");
 
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getGoalTransformToParent(), cdr);
       cdr.write_type_9(data.getExecutionState());
 
       cdr.write_type_3(data.getTotalNumberOfFootsteps());
@@ -155,6 +160,7 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       cdr.read_type_e(data.getFootsteps());	
+      controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getGoalTransformToParent(), cdr);	
       data.setExecutionState(cdr.read_type_9());
       	
       data.setTotalNumberOfFootsteps(cdr.read_type_3());
@@ -176,6 +182,8 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       ser.write_type_a("definition", new behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_e("footsteps", data.getFootsteps());
+      ser.write_type_a("goal_transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getGoalTransformToParent());
+
       ser.write_type_9("execution_state", data.getExecutionState());
       ser.write_type_3("total_number_of_footsteps", data.getTotalNumberOfFootsteps());
       ser.write_type_3("number_of_incomplete_footsteps", data.getNumberOfIncompleteFootsteps());
@@ -195,6 +203,8 @@ public class FootstepPlanActionStateMessagePubSubType implements us.ihmc.pubsub.
       ser.read_type_a("definition", new behavior_msgs.msg.dds.FootstepPlanActionDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.read_type_e("footsteps", data.getFootsteps());
+      ser.read_type_a("goal_transform_to_parent", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getGoalTransformToParent());
+
       data.setExecutionState(ser.read_type_9("execution_state"));
       data.setTotalNumberOfFootsteps(ser.read_type_3("total_number_of_footsteps"));
       data.setNumberOfIncompleteFootsteps(ser.read_type_3("number_of_incomplete_footsteps"));
