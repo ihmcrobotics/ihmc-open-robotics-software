@@ -216,17 +216,15 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
                state.freeze();
 
          if (state.isFrozen())
-         {
             for (RobotSide side : RobotSide.values)
                state.copyGoalFootstepToGoalTransformToDefinition(side);
-         }
          else
-         {
             for (RobotSide side : RobotSide.values)
                state.copyDefinitionToGoalFoostepToGoalTransform(side);
-         }
+
          state.getGoalFrame().getReferenceFrame().update();
 
+         // Update arrow graphic geometry
          goalArrowPose.setToZero(state.getParentFrame());
          goalArrowPose.getTranslation().set(definition.getGoalStancePoint().getValueReadOnly());
          goalFocalPointVector.sub(definition.getGoalFocalPoint().getValueReadOnly(), definition.getGoalStancePoint().getValueReadOnly());
@@ -261,10 +259,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    {
       if (state.areFramesInWorld())
       {
-         if (!definition.getIsManuallyPlaced())
-         {
-
-         }
+         // TODO: VR support for Pose3DGizmo
       }
    }
 
@@ -275,7 +270,7 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       {
          if (!definition.getIsManuallyPlaced())
          {
-
+            // TODO: VR support for Pose3DGizmo
          }
       }
    }
@@ -352,6 +347,12 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          if (definition.getIsManuallyPlaced())
          {
             ImGui.checkbox(labels.get("Edit Manually Placed Steps"), editManuallyPlacedSteps);
+
+            ImGui.sameLine();
+            if (editManuallyPlacedSteps.get() && ImGui.button("Select All Footsteps"))
+               for (RDXFootstepPlanActionFootstep manuallyPlacedFootstep : manuallyPlacedFootsteps)
+                  manuallyPlacedFootstep.getInteractableFootstep().getSelectablePose3DGizmo().setSelected(true);
+
             ImGui.text("Number of footsteps: %d".formatted(manuallyPlacedFootsteps.size()));
             ImGui.text("Add:");
             for (RobotSide side : RobotSide.values)
