@@ -9,6 +9,7 @@ import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.*;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -21,6 +22,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
 {
    private final CRDTUnidirectionalDouble swingDuration;
    private final CRDTUnidirectionalDouble transferDuration;
+   private final CRDTUnidirectionalEnumField<ExecutionMode> executionMode;
    private final CRDTUnidirectionalString parentFrameName;
    private final CRDTUnidirectionalBoolean isManuallyPlaced;
    private final CRDTUnidirectionalRecyclingArrayList<FootstepPlanActionFootstepDefinition> footsteps;
@@ -33,6 +35,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    // On disk fields
    private double onDiskSwingDuration;
    private double onDiskTransferDuration;
+   private ExecutionMode onDiskExecutionMode;
    private String onDiskParentFrameName;
    private boolean onDiskIsManuallyPlaced;
    private int onDiskNumberOfFootsteps;
@@ -48,6 +51,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
 
       swingDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.2);
       transferDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.8);
+      executionMode = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, ExecutionMode.OVERRIDE);
       parentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, ReferenceFrame.getWorldFrame().getName());
       isManuallyPlaced = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, false);
       footsteps = new CRDTUnidirectionalRecyclingArrayList<>(ROS2ActorDesignation.OPERATOR,
@@ -67,6 +71,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
 
       jsonNode.put("swingDuration", swingDuration.getValue());
       jsonNode.put("transferDuration", transferDuration.getValue());
+      jsonNode.put("executionMode", executionMode.getValue().name());
       jsonNode.put("parentFrame", parentFrameName.getValue());
 
       if (isManuallyPlaced.getValue())
@@ -100,6 +105,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
 
       swingDuration.setValue(jsonNode.get("swingDuration").asDouble());
       transferDuration.setValue(jsonNode.get("transferDuration").asDouble());
+      executionMode.setValue(ExecutionMode.valueOf(jsonNode.get("executionMode").textValue()));
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
       isManuallyPlaced.setValue(jsonNode.get("footsteps") != null);
 
@@ -130,6 +136,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
 
       onDiskSwingDuration = swingDuration.getValue();
       onDiskTransferDuration = transferDuration.getValue();
+      onDiskExecutionMode = executionMode.getValue();
       onDiskParentFrameName = parentFrameName.getValue();
       onDiskIsManuallyPlaced = isManuallyPlaced.getValue();
       onDiskNumberOfFootsteps = footsteps.getSize();
@@ -153,6 +160,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
 
       swingDuration.setValue(onDiskSwingDuration);
       transferDuration.setValue(onDiskTransferDuration);
+      executionMode.setValue(onDiskExecutionMode);
       parentFrameName.setValue(onDiskParentFrameName);
       isManuallyPlaced.setValue(onDiskIsManuallyPlaced);
       footsteps.getValue().clear();
@@ -178,6 +186,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
 
       unchanged &= swingDuration.getValue() == onDiskSwingDuration;
       unchanged &= transferDuration.getValue() == onDiskTransferDuration;
+      unchanged &= executionMode.getValue() == onDiskExecutionMode;
       unchanged &= parentFrameName.getValue().equals(onDiskParentFrameName);
       unchanged &= isManuallyPlaced.getValue() == onDiskIsManuallyPlaced;
       unchanged &= goalStancePoint.getValueReadOnly().equals(onDiskGoalStancePoint);
@@ -205,6 +214,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
 
       message.setSwingDuration(swingDuration.toMessage());
       message.setTransferDuration(transferDuration.toMessage());
+      message.setExecutionMode(executionMode.toMessageOrdinal());
       message.setParentFrameName(parentFrameName.toMessage());
       message.setIsManuallyPlaced(isManuallyPlaced.toMessage());
 
@@ -229,6 +239,7 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
 
       swingDuration.fromMessage(message.getSwingDuration());
       transferDuration.fromMessage(message.getTransferDuration());
+      executionMode.fromMessageOrdinal(message.getExecutionMode(), ExecutionMode.values);
       parentFrameName.fromMessage(message.getParentFrameNameAsString());
       isManuallyPlaced.fromMessage(message.getIsManuallyPlaced());
 
@@ -268,6 +279,11 @@ public class FootstepPlanActionDefinition extends ActionNodeDefinition
    public void setTransferDuration(double transferDuration)
    {
       this.transferDuration.setValue(transferDuration);
+   }
+
+   public CRDTUnidirectionalEnumField<ExecutionMode> getExecutionMode()
+   {
+      return executionMode;
    }
 
    public String getParentFrameName()

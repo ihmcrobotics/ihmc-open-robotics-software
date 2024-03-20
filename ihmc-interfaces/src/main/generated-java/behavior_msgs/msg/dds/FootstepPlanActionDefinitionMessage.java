@@ -25,6 +25,10 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
             */
    public double transfer_duration_;
    /**
+            * OVERRIDE (0) or QUEUE (1)
+            */
+   public int execution_mode_;
+   /**
             * Is using the footstep planner or manually placing
             */
    public boolean is_manually_placed_;
@@ -90,6 +94,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       swing_duration_ = other.swing_duration_;
 
       transfer_duration_ = other.transfer_duration_;
+
+      execution_mode_ = other.execution_mode_;
 
       is_manually_placed_ = other.is_manually_placed_;
 
@@ -171,6 +177,21 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
    public double getTransferDuration()
    {
       return transfer_duration_;
+   }
+
+   /**
+            * OVERRIDE (0) or QUEUE (1)
+            */
+   public void setExecutionMode(int execution_mode)
+   {
+      execution_mode_ = execution_mode;
+   }
+   /**
+            * OVERRIDE (0) or QUEUE (1)
+            */
+   public int getExecutionMode()
+   {
+      return execution_mode_;
    }
 
    /**
@@ -330,6 +351,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.transfer_duration_, other.transfer_duration_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_mode_, other.execution_mode_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_manually_placed_, other.is_manually_placed_, epsilon)) return false;
 
       if (this.footsteps_.size() != other.footsteps_.size()) { return false; }
@@ -373,6 +396,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
       if(this.transfer_duration_ != otherMyClass.transfer_duration_) return false;
 
+      if(this.execution_mode_ != otherMyClass.execution_mode_) return false;
+
       if(this.is_manually_placed_ != otherMyClass.is_manually_placed_) return false;
 
       if (!this.footsteps_.equals(otherMyClass.footsteps_)) return false;
@@ -408,6 +433,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       builder.append(this.swing_duration_);      builder.append(", ");
       builder.append("transfer_duration=");
       builder.append(this.transfer_duration_);      builder.append(", ");
+      builder.append("execution_mode=");
+      builder.append(this.execution_mode_);      builder.append(", ");
       builder.append("is_manually_placed=");
       builder.append(this.is_manually_placed_);      builder.append(", ");
       builder.append("footsteps=");
