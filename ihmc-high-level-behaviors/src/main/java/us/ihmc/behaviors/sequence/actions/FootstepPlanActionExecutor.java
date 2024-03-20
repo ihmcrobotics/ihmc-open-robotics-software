@@ -100,9 +100,9 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    {
       super.update();
 
-      Point3DReadOnly definitionApproachPoint = definition.getApproachPoint().getValueReadOnly();
-      Point3DReadOnly definitionApproachFocus = definition.getApproachFocus().getValueReadOnly();
-      boolean invalidDefinition = definitionApproachPoint.geometricallyEquals(definitionApproachFocus, 1e-4);
+      Point3DReadOnly definitionGoalStancePoint = definition.getGoalStancePoint().getValueReadOnly();
+      Point3DReadOnly definitionGoalFocalPoint = definition.getGoalFocalPoint().getValueReadOnly();
+      boolean invalidDefinition = definitionGoalStancePoint.geometricallyEquals(definitionGoalFocalPoint, 1e-4);
 
       if (invalidDefinition)
          LogTools.error("Approach point can not be in the same place as the focus point.");
@@ -110,52 +110,52 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       state.setCanExecute(state.areFramesInWorld() && !invalidDefinition);
       if (state.getCanExecute() && !definition.getIsManuallyPlaced())
       {
-         FramePoint3D frameApproachPoint = new FramePoint3D();
-         frameApproachPoint.setIncludingFrame(state.getParentFrame(), definitionApproachPoint);
-         frameApproachPoint.changeFrame(ReferenceFrame.getWorldFrame());
+         FramePoint3D frameStancePoint = new FramePoint3D();
+         frameStancePoint.setIncludingFrame(state.getParentFrame(), definitionGoalStancePoint);
+         frameStancePoint.changeFrame(ReferenceFrame.getWorldFrame());
 
-         FramePoint3D frameApproachFocus = new FramePoint3D();
-         frameApproachFocus.setIncludingFrame(state.getParentFrame(), definitionApproachFocus);
-         frameApproachFocus.changeFrame(ReferenceFrame.getWorldFrame());
+         FramePoint3D frameFocalPoint = new FramePoint3D();
+         frameFocalPoint.setIncludingFrame(state.getParentFrame(), definitionGoalFocalPoint);
+         frameFocalPoint.changeFrame(ReferenceFrame.getWorldFrame());
 
-         double approachPointToFocusDistance = frameApproachPoint.distance(frameApproachFocus);
+         double stancePointToFocalPointDistance = frameStancePoint.distance(frameFocalPoint);
 
          Plane3D zUpPlane = new Plane3D();
-         zUpPlane.getPoint().set(frameApproachFocus);
+         zUpPlane.getPoint().set(frameFocalPoint);
          zUpPlane.getNormal().set(Axis3D.Z);
 
-         Vector3D approachPointVector = new Vector3D();
-         approachPointVector.sub(frameApproachPoint, frameApproachFocus);
-         approachPointVector.normalize();
-         if (Math.abs(approachPointVector.getZ()) == 1.0) // This would be undefined
-            frameApproachPoint.set(frameApproachPoint.getZ(), 0.0, 0.0); // Flip to a random direction so we don't crash
+         Vector3D stancePointVector = new Vector3D();
+         stancePointVector.sub(frameStancePoint, frameFocalPoint);
+         stancePointVector.normalize();
+         if (Math.abs(stancePointVector.getZ()) == 1.0) // This would be undefined
+            frameStancePoint.set(frameStancePoint.getZ(), 0.0, 0.0); // Flip to a random direction so we don't crash
 
          // Project so we can find the horizon level approach point
-         zUpPlane.orthogonalProjection(frameApproachPoint);
+         zUpPlane.orthogonalProjection(frameStancePoint);
 
-         Vector3D snappedApproachPointVector = new Vector3D();
-         snappedApproachPointVector.sub(frameApproachPoint, frameApproachFocus);
-         snappedApproachPointVector.normalize();
-         snappedApproachPointVector.scale(approachPointToFocusDistance);
+         Vector3D snappedStancePointVector = new Vector3D();
+         snappedStancePointVector.sub(frameStancePoint, frameFocalPoint);
+         snappedStancePointVector.normalize();
+         snappedStancePointVector.scale(stancePointToFocalPointDistance);
 
-         Vector3D snappedApproachFocusVector = new Vector3D();
-         snappedApproachFocusVector.set(snappedApproachPointVector);
-         snappedApproachFocusVector.negate();
+         Vector3D snappedFocalPointVector = new Vector3D();
+         snappedFocalPointVector.set(snappedStancePointVector);
+         snappedFocalPointVector.negate();
 
          RotationMatrix stanceOrientation = new RotationMatrix();
-         EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X, snappedApproachFocusVector, stanceOrientation);
+         EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X, snappedFocalPointVector, stanceOrientation);
 
-         FramePoint3D frameSnappedApproachPoint = new FramePoint3D();
-         frameSnappedApproachPoint.setIncludingFrame(frameApproachFocus);
-         frameSnappedApproachPoint.add(snappedApproachPointVector);
+         FramePoint3D frameSnappedStancePoint = new FramePoint3D();
+         frameSnappedStancePoint.setIncludingFrame(frameFocalPoint);
+         frameSnappedStancePoint.add(snappedStancePointVector);
 
-         FramePose3D snappedApproachPose = new FramePose3D();
-         snappedApproachPose.getTranslation().set(frameSnappedApproachPoint);
-         snappedApproachPose.getTranslation().setZ(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getZ());
-         snappedApproachPose.getRotation().set(stanceOrientation);
-         snappedApproachPose.changeFrame(state.getParentFrame());
+         FramePose3D snappedGoalStancePose = new FramePose3D();
+         snappedGoalStancePose.getTranslation().set(frameSnappedStancePoint);
+         snappedGoalStancePose.getTranslation().setZ(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getZ());
+         snappedGoalStancePose.getRotation().set(stanceOrientation);
+         snappedGoalStancePose.changeFrame(state.getParentFrame());
 
-         state.getGoalToParentTransform().getValue().set(snappedApproachPose);
+         state.getGoalToParentTransform().getValue().set(snappedGoalStancePose);
          state.getGoalFrame().getReferenceFrame().update();
 
          for (RobotSide side : RobotSide.values)

@@ -39,13 +39,13 @@ module behavior_msgs
          */
         sequence<behavior_msgs::msg::dds::FootstepPlanActionFootstepDefinitionMessage, 50> footsteps;
         /**
-         * The position to which the approach stance is aligned
+         * The position to which the goal stance is aligned
          */
-        geometry_msgs::msg::dds::Point approach_point;
+        geometry_msgs::msg::dds::Point goal_stance_point;
         /**
-         * The point that the robot should be facing in the approach stance
+         * The point that the robot should be facing in the goal stance
          */
-        geometry_msgs::msg::dds::Point approach_focus;
+        geometry_msgs::msg::dds::Point goal_focal_point;
         /**
          * Left goal foot X to the goal pose
          */

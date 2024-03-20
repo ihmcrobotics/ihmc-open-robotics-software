@@ -57,11 +57,11 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
    private final RecyclingArrayList<RDXFootstepPlanActionFootstep> manuallyPlacedFootsteps;
    private final TypedNotification<RobotSide> userAddedFootstep = new TypedNotification<>();
    private final Notification userRemovedFootstep = new Notification();
-   private final FramePose3D approachArrowPose = new FramePose3D();
-   private final Vector3D approachFocusVector = new Vector3D();
-   private final RDXMutableArrowModel approachArrowGraphic = new RDXMutableArrowModel();
-   private final RDXSelectablePose3DGizmo approachPointGizmo = new RDXSelectablePose3DGizmo();
-   private final RDXSelectablePose3DGizmo approachFocusGizmo = new RDXSelectablePose3DGizmo();
+   private final FramePose3D goalArrowPose = new FramePose3D();
+   private final Vector3D goalFocalPointVector = new Vector3D();
+   private final RDXMutableArrowModel goalArrowGraphic = new RDXMutableArrowModel();
+   private final RDXSelectablePose3DGizmo goalStancePointGizmo = new RDXSelectablePose3DGizmo();
+   private final RDXSelectablePose3DGizmo goalFocalPointGizmo = new RDXSelectablePose3DGizmo();
    private final SideDependentList<RDXFootstepGraphic> goalFeetGraphics = new SideDependentList<>();
    private final SideDependentList<ImBoolean> goalFeetPosesSelected = new SideDependentList<>();
    private final SideDependentList<RDXPose3DGizmo> goalFeetGizmos = new SideDependentList<>();
@@ -112,10 +112,10 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          definition.getGoalFootstepToGoalY(side).setValue(0.5 * side.negateIfRightSide(footstepPlannerParameters.getIdealFootstepWidth()));
       }
 
-      definition.getApproachFocus().getValue().set(0.1, 0.0, 0.0);
+      definition.getGoalFocalPoint().getValue().set(0.1, 0.0, 0.0);
 
-      approachPointGizmo.create(baseUI.getPrimary3DPanel());
-      approachFocusGizmo.create(baseUI.getPrimary3DPanel());
+      goalStancePointGizmo.create(baseUI.getPrimary3DPanel());
+      goalFocalPointGizmo.create(baseUI.getPrimary3DPanel());
 
       for (RobotSide side : RobotSide.values)
       {
@@ -189,8 +189,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          }
 
          ReferenceFrame parentFrame = state.getParentFrame();
-         approachPointGizmo.getPoseGizmo().setParentFrame(parentFrame);
-         approachFocusGizmo.getPoseGizmo().setParentFrame(parentFrame);
+         goalStancePointGizmo.getPoseGizmo().setParentFrame(parentFrame);
+         goalFocalPointGizmo.getPoseGizmo().setParentFrame(parentFrame);
 
          for (RobotSide side : RobotSide.values)
             goalFeetGizmos.get(side).setParentFrame(state.getGoalFrame().getReferenceFrame());
@@ -199,16 +199,16 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          // and/or the parent frame is changed. However, on loading and otherwise we want
          // to make sure the current state reflects the definition because the definition
          // can change. We do this by freezing the node so user changes can propagate.
-         if (approachPointGizmo.getPoseGizmo().getGizmoModifiedByUser().poll()
-          || approachFocusGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
+         if (goalStancePointGizmo.getPoseGizmo().getGizmoModifiedByUser().poll()
+             || goalFocalPointGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
          {
-            definition.getApproachPoint().getValue().set(approachPointGizmo.getPoseGizmo().getTransformToParent().getTranslation());
-            definition.getApproachFocus().getValue().set(approachFocusGizmo.getPoseGizmo().getTransformToParent().getTranslation());
+            definition.getGoalStancePoint().getValue().set(goalStancePointGizmo.getPoseGizmo().getTransformToParent().getTranslation());
+            definition.getGoalFocalPoint().getValue().set(goalFocalPointGizmo.getPoseGizmo().getTransformToParent().getTranslation());
          }
          else
          {
-            approachPointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getApproachPoint().getValueReadOnly());
-            approachFocusGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getApproachFocus().getValueReadOnly());
+            goalStancePointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getGoalStancePoint().getValueReadOnly());
+            goalFocalPointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getGoalFocalPoint().getValueReadOnly());
          }
 
          for (RobotSide side : RobotSide.values)
@@ -227,15 +227,15 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          }
          state.getGoalFrame().getReferenceFrame().update();
 
-         approachArrowPose.setToZero(state.getParentFrame());
-         approachArrowPose.getTranslation().set(definition.getApproachPoint().getValueReadOnly());
-         approachFocusVector.sub(definition.getApproachFocus().getValueReadOnly(), definition.getApproachPoint().getValueReadOnly());
-         EuclidGeometryTools.orientation3DFromZUpToVector3D(approachFocusVector, approachArrowPose.getOrientation());
-         approachArrowPose.changeFrame(ReferenceFrame.getWorldFrame());
-         approachArrowGraphic.update(approachFocusVector.norm(), Color.WHITE);
-         approachArrowGraphic.accessModelIfExists(modelInstance ->
+         goalArrowPose.setToZero(state.getParentFrame());
+         goalArrowPose.getTranslation().set(definition.getGoalStancePoint().getValueReadOnly());
+         goalFocalPointVector.sub(definition.getGoalFocalPoint().getValueReadOnly(), definition.getGoalStancePoint().getValueReadOnly());
+         EuclidGeometryTools.orientation3DFromZUpToVector3D(goalFocalPointVector, goalArrowPose.getOrientation());
+         goalArrowPose.changeFrame(ReferenceFrame.getWorldFrame());
+         goalArrowGraphic.update(goalFocalPointVector.norm(), Color.WHITE);
+         goalArrowGraphic.accessModelIfExists(modelInstance ->
          {
-            modelInstance.setPoseInWorldFrame(approachArrowPose);
+            modelInstance.setPoseInWorldFrame(goalArrowPose);
             modelInstance.setOpacity(0.6f);
          });
 
@@ -294,8 +294,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          }
          else
          {
-            approachPointGizmo.calculate3DViewPick(input);
-            approachFocusGizmo.calculate3DViewPick(input);
+            goalStancePointGizmo.calculate3DViewPick(input);
+            goalFocalPointGizmo.calculate3DViewPick(input);
             for (RobotSide side : RobotSide.values)
             {
                if (goalFeetPosesSelected.get(side).get())
@@ -321,8 +321,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          }
          else
          {
-            approachPointGizmo.process3DViewInput(input);
-            approachFocusGizmo.process3DViewInput(input);
+            goalStancePointGizmo.process3DViewInput(input);
+            goalFocalPointGizmo.process3DViewInput(input);
             tooltip.setInput(input);
             for (RobotSide side : RobotSide.values)
             {
@@ -349,9 +349,11 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       
       if (!definition.getIsManuallyPlaced())
       {
-         ImGui.checkbox(labels.get("Show Approach Point Gizmo"), approachPointGizmo.getSelected());
+         ImGui.text("Adjust:");
          ImGui.sameLine();
-         ImGui.checkbox(labels.get("Show Approach Focus Gizmo"), approachFocusGizmo.getSelected());
+         ImGui.checkbox(labels.get("Stance Point"), goalStancePointGizmo.getSelected());
+         ImGui.sameLine();
+         ImGui.checkbox(labels.get("Focal Point"), goalFocalPointGizmo.getSelected());
       }
 
       if (state.areFramesInWorld()) // Not allowing modification if not renderable
@@ -415,10 +417,10 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          }
          else
          {
-            approachArrowGraphic.getRenderables(renderables, pool);
+            goalArrowGraphic.getRenderables(renderables, pool);
 
-            approachPointGizmo.getVirtualRenderables(renderables, pool);
-            approachFocusGizmo.getVirtualRenderables(renderables, pool);
+            goalStancePointGizmo.getVirtualRenderables(renderables, pool);
+            goalFocalPointGizmo.getVirtualRenderables(renderables, pool);
             for (RobotSide side : RobotSide.values)
             {
                if (goalFeetPosesSelected.get(side).get())
@@ -443,8 +445,8 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
    public void changeParentFrame(String newParentFrameName)
    {
-      FramePoint3D frameApproachPoint = new FramePoint3D(state.getParentFrame(), definition.getApproachPoint().getValueReadOnly());
-      FramePoint3D frameApproachFocus = new FramePoint3D(state.getParentFrame(), definition.getApproachFocus().getValueReadOnly());
+      FramePoint3D frameStancePoint = new FramePoint3D(state.getParentFrame(), definition.getGoalStancePoint().getValueReadOnly());
+      FramePoint3D frameFocalPoint = new FramePoint3D(state.getParentFrame(), definition.getGoalFocalPoint().getValueReadOnly());
 
       definition.setParentFrameName(newParentFrameName);
       // Freeze to prevent the frame from glitching when changing frames
@@ -452,16 +454,16 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
       // Keep the points in the same place w.r.t common ancestor frames
       ReferenceFrame newParent = state.getGoalFrame().getReferenceFrame().getParent();
-      frameApproachPoint.changeFrame(newParent);
-      frameApproachFocus.changeFrame(newParent);
-      definition.getApproachPoint().getValue().set(frameApproachPoint);
-      definition.getApproachFocus().getValue().set(frameApproachFocus);
-      approachPointGizmo.getPoseGizmo().setParentFrame(newParent);
-      approachFocusGizmo.getPoseGizmo().setParentFrame(newParent);
-      approachPointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getApproachPoint().getValueReadOnly());
-      approachFocusGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getApproachFocus().getValueReadOnly());
-      approachPointGizmo.getPoseGizmo().update();
-      approachFocusGizmo.getPoseGizmo().update();
+      frameStancePoint.changeFrame(newParent);
+      frameFocalPoint.changeFrame(newParent);
+      definition.getGoalStancePoint().getValue().set(frameStancePoint);
+      definition.getGoalFocalPoint().getValue().set(frameFocalPoint);
+      goalStancePointGizmo.getPoseGizmo().setParentFrame(newParent);
+      goalFocalPointGizmo.getPoseGizmo().setParentFrame(newParent);
+      goalStancePointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getGoalStancePoint().getValueReadOnly());
+      goalFocalPointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getGoalFocalPoint().getValueReadOnly());
+      goalStancePointGizmo.getPoseGizmo().update();
+      goalFocalPointGizmo.getPoseGizmo().update();
 
       for (FootstepPlanActionFootstepState footstepState : getState().getFootsteps())
       {

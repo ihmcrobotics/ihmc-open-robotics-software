@@ -33,13 +33,13 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
             */
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage>  footsteps_;
    /**
-            * The position to which the approach stance is aligned
+            * The position to which the goal stance is aligned
             */
-   public us.ihmc.euclid.tuple3D.Point3D approach_point_;
+   public us.ihmc.euclid.tuple3D.Point3D goal_stance_point_;
    /**
-            * The point that the robot should be facing in the approach stance
+            * The point that the robot should be facing in the goal stance
             */
-   public us.ihmc.euclid.tuple3D.Point3D approach_focus_;
+   public us.ihmc.euclid.tuple3D.Point3D goal_focal_point_;
    /**
             * Left goal foot X to the goal pose
             */
@@ -70,8 +70,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       parent_frame_name_ = new java.lang.StringBuilder(255);
       footsteps_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessage> (50, new behavior_msgs.msg.dds.FootstepPlanActionFootstepDefinitionMessagePubSubType());
-      approach_point_ = new us.ihmc.euclid.tuple3D.Point3D();
-      approach_focus_ = new us.ihmc.euclid.tuple3D.Point3D();
+      goal_stance_point_ = new us.ihmc.euclid.tuple3D.Point3D();
+      goal_focal_point_ = new us.ihmc.euclid.tuple3D.Point3D();
 
    }
 
@@ -94,8 +94,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       is_manually_placed_ = other.is_manually_placed_;
 
       footsteps_.set(other.footsteps_);
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.approach_point_, approach_point_);
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.approach_focus_, approach_focus_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.goal_stance_point_, goal_stance_point_);
+      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.goal_focal_point_, goal_focal_point_);
       left_goal_foot_x_to_gizmo_ = other.left_goal_foot_x_to_gizmo_;
 
       left_goal_foot_y_to_gizmo_ = other.left_goal_foot_y_to_gizmo_;
@@ -199,20 +199,20 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
 
 
    /**
-            * The position to which the approach stance is aligned
+            * The position to which the goal stance is aligned
             */
-   public us.ihmc.euclid.tuple3D.Point3D getApproachPoint()
+   public us.ihmc.euclid.tuple3D.Point3D getGoalStancePoint()
    {
-      return approach_point_;
+      return goal_stance_point_;
    }
 
 
    /**
-            * The point that the robot should be facing in the approach stance
+            * The point that the robot should be facing in the goal stance
             */
-   public us.ihmc.euclid.tuple3D.Point3D getApproachFocus()
+   public us.ihmc.euclid.tuple3D.Point3D getGoalFocalPoint()
    {
-      return approach_focus_;
+      return goal_focal_point_;
    }
 
    /**
@@ -339,8 +339,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
          {  if (!this.footsteps_.get(i).epsilonEquals(other.footsteps_.get(i), epsilon)) return false; }
       }
 
-      if (!this.approach_point_.epsilonEquals(other.approach_point_, epsilon)) return false;
-      if (!this.approach_focus_.epsilonEquals(other.approach_focus_, epsilon)) return false;
+      if (!this.goal_stance_point_.epsilonEquals(other.goal_stance_point_, epsilon)) return false;
+      if (!this.goal_focal_point_.epsilonEquals(other.goal_focal_point_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.left_goal_foot_x_to_gizmo_, other.left_goal_foot_x_to_gizmo_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.left_goal_foot_y_to_gizmo_, other.left_goal_foot_y_to_gizmo_, epsilon)) return false;
@@ -376,8 +376,8 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       if(this.is_manually_placed_ != otherMyClass.is_manually_placed_) return false;
 
       if (!this.footsteps_.equals(otherMyClass.footsteps_)) return false;
-      if (!this.approach_point_.equals(otherMyClass.approach_point_)) return false;
-      if (!this.approach_focus_.equals(otherMyClass.approach_focus_)) return false;
+      if (!this.goal_stance_point_.equals(otherMyClass.goal_stance_point_)) return false;
+      if (!this.goal_focal_point_.equals(otherMyClass.goal_focal_point_)) return false;
       if(this.left_goal_foot_x_to_gizmo_ != otherMyClass.left_goal_foot_x_to_gizmo_) return false;
 
       if(this.left_goal_foot_y_to_gizmo_ != otherMyClass.left_goal_foot_y_to_gizmo_) return false;
@@ -412,10 +412,10 @@ public class FootstepPlanActionDefinitionMessage extends Packet<FootstepPlanActi
       builder.append(this.is_manually_placed_);      builder.append(", ");
       builder.append("footsteps=");
       builder.append(this.footsteps_);      builder.append(", ");
-      builder.append("approach_point=");
-      builder.append(this.approach_point_);      builder.append(", ");
-      builder.append("approach_focus=");
-      builder.append(this.approach_focus_);      builder.append(", ");
+      builder.append("goal_stance_point=");
+      builder.append(this.goal_stance_point_);      builder.append(", ");
+      builder.append("goal_focal_point=");
+      builder.append(this.goal_focal_point_);      builder.append(", ");
       builder.append("left_goal_foot_x_to_gizmo=");
       builder.append(this.left_goal_foot_x_to_gizmo_);      builder.append(", ");
       builder.append("left_goal_foot_y_to_gizmo=");
