@@ -174,7 +174,6 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          trackingCalculators.get(side).update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
       }
-
    }
 
    @Override
