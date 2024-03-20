@@ -96,11 +96,11 @@ public class MonteCarloFootstepPlanner
       LogTools.warn("Update: Level: {}", node.getLevel());
       timeSpentPlanningSoFar = System.nanoTime() / 1e9 - startTime;
 
-      //if (timeSpentPlanningSoFar > request.getTimeout())
-      //{
-      //   LogTools.info("Timeout Reached: {}", timeSpentPlanningSoFar);
-      //   return;
-      //}
+      if (timeSpentPlanningSoFar > request.getTimeout())
+      {
+         LogTools.warn("Timeout Reached: {}", timeSpentPlanningSoFar);
+         return;
+      }
 
       // Pruning and Sorting
       statistics.startPruningTime();

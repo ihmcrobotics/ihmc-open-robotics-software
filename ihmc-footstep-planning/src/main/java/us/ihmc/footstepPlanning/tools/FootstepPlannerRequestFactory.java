@@ -26,7 +26,7 @@ public class FootstepPlannerRequestFactory
                                new FramePose3D(footstepPlannerLog.getRequestPacket().getStartRightFootPose()),
                                new FramePose3D(footstepPlannerLog.getRequestPacket().getGoalLeftFootPose()),
                                new FramePose3D(footstepPlannerLog.getRequestPacket().getGoalRightFootPose()),
-                               RobotSide.fromByte(footstepPlannerLog.getRequestPacket().getRequestedInitialStanceSide()));
+                               RobotSide.fromByte(footstepPlannerLog.getRequestPacket().getRequestedInitialStanceSide()), 0.05f);
    }
 
    public static MonteCarloFootstepPlannerRequest createMCFPRequest(TerrainMapData terrainMapData,
@@ -35,7 +35,7 @@ public class FootstepPlannerRequestFactory
                                                                     FramePose3D rightStartPose,
                                                                     FramePose3D leftGoalPose,
                                                                     FramePose3D rightGoalPose,
-                                                                    RobotSide initialSide)
+                                                                    RobotSide initialSide, float timeout)
    {
       MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
       request.setTerrainMapData(terrainMapData);

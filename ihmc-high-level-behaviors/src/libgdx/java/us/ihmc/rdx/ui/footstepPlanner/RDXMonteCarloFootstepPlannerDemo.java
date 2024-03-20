@@ -157,7 +157,8 @@ public class RDXMonteCarloFootstepPlannerDemo
                                                                                     startPose.get(RobotSide.RIGHT),
                                                                                     goalPose.get(RobotSide.LEFT),
                                                                                     goalPose.get(RobotSide.RIGHT),
-                                                                                    startingSide);
+                                                                                    startingSide,
+                                                                                    0.4f);
 
 
 
