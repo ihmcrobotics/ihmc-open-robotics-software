@@ -201,7 +201,15 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
          // can change. We do this by freezing the node so user changes can propagate.
          if (approachPointGizmo.getPoseGizmo().getGizmoModifiedByUser().poll()
           || approachFocusGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
-            state.freeze();
+         {
+            definition.getApproachPoint().getValue().set(approachPointGizmo.getPoseGizmo().getTransformToParent().getTranslation());
+            definition.getApproachFocus().getValue().set(approachFocusGizmo.getPoseGizmo().getTransformToParent().getTranslation());
+         }
+         else
+         {
+            approachPointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getApproachPoint().getValueReadOnly());
+            approachFocusGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getApproachFocus().getValueReadOnly());
+         }
 
          for (RobotSide side : RobotSide.values)
             if (goalFeetGizmos.get(side).getGizmoModifiedByUser().poll())
@@ -209,17 +217,11 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
 
          if (state.isFrozen())
          {
-            definition.getApproachPoint().getValue().set(approachPointGizmo.getPoseGizmo().getTransformToParent().getTranslation());
-            definition.getApproachFocus().getValue().set(approachFocusGizmo.getPoseGizmo().getTransformToParent().getTranslation());
-
             for (RobotSide side : RobotSide.values)
                state.copyGoalFootstepToGoalTransformToDefinition(side);
          }
          else
          {
-            approachPointGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getApproachPoint().getValueReadOnly());
-            approachFocusGizmo.getPoseGizmo().getTransformToParent().getTranslation().set(definition.getApproachFocus().getValueReadOnly());
-
             for (RobotSide side : RobotSide.values)
                state.copyDefinitionToGoalFoostepToGoalTransform(side);
          }
