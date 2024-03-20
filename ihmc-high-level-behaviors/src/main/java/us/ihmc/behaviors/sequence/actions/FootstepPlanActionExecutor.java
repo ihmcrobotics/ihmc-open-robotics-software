@@ -344,7 +344,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                                                                                                                     definition.getTransferDuration());
       double finalTransferDuration = 0.01; // We don't want any unecessary pauses at the end; but it can't be 0
       footstepDataListMessage.setFinalTransferDuration(finalTransferDuration);
-      footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+      footstepDataListMessage.getQueueingProperties().setExecutionMode(definition.getExecutionMode().getValue().toByte());
       footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
       LogTools.info("Commanding {} footsteps", footstepDataListMessage.getFootstepDataList().size());
       ros2ControllerHelper.publishToController(footstepDataListMessage);

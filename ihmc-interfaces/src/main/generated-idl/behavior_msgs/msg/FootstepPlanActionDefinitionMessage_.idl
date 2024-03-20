@@ -31,6 +31,10 @@ module behavior_msgs
          */
         double transfer_duration;
         /**
+         * OVERRIDE (0) or QUEUE (1)
+         */
+        long execution_mode;
+        /**
          * Is using the footstep planner or manually placing
          */
         boolean is_manually_placed;

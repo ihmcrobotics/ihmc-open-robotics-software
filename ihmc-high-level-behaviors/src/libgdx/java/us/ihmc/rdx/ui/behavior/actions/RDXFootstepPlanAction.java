@@ -15,6 +15,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -339,6 +340,13 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       swingDurationWidget.renderImGuiWidget();
       transferDurationWidget.renderImGuiWidget();
       ImGui.popItemWidth();
+      ImGui.text("Execution mode:");
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Override"), definition.getExecutionMode().getValue() == ExecutionMode.OVERRIDE))
+         definition.getExecutionMode().setValue(ExecutionMode.OVERRIDE);
+      ImGui.sameLine();
+      if (ImGui.radioButton(labels.get("Queue"), definition.getExecutionMode().getValue() == ExecutionMode.QUEUE))
+         definition.getExecutionMode().setValue(ExecutionMode.QUEUE);
 
       manuallyPlaceStepsWrapper.renderImGuiWidget();
 

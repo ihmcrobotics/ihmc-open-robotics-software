@@ -15,7 +15,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "31507521aa46b2a98bc1329eb133486ae799fe55b05c6afd3315d8507ee03958";
+   		return "4742f4e1db2b627aff97f49f7d618a7716c5ed194c7de39c2418c88170fb2eda";
    }
    
    @Override
@@ -59,6 +59,8 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
@@ -101,6 +103,9 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -148,6 +153,8 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
 
       cdr.write_type_6(data.getTransferDuration());
 
+      cdr.write_type_2(data.getExecutionMode());
+
       cdr.write_type_7(data.getIsManuallyPlaced());
 
       if(data.getFootsteps().size() <= 50)
@@ -178,6 +185,8 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       	
       data.setTransferDuration(cdr.read_type_6());
       	
+      data.setExecutionMode(cdr.read_type_2());
+      	
       data.setIsManuallyPlaced(cdr.read_type_7());
       	
       cdr.read_type_e(data.getFootsteps());	
@@ -206,6 +215,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       ser.write_type_d("parent_frame_name", data.getParentFrameName());
       ser.write_type_6("swing_duration", data.getSwingDuration());
       ser.write_type_6("transfer_duration", data.getTransferDuration());
+      ser.write_type_2("execution_mode", data.getExecutionMode());
       ser.write_type_7("is_manually_placed", data.getIsManuallyPlaced());
       ser.write_type_e("footsteps", data.getFootsteps());
       ser.write_type_a("goal_stance_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalStancePoint());
@@ -228,6 +238,7 @@ public class FootstepPlanActionDefinitionMessagePubSubType implements us.ihmc.pu
       ser.read_type_d("parent_frame_name", data.getParentFrameName());
       data.setSwingDuration(ser.read_type_6("swing_duration"));
       data.setTransferDuration(ser.read_type_6("transfer_duration"));
+      data.setExecutionMode(ser.read_type_2("execution_mode"));
       data.setIsManuallyPlaced(ser.read_type_7("is_manually_placed"));
       ser.read_type_e("footsteps", data.getFootsteps());
       ser.read_type_a("goal_stance_point", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalStancePoint());
