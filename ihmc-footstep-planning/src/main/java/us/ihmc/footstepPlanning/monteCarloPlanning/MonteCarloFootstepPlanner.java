@@ -163,7 +163,6 @@ public class MonteCarloFootstepPlanner
          }
          statistics.stopSearchTime();
 
-         LogTools.info("Recursing: {}", bestNode.getLevel());
          // Recursion into highest UCB node
          updateTree(bestNode, request);
       }

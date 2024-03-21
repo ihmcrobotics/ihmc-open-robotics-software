@@ -11,6 +11,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
@@ -63,7 +64,6 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
    /* Image panel to display the depth image */
    private RDXBytedecoImagePanel depthImagePanel;
-   private Mat contactHeatMapImage;
 
    /* Image panel to display the terrain cost map (16-bit scalar metric for steppability cost per cell,
     *  computed based on terrain inclination and continuity) */
@@ -219,13 +219,13 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          //                                                        humanoidPerception.getRapidHeightMapExtractor().getSensorCroppedHeightMapImage().rows(),
          //                                                        RDXImagePanel.DO_NOT_FLIP_Y);
          terrainCostImagePanel = new RDXBytedecoImagePanel("Terrain Cost Image",
-                                                           RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
-                                                           RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
-                                                           RDXImagePanel.FLIP_Y);
+                 RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
+                 RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
+                 RDXImagePanel.FLIP_Y);
          contactMapImagePanel = new RDXBytedecoImagePanel("Contact Map Image",
-                                                          RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
-                                                          RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
-                                                          RDXImagePanel.FLIP_Y);
+                RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize() * TerrainPlanningDebugger.scaleFactor,
+                RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize() * TerrainPlanningDebugger.scaleFactor,
+                RDXImagePanel.FLIP_Y);
 
          addChild(localHeightMapPanel.getImagePanel());
          addChild(croppedHeightMapPanel.getImagePanel());
@@ -260,14 +260,10 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       }
    }
 
-   public void update(TerrainMapData terrainMapData)
+   public void update(Mat heightMap, Mat contactMap8UC4)
    {
-      //contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(terrainMapData.getContactMap());
-      croppedHeightMapPanel.drawDepthImage(terrainMapData.getHeightMap());
-
-      if (contactHeatMapImage != null)
-         contactMapImagePanel.drawColorImage(contactHeatMapImage);
-
+      croppedHeightMapPanel.drawDepthImage(heightMap);
+      contactMapImagePanel.drawColorImage(contactMap8UC4);
       terrainGridGraphic.update(humanoidPerception.getRapidHeightMapExtractor().getCurrentGroundToWorldTransform());
 
       for (RDXVisualizer visualizer : visualizers.values())
@@ -455,11 +451,6 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          }
          ImGui.unindent();
       }
-   }
-
-   public void setContactHeatMapImage(Mat contactHeatMapImage)
-   {
-      this.contactHeatMapImage = contactHeatMapImage;
    }
 
    public void destroy()

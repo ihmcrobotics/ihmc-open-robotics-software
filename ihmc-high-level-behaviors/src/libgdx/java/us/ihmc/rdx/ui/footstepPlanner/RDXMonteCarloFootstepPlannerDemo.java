@@ -125,8 +125,7 @@ public class RDXMonteCarloFootstepPlannerDemo
             }
 
             humanoidPerception.publishExternalHeightMapImage(ros2Helper);
-
-            humanoidPerceptionUI.update(loadedTerrainMapData);
+            humanoidPerceptionUI.update(loadedTerrainMapData.getHeightMap(), monteCarloFootstepPlanner.getDebugger().getHeatMapImage());
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -183,7 +182,6 @@ public class RDXMonteCarloFootstepPlannerDemo
             monteCarloFootstepPlanner.reset(monteCarloPlannerRequest);
 
          FootstepPlan plan = monteCarloFootstepPlanner.generateFootstepPlan(monteCarloPlannerRequest);
-         humanoidPerceptionUI.setContactHeatMapImage(monteCarloFootstepPlanner.getDebugger().getHeatMapImage());
          publishMonteCarloPlan(plan);
       }
    }
