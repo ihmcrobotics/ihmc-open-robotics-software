@@ -74,7 +74,7 @@ public class CollisionFreeSwingCalculator
    private final YoDouble maxCollisionDistance = new YoDouble("maxCollisionDistance", registry);
    private final boolean visualize;
 
-   private FootstepPlannerParametersReadOnly footstepPlannerParameters;
+   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final SwingPlannerParametersReadOnly swingPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final List<TickAndUpdatable> tickAndUpdatables = new ArrayList<>();
@@ -671,10 +671,5 @@ public class CollisionFreeSwingCalculator
                                        });
 
       return copy;
-   }
-
-   public void setFootstepPlannerParameters(FootstepPlannerParametersReadOnly footstepPlannerParameters)
-   {
-      this.footstepPlannerParameters = footstepPlannerParameters;
    }
 }

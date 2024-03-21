@@ -123,6 +123,7 @@ public class RDXFootstepPlanning
          footstepPlanner.halt();
       }
 
+      footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanner.getAStarBodyPathPlannerParameters().set(bodyPathPlannerParameters);
       footstepPlanner.getSwingPlannerParameters().set(swingFootPlannerParameters);
 

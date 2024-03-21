@@ -107,12 +107,4 @@ public class SwingPlanningModule
    {
       return swingTrajectories;
    }
-
-   public void setFootstepPlannerParameters(FootstepPlannerParametersReadOnly footstepPlannerParameters)
-   {
-      if (adaptiveSwingTrajectoryCalculator != null)
-         adaptiveSwingTrajectoryCalculator.setFootstepPlannerParameters(footstepPlannerParameters);
-      if (collisionFreeSwingCalculator != null)
-         collisionFreeSwingCalculator.setFootstepPlannerParameters(footstepPlannerParameters);
-   }
 }

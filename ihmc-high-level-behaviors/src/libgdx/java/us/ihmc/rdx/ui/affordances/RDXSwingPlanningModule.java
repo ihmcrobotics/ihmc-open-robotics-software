@@ -26,7 +26,6 @@ public class RDXSwingPlanningModule
 {
    private final SwingPlanningModule swingPlanningModule;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private HeightMapMessage heightMapMessage;
    private SwingPlannerParametersReadOnly swingPlannerParameters;
 
@@ -42,7 +41,6 @@ public class RDXSwingPlanningModule
                                  SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.syncedRobot = syncedRobot;
-      this.footstepPlannerParameters = footstepPlannerParameters;
 
       swingPlanningModule = new SwingPlanningModule(footstepPlannerParameters, swingPlannerParameters, walkingControllerParameters, footPolygons);
    }

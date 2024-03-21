@@ -37,7 +37,7 @@ public class FootstepPoseHeuristicChecker
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private FootstepPlannerParametersReadOnly parameters;
+   private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepSnapperReadOnly snapper;
 
    private final TransformReferenceFrame startOfSwingFrame = new TransformReferenceFrame("startOfSwingFrame", ReferenceFrame.getWorldFrame());
@@ -307,10 +307,5 @@ public class FootstepPoseHeuristicChecker
       DiscreteFootstepTools.getSnappedStepTransform(footstep, snapTransform, snappedStepTransform);
 
       System.out.println(snappedStepTransform.getRotation().getYaw());
-   }
-
-   public void setParameters(FootstepPlannerParametersReadOnly parameters)
-   {
-      this.parameters = parameters;
    }
 }
