@@ -64,8 +64,6 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
    {
       for (RDXVisualizerWithHeartbeat visualizer : visualizers.values())
       {
-         if (visualizer.getPanel() != null)
-            visualizer.getPanel().getIsShowing().set(visualizer.isActive());
          if (visualizer.isActive())
             visualizer.update();
       }

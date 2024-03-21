@@ -5,12 +5,13 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -43,7 +44,11 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       if (ImGui.checkbox(labels.get(title), active))
       {
          setActive(active.get());
+
+         if (getPanel() != null)
+            getPanel().getIsShowing().set(active.get());
       }
+
       ImGuiTools.previousWidgetTooltip("Active");
    }
 
@@ -105,6 +110,7 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       this.activenessChangeCallback = activenessChangeCallback;
    }
 
+   @Nullable
    public RDXPanel getPanel()
    {
       return null;
