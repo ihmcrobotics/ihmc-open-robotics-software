@@ -14,7 +14,6 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
-import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
@@ -27,9 +26,7 @@ public class RDXSwingPlanningModule
 {
    private final SwingPlanningModule swingPlanningModule;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final RDXLocomotionParameters locomotionParameters;
    private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
-   private final FootstepPlannerParametersReadOnly turnWalkTurnFootstepPlannerParameters;
    private HeightMapMessage heightMapMessage;
    private SwingPlannerParametersReadOnly swingPlannerParameters;
 
@@ -39,17 +36,13 @@ public class RDXSwingPlanningModule
    private boolean isCurrentlyPlanning = false;
 
    public RDXSwingPlanningModule(ROS2SyncedRobotModel syncedRobot,
-                                 RDXLocomotionParameters locomotionParameters,
                                  FootstepPlannerParametersReadOnly footstepPlannerParameters,
-                                 FootstepPlannerParametersReadOnly turnWalkTurnFootstepPlannerParameters,
                                  SwingPlannerParametersBasics swingPlannerParameters,
                                  WalkingControllerParameters walkingControllerParameters,
                                  SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.syncedRobot = syncedRobot;
-      this.locomotionParameters = locomotionParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
-      this.turnWalkTurnFootstepPlannerParameters = turnWalkTurnFootstepPlannerParameters;
 
       swingPlanningModule = new SwingPlanningModule(footstepPlannerParameters, swingPlannerParameters, walkingControllerParameters, footPolygons);
    }
@@ -79,11 +72,6 @@ public class RDXSwingPlanningModule
       isCurrentlyPlanning = true;
       setInitialFeet();
       FootstepPlan tempPlan = createFakeFootstepPlan(footstepPlan);
-
-      if (locomotionParameters.getPerformAStarSearch())
-         swingPlanningModule.setFootstepPlannerParameters(footstepPlannerParameters);
-      else
-         swingPlanningModule.setFootstepPlannerParameters(turnWalkTurnFootstepPlannerParameters);
 
       HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
       swingPlanningModule.getSwingPlannerParameters().set(swingPlannerParameters);

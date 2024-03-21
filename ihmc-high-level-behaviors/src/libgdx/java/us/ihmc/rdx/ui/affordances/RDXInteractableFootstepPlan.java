@@ -67,7 +67,6 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
                       ROS2SyncedRobotModel syncedRobot,
                       RDXLocomotionParameters locomotionParameters,
                       FootstepPlannerParametersReadOnly footstepPlannerParameters,
-                      FootstepPlannerParametersReadOnly turnWalkTurnFootstepPlannerParameters,
                       SwingPlannerParametersBasics swingFootPlannerParameters)
    {
       this.baseUI = baseUI;
@@ -81,13 +80,9 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
                                            syncedRobot,
                                            controllerStatusTracker,
                                            defaultPolygons,
-                                           locomotionParameters,
-                                           footstepPlannerParameters,
-                                           turnWalkTurnFootstepPlannerParameters);
+                                           footstepPlannerParameters);
       swingPlanningModule = new RDXSwingPlanningModule(syncedRobot,
-                                                       locomotionParameters,
                                                        footstepPlannerParameters,
-                                                       turnWalkTurnFootstepPlannerParameters,
                                                        communicationHelper.getRobotModel().getSwingPlannerParameters(),
                                                        communicationHelper.getRobotModel().getWalkingControllerParameters(),
                                                        defaultPolygons);

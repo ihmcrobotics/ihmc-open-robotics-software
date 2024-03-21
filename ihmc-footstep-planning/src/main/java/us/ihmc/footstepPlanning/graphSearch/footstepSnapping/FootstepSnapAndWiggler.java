@@ -20,7 +20,7 @@ import java.util.HashSet;
 public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 {
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
-   private FootstepPlannerParametersReadOnly parameters;
+   private final FootstepPlannerParametersReadOnly parameters;
 
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
@@ -208,11 +208,5 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    public void reset()
    {
       clearSnapData();
-   }
-
-   public void setParameters(FootstepPlannerParametersReadOnly parameters)
-   {
-      this.parameters = parameters;
-      initialize();
    }
 }
