@@ -74,7 +74,7 @@ public class CollisionFreeSwingCalculator
    private final YoDouble maxCollisionDistance = new YoDouble("maxCollisionDistance", registry);
    private final boolean visualize;
 
-   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
+   private FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final SwingPlannerParametersReadOnly swingPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final List<TickAndUpdatable> tickAndUpdatables = new ArrayList<>();
@@ -649,6 +649,7 @@ public class CollisionFreeSwingCalculator
       return copySwingTrajectories(trajectories, trajectories.get(Axis3D.X).size());
 
    }
+
    public static EnumMap<Axis3D, List<PolynomialReadOnly>> copySwingTrajectories(EnumMap<Axis3D, ArrayList<YoPolynomial>> trajectories, int trajectoriesToCopy)
    {
       EnumMap<Axis3D, List<PolynomialReadOnly>> copy = new EnumMap<>(Axis3D.class);
@@ -670,5 +671,10 @@ public class CollisionFreeSwingCalculator
                                        });
 
       return copy;
+   }
+
+   public void setFootstepPlannerParameters(FootstepPlannerParametersReadOnly footstepPlannerParameters)
+   {
+      this.footstepPlannerParameters = footstepPlannerParameters;
    }
 }

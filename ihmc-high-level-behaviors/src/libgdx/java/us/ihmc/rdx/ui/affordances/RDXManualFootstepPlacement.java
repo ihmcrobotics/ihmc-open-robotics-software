@@ -25,6 +25,7 @@ import us.ihmc.rdx.ui.RDX3DPanelToolbarButton;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -44,7 +45,9 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private ROS2SyncedRobotModel syncedRobot;
    private RobotSide currentFootStepSide;
    private RDXFootstepChecker stepChecker;
+   private RDXLocomotionParameters locomotionParameters;
    private FootstepPlannerParametersReadOnly footstepPlannerParameters;
+   private FootstepPlannerParametersReadOnly turnWalkTurnFootstepPlannerParameters;
    private ImGui3DViewInput latestInput;
    private RDXInteractableFootstepPlan footstepPlan;
    private boolean renderTooltip = false;
@@ -54,12 +57,16 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    public void create(ROS2SyncedRobotModel syncedRobot,
                       RDXBaseUI baseUI,
                       RDXInteractableFootstepPlan footstepPlan,
-                      FootstepPlannerParametersReadOnly footstepPlannerParameters)
+                      RDXLocomotionParameters locomotionParameters,
+                      FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                      FootstepPlannerParametersReadOnly turnWalkTurnFootstepPlannerParameters)
    {
       this.syncedRobot = syncedRobot;
       this.baseUI = baseUI;
       this.footstepPlan = footstepPlan;
+      this.locomotionParameters = locomotionParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
+      this.turnWalkTurnFootstepPlannerParameters = turnWalkTurnFootstepPlannerParameters;
       tooltip = new RDX3DPanelTooltip(baseUI.getPrimary3DPanel());
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltips);
       stepChecker = footstepPlan.getStepChecker();

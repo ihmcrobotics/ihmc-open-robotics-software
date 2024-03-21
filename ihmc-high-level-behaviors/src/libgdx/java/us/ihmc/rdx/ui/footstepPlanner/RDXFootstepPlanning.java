@@ -43,6 +43,7 @@ public class RDXFootstepPlanning
    private final ControllerStatusTracker controllerStatusTracker;
    private final FootstepPlanningModule footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final FootstepPlannerParametersBasics turnWalkTurnFootstepPlannerParameters;
    private final AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters;
    private final SwingPlannerParametersBasics swingFootPlannerParameters;
    private final RDXLocomotionParameters locomotionParameters;
@@ -68,6 +69,7 @@ public class RDXFootstepPlanning
                               ControllerStatusTracker controllerStatusTracker,
                               RDXLocomotionParameters locomotionParameters,
                               FootstepPlannerParametersBasics footstepPlannerParameters,
+                              FootstepPlannerParametersBasics turnWalkTurnFootstepPlannerParameters,
                               AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters,
                               SwingPlannerParametersBasics swingFootPlannerParameters)
    {
@@ -75,6 +77,7 @@ public class RDXFootstepPlanning
       this.controllerStatusTracker = controllerStatusTracker;
       this.locomotionParameters = locomotionParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
+      this.turnWalkTurnFootstepPlannerParameters = turnWalkTurnFootstepPlannerParameters;
       this.bodyPathPlannerParameters = bodyPathPlannerParameters;
       this.swingFootPlannerParameters = swingFootPlannerParameters;
 
@@ -123,7 +126,10 @@ public class RDXFootstepPlanning
          footstepPlanner.halt();
       }
 
-      footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
+      if (locomotionParameters.getPerformAStarSearch())
+         footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
+      else
+         footstepPlanner.getFootstepPlannerParameters().set(turnWalkTurnFootstepPlannerParameters);
       footstepPlanner.getAStarBodyPathPlannerParameters().set(bodyPathPlannerParameters);
       footstepPlanner.getSwingPlannerParameters().set(swingFootPlannerParameters);
 
@@ -157,6 +163,8 @@ public class RDXFootstepPlanning
          footstepPlannerRequest.setRequestedInitialStanceSide(RobotSide.RIGHT);
       else // AUTO
          footstepPlannerRequest.setRequestedInitialStanceSide(getStanceSideToClosestToGoal(footstepPlannerRequest, goalPose));
+
+      footstepPlannerRequest.setPerformAStarSearch(locomotionParameters.getPerformAStarSearch());
 
       boolean assumeFlatGround = true;
       if (!locomotionParameters.getAssumeFlatGround())

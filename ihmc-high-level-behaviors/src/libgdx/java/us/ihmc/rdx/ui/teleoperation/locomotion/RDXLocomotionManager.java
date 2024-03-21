@@ -49,12 +49,16 @@ public class RDXLocomotionManager
    private final CommunicationHelper communicationHelper;
    private final RDXLocomotionParameters locomotionParameters;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final FootstepPlannerParametersBasics turnWalkTurnFootstepPlannerParameters;
    private final AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters;
    private final SwingPlannerParametersBasics swingFootPlannerParameters;
    private final Notification locomotionParametersChanged = new Notification();
    private final Notification footstepPlanningParametersChanged = new Notification();
+   private final Notification turnWalkTurnFootstepPlanningParametersChanged = new Notification();
    private final RDXStoredPropertySetTuner locomotionParametersTuner = new RDXStoredPropertySetTuner("Locomotion Parameters");
    private final RDXStoredPropertySetTuner footstepPlanningParametersTuner = new RDXStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
+   private final RDXStoredPropertySetTuner turnWalkTurnFootstepPlanningParametersTuner
+         = new RDXStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation Turn Walk Turn)");
    private final RDXStoredPropertySetTuner bodyPathPlanningParametersTuner = new RDXStoredPropertySetTuner("Body Path Planner Parameters (Teleoperation)");
    private final RDXStoredPropertySetTuner swingFootPlanningParametersTuner = new RDXStoredPropertySetTuner("Swing Foot Planning Parameters (Teleoperation)");
    private ImGuiStoredPropertySetBooleanWidget areFootstepsAdjustableCheckbox;
@@ -105,6 +109,7 @@ public class RDXLocomotionManager
       locomotionParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
       locomotionParameters.load();
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      turnWalkTurnFootstepPlannerParameters = robotModel.getFootstepPlannerParameters("TurnWalkTurn");
       bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
 
@@ -118,6 +123,7 @@ public class RDXLocomotionManager
                                                  controllerStatusTracker,
                                                  locomotionParameters,
                                                  footstepPlannerParameters,
+                                                 turnWalkTurnFootstepPlannerParameters,
                                                  bodyPathPlannerParameters,
                                                  swingFootPlannerParameters);
       interactableFootstepPlan = new RDXInteractableFootstepPlan(controllerStatusTracker);
@@ -140,9 +146,11 @@ public class RDXLocomotionManager
       controllerStatusTracker.getFootstepTracker().registerFootstepQueuedMessageListener(footstepQueueNotification);
       locomotionParameters.addAnyPropertyChangedListener(locomotionParametersChanged);
       footstepPlannerParameters.addAnyPropertyChangedListener(footstepPlanningParametersChanged);
+      turnWalkTurnFootstepPlannerParameters.addAnyPropertyChangedListener(turnWalkTurnFootstepPlanningParametersChanged);
 
       locomotionParametersTuner.create(locomotionParameters);
       footstepPlanningParametersTuner.create(footstepPlannerParameters, false);
+      turnWalkTurnFootstepPlanningParametersTuner.create(turnWalkTurnFootstepPlannerParameters, false);
       bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false);
       swingFootPlanningParametersTuner.create(swingFootPlannerParameters, false);
 
@@ -157,7 +165,13 @@ public class RDXLocomotionManager
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW, syncedRobot);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
 
-      interactableFootstepPlan.create(baseUI, communicationHelper, syncedRobot, locomotionParameters, footstepPlannerParameters, swingFootPlannerParameters);
+      interactableFootstepPlan.create(baseUI,
+                                      communicationHelper,
+                                      syncedRobot,
+                                      locomotionParameters,
+                                      footstepPlannerParameters,
+                                      turnWalkTurnFootstepPlannerParameters,
+                                      swingFootPlannerParameters);
       baseUI.getVRManager().getContext().addVRPickCalculator(interactableFootstepPlan::calculateVRPick);
       baseUI.getVRManager().getContext().addVRInputProcessor(interactableFootstepPlan::processVRInput);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableFootstepPlan::processImGui3DViewInput);

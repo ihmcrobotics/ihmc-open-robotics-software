@@ -11,8 +11,6 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -33,14 +31,13 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class FootstepPoseHeuristicChecker
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final FootstepPlannerParametersReadOnly parameters;
+   private FootstepPlannerParametersReadOnly parameters;
    private final FootstepSnapperReadOnly snapper;
 
    private final TransformReferenceFrame startOfSwingFrame = new TransformReferenceFrame("startOfSwingFrame", ReferenceFrame.getWorldFrame());
@@ -310,5 +307,10 @@ public class FootstepPoseHeuristicChecker
       DiscreteFootstepTools.getSnappedStepTransform(footstep, snapTransform, snappedStepTransform);
 
       System.out.println(snappedStepTransform.getRotation().getYaw());
+   }
+
+   public void setParameters(FootstepPlannerParametersReadOnly parameters)
+   {
+      this.parameters = parameters;
    }
 }

@@ -14,6 +14,7 @@ import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepPoseHeuristicCh
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -29,6 +30,9 @@ public class RDXFootstepChecker
 {
    private final ROS2SyncedRobotModel syncedRobot;
    private final ControllerStatusTracker controllerStatusTracker;
+   private final RDXLocomotionParameters locomotionParameters;
+   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
+   private final FootstepPlannerParametersReadOnly turnWalkTurnFootstepPlannerParameters;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final FootstepSnapAndWiggler snapper;
    private final FootstepPoseHeuristicChecker stepChecker;
@@ -43,10 +47,15 @@ public class RDXFootstepChecker
                              ROS2SyncedRobotModel syncedRobot,
                              ControllerStatusTracker controllerStatusTracker,
                              SideDependentList<ConvexPolygon2D> footPolygons,
-                             FootstepPlannerParametersReadOnly footstepPlannerParameters)
+                             RDXLocomotionParameters locomotionParameters,
+                             FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                             FootstepPlannerParametersReadOnly turnWalkTurnFootstepPlannerParameters)
    {
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
+      this.locomotionParameters = locomotionParameters;
+      this.footstepPlannerParameters = footstepPlannerParameters;
+      this.turnWalkTurnFootstepPlannerParameters = turnWalkTurnFootstepPlannerParameters;
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::renderTooltips);
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       tooltip = new RDX3DPanelTooltip(baseUI.getPrimary3DPanel());
@@ -87,6 +96,17 @@ public class RDXFootstepChecker
       FramePose3DReadOnly previousFootstepOnSameSide = getPreviousFootstepOnOppositeSide(stepList,
                                                                                          indexOfFootBeingChecked,
                                                                                          candidateStepSide.getOppositeSide());
+      if (locomotionParameters.getPerformAStarSearch())
+      {
+         snapper.setParameters(footstepPlannerParameters);
+         stepChecker.setParameters(footstepPlannerParameters);
+      }
+      else
+      {
+         snapper.setParameters(turnWalkTurnFootstepPlannerParameters);
+         stepChecker.setParameters(turnWalkTurnFootstepPlannerParameters);
+      }
+
       reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, previousFootstepOnOtherSide, previousFootstepOnSameSide);
 
       reasons.add(reason);

@@ -46,7 +46,7 @@ public class AdaptiveSwingTrajectoryCalculator
    private final TickAndUpdatable tickAndUpdatable;
 
    private final SwingPlannerParametersReadOnly swingPlannerParameters;
-   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
+   private FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private HeightMapData heightMapData;
 
@@ -64,14 +64,14 @@ public class AdaptiveSwingTrajectoryCalculator
    }
 
    public AdaptiveSwingTrajectoryCalculator(SwingPlannerParametersReadOnly swingPlannerParameters,
-                                            FootstepPlannerParametersReadOnly footstpePlannerParameters,
+                                            FootstepPlannerParametersReadOnly footstepPlannerParameters,
                                             WalkingControllerParameters walkingControllerParameters,
                                             TickAndUpdatable tickAndUpdatable,
                                             YoGraphicsListRegistry graphicsListRegistry,
                                             YoRegistry parentRegistry)
    {
       this.swingPlannerParameters = swingPlannerParameters;
-      this.footstepPlannerParameters = footstpePlannerParameters;
+      this.footstepPlannerParameters = footstepPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
 
       if (tickAndUpdatable != null)
@@ -231,5 +231,10 @@ public class AdaptiveSwingTrajectoryCalculator
       endOfSwingHeelCollisionGraphic.setPose(new FramePose3D(ReferenceFrame.getWorldFrame(), endOfSwingHeelCollisionBox.getPosition(), endOfSwingHeelCollisionBox.getOrientation()));
 
       tickAndUpdatable.tickAndUpdate();
+   }
+
+   public void setFootstepPlannerParameters(FootstepPlannerParametersReadOnly footstepPlannerParameters)
+   {
+      this.footstepPlannerParameters = footstepPlannerParameters;
    }
 }
