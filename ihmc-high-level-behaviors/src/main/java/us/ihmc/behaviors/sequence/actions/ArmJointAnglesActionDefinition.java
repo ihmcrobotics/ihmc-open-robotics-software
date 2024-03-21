@@ -120,7 +120,7 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
-      message.setPreset(preset.toMessage() == null ? -1 : preset.toMessage().ordinal());
+      message.setPreset(preset.toMessageOrdinal());
       message.setRobotSide(side.toMessage().toByte());
       message.setTrajectoryDuration(trajectoryDuration.toMessage());
       jointAngles.toMessage(message.getJointAngles());
@@ -130,8 +130,7 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
    {
       super.fromMessage(message.getDefinition());
 
-      int presetOrdinal = message.getPreset();
-      preset.fromMessage(presetOrdinal == -1 ? null : PresetArmConfiguration.values()[presetOrdinal]);
+      preset.fromMessageOrdinal(message.getPreset(), PresetArmConfiguration.values);
       side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
       trajectoryDuration.fromMessage(message.getTrajectoryDuration());
       jointAngles.fromMessage(message.getJointAngles());
