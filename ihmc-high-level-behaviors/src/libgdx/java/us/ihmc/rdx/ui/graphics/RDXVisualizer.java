@@ -49,6 +49,12 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
             getPanel().getIsShowing().set(active.get());
       }
 
+      if (getPanel() != null)
+      {
+         if (!getPanel().getIsShowing().get())
+            setActive(false);
+      }
+
       ImGuiTools.previousWidgetTooltip("Active");
    }
 
