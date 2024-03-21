@@ -325,6 +325,11 @@ public class RDXWholeBodyIKManager
       return enabled.get();
    }
 
+   public void setEnabled(boolean enabled)
+   {
+      this.enabled.set(enabled);
+   }
+
    public void reset()
    {
       for (RobotSide side : interactableHands.sides())
