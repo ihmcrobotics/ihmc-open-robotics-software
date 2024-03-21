@@ -1,4 +1,4 @@
-package us.ihmc.perception;
+package us.ihmc.perception.opencl;
 
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
@@ -6,19 +6,20 @@ import org.bytedeco.opencl.global.OpenCL;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.perception.opencl.OpenCLFloatBuffer;
-import us.ihmc.perception.opencl.OpenCLFloatParameters;
-import us.ihmc.perception.opencl.OpenCLManager;
-import us.ihmc.perception.opencl.OpenCLRigidBodyTransformParameter;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.perception.BytedecoImage;
+import us.ihmc.perception.RawImage;
 
 import java.nio.FloatBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class used to get a RecyclingArrayList of Point3D32s (point cloud) from a 16UC1 depth image
  */
 public class OpenCLPointCloudExtractor
 {
-   private static final int FLOATS_PER_PIXEL = 3;
+   private static final int FLOATS_PER_PIXEL = 4; // [0] = depth value, [1] = x, [2] = y, [3] = z (coordinates in world)
    private final OpenCLManager openCLManager;
    private final _cl_program openCLProgram;
    private final _cl_kernel kernel;
@@ -36,7 +37,7 @@ public class OpenCLPointCloudExtractor
       kernel = openCLManager.createKernel(openCLProgram, "convertDepthImageToPointCloud");
    }
 
-   public RecyclingArrayList<Point3D32> extractPointCloud(RawImage depthImage16UC1)
+   public List<Point3DReadOnly> extractPointCloud(RawImage depthImage16UC1)
    {
       if (depthImage != null)
          depthImage.release();
@@ -77,14 +78,16 @@ public class OpenCLPointCloudExtractor
       pointCloudVertexOutput.readOpenCLBufferObject(openCLManager);
       FloatBuffer pointCloudBuffer = pointCloudVertexOutput.getBackingDirectFloatBuffer();
 
-      RecyclingArrayList<Point3D32> pointCloud = new RecyclingArrayList<>(Point3D32::new);
+      ArrayList<Point3DReadOnly> pointCloud = new ArrayList<>();
       for (int i = 0; i < numberOfPixels * FLOATS_PER_PIXEL; i += FLOATS_PER_PIXEL)
       {
-         float x = pointCloudBuffer.get(i + 0);
-         float y = pointCloudBuffer.get(i + 1);
-         float z = pointCloudBuffer.get(i + 2);
-         Point3D32 addedPoint = pointCloud.add();
-         addedPoint.set(x, y, z);
+         if (pointCloudBuffer.get(i) > 0.0f)
+         {
+            float x = pointCloudBuffer.get(i + 1);
+            float y = pointCloudBuffer.get(i + 2);
+            float z = pointCloudBuffer.get(i + 3);
+            pointCloud.add(new Point3D32(x, y, z));
+         }
       }
 
       return pointCloud;
@@ -96,6 +99,9 @@ public class OpenCLPointCloudExtractor
          bytedecoDepthImage.destroy(openCLManager);
       if (depthImage != null)
          depthImage.release();
+
+      if (pointCloudVertexOutput != null)
+         pointCloudVertexOutput.destroy(openCLManager);
 
       openCLProgram.close();
       kernel.close();
