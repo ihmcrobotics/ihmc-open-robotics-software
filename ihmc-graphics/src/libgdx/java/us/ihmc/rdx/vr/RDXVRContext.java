@@ -1,7 +1,6 @@
 package us.ihmc.rdx.vr;
 
 import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
-import static org.lwjgl.openvr.VRSystem.VRSystem_GetStringTrackedDeviceProperty;
 
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
@@ -11,9 +10,11 @@ import java.util.function.Consumer;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.*;
+import org.ddogleg.struct.Tuple2;
 import org.lwjgl.opengl.GL41;
 import org.lwjgl.openvr.*;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -36,16 +37,6 @@ import us.ihmc.tools.io.*;
  */
 public class RDXVRContext
 {
-   // TODO. remove body segments names and serial number once integrated openxr. Use tracker role instead
-   private static final Map<String, String> TRACKER_SERIAL_MAP = new HashMap<String, String>()
-   {
-      {
-         put("LHR-6680BD50", "chest");
-         put("LHR-743512BE", "leftForeArm");
-         put("LHR-41A915A6", "rightForeArm");
-      }
-   }; // must use serial number, tracker role is not supported in org.lwjgl.openvr.VR
-
    // couple of scratch buffers
    private final IntBuffer errorPointer = BufferUtils.newIntBuffer(1);
    private final IntBuffer widthPointer = BufferUtils.newIntBuffer(1);
@@ -99,7 +90,6 @@ public class RDXVRContext
    private final RDXVRHeadset headset = new RDXVRHeadset(vrPlayAreaYUpZBackFrame);
    private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RobotSide.LEFT, vrPlayAreaYUpZBackFrame),
                                                                                           new RDXVRController(RobotSide.RIGHT, vrPlayAreaYUpZBackFrame));
-   private final Map<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
    private final Map<String, RDXVRTracker> trackers = new HashMap<>();
 
    public void initSystem()
@@ -147,22 +137,85 @@ public class RDXVRContext
       {
          controllers.get(side).initSystem();
       }
-      // TODO: Bindings for /user/gamepad
-      int[] deviceIndices = new int[TRACKER_SERIAL_MAP.size()];
+
+      int[] deviceIndices = new int[5]; // a dongle can support only 5 trackers
       IntBuffer trackerIndices = IntBuffer.wrap(deviceIndices);
       int numberOfTrackers = VRSystem.VRSystem_GetSortedTrackedDeviceIndicesOfClass(
             VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker, trackerIndices, -1);
-      for (int i = 0; i < numberOfTrackers; i++) {
-         int deviceIndex = trackerIndices.get(i);
-         if (!trackers.containsKey(getTrackedBodySegment(getSerialNumber(deviceIndex))))
-         {
-            trackers.put(getTrackedBodySegment(getSerialNumber(deviceIndex)), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
-         }
-      }
+      // TODO check here if numberOfTrackers is 5 or only the connected ones
+      LogTools.warn("Trackers no: {}", numberOfTrackers);
+
 
       activeActionSets = VRActiveActionSet.create(1);
       activeActionSets.ulActionSet(mainActionSetHandle.get(0));
       activeActionSets.ulRestrictedToDevice(VR.k_ulInvalidInputValueHandle);
+   }
+
+   private void defineTrackerRoles(int numberOfTrackers, IntBuffer trackerIndices)
+   {
+      // use height to check ankles, use height to check chest,
+      
+      // use height to check rest:
+      // the remaining if it's 1 is pelvis, if it's 2 is forearms (check Y), if it's 3 check Y
+      ReferenceFrame headsetFrame = headset.getXForwardZUpHeadsetFrame();
+      List<Tuple2<RDXVRTracker, FramePose3D>> trackersPoses = new ArrayList<>();
+      for (int i = 0; i < numberOfTrackers; i++)
+      {
+         int deviceIndex = trackerIndices.get(i);
+         RDXVRTracker tracker = new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex);
+         FramePose3D trackerFrame = new FramePose3D(ReferenceFrame.getWorldFrame(), tracker.getXForwardZUpTrackerFrame().getTransformToWorldFrame());
+         trackerFrame.changeFrame(headsetFrame);
+
+         trackersPoses.add(new Tuple2<>(tracker, trackerFrame));
+      }
+
+   }
+
+   /**
+    * Determines the role of a given RDXVRTracker object based on its spatial relationship to the headset.
+    * This method calculates the position of the tracker in relation to the headset's reference frame,
+    * categorizing the tracker's role based on its location. It is designed to differentiate between
+    * trackers located at the ankles, pelvis, and chest. The categorization is simplified and based on
+    * a fixed set of rules that consider the tracker's position in the Y (up-down) and Z (forward-backward)
+    * axes relative to the headset. This method is currently tailored to approximate the roles of adult humans and down to
+    * a child approximately 10 years old, based on the specified height thresholds.
+    *
+    * @param tracker The RDXVRTracker object whose role is to be determined. This object represents a
+    *                tracker whose spatial relationship with the headset is used to infer its role.
+    * @return A String representing the role of the tracker. Possible values are "leftAnkle", "rightAnkle",
+    *         "pelvis", and "chest". If the method cannot determine the role based on the predefined
+    *         conditions, it will return null.
+    */
+   // TODO use SteamVR tracker role when integrated with OpenXR
+   private String getTrackerRole(RDXVRTracker tracker)
+   {
+      String role = null;
+      ReferenceFrame headsetFrame = headset.getXForwardZUpHeadsetFrame();
+      FramePose3D trackerFrame = new FramePose3D(ReferenceFrame.getWorldFrame(), tracker.getXForwardZUpTrackerFrame().getTransformToWorldFrame());
+      trackerFrame.changeFrame(headsetFrame);
+      if (Math.abs(trackerFrame.getTranslationZ()) > 0.12) // head to ankle for a 10y old kid is 120cm; for an adult is more
+      { // ankle trackers
+         if (trackerFrame.getTranslationY() > 0.0)
+            role = "leftAnkle";
+         else
+            role = "rightAnkle";
+      }
+      else if (Math.abs(trackerFrame.getTranslationZ()) > ) // An average person is generally 7.5 heads tall. Chest is located at height - 2.2 heads
+      {
+         role = "chest";
+      }
+      else
+      {
+         if (trackerFrame.getTranslationY() > 0.0)
+         {
+
+         }
+         else if ()
+         {
+            role = "pelvis";
+         }
+      }
+      return role;
    }
 
    /** Needs to be on libGDX thread. */
@@ -240,15 +293,18 @@ public class RDXVRContext
       }
    }
 
-   private String getSerialNumber(int index)
-   {
-      String serialNumber = VRSystem_GetStringTrackedDeviceProperty(index, VR.ETrackedDeviceProperty_Prop_SerialNumber_String, null);
-      return serialNumber;
-   }
-
-   private String getTrackedBodySegment(String serialNumber)
-   {
-      return TRACKER_SERIAL_MAP.get(serialNumber);
+   public Map<String, Integer> mapTrackerRolesToDeviceIndices() {
+      Map<String, Integer> trackerRoleMap = new HashMap<>();
+      // Assuming a method getTrackerRole returns a string representing the role
+      // based on your application's logic or configuration
+      for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++) {
+         int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
+         if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker) {
+            String role = getTrackerRole(deviceIndex); // Implement this based on your application's logic
+            trackerRoleMap.put(role, deviceIndex);
+         }
+      }
+      return trackerRoleMap;
    }
 
    /**
@@ -353,18 +409,6 @@ public class RDXVRContext
       }
    }
 
-   public void getBaseStationRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      for (RDXVRBaseStation baseStation : baseStations.values())
-      {
-         ModelInstance modelInstance = baseStation.getModelInstance();
-         if (modelInstance != null)
-         {
-            modelInstance.getRenderables(renderables, pool);
-         }
-      }
-   }
-
    public RDXVRController getController(RobotSide side)
    {
       return controllers.get(side);
@@ -383,11 +427,6 @@ public class RDXVRContext
    public Set<String> getBodySegmentsWithTrackers()
    {
       return trackers.keySet();
-   }
-
-   public Collection<RDXVRBaseStation> getBaseStations()
-   {
-      return baseStations.values();
    }
 
    public SideDependentList<RDXVREye> getEyes()

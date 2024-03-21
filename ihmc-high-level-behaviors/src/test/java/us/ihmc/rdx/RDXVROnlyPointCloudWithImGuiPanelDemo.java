@@ -90,7 +90,6 @@ public class RDXVROnlyPointCloudWithImGuiPanelDemo
          {
             fusedPointCloud.getRenderables(renderables, pool, sceneLevels);
             vrApplication.getVRContext().getControllerRenderables(renderables, pool);
-            vrApplication.getVRContext().getBaseStationRenderables(renderables, pool);
          }
 
          @Override

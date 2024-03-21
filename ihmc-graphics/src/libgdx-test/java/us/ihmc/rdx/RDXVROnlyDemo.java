@@ -35,7 +35,6 @@ public class RDXVROnlyDemo
             {
                vrApplication.getVRContext().getControllerRenderables(renderables, pool);
                vrApplication.getVRContext().getTrackerRenderables(renderables, pool);
-               vrApplication.getVRContext().getBaseStationRenderables(renderables, pool);
             }), RDXSceneLevel.VIRTUAL);
          }
 
