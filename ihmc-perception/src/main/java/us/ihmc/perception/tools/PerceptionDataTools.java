@@ -78,4 +78,19 @@ public class PerceptionDataTools
 
       fillStepInHeightMap(heightMap, rStart, cStart, rEnd, cEnd, height);
    }
+
+   public static void fillWithStairs(Mat heightMap)
+   {
+      PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(-0.3f, 0.0f), new Point2D(0.3f, 1.2f), 0.3f, false);
+      PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(0.0f, 0.0f), new Point2D(0.3f, 1.2f), 0.6f, false);
+      PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(0.3f, 0.0f), new Point2D(0.3f, 1.2f), 0.9f, false);
+   }
+
+   public static void fillWithStairs(Mat heightMap, float stepHeight, float stepWidth, float stepDepth)
+   {
+      for (int i = 0; i < 3; i++)
+      {
+         PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(i * stepDepth, 0.0f), new Point2D(stepDepth, stepWidth), i * stepHeight, false);
+      }
+   }
 }
