@@ -2,12 +2,12 @@
   "title" : "MonteCarloFootstepPlannerParameters",
   "Reset" : false,
   "Number of iterations" : {
-    "value" : 900,
+    "value" : 86,
     "lowerBound" : 1,
     "upperBound" : 400
   },
   "Number of simulations" : {
-    "value" : 40,
+    "value" : 24,
     "lowerBound" : 1,
     "upperBound" : 400
   },
@@ -32,37 +32,37 @@
     "upperBound" : 1000000
   },
   "Max number of child nodes" : {
-    "value" : 131,
+    "value" : 5,
     "lowerBound" : 5,
     "upperBound" : 1000
   },
   "Max transfer height" : {
-    "value" : 0.35,
+    "value" : 0.234015,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
   "Max transfer depth" : {
-    "value" : 0.35,
+    "value" : 0.285786,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
   "Max transfer yaw" : {
-    "value" : 0.281674,
+    "value" : 0.262483,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
   "Exploration constant" : {
-    "value" : 0.1501508,
+    "value" : 0.488722,
     "lowerBound" : 0.0,
     "upperBound" : 5.0
   },
   "Initial value cutoff" : {
-    "value" : 143,
+    "value" : 122,
     "lowerBound" : -1000,
     "upperBound" : 1000
   },
   "Max tree depth" : {
-    "value" : 10,
+    "value" : 8,
     "lowerBound" : 2,
     "upperBound" : 12
   },
@@ -82,17 +82,17 @@
     "upperBound" : 10
   },
   "Maximum step width" : {
-    "value" : 0.425,
+    "value" : 0.330534,
     "lowerBound" : 0.2,
     "upperBound" : 0.5
   },
   "Maximum step length" : {
-    "value" : 0.474775,
+    "value" : 0.47381,
     "lowerBound" : 0.2,
     "upperBound" : 0.7
   },
   "Minimum step width" : {
-    "value" : 0.115,
+    "value" : 0.117778,
     "lowerBound" : 0.1,
     "upperBound" : 0.3
   },
@@ -102,7 +102,7 @@
     "upperBound" : 0.3
   },
   "Decay factor" : {
-    "value" : 0.888235,
+    "value" : 0.619318,
     "lowerBound" : 0.0,
     "upperBound" : 1.0
   },

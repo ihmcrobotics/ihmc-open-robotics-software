@@ -97,7 +97,7 @@ public class TerrainPlanningDebugger
       refresh(request.getTerrainMapData());
       plotMonteCarloFootstepPlan(plan);
       plotTree(root);
-      display(100);
+      display(1);
    }
 
    public void refresh(TerrainMapData terrainMapData)

@@ -69,10 +69,11 @@ public class MonteCarloFootstepPlanner
          updateTree(root, request);
 
          // For debugging only
-         debugger.renderInTheLoop(root, request, footPolygons);
          debugger.printScoreStats(root, request, parameters, iteration);
-         LogTools.info("Layer Counts: {}", MonteCarloPlannerTools.getLayerCountsString(root));
       }
+
+      debugger.renderInTheLoop(root, request, footPolygons);
+      LogTools.info("Layer Counts: {}", MonteCarloPlannerTools.getLayerCountsString(root));
 
       // Compute plan from maximum value path in the tree so far
       FootstepPlan plan = MonteCarloPlannerTools.getFootstepPlanFromTree(root, request, footPolygons);
@@ -104,8 +105,8 @@ public class MonteCarloFootstepPlanner
 
       // Pruning and Sorting
       statistics.startPruningTime();
-      //node.sortChildren();
-      //node.prune(parameters.getMaxNumberOfChildNodes());
+      node.sortChildren();
+      node.prune(parameters.getMaxNumberOfChildNodes());
       statistics.stopPruningTime();
 
       LogTools.info("Update: Children: {}", node.getChildren().size());
