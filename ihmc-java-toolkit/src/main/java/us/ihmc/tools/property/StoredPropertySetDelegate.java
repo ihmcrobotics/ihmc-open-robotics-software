@@ -11,9 +11,9 @@ import java.util.List;
  */
 public class StoredPropertySetDelegate implements StoredPropertySetBasics
 {
-   private StoredPropertySet storedPropertySet;
+   private StoredPropertySetBasics storedPropertySet;
 
-   public void setStoredPropertySet(StoredPropertySet storedPropertySet)
+   public void setStoredPropertySetToDelegate(StoredPropertySetBasics storedPropertySet)
    {
       this.storedPropertySet = storedPropertySet;
    }

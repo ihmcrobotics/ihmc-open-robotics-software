@@ -76,11 +76,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       this.swingFootPlannerParameters = swingFootPlannerParameters;
 
       defaultPolygons = FootstepPlanningModuleLauncher.createFootPolygons(communicationHelper.getRobotModel());
-      stepChecker = new RDXFootstepChecker(baseUI,
-                                           syncedRobot,
-                                           controllerStatusTracker,
-                                           defaultPolygons,
-                                           footstepPlannerParameters);
+      stepChecker = new RDXFootstepChecker(baseUI, syncedRobot, controllerStatusTracker, defaultPolygons, footstepPlannerParameters);
       swingPlanningModule = new RDXSwingPlanningModule(syncedRobot,
                                                        footstepPlannerParameters,
                                                        communicationHelper.getRobotModel().getSwingPlannerParameters(),

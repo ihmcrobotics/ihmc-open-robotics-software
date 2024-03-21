@@ -7,10 +7,5 @@ import us.ihmc.tools.property.StoredPropertySetDelegate;
  */
 public class FootstepPlannerParametersDelegate extends StoredPropertySetDelegate implements FootstepPlannerParametersBasics
 {
-   private FootstepPlannerParametersBasics parameters;
 
-   public void setParameters(FootstepPlannerParametersBasics parameters)
-   {
-      super.set(parameters);
-   }
 }
