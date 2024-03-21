@@ -30,6 +30,7 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectionUpdater;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
+import us.ihmc.perception.sceneGraph.yolo.YOLOv8DetectionManager;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -133,6 +134,8 @@ public class PerceptionAndAutonomyProcess
    private final CenterposeDetectionManager centerposeDetectionManager;
    private ROS2DemandGraphNode centerposeDemandNode;
 
+   private final YOLOv8DetectionManager yolOv8DetectionManager;
+
    private final IterativeClosestPointManager icpManager;
 
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
@@ -194,6 +197,8 @@ public class PerceptionAndAutonomyProcess
       sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", SceneGraph.UPDATE_FREQUENCY, this::updateSceneGraph);
 
       centerposeDetectionManager = new CenterposeDetectionManager(ros2Helper);
+
+      yolOv8DetectionManager = new YOLOv8DetectionManager(ros2Helper);
 
       icpManager = new IterativeClosestPointManager(ros2Helper, sceneGraph);
       icpManager.startWorkers();
@@ -330,6 +335,8 @@ public class PerceptionAndAutonomyProcess
          realsenseImagePublisher.setNextDepthImage(realsenseDepthImage.get());
          realsenseImagePublisher.setNextColorImage(realsenseColorImage.get());
 
+         yolOv8DetectionManager.setDetectionImages(realsenseColorImage, realsenseColorImage);
+
          realsenseDepthImage.release();
          realsenseColorImage.release();
       }
@@ -413,6 +420,8 @@ public class PerceptionAndAutonomyProcess
       // Update CenterPose stuff
       if (centerposeDemandNode.isDemanded())
          centerposeDetectionManager.updateSceneGraph(sceneGraph);
+
+      yolOv8DetectionManager.updateSceneGraph(sceneGraph);
 
       // Update general stuff
       sceneGraph.updateOnRobotOnly(robotPelvisFrameSupplier.get());

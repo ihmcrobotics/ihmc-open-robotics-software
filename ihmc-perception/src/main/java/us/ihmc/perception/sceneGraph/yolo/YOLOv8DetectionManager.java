@@ -19,7 +19,7 @@ import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
-import us.ihmc.tools.thread.RestartableThread;
+import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.util.Iterator;
@@ -38,14 +38,13 @@ public class YOLOv8DetectionManager
    private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor(openCLManager);
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter(openCLManager);
 
-
    private final YOLOv8ObjectDetector yoloDetector = new YOLOv8ObjectDetector();
    private RawImage colorImage = null;
    private long lastColorImageSequenceNumber = -1L;
    private RawImage depthImage = null;
    private long lastDepthImageSequenceNumber = -1L;
 
-   private final RestartableThread yoloDetectionThread;
+   private final RestartableThrottledThread yoloDetectionThread;
    private final Lock newImageLock = new ReentrantLock();
    private final Condition newImageAvailable = newImageLock.newCondition();
    private final Notification readyToRunNotification = new Notification();
@@ -65,7 +64,10 @@ public class YOLOv8DetectionManager
    {
       this.ros2Helper = ros2Helper;
 
-      yoloDetectionThread = new RestartableThread("YOLODetector", this::runYOLODetection);
+      yoloDetectionThread = new RestartableThrottledThread("YOLODetector", 5.0, this::runYOLODetection);
+      yoloDetectionThread.start();
+
+      readyToRunNotification.set();
 
       yoloParameterSubscription = ros2Helper.subscribe(PerceptionAPI.YOLO_PARAMETERS);
       yoloParameterSubscription.addCallback(parametersMessage ->
@@ -79,52 +81,24 @@ public class YOLOv8DetectionManager
 
    public void setDetectionImages(RawImage newColorImage, RawImage newDepthImage)
    {
-      if (colorImage != null)
-         colorImage.release();
-      colorImage = newColorImage.get();
-
-      if (depthImage != null)
-         depthImage.release();
-      depthImage = newDepthImage.get();
-   }
-
-   public void updateSceneGraph(ROS2SceneGraph sceneGraph)
-   {
-      sceneGraph.modifyTree(modificationQueue ->
+      newColorImage.get();
+      newDepthImage.get();
+      newImageLock.lock();
+      try
       {
-         // Handle existing detections
-         for (YOLOv8Node yoloNode : currentlyDetectedNodes.values())
-         {
-            if (!yoloNode.update())
-               modificationQueue.accept(new SceneGraphNodeRemoval(yoloNode, sceneGraph));
-         }
+         if (colorImage != null)
+            colorImage.release();
+         if (depthImage != null)
+            depthImage.release();
 
-         // Handle candidate detections (add or forget)
-//         synchronized (candidateDetections)
-//         {
-            Iterator<Entry<YOLOv8Detection, DetectionFilter>> candidateIterator = candidateDetections.entrySet().iterator();
-            while (candidateIterator.hasNext())
-            {
-               Map.Entry<YOLOv8Detection, DetectionFilter> candidateDetectionEntry = candidateIterator.next();
-               YOLOv8Detection candidateDetection = candidateDetectionEntry.getKey();
-               DetectionFilter filter = candidateDetectionEntry.getValue();
-
-               if (filter.hasEnoughSamples())
-               {
-                  if (filter.isStableDetectionResult())
-                  {
-                     long nodeID = sceneGraph.getNextID().getAndIncrement();
-                     YOLOv8Node newYOLOICPCombo = new YOLOv8Node(nodeID, "YOLO " + candidateDetection.objectClass().name(), candidateDetection, filter);
-                     modificationQueue.accept(new SceneGraphNodeAddition(newYOLOICPCombo, sceneGraph.getRootNode()));
-                     sceneGraph.getIDToNodeMap().put(nodeID, newYOLOICPCombo);
-                     currentlyDetectedNodes.put(candidateDetection.objectClass(), newYOLOICPCombo);
-                  }
-
-                  candidateIterator.remove();
-               }
-            }
-//         }
-      });
+         colorImage = newColorImage;
+         depthImage = newDepthImage;
+         newImageAvailable.signal();
+      }
+      finally
+      {
+         newImageLock.unlock();
+      }
    }
 
    public void start()
@@ -181,6 +155,7 @@ public class YOLOv8DetectionManager
       {
          if (readyToRunNotification.poll())
             runYOLOAndSegmentation(colorImageCopy, depthImageCopy);
+
          colorImageCopy.release();
          depthImageCopy.release();
       }
@@ -311,5 +286,44 @@ public class YOLOv8DetectionManager
          filter.update();
          candidateDetections.put(newDetection, filter);
       }
+   }
+
+   public void updateSceneGraph(ROS2SceneGraph sceneGraph)
+   {
+      sceneGraph.modifyTree(modificationQueue ->
+      {
+         // Handle existing detections
+         for (YOLOv8Node yoloNode : currentlyDetectedNodes.values())
+         {
+            if (!yoloNode.update())
+               modificationQueue.accept(new SceneGraphNodeRemoval(yoloNode, sceneGraph));
+         }
+
+         // Handle candidate detections (add or forget)
+         //         synchronized (candidateDetections)
+         //         {
+         Iterator<Entry<YOLOv8Detection, DetectionFilter>> candidateIterator = candidateDetections.entrySet().iterator();
+         while (candidateIterator.hasNext())
+         {
+            Map.Entry<YOLOv8Detection, DetectionFilter> candidateDetectionEntry = candidateIterator.next();
+            YOLOv8Detection candidateDetection = candidateDetectionEntry.getKey();
+            DetectionFilter filter = candidateDetectionEntry.getValue();
+
+            if (filter.hasEnoughSamples())
+            {
+               if (filter.isStableDetectionResult())
+               {
+                  long nodeID = sceneGraph.getNextID().getAndIncrement();
+                  YOLOv8Node newYOLOICPCombo = new YOLOv8Node(nodeID, "YOLO " + candidateDetection.objectClass().name(), candidateDetection, filter);
+                  modificationQueue.accept(new SceneGraphNodeAddition(newYOLOICPCombo, sceneGraph.getRootNode()));
+                  sceneGraph.getIDToNodeMap().put(nodeID, newYOLOICPCombo);
+                  currentlyDetectedNodes.put(candidateDetection.objectClass(), newYOLOICPCombo);
+               }
+
+               candidateIterator.remove();
+            }
+         }
+         //         }
+      });
    }
 }
