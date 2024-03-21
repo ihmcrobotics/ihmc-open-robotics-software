@@ -217,6 +217,11 @@ public class RawImage
       return cpuImageMat == null && gpuImageMat == null;
    }
 
+   public boolean isAvailable()
+   {
+      return numberOfReferences.get() > 0;
+   }
+
    public RawImage get()
    {
       if (numberOfReferences.incrementAndGet() > 1)
