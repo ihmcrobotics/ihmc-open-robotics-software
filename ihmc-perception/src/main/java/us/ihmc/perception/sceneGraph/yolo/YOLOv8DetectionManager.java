@@ -316,7 +316,6 @@ public class YOLOv8DetectionManager
                   long nodeID = sceneGraph.getNextID().getAndIncrement();
                   YOLOv8Node newYOLOICPCombo = new YOLOv8Node(nodeID, "YOLO " + candidateDetection.objectClass().name(), candidateDetection, filter);
                   modificationQueue.accept(new SceneGraphNodeAddition(newYOLOICPCombo, sceneGraph.getRootNode()));
-                  sceneGraph.getIDToNodeMap().put(nodeID, newYOLOICPCombo);
                   currentlyDetectedNodes.put(candidateDetection.objectClass(), newYOLOICPCombo);
                }
 
