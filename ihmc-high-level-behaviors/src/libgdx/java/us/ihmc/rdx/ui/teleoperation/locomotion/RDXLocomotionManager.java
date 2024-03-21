@@ -113,9 +113,9 @@ public class RDXLocomotionManager
       locomotionParameters.load();
       aStarFootstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       turnWalkTurnFootstepPlannerParameters = robotModel.getFootstepPlannerParameters("TurnWalkTurn");
-      footstepPlannerParametersDelegate.setStoredPropertySetToDelegate(locomotionParameters.getPerformAStarSearch() ?
-                                                                             aStarFootstepPlannerParameters :
-                                                                             turnWalkTurnFootstepPlannerParameters);
+      footstepPlannerParametersDelegate.setParametersToDelegate(locomotionParameters.getPerformAStarSearch() ?
+                                                                      aStarFootstepPlannerParameters :
+                                                                      turnWalkTurnFootstepPlannerParameters);
       bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
 
@@ -206,9 +206,9 @@ public class RDXLocomotionManager
          deleteAll();
       }
 
-      footstepPlannerParametersDelegate.setStoredPropertySetToDelegate(locomotionParameters.getPerformAStarSearch() ?
-                                                                             aStarFootstepPlannerParameters :
-                                                                             turnWalkTurnFootstepPlannerParameters);
+      footstepPlannerParametersDelegate.setParametersToDelegate(locomotionParameters.getPerformAStarSearch() ?
+                                                                      aStarFootstepPlannerParameters :
+                                                                      turnWalkTurnFootstepPlannerParameters);
 
       swingFootPlannerParameters.setMinimumSwingTime(locomotionParameters.getSwingTime());
 
