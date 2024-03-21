@@ -719,4 +719,9 @@ public class RDXTeleoperationManager extends RDXPanel
    {
       return armManager;
    }
+
+   public RDXWholeBodyIKManager getWholeBodyIKManager()
+   {
+      return wholeBodyIKManager;
+   }
 }
