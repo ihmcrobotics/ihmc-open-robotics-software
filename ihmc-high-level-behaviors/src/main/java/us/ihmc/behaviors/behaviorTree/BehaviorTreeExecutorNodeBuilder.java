@@ -61,7 +61,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       }
       if (nodeType == DoorTraversalDefinition.class)
       {
-         return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory);
+         return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory, syncedRobot);
       }
       if (nodeType == ArmJointAnglesActionDefinition.class)
       {

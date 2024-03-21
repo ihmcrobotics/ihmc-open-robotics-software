@@ -64,7 +64,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       }
       if (nodeType == DoorTraversalDefinition.class)
       {
-         return new RDXDoorTraversal(id, crdtInfo, saveFileDirectory);
+         return new RDXDoorTraversal(id, crdtInfo, saveFileDirectory, syncedRobot);
       }
 
       // Actions:

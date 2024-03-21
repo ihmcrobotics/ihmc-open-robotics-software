@@ -449,6 +449,14 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
       if (state.getScrewFrame().isChildOfWorld())
       {
+         if (state.getCommandedTrajectory().isEmpty())
+         {
+            LogTools.error("Commanded trajectory is empty.");
+            state.setIsExecuting(false);
+            state.setFailed(true);
+            return;
+         }
+
          SE3TrajectoryPointReadOnly lastTrajectoryPose = state.getCommandedTrajectory().getLastValueReadOnly();
          desiredHandControlPose.set(lastTrajectoryPose.getPosition(), lastTrajectoryPose.getOrientation());
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));

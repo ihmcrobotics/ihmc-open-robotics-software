@@ -21,6 +21,10 @@ module behavior_msgs
          * Definition
          */
         behavior_msgs::msg::dds::DoorTraversalDefinitionMessage definition;
+        /**
+         * Used to tell the operator that the robot is retrying the pull door
+         */
+        boolean retrying_pull_door_notification;
       };
     };
   };

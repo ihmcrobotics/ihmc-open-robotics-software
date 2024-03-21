@@ -16,6 +16,10 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
             * Definition
             */
    public behavior_msgs.msg.dds.DoorTraversalDefinitionMessage definition_;
+   /**
+            * Used to tell the operator that the robot is retrying the pull door
+            */
+   public boolean retrying_pull_door_notification_;
 
    public DoorTraversalStateMessage()
    {
@@ -33,6 +37,8 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.DoorTraversalDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      retrying_pull_door_notification_ = other.retrying_pull_door_notification_;
+
    }
 
 
@@ -51,6 +57,21 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
    public behavior_msgs.msg.dds.DoorTraversalDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+   /**
+            * Used to tell the operator that the robot is retrying the pull door
+            */
+   public void setRetryingPullDoorNotification(boolean retrying_pull_door_notification)
+   {
+      retrying_pull_door_notification_ = retrying_pull_door_notification;
+   }
+   /**
+            * Used to tell the operator that the robot is retrying the pull door
+            */
+   public boolean getRetryingPullDoorNotification()
+   {
+      return retrying_pull_door_notification_;
    }
 
 
@@ -73,6 +94,8 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
 
       if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.retrying_pull_door_notification_, other.retrying_pull_door_notification_, epsilon)) return false;
+
 
       return true;
    }
@@ -88,6 +111,8 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
 
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if(this.retrying_pull_door_notification_ != otherMyClass.retrying_pull_door_notification_) return false;
+
 
       return true;
    }
@@ -101,7 +126,9 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
       builder.append("state=");
       builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");
-      builder.append(this.definition_);
+      builder.append(this.definition_);      builder.append(", ");
+      builder.append("retrying_pull_door_notification=");
+      builder.append(this.retrying_pull_door_notification_);
       builder.append("}");
       return builder.toString();
    }
