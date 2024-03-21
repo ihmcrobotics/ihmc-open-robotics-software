@@ -94,7 +94,7 @@ public class MonteCarloFootstepPlanner
 
    public void updateTree(MonteCarloFootstepNode node, MonteCarloFootstepPlannerRequest request)
    {
-      LogTools.warn("Update: Level: {}", node.getLevel());
+      //LogTools.warn("Update: Level: {}", node.getLevel());
       timeSpentPlanningSoFar = System.nanoTime() / 1e9 - startTime;
 
       if (timeSpentPlanningSoFar > request.getTimeout())
@@ -109,7 +109,7 @@ public class MonteCarloFootstepPlanner
       node.prune(parameters.getMaxNumberOfChildNodes());
       statistics.stopPruningTime();
 
-      LogTools.info("Update: Children: {}", node.getChildren().size());
+      //LogTools.warn("Update: Children: {}", node.getChildren().size());
       if (node.getChildren().isEmpty())
       {
          MonteCarloFootstepNode childNode = null;
@@ -128,13 +128,13 @@ public class MonteCarloFootstepPlanner
 
          if (childNode != null)
          {
-            LogTools.info("Simulating: {}", childNode.getLevel());
+            //LogTools.info("Simulating: {}", childNode.getLevel());
             // Simulation
             statistics.startSimulationTime();
             double score = simulate(childNode, request);
             statistics.stopSimulationTime();
 
-            LogTools.info("Back Propagating: {}", childNode.getLevel());
+            //LogTools.info("Back Propagating: {}", childNode.getLevel());
             // Back Propagation
             statistics.startPropagationTime();
             childNode.setValue((float) score);
@@ -254,7 +254,7 @@ public class MonteCarloFootstepPlanner
 
    public void reset(MonteCarloFootstepPlannerRequest request)
    {
-      random.setSeed(100);
+      //random.setSeed(100);
       uniqueNodeId = 0;
       visitedNodes.clear();
 
@@ -306,5 +306,10 @@ public class MonteCarloFootstepPlanner
    public boolean isPlanning()
    {
       return planning;
+   }
+
+   public TerrainPlanningDebugger getDebugger()
+   {
+      return debugger;
    }
 }

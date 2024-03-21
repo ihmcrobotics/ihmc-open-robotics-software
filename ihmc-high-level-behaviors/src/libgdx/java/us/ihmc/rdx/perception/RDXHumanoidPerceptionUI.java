@@ -63,6 +63,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
    /* Image panel to display the depth image */
    private RDXBytedecoImagePanel depthImagePanel;
+   private Mat contactHeatMapImage;
 
    /* Image panel to display the terrain cost map (16-bit scalar metric for steppability cost per cell,
     *  computed based on terrain inclination and continuity) */
@@ -261,9 +262,12 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
    public void update(TerrainMapData terrainMapData)
    {
-      Mat contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(terrainMapData.getContactMap());
+      //contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(terrainMapData.getContactMap());
       croppedHeightMapPanel.drawDepthImage(terrainMapData.getHeightMap());
-      contactMapImagePanel.drawColorImage(contactHeatMapImage);
+
+      if (contactHeatMapImage != null)
+         contactMapImagePanel.drawColorImage(contactHeatMapImage);
+
       terrainGridGraphic.update(humanoidPerception.getRapidHeightMapExtractor().getCurrentGroundToWorldTransform());
 
       for (RDXVisualizer visualizer : visualizers.values())
@@ -451,6 +455,11 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          }
          ImGui.unindent();
       }
+   }
+
+   public void setContactHeatMapImage(Mat contactHeatMapImage)
+   {
+      this.contactHeatMapImage = contactHeatMapImage;
    }
 
    public void destroy()

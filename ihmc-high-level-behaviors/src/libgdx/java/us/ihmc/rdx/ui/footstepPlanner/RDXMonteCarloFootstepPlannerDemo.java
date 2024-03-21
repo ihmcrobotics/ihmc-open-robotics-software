@@ -183,6 +183,7 @@ public class RDXMonteCarloFootstepPlannerDemo
             monteCarloFootstepPlanner.reset(monteCarloPlannerRequest);
 
          FootstepPlan plan = monteCarloFootstepPlanner.generateFootstepPlan(monteCarloPlannerRequest);
+         humanoidPerceptionUI.setContactHeatMapImage(monteCarloFootstepPlanner.getDebugger().getHeatMapImage());
          publishMonteCarloPlan(plan);
       }
    }

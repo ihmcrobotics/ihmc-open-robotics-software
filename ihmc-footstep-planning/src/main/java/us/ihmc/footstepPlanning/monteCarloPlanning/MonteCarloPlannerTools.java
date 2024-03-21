@@ -260,21 +260,25 @@ public class MonteCarloPlannerTools
       }
    }
 
-   public static void getOptimalPathByDepth(MonteCarloTreeNode root, List<MonteCarloTreeNode> path)
+   public static void getOptimalPathByDepth(MonteCarloTreeNode root, List<MonteCarloTreeNode> path, List<MonteCarloTreeNode> longestPath)
    {
-      if (root.getChildren().isEmpty() && root.getLevel() > path.size())
+      path.add(root);
+
+      if (root.getChildren().isEmpty())
       {
-         path.add(root);
-      }
-      else if (root.getChildren().isEmpty() && root.getLevel() < path.size())
-      {
-         path.remove(path.size() - 1);
+         if (path.size() > longestPath.size())
+         {
+            longestPath.clear();
+            longestPath.addAll(path);
+         }
       }
 
       for (MonteCarloTreeNode node : root.getChildren())
       {
-         getOptimalPathByDepth(node, path);
+         getOptimalPathByDepth(node, path, longestPath);
       }
+
+      path.remove(path.size() - 1);
    }
 
    public static void plotPath(List<MonteCarloTreeNode> path, Mat gridColor)
@@ -337,14 +341,15 @@ public class MonteCarloPlannerTools
                                                       MonteCarloFootstepPlannerRequest request,
                                                       SideDependentList<ConvexPolygon2D> footPolygons)
    {
-      List<MonteCarloTreeNode> path = new ArrayList<>();
-      MonteCarloPlannerTools.getOptimalPathByDepth(root, path);
-      LogTools.info("Optimal Path Size: {}", path.size());
+      List<MonteCarloTreeNode> intermediatePath = new ArrayList<>();
+      List<MonteCarloTreeNode> optimalPath = new ArrayList<>();
+      MonteCarloPlannerTools.getOptimalPathByDepth(root, intermediatePath, optimalPath);
+      LogTools.info("Optimal Path Size: {}", optimalPath.size());
 
       HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
 
       FootstepPlan footstepPlan = new FootstepPlan();
-      for (MonteCarloTreeNode node : path)
+      for (MonteCarloTreeNode node : optimalPath)
       {
          MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) node;
 

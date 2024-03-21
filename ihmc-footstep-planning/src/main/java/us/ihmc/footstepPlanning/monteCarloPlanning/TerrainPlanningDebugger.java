@@ -266,8 +266,9 @@ public class TerrainPlanningDebugger
          return;
 
       // time now
+      ArrayList<MonteCarloTreeNode> intermediatePath = new ArrayList<>();
       ArrayList<MonteCarloTreeNode> optimalPath = new ArrayList<>();
-      MonteCarloPlannerTools.getOptimalPathByDepth(root, optimalPath);
+      MonteCarloPlannerTools.getOptimalPathByDepth(root, intermediatePath, optimalPath);
 
       double totalScore = 0;
       for (int i = 1; i < optimalPath.size(); i++)
@@ -365,5 +366,10 @@ public class TerrainPlanningDebugger
    public void setEnabled(boolean enabled)
    {
       this.enabled = enabled;
+   }
+
+   public Mat getHeatMapImage()
+   {
+      return contactHeatMapColorImage;
    }
 }
