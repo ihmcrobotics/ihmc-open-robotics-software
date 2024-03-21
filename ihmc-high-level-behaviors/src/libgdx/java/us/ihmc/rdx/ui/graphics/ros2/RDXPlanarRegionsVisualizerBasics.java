@@ -26,7 +26,7 @@ public class RDXPlanarRegionsVisualizerBasics extends RDXVisualizer
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImGuiPlot numberOfRegionsPlot = new ImGuiPlot("# Regions", 1000, 230, 20);
    private int numberOfPlanarRegions = 0;
-   private ImDouble opacity = new ImDouble(0.7);
+   private final ImDouble opacity = new ImDouble(0.7);
 
    RDXPlanarRegionsVisualizerBasics(String title, String topicName)
    {
