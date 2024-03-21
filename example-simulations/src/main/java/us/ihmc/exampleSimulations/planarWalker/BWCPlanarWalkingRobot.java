@@ -33,7 +33,8 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
 {
    private final SimFloatingJointBasics floatingJoint;
    private final SideDependentList<SimPrismaticJoint> kneeJoints;
-   private final SideDependentList<SimRevoluteJoint> hipJoints;
+   private final SideDependentList<SimRevoluteJoint> hipPitchJoints;
+   private final SideDependentList<SimRevoluteJoint> hipRollJoints;
 
    private final SideDependentList<YoDouble> legLengths = new SideDependentList<YoDouble>();
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -60,7 +61,8 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
 
       worldFrame = robot.getInertialFrame();
       kneeJoints = new SideDependentList<>();
-      hipJoints = new SideDependentList<>();
+      hipPitchJoints = new SideDependentList<>();
+      hipRollJoints = new SideDependentList<>();
 
       centerOfMassPosition = new YoFramePoint3D("centerOfMassPosition", worldFrame, registry);
       centerOfMassVelocity = new YoFrameVector3D("centerOfMassVelocity", worldFrame, registry);
@@ -75,7 +77,7 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
          SimPrismaticJoint kneeJoint = (SimPrismaticJoint) robot.getJoint(BWCPlanarWalkingRobotDefinition.kneeNames.get(robotSide));
          SimRevoluteJoint hipJoint = (SimRevoluteJoint) robot.getJoint(BWCPlanarWalkingRobotDefinition.hipNames.get(robotSide));
          kneeJoints.put(robotSide, kneeJoint);
-         hipJoints.put(robotSide, hipJoint);
+         hipPitchJoints.put(robotSide, hipJoint);
 
          footMassLocal = Math.max(footMassLocal, kneeJoint.getSuccessor().getInertia().getMass());
 
@@ -143,9 +145,14 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
       return kneeJoints.get(robotSide);
    }
 
-   public SimRevoluteJoint getHipJoint(RobotSide robotSide)
+   public SimRevoluteJoint getHipPitchJoint(RobotSide robotSide)
    {
-      return hipJoints.get(robotSide);
+      return hipPitchJoints.get(robotSide);
+   }
+
+   public SimRevoluteJoint getHipRollJoint(RobotSide robotSide)
+   {
+      return hipRollJoints.get(robotSide);
    }
 
    public MovingReferenceFrame getCenterOfMassFrame()
@@ -199,7 +206,7 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
       {
          group.addChild(newYoGraphicPoint3D(robotSide.getLowerCaseName() + "GroundPoint", kneeJoints.get(robotSide).getAuxiliaryData().getGroundContactPoints().get(0).getPose().getPosition(), 0.01, DarkOrange()));
          group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "KneeFrame", kneeJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
-         group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "HipFrame", hipJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
+         group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "HipFrame", hipPitchJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
       }
       group.setVisible(true);
       return group;

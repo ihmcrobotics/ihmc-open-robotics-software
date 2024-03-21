@@ -22,6 +22,8 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
    public static final String torsoName = "torso";
    public static final String leftHipPitchName = "l_hip_pitch";
    public static final String rightHipPitchName = "r_hip_pitch";
+   public static final String leftHipRollName = "l_hip_roll";
+   public static final String rightHipRollName = "r_hip_roll";
    public static final String leftKneeName = "l_knee_pitch";
    public static final String rightKneeName = "r_knee_pitch";
    public static final String leftThighName = "l_thigh";
@@ -35,6 +37,7 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
    public static final double shinLength = 0.5;
 
    private final SideDependentList<String> hipPitchNames = new SideDependentList<>(leftHipPitchName, rightHipPitchName);
+   private final SideDependentList<String> hipRollNames = new SideDependentList<>(leftHipRollName, rightHipRollName);
    private final SideDependentList<String> thighNames = new SideDependentList<>(leftThighName, rightThighName);
    public static final SideDependentList<String> kneeNames = new SideDependentList<>(leftKneeName, rightKneeName);
    public static final SideDependentList<String> hipNames = new SideDependentList<>(leftHipPitchName, rightHipPitchName);
@@ -64,6 +67,14 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 
       for (RobotSide robotSide : RobotSide.values)
       {
+//         // create the hip pitch joints and add them to the tree
+//         Vector3D hipRollOffsetInTorso = new Vector3D(0.0, robotSide.negateIfRightSide(0.05), -torsoHeight / 2.0);
+//         RevoluteJointDefinition hipRollJointDefinition = new RevoluteJointDefinition(hipRollNames.get(robotSide), hipRollOffsetInTorso, Axis3D.X);
+//         hipRollJointDefinition.setDamping(damping);
+//         hipRollJointDefinition.setPositionLimits(-Math.PI / 2.0, Math.PI / 2.0);
+//         torsoBodyDefinition.addChildJoint(hipRollJointDefinition);
+//         hipPitchJointDefinitions.put(robotSide, hipRollJointDefinition);
+
          // create the hip pitch joints and add them to the tree
          Vector3D hipPitchOffsetInTorso = new Vector3D(0.0, robotSide.negateIfRightSide(0.05), -torsoHeight / 2.0);
          RevoluteJointDefinition hipPitchJointDefinition = new RevoluteJointDefinition(hipPitchNames.get(robotSide), hipPitchOffsetInTorso, Axis3D.Y);
