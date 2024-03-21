@@ -11,7 +11,7 @@ public class RDXROS2FramePlanarRegionsVisualizer extends RDXPlanarRegionsVisuali
 {
    public RDXROS2FramePlanarRegionsVisualizer(String title, ROS2NodeInterface ros2Node, ROS2Topic<FramePlanarRegionsListMessage> topic)
    {
-      super(title + " (ROS 2)", topic.getName());
+      super(title, topic.getName());
       new IHMCROS2Callback<>(ros2Node, topic, this::acceptMessage);
    }
 
