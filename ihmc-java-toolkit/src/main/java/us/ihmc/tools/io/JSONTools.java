@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 import java.util.Iterator;
 import java.util.function.Consumer;
@@ -58,6 +60,46 @@ public class JSONTools
       rigidBodyTransform.getRotation().setYawPitchRoll(Math.toRadians(jsonNode.get("yawInDegrees").asDouble()),
                                                        Math.toRadians(jsonNode.get("pitchInDegrees").asDouble()),
                                                        Math.toRadians(jsonNode.get("rollInDegrees").asDouble()));
+   }
+
+
+   /**
+    * {@link #toJSON(ObjectNode, Tuple3DReadOnly)} but embedded in a named object.
+    */
+   public static void toJSON(ObjectNode jsonNode, String name, Tuple3DReadOnly tuple3D)
+   {
+      ObjectNode transformObject = jsonNode.putObject(name);
+      toJSON(transformObject, tuple3D);
+   }
+
+   /**
+    * {@link #toEuclid(JsonNode, Tuple3DBasics)} but embedded in a named object.
+    */
+   public static void toEuclid(JsonNode jsonNode, String name, Tuple3DBasics tuple3D)
+   {
+      ObjectNode transformObject = (ObjectNode) jsonNode.get(name);
+      toEuclid(transformObject, tuple3D);
+   }
+
+   /**
+    * When saving we reduce the precision of the numbers so that infintesimal changes
+    * do not show up as changes to the actions. We choose half a millimeter as the smallest
+    * increment of translation you might care about and 1/50th of a degree for orientations.
+    */
+   public static void toJSON(ObjectNode jsonNode, Tuple3DReadOnly tuple3D)
+   {
+      // Round to half a millimeter
+      // Cast to float, otherwise you get numbers like 0.0200000001 showing up in the JSON
+      jsonNode.put("x", (float) MathTools.roundToPrecision(tuple3D.getX(), 0.0005));
+      jsonNode.put("y", (float) MathTools.roundToPrecision(tuple3D.getY(), 0.0005));
+      jsonNode.put("z", (float) MathTools.roundToPrecision(tuple3D.getZ(), 0.0005));
+   }
+
+   public static void toEuclid(JsonNode jsonNode, Tuple3DBasics tuple3D)
+   {
+      tuple3D.setX(jsonNode.get("x").asDouble());
+      tuple3D.setY(jsonNode.get("y").asDouble());
+      tuple3D.setZ(jsonNode.get("z").asDouble());
    }
 
    /**

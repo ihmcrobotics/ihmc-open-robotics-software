@@ -42,7 +42,7 @@ public class RDXSceneNode
       {
          if (ImGui.button("Remove##" + sceneNode.getID()))
          {
-            removed = true;
+            remove();
          }
          if (!(this instanceof RDXArUcoMarkerNode))
          {
@@ -69,6 +69,11 @@ public class RDXSceneNode
    public SceneNode getSceneNode()
    {
       return sceneNode;
+   }
+
+   public void remove()
+   {
+      removed = true;
    }
 
    public boolean isRemoved()
