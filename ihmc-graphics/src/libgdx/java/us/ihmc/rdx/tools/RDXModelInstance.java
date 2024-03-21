@@ -54,8 +54,8 @@ public class RDXModelInstance extends ModelInstance
    public void setPoseInWorldFrame(RigidBodyTransformReadOnly pose)
    {
       LibGDXTools.toLibGDX(pose, tempTransform, transform);
-
    }
+
    public void setPositionInWorldFrame(Point3DReadOnly position)
    {
       LibGDXTools.toLibGDX(position, transform);
