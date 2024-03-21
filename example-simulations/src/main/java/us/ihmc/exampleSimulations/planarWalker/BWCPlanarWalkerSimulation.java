@@ -27,7 +27,7 @@ public class BWCPlanarWalkerSimulation
 
       PhysicsEngineFactory physicsEngineFactory = PhysicsEngineFactory.newContactPointBasedPhysicsEngineFactory(contactParameters);
 //      PhysicsEngineFactory physicsEngineFactory = PhysicsEngineFactory.newContactPointBasedPhysicsEngineFactory();
-      SimulationConstructionSet2 scs = new SimulationConstructionSet2("bloop", physicsEngineFactory);
+      SimulationConstructionSet2 scs = new SimulationConstructionSet2("simpleWalker", physicsEngineFactory);
       scs.setBufferRecordTickPeriod(simTicksPerControlTick);
 //      scs.getGravity().setToZero();
 

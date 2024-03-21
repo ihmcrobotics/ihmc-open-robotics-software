@@ -68,11 +68,11 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
          Vector3D hipPitchOffsetInTorso = new Vector3D(0.0, robotSide.negateIfRightSide(0.05), -torsoHeight / 2.0);
          RevoluteJointDefinition hipPitchJointDefinition = new RevoluteJointDefinition(hipPitchNames.get(robotSide), hipPitchOffsetInTorso, Axis3D.Y);
          hipPitchJointDefinition.setDamping(damping);
+         hipPitchJointDefinition.setPositionLimits(-Math.PI / 2.0, Math.PI / 2.0);
          torsoBodyDefinition.addChildJoint(hipPitchJointDefinition);
          hipPitchJointDefinitions.put(robotSide, hipPitchJointDefinition);
 
          // create the upper leg links and add them to the tree
-         // FIXME we probably need to add an offset from the joint attachment to the origin of the link.
          RigidBodyDefinition thighLink = createThigh(thighNames.get(robotSide));
          hipPitchJointDefinition.setSuccessor(thighLink);
 
@@ -83,10 +83,10 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
          Vector3D leftKneeOffsetInThigh = new Vector3D(0.0, 0.0, -thighLength / 2.0);
          PrismaticJointDefinition kneeJointDefinition = new PrismaticJointDefinition(kneeNames.get(robotSide), leftKneeOffsetInThigh, Axis3D.Z);
          kneeJointDefinition.setDamping(damping);
+         kneeJointDefinition.setPositionLimits(0.0, shinLength / 2.0);
          thighLink.addChildJoint(kneeJointDefinition);
 
          // create the shin links and add them to the tree
-         // FIXME we probably need to add an offset from the joint attachment to the origin of the link.
          RigidBodyDefinition lowerLeg = createShin(shinNames.get(robotSide));
          kneeJointDefinition.setSuccessor(lowerLeg);
 
@@ -97,8 +97,6 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
          GroundContactPointDefinition footContactPoint = new GroundContactPointDefinition(robotSide.getLowerCaseName() + "_gc_point", new Vector3D(0.0, 0.0, -shinLength / 2.0));
          kneeJointDefinition.addGroundContactPointDefinition(footContactPoint);
       }
-
-      // TODO add some kind of collisions. Could be a collision shape. Could be a contact point.
    }
 
    private static RigidBodyDefinition createTorso()

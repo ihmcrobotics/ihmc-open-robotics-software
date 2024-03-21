@@ -28,6 +28,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import static us.ihmc.scs2.definition.visual.ColorDefinitions.*;
 import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.*;
 
+// Stand in for the full robot model
 public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
 {
    private final SimFloatingJointBasics floatingJoint;
