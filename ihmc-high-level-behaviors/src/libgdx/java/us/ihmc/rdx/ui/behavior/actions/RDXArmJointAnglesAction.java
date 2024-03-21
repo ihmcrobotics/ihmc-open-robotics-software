@@ -109,7 +109,7 @@ public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionS
             jointAngleWidgets[i].renderImGuiWidget();
          }
          ImGui.popItemWidth();
-         if (ImGui.button("Set Configuration to Synced Arm"))
+         if (ImGui.button(labels.get("Set Configuration to Synced Arm")))
          {
             ArmJointName[] armJointNames = robotModel.getJointMap().getArmJointNames();
             for (int i = 0; i < ArmJointAnglesActionDefinition.MAX_NUMBER_OF_JOINTS; i++)
