@@ -5,7 +5,7 @@
     "Dataset Navigation Panel" : true,
     "Perception Panel" : false,
     "Contact Map Image" : true,
-    "Cropped Height Map" : false,
+    "Cropped Height Map" : true,
     "Depth Image" : false,
     "GPU Planar Region Extraction" : false,
     "Blurred Depth" : false,

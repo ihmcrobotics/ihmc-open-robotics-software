@@ -40,6 +40,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -52,6 +53,7 @@ public class RDXMonteCarloFootstepPlannerDemo
                                                                                                     getClass(),
                                                                                                     ExecutorServiceTools.ExceptionHandling.CANCEL_AND_REPORT);
 
+   private final RDXStoredPropertySetTuner heightMapParametersTuner = new RDXStoredPropertySetTuner("Height Map Tuner");
    private final RDXStoredPropertySetTuner monteCarloPlannerParametersTuner = new RDXStoredPropertySetTuner("Monte-Carlo Tuner");
    private final SideDependentList<FramePose3D> goalPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<FramePose3D> startPose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
@@ -250,21 +252,21 @@ public class RDXMonteCarloFootstepPlannerDemo
       humanoidPerception.getRapidHeightMapExtractor().initialize();
       humanoidPerception.getRapidHeightMapExtractor().reset();
 
-      Mat heightMap = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
-      PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(0.0f, 0.0f), new Point2D(1.0f, 1.0f), 1.5f, false);
       loadedTerrainMapData = generateTerrainMapData();
-      humanoidPerception.getRapidHeightMapExtractor().reset();
    }
 
    public TerrainMapData generateTerrainMapData()
    {
+      Mat heightMap = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
+      PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(0.0f, 0.0f), new Point2D(1.0f, 1.0f), 0.5f, false);
+
       humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().writeOpenCLImage(openCLManager);
       humanoidPerception.getRapidHeightMapExtractor().populateParameterBuffers(RapidHeightMapExtractor.getHeightMapParameters(), new CameraIntrinsics(), new Point3D());
+
       humanoidPerception.getRapidHeightMapExtractor().computeContactMap();
       humanoidPerception.getRapidHeightMapExtractor().readContactMapImage();
 
       Mat contactMap = humanoidPerception.getRapidHeightMapExtractor().getGlobalContactImage();
-      Mat heightMap = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
       TerrainMapData terrainMapData = new TerrainMapData(heightMap, contactMap, null);
 
       if (latestHeightMapData == null)
@@ -296,6 +298,11 @@ public class RDXMonteCarloFootstepPlannerDemo
       LogTools.info("Monte-Carlo Parameters Save File " + monteCarloPlannerParameters.findSaveFileDirectory().getFileName().toString());
       monteCarloPlannerParametersTuner.create(monteCarloPlannerParameters, false);
       humanoidPerceptionUI.addChild(monteCarloPlannerParametersTuner);
+
+      HeightMapParameters heightMapParameters = RapidHeightMapExtractor.getHeightMapParameters();
+      LogTools.info("Height Map Parameters Save File " + heightMapParameters.findSaveFileDirectory().getFileName().toString());
+      heightMapParametersTuner.create(heightMapParameters, false);
+      humanoidPerceptionUI.addChild(heightMapParametersTuner);
    }
 
    public static void main(String[] args)
