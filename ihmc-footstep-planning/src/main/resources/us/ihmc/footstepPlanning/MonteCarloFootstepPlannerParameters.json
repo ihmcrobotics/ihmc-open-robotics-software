@@ -2,12 +2,12 @@
   "title" : "MonteCarloFootstepPlannerParameters",
   "Reset" : false,
   "Number of iterations" : {
-    "value" : 86,
+    "value" : 101,
     "lowerBound" : 1,
     "upperBound" : 400
   },
   "Number of simulations" : {
-    "value" : 24,
+    "value" : 8,
     "lowerBound" : 1,
     "upperBound" : 400
   },
@@ -37,7 +37,7 @@
     "upperBound" : 1000
   },
   "Max transfer height" : {
-    "value" : 0.234015,
+    "value" : 0.32073,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
