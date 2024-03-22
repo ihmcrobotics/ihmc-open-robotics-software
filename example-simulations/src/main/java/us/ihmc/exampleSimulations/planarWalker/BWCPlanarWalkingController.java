@@ -292,7 +292,7 @@ public class BWCPlanarWalkingController implements Controller, SCS2YoGraphicHold
 
          controllerRobot.getHipPitchJoint(swingSide).setTau(swingHipPitchTorque.getDoubleValue());
 
-         // Calculate the hip roll torque
+         // Calculate the hip roll torque //TODO: verify these signs
          double desiredFootPositionY = swingFootYTrajectory.getValue();
          footDesiredPosition.set(desiredFootPositionY);
          double desiredFootVelocityY = swingFootYTrajectory.getVelocity();
@@ -301,10 +301,10 @@ public class BWCPlanarWalkingController implements Controller, SCS2YoGraphicHold
          double currentFootPositionY = footPosition.getY();
          double currentFootVelocityY = controllerRobot.getVelocityOfFootRelativeToCoM(swingSide).getY();
          double hipRollTorque = swingHipRollController.compute(currentFootPositionY, desiredFootPositionY, currentFootVelocityY, desiredFootVelocityY);
-         swingHipRollTorque.set(swingSide.negateIfRightSide(hipRollTorque)); //TODO check this sign
+         swingHipRollTorque.set(hipRollTorque); //TODO check this sign
 
          //TODO: finish adding hip roll to the robot definition and robot model
-         controllerRobot.getHipRollJoint(swingSide.getOppositeSide()).setTau(swingHipRollTorque.getDoubleValue());
+         controllerRobot.getHipRollJoint(swingSide).setTau(swingHipRollTorque.getDoubleValue());
 
          // Set the desired foot position in world
          footPosition.setX(desiredFootPositionX);
@@ -342,11 +342,12 @@ public class BWCPlanarWalkingController implements Controller, SCS2YoGraphicHold
       private void computeDesiredTouchdownPositionVector(YoFramePoint2D touchdownPositionToPack)
       {
          //FIXME remove this garbage
+         double hipOffset = swingSide.negateIfRightSide(0.05); //TODO pass this from the robot definition
          FrameVector2D currentCoMVelocity = new FrameVector2D(controllerRobot.getVelocityOfFootRelativeToCoM(swingSide.getOppositeSide()));
          currentCoMVelocity.scale(-1.0); // We need to negate the velocity to get CoM relative to foot
          double omega = Math.sqrt(9.81 / desiredBodyHeight.getDoubleValue());
          FrameVector2D adjustedVelocity = new FrameVector2D(desiredCoMVelocity);
-         adjustedVelocity.scale(comVelocityAdjustmentGain.getDoubleValue());
+//         adjustedVelocity.scale(comVelocityAdjustmentGain.getDoubleValue());
 
          double velocitySquareDifferenceX = currentCoMVelocity.getX() * currentCoMVelocity.getX() - adjustedVelocity.getX() * adjustedVelocity.getX();
          double velocitySquareDifferenceY = currentCoMVelocity.getY() * currentCoMVelocity.getY() - adjustedVelocity.getY() * adjustedVelocity.getY();
@@ -358,7 +359,7 @@ public class BWCPlanarWalkingController implements Controller, SCS2YoGraphicHold
             signY = Math.signum(velocitySquareDifferenceY) * Math.signum(desiredCoMVelocity.getY());
 
          touchdownPositionToPack.set(signX * Math.sqrt(Math.abs(velocitySquareDifferenceX)) / omega,
-                                     signY * Math.sqrt(Math.abs(velocitySquareDifferenceY)) / omega);
+                                     signY * Math.sqrt(Math.abs(velocitySquareDifferenceY)) / omega + hipOffset);
       }
 
       @Override

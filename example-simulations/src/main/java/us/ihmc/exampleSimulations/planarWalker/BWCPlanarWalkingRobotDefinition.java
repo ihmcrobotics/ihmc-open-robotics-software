@@ -37,6 +37,7 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
    private static final double torsoHeight = 0.5;
    public static final double thighLength = 0.5;
    public static final double shinLength = 0.5;
+   public static final double hipOffset = 0.05;
 
    public static final SideDependentList<String> hipPitchNames = new SideDependentList<>(leftHipPitchName, rightHipPitchName);
    public static final SideDependentList<String> hipLinkNames = new SideDependentList<>(leftHipLinkName, rightHipLinkName);
@@ -71,7 +72,7 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
       for (RobotSide robotSide : RobotSide.values)
       {
          // create the hip roll joints and add them to the tree
-         Vector3D hipRollOffsetInTorso = new Vector3D(0.0, robotSide.negateIfRightSide(0.05), -torsoHeight / 2.0);
+         Vector3D hipRollOffsetInTorso = new Vector3D(0.0, robotSide.negateIfRightSide(hipOffset), -torsoHeight / 2.0);
          RevoluteJointDefinition hipRollJointDefinition = new RevoluteJointDefinition(hipRollNames.get(robotSide), hipRollOffsetInTorso, Axis3D.X);
          hipRollJointDefinition.setDamping(damping);
          hipRollJointDefinition.setPositionLimits(-Math.PI / 2.0, Math.PI / 2.0);
@@ -104,7 +105,8 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
          Vector3D leftKneeOffsetInThigh = new Vector3D(0.0, 0.0, -thighLength / 2.0);
          PrismaticJointDefinition kneeJointDefinition = new PrismaticJointDefinition(kneeNames.get(robotSide), leftKneeOffsetInThigh, Axis3D.Z);
          kneeJointDefinition.setDamping(damping);
-         kneeJointDefinition.setPositionLimits(0.0, shinLength / 2.0);
+         double debugEpsilon = 0.5;
+         kneeJointDefinition.setPositionLimits(0.0 - debugEpsilon, shinLength / 2.0 + debugEpsilon);
          thighLink.addChildJoint(kneeJointDefinition);
 
          // create the shin links and add them to the tree
