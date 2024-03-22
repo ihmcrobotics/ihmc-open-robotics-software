@@ -26,6 +26,8 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
    public static final String rightHipRollName = "r_hip_roll";
    public static final String leftKneeName = "l_knee_pitch";
    public static final String rightKneeName = "r_knee_pitch";
+   public static final String leftHipLinkName = "l_hip_link";
+   public static final String rightHipLinkName = "r_hip_link";
    public static final String leftThighName = "l_thigh";
    public static final String rightThighName = "r_thigh";
    public static final String leftShinName = "l_shin";
@@ -36,14 +38,15 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
    public static final double thighLength = 0.5;
    public static final double shinLength = 0.5;
 
-   private final SideDependentList<String> hipPitchNames = new SideDependentList<>(leftHipPitchName, rightHipPitchName);
-   private final SideDependentList<String> hipRollNames = new SideDependentList<>(leftHipRollName, rightHipRollName);
-   private final SideDependentList<String> thighNames = new SideDependentList<>(leftThighName, rightThighName);
+   public static final SideDependentList<String> hipPitchNames = new SideDependentList<>(leftHipPitchName, rightHipPitchName);
+   public static final SideDependentList<String> hipLinkNames = new SideDependentList<>(leftHipLinkName, rightHipLinkName);
+   public static final SideDependentList<String> hipRollNames = new SideDependentList<>(leftHipRollName, rightHipRollName);
+   public static final SideDependentList<String> thighNames = new SideDependentList<>(leftThighName, rightThighName);
    public static final SideDependentList<String> kneeNames = new SideDependentList<>(leftKneeName, rightKneeName);
-   public static final SideDependentList<String> hipNames = new SideDependentList<>(leftHipPitchName, rightHipPitchName);
-   private final SideDependentList<String> shinNames = new SideDependentList<>(leftShinName, rightShinName);
+   public static final SideDependentList<String> shinNames = new SideDependentList<>(leftShinName, rightShinName);
 
    private final SideDependentList<RevoluteJointDefinition> hipPitchJointDefinitions = new SideDependentList<>();
+   private final SideDependentList<RevoluteJointDefinition> hipRollJointDefinitions = new SideDependentList<>();
 
    private final PlanarJointDefinition floatingBaseDefinition;
 
@@ -67,28 +70,35 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 
       for (RobotSide robotSide : RobotSide.values)
       {
-//         // create the hip pitch joints and add them to the tree
-//         Vector3D hipRollOffsetInTorso = new Vector3D(0.0, robotSide.negateIfRightSide(0.05), -torsoHeight / 2.0);
-//         RevoluteJointDefinition hipRollJointDefinition = new RevoluteJointDefinition(hipRollNames.get(robotSide), hipRollOffsetInTorso, Axis3D.X);
-//         hipRollJointDefinition.setDamping(damping);
-//         hipRollJointDefinition.setPositionLimits(-Math.PI / 2.0, Math.PI / 2.0);
-//         torsoBodyDefinition.addChildJoint(hipRollJointDefinition);
-//         hipPitchJointDefinitions.put(robotSide, hipRollJointDefinition);
+         // create the hip roll joints and add them to the tree
+         Vector3D hipRollOffsetInTorso = new Vector3D(0.0, robotSide.negateIfRightSide(0.05), -torsoHeight / 2.0);
+         RevoluteJointDefinition hipRollJointDefinition = new RevoluteJointDefinition(hipRollNames.get(robotSide), hipRollOffsetInTorso, Axis3D.X);
+         hipRollJointDefinition.setDamping(damping);
+         hipRollJointDefinition.setPositionLimits(-Math.PI / 2.0, Math.PI / 2.0);
+         torsoBodyDefinition.addChildJoint(hipRollJointDefinition);
+         hipRollJointDefinitions.put(robotSide, hipRollJointDefinition);
+
+         // create the hip link that connects the hip roll joint to the hip pitch joint and add it to the tree
+         RigidBodyDefinition hipLink = createHipLink(hipLinkNames.get(robotSide));
+         hipRollJointDefinition.setSuccessor(hipLink);
+
+         KinematicPointDefinition hipRollPoseDefintion = new KinematicPointDefinition(robotSide.getLowerCaseName() + "_hipRoll");
+         hipRollJointDefinition.addKinematicPointDefinition(hipRollPoseDefintion);
 
          // create the hip pitch joints and add them to the tree
-         Vector3D hipPitchOffsetInTorso = new Vector3D(0.0, robotSide.negateIfRightSide(0.05), -torsoHeight / 2.0);
+         Vector3D hipPitchOffsetInTorso = new Vector3D(0.0, robotSide.negateIfRightSide(0.0), 0.0); //TODO: Verify this offset
          RevoluteJointDefinition hipPitchJointDefinition = new RevoluteJointDefinition(hipPitchNames.get(robotSide), hipPitchOffsetInTorso, Axis3D.Y);
          hipPitchJointDefinition.setDamping(damping);
          hipPitchJointDefinition.setPositionLimits(-Math.PI / 2.0, Math.PI / 2.0);
-         torsoBodyDefinition.addChildJoint(hipPitchJointDefinition);
+         hipLink.addChildJoint(hipPitchJointDefinition);
          hipPitchJointDefinitions.put(robotSide, hipPitchJointDefinition);
 
          // create the upper leg links and add them to the tree
          RigidBodyDefinition thighLink = createThigh(thighNames.get(robotSide));
          hipPitchJointDefinition.setSuccessor(thighLink);
 
-         KinematicPointDefinition hipPoseDefintion = new KinematicPointDefinition(robotSide.getLowerCaseName() + "_hip");
-         hipPitchJointDefinition.addKinematicPointDefinition(hipPoseDefintion);
+         KinematicPointDefinition hipPitchPoseDefintion = new KinematicPointDefinition(robotSide.getLowerCaseName() + "_hipPitch");
+         hipPitchJointDefinition.addKinematicPointDefinition(hipPitchPoseDefintion);
 
          // create the knee joints and add them to the tree
          Vector3D leftKneeOffsetInThigh = new Vector3D(0.0, 0.0, -thighLength / 2.0);
@@ -125,6 +135,24 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
       torsoBodyDefinition.addVisualDefinition(torsoVisualDefinition);
 
       return torsoBodyDefinition;
+   }
+
+   //TODO: Verify this method is even necessary
+   private static RigidBodyDefinition createHipLink(String name)
+   {
+      double hipLinkMass = 0.0;
+      MomentOfInertiaDefinition hipLinkMomentOfInertia = new MomentOfInertiaDefinition(0.0, 0.0, 0.0);
+
+      RigidBodyDefinition hipLinkDefinition = new RigidBodyDefinition(name);
+      hipLinkDefinition.setMass(hipLinkMass);
+      hipLinkDefinition.setMomentOfInertia(hipLinkMomentOfInertia);
+
+//      GeometryDefinition thighGeometryDefinition = new Ellipsoid3DDefinition(0.05, 0.05, thighLength / 2.0);
+//      VisualDefinition thighVisualDefinition = new VisualDefinition(thighGeometryDefinition, ColorDefinition.rgb(Color.ORANGE.getRGB()));
+//
+//      hipLinkDefinition.addVisualDefinition(thighVisualDefinition);
+
+      return hipLinkDefinition;
    }
 
    private static RigidBodyDefinition createThigh(String name)

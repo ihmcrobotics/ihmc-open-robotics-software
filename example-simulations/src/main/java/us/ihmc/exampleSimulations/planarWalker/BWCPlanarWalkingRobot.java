@@ -75,9 +75,11 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
       for (RobotSide robotSide : RobotSide.values)
       {
          SimPrismaticJoint kneeJoint = (SimPrismaticJoint) robot.getJoint(BWCPlanarWalkingRobotDefinition.kneeNames.get(robotSide));
-         SimRevoluteJoint hipJoint = (SimRevoluteJoint) robot.getJoint(BWCPlanarWalkingRobotDefinition.hipNames.get(robotSide));
+         SimRevoluteJoint hipPitchJoint = (SimRevoluteJoint) robot.getJoint(BWCPlanarWalkingRobotDefinition.hipPitchNames.get(robotSide));
+         SimRevoluteJoint hipRollJoint = (SimRevoluteJoint) robot.getJoint(BWCPlanarWalkingRobotDefinition.hipRollNames.get(robotSide));
          kneeJoints.put(robotSide, kneeJoint);
-         hipPitchJoints.put(robotSide, hipJoint);
+         hipPitchJoints.put(robotSide, hipPitchJoint);
+         hipRollJoints.put(robotSide, hipRollJoint);
 
          footMassLocal = Math.max(footMassLocal, kneeJoint.getSuccessor().getInertia().getMass());
 
@@ -190,7 +192,7 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
 
          Twist footTwist = new Twist();
          footFrames.get(robotSide).getTwistRelativeToOther(centerOfMassFrame, footTwist);
-         footVelocity.get(robotSide).setMatchingFrame(footTwist.getLinearPart());
+         footVelocity.get(robotSide).setMatchingFrame(footTwist.getLinearPart()); //TODO: does the y direction need a sign change?
       }
 
       centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
@@ -206,7 +208,8 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
       {
          group.addChild(newYoGraphicPoint3D(robotSide.getLowerCaseName() + "GroundPoint", kneeJoints.get(robotSide).getAuxiliaryData().getGroundContactPoints().get(0).getPose().getPosition(), 0.01, DarkOrange()));
          group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "KneeFrame", kneeJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
-         group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "HipFrame", hipPitchJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
+         group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "HipPitchFrame", hipPitchJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
+         group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "HipRollFrame", hipRollJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
       }
       group.setVisible(true);
       return group;
