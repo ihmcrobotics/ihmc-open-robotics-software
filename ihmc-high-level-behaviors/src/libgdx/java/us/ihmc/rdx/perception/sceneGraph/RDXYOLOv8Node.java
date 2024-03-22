@@ -9,6 +9,7 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
@@ -19,7 +20,9 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImPlotDoublePlot;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 // TODO: Finish this class!
 public class RDXYOLOv8Node extends RDXDetectableSceneNode
@@ -63,6 +66,7 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
    {
       super.getRenderables(renderables, pool, sceneLevels);
 
-      //objectPointCloudRenderer.setPointsToRender(yoloNode.getObjectPointCloud(), Color.GREEN); // TODO: Convert these to Point3D32 (stream.map?)
+      List<Point3D32> renderablePointCloud = yoloNode.getObjectPointCloud().parallelStream().map(Point3D32::new).toList();
+      objectPointCloudRenderer.setPointsToRender(renderablePointCloud, Color.GREEN); // TODO: Convert these to Point3D32 (stream.map?)
    }
 }

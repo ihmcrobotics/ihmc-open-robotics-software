@@ -144,7 +144,7 @@ public class PerceptionAndAutonomyProcess
    private final CenterposeDetectionManager centerposeDetectionManager;
    private ROS2DemandGraphNode centerposeDemandNode;
 
-   private final YOLOv8DetectionManager yolOv8DetectionManager;
+   private final YOLOv8DetectionManager yolov8DetectionManager;
 
    private final IterativeClosestPointManager icpManager;
 
@@ -219,7 +219,7 @@ public class PerceptionAndAutonomyProcess
 
       centerposeDetectionManager = new CenterposeDetectionManager(ros2Helper);
 
-      yolOv8DetectionManager = new YOLOv8DetectionManager(ros2Helper);
+      yolov8DetectionManager = new YOLOv8DetectionManager(ros2Helper);
 
       icpManager = new IterativeClosestPointManager(ros2Helper, sceneGraph);
       icpManager.startWorkers();
@@ -368,7 +368,7 @@ public class PerceptionAndAutonomyProcess
          realsenseImagePublisher.setNextDepthImage(realsenseDepthImage.get());
          realsenseImagePublisher.setNextColorImage(realsenseColorImage.get());
 
-         yolOv8DetectionManager.setDetectionImages(realsenseColorImage, realsenseColorImage);
+         yolov8DetectionManager.setDetectionImages(realsenseColorImage, realsenseColorImage);
 
          realsenseDepthImage.release();
          realsenseColorImage.release();
@@ -454,7 +454,7 @@ public class PerceptionAndAutonomyProcess
       if (centerposeDemandNode.isDemanded())
          centerposeDetectionManager.updateSceneGraph(sceneGraph);
 
-      yolOv8DetectionManager.updateSceneGraph(sceneGraph);
+      yolov8DetectionManager.updateSceneGraph(sceneGraph);
 
       // Update general stuff
       sceneGraph.updateOnRobotOnly(robotPelvisFrameSupplier.get());

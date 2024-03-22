@@ -101,11 +101,6 @@ public class YOLOv8DetectionManager
       }
    }
 
-   public void start()
-   {
-      yoloDetectionThread.start();
-   }
-
    public void destroy()
    {
       yoloDetectionThread.stop();
