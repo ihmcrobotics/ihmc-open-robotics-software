@@ -5,6 +5,8 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -24,7 +26,8 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
     */
    private double distanceToDisableTracking;
    private double currentDistance = Double.NaN;
-   private transient final FramePose3D staticRelativeSceneNodePose = new FramePose3D();
+   private transient final FramePose3D staticRelativeParentSceneNodePose = new FramePose3D();
+   private final long initialParentID;
 
    public StaticRelativeSceneNode(long id,
                                   String name,
@@ -36,8 +39,8 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
                                   double distanceToDisableTracking)
    {
       super(id, name, sceneGraphIDToNodeMap, initialParentNodeID, initialTransformToParent, visualModelFilePath, visualModelToNodeFrameTransform);
-
       this.distanceToDisableTracking = distanceToDisableTracking;
+      this.initialParentID = super.getInitialParentNodeID();
    }
 
    /**
@@ -45,14 +48,27 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
     */
    public void updateTrackingState(ReferenceFrame sensorFrame, SceneGraphModificationQueue modificationQueue)
    {
-      staticRelativeSceneNodePose.setToZero(getNodeFrame());
-      staticRelativeSceneNodePose.setFromReferenceFrame(sensorFrame);
-      currentDistance = staticRelativeSceneNodePose.getPosition().distanceFromOrigin();
+      if (initialParentID != 0)
+      {
+         SceneNode initialParentNode = super.getSceneGraphIDToNodeMap().get(initialParentID);
+         staticRelativeParentSceneNodePose.setToZero(initialParentNode.getNodeFrame());
+      }
+      else
+         staticRelativeParentSceneNodePose.setToZero(getNodeFrame());
+
+      staticRelativeParentSceneNodePose.setFromReferenceFrame(sensorFrame);
+      currentDistance = staticRelativeParentSceneNodePose.getPosition().distanceFromOrigin();
 
       if (currentDistance <= getDistanceToDisableTracking() && getTrackingInitialParent())
       {
          LogTools.warn("{}: Disabling tracking initial parent", getName());
          setTrackInitialParent(false, modificationQueue);
+      }
+      else if (currentDistance > getDistanceToDisableTracking() && !getTrackingInitialParent())
+      {
+         LogTools.warn("{}: Activating tracking initial parent", getName());
+         setTrackInitialParent(true, modificationQueue);
+         clearOffset();
       }
    }
 
