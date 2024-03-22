@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
@@ -111,7 +110,6 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
          if (paletteTexture == null)
             paletteTexture = RDXMultiColorMeshBuilder.loadPaletteTexture();
          material.set(TextureAttribute.createDiffuse(paletteTexture));
-         material.set(new BlendingAttribute(opacity));
          material.set(ColorAttribute.createDiffuse(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
 
          for (RDXMultiColorMeshBuilder meshBuilder : meshBuilders)
@@ -126,6 +124,7 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
 
          lastModel = modelBuilder.end();
          modelInstance = new RDXModelInstance(lastModel); // TODO: Clean up garbage and look into reusing the Model
+         modelInstance.setOpacity(opacity);
       };
    }
 
@@ -264,5 +263,8 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
    public void setBlendOpacity(float opacity)
    {
       this.opacity = opacity;
+
+      if (modelInstance != null)
+         modelInstance.setOpacity(opacity);
    }
 }
