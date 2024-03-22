@@ -32,6 +32,7 @@ public class TerrainMapData
    private Mat heightMap;
    private Mat contactMap;
    private Mat terrainCostMap;
+   private Mat traversabilityGraph;
 
    public TerrainMapData(Mat heightMap, Mat contactMap, Mat terrainCostMap)
    {
@@ -42,11 +43,22 @@ public class TerrainMapData
       this.localGridSize = heightMap.rows();
    }
 
+   public TerrainMapData(Mat heightMap, Mat contactMap, Mat terrainCostMap, Mat traversabilityGraph)
+   {
+      this.heightMap = heightMap;
+      this.contactMap = contactMap;
+      this.terrainCostMap = terrainCostMap;
+      this.traversabilityGraph = traversabilityGraph;
+
+      this.localGridSize = heightMap.rows();
+   }
+
    public TerrainMapData(TerrainMapData data)
    {
       this.heightMap = data.heightMap.clone();
       this.contactMap = data.contactMap.clone();
       this.terrainCostMap = data.terrainCostMap.clone();
+      this.traversabilityGraph = data.traversabilityGraph.clone();
 
       this.cellsPerMeter = data.cellsPerMeter;
       this.localGridSize = data.localGridSize;
@@ -61,6 +73,7 @@ public class TerrainMapData
       heightMap = new Mat(height, width, opencv_core.CV_16UC1);
       terrainCostMap = new Mat(height, width, opencv_core.CV_8UC1);
       contactMap = new Mat(height, width, opencv_core.CV_8UC1);
+      traversabilityGraph = new Mat(height, width, opencv_core.CV_8UC4);
       localGridSize = height;
    }
 
@@ -201,6 +214,11 @@ public class TerrainMapData
       return terrainCostMap;
    }
 
+   public Mat getTraversabilityGraph()
+   {
+      return traversabilityGraph;
+   }
+
    public int getCellsPerMeter()
    {
       return cellsPerMeter;
@@ -224,5 +242,10 @@ public class TerrainMapData
    public void setTerrainCostMap(Mat terrainCostMap)
    {
       this.terrainCostMap = terrainCostMap;
+   }
+
+   public void setTraversabilityGraph(Mat traversabilityGraph)
+   {
+      this.traversabilityGraph = traversabilityGraph;
    }
 }

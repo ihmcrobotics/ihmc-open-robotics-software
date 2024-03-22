@@ -35,6 +35,8 @@
 #define VERTICAL_SEARCH_SIZE 34
 #define VERTICAL_SEARCH_RESOLUTION 35
 #define FAST_SEARCH_SIZE 36
+#define GRAPH_CELLS_PER_AXIS 37
+#define GRAPH_PATCH_SIZE 38
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -189,6 +191,24 @@ float get_spatial_filtered_height(int xIndex, int yIndex, float height, read_wri
    }
 
    return finalHeight;
+}
+
+bool isTraversible(read_write image2d_t contactMap, read_write image2d_t heightMap,int2 aIndex, int2 bIndex, global float *params)
+{
+   float c_a = read_imageui(contactMap, aIndex).x;
+   float h_a = read_imageui(heightMap, aIndex).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+
+   float c_b = read_imageui(contactMap, bIndex).x;
+   float h_b = read_imageui(heightMap, bIndex).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+
+   float c_diff = fabs(c_a - c_b);
+   float h_diff = fabs(h_a - h_b);
+
+   if (c_diff < 1.0f && h_diff < 0.1f)
+   {
+      return true;
+   }
+   return false;
 }
 
 void kernel heightMapUpdateKernel(read_write image2d_t in,
@@ -554,6 +574,49 @@ void kernel contactMapKernel(read_write image2d_t terrainCost,
    score = closestDistance;
    write_imageui(contactMap, (int2)(yIndex, xIndex), (uint4)(score, 0, 0, 0));
 }
+
+void kernel traversabilityGraphKernel(read_write image2d_t contactMap,
+                           read_write image2d_t heightMap,
+                           read_write image2d_t traversabilityGraph,
+                           global float *params)
+{
+   int cIndex = get_global_id(0);
+   int rIndex = get_global_id(1);
+
+   int m = 1;
+
+   //    if(cIndex == 0 && rIndex == 0) printf("MergeKernel:(%d)\n", params[MERGE_RANGE]);
+
+   if (rIndex >= m && rIndex < (int) params[GRAPH_CELLS_PER_AXIS] - m && cIndex >= m && cIndex < (int) params[GRAPH_CELLS_PER_AXIS] - m)
+   {
+      int2 aIndex = (int2) (cIndex, rIndex);
+
+      uint boundaryConnectionsEncodedAsOnes = (uint) (0);
+
+      int count = 0;
+      for (int i = -m; i < m + 1; i += m)
+      {
+         for (int j = -m; j < m + 1; j += m)
+         {
+            if (!(j == 0 && i == 0))
+            {
+               int2 bIndex = (int2) (cIndex + i, rIndex + j);
+
+               if (isTraversible(contactMap, heightMap, aIndex, bIndex, params))
+               {
+                  boundaryConnectionsEncodedAsOnes = (1 << count) | boundaryConnectionsEncodedAsOnes;
+               }
+               count++;
+            }
+         }
+      }
+      write_imageui(traversabilityGraph, (int2) (cIndex, rIndex), (uint4) (123, 0, 0, 0));
+
+      //      printf("MergeKernel[%d,%d] -> (%d)\n", rIndex, cIndex, boundaryConnectionsEncodedAsOnes);
+   }
+}
+
+
 
 
 float get_yaw_from_index(int yaw_discretizations, int idx_yaw)

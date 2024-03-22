@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -44,6 +45,8 @@ public class RapidHeightMapExtractor
    private int globalCenterIndex;
    private int cropCenterIndex;
    private int globalCellsPerAxis;
+   private int graphCellsPerAxis;
+   private int graphPatchSize = 12;
    public int sequenceNumber = 0;
 
    private static final boolean computeSteppability = false;
@@ -81,10 +84,11 @@ public class RapidHeightMapExtractor
    private BytedecoImage globalHeightVarianceImage;
    private BytedecoImage terrainCostImage;
    private BytedecoImage contactMapImage;
+   private BytedecoImage traversabilityGraphImage;
 
-   private BytedecoImage sensorCroppedHeightMapImage;
+   private BytedecoImage croppedHeightMapImage;
    private BytedecoImage sensorCroppedTerrainCostImage;
-   private BytedecoImage sensorCroppedContactMapImage;
+   private BytedecoImage croppedContactMapImage;
    private Mat steppableRegionAssignmentMat;
    private Mat steppableRegionRingMat;
 
@@ -101,6 +105,7 @@ public class RapidHeightMapExtractor
    private _cl_kernel terrainCostKernel;
    private _cl_kernel contactMapKernel;
    private _cl_kernel croppingKernel;
+   private _cl_kernel traversabilityGraphKernel;
 
    private _cl_kernel computeSnappedValuesKernel;
    private _cl_kernel computeSteppabilityConnectionsKernel;
@@ -162,16 +167,19 @@ public class RapidHeightMapExtractor
       createGlobalHeightVarianceImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
       createTerrainCostImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
       createContactMapImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
+      createTraversabilityGraphImage(graphCellsPerAxis, graphCellsPerAxis, opencv_core.CV_8UC1);
+
       createSteppabilityMapImages(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
       createSteppabilityMapImages(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
-      createSensorCroppedHeightMapImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
-      createSensorCroppedTerrainCostImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
-      createSensorCroppedContactMapImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
+      createCroppedHeightMapImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
+      createCroppedTerrainCostImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
+      createCroppedContactMapImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
 
       heightMapUpdateKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateKernel");
       heightMapRegistrationKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapRegistrationKernel");
       terrainCostKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "terrainCostKernel");
       contactMapKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "contactMapKernel");
+      traversabilityGraphKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "traversabilityGraphKernel");
       croppingKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "croppingKernel");
 
       if (computeSteppability)
@@ -199,6 +207,9 @@ public class RapidHeightMapExtractor
       globalCenterIndex = HeightMapTools.computeCenterIndex(heightMapParameters.getInternalGlobalWidthInMeters(),
                                                             heightMapParameters.getInternalGlobalCellSizeInMeters());
       globalCellsPerAxis = 2 * globalCenterIndex + 1;
+      graphCellsPerAxis = globalCellsPerAxis / graphPatchSize + 1;
+
+      LogTools.info("Global: {}, Graph: {}", globalCellsPerAxis, graphCellsPerAxis);
 
       cropCenterIndex = (heightMapParameters.getCropWindowSize() - 1) / 2;
 
@@ -286,8 +297,11 @@ public class RapidHeightMapExtractor
          terrainMapStatistics.startTerrainMapDownloadTime();
 
          terrainMapData.setSensorOrigin(groundToWorldTransform.getTranslationX(), groundToWorldTransform.getTranslationY());
-         terrainMapData.setHeightMap(getCroppedImage_OpenCL(globalHeightMapImage, sensorCroppedHeightMapImage, parametersBuffer));
-         terrainMapData.setContactMap(getCroppedImage_OpenCL(contactMapImage, sensorCroppedContactMapImage, parametersBuffer));
+         terrainMapData.setHeightMap(getCroppedImage_OpenCL(globalHeightMapImage, croppedHeightMapImage, parametersBuffer));
+         terrainMapData.setContactMap(getCroppedImage_OpenCL(contactMapImage, croppedContactMapImage, parametersBuffer));
+
+
+         terrainMapData.setTraversabilityGraph(traversabilityGraphImage.getBytedecoOpenCVMat().clone());
          //terrainMapData.setTerrainCostMap(getCroppedImageOnKernel(terrainCostImage, sensorCroppedTerrainCostImage, parametersBuffer));
 
          terrainMapStatistics.endTerrainMapDownloadTime();
@@ -384,6 +398,8 @@ public class RapidHeightMapExtractor
       parametersBuffer.setParameter((float) parameters.getVerticalSearchSize());
       parametersBuffer.setParameter((float) parameters.getVerticalSearchResolution());
       parametersBuffer.setParameter((float) parameters.getFastSearchSize());
+      parametersBuffer.setParameter((float) graphCellsPerAxis);
+      parametersBuffer.setParameter((float) graphPatchSize);
 
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
@@ -425,9 +441,16 @@ public class RapidHeightMapExtractor
       openCLManager.setKernelArgument(contactMapKernel, 1, contactMapImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(contactMapKernel, 2, parametersBuffer.getOpenCLBufferObject());
 
+      // Set kernel arguments for the traversability graph kernel
+      openCLManager.setKernelArgument(traversabilityGraphKernel, 0, contactMapImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(traversabilityGraphKernel, 0, globalHeightMapImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(traversabilityGraphKernel, 1, traversabilityGraphImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(traversabilityGraphKernel, 2, parametersBuffer.getOpenCLBufferObject());
+
       // Execute kernels with length and width parameters
       openCLManager.execute2D(terrainCostKernel, globalCellsPerAxis, globalCellsPerAxis);
       openCLManager.execute2D(contactMapKernel, globalCellsPerAxis, globalCellsPerAxis);
+      openCLManager.execute2D(traversabilityGraphKernel, graphCellsPerAxis, graphCellsPerAxis);
 
       openCLManager.join();
    }
@@ -521,22 +544,22 @@ public class RapidHeightMapExtractor
       globalHeightVarianceImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
    }
 
-   public void createSensorCroppedHeightMapImage(int height, int width, int type)
+   public void createCroppedHeightMapImage(int height, int width, int type)
    {
-      sensorCroppedHeightMapImage = new BytedecoImage(width, height, type);
-      sensorCroppedHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      croppedHeightMapImage = new BytedecoImage(width, height, type);
+      croppedHeightMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
    }
 
-   public void createSensorCroppedTerrainCostImage(int height, int width, int type)
+   public void createCroppedTerrainCostImage(int height, int width, int type)
    {
       sensorCroppedTerrainCostImage = new BytedecoImage(width, height, type);
       sensorCroppedTerrainCostImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
    }
 
-   public void createSensorCroppedContactMapImage(int height, int width, int type)
+   public void createCroppedContactMapImage(int height, int width, int type)
    {
-      sensorCroppedContactMapImage = new BytedecoImage(width, height, type);
-      sensorCroppedContactMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+      croppedContactMapImage = new BytedecoImage(width, height, type);
+      croppedContactMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
    }
 
    public void createTerrainCostImage(int height, int width, int type)
@@ -549,6 +572,13 @@ public class RapidHeightMapExtractor
    {
       contactMapImage = new BytedecoImage(width, height, type);
       contactMapImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+   }
+
+   public void createTraversabilityGraphImage(int height, int width, int type)
+   {
+      LogTools.warn("Creating traversability graph image: {} {}", height, width);
+      traversabilityGraphImage = new BytedecoImage(width, height, type);
+      traversabilityGraphImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
    }
 
    public void createSteppabilityMapImages(int height, int width)
