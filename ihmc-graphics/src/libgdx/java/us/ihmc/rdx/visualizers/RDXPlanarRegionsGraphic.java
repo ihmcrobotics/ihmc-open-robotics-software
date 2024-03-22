@@ -151,7 +151,7 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
 //         sizeLabel.update();
 //      }
 
-      if (drawBoundingBox)
+      if (true)
       {
 //         RDXMeshGraphicTools.drawBoxEdges(meshBuilder, PlanarRegionTools.getLocalBoundingBox3DInWorld(planarRegion, 0.1), 0.005, color);
 
@@ -160,7 +160,7 @@ public class RDXPlanarRegionsGraphic implements RenderableProvider
          RDXMeshGraphicTools.drawBoxEdges(meshBuilder, box, 0.005, color);
       }
 
-      if (drawNormal)
+      if (true)
       {
          Point3DReadOnly centroid = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
 

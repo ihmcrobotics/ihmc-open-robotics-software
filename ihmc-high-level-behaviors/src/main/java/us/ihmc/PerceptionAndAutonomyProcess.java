@@ -30,9 +30,11 @@ import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectionUpdater;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
+import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.tools.PerceptionMessageTools;
@@ -486,6 +488,14 @@ public class PerceptionAndAutonomyProcess
          PerceptionMessageTools.publishFramePlanarRegionsList(planarRegionsList, PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE, ros2Helper);
 
          latestOusterDepthRawImage.release();
+      }
+
+      for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
+      {
+         if (sceneNode instanceof PredefinedRigidBodySceneNode predefinedRigidBodySceneNode)
+         {
+            predefinedRigidBodySceneNode.updatePlanarRegions(planarRegionsList.getPlanarRegionsList());
+         }
       }
    }
 

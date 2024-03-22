@@ -2,6 +2,7 @@ package us.ihmc.rdx.perception.sceneGraph.builder;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.rdx.perception.sceneGraph.RDXPredefinedRigidBodySceneNode;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -163,6 +164,16 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                  DRILL_VISUAL_MODEL_FILE_PATH,
                                                                                  DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
             yield new RDXPredefinedRigidBodySceneNode(drill, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
+         case "DoorLever" ->
+         {
+            PredefinedRigidBodySceneNode doorHandle = new PredefinedRigidBodySceneNode(nextID,
+                                                                                  name,
+                                                                                  sceneGraph.getIDToNodeMap(),
+                                                                                  parent.getID(),
+                                                                                  new RigidBodyTransform(), DoorSceneNodeDefinitions.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
+                                                                                  DoorSceneNodeDefinitions.LEFT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            yield new RDXPredefinedRigidBodySceneNode(doorHandle, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
          default -> throw new IllegalStateException("Unexpected value: " + name);
       };

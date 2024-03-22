@@ -199,6 +199,12 @@ public class RDXSceneGraphUI
                      modificationQueue.accept(new SceneGraphNodeAddition(drill.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(drill);
                   }
+                  if (ImGui.button(labels.get("Add Door Handle")))
+                  {
+                     RDXPredefinedRigidBodySceneNode doorHandle = predefinedRigidBodySceneNodeBuilder.build("DoorLever");
+                     modificationQueue.accept(new SceneGraphNodeAddition(doorHandle.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(doorHandle);
+                  }
                   ImGui.endTable();
                }
                ImGui.endDisabled();
