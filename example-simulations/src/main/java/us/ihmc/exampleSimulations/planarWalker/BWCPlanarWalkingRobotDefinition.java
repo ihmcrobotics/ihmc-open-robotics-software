@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.planarWalker;
 
+import boofcv.struct.image.Planar;
 import javafx.geometry.Side;
 import org.opencv.features2d.SIFT;
 import us.ihmc.euclid.Axis3D;
@@ -49,7 +50,7 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
    private final SideDependentList<RevoluteJointDefinition> hipPitchJointDefinitions = new SideDependentList<>();
    private final SideDependentList<RevoluteJointDefinition> hipRollJointDefinitions = new SideDependentList<>();
 
-   private final PlanarJointDefinition floatingBaseDefinition;
+   private final SixDoFJointDefinition floatingBaseDefinition;
 
    private final RigidBodyDefinition torsoBodyDefinition;
 
@@ -60,7 +61,8 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
       RigidBodyDefinition elevator = new RigidBodyDefinition("elevator");
       setRootBodyDefinition(elevator);
 
-      floatingBaseDefinition = new PlanarJointDefinition(baseJointName);
+//      floatingBaseDefinition = new PlanarJointDefinition(baseJointName);
+      floatingBaseDefinition = new SixDoFJointDefinition(baseJointName);
       elevator.addChildJoint(floatingBaseDefinition);
 
       torsoBodyDefinition = createTorso();
@@ -124,7 +126,7 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 
    private static RigidBodyDefinition createTorso()
    {
-      double torsoMass = 10.0;
+      double torsoMass = 30.0;
       MomentOfInertiaDefinition torsoMomentOfInertia = new MomentOfInertiaDefinition(0.75, 0.75, 1.0);
 
       RigidBodyDefinition torsoBodyDefinition = new RigidBodyDefinition(torsoName);
@@ -159,7 +161,7 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 
    private static RigidBodyDefinition createThigh(String name)
    {
-      double thighMass = 1.0;
+      double thighMass = 5.0;
       MomentOfInertiaDefinition thighMomentOfInertia = new MomentOfInertiaDefinition(0.1, 0.1, 0.01);
 
       RigidBodyDefinition thighDefinition = new RigidBodyDefinition(name);

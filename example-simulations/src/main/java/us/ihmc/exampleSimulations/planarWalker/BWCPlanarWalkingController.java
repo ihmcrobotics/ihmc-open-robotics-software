@@ -347,7 +347,7 @@ public class BWCPlanarWalkingController implements Controller, SCS2YoGraphicHold
          currentCoMVelocity.scale(-1.0); // We need to negate the velocity to get CoM relative to foot
          double omega = Math.sqrt(9.81 / desiredBodyHeight.getDoubleValue());
          FrameVector2D adjustedVelocity = new FrameVector2D(desiredCoMVelocity);
-//         adjustedVelocity.scale(comVelocityAdjustmentGain.getDoubleValue());
+         adjustedVelocity.scale(comVelocityAdjustmentGain.getDoubleValue());
 
          double velocitySquareDifferenceX = currentCoMVelocity.getX() * currentCoMVelocity.getX() - adjustedVelocity.getX() * adjustedVelocity.getX();
          double velocitySquareDifferenceY = currentCoMVelocity.getY() * currentCoMVelocity.getY() - adjustedVelocity.getY() * adjustedVelocity.getY();
@@ -355,8 +355,17 @@ public class BWCPlanarWalkingController implements Controller, SCS2YoGraphicHold
          double signY = Math.signum(currentCoMVelocity.getY());
          if (desiredCoMVelocity.getX() != 0)
             signX = Math.signum(velocitySquareDifferenceX) * Math.signum(desiredCoMVelocity.getX());
+         //TODO: fix the y direction
          if (desiredCoMVelocity.getY() != 0)
-            signY = Math.signum(velocitySquareDifferenceY) * Math.signum(desiredCoMVelocity.getY());
+            signY = swingSide.negateIfRightSide(Math.signum(velocitySquareDifferenceY));
+//         if (desiredCoMVelocity.getY() > 0)
+//            signY = swingSide.negateIfRightSide(Math.signum(velocitySquareDifferenceY)) * Math.signum(desiredCoMVelocity.getY());
+//            signY = Math.signum(velocitySquareDifferenceY) * swingSide.negateIfRightSide(Math.signum(desiredCoMVelocity.getY()));
+//         if (desiredCoMVelocity.getY() < 0)
+//            signY = swingSide.negateIfRightSide(Math.signum(-velocitySquareDifferenceY)) * Math.signum(desiredCoMVelocity.getY());
+//            signY = Math.signum(velocitySquareDifferenceY) * swingSide.negateIfRightSide(-Math.signum(desiredCoMVelocity.getY()));
+//            signY = Math.signum(swingSide.negateIfRightSide(velocitySquareDifferenceY)) * Math.signum(desiredCoMVelocity.getY());
+//            signY = Math.signum(velocitySquareDifferenceY) * Math.signum(swingSide.negateIfRightSide(desiredCoMVelocity.getY()));
 
          touchdownPositionToPack.set(signX * Math.sqrt(Math.abs(velocitySquareDifferenceX)) / omega,
                                      signY * Math.sqrt(Math.abs(velocitySquareDifferenceY)) / omega + hipOffset);
@@ -458,7 +467,7 @@ public class BWCPlanarWalkingController implements Controller, SCS2YoGraphicHold
                                                        controllerRobot.getFloatingJoint().getFrameAfterJoint().getTwistOfFrame().getAngularPartX(),
                                                        0.0);
 
-         controllerRobot.getHipRollJoint(supportSide).setTau(supportSide.negateIfRightSide(effort)); //TODO: verify sign
+         controllerRobot.getHipRollJoint(supportSide).setTau(-effort); //TODO: verify sign
       }
 
       @Override
