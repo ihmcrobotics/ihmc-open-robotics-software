@@ -70,7 +70,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       // Actions:
       if (nodeType == ArmJointAnglesActionDefinition.class)
       {
-         return new RDXArmJointAnglesAction(id, crdtInfo, saveFileDirectory, robotModel);
+         return new RDXArmJointAnglesAction(id, crdtInfo, saveFileDirectory, syncedRobot, robotModel);
       }
       if (nodeType == ChestOrientationActionDefinition.class)
       {

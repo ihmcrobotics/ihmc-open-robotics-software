@@ -158,6 +158,8 @@ public class RDXFootstepPlanning
       else // AUTO
          footstepPlannerRequest.setRequestedInitialStanceSide(getStanceSideToClosestToGoal(footstepPlannerRequest, goalPose));
 
+      footstepPlannerRequest.setPerformAStarSearch(locomotionParameters.getPerformAStarSearch());
+
       boolean assumeFlatGround = true;
       if (!locomotionParameters.getAssumeFlatGround())
       {
