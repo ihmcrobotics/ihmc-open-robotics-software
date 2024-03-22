@@ -40,7 +40,7 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
       previewTrajectoryLinearVelocity = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, -1.0);
       previewTrajectoryAngularVelocity = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, -1.0);
       previewRequestedTime = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.0);
-      previewJointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS);
+      previewJointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, ArmJointAnglesActionDefinition.MAX_NUMBER_OF_JOINTS);
       previewSolutionQuality = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, 0.0);
    }
 
@@ -63,7 +63,7 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
       message.setPreviewTrajectoryLinearVelocity(previewTrajectoryLinearVelocity.toMessage());
       message.setPreviewTrajectoryAngularVelocity(previewTrajectoryAngularVelocity.toMessage());
       message.setPreviewRequestedTime(previewRequestedTime.toMessage());
-      for (int i = 0; i < ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS; i++)
+      for (int i = 0; i < ArmJointAnglesActionDefinition.MAX_NUMBER_OF_JOINTS; i++)
       {
          previewJointAngles.toMessage(message.getPreviewJointAngles());
       }

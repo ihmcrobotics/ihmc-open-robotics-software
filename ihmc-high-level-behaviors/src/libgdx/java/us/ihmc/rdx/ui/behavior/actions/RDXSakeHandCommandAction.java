@@ -23,7 +23,6 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
    private final ImIntegerWrapper sideWidget;
    private final ImGuiSliderDoubleWrapper handOpenAngleSlider;
    private final ImGuiSliderDoubleWrapper fingertipGripForceSlider;
-   private final ImBooleanWrapper executeWithNextActionWrapper;
    private final ImGuiGripperWidget gripperWidget = new ImGuiGripperWidget();
 
    public RDXSakeHandCommandAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
@@ -44,9 +43,6 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
                                                               definition::getFingertipGripForceLimit,
                                                               definition::setFingertipGripForceLimit);
       fingertipGripForceSlider.addWidgetAligner(widgetAligner);
-      executeWithNextActionWrapper = new ImBooleanWrapper(definition::getExecuteWithNextAction,
-                                                          definition::setExecuteWithNextAction,
-                                                          imBoolean -> imgui.ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
    }
 
    @Override
@@ -58,9 +54,6 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      ImGui.sameLine();
-      executeWithNextActionWrapper.renderImGuiWidget();
-      
       ImGui.pushItemWidth(100.0f);
       sideWidget.renderImGuiWidget();
 

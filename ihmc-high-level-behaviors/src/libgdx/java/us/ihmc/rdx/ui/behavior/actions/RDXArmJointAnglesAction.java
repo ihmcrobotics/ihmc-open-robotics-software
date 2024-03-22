@@ -4,33 +4,43 @@ import imgui.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.actions.ArmJointAnglesActionDefinition;
 import us.ihmc.behaviors.sequence.actions.ArmJointAnglesActionState;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImIntegerWrapper;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionState, ArmJointAnglesActionDefinition>
 {
    private final DRCRobotModel robotModel;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final ArmJointAnglesActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImIntegerWrapper sideWidget;
    private final String[] configurations = new String[PresetArmConfiguration.values().length + 1];
    private final ImInt currentConfiguration = new ImInt(PresetArmConfiguration.HOME.ordinal() + 1);
-   private final ImDoubleWrapper[] jointAngleWidgets = new ImDoubleWrapper[ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS];
+   private final ImDoubleWrapper[] jointAngleWidgets = new ImDoubleWrapper[ArmJointAnglesActionDefinition.MAX_NUMBER_OF_JOINTS];
    private final ImDoubleWrapper trajectoryDurationWidget;
 
-   public RDXArmJointAnglesAction(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, DRCRobotModel robotModel)
+   public RDXArmJointAnglesAction(long id,
+                                  CRDTInfo crdtInfo,
+                                  WorkspaceResourceDirectory saveFileDirectory,
+                                  ROS2SyncedRobotModel syncedRobot,
+                                  DRCRobotModel robotModel)
    {
       super(new ArmJointAnglesActionState(id, crdtInfo, saveFileDirectory));
 
       state = getState();
 
       this.robotModel = robotModel;
+      this.syncedRobot = syncedRobot;
 
       getDefinition().setName("Arm joint angles");
 
@@ -46,7 +56,7 @@ public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionS
          configurations[c++] = preset.name();
       }
 
-      for (int i = 0; i < ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS; i++)
+      for (int i = 0; i < ArmJointAnglesActionDefinition.MAX_NUMBER_OF_JOINTS; i++)
       {
          int jointIndex = i;
          jointAngleWidgets[i] = new ImDoubleWrapper(() -> getDefinition().getJointAngles().getValue()[jointIndex],
@@ -94,11 +104,23 @@ public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionS
       if (getDefinition().getPreset() == null)
       {
          ImGui.pushItemWidth(80.0f);
-         for (int i = 0; i < ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS; i++)
+         for (int i = 0; i < ArmJointAnglesActionDefinition.MAX_NUMBER_OF_JOINTS; i++)
          {
             jointAngleWidgets[i].renderImGuiWidget();
          }
          ImGui.popItemWidth();
+         if (ImGui.button(labels.get("Set Configuration to Synced Arm")))
+         {
+            ArmJointName[] armJointNames = robotModel.getJointMap().getArmJointNames();
+            for (int i = 0; i < ArmJointAnglesActionDefinition.MAX_NUMBER_OF_JOINTS; i++)
+            {
+               OneDoFJointBasics syncedJoint = syncedRobot.getFullRobotModel().getArmJoint(getDefinition().getSide(), armJointNames[i]);
+               if (syncedJoint != null)
+                  getDefinition().getJointAngles().getValue()[i] = syncedJoint.getQ();
+               else
+                  getDefinition().getJointAngles().getValue()[i] = 0.0;
+            }
+         }
       }
    }
 

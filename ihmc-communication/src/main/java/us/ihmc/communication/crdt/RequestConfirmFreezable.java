@@ -24,14 +24,16 @@ import us.ihmc.log.LogTools;
  * <p>
  * A singleton CRDTInfo object exists for a node in the CRDT graph
  * which has an update number that is 0 for the first update and
- * monotonically increases on each subsequent update. In this class
+ * monotonically increases on each subsequent update. This is different
+ * than the request number. In this class
  * that update number is used to "timeout" the freeze if a confirmation
  * is not recieved within the max freeze duration.
  * </p>
  *
  * <p>
- * The {@link #unfreeze} method works pulling back that timeout to
- * the current update number.
+ * The {@link #unfreeze} method works by rewinding the "update number to unfreeze",
+ * which was previously set to a higher number which served as the timeout.
+ * Once there are no unconfirmed req or the timeout update
  * </p>
  *
  * <p>
@@ -43,6 +45,8 @@ import us.ihmc.log.LogTools;
  * <p>
  * TODO: This class currently doesn't work with more than two nodes
  *   in the CRDT graph.
+ * TODO: Is there a bug here where it unfreezes early even if there are
+ *   still unconfirmed requests?
  * </p>
  */
 public class RequestConfirmFreezable implements Freezable
