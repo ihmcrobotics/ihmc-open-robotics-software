@@ -171,21 +171,26 @@ public class IntraprocessYoVariableLogger
       {
          logProperties.getModel().setLoader(logModelProvider.getLoader().getCanonicalName());
          logProperties.getModel().setName(logModelProvider.getModelName());
-         for (String resourceDirectory : logModelProvider.getResourceDirectories())
+         for (String resourceDirectory : logModelProvider.getTopLevelResourceDirectories())
          {
             logProperties.getModel().getResourceDirectoriesList().add(resourceDirectory);
          }
          logProperties.getModel().setPath(MODEL_FILENAME);
          logProperties.getModel().setResourceBundle(MODEL_RESOURCE_BUNDLE);
 
-         File modelFile = createFileInLogFolder(MODEL_FILENAME);
          File resourceFile = createFileInLogFolder(MODEL_RESOURCE_BUNDLE);
          try
          {
-            FileOutputStream modelStream = new FileOutputStream(modelFile, false);
-            modelStream.write(logModelProvider.getModel());
-            modelStream.getFD().sync();
-            modelStream.close();
+            for (byte[] modelFromLog : logModelProvider.getModels())
+            {
+               //FIXME needs to be unique file name
+               File modelFile = createFileInLogFolder(MODEL_FILENAME);
+               FileOutputStream modelStream = new FileOutputStream(modelFile, false);
+               modelStream.write(modelFromLog);
+               modelStream.getFD().sync();
+               modelStream.close();
+            }
+
             FileOutputStream resourceStream = new FileOutputStream(resourceFile, false);
             resourceStream.write(logModelProvider.getResourceZip());
             resourceStream.getFD().sync();
