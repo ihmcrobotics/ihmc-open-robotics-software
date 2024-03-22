@@ -152,7 +152,8 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
                                          state.getCommandedJointTrajectories().getLastValueReadOnly(1).getPosition());
          trackingCalculator.applyTolerance(state.getPositionDistanceToGoalTolerance());
 
-         boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
+         boolean meetsDesiredCompletionCriteria = true;
+//         meetsDesiredCompletionCriteria &= trackingCalculator.isWithinPositionTolerance();
          meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
          state.setIsExecuting(!meetsDesiredCompletionCriteria);
       }
