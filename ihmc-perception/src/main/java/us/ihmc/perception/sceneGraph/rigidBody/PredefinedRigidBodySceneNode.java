@@ -3,9 +3,11 @@ package us.ihmc.perception.sceneGraph.rigidBody;
 import gnu.trove.map.TLongObjectMap;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.interfaces.EuclidGeometry;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -84,7 +86,12 @@ public class PredefinedRigidBodySceneNode extends RigidBodySceneNode
                                                                           doorPlanarRegion.getNormal(),
                                                                           orientation);
 
-               System.out.println(orientation.getYaw());
+               Point3D centerOfDoor = new Point3D();
+               doorPlanarRegion.getBoundingBox3dInWorld().getCenterPoint(centerOfDoor);
+
+               Vector3D centerOfDoorToDoorHandle = new Vector3D();
+
+//               double normalAngle = doorPlanarRegion.getNormal().angle(getNodeFrame().getTransformToWorldFrame().getTranslation());
 
                sideOfDoor = MathTools.sign(orientation.getYaw()) == -1 ? RobotSide.LEFT : RobotSide.RIGHT;
 
