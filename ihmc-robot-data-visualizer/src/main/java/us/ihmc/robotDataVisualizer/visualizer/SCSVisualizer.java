@@ -288,7 +288,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
             LogTools.error("Could not instantiate LogModelLoader: {}. Defaulting to SDFModelLoader.", handshake.getModelLoaderClass());
             modelLoader = new SDFModelLoader();
          }
-         modelLoader.load(handshake.getModelName(), handshake.getModel(), handshake.getResourceDirectories(), handshake.getResourceZip());
+         modelLoader.load(handshake.getModelName(), handshake.getModels(), handshake.getResourceDirectories(), handshake.getResourceZip());
          robot = new RobotFromDescription(modelLoader.createRobot());
       }
 
