@@ -443,9 +443,9 @@ public class RapidHeightMapExtractor
 
       // Set kernel arguments for the traversability graph kernel
       openCLManager.setKernelArgument(traversabilityGraphKernel, 0, contactMapImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(traversabilityGraphKernel, 0, globalHeightMapImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(traversabilityGraphKernel, 1, traversabilityGraphImage.getOpenCLImageObject());
-      openCLManager.setKernelArgument(traversabilityGraphKernel, 2, parametersBuffer.getOpenCLBufferObject());
+      openCLManager.setKernelArgument(traversabilityGraphKernel, 1, globalHeightMapImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(traversabilityGraphKernel, 2, traversabilityGraphImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(traversabilityGraphKernel, 3, parametersBuffer.getOpenCLBufferObject());
 
       // Execute kernels with length and width parameters
       openCLManager.execute2D(terrainCostKernel, globalCellsPerAxis, globalCellsPerAxis);
@@ -460,6 +460,7 @@ public class RapidHeightMapExtractor
       // Read height map image into CPU memory
       terrainCostImage.readOpenCLImage(openCLManager);
       contactMapImage.readOpenCLImage(openCLManager);
+      traversabilityGraphImage.readOpenCLImage(openCLManager);
    }
 
    public void computeSteppabilityImage()
@@ -626,6 +627,11 @@ public class RapidHeightMapExtractor
    public BytedecoImage getInternalGlobalHeightMapImage()
    {
       return globalHeightMapImage;
+   }
+
+   public BytedecoImage getTraversabilityGraphImage()
+   {
+      return traversabilityGraphImage;
    }
 
    public TerrainMapData getTerrainMapData()

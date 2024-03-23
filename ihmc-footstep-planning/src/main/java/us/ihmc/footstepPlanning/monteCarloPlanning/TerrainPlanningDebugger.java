@@ -21,6 +21,7 @@ import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.heightMap.TerrainMapData;
+import us.ihmc.perception.heightMap.TerrainMapDebugger;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -31,39 +32,22 @@ import java.util.List;
 
 public class TerrainPlanningDebugger
 {
+   private boolean enabled = true;
    public static final int scaleFactor = 8;
 
-   private boolean enabled = true;
    private int offsetX = 0;
    private int offsetY = 0;
    private int height = 201;
    private int width = 201;
-   private int scaledHeight = scaleFactor * height;
-   private int scaledWidth = scaleFactor * width;
 
-   private final Mat heightMapImage = new Mat(scaledHeight, scaledWidth, opencv_core.CV_8UC3);
-   private final Mat stacked = new Mat(scaledHeight * 2, scaledWidth, opencv_core.CV_8UC4);
-   private final Mat heightMapColorImage = new Mat(scaledHeight, scaledWidth, opencv_core.CV_8UC4);
-   private final Mat contactHeatMapColorImage = new Mat(scaledHeight, scaledWidth, opencv_core.CV_8UC4);
-   private Mat contactHeatMapImage;
-
-   Mat top = stacked.apply(new org.bytedeco.opencv.opencv_core.Rect(0, 0, heightMapColorImage.cols(), heightMapColorImage.rows()));
-   Mat bottom = stacked.apply(new org.bytedeco.opencv.opencv_core.Rect(0,
-                                                                       heightMapColorImage.rows(),
-                                                                       contactHeatMapColorImage.cols(),
-                                                                       contactHeatMapColorImage.rows()));
-
-   private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
+   private TerrainMapDebugger terrainMapDebugger = new TerrainMapDebugger(height, width, scaleFactor);
    private ContinuousWalkingStatusMessage statusMessage = new ContinuousWalkingStatusMessage();
-
    private IHMCROS2Publisher<FootstepDataListMessage> publisherForUI;
    private IHMCROS2Publisher<ContinuousWalkingStatusMessage> statusPublisher;
    private IHMCROS2Publisher<FootstepDataListMessage> monteCarloPlanPublisherForUI;
    private IHMCROS2Publisher<PoseListMessage> startAndGoalPublisherForUI;
    private IHMCROS2Publisher<PoseListMessage> monteCarloNodesPublisherForUI;
    private MonteCarloFootstepPlannerRequest request;
-
-
 
    public TerrainPlanningDebugger(ROS2Node ros2Node)
    {
@@ -83,8 +67,10 @@ public class TerrainPlanningDebugger
          return;
 
       this.request = request;
-      this.offsetX = (int) (request.getTerrainMapData().getSensorOrigin().getX() * 50.0f);
-      this.offsetY = (int) (request.getTerrainMapData().getSensorOrigin().getY() * 50.0f);
+      offsetX = (int) (request.getTerrainMapData().getSensorOrigin().getX() * 50.0f);
+      offsetY = (int) (request.getTerrainMapData().getSensorOrigin().getY() * 50.0f);
+      terrainMapDebugger.setOffsets(offsetX, offsetY);
+
       refresh(request.getTerrainMapData());
    }
 
@@ -107,18 +93,7 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      this.offsetX = (int) (terrainMapData.getSensorOrigin().getX() * 50.0f);
-      this.offsetY = (int) (terrainMapData.getSensorOrigin().getY() * 50.0f);
-
-      PerceptionDebugTools.convertDepthCopyToColor(terrainMapData.getHeightMap().clone(), heightMapImage);
-      opencv_imgproc.cvtColor(heightMapImage, heightMapColorImage, opencv_imgproc.COLOR_BGR2BGRA);
-      opencv_imgproc.resize(heightMapColorImage, heightMapColorImage, new Size(scaledWidth, scaledHeight));
-
-      if (terrainMapData.getContactMap() != null)
-      {
-         this.contactHeatMapImage = contactHeatMapGenerator.generateHeatMap(terrainMapData.getContactMap().clone());
-         opencv_imgproc.resize(contactHeatMapImage, contactHeatMapColorImage, new Size(scaledWidth, scaledHeight));
-      }
+      terrainMapDebugger.refresh(terrainMapData);
    }
 
    public void plotNode(MonteCarloFootstepNode node)
@@ -126,14 +101,7 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      PerceptionDebugTools.plotRectangleNoScale(contactHeatMapColorImage,
-                                                new Point2D((int) (node.getState().getX() - offsetX) * scaleFactor, (int) (node.getState().getY() - offsetY) * scaleFactor),
-                                                1,
-                                                PerceptionDebugTools.COLOR_PURPLE);
-      PerceptionDebugTools.plotRectangleNoScale(heightMapColorImage,
-                                                new Point2D((int) (node.getState().getX() - offsetX) * scaleFactor, (int) (node.getState().getY() - offsetY) * scaleFactor),
-                                                1,
-                                                PerceptionDebugTools.COLOR_PURPLE);
+      plotRectangle(node.getState().getX32(), node.getState().getY32());
    }
 
    public void plotNodes(ArrayList<?> nodes)
@@ -152,8 +120,8 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      plotFootPoses(contactHeatMapColorImage, poses, 1);
-      plotFootPoses(heightMapColorImage, poses, 1);
+      plotFootPoses(terrainMapDebugger.getContactHeatMapColorImage(), poses, 1);
+      plotFootPoses(terrainMapDebugger.getHeightMapColorImage(), poses, 1);
    }
 
    public void plotFootFramePoses(SideDependentList<FramePose3D> poses, int mode)
@@ -163,8 +131,8 @@ public class TerrainPlanningDebugger
 
       SideDependentList<Pose3D> poses3D = new SideDependentList<>(new Pose3D(poses.get(RobotSide.LEFT)), new Pose3D(poses.get(RobotSide.RIGHT)));
 
-      plotFootPoses(contactHeatMapColorImage, poses3D, mode);
-      plotFootPoses(heightMapColorImage, poses3D, mode);
+      plotFootPoses(terrainMapDebugger.getContactHeatMapColorImage(), poses3D, mode);
+      plotFootPoses(terrainMapDebugger.getHeightMapColorImage(), poses3D, mode);
    }
 
    public void plotMonteCarloFootstepPlan(FootstepPlan plan)
@@ -172,8 +140,8 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      plotMonteCarloFootstepPlan(heightMapColorImage, request, plan);
-      plotMonteCarloFootstepPlan(contactHeatMapColorImage, request, plan);
+      plotMonteCarloFootstepPlan(terrainMapDebugger.getHeightMapColorImage(), request, plan);
+      plotMonteCarloFootstepPlan(terrainMapDebugger.getContactHeatMapColorImage(), request, plan);
    }
 
    public void plotMonteCarloFootstepPlan(Mat image, MonteCarloFootstepPlannerRequest request, FootstepPlan plan)
@@ -191,12 +159,24 @@ public class TerrainPlanningDebugger
       plotNodeRecursive(root);
    }
 
+   public void plotRectangle(float nodeX, float nodeY)
+   {
+      PerceptionDebugTools.plotRectangleNoScale(terrainMapDebugger.getContactHeatMapColorImage(),
+                                                new Point2D((int) (nodeX - offsetX) * scaleFactor, (int) (nodeY - offsetY) * scaleFactor),
+                                                1,
+                                                PerceptionDebugTools.COLOR_PURPLE);
+      PerceptionDebugTools.plotRectangleNoScale(terrainMapDebugger.getHeightMapColorImage(),
+                                                new Point2D((int) (nodeX - offsetX) * scaleFactor, (int) (nodeY - offsetY) * scaleFactor),
+                                                1,
+                                                PerceptionDebugTools.COLOR_PURPLE);
+   }
+
    public void plotNodeRecursive(MonteCarloFootstepNode node)
    {
       for (MonteCarloTreeNode child : node.getChildren())
       {
          MonteCarloFootstepNode childNode = (MonteCarloFootstepNode) child;
-         PerceptionDebugTools.plotLine(contactHeatMapColorImage,
+         PerceptionDebugTools.plotLine(terrainMapDebugger.getContactHeatMapColorImage(),
                                        new Point2D((int) (node.getState().getX() + height/2) * scaleFactor, (int) (node.getState().getY() + height / 2) * scaleFactor),
                                        new Point2D((int) (childNode.getState().getX() + height/2) * scaleFactor, (int) (childNode.getState().getY() + height / 2) * scaleFactor),
                                        PerceptionDebugTools.COLOR_PURPLE);
@@ -210,7 +190,7 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      plotFootstepPlan(heightMapColorImage, plan);
+      plotFootstepPlan(terrainMapDebugger.getHeightMapColorImage(), plan);
    }
 
    public void display(int delay)
@@ -218,13 +198,7 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      heightMapColorImage.copyTo(top);
-      contactHeatMapColorImage.copyTo(bottom);
-
-      // make the stacked image brighter
-      opencv_core.convertScaleAbs(stacked, stacked, 1.5, 0);
-
-      PerceptionDebugTools.display("Display", stacked, delay, 1500);
+      terrainMapDebugger.display(delay);
    }
 
    public void plotFootPoses(Mat image, SideDependentList<Pose3D> poses, int mode)
@@ -364,6 +338,6 @@ public class TerrainPlanningDebugger
 
    public Mat getHeatMapImage()
    {
-      return contactHeatMapColorImage;
+      return terrainMapDebugger.getContactHeatMapColorImage();
    }
 }
