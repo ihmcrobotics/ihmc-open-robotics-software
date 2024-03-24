@@ -2,6 +2,7 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 
 import behavior_msgs.msg.dds.*;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.door.DoorTraversalState;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.*;
 
@@ -18,6 +19,7 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getBehaviorTreeIndices().clear();
       treeStateMessage.getBasicNodes().clear();
       treeStateMessage.getActionSequences().clear();
+      treeStateMessage.getDoorTraversals().clear();
       treeStateMessage.getArmJointAnglesActions().clear();
       treeStateMessage.getChestOrientationActions().clear();
       treeStateMessage.getFootstepPlanActions().clear();
@@ -36,6 +38,12 @@ public class ROS2BehaviorTreeMessageTools
          treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.ACTION_SEQUENCE);
          treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getActionSequences().size());
          actionSequenceState.toMessage(treeStateMessage.getActionSequences().add());
+      }
+      else if (nodeState instanceof DoorTraversalState doorTraversalState)
+      {
+         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.DOOR_TRAVERSAL);
+         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getDoorTraversals().size());
+         doorTraversalState.toMessage(treeStateMessage.getDoorTraversals().add());
       }
       else if (nodeState instanceof ArmJointAnglesActionState armJointAnglesActionState)
       {
@@ -107,6 +115,10 @@ public class ROS2BehaviorTreeMessageTools
       {
          actionSequenceState.fromMessage(subscriptionNode.getActionSequenceStateMessage());
       }
+      else if (nodeState instanceof DoorTraversalState doorTraversalState)
+      {
+         doorTraversalState.fromMessage(subscriptionNode.getDoorTraversalStateMessage());
+      }
       else if (nodeState instanceof ArmJointAnglesActionState armJointAnglesActionState)
       {
          armJointAnglesActionState.fromMessage(subscriptionNode.getArmJointAnglesActionStateMessage());
@@ -168,6 +180,13 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setActionSequenceStateMessage(actionSequenceStateMessage);
             subscriptionNode.setBehaviorTreeNodeStateMessage(actionSequenceStateMessage.getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(actionSequenceStateMessage.getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.DOOR_TRAVERSAL ->
+         {
+            DoorTraversalStateMessage doorTraversalStateMessage = treeStateMessage.getDoorTraversals().get(indexInTypesList);
+            subscriptionNode.setDoorTraversalStateMessage(doorTraversalStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(doorTraversalStateMessage.getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(doorTraversalStateMessage.getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.ARM_JOINT_ANGLES_ACTION ->
          {

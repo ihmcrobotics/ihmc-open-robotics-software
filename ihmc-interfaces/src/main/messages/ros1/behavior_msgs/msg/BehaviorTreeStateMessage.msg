@@ -7,6 +7,8 @@ int8 BASIC_NODE=0
 
 int8 ACTION_SEQUENCE=1
 
+int8 DOOR_TRAVERSAL=2
+
 int8 ARM_JOINT_ANGLES_ACTION=10
 
 int8 CHEST_ORIENTATION_ACTION=11
@@ -45,6 +47,8 @@ uint32[] behavior_tree_indices
 behavior_msgs/BasicNodeStateMessage[] basic_nodes
 
 behavior_msgs/ActionSequenceStateMessage[] action_sequences
+
+behavior_msgs/DoorTraversalStateMessage[] door_traversals
 
 behavior_msgs/ArmJointAnglesActionStateMessage[] arm_joint_angles_actions
 
