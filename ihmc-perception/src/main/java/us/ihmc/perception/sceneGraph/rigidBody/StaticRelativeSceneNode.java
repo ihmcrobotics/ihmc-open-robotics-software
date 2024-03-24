@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.SceneNode;
 
@@ -38,7 +39,7 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
    {
       super(id, name, sceneGraphIDToNodeMap, initialParentNodeID, initialTransformToParent, visualModelFilePath, visualModelToNodeFrameTransform);
       this.distanceToDisableTracking = distanceToDisableTracking;
-      this.initialParentID = super.getInitialParentNodeID();
+      this.initialParentID = getInitialParentNodeID();
    }
 
    /**
@@ -46,11 +47,9 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
     */
    public void updateTrackingState(ReferenceFrame sensorFrame, SceneGraphModificationQueue modificationQueue)
    {
-      if (initialParentID != 0)
-      {
-         SceneNode initialParentNode = super.getSceneGraphIDToNodeMap().get(initialParentID);
+      SceneNode initialParentNode = getSceneGraphIDToNodeMap().get(initialParentID);
+      if (initialParentNode != null && initialParentID != SceneGraph.ROOT_NODE_ID)
          staticRelativeParentSceneNodePose.setToZero(initialParentNode.getNodeFrame());
-      }
       else
          staticRelativeParentSceneNodePose.setToZero(getNodeFrame());
 
@@ -59,12 +58,12 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
 
       if (currentDistance <= getDistanceToDisableTracking() && getTrackingInitialParent())
       {
-         LogTools.warn("{}: Disabling tracking initial parent", getName());
+         LogTools.info("{}: Disabling tracking initial parent", getName());
          setTrackInitialParent(false, modificationQueue);
       }
       else if (currentDistance > getDistanceToDisableTracking() && !getTrackingInitialParent())
       {
-         LogTools.warn("{}: Activating tracking initial parent", getName());
+         LogTools.info("{}: Activating tracking initial parent", getName());
          setTrackInitialParent(true, modificationQueue);
          clearOffset();
       }
