@@ -17,6 +17,7 @@
     "Ny Image" : false,
     "Nz Image" : false,
     "Planar Region Extraction Image" : false,
+    "Height Map Tuner" : false,
     "Local Height Map" : false,
     "Monte-Carlo Tuner" : true,
     "Normal Z" : false,

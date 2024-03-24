@@ -73,5 +73,8 @@ public class TerrainMapDataTest
 
       terrainMapDebugger.refresh(terrainMapData);
       terrainMapDebugger.display(0);
+
+      heightMapExtractor.destroy();
+      openCLManager.destroy();
    }
 }

@@ -159,8 +159,12 @@ public class RapidHeightMapExtractor
 
       terrainMapData = new TerrainMapData(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
       denoisedHeightMapImage = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
-      steppableRegionAssignmentMat = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
-      steppableRegionRingMat = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
+
+      if (computeSteppability)
+      {
+         steppableRegionAssignmentMat = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
+         steppableRegionRingMat = new Mat(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
+      }
 
       createLocalHeightMapImage(localCellsPerAxis, localCellsPerAxis, opencv_core.CV_16UC1);
       createGlobalHeightMapImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_16UC1);
@@ -168,12 +172,15 @@ public class RapidHeightMapExtractor
       createTerrainCostImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
       createContactMapImage(globalCellsPerAxis, globalCellsPerAxis, opencv_core.CV_8UC1);
       createTraversabilityGraphImage(graphCellsPerAxis, graphCellsPerAxis, opencv_core.CV_8UC1);
-
-      createSteppabilityMapImages(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
-      createSteppabilityMapImages(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
       createCroppedHeightMapImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_16UC1);
-      createCroppedTerrainCostImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
+//      createCroppedTerrainCostImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
       createCroppedContactMapImage(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize(), opencv_core.CV_8UC1);
+
+      if (computeSteppability)
+      {
+         createSteppabilityMapImages(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
+         createSteppabilityMapImages(heightMapParameters.getCropWindowSize(), heightMapParameters.getCropWindowSize());
+      }
 
       heightMapUpdateKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapUpdateKernel");
       heightMapRegistrationKernel = openCLManager.createKernel(rapidHeightMapUpdaterProgram, "heightMapRegistrationKernel");
@@ -458,7 +465,7 @@ public class RapidHeightMapExtractor
    public void readContactMapImage()
    {
       // Read height map image into CPU memory
-      terrainCostImage.readOpenCLImage(openCLManager);
+//      terrainCostImage.readOpenCLImage(openCLManager);
       contactMapImage.readOpenCLImage(openCLManager);
       traversabilityGraphImage.readOpenCLImage(openCLManager);
    }
@@ -764,6 +771,27 @@ public class RapidHeightMapExtractor
                                      heightMapParameters.getCropWindowSize(),
                                      heightMapParameters.getCropWindowSize());
       return imageToCrop.apply(cropWindowRectangle);
+   }
+
+   public void destroy()
+   {
+      localHeightMapImage.getOpenCLImageObject().deallocate();
+      globalHeightMapImage.getOpenCLImageObject().deallocate();
+      globalHeightVarianceImage.getOpenCLImageObject().deallocate();
+      terrainCostImage.getOpenCLImageObject().deallocate();
+      contactMapImage.getOpenCLImageObject().deallocate();
+      traversabilityGraphImage.getOpenCLImageObject().deallocate();
+      croppedHeightMapImage.getOpenCLImageObject().deallocate();
+      sensorCroppedTerrainCostImage.getOpenCLImageObject().deallocate();
+      croppedContactMapImage.getOpenCLImageObject().deallocate();
+      parametersBuffer.getOpenCLBufferObject().deallocate();
+      groundToSensorTransformBuffer.getOpenCLBufferObject().deallocate();
+      sensorToGroundTransformBuffer.getOpenCLBufferObject().deallocate();
+      worldToGroundTransformBuffer.getOpenCLBufferObject().deallocate();
+      groundToWorldTransformBuffer.getOpenCLBufferObject().deallocate();
+      groundPlaneBuffer.getOpenCLBufferObject().deallocate();
+
+      initialized = false;
    }
 
    public int getLocalCellsPerAxis()

@@ -195,20 +195,45 @@ float get_spatial_filtered_height(int xIndex, int yIndex, float height, read_wri
 
 bool isTraversible(read_write image2d_t contactMap, read_write image2d_t heightMap,int2 aIndex, int2 bIndex, global float *params)
 {
-   float c_a = read_imageui(contactMap, aIndex).x;
-   float h_a = read_imageui(heightMap, aIndex).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
-
-   float c_b = read_imageui(contactMap, bIndex).x;
-   float h_b = read_imageui(heightMap, bIndex).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
-
-   float c_diff = fabs(c_a - c_b);
-   float h_diff = fabs(h_a - h_b);
-
-   if (c_diff < 1.0f && h_diff < 0.1f)
+   int feasibleEdges = 0;
+   for (int ax = 0; ax < 12; ax+=2)
    {
-      return true;
+       for (int ay = 0; ay < 12; ay+=2)
+       {
+           for (int bx = 0; bx < 12; bx+=2)
+           {
+               for (int by = 0; by < 12; by+=2)
+               {
+                   int2 aOffset = (int2)(ax, ay);
+                   int2 bOffset = (int2)(bx, by);
+
+                   int2 aPos = aIndex * 12 + aOffset;
+                   int2 bPos = bIndex * 12 + bOffset;
+
+                   if (aPos[0] > 0 && aPos[0] < params[GLOBAL_CELLS_PER_AXIS] && aPos[1] > 0 && aPos[1] < params[GLOBAL_CELLS_PER_AXIS]
+                       && bPos[0] > 0 && bPos[0] < params[GLOBAL_CELLS_PER_AXIS] && bPos[1] > 0 && bPos[1] < params[GLOBAL_CELLS_PER_AXIS])
+                   {
+                       float c_a = read_imageui(contactMap, aPos).x;
+                       float h_a = read_imageui(heightMap, aPos).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+
+                       float c_b = read_imageui(contactMap, bPos).x;
+                       float h_b = read_imageui(heightMap, bPos).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+
+                       float h_diff = fabs(h_a - h_b);
+
+                       if (h_diff < 0.35f && c_a > 0 && c_b > 0)
+                       {
+                          feasibleEdges += 1;
+                       }
+
+                       //printf("%d, %d, %d, %d\n", aPos[0], aPos[1], bPos[0], bPos[1]);
+                    }
+               }
+           }
+       }
    }
-   return false;
+
+   return (feasibleEdges > 1000);
 }
 
 void kernel heightMapUpdateKernel(read_write image2d_t in,
@@ -610,9 +635,10 @@ void kernel traversabilityGraphKernel(read_write image2d_t contactMap,
             }
          }
       }
-      write_imageui(traversabilityGraph, (int2) (cIndex, rIndex), (uint4) (123, 0, 0, 0));
 
-      //      printf("MergeKernel[%d,%d] -> (%d)\n", rIndex, cIndex, boundaryConnectionsEncodedAsOnes);
+      write_imageui(traversabilityGraph, (int2) (cIndex, rIndex), (uint4) (boundaryConnectionsEncodedAsOnes, 0, 0, 0));
+
+      //printf("MergeKernel[%d,%d] -> (%d)\n", rIndex, cIndex, boundaryConnectionsEncodedAsOnes);
    }
 }
 
