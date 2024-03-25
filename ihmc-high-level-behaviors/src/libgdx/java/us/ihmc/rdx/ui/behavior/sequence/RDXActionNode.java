@@ -201,6 +201,20 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
 
    }
 
+   @Override
+   public void clearSelections()
+   {
+      super.clearSelections();
+
+      if (!ImGui.getIO().getKeyCtrl())
+         deselectGizmos();
+   }
+
+   public void deselectGizmos()
+   {
+
+   }
+
    public abstract String getActionTypeTitle();
 
    @Override

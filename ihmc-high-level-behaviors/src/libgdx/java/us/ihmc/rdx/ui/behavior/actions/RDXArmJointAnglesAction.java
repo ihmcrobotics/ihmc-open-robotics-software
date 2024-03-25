@@ -112,7 +112,7 @@ public class RDXArmJointAnglesAction extends RDXActionNode<ArmJointAnglesActionS
          if (ImGui.button(labels.get("Set Configuration to Synced Arm")))
          {
             ArmJointName[] armJointNames = robotModel.getJointMap().getArmJointNames();
-            for (int i = 0; i < ArmJointAnglesActionDefinition.MAX_NUMBER_OF_JOINTS; i++)
+            for (int i = 0; i < armJointNames.length; i++)
             {
                OneDoFJointBasics syncedJoint = syncedRobot.getFullRobotModel().getArmJoint(getDefinition().getSide(), armJointNames[i]);
                if (syncedJoint != null)

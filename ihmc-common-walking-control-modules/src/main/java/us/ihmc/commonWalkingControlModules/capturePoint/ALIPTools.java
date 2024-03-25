@@ -1,9 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 
 public class ALIPTools
 {
@@ -14,7 +11,7 @@ public class ALIPTools
                                               FramePoint2DReadOnly initialCoMPosition,
                                               FrameVector2DReadOnly initialAngularMomentum,
                                               FramePoint2DReadOnly pendulumBase,
-                                              FramePoint2DBasics centerOfMassPositionToPack)
+                                              FixedFramePoint2DBasics centerOfMassPositionToPack)
    {
       // Verify everything is in the same reference frame
       initialCoMPosition.checkReferenceFrameMatch(initialAngularMomentum);
@@ -42,7 +39,7 @@ public class ALIPTools
                                              FramePoint2DReadOnly initialCoMPosition,
                                              FrameVector2DReadOnly initialAngularMomentum,
                                              FramePoint2DReadOnly pendulumBase,
-                                             FrameVector2DBasics angularMomentumToPack)
+                                             FixedFrameVector2DBasics angularMomentumToPack)
    {
       // Verify everything is in the same reference frame
       initialCoMPosition.checkReferenceFrameMatch(initialAngularMomentum);
