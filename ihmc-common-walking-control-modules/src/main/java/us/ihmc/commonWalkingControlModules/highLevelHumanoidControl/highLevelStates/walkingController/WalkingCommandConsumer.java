@@ -18,40 +18,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AutomaticManipulationAbortCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestHybridJointspaceTaskspaceTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationsCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandHybridJointspaceTaskspaceTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandLoadBearingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandWrenchTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadHybridJointspaceTaskspaceTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LegTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckDesiredAccelerationsCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PrepareForLocomotionCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationsCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
@@ -156,6 +123,7 @@ public class WalkingCommandConsumer
       commandsToRegister.add(CenterOfMassTrajectoryCommand.class);
       commandsToRegister.add(AbortWalkingCommand.class);
       commandsToRegister.add(PrepareForLocomotionCommand.class);
+      commandsToRegister.add(TriggerKickCommand.class);
       commandsToRegister.add(DirectionalControlInputCommand.class);
       commandsToRegister.add(FastWalkingGaitParametersCommand.class);
 
@@ -603,6 +571,14 @@ public class WalkingCommandConsumer
       if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(AbortWalkingCommand.class))
          return;
       abortWalkingRequested.set(commandConsumerWithDelayBuffers.pollNewestCommand(AbortWalkingCommand.class).isAbortWalkingRequested());
+   }
+
+   public void consumeTriggerKickCommands(YoBoolean triggerKickRequested)
+   {
+      if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(TriggerKickCommand.class))
+         return;
+
+      triggerKickRequested.set(commandConsumerWithDelayBuffers.pollNewestCommand(TriggerKickCommand.class).isTriggerKickRequested());
    }
 
    public void consumePrepareForLocomotionCommands()

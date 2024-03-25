@@ -72,6 +72,7 @@ public class ControllerAPIDefinition
       commands.add(AbortWalkingCommand.class);
       commands.add(PrepareForLocomotionCommand.class);
       commands.add(PauseWalkingCommand.class);
+      commands.add(TriggerKickCommand.class);
       commands.add(SpineDesiredAccelerationsCommand.class);
       commands.add(HandLoadBearingCommand.class);
       commands.add(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
