@@ -4,7 +4,7 @@ import re
 import os
 
 home = os.path.expanduser('~')
-path = home + '/.ihmc/logs/continuous-planning/'
+path = home + '/Documents/Publications/PhD_Dissertation/Data/continuous-planning/'
 files = sorted(os.listdir(path))
 
 if len(files) == 0:
@@ -12,7 +12,7 @@ if len(files) == 0:
     exit()
 
 # Open the log file and read the contents into a string variable
-with open(path + files[-1], 'r') as f:
+with open(path + files[-2], 'r') as f:
     log_data = f.read()
 
 print("Opened log file: ", files[-1])
@@ -180,3 +180,19 @@ fig.suptitle('Continuous Walking Log Data')
 
 # Show the plot
 plt.show()
+
+
+
+# Timeline
+# Feb 27 - GPU-Snap A*
+# Feb 21 - GPU-Snap A*
+# Feb 08 - MCFP Fast
+# Jan 21 - MCFP AlmostAGoodRun, PieceWiseGoodRun
+# Jan 17 - MCFP Flat and Rough Terrain
+# Jan 16 - MCFP Two Levels 
+# Jan 12 - Hybrid Planner
+# Jan 11 - Hybrid Planner
+# Jan 10 - Hybrid Planner (reduced) A* with MCFP reference
+# Jan 08 - CW slow rough terrain A* (reduced A*)
+# Nov 13 - CW over uneven terrain (and disaster strikes)
+# Oct 27 - Continuous Walking Works with A* Over Height Maps
