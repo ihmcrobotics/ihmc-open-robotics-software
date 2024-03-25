@@ -66,8 +66,7 @@ public class YOLOv8Node extends DetectableSceneNode
    public void update()
    {
       objectPose.setTranslationAndIdentityRotation(objectCentroid);
-      if (centroidToObjectTransform != null)
-         objectPose.appendTransform(centroidToObjectTransform);
+      objectPose.appendTransform(centroidToObjectTransform);
    }
 
    public int getMaskErosionKernelRadius()
