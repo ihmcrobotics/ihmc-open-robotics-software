@@ -1,6 +1,14 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
-import perception_msgs.msg.dds.*;
+import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
+import perception_msgs.msg.dds.CenterposeNodeMessage;
+import perception_msgs.msg.dds.DetectableSceneNodeMessage;
+import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
+import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
+import perception_msgs.msg.dds.SceneGraphMessage;
+import perception_msgs.msg.dds.SceneNodeMessage;
+import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
+import perception_msgs.msg.dds.YOLOv8NodeMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
@@ -8,14 +16,16 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
+import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 
 /**
  * Publishes the current state of the complete scene graph.
@@ -45,6 +55,7 @@ public class ROS2SceneGraphPublisher
       sceneGraphMessage.getPredefinedRigidBodySceneNodes().clear();
       sceneGraphMessage.getArucoMarkerSceneNodes().clear();
       sceneGraphMessage.getCenterposeSceneNodes().clear();
+      sceneGraphMessage.getYoloSceneNodes().clear();
       sceneGraphMessage.getStaticRelativeSceneNodes().clear();
       sceneGraphMessage.getPrimitiveRigidBodySceneNodes().clear();
 
@@ -114,6 +125,29 @@ public class ROS2SceneGraphPublisher
             }
             centerposeNodeMessage.setEnableTracking(centerposeNode.isEnableTracking());
             detectableSceneNodeMessage = centerposeNodeMessage.getDetectableSceneNode();
+         }
+         else if (sceneNode instanceof YOLOv8Node yoloNode)
+         {
+            sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.YOLO_NODE_TYPE);
+            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getYoloSceneNodes().size());
+            YOLOv8NodeMessage yoloNodeMessage = sceneGraphMessage.getYoloSceneNodes().add();
+            yoloNodeMessage.setMaskErosionKernelRadius(yoloNode.getMaskErosionKernelRadius());
+            yoloNodeMessage.setOutlierFilterThreshold(yoloNode.getOutlierFilterThreshold());
+            yoloNodeMessage.setDetectionAcceptanceThreshold(yoloNode.getDetectionAcceptanceThreshold());
+            yoloNodeMessage.setDetectionClass(yoloNode.getDetectionClass().name());
+            // set point cloud
+            yoloNodeMessage.getObjectPointCloud().clear();
+            for (int i = 0; i < 5000 && i < yoloNode.getObjectPointCloud().size(); i++)
+            {
+               Point3D32 point = yoloNodeMessage.getObjectPointCloud().add();
+               point.set(yoloNode.getObjectPointCloud().get(i));
+            }
+
+            yoloNodeMessage.getObjectCentroid().set(yoloNode.getObjectCentroid());
+            yoloNodeMessage.getCentroidToObjectTransform().set(yoloNode.getCentroidToObjectTransform());
+            yoloNodeMessage.getObjectPose().set(yoloNode.getObjectPose());
+
+            detectableSceneNodeMessage = yoloNodeMessage.getDetectableSceneNode();
          }
          else
          {

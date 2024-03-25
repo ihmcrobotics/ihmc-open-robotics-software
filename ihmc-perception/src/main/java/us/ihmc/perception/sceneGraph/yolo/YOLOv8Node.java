@@ -3,11 +3,9 @@ package us.ihmc.perception.sceneGraph.yolo;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.perception.YOLOv8.YOLOv8Detection;
-import us.ihmc.perception.YOLOv8.YOLOv8Tools;
-import us.ihmc.perception.filters.DetectionFilter;
+import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 
 import java.util.List;
@@ -15,39 +13,61 @@ import java.util.List;
 public class YOLOv8Node extends DetectableSceneNode
 {
    // Read from RDX node, write to YOLO Manager
-   private int maskErosionKernelRadius = 2;
-   private double outlierFilterThreshold = 2.0;
-   private float detectionAcceptanceThreshold = 0.2f;
+   private int maskErosionKernelRadius;
+   private double outlierFilterThreshold;
+   private float detectionAcceptanceThreshold;
 
-   // Read from YOLO Manager, write to RDX node
-   private YOLOv8Detection yoloDetection;
-   private DetectionFilter detectionFilter;
-   private List<Point3DReadOnly> objectPointCloud;
-   private Pose3D objectCentroid;
+   // Read from YOLO manager, write to RDX
+   private YOLOv8DetectionClass detectionClass;
+   private List<Point3D32> objectPointCloud;
+   private Point3D32 objectCentroid;
 
-   private RigidBodyTransform centroidToPoseTransform;
+   // Set this somewhere
+   private final RigidBodyTransform centroidToObjectTransform = new RigidBodyTransform();
+   private Pose3D objectPose;
 
-   public YOLOv8Node(long id, String name, YOLOv8Detection yoloDetection, DetectionFilter detectionFilter)
+   public YOLOv8Node(long id, String name, YOLOv8DetectionClass detectionClass, List<Point3D32> objectPointCloud, Point3D32 objectCentroid)
+   {
+      this(id,
+           name,
+           2,
+           2.0,
+           0.2f,
+           detectionClass,
+           objectPointCloud,
+           objectCentroid,
+           new RigidBodyTransform(),
+           new Pose3D(objectCentroid, new RotationMatrix()));
+   }
+
+   public YOLOv8Node(long id,
+                     String name,
+                     int maskErosionKernelRadius,
+                     double outlierFilterThreshold,
+                     float detectionAcceptanceThreshold,
+                     YOLOv8DetectionClass detectionClass,
+                     List<Point3D32> objectPointCloud,
+                     Point3D32 objectCentroid,
+                     RigidBodyTransformBasics centroidToObjectTransform,
+                     Pose3D objectPose)
    {
       super(id, name);
 
-      this.yoloDetection = yoloDetection;
-      this.detectionFilter = detectionFilter;
+      this.maskErosionKernelRadius = maskErosionKernelRadius;
+      this.outlierFilterThreshold = outlierFilterThreshold;
+      this.detectionAcceptanceThreshold = detectionAcceptanceThreshold;
+      this.detectionClass = detectionClass;
+      this.objectPointCloud = objectPointCloud;
+      this.objectCentroid = objectCentroid;
+      this.centroidToObjectTransform.set(centroidToObjectTransform);
+      this.objectPose = objectPose;
    }
 
-   public boolean update()
+   public void update()
    {
-      detectionFilter.setAcceptanceThreshold(detectionAcceptanceThreshold);
-      if (detectionFilter.isStableDetectionResult())
-      {
-         objectPointCloud = YOLOv8Tools.filterOutliers(objectPointCloud, outlierFilterThreshold, 200);
-         Point3D32 centroidPoint = YOLOv8Tools.computeCentroidOfPointCloud(objectPointCloud, 200);
-         objectCentroid.set(centroidPoint, new RotationMatrix());
-
-         return true;
-      }
-
-      return false;
+      objectPose.setTranslationAndIdentityRotation(objectCentroid);
+      if (centroidToObjectTransform != null)
+         objectPose.appendTransform(centroidToObjectTransform);
    }
 
    public int getMaskErosionKernelRadius()
@@ -80,38 +100,54 @@ public class YOLOv8Node extends DetectableSceneNode
       this.detectionAcceptanceThreshold = detectionAcceptanceThreshold;
    }
 
-   public YOLOv8Detection getYoloDetection()
+   public YOLOv8DetectionClass getDetectionClass()
    {
-      return yoloDetection;
+      return detectionClass;
    }
 
-   public void setYoloDetection(YOLOv8Detection yoloDetection)
+   public void setDetectionClass(YOLOv8DetectionClass detectionClass)
    {
-      this.yoloDetection = yoloDetection;
+      this.detectionClass = detectionClass;
    }
 
-   public DetectionFilter getDetectionFilter()
-   {
-      return detectionFilter;
-   }
-
-   public List<Point3DReadOnly> getObjectPointCloud()
+   public List<Point3D32> getObjectPointCloud()
    {
       return objectPointCloud;
    }
 
-   public void setObjectPointCloud(List<Point3DReadOnly> objectPointCloud)
+   public void setObjectPointCloud(List<Point3D32> objectPointCloud)
    {
       this.objectPointCloud = objectPointCloud;
    }
 
-   public Pose3D getObjectCentroid()
+   public Point3D32 getObjectCentroid()
    {
       return objectCentroid;
    }
 
-   public void setCentroidToPoseTransform(RigidBodyTransform centroidToPoseTransform)
+   public void setObjectCentroid(Point3D32 objectCentroid)
    {
-      this.centroidToPoseTransform = centroidToPoseTransform;
+      this.objectCentroid = objectCentroid;
    }
+
+   public RigidBodyTransform getCentroidToObjectTransform()
+   {
+      return centroidToObjectTransform;
+   }
+
+   public void setCentroidToObjectTransform(RigidBodyTransformBasics centroidToObjectTransform)
+   {
+      this.centroidToObjectTransform.set(centroidToObjectTransform);
+   }
+
+   public Pose3D getObjectPose()
+   {
+      return objectPose;
+   }
+
+   public void setObjectPose(Pose3D objectPose)
+   {
+      this.objectPose = objectPose;
+   }
+
 }

@@ -3,10 +3,8 @@ package us.ihmc.perception.opencl;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.RawImage;
 
@@ -37,7 +35,7 @@ public class OpenCLPointCloudExtractor
       kernel = openCLManager.createKernel(openCLProgram, "convertDepthImageToPointCloud");
    }
 
-   public List<Point3DReadOnly> extractPointCloud(RawImage depthImage16UC1)
+   public List<Point3D32> extractPointCloud(RawImage depthImage16UC1)
    {
       if (depthImage != null)
          depthImage.release();
@@ -78,7 +76,7 @@ public class OpenCLPointCloudExtractor
       pointCloudVertexOutput.readOpenCLBufferObject(openCLManager);
       FloatBuffer pointCloudBuffer = pointCloudVertexOutput.getBackingDirectFloatBuffer();
 
-      ArrayList<Point3DReadOnly> pointCloud = new ArrayList<>();
+      ArrayList<Point3D32> pointCloud = new ArrayList<>();
       for (int i = 0; i < numberOfPixels * FLOATS_PER_PIXEL; i += FLOATS_PER_PIXEL)
       {
          if (pointCloudBuffer.get(i) > 0.0f)

@@ -1,6 +1,5 @@
 package us.ihmc.perception.YOLOv8;
 
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -18,9 +17,9 @@ public class YOLOv8Tools
 {
    private static final WorkspaceResourceDirectory POINT_CLOUD_DIRECTORY = new WorkspaceResourceDirectory(YOLOv8DetectionClass.class, "/yoloICPPointClouds/");
 
-   public static List<Point3DReadOnly> filterOutliers(List<? extends Point3DReadOnly> pointCloud, double zScoreThreshold, int numberOfSamples)
+   public static List<Point3D32> filterOutliers(List<Point3D32> pointCloud, double zScoreThreshold, int numberOfSamples)
    {
-      Point3D centroid = new Point3D();
+      Point3D32 centroid = new Point3D32();
       double standardDeviation = calculateStandardDeviationAndCentroid(pointCloud, numberOfSamples, true, centroid);
 
       return pointCloud.parallelStream().filter(point ->
@@ -104,7 +103,7 @@ public class YOLOv8Tools
       return pointCloud;
    }
 
-   public static Point3D32 computeCentroidOfPointCloud(List<Point3DReadOnly> pointCloud, int pointsToAverage)
+   public static Point3D32 computeCentroidOfPointCloud(List<Point3D32> pointCloud, int pointsToAverage)
    {
       int numberOfPointsToUse = Math.min(pointsToAverage, pointCloud.size());
 
