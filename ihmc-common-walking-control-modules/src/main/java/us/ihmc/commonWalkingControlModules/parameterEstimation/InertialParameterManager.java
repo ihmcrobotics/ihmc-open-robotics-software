@@ -9,6 +9,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -413,16 +414,16 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private void updateVisuals()
    {
-      RigidBodyBasics[] estimateModelBodies = modelHandler.getBodyArray(RobotModelTask.ESTIMATE);
       RigidBodyReadOnly[] controllerModelBodies = modelHandler.getBodyArray(RobotModelTask.CONTROLLER);
-      for (int i = 0; i < estimateModelBodies.length; i++)
+      SpatialInertiaReadOnly[] tareSpatialInertias = baselineCalculator.getURDFSpatialInertias();
+      for (int i = 0; i < controllerModelBodies.length; i++)
       {
          RigidBodyReadOnly controllerBody = controllerModelBodies[i];
-         RigidBodyReadOnly estimateBody = estimateModelBodies[i];
+         SpatialInertiaReadOnly tareForBody = tareSpatialInertias[i];
 
-         double scale = EuclidCoreTools.clamp(estimateBody.getInertia().getMass() / controllerBody.getInertia().getMass() / 2.0, 0.0, 1.0);
+         double scale = EuclidCoreTools.clamp(controllerBody.getInertia().getMass() / tareForBody.getMass() / 2.0, 0.0, 1.0);
 
-         if (estimateBody.getInertia() != null && controllerBody.getInertia() != null)
+         if (controllerBody.getInertia() != null)
             yoInertiaEllipsoids.get(i).update(scale);
       }
    }

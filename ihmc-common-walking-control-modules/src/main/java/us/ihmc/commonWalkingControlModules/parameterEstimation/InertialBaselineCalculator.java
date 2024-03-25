@@ -54,11 +54,12 @@ public class InertialBaselineCalculator
       RigidBodyBasics[] bodies = model.getRootBody().subtreeArray();
       for (int i = 0; i < nBodies; i++)
       {
-         if (basisSets[i].isEmpty())  // Only create objects for bodies we're estimating
+         urdfSpatialInertias[i] = new SpatialInertia(bodies[i].getInertia());
+
+         if (basisSets[i].isEmpty())  // Only create tares for bodies we're estimating
             continue;
 
          tareSpatialInertias[i] = new YoSpatialInertia(bodies[i].getInertia(), "_tare", registry);
-         urdfSpatialInertias[i] = new SpatialInertia(bodies[i].getInertia());
       }
 
       String[] basisNames = RigidBodyInertialParametersTools.getNamesForPiBasis();
@@ -148,5 +149,10 @@ public class InertialBaselineCalculator
             rateLimitedParameterDeltaContainer.set(j, 0, rateLimitedParameterDeltas[i][j].getDoubleValue());
          RigidBodyInertialParametersTools.addParameterDelta(urdfSpatialInertias[i], rateLimitedParameterDeltaContainer, bodies[i].getInertia());
       }
+   }
+
+   public SpatialInertiaReadOnly[] getURDFSpatialInertias()
+   {
+      return urdfSpatialInertias;
    }
 }
