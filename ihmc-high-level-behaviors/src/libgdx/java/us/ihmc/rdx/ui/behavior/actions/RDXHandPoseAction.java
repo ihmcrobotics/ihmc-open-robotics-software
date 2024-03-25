@@ -35,6 +35,7 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
+import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeTools;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXArmMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
@@ -311,7 +312,12 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    {
       super.renderTreeViewIconArea();
 
-      handIconWidget.render(definition.getSide(), ImGui.getFrameHeight());
+      boolean gizmoWasSelected = poseGizmo.getSelected().get();
+      if (handIconWidget.render(definition.getSide(), ImGui.getFrameHeight(), gizmoWasSelected))
+      {
+         poseGizmo.setSelected(!gizmoWasSelected);
+      }
+
       ImGui.sameLine();
    }
 
@@ -384,6 +390,12 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             actionPalmFrame.update();
          }
       }
+   }
+
+   @Override
+   public void deselectGizmos()
+   {
+      poseGizmo.setSelected(false);
    }
 
    public void render3DPanelImGuiOverlays()
