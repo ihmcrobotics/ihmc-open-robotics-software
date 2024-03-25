@@ -376,7 +376,6 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          positionErrorToleranceInput.renderImGuiWidget();
          orientationErrorToleranceDegreesInput.renderImGuiWidget();
          ImGui.text("IK Solution Quality: %.2f".formatted(state.getSolutionQuality()));
-         ImGui.popItemWidth();
          ImGui.sameLine();
          if (ImGui.button(labels.get("Set Pose to Synced Hand")))
          {
