@@ -19,7 +19,6 @@ import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.tools.time.FrequencyCalculator;
 
@@ -169,7 +168,6 @@ public class YOLOv8DetectionManager
 
       yoloFrequencyCalculator.ping();
 
-      PerceptionDebugTools.display("Color", colorImage.getCpuImageMat(), 1);
       YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImage, yoloConfidenceThreshold, yoloNMSThreshold);
 
       // Extract stuff from the results
