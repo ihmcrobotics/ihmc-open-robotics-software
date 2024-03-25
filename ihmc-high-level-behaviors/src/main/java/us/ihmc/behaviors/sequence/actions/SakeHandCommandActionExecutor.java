@@ -24,9 +24,6 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
     *   desired finger velocities.
     */
    private static final double NOMINAL_TRAJECORY_DURATION = 1.0;
-   public static final double ANGLE_TOLERANCE = Math.toRadians(40.0); // We want to allow a bunch of compliance
-   /** If it's already within 5 degrees, we will just mark is as completed. */
-   public static final double INITIAL_SATISFACTION_TOLERANCE = Math.toRadians(5.0);
 
    private final SakeHandCommandActionState state;
    private final SakeHandCommandActionDefinition definition;
@@ -86,7 +83,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       double goalKnuckleJointAngle = SakeHandParameters.handOpenAngleToKnuckleJointAngle(definition.getHandOpenAngle());
       trackingCalculator.addJointData(x1KnuckleJoints.get(definition.getSide()).getQ(), goalKnuckleJointAngle);
       trackingCalculator.addJointData(x2KnuckleJoints.get(definition.getSide()).getQ(), goalKnuckleJointAngle);
-      trackingCalculator.applyTolerance(INITIAL_SATISFACTION_TOLERANCE);
+      trackingCalculator.applyTolerance(definition.getInitialSatisfactionHandAngleTolerance());
 
       LogTools.info("x1: %.2f%s  x2: %.2f%s  Goal open angle: %.2f%s Error: %.2f%s"
                           .formatted(Math.toDegrees(x1KnuckleJoints.get(definition.getSide()).getQ()),
@@ -103,7 +100,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
          LogTools.info("Gripper is already at the desired position. Proceeding to next action. (Error: %.2f)"
                              .formatted(trackingCalculator.getTotalAbsolutePositionError()));
          state.setNominalExecutionDuration(0.0);
-         state.setPositionDistanceToGoalTolerance(INITIAL_SATISFACTION_TOLERANCE);
+         state.setPositionDistanceToGoalTolerance(definition.getInitialSatisfactionHandAngleTolerance());
       }
       else
       {
@@ -124,7 +121,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
          state.getCommandedJointTrajectories().addTrajectoryPoint(1, x2KnuckleJoints.get(definition.getSide()).getQ(), 0.0);
          state.getCommandedJointTrajectories().addTrajectoryPoint(1, goalKnuckleJointAngle, NOMINAL_TRAJECORY_DURATION);
          state.setNominalExecutionDuration(NOMINAL_TRAJECORY_DURATION);
-         state.setPositionDistanceToGoalTolerance(ANGLE_TOLERANCE);
+         state.setPositionDistanceToGoalTolerance(definition.getCompletionHandAngleTolerance());
       }
    }
 
