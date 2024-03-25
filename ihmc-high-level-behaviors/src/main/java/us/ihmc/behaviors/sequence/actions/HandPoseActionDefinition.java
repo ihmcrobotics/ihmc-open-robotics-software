@@ -88,26 +88,34 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
    {
       super.saveToFile(jsonNode);
 
-      jsonNode.put("parentFrame", palmParentFrameName.getValue());
-      JSONTools.toJSON(jsonNode, palmTransformToParent.getValueReadOnly());
       jsonNode.put("side", side.getValue().getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration.getValue());
-      jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater.getValue());
-      jsonNode.put("jointspaceOnly", jointspaceOnly.getValue());
       jsonNode.put("usePredefinedJointAngles", usePredefinedJointAngles.getValue());
-      jsonNode.put("preset", preset.getValue() == null ? CUSTOM_ANGLES_NAME : preset.getValue().name());
-      if (preset.getValue() == null)
+
+      if (usePredefinedJointAngles.getValue())
       {
-         for (int i = 0; i < MAX_NUMBER_OF_JOINTS; i++)
+         jsonNode.put("preset", preset.getValue() == null ? CUSTOM_ANGLES_NAME : preset.getValue().name());
+         if (preset.getValue() == null)
          {
-            jsonNode.put("j" + i, jointAngles.getValueReadOnly(i));
+            for (int i = 0; i < MAX_NUMBER_OF_JOINTS; i++)
+            {
+               jsonNode.put("j" + i, jointAngles.getValueReadOnly(i));
+            }
          }
       }
-      jsonNode.put("linearPositionWeight", linearPositionWeight.getValue());
-      jsonNode.put("angularPositionWeight", angularPositionWeight.getValue());
+      else
+      {
+         jsonNode.put("parentFrame", palmParentFrameName.getValue());
+         JSONTools.toJSON(jsonNode, palmTransformToParent.getValueReadOnly());
+         jsonNode.put("jointspaceOnly", jointspaceOnly.getValue());
+         jsonNode.put("holdPoseInWorldLater", holdPoseInWorldLater.getValue());
+         jsonNode.put("linearPositionWeight", linearPositionWeight.getValue());
+         jsonNode.put("angularPositionWeight", angularPositionWeight.getValue());
+         jsonNode.put("positionErrorTolerance", Double.parseDouble("%.3f".formatted(positionErrorTolerance.getValue())));
+         jsonNode.put("orientationErrorToleranceDegrees", Double.parseDouble("%.3f".formatted(Math.toDegrees(orientationErrorTolerance.getValue()))));
+      }
+
       jsonNode.put("jointspaceWeight", jointspaceWeight.getValue());
-      jsonNode.put("positionErrorTolerance", Double.parseDouble("%.3f".formatted(positionErrorTolerance.getValue())));
-      jsonNode.put("orientationErrorToleranceDegrees", Double.parseDouble("%.3f".formatted(Math.toDegrees(orientationErrorTolerance.getValue()))));
    }
 
    @Override
@@ -117,25 +125,33 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
 
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
-      palmParentFrameName.setValue(jsonNode.get("parentFrame").textValue());
-      JSONTools.toEuclid(jsonNode, palmTransformToParent.getValue());
-      holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
-      jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
       usePredefinedJointAngles.setValue(jsonNode.get("usePredefinedJointAngles").asBoolean());
-      String presetName = jsonNode.get("preset").textValue();
-      preset.setValue(presetName.equals(CUSTOM_ANGLES_NAME) ? null : PresetArmConfiguration.valueOf(presetName));
-      if (preset.getValue() == null)
+
+      if (usePredefinedJointAngles.getValue())
       {
-         for (int i = 0; i < MAX_NUMBER_OF_JOINTS; i++)
+         String presetName = jsonNode.get("preset").textValue();
+         preset.setValue(presetName.equals(CUSTOM_ANGLES_NAME) ? null : PresetArmConfiguration.valueOf(presetName));
+         if (preset.getValue() == null)
          {
-            jointAngles.getValue()[i] = jsonNode.get("j" + i).asDouble();
+            for (int i = 0; i < MAX_NUMBER_OF_JOINTS; i++)
+            {
+               jointAngles.getValue()[i] = jsonNode.get("j" + i).asDouble();
+            }
          }
       }
-      linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
-      angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
+      else
+      {
+         palmParentFrameName.setValue(jsonNode.get("parentFrame").textValue());
+         JSONTools.toEuclid(jsonNode, palmTransformToParent.getValue());
+         holdPoseInWorldLater.setValue(jsonNode.get("holdPoseInWorldLater").asBoolean());
+         jointspaceOnly.setValue(jsonNode.get("jointspaceOnly").asBoolean());
+         linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
+         angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
+         positionErrorTolerance.setValue(jsonNode.get("positionErrorTolerance").asDouble());
+         orientationErrorTolerance.setValue(Math.toRadians(jsonNode.get("orientationErrorToleranceDegrees").asDouble()));
+      }
+
       jointspaceWeight.setValue(jsonNode.get("jointspaceWeight").asDouble());
-      positionErrorTolerance.setValue(jsonNode.get("positionErrorTolerance").asDouble());
-      orientationErrorTolerance.setValue(Math.toRadians(jsonNode.get("orientationErrorToleranceDegrees").asDouble()));
    }
 
    @Override
