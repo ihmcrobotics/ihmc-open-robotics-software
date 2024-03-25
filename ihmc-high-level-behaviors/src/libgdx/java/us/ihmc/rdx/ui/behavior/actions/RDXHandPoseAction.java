@@ -5,8 +5,11 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImInt;
+import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
@@ -18,6 +21,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
@@ -40,6 +44,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.interaction.MouseCollidable;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
@@ -70,11 +75,15 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final SideDependentList<RDXInteractableHighlightModel> highlightModels = new SideDependentList<>();
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImDoubleWrapper trajectoryDurationWidget;
+   private final String[] configurations = new String[PresetArmConfiguration.values().length + 1];
+   private final ImInt currentConfiguration = new ImInt(PresetArmConfiguration.HOME.ordinal() + 1);
+   private final ImDoubleWrapper[] jointAngleWidgets = new ImDoubleWrapper[HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS];
    private final ImGuiSliderDoubleWrapper linearPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper angularPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper jointspaceWeightWidget;
    private final ImBooleanWrapper holdPoseInWorldLaterWrapper;
    private final ImBooleanWrapper jointSpaceControlWrapper;
+   private final ImBooleanWrapper usePredefinedJointAnglesWrapper;
    private final ImDoubleWrapper positionErrorToleranceInput;
    private final ImDoubleWrapper orientationErrorToleranceDegreesInput;
    private final SideDependentList<RDXArmMultiBodyGraphic> armMultiBodyGraphics = new SideDependentList<>();
@@ -105,9 +114,32 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
                                                      definition::setTrajectoryDuration,
                                                      imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
+      int configurationIndex = 0;
+      configurations[configurationIndex++] = HandPoseActionDefinition.CUSTOM_ANGLES_NAME;
+      for (PresetArmConfiguration preset : PresetArmConfiguration.values())
+      {
+         configurations[configurationIndex++] = preset.name();
+      }
+
+      for (int i = 0; i < HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS; i++)
+      {
+         int jointIndex = i;
+         jointAngleWidgets[i] = new ImDoubleWrapper(() -> getDefinition().getJointAngles().getValue()[jointIndex],
+                                                    jointAngle -> getDefinition().getJointAngles().getValue()[jointIndex] = jointAngle,
+                                                    imDouble -> ImGui.inputDouble(labels.get("j" + jointIndex), imDouble));
+      }
       holdPoseInWorldLaterWrapper = new ImBooleanWrapper(definition::getHoldPoseInWorldLater,
                                                          definition::setHoldPoseInWorldLater,
                                                          imBoolean -> ImGui.checkbox(labels.get("Hold pose in world later"), imBoolean));
+      usePredefinedJointAnglesWrapper = new ImBooleanWrapper(definition::getUsePredefinedJointAngles,
+                                                             definition::setUsePredefinedJointAngles,
+                                                             imBoolean ->
+                                                             {
+                                                                if (ImGui.checkbox(labels.get("Use Predefined Joint Angles"), imBoolean))
+                                                                {
+                                                                   definition.setPreset(null); // Preserve joint angles from before
+                                                                }
+                                                             });
       jointSpaceControlWrapper = new ImBooleanWrapper(definition::getJointspaceOnly,
                                                       definition::setJointspaceOnly,
                                                       imBoolean -> {
@@ -179,7 +211,28 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    {
       super.update();
 
-      if (state.getPalmFrame().isChildOfWorld())
+      // IK solution visualization via ghost arms
+      if (state.getIsNextForExecution())
+         visualizeIK();
+
+      if (definition.getUsePredefinedJointAngles())
+      {
+         PresetArmConfiguration preset = getDefinition().getPreset();
+         currentConfiguration.set(preset == null ? 0 : preset.ordinal() + 1);
+
+         // Copy the preset values into the custom data fields so they can be tweaked
+         // relatively when switching to custom angles.
+         if (preset != null)
+         {
+            // TODO: Would be great if there was a #getPresetArmConfiguration that accepts an array to pack
+            double[] jointAngles = syncedRobot.getRobotModel().getPresetArmConfiguration(getDefinition().getSide(), preset);
+            for (int i = 0; i < jointAngles.length; i++)
+            {
+               getDefinition().getJointAngles().getValue()[i] = jointAngles[i];
+            }
+         }
+      }
+      else if (state.getPalmFrame().isChildOfWorld())
       {
          if (poseGizmo.getPoseGizmo().getGizmoFrame() != state.getPalmFrame().getReferenceFrame())
          {
@@ -202,18 +255,15 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             highlightModels.get(definition.getSide()).setTransparency(0.5);
          }
 
-         // IK solution visualization via ghost arms
-         if (state.getIsNextForExecution())
-            visualizeIK();
-
-         if (getParent().getState() instanceof ActionSequenceState parent)
+         ActionSequenceState actionSequence = BehaviorTreeTools.findActionSequenceAncestor(state);
+         if (actionSequence != null)
          {
-            HandPoseActionState previousHandAction = parent.findNextPreviousAction(HandPoseActionState.class,
-                                                                                   getState().getActionIndex(),
-                                                                                   definition.getSide());
+            HandPoseActionState previousHandAction = actionSequence.findNextPreviousAction(HandPoseActionState.class,
+                                                                                           getState().getActionIndex(),
+                                                                                           definition.getSide());
 
             boolean previousHandActionExists = previousHandAction != null;
-            boolean weAreAfterIt = previousHandActionExists && parent.getExecutionNextIndex() > previousHandAction.getActionIndex();
+            boolean weAreAfterIt = previousHandActionExists && actionSequence.getExecutionNextIndex() > previousHandAction.getActionIndex();
 
             boolean previousIsExecuting = previousHandActionExists && previousHandAction.getIsExecuting();
             boolean showFromPreviousHand = previousHandActionExists;
@@ -268,38 +318,71 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    @Override
    protected void renderImGuiWidgetsInternal()
    {
-      ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());
-      jointSpaceControlWrapper.renderImGuiWidget();
-      if (!definition.getJointspaceOnly())
-      {
-         ImGui.sameLine();
-         holdPoseInWorldLaterWrapper.renderImGuiWidget();
-      }
-      parentFrameComboBox.render();
-      ImGui.pushItemWidth(80.0f);
       trajectoryDurationWidget.renderImGuiWidget();
-      if (definition.getJointspaceOnly())
-         ImGui.beginDisabled();
-      linearPositionWeightWidget.renderImGuiWidget();
-      angularPositionWeightWidget.renderImGuiWidget();
-      if (definition.getJointspaceOnly())
-         ImGui.endDisabled();
-      jointspaceWeightWidget.renderImGuiWidget();
-      positionErrorToleranceInput.renderImGuiWidget();
-      orientationErrorToleranceDegreesInput.renderImGuiWidget();
-      ImGui.text("IK Solution Quality: %.2f".formatted(state.getSolutionQuality()));
-      ImGui.popItemWidth();
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Set Pose to Synced Hand")))
+      usePredefinedJointAnglesWrapper.renderImGuiWidget();
+
+      if (definition.getUsePredefinedJointAngles())
       {
-         CRDTDetachableReferenceFrame actionPalmFrame = getState().getPalmFrame();
-         CRDTUnidirectionalRigidBodyTransform palmTransformToParent = definition.getPalmTransformToParent();
-         MovingReferenceFrame syncedPalmFrame = syncedRobot.getReferenceFrames().getHandFrame(definition.getSide());
-         FramePose3D syncedPalmPose = new FramePose3D();
-         syncedPalmPose.setToZero(syncedPalmFrame);
-         syncedPalmPose.changeFrame(actionPalmFrame.getReferenceFrame().getParent());
-         palmTransformToParent.getValue().set(syncedPalmPose);
-         actionPalmFrame.update();
+         ImGui.pushItemWidth(200.0f);
+         if (ImGui.combo(labels.get("Configuration"), currentConfiguration, configurations))
+            getDefinition().setPreset(currentConfiguration.get() == 0 ? null : PresetArmConfiguration.values()[currentConfiguration.get() - 1]);
+         ImGui.popItemWidth();
+
+         if (getDefinition().getPreset() == null)
+         {
+            ArmJointName[] armJointNames = syncedRobot.getRobotModel().getJointMap().getArmJointNames();
+            ImGui.pushItemWidth(80.0f);
+            for (int i = 0; i < armJointNames.length; i++)
+            {
+               jointAngleWidgets[i].renderImGuiWidget();
+            }
+            ImGui.popItemWidth();
+            if (ImGui.button(labels.get("Set Configuration to Synced Arm")))
+            {
+               for (int i = 0; i < armJointNames.length; i++)
+               {
+                  OneDoFJointBasics syncedJoint = syncedRobot.getFullRobotModel().getArmJoint(getDefinition().getSide(), armJointNames[i]);
+                  if (syncedJoint != null)
+                     getDefinition().getJointAngles().getValue()[i] = syncedJoint.getQ();
+                  else
+                     getDefinition().getJointAngles().getValue()[i] = 0.0;
+               }
+            }
+         }
+      }
+      else
+      {
+         ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());
+         jointSpaceControlWrapper.renderImGuiWidget();
+         if (!definition.getJointspaceOnly())
+         {
+            ImGui.sameLine();
+            holdPoseInWorldLaterWrapper.renderImGuiWidget();
+         }
+         parentFrameComboBox.render();
+         if (definition.getJointspaceOnly())
+            ImGui.beginDisabled();
+         linearPositionWeightWidget.renderImGuiWidget();
+         angularPositionWeightWidget.renderImGuiWidget();
+         if (definition.getJointspaceOnly())
+            ImGui.endDisabled();
+         jointspaceWeightWidget.renderImGuiWidget();
+         positionErrorToleranceInput.renderImGuiWidget();
+         orientationErrorToleranceDegreesInput.renderImGuiWidget();
+         ImGui.text("IK Solution Quality: %.2f".formatted(state.getSolutionQuality()));
+         ImGui.popItemWidth();
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Set Pose to Synced Hand")))
+         {
+            CRDTDetachableReferenceFrame actionPalmFrame = getState().getPalmFrame();
+            CRDTUnidirectionalRigidBodyTransform palmTransformToParent = definition.getPalmTransformToParent();
+            MovingReferenceFrame syncedPalmFrame = syncedRobot.getReferenceFrames().getHandFrame(definition.getSide());
+            FramePose3D syncedPalmPose = new FramePose3D();
+            syncedPalmPose.setToZero(syncedPalmFrame);
+            syncedPalmPose.changeFrame(actionPalmFrame.getReferenceFrame().getParent());
+            palmTransformToParent.getValue().set(syncedPalmPose);
+            actionPalmFrame.update();
+         }
       }
    }
 
