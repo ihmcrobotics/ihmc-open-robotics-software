@@ -35,7 +35,7 @@ public class OpenCLDepthImageSegmenter
    }
 
    // TODO: Add mask to depth transform so we can use YOLO with other cameras besides ZED
-   public RawImage removeBackground(RawImage depthImage, RawImage imageMask, int erosionKernelRadius)
+   public RawImage removeBackground(RawImage depthImage, RawImage imageMask)
    {
       depthImage.get();
       imageMask.get();
@@ -57,13 +57,6 @@ public class OpenCLDepthImageSegmenter
       parametersBuffer.setParameter(imageMask.getFocalLengthY());
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
-      Mat erodedMat = new Mat(imageMask.getImageHeight(), imageMask.getImageWidth(), imageMask.getOpenCVType());
-      opencv_imgproc.erode(imageMask.getCpuImageMat(),
-                           erodedMat,
-                           opencv_imgproc.getStructuringElement(opencv_imgproc.CV_SHAPE_RECT,
-                                                                new Size(2 * erosionKernelRadius + 1, 2 * erosionKernelRadius + 1),
-                                                                new Point(erosionKernelRadius, erosionKernelRadius)));
-
       if (bytedecoDepthImage != null)
          bytedecoDepthImage.destroy(openCLManager);
       bytedecoDepthImage = new BytedecoImage(depthImage.getCpuImageMat());
@@ -72,7 +65,7 @@ public class OpenCLDepthImageSegmenter
 
       if (bytedecoMaskImage != null)
          bytedecoMaskImage.destroy(openCLManager);
-      bytedecoMaskImage = new BytedecoImage(erodedMat);
+      bytedecoMaskImage = new BytedecoImage(imageMask.getCpuImageMat());
       bytedecoMaskImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
       bytedecoMaskImage.writeOpenCLImage(openCLManager);
 
@@ -91,7 +84,6 @@ public class OpenCLDepthImageSegmenter
 
       bytedecoSegmentedDepth.readOpenCLImage(openCLManager);
 
-      erodedMat.release();
       depthImage.release();
       imageMask.release();
       return new RawImage(depthImage.getSequenceNumber(),
