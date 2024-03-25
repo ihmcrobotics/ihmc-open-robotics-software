@@ -1,18 +1,15 @@
 package us.ihmc.perception.sceneGraph.rigidBody;
 
 import gnu.trove.map.TLongObjectMap;
-import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.interfaces.EuclidGeometry;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
 /**
  * A scene object that is a rigid body whose shape and appearance is
@@ -31,6 +28,8 @@ public class PredefinedRigidBodySceneNode extends RigidBodySceneNode
 {
    private final String visualModelFilePath;
    private final RigidBodyTransform visualModelToNodeFrameTransform;
+   private final ReferenceFrame planarRegionCentroidZUp;
+   private final RigidBodyTransform planarRegionCentroidZUpTransformToWorld = new RigidBodyTransform();
 
    public PredefinedRigidBodySceneNode(long id,
                                        String name,
@@ -43,6 +42,9 @@ public class PredefinedRigidBodySceneNode extends RigidBodySceneNode
       super(id, name, sceneGraphIDToNodeMap, initialParentNodeID, initialTransformToParent);
       this.visualModelFilePath = visualModelFilePath;
       this.visualModelToNodeFrameTransform = visualModelToNodeFrameTransform;
+
+      planarRegionCentroidZUp = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                       planarRegionCentroidZUpTransformToWorld);
    }
 
    public void updatePlanarRegions(PlanarRegionsList planarRegionsList)
@@ -51,7 +53,7 @@ public class PredefinedRigidBodySceneNode extends RigidBodySceneNode
       {
          if (!planarRegionsList.isEmpty())
          {
-            Point3D pointInWorld = new Point3D(getNodeFrame().getTransformToWorldFrame().getTranslation());
+            Point3D doorLeverPointInWorld = new Point3D(getNodeFrame().getTransformToWorldFrame().getTranslation());
 
             float epsilon = 0.15f;
 
@@ -59,7 +61,7 @@ public class PredefinedRigidBodySceneNode extends RigidBodySceneNode
 
             for (PlanarRegion closePlanarRegion : planarRegionsList.getPlanarRegionsAsList())
             {
-               if (closePlanarRegion.distance(pointInWorld) > epsilon)
+               if (closePlanarRegion.distance(doorLeverPointInWorld) > epsilon)
                {
                   continue;
                }
@@ -70,7 +72,7 @@ public class PredefinedRigidBodySceneNode extends RigidBodySceneNode
                   continue;
                }
 
-               if (closePlanarRegion.distance(pointInWorld) < doorPlanarRegion.distance(pointInWorld))
+               if (closePlanarRegion.distance(doorLeverPointInWorld) < doorPlanarRegion.distance(doorLeverPointInWorld))
                {
                   doorPlanarRegion = closePlanarRegion;
                }
@@ -78,28 +80,37 @@ public class PredefinedRigidBodySceneNode extends RigidBodySceneNode
 
             if (doorPlanarRegion != null)
             {
-               System.out.println(doorPlanarRegion.getRegionId());
+               System.out.println("doorPlanarRegion ID " + doorPlanarRegion.getRegionId());
 
-               RobotSide sideOfDoor;
-               Quaternion orientation = new Quaternion();
-               EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(getNodeToParentFrameTransform().getTranslation(),
-                                                                          doorPlanarRegion.getNormal(),
-                                                                          orientation);
+               planarRegionCentroidZUpTransformToWorld.getTranslation().set(doorPlanarRegion.getTransformToWorld().getTranslation());
+               planarRegionCentroidZUpTransformToWorld.getRotation().setYawPitchRoll(doorPlanarRegion.getTransformToWorld().getRotation().getYaw(), 0.0, 0.0);
 
-               Point3D centerOfDoor = new Point3D();
-               doorPlanarRegion.getBoundingBox3dInWorld().getCenterPoint(centerOfDoor);
+               planarRegionCentroidZUp.update();
 
-               Vector3D centerOfDoorToDoorHandle = new Vector3D();
+               FramePoint3D handleFramePoint = new FramePoint3D();
+               handleFramePoint.setToZero(getNodeFrame());
+               handleFramePoint.changeFrame(planarRegionCentroidZUp);
 
-//               double normalAngle = doorPlanarRegion.getNormal().angle(getNodeFrame().getTransformToWorldFrame().getTranslation());
+               System.out.println(handleFramePoint);
 
-               sideOfDoor = MathTools.sign(orientation.getYaw()) == -1 ? RobotSide.LEFT : RobotSide.RIGHT;
+               // Update yaw wrt door normal
+               //               getNodeToParentFrameTransform().getRotation().setToYawOrientation((Math.PI / 2));
+               //               getNodeFrame().update();
 
-               System.out.println(sideOfDoor);
-
-               double doorYawInWorld = doorPlanarRegion.getTransformToWorld().getRotation().getYaw();
-               getNodeToParentFrameTransform().getRotation().setYawPitchRoll(doorYawInWorld + Math.PI / 2, Math.PI, 0);
-               getNodeFrame().update();
+               //               Point3D centerOfDoor = new Point3D();
+               //               doorPlanarRegion.getBoundingBox3dInWorld().getCenterPoint(centerOfDoor);
+               //
+               //               Vector3D normal = new Vector3D(Axis3D.Z);
+               //               doorPlanarRegion.getTransformToWorld().getRotation().transform(normal);
+               //
+               //               System.out.println(normal);
+               //
+               //               Line2D doorLineNormal = new Line2D(centerOfDoor.getX(), centerOfDoor.getY(), normal.getX(), normal.getY());
+               //               Point2D doorLeverPointInWorld2D = new Point2D(doorLeverPointInWorld);
+               //
+               //               RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(doorLeverPointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
+               //
+               //               System.out.println(doorSide);
             }
          }
       }
