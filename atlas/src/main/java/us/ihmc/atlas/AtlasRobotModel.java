@@ -2,6 +2,7 @@ package us.ihmc.atlas;
 
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.function.Consumer;
 
 import us.ihmc.atlas.behaviors.AtlasLookAndStepParameters;
@@ -601,7 +602,8 @@ public class AtlasRobotModel implements DRCRobotModel
    {
       return new DefaultLogModelProvider<>(SDFModelLoader.class,
                                            jointMap.getModelName(),
-                                           selectedVersion.getSdfFileAsStream(),
+                                           Collections.singletonList(selectedVersion.getSdfFileAsStream()),
+                                           null,
                                            selectedVersion.getResourceDirectories());
    }
 
