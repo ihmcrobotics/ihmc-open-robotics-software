@@ -69,6 +69,7 @@ public class YOLOv8ObjectDetector
    public void destroy()
    {
       DETECTION_SIZE.close();
+      yoloNet.close();
    }
 
    private Set<YOLOv8Detection> processOutput(MatVector outputBlobs, float confidenceThreshold, float nonMaximumSuppressionThreshold, int imageWidth, int imageHeight)

@@ -256,6 +256,9 @@ public class PerceptionAndAutonomyProcess
    public void destroy()
    {
       LogTools.info("Destroying {}", getClass().getSimpleName());
+      icpManager.destroy();
+      yolov8DetectionManager.destroy();
+
       if (zedImageRetriever != null)
       {
          zedProcessAndPublishThread.stop();
@@ -297,9 +300,6 @@ public class PerceptionAndAutonomyProcess
          if (blackflyImageRetrievers.get(side) != null)
             blackflyImageRetrievers.get(side).destroy();
       }
-
-      icpManager.destroy();
-      yolov8DetectionManager.destroy();
 
       planarRegionsExtractorThread.stop();
       if (planarRegionsExtractor != null)
