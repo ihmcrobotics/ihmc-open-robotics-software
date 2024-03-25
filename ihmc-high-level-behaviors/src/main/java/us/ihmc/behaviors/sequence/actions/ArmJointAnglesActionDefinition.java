@@ -17,7 +17,7 @@ import javax.annotation.Nullable;
 
 public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
 {
-   public static final int NUMBER_OF_JOINTS = 7;
+   public static final int MAX_NUMBER_OF_JOINTS = 7;
    public static final String CUSTOM_ANGLES_NAME = "CUSTOM_ANGLES";
 
    /** Preset is null when using explicitly specified custom joint angles */
@@ -30,7 +30,7 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
    private PresetArmConfiguration onDiskPreset;
    private RobotSide onDiskSide;
    private double onDiskTrajectoryDuration;
-   private final double[] onDiskJointAngles = new double[NUMBER_OF_JOINTS];
+   private final double[] onDiskJointAngles = new double[MAX_NUMBER_OF_JOINTS];
 
    public ArmJointAnglesActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -39,7 +39,7 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
       preset = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, PresetArmConfiguration.HOME);
       side = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
       trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 4.0);
-      jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.OPERATOR, crdtInfo, NUMBER_OF_JOINTS);
+      jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.OPERATOR, crdtInfo, MAX_NUMBER_OF_JOINTS);
    }
 
    @Override
@@ -52,7 +52,7 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
       jsonNode.put("trajectoryDuration", trajectoryDuration.getValue());
       if (preset.getValue() == null)
       {
-         for (int i = 0; i < NUMBER_OF_JOINTS; i++)
+         for (int i = 0; i < MAX_NUMBER_OF_JOINTS; i++)
          {
             jsonNode.put("j" + i, jointAngles.getValueReadOnly(i));
          }
@@ -70,7 +70,7 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
       trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
       if (preset.getValue() == null)
       {
-         for (int i = 0; i < NUMBER_OF_JOINTS; i++)
+         for (int i = 0; i < MAX_NUMBER_OF_JOINTS; i++)
          {
             jointAngles.getValue()[i] = jsonNode.get("j" + i).asDouble();
          }
@@ -120,7 +120,7 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
    {
       super.toMessage(message.getDefinition());
 
-      message.setPreset(preset.toMessage() == null ? -1 : preset.toMessage().ordinal());
+      message.setPreset(preset.toMessageOrdinal());
       message.setRobotSide(side.toMessage().toByte());
       message.setTrajectoryDuration(trajectoryDuration.toMessage());
       jointAngles.toMessage(message.getJointAngles());
@@ -130,8 +130,7 @@ public class ArmJointAnglesActionDefinition extends ActionNodeDefinition
    {
       super.fromMessage(message.getDefinition());
 
-      int presetOrdinal = message.getPreset();
-      preset.fromMessage(presetOrdinal == -1 ? null : PresetArmConfiguration.values()[presetOrdinal]);
+      preset.fromMessageOrdinal(message.getPreset(), PresetArmConfiguration.values);
       side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
       trajectoryDuration.fromMessage(message.getTrajectoryDuration());
       jointAngles.fromMessage(message.getJointAngles());

@@ -34,7 +34,9 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    private final HeightMapSnapWiggler heightMapSnapWiggler;
 
    // Use this by default
-   public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters, FootstepPlannerEnvironmentHandler environmentHandler)
+   public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
+                                 FootstepPlannerParametersReadOnly parameters,
+                                 FootstepPlannerEnvironmentHandler environmentHandler)
    {
       this(footPolygonsInSoleFrame, parameters, null, environmentHandler,null, null);
    }

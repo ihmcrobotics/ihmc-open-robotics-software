@@ -16,6 +16,9 @@ behavior_msgs/FootstepPlanActionDefinitionMessage definition
 # The footsteps, with a maximum of 50
 behavior_msgs/FootstepPlanActionFootstepStateMessage[] footsteps
 
+# Transform from the planning goal to the action's parent frame
+controller_msgs/RigidBodyTransformMessage goal_transform_to_parent
+
 # Execution state
 int8 execution_state
 

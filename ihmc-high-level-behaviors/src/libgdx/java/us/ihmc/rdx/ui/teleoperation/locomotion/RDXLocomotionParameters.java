@@ -10,6 +10,7 @@ public class RDXLocomotionParameters extends StoredPropertySet
    public static final DoubleStoredPropertyKey swingTime = keys.addDoubleKey("Swing time");
    public static final DoubleStoredPropertyKey transferTime = keys.addDoubleKey("Transfer time");
    public static final BooleanStoredPropertyKey assumeFlatGround = keys.addBooleanKey("Assume flat ground");
+   public static final BooleanStoredPropertyKey performAStarSearch = keys.addBooleanKey("Perform A star search");
    public static final BooleanStoredPropertyKey areFootstepsAdjustable = keys.addBooleanKey("Are footsteps adjustable");
    public static final BooleanStoredPropertyKey planSwingTrajectories = keys.addBooleanKey("Plan swing trajectories");
    public static final BooleanStoredPropertyKey planWidthBodyPath = keys.addBooleanKey("Plan with body path");
@@ -56,6 +57,11 @@ public class RDXLocomotionParameters extends StoredPropertySet
    public boolean getPlanWithBodyPath()
    {
       return get(planWidthBodyPath);
+   }
+
+   public boolean getPerformAStarSearch()
+   {
+      return get(performAStarSearch);
    }
 
    public int getInitialStanceSide()
