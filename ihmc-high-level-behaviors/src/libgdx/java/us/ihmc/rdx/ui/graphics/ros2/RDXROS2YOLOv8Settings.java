@@ -11,13 +11,15 @@ import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 
 public class RDXROS2YOLOv8Settings extends RDXVisualizer
 {
+   private static final String[] AVAILABLE_SENSORS = {"ZED", "D455"};
+
    private final ROS2PublishSubscribeAPI ros2;
 
    private final ImFloat confidenceThreshold = new ImFloat(0.3f);
    private final ImFloat nmsThreshold = new ImFloat(0.1f);
    private final ImFloat maskThreshold = new ImFloat(0.0f);
    private final ImFloat candidateAcceptanceThreshold = new ImFloat(0.6f);
-   private final ImInt zedRealsenseToggle = new ImInt(0); // 0 = ZED, 1 = Realsense
+   private final ImInt selectedSensor = new ImInt(0); // 0 = ZED, 1 = Realsense
 
    private final ROS2Heartbeat demandYOLOv8ICPZed;
    private final ROS2Heartbeat demandYOLOv8ICPRealsense;
@@ -37,11 +39,10 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
    {
       super.renderImGuiWidgets();
 
-      ImGui.pushItemWidth(40.0f);
-      ImGui.sliderInt("ZED/Realsense Toggle", zedRealsenseToggle.getData(), 0, 1);
-      ImGui.popItemWidth();
-      demandYOLOv8ICPZed.setAlive(isActive() && zedRealsenseToggle.get() == 0);
-      demandYOLOv8ICPRealsense.setAlive(isActive() && zedRealsenseToggle.get() == 1);
+      ImGui.combo("Sensor Selection", selectedSensor, AVAILABLE_SENSORS);
+
+      demandYOLOv8ICPZed.setAlive(isActive() && selectedSensor.get() == 0);
+      demandYOLOv8ICPRealsense.setAlive(isActive() && selectedSensor.get() == 1);
 
       boolean parameterChanged = false;
       if (ImGui.sliderFloat("confidenceThreshold", confidenceThreshold.getData(), 0.0f, 1.0f))
