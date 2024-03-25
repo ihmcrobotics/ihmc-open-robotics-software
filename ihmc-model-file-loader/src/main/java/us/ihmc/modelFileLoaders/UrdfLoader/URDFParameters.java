@@ -18,6 +18,4 @@ public interface URDFParameters
    {
       return null;
    }
-
-   InputStream getURDFAsInputStream();
 }
