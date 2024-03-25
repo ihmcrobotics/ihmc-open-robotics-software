@@ -1,29 +1,31 @@
 package us.ihmc.perception.sceneGraph.yolo;
 
 import perception_msgs.msg.dds.YOLOv8ParametersMessage;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.YOLOv8.YOLOv8DetectableObject;
 import us.ihmc.perception.YOLOv8.YOLOv8Detection;
+import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionResults;
 import us.ihmc.perception.YOLOv8.YOLOv8ObjectDetector;
 import us.ihmc.perception.filters.DetectionFilter;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
+import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeRemoval;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
+import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.tools.time.FrequencyCalculator;
 
+import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -50,20 +52,20 @@ public class YOLOv8DetectionManager
    private final Notification readyToRunNotification = new Notification();
    private final FrequencyCalculator yoloFrequencyCalculator = new FrequencyCalculator();
 
-   private final Map<YOLOv8Detection, DetectionFilter> candidateDetections = new ConcurrentHashMap<>();
-   private final Map<YOLOv8DetectableObject, YOLOv8Node> currentlyDetectedNodes = new ConcurrentHashMap<>();
+   private final Map<YOLOv8DetectionClass, YOLOv8Node> currentlyDetectedNodes = new HashMap<>();
+   private final Map<YOLOv8DetectionClass, YOLOv8SegmentedDetection> detectedObjects = new ConcurrentHashMap<>();
+   private final Map<YOLOv8DetectionClass, YOLOv8SegmentedDetection> candidateDetections = new ConcurrentHashMap<>();
 
-   private final ROS2Helper ros2Helper;
    private final IHMCROS2Input<YOLOv8ParametersMessage> yoloParameterSubscription;
-   private float yoloConfidenceThreshold = 0.3f;
+   private float yoloConfidenceThreshold = 0.5f;
    private float yoloNMSThreshold = 0.1f;
    private float yoloSegmentationThreshold = 0.0f;
    private float candidateAcceptanceThreshold = 0.6f;
 
+   private ReferenceFrame robotFrame = null;
+
    public YOLOv8DetectionManager(ROS2Helper ros2Helper)
    {
-      this.ros2Helper = ros2Helper;
-
       yoloDetectionThread = new RestartableThrottledThread("YOLODetector", 5.0, this::runYOLODetection);
       yoloDetectionThread.start();
 
@@ -101,9 +103,14 @@ public class YOLOv8DetectionManager
       }
    }
 
+   public void setRobotFrame(ReferenceFrame robotFrame)
+   {
+      this.robotFrame = robotFrame;
+   }
+
    public void destroy()
    {
-      yoloDetectionThread.stop();
+      yoloDetectionThread.blockingStop();
       segmenter.destroy();
       extractor.destroy();
       openCLManager.destroy();
@@ -146,130 +153,113 @@ public class YOLOv8DetectionManager
          newImageLock.unlock();
       }
 
-      if (colorImageCopy != null && depthImageCopy != null)
+      if (colorImageCopy != null && depthImageCopy != null && robotFrame != null)
       {
          if (readyToRunNotification.poll())
-            runYOLOAndSegmentation(colorImageCopy, depthImageCopy);
+            runYOLOAndSegmentation(colorImageCopy, depthImageCopy, robotFrame);
 
          colorImageCopy.release();
          depthImageCopy.release();
       }
    }
 
-   private void runYOLOAndSegmentation(RawImage colorImage, RawImage depthImage)
+   private void runYOLOAndSegmentation(RawImage colorImage, RawImage depthImage, ReferenceFrame robotFrame)
    {
       colorImage.get();
       depthImage.get();
 
       yoloFrequencyCalculator.ping();
 
+      PerceptionDebugTools.display("Color", colorImage.getCpuImageMat(), 1);
       YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImage, yoloConfidenceThreshold, yoloNMSThreshold);
 
       // Extract stuff from the results
       Map<YOLOv8Detection, RawImage> objectMasks = yoloResults.getSegmentationImages(yoloSegmentationThreshold);
       Set<YOLOv8Detection> newDetections = yoloResults.getDetections();
 
-      // TODO: Does this need to be synchronized?
-      matchDetections(currentlyDetectedNodes, newDetections);
-
-      // Provide segmented point cloud to each yolo node
-      for (YOLOv8Node yoloNode : currentlyDetectedNodes.values())
+      // match new detections to existing detections
+      Point3D robotPoint = new Point3D(robotFrame.getTransformToWorldFrame().getTranslation());
+      for (YOLOv8SegmentedDetection oldDetecion : detectedObjects.values())
       {
-         RawImage mask = objectMasks.get(yoloNode.getYoloDetection());
-         if (mask != null)
-         {
-            RawImage segmentedDepth = segmenter.removeBackground(depthImage, mask, yoloNode.getMaskErosionKernelRadius());
-            List<Point3DReadOnly> objectPointCloud = extractor.extractPointCloud(segmentedDepth);
-            yoloNode.setObjectPointCloud(objectPointCloud);
-         }
-      }
-
-      colorImage.release();
-      depthImage.release();
-
-      for (RawImage mask : objectMasks.values())
-         mask.release();
-      yoloResults.destroy();
-
-      readyToRunNotification.set();
-   }
-
-   private void matchDetections(Map<YOLOv8DetectableObject, YOLOv8Node> oldDetections, Set<YOLOv8Detection> newDetections)
-   {
-      // Find best matching new detection for the old detections
-      for (Entry<YOLOv8DetectableObject, YOLOv8Node> oldDetectionNode : oldDetections.entrySet())
-      {
-         YOLOv8Node yoloNode = oldDetectionNode.getValue();
-         YOLOv8Detection oldDetection = yoloNode.getYoloDetection();
-
-         // Find the new detection with the shortest distance between it and the old detection
-         double bestMatchDistance = Double.POSITIVE_INFINITY;
-         YOLOv8Detection bestMatchDetection = null;
+         double closestDistance = Double.POSITIVE_INFINITY;
+         YOLOv8SegmentedDetection bestMatchDetection = null;
 
          Iterator<YOLOv8Detection> newDetectionIterator = newDetections.iterator();
          while (newDetectionIterator.hasNext())
          {
             YOLOv8Detection newDetection = newDetectionIterator.next();
-            if (newDetection.objectClass() == oldDetection.objectClass())
-            {
-               double distanceSquared = MathTools.square(oldDetection.x() - newDetection.x()) + MathTools.square(oldDetection.y() - newDetection.y());
 
-               if (distanceSquared < bestMatchDistance)
+            if (newDetection.objectClass() == oldDetecion.getDetection().objectClass())
+            {
+               RawImage mask = objectMasks.get(newDetection);
+
+               YOLOv8SegmentedDetection segmentedNewDetection = new YOLOv8SegmentedDetection(newDetection,
+                                                                                             oldDetecion.getDetectionFilter(),
+                                                                                             mask,
+                                                                                             depthImage,
+                                                                                             segmenter::removeBackground,
+                                                                                             extractor::extractPointCloud);
+
+               double distance = robotPoint.distanceSquared(segmentedNewDetection.getCentroid());
+               if (distance < closestDistance)
                {
-                  bestMatchDistance = distanceSquared;
-                  bestMatchDetection = newDetection;
+                  closestDistance = distance;
+                  bestMatchDetection = segmentedNewDetection;
                }
 
-               // remove new detections which are of same object type as old detection
                newDetectionIterator.remove();
             }
          }
 
          if (bestMatchDetection != null)
          {
-            DetectionFilter filter = yoloNode.getDetectionFilter();
+            detectedObjects.replace(bestMatchDetection.getDetection().objectClass(), bestMatchDetection);
+            DetectionFilter filter = bestMatchDetection.getDetectionFilter();
             filter.setHistoryLength((int) yoloFrequencyCalculator.getFrequency());
             filter.registerDetection();
             filter.update();
-            yoloNode.setYoloDetection(bestMatchDetection);
          }
       }
 
-      // Only undetected object types left now; match to candidate detections
-      for (Entry<YOLOv8Detection, DetectionFilter> candidateEntry : candidateDetections.entrySet())
+      for (YOLOv8SegmentedDetection oldCandidate : candidateDetections.values())
       {
-         YOLOv8Detection candidateDetection = candidateEntry.getKey();
-
-         double bestMatchDistance = Double.POSITIVE_INFINITY;
-         YOLOv8Detection bestMatchDetection = null;
+         double closestDistance = Double.POSITIVE_INFINITY;
+         YOLOv8SegmentedDetection bestMatchDetection = null;
 
          Iterator<YOLOv8Detection> newDetectionIterator = newDetections.iterator();
          while (newDetectionIterator.hasNext())
          {
             YOLOv8Detection newDetection = newDetectionIterator.next();
-            if (newDetection.objectClass() == candidateDetection.objectClass())
-            {
-               double distanceSquared =
-                     MathTools.square(candidateDetection.x() - newDetection.x()) + MathTools.square(candidateDetection.y() - newDetection.y());
 
-               if (distanceSquared < bestMatchDistance)
+            if (newDetection.objectClass() == oldCandidate.getDetection().objectClass())
+            {
+               RawImage mask = objectMasks.get(newDetection);
+
+               YOLOv8SegmentedDetection segmentedNewDetection = new YOLOv8SegmentedDetection(newDetection,
+                                                                                             oldCandidate.getDetectionFilter(),
+                                                                                             mask,
+                                                                                             depthImage,
+                                                                                             segmenter::removeBackground,
+                                                                                             extractor::extractPointCloud);
+
+               double distance = robotPoint.distanceSquared(segmentedNewDetection.getCentroid());
+               if (distance < closestDistance)
                {
-                  bestMatchDistance = distanceSquared;
-                  bestMatchDetection = newDetection;
+                  closestDistance = distance;
+                  bestMatchDetection = segmentedNewDetection;
                }
 
-               // remove new detections which are of same object type as candidate detection
                newDetectionIterator.remove();
             }
          }
 
          if (bestMatchDetection != null)
          {
-            DetectionFilter filter = candidateDetections.remove(candidateDetection);
+            candidateDetections.replace(bestMatchDetection.getDetection().objectClass(), bestMatchDetection);
+            DetectionFilter filter = bestMatchDetection.getDetectionFilter();
             filter.setHistoryLength((int) yoloFrequencyCalculator.getFrequency());
             filter.registerDetection();
             filter.update();
-            candidateDetections.put(bestMatchDetection, filter);
          }
       }
 
@@ -279,8 +269,27 @@ public class YOLOv8DetectionManager
          DetectionFilter filter = new DetectionFilter((int) yoloFrequencyCalculator.getFrequency(), candidateAcceptanceThreshold);
          filter.registerDetection();
          filter.update();
-         candidateDetections.put(newDetection, filter);
+
+         YOLOv8SegmentedDetection segmentedNewDetection = new YOLOv8SegmentedDetection(newDetection,
+                                                                                       filter,
+                                                                                       objectMasks.get(newDetection),
+                                                                                       depthImage,
+                                                                                       segmenter::removeBackground,
+                                                                                       extractor::extractPointCloud);
+
+         candidateDetections.put(newDetection.objectClass(), segmentedNewDetection);
       }
+
+      colorImage.release();
+      depthImage.release();
+
+      for (RawImage mask : objectMasks.values())
+         mask.release();
+      yoloResults.destroy();
+
+      System.out.println("Run Frequency: " + yoloFrequencyCalculator.getFrequency());
+
+      readyToRunNotification.set();
    }
 
    public void updateSceneGraph(ROS2SceneGraph sceneGraph)
@@ -288,36 +297,50 @@ public class YOLOv8DetectionManager
       sceneGraph.modifyTree(modificationQueue ->
       {
          // Handle existing detections
-         for (YOLOv8Node yoloNode : currentlyDetectedNodes.values())
+         Iterator<Entry<YOLOv8DetectionClass, YOLOv8Node>> yoloNodeIterator = currentlyDetectedNodes.entrySet().iterator();
+         while (yoloNodeIterator.hasNext())
          {
-            if (!yoloNode.update())
+            YOLOv8Node yoloNode = yoloNodeIterator.next().getValue();
+            YOLOv8SegmentedDetection detection = detectedObjects.get(yoloNode.getDetection().objectClass());
+            DetectionFilter filter = detection.getDetectionFilter();
+
+            if (filter.isStableDetectionResult() && sceneGraph.getIDToNodeMap().containsKey(yoloNode.getID()))
+            {
+               yoloNode.setObjectPointCloud(detection.getObjectPointCloud());
+               yoloNode.update();
+            }
+            else
+            {
                modificationQueue.accept(new SceneGraphNodeRemoval(yoloNode, sceneGraph));
+               yoloNodeIterator.remove();
+               detectedObjects.remove(detection.getDetection().objectClass());
+            }
          }
 
          // Handle candidate detections (add or forget)
-         //         synchronized (candidateDetections)
-         //         {
-         Iterator<Entry<YOLOv8Detection, DetectionFilter>> candidateIterator = candidateDetections.entrySet().iterator();
+         Iterator<Entry<YOLOv8DetectionClass, YOLOv8SegmentedDetection>> candidateIterator = candidateDetections.entrySet().iterator();
          while (candidateIterator.hasNext())
          {
-            Map.Entry<YOLOv8Detection, DetectionFilter> candidateDetectionEntry = candidateIterator.next();
-            YOLOv8Detection candidateDetection = candidateDetectionEntry.getKey();
-            DetectionFilter filter = candidateDetectionEntry.getValue();
+            YOLOv8SegmentedDetection candidateDetection = candidateIterator.next().getValue();
+            DetectionFilter filter = candidateDetection.getDetectionFilter();
 
             if (filter.hasEnoughSamples())
             {
                if (filter.isStableDetectionResult())
                {
                   long nodeID = sceneGraph.getNextID().getAndIncrement();
-                  YOLOv8Node newYOLOICPCombo = new YOLOv8Node(nodeID, "YOLO " + candidateDetection.objectClass().name(), candidateDetection, filter);
-                  modificationQueue.accept(new SceneGraphNodeAddition(newYOLOICPCombo, sceneGraph.getRootNode()));
-                  currentlyDetectedNodes.put(candidateDetection.objectClass(), newYOLOICPCombo);
+                  YOLOv8Node newYoloNode = new YOLOv8Node(nodeID,
+                                                          "YOLO " + candidateDetection.getDetection().objectClass().toString(),
+                                                          candidateDetection.getDetection());
+                  modificationQueue.accept(new SceneGraphNodeAddition(newYoloNode, sceneGraph.getRootNode()));
+                  currentlyDetectedNodes.put(candidateDetection.getDetection().objectClass(), newYoloNode);
+                  detectedObjects.put(candidateDetection.getDetection().objectClass(), candidateDetection);
+                  candidateDetection.getDetectionFilter().setAcceptanceThreshold(0.2f);
                }
 
                candidateIterator.remove();
             }
          }
-         //         }
       });
    }
 }

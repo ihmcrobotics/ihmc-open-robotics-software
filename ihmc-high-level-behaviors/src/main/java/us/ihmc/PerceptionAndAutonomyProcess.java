@@ -364,11 +364,10 @@ public class PerceptionAndAutonomyProcess
          realsenseColorImage = realsenseImageRetriever.getLatestRawColorImage();
 
          // Do processing on image
+         yolov8DetectionManager.setDetectionImages(realsenseColorImage, realsenseDepthImage);
 
          realsenseImagePublisher.setNextDepthImage(realsenseDepthImage.get());
          realsenseImagePublisher.setNextColorImage(realsenseColorImage.get());
-
-         yolov8DetectionManager.setDetectionImages(realsenseColorImage, realsenseColorImage);
 
          realsenseDepthImage.release();
          realsenseColorImage.release();
@@ -454,10 +453,12 @@ public class PerceptionAndAutonomyProcess
       if (centerposeDemandNode.isDemanded())
          centerposeDetectionManager.updateSceneGraph(sceneGraph);
 
+      ReferenceFrame robotPelvisFrame = robotPelvisFrameSupplier.get();
       yolov8DetectionManager.updateSceneGraph(sceneGraph);
+      yolov8DetectionManager.setRobotFrame(robotPelvisFrame);
 
       // Update general stuff
-      sceneGraph.updateOnRobotOnly(robotPelvisFrameSupplier.get());
+      sceneGraph.updateOnRobotOnly(robotPelvisFrame);
       sceneGraph.updatePublication();
 
       ++sceneGraphUpdateIndex;
