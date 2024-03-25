@@ -102,22 +102,22 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       enableFilter.set(false);
 
       modelHandler = new MultipleHumanoidModelHandler<>(RobotModelTask.class);
-      FullHumanoidRobotModel actualRobotModel = toolbox.getFullRobotModel();
-      modelHandler.addRobotModel(RobotModelTask.ACTUAL, actualRobotModel);
+      FullHumanoidRobotModel controllerRobotModel = toolbox.getFullRobotModel();
+      modelHandler.addRobotModel(RobotModelTask.CONTROLLER, controllerRobotModel);
 
       for (RobotModelTask task : new RobotModelTask[] {RobotModelTask.ESTIMATE, RobotModelTask.INVERSE_DYNAMICS, RobotModelTask.REGRESSOR})
       {
-         RigidBodyBasics clonedElevator = MultiBodySystemFactories.cloneMultiBodySystem(actualRobotModel.getElevator(),
-                                                                                       actualRobotModel.getModelStationaryFrame(),
+         RigidBodyBasics clonedElevator = MultiBodySystemFactories.cloneMultiBodySystem(controllerRobotModel.getElevator(),
+                                                                                       controllerRobotModel.getModelStationaryFrame(),
                                                                                        "_" + task.name());
          FullHumanoidRobotModel clonedRobotModel = new FullHumanoidRobotModelWrapper(clonedElevator, false);
          modelHandler.addRobotModel(task, clonedRobotModel);
       }
 
-      covarianceHelper = new HumanoidModelCovarianceHelper(actualRobotModel, inertialEstimationParameters, registry);
+      covarianceHelper = new HumanoidModelCovarianceHelper(controllerRobotModel, inertialEstimationParameters, registry);
       baselineCalculator = new InertialBaselineCalculator(modelHandler.getRobotModel(RobotModelTask.ESTIMATE), inertialEstimationParameters, 1.0, registry);
 
-      yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(actualRobotModel.getRootBody(), registry);
+      yoInertiaEllipsoids = InertiaVisualizationTools.createYoInertiaEllipsoids(controllerRobotModel.getRootBody(), registry);
       ellipsoidGraphicGroup = InertiaVisualizationTools.getInertiaEllipsoidGroup(yoInertiaEllipsoids);
 
       inverseDynamicsCalculator = new InverseDynamicsCalculator(modelHandler.getRobotModel(RobotModelTask.INVERSE_DYNAMICS).getElevator());
@@ -126,7 +126,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       regressorCalculator = new JointTorqueRegressorCalculator(modelHandler.getRobotModel(RobotModelTask.REGRESSOR).getElevator());
       regressorCalculator.setGravitationalAcceleration(-toolbox.getGravityZ());
 
-      int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(actualRobotModel.getRootJoint().subtreeArray());
+      int nDoFs = MultiBodySystemTools.computeDegreesOfFreedom(controllerRobotModel.getRootJoint().subtreeArray());
       int nParameters = inertialEstimationParameters.getNumberOfParameters();
       int nNonEmptyBasisSets = inertialEstimationParameters.getNumberOfNonEmptyBasisSets();
 
@@ -148,15 +148,15 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       this.footSwitches = toolbox.getFootSwitches();
       contactWrenches = new SideDependentList<>();
-      jointIndexHandler = new JointIndexHandler(actualRobotModel.getRootJoint().subtreeArray());
+      jointIndexHandler = new JointIndexHandler(controllerRobotModel.getRootJoint().subtreeArray());
       legJoints = new SideDependentList<>();
       compactContactJacobians = new SideDependentList<>();
       fullContactJacobians = new SideDependentList<>();
-      // NOTE: for the leg joints and compact jacobians, we use the actual robot model because it has the full model information, including all joint names
+      // NOTE: for the leg joints and compact jacobians, we use the controller robot model because it has the full model information, including all joint names
       for (RobotSide side : RobotSide.values)
       {
          contactWrenches.put(side, new DMatrixRMaj(WRENCH_DIMENSION, 1));
-         legJoints.put(side, MultiBodySystemTools.createJointPath(actualRobotModel.getElevator(), actualRobotModel.getFoot(side)));
+         legJoints.put(side, MultiBodySystemTools.createJointPath(controllerRobotModel.getElevator(), controllerRobotModel.getFoot(side)));
          compactContactJacobians.put(side, new GeometricJacobian(legJoints.get(side), footSwitches.get(side).getMeasurementFrame()));
          fullContactJacobians.put(side, new DMatrixRMaj(WRENCH_DIMENSION, nDoFs));
       }
@@ -213,8 +213,8 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private enum RobotModelTask
    {
-      // the actual robot model used in the controller that filtered inertial parameters are sent to
-      ACTUAL,
+      // the robot model used in the controller that filtered inertial parameters are sent to
+      CONTROLLER,
       // the model used to estimate inertial parameters and for visualization
       ESTIMATE,
       // a model where the parameters are being estimated are zeroed, so that an inverse dynamics call results in torques from only known parameters
@@ -288,7 +288,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
          // Pass through estimates to controller
          if (passThroughEstimatesToController.getValue())
-            updateActualRobotModel();
+            updateControllerRobotModel();
 
          updateVisuals();
       }
@@ -308,7 +308,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private void updateWholeSystemTorques()
    {
-      modelHandler.extractJointsState(RobotModelTask.ACTUAL, JointStateType.EFFORT, wholeSystemTorques);
+      modelHandler.extractJointsState(RobotModelTask.CONTROLLER, JointStateType.EFFORT, wholeSystemTorques);
    }
 
    private void updateContactJacobians()
@@ -328,13 +328,13 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private void updateRegressorAndInverseDynamicsModels()
    {
-      modelHandler.copyJointsState(RobotModelTask.ACTUAL, RobotModelTask.REGRESSOR, JointStateType.CONFIGURATION);
-      modelHandler.copyJointsState(RobotModelTask.ACTUAL, RobotModelTask.REGRESSOR, JointStateType.VELOCITY);
-      modelHandler.copyJointsState(RobotModelTask.ACTUAL, RobotModelTask.INVERSE_DYNAMICS, JointStateType.CONFIGURATION);
-      modelHandler.copyJointsState(RobotModelTask.ACTUAL, RobotModelTask.INVERSE_DYNAMICS, JointStateType.VELOCITY);
+      modelHandler.copyJointsState(RobotModelTask.CONTROLLER, RobotModelTask.REGRESSOR, JointStateType.CONFIGURATION);
+      modelHandler.copyJointsState(RobotModelTask.CONTROLLER, RobotModelTask.REGRESSOR, JointStateType.VELOCITY);
+      modelHandler.copyJointsState(RobotModelTask.CONTROLLER, RobotModelTask.INVERSE_DYNAMICS, JointStateType.CONFIGURATION);
+      modelHandler.copyJointsState(RobotModelTask.CONTROLLER, RobotModelTask.INVERSE_DYNAMICS, JointStateType.VELOCITY);
 
       // Update joint accelerations by processing joint velocities
-      modelHandler.extractJointsState(RobotModelTask.ACTUAL, JointStateType.VELOCITY, jointVelocitiesContainer);
+      modelHandler.extractJointsState(RobotModelTask.CONTROLLER, JointStateType.VELOCITY, jointVelocitiesContainer);
       for (int i = 0; i < jointAccelerations.length; ++i)
       {
          jointAccelerations[i].update(jointVelocitiesContainer.get(i));
@@ -348,10 +348,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       modelHandler.getRobotModel(RobotModelTask.INVERSE_DYNAMICS).updateFrames();
    }
 
-   private void updateActualRobotModel()
+   private void updateControllerRobotModel()
    {
       baselineCalculator.calculateRateLimitedParameterDeltas(modelHandler.getBodyArray(RobotModelTask.ESTIMATE));
-      baselineCalculator.addRateLimitedParameterDeltas(modelHandler.getBodyArray(RobotModelTask.ACTUAL));
+      baselineCalculator.addRateLimitedParameterDeltas(modelHandler.getBodyArray(RobotModelTask.CONTROLLER));
    }
 
    private void updateTareSpatialInertias()
@@ -414,15 +414,15 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private void updateVisuals()
    {
       RigidBodyBasics[] estimateModelBodies = modelHandler.getBodyArray(RobotModelTask.ESTIMATE);
-      RigidBodyReadOnly[] actualModelBodies = modelHandler.getBodyArray(RobotModelTask.ACTUAL);
+      RigidBodyReadOnly[] controllerModelBodies = modelHandler.getBodyArray(RobotModelTask.CONTROLLER);
       for (int i = 0; i < estimateModelBodies.length; i++)
       {
-         RigidBodyReadOnly actualBody = actualModelBodies[i];
+         RigidBodyReadOnly controllerBody = controllerModelBodies[i];
          RigidBodyReadOnly estimateBody = estimateModelBodies[i];
 
-         double scale = EuclidCoreTools.clamp(estimateBody.getInertia().getMass() / actualBody.getInertia().getMass() / 2.0, 0.0, 1.0);
+         double scale = EuclidCoreTools.clamp(estimateBody.getInertia().getMass() / controllerBody.getInertia().getMass() / 2.0, 0.0, 1.0);
 
-         if (estimateBody.getInertia() != null && actualBody.getInertia() != null)
+         if (estimateBody.getInertia() != null && controllerBody.getInertia() != null)
             yoInertiaEllipsoids.get(i).update(scale);
       }
    }
