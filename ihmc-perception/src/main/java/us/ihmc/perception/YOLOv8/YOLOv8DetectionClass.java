@@ -4,7 +4,7 @@ import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape
 
 import javax.annotation.Nullable;
 
-public enum YOLOv8DetectableObject
+public enum YOLOv8DetectionClass
 {
    PERSON(null, null),
    BICYCLE(PrimitiveRigidBodyShape.CUSTOM, null),
@@ -93,7 +93,7 @@ public enum YOLOv8DetectableObject
 
    private String pointCloudFileName;
 
-   YOLOv8DetectableObject(PrimitiveRigidBodyShape primitiveApproximation, String pointCloudFileName)
+   YOLOv8DetectionClass(PrimitiveRigidBodyShape primitiveApproximation, String pointCloudFileName)
    {
       this.primitiveApproximation = primitiveApproximation;
       this.pointCloudFileName = pointCloudFileName;
@@ -120,7 +120,7 @@ public enum YOLOv8DetectableObject
       return ordinal();
    }
 
-   public static YOLOv8DetectableObject fromByte(byte enumAsByte)
+   public static YOLOv8DetectionClass fromByte(byte enumAsByte)
    {
       return values()[enumAsByte];
    }

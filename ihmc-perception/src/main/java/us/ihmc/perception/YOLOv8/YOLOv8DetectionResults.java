@@ -29,7 +29,7 @@ public class YOLOv8DetectionResults
    private final MatVector outputBlobs;
    private final RawImage detectionImage;
    private final FloatIndexer outputMasksIndexer;
-   private final EnumMap<YOLOv8DetectableObject, Mat> objectMasks = new EnumMap<>(YOLOv8DetectableObject.class);
+   private final EnumMap<YOLOv8DetectionClass, Mat> objectMasks = new EnumMap<>(YOLOv8DetectionClass.class);
 
    private final int maskOpenCVType;
    private final int numberOfMasks;
@@ -93,7 +93,7 @@ public class YOLOv8DetectionResults
       return segmentationImages;
    }
 
-   public RawImage getSegmentationMatrixForObject(YOLOv8DetectableObject objectType, float maskThreshold)
+   public RawImage getSegmentationMatrixForObject(YOLOv8DetectionClass objectType, float maskThreshold)
    {
       if (objectMasks.containsKey(objectType))
       {

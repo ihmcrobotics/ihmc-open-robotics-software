@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class YOLOv8Tools
 {
-   private static final WorkspaceResourceDirectory POINT_CLOUD_DIRECTORY = new WorkspaceResourceDirectory(YOLOv8DetectableObject.class, "/yoloICPPointClouds/");
+   private static final WorkspaceResourceDirectory POINT_CLOUD_DIRECTORY = new WorkspaceResourceDirectory(YOLOv8DetectionClass.class, "/yoloICPPointClouds/");
 
    public static List<Point3DReadOnly> filterOutliers(List<? extends Point3DReadOnly> pointCloud, double zScoreThreshold, int numberOfSamples)
    {
