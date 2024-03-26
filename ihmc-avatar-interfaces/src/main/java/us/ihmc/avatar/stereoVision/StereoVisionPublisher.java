@@ -36,9 +36,9 @@ public abstract class StereoVisionPublisher
    {
       udpClient.stop();
 
-      getSensorReader().stop();
       getSensorReader().unregisterListener(udpClient);
       getSensorReader().unregisterListener(stereoVisionLogger);
+      getSensorReader().stop();
    }
 
    public StereoVisionUDPClient getUDPClient()
