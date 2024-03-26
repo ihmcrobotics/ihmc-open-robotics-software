@@ -27,9 +27,11 @@ public class KSTInputFilter
    public KSTInputFilter(FullHumanoidRobotModel fullRobotModel, KinematicsStreamingToolboxParameters parameters, YoRegistry parentRegistry)
    {
       midFeetZUpFrame = new MidFootZUpGroundFrame("midFeetZUpFrame", fullRobotModel.getSoleFrame(RobotSide.LEFT), fullRobotModel.getSoleFrame(RobotSide.RIGHT));
-      bbxSize.set(parameters.getInputFilterBBXSize());
+      if (parameters.getInputFilterBBXSize() != null)
+         bbxSize.set(parameters.getInputFilterBBXSize());
       bbxOffset = new YoFramePoint3D("inputFilterBBXCenter", midFeetZUpFrame, registry);
-      bbxOffset.set(parameters.getInputFilterBBXCenter());
+      if (parameters.getInputFilterBBXCenter() != null)
+         bbxOffset.set(parameters.getInputFilterBBXCenter());
 
       parentRegistry.addChild(registry);
    }
