@@ -10,6 +10,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.TaskspaceTrajectoryTrackingErrorCalculator;
@@ -110,9 +111,10 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
       if (state.getScrewFrame().isChildOfWorld())
       {
-         if (getParent().getState() instanceof ActionSequenceState parent)
+         ActionSequenceState actionSequence = BehaviorTreeTools.findActionSequenceAncestor(getParent().getState());
+         if (actionSequence != null)
          {
-            if (parent.getExecutionNextIndex() <= state.getActionIndex())
+            if (actionSequence.getExecutionNextIndex() <= state.getActionIndex())
             {
                ReferenceFrame initialHandFrame = null;
 
@@ -122,7 +124,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                }
                else
                {
-                  HandPoseActionState previousHandPose = parent.findNextPreviousAction(HandPoseActionState.class,
+                  HandPoseActionState previousHandPose = actionSequence.findNextPreviousAction(HandPoseActionState.class,
                                                                                        state.getActionIndex(),
                                                                                        definition.getSide());
                   if (previousHandPose != null && previousHandPose.getPalmFrame().isChildOfWorld())
@@ -449,6 +451,14 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
       if (state.getScrewFrame().isChildOfWorld())
       {
+         if (state.getCommandedTrajectory().isEmpty())
+         {
+            LogTools.error("Commanded trajectory is empty.");
+            state.setIsExecuting(false);
+            state.setFailed(true);
+            return;
+         }
+
          SE3TrajectoryPointReadOnly lastTrajectoryPose = state.getCommandedTrajectory().getLastValueReadOnly();
          desiredHandControlPose.set(lastTrajectoryPose.getPosition(), lastTrajectoryPose.getOrientation());
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));

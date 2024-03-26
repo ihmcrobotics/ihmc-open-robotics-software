@@ -16,6 +16,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 {
    public static final byte BASIC_NODE = (byte) 0;
    public static final byte ACTION_SEQUENCE = (byte) 1;
+   public static final byte DOOR_TRAVERSAL = (byte) 2;
    public static final byte ARM_JOINT_ANGLES_ACTION = (byte) 10;
    public static final byte CHEST_ORIENTATION_ACTION = (byte) 11;
    public static final byte FOOTSTEP_PLAN_ACTION = (byte) 12;
@@ -49,6 +50,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public us.ihmc.idl.IDLSequence.Long  behavior_tree_indices_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BasicNodeStateMessage>  basic_nodes_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ActionSequenceStateMessage>  action_sequences_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.DoorTraversalStateMessage>  door_traversals_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ArmJointAnglesActionStateMessage>  arm_joint_angles_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ChestOrientationActionStateMessage>  chest_orientation_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionStateMessage>  footstep_plan_actions_;
@@ -68,6 +70,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       basic_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BasicNodeStateMessage> (200, new behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType());
       action_sequences_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ActionSequenceStateMessage> (200, new behavior_msgs.msg.dds.ActionSequenceStateMessagePubSubType());
+      door_traversals_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.DoorTraversalStateMessage> (200, new behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType());
       arm_joint_angles_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ArmJointAnglesActionStateMessage> (200, new behavior_msgs.msg.dds.ArmJointAnglesActionStateMessagePubSubType());
       chest_orientation_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ChestOrientationActionStateMessage> (200, new behavior_msgs.msg.dds.ChestOrientationActionStateMessagePubSubType());
       footstep_plan_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionStateMessage> (200, new behavior_msgs.msg.dds.FootstepPlanActionStateMessagePubSubType());
@@ -97,6 +100,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       behavior_tree_indices_.set(other.behavior_tree_indices_);
       basic_nodes_.set(other.basic_nodes_);
       action_sequences_.set(other.action_sequences_);
+      door_traversals_.set(other.door_traversals_);
       arm_joint_angles_actions_.set(other.arm_joint_angles_actions_);
       chest_orientation_actions_.set(other.chest_orientation_actions_);
       footstep_plan_actions_.set(other.footstep_plan_actions_);
@@ -177,6 +181,12 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ActionSequenceStateMessage>  getActionSequences()
    {
       return action_sequences_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.DoorTraversalStateMessage>  getDoorTraversals()
+   {
+      return door_traversals_;
    }
 
 
@@ -274,6 +284,13 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
          {  if (!this.action_sequences_.get(i).epsilonEquals(other.action_sequences_.get(i), epsilon)) return false; }
       }
 
+      if (this.door_traversals_.size() != other.door_traversals_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.door_traversals_.size(); i++)
+         {  if (!this.door_traversals_.get(i).epsilonEquals(other.door_traversals_.get(i), epsilon)) return false; }
+      }
+
       if (this.arm_joint_angles_actions_.size() != other.arm_joint_angles_actions_.size()) { return false; }
       else
       {
@@ -359,6 +376,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       if (!this.behavior_tree_indices_.equals(otherMyClass.behavior_tree_indices_)) return false;
       if (!this.basic_nodes_.equals(otherMyClass.basic_nodes_)) return false;
       if (!this.action_sequences_.equals(otherMyClass.action_sequences_)) return false;
+      if (!this.door_traversals_.equals(otherMyClass.door_traversals_)) return false;
       if (!this.arm_joint_angles_actions_.equals(otherMyClass.arm_joint_angles_actions_)) return false;
       if (!this.chest_orientation_actions_.equals(otherMyClass.chest_orientation_actions_)) return false;
       if (!this.footstep_plan_actions_.equals(otherMyClass.footstep_plan_actions_)) return false;
@@ -392,6 +410,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       builder.append(this.basic_nodes_);      builder.append(", ");
       builder.append("action_sequences=");
       builder.append(this.action_sequences_);      builder.append(", ");
+      builder.append("door_traversals=");
+      builder.append(this.door_traversals_);      builder.append(", ");
       builder.append("arm_joint_angles_actions=");
       builder.append(this.arm_joint_angles_actions_);      builder.append(", ");
       builder.append("chest_orientation_actions=");

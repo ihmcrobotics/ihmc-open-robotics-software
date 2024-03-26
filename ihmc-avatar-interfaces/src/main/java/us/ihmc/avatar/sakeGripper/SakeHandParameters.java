@@ -77,6 +77,11 @@ public class SakeHandParameters
       return denormalizeHandOpenAngle(knuckleJointAngle / Math.toRadians(OPEN_KNUCKLE_JOINT_ANGLE_DEGREES));
    }
 
+   public static double knuckleJointAnglesToHandOpenAngle(double knuckle1JointAngle, double knuckle2JointAngle)
+   {
+      return knuckleJointAngleToHandOpenAngle(knuckle1JointAngle + knuckle2JointAngle) / 2.0;
+   }
+
    public static double handOpenAngleToKnuckleJointAngle(double handOpenAngle)
    {
       return normalizeHandOpenAngle(handOpenAngle) * Math.toRadians(OPEN_KNUCKLE_JOINT_ANGLE_DEGREES);

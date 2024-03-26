@@ -5,6 +5,7 @@
 
 byte BASIC_NODE = 0
 byte ACTION_SEQUENCE = 1
+byte DOOR_TRAVERSAL = 2
 
 byte ARM_JOINT_ANGLES_ACTION = 10
 byte CHEST_ORIENTATION_ACTION = 11
@@ -36,6 +37,8 @@ uint32[<=1000] behavior_tree_indices
 behavior_msgs/BasicNodeStateMessage[<=200] basic_nodes
 
 behavior_msgs/ActionSequenceStateMessage[<=200] action_sequences
+
+behavior_msgs/DoorTraversalStateMessage[<=200] door_traversals
 
 behavior_msgs/ArmJointAnglesActionStateMessage[<=200] arm_joint_angles_actions
 

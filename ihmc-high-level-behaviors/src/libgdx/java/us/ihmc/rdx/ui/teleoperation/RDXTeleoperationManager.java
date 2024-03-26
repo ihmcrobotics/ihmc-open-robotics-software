@@ -631,9 +631,15 @@ public class RDXTeleoperationManager extends RDXPanel
       int i = 0;
       for (ArmJointName armJoint : armJointNames)
       {
-         double q = fullRobotModel.getArmJoint(side, armJoint).getQ();
-         jointAnglesString.append(FormattingTools.getFormattedDecimal3D(q));
-
+         if (fullRobotModel.getArmJoint(side, armJoint) != null)
+         {
+            double q = fullRobotModel.getArmJoint(side, armJoint).getQ();
+            jointAnglesString.append(FormattingTools.getFormattedDecimal3D(q));
+         }
+         else
+         {
+            jointAnglesString.append("0.0");
+         }
          if (i < armJointNames.length - 1)
          {
             jointAnglesString.append(",");
