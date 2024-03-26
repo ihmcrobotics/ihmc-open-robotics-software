@@ -99,7 +99,6 @@ public class RDXROS2PointCloudMapVisualizer extends RDXVisualizer
       {
          new IHMCROS2Callback<>(ros2Node,
                                 topic.withType(FusedSensorHeadPointCloudMessage.class),
-                                ROS2QosProfile.BEST_EFFORT(),
                                 this::queueRenderFusedSensorHeadPointCloud);
       }
    }

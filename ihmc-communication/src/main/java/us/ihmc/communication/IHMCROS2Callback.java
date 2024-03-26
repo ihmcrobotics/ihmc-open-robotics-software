@@ -26,24 +26,14 @@ public class IHMCROS2Callback<T>
    private ROS2Subscription<T> subscription;
    private volatile boolean enabled = true;
 
-   public IHMCROS2Callback(ROS2NodeInterface ros2Node, ROS2Topic<T> topicName, Consumer<T> messageCallback)
+   public IHMCROS2Callback(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic<?> topic, Consumer<T> messageCallback)
    {
-      this(ros2Node, topicName.getType(), topicName.getName(), messageCallback);
+      this(ros2Node, topic.withTypeName(messageType), messageCallback);
    }
 
-   public IHMCROS2Callback(ROS2NodeInterface ros2Node, ROS2Topic<T> topicName, ROS2QosProfile qosProfile, Consumer<T> messageCallback)
+   public IHMCROS2Callback(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, Consumer<T> messageCallback)
    {
-      this(ros2Node, topicName.getType(), topicName.getName(), qosProfile, messageCallback);
-   }
-
-   public IHMCROS2Callback(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic topicName, Consumer<T> messageCallback)
-   {
-      this(ros2Node, messageType, topicName.withTypeName(messageType).toString(), messageCallback);
-   }
-
-   public IHMCROS2Callback(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName, Consumer<T> messageCallback)
-   {
-      this(ros2Node, messageType, topicName, ROS2QosProfile.RELIABLE(), messageCallback);
+      this(ros2Node, topic.getType(), topic.getName(), topic.getQoS(), messageCallback);
    }
 
    public IHMCROS2Callback(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName, ROS2QosProfile qosProfile, Consumer<T> messageCallback)

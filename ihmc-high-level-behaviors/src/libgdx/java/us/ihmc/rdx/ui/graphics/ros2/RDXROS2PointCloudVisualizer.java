@@ -114,7 +114,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
       {
          ros2Callback = new IHMCROS2Callback<>(ros2Node,
                                                topic.withType(FusedSensorHeadPointCloudMessage.class),
-                                               ROS2QosProfile.BEST_EFFORT(),
                                                this::queueRenderFusedSensorHeadPointCloud);
       }
    }

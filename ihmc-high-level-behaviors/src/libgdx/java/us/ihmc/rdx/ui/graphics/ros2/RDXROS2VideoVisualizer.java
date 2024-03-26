@@ -12,7 +12,6 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
 public class RDXROS2VideoVisualizer extends RDXOpenCVVideoVisualizer
@@ -35,7 +34,7 @@ public class RDXROS2VideoVisualizer extends RDXOpenCVVideoVisualizer
       this.ros2Node = ros2Node;
       this.topic = topic;
       this.format = format;
-      new IHMCROS2Callback<>(ros2Node, topic, ROS2QosProfile.BEST_EFFORT(), message -> doReceiveMessageOnThread(() -> acceptMessage(message)));
+      new IHMCROS2Callback<>(ros2Node, topic, message -> doReceiveMessageOnThread(() -> acceptMessage(message)));
    }
 
    private void acceptMessage(VideoPacket videoPacket)

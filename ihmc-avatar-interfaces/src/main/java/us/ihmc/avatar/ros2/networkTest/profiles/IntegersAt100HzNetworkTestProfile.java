@@ -29,10 +29,7 @@ import static us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine.*;
  */
 public class IntegersAt100HzNetworkTestProfile extends ROS2NetworkTestProfile
 {
-   public static final ROS2QosProfile PUBLISHER_QOS_PROFILE = ROS2QosProfile.BEST_EFFORT();
-   public static final ROS2QosProfile SUBSCRIBER_QOS_PROFILE = ROS2QosProfile.BEST_EFFORT();
-
-   private static final ROS2Topic<Int64> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule("ints100hz").withType(Int64.class);
+   private static final ROS2Topic<Int64> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule("ints100hz").withType(Int64.class).withQoS(ROS2QosProfile.BEST_EFFORT());
    private static final ROS2Topic<Int64> TO_OCU = BASE_TOPIC.withSuffix("toocu");
    public static final double PUBLISH_FREQUENCY = 100.0;
    public static final double EXPERIMENT_DURATION = 100.0;
@@ -91,7 +88,7 @@ public class IntegersAt100HzNetworkTestProfile extends ROS2NetworkTestProfile
    {
       if (getLocalMachine() == OCU)
       {
-         new IHMCROS2Callback<>(ros2Node, TO_OCU, SUBSCRIBER_QOS_PROFILE, message ->
+         new IHMCROS2Callback<>(ros2Node, TO_OCU, message ->
          {
             long messageNumber = message.getData();
             if (messageNumber - 1 != lastReceived)

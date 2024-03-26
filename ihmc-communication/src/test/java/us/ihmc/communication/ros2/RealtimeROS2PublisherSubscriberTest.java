@@ -69,11 +69,11 @@ public class RealtimeROS2PublisherSubscriberTest
          }
       }, "Publisher");
 
-      ROS2Topic<?> typedTopic = new ROS2Topic<>().withPrefix("/ihmc/image/test").withType(ImageMessage.class);
+      ROS2Topic<?> typedTopic = new ROS2Topic<>().withPrefix("/ihmc/image/test").withType(ImageMessage.class).withQoS(ROS2QosProfile.BEST_EFFORT());
       LogTools.info("Subscribing to {}", typedTopic.toString());
       FrequencyStatisticPrinter hz = new FrequencyStatisticPrinter();
       ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "hz");
-      new IHMCROS2Callback<>(node, typedTopic, ROS2QosProfile.BEST_EFFORT(), message -> hz.ping());
+      new IHMCROS2Callback<>(node, typedTopic, message -> hz.ping());
 
       ThreadTools.sleepForever();
    }
