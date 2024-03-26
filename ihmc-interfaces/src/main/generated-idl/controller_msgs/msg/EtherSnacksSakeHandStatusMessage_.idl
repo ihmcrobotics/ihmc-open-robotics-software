@@ -1,0 +1,36 @@
+#ifndef __controller_msgs__msg__EtherSnacksSakeHandStatusMessage__idl__
+#define __controller_msgs__msg__EtherSnacksSakeHandStatusMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
+
+      @TypeCode(type="controller_msgs::msg::dds_::EtherSnacksSakeHandStatusMessage_")
+      struct EtherSnacksSakeHandStatusMessage
+      {
+        @defaultValue(value=255)
+        octet robot_side;
+        double desired_position;
+        boolean torque_on;
+        double torque_limit;
+        double measured_position;
+        double measured_torque;
+        long measured_temperature;
+        double measured_velocity;
+        long error_codes;
+        long realtime_tick;
+      };
+    };
+  };
+};
+
+#endif
