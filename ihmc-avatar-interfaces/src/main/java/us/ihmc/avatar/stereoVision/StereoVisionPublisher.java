@@ -28,8 +28,6 @@ public abstract class StereoVisionPublisher
       getSensorReader().start(serialNumbers, imageCropInfo);
       getSensorReader().registerListener(udpClient);
       getSensorReader().registerListener(stereoVisionLogger);
-
-      udpClient.start("127.0.0.1");
    }
 
    public void stop()
