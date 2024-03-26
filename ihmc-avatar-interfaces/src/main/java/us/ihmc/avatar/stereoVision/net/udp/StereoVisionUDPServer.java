@@ -12,17 +12,13 @@ import javax.annotation.Nullable;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.util.concurrent.atomic.AtomicInteger;
 
 // UI process
 public class StereoVisionUDPServer implements StereoVisionPacketListener
 {
    private final SideDependentList<byte[]> imageBuffers = new SideDependentList<>();
    private final SideDependentList<ImageDimensions> imageDimensions = new SideDependentList<>(ImageDimensions::new);
-   private final SideDependentList<AtomicInteger> frameNumbers = new SideDependentList<>();
-   private final SideDependentList<FrequencyCalculator> frequencyCalculators = new SideDependentList<>();
-   @Nullable
-   private InetSocketAddress bindAddress;
+   private final SideDependentList<FrequencyCalculator> frequencyCalculators;
    @Nullable
    private DatagramSocket socket;
    @Nullable
@@ -32,9 +28,7 @@ public class StereoVisionUDPServer implements StereoVisionPacketListener
 
    public StereoVisionUDPServer()
    {
-      frameNumbers.put(RobotSide.LEFT, new AtomicInteger(0));
-      frameNumbers.put(RobotSide.RIGHT, new AtomicInteger(0));
-
+      frequencyCalculators = new SideDependentList<>();
       frequencyCalculators.put(RobotSide.LEFT, new FrequencyCalculator(10));
       frequencyCalculators.put(RobotSide.RIGHT, new FrequencyCalculator(10));
    }
@@ -46,11 +40,9 @@ public class StereoVisionUDPServer implements StereoVisionPacketListener
          throw new RuntimeException(getClass().getName() + " is already running");
       }
 
-      this.bindAddress = new InetSocketAddress(bindAddress, StereoVisionUDPPacketUtil.UDP_PORT);
-
       try
       {
-         socket = new DatagramSocket(this.bindAddress);
+         socket = new DatagramSocket(new InetSocketAddress(bindAddress, StereoVisionUDPPacketUtil.UDP_PORT));
          socket.setSoTimeout(1000);
       }
       catch (SocketException e)
@@ -104,8 +96,6 @@ public class StereoVisionUDPServer implements StereoVisionPacketListener
       imageDimensions.get(side).setImageWidth(imageFragmentPacket.getImageWidth());
       imageDimensions.get(side).setImageHeight(imageFragmentPacket.getImageHeight());
 
-      frameNumbers.get(side).set(imageFragmentPacket.getFrameNumber());
-
       byte[] imageBuffer = imageBuffers.get(side);
 
       int imageBytes = imageFragmentPacket.getImageDataLength();
@@ -124,17 +114,6 @@ public class StereoVisionUDPServer implements StereoVisionPacketListener
       frequencyCalculators.get(side).ping();
    }
 
-   public boolean isConnected()
-   {
-      return socket != null && socket.isConnected();
-   }
-
-   @Nullable
-   public InetSocketAddress getBindAddress()
-   {
-      return bindAddress;
-   }
-
    public SideDependentList<byte[]> getImageBuffers()
    {
       return imageBuffers;
@@ -143,11 +122,6 @@ public class StereoVisionUDPServer implements StereoVisionPacketListener
    public SideDependentList<ImageDimensions> getImageDimensions()
    {
       return imageDimensions;
-   }
-
-   public SideDependentList<AtomicInteger> getFrameNumbers()
-   {
-      return frameNumbers;
    }
 
    public SideDependentList<FrequencyCalculator> getFrequencyCalculators()

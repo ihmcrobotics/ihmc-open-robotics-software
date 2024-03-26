@@ -39,7 +39,7 @@ public class RDXVRModeControls
       if (true)
       {
          ImGuiTools.separatorText("Stereo vision");
-         vrModeManager.getStereoVision().renderControls();
+//         vrModeManager.getStereoVision().renderControls();
 
          ImGuiTools.separatorText("Mode");
          vrModeManager.renderImGuiWidgets();
