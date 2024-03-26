@@ -124,19 +124,10 @@ public class ControllerNetworkSubscriber
             unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, localInstance);
          };
 
-         if (qosProfile == null)
-         {
-            ROS2Tools.createCallbackSubscription(ros2Node, multipleMessageType, topicName, messageListener);
-         }
-         else
-         {
-            ROS2Tools.createCallbackSubscription(ros2Node,
-                                                 multipleMessageType,
-                                                 topicName.toString(),
-                                                 messageListener,
-                                                 qosProfile,
-                                                 ROS2Tools.RUNTIME_EXCEPTION);
-         }
+         if (qosProfile != null)
+            topicName = topicName.withQoS(qosProfile);
+
+         ROS2Tools.createCallbackSubscription(ros2Node, topicName, messageListener);
       }
       catch (InstantiationException | IllegalAccessException e)
       {

@@ -310,14 +310,14 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       }
 
       LogTools.info("Publishing ROS 2 point cloud: {}", ros2PointCloudTopic.getName());
-      publisher = ROS2Tools.createPublisher(ros2Node, ros2PointCloudTopic, ROS2QosProfile.RELIABLE());
+      publisher = ROS2Tools.createPublisher(ros2Node, ros2PointCloudTopic);
    }
 
    public void setupForROS2Color(PubSubImplementation pubSubImplementation, ROS2Topic<BigVideoPacket> ros2VideoTopic)
    {
       // A Realtime ROS 2 node is required for video streaming in order to get stable performance.
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(sensorName) + "_video");
-      ros2VideoPublisher = ROS2Tools.createPublisher(realtimeROS2Node, ros2VideoTopic, ROS2QosProfile.BEST_EFFORT());
+      ros2VideoPublisher = ROS2Tools.createPublisher(realtimeROS2Node, ros2VideoTopic);
       realtimeROS2Node.spin();
       videoPacket = new BigVideoPacket();
       yuv420Image = new Mat();

@@ -19,7 +19,6 @@ import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.perception.gpuHeightMap.HeightMapKernel;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParametersBasics;
@@ -60,7 +59,7 @@ public class RemoteHeightMapUpdater
       heightMapUpdater = new HeightMapUpdater();
       heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, PerceptionAPI.OUSTER_LIDAR_SCAN, ROS2QosProfile.BEST_EFFORT(), new NewMessageListener<LidarScanMessage>()
+      ROS2Tools.createCallbackSubscription(ros2Node, PerceptionAPI.OUSTER_LIDAR_SCAN, new NewMessageListener<LidarScanMessage>()
       {
          @Override
          public void onNewDataMessage(Subscriber<LidarScanMessage> subscriber)

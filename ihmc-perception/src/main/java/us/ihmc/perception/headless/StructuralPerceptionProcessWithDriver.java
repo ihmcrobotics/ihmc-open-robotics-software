@@ -93,7 +93,7 @@ public class StructuralPerceptionProcessWithDriver
 
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_depth_image_node");
       LogTools.info("Publishing ROS 2 depth images: {}", depthTopic);
-      ros2DepthImagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
+      ros2DepthImagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, depthTopic);
       LogTools.info("Spinning Realtime ROS 2 node");
       realtimeROS2Node.spin();
 

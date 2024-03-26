@@ -20,7 +20,6 @@ import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.RestartableThread;
 
@@ -50,7 +49,7 @@ public class BlackflyImagePublisher
       IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(lensProperties);
 
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_publisher");
-      ros2DistoredImagePublisher = ROS2Tools.createPublisher(ros2Node, distortedImageTopic, ROS2QosProfile.BEST_EFFORT());
+      ros2DistoredImagePublisher = ROS2Tools.createPublisher(ros2Node, distortedImageTopic);
       ousterFisheyeColoringIntrinsicsROS2 = new ROS2StoredPropertySet<>(new ROS2Helper(ros2Node),
                                                                         DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS,
                                                                         ousterFisheyeColoringIntrinsics);

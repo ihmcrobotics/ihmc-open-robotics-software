@@ -262,7 +262,6 @@ public class RemoteUIMessageConverter
 
       IHMCRealtimeROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher =
             ROS2Tools.createPublisher(ros2Node,
-                                      BipedalSupportPlanarRegionParametersMessage.class,
                                       PerceptionAPI.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName).withInput().withType(BipedalSupportPlanarRegionParametersMessage.class));
 
       messager.addTopicListener(FootstepPlannerMessagerAPI.BipedalSupportRegionsParameters,  message ->

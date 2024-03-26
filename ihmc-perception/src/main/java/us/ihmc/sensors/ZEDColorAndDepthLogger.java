@@ -10,7 +10,6 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -51,8 +50,8 @@ public class ZEDColorAndDepthLogger
       zedDepthDataLogger.setChannelEnabled(this.timeChannelName, true);
 
       RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(title));
-      ROS2Tools.createCallbackSubscription(realtimeROS2Node, depthTopic, ROS2QosProfile.BEST_EFFORT(), this::receiveAndLogDepthImagesCallback);
-      ROS2Tools.createCallbackSubscription(realtimeROS2Node, colorTopic, ROS2QosProfile.BEST_EFFORT(), this::receiveAndLogColorImagesCallback);
+      ROS2Tools.createCallbackSubscription(realtimeROS2Node, depthTopic, this::receiveAndLogDepthImagesCallback);
+      ROS2Tools.createCallbackSubscription(realtimeROS2Node, colorTopic, this::receiveAndLogColorImagesCallback);
       realtimeROS2Node.spin();
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getName() + "-Shutdown"));

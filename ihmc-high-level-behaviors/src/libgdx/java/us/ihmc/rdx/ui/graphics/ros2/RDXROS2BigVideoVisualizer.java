@@ -17,7 +17,6 @@ import us.ihmc.rdx.imgui.ImPlotDoublePlot;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
@@ -64,7 +63,7 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
    {
       subscribed.set(true);
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
-      ROS2Tools.createCallbackSubscription(realtimeROS2Node, topic, ROS2QosProfile.BEST_EFFORT(), subscriber ->
+      ROS2Tools.createCallbackSubscription(realtimeROS2Node, topic, subscriber ->
       {
          synchronized (syncObject)
          {

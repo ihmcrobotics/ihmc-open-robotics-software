@@ -132,8 +132,7 @@ public class SLAMModule implements PerceptionModule
                                            PerceptionAPI.D435_POINT_CLOUD,
                                            this::handlePointCloud);
       ROS2Tools.createCallbackSubscription(ros2Node,
-                                           REAStateRequestMessage.class,
-                                           REACommunicationProperties.stereoInputTopic,
+                                           REACommunicationProperties.stereoInputTopic.withType(REAStateRequestMessage.class),
                                            this::handleREAStateRequestMessage);
       new IHMCROS2Callback<>(ros2Node, SLAMModuleAPI.CLEAR, message -> clearSLAM());
       new IHMCROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->

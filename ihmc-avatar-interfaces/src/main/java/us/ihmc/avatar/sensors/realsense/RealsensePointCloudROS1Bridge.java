@@ -12,7 +12,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
@@ -48,7 +47,7 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
       ros1Node.attachSubscriber(ros1InputTopic, this);
 
       LogTools.info("Publishing ROS 2: {}", ros2OutputTopic.getName());
-      publisher = ROS2Tools.createPublisher(ros2Node, ros2OutputTopic, ROS2QosProfile.RELIABLE());
+      publisher = ROS2Tools.createPublisher(ros2Node, ros2OutputTopic);
    }
 
    @Override

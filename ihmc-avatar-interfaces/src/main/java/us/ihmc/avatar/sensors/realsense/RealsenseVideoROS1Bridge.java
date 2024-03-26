@@ -9,7 +9,6 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
@@ -50,7 +49,7 @@ public class RealsenseVideoROS1Bridge extends AbstractRosTopicSubscriber<sensor_
 
       ROS2Topic<VideoPacket> ros2Topic = ros2OutputTopic;
       LogTools.info("Publishing ROS 2: {}", ros2Topic.getName());
-      publisher = ROS2Tools.createPublisher(ros2Node, ros2Topic, ROS2QosProfile.RELIABLE());
+      publisher = ROS2Tools.createPublisher(ros2Node, ros2Topic);
    }
 
    @Override

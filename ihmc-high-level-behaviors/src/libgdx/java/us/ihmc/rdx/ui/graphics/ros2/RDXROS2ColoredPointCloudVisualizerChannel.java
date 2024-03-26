@@ -17,7 +17,6 @@ import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
 import us.ihmc.rdx.imgui.ImPlotDoublePlot;
 import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -75,7 +74,7 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
 
    public void subscribe(RealtimeROS2Node realtimeROS2Node, Object imageMessagesSyncObject)
    {
-      ROS2Tools.createCallbackSubscription(realtimeROS2Node, topic, ROS2QosProfile.BEST_EFFORT(), subscriber ->
+      ROS2Tools.createCallbackSubscription(realtimeROS2Node, topic, subscriber ->
       {
          synchronized (imageMessagesSyncObject)
          {

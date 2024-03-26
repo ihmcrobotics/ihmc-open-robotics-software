@@ -108,7 +108,7 @@ public class LidarScanPublisher
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            ROS2Tools.getRobotConfigurationDataTopic(robotName),
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.MULTISENSE_LIDAR_SCAN, qosProfile);
+      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.MULTISENSE_LIDAR_SCAN);
    }
 
    public void setMaximumNumberOfPoints(int maximumNumberOfPoints)

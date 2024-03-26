@@ -15,7 +15,6 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.RestartableThread;
 
@@ -50,9 +49,9 @@ public class ZEDColorDepthImagePublisher
                                       ROS2Topic<ImageMessage> depthTopic)
    {
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "zed_color_depth_publisher");
-      ros2ColorImagePublishers = new SideDependentList<>(ROS2Tools.createPublisher(ros2Node, colorTopics.get(RobotSide.LEFT), ROS2QosProfile.BEST_EFFORT()),
-                                                         ROS2Tools.createPublisher(ros2Node, colorTopics.get(RobotSide.RIGHT), ROS2QosProfile.BEST_EFFORT()));
-      ros2DepthImagePublisher = ROS2Tools.createPublisher(ros2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
+      ros2ColorImagePublishers = new SideDependentList<>(ROS2Tools.createPublisher(ros2Node, colorTopics.get(RobotSide.LEFT)),
+                                                         ROS2Tools.createPublisher(ros2Node, colorTopics.get(RobotSide.RIGHT)));
+      ros2DepthImagePublisher = ROS2Tools.createPublisher(ros2Node, depthTopic);
 
       publishDepthThread = new RestartableThread("ZEDDepthImagePublisher", this::publishDepthThreadFunction);
       publishDepthThread.start();

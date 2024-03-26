@@ -115,7 +115,7 @@ public class IntegersAt100HzNetworkTestProfile extends ROS2NetworkTestProfile
             ThreadTools.sleepSeconds(2.0 * publishPeriod / numberOfRemoteMachines);
          }
 
-         IHMCROS2Publisher<Int64> publisher = ROS2Tools.createPublisher(ros2Node, TO_OCU, PUBLISHER_QOS_PROFILE);
+         IHMCROS2Publisher<Int64> publisher = ROS2Tools.createPublisher(ros2Node, TO_OCU);
          publishThread = new PausablePeriodicThread(getClass().getSimpleName(), publishPeriod, () ->
          {
             if (messagesSent.getValue() < PUBLISH_FREQUENCY * EXPERIMENT_DURATION)

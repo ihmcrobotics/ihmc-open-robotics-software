@@ -19,7 +19,6 @@ import us.ihmc.rdx.imgui.ImPlotDoublePlot;
 import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
 import us.ihmc.rdx.imgui.ImPlotStopwatchPlot;
 import us.ihmc.robotics.time.TimeTools;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.Throttler;
 
@@ -66,7 +65,7 @@ public class RDXWebcamROS2SubscriberDemo
             baseUI.create();
 
             realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videosub");
-            ROS2Tools.createCallbackSubscription(realtimeROS2Node, PerceptionAPI.BIG_VIDEO_TEST, ROS2QosProfile.BEST_EFFORT(), subscriber ->
+            ROS2Tools.createCallbackSubscription(realtimeROS2Node, PerceptionAPI.BIG_VIDEO_TEST, subscriber ->
             {
                receiveFrequencyPlot.ping();
 
