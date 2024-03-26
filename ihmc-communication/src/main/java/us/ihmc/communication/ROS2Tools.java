@@ -20,6 +20,7 @@ import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.*;
 import us.ihmc.tools.thread.SwapReference;
+import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
@@ -256,7 +257,7 @@ public class ROS2Tools
     */
    public static RealtimeROS2Node createRealtimeROS2Node(PubSubImplementation pubSubImplementation, String nodeName)
    {
-      return createRealtimeROS2Node(pubSubImplementation, nodeName);
+      return createRealtimeROS2Node(pubSubImplementation, new PeriodicNonRealtimeThreadSchedulerFactory(), nodeName);
    }
 
    /**
