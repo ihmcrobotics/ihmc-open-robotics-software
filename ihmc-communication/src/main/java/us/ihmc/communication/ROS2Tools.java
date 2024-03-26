@@ -1,6 +1,5 @@
 package us.ihmc.communication;
 
-import com.eprosima.xmlschemas.fastrtps_profiles.ReliabilityQosKindType;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
@@ -246,17 +245,6 @@ public class ROS2Tools
       return typeNamedTopic(SystemServiceLogRefreshMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
    }
 
-   /**
-    * Get the system service status QOS profile for Mission Control
-    * @return the ROS2QosProfile with history
-    */
-   public static ROS2QosProfile getSystemServiceStatusQosProfile()
-   {
-      ROS2QosProfile profile = new ROS2QosProfile();
-      profile.setReliability(ReliabilityQosKindType.RELIABLE);
-      return profile;
-   }
-
    public final static String NAMESPACE = "/us/ihmc"; // ? no idea what this does
 
    private static final RTPSCommunicationFactory FACTORY = new RTPSCommunicationFactory();
@@ -367,7 +355,7 @@ public class ROS2Tools
                                                                              ROS2Topic<?> topicName,
                                                                              NewMessageListener<T> newMessageListener)
    {
-      return createCallbackSubscriptionTypeNamed(ros2Node, messageType, topicName, newMessageListener, ROS2QosProfile.DEFAULT());
+      return createCallbackSubscriptionTypeNamed(ros2Node, messageType, topicName, newMessageListener, ROS2QosProfile.RELIABLE());
    }
 
    public static <T> ROS2Subscription<T> createCallbackSubscriptionTypeNamed(ROS2NodeInterface ros2Node,
@@ -381,7 +369,7 @@ public class ROS2Tools
 
    public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, NewMessageListener<T> newMessageListener)
    {
-      return createCallbackSubscription(ros2Node, topic, newMessageListener, ROS2QosProfile.DEFAULT());
+      return createCallbackSubscription(ros2Node, topic, newMessageListener, ROS2QosProfile.RELIABLE());
    }
 
    public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
@@ -405,7 +393,7 @@ public class ROS2Tools
                                                                     String topicName,
                                                                     NewMessageListener<T> newMessageListener)
    {
-      return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, ROS2QosProfile.DEFAULT());
+      return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, ROS2QosProfile.RELIABLE());
    }
 
    public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
@@ -423,7 +411,7 @@ public class ROS2Tools
                                                                     NewMessageListener<T> newMessageListener,
                                                                     ExceptionHandler exceptionHandler)
    {
-      return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, ROS2QosProfile.DEFAULT(), exceptionHandler);
+      return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, ROS2QosProfile.RELIABLE(), exceptionHandler);
    }
 
    public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
@@ -488,7 +476,7 @@ public class ROS2Tools
                                                      NewMessageListener<T> newMessageListener,
                                                      ExceptionHandler exceptionHandler)
    {
-      createCallbackSubscription(realtimeROS2Node, messageType, topicName, newMessageListener, ROS2QosProfile.DEFAULT(), exceptionHandler);
+      createCallbackSubscription(realtimeROS2Node, messageType, topicName, newMessageListener, ROS2QosProfile.RELIABLE(), exceptionHandler);
    }
 
    public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node,
@@ -536,7 +524,7 @@ public class ROS2Tools
             {
                callback.accept(data);
             }
-         }, topic.getName(), ROS2QosProfile.DEFAULT());
+         }, topic.getName(), ROS2QosProfile.RELIABLE());
       }
       catch (IOException e)
       {
@@ -558,7 +546,7 @@ public class ROS2Tools
                swapReference.swap();
                callback.set();
             }
-         }, topic.getName(), ROS2QosProfile.DEFAULT());
+         }, topic.getName(), ROS2QosProfile.RELIABLE());
          return swapReference;
       }
       catch (IOException e)
@@ -597,7 +585,7 @@ public class ROS2Tools
       try
       {
          TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return realtimeROS2Node.createQueuedSubscription(topicDataType, topicName, ROS2QosProfile.DEFAULT(), 10);
+         return realtimeROS2Node.createQueuedSubscription(topicDataType, topicName, ROS2QosProfile.RELIABLE(), 10);
       }
       catch (IOException e)
       {
@@ -636,7 +624,7 @@ public class ROS2Tools
                                                                   String topicName,
                                                                   ExceptionHandler exceptionHandler)
    {
-      return createPublisher(realtimeROS2Node, messageType, topicName, ROS2QosProfile.DEFAULT(), exceptionHandler);
+      return createPublisher(realtimeROS2Node, messageType, topicName, ROS2QosProfile.RELIABLE(), exceptionHandler);
    }
 
    public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeROS2Node realtimeROS2Node,
@@ -684,7 +672,7 @@ public class ROS2Tools
 
    public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
    {
-      return createPublisher(ros2Node, messageType, topicName, ROS2QosProfile.DEFAULT(), exceptionHandler);
+      return createPublisher(ros2Node, messageType, topicName, ROS2QosProfile.RELIABLE(), exceptionHandler);
    }
 
    public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node,

@@ -8,10 +8,10 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.missionControl.MissionControlTools;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.tools.processManagement.ProcessTools;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -32,7 +32,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
       this.ros2Node = ros2Node;
       serviceStatusPublisher = ROS2Tools.createPublisher(ros2Node,
                                                          ROS2Tools.getSystemServiceStatusTopic(instanceId),
-                                                         ROS2Tools.getSystemServiceStatusQosProfile());
+                                                         ROS2QosProfile.RELIABLE());
       systemServiceStatusPublisherScheduler = new ExceptionHandlingThreadScheduler("SystemServiceStatusPublisherScheduler");
       systemServiceStatusPublisherScheduler.schedule(this::publishStatus, 2.0);
 

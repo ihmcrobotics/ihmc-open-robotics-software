@@ -50,7 +50,7 @@ public class RealsenseVideoROS1Bridge extends AbstractRosTopicSubscriber<sensor_
 
       ROS2Topic<VideoPacket> ros2Topic = ros2OutputTopic;
       LogTools.info("Publishing ROS 2: {}", ros2Topic.getName());
-      publisher = ROS2Tools.createPublisher(ros2Node, ros2Topic, ROS2QosProfile.DEFAULT());
+      publisher = ROS2Tools.createPublisher(ros2Node, ros2Topic, ROS2QosProfile.RELIABLE());
    }
 
    @Override

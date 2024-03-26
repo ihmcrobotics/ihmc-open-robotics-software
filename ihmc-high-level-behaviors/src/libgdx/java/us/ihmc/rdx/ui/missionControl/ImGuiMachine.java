@@ -18,6 +18,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImPlotDoublePlotLine;
 import us.ihmc.rdx.imgui.ImPlotPlot;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2QosProfile;
 
 import java.text.DecimalFormat;
 import java.util.*;
@@ -106,7 +107,7 @@ public class ImGuiMachine
       ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemServiceStatusTopic(instanceId), subscriber ->
       {
          acceptSystemServiceStatusMessage(subscriber.takeNextData());
-      }, ROS2Tools.getSystemServiceStatusQosProfile());
+      }, ROS2QosProfile.RELIABLE());
    }
 
    public String getHostname()

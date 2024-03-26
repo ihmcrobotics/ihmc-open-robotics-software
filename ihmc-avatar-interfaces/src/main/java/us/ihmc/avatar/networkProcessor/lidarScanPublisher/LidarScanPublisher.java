@@ -72,7 +72,7 @@ public class LidarScanPublisher
 
    public LidarScanPublisher(String lidarName, FullRobotModelFactory modelFactory, ROS2NodeInterface ros2Node)
    {
-      this(lidarName, modelFactory, ros2Node, ROS2QosProfile.DEFAULT());
+      this(lidarName, modelFactory, ros2Node, ROS2QosProfile.RELIABLE());
    }
 
    public LidarScanPublisher(String lidarName, FullRobotModelFactory modelFactory, ROS2NodeInterface ros2Node, ROS2QosProfile qosProfile)
@@ -82,7 +82,7 @@ public class LidarScanPublisher
 
    public LidarScanPublisher(FullRobotModelFactory modelFactory, SensorFrameFactory sensorFrameFactory, ROS2NodeInterface ros2Node)
    {
-      this(modelFactory, sensorFrameFactory, ros2Node, ROS2QosProfile.DEFAULT());
+      this(modelFactory, sensorFrameFactory, ros2Node, ROS2QosProfile.RELIABLE());
    }
 
    public LidarScanPublisher(FullRobotModelFactory modelFactory, SensorFrameFactory sensorFrameFactory, ROS2NodeInterface ros2Node, ROS2QosProfile qosProfile)
@@ -92,7 +92,7 @@ public class LidarScanPublisher
 
    public LidarScanPublisher(String robotName, FullRobotModel fullRobotModel, SensorFrameFactory sensorFrameFactory, ROS2NodeInterface ros2Node)
    {
-      this(robotName, fullRobotModel, sensorFrameFactory, ros2Node, ROS2QosProfile.DEFAULT());
+      this(robotName, fullRobotModel, sensorFrameFactory, ros2Node, ROS2QosProfile.RELIABLE());
    }
 
    public LidarScanPublisher(String robotName,

@@ -48,7 +48,7 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
       ros1Node.attachSubscriber(ros1InputTopic, this);
 
       LogTools.info("Publishing ROS 2: {}", ros2OutputTopic.getName());
-      publisher = ROS2Tools.createPublisher(ros2Node, ros2OutputTopic, ROS2QosProfile.DEFAULT());
+      publisher = ROS2Tools.createPublisher(ros2Node, ros2OutputTopic, ROS2QosProfile.RELIABLE());
    }
 
    @Override

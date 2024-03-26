@@ -35,7 +35,7 @@ public class VideoPacketHandler implements CompressedVideoHandler
 
    public VideoPacketHandler(ROS2NodeInterface ros2Node, ROS2Topic<VideoPacket> topic)
    {
-      this(ros2Node, topic, ROS2QosProfile.DEFAULT());
+      this(ros2Node, topic, ROS2QosProfile.RELIABLE());
    }
 
    public VideoPacketHandler(ROS2NodeInterface ros2Node, ROS2Topic<VideoPacket> topic, ROS2QosProfile qosProfile)

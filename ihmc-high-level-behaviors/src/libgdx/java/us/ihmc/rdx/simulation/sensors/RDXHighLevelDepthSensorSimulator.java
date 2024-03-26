@@ -310,7 +310,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       }
 
       LogTools.info("Publishing ROS 2 point cloud: {}", ros2PointCloudTopic.getName());
-      publisher = ROS2Tools.createPublisher(ros2Node, ros2PointCloudTopic, ROS2QosProfile.DEFAULT());
+      publisher = ROS2Tools.createPublisher(ros2Node, ros2PointCloudTopic, ROS2QosProfile.RELIABLE());
    }
 
    public void setupForROS2Color(PubSubImplementation pubSubImplementation, ROS2Topic<BigVideoPacket> ros2VideoTopic)

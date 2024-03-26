@@ -83,7 +83,7 @@ public class StereoVisionPointCloudPublisher
 
    public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, ROS2NodeInterface ros2Node, ROS2Topic<StereoVisionPointCloudMessage> topic)
    {
-      this(modelFactory, ros2Node, topic, ROS2QosProfile.DEFAULT());
+      this(modelFactory, ros2Node, topic, ROS2QosProfile.RELIABLE());
    }
 
    public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory,
@@ -99,7 +99,7 @@ public class StereoVisionPointCloudPublisher
                                           ROS2NodeInterface ros2Node,
                                           ROS2Topic<StereoVisionPointCloudMessage> topic)
    {
-      this(robotName, fullRobotModel, ros2Node, topic, ROS2QosProfile.DEFAULT());
+      this(robotName, fullRobotModel, ros2Node, topic, ROS2QosProfile.RELIABLE());
    }
 
    public StereoVisionPointCloudPublisher(String robotName,
