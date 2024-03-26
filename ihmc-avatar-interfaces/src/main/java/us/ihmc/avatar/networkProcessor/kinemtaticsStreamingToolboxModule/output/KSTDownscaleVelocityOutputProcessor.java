@@ -30,11 +30,8 @@ public class KSTDownscaleVelocityOutputProcessor implements KSTOutputProcessor
    @Override
    public void update(double time, boolean wasStreaming, boolean isStreaming, KSTOutputDataReadOnly latestOutput)
    {
-      if (isStreaming)
-      {
-         outputRobotState.set(latestOutput);
-         outputRobotState.scaleVelocities(downscaleFactor.getValue());
-      }
+      outputRobotState.set(latestOutput);
+      outputRobotState.scaleVelocities(downscaleFactor.getValue());
    }
 
    @Override
