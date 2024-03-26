@@ -573,12 +573,13 @@ public class WalkingCommandConsumer
       abortWalkingRequested.set(commandConsumerWithDelayBuffers.pollNewestCommand(AbortWalkingCommand.class).isAbortWalkingRequested());
    }
 
-   public void consumeTriggerKickCommands(YoBoolean triggerKickRequested)
+   public TriggerKickCommand consumeTriggerKickCommands()
    {
       if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(TriggerKickCommand.class))
-         return;
+         return null;
 
-      triggerKickRequested.set(commandConsumerWithDelayBuffers.pollNewestCommand(TriggerKickCommand.class).isTriggerKickRequested());
+      TriggerKickCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(TriggerKickCommand.class);
+      return command;
    }
 
    public void consumePrepareForLocomotionCommands()

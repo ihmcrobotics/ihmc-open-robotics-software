@@ -7,6 +7,12 @@ module controller_msgs
   {
     module dds
     {
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
 
       /**
        * This message is part of the IHMC whole-body controller API.
@@ -19,6 +25,26 @@ module controller_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
+        /**
+         * Specifies the side of the robot that will execute the kick.
+         */
+        octet robot_side;
+        /**
+         * The height at which the kick should be targeted.
+         */
+        double kick_height;
+        /**
+         * The impulse with which the kick should be executed.
+         */
+        double kick_impulse;
+        /**
+         * The target distance from the robot to where the kick should be aimed.
+         */
+        double kick_target_distance;
+        /**
+         * A boolean for tracking whether a kick has been requested.
+         */
+        boolean trigger_kick_request;
       };
     };
   };

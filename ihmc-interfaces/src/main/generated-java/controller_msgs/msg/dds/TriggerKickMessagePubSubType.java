@@ -15,7 +15,7 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "79a156c18de158aaca32e57b52e06d1d08f658115f0d4e04a0c09e454e942e15";
+   		return "e00cbb5d1447b4eb4b44f6bb2d83de46bdbe6a05041cfc0cec676000064cf64f";
    }
    
    @Override
@@ -54,6 +54,16 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -70,6 +80,21 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -78,11 +103,31 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    {
       cdr.write_type_4(data.getSequenceId());
 
+      cdr.write_type_9(data.getRobotSide());
+
+      cdr.write_type_6(data.getKickHeight());
+
+      cdr.write_type_6(data.getKickImpulse());
+
+      cdr.write_type_6(data.getKickTargetDistance());
+
+      cdr.write_type_7(data.getTriggerKickRequest());
+
    }
 
    public static void read(controller_msgs.msg.dds.TriggerKickMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
+      	
+      data.setRobotSide(cdr.read_type_9());
+      	
+      data.setKickHeight(cdr.read_type_6());
+      	
+      data.setKickImpulse(cdr.read_type_6());
+      	
+      data.setKickTargetDistance(cdr.read_type_6());
+      	
+      data.setTriggerKickRequest(cdr.read_type_7());
       	
 
    }
@@ -91,12 +136,23 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    public final void serialize(controller_msgs.msg.dds.TriggerKickMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_9("robot_side", data.getRobotSide());
+      ser.write_type_6("kick_height", data.getKickHeight());
+      ser.write_type_6("kick_impulse", data.getKickImpulse());
+      ser.write_type_6("kick_target_distance", data.getKickTargetDistance());
+      ser.write_type_7("trigger_kick_request", data.getTriggerKickRequest());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.TriggerKickMessage data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));   }
+      data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setRobotSide(ser.read_type_9("robot_side"));
+      data.setKickHeight(ser.read_type_6("kick_height"));
+      data.setKickImpulse(ser.read_type_6("kick_impulse"));
+      data.setKickTargetDistance(ser.read_type_6("kick_target_distance"));
+      data.setTriggerKickRequest(ser.read_type_7("trigger_kick_request"));
+   }
 
    public static void staticCopy(controller_msgs.msg.dds.TriggerKickMessage src, controller_msgs.msg.dds.TriggerKickMessage dest)
    {
