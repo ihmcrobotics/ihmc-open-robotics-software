@@ -2,6 +2,8 @@ package us.ihmc.rdx.imgui;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import gnu.trove.map.TIntObjectMap;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import imgui.*;
 import imgui.flag.*;
 import imgui.internal.ImGuiContext;
@@ -36,12 +38,17 @@ public class ImGuiTools
    public static final float REASONABLE_HEIGHT_FOR_A_SCROLL_AREA = 150.0f;
    public static final int MAX_STRING_SIZE_FOR_PATH = 1024;
 
-   private static ImFont consoleFont;
-   private static ImFont smallFont;
-   private static ImFont smallBoldFont;
-   private static ImFont mediumFont;
-   private static ImFont bigFont;
-   private static ImFont nodeFont;
+   public static int SMALL_FONT_SIZE = 13;
+   public static boolean SEGOE_EXISTS = false;
+   public static final double DEJAVU_TO_SEGOE_SCALE = 1.2;
+   public static final double SMALL_TO_MEDIUM_SCALE = 1.25;
+   public static final double SMALL_TO_LARGE_SCALE = 2.4;
+
+   private static TIntObjectMap<ImFont> consoleFont = new TIntObjectHashMap<>();
+   private static TIntObjectMap<ImFont> smallFont = new TIntObjectHashMap<>();
+   private static TIntObjectMap<ImFont> smallBoldFont = new TIntObjectHashMap<>();
+   private static TIntObjectMap<ImFont> mediumFont = new TIntObjectHashMap<>();
+   private static TIntObjectMap<ImFont> bigFont = new TIntObjectHashMap<>();
 
    private static boolean userKeysHaveBeenMapped = false;
    private static int spaceKey;
@@ -460,23 +467,17 @@ public class ImGuiTools
       return "###" + thisObject.getClass().getName() + ":" + label;
    }
 
-   public static ImFont setupFonts(ImGuiIO io)
-   {
-      return setupFonts(io, 1);
-   }
-
    /**
     * See https://github.com/ocornut/imgui/blob/master/docs/FONTS.md
     * and ImGuiGlfwFreeTypeDemo in this project
     */
-   public static ImFont setupFonts(ImGuiIO io, int fontSizeLevel)
+   public static ImFont setupFonts(ImGuiIO io)
    {
       final ImFontConfig smallFontConfig = new ImFontConfig(); // Natively allocated object, should be explicitly destroyed
       final ImFontConfig smallBoldFontConfig = new ImFontConfig();
       final ImFontConfig consoleFontConfig = new ImFontConfig();
       final ImFontConfig mediumFontConfig = new ImFontConfig();
       final ImFontConfig bigFontConfig = new ImFontConfig();
-      final ImFontConfig nodeFontConfig = new ImFontConfig();
 
       // Glyphs could be added per-font as well as per config used globally like here
 //      fontConfig.setGlyphRanges(fontAtlas.getGlyphRangesCyrillic());
@@ -496,7 +497,6 @@ public class ImGuiTools
       consoleFontConfig.setFontBuilderFlags(fontsFlags);
       mediumFontConfig.setFontBuilderFlags(fontsFlags);
       bigFontConfig.setFontBuilderFlags(fontsFlags);
-      nodeFontConfig.setFontBuilderFlags(fontsFlags);
 
 //      fontToReturn = fontAtlas.addFontDefault(); // Add a default font, which is 'ProggyClean.ttf, 13px'
 //      fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("basis33.ttf"), 16, fontConfig);
@@ -507,7 +507,9 @@ public class ImGuiTools
          fontDirectory = "/usr/share/fonts/TTF/";
 
       Path segoeui = Paths.get(fontDirectory, "segoeui.ttf");
-      if (Files.exists(segoeui))
+      SEGOE_EXISTS = Files.exists(segoeui);
+      SMALL_FONT_SIZE = getDefaultFontSize();
+      if (SEGOE_EXISTS)
       {
          smallFontConfig.setName("segoeui.ttf, 16px");
          smallFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, smallFontConfig);
@@ -518,9 +520,6 @@ public class ImGuiTools
 
          bigFontConfig.setName("segoeui.ttf, 38px");
          bigFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 38.0f, bigFontConfig);
-
-         nodeFontConfig.setName("segoeui.ttf, 32px 1/2");
-         nodeFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 32.0f, nodeFontConfig);
       }
       else
       {
@@ -533,9 +532,6 @@ public class ImGuiTools
 
          bigFontConfig.setName("DejaVuSans.ttf, 32px");
          bigFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 32.0f, bigFontConfig);
-
-         nodeFontConfig.setName("DejaVuSans.ttf, 26px 1/2");
-         nodeFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 26.0f, nodeFontConfig);
 
          // Accomodate for ImGui issue where the Windows fonts will render smaller than normal
          // This is so saving layout does not change the result depending on the fonts you have installed.
@@ -569,8 +565,6 @@ public class ImGuiTools
 //      fontConfig.setName("Segoe UI"); // We can apply a new config value every time we add a new font
 //      fontToReturn = fontAtlas.addFontFromFileTTF("/usr/share/fonts/TTF/segoeui.ttf", size, fontConfig);
 
-      nodeFont.setScale(0.5f);
-
       fontAtlas = ImGui.getIO().getFonts();
       fontAtlas.build();
 
@@ -578,17 +572,33 @@ public class ImGuiTools
       consoleFontConfig.destroy();
       mediumFontConfig.destroy();
       bigFontConfig.destroy();
-      nodeFontConfig.destroy();
 
-      if (fontSizeLevel == 2)
-         return mediumFont;
-      if (fontSizeLevel == 3)
-         return bigFont;
 
       return smallFont;
    }
 
-   public static ImFont getBigFont() {
+   private static int getCorrectedFontSize(int dejavuSize)
+   {
+      return SEGOE_EXISTS ? (int) Math.round(DEJAVU_TO_SEGOE_SCALE * dejavuSize) : dejavuSize;
+   }
+
+   public static int getSmallestFontSize()
+   {
+      return getCorrectedFontSize(9);
+   }
+
+   public static int getDefaultFontSize()
+   {
+      return getCorrectedFontSize(13);
+   }
+
+   public static int getLargestFontSize()
+   {
+      return getCorrectedFontSize(20);
+   }
+
+   public static ImFont getBigFont()
+   {
       return bigFont;
    }
 
@@ -605,10 +615,6 @@ public class ImGuiTools
    public static ImFont getSmallBoldFont()
    {
       return smallBoldFont;
-   }
-
-   public static ImFont getNodeFont() {
-      return nodeFont;
    }
 
    public static ImFont getConsoleFont()
