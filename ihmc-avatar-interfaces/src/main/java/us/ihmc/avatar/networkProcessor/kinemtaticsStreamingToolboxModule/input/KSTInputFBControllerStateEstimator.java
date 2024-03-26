@@ -34,6 +34,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
    private final SingleEndEffectorEstimator[] endEffectorEstimatorsArray;
 
    private final YoDouble correctionDuration = new YoDouble("correctionDuration", registry);
+   private final YoDouble rawVelocityAlpha = new YoDouble("rawVelocityAlpha", registry);
    private final double updateDT;
    /**
     * Period at which the input is updated. This is used to clamp the correction of the estimated pose. Should preferably be filtered.
@@ -49,6 +50,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
    {
       this.updateDT = updateDT;
       this.inputPeriod = inputPeriod;
+
       for (RigidBodyReadOnly endEffector : endEffectors)
       {
          inputPoseEstimators.put(endEffector, new SingleEndEffectorEstimator(endEffector));
@@ -57,6 +59,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
       endEffectorEstimatorsArray = inputPoseEstimators.values().toArray(new SingleEndEffectorEstimator[0]);
 
       correctionDuration.set(parameters.getInputPoseCorrectionDuration());
+      rawVelocityAlpha.set(parameters.getInputVelocityRawAlpha());
       inputVelocityDecayDuration.set(parameters.getInputVelocityDecayDuration());
 
       parentRegistry.addChild(registry);
@@ -130,13 +133,14 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
 
       private final YoFramePose3D estimatedPose;
       private final YoFixedFrameSpatialVector estimatedVelocity;
+      private final YoFixedFrameSpatialVector estimatedDecayingVelocity;
 
       private final YoFixedFrameSpatialVector correctiveVelocity;
 
       private final YoDouble lastUpdateTime;
       private final YoLong lastInputTimestamp;
-      private final YoFramePose3D lastInputPose;
-      private final YoFixedFrameSpatialVector lastInputVelocity;
+      private final YoFramePose3D rawInputPose;
+      private final YoFixedFrameSpatialVector rawInputVelocity;
       private final YoDouble nextTimeTriggerForDecay;
       private final YoDouble inputVelocityDecayFactor;
 
@@ -147,16 +151,18 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
                                            new YoFrameQuaternion(namePrefix + "EstimatedOrientation", worldFrame, registry));
          estimatedVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "EstimatedAngularVelocity", worldFrame, registry),
                                                            new YoFrameVector3D(namePrefix + "EstimatedLinearVelocity", worldFrame, registry));
+         estimatedDecayingVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "EstimatedDecayingAngularVelocity", worldFrame, registry),
+                                                                   new YoFrameVector3D(namePrefix + "EstimatedDecayingLinearVelocity", worldFrame, registry));
 
          correctiveVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "CorrectiveAngularVelocity", worldFrame, registry),
                                                             new YoFrameVector3D(namePrefix + "CorrectiveLinearVelocity", worldFrame, registry));
 
          lastUpdateTime = new YoDouble(namePrefix + "LastUpdateTime", registry);
          lastInputTimestamp = new YoLong(namePrefix + "LastInputTimestamp", registry);
-         lastInputPose = new YoFramePose3D(new YoFramePoint3D(namePrefix + "LastInputPosition", worldFrame, registry),
-                                           new YoFrameQuaternion(namePrefix + "LastInputOrientation", worldFrame, registry));
-         lastInputVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "LastInputAngularVelocity", worldFrame, registry),
-                                                           new YoFrameVector3D(namePrefix + "LastInputLinearVelocity", worldFrame, registry));
+         rawInputPose = new YoFramePose3D(new YoFramePoint3D(namePrefix + "RawInputPosition", worldFrame, registry),
+                                          new YoFrameQuaternion(namePrefix + "RawInputOrientation", worldFrame, registry));
+         rawInputVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "RawInputAngularVelocity", worldFrame, registry),
+                                                          new YoFrameVector3D(namePrefix + "RawInputLinearVelocity", worldFrame, registry));
 
          nextTimeTriggerForDecay = new YoDouble(namePrefix + "NextTimeTriggerForDecay", registry);
          inputVelocityDecayFactor = new YoDouble(namePrefix + "InputVelocityDecayFactor", registry);
@@ -169,8 +175,8 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
          correctiveVelocity.setToZero();
          lastUpdateTime.set(Double.NaN);
          lastInputTimestamp.set(Long.MIN_VALUE);
-         lastInputPose.setToZero();
-         lastInputVelocity.setToZero();
+         rawInputPose.setToZero();
+         rawInputVelocity.setToZero();
       }
 
       private final Quaternion tempError = new Quaternion();
@@ -186,21 +192,23 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
          else
          {
             double timeInterval = Conversions.nanosecondsToSeconds(inputTimestamp - lastInputTimestamp.getLongValue());
-            KSTTools.computeSpatialVelocity(timeInterval, lastInputPose, pose, lastInputVelocity);
+            KSTTools.computeSpatialVelocity(timeInterval, rawInputPose, pose, rawInputVelocity);
 
             correctiveVelocity.getLinearPart().sub(pose.getPosition(), estimatedPose.getPosition());
             tempError.difference(estimatedPose.getOrientation(), pose.getOrientation());
             tempError.normalizeAndLimitToPi();
             tempError.getRotationVector(correctiveVelocity.getAngularPart());
             correctiveVelocity.scale(1.0 / correctionDuration.getValue());
-            correctiveVelocity.add(lastInputVelocity);
-            estimatedVelocity.set(correctiveVelocity);
-            KSTTools.integrateSpatialVelocity(updateDT, estimatedPose, estimatedVelocity, estimatedPose);
+            estimatedVelocity.set(rawInputVelocity);
+            estimatedVelocity.scale(rawVelocityAlpha.getValue());
+            estimatedVelocity.add(correctiveVelocity);
+            estimatedDecayingVelocity.set(estimatedVelocity);
+            KSTTools.integrateSpatialVelocity(updateDT, estimatedPose, estimatedDecayingVelocity, estimatedPose);
          }
 
          lastUpdateTime.set(time);
          lastInputTimestamp.set(inputTimestamp);
-         lastInputPose.set(pose);
+         rawInputPose.set(pose);
          nextTimeTriggerForDecay.set(time + correctionDuration.getValue());
       }
 
@@ -210,11 +218,11 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
          {
             double alpha = Math.min(1.0, inputVelocityDecayFactor.getValue() + updateDT / inputVelocityDecayDuration.getValue());
             inputVelocityDecayFactor.set(alpha);
-            estimatedVelocity.getLinearPart().interpolate(correctiveVelocity.getLinearPart(), EuclidCoreTools.zeroVector3D, alpha);
-            estimatedVelocity.getAngularPart().interpolate(correctiveVelocity.getAngularPart(), EuclidCoreTools.zeroVector3D, alpha);
+            estimatedDecayingVelocity.getLinearPart().interpolate(estimatedVelocity.getLinearPart(), EuclidCoreTools.zeroVector3D, alpha);
+            estimatedDecayingVelocity.getAngularPart().interpolate(estimatedVelocity.getAngularPart(), EuclidCoreTools.zeroVector3D, alpha);
          }
 
-         KSTTools.integrateSpatialVelocity(updateDT, estimatedPose, estimatedVelocity, estimatedPose);
+         KSTTools.integrateSpatialVelocity(updateDT, estimatedPose, estimatedDecayingVelocity, estimatedPose);
       }
 
       public FramePose3DReadOnly getEstimatedPose()
@@ -224,7 +232,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
 
       public SpatialVectorReadOnly getEstimatedVelocity()
       {
-         return estimatedVelocity;
+         return estimatedDecayingVelocity;
       }
    }
 }

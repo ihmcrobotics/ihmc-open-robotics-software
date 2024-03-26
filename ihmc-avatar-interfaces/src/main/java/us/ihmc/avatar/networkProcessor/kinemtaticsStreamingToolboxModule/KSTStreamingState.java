@@ -120,6 +120,9 @@ public class KSTStreamingState implements State
 
    private final YoBoolean isStreaming = new YoBoolean("isStreaming", registry);
    private final YoBoolean wasStreaming = new YoBoolean("wasStreaming", registry);
+   private final YoDouble defaultLinearGain = new YoDouble("defaultLinearGain", registry);
+   private final YoDouble defaultAngularGain = new YoDouble("defaultAngularGain", registry);
+   private final YoDouble defaultSingleJointGain = new YoDouble("defaultSingleJointGain", registry);
    private final YoDouble linearRateLimit = new YoDouble("linearRateLimit", registry);
    private final YoDouble angularRateLimit = new YoDouble("angularRateLimit", registry);
    private final YoDouble defaultLinearRateLimit = new YoDouble("defaultLinearRateLimit", registry);
@@ -220,6 +223,9 @@ public class KSTStreamingState implements State
       publishingPeriod.set(parameters.getPublishingPeriod());
 
       ikSolution = KSTOutputDataReadOnly.wrap(ikController.getSolution());
+      defaultLinearGain.set(parameters.getDefaultLinearGain());
+      defaultAngularGain.set(parameters.getDefaultAngularGain());
+      defaultSingleJointGain.set(parameters.getDefaultSingleJointGain());
       defaultLinearRateLimit.set(parameters.getDefaultLinearRateLimit());
       defaultAngularRateLimit.set(parameters.getDefaultAngularRateLimit());
       streamingBlendingDuration.set(parameters.getDefaultStreamingBlendingDuration());
@@ -273,11 +279,11 @@ public class KSTStreamingState implements State
       isStreaming.set(false);
       wasStreaming.set(false);
       timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);
-      ikSolverSpatialGains.setPositionProportionalGains(50.0);
-      ikSolverSpatialGains.setOrientationProportionalGains(50.0);
+      ikSolverSpatialGains.setPositionProportionalGains(defaultLinearGain.getValue());
+      ikSolverSpatialGains.setOrientationProportionalGains(defaultAngularGain.getValue());
       ikSolverSpatialGains.setPositionMaxFeedbackAndFeedbackRate(linearRateLimit.getValue(), Double.POSITIVE_INFINITY);
       ikSolverSpatialGains.setOrientationMaxFeedbackAndFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
-      ikSolverJointGains.setKp(50.0);
+      ikSolverJointGains.setKp(defaultSingleJointGain.getValue());
       ikSolverJointGains.setMaximumFeedbackAndMaximumFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
       ikCommandInputManager.submitMessage(tools.getParameters().getDefaultSolverConfiguration());
 

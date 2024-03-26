@@ -105,6 +105,18 @@ public class KinematicsStreamingToolboxParameters
     * Default weight for input messages for which no weight is provided.
     */
    private double defaultAngularWeight;
+   /**
+    * Default gain for the linear part of a taskspace objective.
+    */
+   private double defaultLinearGain;
+   /**
+    * Default gain for the angular part of a taskspace objective.
+    */
+   private double defaultAngularGain;
+   /**
+    * Default gain for a jointspace objective.
+    */
+   private double defaultSingleJointGain;
 
    /**
     * Default rate limit for input messages for which no rate limit is provided.
@@ -182,6 +194,11 @@ public class KinematicsStreamingToolboxParameters
     * Should be greater than the period at which inputs are received.
     * Only used when {@link #inputStateEstimatorType} is set to {@link InputStateEstimatorType#FBC_STYLE}.
     */
+   private double inputVelocityRawAlpha;
+   /**
+    * Duration used to correct the input pose in the state estimator. Should be greater than the period at which inputs are received. Only used when
+    * {@link #inputStateEstimatorType} is set to {@link InputStateEstimatorType#FBC_STYLE}.
+    */
    private double inputPoseCorrectionDuration;
    /**
     * When {@code true}, a bounding box filter is used to reject input poses that are too far from the current pose.
@@ -237,6 +254,9 @@ public class KinematicsStreamingToolboxParameters
       defaultLinearWeight = 20.0;
       defaultAngularWeight = 1.0;
 
+      defaultLinearGain = 50.0;
+      defaultAngularGain = 50.0;
+      defaultSingleJointGain = 50.0;
       defaultLinearRateLimit = 1.5;
       defaultAngularRateLimit = 10.0;
       outputJointVelocityScale = 0.75;
@@ -257,6 +277,7 @@ public class KinematicsStreamingToolboxParameters
       inputPoseLPFBreakFrequency = 4.0;
       inputWeightDecayDuration = 3.0;
       inputVelocityDecayDuration = 0.5;
+      inputVelocityRawAlpha = 0.9;
       inputPoseCorrectionDuration = 0.15;
       useBBXInputFilter = false;
 
@@ -363,6 +384,21 @@ public class KinematicsStreamingToolboxParameters
       return defaultAngularWeight;
    }
 
+   public double getDefaultLinearGain()
+   {
+      return defaultLinearGain;
+   }
+
+   public double getDefaultAngularGain()
+   {
+      return defaultAngularGain;
+   }
+
+   public double getDefaultSingleJointGain()
+   {
+      return defaultSingleJointGain;
+   }
+
    public double getDefaultLinearRateLimit()
    {
       return defaultLinearRateLimit;
@@ -441,6 +477,11 @@ public class KinematicsStreamingToolboxParameters
    public double getInputVelocityDecayDuration()
    {
       return inputVelocityDecayDuration;
+   }
+
+   public double getInputVelocityRawAlpha()
+   {
+      return inputVelocityRawAlpha;
    }
 
    public double getInputPoseCorrectionDuration()
@@ -573,6 +614,21 @@ public class KinematicsStreamingToolboxParameters
       this.defaultAngularWeight = defaultAngularWeight;
    }
 
+   public void setDefaultLinearGain(double defaultLinearGain)
+   {
+      this.defaultLinearGain = defaultLinearGain;
+   }
+
+   public void setDefaultAngularGain(double defaultAngularGain)
+   {
+      this.defaultAngularGain = defaultAngularGain;
+   }
+
+   public void setDefaultSingleJointGain(double defaultSingleJointGain)
+   {
+      this.defaultSingleJointGain = defaultSingleJointGain;
+   }
+
    public void setDefaultLinearRateLimit(double defaultLinearRateLimit)
    {
       this.defaultLinearRateLimit = defaultLinearRateLimit;
@@ -651,6 +707,11 @@ public class KinematicsStreamingToolboxParameters
    public void setInputVelocityDecayDuration(double inputVelocityDecayDuration)
    {
       this.inputVelocityDecayDuration = inputVelocityDecayDuration;
+   }
+
+   public void setInputVelocityRawAlpha(double inputVelocityRawAlpha)
+   {
+      this.inputVelocityRawAlpha = inputVelocityRawAlpha;
    }
 
    public void setInputPoseCorrectionDuration(double inputPoseCorrectionDuration)
