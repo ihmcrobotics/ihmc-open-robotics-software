@@ -7,6 +7,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionState;
@@ -207,14 +208,15 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          if (state.getIsNextForExecution())
             visualizeIK();
 
-         if (getParent().getState() instanceof ActionSequenceState parent)
+         ActionSequenceState actionSequence = BehaviorTreeTools.findActionSequenceAncestor(state);
+         if (actionSequence != null)
          {
-            HandPoseActionState previousHandAction = parent.findNextPreviousAction(HandPoseActionState.class,
-                                                                                   getState().getActionIndex(),
-                                                                                   definition.getSide());
+            HandPoseActionState previousHandAction = actionSequence.findNextPreviousAction(HandPoseActionState.class,
+                                                                                           getState().getActionIndex(),
+                                                                                           definition.getSide());
 
             boolean previousHandActionExists = previousHandAction != null;
-            boolean weAreAfterIt = previousHandActionExists && parent.getExecutionNextIndex() > previousHandAction.getActionIndex();
+            boolean weAreAfterIt = previousHandActionExists && actionSequence.getExecutionNextIndex() > previousHandAction.getActionIndex();
 
             boolean previousIsExecuting = previousHandActionExists && previousHandAction.getIsExecuting();
             boolean showFromPreviousHand = previousHandActionExists;
