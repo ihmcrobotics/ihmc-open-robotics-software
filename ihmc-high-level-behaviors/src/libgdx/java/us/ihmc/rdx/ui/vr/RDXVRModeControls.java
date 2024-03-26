@@ -15,7 +15,6 @@ public class RDXVRModeControls
    {
       this.baseUI = baseUI;
       this.vrModeManager = vrModeManager;
-      baseUI.getPrimary3DPanel().addOverlayPanel(PANEL_NAME, this::render);
    }
 
    public void update()
@@ -36,10 +35,10 @@ public class RDXVRModeControls
 
    private void render()
    {
-      if (true)
+      if (wasVRReady)
       {
          ImGuiTools.separatorText("Stereo vision");
-//         vrModeManager.getStereoVision().renderControls();
+         vrModeManager.getStereoVision().renderControls();
 
          ImGuiTools.separatorText("Mode");
          vrModeManager.renderImGuiWidgets();
