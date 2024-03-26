@@ -43,11 +43,22 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       // Update concurrency ranks
       for (int i = 0; i < state.getActionChildren().size(); i++)
       {
-         int j = i + 1;
-         for (; j < state.getActionChildren().size()
-              && state.getActionChildren().get(j).calculateExecuteAfterActionIndex(state.getActionChildren()) < i; j++);
+         state.getActionChildren().get(i).setConcurrencyRank(1);
 
-         state.getActionChildren().get(i).setConcurrencyRank(j - i);
+//         int j = i + 1;
+//         for (; j < state.getActionChildren().size()
+//              && state.getActionChildren().get(j).calculateExecuteAfterActionIndex(state.getActionChildren()) < i; j++);
+
+         int j = i - 1;
+         for (; j >= 0; j--)
+         {
+            int thisExecuteAfterActionIndex = state.getActionChildren().get(i).calculateExecuteAfterActionIndex(getState().getActionChildren());
+            int executeAfterActionIndexToCompare = state.getActionChildren().get(j).calculateExecuteAfterActionIndex(getState().getActionChildren());
+            if (thisExecuteAfterActionIndex == executeAfterActionIndexToCompare)
+            {
+               state.getActionChildren().get(i).setConcurrencyRank(2);
+            }
+         }
       }
 
       // Update is next for execution
