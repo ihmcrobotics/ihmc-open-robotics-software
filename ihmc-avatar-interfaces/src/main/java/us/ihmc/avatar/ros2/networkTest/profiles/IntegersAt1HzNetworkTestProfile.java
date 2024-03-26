@@ -5,7 +5,7 @@ import std_msgs.msg.dds.Int64;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestProfile;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
@@ -65,7 +65,7 @@ public class IntegersAt1HzNetworkTestProfile extends ROS2NetworkTestProfile
       publisher = ROS2Tools.createPublisher(ros2Node, publisherTopic);
       if (subscriberTopic != null)
       {
-         new IHMCROS2Callback<>(ros2Node, subscriberTopic, message ->
+         new ROS2Callback<>(ros2Node, subscriberTopic, message ->
          {
             messagesReceived.add(1);
          });

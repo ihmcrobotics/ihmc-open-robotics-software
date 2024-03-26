@@ -1,6 +1,7 @@
 package us.ihmc.communication;
 
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -21,7 +22,7 @@ public class IHMCROS2Input<T>
    private final AtomicReference<T> atomicReference;
    private final MessageFilter<T> messageFilter;
    private boolean hasReceivedFirstMessage = false;
-   private final IHMCROS2Callback<T> ros2Callback;
+   private final ROS2Callback<T> ros2Callback;
    private final TypedNotification<T> messageNotification = new TypedNotification<>();
    private final List<Consumer<T>> userCallbacks = new ArrayList<>();
 
@@ -59,7 +60,7 @@ public class IHMCROS2Input<T>
    {
       atomicReference = new AtomicReference<>(initialValue);
       this.messageFilter = messageFilter;
-      ros2Callback = new IHMCROS2Callback<>(ros2Node, messageType, topicName, qosProfile, this::messageReceivedCallback);
+      ros2Callback = new ROS2Callback<>(ros2Node, messageType, topicName, qosProfile, this::messageReceivedCallback);
    }
 
    public interface MessageFilter<T>

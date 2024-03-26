@@ -7,7 +7,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
@@ -34,7 +34,7 @@ public class RDXROS2VideoVisualizer extends RDXOpenCVVideoVisualizer
       this.ros2Node = ros2Node;
       this.topic = topic;
       this.format = format;
-      new IHMCROS2Callback<>(ros2Node, topic, message -> doReceiveMessageOnThread(() -> acceptMessage(message)));
+      new ROS2Callback<>(ros2Node, topic, message -> doReceiveMessageOnThread(() -> acceptMessage(message)));
    }
 
    private void acceptMessage(VideoPacket videoPacket)

@@ -15,7 +15,7 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -134,8 +134,8 @@ public class SLAMModule implements PerceptionModule
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            REACommunicationProperties.stereoInputTopic.withType(REAStateRequestMessage.class),
                                            this::handleREAStateRequestMessage);
-      new IHMCROS2Callback<>(ros2Node, SLAMModuleAPI.CLEAR, message -> clearSLAM());
-      new IHMCROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
+      new ROS2Callback<>(ros2Node, SLAMModuleAPI.CLEAR, message -> clearSLAM());
+      new ROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
       {
          LogTools.info("Received SHUTDOWN. Shutting down...");
          stop();

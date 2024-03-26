@@ -377,14 +377,14 @@ public class ROS2Tools
       }
    }
 
-   public static <T> IHMCROS2Callback<T> createCallbackSubscription2(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, Consumer<T> callback)
+   public static <T> ROS2Callback<T> createCallbackSubscription2(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, Consumer<T> callback)
    {
-      return new IHMCROS2Callback<>(ros2Node, topic, callback);
+      return new ROS2Callback<>(ros2Node, topic, callback);
    }
 
-   public static IHMCROS2Callback<Empty> createCallbackSubscription2(ROS2NodeInterface ros2Node, ROS2Topic<Empty> topic, Runnable callback)
+   public static ROS2Callback<Empty> createCallbackSubscription2(ROS2NodeInterface ros2Node, ROS2Topic<Empty> topic, Runnable callback)
    {
-      return new IHMCROS2Callback<>(ros2Node, topic, message -> callback.run());
+      return new ROS2Callback<>(ros2Node, topic, message -> callback.run());
    }
 
    /**
@@ -396,7 +396,7 @@ public class ROS2Tools
    {
       try
       {
-         TopicDataType<T> topicDataType = IHMCROS2Callback.newMessageTopicDataTypeInstance(topic.getType());
+         TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(topic.getType());
          T data = topicDataType.createData();
          ros2Node.createSubscription(topicDataType, subscriber ->
          {
@@ -417,7 +417,7 @@ public class ROS2Tools
    {
       try
       {
-         TopicDataType<T> topicDataType = IHMCROS2Callback.newMessageTopicDataTypeInstance(topic.getType());
+         TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(topic.getType());
          SwapReference<T> swapReference = new SwapReference<>(topicDataType::createData);
          ros2Node.createSubscription(topicDataType, subscriber ->
          {

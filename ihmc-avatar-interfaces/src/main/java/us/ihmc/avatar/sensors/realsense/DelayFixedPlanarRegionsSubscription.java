@@ -10,7 +10,7 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -54,7 +54,7 @@ public class DelayFixedPlanarRegionsSubscription
    private final MutableDouble delayOffset = new MutableDouble(INITIAL_DELAY_OFFSET);
    private final FullHumanoidRobotModel fullRobotModel;
    private final RobotROSClockCalculator rosClockCalculator;
-   private IHMCROS2Callback<?> robotConfigurationDataSubscriber;
+   private ROS2Callback<?> robotConfigurationDataSubscriber;
    private RosPoseStampedPublisher sensorPosePublisher;
    private RosPoseStampedPublisher pelvisPosePublisher;
    private boolean posePublisherEnabled = false;
