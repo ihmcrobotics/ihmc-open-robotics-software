@@ -161,7 +161,7 @@ public class RDXSakeHandWidgets
       float sliderEnd = ImGui.getColumnWidth();
       float sliderWidth = sliderEnd - sliderStart;
 
-      ImGuiTools.renderSliderOrProgressNotch(sliderStart + (float) currentHandOpenAngleNotchNormal * sliderWidth, ImGui.getColorU32(ImGuiCol.Text));
+      ImGuiTools.renderSliderOrProgressNotch(sliderStart + (float) (1.0f - currentHandOpenAngleNotchNormal) * sliderWidth, ImGui.getColorU32(ImGuiCol.Text));
 
       handOpenAngleDegreesSlider.setWidgetText("%.1f%s".formatted(handOpenAngleDegreesSlider.getDoubleValue(), EuclidCoreMissingTools.DEGREE_SYMBOL));
 

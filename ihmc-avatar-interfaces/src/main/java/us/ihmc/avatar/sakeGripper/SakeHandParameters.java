@@ -34,6 +34,8 @@ public class SakeHandParameters
    public static final double TEMPERATURE_LIMIT_CELCIUS = 60.0;
    /** The temperature at which the Dynamixel will break. */
    public static final double DYNAMIXEL_FAILURE_TEMPERATURE_CELCIUS = 80.0;
+   /** Multiplier to convert Dynamixel's raw velocity value to RPM */
+   public static final double RAW_VELOCITY_TO_RPM = 0.114;
 
    /**
     * @param normalizedHandOpenAngle 0.0 (open) to 1.0 (closed)
