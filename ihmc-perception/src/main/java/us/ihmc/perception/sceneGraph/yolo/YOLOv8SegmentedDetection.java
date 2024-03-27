@@ -5,7 +5,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.YOLOv8.YOLOv8Detection;
 import us.ihmc.perception.YOLOv8.YOLOv8Tools;
@@ -48,7 +47,7 @@ public class YOLOv8SegmentedDetection
       // Get segmented depth image
       RawImage segmentedDepth = segmentImageFunction.apply(depthImage, mask);
       // Get point cloud with outliers filtered ot
-      objectPointCloud = YOLOv8Tools.filterOutliers(extractDepthFunction.apply(segmentedDepth), zScoreThreshold,128);
+      objectPointCloud = YOLOv8Tools.filterOutliers(extractDepthFunction.apply(segmentedDepth), zScoreThreshold, 128);
       // Shuffle the point cloud
       Collections.shuffle(objectPointCloud);
       // Find point cloud centroid
