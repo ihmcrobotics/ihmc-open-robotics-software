@@ -8,11 +8,11 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.ros2.QueuedROS2Subscription;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.ros2.RealtimeROS2Subscription;
 
 public class FrameRealtimeROS2PublisherSubscriberTest
 {
@@ -35,10 +35,10 @@ public class FrameRealtimeROS2PublisherSubscriberTest
          }, topic, ROS2QosProfile.BEST_EFFORT());
 
          int queueSize = 1;
-         RealtimeROS2Subscription<RobotConfigurationData> queuedSubscription = realtimeROS2Node.createQueuedSubscription(topicDataType,
-                                                                                                                 topic,
-                                                                                                                 ROS2QosProfile.BEST_EFFORT(),
-                                                                                                                 queueSize);
+         QueuedROS2Subscription<RobotConfigurationData> queuedSubscription = realtimeROS2Node.createQueuedSubscription(topicDataType,
+                                                                                                                       topic,
+                                                                                                                       ROS2QosProfile.BEST_EFFORT(),
+                                                                                                                       queueSize);
 
          ThreadTools.startAThread(() ->
          {

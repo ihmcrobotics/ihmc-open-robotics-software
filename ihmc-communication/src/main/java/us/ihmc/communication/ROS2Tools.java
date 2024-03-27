@@ -437,12 +437,12 @@ public class ROS2Tools
       }
    }
 
-   public static <T> RealtimeROS2Subscription<T> createQueuedSubscription(RealtimeROS2Node realtimeROS2Node, ROS2Topic<T> topic)
+   public static <T> QueuedROS2Subscription<T> createQueuedSubscription(RealtimeROS2Node realtimeROS2Node, ROS2Topic<T> topic)
    {
       return createQueuedSubscription(realtimeROS2Node, topic.getType(), topic.getName(), topic.getQoS());
    }
 
-   public static <T> RealtimeROS2Subscription<T> createQueuedSubscription(RealtimeROS2Node realtimeROS2Node,
+   public static <T> QueuedROS2Subscription<T> createQueuedSubscription(RealtimeROS2Node realtimeROS2Node,
                                                                           Class<T> messageType,
                                                                           String topicName,
                                                                           ROS2QosProfile qosProfile)

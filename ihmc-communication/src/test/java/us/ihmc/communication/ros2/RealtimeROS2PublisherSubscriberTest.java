@@ -33,10 +33,10 @@ public class RealtimeROS2PublisherSubscriberTest
          }, topic, ROS2QosProfile.BEST_EFFORT());
 
          int queueSize = 1;
-         RealtimeROS2Subscription<ImageMessage> queuedSubscription = realtimeROS2Node.createQueuedSubscription(topicDataType,
-                                                                                                                 topic,
-                                                                                                                 ROS2QosProfile.BEST_EFFORT(),
-                                                                                                                 queueSize);
+         QueuedROS2Subscription<ImageMessage> queuedSubscription = realtimeROS2Node.createQueuedSubscription(topicDataType,
+                                                                                                             topic,
+                                                                                                             ROS2QosProfile.BEST_EFFORT(),
+                                                                                                             queueSize);
 
          ThreadTools.startAThread(() ->
          {
