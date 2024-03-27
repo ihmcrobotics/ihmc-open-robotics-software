@@ -13,14 +13,11 @@ import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.pubsub.Domain;
-import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.*;
 import us.ihmc.tools.thread.SwapReference;
-import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
@@ -240,8 +237,6 @@ public class ROS2Tools
       return typeNamedTopic(SystemServiceLogRefreshMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
    }
 
-   public final static String NAMESPACE = "/us/ihmc"; // ? no idea what this does
-
    private static final RTPSCommunicationFactory FACTORY = new RTPSCommunicationFactory();
    private static final int DOMAIN_ID = FACTORY.getDomainId();
    private static final InetAddress ADDRESS_RESTRICTION = FACTORY.getAddressRestriction();
@@ -256,7 +251,7 @@ public class ROS2Tools
     */
    public static RealtimeROS2Node createRealtimeROS2Node(PubSubImplementation pubSubImplementation, String nodeName)
    {
-      return createRealtimeROS2Node(pubSubImplementation, new PeriodicNonRealtimeThreadSchedulerFactory(), nodeName);
+      return new RealtimeROS2Node(pubSubImplementation, nodeName, DOMAIN_ID, ADDRESS_RESTRICTION);
    }
 
    /**
@@ -272,24 +267,12 @@ public class ROS2Tools
                                                          PeriodicThreadSchedulerFactory periodicThreadSchedulerFactory,
                                                          String nodeName)
    {
-      Domain domain = DomainFactory.getDomain(pubSubImplementation);
-      return new RealtimeROS2Node(domain, periodicThreadSchedulerFactory, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
-   }
-
-   public static ROS2Node createInterprocessROS2Node(String nodeName)
-   {
-      return createROS2Node(PubSubImplementation.FAST_RTPS, nodeName);
-   }
-
-   public static ROS2Node createIntraprocessROS2Node(String nodeName)
-   {
-      return createROS2Node(PubSubImplementation.INTRAPROCESS, nodeName);
+      return new RealtimeROS2Node(pubSubImplementation, periodicThreadSchedulerFactory, nodeName, DOMAIN_ID, ADDRESS_RESTRICTION);
    }
 
    public static ROS2Node createROS2Node(PubSubImplementation pubSubImplementation, String nodeName)
    {
-      Domain domain = DomainFactory.getDomain(pubSubImplementation);
-      return new ROS2Node(domain, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
+      return new ROS2Node(pubSubImplementation, nodeName, DOMAIN_ID, ADDRESS_RESTRICTION);
    }
 
    /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
