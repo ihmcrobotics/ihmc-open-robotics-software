@@ -35,6 +35,7 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
 
@@ -242,11 +243,24 @@ public class ControllerAPIDefinition
    {
       if (inputMessageClasses.contains(messageClass))
       {
-         return getInputTopic(robotName).withTypeName(messageClass);
+         // QoS a little tricky, because for streaming you probably want best effort
+         return getInputTopic(robotName).withTypeName(messageClass).withQoS(ROS2QosProfile.RELIABLE());
       }
       if (outputMessageClasses.contains(messageClass))
       {
-         return getOutputTopic(robotName).withTypeName(messageClass);
+         ROS2Topic<T> topic = getOutputTopic(robotName).withTypeName(messageClass);
+
+         // Peridic topics are should be best effort
+         if (messageClass.equals(CapturabilityBasedStatus.class)
+          || messageClass.equals(JointDesiredOutputMessage.class)
+          || messageClass.equals(RobotDesiredConfigurationData.class)
+          || messageClass.equals(FootstepQueueStatusMessage.class)
+          || messageClass.equals(MultiContactBalanceStatus.class))
+            topic = topic.withQoS(ROS2QosProfile.BEST_EFFORT());
+         else
+            topic = topic.withQoS(ROS2QosProfile.RELIABLE());
+
+         return topic;
       }
 
       throw new RuntimeException("Topic does not exist: " + messageClass);
