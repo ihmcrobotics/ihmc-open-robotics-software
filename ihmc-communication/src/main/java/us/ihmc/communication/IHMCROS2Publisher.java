@@ -31,12 +31,6 @@ public class IHMCROS2Publisher<T>
       this.publisher = ros2Publisher;
    }
 
-   @Deprecated
-   public IHMCROS2Publisher(ROS2NodeInterface ros2Node, Class<T> messageType)
-   {
-      this(ros2Node, messageType, ROS2Tools.IHMC_ROOT);
-   }
-
    public IHMCROS2Publisher(ROS2NodeInterface ros2Node, ROS2Topic<T> topicName)
    {
       this(ros2Node, topicName.getType(), topicName.getName());
