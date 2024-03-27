@@ -87,7 +87,7 @@ public class SakeHandParameters
 
    public static double handOpenAngleToKnuckleJointAngle(double handOpenAngle)
    {
-      return normalizeHandOpenAngle(handOpenAngle) * Math.toRadians(OPEN_KNUCKLE_JOINT_ANGLE_DEGREES);
+      return (1.0 - normalizeHandOpenAngle(handOpenAngle)) * Math.toRadians(OPEN_KNUCKLE_JOINT_ANGLE_DEGREES);
    }
 
    public static void resetDesiredCommandMessage(EtherSnacksSakeHandCommandMessage sakeHandDesiredCommandMessage)
