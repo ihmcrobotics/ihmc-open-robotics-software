@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 public enum YOLOv8DetectionClass
 {
    DRILL(null, null),
-   DOOR_HANDLE(null, null);
+   DOOR_LEVER(null, null);
 
    @Nullable
    private PrimitiveRigidBodyShape primitiveApproximation;

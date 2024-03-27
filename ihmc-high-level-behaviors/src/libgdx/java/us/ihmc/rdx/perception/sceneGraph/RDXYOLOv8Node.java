@@ -33,6 +33,12 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
 
    private final ImGuiUniqueLabelMap labels;
 
+   /**
+    * The mask erosion kernel radius determines how much the YOLO mask is eroded,
+    * i.e. how much it is shrunk.
+    * A larger radius will result is more shrinkage, and a radius of 0 will not shrink the mask.
+    * Erosion is useful when the YOLO mask is slightly larger than the object it detects.
+    */
    private final ImInt maskErosionKernelRadius;
    private final ImDouble outlierFilterThreshold;
    private final ImFloat detectionAcceptanceThreshold;
@@ -62,7 +68,7 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
    {
       switch (yoloNode.getDetectionClass())
       {
-         case DOOR_HANDLE ->
+         case DOOR_LEVER ->
          {
             interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
             interactableObject.load(DoorSceneNodeDefinitions.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,

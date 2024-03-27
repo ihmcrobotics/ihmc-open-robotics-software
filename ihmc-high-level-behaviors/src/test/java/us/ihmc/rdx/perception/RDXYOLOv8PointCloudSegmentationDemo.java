@@ -37,7 +37,7 @@ public class RDXYOLOv8PointCloudSegmentationDemo
    private static final float CONFIDENCE_THRESHOLD = 0.5f;
    private static final float NMS_THRESHOLD = 0.1f;
    private static final float MASK_THRESHOLD = 0.0f;
-   private static final YOLOv8DetectionClass OBJECT_TYPE = YOLOv8DetectionClass.DOOR_HANDLE;
+   private static final YOLOv8DetectionClass OBJECT_TYPE = YOLOv8DetectionClass.DOOR_LEVER;
    private static final Random random = new Random();
 
    private final OpenCLManager openCLManager = new OpenCLManager();
