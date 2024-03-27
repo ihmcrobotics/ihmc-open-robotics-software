@@ -6,3 +6,6 @@ byte robot_side 255
 float64 desired_position
 float64 torque_limit
 bool torque_on
+
+bool calibrate
+bool reset

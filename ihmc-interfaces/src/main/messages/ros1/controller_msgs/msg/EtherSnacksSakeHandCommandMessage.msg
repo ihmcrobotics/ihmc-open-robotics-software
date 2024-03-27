@@ -12,4 +12,8 @@ float64 torque_limit
 
 bool torque_on
 
+bool calibrate
+
+bool reset
+
 

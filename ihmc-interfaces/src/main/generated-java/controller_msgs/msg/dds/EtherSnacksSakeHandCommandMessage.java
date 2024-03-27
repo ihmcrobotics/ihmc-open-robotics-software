@@ -14,6 +14,8 @@ public class EtherSnacksSakeHandCommandMessage extends Packet<EtherSnacksSakeHan
    public double desired_position_;
    public double torque_limit_;
    public boolean torque_on_;
+   public boolean calibrate_;
+   public boolean reset_;
 
    public EtherSnacksSakeHandCommandMessage()
    {
@@ -34,6 +36,10 @@ public class EtherSnacksSakeHandCommandMessage extends Packet<EtherSnacksSakeHan
       torque_limit_ = other.torque_limit_;
 
       torque_on_ = other.torque_on_;
+
+      calibrate_ = other.calibrate_;
+
+      reset_ = other.reset_;
 
    }
 
@@ -73,6 +79,24 @@ public class EtherSnacksSakeHandCommandMessage extends Packet<EtherSnacksSakeHan
       return torque_on_;
    }
 
+   public void setCalibrate(boolean calibrate)
+   {
+      calibrate_ = calibrate;
+   }
+   public boolean getCalibrate()
+   {
+      return calibrate_;
+   }
+
+   public void setReset(boolean reset)
+   {
+      reset_ = reset;
+   }
+   public boolean getReset()
+   {
+      return reset_;
+   }
+
 
    public static Supplier<EtherSnacksSakeHandCommandMessagePubSubType> getPubSubType()
    {
@@ -99,6 +123,10 @@ public class EtherSnacksSakeHandCommandMessage extends Packet<EtherSnacksSakeHan
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.torque_on_, other.torque_on_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.calibrate_, other.calibrate_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.reset_, other.reset_, epsilon)) return false;
+
 
       return true;
    }
@@ -120,6 +148,10 @@ public class EtherSnacksSakeHandCommandMessage extends Packet<EtherSnacksSakeHan
 
       if(this.torque_on_ != otherMyClass.torque_on_) return false;
 
+      if(this.calibrate_ != otherMyClass.calibrate_) return false;
+
+      if(this.reset_ != otherMyClass.reset_) return false;
+
 
       return true;
    }
@@ -137,7 +169,11 @@ public class EtherSnacksSakeHandCommandMessage extends Packet<EtherSnacksSakeHan
       builder.append("torque_limit=");
       builder.append(this.torque_limit_);      builder.append(", ");
       builder.append("torque_on=");
-      builder.append(this.torque_on_);
+      builder.append(this.torque_on_);      builder.append(", ");
+      builder.append("calibrate=");
+      builder.append(this.calibrate_);      builder.append(", ");
+      builder.append("reset=");
+      builder.append(this.reset_);
       builder.append("}");
       return builder.toString();
    }

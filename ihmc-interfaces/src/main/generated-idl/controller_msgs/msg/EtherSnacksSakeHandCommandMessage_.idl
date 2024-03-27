@@ -22,6 +22,8 @@ module controller_msgs
         double desired_position;
         double torque_limit;
         boolean torque_on;
+        boolean calibrate;
+        boolean reset;
       };
     };
   };

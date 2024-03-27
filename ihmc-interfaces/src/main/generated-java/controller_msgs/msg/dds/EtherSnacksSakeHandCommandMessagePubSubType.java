@@ -15,7 +15,7 @@ public class EtherSnacksSakeHandCommandMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "3358653439ea814573f82e8ada8e60aaf31bd88975484ed70a32065eb30120b9";
+   		return "ab6c143aea9bf5d14678999acf54a880a05a7944aadb98a16c772d1be17021fb";
    }
    
    @Override
@@ -60,6 +60,10 @@ public class EtherSnacksSakeHandCommandMessagePubSubType implements us.ihmc.pubs
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -85,6 +89,12 @@ public class EtherSnacksSakeHandCommandMessagePubSubType implements us.ihmc.pubs
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -99,6 +109,10 @@ public class EtherSnacksSakeHandCommandMessagePubSubType implements us.ihmc.pubs
 
       cdr.write_type_7(data.getTorqueOn());
 
+      cdr.write_type_7(data.getCalibrate());
+
+      cdr.write_type_7(data.getReset());
+
    }
 
    public static void read(controller_msgs.msg.dds.EtherSnacksSakeHandCommandMessage data, us.ihmc.idl.CDR cdr)
@@ -111,6 +125,10 @@ public class EtherSnacksSakeHandCommandMessagePubSubType implements us.ihmc.pubs
       	
       data.setTorqueOn(cdr.read_type_7());
       	
+      data.setCalibrate(cdr.read_type_7());
+      	
+      data.setReset(cdr.read_type_7());
+      	
 
    }
 
@@ -121,6 +139,8 @@ public class EtherSnacksSakeHandCommandMessagePubSubType implements us.ihmc.pubs
       ser.write_type_6("desired_position", data.getDesiredPosition());
       ser.write_type_6("torque_limit", data.getTorqueLimit());
       ser.write_type_7("torque_on", data.getTorqueOn());
+      ser.write_type_7("calibrate", data.getCalibrate());
+      ser.write_type_7("reset", data.getReset());
    }
 
    @Override
@@ -130,6 +150,8 @@ public class EtherSnacksSakeHandCommandMessagePubSubType implements us.ihmc.pubs
       data.setDesiredPosition(ser.read_type_6("desired_position"));
       data.setTorqueLimit(ser.read_type_6("torque_limit"));
       data.setTorqueOn(ser.read_type_7("torque_on"));
+      data.setCalibrate(ser.read_type_7("calibrate"));
+      data.setReset(ser.read_type_7("reset"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.EtherSnacksSakeHandCommandMessage src, controller_msgs.msg.dds.EtherSnacksSakeHandCommandMessage dest)
