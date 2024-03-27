@@ -4,7 +4,7 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
@@ -44,7 +44,7 @@ public class ROS2Heartbeat
    public static final double STATUS_FREQUENCY = 2.5;
    public static final double HEARTBEAT_PERIOD = UnitConversions.hertzToSeconds(STATUS_FREQUENCY);
    private ROS2PublishSubscribeAPI ros2;
-   private IHMCROS2Publisher<Empty> heartbeatPublisher;
+   private ROS2PublisherBasics<Empty> heartbeatPublisher;
    private final Empty emptyMessage = new Empty();
    private final ROS2Topic<Empty> heartbeatTopic;
    private volatile boolean alive = false;
@@ -96,6 +96,6 @@ public class ROS2Heartbeat
    {
       setAlive(false);
       if (heartbeatPublisher != null)
-         heartbeatPublisher.destroy();
+         heartbeatPublisher.remove();
    }
 }

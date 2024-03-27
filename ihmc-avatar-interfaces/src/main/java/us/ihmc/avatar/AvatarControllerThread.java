@@ -20,7 +20,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
@@ -83,7 +83,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
    private final ModularRobotController robotController;
 
-   private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> crashNotificationPublisher;
+   private final ROS2PublisherBasics<ControllerCrashNotificationPacket> crashNotificationPublisher;
 
    private final HumanoidRobotContextData humanoidRobotContextData;
 

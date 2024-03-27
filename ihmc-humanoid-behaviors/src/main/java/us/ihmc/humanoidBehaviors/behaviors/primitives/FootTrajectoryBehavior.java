@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import org.apache.commons.lang3.StringUtils;
 
 import controller_msgs.msg.dds.FootTrajectoryMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.ros2.ROS2Node;
@@ -21,7 +21,7 @@ public class FootTrajectoryBehavior extends AbstractBehavior
    private final YoBoolean trajectoryTimeElapsed;
    private final YoBoolean doubleSupport;
 
-   private final IHMCROS2Publisher<FootTrajectoryMessage> publisher;
+   private final ROS2PublisherBasics<FootTrajectoryMessage> publisher;
 
    public FootTrajectoryBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport)
    {

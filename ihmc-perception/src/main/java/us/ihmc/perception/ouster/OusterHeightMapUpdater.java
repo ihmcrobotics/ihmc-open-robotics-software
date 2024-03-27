@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
@@ -35,7 +35,7 @@ public class OusterHeightMapUpdater
    private static final int initialPublishFrequency = 5;
 
    private final RealtimeROS2Node realtimeROS2Node;
-   private final IHMCRealtimeROS2Publisher<HeightMapMessage> heightMapPublisher;
+   private final ROS2PublisherBasics<HeightMapMessage> heightMapPublisher;
    private final AtomicBoolean updateThreadIsRunning = new AtomicBoolean(false);
    private final AtomicReference<WalkingStatus> currentWalkingStatus = new AtomicReference<>();
    private final HeightMapUpdater heightMapUpdater;

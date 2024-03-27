@@ -6,7 +6,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -182,10 +182,10 @@ public class FootstepPlanningModuleLauncher
 
    private static void createStatusPublisher(String robotName, ROS2NodeInterface ros2Node, FootstepPlanningModule footstepPlanningModule, ROS2Topic outputTopic)
    {
-      IHMCROS2Publisher<FootstepPlanningToolboxOutputStatus> resultPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+      ROS2PublisherBasics<FootstepPlanningToolboxOutputStatus> resultPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                   FootstepPlanningToolboxOutputStatus.class,
                                                                                                                   outputTopic);
-      IHMCROS2Publisher<FootstepDataListMessage> swingReplanPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerAPI.swingReplanOutputTopic(robotName));
+      ROS2PublisherBasics<FootstepDataListMessage> swingReplanPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerAPI.swingReplanOutputTopic(robotName));
 
       footstepPlanningModule.addStatusCallback(output ->
                                                {
@@ -215,7 +215,7 @@ public class FootstepPlanningModuleLauncher
                                                    ROS2Topic inputTopic,
                                                    ROS2Topic outputTopic)
    {
-      IHMCROS2Publisher<FootstepPlannerParametersPacket> parametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+      ROS2PublisherBasics<FootstepPlannerParametersPacket> parametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                   FootstepPlannerParametersPacket.class,
                                                                                                                   outputTopic);
 

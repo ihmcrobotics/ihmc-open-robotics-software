@@ -8,7 +8,7 @@ import perception_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
@@ -23,7 +23,7 @@ public class HumanoidAvatarREAStateUpdater implements CloseableAndDisposable
 {
    private final boolean manageROS2Node;
    private final RealtimeROS2Node ros2Node;
-   private final IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
+   private final ROS2PublisherBasics<REAStateRequestMessage> reaStateRequestPublisher;
 
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
 

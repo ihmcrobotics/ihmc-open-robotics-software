@@ -7,7 +7,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import quadruped_msgs.msg.dds.*;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.packets.MessageTools;
@@ -76,13 +76,13 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Boolean> assumeFlatGround;
 
 
-   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
-   private IHMCRealtimeROS2Publisher<PawStepPlannerParametersPacket> plannerParametersPublisher;
-   private IHMCRealtimeROS2Publisher<VisibilityGraphsParametersPacket> visibilityGraphsParametersPublisher;
-   private IHMCRealtimeROS2Publisher<PawStepPlanningRequestPacket> pawPlanningRequestPublisher;
-   private IHMCRealtimeROS2Publisher<QuadrupedTimedStepListMessage> footstepDataListPublisher;
-//   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> walkingPreviewToolboxStatePublisher;
-//   private IHMCRealtimeROS2Publisher<WalkingControllerPreviewInputMessage> walkingPreviewRequestPublisher;
+   private ROS2PublisherBasics<ToolboxStateMessage> toolboxStatePublisher;
+   private ROS2PublisherBasics<PawStepPlannerParametersPacket> plannerParametersPublisher;
+   private ROS2PublisherBasics<VisibilityGraphsParametersPacket> visibilityGraphsParametersPublisher;
+   private ROS2PublisherBasics<PawStepPlanningRequestPacket> pawPlanningRequestPublisher;
+   private ROS2PublisherBasics<QuadrupedTimedStepListMessage> footstepDataListPublisher;
+//   private ROS2PublisherBasics<ToolboxStateMessage> walkingPreviewToolboxStatePublisher;
+//   private ROS2PublisherBasics<WalkingControllerPreviewInputMessage> walkingPreviewRequestPublisher;
 
    public static RemoteUIMessageConverter createRemoteConverter(Messager messager, String robotName)
    {

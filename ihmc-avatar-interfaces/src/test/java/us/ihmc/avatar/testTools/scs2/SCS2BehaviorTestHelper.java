@@ -16,7 +16,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -76,7 +76,7 @@ public class SCS2BehaviorTestHelper implements YoVariableHolder
    private final BehaviorDispatcher behaviorDispatcher;
 
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_behavior_test_helper");
-   private final IHMCROS2Publisher<HumanoidBehaviorTypePacket> humanoidBehabiorTypePublisher;
+   private final ROS2PublisherBasics<HumanoidBehaviorTypePacket> humanoidBehabiorTypePublisher;
    private final String robotName;
    private SCS2AvatarTestingSimulation avatarTestingSimulation;
 

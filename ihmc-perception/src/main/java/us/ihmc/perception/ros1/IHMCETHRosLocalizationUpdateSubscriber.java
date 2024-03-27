@@ -10,7 +10,7 @@ import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import sensor_msgs.PointCloud2;
 import std_msgs.Float64;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.PacketDestination;
@@ -30,7 +30,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
    private double overlap = 1.0;
 
    private final AtomicReference<UnpackedPointCloud> localizationMapPointCloud = new AtomicReference<UnpackedPointCloud>();
-   private final IHMCRealtimeROS2Publisher<LocalizationPointMapPacket> localizationPointMapPublisher;
+   private final ROS2PublisherBasics<LocalizationPointMapPacket> localizationPointMapPublisher;
 
    public IHMCETHRosLocalizationUpdateSubscriber(String robotName, final RosMainNode rosMainNode, RealtimeROS2Node ros2Node,
                                                  LongUnaryOperator robotMonotonicTimeCalculator)
@@ -38,7 +38,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, LocalizationPacket.class, ROS2Tools.IHMC_ROOT, s -> receivedPacket(s.takeNextData()));
       localizationPointMapPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, LocalizationPointMapPacket.class, ROS2Tools.IHMC_ROOT);
 
-      IHMCRealtimeROS2Publisher<StampedPosePacket> stampedPosePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+      ROS2PublisherBasics<StampedPosePacket> stampedPosePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                              StampedPosePacket.class,
                                                                                                              ROS2Tools.getControllerInputTopic(robotName));
       RosPoseStampedSubscriber rosPoseStampedSubscriber = new RosPoseStampedSubscriber()
@@ -60,7 +60,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
 
       rosMainNode.attachSubscriber(RosLocalizationConstants.POSE_UPDATE_TOPIC, rosPoseStampedSubscriber);
 
-      IHMCRealtimeROS2Publisher<LocalizationStatusPacket> localizationStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+      ROS2PublisherBasics<LocalizationStatusPacket> localizationStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                            LocalizationStatusPacket.class,
                                                                                                                            ROS2Tools.IHMC_ROOT);
       AbstractRosTopicSubscriber<Float64> overlapSubscriber = new AbstractRosTopicSubscriber<std_msgs.Float64>(std_msgs.Float64._TYPE)

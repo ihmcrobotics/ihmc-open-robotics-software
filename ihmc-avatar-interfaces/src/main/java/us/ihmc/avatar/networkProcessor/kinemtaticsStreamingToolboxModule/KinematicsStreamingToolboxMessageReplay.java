@@ -9,7 +9,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
@@ -41,11 +41,11 @@ public class KinematicsStreamingToolboxMessageReplay
    private final JSONSerializer<KinematicsToolboxConfigurationMessage> kinematicsToolboxConfigurationMessageSerializer = new JSONSerializer<>(new KinematicsToolboxConfigurationMessagePubSubType());
    private final JSONSerializer<KinematicsStreamingToolboxInputMessage> kinematicsStreamingToolboxInputMessageSerializer = new JSONSerializer<>(new KinematicsStreamingToolboxInputMessagePubSubType());
 
-   private final IHMCRealtimeROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
-   private final IHMCRealtimeROS2Publisher<CapturabilityBasedStatus> capturabilityBasedStatusPublisher;
-   private final IHMCRealtimeROS2Publisher<KinematicsToolboxConfigurationMessage> kinematicsToolboxConfigurationPublisher;
-   private final IHMCRealtimeROS2Publisher<KinematicsStreamingToolboxInputMessage> kinematicsStreamingToolboxInputPublisher;
-   private final IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
+   private final ROS2PublisherBasics<RobotConfigurationData> robotConfigurationDataPublisher;
+   private final ROS2PublisherBasics<CapturabilityBasedStatus> capturabilityBasedStatusPublisher;
+   private final ROS2PublisherBasics<KinematicsToolboxConfigurationMessage> kinematicsToolboxConfigurationPublisher;
+   private final ROS2PublisherBasics<KinematicsStreamingToolboxInputMessage> kinematicsStreamingToolboxInputPublisher;
+   private final ROS2PublisherBasics<ToolboxStateMessage> toolboxStatePublisher;
 
    private final MutableInt counter = new MutableInt();
    private double timeOffsetSeconds;

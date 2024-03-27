@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.tools.perception;
 
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -21,8 +21,8 @@ import java.util.function.Supplier;
 public class CompositePlanarRegionService
 {
    private Supplier<PlanarRegionsList>[] planarRegionSuppliers;
-   private final List<IHMCROS2Publisher<PlanarRegionsListMessage>> planarRegionPublishers = new ArrayList<>();
-   private final IHMCROS2Publisher<PlanarRegionsListMessage> combinedPlanarRegionPublisher;
+   private final List<ROS2PublisherBasics<PlanarRegionsListMessage>> planarRegionPublishers = new ArrayList<>();
+   private final ROS2PublisherBasics<PlanarRegionsListMessage> combinedPlanarRegionPublisher;
    private final PausablePeriodicThread thread;
 
    private PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();

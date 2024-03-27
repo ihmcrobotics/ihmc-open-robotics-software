@@ -5,7 +5,7 @@ import java.util.List;
 import controller_msgs.msg.dds.HandCollisionDetectedPacket;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commons.MathTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -61,7 +61,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
    private final YoDouble yoImpactStiffnessThreshold_NperM;
    private final YoDouble yoImpactForceThreshold_N;
 
-   private final IHMCROS2Publisher<HandCollisionDetectedPacket> publisher;
+   private final ROS2PublisherBasics<HandCollisionDetectedPacket> publisher;
 
    public WristForceSensorFilteredUpdatable(String robotName,
                                             RobotSide robotSide,

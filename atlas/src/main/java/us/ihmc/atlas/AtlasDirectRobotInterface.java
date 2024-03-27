@@ -5,7 +5,7 @@ import atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage;
 import atlas_msgs.msg.dds.BDIBehaviorCommandPacket;
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -15,11 +15,11 @@ import us.ihmc.ros2.ROS2Topic;
 
 public class AtlasDirectRobotInterface implements RobotLowLevelMessenger
 {
-   private final IHMCROS2Publisher<AtlasLowLevelControlModeMessage> lowLevelModePublisher;
-   private final IHMCROS2Publisher<BDIBehaviorCommandPacket> bdiBehaviorPublisher;
-   private final IHMCROS2Publisher<AtlasDesiredPumpPSIPacket> desiredPumpPSIPublisher;
-   private final IHMCROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
-   private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
+   private final ROS2PublisherBasics<AtlasLowLevelControlModeMessage> lowLevelModePublisher;
+   private final ROS2PublisherBasics<BDIBehaviorCommandPacket> bdiBehaviorPublisher;
+   private final ROS2PublisherBasics<AtlasDesiredPumpPSIPacket> desiredPumpPSIPublisher;
+   private final ROS2PublisherBasics<AbortWalkingMessage> abortWalkingPublisher;
+   private final ROS2PublisherBasics<PauseWalkingMessage> pauseWalkingPublisher;
 
    public AtlasDirectRobotInterface(ROS2NodeInterface ros2Node, DRCRobotModel robotModel)
    {

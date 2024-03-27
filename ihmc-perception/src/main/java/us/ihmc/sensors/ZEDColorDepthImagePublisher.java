@@ -2,7 +2,7 @@ package us.ihmc.sensors;
 
 import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.perception.CameraModel;
@@ -25,8 +25,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ZEDColorDepthImagePublisher
 {
    private final ROS2Node ros2Node;
-   private final SideDependentList<IHMCROS2Publisher<ImageMessage>> ros2ColorImagePublishers;
-   private final IHMCROS2Publisher<ImageMessage> ros2DepthImagePublisher;
+   private final SideDependentList<ROS2PublisherBasics<ImageMessage>> ros2ColorImagePublishers;
+   private final ROS2PublisherBasics<ImageMessage> ros2DepthImagePublisher;
 
    private final SideDependentList<CUDAImageEncoder> imageEncoders = new SideDependentList<>();
 
@@ -247,10 +247,10 @@ public class ZEDColorDepthImagePublisher
             imageEncoders.get(side).destroy();
          if (nextGpuColorImages.get(side) != null)
             nextGpuColorImages.get(side).release();
-         ros2ColorImagePublishers.get(side).destroy();
+         ros2ColorImagePublishers.get(side).remove();
       }
 
-      ros2DepthImagePublisher.destroy();
+      ros2DepthImagePublisher.remove();
       ros2Node.destroy();
       System.out.println("Destroyed " + getClass().getSimpleName());
    }

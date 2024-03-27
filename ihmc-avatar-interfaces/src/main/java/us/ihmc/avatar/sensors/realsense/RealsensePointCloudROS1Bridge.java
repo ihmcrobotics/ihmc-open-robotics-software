@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.perception.depthData.PointCloudData;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -27,7 +27,7 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
    private static final int MAX_POINTS = 5000;
    private static final double MIN_PUBLISH_PERIOD = UnitConversions.hertzToSeconds(10.0);
 
-   private final IHMCROS2Publisher<StereoVisionPointCloudMessage> publisher;
+   private final ROS2PublisherBasics<StereoVisionPointCloudMessage> publisher;
    private final ROS2SyncedRobotModel syncedRobot;
    private final FramePose3D tempSensorFramePose = new FramePose3D();
    private final Timer throttleTimer = new Timer();

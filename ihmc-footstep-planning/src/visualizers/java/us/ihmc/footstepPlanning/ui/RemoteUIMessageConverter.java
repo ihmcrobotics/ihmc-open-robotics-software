@@ -8,7 +8,7 @@ import toolbox_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -93,25 +93,25 @@ public class RemoteUIMessageConverter
    private final AtomicReference<FootstepDataListMessage> footstepPlanResponseReference;
    private final AtomicReference<PlanarRegionsList> planarRegionListReference;
 
-   private IHMCRealtimeROS2Publisher<FootstepPlannerActionMessage> plannerActionPublisher;
-   private IHMCRealtimeROS2Publisher<VisibilityGraphsParametersPacket> visibilityGraphsParametersPublisher;
-   private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> plannerParametersPublisher;
-   private IHMCRealtimeROS2Publisher<SwingPlannerParametersPacket> swingPlannerParametersPublisher;
-   private IHMCRealtimeROS2Publisher<SwingPlanningRequestPacket> swingReplanRequestPublisher;
+   private ROS2PublisherBasics<FootstepPlannerActionMessage> plannerActionPublisher;
+   private ROS2PublisherBasics<VisibilityGraphsParametersPacket> visibilityGraphsParametersPublisher;
+   private ROS2PublisherBasics<FootstepPlannerParametersPacket> plannerParametersPublisher;
+   private ROS2PublisherBasics<SwingPlannerParametersPacket> swingPlannerParametersPublisher;
+   private ROS2PublisherBasics<SwingPlanningRequestPacket> swingReplanRequestPublisher;
 
-   private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
-   private IHMCRealtimeROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
-   private IHMCRealtimeROS2Publisher<GoHomeMessage> goHomePublisher;
-   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> walkingPreviewToolboxStatePublisher;
-   private IHMCRealtimeROS2Publisher<WalkingControllerPreviewInputMessage> walkingPreviewRequestPublisher;
+   private ROS2PublisherBasics<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
+   private ROS2PublisherBasics<FootstepDataListMessage> footstepDataListPublisher;
+   private ROS2PublisherBasics<GoHomeMessage> goHomePublisher;
+   private ROS2PublisherBasics<ToolboxStateMessage> walkingPreviewToolboxStatePublisher;
+   private ROS2PublisherBasics<WalkingControllerPreviewInputMessage> walkingPreviewRequestPublisher;
 
-   private IHMCRealtimeROS2Publisher<ArmTrajectoryMessage> armTrajectoryMessagePublisher;
-   private IHMCRealtimeROS2Publisher<HandTrajectoryMessage> handTrajectoryMessagePublisher;
-   private IHMCRealtimeROS2Publisher<FootTrajectoryMessage> footTrajectoryMessagePublisher;
-   private IHMCRealtimeROS2Publisher<ChestTrajectoryMessage> chestTrajectoryMessagePublisher;
-   private IHMCRealtimeROS2Publisher<SpineTrajectoryMessage> spineTrajectoryMessagePublisher;
-   private IHMCRealtimeROS2Publisher<HeadTrajectoryMessage> headTrajectoryMessagePublisher;
-   private IHMCRealtimeROS2Publisher<NeckTrajectoryMessage> neckTrajectoryMessagePublisher;
+   private ROS2PublisherBasics<ArmTrajectoryMessage> armTrajectoryMessagePublisher;
+   private ROS2PublisherBasics<HandTrajectoryMessage> handTrajectoryMessagePublisher;
+   private ROS2PublisherBasics<FootTrajectoryMessage> footTrajectoryMessagePublisher;
+   private ROS2PublisherBasics<ChestTrajectoryMessage> chestTrajectoryMessagePublisher;
+   private ROS2PublisherBasics<SpineTrajectoryMessage> spineTrajectoryMessagePublisher;
+   private ROS2PublisherBasics<HeadTrajectoryMessage> headTrajectoryMessagePublisher;
+   private ROS2PublisherBasics<NeckTrajectoryMessage> neckTrajectoryMessagePublisher;
 
    public static RemoteUIMessageConverter createRemoteConverter(Messager messager, String robotName)
    {
@@ -260,7 +260,7 @@ public class RemoteUIMessageConverter
       messager.addTopicListener(FootstepPlannerMessagerAPI.GoHomeTopic, goHomePublisher::publish);
       messager.addTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListPublisher::publish);
 
-      IHMCRealtimeROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher =
+      ROS2PublisherBasics<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher =
             ROS2Tools.createPublisher(ros2Node,
                                       PerceptionAPI.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName).withInput().withType(BipedalSupportPlanarRegionParametersMessage.class));
 

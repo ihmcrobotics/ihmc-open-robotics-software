@@ -5,7 +5,7 @@ import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
 import mission_control_msgs.msg.dds.SystemServiceActionMessage;
 import mission_control_msgs.msg.dds.SystemServiceLogRefreshMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.missionControl.resourceMonitor.FreeMemoryMonitor;
@@ -43,8 +43,8 @@ public class MissionControlDaemon
    private final Map<String, SystemdServiceMonitor> serviceMonitors = new HashMap<>();
 
    private final ROS2Node ros2Node;
-   private final IHMCROS2Publisher<SystemAvailableMessage> systemAvailablePublisher;
-   private final IHMCROS2Publisher<SystemResourceUsageMessage> systemResourceUsagePublisher;
+   private final ROS2PublisherBasics<SystemAvailableMessage> systemAvailablePublisher;
+   private final ROS2PublisherBasics<SystemResourceUsageMessage> systemResourceUsagePublisher;
    private final List<ExceptionHandlingThreadScheduler> schedulers = new ArrayList<>();
 
    public MissionControlDaemon()
@@ -231,8 +231,8 @@ public class MissionControlDaemon
    {
       if (networkMonitor != null)
          networkMonitor.stop();
-      systemAvailablePublisher.destroy();
-      systemResourceUsagePublisher.destroy();
+      systemAvailablePublisher.remove();
+      systemResourceUsagePublisher.remove();
       schedulers.forEach(ExceptionHandlingThreadScheduler::shutdown);
       serviceMonitors.values().forEach(SystemdServiceMonitor::destroy);
       ros2Node.destroy();

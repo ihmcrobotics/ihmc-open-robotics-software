@@ -16,7 +16,7 @@ import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.RangeScanPointFilter;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
@@ -60,7 +60,7 @@ public class LidarScanPublisher
 
    private RobotROSClockCalculator rosClockCalculator = null;
 
-   private final IHMCROS2Publisher<LidarScanMessage> lidarScanPublisher;
+   private final ROS2PublisherBasics<LidarScanMessage> lidarScanPublisher;
 
    private int maximumNumberOfPoints = DEFAULT_MAX_NUMBER_OF_POINTS;
    private RangeScanPointFilter rangeFilter = null;

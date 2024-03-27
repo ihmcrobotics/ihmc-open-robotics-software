@@ -6,7 +6,7 @@ import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
@@ -57,7 +57,7 @@ public class NetworkSubscriber
     * Local buffers for each message to ensure proper copying from the controller thread to the
     * communication thread.
     */
-   private final Map<Class<? extends Settable<?>>, IHMCRealtimeROS2Publisher<?>> outputMessagePublisherMap = new HashMap<>();
+   private final Map<Class<? extends Settable<?>>, ROS2PublisherBasics<?>> outputMessagePublisherMap = new HashMap<>();
 
    private final RealtimeROS2Node realtimeROS2Node;
 
@@ -149,7 +149,7 @@ public class NetworkSubscriber
 
    public void addMessageCollectors(MessageIDExtractor messageIDExtractor, int numberOfSimultaneousCollectionsToSupport, ROS2Topic messageTopicName)
    {
-      IHMCRealtimeROS2Publisher<MessageCollectionNotification> publisher = createPublisher(MessageCollectionNotification.class, messageTopicName);
+      ROS2PublisherBasics<MessageCollectionNotification> publisher = createPublisher(MessageCollectionNotification.class, messageTopicName);
       listOfSupportedOutputMessages.add(MessageCollectionNotification.class);
 
       for (int i = 0; i < numberOfSimultaneousCollectionsToSupport; i++)
@@ -220,9 +220,9 @@ public class NetworkSubscriber
       }
    }
 
-   private <T extends Settable<T>> IHMCRealtimeROS2Publisher<T> createPublisher(Class<T> messageClass, ROS2Topic topicName)
+   private <T extends Settable<T>> ROS2PublisherBasics<T> createPublisher(Class<T> messageClass, ROS2Topic topicName)
    {
-      IHMCRealtimeROS2Publisher<T> publisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, messageClass, topicName);
+      ROS2PublisherBasics<T> publisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, messageClass, topicName);
       return publisher;
    }
 
@@ -294,7 +294,7 @@ public class NetworkSubscriber
    @SuppressWarnings("unchecked")
    private <T> void publishStatusMessage(T message)
    {
-      IHMCRealtimeROS2Publisher<T> publisher = (IHMCRealtimeROS2Publisher<T>) outputMessagePublisherMap.get(message.getClass());
+      ROS2PublisherBasics<T> publisher = (ROS2PublisherBasics<T>) outputMessagePublisherMap.get(message.getClass());
       publisher.publish(message);
    }
 

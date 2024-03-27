@@ -5,7 +5,7 @@ import imgui.ImGui;
 import mission_control_msgs.msg.dds.SystemServiceActionMessage;
 import mission_control_msgs.msg.dds.SystemServiceLogRefreshMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -24,8 +24,8 @@ public class ImGuiMachineService
    @Nullable
    private String status;
    private final RDXPanel logPanel;
-   private IHMCROS2Publisher<SystemServiceLogRefreshMessage> logRefreshPublisher;
-   private IHMCROS2Publisher<SystemServiceActionMessage> serviceActionPublisher;
+   private ROS2PublisherBasics<SystemServiceLogRefreshMessage> logRefreshPublisher;
+   private ROS2PublisherBasics<SystemServiceActionMessage> serviceActionPublisher;
    private final ImGuiConsoleArea consoleArea;
 
    /**

@@ -2,7 +2,7 @@ package us.ihmc.sensors;
 
 import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.perception.CameraModel;
@@ -23,8 +23,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class RealsenseColorDepthImagePublisher
 {
    private final ROS2Node ros2Node;
-   private final IHMCROS2Publisher<ImageMessage> ros2DepthImagePublisher;
-   private final IHMCROS2Publisher<ImageMessage> ros2ColorImagePublisher;
+   private final ROS2PublisherBasics<ImageMessage> ros2DepthImagePublisher;
+   private final ROS2PublisherBasics<ImageMessage> ros2ColorImagePublisher;
 
    private CUDAImageEncoder imageEncoder;
 
@@ -261,8 +261,8 @@ public class RealsenseColorDepthImagePublisher
       if (imageEncoder != null)
          imageEncoder.destroy();
 
-      ros2DepthImagePublisher.destroy();
-      ros2ColorImagePublisher.destroy();
+      ros2DepthImagePublisher.remove();
+      ros2ColorImagePublisher.remove();
       ros2Node.destroy();
       System.out.println("Destroyed " + getClass().getSimpleName());
    }

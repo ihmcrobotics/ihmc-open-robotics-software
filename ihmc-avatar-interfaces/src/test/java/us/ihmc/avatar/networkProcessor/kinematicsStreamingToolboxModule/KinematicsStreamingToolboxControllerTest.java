@@ -22,7 +22,7 @@ import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -107,8 +107,8 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
    protected Robot robot, ghost;
    protected ROS2Node ros2Node;
-   protected IHMCROS2Publisher<KinematicsStreamingToolboxInputMessage> inputPublisher;
-   protected IHMCROS2Publisher<ToolboxStateMessage> statePublisher;
+   protected ROS2PublisherBasics<KinematicsStreamingToolboxInputMessage> inputPublisher;
+   protected ROS2PublisherBasics<ToolboxStateMessage> statePublisher;
    protected ROS2Topic<?> controllerInputTopic;
    protected ROS2Topic<?> controllerOutputTopic;
    protected ROS2Topic<?> toolboxInputTopic;
@@ -153,7 +153,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       RealtimeROS2Node toolboxROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
       new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxROS2Node);
-      IHMCROS2Publisher<WholeBodyTrajectoryMessage> outputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+      ROS2PublisherBasics<WholeBodyTrajectoryMessage> outputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                          WholeBodyTrajectoryMessage.class,
                                                                                                          controllerInputTopic);
       toolboxController.setTrajectoryMessagePublisher(outputPublisher::publish);

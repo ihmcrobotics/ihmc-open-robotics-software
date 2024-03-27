@@ -42,7 +42,7 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -103,9 +103,9 @@ public class StepGeneratorJavaFXController
    private final HumanoidRobotKickMessenger kickMessenger;
    private final HumanoidRobotPunchMessenger punchMessenger;
 
-   private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
-   private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
-   private final IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
+   private final ROS2PublisherBasics<FootstepDataListMessage> footstepPublisher;
+   private final ROS2PublisherBasics<PauseWalkingMessage> pauseWalkingPublisher;
+   private final ROS2PublisherBasics<REAStateRequestMessage> reaStateRequestPublisher;
 
    private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
 

@@ -7,7 +7,7 @@ import java.util.List;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
@@ -95,7 +95,7 @@ public class SimulatedRobotiqHandsController implements RobotController
 
       if (realtimeROS2Node != null)
       {
-         IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
+         ROS2PublisherBasics<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
                                                                                                                   HandJointAnglePacket.class,
                                                                                                                   outputTopic);
          jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(jointAnglePublisher, fullRobotModel);

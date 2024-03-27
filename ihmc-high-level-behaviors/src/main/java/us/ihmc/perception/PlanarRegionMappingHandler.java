@@ -11,7 +11,7 @@ import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -62,7 +62,7 @@ public class PlanarRegionMappingHandler
 
    private ROS2Node ros2Node = null;
    private ROS2Helper ros2Helper = null;
-   private IHMCROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
+   private ROS2PublisherBasics<PlanarRegionsListMessage> controllerRegionsPublisher;
 
    private final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                         getClass(),

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -32,7 +32,7 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
    private QuadrupedTestYoVariables variables;
    private RemoteQuadrupedTeleopManager stepTeleopManager;
    private QuadrupedTestFactory quadrupedTestFactory;
-   private IHMCROS2Publisher<SoleTrajectoryMessage> soleTrajectoryPublisher;
+   private ROS2PublisherBasics<SoleTrajectoryMessage> soleTrajectoryPublisher;
 
    @BeforeEach
    public void setup() throws IOException

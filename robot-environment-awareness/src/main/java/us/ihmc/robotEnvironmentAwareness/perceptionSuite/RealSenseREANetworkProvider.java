@@ -2,7 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.perceptionSuite;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import perception_msgs.msg.dds.*;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -25,8 +25,8 @@ import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPr
 
 public class RealSenseREANetworkProvider implements REANetworkProvider
 {
-   private final IHMCROS2Publisher<PlanarRegionsListMessage> stereoRegionPublisher;
-   private final IHMCROS2Publisher<OcTreeKeyListMessage> ocTreePublisher;
+   private final ROS2PublisherBasics<PlanarRegionsListMessage> stereoRegionPublisher;
+   private final ROS2PublisherBasics<OcTreeKeyListMessage> ocTreePublisher;
 
    private final ROS2Node ros2Node;
    private final ROS2Topic inputTopic;

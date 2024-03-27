@@ -16,7 +16,7 @@ import perception_msgs.msg.dds.Image32;
 import sensor_msgs.CameraInfo;
 import sensor_msgs.Image;
 import std_msgs.Header;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.fusion.MultisenseInformation;
@@ -30,7 +30,7 @@ public class MultisenseImageROS1Bridge extends AbstractRosTopicSubscriber<Image>
 
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "imagePublisherNode");
 
-   private final IHMCROS2Publisher<Image32> imagePublisher;
+   private final ROS2PublisherBasics<Image32> imagePublisher;
 
    private final MultisenseCameraInfoROS1Bridge cameraInfoBridge;
 

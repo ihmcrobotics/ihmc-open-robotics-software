@@ -14,7 +14,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -29,9 +29,9 @@ import us.ihmc.ros2.RealtimeROS2Node;
 
 public class DirectionalControlModule extends ToolboxModule
 {
-   private IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
-   private IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
-   private IHMCROS2Publisher<FootstepDataListMessage> footstepVisualizationPublisher;
+   private ROS2PublisherBasics<PauseWalkingMessage> pauseWalkingPublisher;
+   private ROS2PublisherBasics<FootstepDataListMessage> footstepPublisher;
+   private ROS2PublisherBasics<FootstepDataListMessage> footstepVisualizationPublisher;
    private final DirectionalControlController steppingController;
 
    /*

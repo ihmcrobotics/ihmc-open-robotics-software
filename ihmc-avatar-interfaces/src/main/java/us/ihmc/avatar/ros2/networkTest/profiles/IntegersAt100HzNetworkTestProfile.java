@@ -6,7 +6,7 @@ import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine;
 import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestProfile;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
@@ -112,7 +112,7 @@ public class IntegersAt100HzNetworkTestProfile extends ROS2NetworkTestProfile
             ThreadTools.sleepSeconds(2.0 * publishPeriod / numberOfRemoteMachines);
          }
 
-         IHMCROS2Publisher<Int64> publisher = ROS2Tools.createPublisher(ros2Node, TO_OCU);
+         ROS2PublisherBasics<Int64> publisher = ROS2Tools.createPublisher(ros2Node, TO_OCU);
          publishThread = new PausablePeriodicThread(getClass().getSimpleName(), publishPeriod, () ->
          {
             if (messagesSent.getValue() < PUBLISH_FREQUENCY * EXPERIMENT_DURATION)

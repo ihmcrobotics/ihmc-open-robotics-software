@@ -11,7 +11,7 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -35,7 +35,7 @@ public class RemotePlannerMessageConverter
    private final Messager messager;
    private final String robotName;
 
-   private IHMCRealtimeROS2Publisher<FootstepPlanningToolboxOutputStatus> outputStatusPublisher;
+   private ROS2PublisherBasics<FootstepPlanningToolboxOutputStatus> outputStatusPublisher;
 
    private Optional<HeightMapMessage> heightMapData = Optional.empty();
 

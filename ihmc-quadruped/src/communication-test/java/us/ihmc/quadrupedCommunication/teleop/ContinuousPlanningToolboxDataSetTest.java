@@ -32,7 +32,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -138,10 +138,10 @@ public class ContinuousPlanningToolboxDataSetTest
    private static final String robotName = "testBot";
    public static final PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
 
-   private IHMCRealtimeROS2Publisher<QuadrupedContinuousPlanningRequestPacket> requestPublisher;
-   private IHMCRealtimeROS2Publisher<PlanarRegionsListMessage> planarRegionsPublisher;
-   private IHMCRealtimeROS2Publisher<QuadrupedFootstepStatusMessage> footstepStatusPublisher;
-   private IHMCRealtimeROS2Publisher<PawStepPlannerParametersPacket> plannerParametersPublisher;
+   private ROS2PublisherBasics<QuadrupedContinuousPlanningRequestPacket> requestPublisher;
+   private ROS2PublisherBasics<PlanarRegionsListMessage> planarRegionsPublisher;
+   private ROS2PublisherBasics<QuadrupedFootstepStatusMessage> footstepStatusPublisher;
+   private ROS2PublisherBasics<PawStepPlannerParametersPacket> plannerParametersPublisher;
    private YoBoolean planningFailed;
 
    public QuadrupedXGaitSettingsReadOnly getXGaitSettings()

@@ -24,7 +24,7 @@ import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.MessageTools;
@@ -275,7 +275,7 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void runPlannerRequestToUI()
    {
       Random random = new Random(1738L);
-      IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher = ROS2Tools
+      ROS2PublisherBasics<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher = ROS2Tools
             .createPublisherTypeNamed(localNode, FootstepPlanningRequestPacket.class,
                                       ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput());
       localNode.spin();
@@ -417,7 +417,7 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void runOutputStatusToUI()
    {
       Random random = new Random(1738L);
-      IHMCRealtimeROS2Publisher<FootstepPlanningToolboxOutputStatus> footstepOutputStatusPublisher = ROS2Tools
+      ROS2PublisherBasics<FootstepPlanningToolboxOutputStatus> footstepOutputStatusPublisher = ROS2Tools
             .createPublisherTypeNamed(localNode, FootstepPlanningToolboxOutputStatus.class,
                                       ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput());
 

@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
@@ -73,8 +73,8 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    private E stopBehaviorKey;
    private E currentBehaviorKey;
 
-   private final IHMCROS2Publisher<BehaviorStatusPacket> behaviorStatusPublisher;
-   private final IHMCROS2Publisher<BehaviorControlModeResponsePacket> behaviorControlModeResponsePublisher;
+   private final ROS2PublisherBasics<BehaviorStatusPacket> behaviorStatusPublisher;
+   private final ROS2PublisherBasics<BehaviorControlModeResponsePacket> behaviorControlModeResponsePublisher;
 
    MessagerAPIFactory apiFactory = new MessagerAPIFactory();
 

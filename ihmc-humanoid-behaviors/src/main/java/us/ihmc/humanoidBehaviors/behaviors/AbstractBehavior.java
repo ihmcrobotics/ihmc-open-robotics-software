@@ -8,7 +8,7 @@ import java.util.Map;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
@@ -43,7 +43,7 @@ public abstract class AbstractBehavior implements RobotController
    KryoMessager messager;
 
    protected final ROS2Node ros2Node;
-   private final Map<ROS2Topic<?>, IHMCROS2Publisher<?>> publishers = new HashMap<>();
+   private final Map<ROS2Topic<?>, ROS2PublisherBasics<?>> publishers = new HashMap<>();
 
    protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>> localListeningNetworkQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>>();
 
@@ -62,8 +62,8 @@ public abstract class AbstractBehavior implements RobotController
    protected final YoDouble percentCompleted;
 
    private final List<BehaviorService> behaviorsServices;
-   private final IHMCROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
-   private final IHMCROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
+   private final ROS2PublisherBasics<TextToSpeechPacket> textToSpeechPublisher;
+   private final ROS2PublisherBasics<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
 
    protected final String robotName;
 
@@ -118,26 +118,26 @@ public abstract class AbstractBehavior implements RobotController
       return null;
    }
 
-   public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
+   public <T> ROS2PublisherBasics<T> createPublisherForController(Class<T> messageType)
    {
       return createPublisher(messageType, controllerInputTopic);
    }
 
-   public <T> IHMCROS2Publisher<T> createBehaviorOutputPublisher(Class<T> messageType)
+   public <T> ROS2PublisherBasics<T> createBehaviorOutputPublisher(Class<T> messageType)
    {
       return createPublisher(messageType, behaviorOutputTopic);
    }
 
-   public <T> IHMCROS2Publisher<T> createBehaviorInputPublisher(Class<T> messageType)
+   public <T> ROS2PublisherBasics<T> createBehaviorInputPublisher(Class<T> messageType)
    {
       return createPublisher(messageType, behaviorInputTopic);
    }
 
    @SuppressWarnings("unchecked")
-   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic<?> topicName)
+   public <T> ROS2PublisherBasics<T> createPublisher(Class<T> messageType, ROS2Topic<?> topicName)
    {
       ROS2Topic<T> typedNamedTopic = topicName.withTypeName(messageType);
-      IHMCROS2Publisher<T> publisher = (IHMCROS2Publisher<T>) publishers.get(typedNamedTopic);
+      ROS2PublisherBasics<T> publisher = (ROS2PublisherBasics<T>) publishers.get(typedNamedTopic);
 
       if (publisher == null) // !containsKey
       {

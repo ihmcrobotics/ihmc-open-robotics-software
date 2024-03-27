@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.util.NetworkPorts;
@@ -34,7 +34,7 @@ public class LidarScanLogReader
    private ScheduledFuture<?> currentLoggingTask = null;
 
    private RealtimeROS2Node ros2Node;
-   private IHMCRealtimeROS2Publisher<LidarScanMessage> lidarScanPublisher;
+   private ROS2PublisherBasics<LidarScanMessage> lidarScanPublisher;
    private PacketConsumer<LidarScanMessage> lidarScanConsumer = null;
 
    private final AtomicBoolean loggingEnabled = new AtomicBoolean(false);

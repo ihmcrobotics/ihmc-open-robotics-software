@@ -16,7 +16,7 @@ import perception_msgs.msg.dds.REAStateRequestMessage;
 import perception_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -38,11 +38,11 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
 {
    private static final boolean publishOctree = false;
 
-   private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
-   private final IHMCROS2Publisher<PlanarRegionsListMessage> lidarRegionPublisher;
-   private final IHMCROS2Publisher<PlanarRegionsListMessage> stereoRegionPublisher;
-   private final IHMCROS2Publisher<PlanarRegionsListMessage> depthRegionPublisher;
-   private final IHMCROS2Publisher<OcTreeKeyListMessage> ocTreePublisher;
+   private final ROS2PublisherBasics<PlanarRegionsListMessage> planarRegionPublisher;
+   private final ROS2PublisherBasics<PlanarRegionsListMessage> lidarRegionPublisher;
+   private final ROS2PublisherBasics<PlanarRegionsListMessage> stereoRegionPublisher;
+   private final ROS2PublisherBasics<PlanarRegionsListMessage> depthRegionPublisher;
+   private final ROS2PublisherBasics<OcTreeKeyListMessage> ocTreePublisher;
 
    private REACurrentStateProvider currentStateProvider = null;
    private AtomicReference<Boolean> isUsingLidar, isUsingStereoVision, isUsingDepthCloud;

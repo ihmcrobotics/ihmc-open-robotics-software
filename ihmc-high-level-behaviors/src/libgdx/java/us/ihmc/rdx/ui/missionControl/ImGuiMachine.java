@@ -10,7 +10,7 @@ import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
 import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -41,7 +41,7 @@ public class ImGuiMachine
    private final String hostname;
 
    private final ROS2Node ros2Node;
-   private IHMCROS2Publisher<Empty> rebootPublisher;
+   private ROS2PublisherBasics<Empty> rebootPublisher;
    private SystemResourceUsageMessage lastResourceUsageMessage = new SystemResourceUsageMessage();
 
    private final RDXPanel panel;

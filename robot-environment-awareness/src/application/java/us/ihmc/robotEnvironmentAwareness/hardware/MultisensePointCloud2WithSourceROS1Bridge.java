@@ -7,7 +7,7 @@ import java.net.URISyntaxException;
 import perception_msgs.msg.dds.LidarScanMessage;
 import geometry_msgs.Point;
 import scan_to_cloud.PointCloud2WithSource;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
@@ -27,7 +27,7 @@ public class MultisensePointCloud2WithSourceROS1Bridge extends AbstractRosTopicS
    
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "lidarScanPublisherNode");
 
-   private final IHMCROS2Publisher<LidarScanMessage> lidarScanPublisher;
+   private final ROS2PublisherBasics<LidarScanMessage> lidarScanPublisher;
 
    public MultisensePointCloud2WithSourceROS1Bridge() throws URISyntaxException, IOException
    {

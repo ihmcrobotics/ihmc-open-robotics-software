@@ -7,7 +7,7 @@ import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import quadruped_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
 import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -19,7 +19,7 @@ import us.ihmc.ros2.RealtimeROS2Node;
 public class QuadrupedREAStateUpdater
 {
    private final RealtimeROS2Node ros2Node;
-   private final IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
+   private final ROS2PublisherBasics<REAStateRequestMessage> reaStateRequestPublisher;
 
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 

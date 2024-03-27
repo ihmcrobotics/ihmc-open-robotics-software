@@ -13,7 +13,7 @@ import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.packets.MessageTools;
@@ -73,27 +73,27 @@ public class QuadrupedUIMessageConverter
    private final AtomicReference<Integer> currentPlanRequestId;
    private final AtomicReference<Boolean> assumeFlatGround;
 
-   private IHMCRealtimeROS2Publisher<HighLevelStateMessage> desiredHighLevelStatePublisher;
-   private IHMCRealtimeROS2Publisher<QuadrupedBodyHeightMessage> bodyHeightPublisher;
-   private IHMCRealtimeROS2Publisher<QuadrupedTeleopDesiredVelocity> desiredTeleopVelocityPublisher;
-   private IHMCRealtimeROS2Publisher<QuadrupedBodyTrajectoryMessage> desiredBodyPosePublisher;
-   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> enableStepTeleopPublisher;
-   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> enableFootstepPlanningPublisher;
-   private IHMCRealtimeROS2Publisher<QuadrupedXGaitSettingsPacket> stepTeleopXGaitSettingsPublisher;
-   private IHMCRealtimeROS2Publisher<QuadrupedXGaitSettingsPacket> footstepPlanningXGaitSettingsPublisher;
+   private ROS2PublisherBasics<HighLevelStateMessage> desiredHighLevelStatePublisher;
+   private ROS2PublisherBasics<QuadrupedBodyHeightMessage> bodyHeightPublisher;
+   private ROS2PublisherBasics<QuadrupedTeleopDesiredVelocity> desiredTeleopVelocityPublisher;
+   private ROS2PublisherBasics<QuadrupedBodyTrajectoryMessage> desiredBodyPosePublisher;
+   private ROS2PublisherBasics<ToolboxStateMessage> enableStepTeleopPublisher;
+   private ROS2PublisherBasics<ToolboxStateMessage> enableFootstepPlanningPublisher;
+   private ROS2PublisherBasics<QuadrupedXGaitSettingsPacket> stepTeleopXGaitSettingsPublisher;
+   private ROS2PublisherBasics<QuadrupedXGaitSettingsPacket> footstepPlanningXGaitSettingsPublisher;
 
-   private IHMCRealtimeROS2Publisher<PawStepPlannerParametersPacket> footstepPlannerParametersPublisher;
-   private IHMCRealtimeROS2Publisher<VisibilityGraphsParametersPacket> visibilityGraphsParametersPublisher;
-   private IHMCRealtimeROS2Publisher<PawStepPlanningRequestPacket> pawPlanningRequestPublisher;
+   private ROS2PublisherBasics<PawStepPlannerParametersPacket> footstepPlannerParametersPublisher;
+   private ROS2PublisherBasics<VisibilityGraphsParametersPacket> visibilityGraphsParametersPublisher;
+   private ROS2PublisherBasics<PawStepPlanningRequestPacket> pawPlanningRequestPublisher;
 
-   private IHMCRealtimeROS2Publisher<QuadrupedTimedStepListMessage> stepListMessagePublisher;
-   private IHMCRealtimeROS2Publisher<SoleTrajectoryMessage> soleTrajectoryMessagePublisher;
-   private IHMCRealtimeROS2Publisher<QuadrupedRequestedSteppingStateMessage> desiredSteppingStatePublisher;
-   private IHMCRealtimeROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
-   private IHMCRealtimeROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
-   private IHMCRealtimeROS2Publisher<QuadrupedFootLoadBearingMessage> loadBearingRequestPublisher;
+   private ROS2PublisherBasics<QuadrupedTimedStepListMessage> stepListMessagePublisher;
+   private ROS2PublisherBasics<SoleTrajectoryMessage> soleTrajectoryMessagePublisher;
+   private ROS2PublisherBasics<QuadrupedRequestedSteppingStateMessage> desiredSteppingStatePublisher;
+   private ROS2PublisherBasics<PauseWalkingMessage> pauseWalkingPublisher;
+   private ROS2PublisherBasics<AbortWalkingMessage> abortWalkingPublisher;
+   private ROS2PublisherBasics<QuadrupedFootLoadBearingMessage> loadBearingRequestPublisher;
 
-   private IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
+   private ROS2PublisherBasics<REAStateRequestMessage> reaStateRequestPublisher;
 
    public QuadrupedUIMessageConverter(RealtimeROS2Node ros2Node, Messager messager, String robotName)
    {

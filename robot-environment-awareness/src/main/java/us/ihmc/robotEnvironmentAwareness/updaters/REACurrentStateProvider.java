@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import perception_msgs.msg.dds.REASensorDataFilterParametersMessage;
 import perception_msgs.msg.dds.REAStatusMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
@@ -14,7 +14,7 @@ import us.ihmc.ros2.ROS2Topic;
 
 public class REACurrentStateProvider
 {
-   private final IHMCROS2Publisher<REAStatusMessage> currentStatePublisher;
+   private final ROS2PublisherBasics<REAStatusMessage> currentStatePublisher;
    private final AtomicReference<Boolean> isRunning, hasCleared, isUsingLidar, isUsingStereoVision, isUsingDepthCloud;
    private final AtomicReference<Double> minRange, maxRange;
    private final AtomicReference<BoundingBoxParametersMessage> boundingBoxParameters;

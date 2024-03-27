@@ -15,7 +15,7 @@ import quadruped_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -59,7 +59,7 @@ public class QuadrupedSupportPlanarRegionPublisher
    private static final int numberOfRegions = 6;
 
    private final RealtimeROS2Node ros2Node;
-   private final IHMCRealtimeROS2Publisher<PlanarRegionsListMessage> regionPublisher;
+   private final ROS2PublisherBasics<PlanarRegionsListMessage> regionPublisher;
 
    private final AtomicReference<RobotConfigurationData> latestRobotConfigurationData = new AtomicReference<>(null);
    private final AtomicReference<QuadrupedSupportPlanarRegionParametersMessage> latestParametersMessage = new AtomicReference<>(null);

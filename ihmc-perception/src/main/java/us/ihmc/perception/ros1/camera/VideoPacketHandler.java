@@ -3,7 +3,7 @@ package us.ihmc.perception.ros1.camera;
 import boofcv.struct.calib.CameraPinholeBrown;
 import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ConnectionStateListener;
@@ -19,7 +19,7 @@ import us.ihmc.ros2.ROS2Topic;
 
 public class VideoPacketHandler implements CompressedVideoHandler
 {
-   private final IHMCROS2Publisher<VideoPacket> publisher;
+   private final ROS2PublisherBasics<VideoPacket> publisher;
 
    private volatile boolean enable = true;
 

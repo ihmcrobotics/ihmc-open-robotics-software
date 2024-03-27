@@ -6,7 +6,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.MessageTools;
@@ -30,8 +30,8 @@ import java.util.function.Supplier;
 public class OusterDepthPublisher
 {
    private final RealtimeROS2Node realtimeROS2Node;
-   private final IHMCRealtimeROS2Publisher<ImageMessage> imagePublisher;
-   private final IHMCRealtimeROS2Publisher<LidarScanMessage> lidarScanPublisher;
+   private final ROS2PublisherBasics<ImageMessage> imagePublisher;
+   private final ROS2PublisherBasics<LidarScanMessage> lidarScanPublisher;
 
    private final FramePose3D cameraPose = new FramePose3D();
    private IntPointer compressionParameters;

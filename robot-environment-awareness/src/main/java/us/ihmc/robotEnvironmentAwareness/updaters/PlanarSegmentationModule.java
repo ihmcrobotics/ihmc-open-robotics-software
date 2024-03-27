@@ -11,7 +11,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -62,7 +62,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
    private final REAPlanarRegionFeatureUpdater planarRegionFeatureUpdater;
 
    private final SegmentationModuleStateReporter moduleStateReporter;
-   private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
+   private final ROS2PublisherBasics<PlanarRegionsListMessage> planarRegionPublisher;
 
    private final AtomicReference<Boolean> clearOcTree;
    private final AtomicReference<NormalOcTree> ocTree = new AtomicReference<>(null);

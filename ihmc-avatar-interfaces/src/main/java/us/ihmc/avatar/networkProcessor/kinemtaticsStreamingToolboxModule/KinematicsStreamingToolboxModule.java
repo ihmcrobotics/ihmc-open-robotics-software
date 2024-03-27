@@ -20,7 +20,7 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -39,8 +39,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 5;
 
    protected final KinematicsStreamingToolboxController controller;
-   private IHMCROS2Publisher<WholeBodyTrajectoryMessage> trajectoryMessagePublisher;
-   private IHMCROS2Publisher<WholeBodyStreamingMessage> streamingMessagePublisher;
+   private ROS2PublisherBasics<WholeBodyTrajectoryMessage> trajectoryMessagePublisher;
+   private ROS2PublisherBasics<WholeBodyStreamingMessage> streamingMessagePublisher;
 
    public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {

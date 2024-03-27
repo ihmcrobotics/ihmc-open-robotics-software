@@ -35,8 +35,8 @@ import perception_msgs.msg.dds.LidarScanMessage;
 import sensor_msgs.Image;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -132,9 +132,9 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
    private ROS2NodeInterface ros2Node;
    private ROS2Helper ros2Helper;
    private Class<?> pointCloudMessageType;
-   private IHMCROS2Publisher<?> publisher;
+   private ROS2PublisherBasics<?> publisher;
    private RealtimeROS2Node realtimeROS2Node;
-   private IHMCRealtimeROS2Publisher<BigVideoPacket> ros2VideoPublisher;
+   private ROS2PublisherBasics<BigVideoPacket> ros2VideoPublisher;
    private BigVideoPacket videoPacket;
    private BytePointer jpegImageBytePointer;
    private Mat yuv420Image;
@@ -597,7 +597,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
                      LidarScanMessage message = PointCloudMessageTools.toLidarScanMessage(timestamp,
                                                                                           ros2PointsToPublish,
                                                                                           tempSensorFramePose);
-                     ((IHMCROS2Publisher<LidarScanMessage>) publisher).publish(message);
+                     ((ROS2PublisherBasics<LidarScanMessage>) publisher).publish(message);
                   }
                   else if (pointCloudMessageType.equals(StereoVisionPointCloudMessage.class))
                   {
@@ -615,7 +615,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
                      message.getSensorOrientation().set(tempSensorFramePose.getOrientation());
                      message.setIsDataLocalToSensor(false);
                      //      LogTools.info("Publishing point cloud of size {}", message.getNumberOfPoints());
-                     ((IHMCROS2Publisher<StereoVisionPointCloudMessage>) publisher).publish(message);
+                     ((ROS2PublisherBasics<StereoVisionPointCloudMessage>) publisher).publish(message);
                   }
                });
             }
@@ -663,7 +663,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
             outputFusedROS2Message.setPointsPerSegment(pointsPerSegment);
             outputFusedROS2Message.setSegmentIndex(segmentIndex);
             outputFusedROS2Message.setNumberOfSegments(numberOfSegments);
-            ((IHMCROS2Publisher<FusedSensorHeadPointCloudMessage>) publisher).publish(outputFusedROS2Message);
+            ((ROS2PublisherBasics<FusedSensorHeadPointCloudMessage>) publisher).publish(outputFusedROS2Message);
 
             ++segmentIndex;
             if (segmentIndex == numberOfSegments)

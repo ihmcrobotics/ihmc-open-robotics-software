@@ -11,7 +11,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -41,7 +41,7 @@ public class AtlasSLAMModule extends SLAMModule
     * to update corrected sensor frame for robot state estimation.
     */
    protected final AtomicLong latestRobotTimeStamp = new AtomicLong();
-   protected IHMCROS2Publisher<StampedPosePacket> estimatedPelvisPublisher = null;
+   protected ROS2PublisherBasics<StampedPosePacket> estimatedPelvisPublisher = null;
    protected RigidBodyTransform sensorPoseToPelvisTransformer = null;
 
    public AtlasSLAMModule(ROS2Node ros2Node, Messager messager, DRCRobotModel drcRobotModel, File configurationFile)

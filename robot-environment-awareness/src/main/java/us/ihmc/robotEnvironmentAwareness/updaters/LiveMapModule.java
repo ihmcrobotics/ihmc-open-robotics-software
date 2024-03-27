@@ -1,7 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -57,7 +57,7 @@ public class LiveMapModule implements PerceptionModule
 
    private final PlanarRegionSLAMParameters slamParameters;
 
-   private final IHMCROS2Publisher<PlanarRegionsListMessage> combinedMapPublisher;
+   private final ROS2PublisherBasics<PlanarRegionsListMessage> combinedMapPublisher;
 
    private LiveMapModule(ROS2Node ros2Node, Messager messager)
    {

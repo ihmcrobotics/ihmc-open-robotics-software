@@ -7,7 +7,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
@@ -54,7 +54,7 @@ import java.util.function.Supplier;
 public class StructuralPerceptionProcessWithDriver
 {
    private final RealtimeROS2Node realtimeROS2Node;
-   private final IHMCRealtimeROS2Publisher<ImageMessage> ros2DepthImagePublisher;
+   private final ROS2PublisherBasics<ImageMessage> ros2DepthImagePublisher;
    private final Supplier<ReferenceFrame> sensorFrameUpdater;
    private final FramePose3D cameraPose = new FramePose3D();
    private final ResettableExceptionHandlingExecutorService extractCompressAndPublishThread;

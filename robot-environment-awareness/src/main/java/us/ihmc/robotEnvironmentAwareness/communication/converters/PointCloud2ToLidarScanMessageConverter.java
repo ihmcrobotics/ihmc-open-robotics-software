@@ -2,7 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -54,7 +54,7 @@ public class PointCloud2ToLidarScanMessageConverter
       Pose3D sensorPose = new Pose3D(poseX, poseY, poseZ, poseYaw, posePitch, poseRoll);
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
-      IHMCROS2Publisher<LidarScanMessage> lidarScanMessagePublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan");
+      ROS2PublisherBasics<LidarScanMessage> lidarScanMessagePublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan");
 
       // save and handle on another thread
       RosPointCloudSubscriber pointCloudSubscriber = new RosPointCloudSubscriber()

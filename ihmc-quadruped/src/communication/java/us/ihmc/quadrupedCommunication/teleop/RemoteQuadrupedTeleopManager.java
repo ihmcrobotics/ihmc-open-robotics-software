@@ -8,7 +8,7 @@ import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import quadruped_msgs.msg.dds.*;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.packets.MessageTools;
@@ -43,28 +43,28 @@ public class RemoteQuadrupedTeleopManager
    private final AtomicReference<QuadrupedSteppingStateChangeMessage> steppingStateChangeMessage = new AtomicReference<>();
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
 
-   private final IHMCROS2Publisher<HighLevelStateMessage> controllerStatePublisher;
-   private final IHMCROS2Publisher<QuadrupedRequestedSteppingStateMessage> steppingStatePublisher;
-   private final IHMCROS2Publisher<QuadrupedTimedStepListMessage> timedStepListPublisher;
-   private final IHMCROS2Publisher<QuadrupedBodyOrientationMessage> bodyOrientationPublisher;
-   private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionsListControllerPublisher;
-   private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingMessagePublisher;
-   private final IHMCROS2Publisher<AbortWalkingMessage> abortWalkingMessagePublisher;
-   private final IHMCROS2Publisher<QuadrupedFootLoadBearingMessage> loadBearingMessagePublisher;
-   private final IHMCROS2Publisher<QuadrupedBodyHeightMessage> bodyHeightPublisher;
-   private final IHMCROS2Publisher<QuadrupedBodyTrajectoryMessage> bodyPosePublisher;
+   private final ROS2PublisherBasics<HighLevelStateMessage> controllerStatePublisher;
+   private final ROS2PublisherBasics<QuadrupedRequestedSteppingStateMessage> steppingStatePublisher;
+   private final ROS2PublisherBasics<QuadrupedTimedStepListMessage> timedStepListPublisher;
+   private final ROS2PublisherBasics<QuadrupedBodyOrientationMessage> bodyOrientationPublisher;
+   private final ROS2PublisherBasics<PlanarRegionsListMessage> planarRegionsListControllerPublisher;
+   private final ROS2PublisherBasics<PauseWalkingMessage> pauseWalkingMessagePublisher;
+   private final ROS2PublisherBasics<AbortWalkingMessage> abortWalkingMessagePublisher;
+   private final ROS2PublisherBasics<QuadrupedFootLoadBearingMessage> loadBearingMessagePublisher;
+   private final ROS2PublisherBasics<QuadrupedBodyHeightMessage> bodyHeightPublisher;
+   private final ROS2PublisherBasics<QuadrupedBodyTrajectoryMessage> bodyPosePublisher;
 
-   private final IHMCROS2Publisher<QuadrupedTeleopDesiredVelocity> desiredVelocityPublisher;
+   private final ROS2PublisherBasics<QuadrupedTeleopDesiredVelocity> desiredVelocityPublisher;
 
-   private final IHMCROS2Publisher<ToolboxStateMessage> stepTeleopStatePublisher;
-   private final IHMCROS2Publisher<ToolboxStateMessage> pawPlannerStatePublisher;
+   private final ROS2PublisherBasics<ToolboxStateMessage> stepTeleopStatePublisher;
+   private final ROS2PublisherBasics<ToolboxStateMessage> pawPlannerStatePublisher;
 
-   private final IHMCROS2Publisher<QuadrupedXGaitSettingsPacket> stepXGaitSettingsPublisher;
-   private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionsListTeleopPublisher;
-   private final IHMCROS2Publisher<QuadrupedBodyPathPlanMessage> bodyPathPublisher;
+   private final ROS2PublisherBasics<QuadrupedXGaitSettingsPacket> stepXGaitSettingsPublisher;
+   private final ROS2PublisherBasics<PlanarRegionsListMessage> planarRegionsListTeleopPublisher;
+   private final ROS2PublisherBasics<QuadrupedBodyPathPlanMessage> bodyPathPublisher;
 
-   private final IHMCROS2Publisher<QuadrupedXGaitSettingsPacket> plannerXGaitSettingsPublisher;
-   private final IHMCROS2Publisher<PawStepPlanningRequestPacket> planningRequestPublisher;
+   private final ROS2PublisherBasics<QuadrupedXGaitSettingsPacket> plannerXGaitSettingsPublisher;
+   private final ROS2PublisherBasics<PawStepPlanningRequestPacket> planningRequestPublisher;
 
    private final AtomicDouble timestamp = new AtomicDouble();
    private final QuadrupedRobotDataReceiver robotDataReceiver;

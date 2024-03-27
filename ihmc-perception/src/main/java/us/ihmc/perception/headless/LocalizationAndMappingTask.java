@@ -8,7 +8,7 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -57,8 +57,8 @@ public class LocalizationAndMappingTask
    protected ROS2Node ros2Node;
    protected PlanarRegionMap planarRegionMap;
 
-   private IHMCROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
-   private IHMCROS2Publisher<PlanarRegionsListMessage> slamOutputRegionsPublisher;
+   private ROS2PublisherBasics<PlanarRegionsListMessage> controllerRegionsPublisher;
+   private ROS2PublisherBasics<PlanarRegionsListMessage> slamOutputRegionsPublisher;
 
    private final AtomicReference<HighLevelStateMessage> highLevelState = new AtomicReference<>();
    private final AtomicReference<WalkingControllerFailureStatusMessage> walkingFailureStatus = new AtomicReference<>();

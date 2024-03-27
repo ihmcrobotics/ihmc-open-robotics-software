@@ -2,7 +2,7 @@ package us.ihmc.missionControl.systemd;
 
 import com.google.common.collect.Lists;
 import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.log.LogTools;
@@ -21,7 +21,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
 
    private final String serviceName;
    private final ROS2Node ros2Node;
-   private final IHMCROS2Publisher<SystemServiceStatusMessage> serviceStatusPublisher;
+   private final ROS2PublisherBasics<SystemServiceStatusMessage> serviceStatusPublisher;
    private final ExceptionHandlingThreadScheduler systemServiceStatusPublisherScheduler;
    private final JournalCtlReader reader;
 
@@ -98,7 +98,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
    {
       reader.stop();
       systemServiceStatusPublisherScheduler.shutdown();
-      serviceStatusPublisher.destroy();
+      serviceStatusPublisher.remove();
       ros2Node.destroy();
    }
 

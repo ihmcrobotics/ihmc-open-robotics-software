@@ -6,7 +6,7 @@ import java.util.function.LongUnaryOperator;
 import boofcv.struct.calib.CameraPinholeBrown;
 import perception_msgs.msg.dds.FisheyePacket;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.producers.CompressedVideoHandler;
@@ -62,7 +62,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
 
    private static class CompressedFisheyeHandler implements CompressedVideoHandler
    {
-      private final IHMCROS2Publisher<FisheyePacket> publisher;
+      private final ROS2PublisherBasics<FisheyePacket> publisher;
 
       public CompressedFisheyeHandler(ROS2NodeInterface ros2Node)
       {

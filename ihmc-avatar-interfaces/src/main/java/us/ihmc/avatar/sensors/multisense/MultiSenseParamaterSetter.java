@@ -19,7 +19,7 @@ import dynamic_reconfigure.Reconfigure;
 import dynamic_reconfigure.ReconfigureRequest;
 import dynamic_reconfigure.ReconfigureResponse;
 import dynamic_reconfigure.StrParameter;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.PacketConsumer;
@@ -43,7 +43,7 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
    private final RosServiceClient<ReconfigureRequest, ReconfigureResponse> multiSenseClient;
    private final RosMainNode rosMainNode;
    private ParameterTree params;
-   private IHMCROS2Publisher<MultisenseParameterPacket> publisher;
+   private ROS2PublisherBasics<MultisenseParameterPacket> publisher;
 
    public MultiSenseParamaterSetter(RosMainNode rosMainNode, ROS2NodeInterface ros2Node)
    {

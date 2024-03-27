@@ -383,60 +383,52 @@ public class ROS2Tools
    }
 
    public static <T> QueuedROS2Subscription<T> createQueuedSubscription(RealtimeROS2Node realtimeROS2Node,
-                                                                          Class<T> messageType,
-                                                                          String topicName, ROS2QosProfile qosProfile)
+                                                                        Class<T> messageType,
+                                                                        String topicName, ROS2QosProfile qosProfile)
    {
-      TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-      return realtimeROS2Node.createQueuedSubscription(topicDataType, topicName, qosProfile, ROS2NodeInterface.DEFAULT_QUEUE_SIZE);
+      return realtimeROS2Node.createQueuedSubscription(messageType, topicName, qosProfile, ROS2NodeInterface.DEFAULT_QUEUE_SIZE);
    }
 
    /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
-   public static <T> IHMCRealtimeROS2Publisher<T> createPublisherTypeNamed(RealtimeROS2Node realtimeROS2Node, Class<T> messageType, ROS2Topic<?> topicName)
+   public static <T> ROS2PublisherBasics<T> createPublisherTypeNamed(RealtimeROS2Node realtimeROS2Node, Class<T> messageType, ROS2Topic<?> topicName)
    {
       return createPublisher(realtimeROS2Node, typeNamedTopic(messageType).withTopic(topicName));
    }
 
-   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeROS2Node realtimeROS2Node, ROS2Topic<T> topic)
+   public static <T> ROS2PublisherBasics<T> createPublisher(RealtimeROS2Node realtimeROS2Node,
+                                                            Class<T> messageType,
+                                                            String topicName,
+                                                            ROS2QosProfile qosProfile)
    {
-      return createPublisher(realtimeROS2Node, topic.getType(), topic.getName(), topic.getQoS());
-   }
-
-   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeROS2Node realtimeROS2Node,
-                                                                  Class<T> messageType,
-                                                                  String topicName,
-                                                                  ROS2QosProfile qosProfile)
-   {
-      TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-      return new IHMCRealtimeROS2Publisher<T>(realtimeROS2Node.createPublisher(topicDataType, topicName, qosProfile, 10));
+      return realtimeROS2Node.createPublisher(messageType, topicName, qosProfile);
    }
 
    /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
-   public static <T> IHMCROS2Publisher<T> createPublisherTypeNamed(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic<?> topicName)
+   public static <T> ROS2PublisherBasics<T> createPublisherTypeNamed(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic<?> topicName)
    {
       return createPublisher(ros2Node, typeNamedTopic(messageType).withTopic(topicName));
    }
 
-   public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, ROS2Topic<T> topic)
+   public static <T> ROS2PublisherBasics<T> createPublisher(ROS2NodeInterface ros2Node, ROS2Topic<T> topic)
    {
       return createPublisher(ros2Node, topic.getType(), topic.getName(), topic.getQoS());
    }
 
-   public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic<?> topicName)
+   public static <T> ROS2PublisherBasics<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic<?> topicName)
    {
       return createPublisher(ros2Node, messageType, topicName.getName(), topicName.getQoS());
    }
 
-   public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName)
+   public static <T> ROS2PublisherBasics<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName)
    {
       return createPublisher(ros2Node, messageType, topicName, DEFAULT_QOS_PROFILE);
    }
 
-   public static <T> IHMCROS2Publisher<T> createPublisher(ROS2NodeInterface ros2Node,
-                                                          Class<T> messageType,
-                                                          String topicName,
-                                                          ROS2QosProfile qosProfile)
+   public static <T> ROS2PublisherBasics<T> createPublisher(ROS2NodeInterface ros2Node,
+                                                            Class<T> messageType,
+                                                            String topicName,
+                                                            ROS2QosProfile qosProfile)
    {
-      TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-      return new IHMCROS2Publisher<T>(ros2Node.createPublisher(topicDataType, topicName, qosProfile));
+      return ros2Node.createPublisher(messageType, topicName, qosProfile);
    }
 }

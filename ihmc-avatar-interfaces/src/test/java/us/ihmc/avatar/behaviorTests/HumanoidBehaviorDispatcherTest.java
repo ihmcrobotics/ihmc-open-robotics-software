@@ -20,7 +20,7 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
@@ -466,7 +466,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
       targetMidFeetPose.changeFrame(worldFrame);
 
       BehaviorControlModePacket pauseModePacket = HumanoidMessageTools.createBehaviorControlModePacket(BehaviorControlModeEnum.PAUSE);
-      IHMCROS2Publisher<BehaviorControlModePacket> publisher = simulationTestHelper.createPublisher(BehaviorControlModePacket.class,
+      ROS2PublisherBasics<BehaviorControlModePacket> publisher = simulationTestHelper.createPublisher(BehaviorControlModePacket.class,
                                                                                                     IHMCHumanoidBehaviorManager.getInputTopic(getSimpleRobotName()));
       publisher.publish(pauseModePacket);
       LogTools.debug(this, "Sending Pause Request");
