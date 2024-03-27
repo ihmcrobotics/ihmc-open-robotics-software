@@ -96,7 +96,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
             SingleEndEffectorEstimator inputPoseEstimator = inputPoseEstimators.get(input.getEndEffector());
 
             if (inputPoseEstimator != null)
-               inputPoseEstimator.update(time, latestInputCommand.getTimestamp(), input.getDesiredPose());
+               inputPoseEstimator.update(time, latestInputCommand.getTimestamp(), input);
          }
       }
       else
@@ -141,6 +141,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
       private final YoLong lastInputTimestamp;
       private final YoFramePose3D rawInputPose;
       private final YoFixedFrameSpatialVector rawInputVelocity;
+      private final YoFixedFrameSpatialVector debugInputVelocity;
       private final YoDouble nextTimeTriggerForDecay;
       private final YoDouble inputVelocityDecayFactor;
 
@@ -156,6 +157,8 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
 
          correctiveVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "CorrectiveAngularVelocity", worldFrame, registry),
                                                             new YoFrameVector3D(namePrefix + "CorrectiveLinearVelocity", worldFrame, registry));
+         debugInputVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "DebugAngularVelocity", worldFrame, registry),
+                                                            new YoFrameVector3D(namePrefix + "DebugLinearVelocity", worldFrame, registry));
 
          lastUpdateTime = new YoDouble(namePrefix + "LastUpdateTime", registry);
          lastInputTimestamp = new YoLong(namePrefix + "LastInputTimestamp", registry);
@@ -181,29 +184,56 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
 
       private final Quaternion tempError = new Quaternion();
 
-      public void update(double time, long inputTimestamp, FramePose3DReadOnly pose)
+      public void update(double time, long inputTimestamp, KinematicsToolboxRigidBodyCommand input)
       {
+         FramePose3DReadOnly pose = input.getDesiredPose();
+
          if (lastUpdateTime.isNaN())
          {
             estimatedPose.set(pose);
-            estimatedVelocity.setToZero();
             correctiveVelocity.setToZero();
+
+            if (!input.getHasDesiredVelocity())
+            {
+               estimatedVelocity.setToZero();
+               estimatedDecayingVelocity.setToZero();
+            }
+            else
+            {
+               estimatedVelocity.setMatchingFrame(input.getDesiredVelocity());
+               estimatedDecayingVelocity.set(estimatedVelocity);
+            }
          }
          else
          {
-            double timeInterval = Conversions.nanosecondsToSeconds(inputTimestamp - lastInputTimestamp.getLongValue());
-            KSTTools.computeSpatialVelocity(timeInterval, rawInputPose, pose, rawInputVelocity);
-
             correctiveVelocity.getLinearPart().sub(pose.getPosition(), estimatedPose.getPosition());
             tempError.difference(estimatedPose.getOrientation(), pose.getOrientation());
             tempError.normalizeAndLimitToPi();
             tempError.getRotationVector(correctiveVelocity.getAngularPart());
             correctiveVelocity.scale(1.0 / correctionDuration.getValue());
+            rawInputPose.getOrientation().transform(correctiveVelocity.getAngularPart()); // TODO Double check if this transform is actually needed
+
+            if (!input.getHasDesiredVelocity())
+            {
+               double timeInterval = Conversions.nanosecondsToSeconds(inputTimestamp - lastInputTimestamp.getLongValue());
+               KSTTools.computeSpatialVelocity(timeInterval, rawInputPose, pose, rawInputVelocity);
+               rawInputPose.getOrientation().transform(rawInputVelocity.getAngularPart());
+            }
+            else
+            {
+               double timeInterval = Conversions.nanosecondsToSeconds(inputTimestamp - lastInputTimestamp.getLongValue());
+               KSTTools.computeSpatialVelocity(timeInterval, rawInputPose, pose, debugInputVelocity);
+               rawInputPose.getOrientation().transform(debugInputVelocity.getAngularPart());
+
+               rawInputVelocity.setMatchingFrame(input.getDesiredVelocity());
+            }
+
             estimatedVelocity.set(rawInputVelocity);
             estimatedVelocity.scale(rawVelocityAlpha.getValue());
             estimatedVelocity.add(correctiveVelocity);
             estimatedDecayingVelocity.set(estimatedVelocity);
-            KSTTools.integrateSpatialVelocity(updateDT, estimatedPose, estimatedDecayingVelocity, estimatedPose);
+            KSTTools.integrateLinearVelocity(updateDT, estimatedPose.getPosition(), estimatedDecayingVelocity.getLinearPart(), estimatedPose.getPosition());
+            KSTTools.integrateAngularVelocity(updateDT, estimatedPose.getOrientation(), estimatedDecayingVelocity.getAngularPart(), false, estimatedPose.getOrientation());
          }
 
          lastUpdateTime.set(time);
@@ -222,7 +252,8 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
             estimatedDecayingVelocity.getAngularPart().interpolate(estimatedVelocity.getAngularPart(), EuclidCoreTools.zeroVector3D, alpha);
          }
 
-         KSTTools.integrateSpatialVelocity(updateDT, estimatedPose, estimatedDecayingVelocity, estimatedPose);
+         KSTTools.integrateLinearVelocity(updateDT, estimatedPose.getPosition(), estimatedDecayingVelocity.getLinearPart(), estimatedPose.getPosition());
+         KSTTools.integrateAngularVelocity(updateDT, estimatedPose.getOrientation(), estimatedDecayingVelocity.getAngularPart(), false, estimatedPose.getOrientation());
       }
 
       public FramePose3DReadOnly getEstimatedPose()

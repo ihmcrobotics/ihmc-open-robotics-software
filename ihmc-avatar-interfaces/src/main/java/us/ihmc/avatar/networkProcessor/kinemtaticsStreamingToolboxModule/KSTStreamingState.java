@@ -61,6 +61,8 @@ public class KSTStreamingState implements State
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final KSTTools tools;
+   private final YoDouble defaultJointVelocityWeight = new YoDouble("defaultJointVelocityWeight", registry);
+   private final YoDouble defaultJointAccelerationWeight = new YoDouble("defaultJointAccelerationWeight", registry);
    private final double toolboxControllerPeriod;
 
    private final YoDouble timeOfLastMessageSentToController = new YoDouble("timeOfLastMessageSentToController", registry);
@@ -194,6 +196,9 @@ public class KSTStreamingState implements State
                                            .collect(Collectors.toList()));
       }
 
+      defaultJointVelocityWeight.set(parameters.getDefaultSolverConfiguration().getJointVelocityWeight());
+      defaultJointAccelerationWeight.set(parameters.getDefaultSolverConfiguration().getJointAccelerationWeight());
+
       defaultArmMessageWeight.set(parameters.getDefaultArmMessageWeight());
       defaultNeckMessageWeight.set(parameters.getDefaultNeckMessageWeight());
       defaultPelvisMessageLinearWeight.set(parameters.getDefaultPelvisMessageLinearWeight());
@@ -285,6 +290,10 @@ public class KSTStreamingState implements State
       ikSolverSpatialGains.setOrientationMaxFeedbackAndFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
       ikSolverJointGains.setKp(defaultSingleJointGain.getValue());
       ikSolverJointGains.setMaximumFeedbackAndMaximumFeedbackRate(angularRateLimit.getValue(), Double.POSITIVE_INFINITY);
+
+      tools.resetUserInvalidInputFlag();
+      tools.getParameters().getDefaultSolverConfiguration().setJointVelocityWeight(defaultJointVelocityWeight.getValue());
+      tools.getParameters().getDefaultSolverConfiguration().setJointAccelerationWeight(defaultJointAccelerationWeight.getValue());
       ikCommandInputManager.submitMessage(tools.getParameters().getDefaultSolverConfiguration());
 
       /*
@@ -424,7 +433,11 @@ public class KSTStreamingState implements State
 
       KinematicsStreamingToolboxInputCommand latestInput = tools.getLatestInput();
 
-      if (latestInput != null)
+      if (tools.hasUserSubmittedInvalidInput())
+      {
+         isStreaming.set(false);
+      }
+      else if (latestInput != null)
       {
          isStreaming.set(latestInput.getStreamToController());
          if (latestInput.getStreamInitialBlendDuration() > 0.0)
