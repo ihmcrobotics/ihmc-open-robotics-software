@@ -20,6 +20,8 @@ public class EtherSnacksSakeHandStatusMessage extends Packet<EtherSnacksSakeHand
    public double measured_velocity_;
    public int error_codes_;
    public int realtime_tick_;
+   public boolean is_calibrated_;
+   public boolean needs_reset_;
 
    public EtherSnacksSakeHandStatusMessage()
    {
@@ -52,6 +54,10 @@ public class EtherSnacksSakeHandStatusMessage extends Packet<EtherSnacksSakeHand
       error_codes_ = other.error_codes_;
 
       realtime_tick_ = other.realtime_tick_;
+
+      is_calibrated_ = other.is_calibrated_;
+
+      needs_reset_ = other.needs_reset_;
 
    }
 
@@ -145,6 +151,24 @@ public class EtherSnacksSakeHandStatusMessage extends Packet<EtherSnacksSakeHand
       return realtime_tick_;
    }
 
+   public void setIsCalibrated(boolean is_calibrated)
+   {
+      is_calibrated_ = is_calibrated;
+   }
+   public boolean getIsCalibrated()
+   {
+      return is_calibrated_;
+   }
+
+   public void setNeedsReset(boolean needs_reset)
+   {
+      needs_reset_ = needs_reset;
+   }
+   public boolean getNeedsReset()
+   {
+      return needs_reset_;
+   }
+
 
    public static Supplier<EtherSnacksSakeHandStatusMessagePubSubType> getPubSubType()
    {
@@ -183,6 +207,10 @@ public class EtherSnacksSakeHandStatusMessage extends Packet<EtherSnacksSakeHand
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.realtime_tick_, other.realtime_tick_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_calibrated_, other.is_calibrated_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.needs_reset_, other.needs_reset_, epsilon)) return false;
+
 
       return true;
    }
@@ -216,6 +244,10 @@ public class EtherSnacksSakeHandStatusMessage extends Packet<EtherSnacksSakeHand
 
       if(this.realtime_tick_ != otherMyClass.realtime_tick_) return false;
 
+      if(this.is_calibrated_ != otherMyClass.is_calibrated_) return false;
+
+      if(this.needs_reset_ != otherMyClass.needs_reset_) return false;
+
 
       return true;
    }
@@ -245,7 +277,11 @@ public class EtherSnacksSakeHandStatusMessage extends Packet<EtherSnacksSakeHand
       builder.append("error_codes=");
       builder.append(this.error_codes_);      builder.append(", ");
       builder.append("realtime_tick=");
-      builder.append(this.realtime_tick_);
+      builder.append(this.realtime_tick_);      builder.append(", ");
+      builder.append("is_calibrated=");
+      builder.append(this.is_calibrated_);      builder.append(", ");
+      builder.append("needs_reset=");
+      builder.append(this.needs_reset_);
       builder.append("}");
       return builder.toString();
    }

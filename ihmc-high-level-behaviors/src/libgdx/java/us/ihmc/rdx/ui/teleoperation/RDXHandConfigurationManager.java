@@ -1,5 +1,6 @@
 package us.ihmc.rdx.ui.teleoperation;
 
+import controller_msgs.msg.dds.EtherSnacksSakeHandCommandMessage;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -70,27 +71,27 @@ public class RDXHandConfigurationManager
 
    public void publishHandCommand(RobotSide side, @Nullable SakeHandPreset handPreset, boolean calibrate, boolean reset)
    {
-      SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage = new SakeHandDesiredCommandMessage();
+      EtherSnacksSakeHandCommandMessage sakeHandDesiredCommandMessage = new EtherSnacksSakeHandCommandMessage();
       sakeHandDesiredCommandMessage.setRobotSide(side.toByte());
       SakeHandParameters.resetDesiredCommandMessage(sakeHandDesiredCommandMessage);
 
       if (calibrate)
       {
-         sakeHandDesiredCommandMessage.setRequestCalibration(true);
+         sakeHandDesiredCommandMessage.setCalibrate(true);
       }
       else if (reset)
       {
-         sakeHandDesiredCommandMessage.setRequestResetErrors(true);
+         sakeHandDesiredCommandMessage.setReset(true);
       }
       else if (handPreset != null)
       {
-         sakeHandDesiredCommandMessage.setNormalizedGripperDesiredPosition(
+         sakeHandDesiredCommandMessage.setDesiredPosition(
                SakeHandParameters.normalizeHandOpenAngle(handPreset.getHandOpenAngle()));
-         sakeHandDesiredCommandMessage.setNormalizedGripperTorqueLimit(
+         sakeHandDesiredCommandMessage.setTorqueLimit(
                SakeHandParameters.normalizeFingertipGripForceLimit(handPreset.getFingertipGripForceLimit()));
       }
 
       RDXBaseUI.pushNotification("Commanding hand configuration...");
-      communicationHelper.publish(ROS2Tools.getHandSakeCommandTopic(robotName, side), sakeHandDesiredCommandMessage);
+      communicationHelper.publish(ROS2Tools.getEtherSnacksHandCommandTopic(robotName, side), sakeHandDesiredCommandMessage);
    }
 }

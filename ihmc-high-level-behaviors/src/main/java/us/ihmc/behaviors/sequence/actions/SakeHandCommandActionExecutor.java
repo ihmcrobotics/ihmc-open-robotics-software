@@ -105,7 +105,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       else
       {
          sakeHandDesiredCommandMessage.setRobotSide(definition.getSide().toByte());
-         SakeHandParameters.resetDesiredCommandMessage(sakeHandDesiredCommandMessage);
+//         SakeHandParameters.resetDesiredCommandMessage(sakeHandDesiredCommandMessage); FIXME: make this the new ethersnacks message
          sakeHandDesiredCommandMessage.setNormalizedGripperDesiredPosition(SakeHandParameters.normalizeHandOpenAngle(definition.getHandOpenAngle()));
          sakeHandDesiredCommandMessage.setNormalizedGripperTorqueLimit(
                                                        SakeHandParameters.normalizeFingertipGripForceLimit(definition.getFingertipGripForceLimit()));

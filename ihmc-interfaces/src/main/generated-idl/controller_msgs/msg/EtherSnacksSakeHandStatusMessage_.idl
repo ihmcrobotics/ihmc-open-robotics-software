@@ -28,6 +28,8 @@ module controller_msgs
         double measured_velocity;
         long error_codes;
         long realtime_tick;
+        boolean is_calibrated;
+        boolean needs_reset;
       };
     };
   };

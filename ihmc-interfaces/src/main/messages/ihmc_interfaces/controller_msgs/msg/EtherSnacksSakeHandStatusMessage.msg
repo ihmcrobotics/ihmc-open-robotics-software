@@ -12,3 +12,6 @@ int32 measured_temperature
 float64 measured_velocity
 int32 error_codes
 int32 realtime_tick
+
+bool is_calibrated
+bool needs_reset

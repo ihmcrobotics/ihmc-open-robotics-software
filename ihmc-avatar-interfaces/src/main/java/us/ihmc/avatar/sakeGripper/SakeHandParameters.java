@@ -1,5 +1,6 @@
 package us.ihmc.avatar.sakeGripper;
 
+import controller_msgs.msg.dds.EtherSnacksSakeHandCommandMessage;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 
 public class SakeHandParameters
@@ -35,21 +36,21 @@ public class SakeHandParameters
    public static final double DYNAMIXEL_FAILURE_TEMPERATURE_CELCIUS = 80.0;
 
    /**
-    * @param normalizedHandOpenAngle 0.0 (closed) to 1.0 (open)
+    * @param normalizedHandOpenAngle 0.0 (open) to 1.0 (closed)
     * @return actual angle between fingers in radians
     */
    public static double denormalizeHandOpenAngle(double normalizedHandOpenAngle)
    {
-      return normalizedHandOpenAngle * Math.toRadians(MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES);
+      return (1.0 - normalizedHandOpenAngle) * Math.toRadians(MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES);
    }
 
    /**
     * @param handOpenAngle actual angle between fingers in radians
-    * @return 0.0 (closed) to 1.0 (open)
+    * @return 0.0 (open) to 1.0 (closed)
     */
    public static double normalizeHandOpenAngle(double handOpenAngle)
    {
-      return handOpenAngle / Math.toRadians(MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES);
+      return 1.0 - (handOpenAngle / Math.toRadians(MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES));
    }
 
    public static double denormalizeFingertipGripForceLimit(double normalizedFingertipGripForceLimit)
@@ -87,11 +88,10 @@ public class SakeHandParameters
       return normalizeHandOpenAngle(handOpenAngle) * Math.toRadians(OPEN_KNUCKLE_JOINT_ANGLE_DEGREES);
    }
 
-   public static void resetDesiredCommandMessage(SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage)
+   public static void resetDesiredCommandMessage(EtherSnacksSakeHandCommandMessage sakeHandDesiredCommandMessage)
    {
-      sakeHandDesiredCommandMessage.setNormalizedGripperDesiredPosition(-1.0);
-      sakeHandDesiredCommandMessage.setNormalizedGripperTorqueLimit(-1.0);
-      sakeHandDesiredCommandMessage.setRequestCalibration(false);
-      sakeHandDesiredCommandMessage.setRequestCalibration(false);
+      sakeHandDesiredCommandMessage.setDesiredPosition(-1.0);
+      sakeHandDesiredCommandMessage.setTorqueLimit(-1.0);
+      sakeHandDesiredCommandMessage.setCalibrate(false);
    }
 }

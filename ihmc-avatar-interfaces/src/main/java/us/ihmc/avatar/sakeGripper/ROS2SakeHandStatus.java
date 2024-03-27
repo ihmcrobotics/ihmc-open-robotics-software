@@ -8,23 +8,32 @@ public class ROS2SakeHandStatus
 {
    private volatile boolean isCalibrated = false;
    private volatile boolean needsReset;
-   private volatile double currentTemperature = Double.NaN;
-   private volatile double currentHandOpenAngle = Double.NaN;
+
+   private volatile boolean isTorqueOn;
    private volatile double commandedHandOpenAngle = Double.NaN;
-   private volatile double currentFingertipGripForce = Double.NaN;
    private volatile double commandedFingertipGripForceLimit = Double.NaN;
+   private volatile double currentHandOpenAngle = Double.NaN;
+   private volatile double currentFingertipGripForce = Double.NaN;
+   private volatile double currentTemperature = Double.NaN;
+   private volatile double currentVelocity = Double.NaN;
+   private volatile int errorCodes = 0;
+   private volatile int handRealtimeTick = 0;
 
    public ROS2SakeHandStatus(ROS2NodeInterface ros2Node, String robotName, RobotSide handSide)
    {
-      ROS2Tools.createVolatileCallbackSubscription(ros2Node, ROS2Tools.getHandSakeStatusTopic(robotName, handSide), sakeHandStatusMessage ->
+      ROS2Tools.createVolatileCallbackSubscription(ros2Node, ROS2Tools.getEtherSnackHandStatusTopic(robotName, handSide), sakeHandStatusMessage ->
       {
          isCalibrated = sakeHandStatusMessage.getIsCalibrated();
          needsReset = sakeHandStatusMessage.getNeedsReset();
-         currentTemperature = sakeHandStatusMessage.getTemperature();
-         currentHandOpenAngle = SakeHandParameters.denormalizeHandOpenAngle(sakeHandStatusMessage.getNormalizedCurrentPosition());
-         commandedHandOpenAngle = SakeHandParameters.denormalizeHandOpenAngle(sakeHandStatusMessage.getNormalizedDesiredPosition());
-         currentFingertipGripForce = SakeHandParameters.denormalizeFingertipGripForceLimit(sakeHandStatusMessage.getNormalizedCurrentTorque());
-         commandedFingertipGripForceLimit = SakeHandParameters.denormalizeFingertipGripForceLimit(sakeHandStatusMessage.getNormalizedTorqueLimit());
+         isTorqueOn = sakeHandStatusMessage.getTorqueOn();
+         currentTemperature = sakeHandStatusMessage.getMeasuredTemperature();
+         currentHandOpenAngle = SakeHandParameters.denormalizeHandOpenAngle(sakeHandStatusMessage.getMeasuredPosition());
+         commandedHandOpenAngle = SakeHandParameters.denormalizeHandOpenAngle(sakeHandStatusMessage.getDesiredPosition());
+         currentFingertipGripForce = SakeHandParameters.denormalizeFingertipGripForceLimit(sakeHandStatusMessage.getMeasuredTorque());
+         commandedFingertipGripForceLimit = SakeHandParameters.denormalizeFingertipGripForceLimit(sakeHandStatusMessage.getTorqueLimit());
+         currentVelocity = sakeHandStatusMessage.getMeasuredVelocity();
+         errorCodes = sakeHandStatusMessage.getErrorCodes();
+         handRealtimeTick = sakeHandStatusMessage.getRealtimeTick();
       });
    }
 
@@ -61,5 +70,25 @@ public class ROS2SakeHandStatus
    public double getCommandedFingertipGripForceLimit()
    {
       return commandedFingertipGripForceLimit;
+   }
+
+   public boolean isTorqueOn()
+   {
+      return isTorqueOn;
+   }
+
+   public double getCurrentVelocity()
+   {
+      return currentVelocity;
+   }
+
+   public int getErrorCodes()
+   {
+      return errorCodes;
+   }
+
+   public int getHandRealtimeTick()
+   {
+      return handRealtimeTick;
    }
 }

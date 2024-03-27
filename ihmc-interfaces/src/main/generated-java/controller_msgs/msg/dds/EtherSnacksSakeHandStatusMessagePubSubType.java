@@ -15,7 +15,7 @@ public class EtherSnacksSakeHandStatusMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2e0b3e09e9906d3707ac2e2f95314de72435b74ec3123e90e6e1c6a1674dfa49";
+   		return "9011b84ea735afffd8ce67c2bc807203d4cff16fd1383a0888de31442120614a";
    }
    
    @Override
@@ -72,6 +72,10 @@ public class EtherSnacksSakeHandStatusMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -115,6 +119,12 @@ public class EtherSnacksSakeHandStatusMessagePubSubType implements us.ihmc.pubsu
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -141,6 +151,10 @@ public class EtherSnacksSakeHandStatusMessagePubSubType implements us.ihmc.pubsu
 
       cdr.write_type_2(data.getRealtimeTick());
 
+      cdr.write_type_7(data.getIsCalibrated());
+
+      cdr.write_type_7(data.getNeedsReset());
+
    }
 
    public static void read(controller_msgs.msg.dds.EtherSnacksSakeHandStatusMessage data, us.ihmc.idl.CDR cdr)
@@ -165,6 +179,10 @@ public class EtherSnacksSakeHandStatusMessagePubSubType implements us.ihmc.pubsu
       	
       data.setRealtimeTick(cdr.read_type_2());
       	
+      data.setIsCalibrated(cdr.read_type_7());
+      	
+      data.setNeedsReset(cdr.read_type_7());
+      	
 
    }
 
@@ -181,6 +199,8 @@ public class EtherSnacksSakeHandStatusMessagePubSubType implements us.ihmc.pubsu
       ser.write_type_6("measured_velocity", data.getMeasuredVelocity());
       ser.write_type_2("error_codes", data.getErrorCodes());
       ser.write_type_2("realtime_tick", data.getRealtimeTick());
+      ser.write_type_7("is_calibrated", data.getIsCalibrated());
+      ser.write_type_7("needs_reset", data.getNeedsReset());
    }
 
    @Override
@@ -196,6 +216,8 @@ public class EtherSnacksSakeHandStatusMessagePubSubType implements us.ihmc.pubsu
       data.setMeasuredVelocity(ser.read_type_6("measured_velocity"));
       data.setErrorCodes(ser.read_type_2("error_codes"));
       data.setRealtimeTick(ser.read_type_2("realtime_tick"));
+      data.setIsCalibrated(ser.read_type_7("is_calibrated"));
+      data.setNeedsReset(ser.read_type_7("needs_reset"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.EtherSnacksSakeHandStatusMessage src, controller_msgs.msg.dds.EtherSnacksSakeHandStatusMessage dest)
