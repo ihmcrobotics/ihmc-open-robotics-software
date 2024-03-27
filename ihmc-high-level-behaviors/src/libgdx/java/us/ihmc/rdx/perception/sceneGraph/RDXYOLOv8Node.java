@@ -8,16 +8,22 @@ import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
+import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
+import us.ihmc.rdx.ui.interactable.RDXInteractableObject;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
@@ -34,6 +40,11 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
    private final RDXPointCloudRenderer objectPointCloudRenderer = new RDXPointCloudRenderer();
    private final RDXReferenceFrameGraphic objectPoseGraphic = new RDXReferenceFrameGraphic(0.2);
 
+   @Nullable
+   private RDXInteractableObject interactableObject;
+
+   private RigidBodyTransform visualModelTransformToWorld = new RigidBodyTransform();
+
    public RDXYOLOv8Node(YOLOv8Node yoloNode, ImGuiUniqueLabelMap labels)
    {
       super(yoloNode);
@@ -47,6 +58,19 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
       objectPoseGraphic.setPoseInWorldFrame(yoloNode.getObjectPose());
    }
 
+   private void createInteractableObject()
+   {
+      switch (yoloNode.getDetectionClass())
+      {
+         case DOOR_HANDLE ->
+         {
+            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+            interactableObject.load(DoorSceneNodeDefinitions.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
+                                    DoorSceneNodeDefinitions.RIGHT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         }
+      }
+   }
+
    @Override
    public void update(SceneGraphModificationQueue modificationQueue)
    {
@@ -55,6 +79,19 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
       yoloNode.setMaskErosionKernelRadius(maskErosionKernelRadius.get());
       yoloNode.setOutlierFilterThreshold(outlierFilterThreshold.get());
       yoloNode.setDetectionAcceptanceThreshold(detectionAcceptanceThreshold.get());
+
+      if (interactableObject != null)
+      {
+         visualModelTransformToWorld.getTranslation().set(yoloNode.getFilteredObjectPose().getTranslation());
+         visualModelTransformToWorld.getRotation().set(yoloNode.getFilteredObjectPose().getRotation());
+
+         LibGDXTools.setDiffuseColor(interactableObject.getModelInstance(), Color.WHITE); // TODO: keep?
+         interactableObject.setPose(visualModelTransformToWorld);
+      }
+      else
+      {
+         createInteractableObject();
+      }
    }
 
    @Override
@@ -82,6 +119,9 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
 
       objectPoseGraphic.setPoseInWorldFrame(yoloNode.getObjectPose());
       objectPoseGraphic.getRenderables(renderables, pool);
+
+      if (interactableObject != null)
+         interactableObject.getRenderables(renderables, pool);
    }
 
    @Override
@@ -91,5 +131,11 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
 
       objectPointCloudRenderer.dispose();
       objectPoseGraphic.dispose();
+
+      if (interactableObject != null)
+      {
+         interactableObject.getModelInstance().model.dispose();
+         interactableObject.clear();
+      }
    }
 }

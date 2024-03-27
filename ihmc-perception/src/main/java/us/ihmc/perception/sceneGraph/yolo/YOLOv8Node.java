@@ -1,14 +1,25 @@
 package us.ihmc.perception.sceneGraph.yolo;
 
+import us.ihmc.euclid.Axis2D;
+import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.List;
+import java.util.Locale;
 
 public class YOLOv8Node extends DetectableSceneNode
 {
@@ -25,6 +36,8 @@ public class YOLOv8Node extends DetectableSceneNode
    // Set this somewhere
    private final RigidBodyTransform centroidToObjectTransform = new RigidBodyTransform();
    private Pose3D objectPose;
+   private Pose3D filteredObjectPose;
+   private final RigidBodyTransform visualTransformToObjectPose = new RigidBodyTransform();
 
    public YOLOv8Node(long id, String name, YOLOv8DetectionClass detectionClass, List<Point3D32> objectPointCloud, Point3D32 objectCentroid)
    {
@@ -37,7 +50,9 @@ public class YOLOv8Node extends DetectableSceneNode
            objectPointCloud,
            objectCentroid,
            new RigidBodyTransform(),
-           new Pose3D(objectCentroid, new RotationMatrix()));
+           new Pose3D(objectCentroid, new RotationMatrix()),
+           new Pose3D(objectCentroid, new RotationMatrix()),
+           new RigidBodyTransform());
    }
 
    public YOLOv8Node(long id,
@@ -49,7 +64,9 @@ public class YOLOv8Node extends DetectableSceneNode
                      List<Point3D32> objectPointCloud,
                      Point3D32 objectCentroid,
                      RigidBodyTransformBasics centroidToObjectTransform,
-                     Pose3D objectPose)
+                     Pose3D objectPose,
+                     Pose3D filteredObjectPose,
+                     RigidBodyTransformBasics visualTransformToObjectPose)
    {
       super(id, name);
 
@@ -61,12 +78,76 @@ public class YOLOv8Node extends DetectableSceneNode
       this.objectCentroid = objectCentroid;
       this.centroidToObjectTransform.set(centroidToObjectTransform);
       this.objectPose = objectPose;
+      this.filteredObjectPose = filteredObjectPose;
+      this.visualTransformToObjectPose.set(visualTransformToObjectPose);
    }
 
    public void update()
    {
-      objectPose.setTranslationAndIdentityRotation(objectCentroid);
+      objectPose.getTranslation().set(objectCentroid);
       objectPose.appendTransform(centroidToObjectTransform);
+
+      if (!filteredObjectPose.hasRotation())
+         filteredObjectPose.getRotation().set(objectPose.getRotation());
+
+      filteredObjectPose.interpolate(objectPose, 0.25f);
+   }
+
+   public void updatePlanarRegions(PlanarRegionsList planarRegionsList)
+   {
+      if (getName().toLowerCase(Locale.ROOT).contains("door handle"))
+      {
+         Point3D objectCentroidInWorld = new Point3D(objectPose.getTranslation());
+
+         if (!planarRegionsList.isEmpty())
+         {
+            float epsilon = 1.25f;
+
+            // TODO: fixme doesn't work
+            //            PlanarRegion doorPlanarRegion = planarRegionsList.findClosestPlanarRegionToPointByProjectionOntoXYPlane(doorLeverPointInWorld.getX(),
+            //                                                                                                                    doorLeverPointInWorld.getY());
+
+            PlanarRegion doorPlanarRegion = null;
+            Point3DReadOnly doorPlanarRegionCentroidInWorld = null;
+
+            for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
+            {
+               Point3DReadOnly planarRegionCentroidInWorld = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
+
+               if (planarRegionCentroidInWorld.distance(objectCentroidInWorld) > epsilon)
+               {
+                  continue;
+               }
+
+               if (doorPlanarRegion == null)
+               {
+                  doorPlanarRegion = planarRegion;
+                  doorPlanarRegionCentroidInWorld = planarRegionCentroidInWorld;
+                  continue;
+               }
+
+               if (planarRegionCentroidInWorld.distance(objectCentroidInWorld) < doorPlanarRegionCentroidInWorld.distance(objectCentroidInWorld))
+               {
+                  doorPlanarRegion = planarRegion;
+                  doorPlanarRegionCentroidInWorld = planarRegionCentroidInWorld;
+               }
+            }
+
+            if (doorPlanarRegion != null)
+            {
+               Line2D doorLineNormal = new Line2D(doorPlanarRegionCentroidInWorld.getX(),
+                                                  doorPlanarRegionCentroidInWorld.getY(),
+                                                  doorPlanarRegion.getNormalX(),
+                                                  doorPlanarRegion.getNormalY());
+               Point2D doorLeverPointInWorld2D = new Point2D(objectCentroidInWorld);
+
+               RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(doorLeverPointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
+
+               double yaw = TupleTools.angle(Axis2D.X, doorLineNormal.getDirection());
+               getObjectPose().getRotation().setYawPitchRoll(yaw, 0.0, doorSide == RobotSide.LEFT ? Math.PI : 0.0);
+            }
+         }
+      }
    }
 
    public int getMaskErosionKernelRadius()
@@ -149,4 +230,23 @@ public class YOLOv8Node extends DetectableSceneNode
       this.objectPose = objectPose;
    }
 
+   public Pose3D getFilteredObjectPose()
+   {
+      return filteredObjectPose;
+   }
+
+   public void setFilteredObjectPose(Pose3D filteredObjectPose)
+   {
+      this.filteredObjectPose = filteredObjectPose;
+   }
+
+   public RigidBodyTransform getVisualTransformToObjectPose()
+   {
+      return visualTransformToObjectPose;
+   }
+
+   public void setVisualTransformToObjectPose(RigidBodyTransformBasics visualTransformToObjectPose)
+   {
+      this.visualTransformToObjectPose.set(visualTransformToObjectPose);
+   }
 }

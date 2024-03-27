@@ -84,7 +84,9 @@ public class ROS2SceneGraphTools
                                     subscriptionNode.getYOLONodeMessage().getObjectPointCloud(),
                                     subscriptionNode.getYOLONodeMessage().getObjectCentroid(),
                                     subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform(),
-                                    subscriptionNode.getYOLONodeMessage().getObjectPose());
+                                    subscriptionNode.getYOLONodeMessage().getObjectPose(),
+                                    subscriptionNode.getYOLONodeMessage().getFilteredObjectPose(),
+                                    subscriptionNode.getYOLONodeMessage().getVisualTransformToObjectPose());
       }
       else if (nodeType == SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE)
       {

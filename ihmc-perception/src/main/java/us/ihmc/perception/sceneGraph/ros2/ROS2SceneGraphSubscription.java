@@ -149,6 +149,8 @@ public class ROS2SceneGraphSubscription
             yoloNode.setObjectPointCloud(subscriptionNode.getYOLONodeMessage().getObjectPointCloud());
             yoloNode.setCentroidToObjectTransform(subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform());
             yoloNode.setObjectPose(subscriptionNode.getYOLONodeMessage().getObjectPose());
+            yoloNode.setFilteredObjectPose(subscriptionNode.getYOLONodeMessage().getFilteredObjectPose());
+            yoloNode.setVisualTransformToObjectPose(subscriptionNode.getYOLONodeMessage().getVisualTransformToObjectPose());
          }
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
          {

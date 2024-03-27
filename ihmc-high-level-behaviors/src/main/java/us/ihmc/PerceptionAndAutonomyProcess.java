@@ -30,14 +30,17 @@ import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectionUpdater;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8DetectionManager;
+import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -92,7 +95,7 @@ public class PerceptionAndAutonomyProcess
    private static final ROS2Topic<ImageMessage> OUSTER_DEPTH_TOPIC = PerceptionAPI.OUSTER_DEPTH_IMAGE;
 
    private static final String LEFT_BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "00000000");
-   private static final String RIGHT_BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
+   private static final String RIGHT_BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "17403057");
    private static final BlackflyLensProperties BLACKFLY_LENS = BlackflyLensProperties.BFS_U3_27S5C_FE185C086HA_1;
    private static final ROS2Topic<ImageMessage> BLACKFLY_IMAGE_TOPIC = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT);
 
@@ -155,7 +158,6 @@ public class PerceptionAndAutonomyProcess
    @Nullable
    private RapidPlanarRegionsExtractor planarRegionsExtractor;
    private final RestartableThrottledThread planarRegionsExtractorThread;
-   private final FramePlanarRegionsList planarRegionsList;
    private ROS2DemandGraphNode planarRegionsDemandNode;
 
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
@@ -228,7 +230,6 @@ public class PerceptionAndAutonomyProcess
 
       planarRegionsExtractorThread = new RestartableThrottledThread("PlanarRegionsExtractor", 10.0, this::updatePlanarRegions);
       planarRegionsExtractorThread.start();
-      planarRegionsList = new FramePlanarRegionsList();
    }
 
    /** Needs to be a separate method to allow constructing test bench version. */
@@ -500,13 +501,27 @@ public class PerceptionAndAutonomyProcess
             planarRegionsExtractor.getDebugger().setEnabled(false);
          }
 
+         FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
+
          // TODO: Get rid of BytedecoImage, RapidPlanarRegionsExtractor requires it
          BytedecoImage bytedecoImage = new BytedecoImage(latestOusterDepthRawImage.getCpuImageMat());
          bytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-         planarRegionsExtractor.update(bytedecoImage, ousterFrameSupplier.get(), planarRegionsList);
+         planarRegionsExtractor.update(bytedecoImage, ousterFrameSupplier.get(), framePlanarRegionsList);
          planarRegionsExtractor.setProcessing(false);
          bytedecoImage.destroy(openCLManager);
-         PerceptionMessageTools.publishFramePlanarRegionsList(planarRegionsList, PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE, ros2Helper);
+
+         PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE, ros2Helper);
+
+         PlanarRegionsList planarRegionsInWorldFrame = framePlanarRegionsList.getPlanarRegionsList().copy();
+         planarRegionsInWorldFrame.applyTransform(ousterFrameSupplier.get().getTransformToWorldFrame());
+
+         for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
+         {
+            if (sceneNode instanceof YOLOv8Node yolOv8Node)
+            {
+               yolOv8Node.updatePlanarRegions(planarRegionsInWorldFrame);
+            }
+         }
 
          latestOusterDepthRawImage.release();
       }
@@ -589,11 +604,6 @@ public class PerceptionAndAutonomyProcess
 
       rightBlackflyHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.RIGHT));
       rightBlackflyHeartbeat.setAlive(true);
-   }
-
-   public FramePlanarRegionsList getPlanarRegionsList()
-   {
-      return planarRegionsList;
    }
 
    public static void main(String[] args)
