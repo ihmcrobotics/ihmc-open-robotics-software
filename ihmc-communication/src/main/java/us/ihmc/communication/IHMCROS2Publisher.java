@@ -36,11 +36,6 @@ public class IHMCROS2Publisher<T>
       this(ros2Node, topicName.getType(), topicName.getName());
    }
 
-   public IHMCROS2Publisher(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic topicName)
-   {
-      this(ros2Node, messageType, topicName.withTypeName(messageType).toString());
-   }
-
    public IHMCROS2Publisher(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName)
    {
       ExceptionTools.handle(() -> publisher = ros2Node.createPublisher(ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType), topicName),
