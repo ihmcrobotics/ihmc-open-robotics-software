@@ -288,7 +288,7 @@ public class ROS2Tools
                                                                     ROS2Topic<T> topic,
                                                                     NewMessageListener<T> newMessageListener)
    {
-      return createCallbackSubscription(ros2Node, topic.getType(), topic.getName(), newMessageListener, topic.getQoS());
+      return ros2Node.createSubscription(topic, newMessageListener);
    }
 
    public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
@@ -296,7 +296,7 @@ public class ROS2Tools
                                                                     String topicName,
                                                                     NewMessageListener<T> newMessageListener)
    {
-      return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, DEFAULT_QOS_PROFILE);
+      return ros2Node.createSubscription(messageType, newMessageListener, topicName, DEFAULT_QOS_PROFILE);
    }
 
    public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
@@ -305,8 +305,7 @@ public class ROS2Tools
                                                                     NewMessageListener<T> newMessageListener,
                                                                     ROS2QosProfile qosProfile)
    {
-      TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-      return ros2Node.createSubscription(topicDataType, newMessageListener, topicName, qosProfile);
+      return ros2Node.createSubscription(messageType, newMessageListener, topicName, qosProfile);
    }
 
    /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
@@ -320,7 +319,7 @@ public class ROS2Tools
 
    public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node, ROS2Topic<T> topic, NewMessageListener<T> newMessageListener)
    {
-      createCallbackSubscription(realtimeROS2Node, topic.getType(), topic.getName(), newMessageListener, topic.getQoS());
+      realtimeROS2Node.createSubscription(topic, newMessageListener);
    }
 
    public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node,
@@ -329,18 +328,12 @@ public class ROS2Tools
                                                      NewMessageListener<T> newMessageListener,
                                                      ROS2QosProfile qosProfile)
    {
-      TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-      realtimeROS2Node.createSubscription(topicDataType, newMessageListener, topicName, qosProfile);
+      realtimeROS2Node.createSubscription(messageType, newMessageListener, topicName, qosProfile);
    }
 
    public static <T> ROS2Callback<T> createCallbackSubscription2(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, Consumer<T> callback)
    {
       return new ROS2Callback<>(ros2Node, topic, callback);
-   }
-
-   public static ROS2Callback<Empty> createCallbackSubscription2(ROS2NodeInterface ros2Node, ROS2Topic<Empty> topic, Runnable callback)
-   {
-      return new ROS2Callback<>(ros2Node, topic, message -> callback.run());
    }
 
    /**
@@ -377,30 +370,10 @@ public class ROS2Tools
       return swapReference;
    }
 
-   public static <T> QueuedROS2Subscription<T> createQueuedSubscription(RealtimeROS2Node realtimeROS2Node, ROS2Topic<T> topic)
-   {
-      return createQueuedSubscription(realtimeROS2Node, topic.getType(), topic.getName(), topic.getQoS());
-   }
-
-   public static <T> QueuedROS2Subscription<T> createQueuedSubscription(RealtimeROS2Node realtimeROS2Node,
-                                                                        Class<T> messageType,
-                                                                        String topicName, ROS2QosProfile qosProfile)
-   {
-      return realtimeROS2Node.createQueuedSubscription(messageType, topicName, qosProfile, ROS2NodeInterface.DEFAULT_QUEUE_SIZE);
-   }
-
    /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
    public static <T> ROS2PublisherBasics<T> createPublisherTypeNamed(RealtimeROS2Node realtimeROS2Node, Class<T> messageType, ROS2Topic<?> topicName)
    {
       return createPublisher(realtimeROS2Node, typeNamedTopic(messageType).withTopic(topicName));
-   }
-
-   public static <T> ROS2PublisherBasics<T> createPublisher(RealtimeROS2Node realtimeROS2Node,
-                                                            Class<T> messageType,
-                                                            String topicName,
-                                                            ROS2QosProfile qosProfile)
-   {
-      return realtimeROS2Node.createPublisher(messageType, topicName, qosProfile);
    }
 
    /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
@@ -411,24 +384,18 @@ public class ROS2Tools
 
    public static <T> ROS2PublisherBasics<T> createPublisher(ROS2NodeInterface ros2Node, ROS2Topic<T> topic)
    {
-      return createPublisher(ros2Node, topic.getType(), topic.getName(), topic.getQoS());
+      return ros2Node.createPublisher(topic);
    }
 
+   /** @deprecated Use {@link ROS2Topic#withType} instead. */
    public static <T> ROS2PublisherBasics<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic<?> topicName)
    {
-      return createPublisher(ros2Node, messageType, topicName.getName(), topicName.getQoS());
+      return ros2Node.createPublisher(messageType, topicName.getName(), topicName.getQoS());
    }
 
+   /** @deprecated Use {@link ROS2Topic#withType} instead. */
    public static <T> ROS2PublisherBasics<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName)
    {
-      return createPublisher(ros2Node, messageType, topicName, DEFAULT_QOS_PROFILE);
-   }
-
-   public static <T> ROS2PublisherBasics<T> createPublisher(ROS2NodeInterface ros2Node,
-                                                            Class<T> messageType,
-                                                            String topicName,
-                                                            ROS2QosProfile qosProfile)
-   {
-      return ros2Node.createPublisher(messageType, topicName, qosProfile);
+      return ros2Node.createPublisher(messageType, topicName, DEFAULT_QOS_PROFILE);
    }
 }
