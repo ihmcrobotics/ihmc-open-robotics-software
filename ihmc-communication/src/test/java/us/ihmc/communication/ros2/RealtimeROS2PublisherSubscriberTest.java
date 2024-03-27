@@ -15,7 +15,7 @@ import java.io.IOException;
 public class RealtimeROS2PublisherSubscriberTest
 {
    private RealtimeROS2Node realtimeROS2Node;
-   private RealtimeROS2Publisher<ImageMessage> publisher;
+   private ROS2PublisherBasics<ImageMessage> publisher;
 
    public RealtimeROS2PublisherSubscriberTest()
    {

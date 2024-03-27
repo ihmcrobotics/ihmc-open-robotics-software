@@ -8,16 +8,16 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.ros2.RealtimeROS2Publisher;
 import us.ihmc.ros2.RealtimeROS2Subscription;
 
 public class FrameRealtimeROS2PublisherSubscriberTest
 {
    private RealtimeROS2Node realtimeROS2Node;
-   private RealtimeROS2Publisher<RobotConfigurationData> publisher;
+   private ROS2PublisherBasics<RobotConfigurationData> publisher;
 
    public FrameRealtimeROS2PublisherSubscriberTest()
    {
