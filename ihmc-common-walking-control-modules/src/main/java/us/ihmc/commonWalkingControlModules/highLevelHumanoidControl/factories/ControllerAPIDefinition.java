@@ -251,4 +251,14 @@ public class ControllerAPIDefinition
 
       throw new RuntimeException("Topic does not exist: " + messageClass);
    }
+
+   public static ROS2Topic<RobotConfigurationData> getRobotConfigurationDataTopic(String robotName)
+   {
+      return ROS2Tools.typeNamedTopic(RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName));
+   }
+
+   public static ROS2Topic<HandJointAnglePacket> getHandJointAnglePacketTopic(String robotName)
+   {
+      return ROS2Tools.typeNamedTopic(HandJointAnglePacket.class, ROS2Tools.getControllerOutputTopic(robotName));
+   }
 }

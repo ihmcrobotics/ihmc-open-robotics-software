@@ -3,6 +3,7 @@ package us.ihmc.avatar.drcRobot;
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -30,7 +31,7 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
 
       robotConfigurationDataInput = new ROS2Input<>(ros2Node,
                                                     RobotConfigurationData.class,
-                                                    ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
+                                                    ControllerAPIDefinition.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
                                                     robotConfigurationData,
                                                     message ->
                                                     {

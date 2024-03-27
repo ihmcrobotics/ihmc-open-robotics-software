@@ -6,6 +6,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.tuple.Pair;
 import org.ros.message.Time;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.perception.filters.CollidingScanRegionFilter;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
@@ -79,7 +80,7 @@ public class DelayFixedPlanarRegionsSubscription
 
       rosClockCalculator = robotModel.getROSClockCalculator();
       ROS2Tools.createCallbackSubscription2(ros2Node,
-                                            ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
+                                            ControllerAPIDefinition.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
                                             rosClockCalculator::receivedRobotConfigurationData);
 
       ROS2Tools.createCallbackSubscription2(ros2Node, PerceptionAPI.MAPSENSE_REGIONS_DELAY_OFFSET, message -> delayOffset.setValue(message.getData()));
@@ -228,7 +229,7 @@ public class DelayFixedPlanarRegionsSubscription
          if (enabled)
          {
             robotConfigurationDataSubscriber = ROS2Tools.createCallbackSubscription2(ros2Node,
-                                                                                     ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
+                                                                                     ControllerAPIDefinition.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
                                                                                      this::acceptRobotConfigurationData);
          }
          else
