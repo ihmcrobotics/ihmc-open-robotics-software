@@ -213,6 +213,11 @@ public class KinematicsStreamingToolboxParameters
     * Center of the bounding box with respect to the robot's mid-foot z-up frame.
     */
    private Point3D inputFilterBBXCenter;
+   private double inputFilterMaxLinearDelta;
+   private double inputFilterMaxAngularDelta;
+   private double inputFilterMaxLinearVelocity;
+   private double inputFilterMaxAngularVelocity;
+
    private boolean useStreamingPublisher;
    private double publishingPeriod;
 
@@ -302,6 +307,11 @@ public class KinematicsStreamingToolboxParameters
 
       defaultSolverConfiguration.setJointVelocityWeight(1.0);
       defaultSolverConfiguration.setEnableJointVelocityLimits(true);
+
+      inputFilterMaxLinearDelta = 0.5;
+      inputFilterMaxAngularDelta = Double.POSITIVE_INFINITY;
+      inputFilterMaxLinearVelocity = 6.0;
+      inputFilterMaxAngularVelocity = Double.POSITIVE_INFINITY;
    }
 
    public ClockType getClockType()
@@ -502,6 +512,26 @@ public class KinematicsStreamingToolboxParameters
    public Point3D getInputFilterBBXCenter()
    {
       return inputFilterBBXCenter;
+   }
+
+   public double getInputFilterMaxLinearDelta()
+   {
+      return inputFilterMaxLinearDelta;
+   }
+
+   public double getInputFilterMaxAngularDelta()
+   {
+      return inputFilterMaxAngularDelta;
+   }
+
+   public double getInputFilterMaxLinearVelocity()
+   {
+      return inputFilterMaxLinearVelocity;
+   }
+
+   public double getInputFilterMaxAngularVelocity()
+   {
+      return inputFilterMaxAngularVelocity;
    }
 
    public boolean getUseStreamingPublisher()
@@ -746,6 +776,26 @@ public class KinematicsStreamingToolboxParameters
    public void setInputFilterBBXSize(Vector3D inputFilterBBXSize)
    {
       this.inputFilterBBXSize = inputFilterBBXSize;
+   }
+
+   public void setInputFilterMaxLinearDelta(double inputFilterMaxLinearDelta)
+   {
+      this.inputFilterMaxLinearDelta = inputFilterMaxLinearDelta;
+   }
+
+   public void setInputFilterMaxAngularDelta(double inputFilterMaxAngularDelta)
+   {
+      this.inputFilterMaxAngularDelta = inputFilterMaxAngularDelta;
+   }
+
+   public void setInputFilterMaxLinearVelocity(double inputFilterMaxLinearVelocity)
+   {
+      this.inputFilterMaxLinearVelocity = inputFilterMaxLinearVelocity;
+   }
+
+   public void setInputFilterMaxAngularVelocity(double inputFilterMaxAngularVelocity)
+   {
+      this.inputFilterMaxAngularVelocity = inputFilterMaxAngularVelocity;
    }
 
    public void setUseStreamingPublisher(boolean useStreamingPublisher)

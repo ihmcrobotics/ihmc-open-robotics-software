@@ -20,6 +20,7 @@ import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
@@ -29,7 +30,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialVectorBasics;
-import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -91,7 +91,9 @@ public class KSTTools
    private final SideDependentList<YoBoolean> areHandTaskspaceOutputsEnabled = new SideDependentList<>();
    private final SideDependentList<YoBoolean> areArmJointspaceOutputsEnabled = new SideDependentList<>();
 
-   private final YoLong latestInputTimestamp;
+   private final YoBoolean invalidUserInput;
+   private final YoLong latestInputTimestampSource;
+   private final YoDouble latestInputTimeSource;
    private final YoBoolean useStreamingPublisher;
    private final KSTInputFilter inputFilter;
 
@@ -176,7 +178,9 @@ public class KSTTools
          areArmJointspaceOutputsEnabled.put(robotSide, isArmJointspaceOutputEnabled);
       }
 
-      latestInputTimestamp = new YoLong("latestInputTimestamp", registry);
+      invalidUserInput = new YoBoolean("invalidUserInput", registry);
+      latestInputTimestampSource = new YoLong("latestInputTimestampSource", registry);
+      latestInputTimeSource = new YoDouble("latestInputTimeSource", registry);
 
       useStreamingPublisher = new YoBoolean("useStreamingPublisher", registry);
       useStreamingPublisher.set(parameters.getUseStreamingPublisher());
@@ -234,14 +238,16 @@ public class KSTTools
 
          for (int i = latestInput.getNumberOfInputs() - 1; i >= 0; i--)
          {
-            if (!inputFilter.isInputValid(latestInput.getInput(i)))
-               latestInput.removeInput(i);
+            if (!inputFilter.isInputValid(latestInput.getInput(i), hasPreviousInput.getValue() ? previousInput.getInput(i) : null))
+               invalidUserInput.set(true);
          }
+
+         latestInputTimestampSource.set(latestInput.getTimestamp());
+         latestInputTimeSource.set(latestInput.getTimestamp() * 1.0e-9);
 
          if (latestInput.getTimestamp() <= 0)
             latestInput.setTimestamp(Conversions.secondsToNanoseconds(time.getValue()));
 
-         latestInputTimestamp.set(latestInput.getTimestamp());
          latestInputReceivedTime.set(time.getValue());
          hasNewInputCommand.set(true);
       }
@@ -249,6 +255,16 @@ public class KSTTools
       {
          hasNewInputCommand.set(false);
       }
+   }
+
+   public void resetUserInvalidInputFlag()
+   {
+      invalidUserInput.set(false);
+   }
+
+   public boolean hasUserSubmittedInvalidInput()
+   {
+      return invalidUserInput.getValue();
    }
 
    public KinematicsStreamingToolboxParameters getParameters()
@@ -273,7 +289,7 @@ public class KSTTools
 
    public boolean hasNewInputCommand()
    {
-      return hasNewInputCommand.getValue();
+      return hasNewInputCommand.getValue() && !hasUserSubmittedInvalidInput();
    }
 
    public KinematicsStreamingToolboxInputCommand getLatestInput()
@@ -620,15 +636,6 @@ public class KSTTools
       angularVelocityToPack.scale(2.0 / dt);
    }
 
-   public static void integrateSpatialVelocity(double dt,
-                                               FramePose3DReadOnly initialPose,
-                                               SpatialVectorReadOnly spatialVelocity,
-                                               FixedFramePose3DBasics finalPose)
-   {
-      integrateLinearVelocity(dt, initialPose.getPosition(), spatialVelocity.getLinearPart(), finalPose.getPosition());
-      integrateAngularVelocity(dt, initialPose.getOrientation(), spatialVelocity.getAngularPart(), finalPose.getOrientation());
-   }
-
    public static void integrateLinearVelocity(double dt,
                                               FramePoint3DReadOnly initialPosition,
                                               FrameVector3DReadOnly linearVelocity,
@@ -640,6 +647,7 @@ public class KSTTools
    public static void integrateAngularVelocity(double dt,
                                                FrameQuaternionReadOnly initialOrientation,
                                                FrameVector3DReadOnly angularVelocity,
+                                               boolean isAngularVelocityLocal,
                                                FixedFrameQuaternionBasics finalOrientation)
    {
       double qInit_x = initialOrientation.getX();
@@ -657,11 +665,10 @@ public class KSTTools
       double qInt_z = finalOrientation.getZ();
       double qInt_s = finalOrientation.getS();
 
-      double qFinal_x = qInit_s * qInt_x + qInit_x * qInt_s + qInit_y * qInt_z - qInit_z * qInt_y;
-      double qFinal_y = qInit_s * qInt_y - qInit_x * qInt_z + qInit_y * qInt_s + qInit_z * qInt_x;
-      double qFinal_z = qInit_s * qInt_z + qInit_x * qInt_y - qInit_y * qInt_x + qInit_z * qInt_s;
-      double qFinal_s = qInit_s * qInt_s - qInit_x * qInt_x - qInit_y * qInt_y - qInit_z * qInt_z;
-      finalOrientation.set(qFinal_x, qFinal_y, qFinal_z, qFinal_s);
+      if (isAngularVelocityLocal)
+         QuaternionTools.multiplyImpl(qInit_x, qInit_y, qInit_z, qInit_s, false, qInt_x, qInt_y, qInt_z, qInt_s, false, finalOrientation);
+      else
+         QuaternionTools.multiplyImpl(qInt_x, qInt_y, qInt_z, qInt_s, false, qInit_x, qInit_y, qInit_z, qInit_s, false, finalOrientation);
    }
 
    /**
