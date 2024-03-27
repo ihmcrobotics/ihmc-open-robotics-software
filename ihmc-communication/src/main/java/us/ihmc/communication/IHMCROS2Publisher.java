@@ -8,6 +8,10 @@ import us.ihmc.log.LogTools;
 import us.ihmc.ros2.*;
 import us.ihmc.ros2.rosidl.geometry_msgs.msg.dds.Pose3DPubSubTypeImpl;
 
+/**
+ * @deprecated Should use {@link ROS2NodeInterface#createPublisher} instead.
+ * @param <T>
+ */
 public class IHMCROS2Publisher<T>
 {
    private static final int NUMBER_OF_EXCEPTIONS_TO_PRINT = 5;
