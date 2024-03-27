@@ -60,32 +60,25 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    @Override
    public <T> ConcurrentRingBuffer<T> subscribeViaQueue(ROS2Topic<T> topic)
    {
-      try
+      TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(topic.getType());
+      int queueSize = 16;
+      ConcurrentRingBuffer<T> concurrentQueue = new ConcurrentRingBuffer<>(topicDataType::createData, queueSize);
+      ros2NodeInterface.createSubscription(topicDataType, subscriber ->
       {
-         TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(topic.getType());
-         int queueSize = 16;
-         ConcurrentRingBuffer<T> concurrentQueue = new ConcurrentRingBuffer<>(topicDataType::createData, queueSize);
-         ros2NodeInterface.createSubscription(topicDataType, subscriber ->
+         T nextData = concurrentQueue.next();
+         if (nextData != null)
          {
-            T nextData = concurrentQueue.next();
-            if (nextData != null)
+            if (subscriber.takeNextData(nextData, null))
             {
-               if (subscriber.takeNextData(nextData, null))
-               {
-                  concurrentQueue.commit();
-               }
+               concurrentQueue.commit();
             }
-            else
-            {
-               LogTools.warn("Concurrent ring buffer is full! Queue size: {}", queueSize);
-            }
-         }, topic.getName(), ROS2QosProfile.RELIABLE());
-         return concurrentQueue;
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+         }
+         else
+         {
+            LogTools.warn("Concurrent ring buffer is full! Queue size: {}", queueSize);
+         }
+      }, topic.getName(), ROS2QosProfile.RELIABLE());
+      return concurrentQueue;
    }
 
    @Override

@@ -1,7 +1,5 @@
 package us.ihmc.communication.ros2;
 
-import java.io.IOException;
-
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import us.ihmc.commons.thread.ThreadTools;
@@ -22,42 +20,35 @@ public class FrameRealtimeROS2PublisherSubscriberTest
    public FrameRealtimeROS2PublisherSubscriberTest()
    {
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "frameTest");
-      try
+      String topic = "FrameData";
+      LogTools.info("Publishing to {}", topic);
+      RobotConfigurationDataPubSubType topicDataType = RobotConfigurationData.getPubSubType().get();
+      publisher = realtimeROS2Node.createPublisher(topicDataType, topic, ROS2QosProfile.BEST_EFFORT());
+
+      ROS2Subscription<RobotConfigurationData> subscriber = realtimeROS2Node.createSubscription(topicDataType, subscriber2 ->
       {
-         String topic = "FrameData";
-         LogTools.info("Publishing to {}", topic);
-         RobotConfigurationDataPubSubType topicDataType = RobotConfigurationData.getPubSubType().get();
-         publisher = realtimeROS2Node.createPublisher(topicDataType, topic, ROS2QosProfile.BEST_EFFORT());
+         LogTools.info("Got from callback");
+      }, topic, ROS2QosProfile.BEST_EFFORT());
 
-         ROS2Subscription<RobotConfigurationData> subscriber = realtimeROS2Node.createSubscription(topicDataType, subscriber2 ->
+      int queueSize = 1;
+      QueuedROS2Subscription<RobotConfigurationData> queuedSubscription = realtimeROS2Node.createQueuedSubscription(topicDataType,
+                                                                                                                    topic,
+                                                                                                                    ROS2QosProfile.BEST_EFFORT(),
+                                                                                                                    queueSize);
+
+      ThreadTools.startAThread(() ->
+      {
+         RobotConfigurationData RobotConfigurationData = new RobotConfigurationData();
+         while (true)
          {
-            LogTools.info("Got from callback");
-         }, topic, ROS2QosProfile.BEST_EFFORT());
-
-         int queueSize = 1;
-         QueuedROS2Subscription<RobotConfigurationData> queuedSubscription = realtimeROS2Node.createQueuedSubscription(topicDataType,
-                                                                                                                       topic,
-                                                                                                                       ROS2QosProfile.BEST_EFFORT(),
-                                                                                                                       queueSize);
-
-         ThreadTools.startAThread(() ->
-         {
-            RobotConfigurationData RobotConfigurationData = new RobotConfigurationData();
-            while (true)
+            boolean got = queuedSubscription.flushAndGetLatest(RobotConfigurationData);
+            if (got)
             {
-               boolean got = queuedSubscription.flushAndGetLatest(RobotConfigurationData);
-               if (got)
-               {
-                  LogTools.info("Got from queued");
-               }
-               ThreadTools.sleep(1000);
+               LogTools.info("Got from queued");
             }
-         }, "Subscriber");
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+            ThreadTools.sleep(1000);
+         }
+      }, "Subscriber");
 
       realtimeROS2Node.spin();
 

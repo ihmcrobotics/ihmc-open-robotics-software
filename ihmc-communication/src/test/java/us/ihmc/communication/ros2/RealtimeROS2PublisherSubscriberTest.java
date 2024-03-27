@@ -10,8 +10,6 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.*;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
-import java.io.IOException;
-
 public class RealtimeROS2PublisherSubscriberTest
 {
    private RealtimeROS2Node realtimeROS2Node;
@@ -20,42 +18,35 @@ public class RealtimeROS2PublisherSubscriberTest
    public RealtimeROS2PublisherSubscriberTest()
    {
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videotest");
-      try
+      String topic = "/ihmc/image/test";
+      LogTools.info("Publishing to {}", topic);
+      ImageMessagePubSubType topicDataType = ImageMessage.getPubSubType().get();
+      publisher = realtimeROS2Node.createPublisher(topicDataType, topic, ROS2QosProfile.BEST_EFFORT());
+
+      ROS2Subscription<ImageMessage> subscriber = realtimeROS2Node.createSubscription(topicDataType, subscriber2 ->
       {
-         String topic = "/ihmc/image/test";
-         LogTools.info("Publishing to {}", topic);
-         ImageMessagePubSubType topicDataType = ImageMessage.getPubSubType().get();
-         publisher = realtimeROS2Node.createPublisher(topicDataType, topic, ROS2QosProfile.BEST_EFFORT());
+         LogTools.info("Got from callback");
+      }, topic, ROS2QosProfile.BEST_EFFORT());
 
-         ROS2Subscription<ImageMessage> subscriber = realtimeROS2Node.createSubscription(topicDataType, subscriber2 ->
+      int queueSize = 1;
+      QueuedROS2Subscription<ImageMessage> queuedSubscription = realtimeROS2Node.createQueuedSubscription(topicDataType,
+                                                                                                          topic,
+                                                                                                          ROS2QosProfile.BEST_EFFORT(),
+                                                                                                          queueSize);
+
+      ThreadTools.startAThread(() ->
+      {
+         ImageMessage bigVideoPacket = new ImageMessage();
+         while (true)
          {
-            LogTools.info("Got from callback");
-         }, topic, ROS2QosProfile.BEST_EFFORT());
-
-         int queueSize = 1;
-         QueuedROS2Subscription<ImageMessage> queuedSubscription = realtimeROS2Node.createQueuedSubscription(topicDataType,
-                                                                                                             topic,
-                                                                                                             ROS2QosProfile.BEST_EFFORT(),
-                                                                                                             queueSize);
-
-         ThreadTools.startAThread(() ->
-         {
-            ImageMessage bigVideoPacket = new ImageMessage();
-            while (true)
+            boolean got = queuedSubscription.flushAndGetLatest(bigVideoPacket);
+            if (got)
             {
-               boolean got = queuedSubscription.flushAndGetLatest(bigVideoPacket);
-               if (got)
-               {
-                  LogTools.info("Got from queued");
-               }
-               ThreadTools.sleep(1000);
+               LogTools.info("Got from queued");
             }
-         }, "Subscriber");
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+            ThreadTools.sleep(1000);
+         }
+      }, "Subscriber");
 
       realtimeROS2Node.spin();
 

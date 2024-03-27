@@ -24,7 +24,6 @@ import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -274,14 +273,7 @@ public class ROS2Tools
                                                          String nodeName)
    {
       Domain domain = DomainFactory.getDomain(pubSubImplementation);
-      try
-      {
-         return new RealtimeROS2Node(domain, periodicThreadSchedulerFactory, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+      return new RealtimeROS2Node(domain, periodicThreadSchedulerFactory, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
    }
 
    public static ROS2Node createInterprocessROS2Node(String nodeName)
@@ -297,14 +289,7 @@ public class ROS2Tools
    public static ROS2Node createROS2Node(PubSubImplementation pubSubImplementation, String nodeName)
    {
       Domain domain = DomainFactory.getDomain(pubSubImplementation);
-      try
-      {
-         return new ROS2Node(domain, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+      return new ROS2Node(domain, nodeName, NAMESPACE, DOMAIN_ID, ADDRESS_RESTRICTION);
    }
 
    /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
@@ -337,15 +322,8 @@ public class ROS2Tools
                                                                     NewMessageListener<T> newMessageListener,
                                                                     ROS2QosProfile qosProfile)
    {
-      try
-      {
-         TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return ros2Node.createSubscription(topicDataType, newMessageListener, topicName, qosProfile);
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+      TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
+      return ros2Node.createSubscription(topicDataType, newMessageListener, topicName, qosProfile);
    }
 
    /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
@@ -368,15 +346,8 @@ public class ROS2Tools
                                                      NewMessageListener<T> newMessageListener,
                                                      ROS2QosProfile qosProfile)
    {
-      try
-      {
-         TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         realtimeROS2Node.createSubscription(topicDataType, newMessageListener, topicName, qosProfile);
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+      TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
+      realtimeROS2Node.createSubscription(topicDataType, newMessageListener, topicName, qosProfile);
    }
 
    public static <T> ROS2Callback<T> createCallbackSubscription2(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, Consumer<T> callback)
@@ -396,45 +367,31 @@ public class ROS2Tools
     */
    public static <T> void createVolatileCallbackSubscription(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, Consumer<T> callback)
    {
-      try
+      TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(topic.getType());
+      T data = topicDataType.createData();
+      ros2Node.createSubscription(topicDataType, subscriber ->
       {
-         TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(topic.getType());
-         T data = topicDataType.createData();
-         ros2Node.createSubscription(topicDataType, subscriber ->
+         if (subscriber.takeNextData(data, null))
          {
-            if (subscriber.takeNextData(data, null))
-            {
-               callback.accept(data);
-            }
-         }, topic.getName(), topic.getQoS());
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+            callback.accept(data);
+         }
+      }, topic.getName(), topic.getQoS());
    }
 
    /** Use when you only need the latest message and need allocation free. */
    public static <T> SwapReference<T> createSwapReferenceSubscription(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, Notification callback)
    {
-      try
+      TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(topic.getType());
+      SwapReference<T> swapReference = new SwapReference<>(topicDataType::createData);
+      ros2Node.createSubscription(topicDataType, subscriber ->
       {
-         TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(topic.getType());
-         SwapReference<T> swapReference = new SwapReference<>(topicDataType::createData);
-         ros2Node.createSubscription(topicDataType, subscriber ->
+         if (subscriber.takeNextData(swapReference.getForThreadOne(), null))
          {
-            if (subscriber.takeNextData(swapReference.getForThreadOne(), null))
-            {
-               swapReference.swap();
-               callback.set();
-            }
-         }, topic.getName(), topic.getQoS());
-         return swapReference;
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+            swapReference.swap();
+            callback.set();
+         }
+      }, topic.getName(), topic.getQoS());
+      return swapReference;
    }
 
    public static <T> QueuedROS2Subscription<T> createQueuedSubscription(RealtimeROS2Node realtimeROS2Node, ROS2Topic<T> topic)
@@ -444,18 +401,10 @@ public class ROS2Tools
 
    public static <T> QueuedROS2Subscription<T> createQueuedSubscription(RealtimeROS2Node realtimeROS2Node,
                                                                           Class<T> messageType,
-                                                                          String topicName,
-                                                                          ROS2QosProfile qosProfile)
+                                                                          String topicName, ROS2QosProfile qosProfile)
    {
-      try
-      {
-         TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return realtimeROS2Node.createQueuedSubscription(topicDataType, topicName, qosProfile, ROS2NodeInterface.DEFAULT_QUEUE_SIZE);
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+      TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
+      return realtimeROS2Node.createQueuedSubscription(topicDataType, topicName, qosProfile, ROS2NodeInterface.DEFAULT_QUEUE_SIZE);
    }
 
    /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
@@ -474,15 +423,8 @@ public class ROS2Tools
                                                                   String topicName,
                                                                   ROS2QosProfile qosProfile)
    {
-      try
-      {
-         TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return new IHMCRealtimeROS2Publisher<T>(realtimeROS2Node.createPublisher(topicDataType, topicName, qosProfile, 10));
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+      TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
+      return new IHMCRealtimeROS2Publisher<T>(realtimeROS2Node.createPublisher(topicDataType, topicName, qosProfile, 10));
    }
 
    /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
@@ -511,14 +453,7 @@ public class ROS2Tools
                                                           String topicName,
                                                           ROS2QosProfile qosProfile)
    {
-      try
-      {
-         TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         return new IHMCROS2Publisher<T>(ros2Node.createPublisher(topicDataType, topicName, qosProfile));
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
+      TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
+      return new IHMCROS2Publisher<T>(ros2Node.createPublisher(topicDataType, topicName, qosProfile));
    }
 }
