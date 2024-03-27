@@ -6,6 +6,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.ros2.ROS2NodeInterface;
@@ -64,7 +65,7 @@ public class ROS2ControllerHelper extends ROS2Helper implements ROS2ControllerPu
    @Override
    public IHMCROS2Input<RobotConfigurationData> subscribeToRobotConfigurationData()
    {
-      return subscribe(ControllerAPIDefinition.getRobotConfigurationDataTopic(getRobotName()));
+      return subscribe(ROS2Tools.getRobotConfigurationDataTopic(getRobotName()));
    }
 
    @Override

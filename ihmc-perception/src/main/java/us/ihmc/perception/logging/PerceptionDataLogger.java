@@ -8,7 +8,6 @@ import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.LongPointer;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
@@ -271,7 +270,7 @@ public class PerceptionDataLogger
       // Add callback for Robot Configuration Data
       if (channels.get(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME).isEnabled())
       {
-         var robotConfigurationDataSubscription = ros2Helper.subscribe(ControllerAPIDefinition.getRobotConfigurationDataTopic(simpleRobotName));
+         var robotConfigurationDataSubscription = ros2Helper.subscribe(ROS2Tools.getRobotConfigurationDataTopic(simpleRobotName));
          robotConfigurationDataSubscription.addCallback(this::logRobotConfigurationData);
          runnablesToStopLogging.addLast(robotConfigurationDataSubscription::destroy);
       }

@@ -3,6 +3,7 @@ package us.ihmc.communication;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SakeHandStatusMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
@@ -178,6 +179,16 @@ public class ROS2Tools
    public static <T> ROS2Topic<T> typeNamedTopic(Class<T> messageType, ROS2Topic<?> topicName)
    {
       return typeNamedTopic(messageType).withTopic(topicName);
+   }
+
+   public static ROS2Topic<RobotConfigurationData> getRobotConfigurationDataTopic(String robotName)
+   {
+      return typeNamedTopic(RobotConfigurationData.class, getControllerOutputTopic(robotName));
+   }
+
+   public static ROS2Topic<HandJointAnglePacket> getHandJointAnglePacketTopic(String robotName)
+   {
+      return typeNamedTopic(HandJointAnglePacket.class, getControllerOutputTopic(robotName));
    }
 
    public static ROS2Topic<StampedPosePacket> getPoseCorrectionTopic(String robotName)

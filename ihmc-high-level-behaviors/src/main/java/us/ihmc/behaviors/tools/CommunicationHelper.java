@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -202,7 +203,7 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    @Override
    public IHMCROS2Input<RobotConfigurationData> subscribeToRobotConfigurationData()
    {
-      return subscribe(ControllerAPIDefinition.getRobotConfigurationDataTopic(getRobotName()));
+      return subscribe(ROS2Tools.getRobotConfigurationDataTopic(getRobotName()));
    }
 
    public void subscribeToPlanarRegionsViaCallback(ROS2Topic<PlanarRegionsListMessage> topic, Consumer<PlanarRegionsList> callback)
@@ -238,7 +239,7 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
 
    public void subscribeToRobotConfigurationDataViaCallback(Consumer<RobotConfigurationData> callback)
    {
-      subscribeViaCallback(ControllerAPIDefinition.getRobotConfigurationDataTopic(getRobotModel().getSimpleRobotName()), callback);
+      subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(getRobotModel().getSimpleRobotName()), callback);
    }
 
    @Override
