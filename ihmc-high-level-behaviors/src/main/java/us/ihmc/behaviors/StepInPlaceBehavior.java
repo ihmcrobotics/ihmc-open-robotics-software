@@ -10,7 +10,7 @@ import std_msgs.msg.dds.Bool;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.behaviorTree.LocalOnlyBehaviorTreeNodeExecutor;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -35,7 +35,7 @@ public class StepInPlaceBehavior extends LocalOnlyBehaviorTreeNodeExecutor imple
 {
    private final BehaviorHelper helper;
 
-   private final IHMCROS2Input<Bool> stepping;
+   private final ROS2Input<Bool> stepping;
    private final AtomicInteger footstepsTaken = new AtomicInteger(2);
    private final AtomicLong lastFootstepTakenID = new AtomicLong(0);
    private final AtomicLong footstepID = new AtomicLong();

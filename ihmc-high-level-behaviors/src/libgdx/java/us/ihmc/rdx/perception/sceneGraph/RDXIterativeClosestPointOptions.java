@@ -13,7 +13,7 @@ import perception_msgs.msg.dds.DetectedObjectPacket;
 import perception_msgs.msg.dds.IterativeClosestPointRequest;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -39,7 +39,7 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
    private final ROS2Node ros2Node;
    private final ROS2Helper ros2Helper;
    private final IHMCROS2Publisher<IterativeClosestPointRequest> requestPublisher;
-   private final IHMCROS2Input<DetectedObjectPacket> resultSubscription;
+   private final ROS2Input<DetectedObjectPacket> resultSubscription;
    private final RestartableThrottledThread updateThread;
 
    private final ImGuiUniqueLabelMap labels;

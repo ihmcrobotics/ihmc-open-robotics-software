@@ -10,6 +10,7 @@ import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.PerceptionAPI;
@@ -57,14 +58,12 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
          realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "supporting_planar_region_publisher");
       ros2Node = realtimeROS2Node;
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    CapturabilityBasedStatus.class,
-                                                    ROS2Tools.getControllerOutputTopic(robotName),
-                                                    subscriber -> latestCapturabilityBasedStatusMessage.set(subscriber.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class,
-                                                    ROS2Tools.getControllerOutputTopic(robotName),
-                                                    subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           ControllerAPIDefinition.getTopic(CapturabilityBasedStatus.class, robotName),
+                                           subscriber -> latestCapturabilityBasedStatusMessage.set(subscriber.takeNextData()));
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           ROS2Tools.getRobotConfigurationDataTopic(robotName),
+                                           subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
       regionPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.BIPEDAL_SUPPORT_REGIONS);
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            getTopic(robotName),

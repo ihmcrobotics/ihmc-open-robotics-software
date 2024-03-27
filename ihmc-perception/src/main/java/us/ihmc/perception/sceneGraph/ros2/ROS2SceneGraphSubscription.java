@@ -2,7 +2,7 @@ package us.ihmc.perception.sceneGraph.ros2;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import perception_msgs.msg.dds.*;
-import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
@@ -25,7 +25,7 @@ import java.util.function.BiFunction;
  */
 public class ROS2SceneGraphSubscription
 {
-   private final IHMCROS2Input<SceneGraphMessage> sceneGraphSubscription;
+   private final ROS2Input<SceneGraphMessage> sceneGraphSubscription;
    private final SceneGraph sceneGraph;
    private final BiFunction<SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier;
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
@@ -237,7 +237,7 @@ public class ROS2SceneGraphSubscription
       sceneGraphSubscription.destroy();
    }
 
-   public IHMCROS2Input<SceneGraphMessage> getSceneGraphSubscription()
+   public ROS2Input<SceneGraphMessage> getSceneGraphSubscription()
    {
       return sceneGraphSubscription;
    }

@@ -11,6 +11,7 @@ import ihmc_common_msgs.msg.dds.SO3TrajectoryPointMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.*;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
@@ -80,8 +81,8 @@ public class RemoteHumanoidRobotInterface
       HighLevelStateChangeStatusMessage initialState = new HighLevelStateChangeStatusMessage();
       initialState.setInitialHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
       initialState.setEndHighLevelControllerName(HighLevelControllerName.WALKING.toByte());
-      controllerStateInput = new ROS2Input<>(ros2Node, HighLevelStateChangeStatusMessage.class, topicName.withOutput(), initialState, this::acceptStatusChange);
-      capturabilityBasedStatusInput = new ROS2Input<>(ros2Node, CapturabilityBasedStatus.class, topicName.withOutput());
+      controllerStateInput = new ROS2Input<>(ros2Node, ControllerAPIDefinition.getTopic(HighLevelStateChangeStatusMessage.class, robotName), initialState, this::acceptStatusChange);
+      capturabilityBasedStatusInput = new ROS2Input<>(ros2Node, ControllerAPIDefinition.getTopic(CapturabilityBasedStatus.class, robotName));
 
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
    }

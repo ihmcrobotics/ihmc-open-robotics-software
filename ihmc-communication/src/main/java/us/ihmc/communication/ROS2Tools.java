@@ -307,6 +307,7 @@ public class ROS2Tools
       }
    }
 
+   /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
    public static <T> ROS2Subscription<T> createCallbackSubscriptionTypeNamed(ROS2NodeInterface ros2Node,
                                                                              Class<T> messageType,
                                                                              ROS2Topic<?> topicName,
@@ -347,6 +348,7 @@ public class ROS2Tools
       }
    }
 
+   /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
    public static <T> void createCallbackSubscriptionTypeNamed(RealtimeROS2Node realtimeROS2Node,
                                                               Class<T> messageType,
                                                               ROS2Topic<?> topicName,
@@ -456,6 +458,7 @@ public class ROS2Tools
       }
    }
 
+   /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
    public static <T> IHMCRealtimeROS2Publisher<T> createPublisherTypeNamed(RealtimeROS2Node realtimeROS2Node, Class<T> messageType, ROS2Topic<?> topicName)
    {
       return createPublisher(realtimeROS2Node, typeNamedTopic(messageType).withTopic(topicName));
@@ -482,6 +485,7 @@ public class ROS2Tools
       }
    }
 
+   /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
    public static <T> IHMCROS2Publisher<T> createPublisherTypeNamed(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic<?> topicName)
    {
       return createPublisher(ros2Node, typeNamedTopic(messageType).withTopic(topicName));

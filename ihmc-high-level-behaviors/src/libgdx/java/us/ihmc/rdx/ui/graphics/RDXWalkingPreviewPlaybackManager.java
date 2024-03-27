@@ -4,7 +4,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.commons.MathTools;
-import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RDXWalkingPreviewPlaybackManager
 {
-   private final IHMCROS2Input<WalkingControllerPreviewOutputMessage> walkingPreviewOutput;
+   private final ROS2Input<WalkingControllerPreviewOutputMessage> walkingPreviewOutput;
    // frames per call to handle()
    private final int playbackSpeed = 1;
 
