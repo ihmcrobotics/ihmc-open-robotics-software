@@ -143,13 +143,10 @@ public class RDXVRManager
                waitingOnPoses = false;
             }
 
-            if (posesReadyThisFrame)
+//            if (posesReadyThisFrame)
             {
-               pollEventsFrequencyCalculator.ping();
-               synchronized (syncObject)
-               {
+//               pollEventsFrequencyCalculator.ping();
                   context.pollEvents(); // FIXME: Potential bug is that the poses get updated in the above thread while they're being used in here
-               }
             }
          }
       }

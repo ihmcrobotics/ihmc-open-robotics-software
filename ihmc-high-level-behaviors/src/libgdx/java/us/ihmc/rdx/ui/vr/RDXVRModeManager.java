@@ -31,7 +31,7 @@ public class RDXVRModeManager
    private RDXVRHandPlacedFootstepMode handPlacedFootstepMode;
    private RDXVRKinematicsStreamingMode kinematicsStreamingMode;
    private RDXJoystickBasedStepping joystickBasedStepping;
-   private RDX3DSituatedImGuiPanel leftHandPanel;
+//   private RDX3DSituatedImGuiPanel leftHandPanel;
    private RDXVRStereoVision stereoVision;
    private RDXVRModeControls vrModeControls;
    private final FramePose3D leftHandPanelPose = new FramePose3D();
@@ -66,11 +66,11 @@ public class RDXVRModeManager
       joystickBasedStepping.create(baseUI, controllerHelper, syncedRobot);
 
       // Panel in VR
-      leftHandPanel = new RDX3DSituatedImGuiPanel("VR Mode Manager", this::renderImGuiWidgets);
-      leftHandPanel.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5, 10);
-      leftHandPanel.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
-      baseUI.getVRManager().getContext().addVRPickCalculator(leftHandPanel::calculateVRPick);
-      baseUI.getVRManager().getContext().addVRInputProcessor(leftHandPanel::processVRInput);
+//      leftHandPanel = new RDX3DSituatedImGuiPanel("VR Mode Manager", this::renderImGuiWidgets);
+//      leftHandPanel.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5, 10);
+//      leftHandPanel.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
+//      baseUI.getVRManager().getContext().addVRPickCalculator(leftHandPanel::calculateVRPick);
+//      baseUI.getVRManager().getContext().addVRInputProcessor(leftHandPanel::processVRInput);
 
       stereoVision = new RDXVRStereoVision(syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame());
 
@@ -89,11 +89,11 @@ public class RDXVRModeManager
          {
             if (side == RobotSide.LEFT)
             {
-               leftHandPanelPose.setToZero(controller.getXForwardZUpControllerFrame());
-               leftHandPanelPose.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 4.0);
-               leftHandPanelPose.getPosition().addY(-0.05);
-               leftHandPanelPose.changeFrame(ReferenceFrame.getWorldFrame());
-               leftHandPanel.updateDesiredPose(leftHandPanelPose::get);
+//               leftHandPanelPose.setToZero(controller.getXForwardZUpControllerFrame());
+//               leftHandPanelPose.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 4.0);
+//               leftHandPanelPose.getPosition().addY(-0.05);
+//               leftHandPanelPose.changeFrame(ReferenceFrame.getWorldFrame());
+//               leftHandPanel.updateDesiredPose(leftHandPanelPose::get);
             }
          });
       }
@@ -113,7 +113,7 @@ public class RDXVRModeManager
    {
       if (kinematicsStreamingMode != null)
          kinematicsStreamingMode.update(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING);
-      leftHandPanel.update();
+//      leftHandPanel.update();
       joystickBasedStepping.update(mode == RDXVRMode.JOYSTICK_WALKING);
       vrModeControls.update();
    }
@@ -165,7 +165,7 @@ public class RDXVRModeManager
 
    public void destroy()
    {
-      leftHandPanel.dispose();
+//      leftHandPanel.dispose();
       if (kinematicsStreamingMode != null)
          kinematicsStreamingMode.destroy();
       joystickBasedStepping.destroy();
@@ -197,8 +197,8 @@ public class RDXVRModeManager
       return stereoVision;
    }
 
-   public RDX3DSituatedImGuiPanel getLeftHandPanel()
-   {
-      return leftHandPanel;
-   }
+//   public RDX3DSituatedImGuiPanel getLeftHandPanel()
+//   {
+//      return leftHandPanel;
+//   }
 }

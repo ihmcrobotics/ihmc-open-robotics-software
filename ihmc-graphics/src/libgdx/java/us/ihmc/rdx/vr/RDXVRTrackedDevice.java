@@ -3,14 +3,13 @@ package us.ihmc.rdx.vr;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.utils.BufferUtils;
-import org.lwjgl.openvr.HmdMatrix34;
-import org.lwjgl.openvr.TrackedDevicePose;
-import org.lwjgl.openvr.VR;
-import org.lwjgl.openvr.VRSystem;
+import org.lwjgl.openvr.*;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelLoader;
@@ -26,6 +25,10 @@ public abstract class RDXVRTrackedDevice
    private final ReferenceFrame deviceYUpZBackFrame;
    private final RigidBodyTransform tempOpenVRToWorldTransform = new RigidBodyTransform();
    private ModelInstance modelInstance = null;
+   private long lastPollTimeNanos;
+   private Vector3D trackedLinearVelocity = new Vector3D();
+   private Vector3D trackedAngularVelocity = new Vector3D();
+
 
    public RDXVRTrackedDevice(ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
@@ -34,14 +37,17 @@ public abstract class RDXVRTrackedDevice
                                                                                             deviceToPlayAreaTransform);
    }
 
-   protected void update(TrackedDevicePose.Buffer trackedDevicePoses)
+   protected void update(TrackedDevicePoseParsed[] trackedDevicePoses)
    {
       if (isConnected)
       {
-         HmdMatrix34 openVRRigidBodyTransform = trackedDevicePoses.get(deviceIndex).mDeviceToAbsoluteTracking();
+         lastPollTimeNanos = trackedDevicePoses[deviceIndex].timestamp;
 
          // We do this stuff to try and safely catch exceptions
-         LibGDXTools.toEuclidUnsafe(openVRRigidBodyTransform, deviceToPlayAreaTransform);
+         deviceToPlayAreaTransform.set(trackedDevicePoses[deviceIndex].mDeviceToAbsoluteTracking);
+         trackedLinearVelocity.set(trackedDevicePoses[deviceIndex].vVelocity);
+         trackedAngularVelocity.set(trackedDevicePoses[deviceIndex].vAngularVelocity);
+
          boolean matrixInvalid = deviceToPlayAreaTransform.containsNaN();
          if (!matrixInvalid)
          {
@@ -98,8 +104,15 @@ public abstract class RDXVRTrackedDevice
 
             deviceYUpZBackFrame.getTransformToDesiredFrame(tempOpenVRToWorldTransform, ReferenceFrame.getWorldFrame());
             LibGDXTools.toLibGDX(tempOpenVRToWorldTransform, modelInstance.transform);
+//            deviceToPlayAreaTransform.transform(trackedAngularVelocity);
+            deviceYUpZBackFrame.getParent().getTransformToRoot().transform(trackedAngularVelocity);
          }
       }
+   }
+
+   public long getLastPollTimeNanos()
+   {
+      return lastPollTimeNanos;
    }
 
    public String getModelName()
@@ -138,5 +151,17 @@ public abstract class RDXVRTrackedDevice
    public int getDeviceIndex()
    {
       return deviceIndex;
+   }
+
+
+
+   public Vector3D getLinearVelocity()
+   {
+      return trackedLinearVelocity;
+   }
+
+   public Vector3D getAngularVelocity()
+   {
+      return trackedAngularVelocity;
    }
 }

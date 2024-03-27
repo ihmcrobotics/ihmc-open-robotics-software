@@ -46,8 +46,8 @@ public class DualBlackflyUDPSender
       double croppedHeight = 960f;
       double croppedWidth = croppedHeight * aspectRatio;
 
-      double xOffset = (originalWidth - croppedHeight) / 2;
-      double yOffset = (originalHeight - croppedHeight) / 2;
+      double xOffset = (originalWidth - croppedHeight) / 2 + 400;
+      double yOffset = (originalHeight - croppedHeight) / 2 + 400;
 
       for (RobotSide side : RobotSide.values())
       {

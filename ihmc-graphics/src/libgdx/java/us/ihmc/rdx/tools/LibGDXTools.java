@@ -26,6 +26,7 @@ import org.lwjgl.opengl.GLDebugMessageCallback;
 import org.lwjgl.opengl.KHRDebug;
 import org.lwjgl.openvr.HmdMatrix34;
 import org.lwjgl.openvr.HmdMatrix44;
+import org.lwjgl.openvr.HmdVector3;
 import org.lwjgl.system.Callback;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -33,6 +34,7 @@ import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -244,6 +246,12 @@ public class LibGDXTools
       euclidAffine.getTranslation().setX(openVRValueBuffer.get(3));
       euclidAffine.getTranslation().setY(openVRValueBuffer.get(7));
       euclidAffine.getTranslation().setZ(openVRValueBuffer.get(11));
+   }
+
+   public static void toEuclid(HmdVector3 OpenVR3DVector, Vector3D vector3D)
+   {
+      FloatBuffer openVRValueBuffer = OpenVR3DVector.v();
+      vector3D.set(openVRValueBuffer.get(0), openVRValueBuffer.get(1), openVRValueBuffer.get(2));
    }
 
    public static void toEuclid(Matrix4 gdxAffine, RigidBodyTransform rigidBodyTransform)

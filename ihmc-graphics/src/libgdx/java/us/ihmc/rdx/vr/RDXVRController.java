@@ -25,6 +25,7 @@ import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 import java.nio.LongBuffer;
 import java.util.ArrayList;
@@ -186,7 +187,7 @@ public class RDXVRController extends RDXVRTrackedDevice
       gripActionData = InputAnalogActionData.create();
    }
 
-   public void update(TrackedDevicePose.Buffer trackedDevicePoses)
+   public void update(TrackedDevicePoseParsed[] trackedDevicePoses)
    {
       VRInput.VRInput_GetOriginTrackedDeviceInfo(inputSourceHandle.get(0), inputOriginInfo.get(0));
       setDeviceIndex(inputOriginInfo.trackedDeviceIndex());

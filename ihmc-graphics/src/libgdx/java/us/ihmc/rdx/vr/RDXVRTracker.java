@@ -40,12 +40,12 @@ public class RDXVRTracker extends RDXVRTrackedDevice
                                                                                 trackerYBackZLeftXRightToXForwardZUp);
    }
 
-   public void update(TrackedDevicePose.Buffer trackedDevicePoses)
+   public void update(TrackedDevicePoseParsed[] trackedDevicePoses)
    {
       setConnected(getDeviceIndex() != VR.k_unTrackedDeviceIndexInvalid);
 
-      xForwardZUpTrackerFrame.update();
       super.update(trackedDevicePoses);
+      xForwardZUpTrackerFrame.update();
    }
 
    public void runIfConnected(Consumer<us.ihmc.rdx.vr.RDXVRTracker> runIfConnected)

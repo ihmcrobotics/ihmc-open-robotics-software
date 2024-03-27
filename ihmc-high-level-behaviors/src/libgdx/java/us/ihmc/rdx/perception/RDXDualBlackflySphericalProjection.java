@@ -36,7 +36,7 @@ public class RDXDualBlackflySphericalProjection
 {
    private final RDXBaseUI baseUI;
    private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(RDXProjectionSphere::new);
-   private final ImDouble pupillaryDistance = new ImDouble(-0.032520);
+   private final ImDouble pupillaryDistance = new ImDouble(-0.040650);
    private final FramePose3D leftEyePose = new FramePose3D();
    private final FramePose3D rightEyePose = new FramePose3D();
    private final ReferenceFrame robotZUpFrame;
@@ -48,7 +48,8 @@ public class RDXDualBlackflySphericalProjection
    private volatile boolean reconnecting = false;
    private Thread reconnectThread;
 
-   private final ImDouble projectionZOffset = new ImDouble(0.422764);
+   private final ImDouble projectionZOffset = new ImDouble(1.4);
+   private final ImDouble projectionXOffset = new ImDouble(1.0);
    private final SideDependentList<RDXReferenceFrameGraphic> eyeFrameGraphics = new SideDependentList<>();
 
    private long lastFrameUpdateTime;
@@ -58,13 +59,16 @@ public class RDXDualBlackflySphericalProjection
       this.baseUI = RDXBaseUI.getInstance();
       this.robotZUpFrame = robotZUpFrame;
 
-      projectionSpheres.get(RobotSide.LEFT).setProjectionScaleX(0.713780);
-      projectionSpheres.get(RobotSide.LEFT).setProjectionScaleY(0.891748);
+      projectionSpheres.get(RobotSide.LEFT).setProjectionScaleX(0.665244);
+      projectionSpheres.get(RobotSide.LEFT).setProjectionScaleY(0.713780);
+      projectionSpheres.get(RobotSide.LEFT).setSyncProjectionScales(false);
+      projectionSpheres.get(RobotSide.RIGHT).setSyncProjectionScales(false);
    }
 
    public void renderControls()
    {
       ImGuiTools.sliderDouble("Projection Z offset", projectionZOffset, -4, 4);
+      ImGuiTools.sliderDouble("Projection X offset", projectionXOffset, -4, 4);
       ImGuiTools.sliderDouble(labels.get("Pupillary distance"), pupillaryDistance, -0.5, 0.5);
       ImGui.separator();
       projectionSpheres.get(RobotSide.LEFT).renderImGuiWidgets();
@@ -226,6 +230,7 @@ public class RDXDualBlackflySphericalProjection
                      transformToParent.getTranslation().set(eyeFrame.getTransformToRoot().getTranslation());
                      transformToParent.getRotation().setToYawOrientation(robotZUpFrame.getTransformToRoot().getRotation().getYaw());
                      transformToParent.getTranslation().setZ(projectionZOffset.get());
+                     transformToParent.getTranslation().setX(projectionXOffset.get());
                   }
                };
 

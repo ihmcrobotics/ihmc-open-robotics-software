@@ -37,6 +37,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
@@ -71,6 +72,7 @@ public class RDXVRContext
    private final SideDependentList<RDXVREye> eyes = new SideDependentList<>();
 
    // internal native objects to get device poses
+   private final AtomicReference<TrackedDevicePoseParsed[]> trackedDevicePosesParsedRef = new AtomicReference<>();
    private TrackedDevicePose.Buffer trackedDevicePoses;
    private TrackedDevicePose.Buffer trackedDeviceGamePoses;
 
@@ -92,29 +94,36 @@ public class RDXVRContext
    // your thumb is pointing at your face and your index finger pointing right
    // The default orientation of the IHMC Zup frame is such that
    // your thumb is up and your index finger is pointing away from you
-   public static final RigidBodyTransformReadOnly openVRYUpToIHMCZUpSpace = new RigidBodyTransform(
-         new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
-            Math.toRadians(-90.0),  // rotating around thumb, index goes forward to right
-            Math.toRadians(0.0),    // no rotation about middle finger
-            Math.toRadians(90.0)    // rotating about index finger, thumb goes up to toward you
-         ),
-         new Point3D()
-   );
-   /** When the VR player teleports, it adds onto the transform from VR play area frame to world ZUp frame. */
+   public static final RigidBodyTransformReadOnly openVRYUpToIHMCZUpSpace = new RigidBodyTransform(new YawPitchRoll(
+         // For this transformation, we start with IHMC ZUp with index forward and thumb up
+         Math.toRadians(-90.0),
+         // rotating around thumb, index goes forward to right
+         Math.toRadians(0.0),
+         // no rotation about middle finger
+         Math.toRadians(90.0)
+         // rotating about index finger, thumb goes up to toward you
+   ), new Point3D());
+   /**
+    * When the VR player teleports, it adds onto the transform from VR play area frame to world ZUp frame.
+    */
    private final RigidBodyTransform teleportIHMCZUpToIHMCZUpWorld = new RigidBodyTransform();
-   private final ReferenceFrame teleportFrameIHMCZUp
-         = ReferenceFrameTools.constructFrameWithChangingTransformToParent("teleportFrame",
-                                                                           ReferenceFrame.getWorldFrame(),
-                                                                           teleportIHMCZUpToIHMCZUpWorld);
-   /** The VR play area is on the floor in the center of your VR tracker space area. Also called tracker frame. */
-   private final ReferenceFrame vrPlayAreaYUpZBackFrame
-         = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("vrPlayAreaFrame",
-                                                                           teleportFrameIHMCZUp,
-                                                                           openVRYUpToIHMCZUpSpace);
+   private final ReferenceFrame teleportFrameIHMCZUp = ReferenceFrameTools.constructFrameWithChangingTransformToParent("teleportFrame",
+                                                                                                                       ReferenceFrame.getWorldFrame(),
+                                                                                                                       teleportIHMCZUpToIHMCZUpWorld);
+   /**
+    * The VR play area is on the floor in the center of your VR tracker space area. Also called tracker frame.
+    */
+   private final ReferenceFrame vrPlayAreaYUpZBackFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("vrPlayAreaFrame",
+                                                                                                                            teleportFrameIHMCZUp,
+                                                                                                                            openVRYUpToIHMCZUpSpace);
    private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
    private final RDXVRHeadset headset = new RDXVRHeadset(vrPlayAreaYUpZBackFrame);
-   private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RDXVRControllerModel.UNKNOWN, RobotSide.LEFT, vrPlayAreaYUpZBackFrame),
-                                                                                          new RDXVRController(RDXVRControllerModel.UNKNOWN, RobotSide.RIGHT, vrPlayAreaYUpZBackFrame));
+   private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RDXVRControllerModel.UNKNOWN,
+                                                                                                              RobotSide.LEFT,
+                                                                                                              vrPlayAreaYUpZBackFrame),
+                                                                                          new RDXVRController(RDXVRControllerModel.UNKNOWN,
+                                                                                                              RobotSide.RIGHT,
+                                                                                                              vrPlayAreaYUpZBackFrame));
    private final Map<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
    private final Map<String, RDXVRTracker> trackers = new HashMap<>();
 
@@ -123,7 +132,7 @@ public class RDXVRContext
       LogTools.info("Initializing");
 
       event = VREvent.create(); // about 92 ms
-      trackedDevicePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount); // 10 ms
+      trackedDevicePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount);
       trackedDeviceGamePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount); // 10 ms
 
       int token = VR.VR_InitInternal(errorPointer, VR.EVRApplicationType_VRApplication_Scene); // takes 148 ms
@@ -167,9 +176,11 @@ public class RDXVRContext
       // TODO: Bindings for /user/gamepad
       int[] deviceIndices = new int[TRACKER_SERIAL_MAP.size()];
       IntBuffer trackerIndices = IntBuffer.wrap(deviceIndices);
-      int numberOfTrackers = VRSystem.VRSystem_GetSortedTrackedDeviceIndicesOfClass(
-            VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker, trackerIndices, -1);
-      for (int i = 0; i < numberOfTrackers; i++) {
+      int numberOfTrackers = VRSystem.VRSystem_GetSortedTrackedDeviceIndicesOfClass(VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker,
+                                                                                    trackerIndices,
+                                                                                    -1);
+      for (int i = 0; i < numberOfTrackers; i++)
+      {
          int deviceIndex = trackerIndices.get(i);
          if (!trackers.containsKey(getTrackedBodySegment(getSerialNumber(deviceIndex))))
          {
@@ -182,7 +193,9 @@ public class RDXVRContext
       activeActionSets.ulRestrictedToDevice(VR.k_ulInvalidInputValueHandle);
    }
 
-   /** Needs to be on libGDX thread. */
+   /**
+    * Needs to be on libGDX thread.
+    */
    public void setupEyes()
    {
       LogTools.info("VR per eye render size: {} x {}", width, height);
@@ -201,28 +214,43 @@ public class RDXVRContext
       }
    }
 
-   /** This method waits for OpenVR to say "go" and gathers the latest data.
-    *  The goal is to submit frames to the eyes ASAP after this returns,
-    *  then get back to this method before the frame is over. */
+   /**
+    * This method waits for OpenVR to say "go" and gathers the latest data.
+    * The goal is to submit frames to the eyes ASAP after this returns,
+    * then get back to this method before the frame is over.
+    */
    public void waitGetPoses()
    {
       VRCompositor.VRCompositor_WaitGetPoses(trackedDevicePoses, trackedDeviceGamePoses);
-      // VRCompositor.VRCompositor_GetLastPoses(trackedDevicePoses, trackedDeviceGamePoses); // Is there a way to wait better?
+//      VRCompositor.VRCompositor_GetLastPoses(trackedDevicePoses, trackedDeviceGamePoses); // Is there a way to wait better?
+      long measurementTimestamp = System.nanoTime();
+      TrackedDevicePoseParsed[] temp = new TrackedDevicePoseParsed[VR.k_unMaxTrackedDeviceCount];
+      for (int i = 0; i < temp.length; i++)
+      {
+         temp[i] = new TrackedDevicePoseParsed(measurementTimestamp, trackedDevicePoses, i);
+      }
+      trackedDevicePosesParsedRef.set(temp);
+
    }
 
    /**
-    *  For input, see https://github.com/ValveSoftware/openvr/wiki/SteamVR-Input
-    *  and https://github.com/ValveSoftware/openvr/issues/1151
+    * For input, see https://github.com/ValveSoftware/openvr/wiki/SteamVR-Input
+    * and https://github.com/ValveSoftware/openvr/issues/1151
     */
    public void pollEvents()
    {
+      TrackedDevicePoseParsed[] newTrackedDevicePosesParsed = trackedDevicePosesParsedRef.getAndSet(null);
+
+      if (newTrackedDevicePosesParsed == null)
+         return;
+
       VRInput.VRInput_UpdateActionState(activeActionSets, VRActiveActionSet.SIZEOF);
 
-      headset.update(trackedDevicePoses);
+      headset.update(newTrackedDevicePosesParsed);
 
       for (RobotSide side : RobotSide.values)
       {
-         controllers.get(side).update(trackedDevicePoses);
+         controllers.get(side).update(newTrackedDevicePosesParsed);
       }
 
       while (VRSystem.VRSystem_PollNextEvent(event))
@@ -240,7 +268,7 @@ public class RDXVRContext
 
       for (Map.Entry<String, RDXVRTracker> entryTracker : trackers.entrySet())
       {
-         entryTracker.getValue().update(trackedDevicePoses);
+         entryTracker.getValue().update(newTrackedDevicePosesParsed);
       }
 
       for (Consumer<RDXVRContext> vrPickCalculator : vrPickCalculators)
