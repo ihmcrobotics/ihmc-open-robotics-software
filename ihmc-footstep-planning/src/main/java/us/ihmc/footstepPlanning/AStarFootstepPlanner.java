@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning;
 
+import com.jme3.audio.lwjgl.LwjglEFX;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commons.MathTools;
@@ -426,8 +427,8 @@ public class AStarFootstepPlanner
       }
       else
       {
-         addSnapData(request.getGoalFootPoses().get(RobotSide.LEFT), RobotSide.LEFT);
-         addSnapData(request.getGoalFootPoses().get(RobotSide.RIGHT), RobotSide.RIGHT);
+         addSnapData(goalSteps.get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.LEFT), RobotSide.LEFT);
+         addSnapData(goalSteps.get(RobotSide.RIGHT), request.getGoalFootPoses().get(RobotSide.RIGHT), RobotSide.RIGHT);
          return true;
       }
 
@@ -455,6 +456,11 @@ public class AStarFootstepPlanner
    private void addSnapData(Pose3D footstepPose, RobotSide side)
    {
       DiscreteFootstep footstep = new DiscreteFootstep(footstepPose.getX(), footstepPose.getY(), footstepPose.getYaw(), side);
+      addSnapData(footstep, footstepPose, side);
+   }
+
+   private void addSnapData(DiscreteFootstep footstep, Pose3DReadOnly footstepPose, RobotSide side)
+   {
       FootstepSnapData snapData = new FootstepSnapData(FootstepSnappingTools.computeSnapTransform(footstep, footstepPose));
       snapData.getCroppedFoothold().set(footPolygons.get(side));
       snapData.getWiggleTransformInWorld().setIdentity();
