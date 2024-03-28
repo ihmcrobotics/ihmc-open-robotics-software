@@ -134,7 +134,7 @@ public class DirectionalControlModule extends ToolboxModule
 
       pauseWalkingPublisher = ros2Node.createPublisher(controllerSubGenerator.withTypeName(PauseWalkingMessage.class));
       footstepPublisher = ros2Node.createPublisher(controllerSubGenerator.withTypeName(FootstepDataListMessage.class));
-      footstepVisualizationPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(FootstepDataListMessage.class).withTopic(DirectionalControlModule.getOutputTopic(robotName)));
+      footstepVisualizationPublisher = ros2Node.createPublisher(DirectionalControlModule.getOutputTopic(robotName).withTypeName(FootstepDataListMessage.class));
 
    }
 

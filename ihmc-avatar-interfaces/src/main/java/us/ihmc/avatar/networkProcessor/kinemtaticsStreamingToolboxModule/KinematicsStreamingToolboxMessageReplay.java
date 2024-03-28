@@ -65,10 +65,8 @@ public class KinematicsStreamingToolboxMessageReplay
       capturabilityBasedStatusPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(CapturabilityBasedStatus.class));
 
       ROS2Topic toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
-      kinematicsToolboxConfigurationPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(KinematicsToolboxConfigurationMessage.class)
-                                                                                  .withTopic(toolboxInputTopic));
-      kinematicsStreamingToolboxInputPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(KinematicsStreamingToolboxInputMessage.class)
-                                                                                   .withTopic(toolboxInputTopic));
+      kinematicsToolboxConfigurationPublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(KinematicsToolboxConfigurationMessage.class));
+      kinematicsStreamingToolboxInputPublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(KinematicsStreamingToolboxInputMessage.class));
       toolboxStatePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ToolboxStateMessage.class));
 
       ros2Node.spin();

@@ -188,8 +188,7 @@ public class QuadrupedUIMessageConverter
                                                                                .withInput();
 
       desiredHighLevelStatePublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(HighLevelStateMessage.class));
-      desiredSteppingStatePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(QuadrupedRequestedSteppingStateMessage.class)
-                                                                        .withTopic(controllerInputTopic));
+      desiredSteppingStatePublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(QuadrupedRequestedSteppingStateMessage.class));
       soleTrajectoryMessagePublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(SoleTrajectoryMessage.class));
       pauseWalkingPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(PauseWalkingMessage.class));
       abortWalkingPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(AbortWalkingMessage.class));
@@ -198,28 +197,20 @@ public class QuadrupedUIMessageConverter
       desiredBodyPosePublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(QuadrupedBodyTrajectoryMessage.class));
 
       enableStepTeleopPublisher = ros2Node.createPublisher(stepTeleopInputTopicGenerator.withTypeName(ToolboxStateMessage.class));
-      enableFootstepPlanningPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(ToolboxStateMessage.class)
-                                                                          .withTopic(footstepPlannerInputTopicGenerator));
+      enableFootstepPlanningPublisher = ros2Node.createPublisher(footstepPlannerInputTopicGenerator.withTypeName(ToolboxStateMessage.class));
 
-      stepTeleopXGaitSettingsPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(QuadrupedXGaitSettingsPacket.class)
-                                                                           .withTopic(stepTeleopInputTopicGenerator));
-      footstepPlanningXGaitSettingsPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(QuadrupedXGaitSettingsPacket.class)
-                                                                                 .withTopic(footstepPlannerInputTopicGenerator));
+      stepTeleopXGaitSettingsPublisher = ros2Node.createPublisher(stepTeleopInputTopicGenerator.withTypeName(QuadrupedXGaitSettingsPacket.class));
+      footstepPlanningXGaitSettingsPublisher = ros2Node.createPublisher(footstepPlannerInputTopicGenerator.withTypeName(QuadrupedXGaitSettingsPacket.class));
 
-      desiredTeleopVelocityPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(QuadrupedTeleopDesiredVelocity.class)
-                                                                         .withTopic(stepTeleopInputTopicGenerator));
+      desiredTeleopVelocityPublisher = ros2Node.createPublisher(stepTeleopInputTopicGenerator.withTypeName(QuadrupedTeleopDesiredVelocity.class));
 
-      footstepPlannerParametersPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PawStepPlannerParametersPacket.class)
-                                                                             .withTopic(footstepPlannerInputTopicGenerator));
-      visibilityGraphsParametersPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(VisibilityGraphsParametersPacket.class)
-                                                                              .withTopic(footstepPlannerInputTopicGenerator));
-      pawPlanningRequestPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PawStepPlanningRequestPacket.class)
-                                                                      .withTopic(footstepPlannerInputTopicGenerator));
+      footstepPlannerParametersPublisher = ros2Node.createPublisher(footstepPlannerInputTopicGenerator.withTypeName(PawStepPlannerParametersPacket.class));
+      visibilityGraphsParametersPublisher = ros2Node.createPublisher(footstepPlannerInputTopicGenerator.withTypeName(VisibilityGraphsParametersPacket.class));
+      pawPlanningRequestPublisher = ros2Node.createPublisher(footstepPlannerInputTopicGenerator.withTypeName(PawStepPlanningRequestPacket.class));
 
       stepListMessagePublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(QuadrupedTimedStepListMessage.class));
 
-      reaStateRequestPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(REAStateRequestMessage.class)
-                                                                   .withTopic(REACommunicationProperties.inputTopic));
+      reaStateRequestPublisher = ros2Node.createPublisher(REACommunicationProperties.inputTopic.withTypeName(REAStateRequestMessage.class));
 
       messager.addTopicListener(QuadrupedUIMessagerAPI.DesiredControllerNameTopic, this::publishDesiredHighLevelControllerState);
       messager.addTopicListener(QuadrupedUIMessagerAPI.DesiredSteppingStateNameTopic, this::publishDesiredQuadrupedSteppigState);

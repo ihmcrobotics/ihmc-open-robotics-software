@@ -39,8 +39,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, LocalizationPacket.class, ROS2Tools.IHMC_ROOT, s -> receivedPacket(s.takeNextData()));
       localizationPointMapPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(LocalizationPointMapPacket.class).withTopic(ROS2Tools.IHMC_ROOT));
 
-      ROS2PublisherBasics<StampedPosePacket> stampedPosePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(StampedPosePacket.class)
-                                                                                                      .withTopic(HumanoidControllerAPI.getInputTopic(robotName)));
+      ROS2PublisherBasics<StampedPosePacket> stampedPosePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(StampedPosePacket.class));
       RosPoseStampedSubscriber rosPoseStampedSubscriber = new RosPoseStampedSubscriber()
       {
          @Override

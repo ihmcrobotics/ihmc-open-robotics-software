@@ -154,8 +154,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       RealtimeROS2Node toolboxROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
       new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxROS2Node);
-      ROS2PublisherBasics<WholeBodyTrajectoryMessage> outputPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(WholeBodyTrajectoryMessage.class)
-                                                                                                          .withTopic(controllerInputTopic));
+      ROS2PublisherBasics<WholeBodyTrajectoryMessage> outputPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(WholeBodyTrajectoryMessage.class));
       toolboxController.setTrajectoryMessagePublisher(outputPublisher::publish);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,

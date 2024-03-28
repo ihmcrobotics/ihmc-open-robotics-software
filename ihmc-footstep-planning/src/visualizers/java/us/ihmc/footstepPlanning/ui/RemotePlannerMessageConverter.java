@@ -90,7 +90,7 @@ public class RemotePlannerMessageConverter
 //                                           s -> processIncomingPlanarRegionMessage(s.takeNextData()));
 
       // publishers
-      outputStatusPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(FootstepPlanningToolboxOutputStatus.class).withTopic(FootstepPlannerAPI.outputTopic(robotName)));
+      outputStatusPublisher = ros2Node.createPublisher(FootstepPlannerAPI.outputTopic(robotName).withTypeName(FootstepPlanningToolboxOutputStatus.class));
 
       messager.addTopicListener(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, request -> checkAndPublishIfInvalidResult());
       messager.addTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponse, request -> publishResultingPlan());

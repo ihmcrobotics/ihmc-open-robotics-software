@@ -169,8 +169,7 @@ public class AtlasHeightMapTopicConverter
       zForwardXRightToZUpXForward.appendPitchRotation(Math.PI / 2.0);
       zForwardXRightToZUpXForward.appendYawRotation(-Math.PI / 2.0);
 
-      ROS2PublisherBasics<PlanarRegionsListMessage> regionsPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PlanarRegionsListMessage.class)
-                                                                                                         .withTopic(REACommunicationProperties.outputTopic));
+      ROS2PublisherBasics<PlanarRegionsListMessage> regionsPublisher = ros2Node.createPublisher(REACommunicationProperties.outputTopic.withTypeName(PlanarRegionsListMessage.class));
 
       RosTfPublisher tfPublisher = new RosTfPublisher(ros1Node, null);
 

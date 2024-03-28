@@ -36,7 +36,7 @@ public class AtlasJoystickBasedSteppingApplication extends ApplicationNoModule
       PrintTools.info("-------------------------------------------------------------------");
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_LEFT_NUB_RIGHT_ROBOTIQ, robotTarget, false);
       String robotName = robotModel.getSimpleRobotName();
-      bdiBehaviorcommandPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(BDIBehaviorCommandPacket.class).withTopic(HumanoidControllerAPI.getInputTopic(robotName)));
+      bdiBehaviorcommandPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(BDIBehaviorCommandPacket.class));
       AtlasKickAndPunchMessenger atlasKickAndPunchMessenger = new AtlasKickAndPunchMessenger(ros2Node, robotName);
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();

@@ -108,7 +108,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
                                                     REACommunicationProperties.outputTopic,
                                                     s -> updatePlanarRegion(s.takeNextData()));
 
-      constraintRegionPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(StepConstraintMessage.class).withTopic(ControllerAPIDefinition.getInputTopic(robotName)));
+      constraintRegionPublisher = ros2Node.createPublisher(ControllerAPIDefinition.getInputTopic(robotName).withTypeName(StepConstraintMessage.class));
    }
 
    public void setSwitchPlanarRegionConstraintsAutomatically(boolean switchAutomatically)

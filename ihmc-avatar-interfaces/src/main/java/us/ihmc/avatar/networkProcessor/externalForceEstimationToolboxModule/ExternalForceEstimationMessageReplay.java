@@ -53,12 +53,10 @@ public class ExternalForceEstimationMessageReplay
 
       ROS2Topic controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       robotConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(RobotConfigurationData.class));
-      robotDesiredConfigurationDataPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(RobotDesiredConfigurationData.class)
-                                                                                 .withTopic(controllerOutputTopic));
+      robotDesiredConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(RobotDesiredConfigurationData.class));
 
       ROS2Topic toolboxInputTopic = ExternalForceEstimationToolboxModule.getInputTopic(robotName);
-      configMessagePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(ExternalForceEstimationConfigurationMessage.class)
-                                                                 .withTopic(toolboxInputTopic));
+      configMessagePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ExternalForceEstimationConfigurationMessage.class));
       toolboxStatePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ToolboxStateMessage.class));
 
       ros2Node.spin();

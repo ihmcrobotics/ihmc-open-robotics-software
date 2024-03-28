@@ -148,8 +148,7 @@ public class StepGeneratorJavaFXController
 
       pauseWalkingPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(PauseWalkingMessage.class));
       footstepPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(FootstepDataListMessage.class));
-      reaStateRequestPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(REAStateRequestMessage.class)
-                                                                   .withTopic(REACommunicationProperties.inputTopic));
+      reaStateRequestPublisher = ros2Node.createPublisher(REACommunicationProperties.inputTopic.withTypeName(REAStateRequestMessage.class));
 
       continuousStepController.setFootstepMessenger(this::prepareFootsteps);
       continuousStepController.setPauseWalkingPublisher(this::sendPauseWalkingMessage);

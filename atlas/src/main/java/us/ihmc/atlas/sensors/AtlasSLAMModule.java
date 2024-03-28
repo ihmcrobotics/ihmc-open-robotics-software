@@ -59,7 +59,7 @@ public class AtlasSLAMModule extends SLAMModule
                                                     HumanoidControllerAPI.getOutputTopic(drcRobotModel.getSimpleRobotName()),
                                                     this::handleFootstepStatusMessage);
 
-      estimatedPelvisPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(StampedPosePacket.class).withTopic(HumanoidControllerAPI.getOutputTopic(drcRobotModel.getSimpleRobotName())));
+      estimatedPelvisPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getOutputTopic(drcRobotModel.getSimpleRobotName()).withTypeName(StampedPosePacket.class));
       sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToD435DepthCamera);
       sensorPoseToPelvisTransformer.invert();
 
@@ -77,7 +77,7 @@ public class AtlasSLAMModule extends SLAMModule
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class,
                                                     HumanoidControllerAPI.getOutputTopic(drcRobotModel.getSimpleRobotName()), this::handleFootstepStatusMessage);
 
-      estimatedPelvisPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(StampedPosePacket.class).withTopic(HumanoidControllerAPI.getInputTopic(drcRobotModel.getSimpleRobotName())));
+      estimatedPelvisPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(drcRobotModel.getSimpleRobotName()).withTypeName(StampedPosePacket.class));
       sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToD435DepthCamera);
       sensorPoseToPelvisTransformer.invert();
 

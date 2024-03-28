@@ -115,8 +115,7 @@ public class RemoteQuadrupedTeleopManager
       stepXGaitSettingsPublisher = ros2Node.createPublisher(stepTeleopInputTopic.withTypeName(QuadrupedXGaitSettingsPacket.class));
       bodyPathPublisher = ros2Node.createPublisher(stepTeleopInputTopic.withTypeName(QuadrupedBodyPathPlanMessage.class));
 
-      plannerXGaitSettingsPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(QuadrupedXGaitSettingsPacket.class)
-                                                                        .withTopic(footstepPlannerInputTopic));
+      plannerXGaitSettingsPublisher = ros2Node.createPublisher(footstepPlannerInputTopic.withTypeName(QuadrupedXGaitSettingsPacket.class));
       planningRequestPublisher = ros2Node.createPublisher(footstepPlannerInputTopic.withTypeName(PawStepPlanningRequestPacket.class));
 
       robotDataReceiver = new QuadrupedRobotDataReceiver(robotModel, null);
