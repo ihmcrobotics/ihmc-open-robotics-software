@@ -10,6 +10,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -95,7 +96,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withOutput();
+      return ToolboxAPIs.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
@@ -106,7 +107,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withInput();
+      return ToolboxAPIs.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withInput();
    }
 
    public YoRegistry getRegistry()

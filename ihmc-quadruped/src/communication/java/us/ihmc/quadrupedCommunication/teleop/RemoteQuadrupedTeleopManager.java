@@ -9,6 +9,7 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import quadruped_msgs.msg.dds.*;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.communication.QuadrupedAPI;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2Topic;
@@ -88,8 +89,8 @@ public class RemoteQuadrupedTeleopManager
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s -> robotConfigurationData.set(s.takeNextData()));
 
       ROS2Topic controllerInputTopic = QuadrupedAPI.getQuadrupedControllerInputTopic(robotName);
-      ROS2Topic stepTeleopInputTopic = ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName)
-                                                                        .withInput();
+      ROS2Topic stepTeleopInputTopic = ToolboxAPIs.STEP_TELEOP_TOOLBOX.withRobot(robotName)
+                                                                      .withInput();
       ROS2Topic footstepPlannerInputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
                                                                              .withInput();
 

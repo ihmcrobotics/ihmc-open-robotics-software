@@ -10,6 +10,7 @@ import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.OldBehaviorAPI;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2Node;
@@ -101,10 +102,10 @@ public abstract class AbstractBehavior implements RobotController
 
       footstepPlannerInputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
       footstepPlannerOutputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
-      kinematicsToolboxInputTopic = ROS2Tools.KINEMATICS_TOOLBOX.withRobot(robotName).withInput();
-      kinematicsToolboxOutputTopic = ROS2Tools.KINEMATICS_TOOLBOX.withRobot(robotName).withOutput();
-      kinematicsPlanningToolboxInputTopic = ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
-      kinematicsPlanningToolboxOutputTopic = ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
+      kinematicsToolboxInputTopic = ToolboxAPIs.KINEMATICS_TOOLBOX.withRobot(robotName).withInput();
+      kinematicsToolboxOutputTopic = ToolboxAPIs.KINEMATICS_TOOLBOX.withRobot(robotName).withOutput();
+      kinematicsPlanningToolboxInputTopic = ToolboxAPIs.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
+      kinematicsPlanningToolboxOutputTopic = ToolboxAPIs.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
 
       controllerInputTopic = HumanoidControllerAPI.HUMANOID_CONTROLLER.withRobot(robotName).withInput();
       controllerOutputTopic = HumanoidControllerAPI.HUMANOID_CONTROLLER.withRobot(robotName).withOutput();

@@ -43,7 +43,7 @@ class ROS2ToolsTest
       ROS2Topic<?> defaultTopicName3 = ROS2Tools.IHMC_ROOT.withRobot("atlas").withModule("rea").withOutput();
       assertEquals("/ihmc/atlas/rea/output/rea_state_request", defaultTopicName3.withTypeName(REAStateRequestMessage.class).toString());
 
-      assertEquals("/ihmc/atlas/toolbox/teleop/step_teleop/output", ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot("atlas").withOutput().toString());
+      assertEquals("/ihmc/atlas/toolbox/teleop/step_teleop/output", ToolboxAPIs.STEP_TELEOP_TOOLBOX.withRobot("atlas").withOutput().toString());
    }
 
    @Disabled

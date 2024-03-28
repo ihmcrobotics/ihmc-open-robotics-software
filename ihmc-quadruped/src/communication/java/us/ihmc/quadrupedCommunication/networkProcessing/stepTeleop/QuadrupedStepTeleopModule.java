@@ -20,6 +20,7 @@ import quadruped_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.communication.QuadrupedAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -170,13 +171,13 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    @Override
    public ROS2Topic getOutputTopic()
    {
-      return ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName).withOutput();
+      return ToolboxAPIs.STEP_TELEOP_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
    public ROS2Topic getInputTopic()
    {
-      return ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName).withInput();
+      return ToolboxAPIs.STEP_TELEOP_TOOLBOX.withRobot(robotName).withInput();
    }
 
    @Override

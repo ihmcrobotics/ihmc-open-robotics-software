@@ -9,6 +9,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -231,7 +232,7 @@ public class RemoteUIMessageConverter
                                                                     .withTopic(HumanoidControllerAPI.getInputTopic(robotName)));
       goHomePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(GoHomeMessage.class).withTopic(HumanoidControllerAPI.getInputTopic(robotName)));
 
-      ROS2Topic controllerPreviewInputTopic = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withInput();
+      ROS2Topic controllerPreviewInputTopic = ToolboxAPIs.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withInput();
       walkingPreviewToolboxStatePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(ToolboxStateMessage.class)
                                                                               .withTopic(controllerPreviewInputTopic));
       walkingPreviewRequestPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(WalkingControllerPreviewInputMessage.class)

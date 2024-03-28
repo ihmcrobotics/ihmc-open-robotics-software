@@ -21,6 +21,7 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -172,7 +173,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ROS2Tools.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withOutput();
+      return ToolboxAPIs.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
@@ -183,7 +184,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ROS2Tools.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withInput();
+      return ToolboxAPIs.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withInput();
    }
 
    public static ROS2Topic<ToolboxStateMessage> getInputStateTopic(String robotName)

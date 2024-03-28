@@ -14,6 +14,7 @@ import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.QuadrupedAPI;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2Topic;
@@ -183,8 +184,8 @@ public class QuadrupedUIMessageConverter
       /* publishers */
       ROS2Topic controllerInputTopic = QuadrupedAPI.getQuadrupedControllerInputTopic(robotName);
 
-      ROS2Topic stepTeleopInputTopicGenerator = ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName)
-                                                                             .withInput();
+      ROS2Topic stepTeleopInputTopicGenerator = ToolboxAPIs.STEP_TELEOP_TOOLBOX.withRobot(robotName)
+                                                                               .withInput();
 
       desiredHighLevelStatePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(HighLevelStateMessage.class).withTopic(controllerInputTopic));
       desiredSteppingStatePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(QuadrupedRequestedSteppingStateMessage.class)

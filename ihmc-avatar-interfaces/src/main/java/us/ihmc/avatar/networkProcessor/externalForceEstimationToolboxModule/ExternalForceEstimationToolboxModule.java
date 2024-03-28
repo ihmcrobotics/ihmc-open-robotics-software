@@ -8,6 +8,7 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -100,7 +101,7 @@ public class ExternalForceEstimationToolboxModule extends ToolboxModule
 
    public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ROS2Tools.EXTERNAL_FORCE_ESTIMATION_TOOLBOX.withRobot(robotName).withOutput();
+      return ToolboxAPIs.EXTERNAL_FORCE_ESTIMATION_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
@@ -111,6 +112,6 @@ public class ExternalForceEstimationToolboxModule extends ToolboxModule
 
    public static ROS2Topic getInputTopic(String robotName)
    {
-      return ROS2Tools.EXTERNAL_FORCE_ESTIMATION_TOOLBOX.withRobot(robotName).withInput();
+      return ToolboxAPIs.EXTERNAL_FORCE_ESTIMATION_TOOLBOX.withRobot(robotName).withInput();
    }
 }

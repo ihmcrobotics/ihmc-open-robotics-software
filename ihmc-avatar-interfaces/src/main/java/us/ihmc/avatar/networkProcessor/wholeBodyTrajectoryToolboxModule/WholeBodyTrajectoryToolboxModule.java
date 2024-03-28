@@ -14,6 +14,7 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
@@ -102,7 +103,7 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 
    public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ROS2Tools.WHOLE_BODY_TRAJECTORY_TOOLBOX.withRobot(robotName).withOutput();
+      return ToolboxAPIs.WHOLE_BODY_TRAJECTORY_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
@@ -113,7 +114,7 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 
    public static ROS2Topic getInputTopic(String robotName)
    {
-      return ROS2Tools.WHOLE_BODY_TRAJECTORY_TOOLBOX.withRobot(robotName).withInput();
+      return ToolboxAPIs.WHOLE_BODY_TRAJECTORY_TOOLBOX.withRobot(robotName).withInput();
    }
 
    @Override

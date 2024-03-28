@@ -8,6 +8,7 @@ import quadruped_msgs.msg.dds.*;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2Topic;
@@ -169,8 +170,8 @@ public class RemoteUIMessageConverter
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, HumanoidControllerAPI.getOutputTopic(robotName),
                                            s -> messager.submitMessage(PawStepPlannerMessagerAPI.RobotConfigurationDataTopic, s.takeNextData()));
 
-      ROS2Topic controllerPreviewOutputTopic = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
-                                                                                    .withOutput();
+      ROS2Topic controllerPreviewOutputTopic = ToolboxAPIs.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
+                                                                                  .withOutput();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, WalkingControllerPreviewOutputMessage.class, controllerPreviewOutputTopic, s -> messager.submitMessage(
             PawStepPlannerMessagerAPI.WalkingPreviewOutput, s.takeNextData()));
 

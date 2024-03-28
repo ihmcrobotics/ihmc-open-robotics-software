@@ -11,6 +11,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -176,7 +177,7 @@ public class KinematicsToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ROS2Tools.KINEMATICS_TOOLBOX.withRobot(robotName).withOutput();
+      return ToolboxAPIs.KINEMATICS_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
@@ -187,6 +188,6 @@ public class KinematicsToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ROS2Tools.KINEMATICS_TOOLBOX.withRobot(robotName).withInput();
+      return ToolboxAPIs.KINEMATICS_TOOLBOX.withRobot(robotName).withInput();
    }
 }
