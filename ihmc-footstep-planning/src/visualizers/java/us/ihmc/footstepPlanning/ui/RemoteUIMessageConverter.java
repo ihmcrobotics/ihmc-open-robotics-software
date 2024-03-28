@@ -19,7 +19,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerAPI;
+import us.ihmc.communication.FootstepPlannerAPI;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
@@ -222,7 +222,7 @@ public class RemoteUIMessageConverter
       plannerActionPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(FootstepPlannerActionMessage.class)
                                                                  .withTopic(FootstepPlannerAPI.inputTopic(robotName)));
       swingPlannerParametersPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(SwingPlannerParametersPacket.class)
-                                                                          .withTopic(ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput()));
+                                                                          .withTopic(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withInput()));
       swingReplanRequestPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(SwingPlanningRequestPacket.class)
                                                                       .withTopic(FootstepPlannerAPI.inputTopic(robotName)));
 

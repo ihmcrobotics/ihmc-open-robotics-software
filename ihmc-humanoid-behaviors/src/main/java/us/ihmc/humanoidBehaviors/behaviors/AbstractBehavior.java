@@ -8,6 +8,7 @@ import java.util.Map;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.communication.FootstepPlannerAPI;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.OldBehaviorAPI;
 import us.ihmc.communication.ToolboxAPIs;
@@ -100,8 +101,8 @@ public abstract class AbstractBehavior implements RobotController
 
       behaviorsServices = new ArrayList<>();
 
-      footstepPlannerInputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
-      footstepPlannerOutputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
+      footstepPlannerInputTopic = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
+      footstepPlannerOutputTopic = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
       kinematicsToolboxInputTopic = ToolboxAPIs.KINEMATICS_TOOLBOX.withRobot(robotName).withInput();
       kinematicsToolboxOutputTopic = ToolboxAPIs.KINEMATICS_TOOLBOX.withRobot(robotName).withOutput();
       kinematicsPlanningToolboxInputTopic = ToolboxAPIs.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withInput();

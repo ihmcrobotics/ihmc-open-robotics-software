@@ -8,6 +8,7 @@ import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import quadruped_msgs.msg.dds.*;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import us.ihmc.communication.FootstepPlannerAPI;
 import us.ihmc.communication.QuadrupedAPI;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2PublisherBasics;
@@ -91,8 +92,8 @@ public class RemoteQuadrupedTeleopManager
       ROS2Topic controllerInputTopic = QuadrupedAPI.getQuadrupedControllerInputTopic(robotName);
       ROS2Topic stepTeleopInputTopic = ToolboxAPIs.STEP_TELEOP_TOOLBOX.withRobot(robotName)
                                                                       .withInput();
-      ROS2Topic footstepPlannerInputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
-                                                                             .withInput();
+      ROS2Topic footstepPlannerInputTopic = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName)
+                                                                               .withInput();
 
       controllerStatePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(HighLevelStateMessage.class).withTopic(controllerInputTopic));
       steppingStatePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(QuadrupedRequestedSteppingStateMessage.class).withTopic(controllerInputTopic));

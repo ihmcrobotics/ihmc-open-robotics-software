@@ -22,12 +22,7 @@ public class ROS2Tools
 {
    public static final String IHMC_TOPIC_PREFIX = "ihmc";
 
-   public static final String FOOTSTEP_PLANNER_NODE_NAME = "ihmc_multi_stage_footstep_planning_module";
-
-   public static final String FOOTSTEP_PLANNER_MODULE_NAME = "toolbox/footstep_plan";
-
    public static final ROS2Topic<?> IHMC_ROOT = new ROS2Topic<>().withPrefix(IHMC_TOPIC_PREFIX);
-   public static final ROS2Topic<?> FOOTSTEP_PLANNER = IHMC_ROOT.withModule(FOOTSTEP_PLANNER_MODULE_NAME);
 
    public static final ROS2Topic<Empty> KINEMATICS_SIMULATION_HEARTBEAT
          = IHMC_ROOT.withModule("kinematics_simulation").withOutput().withSuffix("heartbeat").withType(Empty.class);

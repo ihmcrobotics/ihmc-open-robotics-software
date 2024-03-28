@@ -10,6 +10,7 @@ import quadruped_msgs.msg.dds.PawStepPlanningRequestPacket;
 import quadruped_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
 import quadruped_msgs.msg.dds.QuadrupedBodyOrientationMessage;
 import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
+import us.ihmc.communication.FootstepPlannerAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerType;
@@ -79,17 +80,17 @@ public abstract class AStarPawStepSimulationPlanToWaypointTest implements Quadru
       stepTeleopManager.setEndPhaseShift(180);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(stepTeleopManager.getROS2Node(), PawStepPlanningToolboxOutputStatus.class,
-                                                    ROS2Tools.FOOTSTEP_PLANNER.withRobot(stepTeleopManager.getRobotName())
-                                                              .withOutput(),
-                                           s -> {
+                                                    FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(stepTeleopManager.getRobotName())
+                                                                                       .withOutput(),
+                                                    s -> {
          QuadrupedTimedStepListMessage stepMessage = s.takeNextData().getFootstepDataList();
          stepMessage.setAreStepsAdjustable(true);
          stepTeleopManager.publishTimedStepListToController(stepMessage);
                                            });
       ROS2Tools.createCallbackSubscriptionTypeNamed(stepTeleopManager.getROS2Node(), QuadrupedBodyOrientationMessage.class,
-                                                    ROS2Tools.FOOTSTEP_PLANNER.withRobot(stepTeleopManager.getRobotName())
-                                                              .withOutput(),
-                                           s -> stepTeleopManager.publishBodyOrientationMessage(s.takeNextData()));
+                                                    FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(stepTeleopManager.getRobotName())
+                                                                                       .withOutput(),
+                                                    s -> stepTeleopManager.publishBodyOrientationMessage(s.takeNextData()));
 
       PawStepPlanningRequestPacket planningRequestPacket = new PawStepPlanningRequestPacket();
       planningRequestPacket.getBodyPositionInWorld().set(variables.getRobotBodyX().getDoubleValue(), variables.getRobotBodyY().getDoubleValue(),

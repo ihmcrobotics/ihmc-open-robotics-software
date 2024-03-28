@@ -16,6 +16,7 @@ import quadruped_msgs.msg.dds.QuadrupedFootstepStatusMessage;
 import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import quadruped_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import us.ihmc.communication.FootstepPlannerAPI;
 import us.ihmc.communication.QuadrupedAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ToolboxAPIs;
@@ -79,7 +80,7 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
                                                     s -> processFootstepStatusMessage(s.takeNextData()));
 
       // status messages from the planner
-      ROS2Topic plannerOutputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
+      ROS2Topic plannerOutputTopic = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
                                                     PawStepPlanningToolboxOutputStatus.class,
                                                     plannerOutputTopic,
@@ -109,7 +110,7 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
       messages.put(BodyPathPlanMessage.class, getOutputTopic());
       messages.put(QuadrupedTimedStepListMessage.class, getOutputTopic());
 
-      ROS2Topic plannerInputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
+      ROS2Topic plannerInputTopic = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
       messages.put(PawStepPlanningRequestPacket.class, plannerInputTopic);
       messages.put(ToolboxStateMessage.class, plannerInputTopic);
 
