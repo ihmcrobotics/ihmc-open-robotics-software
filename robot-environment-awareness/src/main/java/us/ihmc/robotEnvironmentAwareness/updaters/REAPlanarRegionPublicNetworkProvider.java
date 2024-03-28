@@ -133,21 +133,15 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
    @Override
    public void registerLidarScanHandler(NewMessageListener<LidarScanMessage> lidarScanHandler)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           LidarScanMessage.class,
-                                           REASourceType.LIDAR_SCAN.getTopicName(),
-                                           lidarScanHandler,
-                                           ROS2QosProfile.BEST_EFFORT());
+      String topicName = REASourceType.LIDAR_SCAN.getTopicName();
+      ros2Node.createSubscription(LidarScanMessage.class, lidarScanHandler, topicName, ROS2QosProfile.BEST_EFFORT());
    }
 
    @Override
    public void registerStereoVisionPointCloudHandler(NewMessageListener<StereoVisionPointCloudMessage> stereoVisionPointCloudHandler)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           StereoVisionPointCloudMessage.class,
-                                           REASourceType.STEREO_POINT_CLOUD.getTopicName(),
-                                           stereoVisionPointCloudHandler,
-                                           ROS2QosProfile.BEST_EFFORT());
+      String topicName = REASourceType.STEREO_POINT_CLOUD.getTopicName();
+      ros2Node.createSubscription(StereoVisionPointCloudMessage.class, stereoVisionPointCloudHandler, topicName, ROS2QosProfile.BEST_EFFORT());
    }
 
    @Override

@@ -27,8 +27,6 @@ import java.util.function.Consumer;
 
 public class ROS2Tools
 {
-   public static final ROS2QosProfile DEFAULT_QOS_PROFILE = ROS2QosProfile.BEST_EFFORT();
-
    public static final String IHMC_TOPIC_PREFIX = "ihmc";
 
    public static final String HUMANOID_CONTROLLER_NODE_NAME = "ihmc_controller";
@@ -296,16 +294,7 @@ public class ROS2Tools
                                                                     String topicName,
                                                                     NewMessageListener<T> newMessageListener)
    {
-      return ros2Node.createSubscription(messageType, newMessageListener, topicName, DEFAULT_QOS_PROFILE);
-   }
-
-   public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
-                                                                    Class<T> messageType,
-                                                                    String topicName,
-                                                                    NewMessageListener<T> newMessageListener,
-                                                                    ROS2QosProfile qosProfile)
-   {
-      return ros2Node.createSubscription(messageType, newMessageListener, topicName, qosProfile);
+      return ros2Node.createSubscription(messageType, newMessageListener, topicName);
    }
 
    /**
@@ -368,6 +357,6 @@ public class ROS2Tools
    /** @deprecated Use {@link ROS2Topic#withType} instead. */
    public static <T> ROS2PublisherBasics<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName)
    {
-      return ros2Node.createPublisher(messageType, topicName, DEFAULT_QOS_PROFILE);
+      return ros2Node.createPublisher(messageType, topicName);
    }
 }

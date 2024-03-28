@@ -77,7 +77,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
          {
             LogTools.warn("Concurrent ring buffer is full! Queue size: {}", queueSize);
          }
-      }, topic.getName(), ROS2QosProfile.RELIABLE());
+      }, topic.getName(), topic.getQoS());
       return concurrentQueue;
    }
 
