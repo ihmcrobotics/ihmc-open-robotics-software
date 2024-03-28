@@ -70,7 +70,7 @@ public class RemoteHumanoidRobotInterface
       this.robotModel = robotModel;
       robotName = robotModel.getSimpleRobotName();
       jointMap = robotModel.getJointMap();
-      topicName = ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName);
+      topicName = HumanoidControllerAPI.HUMANOID_CONTROLLER.withRobot(robotName);
 
       controllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotName);
       publisherMap = new ROS2PublisherMap(ros2Node);

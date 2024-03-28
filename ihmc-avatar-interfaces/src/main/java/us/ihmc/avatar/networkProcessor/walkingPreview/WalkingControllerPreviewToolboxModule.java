@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
@@ -49,7 +50,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      ROS2Topic<?> controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
       {

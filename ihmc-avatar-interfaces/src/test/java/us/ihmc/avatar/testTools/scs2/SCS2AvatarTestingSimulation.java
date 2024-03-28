@@ -9,6 +9,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -583,7 +584,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    public <T> ROS2PublisherBasics<T> createPublisherForController(Class<T> messageType)
    {
-      return createPublisher(messageType, ROS2Tools.getControllerInputTopic(getRobotModel().getSimpleRobotName()));
+      return createPublisher(messageType, HumanoidControllerAPI.getInputTopic(getRobotModel().getSimpleRobotName()));
    }
 
    public <T> ROS2PublisherBasics<T> createPublisher(Class<T> messageType, ROS2Topic<?> generator)
@@ -643,7 +644,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      createSubscriber(messageType, ROS2Tools.getControllerOutputTopic(getRobotModel().getSimpleRobotName()), consumer);
+      createSubscriber(messageType, HumanoidControllerAPI.getOutputTopic(getRobotModel().getSimpleRobotName()), consumer);
    }
 
    public <T> void createSubscriber(Class<T> messageType, ROS2Topic<?> generator, ObjectConsumer<T> consumer)

@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.OldBehaviorAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -132,7 +133,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
       HumanoidReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
 
-      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,

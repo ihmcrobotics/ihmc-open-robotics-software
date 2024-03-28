@@ -16,6 +16,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -95,7 +96,7 @@ public class SCS2BehaviorTestHelper implements YoVariableHolder
       robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, forceSensorDataHolder);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,
-                                                    ROS2Tools.getControllerOutputTopic(robotName),
+                                                    HumanoidControllerAPI.getOutputTopic(robotName),
                                                     s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -277,7 +278,7 @@ public class SCS2BehaviorTestHelper implements YoVariableHolder
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     CapturabilityBasedStatus.class,
-                                                    ROS2Tools.getControllerOutputTopic(robotName),
+                                                    HumanoidControllerAPI.getOutputTopic(robotName),
                                                     s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.takeNextData()));
 
       CapturePointUpdatable ret = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);

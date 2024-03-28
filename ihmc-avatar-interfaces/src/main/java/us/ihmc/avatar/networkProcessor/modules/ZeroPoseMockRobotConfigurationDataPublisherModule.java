@@ -3,6 +3,7 @@ package us.ihmc.avatar.networkProcessor.modules;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -33,7 +34,7 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
       fullRobotModel = robotModel.createFullRobotModel();
       forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
 
-      publisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(RobotConfigurationData.class).withTopic(ROS2Tools.getControllerOutputTopic(robotModel.getSimpleRobotName())));
+      publisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(RobotConfigurationData.class).withTopic(HumanoidControllerAPI.getOutputTopic(robotModel.getSimpleRobotName())));
 
       Thread t = new Thread(this);
       t.start();

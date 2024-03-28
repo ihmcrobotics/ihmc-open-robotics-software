@@ -17,6 +17,7 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXController.SecondaryControlOption;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -106,7 +107,7 @@ public class JoystickBasedSteppingMainUI
       robotVisualizer = new JavaFXRobotVisualizer(fullRobotModelFactory);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,
-                                                    ROS2Tools.getControllerOutputTopic(robotName),
+                                                    HumanoidControllerAPI.getOutputTopic(robotName),
                                                     s -> robotVisualizer.submitNewConfiguration(s.takeNextData()));
       view3dFactory.addNodeToView(robotVisualizer.getRootNode());
 

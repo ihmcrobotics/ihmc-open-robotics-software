@@ -31,6 +31,7 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
@@ -65,7 +66,6 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
@@ -148,7 +148,7 @@ public class HumanoidKinematicsSimulation
       this.kinematicsSimulationParameters = kinematicsSimulationParameters;
 
       // instantiate some existing controller ROS2 API?
-      ros2Node = ROS2Tools.createROS2Node(kinematicsSimulationParameters.getPubSubImplementation(), ROS2Tools.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME);
+      ros2Node = ROS2Tools.createROS2Node(kinematicsSimulationParameters.getPubSubImplementation(), HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME);
       heartbeat = new ROS2Heartbeat(ros2Node, ROS2Tools.KINEMATICS_SIMULATION_HEARTBEAT);
 
       String robotName = robotModel.getSimpleRobotName();
@@ -249,9 +249,9 @@ public class HumanoidKinematicsSimulation
 
       // create controller network subscriber here!!
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(kinematicsSimulationParameters.getPubSubImplementation(),
-                                                          ROS2Tools.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
-      ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
-      ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+                                                          HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
+      ROS2Topic inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
+      ROS2Topic outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
                                                                                                 walkingInputManager,
                                                                                                 outputTopic,
@@ -405,7 +405,7 @@ public class HumanoidKinematicsSimulation
       rcdPublisherFactory.setPublishPeriod(0L);
       rcdPublisherFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
       
-      rcdPublisherFactory.setROS2Info(realtimeROS2Node, ROS2Tools.getControllerOutputTopic(robotName));
+      rcdPublisherFactory.setROS2Info(realtimeROS2Node, HumanoidControllerAPI.getOutputTopic(robotName));
 
       return rcdPublisherFactory.createRobotConfigurationDataPublisher();
    }

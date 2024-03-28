@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
@@ -219,7 +220,7 @@ public class AvatarEstimatorThreadFactory
     */
    public void setROS2Info(RealtimeROS2Node ros2Node, String robotName)
    {
-      setROS2Info(ros2Node, ROS2Tools.getControllerOutputTopic(robotName), ROS2Tools.getControllerInputTopic(robotName));
+      setROS2Info(ros2Node, HumanoidControllerAPI.getOutputTopic(robotName), HumanoidControllerAPI.getInputTopic(robotName));
    }
 
    /**

@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.*;
 import ihmc_common_msgs.msg.dds.TrajectoryPoint1DMessage;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotKickMessenger;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotPunchMessenger;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
@@ -32,7 +33,7 @@ public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, 
 
    public AtlasKickAndPunchMessenger(ROS2Node ros2Node, String robotName)
    {
-      ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      ROS2Topic inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
       armTrajectoryPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(ArmTrajectoryMessage.class).withTopic(inputTopic));
       footTrajectoryPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(FootTrajectoryMessage.class).withTopic(inputTopic));
       footLoadBearingPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(FootLoadBearingMessage.class).withTopic(inputTopic));

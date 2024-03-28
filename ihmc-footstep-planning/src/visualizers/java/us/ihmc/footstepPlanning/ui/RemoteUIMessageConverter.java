@@ -8,6 +8,7 @@ import toolbox_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -202,11 +203,11 @@ public class RemoteUIMessageConverter
                                            });
 
       /* controller messages */
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, HumanoidControllerAPI.getOutputTopic(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.RobotConfigurationData, s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, ROS2Tools.getControllerOutputTopic(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, HumanoidControllerAPI.getOutputTopic(robotName),
                                            s -> processCapturabilityStatus(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class, ROS2Tools.getControllerOutputTopic(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class, HumanoidControllerAPI.getOutputTopic(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepStatusMessage, s.takeNextData()));
 
       ROS2Topic<HeightMapMessage> heightMapOutput = PerceptionAPI.HEIGHT_MAP_OUTPUT;
@@ -227,8 +228,8 @@ public class RemoteUIMessageConverter
       footstepPlanningRequestPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(FootstepPlanningRequestPacket.class)
                                                                            .withTopic(FootstepPlannerAPI.inputTopic(robotName)));
       footstepDataListPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(FootstepDataListMessage.class)
-                                                                    .withTopic(ROS2Tools.getControllerInputTopic(robotName)));
-      goHomePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(GoHomeMessage.class).withTopic(ROS2Tools.getControllerInputTopic(robotName)));
+                                                                    .withTopic(HumanoidControllerAPI.getInputTopic(robotName)));
+      goHomePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(GoHomeMessage.class).withTopic(HumanoidControllerAPI.getInputTopic(robotName)));
 
       ROS2Topic controllerPreviewInputTopic = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withInput();
       walkingPreviewToolboxStatePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(ToolboxStateMessage.class)
@@ -236,19 +237,19 @@ public class RemoteUIMessageConverter
       walkingPreviewRequestPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(WalkingControllerPreviewInputMessage.class)
                                                                          .withTopic(controllerPreviewInputTopic));
       armTrajectoryMessagePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(ArmTrajectoryMessage.class)
-                                                                        .withTopic(ROS2Tools.getControllerInputTopic(robotName)));
+                                                                        .withTopic(HumanoidControllerAPI.getInputTopic(robotName)));
       handTrajectoryMessagePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(HandTrajectoryMessage.class)
-                                                                         .withTopic(ROS2Tools.getControllerInputTopic(robotName)));
+                                                                         .withTopic(HumanoidControllerAPI.getInputTopic(robotName)));
       footTrajectoryMessagePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(FootTrajectoryMessage.class)
-                                                                         .withTopic(ROS2Tools.getControllerInputTopic(robotName)));
+                                                                         .withTopic(HumanoidControllerAPI.getInputTopic(robotName)));
       chestTrajectoryMessagePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(ChestTrajectoryMessage.class)
-                                                                          .withTopic(ROS2Tools.getControllerInputTopic(robotName)));
+                                                                          .withTopic(HumanoidControllerAPI.getInputTopic(robotName)));
       spineTrajectoryMessagePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(SpineTrajectoryMessage.class)
-                                                                          .withTopic(ROS2Tools.getControllerInputTopic(robotName)));
+                                                                          .withTopic(HumanoidControllerAPI.getInputTopic(robotName)));
       headTrajectoryMessagePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(HeadTrajectoryMessage.class)
-                                                                         .withTopic(ROS2Tools.getControllerInputTopic(robotName)));
+                                                                         .withTopic(HumanoidControllerAPI.getInputTopic(robotName)));
       neckTrajectoryMessagePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(NeckTrajectoryMessage.class)
-                                                                         .withTopic(ROS2Tools.getControllerInputTopic(robotName)));
+                                                                         .withTopic(HumanoidControllerAPI.getInputTopic(robotName)));
 
       messager.addTopicListener(FootstepPlannerMessagerAPI.ComputePath, request -> requestNewPlan());
       messager.addTopicListener(FootstepPlannerMessagerAPI.ReplanSwing, request ->

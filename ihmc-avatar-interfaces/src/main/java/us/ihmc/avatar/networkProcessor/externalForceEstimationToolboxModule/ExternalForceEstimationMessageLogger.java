@@ -8,6 +8,7 @@ import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
 import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessagePubSubType;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
@@ -69,7 +70,7 @@ public class ExternalForceEstimationMessageLogger
       ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation,
                                                   "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "ExternalForceEstimationMessageLogger"));
 
-      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s -> robotConfigurationData.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotDesiredConfigurationData.class, controllerOutputTopic, s -> robotDesiredConfigurationData.set(s.takeNextData()));
 

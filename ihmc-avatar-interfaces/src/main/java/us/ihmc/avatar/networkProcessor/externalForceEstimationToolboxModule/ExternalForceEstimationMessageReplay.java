@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
@@ -50,7 +51,7 @@ public class ExternalForceEstimationMessageReplay
       String name = getClass().getSimpleName();
       ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_" + name);
 
-      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       robotConfigurationDataPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(RobotConfigurationData.class).withTopic(controllerOutputTopic));
       robotDesiredConfigurationDataPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(RobotDesiredConfigurationData.class)
                                                                                  .withTopic(controllerOutputTopic));

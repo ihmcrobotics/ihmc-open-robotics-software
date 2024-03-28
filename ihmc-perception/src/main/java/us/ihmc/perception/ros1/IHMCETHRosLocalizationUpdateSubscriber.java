@@ -10,6 +10,7 @@ import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import sensor_msgs.PointCloud2;
 import std_msgs.Float64;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.PacketConsumer;
@@ -39,7 +40,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
       localizationPointMapPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(LocalizationPointMapPacket.class).withTopic(ROS2Tools.IHMC_ROOT));
 
       ROS2PublisherBasics<StampedPosePacket> stampedPosePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(StampedPosePacket.class)
-                                                                                                      .withTopic(ROS2Tools.getControllerInputTopic(robotName)));
+                                                                                                      .withTopic(HumanoidControllerAPI.getInputTopic(robotName)));
       RosPoseStampedSubscriber rosPoseStampedSubscriber = new RosPoseStampedSubscriber()
       {
          @Override

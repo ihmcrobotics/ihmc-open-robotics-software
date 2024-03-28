@@ -1,8 +1,8 @@
 package us.ihmc.sensorProcessing.communication.producers;
 
 import ihmc_common_msgs.msg.dds.RobotFrameData;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.ros2.ROS2Topic;
@@ -46,6 +46,6 @@ public class RobotFrameDataPublisher
 
    public static ROS2Topic<RobotFrameData> getTopic(String robotName, String referenceFrameName)
    {
-      return ROS2Tools.getControllerOutputTopic(robotName).withType(RobotFrameData.class).withSuffix(referenceFrameName);
+      return HumanoidControllerAPI.getOutputTopic(robotName).withType(RobotFrameData.class).withSuffix(referenceFrameName);
    }
 }

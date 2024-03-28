@@ -27,15 +27,13 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -268,8 +266,8 @@ public class AvatarSimulationFactory
    {
       String robotName = robotModel.get().getSimpleRobotName();
 
-      ROS2Topic<?> outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-      ROS2Topic<?> inputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      ROS2Topic<?> outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+      ROS2Topic<?> inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
 
       PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
       if (externalPelvisCorrectorSubscriber.hasValue())

@@ -22,6 +22,7 @@ import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commons.ContinuousIntegrationTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -146,8 +147,8 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       ros2Node = simulationTestHelper.getROS2Node();
 
-      controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
-      controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      controllerInputTopic = HumanoidControllerAPI.getInputTopic(robotName);
+      controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
       toolboxOutputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
 

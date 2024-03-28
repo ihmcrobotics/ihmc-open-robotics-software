@@ -17,6 +17,7 @@ import us.ihmc.avatar.ros.RosRobotConfigurationDataPublisher;
 import us.ihmc.avatar.ros.RosSCSCameraPublisher;
 import us.ihmc.avatar.ros.RosSCSLidarPublisher;
 import us.ihmc.avatar.ros.RosTfPublisher;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -60,14 +61,14 @@ public class RosModule implements CloseableAndDisposable
    {
       this(robotModel, robotModel.getROSClockCalculator(), robotModel.getSensorInformation(), robotModel.getSensorInformation(), robotModel.getJointMap(),
            rosCoreURI, simulatedSensorCommunicator,
-           ROS2Tools.getControllerOutputTopic(robotModel.getRobotDefinition().getName()).withTypeName(RobotConfigurationData.class), realtimeROS2Node);
+           HumanoidControllerAPI.getOutputTopic(robotModel.getRobotDefinition().getName()).withTypeName(RobotConfigurationData.class), realtimeROS2Node);
    }
 
    public RosModule(DRCRobotModel robotModel, URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator, PubSubImplementation pubSubImplementation)
    {
       this(robotModel, robotModel.getROSClockCalculator(), robotModel.getSensorInformation(), robotModel.getSensorInformation(), robotModel.getJointMap(),
            rosCoreURI, simulatedSensorCommunicator,
-           ROS2Tools.getControllerOutputTopic(robotModel.getRobotDefinition().getName()).withTypeName(RobotConfigurationData.class), pubSubImplementation);
+           HumanoidControllerAPI.getOutputTopic(robotModel.getRobotDefinition().getName()).withTypeName(RobotConfigurationData.class), pubSubImplementation);
    }
 
    public RosModule(FullRobotModelFactory robotModelFactory, RobotROSClockCalculator rosClockCalculator,

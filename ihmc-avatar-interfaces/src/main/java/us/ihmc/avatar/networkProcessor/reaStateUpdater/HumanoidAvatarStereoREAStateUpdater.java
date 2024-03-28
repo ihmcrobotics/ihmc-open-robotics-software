@@ -5,6 +5,7 @@ import perception_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -49,9 +50,9 @@ public class HumanoidAvatarStereoREAStateUpdater implements CloseableAndDisposab
       ros2Node = ROS2Tools.createRealtimeROS2Node(implementation, "avatar_rea_state_updater");
 
       reaStateRequestPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(REAStateRequestMessage.class).withTopic(inputTopic));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, HighLevelStateChangeStatusMessage.class, ROS2Tools.getControllerOutputTopic(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, HighLevelStateChangeStatusMessage.class, HumanoidControllerAPI.getOutputTopic(robotName),
                                                     this::handleHighLevelStateChangeMessage);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, WalkingStatusMessage.class, ROS2Tools.getControllerOutputTopic(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, WalkingStatusMessage.class, HumanoidControllerAPI.getOutputTopic(robotName),
                                                     this::handleWalkingStatusMessage);
 
       ros2Node.spin();

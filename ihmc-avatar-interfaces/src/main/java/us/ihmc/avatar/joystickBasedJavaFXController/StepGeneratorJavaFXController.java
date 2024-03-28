@@ -42,6 +42,7 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
@@ -128,8 +129,8 @@ public class StepGeneratorJavaFXController
       continuousStepController = new ContinuousStepController(walkingControllerParameters);
 
       messager.addTopicListener(SteppingParameters, continuousStepController::setJoystickStepParameters);
-      ROS2Topic<?> controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-      ROS2Topic<?> controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+      ROS2Topic<?> controllerInputTopic = HumanoidControllerAPI.getInputTopic(robotName);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,

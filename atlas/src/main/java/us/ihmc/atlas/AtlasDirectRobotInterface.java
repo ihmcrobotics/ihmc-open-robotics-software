@@ -5,6 +5,7 @@ import atlas_msgs.msg.dds.AtlasLowLevelControlModeMessage;
 import atlas_msgs.msg.dds.BDIBehaviorCommandPacket;
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
@@ -23,7 +24,7 @@ public class AtlasDirectRobotInterface implements RobotLowLevelMessenger
 
    public AtlasDirectRobotInterface(ROS2NodeInterface ros2Node, DRCRobotModel robotModel)
    {
-      ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName());
+      ROS2Topic inputTopic = HumanoidControllerAPI.getInputTopic(robotModel.getSimpleRobotName());
       lowLevelModePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(AtlasLowLevelControlModeMessage.class).withTopic(inputTopic));
       bdiBehaviorPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(BDIBehaviorCommandPacket.class).withTopic(inputTopic));
       desiredPumpPSIPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(AtlasDesiredPumpPSIPacket.class).withTopic(inputTopic));

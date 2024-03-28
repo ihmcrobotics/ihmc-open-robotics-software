@@ -47,7 +47,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTraj
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
@@ -555,16 +555,16 @@ public class AtlasRobotModel implements DRCRobotModel
       {
          return new SimulatedRobotiqHandsControlThread(createFullRobotModel(),
                                                        realtimeROS2Node,
-                                                       ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
-                                                       ROS2Tools.getControllerInputTopic(getSimpleRobotName()),
+                                                       HumanoidControllerAPI.getOutputTopic(getSimpleRobotName()),
+                                                       HumanoidControllerAPI.getInputTopic(getSimpleRobotName()),
                                                        RobotSide.values);
       }
       else if (selectedVersion == AtlasRobotVersion.ATLAS_UNPLUGGED_V5_LEFT_NUB_RIGHT_ROBOTIQ)
       {
          return new SimulatedRobotiqHandsControlThread(createFullRobotModel(),
                                                        realtimeROS2Node,
-                                                       ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
-                                                       ROS2Tools.getControllerInputTopic(getSimpleRobotName()),
+                                                       HumanoidControllerAPI.getOutputTopic(getSimpleRobotName()),
+                                                       HumanoidControllerAPI.getInputTopic(getSimpleRobotName()),
                                                        new RobotSide[] {RobotSide.RIGHT});
       }
       else

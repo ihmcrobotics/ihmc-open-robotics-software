@@ -46,6 +46,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -350,8 +351,8 @@ public class SCS2AvatarSimulationFactory
 
       if (realtimeROS2Node.hasBeenSet())
       {
-         outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-         inputTopic = ROS2Tools.getControllerInputTopic(robotName);
+         outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+         inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
       }
 
       if (externalPelvisCorrectorSubscriber.hasValue())

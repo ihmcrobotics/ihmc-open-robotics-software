@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import quadruped_msgs.msg.dds.*;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2Topic;
@@ -165,7 +166,7 @@ public class RemoteUIMessageConverter
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.OccupancyMapTopic, s.takeNextData()));
                                            */
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, HumanoidControllerAPI.getOutputTopic(robotName),
                                            s -> messager.submitMessage(PawStepPlannerMessagerAPI.RobotConfigurationDataTopic, s.takeNextData()));
 
       ROS2Topic controllerPreviewOutputTopic = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
@@ -183,7 +184,7 @@ public class RemoteUIMessageConverter
       pawPlanningRequestPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PawStepPlanningRequestPacket.class)
                                                                       .withTopic(PawStepPlannerCommunicationProperties.inputTopic(robotName)));
       footstepDataListPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(QuadrupedTimedStepListMessage.class)
-                                                                    .withTopic(ROS2Tools.getControllerInputTopic(robotName)));
+                                                                    .withTopic(HumanoidControllerAPI.getInputTopic(robotName)));
 
 //      MessageTopicName controllerPreviewInputTopic = ROS2Tools.getTopicName(robotName, ROS2Tools.WALKING_PREVIEW_TOOLBOX, ROS2TopicQualifier.INPUT);
 //      walkingPreviewToolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, controllerPreviewInputTopic);

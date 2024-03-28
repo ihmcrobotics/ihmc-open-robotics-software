@@ -9,6 +9,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
@@ -59,7 +60,7 @@ public class KinematicsStreamingToolboxMessageReplay
 
       ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_" + name);
 
-      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       robotConfigurationDataPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(RobotConfigurationData.class).withTopic(controllerOutputTopic));
       capturabilityBasedStatusPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(CapturabilityBasedStatus.class).withTopic(controllerOutputTopic));
 

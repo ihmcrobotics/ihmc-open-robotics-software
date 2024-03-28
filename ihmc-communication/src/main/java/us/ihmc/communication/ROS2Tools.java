@@ -25,13 +25,10 @@ public class ROS2Tools
 {
    public static final String IHMC_TOPIC_PREFIX = "ihmc";
 
-   public static final String HUMANOID_CONTROLLER_NODE_NAME = "ihmc_controller";
-   public static final String HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME = "kinematics_ihmc_controller";
    public static final String LLAMA_NODE_NAME = "llama_network";
    public static final String FOOTSTEP_PLANNER_NODE_NAME = "ihmc_multi_stage_footstep_planning_module";
    public static final String BEHAVIOR_MODULE_NODE_NAME = "behavior_module";
 
-   public static final String HUMANOID_CONTROL_MODULE_NAME = "humanoid_control";
    public static final String QUADRUPED_CONTROL_MODULE_NAME = "quadruped_control";
    public static final String FOOTSTEP_PLANNER_MODULE_NAME = "toolbox/footstep_plan";
    public static final String CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME = "toolbox/continuous_planning";
@@ -55,7 +52,6 @@ public class ROS2Tools
    public static final String OUTPUT = ROS2Topic.OUTPUT;
 
    public static final ROS2Topic<?> IHMC_ROOT = new ROS2Topic<>().withPrefix(IHMC_TOPIC_PREFIX);
-   public static final ROS2Topic<?> HUMANOID_CONTROLLER = IHMC_ROOT.withModule(HUMANOID_CONTROL_MODULE_NAME);
    public static final ROS2Topic<?> QUADRUPED_CONTROLLER = IHMC_ROOT.withModule(QUADRUPED_CONTROL_MODULE_NAME);
    public static final ROS2Topic<?> FOOTSTEP_PLANNER = IHMC_ROOT.withModule(FOOTSTEP_PLANNER_MODULE_NAME);
    public static final ROS2Topic<?> CONTINUOUS_PLANNING_TOOLBOX = IHMC_ROOT.withModule(CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME);
@@ -77,12 +73,12 @@ public class ROS2Tools
 
    public static final ROS2Topic<TextToSpeechPacket> TEXT_STATUS = IHMC_ROOT.withTypeName(TextToSpeechPacket.class);
 
-   private static final ROS2Topic<HandDesiredConfigurationMessage> HAND_CONFIGURATION = HUMANOID_CONTROLLER.withInput()
-                                                                                                           .withTypeName(HandDesiredConfigurationMessage.class);
-   private static final ROS2Topic<SakeHandDesiredCommandMessage> HAND_SAKE_DESIRED_COMMAND = HUMANOID_CONTROLLER.withInput()
-                                                                                                                .withTypeName(SakeHandDesiredCommandMessage.class);
-   private static final ROS2Topic<SakeHandStatusMessage> HAND_SAKE_DESIRED_STATUS = HUMANOID_CONTROLLER.withOutput()
-                                                                                                       .withTypeName(SakeHandStatusMessage.class);
+   private static final ROS2Topic<HandDesiredConfigurationMessage> HAND_CONFIGURATION = HumanoidControllerAPI.HUMANOID_CONTROLLER.withInput()
+                                                                                                                                 .withTypeName(HandDesiredConfigurationMessage.class);
+   private static final ROS2Topic<SakeHandDesiredCommandMessage> HAND_SAKE_DESIRED_COMMAND = HumanoidControllerAPI.HUMANOID_CONTROLLER.withInput()
+                                                                                                                                      .withTypeName(SakeHandDesiredCommandMessage.class);
+   private static final ROS2Topic<SakeHandStatusMessage> HAND_SAKE_DESIRED_STATUS = HumanoidControllerAPI.HUMANOID_CONTROLLER.withOutput()
+                                                                                                                             .withTypeName(SakeHandStatusMessage.class);
 
    public static final ROS2Topic<Float64> BOX_MASS = IHMC_ROOT.withSuffix("box_mass").withType(Float64.class);
 
@@ -101,16 +97,6 @@ public class ROS2Tools
    public static ROS2Topic<SakeHandStatusMessage> getHandSakeStatusTopic(String robotName, RobotSide side)
    {
       return HAND_SAKE_DESIRED_STATUS.withRobot(robotName).withSuffix(side.getLowerCaseName());
-   }
-
-   public static ROS2Topic<?> getControllerOutputTopic(String robotName)
-   {
-      return HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
-   }
-
-   public static ROS2Topic<?> getControllerInputTopic(String robotName)
-   {
-      return HUMANOID_CONTROLLER.withRobot(robotName).withInput();
    }
 
    public static ROS2Topic<WalkingControllerPreviewInputMessage> getControllerPreviewInputTopic(String robotName)
@@ -133,6 +119,7 @@ public class ROS2Tools
       return QUADRUPED_CONTROLLER.withRobot(robotName).withInput();
    }
 
+   /** @deprecated Use {@link ROS2Topic#withTypeName} instead. */
    public static <T> ROS2Topic<T> typeNamedTopic(Class<T> messageType)
    {
       return new ROS2Topic<>().withTypeName(messageType);
@@ -140,7 +127,7 @@ public class ROS2Tools
 
    public static ROS2Topic<StampedPosePacket> getPoseCorrectionTopic(String robotName)
    {
-      return getControllerInputTopic(robotName).withTypeName(StampedPosePacket.class);
+      return HumanoidControllerAPI.getInputTopic(robotName).withTypeName(StampedPosePacket.class);
    }
 
    public static ROS2Topic<DoorParameterPacket> getDoorParameterTopic()

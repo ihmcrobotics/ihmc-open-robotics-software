@@ -11,6 +11,7 @@ import perception_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2NodeInterface;
@@ -45,7 +46,7 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
       {
          if (controller != null)

@@ -30,6 +30,7 @@ import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -235,19 +236,19 @@ public class ControllerAPIDefinition
    /** Applies only for the humanoid controller. */
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ROS2Tools.getControllerInputTopic(robotName);
+      return HumanoidControllerAPI.getInputTopic(robotName);
    }
 
    /** Applies only for the humanoid controller. */
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ROS2Tools.getControllerOutputTopic(robotName);
+      return HumanoidControllerAPI.getOutputTopic(robotName);
    }
 
    /** Applies only for the humanoid controller. */
    public static <T> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
    {
-      return getTopic(getBaseTopic(ROS2Tools.HUMANOID_CONTROL_MODULE_NAME, robotName), messageClass);
+      return getTopic(getBaseTopic(HumanoidControllerAPI.HUMANOID_CONTROL_MODULE_NAME, robotName), messageClass);
    }
 
    public static ROS2Topic<?> getBaseTopic(String controlModuleName, String robotName)

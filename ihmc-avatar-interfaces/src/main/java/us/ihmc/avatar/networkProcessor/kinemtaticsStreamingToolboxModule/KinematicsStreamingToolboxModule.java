@@ -20,6 +20,7 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -99,8 +100,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      ROS2Topic<?> controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
-      ROS2Topic<?> controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic<?> controllerInputTopic = HumanoidControllerAPI.getInputTopic(robotName);
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 
       trajectoryMessagePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(WholeBodyTrajectoryMessage.class).withTopic(controllerInputTopic));
       streamingMessagePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(WholeBodyStreamingMessage.class).withTopic(controllerInputTopic));

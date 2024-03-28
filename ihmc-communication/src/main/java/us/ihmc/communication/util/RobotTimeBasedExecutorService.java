@@ -10,6 +10,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.*;
 import us.ihmc.log.LogTools;
@@ -66,7 +67,7 @@ public class RobotTimeBasedExecutorService
 
    private static ROS2Topic createTopicName(String robotName)
    {
-      return ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
+      return HumanoidControllerAPI.HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
    }
 
    private static NewMessageListener<RobotConfigurationData> createListener(long period, TimeUnit timeUnit, Runnable runnable)

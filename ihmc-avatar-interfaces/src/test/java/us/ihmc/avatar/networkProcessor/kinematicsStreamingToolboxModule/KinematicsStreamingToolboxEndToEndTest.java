@@ -21,6 +21,7 @@ import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -168,7 +169,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
    public void createToolboxController(DRCRobotModel robotModel)
    {
       String robotName = robotModel.getSimpleRobotName();
-      ROS2Topic<?> controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       ROS2Topic<?> toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
       ROS2Topic<?> toolboxOutputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
 
