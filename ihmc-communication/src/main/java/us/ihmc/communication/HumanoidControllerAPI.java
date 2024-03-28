@@ -1,6 +1,7 @@
 package us.ihmc.communication;
 
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
+import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.ros2.ROS2Topic;
 
 public class HumanoidControllerAPI
@@ -10,6 +11,7 @@ public class HumanoidControllerAPI
    public static final String HUMANOID_CONTROL_MODULE_NAME = "humanoid_control";
 
    public static final ROS2Topic<?> HUMANOID_CONTROLLER = ROS2Tools.IHMC_ROOT.withModule(HUMANOID_CONTROL_MODULE_NAME);
+   public static final ROS2Topic<TextToSpeechPacket> TEXT_STATUS = ROS2Tools.IHMC_ROOT.withTypeName(TextToSpeechPacket.class);
 
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
