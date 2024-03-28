@@ -10,6 +10,7 @@ import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
 import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.MissionControlAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
@@ -96,14 +97,14 @@ public class ImGuiMachine
 
       ThreadTools.startAsDaemon(() ->
       {
-         rebootPublisher = ros2Node.createPublisher(ROS2Tools.getSystemRebootTopic(instanceId));
+         rebootPublisher = ros2Node.createPublisher(MissionControlAPI.getSystemRebootTopic(instanceId));
       }, "Reboot-Publisher-Thread");
 
-      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemResourceUsageTopic(instanceId), subscriber ->
+      ROS2Tools.createCallbackSubscription(ros2Node, MissionControlAPI.getSystemResourceUsageTopic(instanceId), subscriber ->
       {
          acceptSystemResourceUsageMessage(subscriber.takeNextData());
       });
-      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemServiceStatusTopic(instanceId), subscriber ->
+      ROS2Tools.createCallbackSubscription(ros2Node, MissionControlAPI.getSystemServiceStatusTopic(instanceId), subscriber ->
       {
          acceptSystemServiceStatusMessage(subscriber.takeNextData());
       });

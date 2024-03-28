@@ -2,8 +2,8 @@ package us.ihmc.missionControl.systemd;
 
 import com.google.common.collect.Lists;
 import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
+import us.ihmc.communication.MissionControlAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.missionControl.MissionControlTools;
@@ -29,7 +29,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
    {
       this.serviceName = serviceName;
       this.ros2Node = ros2Node;
-      serviceStatusPublisher = ros2Node.createPublisher(ROS2Tools.getSystemServiceStatusTopic(instanceId));
+      serviceStatusPublisher = ros2Node.createPublisher(MissionControlAPI.getSystemServiceStatusTopic(instanceId));
       systemServiceStatusPublisherScheduler = new ExceptionHandlingThreadScheduler("SystemServiceStatusPublisherScheduler");
       systemServiceStatusPublisherScheduler.schedule(this::publishStatus, 2.0);
 

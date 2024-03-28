@@ -5,6 +5,7 @@ import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
 import mission_control_msgs.msg.dds.SystemServiceActionMessage;
 import mission_control_msgs.msg.dds.SystemServiceLogRefreshMessage;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.MissionControlAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
@@ -94,7 +95,7 @@ public class MissionControlDaemon
       String ros2NodeName = "mission_control_daemon_" + instanceId.toString().replace("-", ""); // ROS2 node names cannot have dashes
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ros2NodeName);
       systemAvailablePublisher = ros2Node.createPublisher(ROS2Tools.SYSTEM_AVAILABLE);
-      systemResourceUsagePublisher = ros2Node.createPublisher(ROS2Tools.getSystemResourceUsageTopic(instanceId));
+      systemResourceUsagePublisher = ros2Node.createPublisher(MissionControlAPI.getSystemResourceUsageTopic(instanceId));
 
       ExceptionHandlingThreadScheduler systemAvailablePublisherScheduler = new ExceptionHandlingThreadScheduler("SystemAvailablePublisherScheduler");
       ExceptionHandlingThreadScheduler systemResourceUsagePublisherScheduler = new ExceptionHandlingThreadScheduler("SystemResourceUsagePublisherScheduler");
@@ -105,17 +106,17 @@ public class MissionControlDaemon
       systemAvailablePublisherScheduler.schedule(this::publishAvailable, 1.0);
       systemResourceUsagePublisherScheduler.schedule(this::publishResourceUsage, 0.1);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemServiceLogRefreshTopic(instanceId), subscriber ->
+      ROS2Tools.createCallbackSubscription(ros2Node, MissionControlAPI.getSystemServiceLogRefreshTopic(instanceId), subscriber ->
       {
          handleServiceLogRefreshMessage(subscriber.takeNextData());
       });
-      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemServiceActionTopic(instanceId), subscriber ->
+      ROS2Tools.createCallbackSubscription(ros2Node, MissionControlAPI.getSystemServiceActionTopic(instanceId), subscriber ->
       {
          SystemServiceActionMessage message = subscriber.takeNextData();
          LogTools.info("Received service action message " + message);
          handleServiceActionMessage(message);
       });
-      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemRebootTopic(instanceId), subscriber ->
+      ROS2Tools.createCallbackSubscription(ros2Node, MissionControlAPI.getSystemRebootTopic(instanceId), subscriber ->
       {
          ProcessTools.execSimpleCommandSafe("sudo reboot");
       });

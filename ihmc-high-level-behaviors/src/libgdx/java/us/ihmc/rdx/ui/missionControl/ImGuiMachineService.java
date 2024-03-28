@@ -5,8 +5,8 @@ import imgui.ImGui;
 import mission_control_msgs.msg.dds.SystemServiceActionMessage;
 import mission_control_msgs.msg.dds.SystemServiceLogRefreshMessage;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.MissionControlAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.ros2.ROS2Node;
@@ -49,11 +49,11 @@ public class ImGuiMachineService
 
       ThreadTools.startAsDaemon(() ->
       {
-         logRefreshPublisher = ros2Node.createPublisher(ROS2Tools.getSystemServiceLogRefreshTopic(instanceId));
+         logRefreshPublisher = ros2Node.createPublisher(MissionControlAPI.getSystemServiceLogRefreshTopic(instanceId));
       }, "Log-Refresh-Publisher-Thread");
       ThreadTools.startAsDaemon(() ->
       {
-         serviceActionPublisher = ros2Node.createPublisher(ROS2Tools.getSystemServiceActionTopic(instanceId));
+         serviceActionPublisher = ros2Node.createPublisher(MissionControlAPI.getSystemServiceActionTopic(instanceId));
       }, "Service-Action-Publisher-Thread");
 
       // Request a refresh after 1 second

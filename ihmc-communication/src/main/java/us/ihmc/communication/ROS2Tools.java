@@ -20,7 +20,6 @@ import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 import java.net.InetAddress;
-import java.util.UUID;
 import java.util.function.Consumer;
 
 public class ROS2Tools
@@ -170,46 +169,6 @@ public class ROS2Tools
    public static ROS2Topic<DoorParameterPacket> getDoorParameterTopic()
    {
       return ROS2Tools.IHMC_ROOT.withTypeName(DoorParameterPacket.class);
-   }
-
-   /**
-    * Get system resource usage topic for Mission Control
-    * @param instanceId of the Mission Control Daemon
-    * @return the ROS2Topic the daemon will use for system resource usage messages
-    */
-   public static ROS2Topic<SystemResourceUsageMessage> getSystemResourceUsageTopic(UUID instanceId)
-   {
-      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
-      return IHMC_ROOT.withModule("mission_control").withSuffix(topicId).withTypeName(SystemResourceUsageMessage.class);
-   }
-
-   /**
-    * Get system service status topic for Mission Control
-    * @param instanceId of the Mission Control Daemon
-    * @return the ROS2Topic the daemon will use for system service status messages
-    */
-   public static ROS2Topic<SystemServiceStatusMessage> getSystemServiceStatusTopic(UUID instanceId)
-   {
-      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
-      return IHMC_ROOT.withModule("mission_control").withSuffix(topicId).withQoS(ROS2QosProfile.RELIABLE()).withTypeName(SystemServiceStatusMessage.class);
-   }
-
-   public static ROS2Topic<SystemServiceActionMessage> getSystemServiceActionTopic(UUID instanceId)
-   {
-      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
-      return IHMC_ROOT.withModule("mission_control").withSuffix(topicId).withTypeName(SystemServiceActionMessage.class);
-   }
-
-   public static ROS2Topic<Empty> getSystemRebootTopic(UUID instanceId)
-   {
-      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
-      return IHMC_ROOT.withModule("mission_control").withSuffix(topicId).withTypeName(Empty.class);
-   }
-
-   public static ROS2Topic<SystemServiceLogRefreshMessage> getSystemServiceLogRefreshTopic(UUID instanceId)
-   {
-      String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
-      return IHMC_ROOT.withModule("mission_control").withSuffix(topicId).withTypeName(SystemServiceLogRefreshMessage.class);
    }
 
    private static final RTPSCommunicationFactory FACTORY = new RTPSCommunicationFactory();
