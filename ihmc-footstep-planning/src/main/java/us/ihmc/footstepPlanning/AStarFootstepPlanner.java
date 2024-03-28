@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning;
 
-import com.jme3.audio.lwjgl.LwjglEFX;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commons.MathTools;
