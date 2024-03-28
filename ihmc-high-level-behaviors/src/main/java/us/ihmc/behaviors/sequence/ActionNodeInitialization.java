@@ -45,6 +45,24 @@ public class ActionNodeInitialization
          }
          handPoseAction.update();
       }
+      else if (newAction instanceof WholeBodyBimanipulationActionState wholeBodyBimanipulationActionState)
+      {
+         WholeBodyBimanipulationActionState nextPreviousAction = findNextPreviousAction(actionSequence, WholeBodyBimanipulationActionState.class, indexOfInsertion, null);
+         if (nextPreviousAction != null && nextPreviousAction.getHandFrame(RobotSide.LEFT).isChildOfWorld())
+         {
+            wholeBodyBimanipulationActionState.getDefinition().setParentFrameName(nextPreviousAction.getDefinition().getParentFrameName());
+            for (RobotSide side : RobotSide.values)
+            {
+               wholeBodyBimanipulationActionState.getDefinition().getHandToParentTransform(side).getValue()
+                                                 .set(nextPreviousAction.getDefinition().getHandToParentTransform(side).getValueReadOnly());
+            }
+         }
+         else
+         {
+            wholeBodyBimanipulationActionState.getDefinition().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+         }
+         wholeBodyBimanipulationActionState.update();
+      }
       else if (newAction instanceof ScrewPrimitiveActionState screwPrimitiveAction)
       {
          screwPrimitiveAction.getDefinition().setSide(sideOfNewAction);

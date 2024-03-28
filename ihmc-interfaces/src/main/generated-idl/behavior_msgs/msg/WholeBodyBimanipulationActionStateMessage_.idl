@@ -1,0 +1,37 @@
+#ifndef __behavior_msgs__msg__WholeBodyBimanipulationActionStateMessage__idl__
+#define __behavior_msgs__msg__WholeBodyBimanipulationActionStateMessage__idl__
+
+#include "behavior_msgs/msg/./ActionNodeStateMessage_.idl"
+#include "behavior_msgs/msg/./WholeBodyBimanipulationActionDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::WholeBodyBimanipulationActionStateMessage_")
+      struct WholeBodyBimanipulationActionStateMessage
+      {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::ActionNodeStateMessage state;
+        /**
+         * Definition
+         */
+        behavior_msgs::msg::dds::WholeBodyBimanipulationActionDefinitionMessage definition;
+        /**
+         * Joint angles
+         */
+        double joint_angles[7];
+        /**
+         * Quality of the IK solution
+         */
+        double solution_quality;
+      };
+    };
+  };
+};
+
+#endif
