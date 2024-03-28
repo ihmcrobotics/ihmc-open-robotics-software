@@ -29,14 +29,7 @@ public class ROS2PublisherMap
       ROS2PublisherBasics publisher = map.get(topic);
       if (publisher == null)
       {
-         if (topic.getType().equals(Pose3D.class))
-         {
-            publisher = ros2Node.createPose3DPublisher((ROS2Topic<Pose3D>) topic);
-         }
-         else
-         {
-            publisher = ros2Node.createPublisher(topic);
-         }
+         publisher = ros2Node.createPublisher(topic);
          map.put(topic, publisher);
       }
 
