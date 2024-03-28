@@ -99,7 +99,7 @@ public class LiveMapModule implements PerceptionModule
 
       sendCurrentState();
 
-      combinedMapPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PlanarRegionsListMessage.class).withTopic(PerceptionAPI.MAP_REGIONS));
+      combinedMapPublisher = ros2Node.createPublisher(PerceptionAPI.MAP_REGIONS.withTypeName(PlanarRegionsListMessage.class));
    }
 
    private void sendCurrentState()

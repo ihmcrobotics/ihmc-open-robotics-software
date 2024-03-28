@@ -37,7 +37,7 @@ public class CompositePlanarRegionService
          planarRegionPublishers.add(ros2Node.createPublisher(PlanarRegionsListMessage.class, topicNames.get(i)));
       }
 
-      combinedPlanarRegionPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PlanarRegionsListMessage.class).withTopic(PerceptionAPI.MAP_REGIONS));
+      combinedPlanarRegionPublisher = ros2Node.createPublisher(PerceptionAPI.MAP_REGIONS.withTypeName(PlanarRegionsListMessage.class));
       thread = new PausablePeriodicThread(getClass().getSimpleName(), period, this::process);
    }
 
