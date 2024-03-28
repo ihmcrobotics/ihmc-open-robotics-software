@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import controller_msgs.msg.dds.*;
+import ihmc_common_msgs.msg.dds.MessageCollection;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
@@ -102,7 +103,9 @@ public class ControllerAPIDefinition
       controllerSupportedCommands = Collections.unmodifiableList(commands);
       controllerSupportedCommands.forEach(command -> inputMessageClasses.add(ROS2TopicNameTools.newMessageInstance(command).getMessageClass()));
       // Input messages that don't have a corresponding command
+      inputMessageClasses.add(MessageCollection.class);
       inputMessageClasses.add(WholeBodyTrajectoryMessage.class);
+      inputMessageClasses.add(WholeBodyStreamingMessage.class);
 
       List<Class<? extends Settable<?>>> statusMessages = new ArrayList<>();
 
@@ -243,26 +246,41 @@ public class ControllerAPIDefinition
    {
       if (inputMessageClasses.contains(messageClass))
       {
-         // QoS a little tricky, because for streaming you probably want best effort
-         return getInputTopic(robotName).withTypeName(messageClass).withQoS(ROS2QosProfile.RELIABLE());
+         return getInputTopic(robotName).withTypeName(messageClass).withQoS(getQoS(messageClass));
       }
       if (outputMessageClasses.contains(messageClass))
       {
-         ROS2Topic<T> topic = getOutputTopic(robotName).withTypeName(messageClass);
+         return getOutputTopic(robotName).withTypeName(messageClass).withQoS(getQoS(messageClass));
+      }
 
-         // Peridic topics are should be best effort
+      throw new RuntimeException("Topic does not exist: " + messageClass);
+   }
+
+   public static ROS2QosProfile getQoS(Class<?> messageClass)
+   {
+      if (inputMessageClasses.contains(messageClass))
+      {
+         // Streaming commands should be best effort
+         if (messageClass.equals(WholeBodyStreamingMessage.class))
+            return ROS2QosProfile.BEST_EFFORT();
+
+         return ROS2QosProfile.RELIABLE();
+      }
+      else if (outputMessageClasses.contains(messageClass))
+      {
+         // Periodic topics are should be best effort
          if (messageClass.equals(CapturabilityBasedStatus.class)
           || messageClass.equals(JointDesiredOutputMessage.class)
           || messageClass.equals(RobotDesiredConfigurationData.class)
           || messageClass.equals(FootstepQueueStatusMessage.class)
           || messageClass.equals(MultiContactBalanceStatus.class))
-            topic = topic.withQoS(ROS2QosProfile.BEST_EFFORT());
-         else
-            topic = topic.withQoS(ROS2QosProfile.RELIABLE());
+            return ROS2QosProfile.BEST_EFFORT();
 
-         return topic;
+         return ROS2QosProfile.RELIABLE();
       }
-
-      throw new RuntimeException("Topic does not exist: " + messageClass);
+      else
+      {
+         return ROS2QosProfile.DEFAULT();
+      }
    }
 }

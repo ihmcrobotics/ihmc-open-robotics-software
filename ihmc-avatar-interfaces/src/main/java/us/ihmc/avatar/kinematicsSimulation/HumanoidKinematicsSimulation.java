@@ -271,8 +271,6 @@ public class HumanoidKinematicsSimulation
                                                                        9,
                                                                        MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
       controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyStreamingMessage.class,
-                                                                       inputTopic,
-                                                                       ROS2QosProfile.BEST_EFFORT(),
                                                                        9,
                                                                        MessageUnpackingTools.createWholeBodyStreamingMessageUnpacker());
       controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
