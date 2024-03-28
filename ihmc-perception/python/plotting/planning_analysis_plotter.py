@@ -27,7 +27,17 @@ class AStarPlanningStatistics:
 
 def split_logs():
     # Read the file
-    file_path = "data/planning-analysis-console.txt"
+
+    import os
+    home = os.path.expanduser('~')
+    path = home + '/Documents/Publications/PhD_Dissertation/Data/terrain-map/'
+    files = sorted(os.listdir(path))
+    
+    print(files)
+
+    file_path = path + files[-1]
+
+    # file_path = "data/planning-analysis-console.txt"
     with open(file_path, "r") as file:
         lines = file.readlines()
 
