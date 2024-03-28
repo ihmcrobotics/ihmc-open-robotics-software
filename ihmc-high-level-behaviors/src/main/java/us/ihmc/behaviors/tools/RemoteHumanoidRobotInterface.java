@@ -314,7 +314,7 @@ public class RemoteHumanoidRobotInterface
       stampedPosePacket.setConfidenceFactor(confidenceFactor);
 
       LogTools.debug("Publishing Pose " + pose + " with timestamp " + timestamp);
-      publisherMap.publish(ROS2Tools.getPoseCorrectionTopic(robotName), stampedPosePacket);
+      publisherMap.publish(HumanoidControllerAPI.getPoseCorrectionTopic(robotName), stampedPosePacket);
    }
 
    public void pauseWalking()

@@ -3,10 +3,8 @@ package us.ihmc.communication;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import controller_msgs.msg.dds.SakeHandStatusMessage;
-import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import mission_control_msgs.msg.dds.*;
-import perception_msgs.msg.dds.DoorParameterPacket;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
 import us.ihmc.commons.thread.Notification;
@@ -66,16 +64,6 @@ public class ROS2Tools
    public static <T> ROS2Topic<T> typeNamedTopic(Class<T> messageType)
    {
       return new ROS2Topic<>().withTypeName(messageType);
-   }
-
-   public static ROS2Topic<StampedPosePacket> getPoseCorrectionTopic(String robotName)
-   {
-      return HumanoidControllerAPI.getInputTopic(robotName).withTypeName(StampedPosePacket.class);
-   }
-
-   public static ROS2Topic<DoorParameterPacket> getDoorParameterTopic()
-   {
-      return ROS2Tools.IHMC_ROOT.withTypeName(DoorParameterPacket.class);
    }
 
    private static final RTPSCommunicationFactory FACTORY = new RTPSCommunicationFactory();

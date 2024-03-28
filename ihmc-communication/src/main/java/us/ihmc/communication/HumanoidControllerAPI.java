@@ -1,5 +1,6 @@
 package us.ihmc.communication;
 
+import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.ros2.ROS2Topic;
 
 public class HumanoidControllerAPI
@@ -18,5 +19,10 @@ public class HumanoidControllerAPI
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
       return HUMANOID_CONTROLLER.withRobot(robotName).withInput();
+   }
+
+   public static ROS2Topic<StampedPosePacket> getPoseCorrectionTopic(String robotName)
+   {
+      return getInputTopic(robotName).withTypeName(StampedPosePacket.class);
    }
 }
