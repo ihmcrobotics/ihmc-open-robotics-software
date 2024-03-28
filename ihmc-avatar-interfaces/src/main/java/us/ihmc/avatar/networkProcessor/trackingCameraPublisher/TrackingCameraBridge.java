@@ -16,6 +16,7 @@ import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -63,7 +64,7 @@ public class TrackingCameraBridge
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,
-                                                    ROS2Tools.getRobotConfigurationDataTopic(robotName),
+                                                    StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
                                                     s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
       stampedPosePacketPublisher = ros2Node.createPublisher(PerceptionAPI.T265_POSE)::publish;
    }
@@ -73,7 +74,7 @@ public class TrackingCameraBridge
       this.fullRobotModel = fullRobotModel;
 
       ROS2Tools.createCallbackSubscription(realtimeROS2Node,
-                                           ROS2Tools.getRobotConfigurationDataTopic(robotName),
+                                           StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
       stampedPosePacketPublisher = realtimeROS2Node.createPublisher(PerceptionAPI.T265_POSE)::publish;
    }

@@ -5,8 +5,8 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.ros2.ROS2Input;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.ros2.ROS2NodeInterface;
@@ -65,7 +65,7 @@ public class ROS2ControllerHelper extends ROS2Helper implements ROS2ControllerPu
    @Override
    public ROS2Input<RobotConfigurationData> subscribeToRobotConfigurationData()
    {
-      return subscribe(ROS2Tools.getRobotConfigurationDataTopic(getRobotName()));
+      return subscribe(StateEstimatorAPI.getRobotConfigurationDataTopic(getRobotName()));
    }
 
    @Override

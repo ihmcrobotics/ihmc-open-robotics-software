@@ -10,6 +10,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
@@ -72,7 +73,7 @@ public class SCSLidarAndCameraSimulator
    {
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "lidar_and_camera");
 
-      robotConfigurationData = new ROS2Input<>(ros2Node, ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()));
+      robotConfigurationData = new ROS2Input<>(ros2Node, StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()));
 
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
@@ -113,7 +114,7 @@ public class SCSLidarAndCameraSimulator
 
       // required for timestamp
       ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
-                                                                                 ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()));
+                                                                                 StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()));
       ROS2PublisherBasics<VideoPacket> scsCameraPublisher = ros2Node.createPublisher(PerceptionAPI.VIDEO);
       CameraConfiguration cameraConfiguration = new CameraConfiguration(videoCameraMountName);
       cameraConfiguration.setCameraMount(videoCameraMountName);

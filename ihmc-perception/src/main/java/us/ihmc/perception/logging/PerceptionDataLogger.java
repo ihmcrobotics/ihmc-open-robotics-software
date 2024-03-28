@@ -12,6 +12,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -270,7 +271,7 @@ public class PerceptionDataLogger
       // Add callback for Robot Configuration Data
       if (channels.get(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME).isEnabled())
       {
-         var robotConfigurationDataSubscription = ros2Helper.subscribe(ROS2Tools.getRobotConfigurationDataTopic(simpleRobotName));
+         var robotConfigurationDataSubscription = ros2Helper.subscribe(StateEstimatorAPI.getRobotConfigurationDataTopic(simpleRobotName));
          robotConfigurationDataSubscription.addCallback(this::logRobotConfigurationData);
          runnablesToStopLogging.addLast(robotConfigurationDataSubscription::destroy);
       }

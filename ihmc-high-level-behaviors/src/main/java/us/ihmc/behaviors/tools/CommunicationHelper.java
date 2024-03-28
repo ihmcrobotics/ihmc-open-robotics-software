@@ -12,6 +12,7 @@ import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningMo
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.avatar.sensors.realsense.MapsenseTools;
@@ -19,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.ros2.ROS2Input;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -203,7 +203,7 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    @Override
    public ROS2Input<RobotConfigurationData> subscribeToRobotConfigurationData()
    {
-      return subscribe(ROS2Tools.getRobotConfigurationDataTopic(getRobotName()));
+      return subscribe(StateEstimatorAPI.getRobotConfigurationDataTopic(getRobotName()));
    }
 
    public void subscribeToPlanarRegionsViaCallback(ROS2Topic<PlanarRegionsListMessage> topic, Consumer<PlanarRegionsList> callback)
@@ -239,7 +239,7 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
 
    public void subscribeToRobotConfigurationDataViaCallback(Consumer<RobotConfigurationData> callback)
    {
-      subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(getRobotModel().getSimpleRobotName()), callback);
+      subscribeViaCallback(StateEstimatorAPI.getRobotConfigurationDataTopic(getRobotModel().getSimpleRobotName()), callback);
    }
 
    @Override

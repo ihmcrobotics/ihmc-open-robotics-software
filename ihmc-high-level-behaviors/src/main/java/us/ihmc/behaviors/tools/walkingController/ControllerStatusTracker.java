@@ -3,8 +3,8 @@ package us.ihmc.behaviors.tools.walkingController;
 import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogToolsWriteOnly;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
@@ -51,7 +51,7 @@ public class ControllerStatusTracker
 
       finishedWalkingNotification.set();
 
-      new ROS2Callback<>(ros2Node, ROS2Tools.getRobotConfigurationDataTopic(robotName), this::acceptRobotConfigurationData);
+      new ROS2Callback<>(ros2Node, StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), this::acceptRobotConfigurationData);
       new ROS2Callback<>(ros2Node, getTopic(HighLevelStateChangeStatusMessage.class, robotName), this::acceptHighLevelStateChangeStatusMessage);
       new ROS2Callback<>(ros2Node, getTopic(WalkingControllerFailureStatusMessage.class, robotName), this::acceptWalkingControllerFailureStatusMessage);
       new ROS2Callback<>(ros2Node, getTopic(PlanOffsetStatus.class, robotName), this::acceptPlanOffsetStatus);

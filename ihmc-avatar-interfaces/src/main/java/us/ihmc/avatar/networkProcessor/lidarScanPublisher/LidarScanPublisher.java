@@ -11,6 +11,7 @@ import gnu.trove.list.array.TFloatArrayList;
 import scan_to_cloud.PointCloud2WithSource;
 import sensor_msgs.PointCloud2;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.perception.filters.CollidingScanPointFilter;
 import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.RangeScanPointFilter;
@@ -106,7 +107,7 @@ public class LidarScanPublisher
       lidarSensorFrame = sensorFrameFactory.setupSensorFrame(fullRobotModel);
 
       ROS2Tools.createCallbackSubscription(ros2Node,
-                                           ROS2Tools.getRobotConfigurationDataTopic(robotName),
+                                           StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
       lidarScanPublisher = ros2Node.createPublisher(PerceptionAPI.MULTISENSE_LIDAR_SCAN);
    }

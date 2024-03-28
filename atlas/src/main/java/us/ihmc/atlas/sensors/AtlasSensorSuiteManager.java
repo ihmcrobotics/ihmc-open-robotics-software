@@ -13,6 +13,7 @@ import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.avatar.sensors.multisense.MultiSenseSensorManager;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.perception.ros1.camera.FisheyeCameraReceiver;
@@ -112,7 +113,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       if (enableVideoPublisher)
       {
          ROS2Tools.createCallbackSubscription(ros2Node,
-                                              ROS2Tools.getRobotConfigurationDataTopic(robotName),
+                                              StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
          cameraDataReceiver = new SCSCameraDataReceiver(sensorInformation.getCameraParameters(0).getRobotSide(),

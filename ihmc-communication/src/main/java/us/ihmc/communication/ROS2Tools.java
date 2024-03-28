@@ -1,9 +1,7 @@
 package us.ihmc.communication;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SakeHandStatusMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
@@ -94,7 +92,6 @@ public class ROS2Tools
                                                                                                                 .withTypeName(SakeHandDesiredCommandMessage.class);
    private static final ROS2Topic<SakeHandStatusMessage> HAND_SAKE_DESIRED_STATUS = HUMANOID_CONTROLLER.withOutput()
                                                                                                        .withTypeName(SakeHandStatusMessage.class);
-   private static final ROS2Topic<HandJointAnglePacket> HAND_JOINT_ANGLES = HUMANOID_CONTROLLER.withOutput().withTypeName(HandJointAnglePacket.class);
 
    public static final ROS2Topic<Float64> BOX_MASS = IHMC_ROOT.withSuffix("box_mass").withType(Float64.class);
 
@@ -113,11 +110,6 @@ public class ROS2Tools
    public static ROS2Topic<SakeHandStatusMessage> getHandSakeStatusTopic(String robotName, RobotSide side)
    {
       return HAND_SAKE_DESIRED_STATUS.withRobot(robotName).withSuffix(side.getLowerCaseName());
-   }
-
-   public static ROS2Topic<HandJointAnglePacket> getHandJointAnglesTopic(String robotName)
-   {
-      return HAND_JOINT_ANGLES.withRobot(robotName);
    }
 
    public static ROS2Topic<BehaviorControlModePacket> getBehaviorControlModeTopic(String robotName)
@@ -173,16 +165,6 @@ public class ROS2Tools
    public static <T> ROS2Topic<T> typeNamedTopic(Class<T> messageType, ROS2Topic<?> topicName)
    {
       return typeNamedTopic(messageType).withTopic(topicName);
-   }
-
-   public static ROS2Topic<RobotConfigurationData> getRobotConfigurationDataTopic(String robotName)
-   {
-      return typeNamedTopic(RobotConfigurationData.class, getControllerOutputTopic(robotName));
-   }
-
-   public static ROS2Topic<HandJointAnglePacket> getHandJointAnglePacketTopic(String robotName)
-   {
-      return typeNamedTopic(HandJointAnglePacket.class, getControllerOutputTopic(robotName));
    }
 
    public static ROS2Topic<StampedPosePacket> getPoseCorrectionTopic(String robotName)
