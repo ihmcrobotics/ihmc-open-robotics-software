@@ -6,7 +6,6 @@ import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.JPEGEncoder;
 import us.ihmc.codecs.yuv.YUVPictureConverter;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
@@ -49,7 +48,7 @@ public class RealsenseVideoROS1Bridge extends AbstractRosTopicSubscriber<sensor_
 
       ROS2Topic<VideoPacket> ros2Topic = ros2OutputTopic;
       LogTools.info("Publishing ROS 2: {}", ros2Topic.getName());
-      publisher = ROS2Tools.createPublisher(ros2Node, ros2Topic);
+      publisher = ros2Node.createPublisher(ros2Topic);
    }
 
    @Override

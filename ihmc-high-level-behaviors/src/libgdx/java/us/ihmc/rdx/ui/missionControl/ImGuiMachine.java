@@ -96,7 +96,7 @@ public class ImGuiMachine
 
       ThreadTools.startAsDaemon(() ->
       {
-         rebootPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemRebootTopic(instanceId));
+         rebootPublisher = ros2Node.createPublisher(ROS2Tools.getSystemRebootTopic(instanceId));
       }, "Reboot-Publisher-Thread");
 
       ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getSystemResourceUsageTopic(instanceId), subscriber ->

@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.St
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -35,6 +34,7 @@ import us.ihmc.robotics.geometry.PlanarLandmarkList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -137,7 +137,7 @@ public class PlanarRegionMappingHandler
          this.ros2Helper = new ROS2Helper(ros2Node);
 
          launchMapper();
-         controllerRegionsPublisher = ROS2Tools.createPublisher(ros2Node, StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, simpleRobotName));
+         controllerRegionsPublisher = ros2Node.createPublisher(StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, simpleRobotName));
          ros2Helper.subscribeViaCallback(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, latestIncomingRegions::set);
 
          ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), message ->

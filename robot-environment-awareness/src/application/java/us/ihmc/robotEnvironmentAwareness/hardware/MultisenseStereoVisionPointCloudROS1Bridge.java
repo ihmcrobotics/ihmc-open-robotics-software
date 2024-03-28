@@ -60,7 +60,7 @@ public class MultisenseStereoVisionPointCloudROS1Bridge extends AbstractRosTopic
 
       rosMainNode.execute();
 
-      stereoVisionPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.MULTISENSE_STEREO_POINT_CLOUD);
+      stereoVisionPublisher = ros2Node.createPublisher(PerceptionAPI.MULTISENSE_STEREO_POINT_CLOUD);
 
       commandScanner = new Scanner(System.in);
       Runnable inputReader = new Runnable()

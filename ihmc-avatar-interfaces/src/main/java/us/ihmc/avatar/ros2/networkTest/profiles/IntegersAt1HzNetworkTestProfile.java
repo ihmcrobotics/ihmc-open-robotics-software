@@ -62,7 +62,7 @@ public class IntegersAt1HzNetworkTestProfile extends ROS2NetworkTestProfile
          subscriberTopic = TO_OCU;
       }
 
-      publisher = ROS2Tools.createPublisher(ros2Node, publisherTopic);
+      publisher = ros2Node.createPublisher(publisherTopic);
       if (subscriberTopic != null)
       {
          new ROS2Callback<>(ros2Node, subscriberTopic, message ->

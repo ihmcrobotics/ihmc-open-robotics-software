@@ -52,7 +52,7 @@ public class RemoteHeightMapUpdater
    {
       this.ros2Node = ros2Node;
 
-      ROS2PublisherBasics<HeightMapMessage> heightMapPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.HEIGHT_MAP_OUTPUT);
+      ROS2PublisherBasics<HeightMapMessage> heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_OUTPUT);
       ROS2Tools.createCallbackSubscription(ros2Node, PerceptionAPI.HEIGHT_MAP_STATE_REQUEST, m -> consumeStateRequestMessage(m.readNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, ControllerAPIDefinition.getTopic(WalkingStatusMessage.class, robotName), m -> consumeWalkingStatusMessage(m.readNextData()));
 

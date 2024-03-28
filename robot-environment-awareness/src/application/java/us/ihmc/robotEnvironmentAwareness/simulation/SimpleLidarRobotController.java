@@ -9,7 +9,6 @@ import perception_msgs.msg.dds.LidarScanMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -97,7 +96,7 @@ public class SimpleLidarRobotController implements RobotController
       yoGraphicPlanarRegionsList.hideGraphicObject();
       yoGraphicsListRegistry.registerYoGraphic("Regions", yoGraphicPlanarRegionsList);
 
-      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.MULTISENSE_LIDAR_SCAN);
+      lidarScanPublisher = ros2Node.createPublisher(PerceptionAPI.MULTISENSE_LIDAR_SCAN);
    }
 
    @Override

@@ -334,17 +334,12 @@ public class ROS2Tools
    /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
    public static <T> ROS2PublisherBasics<T> createPublisherTypeNamed(RealtimeROS2Node realtimeROS2Node, Class<T> messageType, ROS2Topic<?> topicName)
    {
-      return createPublisher(realtimeROS2Node, typeNamedTopic(messageType).withTopic(topicName));
+      return realtimeROS2Node.createPublisher(typeNamedTopic(messageType).withTopic(topicName));
    }
 
    /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
    public static <T> ROS2PublisherBasics<T> createPublisherTypeNamed(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic<?> topicName)
    {
-      return createPublisher(ros2Node, typeNamedTopic(messageType).withTopic(topicName));
-   }
-
-   public static <T> ROS2PublisherBasics<T> createPublisher(ROS2NodeInterface ros2Node, ROS2Topic<T> topic)
-   {
-      return ros2Node.createPublisher(topic);
+      return ros2Node.createPublisher(typeNamedTopic(messageType).withTopic(topicName));
    }
 }

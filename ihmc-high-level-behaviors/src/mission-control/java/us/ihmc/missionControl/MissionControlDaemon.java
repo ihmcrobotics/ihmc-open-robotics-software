@@ -93,8 +93,8 @@ public class MissionControlDaemon
 
       String ros2NodeName = "mission_control_daemon_" + instanceId.toString().replace("-", ""); // ROS2 node names cannot have dashes
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ros2NodeName);
-      systemAvailablePublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.SYSTEM_AVAILABLE);
-      systemResourceUsagePublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemResourceUsageTopic(instanceId));
+      systemAvailablePublisher = ros2Node.createPublisher(ROS2Tools.SYSTEM_AVAILABLE);
+      systemResourceUsagePublisher = ros2Node.createPublisher(ROS2Tools.getSystemResourceUsageTopic(instanceId));
 
       ExceptionHandlingThreadScheduler systemAvailablePublisherScheduler = new ExceptionHandlingThreadScheduler("SystemAvailablePublisherScheduler");
       ExceptionHandlingThreadScheduler systemResourceUsagePublisherScheduler = new ExceptionHandlingThreadScheduler("SystemResourceUsagePublisherScheduler");

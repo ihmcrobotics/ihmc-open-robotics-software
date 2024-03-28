@@ -5,7 +5,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -47,7 +46,7 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
       ros1Node.attachSubscriber(ros1InputTopic, this);
 
       LogTools.info("Publishing ROS 2: {}", ros2OutputTopic.getName());
-      publisher = ROS2Tools.createPublisher(ros2Node, ros2OutputTopic);
+      publisher = ros2Node.createPublisher(ros2OutputTopic);
    }
 
    @Override

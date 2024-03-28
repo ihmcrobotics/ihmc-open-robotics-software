@@ -115,7 +115,7 @@ public class StereoVisionPointCloudPublisher
                                            ROS2Tools.getRobotConfigurationDataTopic(robotName),
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
       LogTools.info("Creating stereo point cloud publisher. Topic name: {}", topic.getName());
-      pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, topic)::publish;
+      pointcloudPublisher = ros2Node.createPublisher(topic)::publish;
    }
 
    public void setMaximumNumberOfPoints(int maximumNumberOfPoints)

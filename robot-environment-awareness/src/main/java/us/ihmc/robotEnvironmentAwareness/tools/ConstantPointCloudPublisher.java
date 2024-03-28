@@ -23,7 +23,7 @@ public class ConstantPointCloudPublisher
    public ConstantPointCloudPublisher()
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
-      ROS2PublisherBasics<LidarScanMessage> publisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.MULTISENSE_LIDAR_SCAN);
+      ROS2PublisherBasics<LidarScanMessage> publisher = ros2Node.createPublisher(PerceptionAPI.MULTISENSE_LIDAR_SCAN);
 
       LidarScanMessage lidarScanMessage = new LidarScanMessage();
       lidarScanMessage.getLidarPosition().set(0.0, 0.0, 0.7);

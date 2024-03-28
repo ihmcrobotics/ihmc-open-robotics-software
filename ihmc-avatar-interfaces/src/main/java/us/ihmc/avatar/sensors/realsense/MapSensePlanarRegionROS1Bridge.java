@@ -6,7 +6,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedBufferedRobotModel;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
@@ -32,7 +31,7 @@ public class MapSensePlanarRegionROS1Bridge
 
       MapsenseTools.createROS1Callback(ros1Node, this::acceptMessage);
 
-      publisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.MAPSENSE_REGIONS);
+      publisher = ros2Node.createPublisher(PerceptionAPI.MAPSENSE_REGIONS);
 
       boolean daemon = true;
       int queueSize = 1;

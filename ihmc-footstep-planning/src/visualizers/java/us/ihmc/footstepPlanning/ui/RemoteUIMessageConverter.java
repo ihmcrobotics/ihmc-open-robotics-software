@@ -34,7 +34,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -260,9 +259,10 @@ public class RemoteUIMessageConverter
       messager.addTopicListener(FootstepPlannerMessagerAPI.GoHomeTopic, goHomePublisher::publish);
       messager.addTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListPublisher::publish);
 
-      ROS2PublisherBasics<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher =
-            ROS2Tools.createPublisher(ros2Node,
-                                      PerceptionAPI.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName).withInput().withType(BipedalSupportPlanarRegionParametersMessage.class));
+      ROS2PublisherBasics<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher
+            = ros2Node.createPublisher(PerceptionAPI.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
+                                                                                   .withInput()
+                                                                                   .withType(BipedalSupportPlanarRegionParametersMessage.class));
 
       messager.addTopicListener(FootstepPlannerMessagerAPI.BipedalSupportRegionsParameters,  message ->
       {

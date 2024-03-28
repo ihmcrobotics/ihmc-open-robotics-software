@@ -45,8 +45,8 @@ public class RealsenseColorDepthImagePublisher
                                             ROS2Topic<ImageMessage> colorTopic)
    {
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "realsense_color_depth_publisher");
-      ros2DepthImagePublisher = ROS2Tools.createPublisher(ros2Node, depthTopic);
-      ros2ColorImagePublisher = ROS2Tools.createPublisher(ros2Node, colorTopic);
+      ros2DepthImagePublisher = ros2Node.createPublisher(depthTopic);
+      ros2ColorImagePublisher = ros2Node.createPublisher(colorTopic);
 
       publishDepthThread = new RestartableThread("RealsenseDepthImagePublisher", this::publishDepthThreadFunction);
       publishColorThread = new RestartableThread("RealsenseColorImagePublisher", this::publishColorThreadFunction);

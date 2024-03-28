@@ -21,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVis
 import us.ihmc.commonWalkingControlModules.visualizer.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.commons.Conversions;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -122,8 +121,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
       if (realtimeROS2Node != null)
       {
-         crashNotificationPublisher = ROS2Tools.createPublisher(realtimeROS2Node,
-                                                                ControllerAPIDefinition.getTopic(ControllerCrashNotificationPacket.class, robotName));
+         crashNotificationPublisher = realtimeROS2Node.createPublisher(ControllerAPIDefinition.getTopic(ControllerCrashNotificationPacket.class, robotName));
       }
       else
       {

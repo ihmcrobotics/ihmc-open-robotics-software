@@ -21,7 +21,6 @@ import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -185,7 +184,7 @@ public class FootstepPlanningModuleLauncher
       ROS2PublisherBasics<FootstepPlanningToolboxOutputStatus> resultPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                   FootstepPlanningToolboxOutputStatus.class,
                                                                                                                   outputTopic);
-      ROS2PublisherBasics<FootstepDataListMessage> swingReplanPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerAPI.swingReplanOutputTopic(robotName));
+      ROS2PublisherBasics<FootstepDataListMessage> swingReplanPublisher = ros2Node.createPublisher(FootstepPlannerAPI.swingReplanOutputTopic(robotName));
 
       footstepPlanningModule.addStatusCallback(output ->
                                                {

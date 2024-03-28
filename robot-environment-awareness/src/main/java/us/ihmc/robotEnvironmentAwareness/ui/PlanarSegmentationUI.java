@@ -8,13 +8,10 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import std_msgs.msg.dds.Empty;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -112,7 +109,7 @@ public class PlanarSegmentationUI implements PerceptionUI
       primaryStage.setScene(mainScene);
 
       ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "planar_segmentation_ui");
-      ROS2PublisherBasics<Empty> shutdownPublisher = ROS2Tools.createPublisher(ros2Node, SLAMModuleAPI.SHUTDOWN);
+      ROS2PublisherBasics<Empty> shutdownPublisher = ros2Node.createPublisher(SLAMModuleAPI.SHUTDOWN);
       new ROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
       {
          if (!shuttingDown)

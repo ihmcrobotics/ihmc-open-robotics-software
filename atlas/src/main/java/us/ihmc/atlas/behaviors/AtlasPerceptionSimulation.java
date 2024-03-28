@@ -84,7 +84,7 @@ public class AtlasPerceptionSimulation
       if (runLidarREA)
       {
          MultisenseLidarSimulator multisenseLidar = new MultisenseLidarSimulator(robotModel, ros2Node, map, multisenseLidarScanSize);
-         ROS2PublisherBasics<LidarScanMessage> publisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.MULTISENSE_LIDAR_SCAN);
+         ROS2PublisherBasics<LidarScanMessage> publisher = ros2Node.createPublisher(PerceptionAPI.MULTISENSE_LIDAR_SCAN);
          multisenseLidar.addLidarScanListener(scan -> publisher.publish(PointCloudMessageTools.toLidarScanMessage(scan, multisenseLidar.getSensorPose())));
 
          ExceptionTools.handle(() ->
@@ -108,7 +108,7 @@ public class AtlasPerceptionSimulation
                                                                                             ros2Node,
                                                                                             multisenseStereoRange,
                                                                                             multisenseStereoSphereScanSize);
-         ROS2PublisherBasics<PlanarRegionsListMessage> publisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.LIDAR_REA_REGIONS);
+         ROS2PublisherBasics<PlanarRegionsListMessage> publisher = ros2Node.createPublisher(PerceptionAPI.LIDAR_REA_REGIONS);
          multisenseRegionsPublisher = new PausablePeriodicThread("MultisenseREARegionsPublisher", period,
             () -> publisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(multisenseStereo.computeRegions())));
          multisenseRegionsPublisher.start();
@@ -117,7 +117,7 @@ public class AtlasPerceptionSimulation
       RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(map, robotModel, ros2Node, realsenseRange, realsenseSphereScanSize);
       if (runRealsenseSLAM)
       {
-         ROS2PublisherBasics<StereoVisionPointCloudMessage> publisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.D435_POINT_CLOUD);
+         ROS2PublisherBasics<StereoVisionPointCloudMessage> publisher = ros2Node.createPublisher(PerceptionAPI.D435_POINT_CLOUD);
          realsensePointCloudPublisher = new PausablePeriodicThread("RealsensePointCloudPublisher", period,
             () ->
             {
@@ -131,7 +131,7 @@ public class AtlasPerceptionSimulation
       else
       {
          PlanarRegionSLAMMapper realsenseSLAM = new PlanarRegionSLAMMapper();
-         ROS2PublisherBasics<PlanarRegionsListMessage> publisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.REALSENSE_SLAM_REGIONS);
+         ROS2PublisherBasics<PlanarRegionsListMessage> publisher = ros2Node.createPublisher(PerceptionAPI.REALSENSE_SLAM_REGIONS);
          realsenseRegionsPublisher = new PausablePeriodicThread("RealsenseSLAMPublisher", period,
             () -> publisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(realsenseSLAM.update(realsense.computeRegions()))));
          realsenseRegionsPublisher.start();

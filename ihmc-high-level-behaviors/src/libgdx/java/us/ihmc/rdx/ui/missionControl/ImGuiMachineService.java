@@ -49,11 +49,11 @@ public class ImGuiMachineService
 
       ThreadTools.startAsDaemon(() ->
       {
-         logRefreshPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemServiceLogRefreshTopic(instanceId));
+         logRefreshPublisher = ros2Node.createPublisher(ROS2Tools.getSystemServiceLogRefreshTopic(instanceId));
       }, "Log-Refresh-Publisher-Thread");
       ThreadTools.startAsDaemon(() ->
       {
-         serviceActionPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.getSystemServiceActionTopic(instanceId));
+         serviceActionPublisher = ros2Node.createPublisher(ROS2Tools.getSystemServiceActionTopic(instanceId));
       }, "Service-Action-Publisher-Thread");
 
       // Request a refresh after 1 second

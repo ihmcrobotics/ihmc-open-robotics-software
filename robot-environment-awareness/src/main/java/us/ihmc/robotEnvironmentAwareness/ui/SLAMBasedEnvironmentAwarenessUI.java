@@ -160,7 +160,7 @@ public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
       primaryStage.setScene(mainScene);
 
       ros2Node = ROS2Tools.createROS2Node(FAST_RTPS, "slam_ui");
-      ROS2PublisherBasics<Empty> shutdownPublisher = ROS2Tools.createPublisher(ros2Node, SLAMModuleAPI.SHUTDOWN);
+      ROS2PublisherBasics<Empty> shutdownPublisher = ros2Node.createPublisher(SLAMModuleAPI.SHUTDOWN);
       new ROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
       {
          if (!shuttingDown)

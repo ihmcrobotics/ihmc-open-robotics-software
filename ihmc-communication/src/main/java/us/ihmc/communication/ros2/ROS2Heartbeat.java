@@ -5,7 +5,6 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.UnitConversions;
@@ -59,7 +58,7 @@ public class ROS2Heartbeat
    public ROS2Heartbeat(ROS2NodeInterface ros2Node, ROS2Topic<Empty> heartbeatTopic)
    {
       this.heartbeatTopic = heartbeatTopic;
-      heartbeatPublisher = ROS2Tools.createPublisher(ros2Node, heartbeatTopic);
+      heartbeatPublisher = ros2Node.createPublisher(heartbeatTopic);
    }
 
    /**

@@ -29,8 +29,7 @@ public class SystemdServiceMonitor implements Consumer<List<String>>
    {
       this.serviceName = serviceName;
       this.ros2Node = ros2Node;
-      serviceStatusPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                         ROS2Tools.getSystemServiceStatusTopic(instanceId));
+      serviceStatusPublisher = ros2Node.createPublisher(ROS2Tools.getSystemServiceStatusTopic(instanceId));
       systemServiceStatusPublisherScheduler = new ExceptionHandlingThreadScheduler("SystemServiceStatusPublisherScheduler");
       systemServiceStatusPublisherScheduler.schedule(this::publishStatus, 2.0);
 

@@ -49,7 +49,7 @@ public class BlackflyImagePublisher
       IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(lensProperties);
 
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_publisher");
-      ros2DistoredImagePublisher = ROS2Tools.createPublisher(ros2Node, distortedImageTopic);
+      ros2DistoredImagePublisher = ros2Node.createPublisher(distortedImageTopic);
       ousterFisheyeColoringIntrinsicsROS2 = new ROS2StoredPropertySet<>(new ROS2Helper(ros2Node),
                                                                         DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS,
                                                                         ousterFisheyeColoringIntrinsics);

@@ -37,7 +37,7 @@ public class MultisensePointCloud2WithSourceROS1Bridge extends AbstractRosTopicS
       rosMainNode.attachSubscriber(MultisenseInformation.getLidarScanTopicName(), this);
       rosMainNode.execute();
 
-      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.MULTISENSE_LIDAR_SCAN);
+      lidarScanPublisher = ros2Node.createPublisher(PerceptionAPI.MULTISENSE_LIDAR_SCAN);
    }
 
    @Override

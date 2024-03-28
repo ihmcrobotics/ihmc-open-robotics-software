@@ -29,7 +29,6 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -93,7 +92,7 @@ public class StructuralPerceptionProcessWithDriver
 
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_depth_image_node");
       LogTools.info("Publishing ROS 2 depth images: {}", depthTopic);
-      ros2DepthImagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, depthTopic);
+      ros2DepthImagePublisher = realtimeROS2Node.createPublisher(depthTopic);
       LogTools.info("Spinning Realtime ROS 2 node");
       realtimeROS2Node.spin();
 

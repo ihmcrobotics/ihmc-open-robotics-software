@@ -65,7 +65,7 @@ public class TrackingCameraBridge
                                                     RobotConfigurationData.class,
                                                     ROS2Tools.getRobotConfigurationDataTopic(robotName),
                                                     s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-      stampedPosePacketPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.T265_POSE)::publish;
+      stampedPosePacketPublisher = ros2Node.createPublisher(PerceptionAPI.T265_POSE)::publish;
    }
 
    public TrackingCameraBridge(String robotName, FullRobotModel fullRobotModel, RealtimeROS2Node realtimeROS2Node)
@@ -75,7 +75,7 @@ public class TrackingCameraBridge
       ROS2Tools.createCallbackSubscription(realtimeROS2Node,
                                            ROS2Tools.getRobotConfigurationDataTopic(robotName),
                                            s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-      stampedPosePacketPublisher = ROS2Tools.createPublisher(realtimeROS2Node, PerceptionAPI.T265_POSE)::publish;
+      stampedPosePacketPublisher = realtimeROS2Node.createPublisher(PerceptionAPI.T265_POSE)::publish;
    }
 
    public void start()

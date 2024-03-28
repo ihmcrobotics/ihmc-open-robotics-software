@@ -9,7 +9,6 @@ import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.perception.heightMap.HeightMapUpdater;
 import us.ihmc.messager.Messager;
@@ -54,7 +53,7 @@ public class HeightMapUpdaterForUI
 
       attachMessagerToUpdater();
 
-      ROS2PublisherBasics<HeightMapMessage> heightMapPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.HEIGHT_MAP_OUTPUT);
+      ROS2PublisherBasics<HeightMapMessage> heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_OUTPUT);
       heightMapUpdater.attachHeightMapConsumer(heightMap -> messager.submitMessage(HeightMapMessagerAPI.HeightMapData, heightMap));
       heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
 

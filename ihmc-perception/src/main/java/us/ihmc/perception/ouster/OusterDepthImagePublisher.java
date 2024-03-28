@@ -40,7 +40,7 @@ public class OusterDepthImagePublisher
       this.ouster = ouster;
 
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ouster_depth_publisher");
-      ros2DepthImagePublisher = ROS2Tools.createPublisher(ros2Node, depthTopic);
+      ros2DepthImagePublisher = ros2Node.createPublisher(depthTopic);
 
       publishDepthThread = new RestartableThread("OusterDepthImagePublisher", this::publishDepthThreadFunction);
       publishDepthThread.start();

@@ -26,7 +26,7 @@ public class SimulatedStereoVisionPointCloudPublisher extends ApplicationNoModul
    private static long DEFAULT_PUBLISHING_PERIOD_MS = 250;
 
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
-   private final ROS2PublisherBasics<StereoVisionPointCloudMessage> stereoVisionPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.D435_POINT_CLOUD);
+   private final ROS2PublisherBasics<StereoVisionPointCloudMessage> stereoVisionPublisher = ros2Node.createPublisher(PerceptionAPI.D435_POINT_CLOUD);
 
    private int indexToPublish = 0;
    private final List<StereoVisionPointCloudMessage> stereoVisionPointCloudMessagesToPublish = new ArrayList<>();

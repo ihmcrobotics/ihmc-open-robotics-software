@@ -5,7 +5,6 @@ import perception_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ConnectionStateListener;
 import us.ihmc.communication.producers.CompressedVideoHandler;
 import us.ihmc.communication.producers.VideoSource;
@@ -41,7 +40,7 @@ public class VideoPacketHandler implements CompressedVideoHandler
    public VideoPacketHandler(ROS2NodeInterface ros2Node, ROS2Topic<VideoPacket> topic, ROS2QosProfile qosProfile)
    {
       LogTools.info("Creating video publisher on topic: {}", topic.getName());
-      publisher = ROS2Tools.createPublisher(ros2Node, topic);
+      publisher = ros2Node.createPublisher(topic);
    }
 
    private Stopwatch timer;
