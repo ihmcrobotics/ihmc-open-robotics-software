@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.communication.OldBehaviorAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -535,7 +536,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
    public static ROS2Topic getBehaviorRosTopicPrefix(String robotName, String suffix)
    {
-      return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withSuffix(suffix);
+      return OldBehaviorAPI.BEHAVIOR_MODULE.withRobot(robotName).withSuffix(suffix);
    }
 
    public static ROS2Topic getBehaviorOutputRosTopicPrefix(String robotName)
@@ -550,12 +551,12 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
    public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
+      return OldBehaviorAPI.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
    }
 
    public static ROS2Topic getInputTopic(String robotName)
    {
-      return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withInput();
+      return OldBehaviorAPI.BEHAVIOR_MODULE.withRobot(robotName).withInput();
    }
 
    @Override

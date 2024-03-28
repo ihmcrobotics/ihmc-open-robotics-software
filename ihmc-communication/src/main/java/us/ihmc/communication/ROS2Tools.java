@@ -72,18 +72,11 @@ public class ROS2Tools
    public static final ROS2Topic<?> DIRECTIONAL_CONTROL_TOOLBOX = IHMC_ROOT.withModule(DIRECTIONAL_CONTROL_TOOLBOX_MODULE_NAME);
    public static final ROS2Topic<?> QUADRUPED_SUPPORT_REGION_PUBLISHER = IHMC_ROOT.withModule(QUADRUPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME);
 
-   public static final ROS2Topic<?> BEHAVIOR_MODULE = IHMC_ROOT.withModule(BEHAVIOR_MODULE_NAME);
-
    public static final ROS2Topic<Empty> KINEMATICS_SIMULATION_HEARTBEAT
          = IHMC_ROOT.withModule("kinematics_simulation").withOutput().withSuffix("heartbeat").withType(Empty.class);
 
    public static final ROS2Topic<TextToSpeechPacket> TEXT_STATUS = IHMC_ROOT.withTypeName(TextToSpeechPacket.class);
 
-   public static final ROS2Topic<?> BEHAVIOR_MODULE_INPUT = ROS2Tools.BEHAVIOR_MODULE.withInput();
-   public static final ROS2Topic<?> BEHAVIOR_MODULE_OUTPUT = ROS2Tools.BEHAVIOR_MODULE.withOutput();
-   private static final ROS2Topic<BehaviorControlModePacket> BEHAVIOR_CONTROL_MODE = BEHAVIOR_MODULE_INPUT.withTypeName(BehaviorControlModePacket.class);
-   private static final ROS2Topic<HumanoidBehaviorTypePacket> BEHAVIOR_TYPE = BEHAVIOR_MODULE_INPUT.withTypeName(HumanoidBehaviorTypePacket.class);
-   private static final ROS2Topic<BehaviorStatusPacket> BEHAVIOR_STATUS = BEHAVIOR_MODULE_OUTPUT.withTypeName(BehaviorStatusPacket.class);
    private static final ROS2Topic<HandDesiredConfigurationMessage> HAND_CONFIGURATION = HUMANOID_CONTROLLER.withInput()
                                                                                                            .withTypeName(HandDesiredConfigurationMessage.class);
    private static final ROS2Topic<SakeHandDesiredCommandMessage> HAND_SAKE_DESIRED_COMMAND = HUMANOID_CONTROLLER.withInput()
@@ -108,21 +101,6 @@ public class ROS2Tools
    public static ROS2Topic<SakeHandStatusMessage> getHandSakeStatusTopic(String robotName, RobotSide side)
    {
       return HAND_SAKE_DESIRED_STATUS.withRobot(robotName).withSuffix(side.getLowerCaseName());
-   }
-
-   public static ROS2Topic<BehaviorControlModePacket> getBehaviorControlModeTopic(String robotName)
-   {
-      return BEHAVIOR_CONTROL_MODE.withRobot(robotName);
-   }
-
-   public static ROS2Topic<HumanoidBehaviorTypePacket> getBehaviorTypeTopic(String robotName)
-   {
-      return BEHAVIOR_TYPE.withRobot(robotName);
-   }
-
-   public static ROS2Topic<BehaviorStatusPacket> getBehaviorStatusTopic(String robotName)
-   {
-      return BEHAVIOR_STATUS.withRobot(robotName);
    }
 
    public static ROS2Topic<?> getControllerOutputTopic(String robotName)

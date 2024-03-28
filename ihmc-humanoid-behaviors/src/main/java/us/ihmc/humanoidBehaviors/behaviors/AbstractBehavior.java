@@ -8,6 +8,7 @@ import java.util.Map;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.communication.OldBehaviorAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2Node;
@@ -106,8 +107,8 @@ public abstract class AbstractBehavior implements RobotController
 
       controllerInputTopic = ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withInput();
       controllerOutputTopic = ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
-      behaviorInputTopic = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withInput();
-      behaviorOutputTopic = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
+      behaviorInputTopic = OldBehaviorAPI.BEHAVIOR_MODULE.withRobot(robotName).withInput();
+      behaviorOutputTopic = OldBehaviorAPI.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
 
       textToSpeechPublisher = createPublisher(TextToSpeechPacket.class, ROS2Tools.IHMC_ROOT);
       uiPositionCheckerPacketpublisher = createBehaviorOutputPublisher(UIPositionCheckerPacket.class);
