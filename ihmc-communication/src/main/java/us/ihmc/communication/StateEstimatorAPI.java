@@ -2,6 +2,7 @@ package us.ihmc.communication;
 
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
 public class StateEstimatorAPI
@@ -15,11 +16,11 @@ public class StateEstimatorAPI
 
    public static ROS2Topic<RobotConfigurationData> getRobotConfigurationDataTopic(String robotName)
    {
-      return ROS2Tools.typeNamedTopic(RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName));
+      return ROS2Tools.getControllerOutputTopic(robotName).withTypeName(RobotConfigurationData.class).withQoS(ROS2QosProfile.BEST_EFFORT());
    }
 
    public static ROS2Topic<HandJointAnglePacket> getHandJointAnglePacketTopic(String robotName)
    {
-      return ROS2Tools.typeNamedTopic(HandJointAnglePacket.class, ROS2Tools.getControllerOutputTopic(robotName));
+      return ROS2Tools.getControllerOutputTopic(robotName).withTypeName(HandJointAnglePacket.class).withQoS(ROS2QosProfile.BEST_EFFORT());
    }
 }
