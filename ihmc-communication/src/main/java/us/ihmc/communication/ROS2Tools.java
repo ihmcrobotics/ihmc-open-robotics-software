@@ -65,7 +65,7 @@ public class ROS2Tools
                                                                     ROS2Topic<T> topic,
                                                                     NewMessageListener<T> newMessageListener)
    {
-      return ros2Node.createSubscription(topic, newMessageListener, newMessageListener::onSubscriptionMatched);
+      return ros2Node.createSubscription(topic, newMessageListener);
    }
 
    /**
