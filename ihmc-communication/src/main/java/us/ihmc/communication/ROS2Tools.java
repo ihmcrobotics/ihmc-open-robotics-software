@@ -353,10 +353,4 @@ public class ROS2Tools
    {
       return ros2Node.createPublisher(messageType, topicName.getName(), topicName.getQoS());
    }
-
-   /** @deprecated Use {@link ROS2Topic#withType} instead. */
-   public static <T> ROS2PublisherBasics<T> createPublisher(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName)
-   {
-      return ros2Node.createPublisher(messageType, topicName);
-   }
 }

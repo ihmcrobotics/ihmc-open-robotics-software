@@ -54,7 +54,7 @@ public class PointCloud2ToLidarScanMessageConverter
       Pose3D sensorPose = new Pose3D(poseX, poseY, poseZ, poseYaw, posePitch, poseRoll);
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
-      ROS2PublisherBasics<LidarScanMessage> lidarScanMessagePublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan");
+      ROS2PublisherBasics<LidarScanMessage> lidarScanMessagePublisher = ros2Node.createPublisher(LidarScanMessage.class, "/ihmc/lidar_scan");
 
       // save and handle on another thread
       RosPointCloudSubscriber pointCloudSubscriber = new RosPointCloudSubscriber()

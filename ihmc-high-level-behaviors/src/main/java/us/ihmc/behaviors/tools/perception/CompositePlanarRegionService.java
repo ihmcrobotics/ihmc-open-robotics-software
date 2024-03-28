@@ -34,7 +34,7 @@ public class CompositePlanarRegionService
 
       for (int i = 0; i < planarRegionSuppliers.length; i++)
       {
-         planarRegionPublishers.add(ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, topicNames.get(i)));
+         planarRegionPublishers.add(ros2Node.createPublisher(PlanarRegionsListMessage.class, topicNames.get(i)));
       }
 
       combinedPlanarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, PerceptionAPI.MAP_REGIONS);

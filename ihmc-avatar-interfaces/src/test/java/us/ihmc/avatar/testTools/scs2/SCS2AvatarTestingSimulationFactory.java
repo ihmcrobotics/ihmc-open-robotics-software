@@ -169,7 +169,7 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
 
    public <T> ROS2PublisherBasics<T> createPublisher(Class<T> messageType, String topicName)
    {
-      return ROS2Tools.createPublisher(ros2Node, messageType, topicName);
+      return ros2Node.createPublisher(messageType, topicName);
    }
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
