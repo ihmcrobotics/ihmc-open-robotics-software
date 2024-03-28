@@ -11,8 +11,6 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematic
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.TaskspaceTrajectoryTrackingErrorCalculator;
-import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
-import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -27,7 +25,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
-import us.ihmc.robotics.geometry.FramePose3DChangedTracker;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -37,8 +34,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.Arrays;
 
 public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<WholeBodyBimanipulationActionState, WholeBodyBimanipulationActionDefinition>
 {
@@ -52,8 +47,6 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
    private final HumanoidKinematicsSolver wholeBodyIKSolver;
    private final FullHumanoidRobotModel desiredFullRobotModel;
    private final OneDoFJointBasics[] desiredOneDoFJointsExcludingHands;
-//   private final ControllerStatusTracker controllerStatusTracker;
-//   private final LogToolsLogger logToolsLogger = new LogToolsLogger();
    private final SideDependentList<KinematicsToolboxRigidBodyCommand> handRigidBodyCommands = new SideDependentList<>();
    private volatile boolean isSolutionGood = false;
 
@@ -79,7 +72,6 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       wholeBodyIKSolver = new HumanoidKinematicsSolver(robotModel, yoGraphicsListRegistry, new YoRegistry(getClass().getSimpleName()));
-//      controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2ControllerHelper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
 
       for (RobotSide side : RobotSide.values)
       {
@@ -90,8 +82,9 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
             rigidBodyCommand.getControlFramePose().setToZero(wholeBodyIKSolver.getDesiredFullRobotModel().getHandControlFrame(side));
             rigidBodyCommand.getControlFramePose().changeFrame(wholeBodyIKSolver.getDesiredFullRobotModel().getHand(side).getBodyFixedFrame());
             // TODO: Use default values from somewhere else
-            rigidBodyCommand.getWeightMatrix().setLinearWeights(20.0, 20.0, 20.0);
-            rigidBodyCommand.getWeightMatrix().setAngularWeights(1.0, 1.0, 1.0);
+            rigidBodyCommand.getWeightMatrix().setLinearWeights(5.0, 5.0, 5.0);
+            rigidBodyCommand.getWeightMatrix().setAngularWeights(1.0, 1.0, 5.0);
+            rigidBodyCommand.getSelectionMatrix().getAngularPart().setAxisSelection(false, false, true);
             handRigidBodyCommands.put(side, rigidBodyCommand);
          }
       }
@@ -121,6 +114,7 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
             KinematicsToolboxRigidBodyCommand rigidBodyCommand = handRigidBodyCommands.get(side);
             rigidBodyCommand.getDesiredPose().setFromReferenceFrame(state.getHandFrame(side).getReferenceFrame());
             wholeBodyIKSolver.submit(rigidBodyCommand);
+            wholeBodyIKSolver.setAsDoubleSupport();
          }
 
          // We solve on a thread because the solver can take some milliseconds
