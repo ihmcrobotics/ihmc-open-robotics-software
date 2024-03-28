@@ -19,7 +19,6 @@ import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
-import java.net.InetAddress;
 import java.util.function.Consumer;
 
 public class ROS2Tools
@@ -172,8 +171,6 @@ public class ROS2Tools
    }
 
    private static final RTPSCommunicationFactory FACTORY = new RTPSCommunicationFactory();
-   private static final int DOMAIN_ID = FACTORY.getDomainId();
-   private static final InetAddress ADDRESS_RESTRICTION = FACTORY.getAddressRestriction();
 
    /**
     * Creates a ROS2 node that shares the same implementation as a real-time node <b>but that should
@@ -185,7 +182,7 @@ public class ROS2Tools
     */
    public static RealtimeROS2Node createRealtimeROS2Node(PubSubImplementation pubSubImplementation, String nodeName)
    {
-      return new RealtimeROS2Node(pubSubImplementation, nodeName, DOMAIN_ID, ADDRESS_RESTRICTION);
+      return new RealtimeROS2Node(pubSubImplementation, nodeName, FACTORY.getDomainId(), FACTORY.getAddressRestriction());
    }
 
    /**
@@ -201,12 +198,12 @@ public class ROS2Tools
                                                          PeriodicThreadSchedulerFactory periodicThreadSchedulerFactory,
                                                          String nodeName)
    {
-      return new RealtimeROS2Node(pubSubImplementation, periodicThreadSchedulerFactory, nodeName, DOMAIN_ID, ADDRESS_RESTRICTION);
+      return new RealtimeROS2Node(pubSubImplementation, periodicThreadSchedulerFactory, nodeName, FACTORY.getDomainId(), FACTORY.getAddressRestriction());
    }
 
    public static ROS2Node createROS2Node(PubSubImplementation pubSubImplementation, String nodeName)
    {
-      return new ROS2Node(pubSubImplementation, nodeName, DOMAIN_ID, ADDRESS_RESTRICTION);
+      return new ROS2Node(pubSubImplementation, nodeName, FACTORY.getDomainId(), FACTORY.getAddressRestriction());
    }
 
    /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
