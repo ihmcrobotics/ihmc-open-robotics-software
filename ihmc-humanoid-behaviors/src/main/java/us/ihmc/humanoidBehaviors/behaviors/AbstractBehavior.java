@@ -141,7 +141,7 @@ public abstract class AbstractBehavior implements RobotController
 
       if (publisher == null) // !containsKey
       {
-         publisher = ROS2Tools.createPublisher(ros2Node, messageType, typedNamedTopic);
+         publisher = ros2Node.createPublisher(messageType, typedNamedTopic.getName(), typedNamedTopic.getQoS());
          publishers.put(typedNamedTopic, publisher);
       }
 
