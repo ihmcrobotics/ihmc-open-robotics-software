@@ -1,16 +1,8 @@
 package us.ihmc.communication;
 
-import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
-import controller_msgs.msg.dds.SakeHandStatusMessage;
-import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
-import mission_control_msgs.msg.dds.*;
-import std_msgs.msg.dds.Empty;
-import std_msgs.msg.dds.Float64;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.*;
 import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
@@ -23,37 +15,6 @@ public class ROS2Tools
    public static final String IHMC_TOPIC_PREFIX = "ihmc";
 
    public static final ROS2Topic<?> IHMC_ROOT = new ROS2Topic<>().withPrefix(IHMC_TOPIC_PREFIX);
-
-   public static final ROS2Topic<Empty> KINEMATICS_SIMULATION_HEARTBEAT
-         = IHMC_ROOT.withModule("kinematics_simulation").withOutput().withSuffix("heartbeat").withType(Empty.class);
-
-   public static final ROS2Topic<TextToSpeechPacket> TEXT_STATUS = IHMC_ROOT.withTypeName(TextToSpeechPacket.class);
-
-   private static final ROS2Topic<HandDesiredConfigurationMessage> HAND_CONFIGURATION = HumanoidControllerAPI.HUMANOID_CONTROLLER.withInput()
-                                                                                                                                 .withTypeName(HandDesiredConfigurationMessage.class);
-   private static final ROS2Topic<SakeHandDesiredCommandMessage> HAND_SAKE_DESIRED_COMMAND = HumanoidControllerAPI.HUMANOID_CONTROLLER.withInput()
-                                                                                                                                      .withTypeName(SakeHandDesiredCommandMessage.class);
-   private static final ROS2Topic<SakeHandStatusMessage> HAND_SAKE_DESIRED_STATUS = HumanoidControllerAPI.HUMANOID_CONTROLLER.withOutput()
-                                                                                                                             .withTypeName(SakeHandStatusMessage.class);
-
-   public static final ROS2Topic<Float64> BOX_MASS = IHMC_ROOT.withSuffix("box_mass").withType(Float64.class);
-
-   public static final ROS2Topic<SystemAvailableMessage> SYSTEM_AVAILABLE = IHMC_ROOT.withModule("mission_control").withType(SystemAvailableMessage.class);
-
-   public static ROS2Topic<HandDesiredConfigurationMessage> getHandConfigurationTopic(String robotName)
-   {
-      return HAND_CONFIGURATION.withRobot(robotName);
-   }
-
-   public static ROS2Topic<SakeHandDesiredCommandMessage> getHandSakeCommandTopic(String robotName, RobotSide side)
-   {
-      return HAND_SAKE_DESIRED_COMMAND.withRobot(robotName).withSuffix(side.getLowerCaseName());
-   }
-
-   public static ROS2Topic<SakeHandStatusMessage> getHandSakeStatusTopic(String robotName, RobotSide side)
-   {
-      return HAND_SAKE_DESIRED_STATUS.withRobot(robotName).withSuffix(side.getLowerCaseName());
-   }
 
    /** @deprecated Use {@link ROS2Topic#withTypeName} instead. */
    public static <T> ROS2Topic<T> typeNamedTopic(Class<T> messageType)

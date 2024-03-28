@@ -32,6 +32,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.MiscAPIs;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
@@ -149,7 +150,7 @@ public class HumanoidKinematicsSimulation
 
       // instantiate some existing controller ROS2 API?
       ros2Node = ROS2Tools.createROS2Node(kinematicsSimulationParameters.getPubSubImplementation(), HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME);
-      heartbeat = new ROS2Heartbeat(ros2Node, ROS2Tools.KINEMATICS_SIMULATION_HEARTBEAT);
+      heartbeat = new ROS2Heartbeat(ros2Node, MiscAPIs.KINEMATICS_SIMULATION_HEARTBEAT);
 
       String robotName = robotModel.getSimpleRobotName();
       fullRobotModel = robotModel.createFullRobotModel();

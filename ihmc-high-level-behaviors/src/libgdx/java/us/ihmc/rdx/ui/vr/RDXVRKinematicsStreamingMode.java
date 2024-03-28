@@ -17,8 +17,8 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.Kinemat
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.communication.DeprecatedAPIs;
 import us.ihmc.ros2.ROS2Input;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -555,7 +555,7 @@ public class RDXVRKinematicsStreamingMode
 
    public void sendHandCommand(RobotSide robotSide, HandConfiguration desiredHandConfiguration)
    {
-      ros2ControllerHelper.publish(ROS2Tools::getHandConfigurationTopic,
+      ros2ControllerHelper.publish(DeprecatedAPIs::getHandConfigurationTopic,
                                    HumanoidMessageTools.createHandDesiredConfigurationMessage(robotSide, desiredHandConfiguration));
    }
 

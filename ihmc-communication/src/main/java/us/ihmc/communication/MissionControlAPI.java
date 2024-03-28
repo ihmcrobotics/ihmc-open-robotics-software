@@ -1,5 +1,6 @@
 package us.ihmc.communication;
 
+import mission_control_msgs.msg.dds.SystemAvailableMessage;
 import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
 import mission_control_msgs.msg.dds.SystemServiceActionMessage;
 import mission_control_msgs.msg.dds.SystemServiceLogRefreshMessage;
@@ -12,6 +13,8 @@ import java.util.UUID;
 
 public class MissionControlAPI
 {
+   public static final ROS2Topic<SystemAvailableMessage> SYSTEM_AVAILABLE = ROS2Tools.IHMC_ROOT.withModule("mission_control").withType(SystemAvailableMessage.class);
+
    /**
     * Get system resource usage topic for Mission Control
     * @param instanceId of the Mission Control Daemon

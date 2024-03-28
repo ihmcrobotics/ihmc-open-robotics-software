@@ -14,7 +14,7 @@ import us.ihmc.behaviors.tools.yo.YoBooleanClientHelper;
 import us.ihmc.behaviors.tools.yo.YoDoubleClientHelper;
 import us.ihmc.behaviors.tools.yo.YoVariableClientPublishSubscribeAPI;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
-import us.ihmc.communication.OldBehaviorAPI;
+import us.ihmc.communication.DeprecatedAPIs;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
@@ -60,8 +60,8 @@ import java.util.function.Function;
  */
 public class BehaviorHelper extends CommunicationHelper implements YoVariableClientPublishSubscribeAPI
 {
-   public static final ROS2Topic<?> BEHAVIOR_MODULE_INPUT = OldBehaviorAPI.BEHAVIOR_MODULE.withInput();
-   public static final ROS2Topic<?> BEHAVIOR_MODULE_OUTPUT = OldBehaviorAPI.BEHAVIOR_MODULE.withOutput();
+   public static final ROS2Topic<?> BEHAVIOR_MODULE_INPUT = DeprecatedAPIs.BEHAVIOR_MODULE.withInput();
+   public static final ROS2Topic<?> BEHAVIOR_MODULE_OUTPUT = DeprecatedAPIs.BEHAVIOR_MODULE.withOutput();
    public static final ROS2Topic<BehaviorControlModePacket> BEHAVIOR_CONTROL_MODE = BEHAVIOR_MODULE_INPUT.withTypeName(BehaviorControlModePacket.class);
    public static final ROS2Topic<HumanoidBehaviorTypePacket> BEHAVIOR_TYPE = BEHAVIOR_MODULE_INPUT.withTypeName(HumanoidBehaviorTypePacket.class);
    public static final ROS2Topic<BehaviorStatusPacket> BEHAVIOR_STATUS = BEHAVIOR_MODULE_OUTPUT.withTypeName(BehaviorStatusPacket.class);
