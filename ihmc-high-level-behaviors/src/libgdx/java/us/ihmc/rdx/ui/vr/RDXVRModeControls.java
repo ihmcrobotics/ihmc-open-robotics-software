@@ -30,7 +30,7 @@ public class RDXVRModeControls
       baseUI.getVRManager().getContext().addVRPickCalculator(leftHandPanel::calculateVRPick);
       baseUI.getVRManager().getContext().addVRInputProcessor(leftHandPanel::processVRInput);
       baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
-      baseUI.getPrimaryScene().addModelInstance(leftHandPanel.getModelInstance());
+//      baseUI.getPrimaryScene().addModelInstance(leftHandPanel.getModelInstance());
       baseUI.getPrimary3DPanel().addOverlayPanel(PANEL_NAME, this::render);
    }
 

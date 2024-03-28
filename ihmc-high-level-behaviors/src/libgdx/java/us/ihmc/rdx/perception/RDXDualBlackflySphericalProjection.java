@@ -14,7 +14,7 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import us.ihmc.avatar.colorVision.stereo.DualZEDUDPReceiver;
+import us.ihmc.avatar.colorVision.stereo.DualBlackflyUDPReceiver;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -27,21 +27,27 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
+import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class RDXDualBlackflySphericalProjection
 {
    private final RDXBaseUI baseUI;
-   private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(RDXProjectionSphere::new);
+   private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>();
    private final ImDouble pupillaryDistance = new ImDouble(-0.040650);
    private final FramePose3D leftEyePose = new FramePose3D();
    private final FramePose3D rightEyePose = new FramePose3D();
    private final ReferenceFrame robotZUpFrame;
    private final SideDependentList<ReferenceFrame> projectionOriginFrames = new SideDependentList<>();
-   private final DualZEDUDPReceiver dualZEDUDPReceiver = new DualZEDUDPReceiver();
+   private final DualBlackflyUDPReceiver dualBlackflyUDPReceiver = new DualBlackflyUDPReceiver();
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
@@ -50,19 +56,77 @@ public class RDXDualBlackflySphericalProjection
 
    private final ImDouble projectionZOffset = new ImDouble(1.4);
    private final ImDouble projectionXOffset = new ImDouble(1.0);
+   private final ImDouble projectionYaw = new ImDouble(0.0);
+   private final ImDouble projectionPitch = new ImDouble(0.0);
+   private final ImDouble projectionRoll = new ImDouble(0.0);
    private final SideDependentList<RDXReferenceFrameGraphic> eyeFrameGraphics = new SideDependentList<>();
 
    private long lastFrameUpdateTime;
+
+   private YoRegistry stereoVisionRegistry = new YoRegistry("stereoVision");
+
+   private YoDouble yoPupilaryDistance;
+   private YoDouble yoProjectionZOffset;
+   private YoDouble yoProjectionXOffset;
+   private YoDouble yoProjectionYaw;
+   private YoDouble yoProjectionPitch;
+   private YoDouble yoProjectionRoll;
+
+   private YoDouble yoSphereRadius;
+   private YoDouble yoFocalLengthX;
+   private YoDouble yoFocalLengthY;
+   private YoDouble yoPrinciplePointX;
+   private YoDouble yoPrinciplePointY;
+
+   private final YoVariableServer yoVariableServer;
 
    public RDXDualBlackflySphericalProjection(ReferenceFrame robotZUpFrame)
    {
       this.baseUI = RDXBaseUI.getInstance();
       this.robotZUpFrame = robotZUpFrame;
 
-      projectionSpheres.get(RobotSide.LEFT).setProjectionScaleX(0.665244);
-      projectionSpheres.get(RobotSide.LEFT).setProjectionScaleY(0.713780);
-      projectionSpheres.get(RobotSide.LEFT).setSyncProjectionScales(false);
-      projectionSpheres.get(RobotSide.RIGHT).setSyncProjectionScales(false);
+      yoVariableServer = new YoVariableServer(RDXDualBlackflySphericalProjection.class, null, new DataServerSettings(false, true), 1.0/120.0);
+      yoVariableServer.setMainRegistry(stereoVisionRegistry, null);
+
+      yoPupilaryDistance = new YoDouble("pupilaryDistance", stereoVisionRegistry);
+      yoPupilaryDistance.set(pupillaryDistance.get());
+      yoProjectionZOffset = new YoDouble("projectionZOffset", stereoVisionRegistry);
+      yoProjectionZOffset.set(projectionZOffset.get());
+      yoProjectionXOffset = new YoDouble("projectionXOffset", stereoVisionRegistry);
+      yoProjectionXOffset.set(projectionXOffset.get());
+      yoProjectionYaw = new YoDouble("projectionYaw", stereoVisionRegistry);
+      yoProjectionPitch = new YoDouble("projectionPitch", stereoVisionRegistry);
+      yoProjectionRoll = new YoDouble("projectionRoll", stereoVisionRegistry);
+
+      yoSphereRadius = new YoDouble("sphereRadius", stereoVisionRegistry);
+      yoSphereRadius.set(1.0);
+      yoFocalLengthX = new YoDouble("focalLengthX", stereoVisionRegistry);
+      yoFocalLengthX.set(0.665244);
+      yoFocalLengthY = new YoDouble("focalLengthY", stereoVisionRegistry);
+      yoFocalLengthY.set(0.713780);
+      yoPrinciplePointX = new YoDouble("principlePointX", stereoVisionRegistry);
+      yoPrinciplePointX.set(0.0);
+      yoPrinciplePointY = new YoDouble("principlePointY", stereoVisionRegistry);
+      yoPrinciplePointY.set(0.5);
+
+      // Dex preferred params:
+      yoPupilaryDistance.set(-0.002);
+      yoProjectionZOffset.set(1.764);
+      yoProjectionXOffset.set(-0.433);
+      yoProjectionYaw.set(-0.03070866141732287);
+      yoProjectionPitch.set(-0.015748031496062964);
+      yoProjectionRoll.set(0.017);
+      yoSphereRadius.set(5.7);
+      yoFocalLengthX.set(0.386);
+      yoFocalLengthY.set(0.622);
+      yoPrinciplePointX.set(0.005);
+      yoPrinciplePointY.set(0.437);
+
+      projectionSpheres.put(RobotSide.LEFT, new RDXProjectionSphere());
+      projectionSpheres.put(RobotSide.RIGHT, new RDXProjectionSphere());
+
+      yoVariableServer.start();
+      Executors.newSingleThreadScheduledExecutor().scheduleAtFixedRate(() -> yoVariableServer.update(System.nanoTime()), 0, 10, TimeUnit.MILLISECONDS);
    }
 
    public void renderControls()
@@ -75,13 +139,28 @@ public class RDXDualBlackflySphericalProjection
       projectionSpheres.get(RobotSide.RIGHT).renderImGuiWidgets();
 
       // Sync (or mirror settings)
-      projectionSpheres.get(RobotSide.RIGHT).setProjectionScaleX(projectionSpheres.get(RobotSide.LEFT).getProjectionScaleX());
-      projectionSpheres.get(RobotSide.RIGHT).setProjectionScaleY(projectionSpheres.get(RobotSide.LEFT).getProjectionScaleY());
-      projectionSpheres.get(RobotSide.RIGHT).setRadius(projectionSpheres.get(RobotSide.LEFT).getRadius());
-//      double principlePointX = projectionSpheres.get(RobotSide.LEFT).getPrinciplePointX();
-//      double principlePointY = projectionSpheres.get(RobotSide.LEFT).getPrinciplePointY();
-//      projectionSpheres.get(RobotSide.RIGHT).setPrinciplePointX(-principlePointX);
-//      projectionSpheres.get(RobotSide.RIGHT).setPrinciplePointY(principlePointY);
+      pupillaryDistance.set(yoPupilaryDistance.getValue());
+      projectionZOffset.set(yoProjectionZOffset.getValue());
+      projectionXOffset.set(yoProjectionXOffset.getValue());
+      projectionYaw.set(yoProjectionYaw.getValue());
+      projectionPitch.set(yoProjectionPitch.getValue());
+      projectionRoll.set(yoProjectionRoll.getValue());
+
+      for (RobotSide side : RobotSide.values)
+      {
+         projectionSpheres.get(side).setRadius(yoSphereRadius.getValue());
+
+         projectionSpheres.get(side).setFocalLengthX(yoFocalLengthX.getValue());
+         projectionSpheres.get(side).setFocalLengthY(yoFocalLengthY.getValue());
+      }
+
+      // mirror principle point
+      projectionSpheres.get(RobotSide.LEFT).setPrinciplePointX(yoPrinciplePointX.getValue());
+      projectionSpheres.get(RobotSide.LEFT).setPrinciplePointY(yoPrinciplePointY.getValue());
+      double principlePointX = yoPrinciplePointX.getValue();
+      double principlePointY = yoPrinciplePointY.getValue();
+      projectionSpheres.get(RobotSide.RIGHT).setPrinciplePointX(-principlePointX);
+      projectionSpheres.get(RobotSide.RIGHT).setPrinciplePointY(principlePointY);
    }
 
    public boolean isConnectingOrConnected()
@@ -96,7 +175,7 @@ public class RDXDualBlackflySphericalProjection
 
    public boolean isConnected()
    {
-      return dualZEDUDPReceiver.connected();
+      return dualBlackflyUDPReceiver.connected();
    }
 
    private void startReconnectThread()
@@ -111,12 +190,12 @@ public class RDXDualBlackflySphericalProjection
          {
             RDXBaseUI.pushNotification("Dual Blackfly stereo client reconnecting...");
 
-            dualZEDUDPReceiver.stop();
-            dualZEDUDPReceiver.start();
+            dualBlackflyUDPReceiver.stop();
+            dualBlackflyUDPReceiver.start();
 
             ThreadTools.sleep(5000);
          }
-         while (reconnecting && !dualZEDUDPReceiver.connected());
+         while (reconnecting && !dualBlackflyUDPReceiver.connected());
       }, getClass().getName() + "-ReconnectThread");
 
       reconnectThread.start();
@@ -152,14 +231,14 @@ public class RDXDualBlackflySphericalProjection
       // Disable on a thread, so we don't hang the UI
       ThreadTools.startAThread(this::stopReconnectThread, getClass().getSimpleName() + "StopReconnect");
 
-      dualZEDUDPReceiver.stop();
+      dualBlackflyUDPReceiver.stop();
    }
 
    public void shutdown()
    {
       stopReconnectThread();
 
-      dualZEDUDPReceiver.stop();
+      dualBlackflyUDPReceiver.stop();
    }
 
    public void render()
@@ -172,20 +251,20 @@ public class RDXDualBlackflySphericalProjection
 
          for (RobotSide side : RobotSide.values)
          {
-            byte[] imageData = dualZEDUDPReceiver.getImageBuffers().get(side);
+            byte[] imageData = dualBlackflyUDPReceiver.getImageBuffers().get(side);
 
             if (imageData != null)
             {
-               ImageDimensions imageDimensions = dualZEDUDPReceiver.getImageDimensions().get(side);
+               ImageDimensions imageDimensions = dualBlackflyUDPReceiver.getImageDimensions().get(side);
                BytePointer imageDataPointer = new BytePointer(imageData);
 
-               Mat mat = new Mat(imageDimensions.getImageHeight(), imageDimensions.getImageWidth(), opencv_core.CV_8UC4);
+               Mat mat = new Mat(imageDimensions.getImageHeight(), imageDimensions.getImageWidth(), opencv_core.CV_8UC1);
                mat.data(imageDataPointer);
 
                Pixmap pixmap = new Pixmap(mat.cols(), mat.rows(), Pixmap.Format.RGBA8888);
                BytePointer rgba8888BytePointer = new BytePointer(pixmap.getPixels());
                Mat rgba8Mat = new Mat(mat.rows(), mat.cols(), opencv_core.CV_8UC4, rgba8888BytePointer);
-               opencv_imgproc.cvtColor(mat, rgba8Mat, opencv_imgproc.COLOR_BGR2RGBA);
+               opencv_imgproc.cvtColor(mat, rgba8Mat, opencv_imgproc.COLOR_BayerBG2RGBA);
 
                // Draw a circle in the center
                int centerX = mat.cols() / 2;
@@ -231,6 +310,9 @@ public class RDXDualBlackflySphericalProjection
                      transformToParent.getRotation().setToYawOrientation(robotZUpFrame.getTransformToRoot().getRotation().getYaw());
                      transformToParent.getTranslation().setZ(projectionZOffset.get());
                      transformToParent.getTranslation().setX(projectionXOffset.get());
+                     transformToParent.getRotation().appendYawRotation(side.negateIfRightSide(projectionYaw.get()));
+                     transformToParent.getRotation().appendPitchRotation(side.negateIfRightSide(projectionPitch.get()));
+                     transformToParent.getRotation().appendRollRotation(side.negateIfRightSide(projectionRoll.get()));
                   }
                };
 
@@ -292,9 +374,9 @@ public class RDXDualBlackflySphericalProjection
       }
    }
 
-   public DualZEDUDPReceiver getDualBlackflyUDPReceiver()
+   public DualBlackflyUDPReceiver getDualBlackflyUDPReceiver()
    {
-      return dualZEDUDPReceiver;
+      return dualBlackflyUDPReceiver;
    }
 
    public SideDependentList<RDXProjectionSphere> getProjectionSpheres()

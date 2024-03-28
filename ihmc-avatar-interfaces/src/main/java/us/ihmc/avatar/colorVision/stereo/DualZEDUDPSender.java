@@ -26,8 +26,8 @@ import static org.bytedeco.zed.global.zed.*;
 
 public class DualZEDUDPSender
 {
-   private static final String LEFT_DESTINATION_IP_ADDRESS = System.getProperty("zed.left.udp.dest.address", "127.0.0.1");
-   private static final String RIGHT_DESTINATION_IP_ADDRESS = System.getProperty("zed.right.udp.dest.address", "127.0.0.1");
+   private static final String LEFT_DESTINATION_IP_ADDRESS = System.getProperty("zed.left.udp.dest.address", "172.16.66.230");
+   private static final String RIGHT_DESTINATION_IP_ADDRESS = System.getProperty("zed.right.udp.dest.address", "172.16.66.230");
    public static final int LEFT_UDP_PORT = 9200;
    public static final int RIGHT_UDP_PORT = 9201;
    public static final int IPV4_HEADER_LENGTH = 28;

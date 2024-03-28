@@ -11,6 +11,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -18,6 +20,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
+import java.util.Properties;
 
 public class DualBlackflyUDPSender
 {
@@ -33,8 +36,20 @@ public class DualBlackflyUDPSender
    private final SideDependentList<Thread> publishThreads = new SideDependentList<>();
    private volatile boolean running;
 
+   private File blackflyPropsFile = new File("/home/robotlab/blackfly.properties");
+
    public void start(BlackflyModelProperties blackflyModelProperties)
    {
+      Properties properties = new Properties();
+      try
+      {
+         properties.load(new FileInputStream(blackflyPropsFile));
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+
       running = true;
 
       SpinnakerBlackflyManager spinnakerBlackflyManager = new SpinnakerBlackflyManager();
@@ -43,11 +58,16 @@ public class DualBlackflyUDPSender
       double originalHeight = blackflyModelProperties.getImageHeightPixels();
       double aspectRatio = originalWidth / originalHeight;
 
-      double croppedHeight = 960f;
+      double croppedHeight = Integer.parseInt(properties.getProperty("croppedHeight"));
       double croppedWidth = croppedHeight * aspectRatio;
 
-      double xOffset = (originalWidth - croppedHeight) / 2 + 400;
-      double yOffset = (originalHeight - croppedHeight) / 2 + 400;
+      double xOffset = (originalWidth - croppedHeight) / 2 + Integer.parseInt(properties.getProperty("xoffset"));
+      double yOffset = (originalHeight - croppedHeight) / 2 - Integer.parseInt(properties.getProperty("yoffset"));
+
+      System.out.println("croppedHeight " + croppedHeight);
+      System.out.println("croppedWidth " + croppedWidth);
+      System.out.println("xOffset " + xOffset);
+      System.out.println("yOffset " + yOffset);
 
       for (RobotSide side : RobotSide.values())
       {
@@ -185,7 +205,7 @@ public class DualBlackflyUDPSender
    {
       DualBlackflyUDPSender dualBlackflyUDPSender = new DualBlackflyUDPSender();
 
-      dualBlackflyUDPSender.start(BlackflyModelProperties.BFLY_U3_23S6C);
+      dualBlackflyUDPSender.start(BlackflyModelProperties.BFS_U3_27S5C);
 
       Runtime.getRuntime().addShutdownHook(new Thread(dualBlackflyUDPSender::stop));
 

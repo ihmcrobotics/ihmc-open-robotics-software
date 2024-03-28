@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL41;
 import org.lwjgl.openvr.*;
+import sun.misc.Unsafe;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -203,8 +204,13 @@ public class RDXVRContext
       }
    }
 
-   private double openvrInitialTime = Double.NaN;
+   private double openvrInitialTime = 0.0;
    private double systemInitialTime = Double.NaN;
+   private CompositorFrameTiming.Buffer latestFrameTimingBuffer = CompositorFrameTiming.create(1);
+
+   { // FIXME Workaround to set the field m_nsize before request timing, without that, the VRCompositor.VRCompositor_GetFrameTimings() will not work. Should submit issue to LWJGL
+      getUnsafeInstance().putInt(null, latestFrameTimingBuffer.address() + CompositorFrameTiming.M_NSIZE, latestFrameTimingBuffer.sizeof());
+   }
 
    /**
     * This method waits for OpenVR to say "go" and gathers the latest data.
@@ -214,33 +220,25 @@ public class RDXVRContext
    public void waitGetPoses()
    {
 
-   CompositorFrameTiming.Buffer latestFrameTimingBuffer = CompositorFrameTiming.create(CompositorFrameTiming.SIZEOF);
       VRCompositor.VRCompositor_WaitGetPoses(trackedDevicePoses, trackedDeviceGamePoses);
-      boolean getFrameTiming = VRCompositor.VRCompositor_GetFrameTiming(latestFrameTimingBuffer);
-      double systemTimeInSeconds = latestFrameTimingBuffer.m_flSystemTimeInSeconds();
-      double newPosesReadyMs = latestFrameTimingBuffer.m_flNewPosesReadyMs();
+      int nRead = VRCompositor.VRCompositor_GetFrameTimings(latestFrameTimingBuffer);
+      CompositorFrameTiming compositorFrameTiming = latestFrameTimingBuffer.get(0);
+      double systemTimeInSeconds = compositorFrameTiming.m_flSystemTimeInSeconds();
+      double newPosesReadyMs = compositorFrameTiming.m_flNewPosesReadyMs();
       double openvrTime = systemTimeInSeconds + newPosesReadyMs * 0.001;
-      if (Double.isNaN(openvrInitialTime))
-         openvrInitialTime = openvrTime;
-      openvrTime -= openvrInitialTime;
       double systemTime = 1.0e-9 * System.nanoTime();
-      if (Double.isNaN(systemInitialTime))
+      if (openvrInitialTime == 0.0)
+      {
          systemInitialTime = systemTime;
+         openvrInitialTime = openvrTime;
+      }
+      openvrTime -= openvrInitialTime;
       systemTime -= systemInitialTime;
 
-      LogTools.info(
-            "m_nFrameIndex=%s, m_nNumFramePresents=%s, m_nNumMisPresented=%s, m_nNumDroppedFrames=%s, m_nReprojectionFlags=%s, m_flSystemTimeInSeconds=%s".formatted(
-                  Objects.toString(latestFrameTimingBuffer.m_nFrameIndex()),
-                  Objects.toString(latestFrameTimingBuffer.m_nNumFramePresents()),
-                  Objects.toString(latestFrameTimingBuffer.m_nNumMisPresented()),
-                  Objects.toString(latestFrameTimingBuffer.m_nNumDroppedFrames()),
-                  Objects.toString(latestFrameTimingBuffer.m_nReprojectionFlags()),
-                  Objects.toString(latestFrameTimingBuffer.m_flSystemTimeInSeconds())));
-
-      LogTools.info(getFrameTiming + " - Times: OpenVR=%6.3f, System=%6.3f, Delta=%6.3f".formatted(openvrTime, systemTime, openvrTime - systemTime));
+//      LogTools.info(nRead + " - Times: OpenVR=%6.5f, System=%6.5f, Delta=%6.5f".formatted(openvrTime, systemTime, openvrTime - systemTime));
 
       //      VRCompositor.VRCompositor_GetLastPoses(trackedDevicePoses, trackedDeviceGamePoses); // Is there a way to wait better?
-      long measurementTimestamp = System.nanoTime();
+      long measurementTimestamp = (long) (openvrTime * 1.0e9);
       TrackedDevicePoseParsed[] temp = new TrackedDevicePoseParsed[VR.k_unMaxTrackedDeviceCount];
       for (int i = 0; i < temp.length; i++)
       {
@@ -479,5 +477,44 @@ public class RDXVRContext
    public RDXVRControllerModel getControllerModel()
    {
       return controllerModel;
+   }
+
+   private static sun.misc.Unsafe getUnsafeInstance()
+   {
+      java.lang.reflect.Field[] fields = sun.misc.Unsafe.class.getDeclaredFields();
+
+        /*
+        Different runtimes use different names for the Unsafe singleton,
+        so we cannot use .getDeclaredField and we scan instead. For example:
+
+        Oracle: theUnsafe
+        PERC : m_unsafe_instance
+        Android: THE_ONE
+        */
+      for (java.lang.reflect.Field field : fields)
+      {
+         if (!field.getType().equals(sun.misc.Unsafe.class))
+         {
+            continue;
+         }
+
+         int modifiers = field.getModifiers();
+         if (!(java.lang.reflect.Modifier.isStatic(modifiers) && java.lang.reflect.Modifier.isFinal(modifiers)))
+         {
+            continue;
+         }
+
+         try
+         {
+            field.setAccessible(true);
+            return (sun.misc.Unsafe) field.get(null);
+         }
+         catch (Exception ignored)
+         {
+         }
+         break;
+      }
+
+      throw new UnsupportedOperationException("LWJGL requires sun.misc.Unsafe to be available.");
    }
 }

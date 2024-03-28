@@ -31,7 +31,7 @@ import java.util.Set;
 public class RDXValveIndexBlackflyStereoPassthroughDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(RDXProjectionSphere::new);
+   private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(/*RDXProjectionSphere::new*/);
    private final ImDouble pupillaryDistance = new ImDouble(0.0);
 
    private final FramePose3D leftEyePose = new FramePose3D();
@@ -49,8 +49,8 @@ public class RDXValveIndexBlackflyStereoPassthroughDemo
    {
       for (RDXProjectionSphere projectionSphere : projectionSpheres)
       {
-         projectionSphere.setProjectionScaleX(0.284862);
-         projectionSphere.setProjectionScaleY(0.394807);
+//         projectionSphere.setProjectionScaleX(0.284862);
+//         projectionSphere.setProjectionScaleY(0.394807);
       }
 
       projectionSpheres.get(RobotSide.LEFT).setPrinciplePointX(-0.013812);

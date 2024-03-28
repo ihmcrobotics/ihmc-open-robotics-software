@@ -34,7 +34,7 @@ public class RDXValveIndexStereoPassthroughDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private final ValveIndexCameraReaderThread cameraReaderThread = new ValveIndexCameraReaderThread();
-   private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(RDXProjectionSphere::new);
+   private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(/*RDXProjectionSphere::new*/);
    private volatile boolean running;
 
    private final FramePose3D leftEyePose = new FramePose3D();

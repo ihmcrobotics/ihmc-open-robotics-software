@@ -27,6 +27,8 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.mesh.MeshDataGeneratorMissing;
 import us.ihmc.rdx.mesh.RDXMeshDataInterpreter;
 import us.ihmc.robotics.EuclidCoreMissingTools;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class RDXProjectionSphere
 {
@@ -35,9 +37,8 @@ public class RDXProjectionSphere
    private final ImDouble sphereRadius = new ImDouble(1);
    private final ImInt sphereLatitudeVertices = new ImInt(100);
    private final ImInt sphereLongitudeVertices = new ImInt(100);
-   private final ImBoolean syncProjectionScales = new ImBoolean(true);
-   private final ImDouble focalLengthX = new ImDouble(0.466206);
-   private final ImDouble focalLengthY = new ImDouble(0.466206);
+   private final ImDouble focalLengthX = new ImDouble();
+   private final ImDouble focalLengthY = new ImDouble();
    private final ImDouble principlePointX = new ImDouble(0.0);
    private final ImDouble principlePointY = new ImDouble(0.5);
    private final ImBoolean renderSphereIfNoTexture = new ImBoolean(true);
@@ -58,18 +59,8 @@ public class RDXProjectionSphere
       rebuildMesh |= ImGuiTools.sliderDouble(labels.get("Sphere radius"), sphereRadius, 0.2, 5);
       rebuildMesh |= ImGuiTools.volatileInputInt(labels.get("Sphere latitude vertices"), sphereLatitudeVertices);
       rebuildMesh |= ImGuiTools.volatileInputInt(labels.get("Sphere longitude vertices"), sphereLongitudeVertices);
-      rebuildMesh |= ImGui.checkbox(labels.get("Sync projection scales"), syncProjectionScales);
       rebuildMesh |= ImGuiTools.sliderDouble(labels.get("Projection scale X"), focalLengthX, 0.01, 2.0);
-      if (syncProjectionScales.get())
-      {
-         ImGui.beginDisabled();
-         focalLengthY.set(focalLengthX.get());
-      }
       rebuildMesh |= ImGuiTools.sliderDouble(labels.get("Projection scale Y"), focalLengthY, 0.01, 2.0);
-      if (syncProjectionScales.get())
-      {
-         ImGui.endDisabled();
-      }
       rebuildMesh |= ImGuiTools.sliderDouble(labels.get("Principle point X (Cx)"), principlePointX, -0.5, 0.5);
       rebuildMesh |= ImGuiTools.sliderDouble(labels.get("Principle point Y (Cy)"), principlePointY, -0.5, 0.5);
       rebuildMesh |= ImGui.checkbox(labels.get("Render sphere if no texture"), renderSphereIfNoTexture);
@@ -152,44 +143,6 @@ public class RDXProjectionSphere
       return modelInstance;
    }
 
-   public double getProjectionScaleX()
-   {
-      return this.focalLengthX.get();
-   }
-
-   public void setProjectionScaleX(double projectionScaleX)
-   {
-      if (this.focalLengthX.get() != projectionScaleX)
-      {
-         this.focalLengthX.set(projectionScaleX);
-         rebuildMesh = true;
-      }
-   }
-
-   public double getProjectionScaleY()
-   {
-      return this.focalLengthY.get();
-   }
-
-   public void setProjectionScaleY(double projectionScaleY)
-   {
-      if (this.focalLengthY.get() != projectionScaleY)
-      {
-         this.focalLengthY.set(projectionScaleY);
-         rebuildMesh = true;
-      }
-   }
-
-   public void setSyncProjectionScales(boolean syncProjectionScales)
-   {
-      this.syncProjectionScales.set(syncProjectionScales);
-   }
-
-   public boolean getSyncProjectionScales()
-   {
-      return syncProjectionScales.get();
-   }
-
    public double getRadius()
    {
       return this.sphereRadius.get();
@@ -229,6 +182,34 @@ public class RDXProjectionSphere
       if (this.principlePointY.get() != principlePointY)
       {
          this.principlePointY.set(principlePointY);
+         rebuildMesh = true;
+      }
+   }
+
+   public double getFocalLengthX()
+   {
+      return focalLengthX.get();
+   }
+
+   public void setFocalLengthX(double focalLengthX)
+   {
+      if (this.focalLengthX.get() != focalLengthX)
+      {
+         this.focalLengthX.set(focalLengthX);
+         rebuildMesh = true;
+      }
+   }
+
+   public double getFocalLengthY()
+   {
+      return focalLengthY.get();
+   }
+
+   public void setFocalLengthY(double focalLengthY)
+   {
+      if (this.focalLengthY.get() != focalLengthY)
+      {
+         this.focalLengthY.set(focalLengthY);
          rebuildMesh = true;
       }
    }
