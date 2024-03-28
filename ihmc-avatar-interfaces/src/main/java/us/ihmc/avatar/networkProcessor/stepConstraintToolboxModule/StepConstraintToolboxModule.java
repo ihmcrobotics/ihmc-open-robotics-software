@@ -12,7 +12,7 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -59,7 +59,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      ROS2Topic<?> controllerPubGenerator = ControllerAPIDefinition.getOutputTopic(robotName);
+      ROS2Topic<?> controllerPubGenerator = HumanoidControllerAPI.getOutputTopic(robotName);
 
       ros2Node.createSubscription(controllerPubGenerator.withTypeName(RobotConfigurationData.class), s ->
       {
@@ -105,7 +105,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
       ros2Node.createSubscription(REACommunicationProperties.outputTopic.withTypeName(PlanarRegionsListMessage.class),
                                   s -> updatePlanarRegion(s.takeNextData()));
 
-      constraintRegionPublisher = ros2Node.createPublisher(ControllerAPIDefinition.getInputTopic(robotName).withTypeName(StepConstraintMessage.class));
+      constraintRegionPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(StepConstraintMessage.class));
    }
 
    public void setSwitchPlanarRegionConstraintsAutomatically(boolean switchAutomatically)

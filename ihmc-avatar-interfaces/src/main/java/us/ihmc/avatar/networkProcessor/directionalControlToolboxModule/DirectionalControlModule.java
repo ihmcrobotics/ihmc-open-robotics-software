@@ -13,7 +13,7 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -101,7 +101,7 @@ public class DirectionalControlModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      ROS2Topic<?> controllerPubGenerator = ControllerAPIDefinition.getOutputTopic(robotName);
+      ROS2Topic<?> controllerPubGenerator = HumanoidControllerAPI.getOutputTopic(robotName);
 
       ros2Node.createSubscription(controllerPubGenerator.withTypeName(RobotConfigurationData.class), s ->
       {
@@ -129,7 +129,7 @@ public class DirectionalControlModule extends ToolboxModule
             steppingController.updateCapturabilityBasedStatus(s.takeNextData());
       });
 
-      ROS2Topic<?> controllerSubGenerator = ControllerAPIDefinition.getInputTopic(robotName);
+      ROS2Topic<?> controllerSubGenerator = HumanoidControllerAPI.getInputTopic(robotName);
 
       pauseWalkingPublisher = ros2Node.createPublisher(controllerSubGenerator.withTypeName(PauseWalkingMessage.class));
       footstepPublisher = ros2Node.createPublisher(controllerSubGenerator.withTypeName(FootstepDataListMessage.class));

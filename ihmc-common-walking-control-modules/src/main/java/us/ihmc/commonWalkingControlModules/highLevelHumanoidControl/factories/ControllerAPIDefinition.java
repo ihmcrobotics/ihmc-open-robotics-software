@@ -234,18 +234,6 @@ public class ControllerAPIDefinition
    }
 
    /** Applies only for the humanoid controller. */
-   public static ROS2Topic<?> getInputTopic(String robotName)
-   {
-      return HumanoidControllerAPI.getInputTopic(robotName);
-   }
-
-   /** Applies only for the humanoid controller. */
-   public static ROS2Topic<?> getOutputTopic(String robotName)
-   {
-      return HumanoidControllerAPI.getOutputTopic(robotName);
-   }
-
-   /** Applies only for the humanoid controller. */
    public static <T> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
    {
       return getTopic(getBaseTopic(HumanoidControllerAPI.HUMANOID_CONTROL_MODULE_NAME, robotName), messageClass);
