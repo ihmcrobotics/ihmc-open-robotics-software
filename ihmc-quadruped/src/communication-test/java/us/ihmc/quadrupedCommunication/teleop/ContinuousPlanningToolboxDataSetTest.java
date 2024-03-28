@@ -239,7 +239,7 @@ public class ContinuousPlanningToolboxDataSetTest
                                                                      .withTopic(ToolboxAPIs.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName).withInput()));
 
       ROS2Topic controllerOutputTopic = QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName);
-      footstepStatusPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(QuadrupedFootstepStatusMessage.class).withTopic(controllerOutputTopic));
+      footstepStatusPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(QuadrupedFootstepStatusMessage.class));
 
       ros2Node.spin();
 

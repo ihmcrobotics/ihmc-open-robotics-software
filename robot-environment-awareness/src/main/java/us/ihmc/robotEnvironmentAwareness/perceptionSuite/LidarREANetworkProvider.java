@@ -47,9 +47,9 @@ public class LidarREANetworkProvider implements REANetworkProvider
       this.ros2Node = ros2Node;
       this.outputTopic = outputTopic;
 
-      planarRegionPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PlanarRegionsListMessage.class).withTopic(outputTopic));
-      lidarRegionPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PlanarRegionsListMessage.class).withTopic(lidarOutputTopic));
-      ocTreePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(OcTreeKeyListMessage.class).withTopic(outputTopic));
+      planarRegionPublisher = ros2Node.createPublisher(outputTopic.withTypeName(PlanarRegionsListMessage.class));
+      lidarRegionPublisher = ros2Node.createPublisher(lidarOutputTopic.withTypeName(PlanarRegionsListMessage.class));
+      ocTreePublisher = ros2Node.createPublisher(outputTopic.withTypeName(OcTreeKeyListMessage.class));
    }
 
    public void registerMessager(Messager messager)

@@ -589,7 +589,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    public <T> ROS2PublisherBasics<T> createPublisher(Class<T> messageType, ROS2Topic<?> generator)
    {
-      return ros2Node.createPublisher(ROS2Tools.typeNamedTopic(messageType).withTopic(generator));
+      return ros2Node.createPublisher(generator.withTypeName(messageType));
    }
 
    public <T> ROS2PublisherBasics<T> createPublisher(Class<T> messageType, String topicName)

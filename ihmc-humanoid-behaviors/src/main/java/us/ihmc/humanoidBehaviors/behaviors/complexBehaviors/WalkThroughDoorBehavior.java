@@ -168,7 +168,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
 
       ROS2Topic outputTopic = IHMCHumanoidBehaviorManager.getOutputTopic(robotName);
-      behaviorStatusPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(BehaviorStatusPacket.class).withTopic(outputTopic));
+      behaviorStatusPublisher = ros2Node.createPublisher(outputTopic.withTypeName(BehaviorStatusPacket.class));
 
       setupStateMachine();
    }

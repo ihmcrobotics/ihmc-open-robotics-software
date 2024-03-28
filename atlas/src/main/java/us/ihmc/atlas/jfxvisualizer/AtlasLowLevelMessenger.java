@@ -23,10 +23,10 @@ public class AtlasLowLevelMessenger implements RobotLowLevelMessenger
    public AtlasLowLevelMessenger(RealtimeROS2Node ros2Node, String robotName)
    {
       ROS2Topic inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
-      lowLevelModePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(AtlasLowLevelControlModeMessage.class).withTopic(inputTopic));
-      bdiBehaviorPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(BDIBehaviorCommandPacket.class).withTopic(inputTopic));
-      abortWalkingPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(AbortWalkingMessage.class).withTopic(inputTopic));
-      pauseWalkingPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PauseWalkingMessage.class).withTopic(inputTopic));
+      lowLevelModePublisher = ros2Node.createPublisher(inputTopic.withTypeName(AtlasLowLevelControlModeMessage.class));
+      bdiBehaviorPublisher = ros2Node.createPublisher(inputTopic.withTypeName(BDIBehaviorCommandPacket.class));
+      abortWalkingPublisher = ros2Node.createPublisher(inputTopic.withTypeName(AbortWalkingMessage.class));
+      pauseWalkingPublisher = ros2Node.createPublisher(inputTopic.withTypeName(PauseWalkingMessage.class));
    }
 
    @Override

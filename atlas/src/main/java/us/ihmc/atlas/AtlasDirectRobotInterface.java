@@ -25,11 +25,11 @@ public class AtlasDirectRobotInterface implements RobotLowLevelMessenger
    public AtlasDirectRobotInterface(ROS2NodeInterface ros2Node, DRCRobotModel robotModel)
    {
       ROS2Topic inputTopic = HumanoidControllerAPI.getInputTopic(robotModel.getSimpleRobotName());
-      lowLevelModePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(AtlasLowLevelControlModeMessage.class).withTopic(inputTopic));
-      bdiBehaviorPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(BDIBehaviorCommandPacket.class).withTopic(inputTopic));
-      desiredPumpPSIPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(AtlasDesiredPumpPSIPacket.class).withTopic(inputTopic));
-      abortWalkingPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(AbortWalkingMessage.class).withTopic(inputTopic));
-      pauseWalkingPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PauseWalkingMessage.class).withTopic(inputTopic));
+      lowLevelModePublisher = ros2Node.createPublisher(inputTopic.withTypeName(AtlasLowLevelControlModeMessage.class));
+      bdiBehaviorPublisher = ros2Node.createPublisher(inputTopic.withTypeName(BDIBehaviorCommandPacket.class));
+      desiredPumpPSIPublisher = ros2Node.createPublisher(inputTopic.withTypeName(AtlasDesiredPumpPSIPacket.class));
+      abortWalkingPublisher = ros2Node.createPublisher(inputTopic.withTypeName(AbortWalkingMessage.class));
+      pauseWalkingPublisher = ros2Node.createPublisher(inputTopic.withTypeName(PauseWalkingMessage.class));
    }
 
    @Override

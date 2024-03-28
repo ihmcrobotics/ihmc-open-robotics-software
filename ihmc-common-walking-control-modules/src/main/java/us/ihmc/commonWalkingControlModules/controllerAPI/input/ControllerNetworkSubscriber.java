@@ -227,7 +227,7 @@ public class ControllerNetworkSubscriber
    private <T extends Settable<T>> ROS2PublisherBasics<T> createPublisher(Class<T> messageClass)
    {
       ROS2Topic<T> topicName = outputTopic.withTypeName(messageClass);
-      ROS2PublisherBasics<T> publisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(messageClass).withTopic(topicName));
+      ROS2PublisherBasics<T> publisher = ros2Node.createPublisher(topicName.withTypeName(messageClass));
       return publisher;
    }
 

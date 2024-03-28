@@ -222,7 +222,7 @@ public class NetworkSubscriber
 
    private <T extends Settable<T>> ROS2PublisherBasics<T> createPublisher(Class<T> messageClass, ROS2Topic topicName)
    {
-      ROS2PublisherBasics<T> publisher = realtimeROS2Node.createPublisher(ROS2Tools.typeNamedTopic(messageClass).withTopic(topicName));
+      ROS2PublisherBasics<T> publisher = realtimeROS2Node.createPublisher(topicName.withTypeName(messageClass));
       return publisher;
    }
 

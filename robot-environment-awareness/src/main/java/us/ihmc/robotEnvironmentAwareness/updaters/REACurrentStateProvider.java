@@ -24,7 +24,7 @@ public class REACurrentStateProvider
                                   ROS2Topic outputTopic,
                                   Messager messager)
    {
-      currentStatePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(REAStatusMessage.class).withTopic(outputTopic));
+      currentStatePublisher = ros2Node.createPublisher(outputTopic.withTypeName(REAStatusMessage.class));
       isRunning = messager.createInput(REAModuleAPI.OcTreeEnable);
       // This should be the only input with a default value, the rest gets populated at the very start.
       hasCleared = messager.createInput(REAModuleAPI.OcTreeClear, false);

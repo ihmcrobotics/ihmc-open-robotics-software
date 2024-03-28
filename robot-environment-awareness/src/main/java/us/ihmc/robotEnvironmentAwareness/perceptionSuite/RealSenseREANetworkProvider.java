@@ -43,8 +43,8 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
       this.ros2Node = ros2Node;
       this.inputTopic = inputTopic;
 
-      stereoRegionPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PlanarRegionsListMessage.class).withTopic(stereoOutputTopic));
-      ocTreePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(OcTreeKeyListMessage.class).withTopic(stereoOutputTopic));
+      stereoRegionPublisher = ros2Node.createPublisher(stereoOutputTopic.withTypeName(PlanarRegionsListMessage.class));
+      ocTreePublisher = ros2Node.createPublisher(stereoOutputTopic.withTypeName(OcTreeKeyListMessage.class));
    }
 
    @Override

@@ -75,7 +75,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       this.publishPeriod = publishPeriod;
 
       robotConfigurationData.setJointNameHash(RobotConfigurationDataFactory.calculateJointNameHash(jointSensorData, forceSensorData, imuSensorData));
-      robotConfigurationDataPublisher = realtimeROS2Node.createPublisher(ROS2Tools.typeNamedTopic(RobotConfigurationData.class).withTopic(outputTopic));
+      robotConfigurationDataPublisher = realtimeROS2Node.createPublisher(outputTopic.withTypeName(RobotConfigurationData.class));
 
       // Create RobotFrameDataPublishers here.
       for (ReferenceFrame frame : frameData)

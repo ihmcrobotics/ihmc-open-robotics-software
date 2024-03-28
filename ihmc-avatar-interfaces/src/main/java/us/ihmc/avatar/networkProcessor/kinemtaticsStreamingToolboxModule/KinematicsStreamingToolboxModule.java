@@ -104,8 +104,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       ROS2Topic<?> controllerInputTopic = HumanoidControllerAPI.getInputTopic(robotName);
       ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 
-      trajectoryMessagePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(WholeBodyTrajectoryMessage.class).withTopic(controllerInputTopic));
-      streamingMessagePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(WholeBodyStreamingMessage.class).withTopic(controllerInputTopic));
+      trajectoryMessagePublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(WholeBodyTrajectoryMessage.class));
+      streamingMessagePublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(WholeBodyStreamingMessage.class));
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 

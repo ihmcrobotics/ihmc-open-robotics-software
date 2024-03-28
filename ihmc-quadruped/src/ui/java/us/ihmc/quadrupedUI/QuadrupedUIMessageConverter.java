@@ -187,17 +187,17 @@ public class QuadrupedUIMessageConverter
       ROS2Topic stepTeleopInputTopicGenerator = ToolboxAPIs.STEP_TELEOP_TOOLBOX.withRobot(robotName)
                                                                                .withInput();
 
-      desiredHighLevelStatePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(HighLevelStateMessage.class).withTopic(controllerInputTopic));
+      desiredHighLevelStatePublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(HighLevelStateMessage.class));
       desiredSteppingStatePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(QuadrupedRequestedSteppingStateMessage.class)
                                                                         .withTopic(controllerInputTopic));
-      soleTrajectoryMessagePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(SoleTrajectoryMessage.class).withTopic(controllerInputTopic));
-      pauseWalkingPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PauseWalkingMessage.class).withTopic(controllerInputTopic));
-      abortWalkingPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(AbortWalkingMessage.class).withTopic(controllerInputTopic));
-      loadBearingRequestPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(QuadrupedFootLoadBearingMessage.class).withTopic(controllerInputTopic));
-      bodyHeightPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(QuadrupedBodyHeightMessage.class).withTopic(controllerInputTopic));
-      desiredBodyPosePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(QuadrupedBodyTrajectoryMessage.class).withTopic(controllerInputTopic));
+      soleTrajectoryMessagePublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(SoleTrajectoryMessage.class));
+      pauseWalkingPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(PauseWalkingMessage.class));
+      abortWalkingPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(AbortWalkingMessage.class));
+      loadBearingRequestPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(QuadrupedFootLoadBearingMessage.class));
+      bodyHeightPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(QuadrupedBodyHeightMessage.class));
+      desiredBodyPosePublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(QuadrupedBodyTrajectoryMessage.class));
 
-      enableStepTeleopPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(ToolboxStateMessage.class).withTopic(stepTeleopInputTopicGenerator));
+      enableStepTeleopPublisher = ros2Node.createPublisher(stepTeleopInputTopicGenerator.withTypeName(ToolboxStateMessage.class));
       enableFootstepPlanningPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(ToolboxStateMessage.class)
                                                                           .withTopic(footstepPlannerInputTopicGenerator));
 
@@ -216,7 +216,7 @@ public class QuadrupedUIMessageConverter
       pawPlanningRequestPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PawStepPlanningRequestPacket.class)
                                                                       .withTopic(footstepPlannerInputTopicGenerator));
 
-      stepListMessagePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(QuadrupedTimedStepListMessage.class).withTopic(controllerInputTopic));
+      stepListMessagePublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(QuadrupedTimedStepListMessage.class));
 
       reaStateRequestPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(REAStateRequestMessage.class)
                                                                    .withTopic(REACommunicationProperties.inputTopic));

@@ -59,7 +59,7 @@ public abstract class BehaviorService
 
       if (publisher == null)
       {
-         publisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(messageType).withTopic(topicName));
+         publisher = ros2Node.createPublisher(topicName.withTypeName(messageType));
          publishers.put(topicName, publisher);
       }
 
