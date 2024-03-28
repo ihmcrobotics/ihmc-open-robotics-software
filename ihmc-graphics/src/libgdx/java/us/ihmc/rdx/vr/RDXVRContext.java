@@ -7,14 +7,7 @@ import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL41;
-import org.lwjgl.openvr.OpenVR;
-import org.lwjgl.openvr.TrackedDevicePose;
-import org.lwjgl.openvr.VR;
-import org.lwjgl.openvr.VRActiveActionSet;
-import org.lwjgl.openvr.VRCompositor;
-import org.lwjgl.openvr.VREvent;
-import org.lwjgl.openvr.VRInput;
-import org.lwjgl.openvr.VRSystem;
+import org.lwjgl.openvr.*;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -32,11 +25,7 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -214,6 +203,9 @@ public class RDXVRContext
       }
    }
 
+   private double openvrInitialTime = Double.NaN;
+   private double systemInitialTime = Double.NaN;
+
    /**
     * This method waits for OpenVR to say "go" and gathers the latest data.
     * The goal is to submit frames to the eyes ASAP after this returns,
@@ -221,8 +213,33 @@ public class RDXVRContext
     */
    public void waitGetPoses()
    {
+
+   CompositorFrameTiming.Buffer latestFrameTimingBuffer = CompositorFrameTiming.create(CompositorFrameTiming.SIZEOF);
       VRCompositor.VRCompositor_WaitGetPoses(trackedDevicePoses, trackedDeviceGamePoses);
-//      VRCompositor.VRCompositor_GetLastPoses(trackedDevicePoses, trackedDeviceGamePoses); // Is there a way to wait better?
+      boolean getFrameTiming = VRCompositor.VRCompositor_GetFrameTiming(latestFrameTimingBuffer);
+      double systemTimeInSeconds = latestFrameTimingBuffer.m_flSystemTimeInSeconds();
+      double newPosesReadyMs = latestFrameTimingBuffer.m_flNewPosesReadyMs();
+      double openvrTime = systemTimeInSeconds + newPosesReadyMs * 0.001;
+      if (Double.isNaN(openvrInitialTime))
+         openvrInitialTime = openvrTime;
+      openvrTime -= openvrInitialTime;
+      double systemTime = 1.0e-9 * System.nanoTime();
+      if (Double.isNaN(systemInitialTime))
+         systemInitialTime = systemTime;
+      systemTime -= systemInitialTime;
+
+      LogTools.info(
+            "m_nFrameIndex=%s, m_nNumFramePresents=%s, m_nNumMisPresented=%s, m_nNumDroppedFrames=%s, m_nReprojectionFlags=%s, m_flSystemTimeInSeconds=%s".formatted(
+                  Objects.toString(latestFrameTimingBuffer.m_nFrameIndex()),
+                  Objects.toString(latestFrameTimingBuffer.m_nNumFramePresents()),
+                  Objects.toString(latestFrameTimingBuffer.m_nNumMisPresented()),
+                  Objects.toString(latestFrameTimingBuffer.m_nNumDroppedFrames()),
+                  Objects.toString(latestFrameTimingBuffer.m_nReprojectionFlags()),
+                  Objects.toString(latestFrameTimingBuffer.m_flSystemTimeInSeconds())));
+
+      LogTools.info(getFrameTiming + " - Times: OpenVR=%6.3f, System=%6.3f, Delta=%6.3f".formatted(openvrTime, systemTime, openvrTime - systemTime));
+
+      //      VRCompositor.VRCompositor_GetLastPoses(trackedDevicePoses, trackedDeviceGamePoses); // Is there a way to wait better?
       long measurementTimestamp = System.nanoTime();
       TrackedDevicePoseParsed[] temp = new TrackedDevicePoseParsed[VR.k_unMaxTrackedDeviceCount];
       for (int i = 0; i < temp.length; i++)
@@ -230,7 +247,6 @@ public class RDXVRContext
          temp[i] = new TrackedDevicePoseParsed(measurementTimestamp, trackedDevicePoses, i);
       }
       trackedDevicePosesParsedRef.set(temp);
-
    }
 
    /**
