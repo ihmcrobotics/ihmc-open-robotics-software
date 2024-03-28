@@ -274,8 +274,7 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void runPlannerRequestToUI()
    {
       Random random = new Random(1738L);
-      ROS2PublisherBasics<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher = localNode.createPublisher(ROS2Tools.typeNamedTopic(
-            FootstepPlanningRequestPacket.class).withTopic(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withInput()));
+      ROS2PublisherBasics<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher = localNode.createPublisher(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withInput().withTypeName(FootstepPlanningRequestPacket.class));
       localNode.spin();
 
       AtomicReference<Pose3DReadOnly> leftFootPoseReference = messager.createInput(FootstepPlannerMessagerAPI.LeftFootPose);
@@ -415,8 +414,7 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void runOutputStatusToUI()
    {
       Random random = new Random(1738L);
-      ROS2PublisherBasics<FootstepPlanningToolboxOutputStatus> footstepOutputStatusPublisher = localNode.createPublisher(ROS2Tools.typeNamedTopic(
-            FootstepPlanningToolboxOutputStatus.class).withTopic(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withOutput()));
+      ROS2PublisherBasics<FootstepPlanningToolboxOutputStatus> footstepOutputStatusPublisher = localNode.createPublisher(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withOutput().withTypeName(FootstepPlanningToolboxOutputStatus.class));
 
       localNode.spin();
       AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
