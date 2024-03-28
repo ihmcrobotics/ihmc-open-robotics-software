@@ -26,7 +26,6 @@ public class ROS2Tools
    public static final String IHMC_TOPIC_PREFIX = "ihmc";
 
    public static final String FOOTSTEP_PLANNER_NODE_NAME = "ihmc_multi_stage_footstep_planning_module";
-   public static final String BEHAVIOR_MODULE_NODE_NAME = "behavior_module";
 
    public static final String FOOTSTEP_PLANNER_MODULE_NAME = "toolbox/footstep_plan";
    public static final String CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME = "toolbox/continuous_planning";
