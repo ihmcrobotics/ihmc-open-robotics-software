@@ -162,11 +162,6 @@ public class ROS2Tools
       return new ROS2Topic<>().withTypeName(messageType);
    }
 
-   public static <T> ROS2Topic<T> typeNamedTopic(Class<T> messageType, ROS2Topic<?> topicName)
-   {
-      return typeNamedTopic(messageType).withTopic(topicName);
-   }
-
    public static ROS2Topic<StampedPosePacket> getPoseCorrectionTopic(String robotName)
    {
       return getControllerInputTopic(robotName).withTypeName(StampedPosePacket.class);
@@ -174,7 +169,7 @@ public class ROS2Tools
 
    public static ROS2Topic<DoorParameterPacket> getDoorParameterTopic()
    {
-      return typeNamedTopic(DoorParameterPacket.class, ROS2Tools.IHMC_ROOT);
+      return ROS2Tools.IHMC_ROOT.withTypeName(DoorParameterPacket.class);
    }
 
    /**
@@ -185,7 +180,7 @@ public class ROS2Tools
    public static ROS2Topic<SystemResourceUsageMessage> getSystemResourceUsageTopic(UUID instanceId)
    {
       String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
-      return typeNamedTopic(SystemResourceUsageMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+      return IHMC_ROOT.withModule("mission_control").withSuffix(topicId).withTypeName(SystemResourceUsageMessage.class);
    }
 
    /**
@@ -196,25 +191,25 @@ public class ROS2Tools
    public static ROS2Topic<SystemServiceStatusMessage> getSystemServiceStatusTopic(UUID instanceId)
    {
       String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
-      return typeNamedTopic(SystemServiceStatusMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId).withQoS(ROS2QosProfile.RELIABLE()));
+      return IHMC_ROOT.withModule("mission_control").withSuffix(topicId).withQoS(ROS2QosProfile.RELIABLE()).withTypeName(SystemServiceStatusMessage.class);
    }
 
    public static ROS2Topic<SystemServiceActionMessage> getSystemServiceActionTopic(UUID instanceId)
    {
       String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
-      return typeNamedTopic(SystemServiceActionMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+      return IHMC_ROOT.withModule("mission_control").withSuffix(topicId).withTypeName(SystemServiceActionMessage.class);
    }
 
    public static ROS2Topic<Empty> getSystemRebootTopic(UUID instanceId)
    {
       String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
-      return typeNamedTopic(Empty.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+      return IHMC_ROOT.withModule("mission_control").withSuffix(topicId).withTypeName(Empty.class);
    }
 
    public static ROS2Topic<SystemServiceLogRefreshMessage> getSystemServiceLogRefreshTopic(UUID instanceId)
    {
       String topicId = instanceId.toString().replace("-", ""); // ROS2 topic names cannot have dashes
-      return typeNamedTopic(SystemServiceLogRefreshMessage.class, IHMC_ROOT.withModule("mission_control").withSuffix(topicId));
+      return IHMC_ROOT.withModule("mission_control").withSuffix(topicId).withTypeName(SystemServiceLogRefreshMessage.class);
    }
 
    private static final RTPSCommunicationFactory FACTORY = new RTPSCommunicationFactory();
