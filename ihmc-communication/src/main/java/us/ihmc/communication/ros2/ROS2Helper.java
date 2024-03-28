@@ -15,7 +15,6 @@ import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.ros2.*;
 import us.ihmc.tools.thread.SwapReference;
 
-import java.io.IOException;
 import java.util.function.Consumer;
 
 /**
@@ -42,7 +41,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    @Override
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback)
    {
-      ros2NodeInterface.createSubscription(topic, callback);
+      ros2NodeInterface.createSubscription2(topic, callback);
    }
 
    @Override
@@ -84,7 +83,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    @Override
    public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback)
    {
-      ros2NodeInterface.createSubscription(topic, message -> callback.run());
+      ros2NodeInterface.createSubscription2(topic, message -> callback.run());
    }
 
    @Override
@@ -117,7 +116,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    public <T> TypedNotification<T> subscribeViaTypedNotification(ROS2Topic<T> topic)
    {
       TypedNotification<T> typedNotification = new TypedNotification<>();
-      ros2NodeInterface.createSubscription(topic, typedNotification::set);
+      ros2NodeInterface.createSubscription2(topic, typedNotification::set);
       return typedNotification;
    }
 
@@ -125,7 +124,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    public TypedNotification<Boolean> subscribeViaBooleanNotification(ROS2Topic<Bool> topic)
    {
       TypedNotification<Boolean> typedNotification = new TypedNotification<>();
-      ros2NodeInterface.createSubscription(topic, message -> typedNotification.set(message.getData()));
+      ros2NodeInterface.createSubscription2(topic, message -> typedNotification.set(message.getData()));
       return typedNotification;
    }
 

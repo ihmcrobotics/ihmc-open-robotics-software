@@ -78,10 +78,10 @@ public class DelayFixedPlanarRegionsSubscription
       this.callback = callback;
 
       rosClockCalculator = robotModel.getROSClockCalculator();
-      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
-                                  rosClockCalculator::receivedRobotConfigurationData);
+      ros2Node.createSubscription2(StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
+                                   rosClockCalculator::receivedRobotConfigurationData);
 
-      ros2Node.createSubscription(PerceptionAPI.MAPSENSE_REGIONS_DELAY_OFFSET, message -> delayOffset.setValue(message.getData()));
+      ros2Node.createSubscription2(PerceptionAPI.MAPSENSE_REGIONS_DELAY_OFFSET, message -> delayOffset.setValue(message.getData()));
 
       boolean daemon = true;
       int queueSize = 1;
@@ -226,8 +226,8 @@ public class DelayFixedPlanarRegionsSubscription
       {
          if (enabled)
          {
-            robotConfigurationDataSubscriber = ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
-                                                                           this::acceptRobotConfigurationData);
+            robotConfigurationDataSubscriber = ros2Node.createSubscription2(StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
+                                                                            this::acceptRobotConfigurationData);
          }
          else
          {
