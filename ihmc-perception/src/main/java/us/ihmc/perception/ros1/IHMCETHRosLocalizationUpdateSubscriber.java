@@ -36,11 +36,10 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
                                                  LongUnaryOperator robotMonotonicTimeCalculator)
    {
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, LocalizationPacket.class, ROS2Tools.IHMC_ROOT, s -> receivedPacket(s.takeNextData()));
-      localizationPointMapPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, LocalizationPointMapPacket.class, ROS2Tools.IHMC_ROOT);
+      localizationPointMapPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(LocalizationPointMapPacket.class).withTopic(ROS2Tools.IHMC_ROOT));
 
-      ROS2PublisherBasics<StampedPosePacket> stampedPosePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                                                             StampedPosePacket.class,
-                                                                                                             ROS2Tools.getControllerInputTopic(robotName));
+      ROS2PublisherBasics<StampedPosePacket> stampedPosePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(StampedPosePacket.class)
+                                                                                                      .withTopic(ROS2Tools.getControllerInputTopic(robotName)));
       RosPoseStampedSubscriber rosPoseStampedSubscriber = new RosPoseStampedSubscriber()
       {
          @Override
@@ -60,9 +59,8 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
 
       rosMainNode.attachSubscriber(RosLocalizationConstants.POSE_UPDATE_TOPIC, rosPoseStampedSubscriber);
 
-      ROS2PublisherBasics<LocalizationStatusPacket> localizationStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                                                                           LocalizationStatusPacket.class,
-                                                                                                                           ROS2Tools.IHMC_ROOT);
+      ROS2PublisherBasics<LocalizationStatusPacket> localizationStatusPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(LocalizationStatusPacket.class)
+                                                                                                                    .withTopic(ROS2Tools.IHMC_ROOT));
       AbstractRosTopicSubscriber<Float64> overlapSubscriber = new AbstractRosTopicSubscriber<std_msgs.Float64>(std_msgs.Float64._TYPE)
       {
          @Override

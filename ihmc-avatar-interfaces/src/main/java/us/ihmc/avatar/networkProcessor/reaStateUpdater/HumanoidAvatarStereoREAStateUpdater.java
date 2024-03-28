@@ -48,7 +48,7 @@ public class HumanoidAvatarStereoREAStateUpdater implements CloseableAndDisposab
 
       ros2Node = ROS2Tools.createRealtimeROS2Node(implementation, "avatar_rea_state_updater");
 
-      reaStateRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStateRequestMessage.class, inputTopic);
+      reaStateRequestPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(REAStateRequestMessage.class).withTopic(inputTopic));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, HighLevelStateChangeStatusMessage.class, ROS2Tools.getControllerOutputTopic(robotName),
                                                     this::handleHighLevelStateChangeMessage);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, WalkingStatusMessage.class, ROS2Tools.getControllerOutputTopic(robotName),

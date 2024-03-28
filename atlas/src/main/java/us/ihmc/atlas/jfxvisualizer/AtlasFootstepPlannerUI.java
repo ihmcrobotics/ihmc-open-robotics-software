@@ -56,7 +56,7 @@ public class AtlasFootstepPlannerUI extends ApplicationNoModule
       RealtimeROS2Node ros2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "ihmc_footstep_planner_ui");
       AtlasLowLevelMessenger robotLowLevelMessenger = new AtlasLowLevelMessenger(ros2Node, drcRobotModel.getSimpleRobotName());
       ROS2PublisherBasics<REAStateRequestMessage> reaStateRequestPublisher
-            = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.inputTopic);
+            = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(REAStateRequestMessage.class).withTopic(REACommunicationProperties.inputTopic));
       messageConverter = new RemoteUIMessageConverter(ros2Node, messager, drcRobotModel.getSimpleRobotName());
 
       messager.startMessager();

@@ -95,9 +95,8 @@ public class SimulatedRobotiqHandsController implements RobotController
 
       if (realtimeROS2Node != null)
       {
-         ROS2PublisherBasics<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
-                                                                                                                  HandJointAnglePacket.class,
-                                                                                                                  outputTopic);
+         ROS2PublisherBasics<HandJointAnglePacket> jointAnglePublisher = realtimeROS2Node.createPublisher(ROS2Tools.typeNamedTopic(HandJointAnglePacket.class)
+                                                                                                                   .withTopic(outputTopic));
          jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(jointAnglePublisher, fullRobotModel);
       }
       else

@@ -51,12 +51,14 @@ public class ExternalForceEstimationMessageReplay
       ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_" + name);
 
       ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-      robotConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic);
-      robotDesiredConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, RobotDesiredConfigurationData.class, controllerOutputTopic);
+      robotConfigurationDataPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(RobotConfigurationData.class).withTopic(controllerOutputTopic));
+      robotDesiredConfigurationDataPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(RobotDesiredConfigurationData.class)
+                                                                                 .withTopic(controllerOutputTopic));
 
       ROS2Topic toolboxInputTopic = ExternalForceEstimationToolboxModule.getInputTopic(robotName);
-      configMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ExternalForceEstimationConfigurationMessage.class, toolboxInputTopic);
-      toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxInputTopic);
+      configMessagePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(ExternalForceEstimationConfigurationMessage.class)
+                                                                 .withTopic(toolboxInputTopic));
+      toolboxStatePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(ToolboxStateMessage.class).withTopic(toolboxInputTopic));
 
       ros2Node.spin();
    }

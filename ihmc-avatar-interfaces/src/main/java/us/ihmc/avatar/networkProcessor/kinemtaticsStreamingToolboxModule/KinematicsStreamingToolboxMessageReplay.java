@@ -60,13 +60,15 @@ public class KinematicsStreamingToolboxMessageReplay
       ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_" + name);
 
       ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-      robotConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic);
-      capturabilityBasedStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerOutputTopic);
+      robotConfigurationDataPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(RobotConfigurationData.class).withTopic(controllerOutputTopic));
+      capturabilityBasedStatusPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(CapturabilityBasedStatus.class).withTopic(controllerOutputTopic));
 
       ROS2Topic toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
-      kinematicsToolboxConfigurationPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsToolboxConfigurationMessage.class, toolboxInputTopic);
-      kinematicsStreamingToolboxInputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsStreamingToolboxInputMessage.class, toolboxInputTopic);
-      toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxInputTopic);
+      kinematicsToolboxConfigurationPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(KinematicsToolboxConfigurationMessage.class)
+                                                                                  .withTopic(toolboxInputTopic));
+      kinematicsStreamingToolboxInputPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(KinematicsStreamingToolboxInputMessage.class)
+                                                                                   .withTopic(toolboxInputTopic));
+      toolboxStatePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(ToolboxStateMessage.class).withTopic(toolboxInputTopic));
 
       ros2Node.spin();
    }
