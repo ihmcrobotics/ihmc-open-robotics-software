@@ -44,11 +44,6 @@ public class ROS2TypelessInput
       return hasReceivedFirstMessage;
    }
 
-   public void setEnabled(boolean enabled)
-   {
-      ros2Callback.setEnabled(enabled);
-   }
-
    public void addCallback(Runnable messageReceivedCallback)
    {
       userCallbacks.add(messageReceivedCallback);
