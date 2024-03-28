@@ -42,7 +42,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    @Override
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback)
    {
-      ROS2Tools.createCallbackSubscription2(ros2NodeInterface, topic, callback);
+      ros2NodeInterface.createSubscription(topic, callback);
    }
 
    @Override
@@ -84,7 +84,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    @Override
    public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback)
    {
-      ROS2Tools.createCallbackSubscription2(ros2NodeInterface, topic, message -> callback.run());
+      ros2NodeInterface.createSubscription(topic, message -> callback.run());
    }
 
    @Override
@@ -117,7 +117,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    public <T> TypedNotification<T> subscribeViaTypedNotification(ROS2Topic<T> topic)
    {
       TypedNotification<T> typedNotification = new TypedNotification<>();
-      ROS2Tools.createCallbackSubscription2(ros2NodeInterface, topic, typedNotification::set);
+      ros2NodeInterface.createSubscription(topic, typedNotification::set);
       return typedNotification;
    }
 
@@ -125,7 +125,7 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    public TypedNotification<Boolean> subscribeViaBooleanNotification(ROS2Topic<Bool> topic)
    {
       TypedNotification<Boolean> typedNotification = new TypedNotification<>();
-      ROS2Tools.createCallbackSubscription2(ros2NodeInterface, topic, message -> typedNotification.set(message.getData()));
+      ros2NodeInterface.createSubscription(topic, message -> typedNotification.set(message.getData()));
       return typedNotification;
    }
 

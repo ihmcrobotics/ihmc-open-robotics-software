@@ -288,7 +288,7 @@ public class ROS2Tools
                                                                     ROS2Topic<T> topic,
                                                                     NewMessageListener<T> newMessageListener)
    {
-      return ros2Node.createSubscription(topic, newMessageListener);
+      return ros2Node.createSubscription(topic, newMessageListener, newMessageListener::onSubscriptionMatched);
    }
 
    public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
@@ -306,34 +306,6 @@ public class ROS2Tools
                                                                     ROS2QosProfile qosProfile)
    {
       return ros2Node.createSubscription(messageType, newMessageListener, topicName, qosProfile);
-   }
-
-   /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
-   public static <T> void createCallbackSubscriptionTypeNamed(RealtimeROS2Node realtimeROS2Node,
-                                                              Class<T> messageType,
-                                                              ROS2Topic<?> topicName,
-                                                              NewMessageListener<T> newMessageListener)
-   {
-      createCallbackSubscription(realtimeROS2Node, typeNamedTopic(messageType).withTopic(topicName), newMessageListener);
-   }
-
-   public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node, ROS2Topic<T> topic, NewMessageListener<T> newMessageListener)
-   {
-      realtimeROS2Node.createSubscription(topic, newMessageListener);
-   }
-
-   public static <T> void createCallbackSubscription(RealtimeROS2Node realtimeROS2Node,
-                                                     Class<T> messageType,
-                                                     String topicName,
-                                                     NewMessageListener<T> newMessageListener,
-                                                     ROS2QosProfile qosProfile)
-   {
-      realtimeROS2Node.createSubscription(messageType, newMessageListener, topicName, qosProfile);
-   }
-
-   public static <T> ROS2Callback<T> createCallbackSubscription2(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, Consumer<T> callback)
-   {
-      return new ROS2Callback<>(ros2Node, topic, callback);
    }
 
    /**

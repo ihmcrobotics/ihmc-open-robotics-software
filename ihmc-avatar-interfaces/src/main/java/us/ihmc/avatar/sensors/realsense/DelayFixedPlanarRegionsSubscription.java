@@ -28,6 +28,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Subscription;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -54,7 +55,7 @@ public class DelayFixedPlanarRegionsSubscription
    private final MutableDouble delayOffset = new MutableDouble(INITIAL_DELAY_OFFSET);
    private final FullHumanoidRobotModel fullRobotModel;
    private final RobotROSClockCalculator rosClockCalculator;
-   private ROS2Callback<?> robotConfigurationDataSubscriber;
+   private ROS2Subscription<?> robotConfigurationDataSubscriber;
    private RosPoseStampedPublisher sensorPosePublisher;
    private RosPoseStampedPublisher pelvisPosePublisher;
    private boolean posePublisherEnabled = false;
@@ -78,11 +79,10 @@ public class DelayFixedPlanarRegionsSubscription
       this.callback = callback;
 
       rosClockCalculator = robotModel.getROSClockCalculator();
-      ROS2Tools.createCallbackSubscription2(ros2Node,
-                                            ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
-                                            rosClockCalculator::receivedRobotConfigurationData);
+      ros2Node.createSubscription(ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
+                                  rosClockCalculator::receivedRobotConfigurationData);
 
-      ROS2Tools.createCallbackSubscription2(ros2Node, PerceptionAPI.MAPSENSE_REGIONS_DELAY_OFFSET, message -> delayOffset.setValue(message.getData()));
+      ros2Node.createSubscription(PerceptionAPI.MAPSENSE_REGIONS_DELAY_OFFSET, message -> delayOffset.setValue(message.getData()));
 
       boolean daemon = true;
       int queueSize = 1;
@@ -227,14 +227,13 @@ public class DelayFixedPlanarRegionsSubscription
       {
          if (enabled)
          {
-            robotConfigurationDataSubscriber = ROS2Tools.createCallbackSubscription2(ros2Node,
-                                                                                     ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
-                                                                                     this::acceptRobotConfigurationData);
+            robotConfigurationDataSubscriber = ros2Node.createSubscription(ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
+                                                                           this::acceptRobotConfigurationData);
          }
          else
          {
             executorService.interruptAndReset();
-            robotConfigurationDataSubscriber.destroy();
+            robotConfigurationDataSubscriber.remove();
             robotConfigurationDataSubscriber = null;
          }
       }
