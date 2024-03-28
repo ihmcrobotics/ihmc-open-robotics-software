@@ -63,7 +63,10 @@ public class RDXROS2BigVideoVisualizer extends RDXOpenCVVideoVisualizer
    {
       subscribed.set(true);
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
-      ROS2Tools.createCallbackSubscription(realtimeROS2Node, topic, subscriber ->
+      // imdecode takes the longest by far out of all this stuff
+      // synchronize with the update method
+      // YUV I420 has 1.5 times the height of the image
+      realtimeROS2Node.createSubscription(topic, subscriber ->
       {
          synchronized (syncObject)
          {

@@ -18,7 +18,6 @@ import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.RangeScanPointF
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
@@ -106,9 +105,8 @@ public class LidarScanPublisher
       this.fullRobotModel = fullRobotModel;
       lidarSensorFrame = sensorFrameFactory.setupSensorFrame(fullRobotModel);
 
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
-                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
+                                  s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
       lidarScanPublisher = ros2Node.createPublisher(PerceptionAPI.MULTISENSE_LIDAR_SCAN);
    }
 

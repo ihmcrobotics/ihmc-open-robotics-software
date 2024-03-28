@@ -195,13 +195,11 @@ public class RemoteUIMessageConverter
                                                     OcTreeKeyListMessage.class,
                                                     REACommunicationProperties.outputTopic,
                                                     s -> messager.submitMessage(FootstepPlannerMessagerAPI.OcTreeData, s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           FootstepPlannerAPI.swingReplanOutputTopic(robotName),
-                                           s ->
-                                           {
-                                              LogTools.info("Received replanned swing");
-                                              messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, s.takeNextData());
-                                           });
+      ros2Node.createSubscription(FootstepPlannerAPI.swingReplanOutputTopic(robotName), subscriber ->
+      {
+         LogTools.info("Received replanned swing");
+         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, subscriber.takeNextData());
+      });
 
       /* controller messages */
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, HumanoidControllerAPI.getOutputTopic(robotName),

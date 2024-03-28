@@ -22,7 +22,6 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
 
@@ -108,7 +107,7 @@ public class ControllerNetworkSubscriber
             unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, localInstance);
          };
 
-         ROS2Tools.createCallbackSubscription(ros2Node, topic, messageListener);
+         ros2Node.createSubscription(topic, messageListener);
       }
       catch (InstantiationException | IllegalAccessException e)
       {

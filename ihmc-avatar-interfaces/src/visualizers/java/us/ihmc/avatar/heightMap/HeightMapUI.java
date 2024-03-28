@@ -75,7 +75,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
       DRCRobotModel robotModel = getRobotModel();
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, PerceptionAPI.OUSTER_LIDAR_SCAN, new NewMessageListener<LidarScanMessage>()
+      ros2Node.createSubscription(PerceptionAPI.OUSTER_LIDAR_SCAN, new NewMessageListener<LidarScanMessage>()
       {
          @Override
          public void onNewDataMessage(Subscriber<LidarScanMessage> subscriber)
@@ -97,8 +97,8 @@ public abstract class HeightMapUI extends ApplicationNoModule
 
             messager.submitMessage(HeightMapMessagerAPI.PointCloudData, inputData);
          }
-      } );
-      /*
+      });
+   /*
       ROS2Tools.createCallbackSubscription(ros2Node, PerceptionAPI.OUSTER_DEPTH_IMAGE, ROS2QosProfile.BEST_EFFORT(), new NewMessageListener<ImageMessage>()
       {
          @Override

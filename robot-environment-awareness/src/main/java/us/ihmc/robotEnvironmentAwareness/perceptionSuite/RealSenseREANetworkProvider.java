@@ -92,7 +92,7 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
    @Override
    public void registerStereoVisionPointCloudHandler(NewMessageListener<StereoVisionPointCloudMessage> stereoVisionPointCloudHandler)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, PerceptionAPI.D435_POINT_CLOUD, stereoVisionPointCloudHandler);
+      ros2Node.createSubscription(PerceptionAPI.D435_POINT_CLOUD, stereoVisionPointCloudHandler);
    }
 
    @Override

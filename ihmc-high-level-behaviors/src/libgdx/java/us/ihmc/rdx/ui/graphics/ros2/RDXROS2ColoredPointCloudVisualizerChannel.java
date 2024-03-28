@@ -2,7 +2,6 @@ package us.ihmc.rdx.ui.graphics.ros2;
 
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -74,7 +73,7 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
 
    public void subscribe(RealtimeROS2Node realtimeROS2Node, Object imageMessagesSyncObject)
    {
-      ROS2Tools.createCallbackSubscription(realtimeROS2Node, topic, subscriber ->
+      realtimeROS2Node.createSubscription(topic, subscriber ->
       {
          synchronized (imageMessagesSyncObject)
          {

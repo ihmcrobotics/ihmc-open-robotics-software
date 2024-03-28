@@ -12,7 +12,6 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.MissionControlAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -100,14 +99,10 @@ public class ImGuiMachine
          rebootPublisher = ros2Node.createPublisher(MissionControlAPI.getSystemRebootTopic(instanceId));
       }, "Reboot-Publisher-Thread");
 
-      ROS2Tools.createCallbackSubscription(ros2Node, MissionControlAPI.getSystemResourceUsageTopic(instanceId), subscriber ->
-      {
-         acceptSystemResourceUsageMessage(subscriber.takeNextData());
-      });
-      ROS2Tools.createCallbackSubscription(ros2Node, MissionControlAPI.getSystemServiceStatusTopic(instanceId), subscriber ->
-      {
-         acceptSystemServiceStatusMessage(subscriber.takeNextData());
-      });
+      ros2Node.createSubscription(MissionControlAPI.getSystemResourceUsageTopic(instanceId),
+                                  subscriber -> acceptSystemResourceUsageMessage(subscriber.takeNextData()));
+      ros2Node.createSubscription(MissionControlAPI.getSystemServiceStatusTopic(instanceId),
+                                  subscriber -> acceptSystemServiceStatusMessage(subscriber.takeNextData()));
    }
 
    public String getHostname()

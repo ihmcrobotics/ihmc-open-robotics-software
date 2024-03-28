@@ -106,17 +106,17 @@ public class MissionControlDaemon
       systemAvailablePublisherScheduler.schedule(this::publishAvailable, 1.0);
       systemResourceUsagePublisherScheduler.schedule(this::publishResourceUsage, 0.1);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, MissionControlAPI.getSystemServiceLogRefreshTopic(instanceId), subscriber ->
+      ros2Node.createSubscription(MissionControlAPI.getSystemServiceLogRefreshTopic(instanceId), subscriber ->
       {
          handleServiceLogRefreshMessage(subscriber.takeNextData());
       });
-      ROS2Tools.createCallbackSubscription(ros2Node, MissionControlAPI.getSystemServiceActionTopic(instanceId), subscriber ->
+      ros2Node.createSubscription(MissionControlAPI.getSystemServiceActionTopic(instanceId), subscriber ->
       {
          SystemServiceActionMessage message = subscriber.takeNextData();
          LogTools.info("Received service action message " + message);
          handleServiceActionMessage(message);
       });
-      ROS2Tools.createCallbackSubscription(ros2Node, MissionControlAPI.getSystemRebootTopic(instanceId), subscriber ->
+      ros2Node.createSubscription(MissionControlAPI.getSystemRebootTopic(instanceId), subscriber ->
       {
          ProcessTools.execSimpleCommandSafe("sudo reboot");
       });

@@ -57,7 +57,8 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
    private void subscribe()
    {
       this.realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
-      ROS2Tools.createCallbackSubscription(realtimeROS2Node, topic, subscriber ->
+      // synchronize with the update method
+      realtimeROS2Node.createSubscription(topic, subscriber ->
       {
          synchronized (syncObject)
          {

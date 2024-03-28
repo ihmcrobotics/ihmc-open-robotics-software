@@ -85,7 +85,7 @@ public class StepGeneratorNetworkSubscriber
          if (qosProfile != null)
             topicName = topicName.withQoS(qosProfile);
 
-         ROS2Tools.createCallbackSubscription(realtimeROS2Node, topicName, messageListener);
+         realtimeROS2Node.createSubscription(topicName, messageListener);
       }
       catch (InstantiationException | IllegalAccessException e)
       {

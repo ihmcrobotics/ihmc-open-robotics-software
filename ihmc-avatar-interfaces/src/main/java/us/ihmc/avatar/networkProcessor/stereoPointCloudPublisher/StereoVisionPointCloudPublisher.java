@@ -18,7 +18,6 @@ import us.ihmc.avatar.networkProcessor.lidarScanPublisher.ScanPointFilterList;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
@@ -112,9 +111,8 @@ public class StereoVisionPointCloudPublisher
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
 
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
-                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
+                                  s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
       LogTools.info("Creating stereo point cloud publisher. Topic name: {}", topic.getName());
       pointcloudPublisher = ros2Node.createPublisher(topic)::publish;
    }

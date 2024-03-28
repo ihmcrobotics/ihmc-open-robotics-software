@@ -71,7 +71,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
    {
       subscribed = true;
       this.realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
-      ROS2Tools.createCallbackSubscription(realtimeROS2Node, topic, this::queueRenderImage);
+      realtimeROS2Node.createSubscription(topic, this::queueRenderImage);
       realtimeROS2Node.spin();
    }
 

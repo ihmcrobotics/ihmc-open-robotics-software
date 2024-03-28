@@ -32,7 +32,7 @@ public class MissionControlUI
    {
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "mission_control_ui");
 
-      ROS2Tools.createCallbackSubscription(ros2Node, MissionControlAPI.SYSTEM_AVAILABLE, subscriber ->
+      ros2Node.createSubscription(MissionControlAPI.SYSTEM_AVAILABLE, subscriber ->
       {
          SystemAvailableMessage message = subscriber.takeNextData();
          String instanceIdString = message.getInstanceIdAsString();

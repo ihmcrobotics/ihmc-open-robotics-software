@@ -65,7 +65,11 @@ public class RDXWebcamROS2SubscriberDemo
             baseUI.create();
 
             realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videosub");
-            ROS2Tools.createCallbackSubscription(realtimeROS2Node, PerceptionAPI.BIG_VIDEO_TEST, subscriber ->
+            //             videoSwapData.accessOnHighPriorityThread(data ->
+            //             {
+            //                data.incomingDataMessage(subscriber);
+            //             });
+            realtimeROS2Node.createSubscription(PerceptionAPI.BIG_VIDEO_TEST, subscriber ->
             {
                receiveFrequencyPlot.ping();
 

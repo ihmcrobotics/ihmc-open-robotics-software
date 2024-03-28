@@ -326,7 +326,7 @@ public class PerceptionDataLogger
       {
          SampleInfo sampleInfo = new SampleInfo();
          byteArrays.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
-         ROS2Tools.createCallbackSubscription(realtimeROS2Node, PerceptionAPI.OUSTER_DEPTH_IMAGE, (subscriber) ->
+         realtimeROS2Node.createSubscription(PerceptionAPI.OUSTER_DEPTH_IMAGE, (subscriber) ->
          {
             LogTools.info("Depth Map Received");
 
@@ -341,7 +341,7 @@ public class PerceptionDataLogger
       LogTools.info("MoCap Logging Enabled: " + channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled());
       if (channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled())
       {
-         ROS2Tools.createCallbackSubscription(realtimeROS2Node, PerceptionAPI.MOCAP_RIGID_BODY, (subscriber) ->
+         realtimeROS2Node.createSubscription(PerceptionAPI.MOCAP_RIGID_BODY, (subscriber) ->
          {
             Pose3D transformMessage = new Pose3D();
             subscriber.takeNextData(transformMessage, new SampleInfo());

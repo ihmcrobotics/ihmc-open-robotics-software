@@ -125,15 +125,9 @@ public class SLAMModule implements PerceptionModule
       slam = new SurfaceElementICPSLAM(DEFAULT_OCTREE_RESOLUTION, transformFromLocalFrameToSensor);
 
       // TODO: Check name space and fix. Suspected atlas sensor suite and publisher.
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           PerceptionAPI.MULTISENSE_STEREO_POINT_CLOUD,
-                                           this::handlePointCloud);
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           PerceptionAPI.D435_POINT_CLOUD,
-                                           this::handlePointCloud);
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           REACommunicationProperties.stereoInputTopic.withType(REAStateRequestMessage.class),
-                                           this::handleREAStateRequestMessage);
+      ros2Node.createSubscription(PerceptionAPI.MULTISENSE_STEREO_POINT_CLOUD, this::handlePointCloud);
+      ros2Node.createSubscription(PerceptionAPI.D435_POINT_CLOUD, this::handlePointCloud);
+      ros2Node.createSubscription(REACommunicationProperties.stereoInputTopic.withType(REAStateRequestMessage.class), this::handleREAStateRequestMessage);
       new ROS2Callback<>(ros2Node, SLAMModuleAPI.CLEAR, message -> clearSLAM());
       new ROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
       {

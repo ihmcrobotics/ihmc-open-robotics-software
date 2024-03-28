@@ -113,9 +113,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    {
       if (enableVideoPublisher)
       {
-         ROS2Tools.createCallbackSubscription(ros2Node,
-                                              StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
-                                              s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+         ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
+                                     s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
          cameraDataReceiver = new SCSCameraDataReceiver(sensorInformation.getCameraParameters(0).getRobotSide(),
                                                         modelFactory,

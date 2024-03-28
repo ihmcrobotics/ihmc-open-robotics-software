@@ -58,14 +58,7 @@ public class ROS2Tools
                                                                              ROS2Topic<?> topicName,
                                                                              NewMessageListener<T> newMessageListener)
    {
-      return createCallbackSubscription(ros2Node, topicName.withTypeName(messageType), newMessageListener);
-   }
-
-   public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
-                                                                    ROS2Topic<T> topic,
-                                                                    NewMessageListener<T> newMessageListener)
-   {
-      return ros2Node.createSubscription(topic, newMessageListener);
+      return ros2Node.createSubscription(topicName.withTypeName(messageType), newMessageListener);
    }
 
    /**

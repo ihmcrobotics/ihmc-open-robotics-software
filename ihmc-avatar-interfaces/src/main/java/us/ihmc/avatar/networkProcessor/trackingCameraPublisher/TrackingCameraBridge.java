@@ -73,9 +73,8 @@ public class TrackingCameraBridge
    {
       this.fullRobotModel = fullRobotModel;
 
-      ROS2Tools.createCallbackSubscription(realtimeROS2Node,
-                                           StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
-                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+      realtimeROS2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
+                                          s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
       stampedPosePacketPublisher = realtimeROS2Node.createPublisher(PerceptionAPI.T265_POSE)::publish;
    }
 

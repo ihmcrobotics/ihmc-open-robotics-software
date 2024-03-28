@@ -50,8 +50,8 @@ public class ZEDColorAndDepthLogger
       zedDepthDataLogger.setChannelEnabled(this.timeChannelName, true);
 
       RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(title));
-      ROS2Tools.createCallbackSubscription(realtimeROS2Node, depthTopic, this::receiveAndLogDepthImagesCallback);
-      ROS2Tools.createCallbackSubscription(realtimeROS2Node, colorTopic, this::receiveAndLogColorImagesCallback);
+      realtimeROS2Node.createSubscription(depthTopic, this::receiveAndLogDepthImagesCallback);
+      realtimeROS2Node.createSubscription(colorTopic, this::receiveAndLogColorImagesCallback);
       realtimeROS2Node.spin();
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, getClass().getName() + "-Shutdown"));
