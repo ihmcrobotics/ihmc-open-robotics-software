@@ -29,7 +29,7 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
    private final ROS2PublisherBasics<OcTreeKeyListMessage> ocTreePublisher;
 
    private final ROS2Node ros2Node;
-   private final ROS2Topic inputTopic;
+   private final ROS2Topic<?> inputTopic;
 
    private PlanarRegionsListMessage lastPlanarRegionsListMessage;
 
@@ -50,20 +50,14 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
    @Override
    public void registerMessager(Messager messager)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    NormalEstimationParametersMessage.class,
-                                                    inputTopic,
-                                                    s -> messager.submitMessage(REAModuleAPI.NormalEstimationParameters,
-                                                                                REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    PlanarRegionSegmentationParametersMessage.class,
-                                                    inputTopic,
-                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters,
-                                                                                REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    PolygonizerParametersMessage.class,
-                                                    inputTopic,
-                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, s.takeNextData()));
+      ros2Node.createSubscription(inputTopic.withTypeName(NormalEstimationParametersMessage.class), s -> messager.submitMessage(REAModuleAPI.NormalEstimationParameters,
+                                                                                                                                 REAParametersMessageHelper.convertFromMessage(
+                                                                                                                                                        s.takeNextData())));
+      ros2Node.createSubscription(inputTopic.withTypeName(PlanarRegionSegmentationParametersMessage.class),
+                                  s -> messager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters,
+                                                               REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+      ros2Node.createSubscription(inputTopic.withTypeName(PolygonizerParametersMessage.class),
+                                  s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, s.takeNextData()));
    }
 
    @Override
@@ -109,19 +103,19 @@ public class RealSenseREANetworkProvider implements REANetworkProvider
    @Override
    public void registerCustomRegionsHandler(NewMessageListener<PlanarRegionsListMessage> customRegionsHandler)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicName, customRegionsHandler);
+      ros2Node.createSubscription(subscriberCustomRegionsTopicName.withTypeName(PlanarRegionsListMessage.class), customRegionsHandler);
    }
 
    @Override
    public void registerREAStateRequestHandler(NewMessageListener<REAStateRequestMessage> requestHandler)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REAStateRequestMessage.class, inputTopic, requestHandler);
+      ros2Node.createSubscription(inputTopic.withTypeName(REAStateRequestMessage.class), requestHandler);
    }
 
    @Override
    public void registerREASensorDataFilterParametersHandler(NewMessageListener<REASensorDataFilterParametersMessage> parametersHandler)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REASensorDataFilterParametersMessage.class, inputTopic, parametersHandler);
+      ros2Node.createSubscription(inputTopic.withTypeName(REASensorDataFilterParametersMessage.class), parametersHandler);
    }
 
    @Override

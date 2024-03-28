@@ -44,7 +44,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -132,19 +131,13 @@ public class StepGeneratorJavaFXController
       ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       ROS2Topic<?> controllerInputTopic = HumanoidControllerAPI.getInputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class,
-                                                    controllerOutputTopic,
-                                                    s -> continuousStepController.updateControllerMotionStatus(RobotMotionStatus.fromByte(s.takeNextData()
-                                                                                                                                           .getRobotMotionStatus())));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    FootstepStatusMessage.class,
-                                                    controllerOutputTopic,
-                                                    s -> queuedTasksToProcess.add(() -> continuousStepController.consumeFootstepStatus(s.takeNextData())));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    PlanarRegionsListMessage.class,
-                                                    REACommunicationProperties.outputTopic,
-                                                    s -> queuedTasksToProcess.add(() -> continuousStepController.consumePlanarRegionsListMessage(s.takeNextData())));
+      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class),
+                                  s -> continuousStepController.updateControllerMotionStatus(RobotMotionStatus.fromByte(s.takeNextData()
+                                                                                                                           .getRobotMotionStatus())));
+      ros2Node.createSubscription(controllerOutputTopic.withTypeName(FootstepStatusMessage.class),
+                                  s -> queuedTasksToProcess.add(() -> continuousStepController.consumeFootstepStatus(s.takeNextData())));
+      ros2Node.createSubscription(REACommunicationProperties.outputTopic.withTypeName(PlanarRegionsListMessage.class),
+                                  s -> queuedTasksToProcess.add(() -> continuousStepController.consumePlanarRegionsListMessage(s.takeNextData())));
 
       pauseWalkingPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(PauseWalkingMessage.class));
       footstepPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(FootstepDataListMessage.class));
@@ -159,7 +152,7 @@ public class StepGeneratorJavaFXController
          else
             return null;
       });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
+      ros2Node.createSubscription(controllerOutputTopic.withTypeName(CapturabilityBasedStatus.class), s ->
       {
          CapturabilityBasedStatus status = s.takeNextData();
          if (status == null)
@@ -194,10 +187,8 @@ public class StepGeneratorJavaFXController
       messager.addTopicListener(DPadLeftState, state -> sendREAResumeRequest());
       messager.addTopicListener(DPadDownState, state -> sendREAClearRequest());
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    WalkingControllerFailureStatusMessage.class,
-                                                    controllerOutputTopic,
-                                                    s -> continuousStepController.submitWalkingRequest(false));
+      ros2Node.createSubscription(controllerOutputTopic.withTypeName(WalkingControllerFailureStatusMessage.class),
+                                  s -> continuousStepController.submitWalkingRequest(false));
       messager.addTopicListener(ButtonSelectState, state -> continuousStepController.submitWalkingRequest(false));
       messager.addTopicListener(ButtonSelectState, state -> lowLevelMessenger.sendFreezeRequest());
       messager.addTopicListener(ButtonStartState, state -> continuousStepController.submitWalkingRequest(false));

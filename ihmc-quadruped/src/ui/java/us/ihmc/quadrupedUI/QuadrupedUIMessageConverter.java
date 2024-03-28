@@ -135,36 +135,36 @@ public class QuadrupedUIMessageConverter
    private void registerPubSubs()
    {
       /* subscribers */
-      ROS2Topic controllerOutputTopic = QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName);
-      ROS2Topic footstepPlannerOutputTopic = PawStepPlannerCommunicationProperties.outputTopic(robotName);
-      ROS2Topic footstepPlannerInputTopicGenerator = PawStepPlannerCommunicationProperties.inputTopic(robotName);
+      ROS2Topic<?> controllerOutputTopic = QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName);
+      ROS2Topic<?> footstepPlannerOutputTopic = PawStepPlannerCommunicationProperties.outputTopic(robotName);
+      ROS2Topic<?> footstepPlannerInputTopicGenerator = PawStepPlannerCommunicationProperties.inputTopic(robotName);
 
-      ROS2Tools
-            .createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s -> processRobotConfigurationData(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, HighLevelStateChangeStatusMessage.class, controllerOutputTopic,
-                                           s -> processHighLevelStateChangeMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, QuadrupedSteppingStateChangeMessage.class, controllerOutputTopic,
-                                           s -> processSteppingStateStateChangeMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, QuadrupedFootstepStatusMessage.class, controllerOutputTopic,
-                                           s -> messager.submitMessage(QuadrupedUIMessagerAPI.FootstepStatusMessageTopic, s.takeNextData()));
+      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class),
+                                  s -> processRobotConfigurationData(s.takeNextData()));
+      ros2Node.createSubscription(controllerOutputTopic.withTypeName(HighLevelStateChangeStatusMessage.class),
+                                  s -> processHighLevelStateChangeMessage(s.takeNextData()));
+      ros2Node.createSubscription(controllerOutputTopic.withTypeName(QuadrupedSteppingStateChangeMessage.class),
+                                  s -> processSteppingStateStateChangeMessage(s.takeNextData()));
+      ros2Node.createSubscription(controllerOutputTopic.withTypeName(QuadrupedFootstepStatusMessage.class),
+                                  s -> messager.submitMessage(QuadrupedUIMessagerAPI.FootstepStatusMessageTopic, s.takeNextData()));
 
       // we want to listen to the incoming request to the planning toolbox
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PawStepPlanningRequestPacket.class, footstepPlannerInputTopicGenerator,
-                                           s -> processPawPlanningRequestPacket(s.takeNextData()));
+      ros2Node.createSubscription(footstepPlannerInputTopicGenerator.withTypeName(PawStepPlanningRequestPacket.class),
+                                  s -> processPawPlanningRequestPacket(s.takeNextData()));
       // we want to listen to the resulting body path plan from the toolbox
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, BodyPathPlanMessage.class, footstepPlannerOutputTopic,
-                                           s -> processBodyPathPlanMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlannerStatusMessage.class, footstepPlannerOutputTopic,
-                                           s -> processFootstepPlannerStatus(s.takeNextData()));
+      ros2Node.createSubscription(footstepPlannerOutputTopic.withTypeName(BodyPathPlanMessage.class),
+                                  s -> processBodyPathPlanMessage(s.takeNextData()));
+      ros2Node.createSubscription(footstepPlannerOutputTopic.withTypeName(FootstepPlannerStatusMessage.class),
+                                  s -> processFootstepPlannerStatus(s.takeNextData()));
       // we want to listen to the resulting footstep plan from the toolbox
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PawStepPlanningToolboxOutputStatus.class, footstepPlannerOutputTopic,
-                                           s -> processFootstepPlanningOutputStatus(s.takeNextData()));
+      ros2Node.createSubscription(footstepPlannerOutputTopic.withTypeName(PawStepPlanningToolboxOutputStatus.class),
+                                  s -> processFootstepPlanningOutputStatus(s.takeNextData()));
       // we want to also listen to incoming REA planar region data.
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
-                                           s -> processIncomingPlanarRegionMessage(s.takeNextData()));
+      ros2Node.createSubscription(REACommunicationProperties.outputTopic.withTypeName(PlanarRegionsListMessage.class),
+                                  s -> processIncomingPlanarRegionMessage(s.takeNextData()));
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT,
-                                           s -> messager.submitMessage(QuadrupedUIMessagerAPI.LeftCameraVideo, s.takeNextData()));
+      ros2Node.createSubscription(ROS2Tools.IHMC_ROOT.withTypeName(VideoPacket.class),
+                                  s -> messager.submitMessage(QuadrupedUIMessagerAPI.LeftCameraVideo, s.takeNextData()));
 
       /* TODO
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepNodeDataListMessage.class,

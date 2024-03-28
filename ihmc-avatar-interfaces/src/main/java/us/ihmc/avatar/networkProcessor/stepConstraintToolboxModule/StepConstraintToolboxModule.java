@@ -15,7 +15,6 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -60,9 +59,9 @@ public class StepConstraintToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      ROS2Topic controllerPubGenerator = ControllerAPIDefinition.getOutputTopic(robotName);
+      ROS2Topic<?> controllerPubGenerator = ControllerAPIDefinition.getOutputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      ros2Node.createSubscription(controllerPubGenerator.withTypeName(RobotConfigurationData.class), s ->
       {
          if (controller != null)
          {
@@ -72,7 +71,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      ros2Node.createSubscription(controllerPubGenerator.withTypeName(RobotConfigurationData.class), s ->
       {
          if (controller != null)
          {
@@ -83,7 +82,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
+      ros2Node.createSubscription(controllerPubGenerator.withTypeName(CapturabilityBasedStatus.class), s ->
       {
          if (controller != null)
          {
@@ -94,7 +93,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
 
       FootstepStatusMessage statusMessage = new FootstepStatusMessage();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class, controllerPubGenerator, s ->
+      ros2Node.createSubscription(controllerPubGenerator.withTypeName(FootstepStatusMessage.class), s ->
       {
          if (controller != null)
          {
@@ -103,10 +102,8 @@ public class StepConstraintToolboxModule extends ToolboxModule
          }
       });
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    PlanarRegionsListMessage.class,
-                                                    REACommunicationProperties.outputTopic,
-                                                    s -> updatePlanarRegion(s.takeNextData()));
+      ros2Node.createSubscription(REACommunicationProperties.outputTopic.withTypeName(PlanarRegionsListMessage.class),
+                                  s -> updatePlanarRegion(s.takeNextData()));
 
       constraintRegionPublisher = ros2Node.createPublisher(ControllerAPIDefinition.getInputTopic(robotName).withTypeName(StepConstraintMessage.class));
    }

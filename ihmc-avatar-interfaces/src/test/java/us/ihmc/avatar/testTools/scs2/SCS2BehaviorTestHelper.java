@@ -94,10 +94,8 @@ public class SCS2BehaviorTestHelper implements YoVariableHolder
 
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
       robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, forceSensorDataHolder);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class,
-                                                    HumanoidControllerAPI.getOutputTopic(robotName),
-                                                    s -> robotDataReceiver.receivedPacket(s.takeNextData()));
+      ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic(robotName).withTypeName(RobotConfigurationData.class),
+                                  s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
@@ -213,16 +211,12 @@ public class SCS2BehaviorTestHelper implements YoVariableHolder
                                                       YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    BehaviorControlModePacket.class,
-                                                    IHMCHumanoidBehaviorManager.getInputTopic(robotName),
-                                                    s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
+      ros2Node.createSubscription(IHMCHumanoidBehaviorManager.getInputTopic(robotName).withTypeName(BehaviorControlModePacket.class),
+                                  s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
 
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    HumanoidBehaviorTypePacket.class,
-                                                    IHMCHumanoidBehaviorManager.getInputTopic(robotName),
-                                                    s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
+      ros2Node.createSubscription(IHMCHumanoidBehaviorManager.getInputTopic(robotName).withTypeName(HumanoidBehaviorTypePacket.class),
+                                  s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
 
       YoVariableServer yoVariableServer = null;
       yoGraphicsListRegistry.setYoGraphicsUpdatedRemotely(false);
@@ -276,10 +270,8 @@ public class SCS2BehaviorTestHelper implements YoVariableHolder
    private CapturePointUpdatable createCapturePointUpdateable(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    CapturabilityBasedStatus.class,
-                                                    HumanoidControllerAPI.getOutputTopic(robotName),
-                                                    s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.takeNextData()));
+      ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic(robotName).withTypeName(CapturabilityBasedStatus.class),
+                                  s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.takeNextData()));
 
       CapturePointUpdatable ret = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
 

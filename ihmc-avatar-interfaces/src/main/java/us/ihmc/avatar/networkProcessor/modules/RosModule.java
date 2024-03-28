@@ -107,10 +107,8 @@ public class RosModule implements CloseableAndDisposable
 
       this.rosClockCalculator = rosClockCalculator;
       this.rosClockCalculator.subscribeToROS1Topics(rosMainNode);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class,
-                                                    robotConfigurationDataTopicName,
-                                                    s -> this.rosClockCalculator.receivedRobotConfigurationData(s.takeNextData()));
+      ros2Node.createSubscription(robotConfigurationDataTopicName.withTypeName(RobotConfigurationData.class),
+                                  s -> this.rosClockCalculator.receivedRobotConfigurationData(s.takeNextData()));
 
       this.sensorInformation = sensorInformation;
 
@@ -176,10 +174,8 @@ public class RosModule implements CloseableAndDisposable
    {
       new IHMCETHRosLocalizationUpdateSubscriber(robotName, rosMainNode, ros2Node, rosClockCalculator::computeRobotMonotonicTime);
       RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    LocalizationPacket.class,
-                                                    ROS2Tools.IHMC_ROOT,
-                                                    s -> rosLocalizationServiceClient.receivedPacket(s.takeNextData()));
+      ros2Node.createSubscription(ROS2Tools.IHMC_ROOT.withTypeName(LocalizationPacket.class),
+                                  s -> rosLocalizationServiceClient.receivedPacket(s.takeNextData()));
    }
 
    //   private void setupFootstepServiceClient()

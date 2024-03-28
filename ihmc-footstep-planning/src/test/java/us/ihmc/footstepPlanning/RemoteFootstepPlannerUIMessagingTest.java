@@ -56,6 +56,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
@@ -203,10 +204,8 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void runPlanningRequestTestFromUI()
    {
       Random random = new Random(1738L);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(localNode, FootstepPlanningRequestPacket.class,
-                                                    FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName)
-                                                                                       .withInput(),
-                                                    s -> processFootstepPlanningRequestPacket(s.takeNextData()));
+      localNode.createSubscription(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName)
+                                                                      .withInput().withTypeName(FootstepPlanningRequestPacket.class), s -> processFootstepPlanningRequestPacket(s.takeNextData()));
       localNode.spin();
 
       double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
@@ -348,14 +347,14 @@ public class RemoteFootstepPlannerUIMessagingTest
    private void runPlanObjectivePackets()
    {
       Random random = new Random(1738L);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(localNode, FootstepPlannerParametersPacket.class,
-                                                    FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName)
-                                                                                       .withInput(),
-                                                    s -> processFootstepPlannerParametersPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(localNode, VisibilityGraphsParametersPacket.class,
-                                                    FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName)
-                                                                                       .withInput(),
-                                                    s -> processVisibilityGraphsParametersPacket(s.takeNextData()));
+      ROS2Topic<?> topicName1 = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName)
+                                         .withInput();
+      localNode.createSubscription(topicName1.withTypeName(FootstepPlannerParametersPacket.class),
+                                   s1 -> processFootstepPlannerParametersPacket(s1.takeNextData()));
+      ROS2Topic<?> topicName = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName)
+                                                                  .withInput();
+      localNode.createSubscription(topicName.withTypeName(VisibilityGraphsParametersPacket.class),
+                                   s -> processVisibilityGraphsParametersPacket(s.takeNextData()));
       localNode.spin();
 
       FootstepPlannerParametersBasics randomParameters = FootstepPlanningTestTools.createRandomParameters(random);

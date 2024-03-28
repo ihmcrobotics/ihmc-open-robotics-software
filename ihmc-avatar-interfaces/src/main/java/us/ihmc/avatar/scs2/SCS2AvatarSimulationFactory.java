@@ -47,7 +47,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.Compo
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.HeightMap;
@@ -364,10 +363,8 @@ public class SCS2AvatarSimulationFactory
          if (realtimeROS2Node.hasBeenSet())
          {
             pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeROS2Node.get(), outputTopic);
-            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node.get(),
-                                                          StampedPosePacket.class,
-                                                          inputTopic,
-                                                          s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
+            realtimeROS2Node.get().createSubscription(inputTopic.withTypeName(StampedPosePacket.class),
+                                        s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
          }
       }
 

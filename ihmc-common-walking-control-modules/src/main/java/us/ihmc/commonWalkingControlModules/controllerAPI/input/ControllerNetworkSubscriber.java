@@ -12,7 +12,6 @@ import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -161,7 +160,7 @@ public class ControllerNetworkSubscriber
       MessageCollection messageCollection = new MessageCollection();
 
       ROS2Topic<MessageCollection> topicName = inputTopic.withTypeName(MessageCollection.class);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, MessageCollection.class, topicName, s ->
+      ros2Node.createSubscription(topicName.withTypeName(MessageCollection.class), s ->
       {
          s.takeNextData(messageCollection, null);
 
@@ -215,7 +214,7 @@ public class ControllerNetworkSubscriber
          T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
          ROS2Topic<?> topicName = inputTopic.withTypeName(messageClass);
 
-         ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, messageClass, topicName, s ->
+         ros2Node.createSubscription(topicName.withTypeName(messageClass), s ->
          {
             s.takeNextData(messageLocalInstance, null);
             receivedMessage(messageLocalInstance);

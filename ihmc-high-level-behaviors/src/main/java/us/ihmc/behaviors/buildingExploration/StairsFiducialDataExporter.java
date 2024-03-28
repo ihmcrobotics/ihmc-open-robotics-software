@@ -27,14 +27,12 @@ public class StairsFiducialDataExporter
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
 
       AtomicReference<DetectedFiducialPacket> latestDetectedFiducial = new AtomicReference<>();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    DetectedFiducialPacket.class,
-                                                    FiducialDetectorToolboxModule.getOutputTopic("Atlas"),
-                                                    s -> latestDetectedFiducial.set(s.takeNextData()));
+      ros2Node.createSubscription(FiducialDetectorToolboxModule.getOutputTopic("Atlas").withTypeName(DetectedFiducialPacket.class),
+                                  s -> latestDetectedFiducial.set(s.takeNextData()));
 
       AtomicReference<PlanarRegionsListMessage> latestRegions = new AtomicReference<>();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
-                                                    s -> latestRegions.set(s.takeNextData()));
+      ros2Node.createSubscription(REACommunicationProperties.outputTopic.withTypeName(PlanarRegionsListMessage.class),
+                                  s -> latestRegions.set(s.takeNextData()));
 
       long exportFrequency = 7000;
 

@@ -221,15 +221,11 @@ public class ContinuousPlanningToolboxDataSetTest
 
       ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_footstep_planner_test");
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    PawStepPlanningToolboxOutputStatus.class,
-                                                    PawStepPlannerCommunicationProperties.outputTopic(robotName),
-                                           s -> processFootstepPlanningOutputStatus(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    QuadrupedTimedStepListMessage.class,
-                                                    ToolboxAPIs.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName)
-                                                                                           .withOutput(),
-                                                    s -> processTimedStepListMessage(s.takeNextData()));
+      ros2Node.createSubscription(PawStepPlannerCommunicationProperties.outputTopic(robotName).withTypeName(PawStepPlanningToolboxOutputStatus.class),
+                                  s1 -> processFootstepPlanningOutputStatus(s1.takeNextData()));
+      ros2Node.createSubscription(ToolboxAPIs.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName)
+                                                                         .withOutput().withTypeName(QuadrupedTimedStepListMessage.class),
+                                  s -> processTimedStepListMessage(s.takeNextData()));
 
       requestPublisher = ros2Node.createPublisher(ToolboxAPIs.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName).withInput().withTypeName(QuadrupedContinuousPlanningRequestPacket.class));
       planarRegionsPublisher = ros2Node.createPublisher(REACommunicationProperties.outputTopic.withTypeName(PlanarRegionsListMessage.class));

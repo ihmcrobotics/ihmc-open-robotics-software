@@ -86,15 +86,12 @@ public class QuadrupedSupportPlanarRegionPublisher
 
       ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "supporting_planar_region_publisher");
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class, QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName),
-                                                    (NewMessageListener<RobotConfigurationData>) subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
+      ros2Node.createSubscription(QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName).withTypeName(RobotConfigurationData.class),
+                                  (NewMessageListener<RobotConfigurationData>) subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
       regionPublisher = ros2Node.createPublisher(REACommunicationProperties.subscriberCustomRegionsTopicName.withTypeName(PlanarRegionsListMessage.class));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    QuadrupedSupportPlanarRegionParametersMessage.class,
-                                                    QuadrupedAPI.QUADRUPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
-                                                                                                   .withInput(),
-                                                    s -> latestParametersMessage.set(s.takeNextData()));
+      ros2Node.createSubscription(QuadrupedAPI.QUADRUPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
+                                                                                 .withInput().withTypeName(QuadrupedSupportPlanarRegionParametersMessage.class),
+                                  s -> latestParametersMessage.set(s.takeNextData()));
 
       QuadrupedSupportPlanarRegionParametersMessage defaultParameters = new QuadrupedSupportPlanarRegionParametersMessage();
       defaultParameters.setEnable(true);

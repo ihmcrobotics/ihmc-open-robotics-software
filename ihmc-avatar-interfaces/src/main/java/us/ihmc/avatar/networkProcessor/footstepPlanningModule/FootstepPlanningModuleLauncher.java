@@ -118,8 +118,8 @@ public class FootstepPlanningModuleLauncher
       FootstepPlanningModule footstepPlanningModule = createModule(robotModel);
       footstepPlanningModule.registerRosNode(ros2Node, manageROS2Node);
       String name = footstepPlanningModule.getName();
-      ROS2Topic inputTopic = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(name).withInput();
-      ROS2Topic outputTopic = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(name).withOutput();
+      ROS2Topic<?> inputTopic = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(name).withInput();
+      ROS2Topic<?> outputTopic = FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(name).withOutput();
 
       AtomicBoolean generateLog = new AtomicBoolean();
 
@@ -134,14 +134,14 @@ public class FootstepPlanningModuleLauncher
 
    private static void createParametersCallbacks(ROS2NodeInterface ros2Node,
                                                  FootstepPlanningModule footstepPlanningModule,
-                                                 ROS2Topic inputTopic)
+                                                 ROS2Topic<?> inputTopic)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlannerParametersPacket.class, inputTopic, s ->
+      ros2Node.createSubscription(inputTopic.withTypeName(FootstepPlannerParametersPacket.class), s ->
       {
          if (!footstepPlanningModule.isPlanning())
             footstepPlanningModule.getFootstepPlannerParameters().set(s.readNextData());
       });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, SwingPlannerParametersPacket.class, inputTopic, s ->
+      ros2Node.createSubscription(inputTopic.withTypeName(SwingPlannerParametersPacket.class), s ->
       {
          if (!footstepPlanningModule.isPlanning())
             footstepPlanningModule.getSwingPlannerParameters().set(s.takeNextData());
@@ -151,10 +151,10 @@ public class FootstepPlanningModuleLauncher
    private static void createRequestCallback(String robotName,
                                              ROS2NodeInterface ros2Node,
                                              FootstepPlanningModule footstepPlanningModule,
-                                             ROS2Topic inputTopic,
+                                             ROS2Topic<?> inputTopic,
                                              AtomicBoolean generateLog)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningRequestPacket.class, inputTopic, s ->
+      ros2Node.createSubscription(inputTopic.withTypeName(FootstepPlanningRequestPacket.class), s ->
       {
          FootstepPlannerRequest request = new FootstepPlannerRequest();
          FootstepPlanningRequestPacket requestPacket = s.takeNextData();
@@ -163,7 +163,7 @@ public class FootstepPlanningModuleLauncher
          new Thread(() -> footstepPlanningModule.handleRequest(request), "FootstepPlanningRequestHandler").start();
       });
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, SwingPlanningRequestPacket.class, inputTopic, s ->
+      ros2Node.createSubscription(inputTopic.withTypeName(SwingPlanningRequestPacket.class), s ->
       {
          SwingPlannerType swingPlannerType = SwingPlannerType.fromByte(s.takeNextData().getRequestedSwingPlanner());
          if (swingPlannerType == SwingPlannerType.NONE)
@@ -231,7 +231,7 @@ public class FootstepPlanningModuleLauncher
          }
       };
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlannerActionMessage.class, inputTopic, s ->
+      ros2Node.createSubscription(((ROS2Topic<?>) inputTopic).withTypeName(FootstepPlannerActionMessage.class), s ->
       {
          s.takeNextData(footstepPlannerActionMessage, null);
          new Thread(callback, "FootstepPlannerActionCallback").start();

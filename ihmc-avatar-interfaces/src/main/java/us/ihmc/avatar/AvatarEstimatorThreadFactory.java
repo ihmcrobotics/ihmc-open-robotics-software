@@ -21,7 +21,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -485,10 +484,8 @@ public class AvatarEstimatorThreadFactory
       if (realtimeROS2NodeField.hasValue())
       {
          ForceSensorStateUpdater forceSensorStateUpdater = stateEstimator.getForceSensorStateUpdater();
-         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2NodeField.get(),
-                                                       RequestWristForceSensorCalibrationPacket.class,
-                                                       inputTopicField.get(),
-                                                       subscriber -> forceSensorStateUpdater.requestWristForceSensorCalibrationAtomic());
+         realtimeROS2NodeField.get().createSubscription(inputTopicField.get().withTypeName(RequestWristForceSensorCalibrationPacket.class),
+                                     subscriber -> forceSensorStateUpdater.requestWristForceSensorCalibrationAtomic());
       }
 
       return stateEstimator;

@@ -19,7 +19,6 @@ import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import quadruped_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.communication.QuadrupedAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -59,28 +58,23 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    public void registerExtraSubscribers(RealtimeROS2Node realtimeROS2Node)
    {
       // status messages from the controller
-      ROS2Topic controllerOutputTopic = QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic,
-                                           s -> processTimestamp(s.takeNextData().getMonotonicTime()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HighLevelStateMessage.class, controllerOutputTopic, s -> setPaused(true));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HighLevelStateChangeStatusMessage.class, controllerOutputTopic,
-                                           s -> processHighLevelStateChangeMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedFootstepStatusMessage.class, controllerOutputTopic,
-                                           s -> processFootstepStatusMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedSteppingStateChangeMessage.class, controllerOutputTopic,
-                                           s -> processSteppingStateChangeMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, GroundPlaneMessage.class, controllerOutputTopic,
-                                           s -> processGroundPlaneMessage(s.takeNextData()));
+      ROS2Topic<?> controllerOutputTopic = QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName);
+      realtimeROS2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class),
+                                          s -> processTimestamp(s.takeNextData().getMonotonicTime()));
+      realtimeROS2Node.createSubscription(controllerOutputTopic.withTypeName(HighLevelStateMessage.class), s -> setPaused(true));
+      realtimeROS2Node.createSubscription(controllerOutputTopic.withTypeName(HighLevelStateChangeStatusMessage.class),
+                                          s -> processHighLevelStateChangeMessage(s.takeNextData()));
+      realtimeROS2Node.createSubscription(controllerOutputTopic.withTypeName(QuadrupedFootstepStatusMessage.class),
+                                          s -> processFootstepStatusMessage(s.takeNextData()));
+      realtimeROS2Node.createSubscription(controllerOutputTopic.withTypeName(QuadrupedSteppingStateChangeMessage.class),
+                                          s -> processSteppingStateChangeMessage(s.takeNextData()));
+      realtimeROS2Node.createSubscription(controllerOutputTopic.withTypeName(GroundPlaneMessage.class), s -> processGroundPlaneMessage(s.takeNextData()));
 
       // inputs to this module
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedBodyPathPlanMessage.class, getInputTopic(),
-                                           s -> processBodyPathPlanMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedXGaitSettingsPacket.class, getInputTopic(),
-                                           s -> processXGaitSettingsPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, QuadrupedTeleopDesiredVelocity.class, getInputTopic(),
-                                           s -> processTeleopDesiredVelocity(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, PlanarRegionsListMessage.class, getInputTopic(),
-                                           s -> processPlanarRegionsListMessage(s.takeNextData()));
+      realtimeROS2Node.createSubscription(getInputTopic().withTypeName(QuadrupedBodyPathPlanMessage.class), s -> processBodyPathPlanMessage(s.takeNextData()));
+      realtimeROS2Node.createSubscription(getInputTopic().withTypeName(QuadrupedXGaitSettingsPacket.class), s -> processXGaitSettingsPacket(s.takeNextData()));
+      realtimeROS2Node.createSubscription(getInputTopic().withTypeName(QuadrupedTeleopDesiredVelocity.class), s -> processTeleopDesiredVelocity(s.takeNextData()));
+      realtimeROS2Node.createSubscription(getInputTopic().withTypeName(PlanarRegionsListMessage.class), s -> processPlanarRegionsListMessage(s.takeNextData()));
    }
 
    private void processTimestamp(long timestamp)
@@ -169,13 +163,13 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public ROS2Topic getOutputTopic()
+   public ROS2Topic<?> getOutputTopic()
    {
       return ToolboxAPIs.STEP_TELEOP_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2Topic getInputTopic()
+   public ROS2Topic<?> getInputTopic()
    {
       return ToolboxAPIs.STEP_TELEOP_TOOLBOX.withRobot(robotName).withInput();
    }

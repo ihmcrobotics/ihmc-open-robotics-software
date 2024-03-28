@@ -52,15 +52,6 @@ public class ROS2Tools
       return new ROS2Node(pubSubImplementation, nodeName, FACTORY.getDomainId(), FACTORY.getAddressRestriction());
    }
 
-   /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
-   public static <T> ROS2Subscription<T> createCallbackSubscriptionTypeNamed(ROS2NodeInterface ros2Node,
-                                                                             Class<T> messageType,
-                                                                             ROS2Topic<?> topicName,
-                                                                             NewMessageListener<T> newMessageListener)
-   {
-      return ros2Node.createSubscription(topicName.withTypeName(messageType), newMessageListener);
-   }
-
    /**
     * Allocation free callback where the user only has access to the message in the callback.
     * The user should not take up any significant time in the callback to not slow down the ROS 2

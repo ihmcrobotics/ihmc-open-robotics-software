@@ -16,7 +16,7 @@ public class OcTreeTopicEcho
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
       YAMLSerializer<OcTreeKeyListMessage> serializer = new YAMLSerializer<>(new OcTreeKeyListMessagePubSubType());
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, OcTreeKeyListMessage.class, REACommunicationProperties.outputTopic, s ->
+      ros2Node.createSubscription(REACommunicationProperties.outputTopic.withTypeName(OcTreeKeyListMessage.class), s ->
       {
          try
          {

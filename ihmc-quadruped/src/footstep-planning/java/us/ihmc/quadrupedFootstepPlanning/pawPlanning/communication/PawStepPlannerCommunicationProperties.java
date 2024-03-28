@@ -41,12 +41,12 @@ public class PawStepPlannerCommunicationProperties
       return toolboxSupportedCommands;
    }
 
-   public static ROS2Topic outputTopic(String robotName)
+   public static ROS2Topic<?> outputTopic(String robotName)
    {
       return FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
    }
 
-   public static ROS2Topic inputTopic(String robotName)
+   public static ROS2Topic<?> inputTopic(String robotName)
    {
       return FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
    }

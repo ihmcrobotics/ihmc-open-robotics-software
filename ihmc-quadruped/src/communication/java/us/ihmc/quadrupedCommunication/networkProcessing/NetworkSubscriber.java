@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.communication.net.PacketConsumer;
@@ -110,9 +109,9 @@ public class NetworkSubscriber
    {
       final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
-      ROS2Topic topicName = inputTopic.withTypeName(multipleMessageType);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, multipleMessageType, topicName,
-                                           s -> unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, s.takeNextData()));
+      ROS2Topic<?> topicName = inputTopic.withTypeName(multipleMessageType);
+      realtimeROS2Node.createSubscription(topicName.withTypeName(multipleMessageType),
+                                          s -> unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, s.takeNextData()));
    }
 
    private <T extends Settable<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass, MessageUnpacker<T> messageUnpacker,
@@ -159,8 +158,8 @@ public class NetworkSubscriber
 
       MessageCollection messageCollection = new MessageCollection();
 
-      ROS2Topic topicName = inputTopic.withTypeName(MessageCollection.class);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, MessageCollection.class, topicName, s -> {
+      ROS2Topic<?> topicName = inputTopic.withTypeName(MessageCollection.class);
+      realtimeROS2Node.createSubscription(topicName.withTypeName(MessageCollection.class), s -> {
          s.takeNextData(messageCollection, null);
 
          for (int i = 0; i < numberOfSimultaneousCollectionsToSupport; i++)
@@ -213,7 +212,7 @@ public class NetworkSubscriber
          T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
          ROS2Topic topicName = inputTopic.withTypeName(messageClass);
 
-         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, messageClass, topicName, s -> {
+         realtimeROS2Node.createSubscription(((ROS2Topic<?>) topicName).withTypeName(messageClass), s -> {
             s.takeNextData(messageLocalInstance, null);
             receivedMessage(messageLocalInstance);
          });

@@ -183,18 +183,14 @@ public class RemoteUIMessageConverter
    private void registerPubSubs(RealtimeROS2Node ros2Node)
    {
       /* footstep planner module outgoing messages */
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningRequestPacket.class,
-                                                    FootstepPlannerAPI.inputTopic(robotName),
-                                           s -> processFootstepPlanningRequestPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningToolboxOutputStatus.class,
-                                                    FootstepPlannerAPI.outputTopic(robotName),
-                                           s -> processFootstepPlanningOutputStatus(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
-                                           s -> processIncomingPlanarRegionMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    OcTreeKeyListMessage.class,
-                                                    REACommunicationProperties.outputTopic,
-                                                    s -> messager.submitMessage(FootstepPlannerMessagerAPI.OcTreeData, s.takeNextData()));
+      ros2Node.createSubscription(FootstepPlannerAPI.inputTopic(robotName).withTypeName(FootstepPlanningRequestPacket.class),
+                                  s -> processFootstepPlanningRequestPacket(s.takeNextData()));
+      ros2Node.createSubscription(FootstepPlannerAPI.outputTopic(robotName).withTypeName(FootstepPlanningToolboxOutputStatus.class),
+                                  s -> processFootstepPlanningOutputStatus(s.takeNextData()));
+      ros2Node.createSubscription(REACommunicationProperties.outputTopic.withTypeName(PlanarRegionsListMessage.class),
+                                  s -> processIncomingPlanarRegionMessage(s.takeNextData()));
+      ros2Node.createSubscription(REACommunicationProperties.outputTopic.withTypeName(OcTreeKeyListMessage.class),
+                                  s -> messager.submitMessage(FootstepPlannerMessagerAPI.OcTreeData, s.takeNextData()));
       ros2Node.createSubscription(FootstepPlannerAPI.swingReplanOutputTopic(robotName), subscriber ->
       {
          LogTools.info("Received replanned swing");
@@ -202,12 +198,11 @@ public class RemoteUIMessageConverter
       });
 
       /* controller messages */
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, HumanoidControllerAPI.getOutputTopic(robotName),
-                                           s -> messager.submitMessage(FootstepPlannerMessagerAPI.RobotConfigurationData, s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, HumanoidControllerAPI.getOutputTopic(robotName),
-                                           s -> processCapturabilityStatus(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class, HumanoidControllerAPI.getOutputTopic(robotName),
-                                           s -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepStatusMessage, s.takeNextData()));
+      ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic(robotName).withTypeName(RobotConfigurationData.class),
+                                  s -> messager.submitMessage(FootstepPlannerMessagerAPI.RobotConfigurationData, s.takeNextData()));
+      ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic(robotName).withTypeName(CapturabilityBasedStatus.class), s -> processCapturabilityStatus(s.takeNextData()));
+      ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic(robotName).withTypeName(FootstepStatusMessage.class),
+                                  s -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepStatusMessage, s.takeNextData()));
 
       ROS2Topic<HeightMapMessage> heightMapOutput = PerceptionAPI.HEIGHT_MAP_OUTPUT;
       new ROS2Callback<>(ros2Node, heightMapOutput, m -> messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, m));

@@ -3,7 +3,6 @@ package us.ihmc.robotEnvironmentAwareness.updaters;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -64,9 +63,9 @@ public class LiveMapModule implements PerceptionModule
       this.ros2Node = ros2Node;
       this.messager = messager;
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, PerceptionAPI.REALSENSE_SLAM_REGIONS, this::dispatchLocalizedMap);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, lidarOutputTopic, this::dispatchLidarMap);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, stereoOutputTopic, this::dispatchRegionsAtFeet);
+      ros2Node.createSubscription(PerceptionAPI.REALSENSE_SLAM_REGIONS.withTypeName(PlanarRegionsListMessage.class), this::dispatchLocalizedMap);
+      ros2Node.createSubscription(lidarOutputTopic.withTypeName(PlanarRegionsListMessage.class), this::dispatchLidarMap);
+      ros2Node.createSubscription(stereoOutputTopic.withTypeName(PlanarRegionsListMessage.class), this::dispatchRegionsAtFeet);
 
       mostRecentLocalizedMap = messager.createInput(LiveMapModuleAPI.LocalizedMap, null);
       mostRecentRegionsAtFeet = messager.createInput(LiveMapModuleAPI.RegionsAtFeet, null);

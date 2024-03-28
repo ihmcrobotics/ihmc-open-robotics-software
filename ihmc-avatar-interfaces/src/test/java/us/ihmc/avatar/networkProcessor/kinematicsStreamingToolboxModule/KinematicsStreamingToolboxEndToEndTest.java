@@ -192,14 +192,10 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       toolboxController.setTrajectoryMessagePublisher(simulationTestHelper::publishToController);
       toolboxController.setStreamingMessagePublisher(simulationTestHelper::publishToController);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(toolboxROS2Node,
-                                                    RobotConfigurationData.class,
-                                                    controllerOutputTopic,
-                                                    s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(toolboxROS2Node,
-                                                    CapturabilityBasedStatus.class,
-                                                    controllerOutputTopic,
-                                                    s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
+      toolboxROS2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class),
+                                         s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
+      toolboxROS2Node.createSubscription(controllerOutputTopic.withTypeName(CapturabilityBasedStatus.class),
+                                         s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
       toolboxROS2Node.spin();
    }
 

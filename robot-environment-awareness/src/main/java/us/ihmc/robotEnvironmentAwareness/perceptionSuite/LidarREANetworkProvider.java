@@ -56,20 +56,13 @@ public class LidarREANetworkProvider implements REANetworkProvider
    {
       currentStateProvider = new REACurrentStateProvider(ros2Node, outputTopic, messager);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    NormalEstimationParametersMessage.class,
-                                                    inputTopic,
-                                                    s -> messager.submitMessage(REAModuleAPI.NormalEstimationParameters,
-                                                                                REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    PlanarRegionSegmentationParametersMessage.class,
-                                                    inputTopic,
-                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters,
-                                                                                REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    PolygonizerParametersMessage.class,
-                                                    inputTopic,
-                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, s.takeNextData()));
+      ros2Node.createSubscription(inputTopic.withTypeName(NormalEstimationParametersMessage.class),
+                                  s -> messager.submitMessage(REAModuleAPI.NormalEstimationParameters, REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+      ros2Node.createSubscription(inputTopic.withTypeName(PlanarRegionSegmentationParametersMessage.class),
+                                  s -> messager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters,
+                                                               REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+      ros2Node.createSubscription(inputTopic.withTypeName(PolygonizerParametersMessage.class),
+                                  s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, s.takeNextData()));
    }
 
    @Override
@@ -113,25 +106,25 @@ public class LidarREANetworkProvider implements REANetworkProvider
    @Override
    public void registerCustomRegionsHandler(NewMessageListener<PlanarRegionsListMessage> customRegionsHandler)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicName, customRegionsHandler);
+      ros2Node.createSubscription(subscriberCustomRegionsTopicName.withTypeName(PlanarRegionsListMessage.class), customRegionsHandler);
    }
 
    @Override
    public void registerPlanarRegionsListRequestHandler(NewMessageListener<RequestPlanarRegionsListMessage> requestHandler)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RequestPlanarRegionsListMessage.class, inputTopic, requestHandler);
+      ros2Node.createSubscription(inputTopic.withTypeName(RequestPlanarRegionsListMessage.class), requestHandler);
    }
 
    @Override
    public void registerREAStateRequestHandler(NewMessageListener<REAStateRequestMessage> requestHandler)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REAStateRequestMessage.class, inputTopic, requestHandler);
+      ros2Node.createSubscription(inputTopic.withTypeName(REAStateRequestMessage.class), requestHandler);
    }
 
    @Override
    public void registerREASensorDataFilterParametersHandler(NewMessageListener<REASensorDataFilterParametersMessage> parametersHandler)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REASensorDataFilterParametersMessage.class, inputTopic, parametersHandler);
+      ros2Node.createSubscription(inputTopic.withTypeName(REASensorDataFilterParametersMessage.class), parametersHandler);
    }
 
    @Override

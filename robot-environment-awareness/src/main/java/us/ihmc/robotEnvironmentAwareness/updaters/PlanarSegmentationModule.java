@@ -192,7 +192,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
                                                                                                                            1.0f,
                                                                                                                            0.5f));
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, customRegionTopic, this::dispatchCustomPlanarRegion);
+      ros2Node.createSubscription(customRegionTopic.withTypeName(PlanarRegionsListMessage.class), this::dispatchCustomPlanarRegion);
       new ROS2Callback<>(ros2Node, SLAMModuleAPI.SHUTDOWN, message ->
       {
          LogTools.info("Received SHUTDOWN. Shutting down...");

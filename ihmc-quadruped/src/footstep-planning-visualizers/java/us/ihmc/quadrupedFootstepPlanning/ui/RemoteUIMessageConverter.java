@@ -141,22 +141,16 @@ public class RemoteUIMessageConverter
    {
       /* subscribers */
       // we want to listen to the incoming request to the planning toolbox
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PawStepPlanningRequestPacket.class,
-                                                    PawStepPlannerCommunicationProperties.inputTopic(robotName),
-                                           s -> processPawPlanningRequestPacket(s.takeNextData()));
+      ros2Node.createSubscription(PawStepPlannerCommunicationProperties.inputTopic(robotName).withTypeName(PawStepPlanningRequestPacket.class), s -> processPawPlanningRequestPacket(s.takeNextData()));
       // we want to listen to the resulting body path plan from the toolbox
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, BodyPathPlanMessage.class, PawStepPlannerCommunicationProperties.outputTopic(robotName),
-                                           s -> processBodyPathPlanMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlannerStatusMessage.class,
-                                                    PawStepPlannerCommunicationProperties.outputTopic(robotName),
-                                           s -> processFootstepPlannerStatus(s.takeNextData()));
+      ros2Node.createSubscription(PawStepPlannerCommunicationProperties.outputTopic(robotName).withTypeName(BodyPathPlanMessage.class), s -> processBodyPathPlanMessage(s.takeNextData()));
+      ros2Node.createSubscription(PawStepPlannerCommunicationProperties.outputTopic(robotName).withTypeName(FootstepPlannerStatusMessage.class), s -> processFootstepPlannerStatus(s.takeNextData()));
       // we want to listen to the resulting footstep plan from the toolbox
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PawStepPlanningToolboxOutputStatus.class,
-                                                    PawStepPlannerCommunicationProperties.outputTopic(robotName),
-                                           s -> processFootstepPlanningOutputStatus(s.takeNextData()));
+      ros2Node.createSubscription(PawStepPlannerCommunicationProperties.outputTopic(robotName).withTypeName(PawStepPlanningToolboxOutputStatus.class),
+                                  s -> processFootstepPlanningOutputStatus(s.takeNextData()));
       // we want to also listen to incoming REA planar region data.
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
-                                           s -> processIncomingPlanarRegionMessage(s.takeNextData()));
+      ros2Node.createSubscription(REACommunicationProperties.outputTopic.withTypeName(PlanarRegionsListMessage.class),
+                                  s -> processIncomingPlanarRegionMessage(s.takeNextData()));
 
       /*
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepNodeDataListMessage.class,
@@ -167,12 +161,11 @@ public class RemoteUIMessageConverter
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.OccupancyMapTopic, s.takeNextData()));
                                            */
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, HumanoidControllerAPI.getOutputTopic(robotName),
-                                           s -> messager.submitMessage(PawStepPlannerMessagerAPI.RobotConfigurationDataTopic, s.takeNextData()));
+      ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic(robotName).withTypeName(RobotConfigurationData.class),
+                                  s -> messager.submitMessage(PawStepPlannerMessagerAPI.RobotConfigurationDataTopic, s.takeNextData()));
 
-      ROS2Topic controllerPreviewOutputTopic = ToolboxAPIs.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
-                                                                                  .withOutput();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, WalkingControllerPreviewOutputMessage.class, controllerPreviewOutputTopic, s -> messager.submitMessage(
+      ROS2Topic<?> controllerPreviewOutputTopic = ToolboxAPIs.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withOutput();
+      ros2Node.createSubscription(controllerPreviewOutputTopic.withTypeName(WalkingControllerPreviewOutputMessage.class), s -> messager.submitMessage(
             PawStepPlannerMessagerAPI.WalkingPreviewOutput, s.takeNextData()));
 
       // publishers

@@ -164,7 +164,7 @@ public abstract class AbstractBehavior implements RobotController
 
    public <T> void createSubscriber(Class<T> messageType, ROS2Topic topicName, ObjectConsumer<T> consumer)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
+      ros2Node.createSubscription(((ROS2Topic<?>) topicName).withTypeName(messageType), s -> consumer.consumeObject(s.takeNextData()));
    }
 
    public void addBehaviorService(BehaviorService behaviorService)

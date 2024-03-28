@@ -168,13 +168,10 @@ public class TerrainPerceptionProcessWithDriver
 
       depthBytedecoImage = new BytedecoImage(realsense.getDepthWidth(), realsense.getDepthHeight(), opencv_core.CV_16UC1);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class,
-                                                    StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
-                                                    s ->
-                                                    {
-                                                       s.takeNextData(robotConfigurationData, null);
-                                                    });
+      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName).withTypeName(RobotConfigurationData.class), s ->
+      {
+         s.takeNextData(robotConfigurationData, null);
+      });
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
    }

@@ -133,12 +133,10 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
       HumanoidReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
 
-      ROS2Topic controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class,
-                                                    controllerOutputTopic,
-                                           s -> robotDataReceiver.receivedPacket(s.takeNextData()));
+      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class),
+                                  s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
@@ -156,10 +154,8 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                             yoGraphicsListRegistry);
 
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    CapturabilityBasedStatus.class,
-                                                    controllerOutputTopic,
-                                           s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.takeNextData()));
+      ros2Node.createSubscription(controllerOutputTopic.withTypeName(CapturabilityBasedStatus.class),
+                                  s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.takeNextData()));
 
       CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
       dispatcher.addUpdatable(capturePointUpdatable);
@@ -217,16 +213,12 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                     footstepPlannerParameters);
       }
 
-      ROS2Topic behaviorInputTopic = getInputTopic(robotName);
+      ROS2Topic<?> behaviorInputTopic = getInputTopic(robotName);
       dispatcher.finalizeStateMachine();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    BehaviorControlModePacket.class,
-                                                    behaviorInputTopic,
-                                           s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    HumanoidBehaviorTypePacket.class,
-                                                    behaviorInputTopic,
-                                           s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
+      ros2Node.createSubscription(behaviorInputTopic.withTypeName(BehaviorControlModePacket.class),
+                                  s1 -> desiredBehaviorControlSubscriber.receivedPacket(s1.takeNextData()));
+      ros2Node.createSubscription(behaviorInputTopic.withTypeName(HumanoidBehaviorTypePacket.class),
+                                  s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
 
       if (startYoVariableServer)
       {
@@ -550,12 +542,12 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
       return getBehaviorRosTopicPrefix(robotName, ROS2Topic.INPUT);
    }
 
-   public static ROS2Topic getOutputTopic(String robotName)
+   public static ROS2Topic<?> getOutputTopic(String robotName)
    {
       return DeprecatedAPIs.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
    }
 
-   public static ROS2Topic getInputTopic(String robotName)
+   public static ROS2Topic<?> getInputTopic(String robotName)
    {
       return DeprecatedAPIs.BEHAVIOR_MODULE.withRobot(robotName).withInput();
    }

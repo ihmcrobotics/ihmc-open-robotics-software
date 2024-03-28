@@ -20,7 +20,6 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.communication.FootstepPlannerAPI;
 import us.ihmc.communication.QuadrupedAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -89,39 +88,24 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    public void registerExtraSubscribers(RealtimeROS2Node realtimeROS2Node)
    {
       // status messages from the controller
-      ROS2Topic controllerOutputTopic = QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
-                                                    RobotConfigurationData.class,
-                                                    controllerOutputTopic,
-                                                    s -> processRobotTimestamp(s.takeNextData().getMonotonicTime()));
+      ROS2Topic<?> controllerOutputTopic = QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName);
+      realtimeROS2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class),
+                                          s -> processRobotTimestamp(s.takeNextData().getMonotonicTime()));
       //      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HighLevelStateMessage.class, controllerOutputTopic, s -> footstepPlanningController.setPaused(true));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
-                                                    GroundPlaneMessage.class,
-                                                    controllerOutputTopic,
-                                                    s -> processGroundPlaneMessage(s.takeNextData()));
+      realtimeROS2Node.createSubscription(controllerOutputTopic.withTypeName(GroundPlaneMessage.class),
+                                          s -> processGroundPlaneMessage(s.takeNextData()));
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
-                                                    QuadrupedSupportPlanarRegionParametersMessage.class,
-                                                    QuadrupedAPI.QUADRUPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName).withInput(),
-                                                    s -> processSupportRegionParameters(s.takeNextData()));
+      realtimeROS2Node.createSubscription(QuadrupedAPI.QUADRUPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName).withInput()
+                                                                                         .withTypeName(QuadrupedSupportPlanarRegionParametersMessage.class),
+                                          s -> processSupportRegionParameters(s.takeNextData()));
 
       // inputs to this module
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
-                                                    PawStepPlanningRequestPacket.class,
-                                                    getInputTopic(),
-                                                    s -> processPawPlanningRequest(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
-                                                    QuadrupedXGaitSettingsPacket.class,
-                                                    getInputTopic(),
-                                                    s -> processXGaitSettingsPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
-                                                    PawStepPlannerParametersPacket.class,
-                                                    getInputTopic(),
-                                                    s -> processFootstepPlannerParametersPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
-                                                    VisibilityGraphsParametersPacket.class,
-                                                    getInputTopic(),
-                                                    s -> processVisibilityGraphParametersPacket(s.takeNextData()));
+      realtimeROS2Node.createSubscription(((ROS2Topic<?>) getInputTopic()).withTypeName(PawStepPlanningRequestPacket.class), s -> processPawPlanningRequest(s.takeNextData()));
+      realtimeROS2Node.createSubscription(((ROS2Topic<?>) getInputTopic()).withTypeName(QuadrupedXGaitSettingsPacket.class), s -> processXGaitSettingsPacket(s.takeNextData()));
+      realtimeROS2Node.createSubscription(((ROS2Topic<?>) getInputTopic()).withTypeName(PawStepPlannerParametersPacket.class),
+                                          s -> processFootstepPlannerParametersPacket(s.takeNextData()));
+      realtimeROS2Node.createSubscription(((ROS2Topic<?>) getInputTopic()).withTypeName(VisibilityGraphsParametersPacket.class),
+                                          s -> processVisibilityGraphParametersPacket(s.takeNextData()));
    }
 
    private void processRobotTimestamp(long timestamp)

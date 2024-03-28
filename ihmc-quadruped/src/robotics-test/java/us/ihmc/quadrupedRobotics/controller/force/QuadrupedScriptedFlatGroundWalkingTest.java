@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import quadruped_msgs.msg.dds.QuadrupedTimedStepMessage;
 import us.ihmc.communication.QuadrupedAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -259,13 +258,12 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       List<QuadrupedTimedStepMessage> steps = getSteps();
       int initialSize = steps.size();
 
-      ROS2Topic controllerOutputTopic = QuadrupedAPI.getQuadrupedControllerOutputTopic(stepTeleopManager.getRobotName());
-      ROS2Tools.createCallbackSubscriptionTypeNamed(stepTeleopManager.getROS2Node(), QuadrupedFootstepStatusMessage.class, controllerOutputTopic,
-                                           s ->
-                                           {
-                                              if (s.takeNextData().getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
-                                                 steps.remove(0);
-                                           });
+      ROS2Topic<?> controllerOutputTopic = QuadrupedAPI.getQuadrupedControllerOutputTopic(stepTeleopManager.getRobotName());
+      stepTeleopManager.getROS2Node().createSubscription(controllerOutputTopic.withTypeName(QuadrupedFootstepStatusMessage.class), s ->
+      {
+         if (s.takeNextData().getFootstepStatus() == QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
+            steps.remove(0);
+      });
       QuadrupedTimedStepListMessage message = QuadrupedMessageTools.createQuadrupedTimedStepListMessage(steps, false);
       stepTeleopManager.publishTimedStepListToController(message);
 

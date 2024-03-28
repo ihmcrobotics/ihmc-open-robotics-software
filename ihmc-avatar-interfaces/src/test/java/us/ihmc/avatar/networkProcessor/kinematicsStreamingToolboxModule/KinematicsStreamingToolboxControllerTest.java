@@ -157,20 +157,16 @@ public abstract class KinematicsStreamingToolboxControllerTest
       ROS2PublisherBasics<WholeBodyTrajectoryMessage> outputPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(WholeBodyTrajectoryMessage.class));
       toolboxController.setTrajectoryMessagePublisher(outputPublisher::publish);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class,
-                                                    controllerOutputTopic,
-                                                    s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    CapturabilityBasedStatus.class,
-                                                    controllerOutputTopic,
-                                                    s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
+      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class),
+                                  s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
+      ros2Node.createSubscription(controllerOutputTopic.withTypeName(CapturabilityBasedStatus.class),
+                                  s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
 
       inputPublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(KinematicsStreamingToolboxInputMessage.class));
       statePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ToolboxStateMessage.class));
 
       AtomicReference<KinematicsToolboxOutputStatus> toolboxViz = new AtomicReference<>(null);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, KinematicsToolboxOutputStatus.class, toolboxOutputTopic, s -> toolboxViz.set(s.takeNextData()));
+      ros2Node.createSubscription(toolboxOutputTopic.withTypeName(KinematicsToolboxOutputStatus.class), s -> toolboxViz.set(s.takeNextData()));
 
       Controller toolboxUpdater = new Controller()
       {

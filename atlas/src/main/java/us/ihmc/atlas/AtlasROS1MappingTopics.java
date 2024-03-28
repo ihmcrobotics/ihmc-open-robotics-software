@@ -63,7 +63,8 @@ public class AtlasROS1MappingTopics
 
       AtomicReference<RobotConfigurationData> robotConfigurationDataHolder = new AtomicReference<>(new RobotConfigurationData());
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "atlas_topics2");
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, HumanoidControllerAPI.getOutputTopic("Atlas"), s -> robotConfigurationDataHolder.set(s.takeNextData()));
+      ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic("Atlas").withTypeName(RobotConfigurationData.class),
+                                  s -> robotConfigurationDataHolder.set(s.takeNextData()));
 
       ros1Node.execute();
 

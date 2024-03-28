@@ -16,7 +16,6 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlConfigurationCommand;
@@ -104,27 +103,27 @@ public class DirectionalControlModule extends ToolboxModule
    {
       ROS2Topic<?> controllerPubGenerator = ControllerAPIDefinition.getOutputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      ros2Node.createSubscription(controllerPubGenerator.withTypeName(RobotConfigurationData.class), s ->
       {
          if (steppingController != null)
             steppingController.updateRobotConfigurationData(s.takeNextData());
       });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class, controllerPubGenerator, s ->
+      ros2Node.createSubscription(controllerPubGenerator.withTypeName(FootstepStatusMessage.class), s ->
       {
          if (steppingController != null)
             steppingController.updateFootstepStatusMessage(s.takeNextData());
       });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic, s ->
+      ros2Node.createSubscription(REACommunicationProperties.outputTopic.withTypeName(PlanarRegionsListMessage.class), s ->
       {
          if (steppingController != null)
             steppingController.updatePlanarRegionsListMessage(s.takeNextData());
       });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, WalkingControllerFailureStatusMessage.class, controllerPubGenerator, s ->
+      ros2Node.createSubscription(controllerPubGenerator.withTypeName(WalkingControllerFailureStatusMessage.class), s ->
       {
          if (steppingController != null)
             steppingController.updateWalkingControllerFailureStatusMessage(s.takeNextData());
       });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
+      ros2Node.createSubscription(controllerPubGenerator.withTypeName(CapturabilityBasedStatus.class), s ->
       {
          if (steppingController != null)
             steppingController.updateCapturabilityBasedStatus(s.takeNextData());
