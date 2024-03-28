@@ -9,6 +9,7 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonsMessage;
+import us.ihmc.communication.OldBehaviorAPI;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
@@ -19,7 +20,7 @@ import us.ihmc.utilities.ros.RosTools;
 
 public class LookAndStepBehaviorAPI
 {
-   private static final String MODULE_NAME = ROS2Tools.BEHAVIOR_MODULE_NAME + "/look_and_step";
+   private static final String MODULE_NAME = OldBehaviorAPI.BEHAVIOR_MODULE_NAME + "/look_and_step";
    private static final ROS2Topic<?> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule(MODULE_NAME);
 
    public static final String REGIONS_FOR_FOOTSTEP_PLANNING = RosTools.MAPSENSE_REGIONS;

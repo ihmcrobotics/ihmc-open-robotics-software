@@ -46,11 +46,6 @@ public class ROS2Tools
    public static final String DIRECTIONAL_CONTROL_TOOLBOX_MODULE_NAME = "/toolbox/directional_control";
    public static final String QUADRUPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME = "quadruped_support_region_publisher";
 
-   public static final String BEHAVIOR_MODULE_NAME = "behavior";
-
-   public static final String INPUT = ROS2Topic.INPUT;
-   public static final String OUTPUT = ROS2Topic.OUTPUT;
-
    public static final ROS2Topic<?> IHMC_ROOT = new ROS2Topic<>().withPrefix(IHMC_TOPIC_PREFIX);
    public static final ROS2Topic<?> QUADRUPED_CONTROLLER = IHMC_ROOT.withModule(QUADRUPED_CONTROL_MODULE_NAME);
    public static final ROS2Topic<?> FOOTSTEP_PLANNER = IHMC_ROOT.withModule(FOOTSTEP_PLANNER_MODULE_NAME);
