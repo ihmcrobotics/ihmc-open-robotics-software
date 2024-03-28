@@ -50,10 +50,9 @@ public class MultiSenseParamaterSetter implements PacketConsumer<MultisenseParam
       this.rosMainNode = rosMainNode;
       multiSenseClient = new RosServiceClient<ReconfigureRequest, ReconfigureResponse>(Reconfigure._TYPE);
       rosMainNode.attachServiceClient("multisense/set_parameters", multiSenseClient);
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           MultisenseParameterPacket.class,
-                                           ROS2Tools.IHMC_TOPIC_PREFIX + "/multisense_parameter",
-                                           s -> receivedPacket(s.takeNextData()));
+      ros2Node.createSubscription(MultisenseParameterPacket.class,
+                                  s -> receivedPacket(s.takeNextData()),
+                                  ROS2Tools.IHMC_TOPIC_PREFIX + "/multisense_parameter");
       publisher = ros2Node.createPublisher(MultisenseParameterPacket.class, ROS2Tools.IHMC_TOPIC_PREFIX + "/initial_multisense_parameter");
    }
 

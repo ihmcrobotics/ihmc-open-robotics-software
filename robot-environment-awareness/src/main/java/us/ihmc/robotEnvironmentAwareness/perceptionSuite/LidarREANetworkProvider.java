@@ -101,7 +101,7 @@ public class LidarREANetworkProvider implements REANetworkProvider
    @Override
    public void registerLidarScanHandler(NewMessageListener<LidarScanMessage> lidarScanHandler)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, REASourceType.LIDAR_SCAN.getTopicName(), lidarScanHandler);
+      ros2Node.createSubscription(LidarScanMessage.class, lidarScanHandler, REASourceType.LIDAR_SCAN.getTopicName());
    }
 
    @Override

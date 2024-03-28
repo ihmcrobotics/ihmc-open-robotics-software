@@ -289,14 +289,6 @@ public class ROS2Tools
       return ros2Node.createSubscription(topic, newMessageListener, newMessageListener::onSubscriptionMatched);
    }
 
-   public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,
-                                                                    Class<T> messageType,
-                                                                    String topicName,
-                                                                    NewMessageListener<T> newMessageListener)
-   {
-      return ros2Node.createSubscription(messageType, newMessageListener, topicName);
-   }
-
    /**
     * Allocation free callback where the user only has access to the message in the callback.
     * The user should not take up any significant time in the callback to not slow down the ROS 2

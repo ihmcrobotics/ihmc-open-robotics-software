@@ -184,6 +184,6 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
 
    public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
+      ros2Node.createSubscription(messageType, s -> consumer.consumeObject(s.takeNextData()), topicName);
    }
 }
