@@ -26,6 +26,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.Kine
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
@@ -49,6 +50,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 
 public class KSTTools
 {
@@ -127,6 +129,36 @@ public class KSTTools
       currentFullRobotModel = fullRobotModelFactory.createFullRobotModel();
       currentRootJoint = currentFullRobotModel.getRootJoint();
       currentOneDoFJoint = FullRobotModelUtils.getAllJointsExcludingHands(currentFullRobotModel);
+
+      if (parameters.getJointCustomPositionLowerLimits() != null)
+      {
+         for (Entry<String, Double> entry : parameters.getJointCustomPositionLowerLimits().entrySet())
+         {
+            OneDoFJointBasics joint = desiredFullRobotModel.getOneDoFJointByName(entry.getKey());
+            if (joint == null)
+            {
+               LogTools.warn("Couldn't find joint {}", entry.getKey());
+               continue;
+            }
+
+            joint.setJointLimitLower(entry.getValue());
+         }
+      }
+
+      if (parameters.getJointCustomPositionUpperLimits() != null)
+      {
+         for (Entry<String, Double> entry : parameters.getJointCustomPositionUpperLimits().entrySet())
+         {
+            OneDoFJointBasics joint = desiredFullRobotModel.getOneDoFJointByName(entry.getKey());
+            if (joint == null)
+            {
+               LogTools.warn("Couldn't find joint {}", entry.getKey());
+               continue;
+            }
+
+            joint.setJointLimitUpper(entry.getValue());
+         }
+      }
 
       ikCommandInputManager = new CommandInputManager(HumanoidKinematicsToolboxController.class.getSimpleName(),
                                                       KinematicsToolboxModule.supportedCommands(),

@@ -218,8 +218,10 @@ public class KinematicsStreamingToolboxParameters
    private double inputFilterMaxLinearVelocity;
    private double inputFilterMaxAngularVelocity;
 
+
    private boolean useStreamingPublisher;
    private double publishingPeriod;
+
 
    private InputStateEstimatorType inputStateEstimatorType;
 
@@ -227,6 +229,8 @@ public class KinematicsStreamingToolboxParameters
     * Map from joint name to initial 1-DoF joint position.
     */
    private Map<String, Double> initialConfigurationMap;
+   private Map<String, Double> jointCustomPositionUpperLimits;
+   private Map<String, Double> jointCustomPositionLowerLimits;
    private final KinematicsStreamingToolboxConfigurationMessage defaultConfiguration = new KinematicsStreamingToolboxConfigurationMessage();
    private final KinematicsToolboxConfigurationMessage defaultSolverConfiguration = new KinematicsToolboxConfigurationMessage();
 
@@ -549,6 +553,16 @@ public class KinematicsStreamingToolboxParameters
       return inputStateEstimatorType;
    }
 
+   public Map<String, Double> getJointCustomPositionUpperLimits()
+   {
+      return jointCustomPositionUpperLimits;
+   }
+
+   public Map<String, Double> getJointCustomPositionLowerLimits()
+   {
+      return jointCustomPositionLowerLimits;
+   }
+
    public Map<String, Double> getInitialConfigurationMap()
    {
       return initialConfigurationMap;
@@ -811,6 +825,16 @@ public class KinematicsStreamingToolboxParameters
    public void setInputStateEstimatorType(InputStateEstimatorType inputStateEstimatorType)
    {
       this.inputStateEstimatorType = inputStateEstimatorType;
+   }
+
+   public void setJointCustomPositionUpperLimits(Map<String, Double> jointCustomPositionUpperLimits)
+   {
+      this.jointCustomPositionUpperLimits = jointCustomPositionUpperLimits;
+   }
+
+   public void setJointCustomPositionLowerLimits(Map<String, Double> jointCustomPositionLowerLimits)
+   {
+      this.jointCustomPositionLowerLimits = jointCustomPositionLowerLimits;
    }
 
    public void setInitialConfigurationMap(Map<String, Double> initialConfigurationMap)
