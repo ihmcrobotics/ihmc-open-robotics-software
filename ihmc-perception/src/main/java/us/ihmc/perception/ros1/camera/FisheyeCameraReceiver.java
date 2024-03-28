@@ -66,7 +66,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
 
       public CompressedFisheyeHandler(ROS2NodeInterface ros2Node)
       {
-         publisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(FisheyePacket.class).withTopic(ROS2Tools.IHMC_ROOT));
+         publisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withTypeName(FisheyePacket.class));
       }
 
       @Override

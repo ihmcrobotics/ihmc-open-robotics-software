@@ -16,12 +16,6 @@ public class ROS2Tools
 
    public static final ROS2Topic<?> IHMC_ROOT = new ROS2Topic<>().withPrefix(IHMC_TOPIC_PREFIX);
 
-   /** @deprecated Use {@link ROS2Topic#withTypeName} instead. */
-   public static <T> ROS2Topic<T> typeNamedTopic(Class<T> messageType)
-   {
-      return new ROS2Topic<>().withTypeName(messageType);
-   }
-
    private static final RTPSCommunicationFactory FACTORY = new RTPSCommunicationFactory();
 
    /**
@@ -64,7 +58,7 @@ public class ROS2Tools
                                                                              ROS2Topic<?> topicName,
                                                                              NewMessageListener<T> newMessageListener)
    {
-      return createCallbackSubscription(ros2Node, typeNamedTopic(messageType).withTopic(topicName), newMessageListener);
+      return createCallbackSubscription(ros2Node, topicName.withTypeName(messageType), newMessageListener);
    }
 
    public static <T> ROS2Subscription<T> createCallbackSubscription(ROS2NodeInterface ros2Node,

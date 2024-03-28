@@ -37,7 +37,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
                                                  LongUnaryOperator robotMonotonicTimeCalculator)
    {
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, LocalizationPacket.class, ROS2Tools.IHMC_ROOT, s -> receivedPacket(s.takeNextData()));
-      localizationPointMapPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(LocalizationPointMapPacket.class).withTopic(ROS2Tools.IHMC_ROOT));
+      localizationPointMapPublisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withTypeName(LocalizationPointMapPacket.class));
 
       ROS2PublisherBasics<StampedPosePacket> stampedPosePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(StampedPosePacket.class));
       RosPoseStampedSubscriber rosPoseStampedSubscriber = new RosPoseStampedSubscriber()
@@ -59,8 +59,8 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
 
       rosMainNode.attachSubscriber(RosLocalizationConstants.POSE_UPDATE_TOPIC, rosPoseStampedSubscriber);
 
-      ROS2PublisherBasics<LocalizationStatusPacket> localizationStatusPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(LocalizationStatusPacket.class)
-                                                                                                                    .withTopic(ROS2Tools.IHMC_ROOT));
+      ROS2PublisherBasics<LocalizationStatusPacket> localizationStatusPublisher
+            = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withTypeName(LocalizationStatusPacket.class));
       AbstractRosTopicSubscriber<Float64> overlapSubscriber = new AbstractRosTopicSubscriber<std_msgs.Float64>(std_msgs.Float64._TYPE)
       {
          @Override
