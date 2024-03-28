@@ -14,7 +14,6 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import us.ihmc.avatar.colorVision.stereo.DualBlackflyUDPReceiver;
 import us.ihmc.avatar.colorVision.stereo.DualZEDUDPReceiver;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -180,13 +179,13 @@ public class RDXDualBlackflySphericalProjection
                ImageDimensions imageDimensions = dualZEDUDPReceiver.getImageDimensions().get(side);
                BytePointer imageDataPointer = new BytePointer(imageData);
 
-               Mat mat = new Mat(imageDimensions.getImageHeight(), imageDimensions.getImageWidth(), opencv_core.CV_8UC1);
+               Mat mat = new Mat(imageDimensions.getImageHeight(), imageDimensions.getImageWidth(), opencv_core.CV_8UC4);
                mat.data(imageDataPointer);
 
                Pixmap pixmap = new Pixmap(mat.cols(), mat.rows(), Pixmap.Format.RGBA8888);
                BytePointer rgba8888BytePointer = new BytePointer(pixmap.getPixels());
                Mat rgba8Mat = new Mat(mat.rows(), mat.cols(), opencv_core.CV_8UC4, rgba8888BytePointer);
-               opencv_imgproc.cvtColor(mat, rgba8Mat, opencv_imgproc.COLOR_BayerBG2RGBA);
+               opencv_imgproc.cvtColor(mat, rgba8Mat, opencv_imgproc.COLOR_BGR2RGBA);
 
                // Draw a circle in the center
                int centerX = mat.cols() / 2;

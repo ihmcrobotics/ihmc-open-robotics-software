@@ -34,8 +34,8 @@ public class DualZEDUDPReceiver
       frequencyCalculators.put(RobotSide.LEFT, new FrequencyCalculator(10));
       frequencyCalculators.put(RobotSide.RIGHT, new FrequencyCalculator(10));
 
-      addresses.put(RobotSide.LEFT, "172.16.66.230");
-      addresses.put(RobotSide.RIGHT, "172.16.66.230");
+      addresses.put(RobotSide.LEFT, "127.0.0.1");
+      addresses.put(RobotSide.RIGHT, "127.0.0.1");
    }
 
    public boolean connected()
@@ -51,7 +51,7 @@ public class DualZEDUDPReceiver
       {
          Thread receiveThread = new Thread(() ->
          {
-            SocketAddress socketAddress = new InetSocketAddress(addresses.get(side),
+            SocketAddress socketAddress = new InetSocketAddress("127.0.0.1",
                                                                 side == RobotSide.LEFT ? DualZEDUDPSender.LEFT_UDP_PORT : DualZEDUDPSender.RIGHT_UDP_PORT);
             DatagramSocket socket;
 

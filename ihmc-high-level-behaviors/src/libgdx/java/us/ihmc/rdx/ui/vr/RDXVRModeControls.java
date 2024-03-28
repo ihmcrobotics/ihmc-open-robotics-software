@@ -31,6 +31,7 @@ public class RDXVRModeControls
       baseUI.getVRManager().getContext().addVRInputProcessor(leftHandPanel::processVRInput);
       baseUI.getVRManager().getContext().addVRInputProcessor(this::processVRInput);
       baseUI.getPrimaryScene().addModelInstance(leftHandPanel.getModelInstance());
+      baseUI.getPrimary3DPanel().addOverlayPanel(PANEL_NAME, this::render);
    }
 
    public void update()
@@ -71,7 +72,7 @@ public class RDXVRModeControls
 
    private void render()
    {
-      if (wasVRReady)
+      if (true)
       {
          ImGuiTools.separatorText("Stereo vision");
          vrModeManager.getStereoVision().renderControls();
