@@ -18,6 +18,7 @@ import quadruped_msgs.msg.dds.QuadrupedTeleopDesiredVelocity;
 import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import quadruped_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import us.ihmc.communication.QuadrupedAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -57,7 +58,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    public void registerExtraSubscribers(RealtimeROS2Node realtimeROS2Node)
    {
       // status messages from the controller
-      ROS2Topic controllerOutputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
+      ROS2Topic controllerOutputTopic = QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerOutputTopic,
                                            s -> processTimestamp(s.takeNextData().getMonotonicTime()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HighLevelStateMessage.class, controllerOutputTopic, s -> setPaused(true));
@@ -158,7 +159,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    {
       Map<Class<? extends Settable<?>>, ROS2Topic> messages = new HashMap<>();
 
-      ROS2Topic controllerInputTopic = ROS2Tools.getQuadrupedControllerInputTopic(robotName);
+      ROS2Topic controllerInputTopic = QuadrupedAPI.getQuadrupedControllerInputTopic(robotName);
       messages.put(QuadrupedTimedStepListMessage.class, controllerInputTopic);
       messages.put(QuadrupedBodyOrientationMessage.class, controllerInputTopic);
       messages.put(AbortWalkingMessage.class, controllerInputTopic);

@@ -32,6 +32,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.QuadrupedAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -236,7 +237,7 @@ public class ContinuousPlanningToolboxDataSetTest
       plannerParametersPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PawStepPlannerParametersPacket.class)
                                                                      .withTopic(ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName).withInput()));
 
-      ROS2Topic controllerOutputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
+      ROS2Topic controllerOutputTopic = QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName);
       footstepStatusPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(QuadrupedFootstepStatusMessage.class).withTopic(controllerOutputTopic));
 
       ros2Node.spin();

@@ -18,6 +18,7 @@ import quadruped_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage;
 import quadruped_msgs.msg.dds.QuadrupedXGaitSettingsPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
+import us.ihmc.communication.QuadrupedAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -87,7 +88,7 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    public void registerExtraSubscribers(RealtimeROS2Node realtimeROS2Node)
    {
       // status messages from the controller
-      ROS2Topic controllerOutputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
+      ROS2Topic controllerOutputTopic = QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
                                                     RobotConfigurationData.class,
                                                     controllerOutputTopic,
@@ -100,7 +101,7 @@ public class PawPlanningModule extends QuadrupedToolboxModule
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node,
                                                     QuadrupedSupportPlanarRegionParametersMessage.class,
-                                                    ROS2Tools.QUADRUPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName).withInput(),
+                                                    QuadrupedAPI.QUADRUPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName).withInput(),
                                                     s -> processSupportRegionParameters(s.takeNextData()));
 
       // inputs to this module
