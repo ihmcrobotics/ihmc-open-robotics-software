@@ -15,6 +15,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.avatar.colorVision.stereo.DualBlackflyUDPReceiver;
+import us.ihmc.avatar.colorVision.stereo.DualZEDUDPReceiver;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -41,7 +42,7 @@ public class RDXDualBlackflySphericalProjection
    private final FramePose3D rightEyePose = new FramePose3D();
    private final ReferenceFrame robotZUpFrame;
    private final SideDependentList<ReferenceFrame> projectionOriginFrames = new SideDependentList<>();
-   private final DualBlackflyUDPReceiver dualBlackflyUDPReceiver = new DualBlackflyUDPReceiver();
+   private final DualZEDUDPReceiver dualZEDUDPReceiver = new DualZEDUDPReceiver();
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
@@ -96,7 +97,7 @@ public class RDXDualBlackflySphericalProjection
 
    public boolean isConnected()
    {
-      return dualBlackflyUDPReceiver.connected();
+      return dualZEDUDPReceiver.connected();
    }
 
    private void startReconnectThread()
@@ -111,12 +112,12 @@ public class RDXDualBlackflySphericalProjection
          {
             RDXBaseUI.pushNotification("Dual Blackfly stereo client reconnecting...");
 
-            dualBlackflyUDPReceiver.stop();
-            dualBlackflyUDPReceiver.start();
+            dualZEDUDPReceiver.stop();
+            dualZEDUDPReceiver.start();
 
             ThreadTools.sleep(5000);
          }
-         while (reconnecting && !dualBlackflyUDPReceiver.connected());
+         while (reconnecting && !dualZEDUDPReceiver.connected());
       }, getClass().getName() + "-ReconnectThread");
 
       reconnectThread.start();
@@ -152,14 +153,14 @@ public class RDXDualBlackflySphericalProjection
       // Disable on a thread, so we don't hang the UI
       ThreadTools.startAThread(this::stopReconnectThread, getClass().getSimpleName() + "StopReconnect");
 
-      dualBlackflyUDPReceiver.stop();
+      dualZEDUDPReceiver.stop();
    }
 
    public void shutdown()
    {
       stopReconnectThread();
 
-      dualBlackflyUDPReceiver.stop();
+      dualZEDUDPReceiver.stop();
    }
 
    public void render()
@@ -172,11 +173,11 @@ public class RDXDualBlackflySphericalProjection
 
          for (RobotSide side : RobotSide.values)
          {
-            byte[] imageData = dualBlackflyUDPReceiver.getImageBuffers().get(side);
+            byte[] imageData = dualZEDUDPReceiver.getImageBuffers().get(side);
 
             if (imageData != null)
             {
-               ImageDimensions imageDimensions = dualBlackflyUDPReceiver.getImageDimensions().get(side);
+               ImageDimensions imageDimensions = dualZEDUDPReceiver.getImageDimensions().get(side);
                BytePointer imageDataPointer = new BytePointer(imageData);
 
                Mat mat = new Mat(imageDimensions.getImageHeight(), imageDimensions.getImageWidth(), opencv_core.CV_8UC1);
@@ -292,9 +293,9 @@ public class RDXDualBlackflySphericalProjection
       }
    }
 
-   public DualBlackflyUDPReceiver getDualBlackflyUDPReceiver()
+   public DualZEDUDPReceiver getDualBlackflyUDPReceiver()
    {
-      return dualBlackflyUDPReceiver;
+      return dualZEDUDPReceiver;
    }
 
    public SideDependentList<RDXProjectionSphere> getProjectionSpheres()
