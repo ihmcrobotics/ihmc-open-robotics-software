@@ -232,25 +232,38 @@ public class ControllerAPIDefinition
       };
    }
 
+   /** Applies only for the humanoid controller. */
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
       return ROS2Tools.getControllerInputTopic(robotName);
    }
 
+   /** Applies only for the humanoid controller. */
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
       return ROS2Tools.getControllerOutputTopic(robotName);
    }
 
+   /** Applies only for the humanoid controller. */
    public static <T> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
+   {
+      return getTopic(getBaseTopic(ROS2Tools.HUMANOID_CONTROL_MODULE_NAME, robotName), messageClass);
+   }
+
+   public static ROS2Topic<?> getBaseTopic(String controlModuleName, String robotName)
+   {
+      return ROS2Tools.IHMC_ROOT.withModule(controlModuleName).withRobot(robotName);
+   }
+
+   public static <T> ROS2Topic<T> getTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
    {
       if (inputMessageClasses.contains(messageClass))
       {
-         return getInputTopic(robotName).withTypeName(messageClass).withQoS(getQoS(messageClass));
+         return baseTopic.withInput().withTypeName(messageClass).withQoS(getQoS(messageClass));
       }
       if (outputMessageClasses.contains(messageClass))
       {
-         return getOutputTopic(robotName).withTypeName(messageClass).withQoS(getQoS(messageClass));
+         return baseTopic.withOutput().withTypeName(messageClass).withQoS(getQoS(messageClass));
       }
 
       throw new RuntimeException("Topic does not exist: " + messageClass);

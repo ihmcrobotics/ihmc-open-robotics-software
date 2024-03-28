@@ -550,7 +550,7 @@ public class AvatarEstimatorThreadFactory
    private ROS2PublisherBasics<ControllerCrashNotificationPacket> createControllerCrashPublisher()
    {
       if (realtimeROS2NodeField.hasValue())
-         return realtimeROS2NodeField.get().createPublisher(ROS2Tools.typeNamedTopic(ControllerCrashNotificationPacket.class).withTopic(outputTopicField.get()));
+         return realtimeROS2NodeField.get().createPublisher(ControllerAPIDefinition.getTopic(outputTopicField.get(), ControllerCrashNotificationPacket.class));
       else
          return null;
    }
