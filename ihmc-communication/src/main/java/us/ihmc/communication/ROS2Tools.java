@@ -336,10 +336,4 @@ public class ROS2Tools
    {
       return realtimeROS2Node.createPublisher(typeNamedTopic(messageType).withTopic(topicName));
    }
-
-   /** @deprecated Use {@link ROS2Topic#withTypeName} or look at other examples how to retrieve the topic in a safer way. */
-   public static <T> ROS2PublisherBasics<T> createPublisherTypeNamed(ROS2NodeInterface ros2Node, Class<T> messageType, ROS2Topic<?> topicName)
-   {
-      return ros2Node.createPublisher(typeNamedTopic(messageType).withTopic(topicName));
-   }
 }

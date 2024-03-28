@@ -67,11 +67,11 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
       this.ros2Node = ros2Node;
       this.outputTopic = outputTopic;
 
-      planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, outputTopic);
-      lidarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, lidarOutputTopic);
-      stereoRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, stereoOutputTopic);
-      depthRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, depthOutputTopic);
-      ocTreePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, OcTreeKeyListMessage.class, outputTopic);
+      planarRegionPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PlanarRegionsListMessage.class).withTopic(outputTopic));
+      lidarRegionPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PlanarRegionsListMessage.class).withTopic(lidarOutputTopic));
+      stereoRegionPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PlanarRegionsListMessage.class).withTopic(stereoOutputTopic));
+      depthRegionPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PlanarRegionsListMessage.class).withTopic(depthOutputTopic));
+      ocTreePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(OcTreeKeyListMessage.class).withTopic(outputTopic));
    }
 
    public void registerMessager(Messager messager)

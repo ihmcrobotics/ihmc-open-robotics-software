@@ -117,9 +117,7 @@ public class SCS2BehaviorTestHelper implements YoVariableHolder
       behaviorDispatcher = setupBehaviorDispatcher(fullRobotModel, ros2Node, robotDataReceiver, yoGraphicsListRegistry);
 
       referenceFrames = robotDataReceiver.getReferenceFrames();
-      humanoidBehabiorTypePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                         HumanoidBehaviorTypePacket.class,
-                                                                         IHMCHumanoidBehaviorManager.getInputTopic(robotName));
+      humanoidBehabiorTypePublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(HumanoidBehaviorTypePacket.class).withTopic(IHMCHumanoidBehaviorManager.getInputTopic(robotName)));
    }
 
    public ROS2Node getROS2Node()

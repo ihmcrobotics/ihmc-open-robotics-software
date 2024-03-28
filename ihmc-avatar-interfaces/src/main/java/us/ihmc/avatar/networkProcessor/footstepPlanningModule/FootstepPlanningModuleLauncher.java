@@ -181,9 +181,8 @@ public class FootstepPlanningModuleLauncher
 
    private static void createStatusPublisher(String robotName, ROS2NodeInterface ros2Node, FootstepPlanningModule footstepPlanningModule, ROS2Topic outputTopic)
    {
-      ROS2PublisherBasics<FootstepPlanningToolboxOutputStatus> resultPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                                                                  FootstepPlanningToolboxOutputStatus.class,
-                                                                                                                  outputTopic);
+      ROS2PublisherBasics<FootstepPlanningToolboxOutputStatus> resultPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(
+            FootstepPlanningToolboxOutputStatus.class).withTopic(outputTopic));
       ROS2PublisherBasics<FootstepDataListMessage> swingReplanPublisher = ros2Node.createPublisher(FootstepPlannerAPI.swingReplanOutputTopic(robotName));
 
       footstepPlanningModule.addStatusCallback(output ->
@@ -214,9 +213,8 @@ public class FootstepPlanningModuleLauncher
                                                    ROS2Topic inputTopic,
                                                    ROS2Topic outputTopic)
    {
-      ROS2PublisherBasics<FootstepPlannerParametersPacket> parametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                                                                  FootstepPlannerParametersPacket.class,
-                                                                                                                  outputTopic);
+      ROS2PublisherBasics<FootstepPlannerParametersPacket> parametersPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(
+            FootstepPlannerParametersPacket.class).withTopic(outputTopic));
 
       FootstepPlannerActionMessage footstepPlannerActionMessage = new FootstepPlannerActionMessage();
       FootstepPlannerParametersPacket footstepPlannerParametersPacket = new FootstepPlannerParametersPacket();

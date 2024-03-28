@@ -199,7 +199,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModul
          stop();
       });
 
-      planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, outputTopic);
+      planarRegionPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PlanarRegionsListMessage.class).withTopic(outputTopic));
 
       clearOcTree = reaMessager.createInput(SegmentationModuleAPI.OcTreeClear, false);
 

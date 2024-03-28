@@ -145,9 +145,10 @@ public class StepGeneratorJavaFXController
                                                     REACommunicationProperties.outputTopic,
                                                     s -> queuedTasksToProcess.add(() -> continuousStepController.consumePlanarRegionsListMessage(s.takeNextData())));
 
-      pauseWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PauseWalkingMessage.class, controllerInputTopic);
-      footstepPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepDataListMessage.class, controllerInputTopic);
-      reaStateRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.inputTopic);
+      pauseWalkingPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(PauseWalkingMessage.class).withTopic(controllerInputTopic));
+      footstepPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(FootstepDataListMessage.class).withTopic(controllerInputTopic));
+      reaStateRequestPublisher = ros2Node.createPublisher(ROS2Tools.typeNamedTopic(REAStateRequestMessage.class)
+                                                                   .withTopic(REACommunicationProperties.inputTopic));
 
       continuousStepController.setFootstepMessenger(this::prepareFootsteps);
       continuousStepController.setPauseWalkingPublisher(this::sendPauseWalkingMessage);

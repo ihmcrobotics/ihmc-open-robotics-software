@@ -6,6 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -64,7 +65,8 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
       ROS2Topic controllerInputTopic = ROS2Tools.getQuadrupedControllerInputTopic(quadrupedTestFactory.getRobotName());
-      soleTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(stepTeleopManager.getROS2Node(), SoleTrajectoryMessage.class, controllerInputTopic);
+      soleTrajectoryPublisher = stepTeleopManager.getROS2Node()
+                                                 .createPublisher(ROS2Tools.typeNamedTopic(SoleTrajectoryMessage.class).withTopic(controllerInputTopic));
 
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
@@ -99,7 +101,8 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
       ROS2Topic controllerInputTopic = ROS2Tools.getQuadrupedControllerInputTopic(quadrupedTestFactory.getRobotName());
-      soleTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(stepTeleopManager.getROS2Node(), SoleTrajectoryMessage.class, controllerInputTopic);
+      soleTrajectoryPublisher = stepTeleopManager.getROS2Node()
+                                                 .createPublisher(ROS2Tools.typeNamedTopic(SoleTrajectoryMessage.class).withTopic(controllerInputTopic));
 
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
