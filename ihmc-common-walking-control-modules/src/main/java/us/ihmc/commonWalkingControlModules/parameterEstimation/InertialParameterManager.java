@@ -9,6 +9,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemFactories;
@@ -41,8 +42,6 @@ import java.util.*;
  */
 public class InertialParameterManager implements SCS2YoGraphicHolder
 {
-   private static final int WRENCH_DIMENSION = 6;
-
    private final YoBoolean enableFilter;
 
    private final MultipleHumanoidModelHandler<RobotModelTask> modelHandler;
@@ -92,6 +91,18 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
    private final YoBoolean tare;
 
    private final YoBoolean areParametersPhysicallyConsistent;
+
+   private enum RobotModelTask
+   {
+      // the robot model used in the controller that filtered inertial parameters are sent to
+      CONTROLLER,
+      // the model used to estimate inertial parameters and for visualization
+      ESTIMATE,
+      // a model where the parameters are being estimated are zeroed, so that an inverse dynamics call results in torques from only known parameters
+      INVERSE_DYNAMICS,
+      // a model to use for regressor calculations, which requires all bodies to be iteratively zeroed inertially
+      REGRESSOR
+   }
 
    public InertialParameterManager(HighLevelHumanoidControllerToolbox toolbox, InertialEstimationParameters inertialEstimationParameters, YoRegistry parentRegistry)
    {
@@ -156,10 +167,10 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       // NOTE: for the leg joints and compact jacobians, we use the controller robot model because it has the full model information, including all joint names
       for (RobotSide side : RobotSide.values)
       {
-         contactWrenches.put(side, new DMatrixRMaj(WRENCH_DIMENSION, 1));
+         contactWrenches.put(side, new DMatrixRMaj(Wrench.SIZE, 1));
          legJoints.put(side, MultiBodySystemTools.createJointPath(controllerRobotModel.getElevator(), controllerRobotModel.getFoot(side)));
          compactContactJacobians.put(side, new GeometricJacobian(legJoints.get(side), footSwitches.get(side).getMeasurementFrame()));
-         fullContactJacobians.put(side, new DMatrixRMaj(WRENCH_DIMENSION, nDoFs));
+         fullContactJacobians.put(side, new DMatrixRMaj(Wrench.SIZE, nDoFs));
       }
 
       wholeSystemTorques = new DMatrixRMaj(nDoFs, 1);
@@ -210,18 +221,6 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       areParametersPhysicallyConsistent = new YoBoolean("areParametersPhysicallyConsistent", registry);
       areParametersPhysicallyConsistent.set(false);
-   }
-
-   private enum RobotModelTask
-   {
-      // the robot model used in the controller that filtered inertial parameters are sent to
-      CONTROLLER,
-      // the model used to estimate inertial parameters and for visualization
-      ESTIMATE,
-      // a model where the parameters are being estimated are zeroed, so that an inverse dynamics call results in torques from only known parameters
-      INVERSE_DYNAMICS,
-      // a model to use for regressor calculations, which requires all bodies to be iteratively zeroed inertially
-      REGRESSOR
    }
 
    public void update()

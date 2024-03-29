@@ -5,6 +5,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.mecano.algorithms.JointTorqueRegressorCalculator.SpatialInertiaBasisOption;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.parameterEstimation.ExtendedKalmanFilter;
 import us.ihmc.robotModels.FullRobotModel;
@@ -32,12 +33,9 @@ import java.util.Set;
  */
 public class InertialKalmanFilter extends ExtendedKalmanFilter implements OnlineInertialEstimator
 {
-   private static final int WRENCH_DIMENSION = 6;
    private final DMatrixRMaj IDENTITY;
 
    private final DMatrixRMaj torqueFromNominal;
-   private final DMatrixRMaj torqueFromEstimates;
-   private final DMatrixRMaj torqueFromContactWrenches;
    private final DMatrixRMaj torqueFromBias;
 
    private final DMatrixRMaj regressor;
@@ -66,16 +64,14 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
       IDENTITY = CommonOps_DDRM.identity(partitionSizes[0]);
 
       torqueFromNominal = new DMatrixRMaj(nDoFs, 1);
-      torqueFromEstimates = new DMatrixRMaj(nDoFs, 1);
-      torqueFromContactWrenches = new DMatrixRMaj(nDoFs, 1);
       torqueFromBias = new DMatrixRMaj(nDoFs, 1);
 
       regressor = new DMatrixRMaj(nDoFs, partitionSizes[0]);
 
       for (RobotSide side : RobotSide.values)
       {
-         contactJacobians.put(side, new DMatrixRMaj(WRENCH_DIMENSION, nDoFs));
-         contactWrenches.put(side, new DMatrixRMaj(WRENCH_DIMENSION, 1));
+         contactJacobians.put(side, new DMatrixRMaj(Wrench.SIZE, nDoFs));
+         contactWrenches.put(side, new DMatrixRMaj(Wrench.SIZE, 1));
       }
 
       measurement = new DMatrixRMaj(nDoFs, 1);
@@ -106,17 +102,14 @@ public class InertialKalmanFilter extends ExtendedKalmanFilter implements Online
       measurement.set(torqueFromNominal);
 
       // Torque from regressor on estimated parameters
-      CommonOps_DDRM.mult(regressor, parametersForEstimate, torqueFromEstimates);
-      CommonOps_DDRM.addEquals(measurement, torqueFromEstimates);
+      CommonOps_DDRM.multAdd(regressor, parametersForEstimate, measurement);
 
       // Torque from contact wrenches
-      torqueFromContactWrenches.zero();
       for (RobotSide side : RobotSide.values)
       {
          // NOTE: the minus for the contact wrench contribution
-         CommonOps_DDRM.multAddTransA(-1.0, contactJacobians.get(side), contactWrenches.get(side), torqueFromContactWrenches);
+         CommonOps_DDRM.multAddTransA(-1.0, contactJacobians.get(side), contactWrenches.get(side), measurement);
       }
-      CommonOps_DDRM.addEquals(measurement, torqueFromContactWrenches);
 
       // Torque from bias
       CommonOps_DDRM.addEquals(measurement, torqueFromBias);
