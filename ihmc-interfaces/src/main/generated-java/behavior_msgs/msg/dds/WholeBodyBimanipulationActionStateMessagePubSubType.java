@@ -15,7 +15,7 @@ public class WholeBodyBimanipulationActionStateMessagePubSubType implements us.i
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "754b3909120bb4c1bd613845eee108bfe01792910e43f404d564d2b0c51e7951";
+   		return "ca6d94e26e395a806788b69fc9c42384c5e912188475ab8a036f8acfb53be080";
    }
    
    @Override
@@ -56,7 +56,7 @@ public class WholeBodyBimanipulationActionStateMessagePubSubType implements us.i
 
       current_alignment += behavior_msgs.msg.dds.WholeBodyBimanipulationActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += ((7) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += ((23) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -77,7 +77,7 @@ public class WholeBodyBimanipulationActionStateMessagePubSubType implements us.i
 
       current_alignment += behavior_msgs.msg.dds.WholeBodyBimanipulationActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
-      current_alignment += ((7) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += ((23) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 

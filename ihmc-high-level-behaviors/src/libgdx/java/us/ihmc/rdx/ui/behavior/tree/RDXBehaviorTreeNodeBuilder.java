@@ -134,7 +134,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       }
       if (nodeType == WholeBodyBimanipulationActionDefinition.class)
       {
-         return new RDXWholeBodyBimanipulationAction(id, crdtInfo, saveFileDirectory, panel3D, referenceFrameLibrary, robotModel, syncedRobot);
+         return new RDXWholeBodyBimanipulationAction(id, crdtInfo, saveFileDirectory, panel3D, referenceFrameLibrary, robotModel, selectionCollisionModel, syncedRobot);
       }
       else
       {

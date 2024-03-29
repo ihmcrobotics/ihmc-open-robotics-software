@@ -3,42 +3,56 @@ package us.ihmc.rdx.ui.behavior.actions;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.flag.ImGuiMouseButton;
+import imgui.ImGui;
+
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.actions.WholeBodyBimanipulationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.WholeBodyBimanipulationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
-import us.ihmc.rdx.input.ImGui3DViewInput;
-import us.ihmc.rdx.input.ImGui3DViewPickResult;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
-import us.ihmc.rdx.ui.RDX3DPanelTooltip;
-import us.ihmc.rdx.ui.affordances.RDXInteractableHand;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.interaction.MouseCollidable;
+import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.wholeBodyController.HandTransformTools;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 
 public class RDXWholeBodyBimanipulationAction extends RDXActionNode<WholeBodyBimanipulationActionState, WholeBodyBimanipulationActionDefinition>
 {
    private final WholeBodyBimanipulationActionState state;
    private final WholeBodyBimanipulationActionDefinition definition;
-   private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
-   private final RDX3DPanelTooltip tooltip;
-   private final SideDependentList<RDXInteractableHand> interactableHands = new SideDependentList<>();
+   private final SideDependentList<RDXSelectablePose3DGizmo> poseGizmos = new SideDependentList<>();
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+
+   private final MutableReferenceFrame collisionShapeFrame = new MutableReferenceFrame();
+   private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
    private final RDXDesiredRobot desiredRobot;
+   private final OneDoFJointBasics[] desiredOneDoFJointsExcludingHands;
+   private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
 
    public RDXWholeBodyBimanipulationAction(long id,
                                            CRDTInfo crdtInfo,
@@ -46,6 +60,7 @@ public class RDXWholeBodyBimanipulationAction extends RDXActionNode<WholeBodyBim
                                            RDX3DPanel panel3D,
                                            ReferenceFrameLibrary referenceFrameLibrary,
                                            DRCRobotModel robotModel,
+                                           RobotCollisionModel selectionCollisionModel,
                                            ROS2SyncedRobotModel syncedRobot)
    {
       super(new WholeBodyBimanipulationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
@@ -59,68 +74,107 @@ public class RDXWholeBodyBimanipulationAction extends RDXActionNode<WholeBodyBim
       desiredRobot.setSceneLevels(RDXSceneLevel.VIRTUAL);
       desiredRobot.create();
       desiredRobot.setActive(true);
+      desiredOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(desiredRobot.getDesiredFullRobotModel());
 
-      tooltip = new RDX3DPanelTooltip(panel3D);
-      panel3D.addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
+      for (RobotSide side : RobotSide.values)
+      {
+         poseGizmos.put(side, new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getHandToParentTransform(side).getValue()));
+         poseGizmos.get(side).create(panel3D);
+      }
+
+      FullHumanoidRobotModel syncedFullRobotModel = syncedRobot.getFullRobotModel();
+      for (RobotSide side : RobotSide.values)
+      {
+         MultiBodySystemBasics handOnlySystem = MultiBodySystemMissingTools.createSingleBodySystem(syncedFullRobotModel.getHand(side));
+         List<Collidable> handCollidables = selectionCollisionModel.getRobotCollidables(handOnlySystem);
+
+         RigidBodyTransformReadOnly linkToControlFrameTransform = HandTransformTools.getHandLinkToControlFrameTransform(syncedFullRobotModel, side);
+         collisionShapeFrame.update(transformToParent -> transformToParent.set(linkToControlFrameTransform));
+
+         for (Collidable handCollidable : handCollidables)
+         {
+            mouseCollidables.add(new MouseCollidable(handCollidable));
+         }
+      }
+
+      parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
+                                                                referenceFrameLibrary,
+                                                                definition::getParentFrameName,
+                                                                getState().getHandFrame(RobotSide.LEFT)::changeFrame);
+
+      definition.getHandToParentTransform(RobotSide.LEFT).getValue().set(new RigidBodyTransform(new Quaternion(Math.toRadians(-30.0), Math.toRadians(-25.0), 0.0), new Point3D(0.0, 0.127, 0.0)));
+      definition.getHandToParentTransform(RobotSide.RIGHT).getValue().set(new RigidBodyTransform(new Quaternion(Math.toRadians(30.0), Math.toRadians(-25.0), 0.0), new Point3D(0.0, -0.127, 0.0)));
    }
 
    @Override
    public void update()
    {
       super.update();
+
+      for (int i = 0; i < desiredOneDoFJointsExcludingHands.length; i++)
+      {
+         desiredOneDoFJointsExcludingHands[i].setQ(state.getJointAngle(i));
+      }
       desiredRobot.update();
-   }
 
-//   @Override
-//   protected void renderImGuiWidgetsInternal()
-//   {
-//   }
-
-   public void render3DPanelImGuiOverlays()
-   {
-//      if (isMouseHovering)
-//      {
-//         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getActionTypeTitle(), state.getActionIndex(), definition.getName()));
-//      }
-   }
-
-   @Override
-   public void calculate3DViewPick(ImGui3DViewInput input)
-   {
-//      if (state.getPalmFrame().isChildOfWorld())
-//      {
-//         poseGizmo.calculate3DViewPick(input);
-//
-//         pickResult.reset();
-//         for (MouseCollidable mouseCollidable : mouseCollidables)
-//         {
-//            double collision = mouseCollidable.collide(input.getPickRayInWorld(), collisionShapeFrame.getReferenceFrame());
-//            if (!Double.isNaN(collision))
-//               pickResult.addPickCollision(collision);
-//         }
-//         if (pickResult.getPickCollisionWasAddedSinceReset())
-//            input.addPickResult(pickResult);
-//      }
-   }
-
-   @Override
-   public void process3DViewInput(ImGui3DViewInput input)
-   {
       if (state.getHandFrame(RobotSide.LEFT).isChildOfWorld())
       {
-         for (RobotSide side : interactableHands.sides())
+         for (RobotSide side : RobotSide.values)
          {
-            interactableHands.get(side).process3DViewInput(input);
-         }
+            if (poseGizmos.get(side).getPoseGizmo().getGizmoFrame() != state.getHandFrame(side).getReferenceFrame())
+            {
+               poseGizmos.get(side).getPoseGizmo().setGizmoFrame(state.getHandFrame(side).getReferenceFrame());
+            }
 
-         tooltip.setInput(input);
+            poseGizmos.get(side).getPoseGizmo().update();
+         }
+      }
+   }
+
+   @Override
+   public void renderTreeViewIconArea()
+   {
+      super.renderTreeViewIconArea();
+   }
+
+   @Override
+   protected void renderImGuiWidgetsInternal()
+   {
+      ImGui.checkbox(labels.get("Adjust " + RobotSide.LEFT.getPascalCaseName() + " Goal Pose"), poseGizmos.get(RobotSide.LEFT).getSelected());
+      ImGui.sameLine();
+      ImGui.checkbox(labels.get("Adjust " + RobotSide.RIGHT.getPascalCaseName() + " Goal Pose"), poseGizmos.get(RobotSide.RIGHT).getSelected());
+
+      parentFrameComboBox.render();
+   }
+
+   @Override
+   public void deselectGizmos()
+   {
+      super.deselectGizmos();
+      for (RobotSide side : RobotSide.values)
+      {
+         poseGizmos.get(side).setSelected(false);
       }
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      desiredRobot.getRenderables(renderables, pool, Collections.singleton(RDXSceneLevel.VIRTUAL));
+      if (state.getHandFrame(RobotSide.LEFT).isChildOfWorld())
+      {
+         for (RobotSide side : RobotSide.values)
+         {
+            poseGizmos.get(side).getVirtualRenderables(renderables, pool);
+         }
+
+         if (state.getIsNextForExecution())
+            desiredRobot.getRenderables(renderables, pool, Collections.singleton(RDXSceneLevel.VIRTUAL));
+      }
+   }
+
+   public ReferenceFrame getReferenceFrame(RobotSide side)
+   {
+      return poseGizmos.get(side).getPoseGizmo().getGizmoFrame();
    }
 
    @Override

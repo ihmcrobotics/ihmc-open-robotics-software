@@ -28,7 +28,7 @@ public class WholeBodyBimanipulationActionState extends ActionNodeState<WholeBod
          handFrames.put(side, handFrame);
       }
 
-      jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, ArmJointAnglesActionDefinition.MAX_NUMBER_OF_JOINTS);
+      jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, WholeBodyBimanipulationActionDefinition.MAX_NUMBER_OF_JOINTS);
       solutionQuality = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
    }
 
@@ -67,6 +67,11 @@ public class WholeBodyBimanipulationActionState extends ActionNodeState<WholeBod
    public CRDTDetachableReferenceFrame getHandFrame(RobotSide side)
    {
       return handFrames.get(side);
+   }
+
+   public double getJointAngle(int i)
+   {
+      return jointAngles.getValueReadOnly(i);
    }
 
    public double[] getJointAngles()

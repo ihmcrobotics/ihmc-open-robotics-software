@@ -15,7 +15,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class WholeBodyBimanipulationActionDefinition extends ActionNodeDefinition
 {
-   public static final int MAX_NUMBER_OF_JOINTS = 7;
+   public static final int MAX_NUMBER_OF_JOINTS = 23;
    private final CRDTUnidirectionalString parentFrameName;
    private final CRDTUnidirectionalBoolean holdPoseInWorldLater;
    private final SideDependentList<CRDTUnidirectionalRigidBodyTransform> handToParentTransforms = new SideDependentList<>();

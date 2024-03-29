@@ -22,6 +22,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.MultiBodySystemMissingTools;
@@ -34,6 +35,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.Arrays;
 
 public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<WholeBodyBimanipulationActionState, WholeBodyBimanipulationActionDefinition>
 {
@@ -131,7 +134,12 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
                                                   wholeBodyIKSolver.getSolution().getDesiredRootPosition());
                MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(wholeBodyIKSolver.getDesiredOneDoFJoints(), desiredOneDoFJointsExcludingHands);
                desiredFullRobotModel.updateFrames();
-               //               state.setJointAngles(Arrays.stream(desiredOneDoFJointsExcludingHands).toArray());
+
+               double[] ikJointPosition = Arrays.stream(desiredOneDoFJointsExcludingHands)
+                                                .mapToDouble(OneDoFJointReadOnly::getQ)
+                                                .toArray();
+               state.setJointAngles(ikJointPosition);
+
                state.setSolutionQuality(wholeBodyIKSolver.getSolution().getSolutionQuality());
 
                WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
