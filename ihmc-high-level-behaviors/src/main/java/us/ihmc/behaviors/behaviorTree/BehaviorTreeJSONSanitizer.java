@@ -3,6 +3,7 @@ package us.ihmc.behaviors.behaviorTree;
 import com.fasterxml.jackson.databind.JsonNode;
 import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperations;
+import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.log.LogTools;
@@ -47,7 +48,11 @@ public class BehaviorTreeJSONSanitizer
    {
       String typeName = jsonNode.get("type").textValue();
 
-      Class<?> definitionType = BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName);
+      Class<?> definitionType;
+      if (typeName.equals("ArmJointAnglesActionDefinition"))
+         definitionType = HandPoseActionDefinition.class;
+      else
+         definitionType = BehaviorTreeDefinitionRegistry.getClassFromTypeName(typeName);
 
       BehaviorTreeNodeDefinition node = BehaviorTreeDefinitionBuilder.createNode(definitionType, crdtInfo, treeFilesDirectory);
 

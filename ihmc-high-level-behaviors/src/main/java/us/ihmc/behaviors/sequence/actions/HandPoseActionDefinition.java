@@ -125,7 +125,12 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
 
       side.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
       trajectoryDuration.setValue(jsonNode.get("trajectoryDuration").asDouble());
-      usePredefinedJointAngles.setValue(jsonNode.get("usePredefinedJointAngles").asBoolean());
+      if (jsonNode.get("usePredefinedJointAngles") != null)
+         usePredefinedJointAngles.setValue(jsonNode.get("usePredefinedJointAngles").asBoolean());
+      else
+      {
+         usePredefinedJointAngles.setValue(jsonNode.get("parentFrame") == null);
+      }
 
       if (usePredefinedJointAngles.getValue())
       {
@@ -149,9 +154,9 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
          angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
          positionErrorTolerance.setValue(jsonNode.get("positionErrorTolerance").asDouble());
          orientationErrorTolerance.setValue(Math.toRadians(jsonNode.get("orientationErrorToleranceDegrees").asDouble()));
+      jointspaceWeight.setValue(jsonNode.get("jointspaceWeight").asDouble());
       }
 
-      jointspaceWeight.setValue(jsonNode.get("jointspaceWeight").asDouble());
    }
 
    @Override
