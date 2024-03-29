@@ -77,7 +77,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
    private final YoMatrix residual;
 
-   private final InertialBiasCompensator biasCompensator;
+   private final InertialBiasWindowFilter biasWindowFilter;
    private final YoBoolean calculateBias;
    private final YoBoolean excludeBias;
    private final YoBoolean eraseBias;
@@ -194,7 +194,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       int windowSizeInTicks = (int) (inertialEstimationParameters.getBiasCompensationWindowSizeInSeconds() / dt);
       calculateBias = new YoBoolean("calculateBias", registry);
-      biasCompensator = new InertialBiasCompensator(nDoFs, windowSizeInTicks, measurementNames, registry);
+      biasWindowFilter = new InertialBiasWindowFilter(nDoFs, windowSizeInTicks, measurementNames, registry);
       excludeBias = new YoBoolean("excludeBias", registry);
       excludeBias.set(false);
       eraseBias = new YoBoolean("eraseBias", registry);
@@ -228,12 +228,12 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
       // Handle bias compensation
       if (calculateBias.getValue())
       {
-         boolean isBiasCalculated = biasCompensator.update(residual);
+         boolean isBiasCalculated = biasWindowFilter.update(residual);
          calculateBias.set(isBiasCalculated);
       }
       if (eraseBias.getValue())
       {
-         biasCompensator.reset();
+         biasWindowFilter.reset();
          eraseBias.set(false);
       }
 
@@ -268,9 +268,9 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
          filter.setContactWrenches(contactWrenches);
 
          if (excludeBias.getValue())
-            filter.setTorqueFromBias(biasCompensator.getZero());
+            filter.setTorqueFromBias(biasWindowFilter.getZero());
          else
-            filter.setTorqueFromBias(biasCompensator.getBias());
+            filter.setTorqueFromBias(biasWindowFilter.getBias());
 
          filter.setNormalizedInnovationThreshold(normalizedInnovationThreshold.getValue());
 

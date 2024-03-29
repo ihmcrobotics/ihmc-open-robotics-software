@@ -139,7 +139,7 @@ public class MatrixMissingTools
       }
    }
 
-   public static void setMatrixRows(DMatrixRMaj dest, int destStartRow, DMatrixRMaj src, int srcStartRow, int numberOfRows)
+   public static void setMatrixRows(DMatrix dest, int destStartRow, DMatrix src, int srcStartRow, int numberOfRows)
    {
       if (numberOfRows == 0)
          return;
@@ -162,7 +162,7 @@ public class MatrixMissingTools
       }
    }
 
-   public static void setMatrixRow(DMatrixRMaj dest, int destRow, DMatrixRMaj src, int srcRow)
+   public static void setMatrixRow(DMatrix dest, int destRow, DMatrix src, int srcRow)
    {
       if (dest.getNumCols() != src.getNumCols())
          throw new IllegalArgumentException(
@@ -178,7 +178,7 @@ public class MatrixMissingTools
       }
    }
 
-   public static void setMatrixColumns(DMatrixRMaj dest, int destStartColumn, DMatrixRMaj src, int srcStartColumn, int numberOfColumns)
+   public static void setMatrixColumns(DMatrix dest, int destStartColumn, DMatrix src, int srcStartColumn, int numberOfColumns)
    {
       if (numberOfColumns == 0)
          return;
@@ -202,7 +202,7 @@ public class MatrixMissingTools
       }
    }
 
-   public static void setMatrixColumn(DMatrixRMaj dest, int destColumn, DMatrixRMaj src, int srcColumn)
+   public static void setMatrixColumn(DMatrix dest, int destColumn, DMatrix src, int srcColumn)
    {
       if (dest.getNumRows() != src.getNumRows())
          throw new IllegalArgumentException(
