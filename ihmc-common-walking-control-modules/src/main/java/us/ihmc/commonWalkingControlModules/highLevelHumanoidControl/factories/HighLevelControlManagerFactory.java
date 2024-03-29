@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
+import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -18,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.commonWalkingControlModules.parameterEstimation.InertialParameterManager;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -68,6 +70,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
    private NaturalPostureManager naturalPostureManager;
+   private InertialParameterManager inertialParameterManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
@@ -77,6 +80,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    private SplitFractionCalculatorParametersReadOnly splitFractionParameters = new DefaultSplitFractionCalculatorParameters();
    private MomentumOptimizationSettings momentumOptimizationSettings;
    private final LoadBearingParameters loadBearingParameters = new LoadBearingParameters(registry);
+   private InertialEstimationParameters inertialEstimationParameters;
 
    private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspaceOrientationGainMap = new HashMap<>();
@@ -155,6 +159,11 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    public void setSplitFractionParameters(SplitFractionCalculatorParametersReadOnly splitFractionParameters)
    {
       this.splitFractionParameters = splitFractionParameters;
+   }
+
+   public void setInertialEstimationParameters(InertialEstimationParameters inertialEstimatorParameters)
+   {
+      this.inertialEstimationParameters = inertialEstimatorParameters;
    }
 
    public BalanceManager getOrCreateBalanceManager()
@@ -387,6 +396,21 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       return naturalPostureManager;
    }
 
+   public InertialParameterManager getOrCreateInertialParameterManager()
+   {
+      if (inertialParameterManager != null)
+         return inertialParameterManager;
+
+      if (!hasHighLevelHumanoidControllerToolbox(InertialParameterManager.class))
+         return null;
+      if (!hasInertialEstimatorParameters(InertialParameterManager.class))
+         return null;
+
+      inertialParameterManager = new InertialParameterManager(controllerToolbox, inertialEstimationParameters, registry);
+
+      return inertialParameterManager;
+   }
+
    private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)
    {
       if (controllerToolbox != null)
@@ -408,6 +432,14 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       if (copTrajectoryParameters != null)
          return true;
       missingObjectWarning(CoPTrajectoryParameters.class, managerClass);
+      return false;
+   }
+
+   private boolean hasInertialEstimatorParameters(Class<?> managerClass)
+   {
+      if (inertialEstimationParameters != null)
+         return true;
+      missingObjectWarning(InertialEstimationParameters.class, managerClass);
       return false;
    }
 

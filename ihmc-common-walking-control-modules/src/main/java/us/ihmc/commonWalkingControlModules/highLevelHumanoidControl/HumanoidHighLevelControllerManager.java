@@ -84,7 +84,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
    private final RobotDesiredConfigurationData robotDesiredConfigurationData = new RobotDesiredConfigurationData();
    private final IntegerParameter jointDesiredOutputBroadcastFrequency = new IntegerParameter("jointDesiredOutputBroadcastFrequency", registry, 10);
 
-   private InertialParameterManager inertialParameterManager;
+   private final InertialParameterManager inertialParameterManager;
 
    public HumanoidHighLevelControllerManager(CommandInputManager commandInputManager,
                                              StatusMessageOutputManager statusMessageOutputManager,
@@ -99,7 +99,6 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
                                              HighLevelControlManagerFactory managerFactory,
                                              WholeBodyControllerCoreFactory controllerCoreFactory,
                                              HighLevelHumanoidControllerToolbox controllerToolbox,
-                                             InertialParameterManagerFactory inertialParameterManagerFactory,
                                              CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
                                              ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                              JointDesiredOutputListBasics lowLevelControllerOutput)
@@ -141,8 +140,7 @@ public class HumanoidHighLevelControllerManager implements RobotController, SCS2
 
       pluginFactories.forEach(this::addControllerPluginFactory);
 
-      if (inertialParameterManagerFactory != null)
-         inertialParameterManager = inertialParameterManagerFactory.createInertialParameterManager();
+      inertialParameterManager = managerFactory.getOrCreateInertialParameterManager();
    }
 
    /**
