@@ -18,9 +18,11 @@ import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import toolbox_msgs.msg.dds.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
@@ -75,22 +77,19 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
       ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation,
                                                   "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "KinematicsStreamingToolboxMessageLogger"));
 
-      ROS2Topic controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
-      ros2Node.createSubscription(((ROS2Topic<?>) controllerOutputTopic).withTypeName(RobotConfigurationData.class),
+      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
                                   s -> robotConfigurationData.set(s.takeNextData()));
-      ros2Node.createSubscription(((ROS2Topic<?>) controllerOutputTopic).withTypeName(CapturabilityBasedStatus.class),
+      ros2Node.createSubscription(ControllerAPIDefinition.getTopic(CapturabilityBasedStatus.class, robotName),
                                   s -> capturabilityBasedStatus.set(s.takeNextData()));
 
-      ROS2Topic toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
-      ros2Node.createSubscription(((ROS2Topic<?>) toolboxInputTopic).withTypeName(ToolboxStateMessage.class),
+      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getInputTopic(robotName).withTypeName(ToolboxStateMessage.class),
                                   s -> processToolboxStateMessage(s.takeNextData()));
-      ros2Node.createSubscription(((ROS2Topic<?>) toolboxInputTopic).withTypeName(KinematicsToolboxConfigurationMessage.class),
+      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getInputTopic(robotName).withTypeName(KinematicsToolboxConfigurationMessage.class),
                                   s -> kinematicsToolboxConfigurationMessage.set(s.takeNextData()));
-      ros2Node.createSubscription(((ROS2Topic<?>) toolboxInputTopic).withTypeName(KinematicsStreamingToolboxInputMessage.class),
+      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getInputTopic(robotName).withTypeName(KinematicsStreamingToolboxInputMessage.class),
                                   s -> kinematicsStreamingToolboxInputMessage.set(s.takeNextData()));
 
-      ROS2Topic toolboxOutputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
-      ros2Node.createSubscription(((ROS2Topic<?>) toolboxOutputTopic).withTypeName(KinematicsToolboxOutputStatus.class),
+      ros2Node.createSubscription(KinematicsStreamingToolboxModule.getOutputTopic(robotName).withTypeName(KinematicsToolboxOutputStatus.class),
                                   s -> kinematicsToolboxOutputStatus.set(s.takeNextData()));
 
       ros2Node.spin();
