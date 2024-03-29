@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import ihmc_common_msgs.msg.dds.MessageCollection;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -17,11 +18,11 @@ import java.util.HashSet;
 public class ControllerAPI
 {
    public static final HashSet<Class<?>> inputMessageClasses = new HashSet<>();
-   public static final HashSet<Class<?>> outputMessageClasses = new HashSet<>();
+   public static final HashSet<Class<? extends Settable<?>>> outputMessageClasses = new HashSet<>();
 
    static
    {
-      /** Commands supported by bipedal walking controller {@link WalkingControllerState} */
+      // Commands supported by bipedal walking controller WalkingControllerState
       inputMessageClasses.add(ArmTrajectoryMessage.class);
       inputMessageClasses.add(HandTrajectoryMessage.class);
       inputMessageClasses.add(LegTrajectoryMessage.class);
@@ -54,20 +55,20 @@ public class ControllerAPI
       inputMessageClasses.add(CenterOfMassTrajectoryMessage.class);
       inputMessageClasses.add(HandWrenchTrajectoryMessage.class);
 
-      /** Commands supported by the fast-walking controller, not in this repo */
+      // Commands supported by the fast-walking controller, not in this repo
       inputMessageClasses.add(DirectionalControlInputMessage.class);
       inputMessageClasses.add(FastWalkingGaitParametersMessage.class);
 
-      /** Commands supported by multi-contact controller, not in this repo */
+      // Commands supported by multi-contact controller, not in this repo
       inputMessageClasses.add(MultiContactTrajectoryMessage.class);
       inputMessageClasses.add(MultiContactTrajectorySequenceMessage.class);
       inputMessageClasses.add(MultiContactBalanceStatus.class);
       inputMessageClasses.add(MultiContactTimedContactSequenceMessage.class);
 
-      /** Commands supported by the Crocoddyl control state */
+      // Commands supported by the Crocoddyl control state
       inputMessageClasses.add(CrocoddylSolverTrajectoryMessage.class);
 
-      /** Command supported by the joint-space controller {@link JointspacePositionControllerState} */
+      // Command supported by the joint-space controller JointspacePositionControllerState
       inputMessageClasses.add(WholeBodyJointspaceTrajectoryMessage.class);
 
       // Input messages that don't have a corresponding command
@@ -75,7 +76,7 @@ public class ControllerAPI
       inputMessageClasses.add(WholeBodyTrajectoryMessage.class);
       inputMessageClasses.add(WholeBodyStreamingMessage.class);
 
-      /** Statuses supported by bipedal walking controller {@link WalkingControllerState} */
+      // Statuses supported by bipedal walking controller {@link WalkingControllerState}
       outputMessageClasses.add(CapturabilityBasedStatus.class);
       outputMessageClasses.add(FootstepStatusMessage.class);
       outputMessageClasses.add(PlanOffsetStatus.class);
@@ -93,7 +94,7 @@ public class ControllerAPI
       outputMessageClasses.add(QueuedFootstepStatusMessage.class);
       outputMessageClasses.add(WrenchTrajectoryStatusMessage.class);
 
-      /** Statuses supported by multi-contact controller, not in this repo */
+      // Statuses supported by multi-contact controller, not in this repo
       outputMessageClasses.add(MultiContactBalanceStatus.class);
       outputMessageClasses.add(MultiContactTrajectoryStatus.class);
    }

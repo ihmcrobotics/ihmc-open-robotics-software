@@ -24,16 +24,20 @@ import java.util.List;
 import java.util.Map;
 
 import controller_msgs.msg.dds.*;
-import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
 
+/**
+ * See {@link ControllerAPI} for the ROS 2 topics.
+ * Command classes must be registered both here and there.
+ */
 public class ControllerAPIDefinition
 {
    private static final List<Class<? extends Command<?, ?>>> controllerSupportedCommands;
@@ -94,31 +98,7 @@ public class ControllerAPIDefinition
 
       controllerSupportedCommands = Collections.unmodifiableList(commands);
 
-      List<Class<? extends Settable<?>>> statusMessages = new ArrayList<>();
-
-      /** Statuses supported by bipedal walking controller {@link WalkingControllerState} */
-      statusMessages.add(CapturabilityBasedStatus.class);
-      statusMessages.add(FootstepStatusMessage.class);
-      statusMessages.add(PlanOffsetStatus.class);
-      statusMessages.add(WalkingStatusMessage.class);
-      statusMessages.add(WalkingControllerFailureStatusMessage.class);
-      statusMessages.add(ManipulationAbortedStatus.class);
-      statusMessages.add(HighLevelStateChangeStatusMessage.class);
-      statusMessages.add(TextToSpeechPacket.class);
-      statusMessages.add(ControllerCrashNotificationPacket.class);
-      statusMessages.add(JointspaceTrajectoryStatusMessage.class);
-      statusMessages.add(TaskspaceTrajectoryStatusMessage.class);
-      statusMessages.add(JointDesiredOutputMessage.class);
-      statusMessages.add(RobotDesiredConfigurationData.class);
-      statusMessages.add(FootstepQueueStatusMessage.class);
-      statusMessages.add(QueuedFootstepStatusMessage.class);
-      statusMessages.add(WrenchTrajectoryStatusMessage.class);
-
-      /** Statuses supported by multi-contact controller, not in this repo */
-      statusMessages.add(MultiContactBalanceStatus.class);
-      statusMessages.add(MultiContactTrajectoryStatus.class);
-
-      controllerSupportedStatusMessages = Collections.unmodifiableList(statusMessages);
+      controllerSupportedStatusMessages = ControllerAPI.outputMessageClasses.stream().toList();
    }
 
    public static List<Class<? extends Command<?, ?>>> getControllerSupportedCommands()
