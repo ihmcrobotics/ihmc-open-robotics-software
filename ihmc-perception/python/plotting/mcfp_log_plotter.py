@@ -14,7 +14,7 @@ import os
 
 def plot_log(filepath):
 
-    # Initialize lists to store extracted times
+    # Initialize lists to store extracted times 
     total_times = []
     simulation_times = []
     expansion_times = []
@@ -24,9 +24,8 @@ def plot_log(filepath):
 
     nodes = [0,0,0,0,0,0,0,0,0]
     samples = [0,0,0,0,0,0,0,0,0]
-
-    # Regular expression pattern to extract times
-    pattern = r'TotalTime: (\d+\.\d+), SimulationTime: (\d+\.\d+), ExpansionTime: (\d+\.\d+), PruningTime: (\d+\.\d+E?-?\d*), PropagationTime: (\d+\.\d+E?-?\d*), SearchTime: (\d+\.\d+E?-?\d*)'
+    stack = [0,0,0,0,0,0,0,0,0]
+    nodes_stack = []
 
     print("File:", filepath)
 
@@ -62,6 +61,12 @@ def plot_log(filepath):
                     nodes[int(first)] += int(second)
                     samples[int(first)] += 1
 
+                    
+                    stack[int(first)] = int(second)
+
+
+            nodes_stack.append(stack)
+            stack = [0,0,0,0,0,0,0,0,0]
 
             print(nodes_per_layer)
         
@@ -70,12 +75,9 @@ def plot_log(filepath):
                 nodes[i] = nodes[i] / samples[i]
 
 
-        print(nodes, samples)
+        for i in range(7):
+            print("{},{},{}".format(i, nodes[i], samples[i]))
 
-    # Create a NumPy matrix from the extracted times
-    matrix = np.column_stack((total_times, simulation_times, expansion_times, pruning_times, propagation_times, search_times))
-
-    
 
     # Create NumPy arrays from the extracted times
     TotalTime = np.array(total_times)
@@ -84,6 +86,9 @@ def plot_log(filepath):
     PruningTime = np.array(pruning_times)
     PropagationTime = np.array(propagation_times)
     SearchTime = np.array(search_times)
+    NodesPerLayer = np.array(nodes_stack)
+
+    print("NodesStack:", NodesPerLayer)
 
     # Store the numpy arrays in a dictionary with descriptive keys
     data_dict = {

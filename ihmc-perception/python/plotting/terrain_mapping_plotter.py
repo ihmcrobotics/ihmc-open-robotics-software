@@ -43,14 +43,16 @@ def plot_log(log_data):
         if match:
             total_time = np.append(total_time, float(match.group(1)))
 
+    start = 0
+    end = 25000
 
     # Store the numpy arrays in a dictionary with descriptive keys
     data_dict = {
-        'cpu_processing_time': cpu_processing_time,
-        'depth_upload_time': depth_upload_time,
-        'terrain_map_download_time': terrain_map_download_time,
-        'gpu_processing_time': gpu_processing_time,
-        'total_time': total_time
+        'cpu_processing_time': cpu_processing_time[start:end],
+        'depth_upload_time': depth_upload_time[start:end],
+        'terrain_map_download_time': terrain_map_download_time[start:end],
+        'gpu_processing_time': gpu_processing_time[start:end],
+        'total_time': total_time[start:end]
     }
 
     # Print the data dictionary
@@ -58,44 +60,37 @@ def plot_log(log_data):
     #     print(key, data_dict[key])
 
     import matplotlib.pyplot as plt
-    plt.rcParams.update({'font.size': 8})
+    plt.rcParams.update({'font.size': 11})
 
     # ... (code to read in data_dict from log file)
 
     # Create a figure with 3 rows and 4 columns of subplots
-    fig, axs = plt.subplots(2, 3, figsize=(12, 8))
+    fig, axs = plt.subplots(3, 1, figsize=(12, 8))
 
     # Adjust the layout to add some space between subplots
     plt.subplots_adjust(hspace=0.5)  # You can adjust the value as needed
 
     # Plot each data field in a separate subplot
-    axs[0, 0].plot(data_dict['cpu_processing_time'])
-    axs[0, 0].set_title('Central Processing Unit Time')
-    axs[0, 0].set_xlabel('Iteration')
-    axs[0, 0].set_ylabel('Total Displacement (m)')
+    axs[0].plot(data_dict['cpu_processing_time'])
+    axs[0].set_title('Central Processing Unit Time')
+    axs[0].set_xlabel('Iteration')
+    axs[0].set_ylabel('CPU Time (s)')
+    axs[0].grid(True)
 
-    axs[0, 1].plot(data_dict['depth_upload_time'])
-    axs[0, 1].set_title('Depth Upload Time')
-    axs[0, 1].set_xlabel('Iteration')
-    axs[0, 1].set_ylabel('Number of Steps')
+    axs[1].plot(data_dict['gpu_processing_time'])
+    axs[1].set_title('GPU Processing Time')
+    axs[1].set_xlabel('Iteration')
+    axs[1].set_ylabel('GPU Time (s)')
+    axs[1].grid(True)
 
-    axs[0, 2].plot(data_dict['terrain_map_download_time'])
-    axs[0, 2].set_title('Terrain Map Download Time')
-    axs[0, 2].set_xlabel('Iteration')
-    axs[0, 2].set_ylabel('Planning time')
-
-    axs[1, 0].plot(data_dict['gpu_processing_time'])
-    axs[1, 0].set_title('GPU _processing TIme')
-    axs[1, 0].set_xlabel('Iteration')
-    axs[1, 0].set_ylabel('Continuous Walking time')
-
-    axs[1, 1].plot(data_dict['total_time'])
-    axs[1, 1].set_title('Number of Interventions')
-    axs[1, 1].set_xlabel('Iteration')
-    axs[1, 1].set_ylabel('Number of Interventions')
+    axs[2].plot(data_dict['total_time'])
+    axs[2].set_title('Total Time')
+    axs[2].set_xlabel('Iteration')
+    axs[2].set_ylabel('Total Time (s)')
+    axs[2].grid(True)
 
     # Add a title to the entire figure
-    fig.suptitle('Terrain Map Extraction Plots')
+    fig.suptitle('Terrain Map Extraction Time Plots')
 
     # Show the plot
     plt.show()
