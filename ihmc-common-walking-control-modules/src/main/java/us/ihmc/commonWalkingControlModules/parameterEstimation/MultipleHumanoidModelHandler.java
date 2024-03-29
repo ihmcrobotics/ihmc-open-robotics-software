@@ -27,14 +27,14 @@ public class MultipleHumanoidModelHandler<T extends Enum<T>>
    /** The map from the enum to the list of joints in each robot model. */
    private final Map<T, List<? extends JointBasics>> jointListMap;
 
-   MultipleHumanoidModelHandler(Class<T> enumClass)
+   public MultipleHumanoidModelHandler(Class<T> enumClass)
    {
       modelMap = new EnumMap<>(enumClass);
       bodyArrayMap = new EnumMap<>(enumClass);
       jointListMap = new EnumMap<>(enumClass);
    }
 
-   public void addRobotModel(T key, FullHumanoidRobotModel model)
+   public void putRobotModel(T key, FullHumanoidRobotModel model)
    {
       modelMap.put(key, model);
       bodyArrayMap.put(key, model.getRootBody().subtreeArray());

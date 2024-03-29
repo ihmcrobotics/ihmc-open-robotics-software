@@ -104,7 +104,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
 
       modelHandler = new MultipleHumanoidModelHandler<>(RobotModelTask.class);
       FullHumanoidRobotModel controllerRobotModel = toolbox.getFullRobotModel();
-      modelHandler.addRobotModel(RobotModelTask.CONTROLLER, controllerRobotModel);
+      modelHandler.putRobotModel(RobotModelTask.CONTROLLER, controllerRobotModel);
 
       for (RobotModelTask task : new RobotModelTask[] {RobotModelTask.ESTIMATE, RobotModelTask.INVERSE_DYNAMICS, RobotModelTask.REGRESSOR})
       {
@@ -112,7 +112,7 @@ public class InertialParameterManager implements SCS2YoGraphicHolder
                                                                                        controllerRobotModel.getModelStationaryFrame(),
                                                                                        "_" + task.name());
          FullHumanoidRobotModel clonedRobotModel = new FullHumanoidRobotModelWrapper(clonedElevator, false);
-         modelHandler.addRobotModel(task, clonedRobotModel);
+         modelHandler.putRobotModel(task, clonedRobotModel);
       }
 
       covarianceHelper = new HumanoidModelCovarianceHelper(controllerRobotModel, inertialEstimationParameters, registry);
