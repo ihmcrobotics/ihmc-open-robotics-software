@@ -21,6 +21,14 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
             */
    public double hand_open_angle_;
    /**
+            * If hand angles are less than this amount off, skip the action
+            */
+   public double initial_satisfaction_hand_angle_tolerance_;
+   /**
+            * Hand angles goal error tolerance
+            */
+   public double completion_hand_angle_tolerance_;
+   /**
             * Torque limit specified as fingertip grip force. Valid up to 29 Newtons. Safe value is 8.7 N.
             */
    public double fingertip_grip_force_limit_;
@@ -42,6 +50,10 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
       robot_side_ = other.robot_side_;
 
       hand_open_angle_ = other.hand_open_angle_;
+
+      initial_satisfaction_hand_angle_tolerance_ = other.initial_satisfaction_hand_angle_tolerance_;
+
+      completion_hand_angle_tolerance_ = other.completion_hand_angle_tolerance_;
 
       fingertip_grip_force_limit_ = other.fingertip_grip_force_limit_;
 
@@ -87,6 +99,36 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
    }
 
    /**
+            * If hand angles are less than this amount off, skip the action
+            */
+   public void setInitialSatisfactionHandAngleTolerance(double initial_satisfaction_hand_angle_tolerance)
+   {
+      initial_satisfaction_hand_angle_tolerance_ = initial_satisfaction_hand_angle_tolerance;
+   }
+   /**
+            * If hand angles are less than this amount off, skip the action
+            */
+   public double getInitialSatisfactionHandAngleTolerance()
+   {
+      return initial_satisfaction_hand_angle_tolerance_;
+   }
+
+   /**
+            * Hand angles goal error tolerance
+            */
+   public void setCompletionHandAngleTolerance(double completion_hand_angle_tolerance)
+   {
+      completion_hand_angle_tolerance_ = completion_hand_angle_tolerance;
+   }
+   /**
+            * Hand angles goal error tolerance
+            */
+   public double getCompletionHandAngleTolerance()
+   {
+      return completion_hand_angle_tolerance_;
+   }
+
+   /**
             * Torque limit specified as fingertip grip force. Valid up to 29 Newtons. Safe value is 8.7 N.
             */
    public void setFingertipGripForceLimit(double fingertip_grip_force_limit)
@@ -124,6 +166,10 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.hand_open_angle_, other.hand_open_angle_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.initial_satisfaction_hand_angle_tolerance_, other.initial_satisfaction_hand_angle_tolerance_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.completion_hand_angle_tolerance_, other.completion_hand_angle_tolerance_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.fingertip_grip_force_limit_, other.fingertip_grip_force_limit_, epsilon)) return false;
 
 
@@ -144,6 +190,10 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
 
       if(this.hand_open_angle_ != otherMyClass.hand_open_angle_) return false;
 
+      if(this.initial_satisfaction_hand_angle_tolerance_ != otherMyClass.initial_satisfaction_hand_angle_tolerance_) return false;
+
+      if(this.completion_hand_angle_tolerance_ != otherMyClass.completion_hand_angle_tolerance_) return false;
+
       if(this.fingertip_grip_force_limit_ != otherMyClass.fingertip_grip_force_limit_) return false;
 
 
@@ -162,6 +212,10 @@ public class SakeHandCommandActionDefinitionMessage extends Packet<SakeHandComma
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("hand_open_angle=");
       builder.append(this.hand_open_angle_);      builder.append(", ");
+      builder.append("initial_satisfaction_hand_angle_tolerance=");
+      builder.append(this.initial_satisfaction_hand_angle_tolerance_);      builder.append(", ");
+      builder.append("completion_hand_angle_tolerance=");
+      builder.append(this.completion_hand_angle_tolerance_);      builder.append(", ");
       builder.append("fingertip_grip_force_limit=");
       builder.append(this.fingertip_grip_force_limit_);
       builder.append("}");

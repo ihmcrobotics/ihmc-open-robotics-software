@@ -52,7 +52,6 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final RDX3DPanelTooltip tooltip;
    private final FullHumanoidRobotModel syncedFullRobotModel;
-   private boolean wasConcurrent = false;
 
    public RDXPelvisHeightPitchAction(long id,
                                      CRDTInfo crdtInfo,
@@ -137,17 +136,6 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
          RigidBodyTransform transformVariation = new RigidBodyTransform();
          transformVariation.setAndInvert(currentRobotPelvisPose);
          getDefinition().getPelvisToParentTransform().getValueReadOnly().transform(transformVariation);
-
-         // if the action is part of a group of concurrent actions that is currently executing or about to be executed
-         // send an update of the pose of the pelvis. Arms IK will be computed wrt this change of this pelvis pose
-         if (state.getIsNextForExecution() && state.getIsToBeExecutedConcurrently())
-         {
-            wasConcurrent = true;
-         }
-         else if (wasConcurrent)
-         {
-            wasConcurrent = false;
-         }
       }
    }
 
