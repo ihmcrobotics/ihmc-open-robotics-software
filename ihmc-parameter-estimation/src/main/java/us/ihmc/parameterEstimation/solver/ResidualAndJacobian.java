@@ -4,7 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 
 /**
  * Abstract class for specifying the residual error function and Jacobian function of a nonlinear least squares problem to be solved by
- * {@link GarbageFreeDoglegSolver}.
+ * {@link DoglegSolver}.
  * <p>
  * We consider nonlinear least squares problems of the form: 0.5 * || r(x) ||<sup>2</sup>
  * where r = r(x) is the residual of the problem. The Jacobian of the residual evaluated at x is denoted J(x).
@@ -14,7 +14,7 @@ import org.ejml.data.DMatrixRMaj;
  * that {@link #calculateResidual} and {@link #calculateJacobian} are garbage-free!
  * </p>
  */
-public interface GarbageFreeResidualAndJacobian
+public interface ResidualAndJacobian
 {
    /**
     * Calculate the residual of the nonlinear least squares problem when the problem variable takes value {@code x}.

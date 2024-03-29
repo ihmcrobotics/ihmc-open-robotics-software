@@ -8,11 +8,11 @@ import us.ihmc.commons.MathTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class GarbageFreeDoglegSolverPowellSingularTest
+public class DoglegSolverPowellSingularTest
 {
    public static final double EPSILON = 1.0e-12;
 
-   private GarbageFreeDoglegSolver solver;
+   private DoglegSolver solver;
 
    private final DMatrixRMaj x0 = new DMatrixRMaj(new double[] {3.0, -1.0, 0.0, 1.0});
 
@@ -22,7 +22,7 @@ public class GarbageFreeDoglegSolverPowellSingularTest
       double trustRegionRadius = 1.0;
       int maximumIterations = 50;
 
-      solver = new GarbageFreeDoglegSolver(new PowellSingularResidualAndJacobian(), maximumIterations);
+      solver = new DoglegSolver(new PowellSingularResidualAndJacobian(), maximumIterations);
 
       solver.initialize(x0, trustRegionRadius);
    }
@@ -50,7 +50,7 @@ public class GarbageFreeDoglegSolverPowellSingularTest
     * This is the Powell singular function problem for nonlinear least squares solvers.
     * </p>
     */
-   private static class PowellSingularResidualAndJacobian implements GarbageFreeResidualAndJacobian
+   private static class PowellSingularResidualAndJacobian implements ResidualAndJacobian
    {
       int parameterSize = 4;
       int residualSize = 4;

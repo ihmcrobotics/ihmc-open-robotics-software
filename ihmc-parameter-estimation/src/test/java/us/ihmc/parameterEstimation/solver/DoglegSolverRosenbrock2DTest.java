@@ -11,11 +11,11 @@ import us.ihmc.robotics.MatrixMissingTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class GarbageFreeDoglegSolverRosenbrock2DTest
+public class DoglegSolverRosenbrock2DTest
 {
    public static final double EPSILON = 1.0e-12;
 
-   private GarbageFreeDoglegSolver solver;
+   private DoglegSolver solver;
 
    private final DMatrixRMaj x0 = new DMatrixRMaj(new double[] {-2.0, 2.0});
 
@@ -25,7 +25,7 @@ public class GarbageFreeDoglegSolverRosenbrock2DTest
       double trustRegionRadius = 1.0;
       int maximumIterations = 50;
 
-      solver = new GarbageFreeDoglegSolver(new Rosenbrock2DResidualAndJacobian(), maximumIterations);
+      solver = new DoglegSolver(new Rosenbrock2DResidualAndJacobian(), maximumIterations);
 
       solver.initialize(x0, trustRegionRadius);
       solver.updateProblemObjects();
@@ -134,7 +134,7 @@ public class GarbageFreeDoglegSolverRosenbrock2DTest
       assertTrue(isEqual);
    }
 
-   private static class Rosenbrock2DResidualAndJacobian implements GarbageFreeResidualAndJacobian
+   private static class Rosenbrock2DResidualAndJacobian implements ResidualAndJacobian
    {
       int parameterSize = 2;
       int residualSize = 2;

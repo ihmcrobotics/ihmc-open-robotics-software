@@ -27,11 +27,11 @@ import us.ihmc.robotics.MatrixMissingTools;
  *
  * @author James Foster
  */
-public class GarbageFreeDoglegSolver
+public class DoglegSolver
 {
    private static final double EPSILON = 1.0e-12;
 
-   private final GarbageFreeResidualAndJacobian residualAndJacobian;
+   private final ResidualAndJacobian residualAndJacobian;
 
    private double objective = 0.0;
    private final DMatrixRMaj residual;
@@ -82,7 +82,7 @@ public class GarbageFreeDoglegSolver
       GAUSS_NEWTON, SCALED_STEEPEST_DESCENT, DOGLEG, NONE
    }
 
-   public GarbageFreeDoglegSolver(GarbageFreeResidualAndJacobian residualAndJacobian, int maximumIterations)
+   public DoglegSolver(ResidualAndJacobian residualAndJacobian, int maximumIterations)
    {
       this.maximumIterations = maximumIterations;
       this.residualAndJacobian = residualAndJacobian;
@@ -376,7 +376,7 @@ public class GarbageFreeDoglegSolver
     * doing. Refer to {@link #solve} for which methods should be called before / after this one.
     * </p>
     */
-   public void updateProblemObjects()
+   void updateProblemObjects()
    {
       calculateResidual(x, residual);
       objective = calculateObjective(residual);
@@ -391,7 +391,7 @@ public class GarbageFreeDoglegSolver
     * doing. Refer to {@link #solve} for which methods should be called before / after this one.
     * </p>
     */
-   public void updateProblemSteps()
+   void updateProblemSteps()
    {
       updateAlpha();
       // Now compute the steepest descent and Gauss-Newton steps for forming the Dogleg

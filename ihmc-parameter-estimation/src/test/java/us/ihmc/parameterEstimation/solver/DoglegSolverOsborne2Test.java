@@ -8,11 +8,11 @@ import us.ihmc.commons.MathTools;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class GarbageFreeDoglegSolverOsborne2Test
+public class DoglegSolverOsborne2Test
 {
    public static final double EPSILON = 1.0e-12;
 
-   private GarbageFreeDoglegSolver solver;
+   private DoglegSolver solver;
 
    private final DMatrixRMaj x0 = new DMatrixRMaj(new double[] {1.3, 0.65, 0.65, 0.7, 0.6, 3.0, 5.0, 7.0, 2.0, 4.5, 5.5});
 
@@ -22,7 +22,7 @@ public class GarbageFreeDoglegSolverOsborne2Test
       double trustRegionRadius = 1.0;
       int maximumIterations = 50;
 
-      solver = new GarbageFreeDoglegSolver(new Osborne2ResidualAndJacobian(), maximumIterations);
+      solver = new DoglegSolver(new Osborne2ResidualAndJacobian(), maximumIterations);
 
       solver.initialize(x0, trustRegionRadius);
    }
@@ -47,7 +47,7 @@ public class GarbageFreeDoglegSolverOsborne2Test
     * This is the Osborne 2 problem for nonlinear least squares solvers.
     * </p>
     */
-   private static class Osborne2ResidualAndJacobian implements GarbageFreeResidualAndJacobian
+   private static class Osborne2ResidualAndJacobian implements ResidualAndJacobian
    {
       DMatrixRMaj data;
 
