@@ -220,13 +220,21 @@ public class MatrixMissingTools
 
    public static void setSelectedMatrixDiagonals(int[] indices, double value, DMatrixRMaj matrix)
    {
+      if (indices.length == 0)
+         throw new IllegalArgumentException("Indices array is empty");
+
       if (matrix.getNumRows() < indices.length || matrix.getNumCols() < indices.length)
          throw new IllegalArgumentException(
                "matrix is too small, min size: [rows: " + indices.length + ", cols: " + indices.length + "], was: [rows: " + matrix.getNumRows() + ", cols: "
                + matrix.getNumCols() + "]");
 
       for (int index : indices)
+      {
+         if (index < 0 || index >= indices.length)
+            throw new IllegalArgumentException("index must be between 0 and " + (indices.length - 1) + ", was: " + index);
+
          matrix.unsafe_set(index, index, value);
+      }
    }
 
    public static DMatrixRMaj createVector(int size, double fillValue)
