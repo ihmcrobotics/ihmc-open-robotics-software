@@ -39,8 +39,10 @@ public class BPWPlanarWalkingSimulation {
         BPWPLanarWalkingRobot controllerRobot = new BPWPLanarWalkingRobot(robot, scs.getTime());
 
         scs.addYoGraphic(controllerRobot.getSCS2YoGraphics());
+
         // controller
         BPWPlanarWalkingController controller = new BPWPlanarWalkingController(controllerRobot, RobotSide.LEFT);
+        scs.addYoGraphic(controller.getSCS2YoGraphics());
 //         add the controller
 //        robot.addController(controller);
         robot.addThrottledController(controller, scs.getDT() * simTicksPerControlTick);
