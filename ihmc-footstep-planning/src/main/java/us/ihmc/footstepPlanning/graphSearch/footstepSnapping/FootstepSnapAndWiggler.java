@@ -70,7 +70,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    public void clearSnapData()
    {
-      LogTools.info("Clearing snap data");
       snappedFootsteps.forEach(DiscreteFootstep::clearSnapData);
       snappedFootsteps.clear();
       manuallySnappedFootsteps.clear();
