@@ -19,6 +19,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
 }
 
-testDependencies {
+examplesDependencies {
+   api("us.ihmc:ihmc-parameter-estimation-test:source")
    api("org.knowm.xchart:xchart:3.8.4")
 }
