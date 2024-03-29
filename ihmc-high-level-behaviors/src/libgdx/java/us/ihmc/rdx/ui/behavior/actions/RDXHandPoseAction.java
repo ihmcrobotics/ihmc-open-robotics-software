@@ -35,7 +35,6 @@ import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.affordances.RDXInteractableHighlightModel;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
-import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeTools;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXArmMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
@@ -218,6 +217,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
       if (definition.getUsePredefinedJointAngles())
       {
+         poseGizmo.setSelected(false);
+
          PresetArmConfiguration preset = getDefinition().getPreset();
          currentConfiguration.set(preset == null ? 0 : preset.ordinal() + 1);
 
@@ -232,9 +233,17 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                getDefinition().getJointAngles().getValue()[i] = jointAngles[i];
             }
          }
+
+         armMultiBodyGraphics.get(definition.getSide()).getHandControlFrame().getTransformToDesiredFrame(definition.getPalmTransformToParent().getValue(),
+                                                                                                         ReferenceFrame.getWorldFrame());
       }
       else if (state.getPalmFrame().isChildOfWorld())
       {
+         for (int i = 0; i < state.getJointAngles().getLength(); i++)
+         {
+            definition.getJointAngles().getValue()[i] = state.getJointAngles().getValueReadOnly(i);
+         }
+
          if (poseGizmo.getPoseGizmo().getGizmoFrame() != state.getPalmFrame().getReferenceFrame())
          {
             poseGizmo.getPoseGizmo().setGizmoFrame(state.getPalmFrame().getReferenceFrame());
@@ -412,15 +421,18 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       {
          poseGizmo.calculate3DViewPick(input);
 
-         pickResult.reset();
-         for (MouseCollidable mouseCollidable : mouseCollidables)
+         if (!definition.getUsePredefinedJointAngles())
          {
-            double collision = mouseCollidable.collide(input.getPickRayInWorld(), collisionShapeFrame.getReferenceFrame());
-            if (!Double.isNaN(collision))
-               pickResult.addPickCollision(collision);
+            pickResult.reset();
+            for (MouseCollidable mouseCollidable : mouseCollidables)
+            {
+               double collision = mouseCollidable.collide(input.getPickRayInWorld(), collisionShapeFrame.getReferenceFrame());
+               if (!Double.isNaN(collision))
+                  pickResult.addPickCollision(collision);
+            }
+            if (pickResult.getPickCollisionWasAddedSinceReset())
+               input.addPickResult(pickResult);
          }
-         if (pickResult.getPickCollisionWasAddedSinceReset())
-            input.addPickResult(pickResult);
       }
    }
 
@@ -448,7 +460,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    {
       if (state.getPalmFrame().isChildOfWorld())
       {
-         if (getSelected() || poseGizmo.isSelected() || handIconWidget.getIsHovered())
+         if (!definition.getUsePredefinedJointAngles() && (getSelected() || poseGizmo.isSelected() || handIconWidget.getIsHovered()))
             highlightModels.get(definition.getSide()).getRenderables(renderables, pool);
          poseGizmo.getVirtualRenderables(renderables, pool);
 
