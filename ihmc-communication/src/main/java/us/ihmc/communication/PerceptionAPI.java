@@ -33,8 +33,6 @@ import us.ihmc.ros2.ROS2Topic;
 
 public class PerceptionAPI
 {
-   public static final String IHMC_TOPIC_PREFIX = "ihmc";
-
    public static final String REA_NODE_NAME = "REA_module";
    public static final String GPU_REA_NODE_NAME = "GPU_based_REA_module";
    public static final String MAPPING_MODULE_NODE_NAME = "mapping_module";
@@ -61,7 +59,7 @@ public class PerceptionAPI
    public static final String T265_NAME = "t265";
    public static final String MULTISENSE_NAME = "multisense";
 
-   public static final ROS2Topic<?> IHMC_ROOT = new ROS2Topic<>().withPrefix(IHMC_TOPIC_PREFIX);
+   public static final ROS2Topic<?> IHMC_ROOT = ROS2Tools.IHMC_ROOT;
    public static final ROS2Topic<?> HEIGHT_QUADTREE_TOOLBOX = IHMC_ROOT.withModule(HEIGHT_QUADTREE_TOOLBOX_MODULE_NAME);
    public static final ROS2Topic<?> FIDUCIAL_DETECTOR_TOOLBOX = IHMC_ROOT.withModule(FIDUCIAL_MODULE_NAME);
    public static final ROS2Topic<?> FIDUCIAL_DETECTOR_TOOLBOX_INPUT = FIDUCIAL_DETECTOR_TOOLBOX.withInput();
