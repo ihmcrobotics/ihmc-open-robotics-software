@@ -134,15 +134,10 @@ public class GarbageFreeDoglegSolverRosenbrock2DTest
       assertTrue(isEqual);
    }
 
-   public static class Rosenbrock2DResidualAndJacobian implements GarbageFreeResidualAndJacobian
+   private static class Rosenbrock2DResidualAndJacobian implements GarbageFreeResidualAndJacobian
    {
       int parameterSize = 2;
       int residualSize = 2;
-
-      Rosenbrock2DResidualAndJacobian()
-      {
-
-      }
 
       @Override
       public void calculateResidual(DMatrixRMaj x, DMatrixRMaj residualToPack)

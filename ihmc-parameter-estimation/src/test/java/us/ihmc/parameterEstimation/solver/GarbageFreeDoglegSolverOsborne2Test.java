@@ -47,7 +47,7 @@ public class GarbageFreeDoglegSolverOsborne2Test
     * This is the Osborne 2 problem for nonlinear least squares solvers.
     * </p>
     */
-   public static class Osborne2ResidualAndJacobian implements GarbageFreeResidualAndJacobian
+   private static class Osborne2ResidualAndJacobian implements GarbageFreeResidualAndJacobian
    {
       DMatrixRMaj data;
 
@@ -56,7 +56,7 @@ public class GarbageFreeDoglegSolverOsborne2Test
       int parameterSize = 11;
       int residualSize = 65;
 
-      Osborne2ResidualAndJacobian()
+      public Osborne2ResidualAndJacobian()
       {
          jacobianRow = new DMatrixRMaj(1, parameterSize);
          jacobianRow.zero();
