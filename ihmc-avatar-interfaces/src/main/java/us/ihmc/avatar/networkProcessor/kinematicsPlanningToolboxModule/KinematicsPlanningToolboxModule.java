@@ -12,6 +12,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
@@ -44,14 +45,12 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
-
-      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class), s ->
+      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), s ->
       {
          if (kinematicsPlanningToolboxController != null)
             kinematicsPlanningToolboxController.updateRobotConfigurationData(s.takeNextData());
       });
-      ros2Node.createSubscription(controllerOutputTopic.withTypeName(CapturabilityBasedStatus.class), s ->
+      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName), s ->
       {
          if (kinematicsPlanningToolboxController != null)
             kinematicsPlanningToolboxController.updateCapturabilityBasedStatus(s.takeNextData());

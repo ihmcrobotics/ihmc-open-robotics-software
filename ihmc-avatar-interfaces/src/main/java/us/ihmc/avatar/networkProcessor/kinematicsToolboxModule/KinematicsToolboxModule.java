@@ -10,6 +10,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -76,11 +77,9 @@ public class KinematicsToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
-
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
-      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class), s ->
+      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), s ->
       {
          if (kinematicsToolBoxController != null)
          {
@@ -91,7 +90,7 @@ public class KinematicsToolboxModule extends ToolboxModule
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-      ros2Node.createSubscription(controllerOutputTopic.withTypeName(CapturabilityBasedStatus.class), s ->
+      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName), s ->
       {
          if (kinematicsToolBoxController != null)
          {
@@ -102,7 +101,7 @@ public class KinematicsToolboxModule extends ToolboxModule
 
       MultiContactBalanceStatus multiContactBalanceStatus = new MultiContactBalanceStatus();
 
-      ros2Node.createSubscription(controllerOutputTopic.withTypeName(MultiContactBalanceStatus.class), s ->
+      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(MultiContactBalanceStatus.class, robotName), s ->
       {
          if (kinematicsToolBoxController != null)
          {

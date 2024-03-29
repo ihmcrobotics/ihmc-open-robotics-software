@@ -6,8 +6,8 @@ import java.util.List;
 import controller_msgs.msg.dds.IMUPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotController.RawOutputWriter;
@@ -75,7 +75,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       this.publishPeriod = publishPeriod;
 
       robotConfigurationData.setJointNameHash(RobotConfigurationDataFactory.calculateJointNameHash(jointSensorData, forceSensorData, imuSensorData));
-      robotConfigurationDataPublisher = realtimeROS2Node.createPublisher(outputTopic.withTypeName(RobotConfigurationData.class));
+      robotConfigurationDataPublisher = realtimeROS2Node.createPublisher(StateEstimatorAPI.getRobotConfigurationDataTopic(outputTopic));
 
       // Create RobotFrameDataPublishers here.
       for (ReferenceFrame frame : frameData)

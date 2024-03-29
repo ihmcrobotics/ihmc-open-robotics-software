@@ -16,7 +16,12 @@ public class StateEstimatorAPI
 
    public static ROS2Topic<RobotConfigurationData> getRobotConfigurationDataTopic(String robotName)
    {
-      return HumanoidControllerAPI.getOutputTopic(robotName).withTypeName(RobotConfigurationData.class).withQoS(ROS2QosProfile.BEST_EFFORT());
+      return getRobotConfigurationDataTopic(HumanoidControllerAPI.getOutputTopic(robotName));
+   }
+
+   public static ROS2Topic<RobotConfigurationData> getRobotConfigurationDataTopic(ROS2Topic<?> outputTopic)
+   {
+      return outputTopic.withTypeName(RobotConfigurationData.class).withQoS(ROS2QosProfile.BEST_EFFORT());
    }
 
    public static ROS2Topic<HandJointAnglePacket> getHandJointAnglePacketTopic(String robotName)
