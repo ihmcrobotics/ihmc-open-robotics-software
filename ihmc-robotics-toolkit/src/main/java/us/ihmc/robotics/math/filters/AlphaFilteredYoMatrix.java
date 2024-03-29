@@ -79,8 +79,7 @@ public class AlphaFilteredYoMatrix extends YoMatrix
     */
    public void solve()
    {
-      filtered.set(previous);
-      CommonOps_DDRM.scale(alpha.getDoubleValue(), filtered);
+      CommonOps_DDRM.scale(alpha.getDoubleValue(), previous, filtered);
 
       super.get(current);
       CommonOps_DDRM.addEquals(filtered, 1 - alpha.getDoubleValue(), current);
@@ -97,8 +96,7 @@ public class AlphaFilteredYoMatrix extends YoMatrix
     */
    public void setAndSolve(DMatrix current)
    {
-      filtered.set(previous);
-      CommonOps_DDRM.scale(alpha.getDoubleValue(), filtered);
+      CommonOps_DDRM.scale(alpha.getDoubleValue(), previous, filtered);
 
       super.set(current);
       this.current.set(current);
