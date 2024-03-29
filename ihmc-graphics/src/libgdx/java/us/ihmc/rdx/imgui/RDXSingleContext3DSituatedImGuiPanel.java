@@ -17,7 +17,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.ImFont;
 import imgui.ImGui;
 import imgui.ImGuiIO;
 import imgui.ImGuiPlatformIO;
@@ -62,7 +61,6 @@ public class RDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
    private float mousePosX;
    private float mousePosY;
    private boolean leftMouseDown;
-   private ImFont font;
    private final int metersToPixels = 10 * 100; // 10 pixels per centimeter
    private final float pixelsToMeters = 1.0f / (float) metersToPixels;
    private final RigidBodyTransform transform = new RigidBodyTransform();
@@ -103,7 +101,6 @@ public class RDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
       ImGuiIO io = ImGui.getIO();
       io.setIniFilename(null); // We don't want to save .ini file
       io.setMouseDrawCursor(true);
-      font = ImGuiTools.setupFonts(io);
       ImGui.styleColorsLight();
 
       imGuiGl3 = new ImGuiImplGl3();
@@ -309,7 +306,7 @@ public class RDXSingleContext3DSituatedImGuiPanel implements RenderableProvider
       io.setDeltaTime(deltaTime > 0.0f ? deltaTime : 1.0f / 60.0f);
 
       ImGui.newFrame();
-      ImGui.pushFont(font);
+      ImGui.pushFont(ImGuiTools.getSmallFont());
 
       ImGui.setNextWindowPos(0.0f, 0.0f);
       ImGui.setNextWindowSize(panelWidth, panelHeight);

@@ -106,7 +106,7 @@ public class RDXImGuiWindowAndDockSystem
       io.setConfigDockingTransparentPayload(false);
 
       ImGuiTools.initializeColorStyle();
-      imFont = ImGuiTools.setupFonts(io);
+      ImGuiTools.setupFonts(io);
 
       // Add a 1px frame border to UI elements
       ImGuiStyle style = ImGui.getStyle();
@@ -133,7 +133,7 @@ public class RDXImGuiWindowAndDockSystem
 
       layoutManager.loadInitialLayout();
 
-      ImGui.pushFont(imFont);
+      ImGui.pushFont(ImGuiTools.getSmallFont());
 
       int flags = ImGuiDockNodeFlags.None;
       flags += ImGuiDockNodeFlags.PassthruCentralNode;

@@ -38,8 +38,15 @@ public class ImGuiTools
    public static final float REASONABLE_HEIGHT_FOR_A_SCROLL_AREA = 150.0f;
    public static final int MAX_STRING_SIZE_FOR_PATH = 1024;
 
-   public static int SMALL_FONT_SIZE = 13;
-   public static boolean SEGOE_EXISTS = false;
+   private static String FONT_DIRECTORY;
+   public static int SMALLEST_FONT_SIZE = 9;
+   public static int DEFAULT_FONT_SIZE = 13;
+   public static int LARGEST_FONT_SIZE = 26;
+   public static int CURRENT_FONT_SIZE = DEFAULT_FONT_SIZE;
+   private static Path SEGOE_UI_PATH;
+   private static Path LUCIDA_CONSOLE_PATH;
+   public static boolean SEGOE_EXISTS;
+   public static boolean LUCIDA_EXISTS;
    public static final double DEJAVU_TO_SEGOE_SCALE = 1.2;
    public static final double SMALL_TO_MEDIUM_SCALE = 1.25;
    public static final double SMALL_TO_LARGE_SCALE = 2.4;
@@ -471,74 +478,12 @@ public class ImGuiTools
     * See https://github.com/ocornut/imgui/blob/master/docs/FONTS.md
     * and ImGuiGlfwFreeTypeDemo in this project
     */
-   public static ImFont setupFonts(ImGuiIO io)
+   public static void setupFonts(ImGuiIO io)
    {
-      final ImFontConfig smallFontConfig = new ImFontConfig(); // Natively allocated object, should be explicitly destroyed
-      final ImFontConfig smallBoldFontConfig = new ImFontConfig();
-      final ImFontConfig consoleFontConfig = new ImFontConfig();
-      final ImFontConfig mediumFontConfig = new ImFontConfig();
-      final ImFontConfig bigFontConfig = new ImFontConfig();
-
-      // Glyphs could be added per-font as well as per config used globally like here
-//      fontConfig.setGlyphRanges(fontAtlas.getGlyphRangesCyrillic());
-
-//      fontConfig.setMergeMode(true); // When enabled, all fonts added with this config would be merged with the previously added font
-      float size = 14.0f;
-//      fontConfig.setSizePixels(size);
-//      fontConfig.setOversampleH(4);
-//      fontConfig.setOversampleV(4);
-      int fontsFlags = 0;
-      fontsFlags += ImGuiFreeTypeBuilderFlags.LightHinting;
-//      fontConfig.setRasterizerFlags(flags);
-//      fontConfig.setRasterizerMultiply(2.0f);
-//      fontConfig.setPixelSnapH(true);
-      smallFontConfig.setFontBuilderFlags(fontsFlags);
-      smallBoldFontConfig.setFontBuilderFlags(fontsFlags + ImGuiFreeTypeBuilderFlags.Bold);
-      consoleFontConfig.setFontBuilderFlags(fontsFlags);
-      mediumFontConfig.setFontBuilderFlags(fontsFlags);
-      bigFontConfig.setFontBuilderFlags(fontsFlags);
-
-//      fontToReturn = fontAtlas.addFontDefault(); // Add a default font, which is 'ProggyClean.ttf, 13px'
-//      fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("basis33.ttf"), 16, fontConfig);
-      String fontDirectory;
       if (SystemUtils.IS_OS_WINDOWS)
-         fontDirectory = System.getenv("WINDIR") + "/Fonts";
+         FONT_DIRECTORY = System.getenv("WINDIR") + "/Fonts";
       else
-         fontDirectory = "/usr/share/fonts/TTF/";
-
-      Path segoeui = Paths.get(fontDirectory, "segoeui.ttf");
-      SEGOE_EXISTS = Files.exists(segoeui);
-      SMALL_FONT_SIZE = getDefaultFontSize();
-      if (SEGOE_EXISTS)
-      {
-         smallFontConfig.setName("segoeui.ttf, 16px");
-         smallFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, smallFontConfig);
-         smallBoldFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, smallBoldFontConfig);
-
-         mediumFontConfig.setName("segoeui.ttf, 20px");
-         mediumFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 20.0f, mediumFontConfig);
-
-         bigFontConfig.setName("segoeui.ttf, 38px");
-         bigFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 38.0f, bigFontConfig);
-      }
-      else
-      {
-         smallFontConfig.setName("DejaVuSans.ttf, 13px");
-         smallFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, smallFontConfig);
-         smallBoldFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, smallBoldFontConfig);
-
-         mediumFontConfig.setName("DejaVuSans.ttf, 17px");
-         mediumFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 17.0f, mediumFontConfig);
-
-         bigFontConfig.setName("DejaVuSans.ttf, 32px");
-         bigFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 32.0f, bigFontConfig);
-
-         // Accomodate for ImGui issue where the Windows fonts will render smaller than normal
-         // This is so saving layout does not change the result depending on the fonts you have installed.
-         // Can be removed when this is fixed: https://github.com/ocornut/imgui/issues/4780
-         ImGui.getStyle().setFramePadding(ImGui.getStyle().getFramePaddingX(), 4.5f);
-      }
-      Path lucidaConsole = Paths.get(fontDirectory, "lucon.ttf");
+         FONT_DIRECTORY = "/usr/share/fonts/TTF/";
 
       ImFontGlyphRangesBuilder glyphRangesBuilder = new ImFontGlyphRangesBuilder();
       glyphRangesBuilder.addRanges(ImGui.getIO().getFonts().getGlyphRangesDefault());
@@ -547,79 +492,113 @@ public class ImGuiTools
       glyphRangesBuilder.addRanges(new short[] {0x25A0, 0x25FF, 0}); // Geometric shapes https://www.compart.com/en/unicode/block/U+25A0
       short[] glyphRanges = glyphRangesBuilder.buildRanges();
 
-      if (Files.exists(lucidaConsole))
-      {
-         consoleFontConfig.setName("lucon.ttf, 12px");
-         consoleFont = io.getFonts().addFontFromFileTTF(lucidaConsole.toAbsolutePath().toString(), 12.0f, consoleFontConfig, glyphRanges);
-      }
-      else
-      {
-         consoleFontConfig.setName("dejaVu/DejaVuSansMono.ttf, 12px");
-         consoleFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSansMono.ttf"), 12.0f, consoleFontConfig, glyphRanges);
-      }
-//      fontConfig.setName("Roboto-Regular.ttf, 14px"); // This name will be displayed in Style Editor
-//      fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("Roboto-Regular.ttf"), size, fontConfig);
-//      fontConfig.setName("Roboto-Regular.ttf, 16px"); // We can apply a new config value every time we add a new font
-//      fontAtlas.addFontFromMemoryTTF(loadFromResources("Roboto-Regular.ttf"), 16, fontConfig);
+      SEGOE_UI_PATH = Paths.get(FONT_DIRECTORY, "segoeui.ttf");
+      LUCIDA_CONSOLE_PATH = Paths.get(FONT_DIRECTORY, "lucon.ttf");
+      SEGOE_EXISTS = Files.exists(SEGOE_UI_PATH);
+      LUCIDA_EXISTS = Files.exists(LUCIDA_CONSOLE_PATH);
 
-//      fontConfig.setName("Segoe UI"); // We can apply a new config value every time we add a new font
-//      fontToReturn = fontAtlas.addFontFromFileTTF("/usr/share/fonts/TTF/segoeui.ttf", size, fontConfig);
+      if (!SEGOE_EXISTS)
+      {
+         // Accomodate for ImGui issue where the Windows fonts will render smaller than normal
+         // This is so saving layout does not change the result depending on the fonts you have installed.
+         // Can be removed when this is fixed: https://github.com/ocornut/imgui/issues/4780
+         ImGui.getStyle().setFramePadding(ImGui.getStyle().getFramePaddingX(), 4.5f);
+      }
+
+      for (int i = SMALLEST_FONT_SIZE; i < LARGEST_FONT_SIZE + 1; i++)
+      {
+         int smallSize = (int) Math.round(SEGOE_EXISTS ? DEJAVU_TO_SEGOE_SCALE * i : i);
+         int mediumSize = (int) Math.round(SEGOE_EXISTS ? DEJAVU_TO_SEGOE_SCALE * SMALL_TO_MEDIUM_SCALE * i : SMALL_TO_MEDIUM_SCALE * i);
+         int largeSize = (int) Math.round(SEGOE_EXISTS ? DEJAVU_TO_SEGOE_SCALE * SMALL_TO_LARGE_SCALE * i : SMALL_TO_LARGE_SCALE * i);
+
+         smallFont.put(i, loadFont(io, smallSize, 0, true, glyphRanges));
+         smallBoldFont.put(i, loadFont(io, smallSize, ImGuiFreeTypeBuilderFlags.Bold, true, glyphRanges));
+         consoleFont.put(i, loadFont(io, i - 1, 0, false, glyphRanges));
+         mediumFont.put(i, loadFont(io, mediumSize, 0, true, glyphRanges));
+         bigFont.put(i, loadFont(io, largeSize, 0, true, glyphRanges));
+      }
 
       fontAtlas = ImGui.getIO().getFonts();
       fontAtlas.build();
-
-      smallFontConfig.destroy(); // After all fonts were added we don't need this config more
-      consoleFontConfig.destroy();
-      mediumFontConfig.destroy();
-      bigFontConfig.destroy();
-
-
-      return smallFont;
    }
 
-   private static int getCorrectedFontSize(int dejavuSize)
+   private static ImFont loadFont(ImGuiIO io, int size, int addedFlags, boolean isSans, short[] glyphRanges)
    {
-      return SEGOE_EXISTS ? (int) Math.round(DEJAVU_TO_SEGOE_SCALE * dejavuSize) : dejavuSize;
-   }
+      ImFontConfig fontConfig = new ImFontConfig();
 
-   public static int getSmallestFontSize()
-   {
-      return getCorrectedFontSize(9);
-   }
+      // Glyphs could be added per-font as well as per config used globally like here
+      // fontConfig.setGlyphRanges(fontAtlas.getGlyphRangesCyrillic());
+      // fontConfig.setMergeMode(true); // When enabled, all fonts added with this config would be merged with the previously added font
+      // fontConfig.setSizePixels(size);
+      // fontConfig.setOversampleH(4);
+      // fontConfig.setOversampleV(4);
+      // fontConfig.setRasterizerFlags(flags);
+      // fontConfig.setRasterizerMultiply(2.0f);
+      // fontConfig.setPixelSnapH(true);
 
-   public static int getDefaultFontSize()
-   {
-      return getCorrectedFontSize(13);
-   }
+      int fontsFlags = 0;
+      fontsFlags += ImGuiFreeTypeBuilderFlags.LightHinting;
+      fontConfig.setFontBuilderFlags(fontsFlags + addedFlags);
 
-   public static int getLargestFontSize()
-   {
-      return getCorrectedFontSize(20);
+      ImFont font;
+      if (isSans && SEGOE_EXISTS)
+      {
+         fontConfig.setName("segoeui.ttf, %dpx".formatted(size));
+         font = io.getFonts().addFontFromFileTTF(SEGOE_UI_PATH.toAbsolutePath().toString(), size, fontConfig);
+      }
+      else if (isSans)
+      {
+         fontConfig.setName("DejaVuSans.ttf, %dpx".formatted(size));
+         font = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), size, fontConfig);
+      }
+      else if (LUCIDA_EXISTS)
+      {
+         fontConfig.setName("lucon.ttf, %dpx".formatted(size));
+         font = io.getFonts().addFontFromFileTTF(LUCIDA_CONSOLE_PATH.toAbsolutePath().toString(), size, fontConfig, glyphRanges);
+      }
+      else
+      {
+         fontConfig.setName("dejaVu/DejaVuSansMono.ttf, %dpx".formatted(size));
+         font = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSansMono.ttf"), size, fontConfig, glyphRanges);
+      }
+
+      // fontToReturn = fontAtlas.addFontDefault(); // Add a default font, which is 'ProggyClean.ttf, 13px'
+      // fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("basis33.ttf"), 16, fontConfig);
+      // fontConfig.setName("Roboto-Regular.ttf, 14px"); // This name will be displayed in Style Editor
+      // fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("Roboto-Regular.ttf"), size, fontConfig);
+      // fontConfig.setName("Roboto-Regular.ttf, 16px"); // We can apply a new config value every time we add a new font
+      // fontAtlas.addFontFromMemoryTTF(loadFromResources("Roboto-Regular.ttf"), 16, fontConfig);
+      // fontConfig.setName("Segoe UI"); // We can apply a new config value every time we add a new font
+      // fontToReturn = fontAtlas.addFontFromFileTTF("/usr/share/fonts/TTF/segoeui.ttf", size, fontConfig);
+
+      fontConfig.destroy();
+
+      return font;
    }
 
    public static ImFont getBigFont()
    {
-      return bigFont;
+      return bigFont.get(CURRENT_FONT_SIZE);
    }
 
    public static ImFont getMediumFont()
    {
-      return mediumFont;
+      return mediumFont.get(CURRENT_FONT_SIZE);
    }
 
    public static ImFont getSmallFont()
    {
-      return smallFont;
+      return smallFont.get(CURRENT_FONT_SIZE);
    }
 
    public static ImFont getSmallBoldFont()
    {
-      return smallBoldFont;
+      return smallBoldFont.get(CURRENT_FONT_SIZE);
    }
 
    public static ImFont getConsoleFont()
    {
-      return consoleFont;
+      return consoleFont.get(CURRENT_FONT_SIZE);
    }
 
    public static ImFontAtlas getFontAtlas()

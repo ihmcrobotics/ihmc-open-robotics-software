@@ -117,6 +117,7 @@ public class RDXBaseUI
    private final ImDouble view3DBackgroundShade = new ImDouble(RDX3DSceneTools.CLEAR_COLOR);
    private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
    private final ImDouble imguiFontScale = new ImDouble(1.0);
+   private final ImInt imguiFontSize = new ImInt(ImGuiTools.DEFAULT_FONT_SIZE);
    private final RDXImGuiLayoutManager layoutManager;
    private final RDXKeyBindings keyBindings = new RDXKeyBindings();
    private long renderIndex = 0;
@@ -437,6 +438,22 @@ public class RDXBaseUI
             if (ImGui.isItemDeactivatedAfterEdit())
             {
                ImGui.getIO().setFontGlobalScale((float) imguiFontScale.get());
+            }
+
+            // Sixth row (font size)
+            ImGui.tableNextRow();
+            ImGui.tableSetColumnIndex(0);
+            ImGui.alignTextToFramePadding();
+            ImGui.text("Font size: ");
+            ImGui.tableSetColumnIndex(1);
+            if (ImGui.sliderInt(labels.getHidden("fontSize"), imguiFontSize.getData(), ImGuiTools.SMALLEST_FONT_SIZE, ImGuiTools.LARGEST_FONT_SIZE, "%d"))
+            {
+//               ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
+            }
+            // Change the font scale after you've let go of the slider
+            if (ImGui.isItemDeactivatedAfterEdit())
+            {
+               ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
             }
 
             ImGui.endTable();
