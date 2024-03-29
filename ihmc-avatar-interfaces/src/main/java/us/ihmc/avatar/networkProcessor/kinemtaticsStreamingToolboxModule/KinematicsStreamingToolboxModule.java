@@ -18,9 +18,11 @@ import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -100,15 +102,12 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      ROS2Topic<?> controllerInputTopic = HumanoidControllerAPI.getInputTopic(robotName);
-      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
-
-      trajectoryMessagePublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(WholeBodyTrajectoryMessage.class));
-      streamingMessagePublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(WholeBodyStreamingMessage.class));
+      trajectoryMessagePublisher = ros2Node.createPublisher(ControllerAPIDefinition.getTopic(WholeBodyTrajectoryMessage.class, robotName));
+      streamingMessagePublisher = ros2Node.createPublisher(ControllerAPIDefinition.getTopic(WholeBodyStreamingMessage.class, robotName));
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
-      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class), s ->
+      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), s ->
       {
          if (controller != null)
          {
@@ -119,7 +118,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-      ros2Node.createSubscription(controllerOutputTopic.withTypeName(CapturabilityBasedStatus.class), s ->
+      ros2Node.createSubscription(ControllerAPIDefinition.getTopic(CapturabilityBasedStatus.class, robotName), s ->
       {
          if (controller != null)
          {
