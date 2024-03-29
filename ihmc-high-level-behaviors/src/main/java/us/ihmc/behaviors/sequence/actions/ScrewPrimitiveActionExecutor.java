@@ -111,7 +111,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
       if (state.getScrewFrame().isChildOfWorld())
       {
-         ActionSequenceState actionSequence = BehaviorTreeTools.findActionSequenceAncestor(getParent().getState());
+         ActionSequenceState actionSequence = BehaviorTreeTools.findActionSequenceAncestor(state);
          if (actionSequence != null)
          {
             if (actionSequence.getExecutionNextIndex() <= state.getActionIndex())
@@ -125,8 +125,8 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                else
                {
                   HandPoseActionState previousHandPose = actionSequence.findNextPreviousAction(HandPoseActionState.class,
-                                                                                       state.getActionIndex(),
-                                                                                       definition.getSide());
+                                                                                               state.getActionIndex(),
+                                                                                               definition.getSide());
                   if (previousHandPose != null && previousHandPose.getPalmFrame().isChildOfWorld())
                   {
                      initialHandFrame = previousHandPose.getPalmFrame().getReferenceFrame();
