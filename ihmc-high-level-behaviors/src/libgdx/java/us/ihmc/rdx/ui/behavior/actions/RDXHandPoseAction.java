@@ -336,7 +336,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
          if (getDefinition().getPreset() == null)
          {
-            ArmJointName[] armJointNames = syncedRobot.getRobotModel().getJointMap().getArmJointNames();
+            ArmJointName[] armJointNames = syncedRobot.getRobotModel().getJointMap().getArmJointNames(getDefinition().getSide());
             ImGui.pushItemWidth(80.0f);
             for (int i = 0; i < armJointNames.length; i++)
             {
@@ -345,7 +345,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             ImGui.popItemWidth();
             if (ImGui.button(labels.get("Set Configuration to Synced Arm")))
             {
-               for (int i = 0; i < armJointNames.length; i++)
+               for (int i = 0; i < getDefinition().getJointAngles().getLength(); i++)
                {
                   OneDoFJointBasics syncedJoint = syncedRobot.getFullRobotModel().getArmJoint(getDefinition().getSide(), armJointNames[i]);
                   if (syncedJoint != null)

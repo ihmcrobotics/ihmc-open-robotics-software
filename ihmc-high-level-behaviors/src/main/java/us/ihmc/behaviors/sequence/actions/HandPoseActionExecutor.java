@@ -274,7 +274,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
 
       if (definition.getUsePredefinedJointAngles())
       {
-         state.setIsExecuting(trackingCalculator.getTimeIsUp());
+         state.setIsExecuting(!trackingCalculator.getTimeIsUp());
       }
       else if (state.getPalmFrame().isChildOfWorld())
       {
@@ -316,7 +316,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
       jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
 
-      double[] jointAngles = new double[syncedRobot.getRobotModel().getJointMap().getArmJointNames().length];
+      double[] jointAngles = new double[syncedRobot.getRobotModel().getJointMap().getArmJointNames(getDefinition().getSide()).length];
 
       if (definition.getUsePredefinedJointAngles())
          for (int i = 0; i < jointAngles.length; i++)
