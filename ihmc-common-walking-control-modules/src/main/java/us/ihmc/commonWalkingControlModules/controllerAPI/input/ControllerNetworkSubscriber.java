@@ -10,7 +10,7 @@ import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
 import ihmc_common_msgs.msg.dds.MessageCollection;
 import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
@@ -96,7 +96,7 @@ public class ControllerNetworkSubscriber
    {
       final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
-      ROS2Topic<T> topic = inputTopic.withTypeName(multipleMessageType).withQoS(ControllerAPIDefinition.getQoS(multipleMessageType));
+      ROS2Topic<T> topic = inputTopic.withTypeName(multipleMessageType).withQoS(ControllerAPI.getQoS(multipleMessageType));
       try
       {
          T localInstance = multipleMessageType.newInstance();

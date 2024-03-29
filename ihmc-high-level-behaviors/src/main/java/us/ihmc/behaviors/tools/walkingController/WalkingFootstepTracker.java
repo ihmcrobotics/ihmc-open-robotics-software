@@ -14,7 +14,7 @@ import us.ihmc.ros2.ROS2NodeInterface;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition.getTopic;
+import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 import static us.ihmc.tools.string.StringTools.format;
 
 /**

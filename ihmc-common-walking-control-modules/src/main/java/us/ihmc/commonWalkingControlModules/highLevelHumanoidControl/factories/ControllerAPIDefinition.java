@@ -20,33 +20,24 @@ import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityCheck
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import controller_msgs.msg.dds.*;
-import ihmc_common_msgs.msg.dds.MessageCollection;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
-import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
-import us.ihmc.ros2.ROS2QosProfile;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2TopicNameTools;
 
 public class ControllerAPIDefinition
 {
    private static final List<Class<? extends Command<?, ?>>> controllerSupportedCommands;
    private static final List<Class<? extends Settable<?>>> controllerSupportedStatusMessages;
-   private static final HashSet<Class<?>> inputMessageClasses = new HashSet<>();
-   private static final HashSet<Class<?>> outputMessageClasses = new HashSet<>();
 
    static
    {
@@ -102,11 +93,6 @@ public class ControllerAPIDefinition
       commands.add(WholeBodyJointspaceTrajectoryCommand.class);
 
       controllerSupportedCommands = Collections.unmodifiableList(commands);
-      controllerSupportedCommands.forEach(command -> inputMessageClasses.add(ROS2TopicNameTools.newMessageInstance(command).getMessageClass()));
-      // Input messages that don't have a corresponding command
-      inputMessageClasses.add(MessageCollection.class);
-      inputMessageClasses.add(WholeBodyTrajectoryMessage.class);
-      inputMessageClasses.add(WholeBodyStreamingMessage.class);
 
       List<Class<? extends Settable<?>>> statusMessages = new ArrayList<>();
 
@@ -133,22 +119,11 @@ public class ControllerAPIDefinition
       statusMessages.add(MultiContactTrajectoryStatus.class);
 
       controllerSupportedStatusMessages = Collections.unmodifiableList(statusMessages);
-      outputMessageClasses.addAll(controllerSupportedStatusMessages);
    }
 
    public static List<Class<? extends Command<?, ?>>> getControllerSupportedCommands()
    {
       return controllerSupportedCommands;
-   }
-
-   public static HashSet<Class<?>> getROS2CommandMessageTypes()
-   {
-      return inputMessageClasses;
-   }
-
-   public static HashSet<Class<?>> getROS2StatusMessageTypes()
-   {
-      return outputMessageClasses;
    }
 
    public static List<Class<? extends Settable<?>>> getControllerSupportedStatusMessages()
@@ -231,58 +206,5 @@ public class ControllerAPIDefinition
             return extractor == null ? NO_ID : extractor.getMessageID(message);
          }
       };
-   }
-
-   /** Applies only for the humanoid controller. */
-   public static <T> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
-   {
-      return getTopic(getBaseTopic(HumanoidControllerAPI.HUMANOID_CONTROL_MODULE_NAME, robotName), messageClass);
-   }
-
-   public static ROS2Topic<?> getBaseTopic(String controlModuleName, String robotName)
-   {
-      return ROS2Tools.IHMC_ROOT.withModule(controlModuleName).withRobot(robotName);
-   }
-
-   public static <T> ROS2Topic<T> getTopic(ROS2Topic<?> baseTopic, Class<T> messageClass)
-   {
-      if (inputMessageClasses.contains(messageClass))
-      {
-         return baseTopic.withInput().withTypeName(messageClass).withQoS(getQoS(messageClass));
-      }
-      if (outputMessageClasses.contains(messageClass))
-      {
-         return baseTopic.withOutput().withTypeName(messageClass).withQoS(getQoS(messageClass));
-      }
-
-      throw new RuntimeException("Topic does not exist: " + messageClass);
-   }
-
-   public static ROS2QosProfile getQoS(Class<?> messageClass)
-   {
-      if (inputMessageClasses.contains(messageClass))
-      {
-         // Streaming commands should be best effort
-         if (messageClass.equals(WholeBodyStreamingMessage.class))
-            return ROS2QosProfile.BEST_EFFORT();
-
-         return ROS2QosProfile.RELIABLE();
-      }
-      else if (outputMessageClasses.contains(messageClass))
-      {
-         // Periodic topics are should be best effort
-         if (messageClass.equals(CapturabilityBasedStatus.class)
-          || messageClass.equals(JointDesiredOutputMessage.class)
-          || messageClass.equals(RobotDesiredConfigurationData.class)
-          || messageClass.equals(FootstepQueueStatusMessage.class)
-          || messageClass.equals(MultiContactBalanceStatus.class))
-            return ROS2QosProfile.BEST_EFFORT();
-
-         return ROS2QosProfile.RELIABLE();
-      }
-      else
-      {
-         return ROS2QosProfile.DEFAULT();
-      }
    }
 }

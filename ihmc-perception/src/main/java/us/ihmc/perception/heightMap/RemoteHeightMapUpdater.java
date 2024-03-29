@@ -4,8 +4,8 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
@@ -53,7 +53,7 @@ public class RemoteHeightMapUpdater
 
       ROS2PublisherBasics<HeightMapMessage> heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_OUTPUT);
       ros2Node.createSubscription(PerceptionAPI.HEIGHT_MAP_STATE_REQUEST, subscriber -> consumeStateRequestMessage(subscriber.readNextData()));
-      ros2Node.createSubscription(ControllerAPIDefinition.getTopic(WalkingStatusMessage.class, robotName),
+      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, robotName),
                                   subscriber -> consumeWalkingStatusMessage(subscriber.readNextData()));
 
       heightMapUpdater = new HeightMapUpdater();

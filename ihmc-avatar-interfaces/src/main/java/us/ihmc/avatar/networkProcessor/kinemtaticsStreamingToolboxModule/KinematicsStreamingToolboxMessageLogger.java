@@ -18,7 +18,6 @@ import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import toolbox_msgs.msg.dds.*;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -27,7 +26,6 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 
@@ -79,7 +77,7 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
 
       ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
                                   s -> robotConfigurationData.set(s.takeNextData()));
-      ros2Node.createSubscription(ControllerAPIDefinition.getTopic(CapturabilityBasedStatus.class, robotName),
+      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName),
                                   s -> capturabilityBasedStatus.set(s.takeNextData()));
 
       ros2Node.createSubscription(KinematicsStreamingToolboxModule.getInputTopic(robotName).withTypeName(ToolboxStateMessage.class),

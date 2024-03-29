@@ -15,11 +15,11 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.commonWalkingControlModules.visualizer.InverseDynamicsMechanismReferenceFrameVisualizer;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
@@ -121,7 +121,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
 
       if (realtimeROS2Node != null)
       {
-         crashNotificationPublisher = realtimeROS2Node.createPublisher(ControllerAPIDefinition.getTopic(ControllerCrashNotificationPacket.class, robotName));
+         crashNotificationPublisher = realtimeROS2Node.createPublisher(HumanoidControllerAPI.getTopic(ControllerCrashNotificationPacket.class, robotName));
       }
       else
       {

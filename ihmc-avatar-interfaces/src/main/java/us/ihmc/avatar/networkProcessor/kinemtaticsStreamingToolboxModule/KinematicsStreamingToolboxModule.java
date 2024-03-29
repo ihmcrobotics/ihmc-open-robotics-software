@@ -18,7 +18,6 @@ import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
@@ -102,8 +101,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      trajectoryMessagePublisher = ros2Node.createPublisher(ControllerAPIDefinition.getTopic(WholeBodyTrajectoryMessage.class, robotName));
-      streamingMessagePublisher = ros2Node.createPublisher(ControllerAPIDefinition.getTopic(WholeBodyStreamingMessage.class, robotName));
+      trajectoryMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(WholeBodyTrajectoryMessage.class, robotName));
+      streamingMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(WholeBodyStreamingMessage.class, robotName));
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
@@ -118,7 +117,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-      ros2Node.createSubscription(ControllerAPIDefinition.getTopic(CapturabilityBasedStatus.class, robotName), s ->
+      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName), s ->
       {
          if (controller != null)
          {

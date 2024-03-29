@@ -17,9 +17,9 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -548,7 +548,7 @@ public class AvatarEstimatorThreadFactory
    private ROS2PublisherBasics<ControllerCrashNotificationPacket> createControllerCrashPublisher()
    {
       if (realtimeROS2NodeField.hasValue())
-         return realtimeROS2NodeField.get().createPublisher(ControllerAPIDefinition.getTopic(outputTopicField.get(), ControllerCrashNotificationPacket.class));
+         return realtimeROS2NodeField.get().createPublisher(ControllerAPI.getTopic(outputTopicField.get(), ControllerCrashNotificationPacket.class));
       else
          return null;
    }

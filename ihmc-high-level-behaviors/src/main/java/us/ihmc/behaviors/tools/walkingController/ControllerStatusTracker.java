@@ -17,7 +17,7 @@ import us.ihmc.tools.thread.Throttler;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition.getTopic;
+import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 
 /**
  * A class to keep track of the controller by listening to its ROS 2 status API.
