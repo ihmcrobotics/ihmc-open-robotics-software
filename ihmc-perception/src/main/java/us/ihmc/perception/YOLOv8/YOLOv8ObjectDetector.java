@@ -10,9 +10,10 @@ import org.bytedeco.opencv.opencv_dnn.Net;
 import org.bytedeco.opencv.opencv_text.FloatVector;
 import org.bytedeco.opencv.opencv_text.IntVector;
 import us.ihmc.perception.RawImage;
-import us.ihmc.tools.io.WorkspaceFile;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+import us.ihmc.tools.io.WorkspaceResourceFile;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,12 +30,19 @@ public class YOLOv8ObjectDetector
    public YOLOv8ObjectDetector()
    {
       WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(getClass(), "/yolo/");
-      WorkspaceFile onnxFile = new WorkspaceFile(directory, ONNX_FILE_NAME);
+      WorkspaceResourceFile onnxFile = new WorkspaceResourceFile(directory, ONNX_FILE_NAME);
 
-      if (onnxFile.getFilesystemFile() == null)
+      if (onnxFile.getClasspathResource() == null)
          throw new NullPointerException("YOLOv8 ONNX file could not be found");
 
-      yoloNet = opencv_dnn.readNet(onnxFile.getFilesystemFile().toString());
+      try
+      {
+         yoloNet = opencv_dnn.readNetFromONNX(onnxFile.getClasspathResourceAsStream().readAllBytes());
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
       if (opencv_core.getCudaEnabledDeviceCount() > 0)
       {
          yoloNet.setPreferableBackend(opencv_dnn.DNN_BACKEND_CUDA);
