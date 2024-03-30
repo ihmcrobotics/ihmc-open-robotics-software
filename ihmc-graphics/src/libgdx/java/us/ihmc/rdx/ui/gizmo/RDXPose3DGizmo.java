@@ -207,8 +207,11 @@ public class RDXPose3DGizmo implements RenderableProvider
     */
    public void setParentFrame(ReferenceFrame newParentFrame)
    {
-      gizmoFrame.remove();
-      gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(newParentFrame, transformToParent);
+      if (newParentFrame != gizmoFrame.getParent())
+      {
+         gizmoFrame.remove();
+         gizmoFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(newParentFrame, transformToParent);
+      }
    }
 
    public void changeParentFrameWithoutMoving(ReferenceFrame newParentFrame)

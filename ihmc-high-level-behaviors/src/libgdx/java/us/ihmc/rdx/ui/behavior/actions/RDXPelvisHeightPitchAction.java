@@ -43,7 +43,6 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
    private final ImDoubleWrapper trajectoryDurationWidget;
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
-   private final ImBooleanWrapper executeWithNextActionWrapper;
    private final MutableReferenceFrame graphicFrame = new MutableReferenceFrame();
    private final MutableReferenceFrame collisionShapeFrame = new MutableReferenceFrame();
    private boolean isMouseHovering = false;
@@ -53,7 +52,6 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final RDX3DPanelTooltip tooltip;
    private final FullHumanoidRobotModel syncedFullRobotModel;
-   private boolean wasConcurrent = false;
 
    public RDXPelvisHeightPitchAction(long id,
                                      CRDTInfo crdtInfo,
@@ -70,7 +68,7 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
 
       this.syncedFullRobotModel = syncedFullRobotModel;
 
-      getDefinition().setDescription("Pelvis height and pitch");
+      getDefinition().setName("Pelvis height and pitch");
 
       poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPelvisToParentTransform().getValue());
       poseGizmo.create(panel3D);
@@ -88,9 +86,6 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
       trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
                                                      getDefinition()::setTrajectoryDuration,
                                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
-      executeWithNextActionWrapper = new ImBooleanWrapper(getDefinition()::getExecuteWithNextAction,
-                                                          getDefinition()::setExecuteWithNextAction,
-                                                          imBoolean -> ImGui.checkbox(labels.get("Execute with next action"), imBoolean));
 
       String pelvisBodyName = syncedFullRobotModel.getPelvis().getName();
       String modelFileName = RDXInteractableTools.getModelFileName(robotModel.getRobotDefinition().getRigidBodyDefinition(pelvisBodyName));
@@ -141,17 +136,6 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
          RigidBodyTransform transformVariation = new RigidBodyTransform();
          transformVariation.setAndInvert(currentRobotPelvisPose);
          getDefinition().getPelvisToParentTransform().getValueReadOnly().transform(transformVariation);
-
-         // if the action is part of a group of concurrent actions that is currently executing or about to be executed
-         // send an update of the pose of the pelvis. Arms IK will be computed wrt this change of this pelvis pose
-         if (state.getIsNextForExecution() && state.getIsToBeExecutedConcurrently())
-         {
-            wasConcurrent = true;
-         }
-         else if (wasConcurrent)
-         {
-            wasConcurrent = false;
-         }
       }
    }
 
@@ -159,8 +143,6 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
    protected void renderImGuiWidgetsInternal()
    {
       ImGui.checkbox(labels.get("Adjust Goal Pose"), poseGizmo.getSelected());
-      ImGui.sameLine();
-      executeWithNextActionWrapper.renderImGuiWidget();
       parentFrameComboBox.render();
       ImGui.pushItemWidth(80.0f);
       heightWidget.renderImGuiWidget();
@@ -173,9 +155,7 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
    {
       if (isMouseHovering)
       {
-         tooltip.render("%s Action\nIndex: %d\nDescription: %s".formatted(getActionTypeTitle(),
-                                                                          state.getActionIndex(),
-                                                                          getDefinition().getDescription()));
+         tooltip.render("%s Action\nIndex: %d\nName: %s".formatted(getActionTypeTitle(), state.getActionIndex(), getDefinition().getName()));
       }
    }
 

@@ -31,6 +31,22 @@ module behavior_msgs
          */
         controller_msgs::msg::dds::RigidBodyTransformMessage transform_to_parent;
         /**
+         * Whether the rigid body is controlled in jointspace (true) or taskspace (false)
+         */
+        boolean joint_space_control;
+        /**
+         * Whether to use predefined joint angles
+         */
+        boolean use_predefined_joint_angles;
+        /**
+         * Preset arm configuration
+         */
+        long preset;
+        /**
+         * Joint angles
+         */
+        double joint_angles[7];
+        /**
          * The trajectory duration
          */
         double trajectory_duration;
@@ -38,13 +54,11 @@ module behavior_msgs
          * Whether maintaining the rigid body controlled in world after the action is complete
          */
         boolean hold_pose_in_world;
-        /**
-         * Whether the rigid body is controlled in jointspace (true) or taskspace (false)
-         */
-        boolean joint_space_control;
         double linear_position_weight;
         double angular_position_weight;
         double jointspace_weight;
+        double position_error_tolerance;
+        double orientation_error_tolerance;
       };
     };
   };

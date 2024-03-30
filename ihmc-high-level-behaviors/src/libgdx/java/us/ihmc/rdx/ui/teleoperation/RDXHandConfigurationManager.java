@@ -32,9 +32,9 @@ public class RDXHandConfigurationManager
 
       robotName = syncedRobotModel.getRobotModel().getSimpleRobotName();
 
-      if (syncedRobotModel.getRobotModel().getHandModels().toString().contains("SakeHand"))
+      for (RobotSide side : RobotSide.values)
       {
-         for (RobotSide side : RobotSide.values)
+         if (syncedRobotModel.getRobotModel().getRobotVersion().hasSakeGripperJoints(side))
          {
             handIcons.put(side, new RDXIconTexture("icons/" + side.getLowerCaseName() + "Hand.png"));
 
@@ -44,7 +44,7 @@ public class RDXHandConfigurationManager
             Runnable resetHand = () -> publishHandCommand(side, null, false, true);
             handQuickAccessButtons.put(side, new RDXHandQuickAccessButtons(baseUI, side, openHand, closeHand, calibrateHand, resetHand));
 
-            sakeHandWidgets.put(side, new RDXSakeHandWidgets(communicationHelper, side));
+            sakeHandWidgets.put(side, new RDXSakeHandWidgets(communicationHelper, syncedRobotModel, side));
          }
       }
    }
@@ -90,6 +90,7 @@ public class RDXHandConfigurationManager
                SakeHandParameters.normalizeFingertipGripForceLimit(handPreset.getFingertipGripForceLimit()));
       }
 
+      RDXBaseUI.pushNotification("Commanding hand configuration...");
       communicationHelper.publish(ROS2Tools.getHandSakeCommandTopic(robotName, side), sakeHandDesiredCommandMessage);
    }
 }

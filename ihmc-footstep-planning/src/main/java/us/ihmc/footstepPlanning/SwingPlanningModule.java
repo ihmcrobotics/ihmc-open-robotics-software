@@ -22,7 +22,6 @@ public class SwingPlanningModule
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final SwingPlannerParametersBasics swingPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
 
@@ -33,31 +32,28 @@ public class SwingPlanningModule
 
    private final List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = new ArrayList<>();
 
-
    public SwingPlanningModule(FootstepPlannerParametersReadOnly footstepPlannerParameters,
                               SwingPlannerParametersBasics swingPlannerParameters,
                               WalkingControllerParameters walkingControllerParameters,
                               SideDependentList<ConvexPolygon2D> footPolygons)
-
    {
-      this.footstepPlannerParameters = footstepPlannerParameters;
       this.swingPlannerParameters = swingPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
 
       if (walkingControllerParameters == null)
       {
-         this.adaptiveSwingTrajectoryCalculator = null;
-         this.collisionFreeSwingCalculator = null;
+         adaptiveSwingTrajectoryCalculator = null;
+         collisionFreeSwingCalculator = null;
       }
       else
       {
-         this.adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(swingPlannerParameters,
-                                                                                        footstepPlannerParameters,
-                                                                                        walkingControllerParameters);
-         this.collisionFreeSwingCalculator = new CollisionFreeSwingCalculator(footstepPlannerParameters,
-                                                                              swingPlannerParameters,
-                                                                              walkingControllerParameters,
-                                                                              footPolygons);
+         adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(swingPlannerParameters,
+                                                                                   footstepPlannerParameters,
+                                                                                   walkingControllerParameters);
+         collisionFreeSwingCalculator = new CollisionFreeSwingCalculator(footstepPlannerParameters,
+                                                                         swingPlannerParameters,
+                                                                         walkingControllerParameters,
+                                                                         footPolygons);
       }
    }
 

@@ -100,6 +100,8 @@ public class ControllerAPIDefinition
 
       controllerSupportedCommands = Collections.unmodifiableList(commands);
       controllerSupportedCommands.forEach(command -> inputMessageClasses.add(ROS2TopicNameTools.newMessageInstance(command).getMessageClass()));
+      // Input messages that don't have a corresponding command
+      inputMessageClasses.add(WholeBodyTrajectoryMessage.class);
 
       List<Class<? extends Settable<?>>> statusMessages = new ArrayList<>();
 
@@ -119,6 +121,7 @@ public class ControllerAPIDefinition
       statusMessages.add(RobotDesiredConfigurationData.class);
       statusMessages.add(FootstepQueueStatusMessage.class);
       statusMessages.add(QueuedFootstepStatusMessage.class);
+      statusMessages.add(WrenchTrajectoryStatusMessage.class);
 
       /** Statuses supported by multi-contact controller, not in this repo */
       statusMessages.add(MultiContactBalanceStatus.class);
@@ -140,7 +143,7 @@ public class ControllerAPIDefinition
 
    public static HashSet<Class<?>> getROS2StatusMessageTypes()
    {
-      return inputMessageClasses;
+      return outputMessageClasses;
    }
 
    public static List<Class<? extends Settable<?>>> getControllerSupportedStatusMessages()

@@ -59,9 +59,11 @@ public class ImGuiTools
    public static int WHITE = Color.WHITE.toIntBits();
    public static int GRAY = Color.GRAY.toIntBits();
    public static int RED = Color.RED.toIntBits();
+   public static int PURPLE = new Color(1.0f, 0.0f, 1.0f, 1.0f).toIntBits();
    public static int YELLOW = Color.YELLOW.toIntBits();
    public static int GREEN = Color.GREEN.toIntBits();
    public static int DARK_RED = new Color(0.7f, 0.0f, 0.0f, 1.0f).toIntBits();
+   public static int DARK_PURPLE = new Color(0.7f, 0.0f, 0.7f, 1.0f).toIntBits();
    public static int DARK_GREEN = new Color(0.0f, 0.7f, 0.0f, 1.0f).toIntBits();
    public static int DARK_ORANGE = new Color(1.0f, 0.55f, 0.0f, 1.0f).toIntBits();
    public static int LIGHT_GRAY = Color.LIGHT_GRAY.toIntBits();
@@ -378,6 +380,17 @@ public class ImGuiTools
    }
 
    /**
+    * A separator with a label in it of given font.
+    * This is in the newer versions of ImGui.
+    */
+   public static void separatorText(String text, ImFont font)
+   {
+      ImGui.pushFont(font);
+      ImGuiTools.separatorText(text);
+      ImGui.popFont();
+   }
+
+   /**
     * A separator with a label in it.
     * This is in the newer versions of ImGui.
     */
@@ -388,7 +401,7 @@ public class ImGuiTools
       int fontSize = ImGui.getFontSize();
       float itemSpacingX = ImGui.getStyle().getItemSpacingX();
       float lineThickness = fontSize * 0.2f;
-      float lineY = ImGui.getTextLineHeight() / 2.0f;
+      float lineY = ImGui.getTextLineHeight() / 2.0f + (lineThickness / 2.0f);
       float initialLineWidth = fontSize * 1.5f;
       int separatorColor = ImGui.getColorU32(ImGuiCol.Separator);
       ImGui.getWindowDrawList().addLine(cursorScreenPosX, cursorScreenPosY + lineY,

@@ -36,7 +36,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
                                                                                               goalChestToWorldTransform.getValueReadOnly());
       force = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
       torque = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
-      jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS);
+      jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS);
       solutionQuality = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
    }
 
@@ -55,7 +55,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
       goalChestToWorldTransform.toMessage(message.getGoalChestTransformToWorld());
       force.toMessage(message.getForce());
       torque.toMessage(message.getTorque());
-      for (int i = 0; i < ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS; i++)
+      for (int i = 0; i < HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS; i++)
       {
          jointAngles.toMessage(message.getJointAngles());
       }

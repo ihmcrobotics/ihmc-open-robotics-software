@@ -12,19 +12,32 @@ string parent_frame_name
 # Transform that expresses the hand pose in the parent frame
 controller_msgs/RigidBodyTransformMessage transform_to_parent
 
+# Whether the rigid body is controlled in jointspace (true) or taskspace (false)
+bool joint_space_control
+
+# Whether to use predefined joint angles
+bool use_predefined_joint_angles
+
+# Preset arm configuration
+int32 preset
+
+# Joint angles
+float64[] joint_angles
+
 # The trajectory duration
 float64 trajectory_duration
 
 # Whether maintaining the rigid body controlled in world after the action is complete
 bool hold_pose_in_world
 
-# Whether the rigid body is controlled in jointspace (true) or taskspace (false)
-bool joint_space_control
-
 float64 linear_position_weight
 
 float64 angular_position_weight
 
 float64 jointspace_weight
+
+float64 position_error_tolerance
+
+float64 orientation_error_tolerance
 
 

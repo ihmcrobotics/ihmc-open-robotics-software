@@ -2,6 +2,7 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 
 import behavior_msgs.msg.dds.*;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.door.DoorTraversalState;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.*;
 
@@ -18,7 +19,7 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getBehaviorTreeIndices().clear();
       treeStateMessage.getBasicNodes().clear();
       treeStateMessage.getActionSequences().clear();
-      treeStateMessage.getArmJointAnglesActions().clear();
+      treeStateMessage.getDoorTraversals().clear();
       treeStateMessage.getChestOrientationActions().clear();
       treeStateMessage.getFootstepPlanActions().clear();
       treeStateMessage.getHandPoseActions().clear();
@@ -37,11 +38,11 @@ public class ROS2BehaviorTreeMessageTools
          treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getActionSequences().size());
          actionSequenceState.toMessage(treeStateMessage.getActionSequences().add());
       }
-      else if (nodeState instanceof ArmJointAnglesActionState armJointAnglesActionState)
+      else if (nodeState instanceof DoorTraversalState doorTraversalState)
       {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.ARM_JOINT_ANGLES_ACTION);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getArmJointAnglesActions().size());
-         armJointAnglesActionState.toMessage(treeStateMessage.getArmJointAnglesActions().add());
+         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.DOOR_TRAVERSAL);
+         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getDoorTraversals().size());
+         doorTraversalState.toMessage(treeStateMessage.getDoorTraversals().add());
       }
       else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
       {
@@ -107,9 +108,9 @@ public class ROS2BehaviorTreeMessageTools
       {
          actionSequenceState.fromMessage(subscriptionNode.getActionSequenceStateMessage());
       }
-      else if (nodeState instanceof ArmJointAnglesActionState armJointAnglesActionState)
+      else if (nodeState instanceof DoorTraversalState doorTraversalState)
       {
-         armJointAnglesActionState.fromMessage(subscriptionNode.getArmJointAnglesActionStateMessage());
+         doorTraversalState.fromMessage(subscriptionNode.getDoorTraversalStateMessage());
       }
       else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
       {
@@ -169,12 +170,12 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setBehaviorTreeNodeStateMessage(actionSequenceStateMessage.getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(actionSequenceStateMessage.getDefinition().getDefinition());
          }
-         case BehaviorTreeStateMessage.ARM_JOINT_ANGLES_ACTION ->
+         case BehaviorTreeStateMessage.DOOR_TRAVERSAL ->
          {
-            ArmJointAnglesActionStateMessage armJointAnglesActionStateMessage = treeStateMessage.getArmJointAnglesActions().get(indexInTypesList);
-            subscriptionNode.setArmJointAnglesActionStateMessage(armJointAnglesActionStateMessage);
-            subscriptionNode.setBehaviorTreeNodeStateMessage(armJointAnglesActionStateMessage.getState().getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(armJointAnglesActionStateMessage.getDefinition().getDefinition().getDefinition());
+            DoorTraversalStateMessage doorTraversalStateMessage = treeStateMessage.getDoorTraversals().get(indexInTypesList);
+            subscriptionNode.setDoorTraversalStateMessage(doorTraversalStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(doorTraversalStateMessage.getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(doorTraversalStateMessage.getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION ->
          {

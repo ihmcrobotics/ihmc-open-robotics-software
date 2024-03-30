@@ -15,7 +15,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "723aade507f141ebe1e8041c677b4a2143271b0dc8d5fefd09c372495a75a4ab";
+   		return "ae56056286fd79953a861b7481fa18d7e8e99c68e73f15c892963f054666224d";
    }
    
    @Override
@@ -58,7 +58,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -105,7 +105,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -153,7 +153,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       cdr.write_type_7(data.getIsNextForExecution());
 
-      cdr.write_type_7(data.getIsToBeExecutedConcurrently());
+      cdr.write_type_3(data.getConcurrencyRank());
 
       cdr.write_type_7(data.getCanExecute());
 
@@ -192,7 +192,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
       	
       data.setIsNextForExecution(cdr.read_type_7());
       	
-      data.setIsToBeExecutedConcurrently(cdr.read_type_7());
+      data.setConcurrencyRank(cdr.read_type_3());
       	
       data.setCanExecute(cdr.read_type_7());
       	
@@ -227,7 +227,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       ser.write_type_4("id", data.getId());
       ser.write_type_7("is_next_for_execution", data.getIsNextForExecution());
-      ser.write_type_7("is_to_be_executed_concurrently", data.getIsToBeExecutedConcurrently());
+      ser.write_type_3("concurrency_rank", data.getConcurrencyRank());
       ser.write_type_7("can_execute", data.getCanExecute());
       ser.write_type_7("is_executing", data.getIsExecuting());
       ser.write_type_7("failed", data.getFailed());
@@ -249,7 +249,7 @@ public class ActionNodeStateMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       data.setId(ser.read_type_4("id"));
       data.setIsNextForExecution(ser.read_type_7("is_next_for_execution"));
-      data.setIsToBeExecutedConcurrently(ser.read_type_7("is_to_be_executed_concurrently"));
+      data.setConcurrencyRank(ser.read_type_3("concurrency_rank"));
       data.setCanExecute(ser.read_type_7("can_execute"));
       data.setIsExecuting(ser.read_type_7("is_executing"));
       data.setFailed(ser.read_type_7("failed"));

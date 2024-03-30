@@ -63,8 +63,8 @@ public class RDXHandQuickAccessButtons
    public void update(boolean isCalibrated, boolean needsReset)
    {
       openHandCalibrateButton.setIconTexture(isCalibrated ? openIcon : calibrateIcon);
-      openHandCalibrateButton.setOnPressed(isCalibrated ? openHand : calibrateHand);
-      openHandCalibrateButton.setTooltipText(isCalibrated ? openHandText : calibrateHandText);
+      openHandCalibrateButton.setOnPressed(needsReset ? null : isCalibrated ? openHand : calibrateHand);
+      openHandCalibrateButton.setTooltipText(needsReset ? "Unavailable" : isCalibrated ? openHandText : calibrateHandText);
       closeHandResetButton.setIconTexture(needsReset ? resetIcon : closeIcon);
       closeHandResetButton.setOnPressed(needsReset ? resetHand : closeHand);
       closeHandResetButton.setTooltipText(needsReset ? resetHandText : closeHandText);

@@ -42,6 +42,7 @@ public class ControllerStatusTracker
    private final Throttler notWalkingStateAnymoreCallbackThrottler = new Throttler();
 
    private final List<Notification> abortedListeners = new ArrayList<>();
+   private CapturabilityBasedStatus latestCapturabilityBasedStatus;
 
    public ControllerStatusTracker(LogToolsWriteOnly statusLogger, ROS2NodeInterface ros2Node, String robotName)
    {
@@ -122,8 +123,9 @@ public class ControllerStatusTracker
       footstepTracker.reset();
    }
 
-   private void acceptCapturabilityBasedStatus(CapturabilityBasedStatus message)
+   private void acceptCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)
    {
+      this.latestCapturabilityBasedStatus = capturabilityBasedStatus;
       capturabilityBasedStatusTimer.reset();
    }
 
@@ -211,5 +213,10 @@ public class ControllerStatusTracker
       {
          reset();
       }
+   }
+
+   public CapturabilityBasedStatus getLatestCapturabilityBasedStatus()
+   {
+      return latestCapturabilityBasedStatus;
    }
 }

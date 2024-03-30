@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.*;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -16,14 +15,13 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.subscribers.FilteredNotification;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersDelegate;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -35,8 +33,6 @@ import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.robotics.geometry.FramePlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.Timer;
@@ -53,13 +49,19 @@ public class RDXLocomotionManager
    private final ROS2SyncedRobotModel syncedRobot;
    private final CommunicationHelper communicationHelper;
    private final RDXLocomotionParameters locomotionParameters;
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final FootstepPlannerParametersBasics aStarFootstepPlannerParameters;
+   private final FootstepPlannerParametersBasics turnWalkTurnFootstepPlannerParameters;
+   private final FootstepPlannerParametersDelegate footstepPlannerParametersDelegate = new FootstepPlannerParametersDelegate();
    private final AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters;
    private final SwingPlannerParametersBasics swingFootPlannerParameters;
    private final Notification locomotionParametersChanged = new Notification();
    private final Notification footstepPlanningParametersChanged = new Notification();
+   private final Notification turnWalkTurnFootstepPlanningParametersChanged = new Notification();
    private final RDXStoredPropertySetTuner locomotionParametersTuner = new RDXStoredPropertySetTuner("Locomotion Parameters");
-   private final RDXStoredPropertySetTuner footstepPlanningParametersTuner = new RDXStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
+   private final RDXStoredPropertySetTuner aStartFootstepPlanningParametersTuner
+         = new RDXStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation A*)");
+   private final RDXStoredPropertySetTuner turnWalkTurnFootstepPlanningParametersTuner
+         = new RDXStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation Turn Walk Turn)");
    private final RDXStoredPropertySetTuner bodyPathPlanningParametersTuner = new RDXStoredPropertySetTuner("Body Path Planner Parameters (Teleoperation)");
    private final RDXStoredPropertySetTuner swingFootPlanningParametersTuner = new RDXStoredPropertySetTuner("Swing Foot Planning Parameters (Teleoperation)");
    private ImGuiStoredPropertySetBooleanWidget areFootstepsAdjustableCheckbox;
@@ -109,12 +111,17 @@ public class RDXLocomotionManager
 
       locomotionParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
       locomotionParameters.load();
-      footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      aStarFootstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      turnWalkTurnFootstepPlannerParameters = robotModel.getFootstepPlannerParameters("TurnWalkTurn");
+      footstepPlannerParametersDelegate.setParametersToDelegate(locomotionParameters.getPerformAStarSearch() ?
+                                                                      aStarFootstepPlannerParameters :
+                                                                      turnWalkTurnFootstepPlannerParameters);
       bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
 
       teleoperationPanel.addChild(locomotionParametersTuner);
-      teleoperationPanel.addChild(footstepPlanningParametersTuner);
+      teleoperationPanel.addChild(aStartFootstepPlanningParametersTuner);
+      teleoperationPanel.addChild(turnWalkTurnFootstepPlanningParametersTuner);
       teleoperationPanel.addChild(bodyPathPlanningParametersTuner);
       teleoperationPanel.addChild(swingFootPlanningParametersTuner);
 
@@ -122,7 +129,7 @@ public class RDXLocomotionManager
                                                  syncedRobot,
                                                  controllerStatusTracker,
                                                  locomotionParameters,
-                                                 footstepPlannerParameters,
+                                                 footstepPlannerParametersDelegate,
                                                  bodyPathPlannerParameters,
                                                  swingFootPlannerParameters);
       interactableFootstepPlan = new RDXInteractableFootstepPlan(controllerStatusTracker);
@@ -144,10 +151,12 @@ public class RDXLocomotionManager
       controllerStatusTracker.registerAbortedListener(abortedNotification);
       controllerStatusTracker.getFootstepTracker().registerFootstepQueuedMessageListener(footstepQueueNotification);
       locomotionParameters.addAnyPropertyChangedListener(locomotionParametersChanged);
-      footstepPlannerParameters.addAnyPropertyChangedListener(footstepPlanningParametersChanged);
+      aStarFootstepPlannerParameters.addAnyPropertyChangedListener(footstepPlanningParametersChanged);
+      turnWalkTurnFootstepPlannerParameters.addAnyPropertyChangedListener(turnWalkTurnFootstepPlanningParametersChanged);
 
       locomotionParametersTuner.create(locomotionParameters);
-      footstepPlanningParametersTuner.create(footstepPlannerParameters, false);
+      aStartFootstepPlanningParametersTuner.create(aStarFootstepPlannerParameters, false);
+      turnWalkTurnFootstepPlanningParametersTuner.create(turnWalkTurnFootstepPlannerParameters, false);
       bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false);
       swingFootPlanningParametersTuner.create(swingFootPlannerParameters, false);
 
@@ -162,17 +171,22 @@ public class RDXLocomotionManager
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW, syncedRobot);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
 
-      interactableFootstepPlan.create(baseUI, communicationHelper, syncedRobot, locomotionParameters, footstepPlannerParameters, swingFootPlannerParameters);
+      interactableFootstepPlan.create(baseUI,
+                                      communicationHelper,
+                                      syncedRobot,
+                                      locomotionParameters,
+                                      footstepPlannerParametersDelegate,
+                                      swingFootPlannerParameters);
       baseUI.getVRManager().getContext().addVRPickCalculator(interactableFootstepPlan::calculateVRPick);
       baseUI.getVRManager().getContext().addVRInputProcessor(interactableFootstepPlan::processVRInput);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(interactableFootstepPlan::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(interactableFootstepPlan::calculate3DViewPick);
 
-      manualFootstepPlacement.create(syncedRobot, baseUI, interactableFootstepPlan, footstepPlannerParameters);
+      manualFootstepPlacement.create(syncedRobot, baseUI, interactableFootstepPlan, footstepPlannerParametersDelegate);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(manualFootstepPlacement::processImGui3DViewInput);
       baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(manualFootstepPlacement::calculate3DViewPick);
 
-      walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, footstepPlannerParameters);
+      walkPathControlRing.create(baseUI.getPrimary3DPanel(), robotModel, syncedRobot, footstepPlannerParametersDelegate);
 
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() -> renderOverlayElements(baseUI.getPrimary3DPanel()));
    }
@@ -192,13 +206,19 @@ public class RDXLocomotionManager
          deleteAll();
       }
 
+      footstepPlannerParametersDelegate.setParametersToDelegate(locomotionParameters.getPerformAStarSearch() ?
+                                                                      aStarFootstepPlannerParameters :
+                                                                      turnWalkTurnFootstepPlannerParameters);
+
       swingFootPlannerParameters.setMinimumSwingTime(locomotionParameters.getSwingTime());
 
-      boolean parametersChanged = locomotionParametersChanged.poll() || footstepPlanningParametersChanged.poll();
+      boolean parametersChanged = locomotionParametersChanged.poll();
+      parametersChanged |= footstepPlanningParametersChanged.poll();
+      parametersChanged |= turnWalkTurnFootstepPlanningParametersChanged.poll();
 
       if (parametersChanged)
       {
-         footstepPlannerParameters.setEnableExpansionMask(locomotionParameters.getAssumeFlatGround());
+         footstepPlannerParametersDelegate.setEnableExpansionMask(locomotionParameters.getAssumeFlatGround());
       }
 
       if (ballAndArrowMidFeetPosePlacement.getPlacedNotification().poll() || (parametersChanged && ballAndArrowMidFeetPosePlacement.isPlaced()))
@@ -353,12 +373,10 @@ public class RDXLocomotionManager
          }
          else if (pauseAvailable)
          {
-            baseUI.getPrimary3DPanel().getNotificationManager().pushNotification("Commanded pause walking");
             setPauseWalkingAndPublish(true);
          }
          else if (continueAvailable)
          {
-            baseUI.getPrimary3DPanel().getNotificationManager().pushNotification("Commanded resume walking");
             setPauseWalkingAndPublish(false);
          }
       }
@@ -450,9 +468,9 @@ public class RDXLocomotionManager
       communicationHelper.publishToController(pauseWalkingMessage);
 
       if (pauseWalking)
-         LogTools.info("Commanding Pause Walking...");
+         RDXBaseUI.pushNotification("Commanding pause walking...");
       else
-         LogTools.info("Commanding Continue Walking...");
+         RDXBaseUI.pushNotification("Commanding continue walking...");
    }
 
    public RDXManualFootstepPlacement getManualFootstepPlacement()
