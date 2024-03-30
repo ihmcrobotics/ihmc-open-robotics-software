@@ -33,13 +33,11 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
    public ArrayList<MonteCarloFootstepNode> getAvailableStates(MonteCarloFootstepPlannerRequest request, MonteCarloFootstepPlannerParameters parameters)
    {
       ArrayList<MonteCarloFootstepNode> availableStates = new ArrayList<>();
-
-      //MonteCarloPlannerTools.getFootstepActionGrid(actions, robotSide == RobotSide.LEFT ? -1 : 1);
-      MonteCarloPlannerTools.getFootstepActionSet(parameters, actions, state.getZ32(), robotSide == RobotSide.LEFT ? -1 : 1);
+      MonteCarloPlannerTools.populateFootstepActionSet(parameters, actions, state.getZ32(), robotSide == RobotSide.LEFT ? -1 : 1);
 
       for (Vector3D action : actions)
       {
-         if (checkActionBoundaries(action, request.getTerrainMapData().getLocalGridSize()) && checkReachability(request, parameters, action))
+         if (checkReachability(request, parameters, action))
          {
             MonteCarloFootstepNode nodeToInsert = computeActionResult(action);
             availableStates.add(nodeToInsert);
@@ -47,14 +45,6 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
       }
 
       return availableStates;
-   }
-
-   public boolean checkActionBoundaries(Vector3DReadOnly action, int gridWidth)
-   {
-      Point3D newPosition = new Point3D();
-      newPosition.add(state, action);
-      return true;
-      //      return MonteCarloPlannerTools.isWithinGridBoundaries(new Point2D(newPosition.getX() + (double) gridWidth / 2, newPosition.getY() + (double) gridWidth / 2), gridWidth);
    }
 
    public boolean checkReachability(MonteCarloFootstepPlannerRequest request, MonteCarloFootstepPlannerParameters parameters, Vector3DReadOnly action)

@@ -197,7 +197,7 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
    public void addExpansionSpheresFromActionSet(FramePose3D footstepPose, RobotSide side, TerrainMapData terrainMapData)
    {
       ArrayList<Vector3D> actions = new ArrayList<>();
-      MonteCarloPlannerTools.getFootstepActionSet(monteCarloFootstepPlannerParameters, actions, (float) footstepPose.getYaw(), side == RobotSide.LEFT ? -1 : 1);
+      MonteCarloPlannerTools.populateFootstepActionSet(monteCarloFootstepPlannerParameters, actions, (float) footstepPose.getYaw(), side == RobotSide.LEFT ? -1 : 1);
 
       Vector3D footstepPosition = new Vector3D(footstepPose.getX(), footstepPose.getY(), 0.0f);
 

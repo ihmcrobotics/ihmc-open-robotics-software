@@ -41,11 +41,11 @@ public class ContinuousGoalGenerator
       currentVelocity.sub(currentPosition, previousPosition);
    }
 
-   public Point2D getNextLocation()
+   public Point2D getNextLocation(double margin)
    {
       goalPosition.set(currentPosition);
       goalPosition.add(currentVelocity);
-      goalPosition.add(random.nextDouble(-0.05, 0.05), random.nextDouble(-0.05, 0.05));
+      goalPosition.add(random.nextDouble(-margin, margin), random.nextDouble(-margin, margin));
 
       if (goalPosition.getX() < boundaryMinX)
       {

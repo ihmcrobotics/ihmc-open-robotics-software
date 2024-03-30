@@ -379,21 +379,9 @@ public class MonteCarloPlannerTools
       return new FramePose3D(ReferenceFrame.getWorldFrame(), position, orientation);
    }
 
-   public static void getFootstepActionGrid(ArrayList<Vector3D> actions, int side)
+   public static void populateFootstepActionSet(MonteCarloFootstepPlannerParameters parameters, ArrayList<Vector3D> actionsToPack, float yawPrevious, int stanceSide)
    {
-      actions.clear();
-      for (int i = 10; i <= 30; i += 4)
-      {
-         for (int j = 10; j <= 30; j += 4)
-         {
-            actions.add(new Vector3D(i, j * side, 0));
-         }
-      }
-   }
-
-   public static void getFootstepActionSet(MonteCarloFootstepPlannerParameters parameters, ArrayList<Vector3D> actions, float yawPrevious, int stanceSide)
-   {
-      actions.clear();
+      actionsToPack.clear();
 
       float minRadius = (float) parameters.getSearchInnerRadius() * 50.0f;
       float maxRadius = (float) parameters.getSearchOuterRadius() * 50.0f;
@@ -436,7 +424,7 @@ public class MonteCarloPlannerTools
                 && orthogonalDistanceToMidline >= minWidth && orthogonalDistanceToBaseLine <= maxLength && orthogonalDistanceToBaseLine >= minLength)
             {
                //actions.add(new Vector3D(i, j, -0.1));
-               actions.add(new Vector3D(i, j, 0));
+               actionsToPack.add(new Vector3D(i, j, 0));
                //actions.add(new Vector3D(i, j, 0.1));
             }
          }

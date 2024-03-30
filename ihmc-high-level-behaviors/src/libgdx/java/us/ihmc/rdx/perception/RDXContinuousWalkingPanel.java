@@ -24,8 +24,10 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
@@ -38,9 +40,11 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -48,7 +52,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class RDXContinuousWalkingPanel extends RDXPanel implements RenderableProvider
 {
    private final ContinuousWalkingCommandMessage commandMessage = new ContinuousWalkingCommandMessage();
-   private final StancePoseCalculator stancePoseCalculator = new StancePoseCalculator(0.5f, 0.5f, 0.1f);
    private final AtomicReference<FootstepDataListMessage> footstepDataListMessage = new AtomicReference<>(null);
    private final AtomicReference<FootstepDataListMessage> monteCarloPlanDataListMessage = new AtomicReference<>(null);
    private final SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
@@ -62,6 +65,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(true);
 
    private RDXStancePoseSelectionPanel stancePoseSelectionPanel;
+   private final StancePoseCalculator stancePoseCalculator;
    private final IHMCROS2Publisher<ContinuousWalkingCommandMessage> commandPublisher;
 
    private static final int numberOfKnotPoints = 12;
@@ -104,10 +108,22 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
 
       commandPublisher = ROS2Tools.createPublisher(ros2Helper.getROS2NodeInterface(), ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND);
 
+      SegmentDependentList<RobotSide, ArrayList<Point2D>> groundContactPoints = syncedRobot.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints();
+      SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
+         groundContactPoints.get(robotSide).forEach(defaultFoothold::addVertex);
+         defaultFoothold.update();
+         defaultContactPoints.put(robotSide, defaultFoothold);
+      }
+      stancePoseCalculator = new StancePoseCalculator(0.5f, 0.5f, 0.1f, defaultContactPoints);
+
       stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(stancePoseCalculator);
       terrainPlanningDebugger = new RDXTerrainPlanningDebugger(ros2Helper,
                                                                monteCarloPlannerParameters,
                                                                syncedRobot.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
+
 
       ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingControllerFailureStatusMessage.class,
                                                                        syncedRobot.getRobotModel().getSimpleRobotName()), message ->
@@ -120,6 +136,19 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
    {
       super("Continuous Planning");
       setRenderMethod(this::renderImGuiWidgets);
+
+      SegmentDependentList<RobotSide, ArrayList<Point2D>> groundContactPoints = robotModel.getContactPointParameters().getControllerFootGroundContactPoints();
+      SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
+         groundContactPoints.get(robotSide).forEach(defaultFoothold::addVertex);
+         defaultFoothold.update();
+         defaultContactPoints.put(robotSide, defaultFoothold);
+      }
+
+      stancePoseCalculator = new StancePoseCalculator(0.5f, 0.5f, 0.1f, defaultContactPoints);
+
       this.ros2Helper = ros2Helper;
       this.swingPlannerParameters = robotModel.getSwingPlannerParameters();
       this.swingTrajectoryParameters = robotModel.getWalkingControllerParameters().getSwingTrajectoryParameters();
@@ -169,8 +198,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
          else
          {
             FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage.get());
-            List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = SwingPlannerTools.computeTrajectories(swingPlannerParameters,
-                                                                                                                      swingTrajectoryParameters,
+            List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = SwingPlannerTools.computeTrajectories(swingTrajectoryParameters,
                                                                                                                       positionTrajectoryGenerator,
                                                                                                                       startStancePose,
                                                                                                                       plan);
