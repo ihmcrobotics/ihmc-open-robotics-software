@@ -144,4 +144,14 @@ public class RDXProjectionSphere
    {
       return modelInstance;
    }
+
+   public ImDouble getPrinciplePointX()
+   {
+      return principlePointX;
+   }
+
+   public ImDouble getPrinciplePointY()
+   {
+      return principlePointY;
+   }
 }
