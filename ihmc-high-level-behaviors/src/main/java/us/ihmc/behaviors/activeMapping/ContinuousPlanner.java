@@ -76,7 +76,7 @@ public class ContinuousPlanner
    private boolean active;
 
    float xRandomMargin = 0.2f;
-   float nominalStanceWidth = 0.11f;
+   float nominalStanceWidth = 0.22f;
 
    public ContinuousPlanner(DRCRobotModel robotModel,
                             HumanoidReferenceFrames humanoidReferenceFrames,

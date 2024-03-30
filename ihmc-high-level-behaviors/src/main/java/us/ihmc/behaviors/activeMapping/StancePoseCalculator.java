@@ -8,7 +8,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -18,6 +17,10 @@ import java.util.ArrayList;
 
 public class StancePoseCalculator
 {
+   public static final float CONTACT_COST_WEIGHT = 10.0f;
+   public static final float MAX_CONTACT_VALUE = 255.0f;
+   public static final float NOMINAL_STANCE_DISTANCE = 0.5f;
+
    private int windowSize = 5;
    private double resolution = 0.08f;
    private double maxWidth = 0.5f;
@@ -94,11 +97,11 @@ public class StancePoseCalculator
             double heightLeft = terrainMap.getHeightInWorld(leftPose.getPosition().getX32(), leftPose.getPosition().getY32());
             double heightRight = terrainMap.getHeightInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32());
 
-            double contactCostLeft = Math.abs(255.0f - terrainMap.getContactScoreInWorld(leftPose.getPosition().getX32(), leftPose.getPosition().getY32()));
-            double contactCostRight = Math.abs(255.0f - terrainMap.getContactScoreInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32()));
+            double contactCostLeft = Math.abs(MAX_CONTACT_VALUE - terrainMap.getContactScoreInWorld(leftPose.getPosition().getX32(), leftPose.getPosition().getY32()));
+            double contactCostRight = Math.abs(MAX_CONTACT_VALUE - terrainMap.getContactScoreInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32()));
 
-            cost = Math.abs(0.5f - leftPose.getPositionDistance(rightPose));
-            cost += 10.0f * (contactCostLeft + contactCostRight);
+            cost = Math.abs(NOMINAL_STANCE_DISTANCE - leftPose.getPositionDistance(rightPose));
+            cost += CONTACT_COST_WEIGHT * (contactCostLeft + contactCostRight);
 
             leftPose.setZ(heightLeft);
             rightPose.setZ(heightRight);
@@ -138,7 +141,6 @@ public class StancePoseCalculator
 
    private void snapToHeightMap(HeightMapData heightMapData, FramePose3D poseToSnap, ConvexPolygon2D footPolygon)
    {
-      //ConvexPolygon2D footPolygon = PlannerTools.createFootPolygon(0.25, 0.12, 0.08);
       footPolygon.applyTransform(poseToSnap);
 
       RigidBodyTransform snapTransform = heightMapPolygonSnapper.snapPolygonToHeightMap(footPolygon, heightMapData, 0.05, Math.toRadians(45));
