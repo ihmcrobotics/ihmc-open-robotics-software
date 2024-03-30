@@ -42,7 +42,6 @@ public class RDXProjectionSphere
    private final ImBoolean renderSphereIfNoTexture = new ImBoolean(true);
    private Model model;
    private final Vector3D vertexRay = new Vector3D();
-   private Mesh mesh;
    private Texture latestTexture;
 
    public void create()
@@ -101,7 +100,7 @@ public class RDXProjectionSphere
          texturePoint.setY(imageY + 0.0);
       }
 
-      mesh = RDXMeshDataInterpreter.interpretMeshData(sphereMeshDataHolder);
+      Mesh mesh = RDXMeshDataInterpreter.interpretMeshData(sphereMeshDataHolder);
 
       ModelBuilder modelBuilder = new ModelBuilder();
       modelBuilder.begin();
@@ -143,6 +142,21 @@ public class RDXProjectionSphere
    public ModelInstance getModelInstance()
    {
       return modelInstance;
+   }
+
+   public ImDouble getSphereRadius()
+   {
+      return sphereRadius;
+   }
+
+   public ImDouble getFocalLengthX()
+   {
+      return focalLengthX;
+   }
+
+   public ImDouble getFocalLengthY()
+   {
+      return focalLengthY;
    }
 
    public ImDouble getPrinciplePointX()

@@ -16,8 +16,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 class ValveIndexCameraReaderThread extends Thread
 {
-   private final ConcurrentLinkedQueue<Mat> leftRects = new ConcurrentLinkedQueue<>();
-   private final ConcurrentLinkedQueue<Mat> rightRects = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<Mat> leftEyeImageQueue = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<Mat> rightEyeImageQueue = new ConcurrentLinkedQueue<>();
    private int width;
    private int height;
    private volatile boolean running = true;
@@ -63,14 +63,14 @@ class ValveIndexCameraReaderThread extends Thread
             Mat rgbLeftCameraRect = new Mat();
             opencv_imgproc.cvtColor(bgrLeftCameraRect, rgbLeftCameraRect, opencv_imgproc.COLOR_BGR2RGBA);
             bgrLeftCameraRect.close();
-            leftRects.add(rgbLeftCameraRect);
+            leftEyeImageQueue.add(rgbLeftCameraRect);
 
             // Right
             Mat bgrRightCameraRect = bgrImage.apply(new Rect(width / 2, 0, width - width / 2, height));
             Mat rgbRightCameraRect = new Mat();
             opencv_imgproc.cvtColor(bgrRightCameraRect, rgbRightCameraRect, opencv_imgproc.COLOR_BGR2RGBA);
             bgrRightCameraRect.close();
-            rightRects.add(rgbRightCameraRect);
+            rightEyeImageQueue.add(rgbRightCameraRect);
          }
 
          bgrImage.close();
@@ -82,12 +82,12 @@ class ValveIndexCameraReaderThread extends Thread
    }
 
    @Nullable
-   public Queue<Mat> getRects(RobotSide side)
+   public Queue<Mat> getEyeImageQueue(RobotSide side)
    {
       if (side == RobotSide.LEFT)
-         return leftRects;
+         return leftEyeImageQueue;
       else
-         return rightRects;
+         return rightEyeImageQueue;
    }
 
    public int getWidth()
