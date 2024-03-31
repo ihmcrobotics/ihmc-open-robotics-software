@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
@@ -43,6 +44,7 @@ public class RDXProjectionSphere
    private Model model;
    private final Vector3D vertexRay = new Vector3D();
    private Texture latestTexture;
+   private final Matrix4 previousTransform = new Matrix4();
 
    public void create()
    {
@@ -78,6 +80,9 @@ public class RDXProjectionSphere
    /** Only needs to be done when parameters change, not the texture.*/
    public void rebuildUVSphereMesh()
    {
+      if (modelInstance != null)
+         previousTransform.set(modelInstance.transform);
+
       MeshDataHolder sphereMeshDataHolder = MeshDataGeneratorMissing.InvertedSphere(sphereRadius.get(),
                                                                                     sphereLatitudeVertices.get(),
                                                                                     sphereLongitudeVertices.get());
@@ -117,6 +122,8 @@ public class RDXProjectionSphere
       model = modelBuilder.end();
 
       modelInstance = new ModelInstance(model);
+
+      modelInstance.transform.set(previousTransform); // Prevent glitching
    }
 
    public void updateTexture(Texture texture)
