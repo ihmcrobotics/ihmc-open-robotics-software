@@ -528,7 +528,8 @@ public class HumanoidPerceptionModule
 
    public void setOrthographicRegionsEnabled(boolean orthographicRegionsEnabled)
    {
-      this.orthographicRegionsExtractor.setEnabled(orthographicRegionsEnabled);
+      if (orthographicRegionsExtractor != null)
+         this.orthographicRegionsExtractor.setEnabled(orthographicRegionsEnabled);
    }
 
    public PerceptionStatistics getPerceptionStatistics()

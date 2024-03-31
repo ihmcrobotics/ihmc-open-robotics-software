@@ -195,45 +195,48 @@ float get_spatial_filtered_height(int xIndex, int yIndex, float height, read_wri
 
 bool isTraversible(read_write image2d_t contactMap, read_write image2d_t heightMap,int2 aIndex, int2 bIndex, global float *params)
 {
-   int feasibleEdges = 0;
-   for (int ax = 0; ax < 12; ax+=2)
-   {
-       for (int ay = 0; ay < 12; ay+=2)
-       {
-           for (int bx = 0; bx < 12; bx+=2)
-           {
-               for (int by = 0; by < 12; by+=2)
-               {
-                   int2 aOffset = (int2)(ax, ay);
-                   int2 bOffset = (int2)(bx, by);
+   float c_a, c_b, h_a, h_b, h_diff;
+   int2 aOffset, bOffset, aPos, bPos;
 
-                   int2 aPos = aIndex * 12 + aOffset;
-                   int2 bPos = bIndex * 12 + bOffset;
+   int feasibleEdges = 0;
+   //for (int ax = 0; ax < 12; ax+=2)
+   {
+       //for (int ay = 0; ay < 12; ay+=2)
+       {
+           aOffset = (int2)(0, 0);
+           aPos = aIndex * 12 + aOffset;
+
+//           for (int bx = 0; bx < 12; bx+=2)
+           {
+//               for (int by = 0; by < 12; by+=2)
+               {
+                   bOffset = (int2)(0, 0);
+                   bPos = bIndex * 12 + bOffset;
 
                    if (aPos[0] > 0 && aPos[0] < params[GLOBAL_CELLS_PER_AXIS] && aPos[1] > 0 && aPos[1] < params[GLOBAL_CELLS_PER_AXIS]
                        && bPos[0] > 0 && bPos[0] < params[GLOBAL_CELLS_PER_AXIS] && bPos[1] > 0 && bPos[1] < params[GLOBAL_CELLS_PER_AXIS])
                    {
-                       float c_a = read_imageui(contactMap, aPos).x;
-                       float h_a = read_imageui(heightMap, aPos).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
-
-                       float c_b = read_imageui(contactMap, bPos).x;
-                       float h_b = read_imageui(heightMap, bPos).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
-
-                       float h_diff = fabs(h_a - h_b);
+                       c_a = read_imageui(contactMap, aPos).x;
+                       h_a = read_imageui(heightMap, aPos).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+//
+                       c_b = read_imageui(contactMap, bPos).x;
+                       h_b = read_imageui(heightMap, bPos).x / params[HEIGHT_SCALING_FACTOR] - params[HEIGHT_OFFSET];
+//
+                       h_diff = fabs(h_a - h_b);
 
                        if (h_diff < 0.35f && c_a > 0 && c_b > 0)
                        {
                           feasibleEdges += 1;
                        }
 
-                       //printf("%d, %d, %d, %d\n", aPos[0], aPos[1], bPos[0], bPos[1]);
+//                       printf("%d, %d, %d, %d -> (%.2f, %.2f) = %d\n", aPos[0], aPos[1], bPos[0], bPos[1], h_a, h_b, feasibleEdges);
                     }
                }
            }
        }
    }
 
-   return (feasibleEdges > 1000);
+   return (feasibleEdges > 0);
 }
 
 void kernel heightMapUpdateKernel(read_write image2d_t in,
@@ -288,15 +291,17 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
       projectedPoint = perspective_projection(cellCenterInSensorZfwd, params);
    }
 
-   for (int pitch_count_offset = - ((int) params[SEARCH_WINDOW_HEIGHT] / 2); pitch_count_offset < ((int) params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitch_count_offset+=skip)
+   float depth;
+   int pitch_count, yaw_count, pitch_count_offset, yaw_count_offset;
+   for (pitch_count_offset = - ((int) params[SEARCH_WINDOW_HEIGHT] / 2); pitch_count_offset < ((int) params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitch_count_offset+=skip)
    {
-      int pitch_count = projectedPoint.y + pitch_count_offset;
-      for (int yaw_count_offset = - ((int) params[SEARCH_WINDOW_WIDTH] / 2); yaw_count_offset <  ((int) params[SEARCH_WINDOW_WIDTH] / 2) + 1; yaw_count_offset+=skip)
+      pitch_count = projectedPoint.y + pitch_count_offset;
+      for (yaw_count_offset = - ((int) params[SEARCH_WINDOW_WIDTH] / 2); yaw_count_offset <  ((int) params[SEARCH_WINDOW_WIDTH] / 2) + 1; yaw_count_offset+=skip)
       {
-         int yaw_count = projectedPoint.x + yaw_count_offset;
+         yaw_count = projectedPoint.x + yaw_count_offset;
          if ((yaw_count >= 0) && (yaw_count < (int)params[DEPTH_INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < (int)params[DEPTH_INPUT_HEIGHT]))
          {
-            float depth = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float) 1000;
+            depth = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float) 1000;
             float3 queryPointInSensor;
             if (params[MODE] == 0) // Spherical
             {
@@ -568,20 +573,21 @@ void kernel contactMapKernel(read_write image2d_t terrainCost,
    // Set the contact map at the current cell to be the sum of the 16x16 neighborhood of the terrain cost map
    uint score = 0;
    uint closestDistance = 1000000;
+   uint steppability, distance;
    for (int i = -params[CONTACT_WINDOW_SIZE]; i < params[CONTACT_WINDOW_SIZE]; i++)
    {
       for (int j = -params[CONTACT_WINDOW_SIZE]; j < params[CONTACT_WINDOW_SIZE]; j++)
       {
          if (xIndex + i >= 0 && xIndex + i < params[GLOBAL_CELLS_PER_AXIS] && yIndex + j >= 0 && yIndex + j < params[GLOBAL_CELLS_PER_AXIS])
          {
-            uint steppability = read_imageui(terrainCost, (int2) (yIndex + j, xIndex + i)).x;
+            steppability = read_imageui(terrainCost, (int2) (yIndex + j, xIndex + i)).x;
             if (steppability <= params[STEPPING_CONTACT_THRESHOLD])
             {
                // Chebyshev distance
 //               uint distance = max(abs(i), abs(j));
 
                // Euclidean distance
-               uint distance = sqrt((float)(i * i + j * j));
+               distance = sqrt((float)(i * i + j * j));
 
                if (distance < closestDistance && distance > 3.0f)
                {
@@ -605,27 +611,26 @@ void kernel traversabilityGraphKernel(read_write image2d_t contactMap,
                            read_write image2d_t traversabilityGraph,
                            global float *params)
 {
+    int2 aIndex, bIndex;
+
    int cIndex = get_global_id(0);
    int rIndex = get_global_id(1);
 
-   int m = 1;
-
-   //    if(cIndex == 0 && rIndex == 0) printf("MergeKernel:(%d)\n", params[MERGE_RANGE]);
-
-   if (rIndex >= m && rIndex < (int) params[GRAPH_CELLS_PER_AXIS] - m && cIndex >= m && cIndex < (int) params[GRAPH_CELLS_PER_AXIS] - m)
+   if (rIndex > 0 && rIndex < (int) params[GRAPH_CELLS_PER_AXIS] - 1 && cIndex > 0 && cIndex < (int) params[GRAPH_CELLS_PER_AXIS] - 1)
    {
-      int2 aIndex = (int2) (cIndex, rIndex);
+      aIndex = (int2) (cIndex, rIndex);
 
-      uint boundaryConnectionsEncodedAsOnes = (uint) (0);
+      uint boundaryConnectionsEncodedAsOnes = (uint) 0;
 
       int count = 0;
-      for (int i = -m; i < m + 1; i += m)
+      int i, j;
+      for (i = -1; i < 1 + 1; i += 1)
       {
-         for (int j = -m; j < m + 1; j += m)
+         for (j = -1; j < 1 + 1; j += 1)
          {
             if (!(j == 0 && i == 0))
             {
-               int2 bIndex = (int2) (cIndex + i, rIndex + j);
+               bIndex = (int2) (cIndex + i, rIndex + j);
 
                if (isTraversible(contactMap, heightMap, aIndex, bIndex, params))
                {
@@ -638,7 +643,8 @@ void kernel traversabilityGraphKernel(read_write image2d_t contactMap,
 
       write_imageui(traversabilityGraph, (int2) (cIndex, rIndex), (uint4) (boundaryConnectionsEncodedAsOnes, 0, 0, 0));
 
-      //printf("MergeKernel[%d,%d] -> (%d)\n", rIndex, cIndex, boundaryConnectionsEncodedAsOnes);
+//      printf("MergeKernel[%d,%d] -> (%d)\n", rIndex, cIndex, boundaryConnectionsEncodedAsOnes);
+
    }
 }
 

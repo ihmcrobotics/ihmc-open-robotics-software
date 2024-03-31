@@ -3,6 +3,9 @@ import numpy as np
 import re
 import os
 
+import matplotlib.pyplot as plt
+plt.rcParams.update({'font.size': 12})
+
 # TerrainMapStatistics:
 #  [
     # TotalTime:0.125, 
@@ -12,7 +15,7 @@ import os
     # PropagationTime:11.375, 
 # ]
 
-def plot_log(filepath):
+def get_data(filepath):
 
     # Initialize lists to store extracted times 
     total_times = []
@@ -100,6 +103,10 @@ def plot_log(filepath):
         'SearchTime': SearchTime
     }
 
+    return data_dict, NodesPerLayer
+
+def plot_times(data_dict):
+
     # Print the data dictionary
     # for key in data_dict:
     #     print(key, data_dict[key])
@@ -152,6 +159,37 @@ def plot_log(filepath):
     # Show the plot
     plt.show()
 
+def plot_evolutions(node_data):
+
+    print("Shape: ", node_data.shape)
+
+
+    # Create a figure with 3 rows and 4 columns of subplots
+    fig = plt.figure(figsize=(12, 8))
+
+    i = 0
+    # plot 16 random rows of the node data passed as matrix with horizontal axis as iterations starting from zero on log scale
+    while i < 64:
+        # count number of zeroes in the indexth row
+        index = np.random.randint(0, node_data.shape[0])
+        zs = np.count_nonzero(node_data[index,:])
+        if zs > 3:
+            i += 1
+            print("Layer: ", index, node_data[index,:])
+            plt.plot(np.log10(node_data[index,:]), label='Layer {}'.format(i))
+
+
+    # Add a title to the entire figure
+    plt.title('Monte-Carlo Planner Node Evolution')
+    plt.xlabel('Tree Depth')
+    plt.ylabel('Nodes (Log(10)-Scale)')
+    # plt.legend()
+    plt.grid(True)
+    
+
+    # Show the plot
+    plt.show()
+
 if __name__ == "__main__":
     home = os.path.expanduser('~')
     path = home + '/Documents/Publications/PhD_Dissertation/Data/mcfp-logs/'
@@ -163,7 +201,12 @@ if __name__ == "__main__":
         exit()
 
     filepath = local_path
-    plot_log(filepath)
+    data, node_data = get_data(filepath)
+
+    # plot_times(data)
+
+    plot_evolutions(node_data)
+
 
 
     # for i, filename in enumerate(files):

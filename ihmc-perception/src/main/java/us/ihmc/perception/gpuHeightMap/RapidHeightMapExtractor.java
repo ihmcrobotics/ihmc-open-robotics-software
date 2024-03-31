@@ -459,7 +459,7 @@ public class RapidHeightMapExtractor
       openCLManager.execute2D(contactMapKernel, globalCellsPerAxis, globalCellsPerAxis);
       openCLManager.execute2D(traversabilityGraphKernel, graphCellsPerAxis, graphCellsPerAxis);
 
-      openCLManager.join();
+//      openCLManager.join();
    }
 
    public void readContactMapImage()
@@ -782,7 +782,10 @@ public class RapidHeightMapExtractor
       contactMapImage.getOpenCLImageObject().deallocate();
       traversabilityGraphImage.getOpenCLImageObject().deallocate();
       croppedHeightMapImage.getOpenCLImageObject().deallocate();
-      sensorCroppedTerrainCostImage.getOpenCLImageObject().deallocate();
+
+      if (sensorCroppedTerrainCostImage != null)
+         sensorCroppedTerrainCostImage.getOpenCLImageObject().deallocate();
+
       croppedContactMapImage.getOpenCLImageObject().deallocate();
       parametersBuffer.getOpenCLBufferObject().deallocate();
       groundToSensorTransformBuffer.getOpenCLBufferObject().deallocate();
@@ -864,7 +867,7 @@ public class RapidHeightMapExtractor
       return currentGroundToWorldTransform;
    }
 
-   public boolean getComputeSnap()
+   public boolean getComputeSteppability()
    {
       return computeSteppability;
    }
