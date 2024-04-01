@@ -343,7 +343,7 @@ public class MonteCarloPlannerTools
    {
       List<MonteCarloTreeNode> intermediatePath = new ArrayList<>();
       List<MonteCarloTreeNode> optimalPath = new ArrayList<>();
-      MonteCarloPlannerTools.getOptimalPathByDepth(root, intermediatePath, optimalPath);
+      MonteCarloPlannerTools.getOptimalPath(root, optimalPath);
       LogTools.info("Optimal Path Size: {}", optimalPath.size());
 
       HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
