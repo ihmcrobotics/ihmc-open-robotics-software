@@ -12,6 +12,7 @@ public class TriggerKickCommand implements Command<TriggerKickCommand, TriggerKi
    private double kickHeight;
    private double kickImpulse;
    private double kickTargetDistance;
+   private double prekickWeightDistribution;
 
    @Override
    public void clear()
@@ -22,17 +23,19 @@ public class TriggerKickCommand implements Command<TriggerKickCommand, TriggerKi
       kickHeight = 0;
       kickImpulse = 0;
       kickTargetDistance = 0;
+      prekickWeightDistribution = 0.5;
    }
 
    @Override
    public void set(TriggerKickCommand other)
    {
       sequenceId = other.sequenceId;
-      triggerKickRequested = other.isTriggerKickRequested();
+      triggerKickRequested = other.triggerKickRequested;
       robotSide = other.robotSide;
       kickHeight = other.kickHeight;
       kickImpulse = other.kickImpulse;
       kickTargetDistance = other.kickTargetDistance;
+      prekickWeightDistribution = other.prekickWeightDistribution;
    }
 
    @Override
@@ -44,6 +47,7 @@ public class TriggerKickCommand implements Command<TriggerKickCommand, TriggerKi
       kickHeight = message.getKickHeight();
       kickImpulse = message.getKickImpulse();
       kickTargetDistance = message.getKickTargetDistance();
+      prekickWeightDistribution = message.getPrekickWeightDistribution();
    }
 
    public RobotSide getRobotSide()
@@ -91,6 +95,16 @@ public class TriggerKickCommand implements Command<TriggerKickCommand, TriggerKi
       this.kickTargetDistance = kickTargetDistance;
    }
 
+   public double getPrekickWeightDistribution()
+   {
+      return prekickWeightDistribution;
+   }
+
+   public void setPrekickWeightDistribution(double prekickWeightDistribution)
+   {
+      this.prekickWeightDistribution = prekickWeightDistribution;
+   }
+
    @Override
    public Class<TriggerKickMessage> getMessageClass()
    {
@@ -106,6 +120,11 @@ public class TriggerKickCommand implements Command<TriggerKickCommand, TriggerKi
       }
 
       if (kickHeight < 0 || kickImpulse < 0 || kickTargetDistance < 0)
+      {
+         return false;
+      }
+
+      if (prekickWeightDistribution < 0 || prekickWeightDistribution > 1)
       {
          return false;
       }

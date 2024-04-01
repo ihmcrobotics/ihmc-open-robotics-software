@@ -45,6 +45,10 @@ module controller_msgs
          * A boolean for tracking whether a kick has been requested.
          */
         boolean trigger_kick_request;
+        /**
+         * Weight distribution before the kick. 1.0 means all weight on the kicking foot. Default is 0.5.
+         */
+        double prekick_weight_distribution;
       };
     };
   };

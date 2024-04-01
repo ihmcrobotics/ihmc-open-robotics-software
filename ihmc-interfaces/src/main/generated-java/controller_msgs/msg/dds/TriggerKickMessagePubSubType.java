@@ -15,7 +15,7 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e00cbb5d1447b4eb4b44f6bb2d83de46bdbe6a05041cfc0cec676000064cf64f";
+   		return "60d1adda16bc13fae6bca562cfca24a13f70658c3d5a25cb2f68dd8ba55645d2";
    }
    
    @Override
@@ -64,6 +64,8 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -95,6 +97,9 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -113,6 +118,8 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
       cdr.write_type_7(data.getTriggerKickRequest());
 
+      cdr.write_type_6(data.getPrekickWeightDistribution());
+
    }
 
    public static void read(controller_msgs.msg.dds.TriggerKickMessage data, us.ihmc.idl.CDR cdr)
@@ -129,6 +136,8 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       	
       data.setTriggerKickRequest(cdr.read_type_7());
       	
+      data.setPrekickWeightDistribution(cdr.read_type_6());
+      	
 
    }
 
@@ -141,6 +150,7 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       ser.write_type_6("kick_impulse", data.getKickImpulse());
       ser.write_type_6("kick_target_distance", data.getKickTargetDistance());
       ser.write_type_7("trigger_kick_request", data.getTriggerKickRequest());
+      ser.write_type_6("prekick_weight_distribution", data.getPrekickWeightDistribution());
    }
 
    @Override
@@ -152,6 +162,7 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       data.setKickImpulse(ser.read_type_6("kick_impulse"));
       data.setKickTargetDistance(ser.read_type_6("kick_target_distance"));
       data.setTriggerKickRequest(ser.read_type_7("trigger_kick_request"));
+      data.setPrekickWeightDistribution(ser.read_type_6("prekick_weight_distribution"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.TriggerKickMessage src, controller_msgs.msg.dds.TriggerKickMessage dest)

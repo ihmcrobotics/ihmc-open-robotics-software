@@ -21,3 +21,6 @@ float64 kick_target_distance
 
 # A boolean for tracking whether a kick has been requested.
 bool trigger_kick_request
+
+# Weight distribution before the kick. 1.0 means all weight on the kicking foot. Default is 0.5.
+float64 prekick_weight_distribution
