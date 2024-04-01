@@ -1,6 +1,5 @@
 package us.ihmc.perception.gpuHeightMap;
 
-import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -59,7 +58,7 @@ public class TerrainMapDataTest
       initialize();
 
       Mat heightMap = heightMapExtractor.getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
-      PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(0.0f, 0.0f), new Point2D(1.0f, 1.0f), 1.5f, false);
+      PerceptionDataTools.fillWithStep(heightMap, new Point2D(0.0f, 0.0f), new Point2D(1.0f, 1.0f), 1.5f, false);
       heightMapExtractor.getInternalGlobalHeightMapImage().writeOpenCLImage(openCLManager);
       heightMapExtractor.populateParameterBuffers(RapidHeightMapExtractor.getHeightMapParameters(), new CameraIntrinsics(), new Point3D());
       heightMapExtractor.computeContactMap();

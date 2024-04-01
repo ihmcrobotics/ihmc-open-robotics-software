@@ -10,7 +10,7 @@ public class HeightMapTerrainGeneratorTools
    {
       for (int i = 0; i < numberOfBlocks; i++)
       {
-         PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(-0.5 + i * 0.5, 0), new Point2D(width, length), stepHeight * (i + 1), false);
+         PerceptionDataTools.fillWithStep(heightMap, new Point2D(-0.5 + i * 0.5, 0), new Point2D(width, length), stepHeight * (i + 1), false);
       }
    }
 
@@ -18,7 +18,7 @@ public class HeightMapTerrainGeneratorTools
    {
       for (int i = 0; i < numberOfBlocks; i++)
       {
-         PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(-0.5 + i * 0.5, 0), new Point2D(width, length), stepHeight * (numberOfBlocks - i), false);
+         PerceptionDataTools.fillWithStep(heightMap, new Point2D(-0.5 + i * 0.5, 0), new Point2D(width, length), stepHeight * (numberOfBlocks - i), false);
       }
    }
 
@@ -26,11 +26,11 @@ public class HeightMapTerrainGeneratorTools
    {
       for (int i = 0; i < numberOfBlocks; i++)
       {
-         PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(-0.5 + i * 0.5, 0), new Point2D(width, length), stepHeight * (i + 1), false);
+         PerceptionDataTools.fillWithStep(heightMap, new Point2D(-0.5 + i * 0.5, 0), new Point2D(width, length), stepHeight * (i + 1), false);
       }
       for (int i = 0; i < numberOfBlocks; i++)
       {
-         PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(-0.5 + (i + numberOfBlocks) * 0.5, 0), new Point2D(width, length), stepHeight * (numberOfBlocks - i), false);
+         PerceptionDataTools.fillWithStep(heightMap, new Point2D(-0.5 + (i + numberOfBlocks) * 0.5, 0), new Point2D(width, length), stepHeight * (numberOfBlocks - i), false);
       }
    }
 
@@ -38,7 +38,7 @@ public class HeightMapTerrainGeneratorTools
    {
       for (int i = 0; i < numberOfBlocks; i++)
       {
-         PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(-0.5 + i * 0.5, Math.pow(-1, i % 2) * spacing), new Point2D(width, length), stepHeight, false);
+         PerceptionDataTools.fillWithStep(heightMap, new Point2D(-0.5 + i * 0.5, Math.pow(-1, i % 2) * spacing), new Point2D(width, length), stepHeight, false);
       }
    }
 }

@@ -171,7 +171,7 @@ public class TerrainPlanningDebugger
       if (!request.getDebug())
          return;
 
-      Scalar color = new Scalar(Math.random() * 255, Math.random() * 255, Math.random() * 255, 255);
+      Scalar color = new Scalar(Math.random() * 255, Math.random() * 255, Math.random() * 255, 100);
       // plot circles at feet center and plot line joining consecutive foot centers using random color
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {

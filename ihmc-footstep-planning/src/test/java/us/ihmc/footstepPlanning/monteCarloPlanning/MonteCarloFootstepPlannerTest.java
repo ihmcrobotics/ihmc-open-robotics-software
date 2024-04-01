@@ -129,7 +129,7 @@ public class MonteCarloFootstepPlannerTest
       initialize();
 
       Mat heightMap = heightMapExtractor.getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
-      PerceptionDataTools.fillStepInHeightMap(heightMap, new Point2D(0.0f, 0.0f), new Point2D(1.0f, 1.0f), 1.5f, false);
+      PerceptionDataTools.fillWithStep(heightMap, new Point2D(0.0f, 0.0f), new Point2D(1.0f, 1.0f), 1.5f, false);
       TerrainMapData terrainMapData = generateTerrainMapData();
 
       MonteCarloFootstepPlannerRequest plannerRequest = createPlannerRequest(terrainMapData,

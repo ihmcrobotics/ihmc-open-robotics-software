@@ -270,7 +270,7 @@ public class RDXMonteCarloFootstepPlannerDemo
    public TerrainMapData generateTerrainMapData()
    {
       Mat heightMap = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
-      PerceptionDataTools.fillWithStairs(heightMap);
+      PerceptionDataTools.fillWithSteppingGridRandomHeight(heightMap);
 
       humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().writeOpenCLImage(openCLManager);
       humanoidPerception.getRapidHeightMapExtractor().populateParameterBuffers(RapidHeightMapExtractor.getHeightMapParameters(), new CameraIntrinsics(), new Point3D());
