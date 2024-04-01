@@ -101,6 +101,7 @@ public class PerceptionAndAutonomyProcess
 
    private final ROS2Helper ros2Helper;
    private final Supplier<ReferenceFrame> ousterFrameSupplier;
+   private final Supplier<ReferenceFrame> realsenseFrameSupplier;
 
    private ROS2DemandGraphNode zedPointCloudDemandNode;
    private ROS2DemandGraphNode zedColorDemandNode;
@@ -182,6 +183,7 @@ public class PerceptionAndAutonomyProcess
    {
       this.ros2Helper = ros2Helper;
       this.ousterFrameSupplier = ousterFrameSupplier;
+      this.realsenseFrameSupplier = realsenseFrameSupplier;
 
       initializeDependencyGraph(ros2Helper);
 
@@ -486,34 +488,42 @@ public class PerceptionAndAutonomyProcess
 
    public void updatePlanarRegions()
    {
-      if (ousterDepthImage != null && ousterDepthImage.isAvailable() && planarRegionsDemandNode.isDemanded())
+      if (realsenseDepthImage != null && realsenseDepthImage.isAvailable() && planarRegionsDemandNode.isDemanded())
       {
-         RawImage latestOusterDepthRawImage = ousterDepthImage.get();
+         RawImage latestRealsenseDepthImage = realsenseDepthImage.get();
 
          if (planarRegionsExtractor == null)
          {
-            int imageHeight = latestOusterDepthRawImage.getImageHeight();
-            int imageWidth = latestOusterDepthRawImage.getImageWidth();
+            int imageHeight = latestRealsenseDepthImage.getImageHeight();
+            int imageWidth = latestRealsenseDepthImage.getImageWidth();
+            double fx = latestRealsenseDepthImage.getFocalLengthX();
+            double fy = latestRealsenseDepthImage.getFocalLengthY();
+            double cx = latestRealsenseDepthImage.getPrincipalPointX();
+            double cy = latestRealsenseDepthImage.getPrincipalPointY();
             planarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
-                                                                     openCLManager.loadProgram("RapidRegionsExtractor"),
                                                                      imageHeight,
-                                                                     imageWidth);
+                                                                     imageWidth,
+                                                                     fx,
+                                                                     fy,
+                                                                     cx,
+                                                                     cy);
+
             planarRegionsExtractor.getDebugger().setEnabled(false);
          }
 
          FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
 
          // TODO: Get rid of BytedecoImage, RapidPlanarRegionsExtractor requires it
-         BytedecoImage bytedecoImage = new BytedecoImage(latestOusterDepthRawImage.getCpuImageMat());
+         BytedecoImage bytedecoImage = new BytedecoImage(latestRealsenseDepthImage.getCpuImageMat());
          bytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-         planarRegionsExtractor.update(bytedecoImage, ousterFrameSupplier.get(), framePlanarRegionsList);
+         planarRegionsExtractor.update(bytedecoImage, realsenseFrameSupplier.get(), framePlanarRegionsList);
          planarRegionsExtractor.setProcessing(false);
          bytedecoImage.destroy(openCLManager);
 
-         PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE, ros2Helper);
+         PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
 
          PlanarRegionsList planarRegionsInWorldFrame = framePlanarRegionsList.getPlanarRegionsList().copy();
-         planarRegionsInWorldFrame.applyTransform(ousterFrameSupplier.get().getTransformToWorldFrame());
+         planarRegionsInWorldFrame.applyTransform(realsenseFrameSupplier.get().getTransformToWorldFrame());
 
          for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
          {
@@ -523,7 +533,7 @@ public class PerceptionAndAutonomyProcess
             }
          }
 
-         latestOusterDepthRawImage.release();
+         latestRealsenseDepthImage.release();
       }
    }
 
