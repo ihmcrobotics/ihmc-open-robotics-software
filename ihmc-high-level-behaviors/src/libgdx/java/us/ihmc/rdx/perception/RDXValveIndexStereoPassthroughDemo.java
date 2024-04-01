@@ -31,6 +31,10 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.Queue;
 import java.util.Set;
 
+/**
+ * A self contained demo that allows experimentation with doing stereo passthrough with
+ * the Valve Index HMD cameras.
+ */
 public class RDXValveIndexStereoPassthroughDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
@@ -116,12 +120,6 @@ public class RDXValveIndexStereoPassthroughDemo
                   hadNewFrame = true;
                }
             }
-
-            // Sync (or mirror settings)
-            double principlePointX = projectionSpheres.get(RobotSide.LEFT).getPrinciplePointX().get();
-            double principlePointY = projectionSpheres.get(RobotSide.LEFT).getPrinciplePointY().get();
-            projectionSpheres.get(RobotSide.RIGHT).getPrinciplePointX().set(-principlePointX);
-            projectionSpheres.get(RobotSide.RIGHT).getPrinciplePointY().set(principlePointY);
 
             if (baseUI.getVRManager().isVRReady() && hadNewFrame)
             {
