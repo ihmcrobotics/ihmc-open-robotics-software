@@ -457,7 +457,7 @@ public class RapidHeightMapExtractor
       // Execute kernels with length and width parameters
       openCLManager.execute2D(terrainCostKernel, globalCellsPerAxis, globalCellsPerAxis);
       openCLManager.execute2D(contactMapKernel, globalCellsPerAxis, globalCellsPerAxis);
-      openCLManager.execute2D(traversabilityGraphKernel, graphCellsPerAxis, graphCellsPerAxis);
+      //openCLManager.execute2D(traversabilityGraphKernel, graphCellsPerAxis, graphCellsPerAxis);
 
 //      openCLManager.join();
    }

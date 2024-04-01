@@ -20,10 +20,6 @@
     "Height Map Tuner" : false,
     "Local Height Map" : false,
     "Monte-Carlo Tuner" : true,
-    "Normal Z" : false,
-    "Region Assignment" : false,
-    "Region Borders" : false,
-    "Region Connections" : false,
     "Terrain Cost Image" : false,
     "VR Settings" : false,
     "VR Thread Debugger" : false

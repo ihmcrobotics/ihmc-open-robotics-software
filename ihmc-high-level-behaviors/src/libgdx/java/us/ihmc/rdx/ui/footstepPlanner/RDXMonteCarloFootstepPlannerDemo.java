@@ -10,7 +10,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
@@ -23,7 +22,6 @@ import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRequestFactory;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
@@ -71,6 +69,7 @@ public class RDXMonteCarloFootstepPlannerDemo
    private TerrainMapData loadedTerrainMapData;
    private OpenCLManager openCLManager;
 
+   private MonteCarloFootstepPlannerRequest monteCarloPlannerRequest;
    private TerrainPlanningDebugger terrainPlanningDebugger;
    private FootstepPlan monteCarloFootstepPlan;
 
@@ -85,6 +84,11 @@ public class RDXMonteCarloFootstepPlannerDemo
 
    private final ImBoolean enableMonteCarloPlanner = new ImBoolean(false);
    private final ImBoolean resetMonteCarloPlanner = new ImBoolean(true);
+   private final ImBoolean debugEnabled = new ImBoolean(true);
+   private final ImBoolean debugRefresh = new ImBoolean(true);
+   private final ImBoolean debugPlotPlan = new ImBoolean(true);
+   private final ImBoolean debugPlotTree = new ImBoolean(true);
+   private final ImBoolean debugPlotMidFootPositions = new ImBoolean(true);
 
    private int autoIncrementCounter = 0;
    private boolean initialized = false;
@@ -147,8 +151,6 @@ public class RDXMonteCarloFootstepPlannerDemo
 
    public void update()
    {
-      MonteCarloFootstepPlannerRequest monteCarloPlannerRequest = null;
-
       if (enableMonteCarloPlanner.get())
       {
          RobotSide startingSide = getCloserStartingSideToGoal();
@@ -161,7 +163,11 @@ public class RDXMonteCarloFootstepPlannerDemo
                                                                                     startingSide,
                                                                                     0.4f);
 
-
+         monteCarloPlannerRequest.setDebug(debugEnabled.get());
+         monteCarloPlannerRequest.setDebugRefresh(debugRefresh.get());
+         monteCarloPlannerRequest.setDebugPlotPlan(debugPlotPlan.get());
+         monteCarloPlannerRequest.setDebugPlotTree(debugPlotTree.get());
+         monteCarloPlannerRequest.setDebugPlotMidFootPositions(debugPlotMidFootPositions.get());
 
          if (enableMonteCarloPlanner.get())
          {
@@ -218,6 +224,12 @@ public class RDXMonteCarloFootstepPlannerDemo
       ImGui.separator();
       ImGui.checkbox("Enable Monte Carlo Planner", enableMonteCarloPlanner);
       ImGui.checkbox("Reset Monte Carlo Planner", resetMonteCarloPlanner);
+      ImGui.separator();
+      ImGui.checkbox("Debug Enabled", debugEnabled);
+      ImGui.checkbox("Debug Refresh", debugRefresh);
+      ImGui.checkbox("Plot Plan", debugPlotPlan);
+      ImGui.checkbox("Plot Tree", debugPlotTree);
+      ImGui.checkbox("Plot Mid Foot Positions", debugPlotMidFootPositions);
    }
 
    private void setStartAndGoalFootPosesWithSliders(MonteCarloFootstepPlannerRequest request)

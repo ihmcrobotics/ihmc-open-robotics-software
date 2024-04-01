@@ -6,6 +6,7 @@ import ihmc_common_msgs.msg.dds.PoseListMessage;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -32,7 +33,6 @@ import java.util.List;
 
 public class TerrainPlanningDebugger
 {
-   private boolean enabled = true;
    public static final int scaleFactor = 8;
 
    private int offsetX = 0;
@@ -63,7 +63,7 @@ public class TerrainPlanningDebugger
 
    public void setRequest(MonteCarloFootstepPlannerRequest request)
    {
-      if (!enabled)
+      if (!request.getDebug())
          return;
 
       this.request = request;
@@ -78,19 +78,26 @@ public class TerrainPlanningDebugger
                                MonteCarloFootstepPlannerRequest request,
                                SideDependentList<ConvexPolygon2D> footPolygons)
    {
-      if (!enabled)
+      if (!request.getDebug())
          return;
 
       FootstepPlan plan = MonteCarloPlannerTools.getFootstepPlanFromTree(root, request, footPolygons);
+
       refresh(request.getTerrainMapData());
-      plotMonteCarloFootstepPlan(plan);
-      plotTree(root);
-      //display(1);
+
+      if (request.getDebugPlotPlan())
+         plotMonteCarloFootstepPlan(plan);
+
+      if (request.getDebugPlotTree())
+         plotTree(root);
+
+      if (request.getDebugPlotMidFootPositions())
+         plotMidFootPositions(plan);
    }
 
    public void refresh(TerrainMapData terrainMapData)
    {
-      if (!enabled)
+      if (!request.getDebug() || !request.getDebugRefresh())
          return;
 
       terrainMapDebugger.refresh(terrainMapData);
@@ -98,7 +105,7 @@ public class TerrainPlanningDebugger
 
    public void plotNode(MonteCarloFootstepNode node)
    {
-      if (!enabled)
+      if (!request.getDebug())
          return;
 
       plotRectangle(node.getState().getX32(), node.getState().getY32());
@@ -106,7 +113,7 @@ public class TerrainPlanningDebugger
 
    public void plotNodes(ArrayList<?> nodes)
    {
-      if (!enabled)
+      if (!request.getDebug())
          return;
 
       for (Object node : nodes)
@@ -117,7 +124,7 @@ public class TerrainPlanningDebugger
 
    public void plotFootPoses(SideDependentList<Pose3D> poses)
    {
-      if (!enabled)
+      if (!request.getDebug())
          return;
 
       plotFootPoses(terrainMapDebugger.getContactHeatMapColorImage(), poses, 1);
@@ -126,7 +133,7 @@ public class TerrainPlanningDebugger
 
    public void plotFootFramePoses(SideDependentList<FramePose3D> poses, int mode)
    {
-      if (!enabled)
+      if (!request.getDebug())
          return;
 
       SideDependentList<Pose3D> poses3D = new SideDependentList<>(new Pose3D(poses.get(RobotSide.LEFT)), new Pose3D(poses.get(RobotSide.RIGHT)));
@@ -137,7 +144,7 @@ public class TerrainPlanningDebugger
 
    public void plotMonteCarloFootstepPlan(FootstepPlan plan)
    {
-      if (!enabled)
+      if (!request.getDebug())
          return;
 
       plotMonteCarloFootstepPlan(terrainMapDebugger.getHeightMapColorImage(), request, plan);
@@ -153,10 +160,37 @@ public class TerrainPlanningDebugger
 
    public void plotTree(MonteCarloFootstepNode root)
    {
-      if (!enabled)
+      if (!request.getDebug())
          return;
 
       plotNodeRecursive(root);
+   }
+
+   public void plotMidFootPositions(FootstepPlan plan)
+   {
+      if (!request.getDebug())
+         return;
+
+      Scalar color = new Scalar(Math.random() * 255, Math.random() * 255, Math.random() * 255, 255);
+      // plot circles at feet center and plot line joining consecutive foot centers using random color
+      for (int i = 0; i < plan.getNumberOfSteps(); i++)
+      {
+         Point3D pose = new Point3D(plan.getFootstep(i).getFootstepPose().getPosition().getX(),
+                                    plan.getFootstep(i).getFootstepPose().getPosition().getY(),
+                                    plan.getFootstep(i).getFootstepPose().getYaw());
+         Point2D point = new Point2D((pose.getX() * 50 - offsetX) * scaleFactor, (pose.getY() * 50 - offsetY) * scaleFactor);
+
+         PerceptionDebugTools.plotCircle(terrainMapDebugger.getContactHeatMapColorImage(), point, 5, color);
+
+         if (i > 0)
+         {
+            Point3D previousPose = new Point3D(plan.getFootstep(i - 1).getFootstepPose().getPosition().getX(),
+                                               plan.getFootstep(i - 1).getFootstepPose().getPosition().getY(),
+                                               plan.getFootstep(i - 1).getFootstepPose().getYaw());
+            Point2D previousPoint = new Point2D((previousPose.getX() * 50 - offsetX) * scaleFactor, (previousPose.getY() * 50 - offsetY) * scaleFactor);
+            PerceptionDebugTools.plotLine(terrainMapDebugger.getContactHeatMapColorImage(), previousPoint, point, color);
+         }
+      }
    }
 
    public void plotRectangle(float nodeX, float nodeY)
@@ -177,8 +211,8 @@ public class TerrainPlanningDebugger
       {
          MonteCarloFootstepNode childNode = (MonteCarloFootstepNode) child;
          PerceptionDebugTools.plotLine(terrainMapDebugger.getContactHeatMapColorImage(),
-                                       new Point2D((int) (node.getState().getX() + height/2) * scaleFactor, (int) (node.getState().getY() + height / 2) * scaleFactor),
-                                       new Point2D((int) (childNode.getState().getX() + height/2) * scaleFactor, (int) (childNode.getState().getY() + height / 2) * scaleFactor),
+                                       new Point2D((int) (node.getState().getX() + height / 2) * scaleFactor, (int) (node.getState().getY() + height / 2) * scaleFactor),
+                                       new Point2D((int) (childNode.getState().getX() + height / 2) * scaleFactor, (int) (childNode.getState().getY() + height / 2) * scaleFactor),
                                        PerceptionDebugTools.COLOR_PURPLE);
 
          plotNodeRecursive(childNode);
@@ -187,7 +221,7 @@ public class TerrainPlanningDebugger
 
    public void plotAStarPlan(FootstepPlan plan)
    {
-      if (!enabled)
+      if (!request.getDebug())
          return;
 
       plotFootstepPlan(terrainMapDebugger.getHeightMapColorImage(), plan);
@@ -195,7 +229,7 @@ public class TerrainPlanningDebugger
 
    public void display(int delay)
    {
-      if (!enabled)
+      if (!request.getDebug())
          return;
 
       terrainMapDebugger.display(delay);
@@ -203,7 +237,7 @@ public class TerrainPlanningDebugger
 
    public void plotFootPoses(Mat image, SideDependentList<Pose3D> poses, int mode)
    {
-      if (!enabled)
+      if (!request.getDebug())
          return;
 
       for (RobotSide side : RobotSide.values)
@@ -240,7 +274,7 @@ public class TerrainPlanningDebugger
                                MonteCarloFootstepPlannerParameters parameters,
                                int iteration)
    {
-      if (!enabled)
+      if (!request.getDebug())
          return;
 
       // time now
@@ -317,7 +351,7 @@ public class TerrainPlanningDebugger
 
    public void printContactMap()
    {
-      if (!enabled)
+      if (!request.getDebug())
          return;
 
       PerceptionDebugTools.printMat("Contact Map", request.getTerrainMapData().getContactMap(), 4);
@@ -325,15 +359,10 @@ public class TerrainPlanningDebugger
 
    public void printHeightMap()
    {
-      if (!enabled)
+      if (!request.getDebug())
          return;
 
       PerceptionDebugTools.printMat("Height Map", request.getTerrainMapData().getHeightMap(), 4);
-   }
-
-   public void setEnabled(boolean enabled)
-   {
-      this.enabled = enabled;
    }
 
    public Mat getHeatMapImage()

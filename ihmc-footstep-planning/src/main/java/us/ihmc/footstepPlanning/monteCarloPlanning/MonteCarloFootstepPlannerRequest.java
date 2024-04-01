@@ -69,6 +69,15 @@ public class MonteCarloFootstepPlannerRequest
     */
    private HeightMapData heightMapData;
 
+   /**
+    * Debugging flags to enabling plotting intermediate output
+    */
+   private boolean debug = false;
+   private boolean debugRefresh = true;
+   private boolean debugPlotTree = false;
+   private boolean debugPlotPlan = false;
+   private boolean debugPlotMidFootPositions = false;
+
    public MonteCarloFootstepPlannerRequest()
    {
       clear();
@@ -270,5 +279,55 @@ public class MonteCarloFootstepPlannerRequest
 
       builder.append("]\n");
       return builder.toString();
+   }
+
+   public void setDebug(boolean debug)
+   {
+      this.debug = debug;
+   }
+
+   public void setDebugPlotTree(boolean debugPlotTree)
+   {
+      this.debugPlotTree = debugPlotTree;
+   }
+
+   public void setDebugPlotPlan(boolean debugPlotPlan)
+   {
+      this.debugPlotPlan = debugPlotPlan;
+   }
+
+   public void setDebugPlotMidFootPositions(boolean debugPlotMidFootPositions)
+   {
+      this.debugPlotMidFootPositions = debugPlotMidFootPositions;
+   }
+
+   public boolean getDebugRefresh()
+   {
+      return debugRefresh;
+   }
+
+   public boolean getDebugPlotTree()
+   {
+      return debugPlotTree;
+   }
+
+   public boolean getDebugPlotPlan()
+   {
+      return debugPlotPlan;
+   }
+
+   public boolean getDebug()
+   {
+      return debug;
+   }
+
+   public boolean getDebugPlotMidFootPositions()
+   {
+      return debugPlotMidFootPositions;
+   }
+
+   public void setDebugRefresh(boolean debugRefresh)
+   {
+      this.debugRefresh = debugRefresh;
    }
 }

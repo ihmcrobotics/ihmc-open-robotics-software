@@ -254,7 +254,7 @@ public class PerceptionDebugTools
          {
             double height = heightMapData.getHeightAt(i, j);
             //if (height > 0.0001)
-               matString.append(String.format("%.1f", height)).append(" ");
+            matString.append(String.format("%.1f", height)).append(" ");
             //else
             //   matString.append("||||").append(" ");
          }
@@ -302,8 +302,7 @@ public class PerceptionDebugTools
       if (screenSize != -1)
       {
          int finalRows = screenSize;
-         int finalCols = (int)((float) screenSize / (float) image.rows() * (float) image.cols());
-         LogTools.debug(String.format("Image Size: %d x %d Display Size: %d x %d", finalRows, finalCols, image.rows(), image.cols()));
+         int finalCols = (int) ((float) screenSize / (float) image.rows() * (float) image.cols());
          opencv_highgui.resizeWindow(tag, finalCols, finalRows);
       }
 
@@ -433,8 +432,6 @@ public class PerceptionDebugTools
 
    public static void plotRectangleNoScale(Mat displayImage, Point2D point, int size, Scalar color)
    {
-      LogTools.debug("Plotting Node: Footstep: {} {}", (int) (point.getY() + displayImage.rows() / 2), (int) (point.getX() + displayImage.cols() / 2));
-
       // just like plotFootsteps
       Point2D positionOnMap = new Point2D(point.getY() + displayImage.rows() / 2, point.getX() + displayImage.cols() / 2);
       opencv_imgproc.rectangle(displayImage,
@@ -448,11 +445,6 @@ public class PerceptionDebugTools
 
    public static void plotTiltedRectangle(Mat displayImage, Point2D origin, float yaw, int size, int side)
    {
-      LogTools.debug("Footstep Plotted: {} {} {}",
-                     (int) (origin.getY() * 50 + displayImage.rows() / 2),
-                     (int) (origin.getX() * 50 + displayImage.cols() / 2),
-                     side);
-
       Scalar color;
 
       switch (side)
@@ -493,10 +485,7 @@ public class PerceptionDebugTools
       double yaw = imageCoordinatesWithYaw.getZ();
 
       // Create the footstep rectangle using the position and orientation
-      Point3D[] points = {new Point3D(-length, -width, 0),
-                          new Point3D(-length, width, 0),
-                          new Point3D(length, width, 0),
-                          new Point3D(length, -width, 0)};
+      Point3D[] points = {new Point3D(-length, -width, 0), new Point3D(-length, width, 0), new Point3D(length, width, 0), new Point3D(length, -width, 0)};
 
       Quaternion quat = new Quaternion();
       quat.setYawPitchRoll(yaw + Math.PI / 2, 0, 0);
@@ -533,19 +522,23 @@ public class PerceptionDebugTools
       }
    }
 
-   public static void plotCircle(Mat displayImage, Point2D origin, int radius)
+   public static void plotCircle(Mat displayImage, Point2D origin, int radius, Scalar color)
    {
-      Scalar color = new Scalar(0, 255, 255, 255);
-
-      Point2D positionOnMap = new Point2D(origin.getY() * 50 + displayImage.rows() / 2, origin.getX() * 50 + displayImage.cols() / 2);
-      opencv_imgproc.circle(displayImage, new Point((int) positionOnMap.getX(), (int) positionOnMap.getY()), radius, color, -1, opencv_imgproc.LINE_4, 0);
+      Point2D positionOnMap = new Point2D(origin.getY() + (int)(displayImage.rows() / 2), origin.getX() + (int)(displayImage.cols() / 2));
+      opencv_imgproc.circle(displayImage, new Point((int) positionOnMap.getX(), (int) positionOnMap.getY()), radius, color, -1, opencv_imgproc.LINE_8, 0);
    }
 
    public static void plotLine(Mat displayImage, Point2D start, Point2D end, Scalar color)
    {
       Point2D startOnMap = new Point2D(start.getY(), start.getX());
       Point2D endOnMap = new Point2D(end.getY(), end.getX());
-      opencv_imgproc.line(displayImage, new Point((int) startOnMap.getX(), (int) startOnMap.getY()), new Point((int) endOnMap.getX(), (int) endOnMap.getY()), color, 2, opencv_imgproc.LINE_4, 0);
+      opencv_imgproc.line(displayImage,
+                          new Point((int) startOnMap.getX() + displayImage.cols() / 2, (int) startOnMap.getY() + displayImage.rows() / 2),
+                           new Point((int) endOnMap.getX() + displayImage.cols() / 2, (int) endOnMap.getY() + displayImage.rows() / 2),
+                          color,
+                          4,
+                          opencv_imgproc.LINE_8,
+                          0);
    }
 
    public static void convertDepthCopyToColor(Mat depthImage16UC1Copy, Mat colorImage8UC3)
