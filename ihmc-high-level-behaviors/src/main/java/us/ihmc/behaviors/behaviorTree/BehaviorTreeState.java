@@ -5,6 +5,7 @@ import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTUnidirectionalString;
 import us.ihmc.communication.crdt.RequestConfirmFreezable;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -28,6 +29,7 @@ public class BehaviorTreeState extends RequestConfirmFreezable
    private final WorkspaceResourceDirectory saveFileDirectory;
    private int numberOfNodes = 0;
    private int numberOfFrozenNodes = 0;
+//   private CRDTUnidirectionalString
 
    public BehaviorTreeState(BehaviorTreeNodeStateBuilder nodeStateBuilder,
                             BehaviorTreeExtensionSubtreeRebuilder treeRebuilder,

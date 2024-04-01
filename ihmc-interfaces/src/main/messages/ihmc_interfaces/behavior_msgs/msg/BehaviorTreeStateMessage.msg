@@ -22,6 +22,8 @@ uint32 sequence_id
 # The ID to assign to the next instantiated node
 uint32 next_id
 
+behavior_msgs/BehaviorTreeLogMessage[<=50] recent_log_messages
+
 # A mechanism for confirming and ending a freeze early
 ihmc_common_msgs/ConfirmableRequestMessage confirmable_request
 
