@@ -63,9 +63,6 @@ public class TerrainPlanningDebugger
 
    public void setRequest(MonteCarloFootstepPlannerRequest request)
    {
-      if (!request.getDebug())
-         return;
-
       this.request = request;
       offsetX = (int) (request.getTerrainMapData().getSensorOrigin().getX() * 50.0f);
       offsetY = (int) (request.getTerrainMapData().getSensorOrigin().getY() * 50.0f);

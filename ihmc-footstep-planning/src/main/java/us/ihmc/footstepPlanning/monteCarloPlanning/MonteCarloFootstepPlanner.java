@@ -115,7 +115,7 @@ public class MonteCarloFootstepPlanner
          MonteCarloFootstepNode childNode = null;
          if (node.getLevel() < parameters.getMaxTreeDepth())
          {
-            LogTools.info("Expanding: {}", node.getLevel());
+            //LogTools.info("Expanding: {}", node.getLevel());
             // Expansion and Random Selection
             statistics.startExpansionTime();
             childNode = expand(node, request);
@@ -143,7 +143,7 @@ public class MonteCarloFootstepPlanner
          }
          else
          {
-            LogTools.warn("Child is NULL");
+            //LogTools.warn("Child is NULL");
          }
       }
       else
@@ -171,7 +171,7 @@ public class MonteCarloFootstepPlanner
    public MonteCarloFootstepNode expand(MonteCarloFootstepNode node, MonteCarloFootstepPlannerRequest request)
    {
       ArrayList<?> availableStates = node.getAvailableStates(request, parameters);
-      LogTools.info("Total Available States: {} at Level: {}", availableStates.size(), node.level);
+      //LogTools.info("Total Available States: {} at Level: {}", availableStates.size(), node.level);
       for (Object newStateObj : availableStates)
       {
          MonteCarloFootstepNode newState = (MonteCarloFootstepNode) newStateObj;
@@ -199,7 +199,7 @@ public class MonteCarloFootstepPlanner
 
       if (node.getChildren().isEmpty())
       {
-         LogTools.info("No Children");
+         //LogTools.info("No Children");
          return null;
       }
 
@@ -226,7 +226,7 @@ public class MonteCarloFootstepPlanner
 
          score += MonteCarloPlannerTools.scoreFootstepNode(node, simulationState, request, parameters, false);
 
-         LogTools.info("[SIMULATE] Position: {} Score: {}", simulationState.getState(), score);
+         //LogTools.info("[SIMULATE] Position: {} Score: {}", simulationState.getState(), score);
       }
 
       return score;
