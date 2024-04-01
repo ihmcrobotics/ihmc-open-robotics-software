@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "37891ce73268750f598d784a233d6dd991adb94d0e022a75190f7be3d3e8336c";
+   		return "d58443c8748e27a29acc266ad5c41e9c77835103f6cc8604e8eda659de9a4afd";
    }
    
    @Override
@@ -56,6 +56,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.BehaviorTreeLogMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -113,6 +116,11 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getRecentLogMessages().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.BehaviorTreeLogMessagePubSubType.getCdrSerializedSize(data.getRecentLogMessages().get(i0), current_alignment);}
 
       current_alignment += ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.getCdrSerializedSize(data.getConfirmableRequest(), current_alignment);
 
@@ -189,6 +197,10 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       cdr.write_type_4(data.getNextId());
 
+      if(data.getRecentLogMessages().size() <= 50)
+      cdr.write_type_e(data.getRecentLogMessages());else
+          throw new RuntimeException("recent_log_messages field exceeds the maximum length");
+
       ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.write(data.getConfirmableRequest(), cdr);
       if(data.getBehaviorTreeTypes().size() <= 1000)
       cdr.write_type_e(data.getBehaviorTreeTypes());else
@@ -250,6 +262,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       	
       data.setNextId(cdr.read_type_4());
       	
+      cdr.read_type_e(data.getRecentLogMessages());	
       ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.read(data.getConfirmableRequest(), cdr);	
       cdr.read_type_e(data.getBehaviorTreeTypes());	
       cdr.read_type_e(data.getBehaviorTreeIndices());	
@@ -272,6 +285,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_4("next_id", data.getNextId());
+      ser.write_type_e("recent_log_messages", data.getRecentLogMessages());
       ser.write_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
 
       ser.write_type_e("behavior_tree_types", data.getBehaviorTreeTypes());
@@ -294,6 +308,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setNextId(ser.read_type_4("next_id"));
+      ser.read_type_e("recent_log_messages", data.getRecentLogMessages());
       ser.read_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
 
       ser.read_type_e("behavior_tree_types", data.getBehaviorTreeTypes());

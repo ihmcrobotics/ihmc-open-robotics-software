@@ -33,6 +33,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
             * The ID to assign to the next instantiated node
             */
    public long next_id_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeLogMessage>  recent_log_messages_;
    /**
             * A mechanism for confirming and ending a freeze early
             */
@@ -61,6 +62,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
    public BehaviorTreeStateMessage()
    {
+      recent_log_messages_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeLogMessage> (50, new behavior_msgs.msg.dds.BehaviorTreeLogMessagePubSubType());
       confirmable_request_ = new ihmc_common_msgs.msg.dds.ConfirmableRequestMessage();
       behavior_tree_types_ = new us.ihmc.idl.IDLSequence.Byte (1000, "type_9");
 
@@ -92,6 +94,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       next_id_ = other.next_id_;
 
+      recent_log_messages_.set(other.recent_log_messages_);
       ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.staticCopy(other.confirmable_request_, confirmable_request_);
       behavior_tree_types_.set(other.behavior_tree_types_);
       behavior_tree_indices_.set(other.behavior_tree_indices_);
@@ -136,6 +139,12 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public long getNextId()
    {
       return next_id_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BehaviorTreeLogMessage>  getRecentLogMessages()
+   {
+      return recent_log_messages_;
    }
 
 
@@ -255,6 +264,13 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.next_id_, other.next_id_, epsilon)) return false;
 
+      if (this.recent_log_messages_.size() != other.recent_log_messages_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.recent_log_messages_.size(); i++)
+         {  if (!this.recent_log_messages_.get(i).epsilonEquals(other.recent_log_messages_.get(i), epsilon)) return false; }
+      }
+
       if (!this.confirmable_request_.epsilonEquals(other.confirmable_request_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.behavior_tree_types_, other.behavior_tree_types_, epsilon)) return false;
 
@@ -354,6 +370,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       if(this.next_id_ != otherMyClass.next_id_) return false;
 
+      if (!this.recent_log_messages_.equals(otherMyClass.recent_log_messages_)) return false;
       if (!this.confirmable_request_.equals(otherMyClass.confirmable_request_)) return false;
       if (!this.behavior_tree_types_.equals(otherMyClass.behavior_tree_types_)) return false;
       if (!this.behavior_tree_indices_.equals(otherMyClass.behavior_tree_indices_)) return false;
@@ -382,6 +399,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("next_id=");
       builder.append(this.next_id_);      builder.append(", ");
+      builder.append("recent_log_messages=");
+      builder.append(this.recent_log_messages_);      builder.append(", ");
       builder.append("confirmable_request=");
       builder.append(this.confirmable_request_);      builder.append(", ");
       builder.append("behavior_tree_types=");
