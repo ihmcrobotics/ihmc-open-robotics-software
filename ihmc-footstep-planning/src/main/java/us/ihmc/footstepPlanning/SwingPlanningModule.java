@@ -5,25 +5,16 @@ import java.util.EnumMap;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
-import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.footstepPlanning.swing.CollisionFreeSwingCalculator;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -31,7 +22,6 @@ public class SwingPlanningModule
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final SwingPlannerParametersBasics swingPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
 
@@ -42,31 +32,28 @@ public class SwingPlanningModule
 
    private final List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = new ArrayList<>();
 
-
    public SwingPlanningModule(FootstepPlannerParametersReadOnly footstepPlannerParameters,
                               SwingPlannerParametersBasics swingPlannerParameters,
                               WalkingControllerParameters walkingControllerParameters,
                               SideDependentList<ConvexPolygon2D> footPolygons)
-
    {
-      this.footstepPlannerParameters = footstepPlannerParameters;
       this.swingPlannerParameters = swingPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
 
       if (walkingControllerParameters == null)
       {
-         this.adaptiveSwingTrajectoryCalculator = null;
-         this.collisionFreeSwingCalculator = null;
+         adaptiveSwingTrajectoryCalculator = null;
+         collisionFreeSwingCalculator = null;
       }
       else
       {
-         this.adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(swingPlannerParameters,
-                                                                                        footstepPlannerParameters,
-                                                                                        walkingControllerParameters);
-         this.collisionFreeSwingCalculator = new CollisionFreeSwingCalculator(footstepPlannerParameters,
-                                                                              swingPlannerParameters,
-                                                                              walkingControllerParameters,
-                                                                              footPolygons);
+         adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(swingPlannerParameters,
+                                                                                   footstepPlannerParameters,
+                                                                                   walkingControllerParameters);
+         collisionFreeSwingCalculator = new CollisionFreeSwingCalculator(footstepPlannerParameters,
+                                                                         swingPlannerParameters,
+                                                                         walkingControllerParameters,
+                                                                         footPolygons);
       }
    }
 

@@ -3,7 +3,7 @@
 
 #include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionFootstepDefinitionMessage_.idl"
-#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+#include "geometry_msgs/msg/./Point_.idl"
 module behavior_msgs
 {
   module msg
@@ -31,6 +31,10 @@ module behavior_msgs
          */
         double transfer_duration;
         /**
+         * OVERRIDE (0) or QUEUE (1)
+         */
+        long execution_mode;
+        /**
          * Is using the footstep planner or manually placing
          */
         boolean is_manually_placed;
@@ -39,17 +43,37 @@ module behavior_msgs
          */
         sequence<behavior_msgs::msg::dds::FootstepPlanActionFootstepDefinitionMessage, 50> footsteps;
         /**
-         * Transform that expresses the planning goal pose in the parent frame
+         * The position to which the goal stance is aligned
          */
-        controller_msgs::msg::dds::RigidBodyTransformMessage goal_transform_to_parent;
+        geometry_msgs::msg::dds::Point goal_stance_point;
         /**
-         * Left goal foot transform to the goal pose
+         * The point that the robot should be facing in the goal stance
          */
-        controller_msgs::msg::dds::RigidBodyTransformMessage left_goal_foot_transform_to_gizmo;
+        geometry_msgs::msg::dds::Point goal_focal_point;
         /**
-         * Right goal foot transform to the goal pose
+         * Left goal foot X to the goal pose
          */
-        controller_msgs::msg::dds::RigidBodyTransformMessage right_goal_foot_transform_to_gizmo;
+        double left_goal_foot_x_to_gizmo;
+        /**
+         * Left goal foot Y to the goal pose
+         */
+        double left_goal_foot_y_to_gizmo;
+        /**
+         * Left goal foot Yaw to the goal pose
+         */
+        double left_goal_foot_yaw_to_gizmo;
+        /**
+         * Right goal foot X to the goal pose
+         */
+        double right_goal_foot_x_to_gizmo;
+        /**
+         * Right goal foot Y to the goal pose
+         */
+        double right_goal_foot_y_to_gizmo;
+        /**
+         * Right goal foot Yaw to the goal pose
+         */
+        double right_goal_foot_yaw_to_gizmo;
       };
     };
   };

@@ -11,8 +11,8 @@ public class ROS2BehaviorTreeSubscriptionNode
    private BehaviorTreeNodeDefinitionMessage behaviorTreeNodeDefinitionMessage;
    private BehaviorTreeNodeStateMessage behaviorTreeNodeStateMessage;
    private ActionSequenceStateMessage actionSequenceStateMessage;
+   private DoorTraversalStateMessage doorTraversalStateMessage;
    private ActionNodeStateMessage actionNodeStateMessage;
-   private ArmJointAnglesActionStateMessage armJointAnglesActionStateMessage;
    private ChestOrientationActionStateMessage chestOrientationActionStateMessage;
    private FootstepPlanActionStateMessage footstepPlanActionStateMessage;
    private SakeHandCommandActionStateMessage sakeHandCommandActionStateMessage;
@@ -29,8 +29,8 @@ public class ROS2BehaviorTreeSubscriptionNode
       behaviorTreeNodeDefinitionMessage = null;
       behaviorTreeNodeStateMessage = null;
       actionSequenceStateMessage = null;
+      doorTraversalStateMessage = null;
       actionNodeStateMessage = null;
-      armJointAnglesActionStateMessage = null;
       chestOrientationActionStateMessage = null;
       footstepPlanActionStateMessage = null;
       sakeHandCommandActionStateMessage = null;
@@ -92,14 +92,14 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.actionSequenceStateMessage = actionSequenceStateMessage;
    }
 
-   public ArmJointAnglesActionStateMessage getArmJointAnglesActionStateMessage()
+   public DoorTraversalStateMessage getDoorTraversalStateMessage()
    {
-      return armJointAnglesActionStateMessage;
+      return doorTraversalStateMessage;
    }
 
-   public void setArmJointAnglesActionStateMessage(ArmJointAnglesActionStateMessage armJointAnglesActionStateMessage)
+   public void setDoorTraversalStateMessage(DoorTraversalStateMessage doorTraversalStateMessage)
    {
-      this.armJointAnglesActionStateMessage = armJointAnglesActionStateMessage;
+      this.doorTraversalStateMessage = doorTraversalStateMessage;
    }
 
    public ChestOrientationActionStateMessage getChestOrientationActionStateMessage()

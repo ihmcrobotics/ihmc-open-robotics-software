@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
-import us.ihmc.behaviors.sequence.actions.ArmJointAnglesActionDefinition;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
 import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
@@ -25,9 +25,9 @@ public class BehaviorTreeDefinitionBuilder
       {
          return new ActionSequenceDefinition(crdtInfo, saveFileDirectory);
       }
-      if (definitionType == ArmJointAnglesActionDefinition.class)
+      if (definitionType == DoorTraversalDefinition.class)
       {
-         return new ArmJointAnglesActionDefinition(crdtInfo, saveFileDirectory);
+         return new DoorTraversalDefinition(crdtInfo, saveFileDirectory);
       }
       if (definitionType == ChestOrientationActionDefinition.class)
       {

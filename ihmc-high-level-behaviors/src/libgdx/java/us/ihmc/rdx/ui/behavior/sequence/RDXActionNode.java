@@ -63,17 +63,17 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
       if (actionSequence != null)
       {
          // Not displaying this now until we calculate it correctly. @dcalvert
-         // if (state.getConcurrencyRank() != 1)
-         // {
-         //    ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
-         //    ImGui.text(state.getConcurrencyRank() == 1 ? " " : String.valueOf(state.getConcurrencyRank()));
-         //    ImGui.popStyleColor();
-         //    ImGui.sameLine();
-         // }
-         // else
-         // {
-         //    ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGuiTools.calcTextSizeX("2") + ImGui.getStyle().getItemSpacingX());
-         // }
+          if (state.getConcurrencyRank() != 1)
+          {
+             ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
+             ImGui.text(state.getConcurrencyRank() == 1 ? " " : String.valueOf(state.getConcurrencyRank()));
+             ImGui.popStyleColor();
+             ImGui.sameLine();
+          }
+          else
+          {
+             ImGui.setCursorPosX(ImGui.getCursorPosX() + ImGuiTools.calcTextSizeX("2") + ImGui.getStyle().getItemSpacingX());
+          }
 
          boolean colorArrow = state.getIsNextForExecution() || state.getIsExecuting();
          int arrowColor = state.getIsNextForExecution() ? ImGuiTools.GREEN : isExecutingFlashingColor.getColor(state.getIsExecuting());
@@ -197,6 +197,20 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    }
 
    protected void renderImGuiWidgetsInternal()
+   {
+
+   }
+
+   @Override
+   public void clearSelections()
+   {
+      super.clearSelections();
+
+      if (!ImGui.getIO().getKeyCtrl())
+         deselectGizmos();
+   }
+
+   public void deselectGizmos()
    {
 
    }

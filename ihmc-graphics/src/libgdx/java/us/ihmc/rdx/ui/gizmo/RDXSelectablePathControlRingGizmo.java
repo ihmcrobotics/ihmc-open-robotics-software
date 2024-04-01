@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
+import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -105,13 +106,15 @@ public class RDXSelectablePathControlRingGizmo
          boolean isClickedOn = pathControlRingGizmo.getRingHovered() && leftMouseReleasedWithoutDrag;
          // To deselect, click on anything other than the ring and the arrows
          boolean somethingElseIsClickedOn = !pathControlRingGizmo.getAnyPartHovered() && leftMouseReleasedWithoutDrag;
+         boolean isCtrlPressed = ImGui.getIO().getKeyCtrl();
 
          // Determine selectedness
          if (selectable && isClickedOn)
          {
             selected.set(true);
          }
-         if (somethingElseIsClickedOn)
+         // Allow mutli-selection by holding Ctrl
+         if (somethingElseIsClickedOn && !isCtrlPressed)
          {
             selected.set(false);
          }
