@@ -11,7 +11,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
  * This class is used to calculate a constant approximation to the offset seen in {@link  InertialParameterManager} estimation residuals on the real robot.
  * <p>
  * The filters used inside {@link InertialParameterManager} assume that the residuals in the estimation process (see {@code residual} in that class) are
- * zero-mean. This is not the case in practice due to various inertial parameter non-idealities. The bias compensator is used to calculate a constant
+ * zero-mean. This is not the case in practice due to various inertial parameter non-idealities. The filter is used to calculate a constant
  * approximation to the offset by storing samples of the residuals over a window into the past and then averaging them. This is a simple, constant
  * approximation to a bias that is in reality state-dependent and time-varying.
  * </p>
