@@ -9,19 +9,15 @@ import org.bytedeco.opencv.global.opencv_objdetect;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.matrix.LinearTransform3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 
@@ -47,11 +43,12 @@ public class OpenCVArUcoMarkerDetectionResults
    private transient final Mat objectPoints;
    private transient final BytePointer objectPointsDataPointer;
    private transient final Mat rotationVector;
-   private transient final Mat rotationMatrix;
    private transient final Mat translationVector;
-   private transient final LinearTransform3D euclidLinearTransform = new LinearTransform3D();
-   private transient final Point3D euclidPosition = new Point3D();
    private transient final Scalar defaultBorderColor;
+
+   private transient final RotationMatrix arucoRotation = new RotationMatrix();
+   private transient final Point3D arucoTranslation = new Point3D();
+
    // This is a temp variable, and is not used to store state
    private transient final FramePose3D tempMarkerPose = new FramePose3D();
 
@@ -71,7 +68,6 @@ public class OpenCVArUcoMarkerDetectionResults
       objectPoints = new Mat(4, 1, opencv_core.CV_32FC3);
       objectPointsDataPointer = objectPoints.ptr();
       rotationVector = new Mat(3, 1, opencv_core.CV_64FC1);
-      rotationMatrix = new Mat(3, 3, opencv_core.CV_64FC1);
       translationVector = new Mat(3, 1, opencv_core.CV_64FC1);
       defaultBorderColor = new Scalar(0, 0, 255, 0);
    }
@@ -151,10 +147,10 @@ public class OpenCVArUcoMarkerDetectionResults
    public void getPoseInSensorFrame(int markerID, double markerSize, Pose3DBasics poseToPack)
    {
       updateMarkerPose(markerID, markerSize);
-      poseToPack.set(euclidPosition, euclidLinearTransform.getAsQuaternion());
+      poseToPack.set(arucoTranslation, arucoRotation);//euclidLinearTransform.getAsQuaternion());
 
-//      poseToPack.getPosition().add(EuclidCoreRandomTools.nextVector3D(random, 0.01));
-//      poseToPack.getRotation().append(EuclidCoreRandomTools.nextQuaternion(random, Math.toRadians(5)));
+      poseToPack.getPosition().add(EuclidCoreRandomTools.nextVector3D(random, 0.01));
+      poseToPack.getRotation().append(EuclidCoreRandomTools.nextQuaternion(random, Math.toRadians(5)));
    }
    
    /**
@@ -187,36 +183,26 @@ public class OpenCVArUcoMarkerDetectionResults
          Mat markerCorners = corners.get(cornersIndex);
          opencv_calib3d.solvePnP(objectPoints, markerCorners, cameraMatrix, distortionCoefficients, rotationVector, translationVector);
 
+         // The weird conversion of axes are because sensor frame is assumed x forward z up, but image frame is z forward, x right. This means z in image is
+         // x in sensor, and x in image is -y in sensor.
+
          // Couldn't figure out why we had to apply these transforms here and below, but it works.
          double rx = rotationVector.ptr(0).getDouble();
          double ry = rotationVector.ptr(0).getDouble(Double.BYTES);
          double rz = rotationVector.ptr(0).getDouble(2 * Double.BYTES);
-         rotationVector.ptr(0).putDouble(rz);
-         rotationVector.ptr(0).putDouble(Double.BYTES, -rx);
-         rotationVector.ptr(0).putDouble(2 * Double.BYTES, -ry);
 
-         opencv_calib3d.Rodrigues(rotationVector, rotationMatrix);
-
-         BytePointer basePtr = rotationMatrix.ptr(0);
-         euclidLinearTransform.set(basePtr.getDouble(),
-                                   basePtr.getDouble(Double.BYTES),
-                                   basePtr.getDouble(2 * Double.BYTES),
-                                   basePtr.getDouble(3 * Double.BYTES),
-                                   basePtr.getDouble(4 * Double.BYTES),
-                                   basePtr.getDouble(5 * Double.BYTES),
-                                   basePtr.getDouble(6 * Double.BYTES),
-                                   basePtr.getDouble(7 * Double.BYTES),
-                                   basePtr.getDouble(8 * Double.BYTES));
+         arucoRotation.setRotationVector(rz, -rx, -ry);
          // These are probably because the coordinate system we define ourselves now for the solvePnP method,
          // probably why they did it,so the way we define it must be different to the way it was internally
          // in estimatePoseSingleMarkers.
-         euclidLinearTransform.appendRollRotation(-Math.PI / 2.0);
-         euclidLinearTransform.appendPitchRotation(Math.PI / 2.0);
+         // TODO these define the transform from sensor to image frame, so that makes sense.
+         arucoRotation.appendRollRotation(-Math.PI / 2.0);
+         arucoRotation.appendPitchRotation(Math.PI / 2.0);
 
          double x = translationVector.ptr(0).getDouble();
          double y = translationVector.ptr(0).getDouble(Double.BYTES);
          double z = translationVector.ptr(0).getDouble(2 * Double.BYTES);
-         euclidPosition.set(z, -x, -y);
+         arucoTranslation.set(z, -x, -y);
       }
    }
 
