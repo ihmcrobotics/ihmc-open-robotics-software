@@ -231,7 +231,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
             handHybridJointspaceTaskspaceTrajectoryMessage.setRobotSide(definition.getSide().toByte());
             handHybridJointspaceTaskspaceTrajectoryMessage.getTaskspaceTrajectoryMessage().set(se3TrajectoryMessage);
             handHybridJointspaceTaskspaceTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
-            LogTools.info("Publishing arm hybrid jointspace taskpace");
+            getState().getLogger().info("Publishing arm hybrid jointspace taskpace");
             ros2ControllerHelper.publishToController(handHybridJointspaceTaskspaceTrajectoryMessage);
          }
 
@@ -241,7 +241,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       }
       else
       {
-         LogTools.error("Cannot execute. Frame is not a child of World frame.");
+         getState().getLogger().error("Cannot execute. Frame is not a child of World frame.");
       }
    }
 
@@ -251,7 +251,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       armTrajectoryMessage.setRobotSide(definition.getSide().toByte());
       armTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
       armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
-      LogTools.info("Publishing arm jointspace trajectory");
+      getState().getLogger().info("Publishing arm jointspace trajectory");
       ros2ControllerHelper.publishToController(armTrajectoryMessage);
    }
 
@@ -267,7 +267,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       {
          state.setIsExecuting(false);
          state.setFailed(true);
-         LogTools.error("Task execution timed out. Publishing stop all trajectories message.");
+         getState().getLogger().error("Task execution timed out. Publishing stop all trajectories message.");
          ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
          return;
       }
@@ -307,7 +307,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    {
       JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildJointspaceTrajectoryMessage();
 
-      LogTools.info("Disengaging holding hand in taskspace");
+      getState().getLogger().info("Disengaging holding hand in taskspace");
       publishJointspaceCommand(jointspaceTrajectoryMessage);
    }
 

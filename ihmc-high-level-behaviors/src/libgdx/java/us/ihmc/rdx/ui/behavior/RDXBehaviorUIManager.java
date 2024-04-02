@@ -18,7 +18,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.registry.RDXBehaviorUIInterface;
 import us.ihmc.rdx.ui.behavior.tree.RDXImNodesBehaviorTreeUI;
-import us.ihmc.rdx.ui.tools.ImGuiLogWidget;
+import us.ihmc.rdx.ui.tools.ImGuiScrollableLogArea;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
@@ -42,7 +42,7 @@ public class RDXBehaviorUIManager
    private final Stopwatch statusStopwatch = new Stopwatch();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Tree status", 1000, 230, 15);
-   private final ImGuiLogWidget logWidget;
+   private final ImGuiScrollableLogArea logArea;
    private final BehaviorHelper helper;
    private final RDXBaseUI baseUI;
    private final RDXImNodesBehaviorTreeUI imNodeBehaviorTreeUI;
@@ -58,13 +58,13 @@ public class RDXBehaviorUIManager
       this.baseUI = baseUI;
 
       helper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node);
-      logWidget = new ImGuiLogWidget();
+      logArea = new ImGuiScrollableLogArea();
       helper.subscribeViaCallback(STATUS_LOG, message ->
-            logWidget.submitEntry(MessageTools.fromMessage(message.getLogLevel()), MessageTools.unpackLongStringFromByteSequence(message.getLogMessage())));
+            logArea.submitEntry(MessageTools.fromMessage(message.getLogLevel()), MessageTools.unpackLongStringFromByteSequence(message.getLogMessage())));
       helper.subscribeViaCallback(ROS2Tools.TEXT_STATUS, textStatus ->
       {
          LogTools.info("TextToSpeech: {}", textStatus.getTextToSpeakAsString());
-         logWidget.submitEntry(Level.INFO, textStatus.getTextToSpeakAsString());
+         logArea.submitEntry(Level.INFO, textStatus.getTextToSpeakAsString());
       });
       helper.subscribeViaCallback(BEHAVIOR_TREE_STATUS, behaviorTreeMessage ->
       {
@@ -73,7 +73,7 @@ public class RDXBehaviorUIManager
       });
 
       treeViewPanel = new RDXPanel("Behavior Tree Panel", this::renderBehaviorTreeImGuiWidgets, false, true);
-      treeViewPanel.addChild(new RDXPanel("Behaviors Status Log", logWidget::renderImGuiWidgets));
+      treeViewPanel.addChild(new RDXPanel("Behaviors Status Log", logArea::renderImGuiWidgets));
 
       this.rootBehaviorUI = new RDXRootBehaviorUI(this::renderRootUIImGuiWidgets);
       imNodeBehaviorTreeUI = new RDXImNodesBehaviorTreeUI();

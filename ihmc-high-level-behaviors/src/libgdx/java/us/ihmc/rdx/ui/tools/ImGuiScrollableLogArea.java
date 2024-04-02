@@ -14,7 +14,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 
-public class ImGuiLogWidget
+public class ImGuiScrollableLogArea
 {
    private static final int WARN_COLOR;
    static
@@ -33,7 +33,7 @@ public class ImGuiLogWidget
    private final ImBoolean scrollToEnd = new ImBoolean(true);
    private final Notification wouldScrollToEnd = new Notification();
 
-   public ImGuiLogWidget()
+   public ImGuiScrollableLogArea()
    {
       submitEntry(Level.INFO, "Log started.");
    }

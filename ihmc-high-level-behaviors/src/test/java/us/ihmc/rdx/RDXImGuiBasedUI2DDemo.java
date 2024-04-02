@@ -5,7 +5,7 @@ import org.apache.logging.log4j.Level;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
 import us.ihmc.rdx.ui.RDXBaseUI2D;
-import us.ihmc.rdx.ui.tools.ImGuiLogWidget;
+import us.ihmc.rdx.ui.tools.ImGuiScrollableLogArea;
 import us.ihmc.tools.string.StringTools;
 
 import java.time.LocalDateTime;
@@ -16,7 +16,7 @@ public class RDXImGuiBasedUI2DDemo
 
    private final Stopwatch stopwatch = new Stopwatch().start();
    private final ImGuiMovingPlot renderPlot = new ImGuiMovingPlot("render count", 1000, 300, 30);
-   private final ImGuiLogWidget logWidget = new ImGuiLogWidget();
+   private final ImGuiScrollableLogArea logArea = new ImGuiScrollableLogArea();
    private long renderCount = 0;
 
    public RDXImGuiBasedUI2DDemo()
@@ -32,11 +32,11 @@ public class RDXImGuiBasedUI2DDemo
             baseUI.getImGuiPanelManager().addPanel("Window 2", RDXImGuiBasedUI2DDemo.this::renderWindow2);
             baseUI.getImGuiPanelManager().addPanel("Window 3", RDXImGuiBasedUI2DDemo.this::renderWindow3);
 
-            logWidget.submitEntry(Level.WARN, "WARN at " + LocalDateTime.now());
-            logWidget.submitEntry(Level.ERROR, "ERROR at " + LocalDateTime.now());
-            logWidget.submitEntry(Level.DEBUG, "DEBUG at " + LocalDateTime.now());
-            logWidget.submitEntry(Level.FATAL, "FATAL at " + LocalDateTime.now());
-            logWidget.submitEntry(Level.TRACE, "TRACE at " + LocalDateTime.now());
+            logArea.submitEntry(Level.WARN, "WARN at " + LocalDateTime.now());
+            logArea.submitEntry(Level.ERROR, "ERROR at " + LocalDateTime.now());
+            logArea.submitEntry(Level.DEBUG, "DEBUG at " + LocalDateTime.now());
+            logArea.submitEntry(Level.FATAL, "FATAL at " + LocalDateTime.now());
+            logArea.submitEntry(Level.TRACE, "TRACE at " + LocalDateTime.now());
          }
 
          @Override
@@ -75,7 +75,7 @@ public class RDXImGuiBasedUI2DDemo
       ImGui.plotLines("Histogram", values, 100);
       renderPlot.calculate(renderCount++);
 
-      logWidget.renderImGuiWidgets();
+      logArea.renderImGuiWidgets();
    }
 
    private void renderWindow2()
