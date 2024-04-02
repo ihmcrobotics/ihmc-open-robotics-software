@@ -10,13 +10,16 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.LinearTransform3D;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 
@@ -44,8 +47,9 @@ public class OpenCVArUcoMarkerDetectionResults
    private transient final Mat translationVector;
    private transient final LinearTransform3D euclidLinearTransform = new LinearTransform3D();
    private transient final Point3D euclidPosition = new Point3D();
-   private transient final FramePose3D markerPose = new FramePose3D();
    private transient final Scalar defaultBorderColor;
+   // This is a temp variable, and is not used to store state
+   private transient final FramePose3D tempMarkerPose = new FramePose3D();
 
    public OpenCVArUcoMarkerDetectionResults()
    {
@@ -113,12 +117,9 @@ public class OpenCVArUcoMarkerDetectionResults
                        double markerSize,
                        ReferenceFrame sensorFrame,
                        ReferenceFrame desiredFrame,
-                       RigidBodyTransform transformToDesiredFrameToPack)
+                       RigidBodyTransformBasics transformToDesiredFrameToPack)
    {
-      updateMarkerPose(markerID, markerSize);
-      markerPose.setIncludingFrame(sensorFrame, euclidPosition, euclidLinearTransform.getAsQuaternion());
-      markerPose.changeFrame(desiredFrame);
-      markerPose.get(transformToDesiredFrameToPack);
+      getPose(markerID, markerSize, sensorFrame, desiredFrame, transformToDesiredFrameToPack.getTranslation(), transformToDesiredFrameToPack.getRotation());
    }
 
    /**
@@ -129,46 +130,25 @@ public class OpenCVArUcoMarkerDetectionResults
                        double markerSize,
                        ReferenceFrame sensorFrame,
                        ReferenceFrame desiredFrame,
-                       Point3D translationToPack,
-                       Quaternion orientationToPack)
+                       Tuple3DBasics translationToPack,
+                       Orientation3DBasics orientationToPack)
    {
-      updateMarkerPose(markerID, markerSize);
-      markerPose.setIncludingFrame(sensorFrame, euclidPosition, euclidLinearTransform.getAsQuaternion());
-      markerPose.changeFrame(desiredFrame);
-      markerPose.get(orientationToPack, translationToPack);
+      tempMarkerPose.setReferenceFrame(sensorFrame);
+      getPoseInSensorFrame(markerID, markerSize, tempMarkerPose);
+      tempMarkerPose.changeFrame(desiredFrame);
+      tempMarkerPose.get(orientationToPack, translationToPack);
    }
 
    /**
     * Get the pose of an ArUco marker. Use with {@link #isDetected} to make sure
     * the ID is currently detected first.
     */
-   public Pose3DReadOnly getPoseInSensorFrame(int markerID, double markerSize, ReferenceFrame sensorFrame)
-   {
-      updateMarkerPose(markerID, markerSize);
-      markerPose.setIncludingFrame(sensorFrame, euclidPosition, euclidLinearTransform.getAsQuaternion());
-      return markerPose;
-   }
-
-   /**
-    * Get the pose of an ArUco marker. Use with {@link #isDetected} to make sure
-    * the ID is currently detected first.
-    */
-   public void getPose(int markerID, double markerSize, Pose3DBasics poseToPack)
+   public void getPoseInSensorFrame(int markerID, double markerSize, Pose3DBasics poseToPack)
    {
       updateMarkerPose(markerID, markerSize);
       poseToPack.set(euclidPosition, euclidLinearTransform.getAsQuaternion());
    }
-
-   /**
-    * Get the pose of an ArUco marker. Use with {@link #isDetected} to make sure
-    * the ID is currently detected first.
-    */
-   public void getPose(int markerID, double markerSize, RigidBodyTransform transformToSensor)
-   {
-      updateMarkerPose(markerID, markerSize);
-      transformToSensor.set(euclidLinearTransform.getAsQuaternion(), euclidPosition);
-   }
-
+   
    /**
     * Estimates the pose of the single marker ID.
     * Multiple markers of the same ID is not supported.
