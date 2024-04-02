@@ -73,6 +73,13 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public void update()
    {
       BehaviorTreeNodeLayer.super.update();
+
+      while (!state.getLogger().getRecentMessages().isEmpty())
+      {
+         LogMessage message = state.getLogger().getRecentMessages().poll();
+         logArea.submitEntry(message.instant(), message.level(), message.message());
+         RDXBaseUI.pushNotification(message.message());
+      }
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -228,11 +235,6 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
          definition.setNotes(notesText.get());
       }
 
-      while (!state.getLogger().getRecentMessages().isEmpty())
-      {
-         LogMessage message = state.getLogger().getRecentMessages().poll();
-         logArea.submitEntry(message.level(), message.message());
-      }
       logArea.renderImGuiWidgets();
    }
 

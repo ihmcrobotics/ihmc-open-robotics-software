@@ -63,8 +63,8 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
             if (handOpenAngle < Math.toRadians(20.0)) // TODO: Tune
             {
+               state.getLogger().info("Retrying pull door...");
                state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
-               state.getRetryingPullDoorNotification().set();
             }
          }
       }
