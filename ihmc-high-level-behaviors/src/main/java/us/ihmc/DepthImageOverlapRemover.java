@@ -25,9 +25,9 @@ public class DepthImageOverlapRemover
    private final MutableReferenceFrame realsenseFrame = new MutableReferenceFrame();
    private final Object imageDataUsageSynchronizer = new Object();
 
-   private RawImage slaveImage;
-   private BytedecoImage bytedecoSlaveImage;
-   private RawImage masterImage;
+   private RawImage lowQualityImage;
+   private BytedecoImage bytedecoLowQualityImage;
+   private RawImage highQualityImage;
 
    private BytedecoImage bytedecoZEDOutput;
 
@@ -39,98 +39,99 @@ public class DepthImageOverlapRemover
    }
 
    /**
-    * Sets the master image (the unmodified image)
+    * Sets the high quality image (the unmodified image)
     *
-    * @param masterImage the master image
+    * @param highQualityImage the high quality image
     */
-   public void setMasterImage(RawImage masterImage)
+   public void setHighQualityImage(RawImage highQualityImage)
    {
       synchronized (imageDataUsageSynchronizer)
       {
-         if (this.masterImage != null)
+         if (this.highQualityImage != null)
          {
-            this.masterImage.release();
+            this.highQualityImage.release();
          }
-         this.masterImage = masterImage;
+         this.highQualityImage = highQualityImage;
       }
    }
 
    /**
-    * Removes the overlapping region between the master and slave image from the slave image.
-    * The master image will not be modified, while the slave image will have the overlapping portion cut out.
+    * Removes the overlapping region between the high quality and low quality image from the low quality image.
+    * The high quality image will not be modified, while the low quality image will have the overlapping portion cut out.
     *
-    * @param slaveImage the slave image which will have the overlapping portion cut out
-    * @return A new RawImage object which is the provided slave image without the overlapping section.
+    * @param lowQualityImage the low quality image which will have the overlapping portion cut out
+    * @return A new RawImage object which is the provided low quality image without the overlapping section.
     */
-   public RawImage removeOverlap(RawImage slaveImage)
+   public RawImage removeOverlap(RawImage lowQualityImage, int allowedOverlap)
    {
-      if (this.slaveImage != null)
-         this.slaveImage.release();
-      this.slaveImage = slaveImage;
+      if (this.lowQualityImage != null)
+         this.lowQualityImage.release();
+      this.lowQualityImage = lowQualityImage;
 
       synchronized (imageDataUsageSynchronizer)
       {
-         if (masterImage == null || masterImage.isEmpty())
-            return this.slaveImage;
+         if (highQualityImage == null || highQualityImage.isEmpty())
+            return this.lowQualityImage;
 
-         zedFrame.update(transformToWorld -> transformToWorld.set(this.slaveImage.getOrientation(), this.slaveImage.getPosition()));
-         realsenseFrame.update(transformToWorld -> transformToWorld.set(masterImage.getOrientation(), masterImage.getPosition()));
+         zedFrame.update(transformToWorld -> transformToWorld.set(this.lowQualityImage.getOrientation(), this.lowQualityImage.getPosition()));
+         realsenseFrame.update(transformToWorld -> transformToWorld.set(highQualityImage.getOrientation(), highQualityImage.getPosition()));
          zedFrame.getReferenceFrame().getTransformToDesiredFrame(zedToRealsenseTransform, realsenseFrame.getReferenceFrame());
          zedToRealsenseTransformParameter.setParameter(zedToRealsenseTransform);
          zedToRealsenseTransformParameter.writeOpenCLBufferObject(openCLManager);
 
-         parameters.setParameter(this.slaveImage.getFocalLengthX());
-         parameters.setParameter(this.slaveImage.getFocalLengthY());
-         parameters.setParameter(this.slaveImage.getPrincipalPointX());
-         parameters.setParameter(this.slaveImage.getPrincipalPointY());
-         parameters.setParameter(this.slaveImage.getDepthDiscretization());
-         parameters.setParameter(this.slaveImage.getImageWidth());
-         parameters.setParameter(this.slaveImage.getImageHeight());
-         parameters.setParameter(masterImage.getFocalLengthX());
-         parameters.setParameter(masterImage.getFocalLengthY());
-         parameters.setParameter(masterImage.getPrincipalPointX());
-         parameters.setParameter(masterImage.getPrincipalPointY());
-         parameters.setParameter(masterImage.getDepthDiscretization());
-         parameters.setParameter(masterImage.getImageWidth());
-         parameters.setParameter(masterImage.getImageHeight());
+         parameters.setParameter(this.lowQualityImage.getFocalLengthX());
+         parameters.setParameter(this.lowQualityImage.getFocalLengthY());
+         parameters.setParameter(this.lowQualityImage.getPrincipalPointX());
+         parameters.setParameter(this.lowQualityImage.getPrincipalPointY());
+         parameters.setParameter(this.lowQualityImage.getDepthDiscretization());
+         parameters.setParameter(this.lowQualityImage.getImageWidth());
+         parameters.setParameter(this.lowQualityImage.getImageHeight());
+         parameters.setParameter(highQualityImage.getFocalLengthX());
+         parameters.setParameter(highQualityImage.getFocalLengthY());
+         parameters.setParameter(highQualityImage.getPrincipalPointX());
+         parameters.setParameter(highQualityImage.getPrincipalPointY());
+         parameters.setParameter(highQualityImage.getDepthDiscretization());
+         parameters.setParameter(highQualityImage.getImageWidth());
+         parameters.setParameter(highQualityImage.getImageHeight());
+         parameters.setParameter(allowedOverlap);
          parameters.writeOpenCLBufferObject(openCLManager);
       }
 
-      if (bytedecoSlaveImage != null)
-         bytedecoSlaveImage.destroy(openCLManager);
-      bytedecoSlaveImage = new BytedecoImage(this.slaveImage.getCpuImageMat());
-      bytedecoSlaveImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
-      bytedecoSlaveImage.writeOpenCLImage(openCLManager);
+      if (bytedecoLowQualityImage != null)
+         bytedecoLowQualityImage.destroy(openCLManager);
+      bytedecoLowQualityImage = new BytedecoImage(this.lowQualityImage.getCpuImageMat());
+      bytedecoLowQualityImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+      bytedecoLowQualityImage.writeOpenCLImage(openCLManager);
 
       if (bytedecoZEDOutput != null)
          bytedecoZEDOutput.destroy(openCLManager);
-      bytedecoZEDOutput = new BytedecoImage(this.slaveImage.getImageWidth(), this.slaveImage.getImageHeight(), this.slaveImage.getOpenCVType());
+      bytedecoZEDOutput = new BytedecoImage(this.lowQualityImage.getImageWidth(), this.lowQualityImage.getImageHeight(), this.lowQualityImage.getOpenCVType());
       bytedecoZEDOutput.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
 
-      openCLManager.setKernelArgument(kernel, 0, bytedecoSlaveImage.getOpenCLImageObject());
+      openCLManager.setKernelArgument(kernel, 0, bytedecoLowQualityImage.getOpenCLImageObject());
       openCLManager.setKernelArgument(kernel, 1, bytedecoZEDOutput.getOpenCLImageObject());
       openCLManager.setKernelArgument(kernel, 2, parameters.getOpenCLBufferObject());
       openCLManager.setKernelArgument(kernel, 3, zedToRealsenseTransformParameter.getOpenCLBufferObject());
 
-      openCLManager.execute2D(kernel, this.slaveImage.getImageWidth(), this.slaveImage.getImageHeight());
+      openCLManager.execute2D(kernel, this.lowQualityImage.getImageWidth(), this.lowQualityImage.getImageHeight());
 
       bytedecoZEDOutput.readOpenCLImage(openCLManager);
 
-      slaveImage.release();
+      lowQualityImage.release();
 
-      return new RawImage(slaveImage.getSequenceNumber(),
-                          slaveImage.getAcquisitionTime(),
-                          slaveImage.getImageWidth(),
-                          slaveImage.getImageHeight(),
-                          slaveImage.getDepthDiscretization(),
+      return new RawImage(lowQualityImage.getSequenceNumber(),
+                          lowQualityImage.getAcquisitionTime(),
+                          lowQualityImage.getImageWidth(),
+                          lowQualityImage.getImageHeight(),
+                          lowQualityImage.getDepthDiscretization(),
                           bytedecoZEDOutput.getBytedecoOpenCVMat(),
                           null,
-                          slaveImage.getOpenCVType(),
-                          slaveImage.getFocalLengthX(),
-                          slaveImage.getFocalLengthY(),
-                          slaveImage.getPrincipalPointX(),
-                          slaveImage.getPrincipalPointY(),
-                          slaveImage.getPosition(),
-                          slaveImage.getOrientation());
+                          lowQualityImage.getOpenCVType(),
+                          lowQualityImage.getFocalLengthX(),
+                          lowQualityImage.getFocalLengthY(),
+                          lowQualityImage.getPrincipalPointX(),
+                          lowQualityImage.getPrincipalPointY(),
+                          lowQualityImage.getPosition(),
+                          lowQualityImage.getOrientation());
    }
 }

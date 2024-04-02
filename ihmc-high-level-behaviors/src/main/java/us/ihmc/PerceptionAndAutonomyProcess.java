@@ -346,7 +346,7 @@ public class PerceptionAndAutonomyProcess
          RawImage zedCutOutDepthImage;
          if (depthOverlapRemovalDemandNode.isDemanded() && realsenseDemandNode.isDemanded() && realsenseDepthImage != null)
          {
-            zedCutOutDepthImage = overlapRemover.removeOverlap(zedDepthImage.get());
+            zedCutOutDepthImage = overlapRemover.removeOverlap(zedDepthImage.get(), 20);
          }
          else
             zedCutOutDepthImage = zedDepthImage.get();
@@ -373,7 +373,7 @@ public class PerceptionAndAutonomyProcess
          realsenseDepthImage = realsenseImageRetriever.getLatestRawDepthImage();
          realsenseColorImage = realsenseImageRetriever.getLatestRawColorImage();
 
-         overlapRemover.setMasterImage(realsenseDepthImage.get());
+         overlapRemover.setHighQualityImage(realsenseDepthImage.get());
 
          realsenseImagePublisher.setNextDepthImage(realsenseDepthImage.get());
          realsenseImagePublisher.setNextColorImage(realsenseColorImage.get());
