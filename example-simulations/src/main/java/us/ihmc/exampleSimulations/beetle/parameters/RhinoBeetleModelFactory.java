@@ -1,7 +1,6 @@
 package us.ihmc.exampleSimulations.beetle.parameters;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 import us.ihmc.modelFileLoaders.RobotDefinitionLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFModelLoader;
@@ -57,7 +56,7 @@ public class RhinoBeetleModelFactory implements FullRobotModelFactory
    {
       return new DefaultLogModelProvider<>(SDFModelLoader.class,
                                            sdfParameters.getSdfModelName(),
-                                           Collections.singletonList(sdfParameters.getSdfAsInputStream()),
+                                           sdfParameters.getSdfAsInputStream(),
                                            null,
                                            sdfParameters.getResourceDirectories());
    }
