@@ -27,6 +27,7 @@ import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
@@ -42,6 +43,7 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 
    private final double controlDT;
    private final double gravityZ;
+   private DoubleProvider totalMassProvider;
    private final FloatingJointBasics rootJoint;
    private final MultiBodySystemBasics multiBodySystemInput;
    private final List<KinematicLoopFunction> kinematicLoopFunctions = new ArrayList<>();
@@ -52,7 +54,6 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 
    private final JointIndexHandler jointIndexHandler;
    private final List<OneDoFJointBasics> inactiveOneDoFJoints = new ArrayList<>();
-   private final double totalRobotMass;
    private CentroidalMomentumCalculator centroidalMomentumCalculator;
    private CentroidalMomentumRateCalculator centroidalMomentumRateCalculator;
    // TODO The mass-matrix calculator (when created) should be used for computing the momentum stuff. Probably need some interface and API improvements.
@@ -178,11 +179,12 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
       this.centerOfMassFrame = centerOfMassFrame;
 
       jointIndexHandler = new JointIndexHandler(controlledJoints);
-      totalRobotMass = TotalMassCalculator.computeSubTreeMass(multiBodySystemInput.getRootBody());
       inverseDynamicsCalculator = new InverseDynamicsCalculator(multiBodySystemInput);
       inverseDynamicsCalculator.setGravitionalAcceleration(-gravityZ); // Watch out for the sign here, it changed with the switch to Mecano.
       rigidBodyAccelerationProvider = inverseDynamicsCalculator.getAccelerationProvider();
       rigidBodyTwistCalculator = new RigidBodyTwistCalculator(multiBodySystemInput);
+
+      totalMassProvider = () -> TotalMassCalculator.computeSubTreeMass(multiBodySystemInput.getRootBody());
 
       parentRegistry.addChild(registry);
    }
@@ -228,6 +230,19 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
    public void setJointPrivilegedConfigurationParameters(JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters)
    {
       this.jointPrivilegedConfigurationParameters = jointPrivilegedConfigurationParameters;
+   }
+
+   /**
+    * Sets the {@code DoubleProvider} that provides the total robot mass, for downstream classes that rely on this toolbox.
+    * <p>
+    * The total robot mass is normally assumed static after initialization, but can be time-varying if significant inertial changes occur on the robot.
+    * </p>
+    *
+    * @param totalMassProvider the {@code DoubleProvider} that provides the total robot mass.
+    */
+   public void setTotalMassProvider(DoubleProvider totalMassProvider)
+   {
+      this.totalMassProvider = totalMassProvider;
    }
 
    /**
@@ -531,7 +546,12 @@ public class WholeBodyControlCoreToolbox implements SCS2YoGraphicHolder
 
    public double getTotalRobotMass()
    {
-      return totalRobotMass;
+      return totalMassProvider.getValue();
+   }
+
+   public DoubleProvider getTotalMassProvider()
+   {
+      return totalMassProvider;
    }
 
    public YoGraphicsListRegistry getYoGraphicsListRegistry()
