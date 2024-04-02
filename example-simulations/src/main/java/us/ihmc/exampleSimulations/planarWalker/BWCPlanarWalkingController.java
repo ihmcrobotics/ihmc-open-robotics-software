@@ -3,6 +3,8 @@ package us.ihmc.exampleSimulations.planarWalker;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.PDController;
@@ -207,58 +209,108 @@ public class BWCPlanarWalkingController implements Controller, SCS2YoGraphicHold
          swingFootXTrajectory.setCubic(0.0, swingDuration, footPositionAtStart.getX(), computeDesiredTouchdownPosition());
       }
 
+//      @Override
+//      public void doAction(double timeInState)
+//      {
+//
+//         swingFootHeightTrajectory.compute(timeInState);
+//
+//         FramePoint3D footPosition = new FramePoint3D(controllerRobot.getFootFrame(swingSide));
+//         footPosition.changeFrame(controllerRobot.getWorldFrame());
+//
+//
+//         double currentHeight = footPosition.getZ();
+//         double desiredHeight = swingFootHeightTrajectory.getValue();
+//         // This is approximately the right velocity. Good enough for stability, but not great overall.
+//         Twist footTwist = new Twist();
+//         controllerRobot.getFootFrame(swingSide).getTwistRelativeToOther(controllerRobot.getWorldFrame(), footTwist);
+//         currentFootVelocity.setMatchingFrame(footTwist.getLinearPart());
+//         double currentVelocity = currentFootVelocity.getZ();
+//         double desiredVelocity = swingFootHeightTrajectory.getVelocity();
+//
+//         swingLegFeedbackForce.set(swingFootHeightController.compute(currentHeight, desiredHeight, currentVelocity, desiredVelocity));
+//         swingLegFeedforwardForce.set(swingFootHeightTrajectory.getAcceleration() * controllerRobot.getFootMass());
+//
+//         swingLegForce.set(swingLegFeedbackForce.getDoubleValue() + swingLegFeedforwardForce.getValue());
+//
+//         // set the desired torque to the knee joint to achieve the desired swing foot height
+//         controllerRobot.getKneeJoint(swingSide).setTau(swingLegForce.getDoubleValue());
+//
+//         footTouchdownPosition.set(computeDesiredTouchdownPosition());
+//         swingFootXTrajectory.setCubic(0.0, desiredSwingDuration.getDoubleValue(), footPositionAtStart.getX(), footTouchdownPosition.getDoubleValue());
+//         swingFootXTrajectory.compute(timeInState);
+//
+//         double desiredFootPositionX = swingFootXTrajectory.getValue();
+//         footDesiredPosition.set(desiredFootPositionX);
+//         double desiredFootVelocityX = swingFootXTrajectory.getVelocity();
+//
+//         footPosition.changeFrame(controllerRobot.getCenterOfMassFrame());
+//         double currentFootPositionX = footPosition.getX();
+//         double currentFootVelocityX = controllerRobot.getVelocityOfFootRelativeToCoM(swingSide).getX();
+//         double hipForce = swingHipPitchController.compute(currentFootPositionX, desiredFootPositionX, currentFootVelocityX, desiredFootVelocityX);
+//         swingHipForce.set(-hipForce);
+//
+//         controllerRobot.getHipJoint(swingSide).setTau(swingHipForce.getDoubleValue());
+//
+//         footPosition.setX(desiredFootPositionX);
+//         footPosition.changeFrame(controllerRobot.getWorldFrame());
+//         footPosition.setZ(desiredHeight);
+//         desiredFootPositions.get(swingSide).setMatchingFrame(footPosition);
+//
+//         footPosition.setZ(0.0);
+//         footPosition.changeFrame(controllerRobot.getCenterOfMassFrame());
+//         footPosition.setX(footTouchdownPosition.getDoubleValue());
+//         desiredTouchdownPositions.get(swingSide).setMatchingFrame(footPosition);
+//      }
+
       @Override
       public void doAction(double timeInState)
       {
+         // Calculate the capture point based on the current CoM position and velocity
+         double omega = Math.sqrt(9.81 / desiredBodyHeight.getDoubleValue());
+         FramePoint3DReadOnly centerOfMassPosition = controllerRobot.getCenterOfMassPosition();
+         FrameVector3DReadOnly centerOfMassVelocity = controllerRobot.getCenterOfMassVelocity();
+         double capturePointX = centerOfMassPosition.getX() + centerOfMassVelocity.getX() / omega;
+         double capturePointY = centerOfMassPosition.getY() + centerOfMassVelocity.getY() / omega;
+
+         // Set the desired touchdown position based on the capture point
+         desiredTouchdownPositions.get(swingSide).set(capturePointX, capturePointY, 0.0);
+
+         // Compute the swing foot height trajectory
          swingFootHeightTrajectory.compute(timeInState);
 
+         // Obtain current foot position and update based on trajectory for visual representation and control
          FramePoint3D footPosition = new FramePoint3D(controllerRobot.getFootFrame(swingSide));
          footPosition.changeFrame(controllerRobot.getWorldFrame());
 
-
          double currentHeight = footPosition.getZ();
          double desiredHeight = swingFootHeightTrajectory.getValue();
-         // This is approximately the right velocity. Good enough for stability, but not great overall.
          Twist footTwist = new Twist();
          controllerRobot.getFootFrame(swingSide).getTwistRelativeToOther(controllerRobot.getWorldFrame(), footTwist);
          currentFootVelocity.setMatchingFrame(footTwist.getLinearPart());
          double currentVelocity = currentFootVelocity.getZ();
          double desiredVelocity = swingFootHeightTrajectory.getVelocity();
 
+         // Calculate feedback and feedforward forces for controlling the swing foot height
          swingLegFeedbackForce.set(swingFootHeightController.compute(currentHeight, desiredHeight, currentVelocity, desiredVelocity));
          swingLegFeedforwardForce.set(swingFootHeightTrajectory.getAcceleration() * controllerRobot.getFootMass());
-
          swingLegForce.set(swingLegFeedbackForce.getDoubleValue() + swingLegFeedforwardForce.getValue());
 
-         // set the desired torque to the knee joint to achieve the desired swing foot height
+         // Apply the forces to the robot's knee joint to achieve the desired swing foot motion
          controllerRobot.getKneeJoint(swingSide).setTau(swingLegForce.getDoubleValue());
 
-         footTouchdownPosition.set(computeDesiredTouchdownPosition());
-         swingFootXTrajectory.setCubic(0.0, desiredSwingDuration.getDoubleValue(), footPositionAtStart.getX(), footTouchdownPosition.getDoubleValue());
-         swingFootXTrajectory.compute(timeInState);
+         // Update desired foot positions for visualization and control
+         footPosition.setX(capturePointX); // Update the X position to the capture point
+         footPosition.setZ(desiredHeight); // Update the Z height as per the trajectory
+         desiredFootPositions.get(swingSide).setMatchingFrame(footPosition); // Set the desired foot position for visualization
 
-         double desiredFootPositionX = swingFootXTrajectory.getValue();
-         footDesiredPosition.set(desiredFootPositionX);
-         double desiredFootVelocityX = swingFootXTrajectory.getVelocity();
-
-         footPosition.changeFrame(controllerRobot.getCenterOfMassFrame());
-         double currentFootPositionX = footPosition.getX();
-         double currentFootVelocityX = controllerRobot.getVelocityOfFootRelativeToCoM(swingSide).getX();
-         double hipForce = swingHipPitchController.compute(currentFootPositionX, desiredFootPositionX, currentFootVelocityX, desiredFootVelocityX);
-         swingHipForce.set(-hipForce);
-
-         controllerRobot.getHipJoint(swingSide).setTau(swingHipForce.getDoubleValue());
-
-         footPosition.setX(desiredFootPositionX);
-         footPosition.changeFrame(controllerRobot.getWorldFrame());
-         footPosition.setZ(desiredHeight);
-         desiredFootPositions.get(swingSide).setMatchingFrame(footPosition);
-
-         footPosition.setZ(0.0);
-         footPosition.changeFrame(controllerRobot.getCenterOfMassFrame());
-         footPosition.setX(footTouchdownPosition.getDoubleValue());
+         // Update the representation of the desired touchdown position and foot trajectory
+         footPosition.setZ(0);
+         // Ensure the X position matches the capture point for the touchdown
+         footPosition.setX(capturePointX);
          desiredTouchdownPositions.get(swingSide).setMatchingFrame(footPosition);
       }
+
 
       private double computeDesiredTouchdownPosition()
       {
