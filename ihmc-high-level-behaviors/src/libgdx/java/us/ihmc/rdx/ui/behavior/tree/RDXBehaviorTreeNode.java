@@ -147,7 +147,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       if (textHovered && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
       {
          setSpecificWidgetOnRowClicked();
-         RDXBehaviorTreeTools.runForEntireTree(this, RDXBehaviorTreeNode::clearSelections);
+         RDXBehaviorTreeTools.clearOtherNodeSelections(this);
          selected.set(true);
          isNameBeingEdited = true;
          imNodeNameText.set(definition.getName());
@@ -168,7 +168,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
       if (mouseHoveringNodeLine && !isNameBeingEdited && ImGui.isMouseClicked(ImGuiMouseButton.Right))
       {
-         RDXBehaviorTreeTools.runForEntireTree(this, RDXBehaviorTreeNode::clearSelections);
+         RDXBehaviorTreeTools.clearOtherNodeSelections(this);
          selected.set(true);
          ImGui.openPopup(nodePopupID);
       }
@@ -178,7 +178,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       if (!anySpecificWidgetOnLineClicked && mouseHoveringNodeLine && ImGui.isMouseClicked(ImGuiMouseButton.Left) && !isNameBeingEdited)
       {
          boolean desiredValue = !selected.get();
-         RDXBehaviorTreeTools.runForEntireTree(this, RDXBehaviorTreeNode::clearSelections);
+         RDXBehaviorTreeTools.clearOtherNodeSelections(this);
          selected.set(desiredValue);
       }
    }

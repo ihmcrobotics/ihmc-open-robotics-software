@@ -26,6 +26,14 @@ module behavior_msgs
          */
         double hand_open_angle;
         /**
+         * If hand angles are less than this amount off, skip the action
+         */
+        double initial_satisfaction_hand_angle_tolerance;
+        /**
+         * Hand angles goal error tolerance
+         */
+        double completion_hand_angle_tolerance;
+        /**
          * Torque limit specified as fingertip grip force. Valid up to 29 Newtons. Safe value is 8.7 N.
          */
         double fingertip_grip_force_limit;

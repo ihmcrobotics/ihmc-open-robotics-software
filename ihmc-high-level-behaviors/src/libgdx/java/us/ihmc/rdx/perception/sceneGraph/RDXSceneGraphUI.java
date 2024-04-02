@@ -345,6 +345,11 @@ public class RDXSceneGraphUI
          ImGui.checkbox(labels.get("Show graphics"), showGraphics);
          ImGui.sameLine();
          ImGui.checkbox(labels.get("View as tree"), viewAsTree);
+         ImGui.sameLine();
+         if (ImGui.button("Remove All"))
+            for (SceneNode sceneNode : uiSceneNodes.keySet())
+               if (sceneNode != sceneGraph.getRootNode())
+                  uiSceneNodes.get(sceneNode).remove();
          ImGui.separator();
 
          if (viewAsTree.get())
@@ -355,7 +360,6 @@ public class RDXSceneGraphUI
          {
             for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
             {
-
                if (uiSceneNodes.containsKey(sceneNode))
                {
                   if (ImGui.collapsingHeader(labels.get(sceneNode.getName())))
@@ -390,7 +394,11 @@ public class RDXSceneGraphUI
    {
       if (showGraphics.get())
       {
-         uiSceneNodes.values().forEach(node -> node.getRenderables(renderables, pool, sceneLevels));
+         uiSceneNodes.values().forEach(node ->
+         {
+            if (!node.isGraphicsHidden())
+               node.getRenderables(renderables, pool, sceneLevels);
+         });
       }
    }
 

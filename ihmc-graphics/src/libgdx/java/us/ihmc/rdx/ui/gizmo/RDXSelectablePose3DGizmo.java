@@ -103,6 +103,7 @@ public class RDXSelectablePose3DGizmo
          boolean leftMouseReleasedWithoutDrag = input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
          boolean isClickedOn = isPickSelected && leftMouseReleasedWithoutDrag;
          boolean somethingElseIsClickedOn = !isPickSelected && leftMouseReleasedWithoutDrag;
+         boolean isCtrlPressed = ImGui.getIO().getKeyCtrl();
          boolean deselectionKeyPressed = ImGui.isKeyReleased(ImGuiTools.getDeleteKey()) || ImGui.isKeyReleased(ImGuiTools.getEscapeKey());
 
          // Determine selectedness
@@ -110,7 +111,8 @@ public class RDXSelectablePose3DGizmo
          {
             selected.set(true);
          }
-         if (somethingElseIsClickedOn || deselectionKeyPressed)
+         // Allow mutli-selection by holding Ctrl
+         if ((somethingElseIsClickedOn && !isCtrlPressed) || deselectionKeyPressed)
          {
             selected.set(false);
          }
