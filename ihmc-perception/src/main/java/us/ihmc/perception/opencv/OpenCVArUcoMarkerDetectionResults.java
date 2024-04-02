@@ -9,11 +9,13 @@ import org.bytedeco.opencv.global.opencv_objdetect;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.matrix.LinearTransform3D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -22,6 +24,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
+
+import java.util.Random;
 
 /**
  * This class provides support for copying the full output from
@@ -139,6 +143,7 @@ public class OpenCVArUcoMarkerDetectionResults
       tempMarkerPose.get(orientationToPack, translationToPack);
    }
 
+   Random random = new Random(1738L);
    /**
     * Get the pose of an ArUco marker. Use with {@link #isDetected} to make sure
     * the ID is currently detected first.
@@ -147,6 +152,9 @@ public class OpenCVArUcoMarkerDetectionResults
    {
       updateMarkerPose(markerID, markerSize);
       poseToPack.set(euclidPosition, euclidLinearTransform.getAsQuaternion());
+
+//      poseToPack.getPosition().add(EuclidCoreRandomTools.nextVector3D(random, 0.01));
+//      poseToPack.getRotation().append(EuclidCoreRandomTools.nextQuaternion(random, Math.toRadians(5)));
    }
    
    /**
