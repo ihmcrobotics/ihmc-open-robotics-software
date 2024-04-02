@@ -24,8 +24,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.MultiBodySystemMissingTools;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -48,8 +46,6 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
    private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
 
    private final HumanoidKinematicsSolver wholeBodyIKSolver;
-   private final FullHumanoidRobotModel desiredFullRobotModel;
-   private final OneDoFJointBasics[] desiredOneDoFJointsExcludingHands;
    private final SideDependentList<KinematicsToolboxRigidBodyCommand> handRigidBodyCommands = new SideDependentList<>();
    private volatile boolean isSolutionGood = false;
 
@@ -69,9 +65,6 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.ros2ControllerHelper = ros2ControllerHelper;
-
-      this.desiredFullRobotModel = robotModel.createFullRobotModel();
-      desiredOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(desiredFullRobotModel);
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       wholeBodyIKSolver = new HumanoidKinematicsSolver(robotModel, yoGraphicsListRegistry, new YoRegistry(getClass().getSimpleName()));
@@ -108,8 +101,9 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
 
       if (state.getHandFrame(RobotSide.LEFT).isChildOfWorld())
       {
-         wholeBodyIKSolver.setInitialConfiguration(syncedRobot.getLatestRobotConfigurationData());
-//         wholeBodyIKSolver.setCapturabilityBasedStatus(controllerStatusTracker.getLatestCapturabilityBasedStatus());
+         RobotConfigurationData robotConfigurationData = syncedRobot.getLatestRobotConfigurationData();
+         wholeBodyIKSolver.setInitialConfiguration(robotConfigurationData);
+         wholeBodyIKSolver.setAsDoubleSupport();
          wholeBodyIKSolver.initialize();
 
          for (RobotSide side : handRigidBodyCommands.sides())
@@ -117,7 +111,6 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
             KinematicsToolboxRigidBodyCommand rigidBodyCommand = handRigidBodyCommands.get(side);
             rigidBodyCommand.getDesiredPose().setFromReferenceFrame(state.getHandFrame(side).getReferenceFrame());
             wholeBodyIKSolver.submit(rigidBodyCommand);
-            wholeBodyIKSolver.setAsDoubleSupport();
          }
 
          // We solve on a thread because the solver can take some milliseconds
@@ -129,13 +122,10 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
             }
             finally
             {
-               desiredFullRobotModel.getRootJoint()
-                           .setJointConfiguration(wholeBodyIKSolver.getSolution().getDesiredRootOrientation(),
-                                                  wholeBodyIKSolver.getSolution().getDesiredRootPosition());
-               MultiBodySystemMissingTools.copyOneDoFJointsConfiguration(wholeBodyIKSolver.getDesiredOneDoFJoints(), desiredOneDoFJointsExcludingHands);
-               desiredFullRobotModel.updateFrames();
+               FullHumanoidRobotModel desiredFullRobotModel = wholeBodyIKSolver.getDesiredFullRobotModel();
+               OneDoFJointBasics[] desiredOneDoFJoints = wholeBodyIKSolver.getDesiredOneDoFJoints();
 
-               double[] ikJointPosition = Arrays.stream(desiredOneDoFJointsExcludingHands)
+               double[] ikJointPosition = Arrays.stream(desiredOneDoFJoints)
                                                 .mapToDouble(OneDoFJointReadOnly::getQ)
                                                 .toArray();
                state.setJointAngles(ikJointPosition);
@@ -146,9 +136,6 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
 
                populateArmTrajectoryMessage(wholeBodyTrajectoryMessage.getLeftArmTrajectoryMessage(), RobotSide.LEFT);
                populateArmTrajectoryMessage(wholeBodyTrajectoryMessage.getRightArmTrajectoryMessage(), RobotSide.RIGHT);
-
-               populateLegTrajectoryMessage(wholeBodyTrajectoryMessage.getLeftLegTrajectoryMessage(), RobotSide.LEFT);
-               populateLegTrajectoryMessage(wholeBodyTrajectoryMessage.getRightLegTrajectoryMessage(), RobotSide.RIGHT);
 
                SpineTrajectoryMessage spineTrajectoryMessage = wholeBodyTrajectoryMessage.getSpineTrajectoryMessage();
                spineTrajectoryMessage.getJointspaceTrajectory().getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
@@ -181,7 +168,7 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
                se3TrajectoryPointMessage.getAngularVelocity().setToZero();
                se3TrajectoryMessage.getFrameInformation().setTrajectoryReferenceFrameId(trajectoryReferenceFrameID);
 
-               LogTools.info("Publishing Wholebody Bimanipulation trajectory");
+               LogTools.info("Publishing Wholebody Bimanipulation trajectory...");
                ros2ControllerHelper.publishToController(wholeBodyTrajectoryMessage);
             }
          });
@@ -220,25 +207,7 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
 
          TrajectoryPoint1DMessage trajectoryPoint1DMessage = oneDoFJointTrajectoryMessage.getTrajectoryPoints().add();
          trajectoryPoint1DMessage.setTime(definition.getTrajectoryDuration());
-         trajectoryPoint1DMessage.setPosition(desiredFullRobotModel.getArmJoint(side, armJointName).getQ());
-         trajectoryPoint1DMessage.setVelocity(0.0);
-      }
-   }
-
-   private void populateLegTrajectoryMessage(LegTrajectoryMessage legTrajectoryMessage, RobotSide side)
-   {
-      legTrajectoryMessage.setRobotSide(side.toByte());
-      legTrajectoryMessage.getJointspaceTrajectory().getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
-      IDLSequence.Object<OneDoFJointTrajectoryMessage> jointTrajectoryMessages = legTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages();
-      for (LegJointName legJointName : robotModel.getJointMap().getLegJointNames())
-      {
-         OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage = jointTrajectoryMessages.add();
-         oneDoFJointTrajectoryMessage.getTrajectoryPoints().clear();
-         oneDoFJointTrajectoryMessage.setWeight(-1.0); // Use default weight
-
-         TrajectoryPoint1DMessage trajectoryPoint1DMessage = oneDoFJointTrajectoryMessage.getTrajectoryPoints().add();
-         trajectoryPoint1DMessage.setTime(definition.getTrajectoryDuration());
-         trajectoryPoint1DMessage.setPosition(desiredFullRobotModel.getLegJoint(side, legJointName).getQ());
+         trajectoryPoint1DMessage.setPosition(wholeBodyIKSolver.getDesiredFullRobotModel().getArmJoint(side, armJointName).getQ());
          trajectoryPoint1DMessage.setVelocity(0.0);
       }
    }

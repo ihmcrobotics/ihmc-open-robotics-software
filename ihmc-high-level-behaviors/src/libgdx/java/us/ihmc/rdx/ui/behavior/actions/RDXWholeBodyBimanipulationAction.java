@@ -104,6 +104,7 @@ public class RDXWholeBodyBimanipulationAction extends RDXActionNode<WholeBodyBim
 
       definition.getHandToParentTransform(RobotSide.LEFT).getValue().set(new RigidBodyTransform(new Quaternion(Math.toRadians(-30.0), Math.toRadians(-25.0), 0.0), new Point3D(0.0, 0.127, 0.0)));
       definition.getHandToParentTransform(RobotSide.RIGHT).getValue().set(new RigidBodyTransform(new Quaternion(Math.toRadians(30.0), Math.toRadians(-25.0), 0.0), new Point3D(0.0, -0.127, 0.0)));
+      definition.setTrajectoryDuration(2.0);
    }
 
    @Override
