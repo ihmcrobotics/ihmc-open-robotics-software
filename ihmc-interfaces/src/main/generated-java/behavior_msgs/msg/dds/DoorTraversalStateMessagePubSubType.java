@@ -15,7 +15,7 @@ public class DoorTraversalStateMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b5fc645714f37f0eead27ba3b2043e6e78c456658cc5a35a211769d5b697a12a";
+   		return "759c099374e538918e72d3f380d98476bf962c350f595ec0c32106d7e5335598";
    }
    
    @Override

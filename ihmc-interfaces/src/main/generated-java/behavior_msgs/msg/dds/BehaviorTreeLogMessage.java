@@ -17,18 +17,15 @@ public class BehaviorTreeLogMessage extends Packet<BehaviorTreeLogMessage> imple
             */
    public int log_level_;
    /**
-            * The ID of the node that generated the message
+            * The log message, as multiple ASCII bytes because of our 255 string length constraint
             */
-   public int source_node_id_;
-   /**
-            * The log message
-            */
-   public java.lang.StringBuilder message_;
+   public us.ihmc.idl.IDLSequence.Byte  log_message_;
 
    public BehaviorTreeLogMessage()
    {
       instant_ = new ihmc_common_msgs.msg.dds.InstantMessage();
-      message_ = new java.lang.StringBuilder(255);
+      log_message_ = new us.ihmc.idl.IDLSequence.Byte (2048, "type_9");
+
    }
 
    public BehaviorTreeLogMessage(BehaviorTreeLogMessage other)
@@ -42,11 +39,7 @@ public class BehaviorTreeLogMessage extends Packet<BehaviorTreeLogMessage> imple
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.instant_, instant_);
       log_level_ = other.log_level_;
 
-      source_node_id_ = other.source_node_id_;
-
-      message_.setLength(0);
-      message_.append(other.message_);
-
+      log_message_.set(other.log_message_);
    }
 
 
@@ -73,43 +66,13 @@ public class BehaviorTreeLogMessage extends Packet<BehaviorTreeLogMessage> imple
       return log_level_;
    }
 
-   /**
-            * The ID of the node that generated the message
-            */
-   public void setSourceNodeId(int source_node_id)
-   {
-      source_node_id_ = source_node_id;
-   }
-   /**
-            * The ID of the node that generated the message
-            */
-   public int getSourceNodeId()
-   {
-      return source_node_id_;
-   }
 
    /**
-            * The log message
+            * The log message, as multiple ASCII bytes because of our 255 string length constraint
             */
-   public void setMessage(java.lang.String message)
+   public us.ihmc.idl.IDLSequence.Byte  getLogMessage()
    {
-      message_.setLength(0);
-      message_.append(message);
-   }
-
-   /**
-            * The log message
-            */
-   public java.lang.String getMessageAsString()
-   {
-      return getMessage().toString();
-   }
-   /**
-            * The log message
-            */
-   public java.lang.StringBuilder getMessage()
-   {
-      return message_;
+      return log_message_;
    }
 
 
@@ -133,9 +96,7 @@ public class BehaviorTreeLogMessage extends Packet<BehaviorTreeLogMessage> imple
       if (!this.instant_.epsilonEquals(other.instant_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.log_level_, other.log_level_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.source_node_id_, other.source_node_id_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.message_, other.message_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.log_message_, other.log_message_, epsilon)) return false;
 
 
       return true;
@@ -153,10 +114,7 @@ public class BehaviorTreeLogMessage extends Packet<BehaviorTreeLogMessage> imple
       if (!this.instant_.equals(otherMyClass.instant_)) return false;
       if(this.log_level_ != otherMyClass.log_level_) return false;
 
-      if(this.source_node_id_ != otherMyClass.source_node_id_) return false;
-
-      if (!us.ihmc.idl.IDLTools.equals(this.message_, otherMyClass.message_)) return false;
-
+      if (!this.log_message_.equals(otherMyClass.log_message_)) return false;
 
       return true;
    }
@@ -171,10 +129,8 @@ public class BehaviorTreeLogMessage extends Packet<BehaviorTreeLogMessage> imple
       builder.append(this.instant_);      builder.append(", ");
       builder.append("log_level=");
       builder.append(this.log_level_);      builder.append(", ");
-      builder.append("source_node_id=");
-      builder.append(this.source_node_id_);      builder.append(", ");
-      builder.append("message=");
-      builder.append(this.message_);
+      builder.append("log_message=");
+      builder.append(this.log_message_);
       builder.append("}");
       return builder.toString();
    }

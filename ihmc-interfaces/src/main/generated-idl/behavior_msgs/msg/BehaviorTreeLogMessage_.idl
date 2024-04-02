@@ -21,13 +21,9 @@ module behavior_msgs
          */
         unsigned short log_level;
         /**
-         * The ID of the node that generated the message
+         * The log message, as multiple ASCII bytes because of our 255 string length constraint
          */
-        unsigned short source_node_id;
-        /**
-         * The log message
-         */
-        string message;
+        sequence<octet, 2048> log_message;
       };
     };
   };

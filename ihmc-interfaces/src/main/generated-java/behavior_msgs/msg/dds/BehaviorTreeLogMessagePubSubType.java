@@ -15,7 +15,7 @@ public class BehaviorTreeLogMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "3ae07b14debcf097d1151bba2ec109c9643c969d561c807d5744efd5eac193fa";
+   		return "6bab6eef6a1625057c3bf3fcfb20760f033aa7e9dc9c6509b94805a4c79df747";
    }
    
    @Override
@@ -56,9 +56,8 @@ public class BehaviorTreeLogMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (2048 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
       return current_alignment - initial_alignment;
    }
@@ -77,10 +76,9 @@ public class BehaviorTreeLogMessagePubSubType implements us.ihmc.pubsub.TopicDat
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
-      current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getLogMessage().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getMessage().length() + 1;
 
 
       return current_alignment - initial_alignment;
@@ -91,11 +89,9 @@ public class BehaviorTreeLogMessagePubSubType implements us.ihmc.pubsub.TopicDat
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getInstant(), cdr);
       cdr.write_type_3(data.getLogLevel());
 
-      cdr.write_type_3(data.getSourceNodeId());
-
-      if(data.getMessage().length() <= 255)
-      cdr.write_type_d(data.getMessage());else
-          throw new RuntimeException("message field exceeds the maximum length");
+      if(data.getLogMessage().size() <= 2048)
+      cdr.write_type_e(data.getLogMessage());else
+          throw new RuntimeException("log_message field exceeds the maximum length");
 
    }
 
@@ -104,9 +100,7 @@ public class BehaviorTreeLogMessagePubSubType implements us.ihmc.pubsub.TopicDat
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getInstant(), cdr);	
       data.setLogLevel(cdr.read_type_3());
       	
-      data.setSourceNodeId(cdr.read_type_3());
-      	
-      cdr.read_type_d(data.getMessage());	
+      cdr.read_type_e(data.getLogMessage());	
 
    }
 
@@ -116,8 +110,7 @@ public class BehaviorTreeLogMessagePubSubType implements us.ihmc.pubsub.TopicDat
       ser.write_type_a("instant", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getInstant());
 
       ser.write_type_3("log_level", data.getLogLevel());
-      ser.write_type_3("source_node_id", data.getSourceNodeId());
-      ser.write_type_d("message", data.getMessage());
+      ser.write_type_e("log_message", data.getLogMessage());
    }
 
    @Override
@@ -126,8 +119,7 @@ public class BehaviorTreeLogMessagePubSubType implements us.ihmc.pubsub.TopicDat
       ser.read_type_a("instant", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getInstant());
 
       data.setLogLevel(ser.read_type_3("log_level"));
-      data.setSourceNodeId(ser.read_type_3("source_node_id"));
-      ser.read_type_d("message", data.getMessage());
+      ser.read_type_e("log_message", data.getLogMessage());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorTreeLogMessage src, behavior_msgs.msg.dds.BehaviorTreeLogMessage dest)
