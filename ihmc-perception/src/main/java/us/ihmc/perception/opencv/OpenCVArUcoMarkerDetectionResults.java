@@ -9,15 +9,18 @@ import org.bytedeco.opencv.global.opencv_objdetect;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 
@@ -46,11 +49,18 @@ public class OpenCVArUcoMarkerDetectionResults
    private transient final Mat translationVector;
    private transient final Scalar defaultBorderColor;
 
-   private transient final RotationMatrix arucoRotation = new RotationMatrix();
-   private transient final Point3D arucoTranslation = new Point3D();
+   private transient final Pose3D arucoPose = new Pose3D();
 
    // This is a temp variable, and is not used to store state
    private transient final FramePose3D tempMarkerPose = new FramePose3D();
+
+   // The weird conversion of axes are because sensor frame is assumed x forward z up, but image frame is z forward, x right. This means z in image is
+   // x in sensor, and x in image is -y in sensor.
+   private static final RigidBodyTransform sensorToImageTransform = new RigidBodyTransform();
+   static {
+      sensorToImageTransform.appendRollRotation(-Math.PI / 2.0);
+      sensorToImageTransform.appendPitchRotation(Math.PI / 2.0);
+   }
 
    public OpenCVArUcoMarkerDetectionResults()
    {
@@ -133,13 +143,12 @@ public class OpenCVArUcoMarkerDetectionResults
                        Tuple3DBasics translationToPack,
                        Orientation3DBasics orientationToPack)
    {
-      tempMarkerPose.setReferenceFrame(sensorFrame);
-      getPoseInSensorFrame(markerID, markerSize, tempMarkerPose);
+      updateMarkerPose(markerID, markerSize);
+      tempMarkerPose.setIncludingFrame(sensorFrame, arucoPose);
       tempMarkerPose.changeFrame(desiredFrame);
       tempMarkerPose.get(orientationToPack, translationToPack);
    }
 
-   Random random = new Random(1738L);
    /**
     * Get the pose of an ArUco marker. Use with {@link #isDetected} to make sure
     * the ID is currently detected first.
@@ -147,10 +156,7 @@ public class OpenCVArUcoMarkerDetectionResults
    public void getPoseInSensorFrame(int markerID, double markerSize, Pose3DBasics poseToPack)
    {
       updateMarkerPose(markerID, markerSize);
-      poseToPack.set(arucoTranslation, arucoRotation);//euclidLinearTransform.getAsQuaternion());
-
-      poseToPack.getPosition().add(EuclidCoreRandomTools.nextVector3D(random, 0.01));
-      poseToPack.getRotation().append(EuclidCoreRandomTools.nextQuaternion(random, Math.toRadians(5)));
+      poseToPack.set(arucoPose);
    }
    
    /**
@@ -177,32 +183,24 @@ public class OpenCVArUcoMarkerDetectionResults
       { // This happens sometimes. There is a bug somewhere, potentially to do with threading, but I can't find it. - @dcalvert
          LogTools.error("Corners index {} is >= the vector size {}. Can't update the pose of this marker this frame.",
                         cornersIndex, cornersSize);
+         arucoPose.setToNaN();
       }
       else
       {
          Mat markerCorners = corners.get(cornersIndex);
          opencv_calib3d.solvePnP(objectPoints, markerCorners, cameraMatrix, distortionCoefficients, rotationVector, translationVector);
 
-         // The weird conversion of axes are because sensor frame is assumed x forward z up, but image frame is z forward, x right. This means z in image is
-         // x in sensor, and x in image is -y in sensor.
-
-         // Couldn't figure out why we had to apply these transforms here and below, but it works.
          double rx = rotationVector.ptr(0).getDouble();
          double ry = rotationVector.ptr(0).getDouble(Double.BYTES);
          double rz = rotationVector.ptr(0).getDouble(2 * Double.BYTES);
 
-         arucoRotation.setRotationVector(rz, -rx, -ry);
-         // These are probably because the coordinate system we define ourselves now for the solvePnP method,
-         // probably why they did it,so the way we define it must be different to the way it was internally
-         // in estimatePoseSingleMarkers.
-         // TODO these define the transform from sensor to image frame, so that makes sense.
-         arucoRotation.appendRollRotation(-Math.PI / 2.0);
-         arucoRotation.appendPitchRotation(Math.PI / 2.0);
-
          double x = translationVector.ptr(0).getDouble();
          double y = translationVector.ptr(0).getDouble(Double.BYTES);
          double z = translationVector.ptr(0).getDouble(2 * Double.BYTES);
-         arucoTranslation.set(z, -x, -y);
+
+         arucoPose.getPosition().set(x, y, z);
+         arucoPose.getOrientation().setRotationVector(rx, ry, rz);
+         arucoPose.applyTransform(sensorToImageTransform);
       }
    }
 
