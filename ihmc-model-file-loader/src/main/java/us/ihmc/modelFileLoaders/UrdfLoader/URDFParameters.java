@@ -14,8 +14,5 @@ public interface URDFParameters
 
    String getResourceDirectory();
 
-   default Collection<InputStream> getURDFAsInputStreamList()
-   {
-      return null;
-   }
+   InputStream getURDFAsInputStream();
 }

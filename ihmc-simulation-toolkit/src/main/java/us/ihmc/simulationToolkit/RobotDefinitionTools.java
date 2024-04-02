@@ -193,7 +193,7 @@ public class RobotDefinitionTools
    // RobotDefinitionLoader redirections:
    // --------------------------------------------------------
 
-   public static RobotDefinition loadURDFModel(Collection<InputStream> streams,
+   public static RobotDefinition loadURDFModel(InputStream inputStream,
                                                Collection<String> resourceDirectories,
                                                ClassLoader classLoader,
                                                String modelName,
@@ -201,7 +201,7 @@ public class RobotDefinitionTools
                                                JointNameMap<?> jointNameMap,
                                                boolean removeCollisionMeshes)
    {
-      return RobotDefinitionLoader.loadURDFModel(streams,
+      return RobotDefinitionLoader.loadURDFModel(inputStream,
                                                  resourceDirectories,
                                                  classLoader,
                                                  modelName,
