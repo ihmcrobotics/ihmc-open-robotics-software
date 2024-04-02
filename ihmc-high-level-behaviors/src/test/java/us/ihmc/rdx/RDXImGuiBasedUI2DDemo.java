@@ -16,7 +16,7 @@ public class RDXImGuiBasedUI2DDemo
 
    private final Stopwatch stopwatch = new Stopwatch().start();
    private final ImGuiMovingPlot renderPlot = new ImGuiMovingPlot("render count", 1000, 300, 30);
-   private final ImGuiLogWidget logWidget = new ImGuiLogWidget("Log");
+   private final ImGuiLogWidget logWidget = new ImGuiLogWidget();
    private long renderCount = 0;
 
    public RDXImGuiBasedUI2DDemo()

@@ -1,81 +1,115 @@
 package us.ihmc.rdx.ui.tools;
 
 import com.badlogic.gdx.graphics.Color;
-import imgui.internal.ImGui;
-import org.apache.commons.lang3.tuple.Pair;
+import imgui.flag.ImGuiCol;
+import imgui.ImGui;
+import imgui.type.ImBoolean;
 import org.apache.logging.log4j.Level;
+import us.ihmc.commons.thread.Notification;
+import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.LinkedList;
 
 public class ImGuiLogWidget
 {
-   private final LinkedList<Pair<Integer, String>> logEntries = new LinkedList<>();
-   private final String name;
-
-   public ImGuiLogWidget(String name)
+   private static final int WARN_COLOR;
+   static
    {
-      this.name = name;
-      logEntries.addLast(Pair.of(Level.INFO.intLevel(), "Log started at " + LocalDateTime.now()));
+      float[] hsv = new float[3];
+      Color.YELLOW.toHsv(hsv);
+      WARN_COLOR = new Color().fromHsv(hsv[0], hsv[1], 0.7f).toIntBits();
    }
 
-   public void submitEntry(Pair<Integer, String> entry)
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private int entryLimit = 0;
+   private float childHeight = 200.0f;
+   private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("H:mm:ss:SSS").withZone(ZoneId.systemDefault());
+   private record Entry(Instant instant, Level level, String message) { };
+   private final LinkedList<Entry> logEntries = new LinkedList<>();
+   private final ImBoolean scrollToEnd = new ImBoolean(true);
+   private final Notification wouldScrollToEnd = new Notification();
+
+   public ImGuiLogWidget()
    {
-      synchronized (logEntries)
-      {
-         logEntries.addLast(entry);
-      }
+      submitEntry(Level.INFO, "Log started.");
    }
 
-   public void submitEntry(Level level, String message)
+   public synchronized void submitEntry(Level level, String message)
    {
-      submitEntry(level.intLevel(), message);
+      submitEntry(Instant.now(), level, message);
    }
 
-   public void submitEntry(int intLevel, String message)
+   public synchronized void submitEntry(Instant instant, Level level, String message)
    {
-      synchronized (logEntries)
-      {
-         logEntries.addLast(Pair.of(intLevel, message));
-      }
+      logEntries.addLast(new Entry(instant, level, message));
+      wouldScrollToEnd.set();
    }
 
-   public void renderImGuiWidgets()
+   public synchronized void renderImGuiWidgets()
    {
-      synchronized (logEntries)
-      {
-         ImGui.text(name + " log : ");
-         ImGui.pushItemWidth(ImGui.getWindowWidth() - 10);
-         int numLogEntriesToShow = 20;
-         while (logEntries.size() > numLogEntriesToShow)
+      ImGui.pushStyleColor(ImGuiCol.ChildBg, ImGui.getColorU32(ImGuiCol.FrameBg));
+      ImGui.beginChild(labels.getHidden("logChild"), 0.0f, childHeight);
+      ImGui.pushFont(ImGuiTools.getConsoleFont());
+
+      if (entryLimit > 0)
+         while (logEntries.size() > entryLimit)
             logEntries.removeFirst();
-         for (Pair<Integer, String> logEntry : logEntries)
+
+      for (Entry logEntry : logEntries)
+      {
+         Level level = logEntry.level();
+
+         int color;
+         if (level.equals(Level.FATAL) || level.equals(Level.ERROR))
          {
-            Color color = Color.WHITE;
-            float[] hsv = new float[3];
-            switch (logEntry.getLeft())
-            {
-               case 100:
-               case 200:
-                  color = Color.RED;
-                  break;
-               case 300:
-                  Color.YELLOW.toHsv(hsv);
-                  color = color.fromHsv(hsv[0], hsv[1], 0.7f);
-                  break;
-               case 400:
-                  color = Color.BLACK;
-                  break;
-               case 500:
-                  color = Color.CYAN;
-                  break;
-               case 600:
-                  color = Color.GREEN;
-                  break;
-            }
-            ImGui.textColored(color.r, color.g, color.b, 1.0f, logEntry.getRight());
+            color = ImGuiTools.RED;
          }
+         else if (level.equals(Level.WARN))
+         {
+            color = WARN_COLOR;
+         }
+         else if (level.equals(Level.DEBUG))
+         {
+            color = ImGuiTools.CYAN;
+         }
+         else if (level.equals(Level.TRACE))
+         {
+            color = ImGuiTools.GREEN;
+         }
+         else
+         {
+            color = ImGui.getColorU32(ImGuiCol.Text); // INFO color
+         }
+
+         String textToDisplay = "%s %s".formatted(dateTimeFormatter.format(logEntry.instant()),
+                                                       logEntry.message());
+         ImGui.textColored(color, textToDisplay);
       }
-      ImGui.popItemWidth();
+
+      if (wouldScrollToEnd.poll() && scrollToEnd.get())
+         ImGui.setScrollHereY();
+
+      ImGui.popFont();
+      ImGui.endChild();
+      ImGui.popStyleColor();
+
+      if (ImGui.checkbox(labels.get("Scroll to End"), scrollToEnd))
+         if (scrollToEnd.get())
+            wouldScrollToEnd.set();
+   }
+
+   public void setScrollableAreaHeight(float childHeight)
+   {
+      this.childHeight = childHeight;
+   }
+
+   /** 0 for unlimited. */
+   public void setEntryLimit(int entryLimit)
+   {
+      this.entryLimit = entryLimit;
    }
 }

@@ -58,9 +58,9 @@ public class RDXBehaviorUIManager
       this.baseUI = baseUI;
 
       helper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node);
-      logWidget = new ImGuiLogWidget("Behavior status");
+      logWidget = new ImGuiLogWidget();
       helper.subscribeViaCallback(STATUS_LOG, message ->
-            logWidget.submitEntry(message.getLogLevel(), MessageTools.unpackLongStringFromByteSequence(message.getLogMessage())));
+            logWidget.submitEntry(MessageTools.fromMessage(message.getLogLevel()), MessageTools.unpackLongStringFromByteSequence(message.getLogMessage())));
       helper.subscribeViaCallback(ROS2Tools.TEXT_STATUS, textStatus ->
       {
          LogTools.info("TextToSpeech: {}", textStatus.getTextToSpeakAsString());

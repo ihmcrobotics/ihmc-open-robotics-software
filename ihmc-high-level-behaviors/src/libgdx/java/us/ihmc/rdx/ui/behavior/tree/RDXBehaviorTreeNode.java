@@ -10,6 +10,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.behaviors.behaviorTree.*;
+import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger.LogMessage;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
@@ -18,6 +19,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImGuiVerticalAligner;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.tools.ImGuiLogWidget;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -48,6 +50,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private final String nodePopupID = labels.get("Node popup");
    private String modalPopupID = labels.get("Create node");
    private final ImGuiVerticalAligner childrenDescriptionAligner = new ImGuiVerticalAligner();
+   private final ImGuiLogWidget logMessages = new ImGuiLogWidget();
 
    /** For extending types. */
    public RDXBehaviorTreeNode(S state)
@@ -224,6 +227,13 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       {
          definition.setNotes(notesText.get());
       }
+
+      while (!state.getLogger().getRecentMessages().isEmpty())
+      {
+         LogMessage message = state.getLogger().getRecentMessages().poll();
+         logMessages.submitEntry(message.level(), message.message());
+      }
+      logMessages.renderImGuiWidgets();
    }
 
    public void clearSelections()

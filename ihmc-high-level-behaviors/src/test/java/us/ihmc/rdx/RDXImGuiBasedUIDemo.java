@@ -26,7 +26,7 @@ public class RDXImGuiBasedUIDemo
    private final RDXBaseUI baseUI = new RDXBaseUI("Demo");
    private final Stopwatch stopwatch = new Stopwatch().start();
    private final ImGuiMovingPlot renderPlot = new ImGuiMovingPlot("render count", 1000, 300, 30);
-   private final ImGuiLogWidget logWidget = new ImGuiLogWidget("Log");
+   private final ImGuiLogWidget logWidget = new ImGuiLogWidget();
    private long renderCount = 0;
    private final ImBoolean option = new ImBoolean();
    private int pressCount = 0;
@@ -77,11 +77,12 @@ public class RDXImGuiBasedUIDemo
             RDX3DPanel second3DPanel = new RDX3DPanel("Second 3D View", true);
             baseUI.add3DPanel(second3DPanel);
 
-            logWidget.submitEntry(Level.WARN, "WARN at " + LocalDateTime.now());
-            logWidget.submitEntry(Level.ERROR, "ERROR at " + LocalDateTime.now());
-            logWidget.submitEntry(Level.DEBUG, "DEBUG at " + LocalDateTime.now());
-            logWidget.submitEntry(Level.FATAL, "FATAL at " + LocalDateTime.now());
-            logWidget.submitEntry(Level.TRACE, "TRACE at " + LocalDateTime.now());
+            logWidget.setScrollableAreaHeight(100.0f);
+            logWidget.submitEntry(Level.WARN, "Test warning level.");
+            logWidget.submitEntry(Level.ERROR, "Test error level.");
+            logWidget.submitEntry(Level.DEBUG, "Test debug level.");
+            logWidget.submitEntry(Level.FATAL, "Test fatal level.");
+            logWidget.submitEntry(Level.TRACE, "Test trace level.");
 
             textForArea.set("Text for area");
          }
@@ -119,7 +120,9 @@ public class RDXImGuiBasedUIDemo
          ImGui.endTabBar();
       }
       ImGui.text(StringTools.format3D("Time: {} s", stopwatch.totalElapsed()).get());
-      ImGui.button("I'm a Button!");
+      if (ImGui.button("I'm a Button!"))
+         logWidget.submitEntry(Level.INFO, "Button pressed!");
+
       float[] values = new float[100];
       for (int i = 0; i < 100; i++)
       {

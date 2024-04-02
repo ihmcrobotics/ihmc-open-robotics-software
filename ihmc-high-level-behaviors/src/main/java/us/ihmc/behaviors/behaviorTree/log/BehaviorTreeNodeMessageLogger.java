@@ -20,8 +20,8 @@ import java.util.function.Supplier;
  */
 public class BehaviorTreeNodeMessageLogger extends CRDTUnidirectionalField implements LogToolsWriteOnly
 {
-   private record LogMessage(Instant instant, Level level, String message) { }
-   private final LinkedList<LogMessage> robotSideMessageQueue = new LinkedList<>();
+   public record LogMessage(Instant instant, Level level, String message) { }
+   private final LinkedList<LogMessage> recentMessages = new LinkedList<>();
    private Instant lastPrintedTimestamp = Instant.now();
 
    public BehaviorTreeNodeMessageLogger(CRDTInfo crdtInfo)
@@ -38,7 +38,7 @@ public class BehaviorTreeNodeMessageLogger extends CRDTUnidirectionalField imple
       logMessage.setLogLevel(MessageTools.toMessage(level));
       MessageTools.packLongStringToByteSequence(message, logMessage.getLogMessage());
 
-      robotSideMessageQueue.add(new LogMessage(Instant.now(), level, message));
+      recentMessages.add(new LogMessage(Instant.now(), level, message));
    }
 
    public void toMessage(us.ihmc.idl.IDLSequence.Object<BehaviorTreeLogMessage> recentLogMessages)
@@ -47,19 +47,19 @@ public class BehaviorTreeNodeMessageLogger extends CRDTUnidirectionalField imple
       {
          // Clear old message from sync
          Instant fiveSecondsAgo = Instant.now().minus(5, ChronoUnit.SECONDS);
-         while (!robotSideMessageQueue.isEmpty() && robotSideMessageQueue.peek().instant.isBefore(fiveSecondsAgo))
+         while (!recentMessages.isEmpty() && recentMessages.peek().instant().isBefore(fiveSecondsAgo))
          {
-            robotSideMessageQueue.poll();
+            recentMessages.poll();
          }
 
          recentLogMessages.clear();
-         for (int i = 0; i < robotSideMessageQueue.size(); i++)
+         for (int i = 0; i < recentMessages.size(); i++)
          {
-            LogMessage localMessage = robotSideMessageQueue.get(i);
+            LogMessage localMessage = recentMessages.get(i);
             BehaviorTreeLogMessage ddsMessage = recentLogMessages.add();
-            MessageTools.toMessage(localMessage.instant, ddsMessage.getInstant());
-            ddsMessage.setLogLevel(MessageTools.toMessage(localMessage.level));
-            MessageTools.packLongStringToByteSequence(localMessage.message, ddsMessage.getLogMessage());
+            MessageTools.toMessage(localMessage.instant(), ddsMessage.getInstant());
+            ddsMessage.setLogLevel(MessageTools.toMessage(localMessage.level()));
+            MessageTools.packLongStringToByteSequence(localMessage.message(), ddsMessage.getLogMessage());
          }
       }
    }
@@ -76,7 +76,8 @@ public class BehaviorTreeNodeMessageLogger extends CRDTUnidirectionalField imple
             {
                Level level = MessageTools.fromMessage(logMessage.getLogLevel());
                String message = MessageTools.unpackLongStringFromByteSequence(logMessage.getLogMessage());
-               LogTools.log(level, 2, message);
+//               LogTools.log(level, 2, message);
+               recentMessages.add(new LogMessage(messageInstant, level, message));
 
                lastPrintedTimestamp = messageInstant;
             }
@@ -87,6 +88,11 @@ public class BehaviorTreeNodeMessageLogger extends CRDTUnidirectionalField imple
    protected boolean isRobotSide()
    {
       return !isModificationDisallowed();
+   }
+
+   public LinkedList<LogMessage> getRecentMessages()
+   {
+      return recentMessages;
    }
 
    public void log(Level level, Object message) { logIfEnabled(level, message); }
