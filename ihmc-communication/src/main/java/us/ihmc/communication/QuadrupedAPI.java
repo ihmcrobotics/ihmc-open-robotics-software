@@ -2,7 +2,7 @@ package us.ihmc.communication;
 
 import us.ihmc.ros2.ROS2Topic;
 
-public class QuadrupedAPI
+public final class QuadrupedAPI
 {
    public static final String QUADRUPED_CONTROL_MODULE_NAME = "quadruped_control";
    public static final String QUADRUPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME = "quadruped_support_region_publisher";

@@ -15,7 +15,7 @@ import java.util.HashSet;
  *
  * For the humanoid controller, see {@link us.ihmc.communication.HumanoidControllerAPI}.
  */
-public class ControllerAPI
+public final class ControllerAPI
 {
    public static final HashSet<Class<?>> inputMessageClasses = new HashSet<>();
    public static final HashSet<Class<? extends Settable<?>>> outputMessageClasses = new HashSet<>();

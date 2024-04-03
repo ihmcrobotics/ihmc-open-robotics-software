@@ -4,7 +4,7 @@ import toolbox_msgs.msg.dds.WalkingControllerPreviewInputMessage;
 import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.ros2.ROS2Topic;
 
-public class ToolboxAPIs
+public final class ToolboxAPIs
 {
    public static final String CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME = "toolbox/continuous_planning";
    public static final String FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME = "toolbox/footstep_postprocessing";

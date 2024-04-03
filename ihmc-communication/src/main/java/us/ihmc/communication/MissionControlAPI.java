@@ -11,7 +11,7 @@ import us.ihmc.ros2.ROS2Topic;
 
 import java.util.UUID;
 
-public class MissionControlAPI
+public final class MissionControlAPI
 {
    public static final ROS2Topic<SystemAvailableMessage> SYSTEM_AVAILABLE = ROS2Tools.IHMC_ROOT.withModule("mission_control").withType(SystemAvailableMessage.class);
 

@@ -11,7 +11,7 @@ import us.ihmc.ros2.ROS2Topic;
 /**
  * TODO: Does this category make sense? Should these go in {@link HumanoidControllerAPI}?
  */
-public class StateEstimatorAPI
+public final class StateEstimatorAPI
 {
    private static final ROS2Topic<HandJointAnglePacket> HAND_JOINT_ANGLES = HumanoidControllerAPI.HUMANOID_CONTROLLER.withOutput().withTypeName(HandJointAnglePacket.class);
 

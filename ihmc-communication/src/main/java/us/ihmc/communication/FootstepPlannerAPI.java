@@ -3,7 +3,7 @@ package us.ihmc.communication;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.ros2.ROS2Topic;
 
-public class FootstepPlannerAPI
+public final class FootstepPlannerAPI
 {
    public static final String FOOTSTEP_PLANNER_NODE_NAME = "ihmc_multi_stage_footstep_planning_module";
    public static final String FOOTSTEP_PLANNER_MODULE_NAME = "toolbox/footstep_plan";

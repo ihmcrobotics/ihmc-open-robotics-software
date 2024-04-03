@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import us.ihmc.ros2.ROS2Topic;
 
 @Deprecated
-public class DeprecatedAPIs
+public final class DeprecatedAPIs
 {
    public static final String BEHAVIOR_MODULE_NAME = "behavior";
 

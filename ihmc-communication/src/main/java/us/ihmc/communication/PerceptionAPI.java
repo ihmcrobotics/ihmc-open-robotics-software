@@ -31,7 +31,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
-public class PerceptionAPI
+public final class PerceptionAPI
 {
    public static final String REA_NODE_NAME = "REA_module";
    public static final String GPU_REA_NODE_NAME = "GPU_based_REA_module";

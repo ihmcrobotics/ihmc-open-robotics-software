@@ -5,7 +5,7 @@ import controller_msgs.msg.dds.SakeHandStatusMessage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Topic;
 
-public class SakeHandAPI
+public final class SakeHandAPI
 {
    private static final ROS2Topic<SakeHandDesiredCommandMessage> HAND_SAKE_DESIRED_COMMAND
          = HumanoidControllerAPI.HUMANOID_CONTROLLER.withInput().withTypeName(SakeHandDesiredCommandMessage.class);

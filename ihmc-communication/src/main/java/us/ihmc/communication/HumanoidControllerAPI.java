@@ -4,7 +4,7 @@ import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.ros2.ROS2Topic;
 
-public class HumanoidControllerAPI
+public final class HumanoidControllerAPI
 {
    public static final String HUMANOID_CONTROLLER_NODE_NAME = "ihmc_controller";
    public static final String HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME = "kinematics_ihmc_controller";
