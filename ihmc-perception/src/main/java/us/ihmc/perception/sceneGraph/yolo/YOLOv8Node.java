@@ -105,7 +105,7 @@ public class YOLOv8Node extends DetectableSceneNode
 
          if (!planarRegionsList.isEmpty())
          {
-            float epsilon = 0.25f;
+            float epsilon = 0.75f;
 
             // TODO: fixme doesn't work
             //            PlanarRegion doorPlanarRegion = planarRegionsList.findClosestPlanarRegionToPointByProjectionOntoXYPlane(doorLeverPointInWorld.getX(),
@@ -123,6 +123,11 @@ public class YOLOv8Node extends DetectableSceneNode
                   continue;
                }
 
+               if (planarRegion.getArea() < 0.2)
+               {
+                  continue;
+               }
+
                if (doorPlanarRegion == null)
                {
                   doorPlanarRegion = planarRegion;
@@ -130,8 +135,7 @@ public class YOLOv8Node extends DetectableSceneNode
                   continue;
                }
 
-               if (planarRegionCentroidInWorld.distance(objectCentroidInWorld) < doorPlanarRegionCentroidInWorld.distance(objectCentroidInWorld)
-                   && planarRegion.getArea() > doorPlanarRegion.getArea())
+               if (planarRegion.getArea() > doorPlanarRegion.getArea())
                {
                   doorPlanarRegion = planarRegion;
                   doorPlanarRegionCentroidInWorld = planarRegionCentroidInWorld;

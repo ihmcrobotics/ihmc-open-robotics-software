@@ -200,7 +200,7 @@ public class PerceptionAndAutonomyProcess
       realsenseProcessAndPublishThread.start();
 
       ouster = new OusterNetServer();
-      ouster.start();
+//      ouster.start();
       ousterDepthImageRetriever = new OusterDepthImageRetriever(ouster,
                                                                 ousterFrameSupplier,
                                                                 ousterLidarScanDemandNode::isDemanded,
@@ -391,7 +391,7 @@ public class PerceptionAndAutonomyProcess
    {
       if (ousterDepthDemandNode.isDemanded())
       {
-         ouster.start();
+//         ouster.start();
          ousterDepthImage = ousterDepthImageRetriever.getLatestRawDepthImage();
          if (ousterDepthImage == null)
             return;
