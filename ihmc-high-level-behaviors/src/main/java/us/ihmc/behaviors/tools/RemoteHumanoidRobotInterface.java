@@ -313,7 +313,7 @@ public class RemoteHumanoidRobotInterface
       stampedPosePacket.setConfidenceFactor(confidenceFactor);
 
       LogTools.debug("Publishing Pose " + pose + " with timestamp " + timestamp);
-      publisherMap.publish(HumanoidControllerAPI.getPoseCorrectionTopic(robotName), stampedPosePacket);
+      publisherMap.publish(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName), stampedPosePacket);
    }
 
    public void pauseWalking()

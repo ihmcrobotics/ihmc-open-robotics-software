@@ -28,6 +28,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.Compo
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -265,9 +266,6 @@ public class AvatarSimulationFactory
    {
       String robotName = robotModel.get().getSimpleRobotName();
 
-      ROS2Topic<?> outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
-      ROS2Topic<?> inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
-
       PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
       if (externalPelvisCorrectorSubscriber.hasValue())
       {
@@ -275,8 +273,8 @@ public class AvatarSimulationFactory
       }
       else
       {
-         pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeROS2Node.get(), outputTopic);
-         realtimeROS2Node.get().createSubscription(inputTopic.withTypeName(StampedPosePacket.class),
+         pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeROS2Node.get(), robotName);
+         realtimeROS2Node.get().createSubscription(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName),
                                                    s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
       }
 
