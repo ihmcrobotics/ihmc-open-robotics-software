@@ -35,7 +35,7 @@ import java.util.function.Consumer;
  * There is a default QoS setting is used when we don't specify the QoS. It is now defined in {@link ROS2QosProfile}
  * and changable via the "ROS_DEFAULT_QOS" environment variable.
  */
-public class ROS2Tools
+public final class ROS2Tools
 {
    public static final String IHMC_TOPIC_PREFIX = "ihmc";
 
