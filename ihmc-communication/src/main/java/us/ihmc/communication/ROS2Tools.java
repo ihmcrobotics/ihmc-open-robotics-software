@@ -10,6 +10,31 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 import java.util.function.Consumer;
 
+/**
+ * A central place to find topic definitions so there is less duplication and errors.
+ * These API classes contains the major topic definitions:
+ * <ul>
+ *    <li>{@link ActiveMappingAPI}</li>
+ *    <li>{@link AutonomyAPI}</li>
+ *    <li>{@link DeprecatedAPIs}</li>
+ *    <li>{@link FootstepPlannerAPI}</li>
+ *    <li>{@link us.ihmc.communication.controllerAPI.ControllerAPI}</li>
+ *    <li>{@link HumanoidControllerAPI}</li>
+ *    <li>{@link MissionControlAPI}</li>
+ *    <li>{@link PerceptionAPI}</li>
+ *    <li>{@link QuadrupedAPI}</li>
+ *    <li>{@link SakeHandAPI}</li>
+ *    <li>{@link StateEstimatorAPI}</li>
+ *    <li>{@link ToolboxAPIs}</li>
+ * </ul>
+ *
+ * This class used to have methods to create publishers and subscribers. Most of those have been
+ * moved to the upstream API. Please use {@link ROS2NodeInterface} or {@link RealtimeROS2Node} directly
+ * instead now to create those. The API has been improved and it no longer throws useless exceptions.
+ *
+ * There is a default QoS setting is used when we don't specify the QoS. It is now defined in {@link ROS2QosProfile}
+ * and changable via the "ROS_DEFAULT_QOS" environment variable.
+ */
 public class ROS2Tools
 {
    public static final String IHMC_TOPIC_PREFIX = "ihmc";
