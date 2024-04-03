@@ -1,5 +1,7 @@
 package us.ihmc.perception.sceneGraph.yolo;
 
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.Axis2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -13,6 +15,8 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
+import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -93,15 +97,15 @@ public class YOLOv8Node extends DetectableSceneNode
       filteredObjectPose.interpolate(objectPose, 0.25f);
    }
 
-   public void updatePlanarRegions(PlanarRegionsList planarRegionsList)
+   public void updatePlanarRegions(PlanarRegionsList planarRegionsList, ROS2Helper ros2Helper)
    {
-      if (getName().toLowerCase(Locale.ROOT).contains("door handle"))
+      if (getName().toLowerCase(Locale.ROOT).contains("door lever") || getName().toLowerCase(Locale.ROOT).contains("door handle"))
       {
          Point3D objectCentroidInWorld = new Point3D(objectPose.getTranslation());
 
          if (!planarRegionsList.isEmpty())
          {
-            float epsilon = 1.25f;
+            float epsilon = 0.25f;
 
             // TODO: fixme doesn't work
             //            PlanarRegion doorPlanarRegion = planarRegionsList.findClosestPlanarRegionToPointByProjectionOntoXYPlane(doorLeverPointInWorld.getX(),
@@ -126,7 +130,8 @@ public class YOLOv8Node extends DetectableSceneNode
                   continue;
                }
 
-               if (planarRegionCentroidInWorld.distance(objectCentroidInWorld) < doorPlanarRegionCentroidInWorld.distance(objectCentroidInWorld))
+               if (planarRegionCentroidInWorld.distance(objectCentroidInWorld) < doorPlanarRegionCentroidInWorld.distance(objectCentroidInWorld)
+                   && planarRegion.getArea() > doorPlanarRegion.getArea())
                {
                   doorPlanarRegion = planarRegion;
                   doorPlanarRegionCentroidInWorld = planarRegionCentroidInWorld;
@@ -145,6 +150,14 @@ public class YOLOv8Node extends DetectableSceneNode
 
                double yaw = TupleTools.angle(Axis2D.X, doorLineNormal.getDirection());
                getObjectPose().getRotation().setYawPitchRoll(yaw, 0.0, doorSide == RobotSide.LEFT ? Math.PI : 0.0);
+
+               PlanarRegionsList doorPlanarRegionsList = new PlanarRegionsList();
+               doorPlanarRegionsList.addPlanarRegion(doorPlanarRegion);
+
+               FramePlanarRegionsList doorFramePlanarRegionsList = new FramePlanarRegionsList();
+               doorFramePlanarRegionsList.setPlanarRegionsList(doorPlanarRegionsList);
+
+               PerceptionMessageTools.publishFramePlanarRegionsList(doorFramePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
             }
          }
       }

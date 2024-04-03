@@ -38,7 +38,6 @@ import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8DetectionManager;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
-import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -520,8 +519,6 @@ public class PerceptionAndAutonomyProcess
          planarRegionsExtractor.setProcessing(false);
          bytedecoImage.destroy(openCLManager);
 
-         PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
-
          PlanarRegionsList planarRegionsInWorldFrame = framePlanarRegionsList.getPlanarRegionsList().copy();
          planarRegionsInWorldFrame.applyTransform(realsenseFrameSupplier.get().getTransformToWorldFrame());
 
@@ -529,7 +526,7 @@ public class PerceptionAndAutonomyProcess
          {
             if (sceneNode instanceof YOLOv8Node yolOv8Node)
             {
-               yolOv8Node.updatePlanarRegions(planarRegionsInWorldFrame);
+               yolOv8Node.updatePlanarRegions(planarRegionsInWorldFrame, ros2Helper);
             }
          }
 
