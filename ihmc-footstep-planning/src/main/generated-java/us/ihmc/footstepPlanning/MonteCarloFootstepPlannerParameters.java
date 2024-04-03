@@ -42,6 +42,7 @@ public class MonteCarloFootstepPlannerParameters extends StoredPropertySet imple
    public static final DoubleStoredPropertyKey decayFactor = keys.addDoubleKey("Decay factor");
    public static final DoubleStoredPropertyKey minimumContactValue = keys.addDoubleKey("Minimum contact value");
    public static final DoubleStoredPropertyKey maximumContactValue = keys.addDoubleKey("Maximum contact value");
+   public static final DoubleStoredPropertyKey yawDelta = keys.addDoubleKey("Yaw delta");
 
    /**
     * Loads this property set.

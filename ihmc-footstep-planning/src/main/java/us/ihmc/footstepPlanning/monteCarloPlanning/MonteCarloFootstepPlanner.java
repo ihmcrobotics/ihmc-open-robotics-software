@@ -68,6 +68,9 @@ public class MonteCarloFootstepPlanner
       {
          updateTree(root, request);
 
+         if (timeSpentPlanningSoFar > request.getTimeout())
+            LogTools.warn("[Monte-Carlo Footstep Planner] Timeout Reached: Spent:{} / Allowed:{}", timeSpentPlanningSoFar, request.getTimeout());
+
          // For debugging only
          debugger.printScoreStats(root, request, parameters, iteration);
       }
@@ -79,14 +82,10 @@ public class MonteCarloFootstepPlanner
       FootstepPlan plan = MonteCarloPlannerTools.getFootstepPlanFromTree(root, request, footPolygons);
 
       // Debug Only
-
       statistics.stopTotalTime();
       statistics.setNumberOfNodesVisited(visitedNodes.size());
       statistics.setLayerCountsString(MonteCarloPlannerTools.getLayerCountsString(root));
       statistics.logToFile(true, true);
-
-      if (timeSpentPlanningSoFar > request.getTimeout())
-         LogTools.warn("[Monte-Carlo Footstep Planner] Timeout Reached: Spent:{} / Allowed:{}", timeSpentPlanningSoFar, request.getTimeout());
 
       planning = false;
       return plan;
@@ -99,7 +98,7 @@ public class MonteCarloFootstepPlanner
 
       if (timeSpentPlanningSoFar > request.getTimeout())
       {
-         LogTools.warn("Timeout Reached: {}", timeSpentPlanningSoFar);
+         LogTools.warn("[Monte-Carlo Footstep Planner] Timeout Reached: Spent:{} / Allowed:{}", timeSpentPlanningSoFar, request.getTimeout());
          return;
       }
 
@@ -123,7 +122,7 @@ public class MonteCarloFootstepPlanner
          }
          else
          {
-            LogTools.warn("Max Depth Reached: {}", node.getLevel());
+            //LogTools.warn("Max Depth Reached: {}", node.getLevel());
          }
 
          if (childNode != null)

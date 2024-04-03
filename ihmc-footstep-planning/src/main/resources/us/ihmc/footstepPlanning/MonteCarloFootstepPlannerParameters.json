@@ -115,5 +115,10 @@
     "value" : 12.0,
     "lowerBound" : 0.0,
     "upperBound" : 255.0
+  },
+  "Yaw delta" : {
+      "value" : 0.1,
+      "lowerBound" : 0.0,
+      "upperBound" : 0.75
   }
 }

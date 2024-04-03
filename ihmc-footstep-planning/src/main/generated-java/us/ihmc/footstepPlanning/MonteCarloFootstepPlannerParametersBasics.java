@@ -127,4 +127,9 @@ public interface MonteCarloFootstepPlannerParametersBasics extends MonteCarloFoo
    {
       set(MonteCarloFootstepPlannerParameters.maximumContactValue, maximumContactValue);
    }
+
+   default void setYawDelta(double yawDelta)
+   {
+      set(MonteCarloFootstepPlannerParameters.yawDelta, yawDelta);
+   }
 }

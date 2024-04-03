@@ -129,4 +129,9 @@ public interface MonteCarloFootstepPlannerParametersReadOnly extends StoredPrope
    {
       return get(maximumContactValue);
    }
+
+   default double getYawDelta()
+   {
+      return get(yawDelta);
+   }
 }

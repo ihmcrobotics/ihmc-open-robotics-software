@@ -117,9 +117,9 @@ public class PerceptionDataTools
 
    public static void fillWithStairs(Mat heightMap)
    {
-      PerceptionDataTools.fillWithStep(heightMap, new Point2D(-0.3f, 0.0f), new Point2D(0.3f, 1.2f), 0.3f, false);
-      PerceptionDataTools.fillWithStep(heightMap, new Point2D(0.0f, 0.0f), new Point2D(0.3f, 1.2f), 0.6f, false);
-      PerceptionDataTools.fillWithStep(heightMap, new Point2D(0.3f, 0.0f), new Point2D(0.3f, 1.2f), 0.9f, false);
+      PerceptionDataTools.fillWithStep(heightMap, new Point2D(-0.3f, 0.0f), new Point2D(0.3f, 0.8f), 0.3f, false);
+      PerceptionDataTools.fillWithStep(heightMap, new Point2D(0.0f, 0.0f), new Point2D(0.3f, 0.8f), 0.6f, false);
+      PerceptionDataTools.fillWithStep(heightMap, new Point2D(0.3f, 0.0f), new Point2D(0.3f, 0.8f), 0.9f, false);
    }
 
    public static void fillWithSteppingStones(Mat heightMap)

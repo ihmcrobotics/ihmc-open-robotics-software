@@ -154,44 +154,56 @@ public class RDXMonteCarloFootstepPlannerDemo
       if (enableMonteCarloPlanner.get())
       {
          RobotSide startingSide = getCloserStartingSideToGoal();
-         monteCarloPlannerRequest = FootstepPlannerRequestFactory.createMCFPRequest(loadedTerrainMapData,
-                                                                                    latestHeightMapData,
-                                                                                    startPose.get(RobotSide.LEFT),
-                                                                                    startPose.get(RobotSide.RIGHT),
-                                                                                    goalPose.get(RobotSide.LEFT),
-                                                                                    goalPose.get(RobotSide.RIGHT),
-                                                                                    startingSide,
-                                                                                    0.4f);
-
-         monteCarloPlannerRequest.setDebug(debugEnabled.get());
-         monteCarloPlannerRequest.setDebugRefresh(debugRefresh.get());
-         monteCarloPlannerRequest.setDebugPlotPlan(debugPlotPlan.get());
-         monteCarloPlannerRequest.setDebugPlotTree(debugPlotTree.get());
-         monteCarloPlannerRequest.setDebugPlotMidFootPositions(debugPlotMidFootPositions.get());
-
-         if (enableMonteCarloPlanner.get())
-         {
-            monteCarloPlannerRequest.setStartFootPose(RobotSide.LEFT, startPose.get(RobotSide.LEFT));
-            monteCarloPlannerRequest.setStartFootPose(RobotSide.RIGHT, startPose.get(RobotSide.RIGHT));
-            monteCarloPlannerRequest.setGoalFootPose(RobotSide.RIGHT, goalPose.get(RobotSide.RIGHT));
-            monteCarloPlannerRequest.setGoalFootPose(RobotSide.LEFT, goalPose.get(RobotSide.LEFT));
-            monteCarloPlannerRequest.setRequestedInitialStanceSide(startingSide);
-         }
-
-         // This overrides the above pose settings
-         setStartAndGoalFootPosesWithSliders(monteCarloPlannerRequest);
-
-         // perform planning based on the requests created above
-         terrainPlanningDebugger.publishStartAndGoalForVisualization(startPose, goalPose);
-
-         LogTools.warn("Monte-Carlo Planner Request: {}", monteCarloPlannerRequest);
-
-         if (resetMonteCarloPlanner.get())
-            monteCarloFootstepPlanner.reset(monteCarloPlannerRequest);
-
-         FootstepPlan plan = monteCarloFootstepPlanner.generateFootstepPlan(monteCarloPlannerRequest);
-         publishMonteCarloPlan(plan);
+         generatePlan(loadedTerrainMapData, latestHeightMapData, startingSide, startPose, goalPose, resetMonteCarloPlanner.get());
       }
+   }
+
+   public void generatePlan(TerrainMapData terrainMap,
+                            HeightMapData heightMap,
+                            RobotSide startingSide,
+                            SideDependentList<FramePose3D> startPoses,
+                            SideDependentList<FramePose3D> goalPoses,
+                            boolean reset)
+   {
+      monteCarloPlannerRequest = FootstepPlannerRequestFactory.createMCFPRequest(terrainMap,
+                                                                                 heightMap,
+                                                                                 startPoses.get(RobotSide.LEFT),
+                                                                                 startPoses.get(RobotSide.RIGHT),
+                                                                                 goalPoses.get(RobotSide.LEFT),
+                                                                                 goalPoses.get(RobotSide.RIGHT),
+                                                                                 startingSide,
+                                                                                 0.4f);
+
+      configureDebugFlags(monteCarloPlannerRequest);
+
+      monteCarloPlannerRequest.setStartFootPose(RobotSide.LEFT, startPoses.get(RobotSide.LEFT));
+      monteCarloPlannerRequest.setStartFootPose(RobotSide.RIGHT, startPoses.get(RobotSide.RIGHT));
+      monteCarloPlannerRequest.setGoalFootPose(RobotSide.RIGHT, goalPoses.get(RobotSide.RIGHT));
+      monteCarloPlannerRequest.setGoalFootPose(RobotSide.LEFT, goalPoses.get(RobotSide.LEFT));
+      monteCarloPlannerRequest.setRequestedInitialStanceSide(startingSide);
+
+      // This overrides the above pose settings
+      setStartAndGoalFootPosesWithSliders(monteCarloPlannerRequest);
+
+      // perform planning based on the requests created above
+      terrainPlanningDebugger.publishStartAndGoalForVisualization(startPoses, goalPoses);
+
+      LogTools.warn("Monte-Carlo Planner Request: {}", monteCarloPlannerRequest);
+
+      if (reset)
+         monteCarloFootstepPlanner.reset(monteCarloPlannerRequest);
+
+      FootstepPlan plan = monteCarloFootstepPlanner.generateFootstepPlan(monteCarloPlannerRequest);
+      publishMonteCarloPlan(plan);
+   }
+
+   public void configureDebugFlags(MonteCarloFootstepPlannerRequest request)
+   {
+      request.setDebug(debugEnabled.get());
+      request.setDebugRefresh(debugRefresh.get());
+      request.setDebugPlotPlan(debugPlotPlan.get());
+      request.setDebugPlotTree(debugPlotTree.get());
+      request.setDebugPlotMidFootPositions(debugPlotMidFootPositions.get());
    }
 
    public void publishMonteCarloPlan(FootstepPlan plan)
@@ -270,10 +282,11 @@ public class RDXMonteCarloFootstepPlannerDemo
    public TerrainMapData generateTerrainMapData()
    {
       Mat heightMap = humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
-      PerceptionDataTools.fillWithSteppingGridRandomHeight(heightMap);
+      PerceptionDataTools.fillWithStairs(heightMap);
 
       humanoidPerception.getRapidHeightMapExtractor().getInternalGlobalHeightMapImage().writeOpenCLImage(openCLManager);
-      humanoidPerception.getRapidHeightMapExtractor().populateParameterBuffers(RapidHeightMapExtractor.getHeightMapParameters(), new CameraIntrinsics(), new Point3D());
+      humanoidPerception.getRapidHeightMapExtractor()
+                        .populateParameterBuffers(RapidHeightMapExtractor.getHeightMapParameters(), new CameraIntrinsics(), new Point3D());
 
       humanoidPerception.getRapidHeightMapExtractor().computeContactMap();
       humanoidPerception.getRapidHeightMapExtractor().readContactMapImage();
