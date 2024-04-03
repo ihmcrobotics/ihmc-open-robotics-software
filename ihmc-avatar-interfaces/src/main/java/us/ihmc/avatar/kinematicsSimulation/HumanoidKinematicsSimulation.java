@@ -311,6 +311,7 @@ public class HumanoidKinematicsSimulation
                                                                             controllerToolbox.getContactableFeet(),
                                                                             fullRobotModel.getElevator(),
                                                                             walkingControllerParameters,
+                                                                            controllerToolbox.getTotalMassProvider(),
                                                                             GRAVITY_Z,
                                                                             controllerToolbox.getControlDT(),
                                                                             walkingParentRegistry,
