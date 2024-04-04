@@ -546,6 +546,10 @@ public class MonteCarloPlannerTools
 
       double goalReward = plannerParameters.getGoalReward() * progressToGoal;
 
+      // distance from current position to goal
+      double dist = currentPosition.distance(goalPosition);
+      double successReward = plannerParameters.getSuccessReward() / (1.0 + Math.exp(dist * dist));
+
       double contactValue = request.getTerrainMapData().getContactScoreInWorld(currentPosition.getX32(), currentPosition.getY32());
       contactValue = MathTools.clamp(contactValue, plannerParameters.getMinimumContactValue(), plannerParameters.getMaximumContactValue());
       contactValue /= plannerParameters.getMaximumContactValue();
@@ -559,7 +563,7 @@ public class MonteCarloPlannerTools
       //      double stepHeightCost = (request.getTerrainMapData().getHeightLocal(rIndex, cIndex) - request.getTerrainMapData().getHeightLocal(rIndex, cIndex)) * 0.01f;
       //      double edgeCost = stepYawCost + stepDistanceCost + stepHeightCost;
 
-      score = goalReward + contactReward;
+      score = goalReward + contactReward + successReward;
 
       if (debug)
          LogTools.debug(String.format("Rewards -> Goal: %.2f, Contact: %.2f, Total: %.2f (%d)", goalReward, contactReward, score, plannerParameters.getInitialValueCutoff()));

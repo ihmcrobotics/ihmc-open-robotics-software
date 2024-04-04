@@ -40,6 +40,11 @@ public interface MonteCarloFootstepPlannerParametersReadOnly extends StoredPrope
       return get(goalReward);
    }
 
+   default double getSuccessReward()
+   {
+      return get(successReward);
+   }
+
    default int getMaxNumberOfVisitedNodes()
    {
       return get(maxNumberOfVisitedNodes);

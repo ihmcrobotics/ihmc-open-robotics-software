@@ -87,7 +87,7 @@ public class RDXMonteCarloFootstepPlannerDemo
    private final ImBoolean debugEnabled = new ImBoolean(true);
    private final ImBoolean debugRefresh = new ImBoolean(true);
    private final ImBoolean debugPlotPlan = new ImBoolean(true);
-   private final ImBoolean debugPlotTree = new ImBoolean(true);
+   private final ImBoolean debugPlotTree = new ImBoolean(false);
    private final ImBoolean debugPlotMidFootPositions = new ImBoolean(true);
 
    private int autoIncrementCounter = 0;

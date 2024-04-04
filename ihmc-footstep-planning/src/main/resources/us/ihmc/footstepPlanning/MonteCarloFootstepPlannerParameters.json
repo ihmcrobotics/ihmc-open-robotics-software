@@ -24,7 +24,12 @@
   "Goal Reward" : {
     "value" : 70.186335,
     "lowerBound" : 0.0,
-    "upperBound" : 100.0
+    "upperBound" : 1000.0
+  },
+  "Success Reward" : {
+    "value" : 100.0,
+    "lowerBound" : 0.0,
+    "upperBound" : 1000.0
   },
   "Max number of visited nodes" : {
     "value" : 30382,
@@ -117,8 +122,8 @@
     "upperBound" : 255.0
   },
   "Yaw delta" : {
-      "value" : 0.1,
-      "lowerBound" : 0.0,
-      "upperBound" : 0.75
+    "value" : 0.405928,
+    "lowerBound" : 0.0,
+    "upperBound" : 0.75
   }
 }

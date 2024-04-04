@@ -24,6 +24,7 @@ public class MonteCarloFootstepPlannerParameters extends StoredPropertySet imple
    public static final DoubleStoredPropertyKey timeoutDuration = keys.addDoubleKey("Timeout duration");
    public static final DoubleStoredPropertyKey feasibleContactReward = keys.addDoubleKey("Feasible Contact Reward");
    public static final DoubleStoredPropertyKey goalReward = keys.addDoubleKey("Goal Reward");
+   public static final DoubleStoredPropertyKey successReward = keys.addDoubleKey("Success Reward");
    public static final IntegerStoredPropertyKey maxNumberOfVisitedNodes = keys.addIntegerKey("Max number of visited nodes");
    public static final IntegerStoredPropertyKey maxNumberOfChildNodes = keys.addIntegerKey("Max number of child nodes");
    public static final DoubleStoredPropertyKey maxTransferHeight = keys.addDoubleKey("Max transfer height");

@@ -159,12 +159,12 @@ if __name__ == "__main__":
 
     plt.figure(figsize=(10, 10))
 
-    plot_time_horizon = 0.15
+    plot_time_horizon = 0.8
     mcfp_time_horizon = 1.25
     asfp_time_horizon = 1.5
 
-    load_and_plot(data, "ASFP", asfp_time_horizon, aggregate_data=False)
-    # load_and_plot(data, "MCFP", mcfp_time_horizon, aggregate_data=False)
+    load_and_plot(data, "ASFP", asfp_time_horizon, aggregate_data=True)
+    load_and_plot(data, "MCFP", mcfp_time_horizon, aggregate_data=True)
 
 
 

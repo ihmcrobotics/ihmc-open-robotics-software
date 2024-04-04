@@ -182,7 +182,8 @@ public class MonteCarloFootstepPlanner
             if (visitedNodes.getOrDefault(newState, null) != null)
             {
                MonteCarloFootstepNode visitedNode = visitedNodes.get(newState);
-               visitedNode.setValue(Math.max((float) score, visitedNode.getValue()));
+               //visitedNode.setValue(Math.max((float) score, visitedNode.getValue()));
+               visitedNode.setValue((float) (score + visitedNode.getValue()));
                visitedNode.incrementVisits();
                node.addChild(visitedNode);
             }
@@ -238,7 +239,8 @@ public class MonteCarloFootstepPlanner
 
       //LogTools.info("Back Propagate: {} {} {}", node.getLevel(), callLevel, score);
 
-      node.setValue(Math.max( (float) (score * parameters.getDecayFactor()), node.getValue()));
+      //node.setValue(Math.max( (float) (score * parameters.getDecayFactor()), node.getValue()));
+      node.setValue((float) (score * parameters.getDecayFactor()) + node.getValue());
       node.incrementVisits();
 
       if (!node.getParents().isEmpty() && node.getLevel() > 0 && callLevel < parameters.getMaxTreeDepth())

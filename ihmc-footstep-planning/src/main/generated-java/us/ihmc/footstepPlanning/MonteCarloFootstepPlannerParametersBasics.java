@@ -38,6 +38,11 @@ public interface MonteCarloFootstepPlannerParametersBasics extends MonteCarloFoo
       set(MonteCarloFootstepPlannerParameters.goalReward, goalReward);
    }
 
+   default void setSuccessReward(double successReward)
+   {
+      set(MonteCarloFootstepPlannerParameters.successReward, successReward);
+   }
+
    default void setMaxNumberOfVisitedNodes(int maxNumberOfVisitedNodes)
    {
       set(MonteCarloFootstepPlannerParameters.maxNumberOfVisitedNodes, maxNumberOfVisitedNodes);
