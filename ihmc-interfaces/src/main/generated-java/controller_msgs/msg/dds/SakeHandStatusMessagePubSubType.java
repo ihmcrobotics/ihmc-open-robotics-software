@@ -15,7 +15,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "67aea8f492292bd057a5bcbe25993da2400e02b2e556f4cdd40486194ff5123c";
+   		return "0c716ec0e23ea7103d2bbbf8139e7732dfe8332c19c4552a1a2d1a9f68cf4233";
    }
    
    @Override
@@ -54,7 +54,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -63,6 +63,14 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -84,7 +92,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -97,6 +105,18 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -113,7 +133,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       cdr.write_type_9(data.getRobotSide());
 
-      cdr.write_type_6(data.getTemperature());
+      cdr.write_type_2(data.getTemperature());
 
       cdr.write_type_6(data.getNormalizedCurrentPosition());
 
@@ -122,6 +142,14 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       cdr.write_type_6(data.getNormalizedDesiredPosition());
 
       cdr.write_type_6(data.getNormalizedTorqueLimit());
+
+      cdr.write_type_7(data.getTorqueOnStatus());
+
+      cdr.write_type_6(data.getCurrentVelocity());
+
+      cdr.write_type_2(data.getErrorCodes());
+
+      cdr.write_type_2(data.getRealtimeTick());
 
       cdr.write_type_7(data.getIsCalibrated());
 
@@ -133,7 +161,7 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       data.setRobotSide(cdr.read_type_9());
       	
-      data.setTemperature(cdr.read_type_6());
+      data.setTemperature(cdr.read_type_2());
       	
       data.setNormalizedCurrentPosition(cdr.read_type_6());
       	
@@ -142,6 +170,14 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       data.setNormalizedDesiredPosition(cdr.read_type_6());
       	
       data.setNormalizedTorqueLimit(cdr.read_type_6());
+      	
+      data.setTorqueOnStatus(cdr.read_type_7());
+      	
+      data.setCurrentVelocity(cdr.read_type_6());
+      	
+      data.setErrorCodes(cdr.read_type_2());
+      	
+      data.setRealtimeTick(cdr.read_type_2());
       	
       data.setIsCalibrated(cdr.read_type_7());
       	
@@ -154,11 +190,15 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    public final void serialize(controller_msgs.msg.dds.SakeHandStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_9("robot_side", data.getRobotSide());
-      ser.write_type_6("temperature", data.getTemperature());
+      ser.write_type_2("temperature", data.getTemperature());
       ser.write_type_6("normalized_current_position", data.getNormalizedCurrentPosition());
       ser.write_type_6("normalized_current_torque", data.getNormalizedCurrentTorque());
       ser.write_type_6("normalized_desired_position", data.getNormalizedDesiredPosition());
       ser.write_type_6("normalized_torque_limit", data.getNormalizedTorqueLimit());
+      ser.write_type_7("torque_on_status", data.getTorqueOnStatus());
+      ser.write_type_6("current_velocity", data.getCurrentVelocity());
+      ser.write_type_2("error_codes", data.getErrorCodes());
+      ser.write_type_2("realtime_tick", data.getRealtimeTick());
       ser.write_type_7("is_calibrated", data.getIsCalibrated());
       ser.write_type_7("needs_reset", data.getNeedsReset());
    }
@@ -167,11 +207,15 @@ public class SakeHandStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.SakeHandStatusMessage data)
    {
       data.setRobotSide(ser.read_type_9("robot_side"));
-      data.setTemperature(ser.read_type_6("temperature"));
+      data.setTemperature(ser.read_type_2("temperature"));
       data.setNormalizedCurrentPosition(ser.read_type_6("normalized_current_position"));
       data.setNormalizedCurrentTorque(ser.read_type_6("normalized_current_torque"));
       data.setNormalizedDesiredPosition(ser.read_type_6("normalized_desired_position"));
       data.setNormalizedTorqueLimit(ser.read_type_6("normalized_torque_limit"));
+      data.setTorqueOnStatus(ser.read_type_7("torque_on_status"));
+      data.setCurrentVelocity(ser.read_type_6("current_velocity"));
+      data.setErrorCodes(ser.read_type_2("error_codes"));
+      data.setRealtimeTick(ser.read_type_2("realtime_tick"));
       data.setIsCalibrated(ser.read_type_7("is_calibrated"));
       data.setNeedsReset(ser.read_type_7("needs_reset"));
    }

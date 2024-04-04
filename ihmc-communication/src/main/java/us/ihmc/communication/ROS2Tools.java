@@ -1,20 +1,26 @@
 package us.ihmc.communication;
 
 import com.eprosima.xmlschemas.fastrtps_profiles.ReliabilityQosKindType;
-import controller_msgs.msg.dds.EtherSnacksSakeHandCommandMessage;
-import controller_msgs.msg.dds.EtherSnacksSakeHandStatusMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
-import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import controller_msgs.msg.dds.SakeHandStatusMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
-import mission_control_msgs.msg.dds.*;
+import mission_control_msgs.msg.dds.SystemAvailableMessage;
+import mission_control_msgs.msg.dds.SystemResourceUsageMessage;
+import mission_control_msgs.msg.dds.SystemServiceActionMessage;
+import mission_control_msgs.msg.dds.SystemServiceLogRefreshMessage;
+import mission_control_msgs.msg.dds.SystemServiceStatusMessage;
 import perception_msgs.msg.dds.DoorParameterPacket;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
-import toolbox_msgs.msg.dds.*;
+import toolbox_msgs.msg.dds.BehaviorControlModePacket;
+import toolbox_msgs.msg.dds.BehaviorStatusPacket;
+import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
+import toolbox_msgs.msg.dds.WalkingControllerPreviewInputMessage;
+import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.pubsub.Domain;
@@ -22,7 +28,15 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.*;
+import us.ihmc.ros2.NewMessageListener;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.ros2.ROS2Subscription;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.ROS2TopicNameTools;
+import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.ros2.RealtimeROS2Subscription;
 import us.ihmc.tools.thread.SwapReference;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
@@ -102,10 +116,7 @@ public class ROS2Tools
                                                                                                                 .withTypeName(SakeHandDesiredCommandMessage.class);
    private static final ROS2Topic<SakeHandStatusMessage> HAND_SAKE_DESIRED_STATUS = HUMANOID_CONTROLLER.withOutput()
                                                                                                        .withTypeName(SakeHandStatusMessage.class);
-   private static final ROS2Topic<EtherSnacksSakeHandCommandMessage> SAKE_HAND_COMMAND = HUMANOID_CONTROLLER.withOutput()
-                                                                                                            .withTypeName(EtherSnacksSakeHandCommandMessage.class);
-   private static final ROS2Topic<EtherSnacksSakeHandStatusMessage> SAKE_HAND_STATUS = HUMANOID_CONTROLLER.withOutput()
-                                                                                                          .withTypeName(EtherSnacksSakeHandStatusMessage.class);
+
    private static final ROS2Topic<HandJointAnglePacket> HAND_JOINT_ANGLES = HUMANOID_CONTROLLER.withOutput().withTypeName(HandJointAnglePacket.class);
 
    public static final ROS2Topic<Float64> BOX_MASS = IHMC_ROOT.withSuffix("box_mass").withType(Float64.class);
@@ -130,16 +141,6 @@ public class ROS2Tools
    public static ROS2Topic<SakeHandStatusMessage> getHandSakeStatusTopic(String robotName, RobotSide side)
    {
       return HAND_SAKE_DESIRED_STATUS.withRobot(robotName).withSuffix(side.getLowerCaseName());
-   }
-
-   public static ROS2Topic<EtherSnacksSakeHandCommandMessage> getEtherSnacksHandCommandTopic(String robotName, RobotSide side)
-   {
-      return SAKE_HAND_COMMAND.withRobot(robotName).withSuffix(side.getLowerCaseName());
-   }
-
-   public static ROS2Topic<EtherSnacksSakeHandStatusMessage> getEtherSnackHandStatusTopic(String robotName, RobotSide side)
-   {
-      return SAKE_HAND_STATUS.withRobot(robotName).withSuffix(side.getLowerCaseName());
    }
 
    public static ROS2Topic<HandJointAnglePacket> getHandJointAnglesTopic(String robotName)

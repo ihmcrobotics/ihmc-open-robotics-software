@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.teleoperation;
 
-import controller_msgs.msg.dds.EtherSnacksSakeHandCommandMessage;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -71,27 +70,28 @@ public class RDXHandConfigurationManager
 
    public void publishHandCommand(RobotSide side, @Nullable SakeHandPreset handPreset, boolean calibrate, boolean reset)
    {
-      EtherSnacksSakeHandCommandMessage sakeHandDesiredCommandMessage = new EtherSnacksSakeHandCommandMessage();
+      SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage = new SakeHandDesiredCommandMessage();
       sakeHandDesiredCommandMessage.setRobotSide(side.toByte());
       SakeHandParameters.resetDesiredCommandMessage(sakeHandDesiredCommandMessage);
 
       if (calibrate)
       {
-         sakeHandDesiredCommandMessage.setCalibrate(true);
+         sakeHandDesiredCommandMessage.setRequestCalibration(true);
       }
       else if (reset)
       {
-         sakeHandDesiredCommandMessage.setReset(true);
+         sakeHandDesiredCommandMessage.setRequestResetErrors(true);
       }
       else if (handPreset != null)
       {
-         sakeHandDesiredCommandMessage.setDesiredPosition(
+         sakeHandDesiredCommandMessage.setNormalizedGripperDesiredPosition(
                SakeHandParameters.normalizeHandOpenAngle(handPreset.getHandOpenAngle()));
-         sakeHandDesiredCommandMessage.setTorqueLimit(
+         sakeHandDesiredCommandMessage.setNormalizedGripperTorqueLimit(
                SakeHandParameters.normalizeFingertipGripForceLimit(handPreset.getFingertipGripForceLimit()));
+         sakeHandDesiredCommandMessage.setTorqueOn(handPreset.getFingertipGripForceLimit() > 0.0);
       }
 
       RDXBaseUI.pushNotification("Commanding hand configuration...");
-      communicationHelper.publish(ROS2Tools.getEtherSnacksHandCommandTopic(robotName, side), sakeHandDesiredCommandMessage);
+      communicationHelper.publish(ROS2Tools.getHandSakeCommandTopic(robotName, side), sakeHandDesiredCommandMessage);
    }
 }

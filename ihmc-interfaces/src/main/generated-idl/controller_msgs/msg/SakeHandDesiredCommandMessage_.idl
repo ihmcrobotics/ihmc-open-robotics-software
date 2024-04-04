@@ -49,6 +49,10 @@ module controller_msgs
          * -1.0 means "unspecified". Gripper will keep current value
          */
         double normalized_gripper_torque_limit;
+        /**
+         * Keeping the torque off when not needed can help keep the hand's temperature down
+         */
+        boolean torque_on;
       };
     };
   };

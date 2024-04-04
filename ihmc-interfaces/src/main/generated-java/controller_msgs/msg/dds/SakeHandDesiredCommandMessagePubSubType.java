@@ -15,7 +15,7 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e26821cb4cc113b04af54de459beb081f1e8375d1eb2d0313a921e37e66d1586";
+   		return "20f5352da5886a3c39d884c2bb1fdcb6dcd5b2f3f7ae23d9dc354caae6fac7de";
    }
    
    @Override
@@ -62,6 +62,8 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -90,6 +92,9 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -106,6 +111,8 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_6(data.getNormalizedGripperTorqueLimit());
 
+      cdr.write_type_7(data.getTorqueOn());
+
    }
 
    public static void read(controller_msgs.msg.dds.SakeHandDesiredCommandMessage data, us.ihmc.idl.CDR cdr)
@@ -120,6 +127,8 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       	
       data.setNormalizedGripperTorqueLimit(cdr.read_type_6());
       	
+      data.setTorqueOn(cdr.read_type_7());
+      	
 
    }
 
@@ -131,6 +140,7 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       ser.write_type_7("request_reset_errors", data.getRequestResetErrors());
       ser.write_type_6("normalized_gripper_desired_position", data.getNormalizedGripperDesiredPosition());
       ser.write_type_6("normalized_gripper_torque_limit", data.getNormalizedGripperTorqueLimit());
+      ser.write_type_7("torque_on", data.getTorqueOn());
    }
 
    @Override
@@ -141,6 +151,7 @@ public class SakeHandDesiredCommandMessagePubSubType implements us.ihmc.pubsub.T
       data.setRequestResetErrors(ser.read_type_7("request_reset_errors"));
       data.setNormalizedGripperDesiredPosition(ser.read_type_6("normalized_gripper_desired_position"));
       data.setNormalizedGripperTorqueLimit(ser.read_type_6("normalized_gripper_torque_limit"));
+      data.setTorqueOn(ser.read_type_7("torque_on"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.SakeHandDesiredCommandMessage src, controller_msgs.msg.dds.SakeHandDesiredCommandMessage dest)

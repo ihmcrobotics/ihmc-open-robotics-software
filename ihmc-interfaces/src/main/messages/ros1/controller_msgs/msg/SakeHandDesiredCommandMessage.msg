@@ -28,4 +28,7 @@ float64 normalized_gripper_desired_position
 # -1.0 means "unspecified". Gripper will keep current value
 float64 normalized_gripper_torque_limit
 
+# Keeping the torque off when not needed can help keep the hand's temperature down
+bool torque_on
+
 

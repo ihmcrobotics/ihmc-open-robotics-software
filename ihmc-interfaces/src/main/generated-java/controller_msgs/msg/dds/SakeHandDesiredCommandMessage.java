@@ -41,6 +41,10 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
             * -1.0 means "unspecified". Gripper will keep current value
             */
    public double normalized_gripper_torque_limit_;
+   /**
+            * Keeping the torque off when not needed can help keep the hand's temperature down
+            */
+   public boolean torque_on_;
 
    public SakeHandDesiredCommandMessage()
    {
@@ -63,6 +67,8 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
       normalized_gripper_desired_position_ = other.normalized_gripper_desired_position_;
 
       normalized_gripper_torque_limit_ = other.normalized_gripper_torque_limit_;
+
+      torque_on_ = other.torque_on_;
 
    }
 
@@ -155,6 +161,21 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
       return normalized_gripper_torque_limit_;
    }
 
+   /**
+            * Keeping the torque off when not needed can help keep the hand's temperature down
+            */
+   public void setTorqueOn(boolean torque_on)
+   {
+      torque_on_ = torque_on;
+   }
+   /**
+            * Keeping the torque off when not needed can help keep the hand's temperature down
+            */
+   public boolean getTorqueOn()
+   {
+      return torque_on_;
+   }
+
 
    public static Supplier<SakeHandDesiredCommandMessagePubSubType> getPubSubType()
    {
@@ -183,6 +204,8 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normalized_gripper_torque_limit_, other.normalized_gripper_torque_limit_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.torque_on_, other.torque_on_, epsilon)) return false;
+
 
       return true;
    }
@@ -206,6 +229,8 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
 
       if(this.normalized_gripper_torque_limit_ != otherMyClass.normalized_gripper_torque_limit_) return false;
 
+      if(this.torque_on_ != otherMyClass.torque_on_) return false;
+
 
       return true;
    }
@@ -225,7 +250,9 @@ public class SakeHandDesiredCommandMessage extends Packet<SakeHandDesiredCommand
       builder.append("normalized_gripper_desired_position=");
       builder.append(this.normalized_gripper_desired_position_);      builder.append(", ");
       builder.append("normalized_gripper_torque_limit=");
-      builder.append(this.normalized_gripper_torque_limit_);
+      builder.append(this.normalized_gripper_torque_limit_);      builder.append(", ");
+      builder.append("torque_on=");
+      builder.append(this.torque_on_);
       builder.append("}");
       return builder.toString();
    }

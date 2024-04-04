@@ -1,6 +1,5 @@
 package us.ihmc.avatar.sakeGripper;
 
-import controller_msgs.msg.dds.EtherSnacksSakeHandCommandMessage;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 
 public class SakeHandParameters
@@ -90,10 +89,11 @@ public class SakeHandParameters
       return (1.0 - normalizeHandOpenAngle(handOpenAngle)) * Math.toRadians(OPEN_KNUCKLE_JOINT_ANGLE_DEGREES);
    }
 
-   public static void resetDesiredCommandMessage(EtherSnacksSakeHandCommandMessage sakeHandDesiredCommandMessage)
+   public static void resetDesiredCommandMessage(SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage)
    {
-      sakeHandDesiredCommandMessage.setDesiredPosition(-1.0);
-      sakeHandDesiredCommandMessage.setTorqueLimit(-1.0);
-      sakeHandDesiredCommandMessage.setCalibrate(false);
+      sakeHandDesiredCommandMessage.setNormalizedGripperDesiredPosition(-1.0);
+      sakeHandDesiredCommandMessage.setNormalizedGripperTorqueLimit(-1.0);
+      sakeHandDesiredCommandMessage.setRequestCalibration(false);
+      sakeHandDesiredCommandMessage.setRequestResetErrors(false);
    }
 }

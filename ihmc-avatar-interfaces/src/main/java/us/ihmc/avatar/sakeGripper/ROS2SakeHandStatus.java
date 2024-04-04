@@ -21,17 +21,17 @@ public class ROS2SakeHandStatus
 
    public ROS2SakeHandStatus(ROS2NodeInterface ros2Node, String robotName, RobotSide handSide)
    {
-      ROS2Tools.createVolatileCallbackSubscription(ros2Node, ROS2Tools.getEtherSnackHandStatusTopic(robotName, handSide), sakeHandStatusMessage ->
+      ROS2Tools.createVolatileCallbackSubscription(ros2Node, ROS2Tools.getHandSakeStatusTopic(robotName, handSide), sakeHandStatusMessage ->
       {
          isCalibrated = sakeHandStatusMessage.getIsCalibrated();
          needsReset = sakeHandStatusMessage.getNeedsReset();
-         isTorqueOn = sakeHandStatusMessage.getTorqueOn();
-         currentTemperature = sakeHandStatusMessage.getMeasuredTemperature();
-         currentHandOpenAngle = SakeHandParameters.denormalizeHandOpenAngle(sakeHandStatusMessage.getMeasuredPosition());
-         commandedHandOpenAngle = SakeHandParameters.denormalizeHandOpenAngle(sakeHandStatusMessage.getDesiredPosition());
-         currentFingertipGripForce = SakeHandParameters.denormalizeFingertipGripForceLimit(sakeHandStatusMessage.getMeasuredTorque());
-         commandedFingertipGripForceLimit = SakeHandParameters.denormalizeFingertipGripForceLimit(sakeHandStatusMessage.getTorqueLimit());
-         currentVelocity = sakeHandStatusMessage.getMeasuredVelocity();
+         isTorqueOn = sakeHandStatusMessage.getTorqueOnStatus();
+         currentTemperature = sakeHandStatusMessage.getTemperature();
+         currentHandOpenAngle = SakeHandParameters.denormalizeHandOpenAngle(sakeHandStatusMessage.getNormalizedCurrentPosition());
+         commandedHandOpenAngle = SakeHandParameters.denormalizeHandOpenAngle(sakeHandStatusMessage.getNormalizedDesiredPosition());
+         currentFingertipGripForce = SakeHandParameters.denormalizeFingertipGripForceLimit(sakeHandStatusMessage.getNormalizedCurrentTorque());
+         commandedFingertipGripForceLimit = SakeHandParameters.denormalizeFingertipGripForceLimit(sakeHandStatusMessage.getNormalizedTorqueLimit());
+         currentVelocity = sakeHandStatusMessage.getCurrentVelocity();
          errorCodes = sakeHandStatusMessage.getErrorCodes();
          handRealtimeTick = sakeHandStatusMessage.getRealtimeTick();
       });

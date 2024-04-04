@@ -17,7 +17,10 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
             * Specifies the side of the robot of the hand being referred to
             */
    public byte robot_side_ = (byte) 255;
-   public double temperature_;
+   /**
+            * Temperature of the Dynamixel in Celsius
+            */
+   public int temperature_;
    /**
             * The current dynamixel position, normalized to the gripper range of motion
             * 0.0 (fingers touching) -> 1.0 (open 210 degrees between fingers)
@@ -32,6 +35,23 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
    public double normalized_current_torque_;
    public double normalized_desired_position_;
    public double normalized_torque_limit_;
+   public boolean torque_on_status_;
+   /**
+            * RPM of the Dynamixel
+            * Positive = closing hand (CCW rotation)
+            * Negative = opening hand (CW rotation)
+            */
+   public double current_velocity_;
+   /**
+            * Dynamixel's error codes
+            * See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+            */
+   public int error_codes_;
+   /**
+            * Realtime tick of the Dynamixel
+            * If this value isn't changing, communication with the hand is broken
+            */
+   public int realtime_tick_;
    public boolean is_calibrated_;
    public boolean needs_reset_;
 
@@ -59,6 +79,14 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       normalized_torque_limit_ = other.normalized_torque_limit_;
 
+      torque_on_status_ = other.torque_on_status_;
+
+      current_velocity_ = other.current_velocity_;
+
+      error_codes_ = other.error_codes_;
+
+      realtime_tick_ = other.realtime_tick_;
+
       is_calibrated_ = other.is_calibrated_;
 
       needs_reset_ = other.needs_reset_;
@@ -80,11 +108,17 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       return robot_side_;
    }
 
-   public void setTemperature(double temperature)
+   /**
+            * Temperature of the Dynamixel in Celsius
+            */
+   public void setTemperature(int temperature)
    {
       temperature_ = temperature;
    }
-   public double getTemperature()
+   /**
+            * Temperature of the Dynamixel in Celsius
+            */
+   public int getTemperature()
    {
       return temperature_;
    }
@@ -145,6 +179,68 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       return normalized_torque_limit_;
    }
 
+   public void setTorqueOnStatus(boolean torque_on_status)
+   {
+      torque_on_status_ = torque_on_status;
+   }
+   public boolean getTorqueOnStatus()
+   {
+      return torque_on_status_;
+   }
+
+   /**
+            * RPM of the Dynamixel
+            * Positive = closing hand (CCW rotation)
+            * Negative = opening hand (CW rotation)
+            */
+   public void setCurrentVelocity(double current_velocity)
+   {
+      current_velocity_ = current_velocity;
+   }
+   /**
+            * RPM of the Dynamixel
+            * Positive = closing hand (CCW rotation)
+            * Negative = opening hand (CW rotation)
+            */
+   public double getCurrentVelocity()
+   {
+      return current_velocity_;
+   }
+
+   /**
+            * Dynamixel's error codes
+            * See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+            */
+   public void setErrorCodes(int error_codes)
+   {
+      error_codes_ = error_codes;
+   }
+   /**
+            * Dynamixel's error codes
+            * See: https://emanual.robotis.com/docs/en/dxl/protocol1/#error
+            */
+   public int getErrorCodes()
+   {
+      return error_codes_;
+   }
+
+   /**
+            * Realtime tick of the Dynamixel
+            * If this value isn't changing, communication with the hand is broken
+            */
+   public void setRealtimeTick(int realtime_tick)
+   {
+      realtime_tick_ = realtime_tick;
+   }
+   /**
+            * Realtime tick of the Dynamixel
+            * If this value isn't changing, communication with the hand is broken
+            */
+   public int getRealtimeTick()
+   {
+      return realtime_tick_;
+   }
+
    public void setIsCalibrated(boolean is_calibrated)
    {
       is_calibrated_ = is_calibrated;
@@ -193,6 +289,14 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normalized_torque_limit_, other.normalized_torque_limit_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.torque_on_status_, other.torque_on_status_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_velocity_, other.current_velocity_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.error_codes_, other.error_codes_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.realtime_tick_, other.realtime_tick_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_calibrated_, other.is_calibrated_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.needs_reset_, other.needs_reset_, epsilon)) return false;
@@ -222,6 +326,14 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       if(this.normalized_torque_limit_ != otherMyClass.normalized_torque_limit_) return false;
 
+      if(this.torque_on_status_ != otherMyClass.torque_on_status_) return false;
+
+      if(this.current_velocity_ != otherMyClass.current_velocity_) return false;
+
+      if(this.error_codes_ != otherMyClass.error_codes_) return false;
+
+      if(this.realtime_tick_ != otherMyClass.realtime_tick_) return false;
+
       if(this.is_calibrated_ != otherMyClass.is_calibrated_) return false;
 
       if(this.needs_reset_ != otherMyClass.needs_reset_) return false;
@@ -248,6 +360,14 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       builder.append(this.normalized_desired_position_);      builder.append(", ");
       builder.append("normalized_torque_limit=");
       builder.append(this.normalized_torque_limit_);      builder.append(", ");
+      builder.append("torque_on_status=");
+      builder.append(this.torque_on_status_);      builder.append(", ");
+      builder.append("current_velocity=");
+      builder.append(this.current_velocity_);      builder.append(", ");
+      builder.append("error_codes=");
+      builder.append(this.error_codes_);      builder.append(", ");
+      builder.append("realtime_tick=");
+      builder.append(this.realtime_tick_);      builder.append(", ");
       builder.append("is_calibrated=");
       builder.append(this.is_calibrated_);      builder.append(", ");
       builder.append("needs_reset=");
