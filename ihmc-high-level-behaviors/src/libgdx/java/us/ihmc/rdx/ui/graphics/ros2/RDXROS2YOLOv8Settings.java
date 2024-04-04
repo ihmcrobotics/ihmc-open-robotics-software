@@ -19,7 +19,7 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
    private final ImFloat nmsThreshold = new ImFloat(0.1f);
    private final ImFloat maskThreshold = new ImFloat(0.0f);
    private final ImFloat candidateAcceptanceThreshold = new ImFloat(0.6f);
-   private final ImInt selectedSensor = new ImInt(1); // 0 = ZED, 1 = Realsense
+   private final ImInt selectedSensor = new ImInt(0); // 0 = ZED, 1 = Realsense
 
    private final ROS2Heartbeat demandYOLOv8ICPZed;
    private final ROS2Heartbeat demandYOLOv8ICPRealsense;

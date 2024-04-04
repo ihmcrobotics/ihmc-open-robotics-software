@@ -476,21 +476,20 @@ public class PerceptionAndAutonomyProcess
       {
          yolov8DetectionManager.updateSceneGraph(sceneGraph);
          yolov8DetectionManager.setRobotFrame(robotPelvisFrame);
-         if (doorYoloNode != null && !sceneGraph.getNodeNameList().contains("doorFrame"))
+         if (doorYoloNode != null && !sceneGraph.getNodeNameList().contains("doorStaticHandle"))
          {
-            LogTools.info(doorYoloNode.getNodeToParentFrameTransform());
             sceneGraph.modifyTree(modificationQueue ->
              {
-                SceneNode doorFrameNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
-                                                                      "doorFrame",
-                                                                      sceneGraph.getIDToNodeMap(),
-                                                                      doorYoloNode.getID(),
-                                                                      new RigidBodyTransform(),
-                                                                      DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
-                                                                      DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM,
-                                                                      DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
-                LogTools.info("Adding doorFrame to scene graph.");
-                modificationQueue.accept(new SceneGraphNodeAddition(doorFrameNode, doorYoloNode));
+                SceneNode doorStaticNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                                       "doorStaticHandle",
+                                                                       sceneGraph.getIDToNodeMap(),
+                                                                       doorYoloNode.getID(),
+                                                                       new RigidBodyTransform(),
+                                                                       DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
+                                                                       DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM,
+                                                                       DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN);
+                LogTools.info("Adding doorStaticHandle to scene graph.");
+                modificationQueue.accept(new SceneGraphNodeAddition(doorStaticNode, doorYoloNode));
              });
          }
          doorYoloNode = yolov8DetectionManager.getDoorYoloNode();
