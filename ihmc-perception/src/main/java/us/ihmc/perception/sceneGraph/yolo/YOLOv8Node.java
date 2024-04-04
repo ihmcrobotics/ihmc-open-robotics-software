@@ -94,7 +94,9 @@ public class YOLOv8Node extends DetectableSceneNode
       if (!filteredObjectPose.hasRotation())
          filteredObjectPose.getRotation().set(objectPose.getRotation());
 
-      filteredObjectPose.interpolate(objectPose, 0.25f);
+      filteredObjectPose.interpolate(objectPose, 0.1f);
+      getNodeToParentFrameTransform().set(filteredObjectPose);
+      getNodeFrame().update();
    }
 
    public void updatePlanarRegions(PlanarRegionsList planarRegionsList, ROS2Helper ros2Helper)

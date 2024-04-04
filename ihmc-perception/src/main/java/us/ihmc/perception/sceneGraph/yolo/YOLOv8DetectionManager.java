@@ -19,7 +19,6 @@ import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.tools.time.FrequencyCalculator;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -59,6 +58,7 @@ public class YOLOv8DetectionManager
    private ReferenceFrame robotFrame = null;
 
    private boolean destroyed = false;
+   private YOLOv8Node doorYoloNode;
 
    public YOLOv8DetectionManager(ROS2Helper ros2Helper)
    {
@@ -332,6 +332,10 @@ public class YOLOv8DetectionManager
                   detectedNodes.put(candidateDetection.getDetection().objectClass(), newYoloNode);
                   detectedObjects.put(candidateDetection.getDetection().objectClass(), candidateDetection);
                   candidateDetection.getDetectionFilter().setAcceptanceThreshold(0.2f);
+                  if (newYoloNode.getName().contains("door"))
+                  {
+                     doorYoloNode = newYoloNode;
+                  }
                }
 
                candidateIterator.remove();
@@ -362,5 +366,10 @@ public class YOLOv8DetectionManager
             yoloNode.update();
          }
       }
+   }
+
+   public YOLOv8Node getDoorYoloNode()
+   {
+      return doorYoloNode;
    }
 }

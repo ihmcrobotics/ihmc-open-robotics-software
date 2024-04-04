@@ -17,6 +17,7 @@ import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.IterativeClosestPointManager;
@@ -34,6 +35,8 @@ import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectionUpdater;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
+import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8DetectionManager;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
@@ -56,6 +59,8 @@ import us.ihmc.tools.thread.SwapReference;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.function.Supplier;
+
+import static us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions.*;
 
 /**
  * <p>
@@ -150,6 +155,7 @@ public class PerceptionAndAutonomyProcess
    private final YOLOv8DetectionManager yolov8DetectionManager;
    private ROS2DemandGraphNode yoloZEDDemandNode;
    private ROS2DemandGraphNode yoloRealsenseDemandNode;
+   private YOLOv8Node doorYoloNode;
 
    private final IterativeClosestPointManager icpManager;
 
@@ -470,6 +476,24 @@ public class PerceptionAndAutonomyProcess
       {
          yolov8DetectionManager.updateSceneGraph(sceneGraph);
          yolov8DetectionManager.setRobotFrame(robotPelvisFrame);
+         if (doorYoloNode != null && !sceneGraph.getNodeNameList().contains("doorFrame"))
+         {
+            LogTools.info(doorYoloNode.getNodeToParentFrameTransform());
+            sceneGraph.modifyTree(modificationQueue ->
+             {
+                SceneNode doorFrameNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                                      "doorFrame",
+                                                                      sceneGraph.getIDToNodeMap(),
+                                                                      doorYoloNode.getID(),
+                                                                      new RigidBodyTransform(),
+                                                                      DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
+                                                                      DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM,
+                                                                      DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
+                LogTools.info("Adding doorFrame to scene graph.");
+                modificationQueue.accept(new SceneGraphNodeAddition(doorFrameNode, doorYoloNode));
+             });
+         }
+         doorYoloNode = yolov8DetectionManager.getDoorYoloNode();
       }
 
       // Update general stuff
@@ -522,13 +546,8 @@ public class PerceptionAndAutonomyProcess
          PlanarRegionsList planarRegionsInWorldFrame = framePlanarRegionsList.getPlanarRegionsList().copy();
          planarRegionsInWorldFrame.applyTransform(realsenseFrameSupplier.get().getTransformToWorldFrame());
 
-         for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
-         {
-            if (sceneNode instanceof YOLOv8Node yolOv8Node)
-            {
-               yolOv8Node.updatePlanarRegions(planarRegionsInWorldFrame, ros2Helper);
-            }
-         }
+         if (doorYoloNode != null)
+            doorYoloNode.updatePlanarRegions(planarRegionsInWorldFrame, ros2Helper);
 
          latestRealsenseDepthImage.release();
       }
