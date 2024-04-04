@@ -13,7 +13,6 @@ public class ROS2BehaviorTreeSubscriptionNode
    private ActionSequenceStateMessage actionSequenceStateMessage;
    private DoorTraversalStateMessage doorTraversalStateMessage;
    private ActionNodeStateMessage actionNodeStateMessage;
-   private ArmJointAnglesActionStateMessage armJointAnglesActionStateMessage;
    private ChestOrientationActionStateMessage chestOrientationActionStateMessage;
    private FootstepPlanActionStateMessage footstepPlanActionStateMessage;
    private SakeHandCommandActionStateMessage sakeHandCommandActionStateMessage;
@@ -32,7 +31,6 @@ public class ROS2BehaviorTreeSubscriptionNode
       actionSequenceStateMessage = null;
       doorTraversalStateMessage = null;
       actionNodeStateMessage = null;
-      armJointAnglesActionStateMessage = null;
       chestOrientationActionStateMessage = null;
       footstepPlanActionStateMessage = null;
       sakeHandCommandActionStateMessage = null;
@@ -102,16 +100,6 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setDoorTraversalStateMessage(DoorTraversalStateMessage doorTraversalStateMessage)
    {
       this.doorTraversalStateMessage = doorTraversalStateMessage;
-   }
-
-   public ArmJointAnglesActionStateMessage getArmJointAnglesActionStateMessage()
-   {
-      return armJointAnglesActionStateMessage;
-   }
-
-   public void setArmJointAnglesActionStateMessage(ArmJointAnglesActionStateMessage armJointAnglesActionStateMessage)
-   {
-      this.armJointAnglesActionStateMessage = armJointAnglesActionStateMessage;
    }
 
    public ChestOrientationActionStateMessage getChestOrientationActionStateMessage()
