@@ -11,8 +11,8 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_objdetect.DetectorParameters;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetector;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -70,7 +70,7 @@ public class RDXOpenCVArUcoMarkerDetectionUI
    private final ImBoolean showGraphics = new ImBoolean(true);
    private ArrayList<OpenCVArUcoMarker> markersToTrack;
    private final ArrayList<RDXModelInstance> markerPoseCoordinateFrames = new ArrayList<>();
-   private final FramePose3D markerPose = new FramePose3D();
+   private final RigidBodyTransform markerPoseInWorld = new RigidBodyTransform();
    private final ImPlotPlot detectionDurationPlot = new ImPlotPlot(70);
    private final ImPlotDoublePlotLine detectionDurationPlotLine = new ImPlotDoublePlotLine("Detection duration");
    private final Stopwatch stopwatch = new Stopwatch().start();
@@ -165,12 +165,14 @@ public class RDXOpenCVArUcoMarkerDetectionUI
                for (int i = 0; i < markersToTrack.size(); i++)
                {
                   OpenCVArUcoMarker markerToTrack = markersToTrack.get(i);
-                  if (arUcoMarkerDetectionResults.isDetected(markerToTrack.getId()))
+                  boolean detected = arUcoMarkerDetectionResults.getPose(markerToTrack.getId(),
+                                                                         markerToTrack.getSideLength(),
+                                                                         cameraFrame,
+                                                                         ReferenceFrame.getWorldFrame(),
+                                                                         markerPoseInWorld);
+                  if (detected)
                   {
-                     markerPose.setToZero(cameraFrame);
-                     arUcoMarkerDetectionResults.getPose(markerToTrack.getId(), markerToTrack.getSideLength(), markerPose);
-                     markerPose.changeFrame(ReferenceFrame.getWorldFrame());
-                     markerPoseCoordinateFrames.get(i).setPoseInWorldFrame(markerPose);
+                     markerPoseCoordinateFrames.get(i).setPoseInWorldFrame(markerPoseInWorld);
                   }
                }
             }

@@ -4,6 +4,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class AlphaFilteredRigidBodyTransform extends RigidBodyTransform
 {
+   // an alpha of zero applies zero filtering, accepting the entirely new input.
    private double alpha = 0.0;
    private final RigidBodyTransform previousFiltered = new RigidBodyTransform();
 
