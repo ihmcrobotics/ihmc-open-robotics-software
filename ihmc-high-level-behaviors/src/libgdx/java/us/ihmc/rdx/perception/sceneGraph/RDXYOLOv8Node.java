@@ -65,10 +65,10 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
 
       alphaFilterValueSlider = new ImGuiInputDoubleWrapper("Break frequency:",
                                                            "%.2f",
-                                                           0.2,
+                                                           0.05,
                                                            5.0,
-                                                           yoloNode::getBreakFrequency,
-                                                           yoloNode::setBreakFrequency,
+                                                           yoloNode::getAlpha,
+                                                           yoloNode::setAlpha,
                                                            yoloNode::freeze);
       alphaFilterValueSlider.setWidgetWidth(100.0f);
 

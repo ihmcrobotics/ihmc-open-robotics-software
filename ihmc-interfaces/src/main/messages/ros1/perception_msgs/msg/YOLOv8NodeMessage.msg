@@ -26,7 +26,7 @@ geometry_msgs/Pose filtered_object_pose
 # The visual transform to parent
 geometry_msgs/Transform visual_transform_to_object_pose
 
-# Break frequency filter value for nodes that are alpha filtered
-float32 break_frequency
+# Alpha filter for transform interpolation
+float32 alpha_filter
 
 

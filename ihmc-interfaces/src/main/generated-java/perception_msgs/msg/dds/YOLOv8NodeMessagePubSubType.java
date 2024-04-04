@@ -15,7 +15,7 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b4effcf8727acbe6966f48d6bcff5fd21c7509028e2b47b02a39e6b7f6b868dc";
+   		return "192aedf4785d61e07e695888d22ebcd3a15bc29558f8350ff7e17aacdaa9b7a0";
    }
    
    @Override
@@ -146,7 +146,7 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       geometry_msgs.msg.dds.PosePubSubType.write(data.getObjectPose(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getFilteredObjectPose(), cdr);
       geometry_msgs.msg.dds.TransformPubSubType.write(data.getVisualTransformToObjectPose(), cdr);
-      cdr.write_type_5(data.getBreakFrequency());
+      cdr.write_type_5(data.getAlphaFilter());
 
    }
 
@@ -166,7 +166,7 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       geometry_msgs.msg.dds.PosePubSubType.read(data.getObjectPose(), cdr);	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getFilteredObjectPose(), cdr);	
       geometry_msgs.msg.dds.TransformPubSubType.read(data.getVisualTransformToObjectPose(), cdr);	
-      data.setBreakFrequency(cdr.read_type_5());
+      data.setAlphaFilter(cdr.read_type_5());
       	
 
    }
@@ -191,7 +191,7 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       ser.write_type_a("visual_transform_to_object_pose", new geometry_msgs.msg.dds.TransformPubSubType(), data.getVisualTransformToObjectPose());
 
-      ser.write_type_5("break_frequency", data.getBreakFrequency());
+      ser.write_type_5("alpha_filter", data.getAlphaFilter());
    }
 
    @Override
@@ -214,7 +214,7 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       ser.read_type_a("visual_transform_to_object_pose", new geometry_msgs.msg.dds.TransformPubSubType(), data.getVisualTransformToObjectPose());
 
-      data.setBreakFrequency(ser.read_type_5("break_frequency"));
+      data.setAlphaFilter(ser.read_type_5("alpha_filter"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.YOLOv8NodeMessage src, perception_msgs.msg.dds.YOLOv8NodeMessage dest)

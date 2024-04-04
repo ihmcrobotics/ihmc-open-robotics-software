@@ -15,7 +15,6 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
-import us.ihmc.perception.filters.BreakFrequencyAlphaCalculator;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
@@ -45,8 +44,7 @@ public class YOLOv8Node extends DetectableSceneNode
    private Pose3D filteredObjectPose;
    private final RigidBodyTransform visualTransformToObjectPose = new RigidBodyTransform();
 
-   private final BreakFrequencyAlphaCalculator breakFrequencyAlphaCalculator = new BreakFrequencyAlphaCalculator();
-   private double breakFrequency = 10.0;
+   private double alpha = 0.15;
 
    public YOLOv8Node(long id, String name, YOLOv8DetectionClass detectionClass, List<Point3D32> objectPointCloud, Point3D32 objectCentroid)
    {
@@ -99,7 +97,7 @@ public class YOLOv8Node extends DetectableSceneNode
       if (!filteredObjectPose.hasRotation())
          filteredObjectPose.getRotation().set(objectPose.getRotation());
 
-      filteredObjectPose.interpolate(objectPose, breakFrequencyAlphaCalculator.calculateAlpha(breakFrequency));
+      filteredObjectPose.interpolate(objectPose, alpha);
       getNodeToParentFrameTransform().set(filteredObjectPose);
       getNodeFrame().update();
    }
@@ -297,13 +295,13 @@ public class YOLOv8Node extends DetectableSceneNode
       this.visualTransformToObjectPose.set(visualTransformToObjectPose);
    }
 
-   public double getBreakFrequency()
+   public double getAlpha()
    {
-      return breakFrequency;
+      return alpha;
    }
 
-   public void setBreakFrequency(double breakFrequency)
+   public void setAlpha(double alpha)
    {
-      this.breakFrequency = breakFrequency;
+      this.alpha = alpha;
    }
 }

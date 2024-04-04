@@ -151,7 +151,7 @@ public class ROS2SceneGraphSubscription
             yoloNode.setObjectPose(subscriptionNode.getYOLONodeMessage().getObjectPose());
             yoloNode.setFilteredObjectPose(subscriptionNode.getYOLONodeMessage().getFilteredObjectPose());
             yoloNode.setVisualTransformToObjectPose(subscriptionNode.getYOLONodeMessage().getVisualTransformToObjectPose());
-            yoloNode.setBreakFrequency(subscriptionNode.getYOLONodeMessage().getBreakFrequency());
+            yoloNode.setAlpha(subscriptionNode.getYOLONodeMessage().getAlphaFilter());
          }
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
          {
