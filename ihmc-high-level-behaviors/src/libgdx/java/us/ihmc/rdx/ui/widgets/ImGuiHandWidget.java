@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.widgets;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiMouseButton;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -61,7 +62,7 @@ public class ImGuiHandWidget
       }
    }
 
-   public void render(RobotSide side, float lineHeight)
+   public boolean render(RobotSide side, float lineHeight, boolean isSelected)
    {
       float fontSize = ImGui.getFontSize();
 
@@ -99,11 +100,17 @@ public class ImGuiHandWidget
          polygon[i].set(cursorScreenPosX + polygon[i].x, cursorScreenPosY + polygon[i].y);
       }
 
-      backgroundColor = side == RobotSide.LEFT ? ImGuiTools.DARK_RED : ImGuiTools.DARK_GREEN;
       lineColor = ImGui.getColorU32(ImGuiCol.Text);
 
-      if (isHovered)
+      if (isHovered || isSelected)
+      {
+         if (!isHovered)
+            backgroundColor = side == RobotSide.LEFT ? ImGuiTools.DARK_RED : ImGuiTools.DARK_GREEN;
+         else
+            backgroundColor = side == RobotSide.LEFT ? ImGuiTools.RED : ImGuiTools.GREEN;
+
          ImGui.getWindowDrawList().addConvexPolyFilled(polygon, polygon.length, backgroundColor);
+      }
 
       for (int i = 0; i < polygon.length - 1; i++)
       {
@@ -118,6 +125,8 @@ public class ImGuiHandWidget
       }
 
       ImGui.newLine();
+
+      return isHovered && ImGui.isMouseClicked(ImGuiMouseButton.Left);
    }
 
    private void drawLine(float x0, float y0, float x1, float y1)
