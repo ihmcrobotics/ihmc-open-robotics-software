@@ -1,10 +1,11 @@
 package us.ihmc.rdx.ui.behavior.actions;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-
+import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.actions.WholeBodyBimanipulationActionDefinition;
@@ -19,8 +20,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
+import us.ihmc.rdx.ui.RDX3DPanelTooltip;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
@@ -104,7 +108,9 @@ public class RDXWholeBodyBimanipulationAction extends RDXActionNode<WholeBodyBim
 
       definition.getHandToParentTransform(RobotSide.LEFT).getValue().set(new RigidBodyTransform(new Quaternion(Math.toRadians(-30.0), Math.toRadians(-25.0), 0.0), new Point3D(0.0, 0.127, 0.0)));
       definition.getHandToParentTransform(RobotSide.RIGHT).getValue().set(new RigidBodyTransform(new Quaternion(Math.toRadians(30.0), Math.toRadians(-25.0), 0.0), new Point3D(0.0, -0.127, 0.0)));
-      definition.setTrajectoryDuration(2.0);
+      definition.setTrajectoryDuration(4.0);
+
+      tooltip = new RDX3DPanelTooltip(panel3D);
    }
 
    @Override
@@ -159,6 +165,41 @@ public class RDXWholeBodyBimanipulationAction extends RDXActionNode<WholeBodyBim
    }
 
    @Override
+   public void calculate3DViewPick(ImGui3DViewInput input)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         poseGizmos.get(side).calculate3DViewPick(input);
+      }
+   }
+
+   private boolean isMouseHovering = false;
+   private final ImGui3DViewPickResult pickResult = new ImGui3DViewPickResult();
+   private final RDX3DPanelTooltip tooltip;
+
+   @Override
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         if (state.getHandFrame(side).isChildOfWorld())
+         {
+            isMouseHovering = input.getClosestPick() == pickResult;
+
+            boolean isClickedOn = isMouseHovering && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left);
+            if (isClickedOn)
+            {
+               poseGizmos.get(side).setSelected(true);
+            }
+
+            poseGizmos.get(side).process3DViewInput(input);
+
+            tooltip.setInput(input);
+         }
+      }
+   }
+
+   @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (state.getHandFrame(RobotSide.LEFT).isChildOfWorld())
@@ -169,7 +210,17 @@ public class RDXWholeBodyBimanipulationAction extends RDXActionNode<WholeBodyBim
          }
 
          if (state.getIsNextForExecution())
+         {
+            desiredRobot.setWholeBodyColor(Color.WHITE);
+            for (RobotSide side : RobotSide.values)
+               desiredRobot.setArmShowing(side, true);
+            for (RobotSide side : RobotSide.values)
+               desiredRobot.setLegShowing(side, true);
+            desiredRobot.setChestShowing(true);
+            desiredRobot.setPelvisShowing(true);
+
             desiredRobot.getRenderables(renderables, pool, Collections.singleton(RDXSceneLevel.VIRTUAL));
+         }
       }
    }
 
