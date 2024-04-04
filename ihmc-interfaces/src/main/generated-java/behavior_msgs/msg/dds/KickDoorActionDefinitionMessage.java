@@ -29,10 +29,6 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
             */
    public double kick_target_distance_;
    /**
-            * A boolean for tracking whether a kick has been requested.
-            */
-   public boolean trigger_kick_request_;
-   /**
             * Weight distribution before the kick. 1.0 means all weight on the kicking foot. Default is 0.5.
             */
    public double prekick_weight_distribution_;
@@ -58,8 +54,6 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
       kick_impulse_ = other.kick_impulse_;
 
       kick_target_distance_ = other.kick_target_distance_;
-
-      trigger_kick_request_ = other.trigger_kick_request_;
 
       prekick_weight_distribution_ = other.prekick_weight_distribution_;
 
@@ -135,21 +129,6 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
    }
 
    /**
-            * A boolean for tracking whether a kick has been requested.
-            */
-   public void setTriggerKickRequest(boolean trigger_kick_request)
-   {
-      trigger_kick_request_ = trigger_kick_request;
-   }
-   /**
-            * A boolean for tracking whether a kick has been requested.
-            */
-   public boolean getTriggerKickRequest()
-   {
-      return trigger_kick_request_;
-   }
-
-   /**
             * Weight distribution before the kick. 1.0 means all weight on the kicking foot. Default is 0.5.
             */
    public void setPrekickWeightDistribution(double prekick_weight_distribution)
@@ -191,8 +170,6 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.kick_target_distance_, other.kick_target_distance_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.trigger_kick_request_, other.trigger_kick_request_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.prekick_weight_distribution_, other.prekick_weight_distribution_, epsilon)) return false;
 
 
@@ -217,8 +194,6 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
 
       if(this.kick_target_distance_ != otherMyClass.kick_target_distance_) return false;
 
-      if(this.trigger_kick_request_ != otherMyClass.trigger_kick_request_) return false;
-
       if(this.prekick_weight_distribution_ != otherMyClass.prekick_weight_distribution_) return false;
 
 
@@ -241,8 +216,6 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
       builder.append(this.kick_impulse_);      builder.append(", ");
       builder.append("kick_target_distance=");
       builder.append(this.kick_target_distance_);      builder.append(", ");
-      builder.append("trigger_kick_request=");
-      builder.append(this.trigger_kick_request_);      builder.append(", ");
       builder.append("prekick_weight_distribution=");
       builder.append(this.prekick_weight_distribution_);
       builder.append("}");

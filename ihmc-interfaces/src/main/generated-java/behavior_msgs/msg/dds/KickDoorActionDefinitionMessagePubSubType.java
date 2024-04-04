@@ -15,7 +15,7 @@ public class KickDoorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7ee1f0336da083ef687b9e6f772acd4eeaa4562c689ce863cf81d3445a4c99f1";
+   		return "cb3733ceca97d8797814a71e2bd76e33224a96764b9940511f3661056252e333";
    }
    
    @Override
@@ -62,8 +62,6 @@ public class KickDoorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -93,9 +91,6 @@ public class KickDoorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -114,8 +109,6 @@ public class KickDoorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getKickTargetDistance());
 
-      cdr.write_type_7(data.getTriggerKickRequest());
-
       cdr.write_type_6(data.getPrekickWeightDistribution());
 
    }
@@ -131,8 +124,6 @@ public class KickDoorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       	
       data.setKickTargetDistance(cdr.read_type_6());
       	
-      data.setTriggerKickRequest(cdr.read_type_7());
-      	
       data.setPrekickWeightDistribution(cdr.read_type_6());
       	
 
@@ -147,7 +138,6 @@ public class KickDoorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       ser.write_type_6("kick_height", data.getKickHeight());
       ser.write_type_6("kick_impulse", data.getKickImpulse());
       ser.write_type_6("kick_target_distance", data.getKickTargetDistance());
-      ser.write_type_7("trigger_kick_request", data.getTriggerKickRequest());
       ser.write_type_6("prekick_weight_distribution", data.getPrekickWeightDistribution());
    }
 
@@ -160,7 +150,6 @@ public class KickDoorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
       data.setKickHeight(ser.read_type_6("kick_height"));
       data.setKickImpulse(ser.read_type_6("kick_impulse"));
       data.setKickTargetDistance(ser.read_type_6("kick_target_distance"));
-      data.setTriggerKickRequest(ser.read_type_7("trigger_kick_request"));
       data.setPrekickWeightDistribution(ser.read_type_6("prekick_weight_distribution"));
    }
 
