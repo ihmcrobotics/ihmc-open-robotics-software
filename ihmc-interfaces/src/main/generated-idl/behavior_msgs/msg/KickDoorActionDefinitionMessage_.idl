@@ -1,0 +1,49 @@
+#ifndef __behavior_msgs__msg__KickDoorActionDefinitionMessage__idl__
+#define __behavior_msgs__msg__KickDoorActionDefinitionMessage__idl__
+
+#include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::KickDoorActionDefinitionMessage_")
+      struct KickDoorActionDefinitionMessage
+      {
+        /**
+         * Parent definition fields
+         */
+        behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
+        /**
+         * Specifies the side of the robot that will execute the kick.
+         */
+        @defaultValue(value=255)
+        octet robot_side;
+        /**
+         * The height at which the kick should be targeted.
+         */
+        double kick_height;
+        /**
+         * The impulse with which the kick should be executed.
+         */
+        double kick_impulse;
+        /**
+         * The target distance from the robot to where the kick should be aimed.
+         */
+        double kick_target_distance;
+        /**
+         * A boolean for tracking whether a kick has been requested.
+         */
+        boolean trigger_kick_request;
+        /**
+         * Weight distribution before the kick. 1.0 means all weight on the kicking foot. Default is 0.5.
+         */
+        double prekick_weight_distribution;
+      };
+    };
+  };
+};
+
+#endif

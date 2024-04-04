@@ -1,0 +1,29 @@
+#ifndef __behavior_msgs__msg__KickDoorActionStateMessage__idl__
+#define __behavior_msgs__msg__KickDoorActionStateMessage__idl__
+
+#include "behavior_msgs/msg/./ActionNodeStateMessage_.idl"
+#include "behavior_msgs/msg/./KickDoorActionDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::KickDoorActionStateMessage_")
+      struct KickDoorActionStateMessage
+      {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::ActionNodeStateMessage state;
+        /**
+         * Definition
+         */
+        behavior_msgs::msg::dds::KickDoorActionDefinitionMessage definition;
+      };
+    };
+  };
+};
+
+#endif
