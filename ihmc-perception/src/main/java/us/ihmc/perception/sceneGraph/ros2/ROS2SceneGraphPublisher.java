@@ -148,6 +148,7 @@ public class ROS2SceneGraphPublisher
             yoloNodeMessage.getObjectPose().set(yoloNode.getObjectPose());
             yoloNodeMessage.getFilteredObjectPose().set(yoloNode.getFilteredObjectPose());
             yoloNodeMessage.getVisualTransformToObjectPose().set(yoloNode.getVisualTransformToObjectPose());
+            yoloNodeMessage.setBreakFrequency((float) yoloNode.getBreakFrequency());
 
             detectableSceneNodeMessage = yoloNodeMessage.getDetectableSceneNode();
          }

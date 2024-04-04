@@ -15,6 +15,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.imgui.ImGuiInputDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -42,6 +43,7 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
    private final ImInt maskErosionKernelRadius;
    private final ImDouble outlierFilterThreshold;
    private final ImFloat detectionAcceptanceThreshold;
+   private final ImGuiInputDoubleWrapper alphaFilterValueSlider;
 
    private final RDXPointCloudRenderer objectPointCloudRenderer = new RDXPointCloudRenderer();
    private final RDXReferenceFrameGraphic objectPoseGraphic = new RDXReferenceFrameGraphic(0.2);
@@ -60,6 +62,16 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
       maskErosionKernelRadius = new ImInt(yoloNode.getMaskErosionKernelRadius());
       outlierFilterThreshold = new ImDouble(yoloNode.getOutlierFilterThreshold());
       detectionAcceptanceThreshold = new ImFloat(yoloNode.getDetectionAcceptanceThreshold());
+
+      alphaFilterValueSlider = new ImGuiInputDoubleWrapper("Break frequency:",
+                                                           "%.2f",
+                                                           0.2,
+                                                           5.0,
+                                                           yoloNode::getBreakFrequency,
+                                                           yoloNode::setBreakFrequency,
+                                                           yoloNode::freeze);
+      alphaFilterValueSlider.setWidgetWidth(100.0f);
+
       objectPointCloudRenderer.create(5000);
       objectPoseGraphic.setPoseInWorldFrame(yoloNode.getObjectPose());
    }
@@ -111,6 +123,7 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
          outlierFilterThreshold.set(MathTools.clamp(outlierFilterThreshold.get(), 0.0, 5.0));
       if (ImGuiTools.volatileInputFloat(labels.get("Detection Acceptance Threshold"), detectionAcceptanceThreshold))
          detectionAcceptanceThreshold.set((float) MathTools.clamp(detectionAcceptanceThreshold.get(), 0.0f, 1.0f));
+      alphaFilterValueSlider.renderImGuiWidget();
    }
 
    @Override

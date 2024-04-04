@@ -41,6 +41,10 @@ module perception_msgs
          * The visual transform to parent
          */
         geometry_msgs::msg::dds::Transform visual_transform_to_object_pose;
+        /**
+         * Break frequency filter value for nodes that are alpha filtered
+         */
+        float break_frequency;
       };
     };
   };

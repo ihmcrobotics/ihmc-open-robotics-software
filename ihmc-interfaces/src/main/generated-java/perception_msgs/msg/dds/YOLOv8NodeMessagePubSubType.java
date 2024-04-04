@@ -15,7 +15,7 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ceece411c5e20bc8d6e75114f98fe36372241621a116420d6752279d1fc89b28";
+   		return "b4effcf8727acbe6966f48d6bcff5fd21c7509028e2b47b02a39e6b7f6b868dc";
    }
    
    @Override
@@ -74,6 +74,8 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -115,6 +117,9 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getCdrSerializedSize(data.getVisualTransformToObjectPose(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -141,6 +146,8 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       geometry_msgs.msg.dds.PosePubSubType.write(data.getObjectPose(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getFilteredObjectPose(), cdr);
       geometry_msgs.msg.dds.TransformPubSubType.write(data.getVisualTransformToObjectPose(), cdr);
+      cdr.write_type_5(data.getBreakFrequency());
+
    }
 
    public static void read(perception_msgs.msg.dds.YOLOv8NodeMessage data, us.ihmc.idl.CDR cdr)
@@ -159,6 +166,8 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       geometry_msgs.msg.dds.PosePubSubType.read(data.getObjectPose(), cdr);	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getFilteredObjectPose(), cdr);	
       geometry_msgs.msg.dds.TransformPubSubType.read(data.getVisualTransformToObjectPose(), cdr);	
+      data.setBreakFrequency(cdr.read_type_5());
+      	
 
    }
 
@@ -182,6 +191,7 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       ser.write_type_a("visual_transform_to_object_pose", new geometry_msgs.msg.dds.TransformPubSubType(), data.getVisualTransformToObjectPose());
 
+      ser.write_type_5("break_frequency", data.getBreakFrequency());
    }
 
    @Override
@@ -204,6 +214,7 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       ser.read_type_a("visual_transform_to_object_pose", new geometry_msgs.msg.dds.TransformPubSubType(), data.getVisualTransformToObjectPose());
 
+      data.setBreakFrequency(ser.read_type_5("break_frequency"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.YOLOv8NodeMessage src, perception_msgs.msg.dds.YOLOv8NodeMessage dest)

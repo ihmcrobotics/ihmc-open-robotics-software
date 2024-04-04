@@ -34,6 +34,10 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
             * The visual transform to parent
             */
    public us.ihmc.euclid.transform.QuaternionBasedTransform visual_transform_to_object_pose_;
+   /**
+            * Break frequency filter value for nodes that are alpha filtered
+            */
+   public float break_frequency_;
 
    public YOLOv8NodeMessage()
    {
@@ -72,6 +76,8 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.object_pose_, object_pose_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.filtered_object_pose_, filtered_object_pose_);
       geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.visual_transform_to_object_pose_, visual_transform_to_object_pose_);
+      break_frequency_ = other.break_frequency_;
+
    }
 
 
@@ -179,6 +185,21 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       return visual_transform_to_object_pose_;
    }
 
+   /**
+            * Break frequency filter value for nodes that are alpha filtered
+            */
+   public void setBreakFrequency(float break_frequency)
+   {
+      break_frequency_ = break_frequency;
+   }
+   /**
+            * Break frequency filter value for nodes that are alpha filtered
+            */
+   public float getBreakFrequency()
+   {
+      return break_frequency_;
+   }
+
 
    public static Supplier<YOLOv8NodeMessagePubSubType> getPubSubType()
    {
@@ -218,6 +239,8 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       if (!this.object_pose_.epsilonEquals(other.object_pose_, epsilon)) return false;
       if (!this.filtered_object_pose_.epsilonEquals(other.filtered_object_pose_, epsilon)) return false;
       if (!this.visual_transform_to_object_pose_.epsilonEquals(other.visual_transform_to_object_pose_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.break_frequency_, other.break_frequency_, epsilon)) return false;
+
 
       return true;
    }
@@ -246,6 +269,8 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       if (!this.object_pose_.equals(otherMyClass.object_pose_)) return false;
       if (!this.filtered_object_pose_.equals(otherMyClass.filtered_object_pose_)) return false;
       if (!this.visual_transform_to_object_pose_.equals(otherMyClass.visual_transform_to_object_pose_)) return false;
+      if(this.break_frequency_ != otherMyClass.break_frequency_) return false;
+
 
       return true;
    }
@@ -277,7 +302,9 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       builder.append("filtered_object_pose=");
       builder.append(this.filtered_object_pose_);      builder.append(", ");
       builder.append("visual_transform_to_object_pose=");
-      builder.append(this.visual_transform_to_object_pose_);
+      builder.append(this.visual_transform_to_object_pose_);      builder.append(", ");
+      builder.append("break_frequency=");
+      builder.append(this.break_frequency_);
       builder.append("}");
       return builder.toString();
    }

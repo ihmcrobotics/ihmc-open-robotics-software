@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
+import us.ihmc.perception.filters.BreakFrequencyAlphaCalculator;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
@@ -42,6 +43,9 @@ public class YOLOv8Node extends DetectableSceneNode
    private Pose3D objectPose;
    private Pose3D filteredObjectPose;
    private final RigidBodyTransform visualTransformToObjectPose = new RigidBodyTransform();
+
+   private final BreakFrequencyAlphaCalculator breakFrequencyAlphaCalculator = new BreakFrequencyAlphaCalculator();
+   private double breakFrequency = 0.5;
 
    public YOLOv8Node(long id, String name, YOLOv8DetectionClass detectionClass, List<Point3D32> objectPointCloud, Point3D32 objectCentroid)
    {
@@ -94,7 +98,7 @@ public class YOLOv8Node extends DetectableSceneNode
       if (!filteredObjectPose.hasRotation())
          filteredObjectPose.getRotation().set(objectPose.getRotation());
 
-      filteredObjectPose.interpolate(objectPose, 0.1f);
+      filteredObjectPose.interpolate(objectPose, breakFrequencyAlphaCalculator.calculateAlpha(breakFrequency));
       getNodeToParentFrameTransform().set(filteredObjectPose);
       getNodeFrame().update();
    }
@@ -155,7 +159,8 @@ public class YOLOv8Node extends DetectableSceneNode
                RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(doorLeverPointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
 
                double yaw = TupleTools.angle(Axis2D.X, doorLineNormal.getDirection());
-               getObjectPose().getRotation().setYawPitchRoll(yaw, 0.0, doorSide == RobotSide.LEFT ? Math.PI : 0.0);
+               double pitch = TupleTools.angle(Axis2D.Y, doorLineNormal.getDirection()) + Math.PI;
+               getObjectPose().getRotation().setYawPitchRoll(yaw, pitch, doorSide == RobotSide.LEFT ? Math.PI : 0.0);
 
                PlanarRegionsList doorPlanarRegionsList = new PlanarRegionsList();
                doorPlanarRegionsList.addPlanarRegion(doorPlanarRegion);
@@ -267,5 +272,15 @@ public class YOLOv8Node extends DetectableSceneNode
    public void setVisualTransformToObjectPose(RigidBodyTransformBasics visualTransformToObjectPose)
    {
       this.visualTransformToObjectPose.set(visualTransformToObjectPose);
+   }
+
+   public double getBreakFrequency()
+   {
+      return breakFrequency;
+   }
+
+   public void setBreakFrequency(double breakFrequency)
+   {
+      this.breakFrequency = breakFrequency;
    }
 }
