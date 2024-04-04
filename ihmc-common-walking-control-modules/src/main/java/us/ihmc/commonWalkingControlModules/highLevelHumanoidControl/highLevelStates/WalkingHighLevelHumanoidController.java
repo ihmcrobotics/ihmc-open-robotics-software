@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManage
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.BimanualManipulationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
@@ -86,6 +87,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    private final FeetManager feetManager;
    private final BalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
+   private final BimanualManipulationManager bimanualManipulationManager;
 
    private final TouchdownErrorCompensator touchdownErrorCompensator;
 
@@ -217,6 +219,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
+      bimanualManipulationManager = managerFactory.getOrCreateBimanualManipulationManager();
 
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
@@ -646,6 +649,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       commandConsumer.handleAutomaticManipulationAbortOnICPError(currentState);
       commandConsumer.consumeLoadBearingCommands();
       commandConsumer.consumePrepareForLocomotionCommands();
+      commandConsumer.consumeBoxManipulationCommands();
 
       updateFailureDetection();
 
@@ -787,6 +791,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          balanceManager.compute(currentState.getTransferToSide(), heightControlCommand, isUpperBodyLoadBearing, controlHeightWithMomentum);
       else
          balanceManager.compute(currentState.getSupportSide(), heightControlCommand, isUpperBodyLoadBearing, controlHeightWithMomentum);
+
+      bimanualManipulationManager.update();
    }
 
    private void updateWholeBodyContactState()
@@ -987,6 +993,12 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
          controllerCoreCommand.addInverseDynamicsCommand(legElasticityDebuggator.getInverseDynamicsCommand());
+
+      // Box manipulation manager
+      if (bimanualManipulationManager.isEnabled())
+      {
+         controllerCoreCommand.addInverseDynamicsCommand(bimanualManipulationManager.getCommand());
+      }
    }
 
    public ControllerCoreCommand getControllerCoreCommand()

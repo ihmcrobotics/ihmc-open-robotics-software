@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.BimanualManipulationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
@@ -71,6 +72,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    private PelvisOrientationManager pelvisOrientationManager;
    private NaturalPostureManager naturalPostureManager;
    private InertialParameterManager inertialParameterManager;
+   private BimanualManipulationManager bimanualManipulationManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
@@ -411,6 +413,19 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
       return inertialParameterManager;
    }
 
+   public BimanualManipulationManager getOrCreateBimanualManipulationManager()
+   {
+      if (bimanualManipulationManager != null)
+         return bimanualManipulationManager;
+
+      if (!hasHighLevelHumanoidControllerToolbox(InertialParameterManager.class))
+         return null;
+
+      bimanualManipulationManager = new BimanualManipulationManager(controllerToolbox, registry);
+
+      return bimanualManipulationManager;
+   }
+
    private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)
    {
       if (controllerToolbox != null)
@@ -518,6 +533,9 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
          for (RigidBodyControlManager rigidBodyControlManager : rigidBodyManagerMapByBodyName.values())
             group.addChild(rigidBodyControlManager.getSCS2YoGraphics());
       }
+      if (bimanualManipulationManager != null)
+         group.addChild(bimanualManipulationManager.getSCS2YoGraphics());
+
       return group;
    }
 }

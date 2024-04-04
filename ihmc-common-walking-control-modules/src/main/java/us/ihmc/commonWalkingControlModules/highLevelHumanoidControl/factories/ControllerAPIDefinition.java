@@ -81,6 +81,7 @@ public class ControllerAPIDefinition
       commands.add(MomentumTrajectoryCommand.class);
       commands.add(CenterOfMassTrajectoryCommand.class);
       commands.add(HandWrenchTrajectoryCommand.class);
+      commands.add(BimanualManipulationCommand.class);
 
       /** Commands supported by the fast-walking controller, not in this repo */
       commands.add(DirectionalControlInputCommand.class);
