@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.filters.BreakFrequencyAlphaCalculator;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
@@ -45,7 +46,7 @@ public class YOLOv8Node extends DetectableSceneNode
    private final RigidBodyTransform visualTransformToObjectPose = new RigidBodyTransform();
 
    private final BreakFrequencyAlphaCalculator breakFrequencyAlphaCalculator = new BreakFrequencyAlphaCalculator();
-   private double breakFrequency = 0.5;
+   private double breakFrequency = 10.0;
 
    public YOLOv8Node(long id, String name, YOLOv8DetectionClass detectionClass, List<Point3D32> objectPointCloud, Point3D32 objectCentroid)
    {
@@ -103,6 +104,10 @@ public class YOLOv8Node extends DetectableSceneNode
       getNodeFrame().update();
    }
 
+   private final int switchSideThreshold = 10;
+   private int switchSide = 0;
+   private RobotSide lastSide;
+
    public void updatePlanarRegions(PlanarRegionsList planarRegionsList, ROS2Helper ros2Helper)
    {
       if (getName().toLowerCase(Locale.ROOT).contains("door lever") || getName().toLowerCase(Locale.ROOT).contains("door handle"))
@@ -158,9 +163,27 @@ public class YOLOv8Node extends DetectableSceneNode
 
                RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(doorLeverPointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
 
+               if (lastSide == null)
+                  lastSide = doorSide;
+
+               // Glitch filter
+               if (lastSide != doorSide)
+               {
+                  if (++switchSide > switchSideThreshold)
+                  {
+                     // Switch sides
+                     switchSide = 0;
+                     LogTools.info("Door lever switched sides");
+                  }
+                  else
+                  {
+                     doorSide = lastSide;
+                  }
+               }
+
                double yaw = TupleTools.angle(Axis2D.X, doorLineNormal.getDirection());
-               double pitch = TupleTools.angle(Axis2D.Y, doorLineNormal.getDirection()) + Math.PI;
-               getObjectPose().getRotation().setYawPitchRoll(yaw, pitch, doorSide == RobotSide.LEFT ? Math.PI : 0.0);
+//               double pitch = TupleTools.angle(Axis2D.Y, doorLineNormal.getDirection()) + Math.PI;
+               getObjectPose().getRotation().setYawPitchRoll(yaw, 0.0, doorSide == RobotSide.LEFT ? Math.PI : 0.0);
 
                PlanarRegionsList doorPlanarRegionsList = new PlanarRegionsList();
                doorPlanarRegionsList.addPlanarRegion(doorPlanarRegion);
