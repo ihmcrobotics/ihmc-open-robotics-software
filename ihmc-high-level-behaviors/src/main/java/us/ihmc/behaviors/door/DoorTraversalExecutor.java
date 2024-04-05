@@ -5,7 +5,11 @@ import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -15,17 +19,23 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
    private final DoorTraversalState state;
    private final DoorTraversalDefinition definition;
    private final ROS2SyncedRobotModel syncedRobot;
+   private final SceneGraph sceneGraph;
 
    private final SideDependentList<RevoluteJoint> x1KnuckleJoints = new SideDependentList<>();
    private final SideDependentList<RevoluteJoint> x2KnuckleJoints = new SideDependentList<>();
 
-   public DoorTraversalExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2SyncedRobotModel syncedRobot)
+   public DoorTraversalExecutor(long id,
+                                CRDTInfo crdtInfo,
+                                WorkspaceResourceDirectory saveFileDirectory,
+                                ROS2SyncedRobotModel syncedRobot,
+                                SceneGraph sceneGraph)
    {
       super(new DoorTraversalState(id, crdtInfo, saveFileDirectory));
 
       state = getState();
       definition = getDefinition();
 
+      this.sceneGraph = sceneGraph;
       this.syncedRobot = syncedRobot;
 
       for (RobotSide side : RobotSide.values)
@@ -55,6 +65,17 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
       if (state.isTreeStructureValid())
       {
+         if (state.getStabilizeDetectionAction().getIsExecuting())
+         {
+            for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
+            {
+               if (sceneNode instanceof StaticRelativeSceneNode staticNode && staticNode.getName().contains("door"))
+               {
+                  staticNode.clearOffset();
+                  staticNode.freeze();
+               }
+            }
+         }
          if (state.getPullScrewPrimitiveAction().getIsExecuting())
          {
             double knuckle1Q = x1KnuckleJoints.get(RobotSide.RIGHT).getQ();

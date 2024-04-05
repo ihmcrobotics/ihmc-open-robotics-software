@@ -22,6 +22,7 @@ import perception_msgs.msg.dds.PolygonizerParametersStringMessage;
 import perception_msgs.msg.dds.REAStateRequestMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
 import perception_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.YOLOv8ParametersMessage;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
@@ -145,6 +146,8 @@ public class PerceptionAPI
    public static final ROS2Topic<Empty> REQUEST_ZED_POINT_CLOUD = PERCEPTION_MODULE.withSuffix("request_zed_point_cloud").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_CENTERPOSE = PERCEPTION_MODULE.withSuffix("request_centerpose").withType(Empty.class);
    public static final ROS2Topic<DetectedObjectPacket> CENTERPOSE_DETECTED_OBJECT = IHMC_ROOT.withModule("centerpose").withType(DetectedObjectPacket.class);
+   public static final ROS2Topic<Empty> REQUEST_YOLO_ZED = PERCEPTION_MODULE.withSuffix("request_yolo_zed").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_YOLO_REALSENSE = PERCEPTION_MODULE.withSuffix("request_yolo_realsense").withType(Empty.class);
    public static final ROS2Topic<ImageMessage> ZED2_STEREO_COLOR = IHMC_ROOT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("color_stereo");
    public static final SideDependentList<ROS2Topic<ImageMessage>> ZED2_COLOR_IMAGES = new SideDependentList<>(IHMC_ROOT.withModule(ZED2_NAME)
                                                                                                                        .withType(ImageMessage.class)
@@ -162,6 +165,9 @@ public class PerceptionAPI
    public static final ROS2Topic<Empty> REQUEST_PLANAR_REGIONS = IHMC_ROOT.withModule("planar_regions")
                                                                           .withSuffix("request")
                                                                           .withType(Empty.class);
+   public static final ROS2Topic<YOLOv8ParametersMessage> YOLO_PARAMETERS = IHMC_ROOT.withModule("yolo")
+                                                                                     .withSuffix("parameters")
+                                                                                     .withType(YOLOv8ParametersMessage.class);
 
    public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
    public static final ROS2Topic<FusedSensorHeadPointCloudMessage> FUSED_SENSOR_HEAD_POINT_CLOUD = IHMC_ROOT.withTypeName(FusedSensorHeadPointCloudMessage.class);
