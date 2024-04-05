@@ -23,6 +23,7 @@ public class BehaviorTreeDefinitionRegistry
       new RegistryRecord(PelvisHeightPitchActionDefinition.class, BehaviorTreeStateMessage.PELVIS_HEIGHT_PITCH_ACTION),
       new RegistryRecord(SakeHandCommandActionDefinition.class, BehaviorTreeStateMessage.SAKE_HAND_COMMAND_ACTION),
       new RegistryRecord(WaitDurationActionDefinition.class, BehaviorTreeStateMessage.WAIT_DURATION_ACTION),
+      new RegistryRecord(KickDoorActionDefinition.class, BehaviorTreeStateMessage.KICK_DOOR_ACTION)
    };
 
    public static Class<?> getClassFromTypeName(String typeName)

@@ -128,6 +128,17 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       {
          return new RDXWaitDurationAction(id, crdtInfo, saveFileDirectory);
       }
+      if (nodeType == KickDoorActionDefinition.class)
+      {
+         return new RDXKickDoorAction(id,
+                                      crdtInfo,
+                                      saveFileDirectory,
+                                      baseUI,
+                                      robotModel,
+                                      syncedRobot,
+                                      referenceFrameLibrary,
+                                      footstepPlannerParametersBasics);
+      }
       else
       {
          return null;

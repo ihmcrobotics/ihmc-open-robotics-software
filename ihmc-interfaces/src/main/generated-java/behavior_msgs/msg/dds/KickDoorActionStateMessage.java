@@ -16,6 +16,10 @@ public class KickDoorActionStateMessage extends Packet<KickDoorActionStateMessag
             * Definition
             */
    public behavior_msgs.msg.dds.KickDoorActionDefinitionMessage definition_;
+   /**
+            * Execution state
+            */
+   public byte execution_state_;
 
    public KickDoorActionStateMessage()
    {
@@ -33,6 +37,8 @@ public class KickDoorActionStateMessage extends Packet<KickDoorActionStateMessag
    {
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.KickDoorActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      execution_state_ = other.execution_state_;
+
    }
 
 
@@ -51,6 +57,21 @@ public class KickDoorActionStateMessage extends Packet<KickDoorActionStateMessag
    public behavior_msgs.msg.dds.KickDoorActionDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+   /**
+            * Execution state
+            */
+   public void setExecutionState(byte execution_state)
+   {
+      execution_state_ = execution_state;
+   }
+   /**
+            * Execution state
+            */
+   public byte getExecutionState()
+   {
+      return execution_state_;
    }
 
 
@@ -73,6 +94,8 @@ public class KickDoorActionStateMessage extends Packet<KickDoorActionStateMessag
 
       if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_state_, other.execution_state_, epsilon)) return false;
+
 
       return true;
    }
@@ -88,6 +111,8 @@ public class KickDoorActionStateMessage extends Packet<KickDoorActionStateMessag
 
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if(this.execution_state_ != otherMyClass.execution_state_) return false;
+
 
       return true;
    }
@@ -101,7 +126,9 @@ public class KickDoorActionStateMessage extends Packet<KickDoorActionStateMessag
       builder.append("state=");
       builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");
-      builder.append(this.definition_);
+      builder.append(this.definition_);      builder.append(", ");
+      builder.append("execution_state=");
+      builder.append(this.execution_state_);
       builder.append("}");
       return builder.toString();
    }

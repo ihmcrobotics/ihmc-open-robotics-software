@@ -21,6 +21,10 @@ module behavior_msgs
          * Definition
          */
         behavior_msgs::msg::dds::KickDoorActionDefinitionMessage definition;
+        /**
+         * Execution state
+         */
+        octet execution_state;
       };
     };
   };

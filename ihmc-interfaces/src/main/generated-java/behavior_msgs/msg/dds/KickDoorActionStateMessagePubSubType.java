@@ -15,7 +15,7 @@ public class KickDoorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0961b89263843a0d6ab3e897340fb6b4daf296befde31b74d412955566cf1563";
+   		return "3a0ebd8fb98c287c4550e03a76a0419036befcca6abf564b0e87ba5fee59ecee";
    }
    
    @Override
@@ -56,6 +56,8 @@ public class KickDoorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += behavior_msgs.msg.dds.KickDoorActionDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -73,6 +75,9 @@ public class KickDoorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += behavior_msgs.msg.dds.KickDoorActionDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -81,12 +86,16 @@ public class KickDoorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.write(data.getState(), cdr);
       behavior_msgs.msg.dds.KickDoorActionDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
+      cdr.write_type_9(data.getExecutionState());
+
    }
 
    public static void read(behavior_msgs.msg.dds.KickDoorActionStateMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.KickDoorActionDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
+      data.setExecutionState(cdr.read_type_9());
+      	
 
    }
 
@@ -97,6 +106,7 @@ public class KickDoorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
       ser.write_type_a("definition", new behavior_msgs.msg.dds.KickDoorActionDefinitionMessagePubSubType(), data.getDefinition());
 
+      ser.write_type_9("execution_state", data.getExecutionState());
    }
 
    @Override
@@ -106,6 +116,7 @@ public class KickDoorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
 
       ser.read_type_a("definition", new behavior_msgs.msg.dds.KickDoorActionDefinitionMessagePubSubType(), data.getDefinition());
 
+      data.setExecutionState(ser.read_type_9("execution_state"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.KickDoorActionStateMessage src, behavior_msgs.msg.dds.KickDoorActionStateMessage dest)

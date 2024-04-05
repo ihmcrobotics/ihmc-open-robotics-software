@@ -28,6 +28,7 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getPelvisHeightActions().clear();
       treeStateMessage.getSakeHandCommandActions().clear();
       treeStateMessage.getWaitDurationActions().clear();
+      treeStateMessage.getKickDoorActions().clear();
    }
 
    public static void packMessage(BehaviorTreeNodeState nodeState, BehaviorTreeStateMessage treeStateMessage)
@@ -91,6 +92,12 @@ public class ROS2BehaviorTreeMessageTools
          treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.WAIT_DURATION_ACTION);
          treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getWaitDurationActions().size());
          waitDurationActionState.toMessage(treeStateMessage.getWaitDurationActions().add());
+      }
+      else if (nodeState instanceof KickDoorActionState kickDoorActionState)
+      {
+         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.KICK_DOOR_ACTION);
+         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getKickDoorActions().size());
+         kickDoorActionState.toMessage(treeStateMessage.getKickDoorActions().add());
       }
       else
       {

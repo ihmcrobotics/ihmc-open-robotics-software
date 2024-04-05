@@ -104,6 +104,10 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       {
          return new WaitDurationActionExecutor(id, crdtInfo, saveFileDirectory, syncedRobot);
       }
+      if (nodeType == KickDoorActionDefinition.class)
+      {
+         return new KickDoorActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, controllerStatusTracker, referenceFrameLibrary, walkingControllerParameters);
+      }
 
       return null;
    }
