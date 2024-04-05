@@ -16,7 +16,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefinition>
 {
    private ActionSequenceState actionSequence;
-   private FootstepPlanActionState approachAction;
+   private WaitDurationActionState stabilizeDetectionAction;
    private WaitDurationActionState waitToOpenRightHandAction;
    private ScrewPrimitiveActionState pullScrewPrimitiveAction;
 
@@ -45,10 +45,10 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       {
          if (child instanceof ActionNodeState<?> actionNode)
          {
-            if (actionNode instanceof FootstepPlanActionState footstepPlanAction
-                && footstepPlanAction.getDefinition().getName().equals("Approach door"))
+            if (actionNode instanceof WaitDurationActionState waitAction
+                && waitAction.getDefinition().getName().equals("Stabilize Detection"))
             {
-               approachAction = footstepPlanAction;
+               stabilizeDetectionAction = waitAction;
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
                 && waitDurationAction.getDefinition().getName().equals("Wait to open right hand"))
@@ -89,8 +89,9 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    public boolean isTreeStructureValid()
    {
       boolean isValid = actionSequence != null;
-      isValid &= waitToOpenRightHandAction != null;
-      isValid &= pullScrewPrimitiveAction != null;
+      isValid &= stabilizeDetectionAction != null;
+//      isValid &= waitToOpenRightHandAction != null;
+//      isValid &= pullScrewPrimitiveAction != null;
       return isValid;
    }
 
@@ -99,9 +100,9 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       return actionSequence;
    }
 
-   public FootstepPlanActionState getApproachAction()
+   public WaitDurationActionState getStabilizeDetectionAction()
    {
-      return approachAction;
+      return stabilizeDetectionAction;
    }
 
    public WaitDurationActionState getWaitToOpenRightHandAction()
