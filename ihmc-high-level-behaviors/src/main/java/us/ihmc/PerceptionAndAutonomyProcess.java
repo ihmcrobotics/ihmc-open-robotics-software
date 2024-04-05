@@ -253,7 +253,8 @@ public class PerceptionAndAutonomyProcess
       behaviorTreeExecutor = new ROS2BehaviorTreeExecutor(ros2ControllerHelper,
                                                           robotModel,
                                                           behaviorTreeSyncedRobot,
-                                                          behaviorTreeReferenceFrameLibrary);
+                                                          behaviorTreeReferenceFrameLibrary,
+                                                          sceneGraph);
    }
 
    public void startAutonomyThread()

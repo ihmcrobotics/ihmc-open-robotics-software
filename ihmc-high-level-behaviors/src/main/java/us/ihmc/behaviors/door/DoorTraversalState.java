@@ -5,6 +5,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -15,6 +16,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefinition>
 {
    private ActionSequenceState actionSequence;
+   private FootstepPlanActionState approachAction;
    private WaitDurationActionState waitToOpenRightHandAction;
    private ScrewPrimitiveActionState pullScrewPrimitiveAction;
 
@@ -43,6 +45,11 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       {
          if (child instanceof ActionNodeState<?> actionNode)
          {
+            if (actionNode instanceof FootstepPlanActionState footstepPlanAction
+                && footstepPlanAction.getDefinition().getName().equals("Approach door"))
+            {
+               approachAction = footstepPlanAction;
+            }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
                 && waitDurationAction.getDefinition().getName().equals("Wait to open right hand"))
             {
@@ -90,6 +97,11 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    public ActionSequenceState getActionSequence()
    {
       return actionSequence;
+   }
+
+   public FootstepPlanActionState getApproachAction()
+   {
+      return approachAction;
    }
 
    public WaitDurationActionState getWaitToOpenRightHandAction()
