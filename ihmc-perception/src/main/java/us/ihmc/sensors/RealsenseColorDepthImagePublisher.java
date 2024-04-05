@@ -252,6 +252,7 @@ public class RealsenseColorDepthImagePublisher
       {
          colorPublishLock.unlock();
       }
+      publishColorThread.blockingStop();
 
       if (nextCpuDepthImage != null)
          nextCpuDepthImage.release();

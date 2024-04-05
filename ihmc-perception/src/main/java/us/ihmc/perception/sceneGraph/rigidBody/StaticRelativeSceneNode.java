@@ -61,12 +61,12 @@ public class StaticRelativeSceneNode extends PredefinedRigidBodySceneNode
          LogTools.info("{}: Disabling tracking initial parent", getName());
          setTrackInitialParent(false, modificationQueue);
       }
-      else if (currentDistance > getDistanceToDisableTracking() && !getTrackingInitialParent())
-      {
-         LogTools.info("{}: Activating tracking initial parent", getName());
-         setTrackInitialParent(true, modificationQueue);
-         clearOffset();
-      }
+//      else if (currentDistance > getDistanceToDisableTracking() && !getTrackingInitialParent())
+//      {
+//         LogTools.info("{}: Activating tracking initial parent", getName());
+//         setTrackInitialParent(true, modificationQueue);
+//         clearOffset();
+//      }
    }
 
    public void setDistanceToDisableTracking(double distanceToDisableTracking)
