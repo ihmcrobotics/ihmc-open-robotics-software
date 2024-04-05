@@ -174,7 +174,6 @@ public class RDXBehaviorTreeNodeCreationMenu
          renderNodeCreationClickable(relativeNode, insertionType, "Chest Orientation", ChestOrientationActionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Pelvis Height", PelvisHeightPitchActionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitDurationActionDefinition.class, null);
-         renderNodeCreationClickable(relativeNode, insertionType, "Kick Door", KickDoorActionDefinition.class, null);
          ImGui.text("Screw Primitive: ");
          for (RobotSide side : RobotSide.values)
          {
@@ -186,6 +185,12 @@ public class RDXBehaviorTreeNodeCreationMenu
          {
             ImGui.sameLine();
             renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandWrenchActionDefinition.class, side);
+         }
+         ImGui.text("Kick Door: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), KickDoorActionDefinition.class, side);
          }
 
          ImGui.unindent();

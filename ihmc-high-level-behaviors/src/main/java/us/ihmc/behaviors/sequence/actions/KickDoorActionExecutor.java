@@ -1,7 +1,5 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HighLevelStateMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -9,15 +7,11 @@ import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionState, KickDoorActionDefinition>
@@ -30,6 +24,7 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
    private final ControllerStatusTracker controllerStatusTracker;
    private final WalkingControllerParameters walkingControllerParameters;
    private final FramePose3D solePose = new FramePose3D();
+   private final RobotSide kickSide;
 
    public KickDoorActionExecutor(long id,
                                      CRDTInfo crdtInfo,
@@ -44,6 +39,7 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
 
       state = getState();
       definition = getDefinition();
+      kickSide = definition.getSide();
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
@@ -72,7 +68,7 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
       {
          case STANDING ->
          {
-            //Change to the kicking controller
+            //Idle until the kick is requested
          }
          case PREPARING_KICK_FOOT ->
          {

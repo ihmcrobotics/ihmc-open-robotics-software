@@ -132,7 +132,7 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
       return kickSide.getValue();
    }
 
-   public void setKickSide(RobotSide kickSide)
+   public void setSide(RobotSide kickSide)
    {
       this.kickSide.setValue(kickSide);
    }

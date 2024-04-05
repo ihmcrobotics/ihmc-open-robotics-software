@@ -9,7 +9,6 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.ImStringWrapper;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -46,7 +45,6 @@ public class RDXKickDoorAction extends RDXActionNode<KickDoorActionState, KickDo
 
       definition.setName("Kick Door");
 
-      //TODO: add robot side to the gui
       kickHeight = new ImDoubleWrapper(definition::getKickHeight,
                                        definition::setKickHeight,
                                        imDouble -> ImGui.inputDouble(labels.get("Kick height"), imDouble));
