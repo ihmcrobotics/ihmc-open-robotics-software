@@ -2,9 +2,11 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.WholeBodyBimanipulationActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.communication.crdt.*;
+import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
+import us.ihmc.communication.crdt.CRDTUnidirectionalDoubleArray;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -81,7 +83,7 @@ public class WholeBodyBimanipulationActionState extends ActionNodeState<WholeBod
 
    public void setJointAngles(double[] value)
    {
-      for (int i = 0; i < ArmJointAnglesActionDefinition.MAX_NUMBER_OF_JOINTS; i++)
+      for (int i = 0; i < WholeBodyBimanipulationActionDefinition.MAX_NUMBER_OF_JOINTS; i++)
       {
          jointAngles.getValue()[i] = value[i];
       }
