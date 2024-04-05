@@ -1,5 +1,8 @@
 package us.ihmc.avatar.sakeGripper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Errors to be sent from hand's Dynamixel over EtherCAT.
  */
@@ -25,5 +28,22 @@ public enum SakeHandError
    public String toString()
    {
       return name().replace("_", " ");
+   }
+
+   public static List<String> getErrorNames(int errorCode)
+   {
+      return getErrorList(errorCode).stream().map(SakeHandError::toString).toList();
+   }
+
+   public static List<SakeHandError> getErrorList(int errorCode)
+   {
+      List<SakeHandError> errorList = new ArrayList<>();
+      for (SakeHandError error : values())
+      {
+         if ((errorCode & error.errorCode) != 0)
+            errorList.add(error);
+      }
+
+      return errorList;
    }
 }
