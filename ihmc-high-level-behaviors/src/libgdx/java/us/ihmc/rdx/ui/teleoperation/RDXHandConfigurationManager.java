@@ -88,7 +88,6 @@ public class RDXHandConfigurationManager
                SakeHandParameters.normalizeHandOpenAngle(handPreset.getHandOpenAngle()));
          sakeHandDesiredCommandMessage.setNormalizedGripperTorqueLimit(
                SakeHandParameters.normalizeFingertipGripForceLimit(handPreset.getFingertipGripForceLimit()));
-         sakeHandDesiredCommandMessage.setTorqueOn(handPreset.getFingertipGripForceLimit() > 0.0);
       }
 
       RDXBaseUI.pushNotification("Commanding hand configuration...");
