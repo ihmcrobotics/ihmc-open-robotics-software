@@ -69,15 +69,14 @@ public class ArUcoSceneTools
          {
             if (child instanceof ArUcoMarkerNode arUcoMarkerNode)
             {
-               boolean isDetected = arUcoMarkerDetectionResults.isDetected(arUcoMarkerNode.getMarkerID());
+               boolean isDetected = arUcoMarkerDetectionResults.getPose(arUcoMarkerNode.getMarkerID(),
+                                                                        arUcoMarkerNode.getMarkerSize(),
+                                                                        sensorFrame,
+                                                                        arUcoMarkerNode.getNodeFrame().getParent(),
+                                                                        arUcoMarkerNode.getNodeToParentFrameTransform());
                arUcoMarkerNode.setCurrentlyDetected(isDetected);
                if (isDetected)
                {
-                  arUcoMarkerDetectionResults.getPose(arUcoMarkerNode.getMarkerID(),
-                                               arUcoMarkerNode.getMarkerSize(),
-                                               sensorFrame,
-                                               arUcoMarkerNode.getNodeFrame().getParent(),
-                                               arUcoMarkerNode.getNodeToParentFrameTransform());
                   arUcoMarkerNode.applyFilter();
                   arUcoMarkerNode.getNodeFrame().update();
                }
