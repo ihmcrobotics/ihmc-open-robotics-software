@@ -171,7 +171,6 @@ public class RDXBehaviorTreeNodeCreationMenu
             ImGui.sameLine();
             renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), SakeHandCommandActionDefinition.class, side);
          }
-         renderNodeCreationClickable(relativeNode, insertionType, "Arm Joint Angles", ArmJointAnglesActionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Chest Orientation", ChestOrientationActionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Pelvis Height", PelvisHeightPitchActionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitDurationActionDefinition.class, null);

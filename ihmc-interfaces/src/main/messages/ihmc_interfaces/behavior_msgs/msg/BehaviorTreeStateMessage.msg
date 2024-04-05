@@ -7,16 +7,15 @@ byte BASIC_NODE = 0
 byte ACTION_SEQUENCE = 1
 byte DOOR_TRAVERSAL = 2
 
-byte ARM_JOINT_ANGLES_ACTION = 10
-byte CHEST_ORIENTATION_ACTION = 11
-byte FOOTSTEP_PLAN_ACTION = 12
-byte SAKE_HAND_COMMAND_ACTION = 13
-byte HAND_POSE_ACTION = 14
-byte HAND_WRENCH_ACTION = 15
-byte SCREW_PRIMITIVE_ACTION = 16
-byte PELVIS_HEIGHT_PITCH_ACTION = 17
-byte WAIT_DURATION_ACTION = 18
-byte WHOLEBODY_BIMANIPULATION_ACTION = 19
+byte CHEST_ORIENTATION_ACTION = 10
+byte FOOTSTEP_PLAN_ACTION = 11
+byte SAKE_HAND_COMMAND_ACTION = 12
+byte HAND_POSE_ACTION = 13
+byte HAND_WRENCH_ACTION = 14
+byte SCREW_PRIMITIVE_ACTION = 15
+byte PELVIS_HEIGHT_PITCH_ACTION = 16
+byte WAIT_DURATION_ACTION = 17
+byte WHOLEBODY_BIMANIPULATION_ACTION = 18
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
 uint32 sequence_id
@@ -40,8 +39,6 @@ behavior_msgs/BasicNodeStateMessage[<=200] basic_nodes
 behavior_msgs/ActionSequenceStateMessage[<=200] action_sequences
 
 behavior_msgs/DoorTraversalStateMessage[<=200] door_traversals
-
-behavior_msgs/ArmJointAnglesActionStateMessage[<=200] arm_joint_angles_actions
 
 behavior_msgs/ChestOrientationActionStateMessage[<=200] chest_orientation_actions
 

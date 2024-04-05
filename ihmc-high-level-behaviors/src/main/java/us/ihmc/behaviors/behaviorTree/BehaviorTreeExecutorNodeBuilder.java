@@ -63,10 +63,6 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       {
          return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory, syncedRobot);
       }
-      if (nodeType == ArmJointAnglesActionDefinition.class)
-      {
-         return new ArmJointAnglesActionExecutor(id, crdtInfo, saveFileDirectory, robotModel, ros2ControllerHelper, syncedRobot);
-      }
       if (nodeType == ChestOrientationActionDefinition.class)
       {
          return new ChestOrientationActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, referenceFrameLibrary);

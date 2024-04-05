@@ -20,7 +20,6 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getBasicNodes().clear();
       treeStateMessage.getActionSequences().clear();
       treeStateMessage.getDoorTraversals().clear();
-      treeStateMessage.getArmJointAnglesActions().clear();
       treeStateMessage.getChestOrientationActions().clear();
       treeStateMessage.getFootstepPlanActions().clear();
       treeStateMessage.getHandPoseActions().clear();
@@ -45,12 +44,6 @@ public class ROS2BehaviorTreeMessageTools
          treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.DOOR_TRAVERSAL);
          treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getDoorTraversals().size());
          doorTraversalState.toMessage(treeStateMessage.getDoorTraversals().add());
-      }
-      else if (nodeState instanceof ArmJointAnglesActionState armJointAnglesActionState)
-      {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.ARM_JOINT_ANGLES_ACTION);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getArmJointAnglesActions().size());
-         armJointAnglesActionState.toMessage(treeStateMessage.getArmJointAnglesActions().add());
       }
       else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
       {
@@ -126,10 +119,6 @@ public class ROS2BehaviorTreeMessageTools
       {
          doorTraversalState.fromMessage(subscriptionNode.getDoorTraversalStateMessage());
       }
-      else if (nodeState instanceof ArmJointAnglesActionState armJointAnglesActionState)
-      {
-         armJointAnglesActionState.fromMessage(subscriptionNode.getArmJointAnglesActionStateMessage());
-      }
       else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
       {
          chestOrientationActionState.fromMessage(subscriptionNode.getChestOrientationActionStateMessage());
@@ -198,13 +187,6 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setDoorTraversalStateMessage(doorTraversalStateMessage);
             subscriptionNode.setBehaviorTreeNodeStateMessage(doorTraversalStateMessage.getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(doorTraversalStateMessage.getDefinition().getDefinition());
-         }
-         case BehaviorTreeStateMessage.ARM_JOINT_ANGLES_ACTION ->
-         {
-            ArmJointAnglesActionStateMessage armJointAnglesActionStateMessage = treeStateMessage.getArmJointAnglesActions().get(indexInTypesList);
-            subscriptionNode.setArmJointAnglesActionStateMessage(armJointAnglesActionStateMessage);
-            subscriptionNode.setBehaviorTreeNodeStateMessage(armJointAnglesActionStateMessage.getState().getState());
-            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(armJointAnglesActionStateMessage.getDefinition().getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION ->
          {
