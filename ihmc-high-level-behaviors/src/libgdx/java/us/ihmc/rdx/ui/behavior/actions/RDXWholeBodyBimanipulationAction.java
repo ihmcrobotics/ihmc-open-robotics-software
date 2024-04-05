@@ -10,14 +10,19 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.actions.WholeBodyBimanipulationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.WholeBodyBimanipulationActionState;
+import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -51,12 +56,14 @@ public class RDXWholeBodyBimanipulationAction extends RDXActionNode<WholeBodyBim
    private final WholeBodyBimanipulationActionDefinition definition;
    private final SideDependentList<RDXSelectablePose3DGizmo> poseGizmos = new SideDependentList<>();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ROS2SyncedRobotModel syncedRobot;
 
    private final MutableReferenceFrame collisionShapeFrame = new MutableReferenceFrame();
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
    private final RDXDesiredRobot desiredRobot;
    private final OneDoFJointBasics[] desiredOneDoFJointsExcludingHands;
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
+   private final ImDoubleWrapper trajectoryDurationWidget;
 
    public RDXWholeBodyBimanipulationAction(long id,
                                            CRDTInfo crdtInfo,
@@ -74,6 +81,10 @@ public class RDXWholeBodyBimanipulationAction extends RDXActionNode<WholeBodyBim
 
       definition.setName("Wholebody Bimanipulation");
 
+      trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
+                                                     definition::setTrajectoryDuration,
+                                                     imDouble -> ImGui.inputDouble(labels.get("Trajectory duration"), imDouble));
+
       desiredRobot = new RDXDesiredRobot(robotModel);
       desiredRobot.setSceneLevels(RDXSceneLevel.VIRTUAL);
       desiredRobot.create();
@@ -86,6 +97,7 @@ public class RDXWholeBodyBimanipulationAction extends RDXActionNode<WholeBodyBim
          poseGizmos.get(side).create(panel3D);
       }
 
+      this.syncedRobot = syncedRobot;
       FullHumanoidRobotModel syncedFullRobotModel = syncedRobot.getFullRobotModel();
       for (RobotSide side : RobotSide.values)
       {
@@ -152,6 +164,22 @@ public class RDXWholeBodyBimanipulationAction extends RDXActionNode<WholeBodyBim
       ImGui.checkbox(labels.get("Adjust " + RobotSide.RIGHT.getPascalCaseName() + " Goal Pose"), poseGizmos.get(RobotSide.RIGHT).getSelected());
 
       parentFrameComboBox.render();
+      ImGui.pushItemWidth(80.0f);
+      trajectoryDurationWidget.renderImGuiWidget();
+      for (RobotSide side : RobotSide.values)
+      {
+         if (ImGui.button(labels.get("Set Pose to " + side.getPascalCaseName() + "Synced Hand")))
+         {
+            CRDTDetachableReferenceFrame actionPalmFrame = getState().getHandFrame(side);
+            CRDTUnidirectionalRigidBodyTransform palmTransformToParent = definition.getHandToParentTransform(side);
+            MovingReferenceFrame syncedPalmFrame = syncedRobot.getReferenceFrames().getHandFrame(side);
+            FramePose3D syncedPalmPose = new FramePose3D();
+            syncedPalmPose.setToZero(syncedPalmFrame);
+            syncedPalmPose.changeFrame(actionPalmFrame.getReferenceFrame().getParent());
+            palmTransformToParent.getValue().set(syncedPalmPose);
+            actionPalmFrame.update();
+         }
+      }
    }
 
    @Override

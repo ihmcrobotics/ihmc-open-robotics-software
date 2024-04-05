@@ -54,7 +54,7 @@ module behavior_msgs
       17;
 
       const octet WHOLEBODY_BIMANIPULATION_ACTION =
-      19;
+      18;
 
 
       /**
