@@ -1,5 +1,6 @@
 package us.ihmc;
 
+import org.bytedeco.opencl.global.OpenCL;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.colorVision.BlackflyImagePublisher;
 import us.ihmc.avatar.colorVision.BlackflyImageRetriever;
@@ -17,12 +18,15 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.IterativeClosestPointManager;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
 import us.ihmc.perception.ouster.OusterDepthImageRetriever;
 import us.ihmc.perception.ouster.OusterNetServer;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -31,6 +35,8 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
+import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -44,6 +50,7 @@ import us.ihmc.tools.thread.RestartableThread;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.tools.thread.SwapReference;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.function.Supplier;
 
@@ -87,6 +94,9 @@ public class PerceptionAndAutonomyProcess
    private static final String RIGHT_BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
    private static final BlackflyLensProperties BLACKFLY_LENS = BlackflyLensProperties.BFS_U3_27S5C_FE185C086HA_1;
    private static final ROS2Topic<ImageMessage> BLACKFLY_IMAGE_TOPIC = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT);
+
+   private final ROS2Helper ros2Helper;
+   private final Supplier<ReferenceFrame> ousterFrameSupplier;
 
    private ROS2DemandGraphNode zedPointCloudDemandNode;
    private ROS2DemandGraphNode zedColorDemandNode;
@@ -135,6 +145,14 @@ public class PerceptionAndAutonomyProcess
 
    private final IterativeClosestPointManager icpManager;
 
+   private final OpenCLManager openCLManager = new OpenCLManager();
+
+   @Nullable
+   private RapidPlanarRegionsExtractor planarRegionsExtractor;
+   private final RestartableThrottledThread planarRegionsExtractorThread;
+   private final FramePlanarRegionsList planarRegionsList;
+   private ROS2DemandGraphNode planarRegionsDemandNode;
+
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
    private ReferenceFrameLibrary behaviorTreeReferenceFrameLibrary;
    private ROS2BehaviorTreeExecutor behaviorTreeExecutor;
@@ -155,6 +173,9 @@ public class PerceptionAndAutonomyProcess
                                        Supplier<ReferenceFrame> robotPelvisFrameSupplier,
                                        ReferenceFrame zed2iLeftCameraFrame)
    {
+      this.ros2Helper = ros2Helper;
+      this.ousterFrameSupplier = ousterFrameSupplier;
+
       initializeDependencyGraph(ros2Helper);
 
       zedImageRetriever = new ZEDColorDepthImageRetriever(ZED_CAMERA_ID, zedFrameSupplier, zedDepthDemandNode, zedColorDemandNode);
@@ -171,7 +192,7 @@ public class PerceptionAndAutonomyProcess
       realsenseProcessAndPublishThread.start();
 
       ouster = new OusterNetServer();
-      ouster.start();
+//      ouster.start();
       ousterDepthImageRetriever = new OusterDepthImageRetriever(ouster,
                                                                 ousterFrameSupplier,
                                                                 ousterLidarScanDemandNode::isDemanded,
@@ -197,6 +218,10 @@ public class PerceptionAndAutonomyProcess
 
       icpManager = new IterativeClosestPointManager(ros2Helper, sceneGraph);
       icpManager.startWorkers();
+
+      planarRegionsExtractorThread = new RestartableThrottledThread("PlanarRegionsExtractor", 10.0, this::updatePlanarRegions);
+      planarRegionsExtractorThread.start();
+      planarRegionsList = new FramePlanarRegionsList();
    }
 
    /** Needs to be a separate method to allow constructing test bench version. */
@@ -268,6 +293,13 @@ public class PerceptionAndAutonomyProcess
 
       icpManager.destroy();
 
+      planarRegionsExtractorThread.stop();
+      if (planarRegionsExtractor != null)
+         planarRegionsExtractor.destroy();
+
+      // TODO: Why does this result in a native crash?
+//      openCLManager.destroy();
+
       zedPointCloudDemandNode.destroy();
       zedColorDemandNode.destroy();
       zedDepthDemandNode.destroy();
@@ -277,6 +309,7 @@ public class PerceptionAndAutonomyProcess
       blackflyImageDemandNodes.forEach(ROS2DemandGraphNode::destroy);
       arUcoDetectionDemandNode.destroy();
       centerposeDemandNode.destroy();
+      planarRegionsDemandNode.destroy();
 
       if (zedHeartbeat != null)
          zedHeartbeat.destroy();
@@ -341,7 +374,7 @@ public class PerceptionAndAutonomyProcess
    {
       if (ousterDepthDemandNode.isDemanded())
       {
-         ouster.start();
+//         ouster.start();
          ousterDepthImage = ousterDepthImageRetriever.getLatestRawDepthImage();
          if (ousterDepthImage == null)
             return;
@@ -427,6 +460,35 @@ public class PerceptionAndAutonomyProcess
       }
    }
 
+   public void updatePlanarRegions()
+   {
+      if (ousterDepthImage != null && ousterDepthImage.isAvailable() && planarRegionsDemandNode.isDemanded())
+      {
+         RawImage latestOusterDepthRawImage = ousterDepthImage.get();
+
+         if (planarRegionsExtractor == null)
+         {
+            int imageHeight = latestOusterDepthRawImage.getImageHeight();
+            int imageWidth = latestOusterDepthRawImage.getImageWidth();
+            planarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
+                                                                     openCLManager.loadProgram("RapidRegionsExtractor"),
+                                                                     imageHeight,
+                                                                     imageWidth);
+            planarRegionsExtractor.getDebugger().setEnabled(false);
+         }
+
+         // TODO: Get rid of BytedecoImage, RapidPlanarRegionsExtractor requires it
+         BytedecoImage bytedecoImage = new BytedecoImage(latestOusterDepthRawImage.getCpuImageMat());
+         bytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+         planarRegionsExtractor.update(bytedecoImage, ousterFrameSupplier.get(), planarRegionsList);
+         planarRegionsExtractor.setProcessing(false);
+         bytedecoImage.destroy(openCLManager);
+         PerceptionMessageTools.publishFramePlanarRegionsList(planarRegionsList, PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE, ros2Helper);
+
+         latestOusterDepthRawImage.release();
+      }
+   }
+
    private void initializeBlackfly(RobotSide side)
    {
       String serialNumber = side == RobotSide.LEFT ? LEFT_BLACKFLY_SERIAL_NUMBER : RIGHT_BLACKFLY_SERIAL_NUMBER;
@@ -467,6 +529,9 @@ public class PerceptionAndAutonomyProcess
 
       centerposeDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_CENTERPOSE);
 
+      planarRegionsDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_PLANAR_REGIONS);
+      ousterDepthDemandNode.addDependents(planarRegionsDemandNode);
+
       // build the graph
       zedDepthDemandNode.addDependents(zedPointCloudDemandNode);
       zedColorDemandNode.addDependents(zedPointCloudDemandNode, centerposeDemandNode);
@@ -494,6 +559,11 @@ public class PerceptionAndAutonomyProcess
 
       rightBlackflyHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(RobotSide.RIGHT));
       rightBlackflyHeartbeat.setAlive(true);
+   }
+
+   public FramePlanarRegionsList getPlanarRegionsList()
+   {
+      return planarRegionsList;
    }
 
    public static void main(String[] args)

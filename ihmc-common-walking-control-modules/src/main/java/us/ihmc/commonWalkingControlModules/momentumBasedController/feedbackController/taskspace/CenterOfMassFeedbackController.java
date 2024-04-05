@@ -1,16 +1,5 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.taskspace;
 
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.LINEAR_ACCELERATION;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.LINEAR_VELOCITY;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.POSITION;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ACHIEVED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.CURRENT;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.DESIRED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.ERROR_INTEGRATED;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDBACK;
-import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.FEEDFORWARD;
-
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerException;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -34,6 +23,9 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D.*;
+import static us.ihmc.commonWalkingControlModules.controllerCore.data.Type.*;
 
 public class CenterOfMassFeedbackController implements FeedbackControllerInterface
 {
@@ -81,14 +73,15 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    private CentroidalMomentumRateCalculator centroidalMomentumHandler;
 
    private final double dt;
-   private final double totalRobotMass;
+   private final DoubleProvider totalMassProvider;
    private final boolean computeIntegralTerm;
 
    public CenterOfMassFeedbackController(WholeBodyControlCoreToolbox toolbox, FeedbackControllerToolbox feedbackControllerToolbox, YoRegistry parentRegistry)
    {
       centerOfMassFrame = toolbox.getCenterOfMassFrame();
       centroidalMomentumHandler = toolbox.getCentroidalMomentumRateCalculator();
-      totalRobotMass = toolbox.getTotalRobotMass();
+
+      totalMassProvider = toolbox.getTotalMassProvider();
       FeedbackControllerSettings settings = toolbox.getFeedbackControllerSettings();
       if (settings != null)
          computeIntegralTerm = settings.enableIntegralTerm();
@@ -106,11 +99,9 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoCurrentPosition = feedbackControllerToolbox.getOrCreateCenterOfMassPositionData(CURRENT, isEnabled, true);
       yoErrorPosition = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(ERROR, POSITION, isEnabled, false);
 
-      yoErrorPositionIntegrated = computeIntegralTerm ? feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(ERROR_INTEGRATED,
-                                                                                                                    POSITION,
-                                                                                                                    isEnabled,
-                                                                                                                    false)
-                                                      : null;
+      yoErrorPositionIntegrated = computeIntegralTerm ?
+            feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(ERROR_INTEGRATED, POSITION, isEnabled, false) :
+            null;
 
       yoDesiredLinearVelocity = feedbackControllerToolbox.getOrCreateCenterOfMassVectorData(DESIRED, LINEAR_VELOCITY, isEnabled, true);
 
@@ -247,7 +238,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoDesiredLinearAcceleration.setIncludingFrame(desiredLinearAcceleration);
       yoDesiredLinearAcceleration.changeFrame(trajectoryFrame);
 
-      desiredLinearAcceleration.scale(totalRobotMass);
+      desiredLinearAcceleration.scale(totalMassProvider.getValue());
       desiredLinearAcceleration.changeFrame(worldFrame);
       inverseDynamicsOutput.setLinearMomentumRate(desiredLinearAcceleration);
    }
@@ -279,7 +270,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoDesiredLinearVelocity.setIncludingFrame(desiredLinearVelocity);
       yoDesiredLinearVelocity.changeFrame(trajectoryFrame);
 
-      desiredLinearVelocity.scale(totalRobotMass);
+      desiredLinearVelocity.scale(totalMassProvider.getValue());
       desiredLinearVelocity.changeFrame(worldFrame);
       inverseKinematicsOutput.setLinearMomentum(desiredLinearVelocity);
    }
@@ -315,7 +306,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       yoDesiredLinearAcceleration.setIncludingFrame(desiredLinearAcceleration);
       yoDesiredLinearAcceleration.changeFrame(trajectoryFrame);
 
-      desiredLinearAcceleration.scale(totalRobotMass);
+      desiredLinearAcceleration.scale(totalMassProvider.getValue());
       desiredLinearAcceleration.changeFrame(worldFrame);
       virtualModelControlOutput.setLinearMomentumRate(desiredLinearAcceleration);
    }
@@ -325,7 +316,7 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    {
       SpatialForceReadOnly achievedMomentumRate = centroidalMomentumHandler.getMomentumRate();
       yoAchievedLinearAcceleration.setIncludingFrame(achievedMomentumRate.getLinearPart());
-      yoAchievedLinearAcceleration.scale(1.0 / totalRobotMass);
+      yoAchievedLinearAcceleration.scale(1.0 / totalMassProvider.getValue());
       yoAchievedLinearAcceleration.changeFrame(yoDesiredPosition.getReferenceFrame());
    }
 

@@ -6,7 +6,7 @@ import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
 import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.rdx.imgui.ImBooleanWrapper;
+import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -22,6 +22,8 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImIntegerWrapper sideWidget;
    private final ImGuiSliderDoubleWrapper handOpenAngleSlider;
+   private final ImDoubleWrapper initialSatisfactionHandAngleToleranceInput;
+   private final ImDoubleWrapper completionHandAngleToleranceInput;
    private final ImGuiSliderDoubleWrapper fingertipGripForceSlider;
    private final ImGuiGripperWidget gripperWidget = new ImGuiGripperWidget();
 
@@ -39,6 +41,16 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
                                                          definition::getHandOpenAngle,
                                                          definition::setHandOpenAngle);
       handOpenAngleSlider.addWidgetAligner(widgetAligner);
+      initialSatisfactionHandAngleToleranceInput = new ImDoubleWrapper(
+            () -> Math.toDegrees(definition.getInitialSatisfactionHandAngleTolerance()),
+            initialSatisfactionHandAngleToleranceDegrees ->
+                  definition.setInitialSatisfactionHandAngleTolerance(Math.toRadians(initialSatisfactionHandAngleToleranceDegrees)),
+            imDouble -> ImGui.inputDouble(labels.get("Initial Satisfaction Hand Angle Tolerance (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)),
+                                          imDouble));
+      completionHandAngleToleranceInput = new ImDoubleWrapper(
+            () -> Math.toDegrees(definition.getCompletionHandAngleTolerance()),
+            completionHandAngleToleranceDegrees -> definition.setCompletionHandAngleTolerance(Math.toRadians(completionHandAngleToleranceDegrees)),
+            imDouble -> ImGui.inputDouble(labels.get("Completion Hand Angle Tolerance (%s)".formatted(EuclidCoreMissingTools.DEGREE_SYMBOL)), imDouble));
       fingertipGripForceSlider = new ImGuiSliderDoubleWrapper("Fingertip Torque Limit", "%.1f N", 0.0, SakeHandParameters.FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT,
                                                               definition::getFingertipGripForceLimit,
                                                               definition::setFingertipGripForceLimit);
@@ -70,6 +82,8 @@ public class RDXSakeHandCommandAction extends RDXActionNode<SakeHandCommandActio
       handOpenAngleSlider.setWidgetText("%.1f%s".formatted(Math.toDegrees(definition.getHandOpenAngle()), EuclidCoreMissingTools.DEGREE_SYMBOL));
 
       handOpenAngleSlider.renderImGuiWidget();
+      initialSatisfactionHandAngleToleranceInput.renderImGuiWidget();
+      completionHandAngleToleranceInput.renderImGuiWidget();
       fingertipGripForceSlider.renderImGuiWidget();
    }
 

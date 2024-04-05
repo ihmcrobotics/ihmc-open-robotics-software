@@ -10,6 +10,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.TaskspaceTrajectoryTrackingErrorCalculator;
@@ -62,7 +63,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private final RecyclingArrayList<FrameVector3D> angularVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final TDoubleArrayList trajectoryTimes = new TDoubleArrayList();
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
-   private final int numberOfJoints = ArmJointAnglesActionDefinition.MAX_NUMBER_OF_JOINTS;
+   private final int numberOfJoints = HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS;
    private int numberOfPoints;
    private double rotationRadius;
    private double signedTotalRotation;
@@ -110,9 +111,10 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
       if (state.getScrewFrame().isChildOfWorld())
       {
-         if (getParent().getState() instanceof ActionSequenceState parent)
+         ActionSequenceState actionSequence = BehaviorTreeTools.findActionSequenceAncestor(state);
+         if (actionSequence != null)
          {
-            if (parent.getExecutionNextIndex() <= state.getActionIndex())
+            if (actionSequence.getExecutionNextIndex() <= state.getActionIndex())
             {
                ReferenceFrame initialHandFrame = null;
 
@@ -122,9 +124,9 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                }
                else
                {
-                  HandPoseActionState previousHandPose = parent.findNextPreviousAction(HandPoseActionState.class,
-                                                                                       state.getActionIndex(),
-                                                                                       definition.getSide());
+                  HandPoseActionState previousHandPose = actionSequence.findNextPreviousAction(HandPoseActionState.class,
+                                                                                               state.getActionIndex(),
+                                                                                               definition.getSide());
                   if (previousHandPose != null && previousHandPose.getPalmFrame().isChildOfWorld())
                   {
                      initialHandFrame = previousHandPose.getPalmFrame().getReferenceFrame();
@@ -449,6 +451,14 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
       if (state.getScrewFrame().isChildOfWorld())
       {
+         if (state.getCommandedTrajectory().isEmpty())
+         {
+            LogTools.error("Commanded trajectory is empty.");
+            state.setIsExecuting(false);
+            state.setFailed(true);
+            return;
+         }
+
          SE3TrajectoryPointReadOnly lastTrajectoryPose = state.getCommandedTrajectory().getLastValueReadOnly();
          desiredHandControlPose.set(lastTrajectoryPose.getPosition(), lastTrajectoryPose.getOrientation());
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));

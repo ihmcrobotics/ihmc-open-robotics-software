@@ -396,6 +396,16 @@ public class RDXFootstepPlanAction extends RDXActionNode<FootstepPlanActionState
       }
    }
 
+   @Override
+   public void deselectGizmos()
+   {
+      goalStancePointGizmo.setSelected(false);
+      goalFocalPointGizmo.setSelected(false);
+      for (RobotSide side : RobotSide.values)
+         goalFeetPosesSelected.get(side).set(false);
+      editManuallyPlacedSteps.set(false);
+   }
+
    public void render3DPanelImGuiOverlays()
    {
       if (!definition.getIsManuallyPlaced())

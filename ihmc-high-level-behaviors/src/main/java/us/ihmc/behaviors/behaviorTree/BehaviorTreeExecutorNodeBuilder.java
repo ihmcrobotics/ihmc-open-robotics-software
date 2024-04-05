@@ -3,6 +3,8 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.door.DoorTraversalDefinition;
+import us.ihmc.behaviors.door.DoorTraversalExecutor;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceExecutor;
 import us.ihmc.behaviors.sequence.actions.*;
@@ -57,9 +59,9 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       {
          return new ActionSequenceExecutor(id, crdtInfo, saveFileDirectory);
       }
-      if (nodeType == ArmJointAnglesActionDefinition.class)
+      if (nodeType == DoorTraversalDefinition.class)
       {
-         return new ArmJointAnglesActionExecutor(id, crdtInfo, saveFileDirectory, robotModel, ros2ControllerHelper, syncedRobot);
+         return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory, syncedRobot);
       }
       if (nodeType == ChestOrientationActionDefinition.class)
       {

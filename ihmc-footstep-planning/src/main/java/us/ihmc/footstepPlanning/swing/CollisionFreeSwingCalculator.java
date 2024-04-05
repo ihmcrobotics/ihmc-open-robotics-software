@@ -649,6 +649,7 @@ public class CollisionFreeSwingCalculator
       return copySwingTrajectories(trajectories, trajectories.get(Axis3D.X).size());
 
    }
+
    public static EnumMap<Axis3D, List<PolynomialReadOnly>> copySwingTrajectories(EnumMap<Axis3D, ArrayList<YoPolynomial>> trajectories, int trajectoriesToCopy)
    {
       EnumMap<Axis3D, List<PolynomialReadOnly>> copy = new EnumMap<>(Axis3D.class);
