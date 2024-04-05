@@ -6,7 +6,7 @@ public class SakeHandParameters
 {
    /**
     * When hand is fully open, fingertips form 210 degrees angle.
-    * This corresponds to the normalized value of 1.0.
+    * This corresponds to the normalized value of 0.0.
     */
    public static final double MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES = 210.0;
    /** Joint angle of a knuckle when fully open */
@@ -32,7 +32,7 @@ public class SakeHandParameters
    /** The max temperature before the hand resets. */
    public static final double TEMPERATURE_LIMIT_CELCIUS = 60.0;
    /** The temperature at which the Dynamixel will break. */
-   public static final double DYNAMIXEL_FAILURE_TEMPERATURE_CELCIUS = 80.0;
+   public static final int DYNAMIXEL_FAILURE_TEMPERATURE_CELCIUS = 80;
    /** Multiplier to convert Dynamixel's raw velocity value to RPM */
    public static final double RAW_VELOCITY_TO_RPM = 0.114;
 
