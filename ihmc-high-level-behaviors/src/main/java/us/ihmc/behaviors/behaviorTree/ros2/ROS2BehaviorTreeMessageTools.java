@@ -28,6 +28,7 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getPelvisHeightActions().clear();
       treeStateMessage.getSakeHandCommandActions().clear();
       treeStateMessage.getWaitDurationActions().clear();
+      treeStateMessage.getWholebodyBimanipulationAction().clear();
    }
 
    public static void packMessage(BehaviorTreeNodeState nodeState, BehaviorTreeStateMessage treeStateMessage)
@@ -92,6 +93,12 @@ public class ROS2BehaviorTreeMessageTools
          treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getWaitDurationActions().size());
          waitDurationActionState.toMessage(treeStateMessage.getWaitDurationActions().add());
       }
+      else if (nodeState instanceof WholeBodyBimanipulationActionState wholeBodyBimanipulationActionState)
+      {
+         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.WHOLEBODY_BIMANIPULATION_ACTION);
+         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getWholebodyBimanipulationAction().size());
+         wholeBodyBimanipulationActionState.toMessage(treeStateMessage.getWholebodyBimanipulationAction().add());
+      }
       else
       {
          treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.BASIC_NODE);
@@ -143,6 +150,10 @@ public class ROS2BehaviorTreeMessageTools
       else if (nodeState instanceof WaitDurationActionState waitDurationActionState)
       {
          waitDurationActionState.fromMessage(subscriptionNode.getWaitDurationActionStateMessage());
+      }
+      else if (nodeState instanceof WholeBodyBimanipulationActionState wholeBodyBimanipulationActionState)
+      {
+         wholeBodyBimanipulationActionState.fromMessage(subscriptionNode.getWholeBodyBimanipulationActionStateMessage());
       }
       else
       {
@@ -232,6 +243,13 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setWaitDurationActionStateMessage(waitDurationActionStateMessage);
             subscriptionNode.setBehaviorTreeNodeStateMessage(waitDurationActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(waitDurationActionStateMessage.getDefinition().getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.WHOLEBODY_BIMANIPULATION_ACTION ->
+         {
+            WholeBodyBimanipulationActionStateMessage wholeBodyBimanipulationActionStateMessage = treeStateMessage.getWholebodyBimanipulationAction().get(indexInTypesList);
+            subscriptionNode.setWholeBodyBimanipulationActionStateMessage(wholeBodyBimanipulationActionStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(wholeBodyBimanipulationActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(wholeBodyBimanipulationActionStateMessage.getDefinition().getDefinition().getDefinition());
          }
       }
    }

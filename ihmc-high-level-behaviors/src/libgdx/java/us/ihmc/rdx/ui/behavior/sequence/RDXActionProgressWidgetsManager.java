@@ -2,10 +2,7 @@ package us.ihmc.rdx.ui.behavior.sequence;
 
 import imgui.ImGui;
 import us.ihmc.rdx.imgui.*;
-import us.ihmc.rdx.ui.behavior.actions.RDXFootstepPlanAction;
-import us.ihmc.rdx.ui.behavior.actions.RDXHandPoseAction;
-import us.ihmc.rdx.ui.behavior.actions.RDXSakeHandCommandAction;
-import us.ihmc.rdx.ui.behavior.actions.RDXScrewPrimitiveAction;
+import us.ihmc.rdx.ui.behavior.actions.*;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 import java.util.ArrayList;
@@ -40,7 +37,7 @@ public class RDXActionProgressWidgetsManager
 
          if (action instanceof RDXFootstepPlanAction)
             containsFootsteps = true;
-         if (action instanceof RDXHandPoseAction || action instanceof RDXScrewPrimitiveAction)
+         if (action instanceof RDXHandPoseAction || action instanceof RDXScrewPrimitiveAction || action instanceof RDXWholeBodyBimanipulationAction)
             containsHandMovements = true;
          if (action instanceof RDXSakeHandCommandAction)
             containsHandConfiguration = true;

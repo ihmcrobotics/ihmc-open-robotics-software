@@ -1,0 +1,45 @@
+#ifndef __behavior_msgs__msg__WholeBodyBimanipulationActionDefinitionMessage__idl__
+#define __behavior_msgs__msg__WholeBodyBimanipulationActionDefinitionMessage__idl__
+
+#include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
+#include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::WholeBodyBimanipulationActionDefinitionMessage_")
+      struct WholeBodyBimanipulationActionDefinitionMessage
+      {
+        /**
+         * Parent definition fields
+         */
+        behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
+        /**
+         * Name of the frame the this action is expressed in
+         */
+        string parent_frame_name;
+        /**
+         * Transform that expresses the hand pose in the parent frame
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage right_hand_transform_to_parent;
+        /**
+         * Transform that expresses the hand pose in the parent frame
+         */
+        controller_msgs::msg::dds::RigidBodyTransformMessage left_hand_transform_to_parent;
+        /**
+         * The trajectory duration
+         */
+        double trajectory_duration;
+        /**
+         * Whether maintaining the rigid body controlled in world after the action is complete
+         */
+        boolean hold_pose_in_world;
+      };
+    };
+  };
+};
+
+#endif
