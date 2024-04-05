@@ -151,6 +151,10 @@ public class ROS2BehaviorTreeMessageTools
       {
          waitDurationActionState.fromMessage(subscriptionNode.getWaitDurationActionStateMessage());
       }
+      else if (nodeState instanceof KickDoorActionState kickDoorActionState)
+      {
+         kickDoorActionState.fromMessage(subscriptionNode.getKickDoorActionStateMessage());
+      }
       else
       {
          nodeState.fromMessage(subscriptionNode.getBehaviorTreeNodeStateMessage());
@@ -239,6 +243,13 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setWaitDurationActionStateMessage(waitDurationActionStateMessage);
             subscriptionNode.setBehaviorTreeNodeStateMessage(waitDurationActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(waitDurationActionStateMessage.getDefinition().getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.KICK_DOOR_ACTION ->
+         {
+            KickDoorActionStateMessage kickDoorActionStateMessage = treeStateMessage.getKickDoorActions().get(indexInTypesList);
+            subscriptionNode.setKickDoorActionStateMessage(kickDoorActionStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(kickDoorActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(kickDoorActionStateMessage.getDefinition().getDefinition().getDefinition());
          }
       }
    }
