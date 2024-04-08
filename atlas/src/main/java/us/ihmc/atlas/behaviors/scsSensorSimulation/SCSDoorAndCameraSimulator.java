@@ -9,9 +9,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
@@ -33,6 +33,7 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.simulationConstructionSetTools.util.environments.*;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.Robot;
@@ -64,9 +65,7 @@ public class SCSDoorAndCameraSimulator
 
    public SCSDoorAndCameraSimulator(ROS2Node ros2Node, CommonAvatarEnvironmentInterface environment, DRCRobotModel robotModel, boolean startMinimized)
    {
-      robotConfigurationData = new ROS2Input<>(ros2Node,
-                                               RobotConfigurationData.class,
-                                               ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName()).withOutput());
+      robotConfigurationData = new ROS2Input<>(ros2Node, StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()));
 
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
@@ -121,10 +120,8 @@ public class SCSDoorAndCameraSimulator
 
       // required for timestamp
       ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
-                                                                                 RobotConfigurationData.class,
-                                                                                 ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName())
-                                                                                                              .withOutput());
-      IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT);
+                                                                                 StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()));
+      ROS2PublisherBasics<VideoPacket> scsCameraPublisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withTypeName(VideoPacket.class));
       CameraConfiguration cameraConfiguration = new CameraConfiguration(videoCameraMountName);
       cameraConfiguration.setCameraMount(videoCameraMountName);
       cameraConfiguration.setCameraFieldOfView(80.0);

@@ -17,7 +17,7 @@ import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonsMessage;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
@@ -58,7 +58,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private long numberOfSteppingRegionsReceived = 0;
    private final ImGuiPlot steppingRegionsPlot = new ImGuiPlot("", 1000, 250, 15);
    private final ImGuiMovingPlot impassibilityDetectedPlot = new ImGuiMovingPlot("Impassibility", 1000, 250, 15);
-   private final IHMCROS2Input<Bool> impassibilityDetected;
+   private final ROS2Input<Bool> impassibilityDetected;
    private ImBooleanWrapper stopForImpassibilities;
    private final ImPlotYoHelperDoublePlotLine footstepPlanningDurationPlot;
    private final ImGuiYoDoublePlot footholdVolumePlot;

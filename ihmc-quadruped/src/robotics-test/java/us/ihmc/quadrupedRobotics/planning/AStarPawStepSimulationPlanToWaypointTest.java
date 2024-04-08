@@ -10,7 +10,7 @@ import quadruped_msgs.msg.dds.PawStepPlanningRequestPacket;
 import quadruped_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
 import quadruped_msgs.msg.dds.QuadrupedBodyOrientationMessage;
 import quadruped_msgs.msg.dds.QuadrupedTimedStepListMessage;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.FootstepPlannerAPI;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerType;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
@@ -19,6 +19,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestFactory;
 import us.ihmc.quadrupedRobotics.QuadrupedTestYoVariables;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.tools.MemoryTools;
@@ -78,17 +79,19 @@ public abstract class AStarPawStepSimulationPlanToWaypointTest implements Quadru
       QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
       stepTeleopManager.setEndPhaseShift(180);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(stepTeleopManager.getROS2Node(), PawStepPlanningToolboxOutputStatus.class,
-                                                    ROS2Tools.FOOTSTEP_PLANNER.withRobot(stepTeleopManager.getRobotName())
-                                                              .withOutput(),
-                                           s -> {
-         QuadrupedTimedStepListMessage stepMessage = s.takeNextData().getFootstepDataList();
-         stepMessage.setAreStepsAdjustable(true);
-         stepTeleopManager.publishTimedStepListToController(stepMessage);
+      stepTeleopManager.getROS2Node()
+                       .createSubscription(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(stepTeleopManager.getRobotName())
+                                                                              .withOutput()
+                                                                              .withTypeName(PawStepPlanningToolboxOutputStatus.class), s1 ->
+                                           {
+                                              QuadrupedTimedStepListMessage stepMessage = s1.takeNextData().getFootstepDataList();
+                                              stepMessage.setAreStepsAdjustable(true);
+                                              stepTeleopManager.publishTimedStepListToController(stepMessage);
                                            });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(stepTeleopManager.getROS2Node(), QuadrupedBodyOrientationMessage.class,
-                                                    ROS2Tools.FOOTSTEP_PLANNER.withRobot(stepTeleopManager.getRobotName())
-                                                              .withOutput(),
+      stepTeleopManager.getROS2Node()
+                       .createSubscription(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(stepTeleopManager.getRobotName())
+                                                                              .withOutput()
+                                                                              .withTypeName(QuadrupedBodyOrientationMessage.class),
                                            s -> stepTeleopManager.publishBodyOrientationMessage(s.takeNextData()));
 
       PawStepPlanningRequestPacket planningRequestPacket = new PawStepPlanningRequestPacket();

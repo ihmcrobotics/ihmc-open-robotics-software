@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.behaviorTree.ResettingNode;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -141,7 +141,7 @@ public class LookAndStepBehavior extends ResettingNode implements Destroyable
          footstepPlanning.acceptHeightMap(heightMapMessage);
       });
       helper.subscribeViaCallback(ROS2_REGIONS_FOR_FOOTSTEP_PLANNING, footstepPlanning::acceptPlanarRegions);
-      helper.subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(helper.getRobotModel().getSimpleRobotName()),
+      helper.subscribeViaCallback(StateEstimatorAPI.getRobotConfigurationDataTopic(helper.getRobotModel().getSimpleRobotName()),
                                   footstepPlanning::acceptRobotConfigurationData);
       helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, footstepPlanning::acceptCapturabilityBasedStatus);
       helper.subscribeToControllerViaCallback(FootstepStatusMessage.class, status ->

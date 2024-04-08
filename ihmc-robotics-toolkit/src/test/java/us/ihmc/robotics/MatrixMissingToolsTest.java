@@ -1,6 +1,5 @@
 package us.ihmc.robotics;
 
-import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.RandomMatrices_DDRM;
@@ -18,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MatrixMissingToolsTest
 {
    private static final double EPSILON = 1.0e-9;
-   private static final int ITERATIONS = 1000;
 
    @Test
    public void testSetDiagonalValues()
@@ -212,64 +210,107 @@ public class MatrixMissingToolsTest
    }
 
    @Test
-   public void testElementWiseLessThan()
+   public void testSetSelectedMatrixDiagonals()
    {
-      Random random = new Random(342765L);
-      for (int i = 0; i < ITERATIONS; i++)
-      {
-         int rowDimension = random.nextInt(1, 20);
-         int colDimension = random.nextInt(1, 20);
-         DMatrixRMaj matrixA = new DMatrixRMaj(rowDimension, colDimension);
-         DMatrixRMaj matrixB = new DMatrixRMaj(rowDimension, colDimension);
+      Random random = new Random(1738L);
 
-         matrixA.setData(RandomNumbers.nextDoubleArray(random, rowDimension * colDimension, 10.0));
-         matrixB.setData(RandomNumbers.nextDoubleArray(random, rowDimension * colDimension, 10.0));
-         boolean expected = elementWiseLessThan(matrixA, matrixB);
-         boolean actual = MatrixMissingTools.elementWiseLessThan(matrixA, matrixB);
-         assertEquals(expected, actual);
+      int iters = 100;
+
+      // Nominal
+      for (int i = 0; i < iters; ++i)
+      {
+         int rowSize = random.nextInt(5, 10);
+         int columnSize = random.nextInt(5, 10);
+         DMatrixRMaj matrix = RandomMatrices_DDRM.diagonal(rowSize, columnSize, 0, 1, random);
+         int indicesSize = Math.min(rowSize, columnSize);
+         int[] indices = new int[indicesSize];
+         for (int j = 0; j < indicesSize; ++j)
+            indices[j] = random.nextInt(0, Math.min(rowSize, columnSize) - 1);
+         double value = random.nextDouble();
+         MatrixMissingTools.setSelectedMatrixDiagonals(indices, value, matrix);
+         for (int index : indices)
+            assertEquals(value, matrix.get(index, index), EPSILON);
       }
-   }
 
-   @Test
-   public void testPower()
-   {
-      Random random = new Random(21543L);
-      for (int i = 0; i < ITERATIONS; i++)
+      // Pass index arrays that have incorrect sizes
+      for (int i = 0; i < iters; ++i)
       {
-         int dimension = random.nextInt(1, 20);
-         DMatrixRMaj matrix = new DMatrixRMaj(dimension, dimension);
-         matrix.setData(RandomNumbers.nextDoubleArray(random, dimension * dimension, 10.0));
-         int power = random.nextInt(1, 10);
+         int rowSize = random.nextInt(5, 10);
+         int columnSize = random.nextInt(5, 10);
+         DMatrixRMaj matrix = RandomMatrices_DDRM.diagonal(rowSize, columnSize, 0, 1, random);
 
-         DMatrixRMaj expected = power(matrix, power);
-
-         DMatrixRMaj temporary = new DMatrixRMaj(dimension, dimension);
-         DMatrixRMaj actual = new DMatrixRMaj(dimension, dimension);
-         MatrixMissingTools.power(matrix, power, temporary, actual);
-         assertArrayEquals(expected.getData(), actual.getData(), EPSILON);
-      }
-   }
-
-   private boolean elementWiseLessThan(DMatrixRMaj a, DMatrixRMaj b)
-   {
-      BMatrixRMaj compareOutput = new BMatrixRMaj(a.numRows, a.numCols);
-      CommonOps_DDRM.elementLessThan(a, b, compareOutput);
-      return compareOutput.sum() == compareOutput.getNumElements();
-   }
-
-   private DMatrixRMaj power(DMatrixRMaj input, int power)
-   {
-      DMatrixRMaj temporary = new DMatrixRMaj(input);
-      DMatrixRMaj result = new DMatrixRMaj(input);
-
-      if (power > 1)
-      {
-         for (int k = 0; k < power - 1; k++)
+         // Coin flip to determine if we are going to pass in a zero-size or too large index array
+         if (random.nextBoolean())  // zero-size
          {
-            CommonOps_DDRM.mult(input, temporary, result);
-            temporary.set(result);
+            int indicesSize = 0;
+            int[] indices = new int[indicesSize];
+            try
+            {
+               MatrixMissingTools.setSelectedMatrixDiagonals(indices, random.nextDouble(), matrix);
+               fail("Should have thrown exception");
+            }
+            catch (IllegalArgumentException e)
+            {
+               // good
+            }
+         }
+         else  // too large
+         {
+            int indicesSize = Math.min(rowSize, columnSize) + 1;
+            int[] indices = new int[indicesSize];
+            for (int j = 0; j < indicesSize; ++j)
+               indices[j] = random.nextInt(0, Math.min(rowSize, columnSize) - 1);
+            try
+            {
+               MatrixMissingTools.setSelectedMatrixDiagonals(indices, random.nextDouble(), matrix);
+               fail("Should have thrown exception");
+            }
+            catch (IllegalArgumentException e)
+            {
+               // good
+            }
          }
       }
-      return result;
+
+      // Pass correctly-sized arrays, but with negative or too large entry values
+      for (int i = 0; i < iters; ++i)
+      {
+         int rowSize = random.nextInt(5, 10);
+         int columnSize = random.nextInt(5, 10);
+         DMatrixRMaj matrix = RandomMatrices_DDRM.diagonal(rowSize, columnSize, 0, 1, random);
+
+         int indicesSize = Math.min(rowSize, columnSize);
+         int[] indices = new int[indicesSize];
+         for (int j = 0; j < indicesSize; ++j)  // start off with good indices
+            indices[j] = random.nextInt(0, Math.min(rowSize, columnSize) - 1);
+
+         // Coin flip to determine if we are going to pass in a negative or too large index
+         if (random.nextBoolean())  // negative
+         {
+            indices[random.nextInt(0, indicesSize - 1)] = -random.nextInt(1, 10);
+            try
+            {
+               MatrixMissingTools.setSelectedMatrixDiagonals(indices, random.nextDouble(), matrix);
+               fail("Should have thrown exception");
+            }
+            catch (IllegalArgumentException e)
+            {
+               // good
+            }
+         }
+         else  // too large
+         {
+            indices[random.nextInt(indicesSize)] = Math.max(rowSize, columnSize) + 1;
+            try
+            {
+               MatrixMissingTools.setSelectedMatrixDiagonals(indices, random.nextDouble(), matrix);
+               fail("Should have thrown exception");
+            }
+            catch (IllegalArgumentException e)
+            {
+               // good
+            }
+         }
+      }
    }
 }

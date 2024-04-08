@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import perception_msgs.msg.dds.DoorLocationPacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
@@ -36,7 +36,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
    
    private long lastUpdateTime = -1;
 
-   private final IHMCROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
+   private final ROS2PublisherBasics<TextToSpeechPacket> textToSpeechPublisher;
 
    
    protected final AtomicReference<DoorLocationPacket> doorLocationLatest = new AtomicReference<DoorLocationPacket>();

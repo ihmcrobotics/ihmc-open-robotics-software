@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 import org.apache.commons.lang3.StringUtils;
 
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -19,7 +19,7 @@ public class PelvisTrajectoryBehavior extends AbstractBehavior
    private final YoDouble trajectoryTime;
    private final YoBoolean trajectoryTimeElapsed;
 
-   private final IHMCROS2Publisher<PelvisTrajectoryMessage> publisher;
+   private final ROS2PublisherBasics<PelvisTrajectoryMessage> publisher;
 
    public PelvisTrajectoryBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime)
    {

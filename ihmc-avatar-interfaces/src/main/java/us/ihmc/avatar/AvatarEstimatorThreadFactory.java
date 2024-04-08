@@ -17,10 +17,10 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -214,12 +214,12 @@ public class AvatarEstimatorThreadFactory
     *
     * @param ros2Node  the real-time node to create the publisher with.
     * @param robotName the name of the robot used to get the topic name generator, see
-    *                  {@link ControllerAPIDefinition#getOutputTopic(String)} and
-    *                  {@link ControllerAPIDefinition#getInputTopic(String)}.
+    *                  {@link HumanoidControllerAPI#getOutputTopic(String)} and
+    *                  {@link HumanoidControllerAPI#getInputTopic(String)}.
     */
    public void setROS2Info(RealtimeROS2Node ros2Node, String robotName)
    {
-      setROS2Info(ros2Node, ROS2Tools.getControllerOutputTopic(robotName), ROS2Tools.getControllerInputTopic(robotName));
+      setROS2Info(ros2Node, HumanoidControllerAPI.getOutputTopic(robotName), HumanoidControllerAPI.getInputTopic(robotName));
    }
 
    /**
@@ -484,10 +484,8 @@ public class AvatarEstimatorThreadFactory
       if (realtimeROS2NodeField.hasValue())
       {
          ForceSensorStateUpdater forceSensorStateUpdater = stateEstimator.getForceSensorStateUpdater();
-         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2NodeField.get(),
-                                                       RequestWristForceSensorCalibrationPacket.class,
-                                                       inputTopicField.get(),
-                                                       subscriber -> forceSensorStateUpdater.requestWristForceSensorCalibrationAtomic());
+         realtimeROS2NodeField.get().createSubscription(inputTopicField.get().withTypeName(RequestWristForceSensorCalibrationPacket.class),
+                                     subscriber -> forceSensorStateUpdater.requestWristForceSensorCalibrationAtomic());
       }
 
       return stateEstimator;
@@ -547,10 +545,10 @@ public class AvatarEstimatorThreadFactory
          return null;
    }
 
-   private IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> createControllerCrashPublisher()
+   private ROS2PublisherBasics<ControllerCrashNotificationPacket> createControllerCrashPublisher()
    {
       if (realtimeROS2NodeField.hasValue())
-         return ROS2Tools.createPublisherTypeNamed(realtimeROS2NodeField.get(), ControllerCrashNotificationPacket.class, outputTopicField.get());
+         return realtimeROS2NodeField.get().createPublisher(ControllerAPI.getTopic(outputTopicField.get(), ControllerCrashNotificationPacket.class));
       else
          return null;
    }

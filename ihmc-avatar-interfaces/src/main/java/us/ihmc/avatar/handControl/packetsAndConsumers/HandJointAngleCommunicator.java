@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import controller_msgs.msg.dds.HandJointAnglePacket;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -23,9 +23,9 @@ public class HandJointAngleCommunicator
 
    private final ScheduledExecutorService executor;
 
-   private final IHMCRealtimeROS2Publisher<HandJointAnglePacket> publisher;
+   private final ROS2PublisherBasics<HandJointAnglePacket> publisher;
 
-   public HandJointAngleCommunicator(RobotSide side, IHMCRealtimeROS2Publisher<HandJointAnglePacket> publisher)
+   public HandJointAngleCommunicator(RobotSide side, ROS2PublisherBasics<HandJointAnglePacket> publisher)
    {
       this.side = side;
       this.publisher = publisher;

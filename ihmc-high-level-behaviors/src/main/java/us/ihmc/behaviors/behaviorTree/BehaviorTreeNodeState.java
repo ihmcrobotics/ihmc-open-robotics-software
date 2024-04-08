@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage;
+import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.RequestConfirmFreezable;
 import us.ihmc.log.LogTools;
@@ -37,12 +38,16 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
    private final List<BehaviorTreeNodeState<?>> children = new ArrayList<>();
    private transient BehaviorTreeNodeState<?> parent;
 
+   private final BehaviorTreeNodeMessageLogger logger;
+
    public BehaviorTreeNodeState(long id, D definition, CRDTInfo crdtInfo)
    {
       super(crdtInfo);
 
       this.id = id;
       this.definition = definition;
+
+      logger = new BehaviorTreeNodeMessageLogger(crdtInfo);
    }
 
    public void toMessage(BehaviorTreeNodeStateMessage message)
@@ -51,6 +56,8 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
 
       message.setId(id);
       message.setIsActive(isActive);
+
+      logger.toMessage(message.getRecentLogMessages());
    }
 
    public void fromMessage(BehaviorTreeNodeStateMessage message)
@@ -61,6 +68,8 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
          LogTools.error("IDs should match! {} != {}", id, message.getId());
 
       isActive = message.getIsActive();
+
+      logger.fromMessage(message.getRecentLogMessages());
    }
 
    @Override
@@ -120,5 +129,10 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
    public BehaviorTreeNodeState<D> getState()
    {
       return this;
+   }
+
+   public BehaviorTreeNodeMessageLogger getLogger()
+   {
+      return logger;
    }
 }

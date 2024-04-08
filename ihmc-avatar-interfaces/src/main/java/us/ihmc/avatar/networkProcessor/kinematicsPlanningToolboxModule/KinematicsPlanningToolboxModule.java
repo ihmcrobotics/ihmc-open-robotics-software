@@ -11,7 +11,9 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -43,14 +45,12 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
+      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), s ->
       {
          if (kinematicsPlanningToolboxController != null)
             kinematicsPlanningToolboxController.updateRobotConfigurationData(s.takeNextData());
       });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
+      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName), s ->
       {
          if (kinematicsPlanningToolboxController != null)
             kinematicsPlanningToolboxController.updateCapturabilityBasedStatus(s.takeNextData());
@@ -101,7 +101,7 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
 
    public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
+      return ToolboxAPIs.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
@@ -112,6 +112,6 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
 
    public static ROS2Topic getInputTopic(String robotName)
    {
-      return ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
+      return ToolboxAPIs.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
    }
 }
