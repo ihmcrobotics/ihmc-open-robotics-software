@@ -4,7 +4,7 @@ import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.ros2.ROS2Topic;
 
-public class AutonomyAPI
+public final class AutonomyAPI
 {
    public static final String BEAVIOR_TREE_MODULE_NAME = "behavior_tree";
 

@@ -6,6 +6,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeExecutor;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 /**
@@ -19,9 +20,10 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
    public ROS2BehaviorTreeExecutor(ROS2ControllerHelper ros2ControllerHelper,
                                    DRCRobotModel robotModel,
                                    ROS2SyncedRobotModel syncedRobot,
-                                   ReferenceFrameLibrary referenceFrameLibrary)
+                                   ReferenceFrameLibrary referenceFrameLibrary,
+                                   SceneGraph sceneGraph)
    {
-      super(robotModel, syncedRobot, referenceFrameLibrary, ros2ControllerHelper);
+      super(robotModel, syncedRobot, referenceFrameLibrary, sceneGraph, ros2ControllerHelper);
 
       ros2BehaviorTreeState = new ROS2BehaviorTreeState(getState(), this::setRootNode, ros2ControllerHelper);
       arUcoDemandHeartbeat = new ROS2Heartbeat(ros2ControllerHelper, PerceptionAPI.REQUEST_ARUCO);

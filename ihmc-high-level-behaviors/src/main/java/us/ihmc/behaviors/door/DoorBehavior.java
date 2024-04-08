@@ -8,7 +8,6 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorTools;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.behaviorTree.ResettingNode;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -66,7 +65,7 @@ public class DoorBehavior extends ResettingNode implements Destroyable
          doorPose.set(doorLocationPacket.getDoorTransformToWorld());
          // publish detected door
       });
-      helper.subscribeViaCallback(ROS2Tools::getBehaviorStatusTopic, status ->
+      helper.subscribeViaCallback(robotName -> BehaviorHelper.BEHAVIOR_STATUS.withRobot(robotName), status ->
       {
          CurrentBehaviorStatus currentBehaviorStatus = CurrentBehaviorStatus.fromByte(status.getCurrentBehaviorStatus());
          if (currentBehaviorStatus == CurrentBehaviorStatus.BEHAVIOR_FINISHED_SUCCESS

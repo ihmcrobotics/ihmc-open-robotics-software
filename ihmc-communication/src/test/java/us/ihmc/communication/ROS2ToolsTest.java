@@ -18,6 +18,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
@@ -40,7 +41,7 @@ class ROS2ToolsTest
       ROS2Topic<?> defaultTopicName3 = ROS2Tools.IHMC_ROOT.withRobot("atlas").withModule("rea").withOutput();
       assertEquals("/ihmc/atlas/rea/output/rea_state_request", defaultTopicName3.withTypeName(REAStateRequestMessage.class).toString());
 
-      assertEquals("/ihmc/atlas/toolbox/teleop/step_teleop/output", ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot("atlas").withOutput().toString());
+      assertEquals("/ihmc/atlas/toolbox/teleop/step_teleop/output", ToolboxAPIs.STEP_TELEOP_TOOLBOX.withRobot("atlas").withOutput().toString());
    }
 
    @Disabled
@@ -86,7 +87,7 @@ class ROS2ToolsTest
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
 
-      IHMCROS2Publisher<Int64> intPublisher = new IHMCROS2Publisher<>(ros2Node, Int64.class, ROS2Tools.IHMC_ROOT);
+      ROS2PublisherBasics<Int64> intPublisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withTypeName(Int64.class));
 
       MutableInt count = new MutableInt();
       new ROS2Callback<>(ros2Node, Int64.class, ROS2Tools.IHMC_ROOT, message ->

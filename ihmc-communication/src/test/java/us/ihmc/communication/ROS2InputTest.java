@@ -6,10 +6,11 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
-public class IHMCROS2InputTest
+public class ROS2InputTest
 {
    @Test
    public void test()
@@ -19,7 +20,7 @@ public class IHMCROS2InputTest
 
       ROS2Topic<Empty> inputTestTopic = ROS2Tools.IHMC_ROOT.withSuffix("input_test_topic").withType(Empty.class);
 
-      IHMCROS2Input<?> subscription = ros2Helper.subscribe(inputTestTopic);
+      ROS2Input<?> subscription = ros2Helper.subscribe(inputTestTopic);
 
       // Testing that the subscription doesn't return a notification immediately
       Assertions.assertFalse(subscription.getMessageNotification().poll());
@@ -28,7 +29,7 @@ public class IHMCROS2InputTest
       ros2Helper.publish(inputTestTopic, new Empty());
 
       // Create a subscriber immediately after publishing
-      IHMCROS2Input<?> subscription3 = ros2Helper.subscribe(inputTestTopic);
+      ROS2Input<?> subscription3 = ros2Helper.subscribe(inputTestTopic);
       Assertions.assertFalse(subscription3.getMessageNotification().poll());
 
       // Wait for the original subscriber to get it
@@ -45,7 +46,7 @@ public class IHMCROS2InputTest
       Assertions.assertFalse(subscription3.getMessageNotification().poll());
 
       // Create a subscriber later and make sure it doesn't get a notification
-      IHMCROS2Input<?> subscription2 = ros2Helper.subscribe(inputTestTopic);
+      ROS2Input<?> subscription2 = ros2Helper.subscribe(inputTestTopic);
       Assertions.assertFalse(subscription2.getMessageNotification().poll());
 
       subscription3.destroy();

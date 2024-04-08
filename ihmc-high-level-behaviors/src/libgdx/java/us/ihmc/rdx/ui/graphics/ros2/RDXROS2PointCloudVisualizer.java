@@ -13,7 +13,7 @@ import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
-import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
@@ -48,7 +48,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
 {
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> topic;
-   private IHMCROS2Callback<?> ros2Callback = null;
+   private ROS2Callback<?> ros2Callback = null;
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImPlotIntegerPlot segmentIndexPlot = new ImPlotIntegerPlot("Segment", 30);
    private final ImFloat pointSize = new ImFloat(0.01f);
@@ -104,17 +104,16 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
       subscribed = true;
       if (topic.getType().equals(LidarScanMessage.class))
       {
-         ros2Callback = new IHMCROS2Callback<>(ros2Node, topic.withType(LidarScanMessage.class), this::queueRenderLidarScan);
+         ros2Callback = new ROS2Callback<>(ros2Node, topic.withType(LidarScanMessage.class), this::queueRenderLidarScan);
       }
       else if (topic.getType().equals(StereoVisionPointCloudMessage.class))
       {
-         ros2Callback = new IHMCROS2Callback<>(ros2Node, topic.withType(StereoVisionPointCloudMessage.class), this::queueRenderStereoVisionPointCloud);
+         ros2Callback = new ROS2Callback<>(ros2Node, topic.withType(StereoVisionPointCloudMessage.class), this::queueRenderStereoVisionPointCloud);
       }
       else if (topic.getType().equals(FusedSensorHeadPointCloudMessage.class))
       {
-         ros2Callback = new IHMCROS2Callback<>(ros2Node,
+         ros2Callback = new ROS2Callback<>(ros2Node,
                                                topic.withType(FusedSensorHeadPointCloudMessage.class),
-                                               ROS2QosProfile.BEST_EFFORT(),
                                                this::queueRenderFusedSensorHeadPointCloud);
       }
    }

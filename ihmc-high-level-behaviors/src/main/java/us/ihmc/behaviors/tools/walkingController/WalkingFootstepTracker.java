@@ -2,7 +2,7 @@ package us.ihmc.behaviors.tools.walkingController;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -14,7 +14,7 @@ import us.ihmc.ros2.ROS2NodeInterface;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition.getTopic;
+import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 import static us.ihmc.tools.string.StringTools.format;
 
 /**
@@ -25,9 +25,9 @@ import static us.ihmc.tools.string.StringTools.format;
  */
 public class WalkingFootstepTracker
 {
-   private final IHMCROS2Callback<FootstepDataListMessage> footstepDataListSubscriber;
-   private final IHMCROS2Callback<FootstepStatusMessage> footstepStatusSubscriber;
-   private final IHMCROS2Callback<FootstepQueueStatusMessage> footstepQueueStatusSubscriber;
+   private final ROS2Callback<FootstepDataListMessage> footstepDataListSubscriber;
+   private final ROS2Callback<FootstepStatusMessage> footstepStatusSubscriber;
+   private final ROS2Callback<FootstepQueueStatusMessage> footstepQueueStatusSubscriber;
 
    private final ArrayList<FootstepDataMessage> footsteps = new ArrayList<>();
    private List<QueuedFootstepStatusMessage> queuedFootsteps = new ArrayList<>();
@@ -40,13 +40,13 @@ public class WalkingFootstepTracker
 
    public WalkingFootstepTracker(ROS2NodeInterface ros2Node, String robotName)
    {
-      footstepDataListSubscriber = new IHMCROS2Callback<>(ros2Node,
+      footstepDataListSubscriber = new ROS2Callback<>(ros2Node,
                                                           getTopic(FootstepDataListMessage.class, robotName),
                                                           this::interceptFootstepDataListMessage);
-      footstepStatusSubscriber = new IHMCROS2Callback<>(ros2Node,
+      footstepStatusSubscriber = new ROS2Callback<>(ros2Node,
                                                         getTopic(FootstepStatusMessage.class, robotName),
                                                         this::acceptFootstepStatusMessage);
-      footstepQueueStatusSubscriber = new IHMCROS2Callback<>(ros2Node,
+      footstepQueueStatusSubscriber = new ROS2Callback<>(ros2Node,
                                                              getTopic(FootstepQueueStatusMessage.class, robotName),
                                                              this::acceptFootstepQueueStatusMessage);
    }

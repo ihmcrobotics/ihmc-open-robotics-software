@@ -6,7 +6,8 @@ import controller_msgs.msg.dds.RobotDesiredConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -44,15 +45,15 @@ public class ExternalForceEstimationToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
-      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
+      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class), s ->
       {
          if(forceEstimationToolboxController != null)
             forceEstimationToolboxController.updateRobotConfigurationData(s.takeNextData());
       });
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotDesiredConfigurationData.class, controllerOutputTopic, s ->
+      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotDesiredConfigurationData.class), s ->
       {
          if(forceEstimationToolboxController != null)
             forceEstimationToolboxController.updateRobotDesiredConfigurationData(s.takeNextData());
@@ -92,24 +93,24 @@ public class ExternalForceEstimationToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2Topic getOutputTopic()
+   public ROS2Topic<?> getOutputTopic()
    {
       return getOutputTopic(robotName);
    }
 
-   public static ROS2Topic getOutputTopic(String robotName)
+   public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ROS2Tools.EXTERNAL_FORCE_ESTIMATION_TOOLBOX.withRobot(robotName).withOutput();
+      return ToolboxAPIs.EXTERNAL_FORCE_ESTIMATION_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2Topic getInputTopic()
+   public ROS2Topic<?> getInputTopic()
    {
       return getInputTopic(robotName);
    }
 
-   public static ROS2Topic getInputTopic(String robotName)
+   public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ROS2Tools.EXTERNAL_FORCE_ESTIMATION_TOOLBOX.withRobot(robotName).withInput();
+      return ToolboxAPIs.EXTERNAL_FORCE_ESTIMATION_TOOLBOX.withRobot(robotName).withInput();
    }
 }

@@ -5,6 +5,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -13,6 +14,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefinition>
 {
    private ActionSequenceState actionSequence;
+   private WaitDurationActionState stabilizeDetectionAction;
    private WaitDurationActionState waitToOpenRightHandAction;
    private ScrewPrimitiveActionState pullScrewPrimitiveAction;
 
@@ -37,6 +39,11 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       {
          if (child instanceof ActionNodeState<?> actionNode)
          {
+            if (actionNode instanceof WaitDurationActionState waitAction
+                && waitAction.getDefinition().getName().equals("Stabilize Detection"))
+            {
+               stabilizeDetectionAction = waitAction;
+            }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
                 && waitDurationAction.getDefinition().getName().equals("Wait to open right hand"))
             {
@@ -72,14 +79,20 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    public boolean isTreeStructureValid()
    {
       boolean isValid = actionSequence != null;
-      isValid &= waitToOpenRightHandAction != null;
-      isValid &= pullScrewPrimitiveAction != null;
+      isValid &= stabilizeDetectionAction != null;
+//      isValid &= waitToOpenRightHandAction != null;
+//      isValid &= pullScrewPrimitiveAction != null;
       return isValid;
    }
 
    public ActionSequenceState getActionSequence()
    {
       return actionSequence;
+   }
+
+   public WaitDurationActionState getStabilizeDetectionAction()
+   {
+      return stabilizeDetectionAction;
    }
 
    public WaitDurationActionState getWaitToOpenRightHandAction()

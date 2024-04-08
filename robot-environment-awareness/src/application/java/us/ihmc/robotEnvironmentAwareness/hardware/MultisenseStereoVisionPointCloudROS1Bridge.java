@@ -15,7 +15,7 @@ import javax.imageio.ImageIO;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.PointCloud2;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
@@ -38,7 +38,7 @@ public class MultisenseStereoVisionPointCloudROS1Bridge extends AbstractRosTopic
 
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
 
-   private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher;
+   private final ROS2PublisherBasics<StereoVisionPointCloudMessage> stereoVisionPublisher;
 
    private static final int projectionWidth = 1024;
    private static final int projectionHeight = 544;
@@ -60,7 +60,7 @@ public class MultisenseStereoVisionPointCloudROS1Bridge extends AbstractRosTopic
 
       rosMainNode.execute();
 
-      stereoVisionPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.MULTISENSE_STEREO_POINT_CLOUD);
+      stereoVisionPublisher = ros2Node.createPublisher(PerceptionAPI.MULTISENSE_STEREO_POINT_CLOUD);
 
       commandScanner = new Scanner(System.in);
       Runnable inputReader = new Runnable()
