@@ -59,11 +59,13 @@ public class TerrainPlanningDebugger
    private IHMCROS2Publisher<PoseListMessage> startAndGoalPublisherForUI;
    private IHMCROS2Publisher<PoseListMessage> monteCarloNodesPublisherForUI;
    private MonteCarloFootstepPlannerRequest request;
+   private MonteCarloFootstepPlannerParameters parameters;
 
    private Mat contactHeatMapImage;
 
-   public TerrainPlanningDebugger(ROS2Node ros2Node)
+   public TerrainPlanningDebugger(ROS2Node ros2Node, MonteCarloFootstepPlannerParameters parameters)
    {
+      this.parameters = parameters;
       if (ros2Node != null)
       {
          publisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousWalkingAPI.PLANNED_FOOTSTEPS);
@@ -80,8 +82,8 @@ public class TerrainPlanningDebugger
          return;
 
       this.request = request;
-      this.offsetX = (int) (request.getTerrainMapData().getSensorOrigin().getX() * 50.0f);
-      this.offsetY = (int) (request.getTerrainMapData().getSensorOrigin().getY() * 50.0f);
+      this.offsetX = (int) (request.getTerrainMapData().getSensorOrigin().getX() * parameters.getNodesPerMeter());
+      this.offsetY = (int) (request.getTerrainMapData().getSensorOrigin().getY() * parameters.getNodesPerMeter());
       refresh(request.getTerrainMapData());
    }
 
@@ -90,8 +92,8 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      this.offsetX = (int) (terrainMapData.getSensorOrigin().getX() * 50.0f);
-      this.offsetY = (int) (terrainMapData.getSensorOrigin().getY() * 50.0f);
+      this.offsetX = (int) (terrainMapData.getSensorOrigin().getX() * parameters.getNodesPerMeter());
+      this.offsetY = (int) (terrainMapData.getSensorOrigin().getY() * parameters.getNodesPerMeter());
 
       PerceptionDebugTools.convertDepthCopyToColor(terrainMapData.getHeightMap().clone(), heightMapColorImage);
       opencv_imgproc.resize(heightMapColorImage, heightMapColorImage, new Size(scaledWidth, scaledHeight));
@@ -201,7 +203,7 @@ public class TerrainPlanningDebugger
          else if (mode == 2)
             LogTools.debug(String.format("Start: %d, %d", (int) point.getX(), (int) point.getY()));
 
-         PerceptionDebugTools.plotTiltedRectangle(image, point, (float) -pose.getYaw(), 2 * scale, mode);
+         PerceptionDebugTools.plotTiltedRectangle(image, point, (float) -pose.getYaw(), 2 * scale, mode, 50);
       }
    }
 
@@ -216,7 +218,7 @@ public class TerrainPlanningDebugger
                                     plan.getFootstep(i).getFootstepPose().getPosition().getY(),
                                     plan.getFootstep(i).getFootstepPose().getYaw());
          Point2D point = new Point2D((pose.getX() * 50 - offsetX) * scale, (pose.getY() * 50 - offsetY) * scale);
-         PerceptionDebugTools.plotTiltedRectangle(image, point, -pose.getZ32(), 2 * scale, plan.getFootstep(i).getRobotSide() == RobotSide.LEFT ? -1 : 1);
+         PerceptionDebugTools.plotTiltedRectangle(image, point, -pose.getZ32(), 50, 2 * scale, plan.getFootstep(i).getRobotSide() == RobotSide.LEFT ? -1 : 1);
       }
    }
 

@@ -82,6 +82,7 @@ public class ContinuousPlanner
                             HumanoidReferenceFrames humanoidReferenceFrames,
                             PlanningMode mode,
                             ContinuousWalkingParameters continuousWalkingParameters,
+                            MonteCarloFootstepPlannerParameters monteCarloPlannerParameters,
                             TerrainPlanningDebugger debugger)
    {
       this.swingPlannerParameters = robotModel.getSwingPlannerParameters();
@@ -94,7 +95,7 @@ public class ContinuousPlanner
       this.active = true;
       this.mode = mode;
 
-      this.monteCarloFootstepPlannerParameters = new MonteCarloFootstepPlannerParameters();
+      this.monteCarloFootstepPlannerParameters = monteCarloPlannerParameters;
       this.footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel, "ForContinuousWalking");
       this.logger = new FootstepPlannerLogger(footstepPlanner);
       this.monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(monteCarloFootstepPlannerParameters,

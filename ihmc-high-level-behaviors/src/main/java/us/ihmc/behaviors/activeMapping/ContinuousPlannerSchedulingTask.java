@@ -14,6 +14,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
@@ -63,8 +64,9 @@ public class ContinuousPlannerSchedulingTask
    private TerrainMapData terrainMap;
 
    private ContinuousPlannerStatistics statistics;
-   private final ContinuousWalkingParameters parameters;
+   private MonteCarloFootstepPlannerParameters monteCarloPlannerParameters;
    private final FootstepSnapAndWiggler snapper;
+   private final ContinuousWalkingParameters parameters;
    private final FootstepPoseHeuristicChecker stepChecker;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -82,10 +84,11 @@ public class ContinuousPlannerSchedulingTask
                                           ContinuousWalkingParameters parameters,
                                           ContinuousPlanner.PlanningMode mode)
    {
-      this.debugger = new TerrainPlanningDebugger(ros2Node);
       this.referenceFrames = referenceFrames;
       this.parameters = parameters;
+      this.monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
 
+      debugger = new TerrainPlanningDebugger(ros2Node, monteCarloPlannerParameters);
       controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
@@ -101,7 +104,7 @@ public class ContinuousPlannerSchedulingTask
                                       this::footstepQueueStatusReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND, commandMessage::set);
 
-      continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, mode, parameters, debugger);
+      this.continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, mode, parameters, monteCarloPlannerParameters, debugger);
 
       statistics = new ContinuousPlannerStatistics();
       continuousPlanner.setContinuousPlannerStatistics(statistics);

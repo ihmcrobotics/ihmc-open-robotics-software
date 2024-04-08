@@ -318,6 +318,7 @@ public class MonteCarloPlannerTools
 
    public static FootstepPlan getFootstepPlanFromTree(MonteCarloFootstepNode root,
                                                       MonteCarloFootstepPlannerRequest request,
+                                                      MonteCarloFootstepPlannerParameters parameters,
                                                       SideDependentList<ConvexPolygon2D> footPolygons)
    {
       List<MonteCarloTreeNode> path = new ArrayList<>();
@@ -331,8 +332,8 @@ public class MonteCarloPlannerTools
       {
          MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) node;
 
-         float nodeX = footstepNode.getState().getX32() / 50.0f;
-         float nodeY = footstepNode.getState().getY32() / 50.0f;
+         float nodeX = (float) (footstepNode.getState().getX32() / parameters.getNodesPerMeter());
+         float nodeY = (float) (footstepNode.getState().getY32() / parameters.getNodesPerMeter());
          float nodeZ = request.getTerrainMapData().getHeightInWorld(nodeX, nodeY);
          float nodeYaw = footstepNode.getState().getZ32();
 
@@ -383,8 +384,8 @@ public class MonteCarloPlannerTools
    {
       actionsToPack.clear();
 
-      float minRadius = (float) parameters.getSearchInnerRadius() * 50.0f;
-      float maxRadius = (float) parameters.getSearchOuterRadius() * 50.0f;
+      float minRadius = (float) (parameters.getSearchInnerRadius() * parameters.getNodesPerMeter());
+      float maxRadius = (float) (parameters.getSearchOuterRadius() * parameters.getNodesPerMeter());
       float maxWidth = (float) parameters.getMaximumStepWidth();
       float minWidth = (float) parameters.getMinimumStepWidth();
       float maxLength = (float) parameters.getMaximumStepLength();
@@ -416,7 +417,7 @@ public class MonteCarloPlannerTools
             float radius = (float) Math.sqrt(i * i + j * j);
 
             // compute distance of point to midline
-            Point2D point = new Point2D((float) i / 50.0f, (float) j / 50.0f);
+            Point2D point = new Point2D((float) i / parameters.getNodesPerMeter(), (float) j / parameters.getNodesPerMeter());
             double orthogonalDistanceToMidline = midLine.distance(point);
             double orthogonalDistanceToBaseLine = baseLine.distance(point);
 
@@ -471,16 +472,16 @@ public class MonteCarloPlannerTools
    public static double scoreFootstepNode(MonteCarloFootstepNode oldNode,
                                           MonteCarloFootstepNode newNode,
                                           MonteCarloFootstepPlannerRequest request,
-                                          MonteCarloFootstepPlannerParameters plannerParameters,
+                                          MonteCarloFootstepPlannerParameters parameters,
                                           boolean debug)
    {
       double score = 0.0;
 
       Point2D previousPosition = new Point2D(oldNode.getState());
-      previousPosition.scale(1 / 50.0f);
+      previousPosition.scale(1 / parameters.getNodesPerMeter());
 
       Point2D currentPosition = new Point2D(newNode.getState());
-      currentPosition.scale(1 / 50.0f);
+      currentPosition.scale(1 / parameters.getNodesPerMeter());
 
       Point2D goalPositionRight = new Point2D(request.getGoalFootPoses().get(RobotSide.LEFT).getPosition());
       Point2D goalPositionLeft = new Point2D(request.getGoalFootPoses().get(RobotSide.RIGHT).getPosition());
@@ -508,14 +509,14 @@ public class MonteCarloPlannerTools
       //      double distanceFromReferenceLine = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(currentPosition, startPosition, goalPosition);
       //      double referenceCost = distanceFromReferenceLine * 10.0f + yawDifferenceFromReference * 10.0f;
 
-      double goalReward = plannerParameters.getGoalReward() * progressToGoal;
+      double goalReward = parameters.getGoalReward() * progressToGoal;
 
       double contactValue = request.getTerrainMapData().getContactScoreInWorld(currentPosition.getX32(), currentPosition.getY32());
-      contactValue = MathTools.clamp(contactValue, plannerParameters.getMinimumContactValue(), plannerParameters.getMaximumContactValue());
-      contactValue /= plannerParameters.getMaximumContactValue();
-      double contactReward = (contactValue) * plannerParameters.getFeasibleContactReward();
+      contactValue = MathTools.clamp(contactValue, parameters.getMinimumContactValue(), parameters.getMaximumContactValue());
+      contactValue /= parameters.getMaximumContactValue();
+      double contactReward = (contactValue) * parameters.getFeasibleContactReward();
 
-      if (contactValue < plannerParameters.getMinimumContactValue() / plannerParameters.getMaximumContactValue())
+      if (contactValue < parameters.getMinimumContactValue() / parameters.getMaximumContactValue())
          contactReward = 0.0f;
 
       //      double stepYawCost = Math.abs(oldNode.getState().getZ() - newNode.getState().getZ()) * 0.01f;
@@ -526,7 +527,7 @@ public class MonteCarloPlannerTools
       score = goalReward + contactReward;
 
       if (debug)
-         LogTools.info(String.format("Rewards -> Goal: %.2f, Contact: %.2f, Total: %.2f (%d)", goalReward, contactReward, score, plannerParameters.getInitialValueCutoff()));
+         LogTools.info(String.format("Rewards -> Goal: %.2f, Contact: %.2f, Total: %.2f (%d)", goalReward, contactReward, score, parameters.getInitialValueCutoff()));
 
       return score;
    }

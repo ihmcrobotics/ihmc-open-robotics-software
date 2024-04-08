@@ -90,7 +90,7 @@ public class MonteCarloFootstepPlanner
       }
 
       // Compute plan from maximum value path in the tree so far
-      FootstepPlan plan = MonteCarloPlannerTools.getFootstepPlanFromTree(root, request, footPolygons);
+      FootstepPlan plan = MonteCarloPlannerTools.getFootstepPlanFromTree(root, request, parameters, footPolygons);
 
       // Debug Only
       debugger.printScoreStats(root, request, parameters);

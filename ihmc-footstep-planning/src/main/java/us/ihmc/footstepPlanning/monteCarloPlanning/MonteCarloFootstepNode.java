@@ -54,8 +54,8 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
       Vector2D positionAction = new Vector2D(action.getX(), action.getY()); // yaw is the z-component, not used
 
       newPosition.add(previousPosition, positionAction);
-      newPosition.scale(1.0 / 50.0);
-      previousPosition.scale(1.0 / 50.0);
+      newPosition.scale(1.0 / parameters.getNodesPerMeter());
+      previousPosition.scale(1.0 / parameters.getNodesPerMeter());
 
       double previousHeight = request.getTerrainMapData().getHeightInWorld((float) previousPosition.getX(), (float) previousPosition.getY());
       double currentHeight = request.getTerrainMapData().getHeightInWorld((float) newPosition.getX(), (float) newPosition.getY());

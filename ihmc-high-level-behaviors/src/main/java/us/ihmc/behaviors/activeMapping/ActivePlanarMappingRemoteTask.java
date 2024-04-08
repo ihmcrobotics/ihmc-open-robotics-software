@@ -47,7 +47,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
       super(simpleRobotName, terrainRegionsTopic, structuralRegionsTopic, ros2Node, referenceFrames, referenceFramesUpdater, smoothing);
 
       this.walkingStatusMessage.get().setWalkingStatus(WalkingStatus.COMPLETED.toByte());
-      this.terrainPlanningDebugger = new TerrainPlanningDebugger(ros2Node);
+      this.terrainPlanningDebugger = new TerrainPlanningDebugger(ros2Node, null);
       this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
       this.continuousPlanningParameters = continuousPlanningParameters;
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
