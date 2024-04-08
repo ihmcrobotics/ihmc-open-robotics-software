@@ -74,19 +74,19 @@ def plot_log(log_data):
     axs[0].plot(data_dict['cpu_processing_time'])
     axs[0].set_title('Central Processing Unit Time')
     axs[0].set_xlabel('Iteration')
-    axs[0].set_ylabel('CPU Time (s)')
+    axs[0].set_ylabel('CPU Time (ms)')
     axs[0].grid(True)
 
     axs[1].plot(data_dict['gpu_processing_time'])
     axs[1].set_title('GPU Processing Time')
     axs[1].set_xlabel('Iteration')
-    axs[1].set_ylabel('GPU Time (s)')
+    axs[1].set_ylabel('GPU Time (ms)')
     axs[1].grid(True)
 
     axs[2].plot(data_dict['total_time'])
     axs[2].set_title('Total Time')
     axs[2].set_xlabel('Iteration')
-    axs[2].set_ylabel('Total Time (s)')
+    axs[2].set_ylabel('Total Time (ms)')
     axs[2].grid(True)
 
     # Add a title to the entire figure

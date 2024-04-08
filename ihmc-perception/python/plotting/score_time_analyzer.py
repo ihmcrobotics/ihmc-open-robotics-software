@@ -81,7 +81,7 @@ def load_and_plot(data, planner, time_horizon, aggregate_data=True):
 
         
         # normalize the score
-        data_block[:, 2] /= np.max(data_block[:, 2])
+        # data_block[:, 2] /= np.max(data_block[:, 2])
 
         # remove all rows in the block that have time more than 0.05
         # data_block = data_block[data_block[:, 0] < time_horizon]
@@ -167,11 +167,10 @@ if __name__ == "__main__":
     load_and_plot(data, "MCFP", mcfp_time_horizon, aggregate_data=True)
 
 
-
-    plt.xlabel("Time")
-    plt.ylabel("Normalized Score")
-    plt.xlim(0, plot_time_horizon)
-    plt.ylim(0, 1.2)
+    plt.xlabel("Time (s)")
+    plt.ylabel("Plan Quality Score")
+    # plt.xlim(0, plot_time_horizon)
+    # plt.ylim(0, 1.2)
     plt.grid()
     plt.legend()
 
