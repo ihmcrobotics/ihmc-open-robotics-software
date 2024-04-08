@@ -37,6 +37,8 @@ public class HandWrenchActionExecutor extends ActionNodeExecutor<HandWrenchActio
    {
       super.triggerActionExecution();
 
+      state.getLogger().info("Executing hand trajectory command.");
+
       HandWrenchTrajectoryMessage handWrenchTrajectoryMessage = new HandWrenchTrajectoryMessage();
       handWrenchTrajectoryMessage.setRobotSide(getDefinition().getSide().toByte());
       //      double force = 4.2; // For 0.5 kg box

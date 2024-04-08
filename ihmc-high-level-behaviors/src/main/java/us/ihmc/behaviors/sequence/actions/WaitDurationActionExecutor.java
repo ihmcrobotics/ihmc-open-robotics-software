@@ -35,6 +35,8 @@ public class WaitDurationActionExecutor extends ActionNodeExecutor<WaitDurationA
    {
       super.triggerActionExecution();
 
+      state.getLogger().info("Waiting for %.2f s...".formatted(getDefinition().getWaitDuration()));
+
       executionTimer.reset();
    }
 

@@ -9,7 +9,10 @@ import org.junit.jupiter.api.Test;
 
 import std_msgs.msg.dds.Float64;
 import std_msgs.msg.dds.Int64;
+import std_msgs.msg.dds.String;
+import test_msgs.msg.dds.LongString;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -21,11 +24,6 @@ import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
 class ROS2ToolsTest
 {
-   public static void main(String[] args)
-   {
-      new ROS2ToolsTest().testROS2Communication();
-   }
-
    @Test
    public void testTopicNameStuff()
    {
@@ -83,6 +81,8 @@ class ROS2ToolsTest
       ThreadTools.sleepForever();
    }
 
+   @Disabled
+   @Test
    public void testROS2Communication()
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
@@ -101,6 +101,63 @@ class ROS2ToolsTest
          num.setData(System.nanoTime());
          LogTools.info("Publishing: {}", num.getData());
          intPublisher.publish(num);
+      }, 1.0);
+
+      ThreadTools.sleepForever();
+   }
+
+   @Disabled
+   @Test
+   public void testStringCommunication()
+   {
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
+
+      ROS2PublisherBasics<String> stringPublisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withType(String.class));
+
+      MutableInt count = new MutableInt();
+      new ROS2Callback<>(ros2Node, String.class, ROS2Tools.IHMC_ROOT, message ->
+      {
+         LogTools.info("Received int #{}: {}", count.getAndIncrement(), message);
+      });
+
+      new ExceptionHandlingThreadScheduler(getClass().getSimpleName()).schedule(() ->
+      {
+         String message = new String();
+         StringBuilder builder = new StringBuilder();
+         for (int i = 0; i < 100; i++)
+            builder.append(i);
+         message.setData(builder.toString());
+         LogTools.info("Publishing: {}", message.getData());
+         stringPublisher.publish(message);
+      }, 1.0);
+
+      ThreadTools.sleepForever();
+   }
+
+   @Disabled
+   @Test
+   public void testLongStringCommunication()
+   {
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
+
+      ROS2PublisherBasics<LongString> stringPublisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withType(LongString.class));
+
+      MutableInt count = new MutableInt();
+      new ROS2Callback<>(ros2Node, LongString.class, ROS2Tools.IHMC_ROOT, message ->
+      {
+         LogTools.info("Received int #{}: {}", count.getAndIncrement(), MessageTools.unpackLongStringFromByteSequence(message.getLongString()));
+      });
+
+      new ExceptionHandlingThreadScheduler(getClass().getSimpleName()).schedule(() ->
+      {
+         LongString message = new LongString();
+         StringBuilder builder = new StringBuilder();
+         for (int i = 0; i < 500; i++)
+            builder.append(i);
+         java.lang.String string = builder.toString();
+         MessageTools.packLongStringToByteSequence(string, message.getLongString());
+         LogTools.info("Publishing: {}", string);
+         stringPublisher.publish(message);
       }, 1.0);
 
       ThreadTools.sleepForever();
