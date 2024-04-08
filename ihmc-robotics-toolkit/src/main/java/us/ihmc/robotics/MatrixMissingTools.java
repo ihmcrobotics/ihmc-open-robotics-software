@@ -139,7 +139,7 @@ public class MatrixMissingTools
       }
    }
 
-   public static void setMatrixRows(DMatrixRMaj dest, int destStartRow, DMatrixRMaj src, int srcStartRow, int numberOfRows)
+   public static void setMatrixRows(DMatrix dest, int destStartRow, DMatrix src, int srcStartRow, int numberOfRows)
    {
       if (numberOfRows == 0)
          return;
@@ -162,7 +162,7 @@ public class MatrixMissingTools
       }
    }
 
-   public static void setMatrixRow(DMatrixRMaj dest, int destRow, DMatrixRMaj src, int srcRow)
+   public static void setMatrixRow(DMatrix dest, int destRow, DMatrix src, int srcRow)
    {
       if (dest.getNumCols() != src.getNumCols())
          throw new IllegalArgumentException(
@@ -178,7 +178,7 @@ public class MatrixMissingTools
       }
    }
 
-   public static void setMatrixColumns(DMatrixRMaj dest, int destStartColumn, DMatrixRMaj src, int srcStartColumn, int numberOfColumns)
+   public static void setMatrixColumns(DMatrix dest, int destStartColumn, DMatrix src, int srcStartColumn, int numberOfColumns)
    {
       if (numberOfColumns == 0)
          return;
@@ -202,7 +202,7 @@ public class MatrixMissingTools
       }
    }
 
-   public static void setMatrixColumn(DMatrixRMaj dest, int destColumn, DMatrixRMaj src, int srcColumn)
+   public static void setMatrixColumn(DMatrix dest, int destColumn, DMatrix src, int srcColumn)
    {
       if (dest.getNumRows() != src.getNumRows())
          throw new IllegalArgumentException(
@@ -215,6 +215,25 @@ public class MatrixMissingTools
       for (int i = 0; i < dest.getNumRows(); i++)
       {
          dest.unsafe_set(i, destColumn, src.unsafe_get(i, srcColumn));
+      }
+   }
+
+   public static void setSelectedMatrixDiagonals(int[] indices, double value, DMatrixRMaj matrix)
+   {
+      if (indices.length == 0)
+         throw new IllegalArgumentException("Indices array is empty");
+
+      if (matrix.getNumRows() < indices.length || matrix.getNumCols() < indices.length)
+         throw new IllegalArgumentException(
+               "matrix is too small, min size: [rows: " + indices.length + ", cols: " + indices.length + "], was: [rows: " + matrix.getNumRows() + ", cols: "
+               + matrix.getNumCols() + "]");
+
+      for (int index : indices)
+      {
+         if (index < 0 || index >= indices.length)
+            throw new IllegalArgumentException("index must be between 0 and " + (indices.length - 1) + ", was: " + index);
+
+         matrix.unsafe_set(index, index, value);
       }
    }
 
