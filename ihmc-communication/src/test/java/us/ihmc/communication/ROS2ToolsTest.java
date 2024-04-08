@@ -112,7 +112,7 @@ class ROS2ToolsTest
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
 
-      IHMCROS2Publisher<String> stringPublisher = new IHMCROS2Publisher<>(ros2Node, String.class, ROS2Tools.IHMC_ROOT);
+      ROS2PublisherBasics<String> stringPublisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withType(String.class));
 
       MutableInt count = new MutableInt();
       new ROS2Callback<>(ros2Node, String.class, ROS2Tools.IHMC_ROOT, message ->
@@ -140,7 +140,7 @@ class ROS2ToolsTest
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
 
-      IHMCROS2Publisher<LongString> stringPublisher = new IHMCROS2Publisher<>(ros2Node, LongString.class, ROS2Tools.IHMC_ROOT);
+      ROS2PublisherBasics<LongString> stringPublisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withType(LongString.class));
 
       MutableInt count = new MutableInt();
       new ROS2Callback<>(ros2Node, LongString.class, ROS2Tools.IHMC_ROOT, message ->
