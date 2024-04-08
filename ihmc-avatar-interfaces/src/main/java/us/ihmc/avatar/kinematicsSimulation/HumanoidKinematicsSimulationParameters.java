@@ -18,6 +18,7 @@ public class HumanoidKinematicsSimulationParameters
    private double dt = UnitConversions.hertzToSeconds(70);
    private boolean runNoFasterThanMaxRealtimeRate = true;
    private double maxRealtimeRate = 2.0;
+   private boolean setupControllerNetworkSubscriber = true;
 
    public double getInitialGroundHeight()
    {
@@ -147,5 +148,16 @@ public class HumanoidKinematicsSimulationParameters
    public void setEnablePeriodicThread(boolean createPeriodicThread)
    {
       this.createPeriodicThread = createPeriodicThread;
+   }
+
+
+   public void setupControllerNetworkSubscriber(boolean setupControllerNetworkSubscriber)
+   {
+      this.setupControllerNetworkSubscriber = setupControllerNetworkSubscriber;
+   }
+
+   public boolean isControllerNetworkSubscriberEnabled()
+   {
+      return setupControllerNetworkSubscriber;
    }
 }

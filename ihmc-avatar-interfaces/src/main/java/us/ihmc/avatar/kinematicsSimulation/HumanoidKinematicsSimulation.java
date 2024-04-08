@@ -248,41 +248,49 @@ public class HumanoidKinematicsSimulation
       walkingParentRegistry.addChild(walkingController.getYoVariableRegistry());
 
       // create controller network subscriber here!!
-      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(kinematicsSimulationParameters.getPubSubImplementation(),
-                                                          ROS2Tools.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
-      ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
-      ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
-                                                                                                walkingInputManager,
-                                                                                                outputTopic,
-                                                                                                walkingOutputManager,
-                                                                                                realtimeROS2Node);
-      controllerNetworkSubscriber.addMessageFilter(message ->
+      if (kinematicsSimulationParameters.isControllerNetworkSubscriberEnabled())
       {
-         if (message instanceof FootstepDataListMessage)
-         {
-            FootstepDataListMessage footstepDataListMessage = (FootstepDataListMessage) message;
-            footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(false); // fixes +Z drift for each step
-         }
-         return true;
-      });
-      walkingInputManager.registerConversionHelper(new FrameMessageCommandConverter(controllerToolbox.getReferenceFrameHashCodeResolver()));
-      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class,
-                                                                       9,
-                                                                       MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
-      controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyStreamingMessage.class,
-                                                                       inputTopic,
-                                                                       ROS2QosProfile.BEST_EFFORT(),
-                                                                       9,
-                                                                       MessageUnpackingTools.createWholeBodyStreamingMessageUnpacker());
-      controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
-      controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
+         realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(kinematicsSimulationParameters.getPubSubImplementation(),
+                                                             ROS2Tools.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
+         ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
+         ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+         ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
+                                                                                                   walkingInputManager,
+                                                                                                   outputTopic,
+                                                                                                   walkingOutputManager,
+                                                                                                   realtimeROS2Node);
+         controllerNetworkSubscriber.addMessageFilter(message ->
+                                                      {
+                                                         if (message instanceof FootstepDataListMessage)
+                                                         {
+                                                            FootstepDataListMessage footstepDataListMessage = (FootstepDataListMessage) message;
+                                                            footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(false); // fixes +Z drift for each step
+                                                         }
+                                                         return true;
+                                                      });
+         walkingInputManager.registerConversionHelper(new FrameMessageCommandConverter(controllerToolbox.getReferenceFrameHashCodeResolver()));
+         controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyTrajectoryMessage.class,
+                                                                          9,
+                                                                          MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
+         controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyStreamingMessage.class,
+                                                                          inputTopic,
+                                                                          ROS2QosProfile.BEST_EFFORT(),
+                                                                          9,
+                                                                          MessageUnpackingTools.createWholeBodyStreamingMessageUnpacker());
+         controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
+         controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
 
-      simulatedHandKinematicController = robotModel.createSimulatedHandKinematicController(fullRobotModel, realtimeROS2Node, yoTime);
-      
-      robotConfigurationDataPublisher = createRobotConfigurationDataPublisher(robotModel.getSimpleRobotName());
+         simulatedHandKinematicController = robotModel.createSimulatedHandKinematicController(fullRobotModel, realtimeROS2Node, yoTime);
 
-      realtimeROS2Node.spin();
+         robotConfigurationDataPublisher = createRobotConfigurationDataPublisher(robotModel.getSimpleRobotName());
+         realtimeROS2Node.spin();
+      }
+      else
+      {
+         realtimeROS2Node = null;
+         robotConfigurationDataPublisher = null;
+         simulatedHandKinematicController = null;
+      }
 
       WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(kinematicsSimulationParameters.getDt(),
                                                                                        GRAVITY_Z,
@@ -300,9 +308,9 @@ public class HumanoidKinematicsSimulation
                                                    managerFactory.createFeedbackControlTemplate(),
                                                    new JointDesiredOutputList(controllerToolbox.getControlledOneDoFJoints()),
                                                    walkingParentRegistry);
-      
+
       jointDesiredOutputList = controllerCore.getOutputForLowLevelController();
-      
+
       walkingController.setControllerCoreOutput(controllerCore.getOutputForHighLevelController());
 
       linearMomentumRateControlModule = new LinearMomentumRateControlModule(centerOfMassStateProvider,
@@ -407,7 +415,7 @@ public class HumanoidKinematicsSimulation
       rcdPublisherFactory.setSensorSource(sensorTimestampHolder, rootJointStateOutput, jointSensorOutputs, forceSensorDataHolder, imuSensorOutputs);
       rcdPublisherFactory.setPublishPeriod(0L);
       rcdPublisherFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
-      
+
       rcdPublisherFactory.setROS2Info(realtimeROS2Node, ROS2Tools.getControllerOutputTopic(robotName));
 
       return rcdPublisherFactory.createRobotConfigurationDataPublisher();
@@ -420,11 +428,11 @@ public class HumanoidKinematicsSimulation
 
    public void setRunning(boolean running)
    {
-      if(controlThread == null)
+      if (controlThread == null)
       {
          return;
       }
-      
+
       if (running && !controlThread.isRunning())
       {
          initialize();
@@ -446,7 +454,7 @@ public class HumanoidKinematicsSimulation
       controllerCore.initialize();
       walkingController.initialize();
 
-//      walkingController.requestImmediateTransitionToStandingAndHoldCurrent();
+      //      walkingController.requestImmediateTransitionToStandingAndHoldCurrent();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -578,6 +586,16 @@ public class HumanoidKinematicsSimulation
          default:
             throw new RuntimeException("Unexpected status: " + status);
       }
+   }
+
+   public CommandInputManager getWalkingInputManager()
+   {
+      return walkingInputManager;
+   }
+
+   public StatusMessageOutputManager getWalkingOutputManager()
+   {
+      return walkingOutputManager;
    }
 
    private void processWalkingStatus(WalkingStatusMessage status)
