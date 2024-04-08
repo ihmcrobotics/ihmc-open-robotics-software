@@ -76,18 +76,18 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
                }
             }
          }
-         if (state.getPullScrewPrimitiveAction().getIsExecuting())
-         {
-            double knuckle1Q = x1KnuckleJoints.get(RobotSide.RIGHT).getQ();
-            double knuckle2Q = x2KnuckleJoints.get(RobotSide.RIGHT).getQ();
-            double handOpenAngle = SakeHandParameters.knuckleJointAnglesToHandOpenAngle(knuckle1Q, knuckle2Q);
-
-            if (handOpenAngle < Math.toRadians(20.0)) // TODO: Tune
-            {
-               state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
-               state.getRetryingPullDoorNotification().set();
-            }
-         }
+//         if (state.getPullScrewPrimitiveAction().getIsExecuting())
+//         {
+//            double knuckle1Q = x1KnuckleJoints.get(RobotSide.RIGHT).getQ();
+//            double knuckle2Q = x2KnuckleJoints.get(RobotSide.RIGHT).getQ();
+//            double handOpenAngle = SakeHandParameters.knuckleJointAnglesToHandOpenAngle(knuckle1Q, knuckle2Q);
+//
+//            if (handOpenAngle < Math.toRadians(20.0)) // TODO: Tune
+//            {
+//               state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
+//               state.getRetryingPullDoorNotification().set();
+//            }
+//         }
       }
    }
 
