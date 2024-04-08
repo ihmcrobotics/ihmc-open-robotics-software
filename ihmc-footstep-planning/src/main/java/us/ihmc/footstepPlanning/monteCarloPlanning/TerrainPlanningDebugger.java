@@ -254,6 +254,9 @@ public class TerrainPlanningDebugger
 
    public void publishMonteCarloNodesForVisualization(MonteCarloTreeNode root, TerrainMapData terrainMap)
    {
+      if (root == null)
+         return;
+
       ArrayList<Pose3D> poses = new ArrayList<>();
 
       addChildPosesToList(root, terrainMap, poses);
