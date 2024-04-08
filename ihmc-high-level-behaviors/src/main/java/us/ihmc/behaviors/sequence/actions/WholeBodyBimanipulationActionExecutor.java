@@ -47,6 +47,7 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
    private final HumanoidKinematicsSolver wholeBodyIKSolver;
    private final SideDependentList<KinematicsToolboxRigidBodyCommand> handRigidBodyCommands = new SideDependentList<>();
    private volatile boolean isSolutionGood = false;
+   private RobotConfigurationData latestStandingRobotConfiguration;
 
    public WholeBodyBimanipulationActionExecutor(long id,
                                                 CRDTInfo crdtInfo,
@@ -65,10 +66,10 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.ros2ControllerHelper = ros2ControllerHelper;
+      this.latestStandingRobotConfiguration = latestStandingRobotConfiguration;
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       wholeBodyIKSolver = new HumanoidKinematicsSolver(robotModel, yoGraphicsListRegistry, new YoRegistry(getClass().getSimpleName()));
-      wholeBodyIKSolver.setInitialConfiguration(latestStandingRobotConfiguration);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -102,8 +103,9 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
 
       if (state.getHandFrame(RobotSide.LEFT).isChildOfWorld())
       {
-         RobotConfigurationData robotConfigurationData = syncedRobot.getLatestRobotConfigurationData();
-         wholeBodyIKSolver.setInitialConfiguration(robotConfigurationData);
+         //         RobotConfigurationData robotConfigurationData = syncedRobot.getLatestRobotConfigurationData();
+         //         wholeBodyIKSolver.setInitialConfiguration(robotConfigurationData);
+         wholeBodyIKSolver.setInitialConfiguration(latestStandingRobotConfiguration);
          wholeBodyIKSolver.setAsDoubleSupport();
          wholeBodyIKSolver.initialize();
 
