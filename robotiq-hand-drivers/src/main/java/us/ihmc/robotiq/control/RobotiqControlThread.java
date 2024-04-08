@@ -12,8 +12,8 @@ import us.ihmc.avatar.handControl.HandControlThread;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.avatar.handControl.packetsAndConsumers.ManualHandControlProvider;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
@@ -41,15 +41,14 @@ public class RobotiqControlThread extends HandControlThread
       handDesiredConfigurationMessageSubscriber = new HandDesiredConfigurationMessageSubscriber(robotSide);
       manualHandControlProvider = new ManualHandControlProvider(robotSide);
 
-      ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-      ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      ROS2Topic<?> outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+      ROS2Topic<?> inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
 
-      IHMCRealtimeROS2Publisher<HandJointAnglePacket> handJointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, HandJointAnglePacket.class,
-                                                                                                                   outputTopic);
+      ROS2PublisherBasics<HandJointAnglePacket> handJointAnglePublisher = realtimeROS2Node.createPublisher(outputTopic.withTypeName(HandJointAnglePacket.class));
       jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, handJointAnglePublisher);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HandDesiredConfigurationMessage.class, inputTopic,
-                                                    handDesiredConfigurationMessageSubscriber);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, ManualHandControlPacket.class, inputTopic, manualHandControlProvider);
+      realtimeROS2Node.createSubscription(inputTopic.withTypeName(HandDesiredConfigurationMessage.class),
+                                          handDesiredConfigurationMessageSubscriber);
+      realtimeROS2Node.createSubscription(inputTopic.withTypeName(ManualHandControlPacket.class), manualHandControlProvider);
       realtimeROS2Node.spin();
    }
 

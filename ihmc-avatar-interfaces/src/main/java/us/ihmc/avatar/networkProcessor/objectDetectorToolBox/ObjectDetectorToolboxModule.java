@@ -10,7 +10,6 @@ import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorT
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -41,20 +40,16 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(ROS2NodeInterface ros2Node)
    {
+      ros2Node.createSubscription(FiducialDetectorToolboxModule.getOutputTopic(robotName).withTypeName(DetectedFiducialPacket.class), s ->
+      {
+         if (controller != null)
+         {
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    DetectedFiducialPacket.class,
-                                                    FiducialDetectorToolboxModule.getOutputTopic(robotName),
-                                                    s ->
-                                                    {
-                                                       if (controller != null)
-                                                       {
+            controller.receivedPacket(s.takeNextData());
+            receivedInput.set(true);
 
-                                                          controller.receivedPacket(s.takeNextData());
-                                                          receivedInput.set(true);
-
-                                                       }
-                                                    });
+         }
+      });
    }
 
    //TODO check this   

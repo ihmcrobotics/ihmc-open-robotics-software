@@ -2,10 +2,10 @@ package us.ihmc.rdx.ui.graphics;
 
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
+import us.ihmc.communication.ToolboxAPIs;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.commons.MathTools;
-import us.ihmc.communication.IHMCROS2Input;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class RDXWalkingPreviewPlaybackManager
 {
-   private final IHMCROS2Input<WalkingControllerPreviewOutputMessage> walkingPreviewOutput;
+   private final ROS2Input<WalkingControllerPreviewOutputMessage> walkingPreviewOutput;
    // frames per call to handle()
    private final int playbackSpeed = 1;
 
@@ -28,7 +28,7 @@ public class RDXWalkingPreviewPlaybackManager
 
    public RDXWalkingPreviewPlaybackManager(ROS2ControllerPublishSubscribeAPI helper)
    {
-      walkingPreviewOutput = helper.subscribe(ROS2Tools.getControllerPreviewOutputTopic(helper.getRobotName()));
+      walkingPreviewOutput = helper.subscribe(ToolboxAPIs.getControllerPreviewOutputTopic(helper.getRobotName()));
    }
 
    public void create(FullHumanoidRobotModel previewRobotModel)

@@ -11,7 +11,7 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorMessageTools;
 import us.ihmc.behaviors.behaviorTree.FallbackNode;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -61,7 +61,7 @@ public class RDXBehaviorUIManager
       logWidget = new ImGuiLogWidget("Behavior status");
       helper.subscribeViaCallback(STATUS_LOG, message ->
             logWidget.submitEntry(message.getLogLevel(), MessageTools.unpackLongStringFromByteSequence(message.getLogMessage())));
-      helper.subscribeViaCallback(ROS2Tools.TEXT_STATUS, textStatus ->
+      helper.subscribeViaCallback(HumanoidControllerAPI.TEXT_STATUS, textStatus ->
       {
          LogTools.info("TextToSpeech: {}", textStatus.getTextToSpeakAsString());
          logWidget.submitEntry(Level.INFO, textStatus.getTextToSpeakAsString());

@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.missionControl;
 
 import imgui.ImGui;
 import mission_control_msgs.msg.dds.SystemAvailableMessage;
+import us.ihmc.communication.MissionControlAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
@@ -31,7 +32,7 @@ public class MissionControlUI
    {
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "mission_control_ui");
 
-      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.SYSTEM_AVAILABLE, subscriber ->
+      ros2Node.createSubscription(MissionControlAPI.SYSTEM_AVAILABLE, subscriber ->
       {
          SystemAvailableMessage message = subscriber.takeNextData();
          String instanceIdString = message.getInstanceIdAsString();

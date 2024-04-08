@@ -5,12 +5,11 @@ import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -57,8 +56,8 @@ public class LocalizationAndMappingTask
    protected ROS2Node ros2Node;
    protected PlanarRegionMap planarRegionMap;
 
-   private IHMCROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
-   private IHMCROS2Publisher<PlanarRegionsListMessage> slamOutputRegionsPublisher;
+   private ROS2PublisherBasics<PlanarRegionsListMessage> controllerRegionsPublisher;
+   private ROS2PublisherBasics<PlanarRegionsListMessage> slamOutputRegionsPublisher;
 
    private final AtomicReference<HighLevelStateMessage> highLevelState = new AtomicReference<>();
    private final AtomicReference<WalkingControllerFailureStatusMessage> walkingFailureStatus = new AtomicReference<>();
@@ -113,17 +112,17 @@ public class LocalizationAndMappingTask
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERSPECTIVE_PLANAR_REGION_MAPPING_PARAMETERS, planarRegionMap.getParameters());
       ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, configurationParameters);
 
-      controllerRegionsPublisher = ROS2Tools.createPublisher(ros2Node, StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, simpleRobotName));
-      slamOutputRegionsPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS);
+      controllerRegionsPublisher = ros2Node.createPublisher(StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, simpleRobotName));
+      slamOutputRegionsPublisher = ros2Node.createPublisher(PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS);
       ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
 
-      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), message ->
+      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), message ->
       {
          LogTools.warn("Resetting Map (Walking Failure Detected)");
          setEnableLiveMode(false);
       });
 
-      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(HighLevelStateMessage.class, simpleRobotName), highLevelState::set);
+      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(HighLevelStateMessage.class, simpleRobotName), highLevelState::set);
 
       updateMapFuture = executorService.scheduleAtFixedRate(this::scheduledUpdate, 0, SCHEDULED_UPDATE_PERIOD_MS, TimeUnit.MILLISECONDS);
    }

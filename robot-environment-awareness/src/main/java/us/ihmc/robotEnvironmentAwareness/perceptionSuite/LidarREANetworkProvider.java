@@ -1,7 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.perceptionSuite;
 
 import perception_msgs.msg.dds.*;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -11,7 +11,6 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.REAParametersMessageHelper;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.robotEnvironmentAwareness.updaters.REACurrentStateProvider;
@@ -27,9 +26,9 @@ import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPr
 
 public class LidarREANetworkProvider implements REANetworkProvider
 {
-   private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
-   private final IHMCROS2Publisher<PlanarRegionsListMessage> lidarRegionPublisher;
-   private final IHMCROS2Publisher<OcTreeKeyListMessage> ocTreePublisher;
+   private final ROS2PublisherBasics<PlanarRegionsListMessage> planarRegionPublisher;
+   private final ROS2PublisherBasics<PlanarRegionsListMessage> lidarRegionPublisher;
+   private final ROS2PublisherBasics<OcTreeKeyListMessage> ocTreePublisher;
 
    private REACurrentStateProvider currentStateProvider = null;
 
@@ -48,29 +47,22 @@ public class LidarREANetworkProvider implements REANetworkProvider
       this.ros2Node = ros2Node;
       this.outputTopic = outputTopic;
 
-      planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, outputTopic);
-      lidarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, lidarOutputTopic);
-      ocTreePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, OcTreeKeyListMessage.class, outputTopic);
+      planarRegionPublisher = ros2Node.createPublisher(outputTopic.withTypeName(PlanarRegionsListMessage.class));
+      lidarRegionPublisher = ros2Node.createPublisher(lidarOutputTopic.withTypeName(PlanarRegionsListMessage.class));
+      ocTreePublisher = ros2Node.createPublisher(outputTopic.withTypeName(OcTreeKeyListMessage.class));
    }
 
    public void registerMessager(Messager messager)
    {
       currentStateProvider = new REACurrentStateProvider(ros2Node, outputTopic, messager);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    NormalEstimationParametersMessage.class,
-                                                    inputTopic,
-                                                    s -> messager.submitMessage(REAModuleAPI.NormalEstimationParameters,
-                                                                                REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    PlanarRegionSegmentationParametersMessage.class,
-                                                    inputTopic,
-                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters,
-                                                                                REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    PolygonizerParametersMessage.class,
-                                                    inputTopic,
-                                                    s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, s.takeNextData()));
+      ros2Node.createSubscription(inputTopic.withTypeName(NormalEstimationParametersMessage.class),
+                                  s -> messager.submitMessage(REAModuleAPI.NormalEstimationParameters, REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+      ros2Node.createSubscription(inputTopic.withTypeName(PlanarRegionSegmentationParametersMessage.class),
+                                  s -> messager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters,
+                                                               REAParametersMessageHelper.convertFromMessage(s.takeNextData())));
+      ros2Node.createSubscription(inputTopic.withTypeName(PolygonizerParametersMessage.class),
+                                  s -> messager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, s.takeNextData()));
    }
 
    @Override
@@ -102,7 +94,7 @@ public class LidarREANetworkProvider implements REANetworkProvider
    @Override
    public void registerLidarScanHandler(NewMessageListener<LidarScanMessage> lidarScanHandler)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, LidarScanMessage.class, REASourceType.LIDAR_SCAN.getTopicName(), lidarScanHandler);
+      ros2Node.createSubscription(LidarScanMessage.class, lidarScanHandler, REASourceType.LIDAR_SCAN.getTopicName());
    }
 
    @Override
@@ -114,25 +106,25 @@ public class LidarREANetworkProvider implements REANetworkProvider
    @Override
    public void registerCustomRegionsHandler(NewMessageListener<PlanarRegionsListMessage> customRegionsHandler)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicName, customRegionsHandler);
+      ros2Node.createSubscription(subscriberCustomRegionsTopicName.withTypeName(PlanarRegionsListMessage.class), customRegionsHandler);
    }
 
    @Override
    public void registerPlanarRegionsListRequestHandler(NewMessageListener<RequestPlanarRegionsListMessage> requestHandler)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RequestPlanarRegionsListMessage.class, inputTopic, requestHandler);
+      ros2Node.createSubscription(inputTopic.withTypeName(RequestPlanarRegionsListMessage.class), requestHandler);
    }
 
    @Override
    public void registerREAStateRequestHandler(NewMessageListener<REAStateRequestMessage> requestHandler)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REAStateRequestMessage.class, inputTopic, requestHandler);
+      ros2Node.createSubscription(inputTopic.withTypeName(REAStateRequestMessage.class), requestHandler);
    }
 
    @Override
    public void registerREASensorDataFilterParametersHandler(NewMessageListener<REASensorDataFilterParametersMessage> parametersHandler)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REASensorDataFilterParametersMessage.class, inputTopic, parametersHandler);
+      ros2Node.createSubscription(inputTopic.withTypeName(REASensorDataFilterParametersMessage.class), parametersHandler);
    }
 
    @Override

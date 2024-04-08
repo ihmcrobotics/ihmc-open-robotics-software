@@ -29,7 +29,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.Compo
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -62,7 +62,6 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.stateMachine.core.StateChangedListener;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -703,8 +702,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public void createControllerNetworkSubscriber(String robotName, RealtimeROS2Node realtimeROS2Node)
    {
-      ROS2Topic<?> inputTopic = ROS2Tools.getControllerInputTopic(robotName);
-      ROS2Topic<?> outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic<?> inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
+      ROS2Topic<?> outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
                                                                                                 commandInputManager,
                                                                                                 outputTopic,
@@ -715,8 +714,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                        9,
                                                                        MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
       controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyStreamingMessage.class,
-                                                                       inputTopic,
-                                                                       ROS2QosProfile.BEST_EFFORT(),
                                                                        9,
                                                                        MessageUnpackingTools.createWholeBodyStreamingMessageUnpacker());
       controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);

@@ -1,7 +1,7 @@
 package us.ihmc.robotiq.simulatedHand;
 
 import us.ihmc.avatar.kinematicsSimulation.SimulatedHandKinematicController;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -47,8 +47,8 @@ public class SimulatedRobotiqHandKinematicController implements SimulatedHandKin
                                                        jointDesiredOutputList,
                                                        controllerTime,
                                                        realtimeROS2Node,
-                                                       ROS2Tools.getControllerOutputTopic(simpleRobotName),
-                                                       ROS2Tools.getControllerInputTopic(simpleRobotName),
+                                                       HumanoidControllerAPI.getOutputTopic(simpleRobotName),
+                                                       HumanoidControllerAPI.getInputTopic(simpleRobotName),
                                                        sides,
                                                        JointDesiredControlMode.POSITION);
       registry.addChild(controller.getYoRegistry());
