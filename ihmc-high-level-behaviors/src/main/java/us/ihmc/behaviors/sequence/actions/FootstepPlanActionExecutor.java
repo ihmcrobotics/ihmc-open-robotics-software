@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
@@ -12,7 +13,6 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -22,12 +22,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlannerOutput;
-import us.ihmc.footstepPlanning.FootstepPlannerRequest;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
@@ -70,6 +65,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    private final SideDependentList<FramePose3D> liveGoalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
    private final SideDependentList<FramePose3D> startFootPosesForThread = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<FramePose3D> goalFootPosesForThread = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private RobotConfigurationData latestStandingRobotConfiguration;
 
    public FootstepPlanActionExecutor(long id,
                                      CRDTInfo crdtInfo,
@@ -80,13 +76,15 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                                      ReferenceFrameLibrary referenceFrameLibrary,
                                      WalkingControllerParameters walkingControllerParameters,
                                      FootstepPlanningModule footstepPlanner,
-                                     FootstepPlannerParametersBasics footstepPlannerParameters)
+                                     FootstepPlannerParametersBasics footstepPlannerParameters,
+                                     RobotConfigurationData latestStandingRobotConfiguration)
    {
       super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
       state = getState();
       definition = getDefinition();
 
+      this.latestStandingRobotConfiguration = latestStandingRobotConfiguration;
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
@@ -420,6 +418,9 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       if (meetsDesiredCompletionCriteria || hitTimeLimit)
       {
          state.setIsExecuting(false);
+         LogTools.info("Walking complete.");
+         latestStandingRobotConfiguration = syncedRobot.getLatestRobotConfigurationData();
+         LogTools.info("Latest standing robot configuration: {}", latestStandingRobotConfiguration);
       }
       if (hitTimeLimit)
       {

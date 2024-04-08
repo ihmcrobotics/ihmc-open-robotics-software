@@ -25,7 +25,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -55,7 +54,8 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
                                                 ROS2ControllerHelper ros2ControllerHelper,
                                                 ReferenceFrameLibrary referenceFrameLibrary,
                                                 DRCRobotModel robotModel,
-                                                ROS2SyncedRobotModel syncedRobot)
+                                                ROS2SyncedRobotModel syncedRobot,
+                                                RobotConfigurationData latestStandingRobotConfiguration)
    {
       super(new WholeBodyBimanipulationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
@@ -68,6 +68,7 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       wholeBodyIKSolver = new HumanoidKinematicsSolver(robotModel, yoGraphicsListRegistry, new YoRegistry(getClass().getSimpleName()));
+      wholeBodyIKSolver.setInitialConfiguration(latestStandingRobotConfiguration);
 
       for (RobotSide side : RobotSide.values)
       {

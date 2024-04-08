@@ -24,7 +24,7 @@ public class WholeBodyBimanipulationActionDefinition extends ActionNodeDefinitio
    private double onDiskTrajectoryDuration;
    private boolean onDiskHoldPoseInWorldLater;
    private String onDiskParentFrameName;
-   private final SideDependentList<RigidBodyTransform> onDiskHandToParentTransform = new SideDependentList<>();
+   private final SideDependentList<RigidBodyTransform> onDiskHandToParentTransform = new SideDependentList<RigidBodyTransform>();
 
    public WholeBodyBimanipulationActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -36,6 +36,7 @@ public class WholeBodyBimanipulationActionDefinition extends ActionNodeDefinitio
       {
          CRDTUnidirectionalRigidBodyTransform handToParentTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.OPERATOR, crdtInfo);
          handToParentTransforms.put(side, handToParentTransform);
+         onDiskHandToParentTransform.put(side, new RigidBodyTransform());
       }
       trajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.0);
    }
@@ -50,7 +51,8 @@ public class WholeBodyBimanipulationActionDefinition extends ActionNodeDefinitio
       jsonNode.put("parentFrame", parentFrameName.getValue());
       for (RobotSide side : RobotSide.values)
       {
-         JSONTools.toJSON(jsonNode, handToParentTransforms.get(side).getValueReadOnly());
+         ObjectNode goalFootNode = jsonNode.putObject(side.getCamelCaseName() + "HandPoseGoal");
+         JSONTools.toJSON(goalFootNode, handToParentTransforms.get(side).getValueReadOnly());
       }
    }
 
@@ -64,7 +66,8 @@ public class WholeBodyBimanipulationActionDefinition extends ActionNodeDefinitio
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
       for (RobotSide side : RobotSide.values)
       {
-         JSONTools.toEuclid(jsonNode, handToParentTransforms.get(side).getValue());
+         ObjectNode goalFootNode = (ObjectNode) jsonNode.get(side.getCamelCaseName() + "HandPoseGoal");
+         JSONTools.toEuclid(goalFootNode, handToParentTransforms.get(side).getValue());
       }
    }
 

@@ -1,10 +1,11 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -16,13 +17,14 @@ public class BehaviorTreeExecutor
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
    private final BehaviorTreeState behaviorTreeState;
    private BehaviorTreeNodeExecutor<?, ?> rootNode;
+   private RobotConfigurationData latestStandingRobotConfiguration = new RobotConfigurationData();
 
    public BehaviorTreeExecutor(DRCRobotModel robotModel,
                                ROS2SyncedRobotModel syncedRobot,
                                ReferenceFrameLibrary referenceFrameLibrary,
                                ROS2ControllerHelper ros2ControllerHelper)
    {
-      nodeBuilder = new BehaviorTreeExecutorNodeBuilder(robotModel, ros2ControllerHelper, syncedRobot, referenceFrameLibrary);
+      nodeBuilder = new BehaviorTreeExecutorNodeBuilder(robotModel, ros2ControllerHelper, syncedRobot, referenceFrameLibrary, latestStandingRobotConfiguration);
       treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode, crdtInfo);
 
       behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, crdtInfo, null);

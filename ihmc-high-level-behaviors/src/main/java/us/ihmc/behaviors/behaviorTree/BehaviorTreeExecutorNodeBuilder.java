@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -30,16 +31,19 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final ROS2ControllerHelper ros2ControllerHelper;
+   private RobotConfigurationData latestStandingRobotConfiguration;
 
    public BehaviorTreeExecutorNodeBuilder(DRCRobotModel robotModel,
                                           ROS2ControllerHelper ros2ControllerHelper,
                                           ROS2SyncedRobotModel syncedRobot,
-                                          ReferenceFrameLibrary referenceFrameLibrary)
+                                          ReferenceFrameLibrary referenceFrameLibrary,
+                                          RobotConfigurationData latestStandingRobotConfiguration)
    {
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
       this.ros2ControllerHelper = ros2ControllerHelper;
+      this.latestStandingRobotConfiguration = latestStandingRobotConfiguration;
 
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2ControllerHelper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
       footstepTracker = controllerStatusTracker.getFootstepTracker();
@@ -77,8 +81,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
                                                controllerStatusTracker,
                                                referenceFrameLibrary,
                                                walkingControllerParameters,
-                                               footstepPlanner,
-                                               footstepPlannerParameters);
+                                               footstepPlanner, footstepPlannerParameters, latestStandingRobotConfiguration);
       }
       if (nodeType == HandPoseActionDefinition.class)
       {
@@ -90,7 +93,14 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       }
       if (nodeType == WholeBodyBimanipulationActionDefinition.class)
       {
-         return new WholeBodyBimanipulationActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot);
+         return new WholeBodyBimanipulationActionExecutor(id,
+                                                          crdtInfo,
+                                                          saveFileDirectory,
+                                                          ros2ControllerHelper,
+                                                          referenceFrameLibrary,
+                                                          robotModel,
+                                                          syncedRobot,
+                                                          latestStandingRobotConfiguration);
       }
       if (nodeType == ScrewPrimitiveActionDefinition.class)
       {
