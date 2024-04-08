@@ -419,8 +419,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       {
          state.setIsExecuting(false);
          LogTools.info("Walking complete.");
-         latestStandingRobotConfiguration = syncedRobot.getLatestRobotConfigurationData();
-         LogTools.info("Latest standing robot configuration: {}", latestStandingRobotConfiguration);
+         latestStandingRobotConfiguration.set(syncedRobot.getLatestRobotConfigurationData());
       }
       if (hitTimeLimit)
       {

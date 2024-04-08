@@ -103,8 +103,6 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
 
       if (state.getHandFrame(RobotSide.LEFT).isChildOfWorld())
       {
-         //         RobotConfigurationData robotConfigurationData = syncedRobot.getLatestRobotConfigurationData();
-         //         wholeBodyIKSolver.setInitialConfiguration(robotConfigurationData);
          wholeBodyIKSolver.setInitialConfiguration(latestStandingRobotConfiguration);
          wholeBodyIKSolver.setAsDoubleSupport();
          wholeBodyIKSolver.initialize();
