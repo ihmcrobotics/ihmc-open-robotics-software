@@ -22,16 +22,18 @@ public class ROS2DemandGraphNode
 
    public boolean isDemanded()
    {
-      if (nodeHeartbeatMonitor.isAlive())
-         return true;
+      return true;
 
-      for (ROS2DemandGraphNode dependent : dependents)
-      {
-         if (dependent.isDemanded())
-            return true;
-      }
-
-      return false;
+//      if (nodeHeartbeatMonitor.isAlive())
+//         return true;
+//
+//      for (ROS2DemandGraphNode dependent : dependents)
+//      {
+//         if (dependent.isDemanded())
+//            return true;
+//      }
+//
+//      return false;
    }
 
    public void destroy()

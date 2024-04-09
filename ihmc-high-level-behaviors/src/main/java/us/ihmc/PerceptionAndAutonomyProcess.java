@@ -12,6 +12,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -511,7 +512,7 @@ public class PerceptionAndAutonomyProcess
 
    public void updatePlanarRegions()
    {
-      if (realsenseDepthImage != null && realsenseDepthImage.isAvailable() && planarRegionsDemandNode.isDemanded())
+      if (realsenseDepthImage != null && realsenseDepthImage.isAvailable()) // && planarRegionsDemandNode.isDemanded())
       {
          RawImage latestRealsenseDepthImage = realsenseDepthImage.get();
 
@@ -546,8 +547,11 @@ public class PerceptionAndAutonomyProcess
          PlanarRegionsList planarRegionsInWorldFrame = framePlanarRegionsList.getPlanarRegionsList().copy();
          planarRegionsInWorldFrame.applyTransform(realsenseFrameSupplier.get().getTransformToWorldFrame());
 
-         if (doorYoloNode != null)
-            doorYoloNode.updatePlanarRegions(planarRegionsInWorldFrame, ros2Helper);
+         LogTools.info("publishing regions");
+         ros2Helper.publish(PerceptionAPI.BRACING_RAPID_REGIONS, PlanarRegionMessageConverter.convertToFramePlanarRegionsListMessage(framePlanarRegionsList));
+
+//         if (doorYoloNode != null)
+//            doorYoloNode.updatePlanarRegions(planarRegionsInWorldFrame, ros2Helper);
 
          latestRealsenseDepthImage.release();
       }
