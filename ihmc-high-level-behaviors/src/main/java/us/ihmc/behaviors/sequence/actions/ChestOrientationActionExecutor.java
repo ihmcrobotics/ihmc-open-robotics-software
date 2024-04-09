@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
@@ -27,7 +26,6 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    private final FramePose3D desiredChestPose = new FramePose3D();
    private final FramePose3D syncedChestPose = new FramePose3D();
    private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
-   private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
 
    public ChestOrientationActionExecutor(long id,
                                          CRDTInfo crdtInfo,

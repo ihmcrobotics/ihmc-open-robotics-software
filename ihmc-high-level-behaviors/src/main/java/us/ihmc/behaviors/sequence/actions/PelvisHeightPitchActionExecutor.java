@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.TaskspaceTrajectoryTrackingErrorCalculator;
@@ -26,7 +25,6 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
    private final FramePose3D desiredPelvisPose = new FramePose3D();
    private final FramePose3D syncedPelvisPose = new FramePose3D();
    private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
-   private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
 
    public PelvisHeightPitchActionExecutor(long id,
                                           CRDTInfo crdtInfo,
