@@ -15,7 +15,7 @@ public class DoorTraversalDefinitionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2d1536c9f1d1080c283ded07aef6c095438376d431ddd37c63514081e542ae78";
+   		return "b801746caf367e64da3b0b5db485a698aca61b4eacbca84b9f3d962cc142c016";
    }
    
    @Override
@@ -54,6 +54,8 @@ public class DoorTraversalDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -69,17 +71,25 @@ public class DoorTraversalDefinitionMessagePubSubType implements us.ihmc.pubsub.
 
       current_alignment += behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(behavior_msgs.msg.dds.DoorTraversalDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);   }
+      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
+      cdr.write_type_6(data.getMinimumHandOpenAngle());
+
+   }
 
    public static void read(behavior_msgs.msg.dds.DoorTraversalDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
+      data.setMinimumHandOpenAngle(cdr.read_type_6());
+      	
 
    }
 
@@ -88,12 +98,15 @@ public class DoorTraversalDefinitionMessagePubSubType implements us.ihmc.pubsub.
    {
       ser.write_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
 
+      ser.write_type_6("minimum_hand_open_angle", data.getMinimumHandOpenAngle());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.DoorTraversalDefinitionMessage data)
    {
       ser.read_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
+
+      data.setMinimumHandOpenAngle(ser.read_type_6("minimum_hand_open_angle"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.DoorTraversalDefinitionMessage src, behavior_msgs.msg.dds.DoorTraversalDefinitionMessage dest)

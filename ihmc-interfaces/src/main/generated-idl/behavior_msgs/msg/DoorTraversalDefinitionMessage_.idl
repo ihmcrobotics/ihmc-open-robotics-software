@@ -16,6 +16,10 @@ module behavior_msgs
          * Parent definition fields
          */
         behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
+        /**
+         * Duration of the trajectory
+         */
+        double minimum_hand_open_angle;
       };
     };
   };

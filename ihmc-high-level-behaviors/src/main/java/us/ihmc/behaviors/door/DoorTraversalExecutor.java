@@ -94,11 +94,10 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
             double knuckle2Q = x2KnuckleJoints.get(RobotSide.RIGHT).getQ();
             double handOpenAngle = SakeHandParameters.knuckleJointAnglesToHandOpenAngle(knuckle1Q, knuckle2Q);
 
-            double minimumHandOpenAngleDegrees = 8.0;
-            if (handOpenAngle < Math.toRadians(minimumHandOpenAngleDegrees)) // TODO: Tune
+            if (handOpenAngle < Math.toRadians(getDefinition().getMinimumHandOpenAngle())) // TODO: Tune
             {
                state.getLogger().info("Retrying pull door. Hand open angle %.2f / %.2f degrees %n Stopping all trajectories going back to wait open right hand action."
-                                            .formatted(Math.toDegrees(handOpenAngle), minimumHandOpenAngleDegrees));
+                                            .formatted(Math.toDegrees(handOpenAngle), getDefinition().getMinimumHandOpenAngle()));
                ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
                waitForPullScrewToFinish = true;
                state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());

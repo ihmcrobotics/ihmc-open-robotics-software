@@ -12,6 +12,10 @@ public class DoorTraversalDefinitionMessage extends Packet<DoorTraversalDefiniti
             * Parent definition fields
             */
    public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage definition_;
+   /**
+            * Duration of the trajectory
+            */
+   public double minimum_hand_open_angle_;
 
    public DoorTraversalDefinitionMessage()
    {
@@ -26,7 +30,10 @@ public class DoorTraversalDefinitionMessage extends Packet<DoorTraversalDefiniti
 
    public void set(DoorTraversalDefinitionMessage other)
    {
-      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);   }
+      behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      minimum_hand_open_angle_ = other.minimum_hand_open_angle_;
+
+   }
 
 
    /**
@@ -35,6 +42,21 @@ public class DoorTraversalDefinitionMessage extends Packet<DoorTraversalDefiniti
    public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+   /**
+            * Duration of the trajectory
+            */
+   public void setMinimumHandOpenAngle(double minimum_hand_open_angle)
+   {
+      minimum_hand_open_angle_ = minimum_hand_open_angle;
+   }
+   /**
+            * Duration of the trajectory
+            */
+   public double getMinimumHandOpenAngle()
+   {
+      return minimum_hand_open_angle_;
    }
 
 
@@ -56,6 +78,8 @@ public class DoorTraversalDefinitionMessage extends Packet<DoorTraversalDefiniti
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_hand_open_angle_, other.minimum_hand_open_angle_, epsilon)) return false;
+
 
       return true;
    }
@@ -70,6 +94,8 @@ public class DoorTraversalDefinitionMessage extends Packet<DoorTraversalDefiniti
       DoorTraversalDefinitionMessage otherMyClass = (DoorTraversalDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if(this.minimum_hand_open_angle_ != otherMyClass.minimum_hand_open_angle_) return false;
+
 
       return true;
    }
@@ -81,7 +107,9 @@ public class DoorTraversalDefinitionMessage extends Packet<DoorTraversalDefiniti
 
       builder.append("DoorTraversalDefinitionMessage {");
       builder.append("definition=");
-      builder.append(this.definition_);
+      builder.append(this.definition_);      builder.append(", ");
+      builder.append("minimum_hand_open_angle=");
+      builder.append(this.minimum_hand_open_angle_);
       builder.append("}");
       return builder.toString();
    }
