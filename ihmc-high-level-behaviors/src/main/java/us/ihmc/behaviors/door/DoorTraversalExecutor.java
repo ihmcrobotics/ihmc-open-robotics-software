@@ -11,6 +11,7 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -94,10 +95,18 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
             double knuckle2Q = x2KnuckleJoints.get(RobotSide.RIGHT).getQ();
             double handOpenAngle = SakeHandParameters.knuckleJointAnglesToHandOpenAngle(knuckle1Q, knuckle2Q);
 
-            if (handOpenAngle < Math.toRadians(getDefinition().getMinimumHandOpenAngle())) // TODO: Tune
+            double lostGraspDetectionHandOpenAngle = getDefinition().getLostGraspDetectionHandOpenAngle().getValue();
+            if (handOpenAngle < lostGraspDetectionHandOpenAngle)
             {
-               state.getLogger().info("Retrying pull door. Hand open angle %.2f / %.2f degrees %n Stopping all trajectories going back to wait open right hand action."
-                                            .formatted(Math.toDegrees(handOpenAngle), getDefinition().getMinimumHandOpenAngle()));
+               state.getLogger().info("""
+                                      Retrying pull door. Hand open angle %.2f%s / %.2f%s degrees.
+                                      Stopping all trajectories.
+                                      Going back to %s.
+                                      """.formatted(Math.toDegrees(handOpenAngle),
+                                                    EuclidCoreMissingTools.DEGREE_SYMBOL,
+                                                    Math.toDegrees(lostGraspDetectionHandOpenAngle),
+                                                    EuclidCoreMissingTools.DEGREE_SYMBOL,
+                                                    state.getWaitToOpenRightHandAction().getDefinition().getName()));
                ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
                waitForPullScrewToFinish = true;
                state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());

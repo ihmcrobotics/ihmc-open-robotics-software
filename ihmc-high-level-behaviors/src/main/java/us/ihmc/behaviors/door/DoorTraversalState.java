@@ -5,7 +5,6 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
-import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -13,6 +12,10 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefinition>
 {
+   public static final String STABILIZE_DETECTION = "Stabilize Detection";
+   public static final String WAIT_TO_OPEN_RIGHT_HAND = "Wait to open right hand";
+   public static final String PULL_SCREW_PRIMITIVE = "Pull Screw primitive";
+
    private ActionSequenceState actionSequence;
    private WaitDurationActionState stabilizeDetectionAction;
    private WaitDurationActionState waitToOpenRightHandAction;
@@ -35,22 +38,26 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
 
    public void updateActionSubtree(BehaviorTreeNodeState<?> node)
    {
+      stabilizeDetectionAction = null;
+      waitToOpenRightHandAction = null;
+      pullScrewPrimitiveAction = null;
+
       for (BehaviorTreeNodeState<?> child : node.getChildren())
       {
          if (child instanceof ActionNodeState<?> actionNode)
          {
             if (actionNode instanceof WaitDurationActionState waitAction
-                && waitAction.getDefinition().getName().equals("Stabilize Detection"))
+                && waitAction.getDefinition().getName().equals(STABILIZE_DETECTION))
             {
                stabilizeDetectionAction = waitAction;
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
-                && waitDurationAction.getDefinition().getName().equals("Wait to open right hand"))
+                && waitDurationAction.getDefinition().getName().equals(WAIT_TO_OPEN_RIGHT_HAND))
             {
                waitToOpenRightHandAction = waitDurationAction;
             }
             if (actionNode instanceof ScrewPrimitiveActionState screwPrimitiveAction
-                && screwPrimitiveAction.getDefinition().getName().equals("Pull Screw primitive"))
+                && screwPrimitiveAction.getDefinition().getName().equals(PULL_SCREW_PRIMITIVE))
             {
                pullScrewPrimitiveAction = screwPrimitiveAction;
             }

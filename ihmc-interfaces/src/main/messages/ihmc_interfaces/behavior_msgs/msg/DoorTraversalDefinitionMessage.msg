@@ -1,6 +1,5 @@
 # Parent definition fields
 behavior_msgs/BehaviorTreeNodeDefinitionMessage definition
 
-# Duration of the trajectory
-float64 minimum_hand_open_angle
-
+# The hand open angle to assume we lost the grasp on the object
+float64 lost_grasp_detection_hand_open_angle

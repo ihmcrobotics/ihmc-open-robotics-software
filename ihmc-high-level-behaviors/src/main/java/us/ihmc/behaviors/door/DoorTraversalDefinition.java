@@ -9,36 +9,31 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class DoorTraversalDefinition extends BehaviorTreeNodeDefinition
 {
-   private final CRDTUnidirectionalDouble minimumHandOpenAngleDegrees;
+   private final CRDTUnidirectionalDouble lostGraspDetectionHandOpenAngle;
 
    public DoorTraversalDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 
-      minimumHandOpenAngleDegrees = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 10.0);
+      lostGraspDetectionHandOpenAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, Math.toRadians(10.0));
    }
 
    public void toMessage(DoorTraversalDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
 
-      message.setMinimumHandOpenAngle(minimumHandOpenAngleDegrees.toMessage());
+      message.setLostGraspDetectionHandOpenAngle(lostGraspDetectionHandOpenAngle.toMessage());
    }
 
    public void fromMessage(DoorTraversalDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 
-      minimumHandOpenAngleDegrees.fromMessage(message.getMinimumHandOpenAngle());
+      lostGraspDetectionHandOpenAngle.fromMessage(message.getLostGraspDetectionHandOpenAngle());
    }
 
-   public double getMinimumHandOpenAngle()
+   public CRDTUnidirectionalDouble getLostGraspDetectionHandOpenAngle()
    {
-      return minimumHandOpenAngleDegrees.getValue();
-   }
-
-   public void setMinimumHandOpenAngle(double handOpenAngle)
-   {
-      this.minimumHandOpenAngleDegrees.setValue(handOpenAngle);
+      return lostGraspDetectionHandOpenAngle;
    }
 }
