@@ -325,12 +325,12 @@ public class HumanoidKinematicsSimulation
                                                                             yoGraphicsListRegistry);
 
       ParameterLoaderHelper.loadParameters(this, robotModel, drcControllerThreadRegistry);
-      YoVariable defaultHeight = registry.findVariable(PelvisHeightControlState.class.getSimpleName(),
-                                                       PelvisHeightControlState.class.getSimpleName() + "DefaultHeight");
-      if (Double.isNaN(defaultHeight.getValueAsDouble()))
-      {
-         throw new RuntimeException("Need to load a default height.");
-      }
+//      YoVariable defaultHeight = registry.findVariable(PelvisHeightControlState.class.getSimpleName(),
+//                                                       PelvisHeightControlState.class.getSimpleName() + "DefaultHeight");
+//      if (Double.isNaN(defaultHeight.getValueAsDouble()))
+//      {
+//         throw new RuntimeException("Need to load a default height.");
+//      }
 
       if (kinematicsSimulationParameters.getLogToFile())
       {
