@@ -15,7 +15,7 @@ public class DoorTraversalDefinitionMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b801746caf367e64da3b0b5db485a698aca61b4eacbca84b9f3d962cc142c016";
+   		return "d019002d35f81c3bd2336587c3f23af38b7b2c312e39aed9009e4446136cee7f";
    }
    
    @Override
@@ -81,14 +81,14 @@ public class DoorTraversalDefinitionMessagePubSubType implements us.ihmc.pubsub.
    public static void write(behavior_msgs.msg.dds.DoorTraversalDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
-      cdr.write_type_6(data.getMinimumHandOpenAngle());
+      cdr.write_type_6(data.getLostGraspDetectionHandOpenAngle());
 
    }
 
    public static void read(behavior_msgs.msg.dds.DoorTraversalDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
-      data.setMinimumHandOpenAngle(cdr.read_type_6());
+      data.setLostGraspDetectionHandOpenAngle(cdr.read_type_6());
       	
 
    }
@@ -98,7 +98,7 @@ public class DoorTraversalDefinitionMessagePubSubType implements us.ihmc.pubsub.
    {
       ser.write_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
 
-      ser.write_type_6("minimum_hand_open_angle", data.getMinimumHandOpenAngle());
+      ser.write_type_6("lost_grasp_detection_hand_open_angle", data.getLostGraspDetectionHandOpenAngle());
    }
 
    @Override
@@ -106,7 +106,7 @@ public class DoorTraversalDefinitionMessagePubSubType implements us.ihmc.pubsub.
    {
       ser.read_type_a("definition", new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType(), data.getDefinition());
 
-      data.setMinimumHandOpenAngle(ser.read_type_6("minimum_hand_open_angle"));
+      data.setLostGraspDetectionHandOpenAngle(ser.read_type_6("lost_grasp_detection_hand_open_angle"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.DoorTraversalDefinitionMessage src, behavior_msgs.msg.dds.DoorTraversalDefinitionMessage dest)

@@ -17,9 +17,9 @@ module behavior_msgs
          */
         behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
         /**
-         * Duration of the trajectory
+         * The hand open angle to assume we lost the grasp on the object
          */
-        double minimum_hand_open_angle;
+        double lost_grasp_detection_hand_open_angle;
       };
     };
   };

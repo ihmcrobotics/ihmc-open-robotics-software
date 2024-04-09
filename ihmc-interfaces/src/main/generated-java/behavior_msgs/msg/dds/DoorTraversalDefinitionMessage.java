@@ -13,9 +13,9 @@ public class DoorTraversalDefinitionMessage extends Packet<DoorTraversalDefiniti
             */
    public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage definition_;
    /**
-            * Duration of the trajectory
+            * The hand open angle to assume we lost the grasp on the object
             */
-   public double minimum_hand_open_angle_;
+   public double lost_grasp_detection_hand_open_angle_;
 
    public DoorTraversalDefinitionMessage()
    {
@@ -31,7 +31,7 @@ public class DoorTraversalDefinitionMessage extends Packet<DoorTraversalDefiniti
    public void set(DoorTraversalDefinitionMessage other)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
-      minimum_hand_open_angle_ = other.minimum_hand_open_angle_;
+      lost_grasp_detection_hand_open_angle_ = other.lost_grasp_detection_hand_open_angle_;
 
    }
 
@@ -45,18 +45,18 @@ public class DoorTraversalDefinitionMessage extends Packet<DoorTraversalDefiniti
    }
 
    /**
-            * Duration of the trajectory
+            * The hand open angle to assume we lost the grasp on the object
             */
-   public void setMinimumHandOpenAngle(double minimum_hand_open_angle)
+   public void setLostGraspDetectionHandOpenAngle(double lost_grasp_detection_hand_open_angle)
    {
-      minimum_hand_open_angle_ = minimum_hand_open_angle;
+      lost_grasp_detection_hand_open_angle_ = lost_grasp_detection_hand_open_angle;
    }
    /**
-            * Duration of the trajectory
+            * The hand open angle to assume we lost the grasp on the object
             */
-   public double getMinimumHandOpenAngle()
+   public double getLostGraspDetectionHandOpenAngle()
    {
-      return minimum_hand_open_angle_;
+      return lost_grasp_detection_hand_open_angle_;
    }
 
 
@@ -78,7 +78,7 @@ public class DoorTraversalDefinitionMessage extends Packet<DoorTraversalDefiniti
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_hand_open_angle_, other.minimum_hand_open_angle_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.lost_grasp_detection_hand_open_angle_, other.lost_grasp_detection_hand_open_angle_, epsilon)) return false;
 
 
       return true;
@@ -94,7 +94,7 @@ public class DoorTraversalDefinitionMessage extends Packet<DoorTraversalDefiniti
       DoorTraversalDefinitionMessage otherMyClass = (DoorTraversalDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
-      if(this.minimum_hand_open_angle_ != otherMyClass.minimum_hand_open_angle_) return false;
+      if(this.lost_grasp_detection_hand_open_angle_ != otherMyClass.lost_grasp_detection_hand_open_angle_) return false;
 
 
       return true;
@@ -108,8 +108,8 @@ public class DoorTraversalDefinitionMessage extends Packet<DoorTraversalDefiniti
       builder.append("DoorTraversalDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
-      builder.append("minimum_hand_open_angle=");
-      builder.append(this.minimum_hand_open_angle_);
+      builder.append("lost_grasp_detection_hand_open_angle=");
+      builder.append(this.lost_grasp_detection_hand_open_angle_);
       builder.append("}");
       return builder.toString();
    }
