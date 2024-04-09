@@ -1,6 +1,8 @@
 package us.ihmc.behaviors.door;
 
+import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
@@ -17,15 +19,20 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 {
    private final DoorTraversalState state;
    private final DoorTraversalDefinition definition;
+   private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final SceneGraph sceneGraph;
 
    private final SideDependentList<RevoluteJoint> x1KnuckleJoints = new SideDependentList<>();
    private final SideDependentList<RevoluteJoint> x2KnuckleJoints = new SideDependentList<>();
 
+   private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
+   private boolean waitForPullScrewToFinish = false;
+
    public DoorTraversalExecutor(long id,
                                 CRDTInfo crdtInfo,
                                 WorkspaceResourceDirectory saveFileDirectory,
+                                ROS2ControllerHelper ros2ControllerHelper,
                                 ROS2SyncedRobotModel syncedRobot,
                                 SceneGraph sceneGraph)
    {
@@ -34,8 +41,9 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
       state = getState();
       definition = getDefinition();
 
-      this.sceneGraph = sceneGraph;
+      this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
+      this.sceneGraph = sceneGraph;
 
       for (RobotSide side : RobotSide.values)
       {
@@ -68,8 +76,6 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
          {
             for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
             {
-//               state.getLogger().info("Retrying pull door...");
-//               state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
                if (sceneNode instanceof StaticRelativeSceneNode staticNode && staticNode.getName().contains("door"))
                {
                   staticNode.clearOffset();
@@ -77,18 +83,28 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
                }
             }
          }
-//         if (state.getPullScrewPrimitiveAction().getIsExecuting())
-//         {
-//            double knuckle1Q = x1KnuckleJoints.get(RobotSide.RIGHT).getQ();
-//            double knuckle2Q = x2KnuckleJoints.get(RobotSide.RIGHT).getQ();
-//            double handOpenAngle = SakeHandParameters.knuckleJointAnglesToHandOpenAngle(knuckle1Q, knuckle2Q);
-//
-//            if (handOpenAngle < Math.toRadians(20.0)) // TODO: Tune
-//            {
-//               state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
-//               state.getRetryingPullDoorNotification().set();
-//            }
-//         }
+         // Here we are preventing the below logic from triggering more than once at a time
+         if (!state.getPullScrewPrimitiveAction().getIsExecuting())
+         {
+            waitForPullScrewToFinish = false;
+         }
+         if (!waitForPullScrewToFinish && state.getPullScrewPrimitiveAction().getIsExecuting())
+         {
+            double knuckle1Q = x1KnuckleJoints.get(RobotSide.RIGHT).getQ();
+            double knuckle2Q = x2KnuckleJoints.get(RobotSide.RIGHT).getQ();
+            double handOpenAngle = SakeHandParameters.knuckleJointAnglesToHandOpenAngle(knuckle1Q, knuckle2Q);
+
+            double minimumHandOpenAngleDegrees = 8.0;
+            if (handOpenAngle < Math.toRadians(minimumHandOpenAngleDegrees)) // TODO: Tune
+            {
+               state.getLogger().info("Retrying pull door. Hand open angle %.2f / %.2f degrees %n Stopping all trajectories going back to wait open right hand action."
+                                            .formatted(Math.toDegrees(handOpenAngle), minimumHandOpenAngleDegrees));
+               ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+               waitForPullScrewToFinish = true;
+               state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
+               state.getPullScrewPrimitiveAction().setIsExecuting(false);
+            }
+         }
       }
    }
 

@@ -443,8 +443,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
       {
          state.setIsExecuting(false);
          state.setFailed(true);
-         state.getLogger().error("Task execution timed out. Publishing stop all trajectories message.");
-         ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+         state.getLogger().error("Task execution timed out.");
          return;
       }
 
