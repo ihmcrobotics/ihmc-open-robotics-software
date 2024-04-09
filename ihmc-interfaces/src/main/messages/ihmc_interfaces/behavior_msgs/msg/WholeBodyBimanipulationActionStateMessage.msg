@@ -9,3 +9,6 @@ float64[23] joint_angles
 
 # Quality of the IK solution
 float64 solution_quality
+
+# Force the latest standing configuration update
+bool force_latest_standing_configuration_update

@@ -64,6 +64,7 @@ public class RDXWholeBodyBimanipulationAction extends RDXActionNode<WholeBodyBim
    private final OneDoFJointBasics[] desiredOneDoFJointsExcludingHands;
    private final ImGuiReferenceFrameLibraryCombo parentFrameComboBox;
    private final ImDoubleWrapper trajectoryDurationWidget;
+   private final ReferenceFrameLibrary referenceFrameLibrary;
 
    public RDXWholeBodyBimanipulationAction(long id,
                                            CRDTInfo crdtInfo,
@@ -78,6 +79,7 @@ public class RDXWholeBodyBimanipulationAction extends RDXActionNode<WholeBodyBim
 
       state = getState();
       definition = getDefinition();
+      this.referenceFrameLibrary = referenceFrameLibrary;
 
       definition.setName("Wholebody Bimanipulation");
 
@@ -115,8 +117,7 @@ public class RDXWholeBodyBimanipulationAction extends RDXActionNode<WholeBodyBim
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
                                                                 referenceFrameLibrary,
-                                                                definition::getParentFrameName,
-                                                                getState().getHandFrame(RobotSide.LEFT)::changeFrame);
+                                                                definition::getParentFrameName, state::changeParentFrame);
 
       definition.getHandToParentTransform(RobotSide.LEFT).getValue().set(new RigidBodyTransform(new Quaternion(Math.toRadians(-30.0), Math.toRadians(-25.0), 0.0), new Point3D(0.0, 0.127, 0.0)));
       definition.getHandToParentTransform(RobotSide.RIGHT).getValue().set(new RigidBodyTransform(new Quaternion(Math.toRadians(30.0), Math.toRadians(-25.0), 0.0), new Point3D(0.0, -0.127, 0.0)));
@@ -168,7 +169,7 @@ public class RDXWholeBodyBimanipulationAction extends RDXActionNode<WholeBodyBim
       trajectoryDurationWidget.renderImGuiWidget();
       for (RobotSide side : RobotSide.values)
       {
-         if (ImGui.button(labels.get("Set Pose to " + side.getPascalCaseName() + "Synced Hand")))
+         if (ImGui.button(labels.get("Set Pose to " + side.getPascalCaseName() + " Synced Hand")))
          {
             CRDTDetachableReferenceFrame actionPalmFrame = getState().getHandFrame(side);
             CRDTUnidirectionalRigidBodyTransform palmTransformToParent = definition.getHandToParentTransform(side);
@@ -176,6 +177,24 @@ public class RDXWholeBodyBimanipulationAction extends RDXActionNode<WholeBodyBim
             FramePose3D syncedPalmPose = new FramePose3D();
             syncedPalmPose.setToZero(syncedPalmFrame);
             syncedPalmPose.changeFrame(actionPalmFrame.getReferenceFrame().getParent());
+            palmTransformToParent.getValue().set(syncedPalmPose);
+            actionPalmFrame.update();
+         }
+      }
+
+      if (ImGui.button(labels.get("Force update Latest Standing Configuration")))
+      {
+         state.setForceLatestStandingRobotConfigurationUpdate(true);
+      }
+
+      for (RobotSide side : RobotSide.values)
+      {
+         if (ImGui.button(labels.get("Zero " + side.getPascalCaseName() + " Hand pose in Object frame")))
+         {
+            CRDTDetachableReferenceFrame actionPalmFrame = getState().getHandFrame(side);
+            CRDTUnidirectionalRigidBodyTransform palmTransformToParent = definition.getHandToParentTransform(side);
+            FramePose3D syncedPalmPose = new FramePose3D();
+            syncedPalmPose.setToZero(actionPalmFrame.getReferenceFrame().getParent());
             palmTransformToParent.getValue().set(syncedPalmPose);
             actionPalmFrame.update();
          }

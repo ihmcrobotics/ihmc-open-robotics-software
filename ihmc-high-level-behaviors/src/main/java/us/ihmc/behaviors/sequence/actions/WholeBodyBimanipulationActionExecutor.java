@@ -93,6 +93,13 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
    {
       super.update();
 
+      if (state.getForceLatestStandingRobotConfigurationUpdate())
+      {
+         latestStandingRobotConfiguration = syncedRobot.getLatestRobotConfigurationData();
+         state.setForceLatestStandingRobotConfigurationUpdate(false);
+         LogTools.info("Updated latest standing robot configuration.");
+      }
+
       trackingCalculator.update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
    }
 

@@ -15,7 +15,7 @@ public class WholeBodyBimanipulationActionStateMessagePubSubType implements us.i
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ca6d94e26e395a806788b69fc9c42384c5e912188475ab8a036f8acfb53be080";
+      return "ec78b3be688bb78f23c7e070d7864786a59428c212c10f82079940bf1b653574";
    }
    
    @Override
@@ -60,6 +60,8 @@ public class WholeBodyBimanipulationActionStateMessagePubSubType implements us.i
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -80,6 +82,8 @@ public class WholeBodyBimanipulationActionStateMessagePubSubType implements us.i
       current_alignment += ((23) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       return current_alignment - initial_alignment;
@@ -96,6 +100,8 @@ public class WholeBodyBimanipulationActionStateMessagePubSubType implements us.i
 
       cdr.write_type_6(data.getSolutionQuality());
 
+      cdr.write_type_7(data.getForceLatestStandingConfigurationUpdate());
+
    }
 
    public static void read(behavior_msgs.msg.dds.WholeBodyBimanipulationActionStateMessage data, us.ihmc.idl.CDR cdr)
@@ -109,6 +115,8 @@ public class WholeBodyBimanipulationActionStateMessagePubSubType implements us.i
       }
       	
       data.setSolutionQuality(cdr.read_type_6());
+
+      data.setForceLatestStandingConfigurationUpdate(cdr.read_type_7());
       	
 
    }
@@ -122,6 +130,7 @@ public class WholeBodyBimanipulationActionStateMessagePubSubType implements us.i
 
       ser.write_type_f("joint_angles", data.getJointAngles());
       ser.write_type_6("solution_quality", data.getSolutionQuality());
+      ser.write_type_7("force_latest_standing_configuration_update", data.getForceLatestStandingConfigurationUpdate());
    }
 
    @Override
@@ -133,6 +142,7 @@ public class WholeBodyBimanipulationActionStateMessagePubSubType implements us.i
 
       ser.read_type_f("joint_angles", data.getJointAngles());
       data.setSolutionQuality(ser.read_type_6("solution_quality"));
+      data.setForceLatestStandingConfigurationUpdate(ser.read_type_7("force_latest_standing_configuration_update"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.WholeBodyBimanipulationActionStateMessage src, behavior_msgs.msg.dds.WholeBodyBimanipulationActionStateMessage dest)

@@ -2,10 +2,7 @@ package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.WholeBodyBimanipulationActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
-import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
-import us.ihmc.communication.crdt.CRDTUnidirectionalDoubleArray;
+import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -17,6 +14,7 @@ public class WholeBodyBimanipulationActionState extends ActionNodeState<WholeBod
    private final SideDependentList<CRDTDetachableReferenceFrame> handFrames = new SideDependentList<>();
    private final CRDTUnidirectionalDoubleArray jointAngles;
    private final CRDTUnidirectionalDouble solutionQuality;
+   private final CRDTBidirectionalBoolean forceLatestStandingRobotConfigurationUpdate;
 
    public WholeBodyBimanipulationActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
@@ -32,6 +30,15 @@ public class WholeBodyBimanipulationActionState extends ActionNodeState<WholeBod
 
       jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, WholeBodyBimanipulationActionDefinition.MAX_NUMBER_OF_JOINTS);
       solutionQuality = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      forceLatestStandingRobotConfigurationUpdate = new CRDTBidirectionalBoolean(this, false);
+   }
+
+   public void changeParentFrame(String newParentFrameName)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         getHandFrame(side).changeFrame(newParentFrameName);
+      }
    }
 
    @Override
@@ -54,6 +61,7 @@ public class WholeBodyBimanipulationActionState extends ActionNodeState<WholeBod
          jointAngles.toMessage(message.getJointAngles());
       }
       message.setSolutionQuality(solutionQuality.toMessage());
+      message.setForceLatestStandingConfigurationUpdate(forceLatestStandingRobotConfigurationUpdate.toMessage());
    }
 
    public void fromMessage(WholeBodyBimanipulationActionStateMessage message)
@@ -64,6 +72,7 @@ public class WholeBodyBimanipulationActionState extends ActionNodeState<WholeBod
 
       jointAngles.fromMessage(message.getJointAngles());
       solutionQuality.fromMessage(message.getSolutionQuality());
+      forceLatestStandingRobotConfigurationUpdate.fromMessage(message.getForceLatestStandingConfigurationUpdate());
    }
 
    public CRDTDetachableReferenceFrame getHandFrame(RobotSide side)
@@ -97,5 +106,15 @@ public class WholeBodyBimanipulationActionState extends ActionNodeState<WholeBod
    public void setSolutionQuality(double solutionQuality)
    {
       this.solutionQuality.setValue(solutionQuality);
+   }
+
+   public boolean getForceLatestStandingRobotConfigurationUpdate()
+   {
+      return forceLatestStandingRobotConfigurationUpdate.getValue();
+   }
+
+   public void setForceLatestStandingRobotConfigurationUpdate(boolean forceLatestStandingRobotConfigurationUpdate)
+   {
+      this.forceLatestStandingRobotConfigurationUpdate.setValue(forceLatestStandingRobotConfigurationUpdate);
    }
 }

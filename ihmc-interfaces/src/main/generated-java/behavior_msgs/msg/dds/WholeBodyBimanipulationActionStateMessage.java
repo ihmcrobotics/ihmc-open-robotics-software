@@ -1,10 +1,11 @@
 package behavior_msgs.msg.dds;
 
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
-import java.util.function.Supplier;
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.pubsub.TopicDataType;
+
+import java.util.function.Supplier;
 
 public class WholeBodyBimanipulationActionStateMessage extends Packet<WholeBodyBimanipulationActionStateMessage> implements Settable<WholeBodyBimanipulationActionStateMessage>, EpsilonComparable<WholeBodyBimanipulationActionStateMessage>
 {
@@ -24,6 +25,10 @@ public class WholeBodyBimanipulationActionStateMessage extends Packet<WholeBodyB
             * Quality of the IK solution
             */
    public double solution_quality_;
+   /**
+    * Force the latest standing configuration update
+    */
+   public boolean force_latest_standing_configuration_update_;
 
    public WholeBodyBimanipulationActionStateMessage()
    {
@@ -51,11 +56,11 @@ public class WholeBodyBimanipulationActionStateMessage extends Packet<WholeBodyB
 
       solution_quality_ = other.solution_quality_;
 
+      force_latest_standing_configuration_update_ = other.force_latest_standing_configuration_update_;
    }
 
-
    /**
-            * Parent state fields
+    * Parent state fields
             */
    public behavior_msgs.msg.dds.ActionNodeStateMessage getState()
    {
@@ -95,6 +100,21 @@ public class WholeBodyBimanipulationActionStateMessage extends Packet<WholeBodyB
       return solution_quality_;
    }
 
+   /**
+    * Force the latest standing configuration update
+    */
+   public void setForceLatestStandingConfigurationUpdate(boolean force_latest_standing_configuration_update)
+   {
+      force_latest_standing_configuration_update_ = force_latest_standing_configuration_update;
+   }
+
+   /**
+    * Force the latest standing configuration update
+    */
+   public boolean getForceLatestStandingConfigurationUpdate()
+   {
+      return force_latest_standing_configuration_update_;
+   }
 
    public static Supplier<WholeBodyBimanipulationActionStateMessagePubSubType> getPubSubType()
    {
@@ -122,6 +142,10 @@ public class WholeBodyBimanipulationActionStateMessage extends Packet<WholeBodyB
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.solution_quality_, other.solution_quality_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.force_latest_standing_configuration_update_,
+                                                     other.force_latest_standing_configuration_update_,
+                                                     epsilon))
+         return false;
 
       return true;
    }
@@ -144,6 +168,8 @@ public class WholeBodyBimanipulationActionStateMessage extends Packet<WholeBodyB
       }
       if(this.solution_quality_ != otherMyClass.solution_quality_) return false;
 
+      if(this.force_latest_standing_configuration_update_ != otherMyClass.force_latest_standing_configuration_update_)
+         return false;
 
       return true;
    }
@@ -162,6 +188,9 @@ public class WholeBodyBimanipulationActionStateMessage extends Packet<WholeBodyB
       builder.append(java.util.Arrays.toString(this.joint_angles_));      builder.append(", ");
       builder.append("solution_quality=");
       builder.append(this.solution_quality_);
+      builder.append(", ");
+      builder.append("force_latest_standing_configuration_update=");
+      builder.append(this.force_latest_standing_configuration_update_);
       builder.append("}");
       return builder.toString();
    }

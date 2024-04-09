@@ -15,7 +15,7 @@ public class HandWrenchActionDefinitionMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5f085b71da58425596e95035e0aaf687c1e856ee21b246ec2dbaa652483174a4";
+      return "4030bf485988347ccf1e0e781dffad02ac17e8f4a93937b971734086f1dc0bcd";
    }
    
    @Override
@@ -145,8 +145,8 @@ public class HandWrenchActionDefinitionMessagePubSubType implements us.ihmc.pubs
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       data.setRobotSide(cdr.read_type_9());
-      	
-      cdr.read_type_d(data.getParentFrameName());
+
+      cdr.read_type_d(data.getParentFrameName());	
       data.setTrajectoryDuration(cdr.read_type_6());
       	
       data.setForceX(cdr.read_type_6());

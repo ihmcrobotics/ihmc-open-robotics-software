@@ -17,14 +17,13 @@ public class BehaviorTreeExecutor
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
    private final BehaviorTreeState behaviorTreeState;
    private BehaviorTreeNodeExecutor<?, ?> rootNode;
-   private RobotConfigurationData latestStandingRobotConfiguration;
+   private RobotConfigurationData latestStandingRobotConfiguration = new RobotConfigurationData();
 
    public BehaviorTreeExecutor(DRCRobotModel robotModel,
                                ROS2SyncedRobotModel syncedRobot,
                                ReferenceFrameLibrary referenceFrameLibrary,
                                ROS2ControllerHelper ros2ControllerHelper)
    {
-      latestStandingRobotConfiguration = syncedRobot.getLatestRobotConfigurationData();
       nodeBuilder = new BehaviorTreeExecutorNodeBuilder(robotModel, ros2ControllerHelper, syncedRobot, referenceFrameLibrary, latestStandingRobotConfiguration);
       treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode, crdtInfo);
 
