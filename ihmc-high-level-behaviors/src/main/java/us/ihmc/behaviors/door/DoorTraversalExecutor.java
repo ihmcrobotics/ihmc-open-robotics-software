@@ -71,19 +71,20 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
       updateActionSubtree(this);
 
-      if (state.isTreeStructureValid())
+      if (state.getStabilizeDetectionAction() != null && state.getStabilizeDetectionAction().getIsExecuting())
       {
-         if (state.getStabilizeDetectionAction().getIsExecuting())
+         for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
          {
-            for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
+            if (sceneNode instanceof StaticRelativeSceneNode staticNode && staticNode.getName().contains("door"))
             {
-               if (sceneNode instanceof StaticRelativeSceneNode staticNode && staticNode.getName().contains("door"))
-               {
-                  staticNode.clearOffset();
-                  staticNode.freeze();
-               }
+               staticNode.clearOffset();
+               staticNode.freeze();
             }
          }
+      }
+
+      if (state.arePullRetryNodesPresent())
+      {
          // Here we are preventing the below logic from triggering more than once at a time
          if (!state.getPullScrewPrimitiveAction().getIsExecuting())
          {

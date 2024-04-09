@@ -83,12 +83,11 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       getDefinition().fromMessage(message.getDefinition());
    }
 
-   public boolean isTreeStructureValid()
+   public boolean arePullRetryNodesPresent()
    {
       boolean isValid = actionSequence != null;
-      isValid &= stabilizeDetectionAction != null;
-//      isValid &= waitToOpenRightHandAction != null;
-//      isValid &= pullScrewPrimitiveAction != null;
+      isValid &= waitToOpenRightHandAction != null;
+      isValid &= pullScrewPrimitiveAction != null;
       return isValid;
    }
 

@@ -74,18 +74,18 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
       renderNodePresenceStatus(DoorTraversalState.WAIT_TO_OPEN_RIGHT_HAND, state.getWaitToOpenRightHandAction());
       renderNodePresenceStatus(DoorTraversalState.PULL_SCREW_PRIMITIVE, state.getPullScrewPrimitiveAction());
 
-      ImGui.text("Tree structure is: ");
+      ImGui.text("Pull door retry: ");
       ImGui.sameLine();
-      if (state.isTreeStructureValid())
-         ImGui.textColored(ImGuiTools.DARK_GREEN, "VALID");
+      if (state.arePullRetryNodesPresent())
+         ImGui.textColored(ImGuiTools.DARK_GREEN, "ENABLED");
       else
-         ImGui.textColored(ImGuiTools.DARK_RED, "INVALID");
+         ImGui.textColored(ImGuiTools.DARK_RED, "DISABLED");
 
       lostGraspDetectionHandOpenAngleSlider.setWidgetText("%.1f%s".formatted(Math.toDegrees(getDefinition().getLostGraspDetectionHandOpenAngle().getValue()),
                                                                              EuclidCoreMissingTools.DEGREE_SYMBOL));
       lostGraspDetectionHandOpenAngleSlider.renderImGuiWidget();
 
-      if (state.isTreeStructureValid())
+      if (state.arePullRetryNodesPresent())
       {
          ImGui.text("Pull screw primitive node: Executing: %b".formatted(state.getPullScrewPrimitiveAction().getIsExecuting()));
       }
