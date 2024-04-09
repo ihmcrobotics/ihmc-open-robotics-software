@@ -18,26 +18,39 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
             */
    public byte robot_side_ = (byte) 255;
    /**
+            * Angle at which the hand is closed, in radians
+            */
+   public double position_upper_limit_;
+   /**
+            * Angle at which the hand is fully open, in radians
+            */
+   public double position_lower_limit_;
+   /**
             * Temperature of the Dynamixel in Celsius
             */
    public int temperature_;
    /**
-            * The current dynamixel position, normalized to the gripper range of motion
-            * 0.0 (fingers touching) -> 1.0 (open 210 degrees between fingers)
+            * The current dynamixel position, in radians
             */
-   public double normalized_current_position_;
+   public double current_position_;
    /**
             * The current dynamixel torque
-            * 0.0: dynamixel will not apply any force and will not achieve desired position
-            * 0.3: A reasonable normal value
-            * 1.0: dynamixel max torque which will quickly overheat the motor
+            * 0: dynamixel will not apply any force and will not achieve desired position
+            * 300: A reasonable normal value
+            * 1023: dynamixel max torque which will quickly overheat the motor
             */
-   public double normalized_current_torque_;
-   public double normalized_desired_position_;
-   public double normalized_torque_limit_;
+   public int raw_current_torque_;
+   /**
+            * The position the Dynamixel is trying to achieve, in radians
+            */
+   public double desired_position_status_;
+   /**
+            * Torque limit set on the Dynamixel
+            */
+   public double raw_torque_limit_status_;
    public boolean torque_on_status_;
    /**
-            * RPM of the Dynamixel
+            * Rotation velocity of the Dynamixel, in rad/s
             * Positive = closing hand (CCW rotation)
             * Negative = opening hand (CW rotation)
             */
@@ -69,15 +82,19 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
    {
       robot_side_ = other.robot_side_;
 
+      position_upper_limit_ = other.position_upper_limit_;
+
+      position_lower_limit_ = other.position_lower_limit_;
+
       temperature_ = other.temperature_;
 
-      normalized_current_position_ = other.normalized_current_position_;
+      current_position_ = other.current_position_;
 
-      normalized_current_torque_ = other.normalized_current_torque_;
+      raw_current_torque_ = other.raw_current_torque_;
 
-      normalized_desired_position_ = other.normalized_desired_position_;
+      desired_position_status_ = other.desired_position_status_;
 
-      normalized_torque_limit_ = other.normalized_torque_limit_;
+      raw_torque_limit_status_ = other.raw_torque_limit_status_;
 
       torque_on_status_ = other.torque_on_status_;
 
@@ -109,6 +126,36 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
    }
 
    /**
+            * Angle at which the hand is closed, in radians
+            */
+   public void setPositionUpperLimit(double position_upper_limit)
+   {
+      position_upper_limit_ = position_upper_limit;
+   }
+   /**
+            * Angle at which the hand is closed, in radians
+            */
+   public double getPositionUpperLimit()
+   {
+      return position_upper_limit_;
+   }
+
+   /**
+            * Angle at which the hand is fully open, in radians
+            */
+   public void setPositionLowerLimit(double position_lower_limit)
+   {
+      position_lower_limit_ = position_lower_limit;
+   }
+   /**
+            * Angle at which the hand is fully open, in radians
+            */
+   public double getPositionLowerLimit()
+   {
+      return position_lower_limit_;
+   }
+
+   /**
             * Temperature of the Dynamixel in Celsius
             */
    public void setTemperature(int temperature)
@@ -124,59 +171,69 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
    }
 
    /**
-            * The current dynamixel position, normalized to the gripper range of motion
-            * 0.0 (fingers touching) -> 1.0 (open 210 degrees between fingers)
+            * The current dynamixel position, in radians
             */
-   public void setNormalizedCurrentPosition(double normalized_current_position)
+   public void setCurrentPosition(double current_position)
    {
-      normalized_current_position_ = normalized_current_position;
+      current_position_ = current_position;
    }
    /**
-            * The current dynamixel position, normalized to the gripper range of motion
-            * 0.0 (fingers touching) -> 1.0 (open 210 degrees between fingers)
+            * The current dynamixel position, in radians
             */
-   public double getNormalizedCurrentPosition()
+   public double getCurrentPosition()
    {
-      return normalized_current_position_;
+      return current_position_;
    }
 
    /**
             * The current dynamixel torque
-            * 0.0: dynamixel will not apply any force and will not achieve desired position
-            * 0.3: A reasonable normal value
-            * 1.0: dynamixel max torque which will quickly overheat the motor
+            * 0: dynamixel will not apply any force and will not achieve desired position
+            * 300: A reasonable normal value
+            * 1023: dynamixel max torque which will quickly overheat the motor
             */
-   public void setNormalizedCurrentTorque(double normalized_current_torque)
+   public void setRawCurrentTorque(int raw_current_torque)
    {
-      normalized_current_torque_ = normalized_current_torque;
+      raw_current_torque_ = raw_current_torque;
    }
    /**
             * The current dynamixel torque
-            * 0.0: dynamixel will not apply any force and will not achieve desired position
-            * 0.3: A reasonable normal value
-            * 1.0: dynamixel max torque which will quickly overheat the motor
+            * 0: dynamixel will not apply any force and will not achieve desired position
+            * 300: A reasonable normal value
+            * 1023: dynamixel max torque which will quickly overheat the motor
             */
-   public double getNormalizedCurrentTorque()
+   public int getRawCurrentTorque()
    {
-      return normalized_current_torque_;
+      return raw_current_torque_;
    }
 
-   public void setNormalizedDesiredPosition(double normalized_desired_position)
+   /**
+            * The position the Dynamixel is trying to achieve, in radians
+            */
+   public void setDesiredPositionStatus(double desired_position_status)
    {
-      normalized_desired_position_ = normalized_desired_position;
+      desired_position_status_ = desired_position_status;
    }
-   public double getNormalizedDesiredPosition()
+   /**
+            * The position the Dynamixel is trying to achieve, in radians
+            */
+   public double getDesiredPositionStatus()
    {
-      return normalized_desired_position_;
+      return desired_position_status_;
    }
 
-   public void setNormalizedTorqueLimit(double normalized_torque_limit)
+   /**
+            * Torque limit set on the Dynamixel
+            */
+   public void setRawTorqueLimitStatus(double raw_torque_limit_status)
    {
-      normalized_torque_limit_ = normalized_torque_limit;
+      raw_torque_limit_status_ = raw_torque_limit_status;
    }
-   public double getNormalizedTorqueLimit()
+   /**
+            * Torque limit set on the Dynamixel
+            */
+   public double getRawTorqueLimitStatus()
    {
-      return normalized_torque_limit_;
+      return raw_torque_limit_status_;
    }
 
    public void setTorqueOnStatus(boolean torque_on_status)
@@ -189,7 +246,7 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
    }
 
    /**
-            * RPM of the Dynamixel
+            * Rotation velocity of the Dynamixel, in rad/s
             * Positive = closing hand (CCW rotation)
             * Negative = opening hand (CW rotation)
             */
@@ -198,7 +255,7 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       current_velocity_ = current_velocity;
    }
    /**
-            * RPM of the Dynamixel
+            * Rotation velocity of the Dynamixel, in rad/s
             * Positive = closing hand (CCW rotation)
             * Negative = opening hand (CW rotation)
             */
@@ -279,15 +336,19 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_upper_limit_, other.position_upper_limit_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_lower_limit_, other.position_lower_limit_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.temperature_, other.temperature_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normalized_current_position_, other.normalized_current_position_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.current_position_, other.current_position_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normalized_current_torque_, other.normalized_current_torque_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.raw_current_torque_, other.raw_current_torque_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normalized_desired_position_, other.normalized_desired_position_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.desired_position_status_, other.desired_position_status_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.normalized_torque_limit_, other.normalized_torque_limit_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.raw_torque_limit_status_, other.raw_torque_limit_status_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.torque_on_status_, other.torque_on_status_, epsilon)) return false;
 
@@ -316,15 +377,19 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
+      if(this.position_upper_limit_ != otherMyClass.position_upper_limit_) return false;
+
+      if(this.position_lower_limit_ != otherMyClass.position_lower_limit_) return false;
+
       if(this.temperature_ != otherMyClass.temperature_) return false;
 
-      if(this.normalized_current_position_ != otherMyClass.normalized_current_position_) return false;
+      if(this.current_position_ != otherMyClass.current_position_) return false;
 
-      if(this.normalized_current_torque_ != otherMyClass.normalized_current_torque_) return false;
+      if(this.raw_current_torque_ != otherMyClass.raw_current_torque_) return false;
 
-      if(this.normalized_desired_position_ != otherMyClass.normalized_desired_position_) return false;
+      if(this.desired_position_status_ != otherMyClass.desired_position_status_) return false;
 
-      if(this.normalized_torque_limit_ != otherMyClass.normalized_torque_limit_) return false;
+      if(this.raw_torque_limit_status_ != otherMyClass.raw_torque_limit_status_) return false;
 
       if(this.torque_on_status_ != otherMyClass.torque_on_status_) return false;
 
@@ -350,16 +415,20 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
       builder.append("SakeHandStatusMessage {");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
+      builder.append("position_upper_limit=");
+      builder.append(this.position_upper_limit_);      builder.append(", ");
+      builder.append("position_lower_limit=");
+      builder.append(this.position_lower_limit_);      builder.append(", ");
       builder.append("temperature=");
       builder.append(this.temperature_);      builder.append(", ");
-      builder.append("normalized_current_position=");
-      builder.append(this.normalized_current_position_);      builder.append(", ");
-      builder.append("normalized_current_torque=");
-      builder.append(this.normalized_current_torque_);      builder.append(", ");
-      builder.append("normalized_desired_position=");
-      builder.append(this.normalized_desired_position_);      builder.append(", ");
-      builder.append("normalized_torque_limit=");
-      builder.append(this.normalized_torque_limit_);      builder.append(", ");
+      builder.append("current_position=");
+      builder.append(this.current_position_);      builder.append(", ");
+      builder.append("raw_current_torque=");
+      builder.append(this.raw_current_torque_);      builder.append(", ");
+      builder.append("desired_position_status=");
+      builder.append(this.desired_position_status_);      builder.append(", ");
+      builder.append("raw_torque_limit_status=");
+      builder.append(this.raw_torque_limit_status_);      builder.append(", ");
       builder.append("torque_on_status=");
       builder.append(this.torque_on_status_);      builder.append(", ");
       builder.append("current_velocity=");

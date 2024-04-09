@@ -86,15 +86,16 @@ public class RDXSakeHandWidgets
          {
             LogTools.info("Commanding hand open angle %.1f%s".formatted(handOpenAngleDegreesSlider.getDoubleValue(),
                                                                         EuclidCoreMissingTools.DEGREE_SYMBOL));
-            sakeHandDesiredCommandMessage.setNormalizedGripperDesiredPosition(
-                  SakeHandParameters.normalizeHandOpenAngle(Math.toRadians(handOpenAngleDegreesSlider.getDoubleValue())));
+            sakeHandDesiredCommandMessage.setGripperDesiredPosition(
+                  SakeHandParameters.handOpenAngleToPosition(Math.toRadians(handOpenAngleDegreesSlider.getDoubleValue()),
+                                                             sakeHandStatus.getPositionLowerLimit(),
+                                                             sakeHandStatus.getPositionUpperLimit()));
          }
 
          if (sendForce)
          {
             LogTools.info("Commanding fingertip grip force limit %.1f N".formatted(fingertipGripForceSlider.getDoubleValue()));
-            sakeHandDesiredCommandMessage.setNormalizedGripperTorqueLimit(
-                  SakeHandParameters.normalizeFingertipGripForceLimit(fingertipGripForceSlider.getDoubleValue()));
+            sakeHandDesiredCommandMessage.setRawGripperTorqueLimit(SakeHandParameters.gripForceToRawTorque(fingertipGripForceSlider.getDoubleValue()));
          }
 
          if (sendCalibrate)
@@ -155,7 +156,7 @@ public class RDXSakeHandWidgets
 
       ImGui.beginDisabled(sakeHandStatus.getNeedsReset() || !sakeHandStatus.getIsCalibrated());
 
-      double currentHandOpenAngleNotchNormal = Math.abs(1.0 - SakeHandParameters.normalizeHandOpenAngle(sakeHandStatus.getCurrentHandOpenAngle()));
+      double currentHandOpenAngleNotchNormal = Math.abs(SakeHandParameters.normalizeHandOpenAngle(sakeHandStatus.getCurrentHandOpenAngle()));
 
       float sliderStart = widgetAligner.getCursorMaxX() + ImGui.getStyle().getItemSpacingX();
       float sliderEnd = ImGui.getColumnWidth();

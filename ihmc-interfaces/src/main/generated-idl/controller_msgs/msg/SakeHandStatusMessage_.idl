@@ -26,26 +26,39 @@ module controller_msgs
         @defaultValue(value=255)
         octet robot_side;
         /**
+         * Angle at which the hand is closed, in radians
+         */
+        double position_upper_limit;
+        /**
+         * Angle at which the hand is fully open, in radians
+         */
+        double position_lower_limit;
+        /**
          * Temperature of the Dynamixel in Celsius
          */
         long temperature;
         /**
-         * The current dynamixel position, normalized to the gripper range of motion
-         * 0.0 (fingers touching) -> 1.0 (open 210 degrees between fingers)
+         * The current dynamixel position, in radians
          */
-        double normalized_current_position;
+        double current_position;
         /**
          * The current dynamixel torque
-         * 0.0: dynamixel will not apply any force and will not achieve desired position
-         * 0.3: A reasonable normal value
-         * 1.0: dynamixel max torque which will quickly overheat the motor
+         * 0: dynamixel will not apply any force and will not achieve desired position
+         * 300: A reasonable normal value
+         * 1023: dynamixel max torque which will quickly overheat the motor
          */
-        double normalized_current_torque;
-        double normalized_desired_position;
-        double normalized_torque_limit;
+        long raw_current_torque;
+        /**
+         * The position the Dynamixel is trying to achieve, in radians
+         */
+        double desired_position_status;
+        /**
+         * Torque limit set on the Dynamixel
+         */
+        double raw_torque_limit_status;
         boolean torque_on_status;
         /**
-         * RPM of the Dynamixel
+         * Rotation velocity of the Dynamixel, in rad/s
          * Positive = closing hand (CCW rotation)
          * Negative = opening hand (CW rotation)
          */

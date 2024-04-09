@@ -6,26 +6,33 @@ byte ROBOT_SIDE_RIGHT = 1
 # Specifies the side of the robot of the hand being referred to
 byte robot_side 255
 
+# Angle at which the hand is closed, in radians
+float64 position_upper_limit
+
+# Angle at which the hand is fully open, in radians
+float64 position_lower_limit
+
 # Temperature of the Dynamixel in Celsius
 int32 temperature
 
-# The current dynamixel position, normalized to the gripper range of motion
-# 0.0 (fingers touching) -> 1.0 (open 210 degrees between fingers)
-float64 normalized_current_position
+# The current dynamixel position, in radians
+float64 current_position
 
 # The current dynamixel torque
-# 0.0: dynamixel will not apply any force and will not achieve desired position
-# 0.3: A reasonable normal value
-# 1.0: dynamixel max torque which will quickly overheat the motor
-float64 normalized_current_torque
+# 0: dynamixel will not apply any force and will not achieve desired position
+# 300: A reasonable normal value
+# 1023: dynamixel max torque which will quickly overheat the motor
+int32 raw_current_torque
 
-float64 normalized_desired_position
+# The position the Dynamixel is trying to achieve, in radians
+float64 desired_position_status
 
-float64 normalized_torque_limit
+# Torque limit set on the Dynamixel
+float64 raw_torque_limit_status
 
 bool torque_on_status
 
-# RPM of the Dynamixel
+# Rotation velocity of the Dynamixel, in rad/s
 # Positive = closing hand (CCW rotation)
 # Negative = opening hand (CW rotation)
 float64 current_velocity
