@@ -341,46 +341,34 @@ public class BWCPlanarWalkingController implements Controller, SCS2YoGraphicHold
 
       private void computeDesiredTouchdownPositionVector(double timeInState, YoFramePoint2D touchdownPositionToPack)
       {
-         if (timeInState == 0.0)
-         {
-            timeInState = 0.00001;
-         }
          //FIXME remove this garbage
-         double hipOffset = swingSide.negateIfRightSide(0.05); //TODO pass this from the robot definition
+         double hipOffset = swingSide.negateIfRightSide(0.025); //TODO pass this from the robot definition
          FrameVector2D currentCoMVelocity = new FrameVector2D(controllerRobot.getVelocityOfFootRelativeToCoM(swingSide.getOppositeSide()));
          currentCoMVelocity.scale(-1.0); // We need to negate the velocity to get CoM relative to foot
          double omega = Math.sqrt(9.81 / desiredBodyHeight.getDoubleValue());
          FrameVector2D adjustedVelocity = new FrameVector2D(desiredCoMVelocity);
          adjustedVelocity.scale(comVelocityAdjustmentGain.getDoubleValue());
 
-         double velocitySquareDifferenceX = currentCoMVelocity.getX() * currentCoMVelocity.getX() - adjustedVelocity.getX() * adjustedVelocity.getX();
-         double velocitySquareDifferenceY = currentCoMVelocity.getY() * currentCoMVelocity.getY() - adjustedVelocity.getY() * adjustedVelocity.getY();
-         double signX = Math.signum(currentCoMVelocity.getX());
-         double signY = Math.signum(currentCoMVelocity.getY());
+         //The adjustment to the footstep for a desired COM velocity is undefined at t=0, so we fudge it a little.
+         if (timeInState == 0.0)
+         {
+            timeInState = 0.00001;
+         }
 
          // Deviation to step from the capture point given a desired velocity. Should be 0 with no desired velocity.
          double capturePointX = 1 / omega * currentCoMVelocity.getX();
-         double deltaX = desiredCoMVelocity.getX() * timeInState / (Math.exp(omega * timeInState) - 1);
+         double deltaX = -desiredCoMVelocity.getX() * timeInState / (Math.exp(omega * timeInState) - 1);
          double touchdownX = capturePointX + deltaX;
-         if (desiredCoMVelocity.getX() != 0)
-            signX = Math.signum(velocitySquareDifferenceX) * Math.signum(desiredCoMVelocity.getX());
-         //TODO: fix the y direction
-         if (desiredCoMVelocity.getY() != 0)
-            signY = swingSide.negateIfRightSide(Math.signum(velocitySquareDifferenceY));
-//         if (desiredCoMVelocity.getY() > 0)
-//            signY = swingSide.negateIfRightSide(Math.signum(velocitySquareDifferenceY)) * Math.signum(desiredCoMVelocity.getY());
-//            signY = Math.signum(velocitySquareDifferenceY) * swingSide.negateIfRightSide(Math.signum(desiredCoMVelocity.getY()));
-//         if (desiredCoMVelocity.getY() < 0)
-//            signY = swingSide.negateIfRightSide(Math.signum(-velocitySquareDifferenceY)) * Math.signum(desiredCoMVelocity.getY());
-//            signY = Math.signum(velocitySquareDifferenceY) * swingSide.negateIfRightSide(-Math.signum(desiredCoMVelocity.getY()));
-//            signY = Math.signum(swingSide.negateIfRightSide(velocitySquareDifferenceY)) * Math.signum(desiredCoMVelocity.getY());
-//            signY = Math.signum(velocitySquareDifferenceY) * Math.signum(swingSide.negateIfRightSide(desiredCoMVelocity.getY()));
 
-//         touchdownPositionToPack.set(signX * Math.sqrt(Math.abs(velocitySquareDifferenceX)) / omega,
-//                                     signY * Math.sqrt(Math.abs(velocitySquareDifferenceY)) / omega + hipOffset);
+         //TODO: replace 0.1 here with the previous step width?
+         //TODO: consider constructing a heading vector and controlling part of the step locations using a PD controller
+         double offsetFromSidewaysRocking = swingSide.negateIfRightSide(0.1 / (1 + Math.exp(omega * timeInState)));
+//         double capturePointY = 1 / omega * currentCoMVelocity.getY() + hipOffset;
+         double capturePointY = 1 / omega * currentCoMVelocity.getY() + offsetFromSidewaysRocking + hipOffset;
+         double deltaY = -desiredCoMVelocity.getY() * timeInState / (Math.exp(omega * timeInState) - 1);
+         double touchdownY = capturePointY + deltaY;
 
-         touchdownPositionToPack.set(touchdownX,
-                                     signY * Math.sqrt(Math.abs(velocitySquareDifferenceY)) / omega + hipOffset);
+         touchdownPositionToPack.set(touchdownX, touchdownY);
       }
 
       @Override

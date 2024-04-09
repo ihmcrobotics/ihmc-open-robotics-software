@@ -50,8 +50,8 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
    private final SideDependentList<RevoluteJointDefinition> hipPitchJointDefinitions = new SideDependentList<>();
    private final SideDependentList<RevoluteJointDefinition> hipRollJointDefinitions = new SideDependentList<>();
 
-   private final PlanarJointDefinition floatingBaseDefinition;
-//   private final SixDoFJointDefinition floatingBaseDefinition;
+//   private final PlanarJointDefinition floatingBaseDefinition;
+   private final SixDoFJointDefinition floatingBaseDefinition;
 
    private final RigidBodyDefinition torsoBodyDefinition;
 
@@ -62,8 +62,8 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
       RigidBodyDefinition elevator = new RigidBodyDefinition("elevator");
       setRootBodyDefinition(elevator);
 
-      floatingBaseDefinition = new PlanarJointDefinition(baseJointName);
-//      floatingBaseDefinition = new SixDoFJointDefinition(baseJointName);
+//      floatingBaseDefinition = new PlanarJointDefinition(baseJointName);
+      floatingBaseDefinition = new SixDoFJointDefinition(baseJointName);
       elevator.addChildJoint(floatingBaseDefinition);
 
       torsoBodyDefinition = createTorso();
