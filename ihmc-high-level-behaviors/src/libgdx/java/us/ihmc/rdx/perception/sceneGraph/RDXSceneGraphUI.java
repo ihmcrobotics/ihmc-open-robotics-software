@@ -199,6 +199,14 @@ public class RDXSceneGraphUI
                      modificationQueue.accept(new SceneGraphNodeAddition(drill.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(drill);
                   }
+                  //TODO: pattern match this to add a reference frame graphic for the door handle to be dragged around
+                  if (ImGui.button(labels.get("Add Door Handle")))
+                  {
+                     RDXPredefinedRigidBodySceneNode doorHandle = predefinedRigidBodySceneNodeBuilder.build("Box");
+                     modificationQueue.accept(new SceneGraphNodeAddition(doorHandle.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(doorHandle);
+                  }
+
                   ImGui.endTable();
                }
                ImGui.endDisabled();

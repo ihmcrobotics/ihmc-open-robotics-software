@@ -8,6 +8,7 @@ import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -25,6 +26,7 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
    private final WalkingControllerParameters walkingControllerParameters;
    private final FramePose3D solePose = new FramePose3D();
    private final RobotSide kickSide;
+   private final ReferenceFrameLibrary referenceFrameLibrary;
 
    public KickDoorActionExecutor(long id,
                                      CRDTInfo crdtInfo,
@@ -41,18 +43,25 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
       definition = getDefinition();
       kickSide = definition.getSide();
 
+      this.referenceFrameLibrary = referenceFrameLibrary;
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
       this.walkingControllerParameters = walkingControllerParameters;
    }
 
+   /** This update is running from the moment this behavior is added to the behavior tree, regardless of whether this behavior is being executed. */
    @Override
    public void update()
    {
       super.update();
+
+      ReferenceFrame doorHandleFrame = referenceFrameLibrary.findFrameByName("doorHandle1");
+      // get kick parameters from the definition in here and compute the goal position for the walk action
+      // add goal frame to definition or state (probs definition)
    }
 
+   /** Called at the beginning of execution of this behvior. */
    @Override
    public void triggerActionExecution()
    {
@@ -61,6 +70,8 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
 
       state.getExecutionState().setValue(KickDoorActionExecutionState.PREPARING_KICK_FOOT);
    }
+
+   /** This is only called while this behavior is being executed. */
    @Override
    public void updateCurrentlyExecuting()
    {

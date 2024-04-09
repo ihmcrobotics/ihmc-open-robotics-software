@@ -13,8 +13,6 @@ public class KickDoorActionState extends ActionNodeState<KickDoorActionDefinitio
 
    private CRDTUnidirectionalEnumField<KickDoorActionExecutionState> executionState;
 
-   /** This is where the kicking foot should step to in preparation for executing the kick */
-
    public KickDoorActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(id, new KickDoorActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
