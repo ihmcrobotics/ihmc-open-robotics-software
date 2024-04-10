@@ -139,6 +139,17 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
                                       referenceFrameLibrary,
                                       footstepPlannerParametersBasics);
       }
+      if (nodeType == KickDoorApproachPlanActionDefinition.class)
+      {
+         return new RDXKickDoorApproachPlanAction(id,
+                                                  crdtInfo,
+                                                  saveFileDirectory,
+                                                  baseUI,
+                                                  robotModel,
+                                                  syncedRobot,
+                                                  referenceFrameLibrary,
+                                                  footstepPlannerParametersBasics);
+      }
       else
       {
          return null;

@@ -74,12 +74,12 @@ public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition
       jsonNode.put("executionMode", executionMode.getValue().name());
       jsonNode.put("parentFrame", parentFrameName.getValue());
 
-      jsonNode.put("kickSide", kickSide.getValue().toString());
       jsonNode.put("kickImpulse", kickImpulse.getValue());
       jsonNode.put("kickTargetDistance", kickTargetDistance.getValue());
       jsonNode.put("prekickWeightDistribution", prekickWeightDistribution.getValue());
       jsonNode.put("horizontalDistanceFromHandle", horizontalDistanceFromHandle.getValue());
       jsonNode.put("stanceFootWidth", stanceFootWidth.getValue());
+      jsonNode.put("kickSide", kickSide.getValue().toString());
    }
 
    @Override
@@ -92,12 +92,12 @@ public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition
       executionMode.setValue(ExecutionMode.valueOf(jsonNode.get("executionMode").textValue()));
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
 
-      kickSide.setValue(RobotSide.getSideFromString(jsonNode.get("kickSide").asText()));
       kickImpulse.setValue(jsonNode.get("kickImpulse").asDouble());
       kickTargetDistance.setValue(jsonNode.get("kickTargetDistance").asDouble());
       prekickWeightDistribution.setValue(jsonNode.get("prekickWeightDistribution").asDouble());
       horizontalDistanceFromHandle.setValue(jsonNode.get("horizontalDistanceFromHandle").asDouble());
       stanceFootWidth.setValue(jsonNode.get("stanceFootWidth").asDouble());
+      kickSide.setValue(RobotSide.getSideFromString(jsonNode.get("kickSide").textValue()));
    }
 
    @Override

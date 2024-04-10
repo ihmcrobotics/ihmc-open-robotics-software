@@ -107,8 +107,8 @@ public class RDXKickDoorApproachPlanAction extends RDXActionNode<KickDoorApproac
 
          // Update arrow graphic geometry
 
-         goalFeetGraphics.get(RobotSide.LEFT).setPose(state.getLeftFootGoalPose().getValue());
-         goalFeetGraphics.get(RobotSide.RIGHT).setPose(state.getRightFootGoalPose().getValue());
+         goalFeetGraphics.get(RobotSide.LEFT).setPose(state.getLeftFootGoalPose().getValueReadOnly());
+         goalFeetGraphics.get(RobotSide.RIGHT).setPose(state.getRightFootGoalPose().getValueReadOnly());
 
       }
    }

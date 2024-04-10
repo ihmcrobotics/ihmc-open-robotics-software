@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2c899d203e51bc91b3593b5f091683e6bb453c1db1ed5ad17ef43ad8feb09db3";
+   		return "eb09f0c4d897abcb5ad3b672feea55721fb178e81516ba82174c14a29864bcb0";
    }
    
    @Override
@@ -98,6 +98,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.KickDoorActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.KickDoorApproachPlanStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -187,6 +190,11 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       {
           current_alignment += behavior_msgs.msg.dds.KickDoorActionStateMessagePubSubType.getCdrSerializedSize(data.getKickDoorActions().get(i0), current_alignment);}
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getKickDoorApproachActions().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.KickDoorApproachPlanStateMessagePubSubType.getCdrSerializedSize(data.getKickDoorApproachActions().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
@@ -254,6 +262,10 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_e(data.getKickDoorActions());else
           throw new RuntimeException("kick_door_actions field exceeds the maximum length");
 
+      if(data.getKickDoorApproachActions().size() <= 200)
+      cdr.write_type_e(data.getKickDoorApproachActions());else
+          throw new RuntimeException("kick_door_approach_actions field exceeds the maximum length");
+
    }
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeStateMessage data, us.ihmc.idl.CDR cdr)
@@ -277,6 +289,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.read_type_e(data.getPelvisHeightActions());	
       cdr.read_type_e(data.getWaitDurationActions());	
       cdr.read_type_e(data.getKickDoorActions());	
+      cdr.read_type_e(data.getKickDoorApproachActions());	
 
    }
 
@@ -301,6 +314,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.write_type_e("pelvis_height_actions", data.getPelvisHeightActions());
       ser.write_type_e("wait_duration_actions", data.getWaitDurationActions());
       ser.write_type_e("kick_door_actions", data.getKickDoorActions());
+      ser.write_type_e("kick_door_approach_actions", data.getKickDoorApproachActions());
    }
 
    @Override
@@ -324,6 +338,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.read_type_e("pelvis_height_actions", data.getPelvisHeightActions());
       ser.read_type_e("wait_duration_actions", data.getWaitDurationActions());
       ser.read_type_e("kick_door_actions", data.getKickDoorActions());
+      ser.read_type_e("kick_door_approach_actions", data.getKickDoorApproachActions());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorTreeStateMessage src, behavior_msgs.msg.dds.BehaviorTreeStateMessage dest)

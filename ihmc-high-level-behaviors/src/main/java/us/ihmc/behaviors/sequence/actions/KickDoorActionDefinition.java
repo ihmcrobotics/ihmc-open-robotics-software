@@ -59,7 +59,7 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
    {
       super.loadFromFile(jsonNode);
 
-      kickSide.setValue(RobotSide.getSideFromString(jsonNode.get("side").asText()));
+      kickSide.setValue(RobotSide.getSideFromString(jsonNode.get("kickSide").textValue()));
       kickHeight.setValue(jsonNode.get("kickHeight").asDouble());
       kickImpulse.setValue(jsonNode.get("kickImpulse").asDouble());
       kickTargetDistance.setValue(jsonNode.get("kickTargetDistance").asDouble());

@@ -27,6 +27,8 @@ int8 WAIT_DURATION_ACTION=17
 
 int8 KICK_DOOR_ACTION=18
 
+int8 KICK_DOOR_APPROACH_ACTION=19
+
 # Monotonically increasing message ID that matches the CRDTInfo update number
 uint32 sequence_id
 
@@ -67,5 +69,7 @@ behavior_msgs/PelvisHeightPitchActionStateMessage[] pelvis_height_actions
 behavior_msgs/WaitDurationActionStateMessage[] wait_duration_actions
 
 behavior_msgs/KickDoorActionStateMessage[] kick_door_actions
+
+behavior_msgs/KickDoorApproachPlanStateMessage[] kick_door_approach_actions
 
 
