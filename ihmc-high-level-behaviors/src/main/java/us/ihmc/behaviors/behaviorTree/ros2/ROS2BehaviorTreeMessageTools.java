@@ -96,12 +96,6 @@ public class ROS2BehaviorTreeMessageTools
          treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getWaitDurationActions().size());
          waitDurationActionState.toMessage(treeStateMessage.getWaitDurationActions().add());
       }
-      else if (nodeState instanceof KickDoorApproachPlanActionState kickDoorApproachPlanActionState)
-      {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.KICK_DOOR_APPROACH_ACTION);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getKickDoorActions().size());
-         kickDoorApproachPlanActionState.toMessage(treeStateMessage.getKickDoorApproachActions().add());
-      }
       else if (nodeState instanceof KickDoorActionState kickDoorActionState)
       {
          treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeDefinitionRegistry.KICK_DOOR_ACTION.toByte());
@@ -168,15 +162,11 @@ public class ROS2BehaviorTreeMessageTools
       }
       else if (nodeState instanceof KickDoorApproachPlanActionState kickDoorApproachPlanActionState)
       {
-         kickDoorApproachPlanActionState.fromMessage(subscriptionNode.getKickDoorApproachPlanStateMessage());
+         kickDoorApproachPlanActionState.fromMessage(subscriptionNode.getKickDoorApproachPlanActionStateMessage());
       }
       else if (nodeState instanceof KickDoorActionState kickDoorActionState)
       {
          kickDoorActionState.fromMessage(subscriptionNode.getKickDoorActionStateMessage());
-      }
-      else if (nodeState instanceof KickDoorApproachPlanActionState kickDoorApproachPlanActionState)
-      {
-         kickDoorApproachPlanActionState.fromMessage(subscriptionNode.getKickDoorApproachPlanActionStateMessage());
       }
       else
       {

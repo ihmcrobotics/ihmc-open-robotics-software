@@ -71,7 +71,7 @@ public class KickDynamicPlanner
       this.centerOfMassControlFrame = centerOfMassControlFrame;
       this.soleFrames = soleFrames;
       // figure out the touchdown duration after the fact.
-      this.gravityZ = gravityZ;
+      this.gravityZ = Math.abs(gravityZ);
       this.totalMass = totalMass;
 
       if (parentRegistry != null)
