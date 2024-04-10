@@ -11,6 +11,8 @@ import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.ImPlotDoublePlotLine;
+import us.ihmc.rdx.imgui.ImPlotPlot;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;
@@ -24,6 +26,9 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
    private final DoorTraversalState state;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiSliderDoubleWrapper lostGraspDetectionHandOpenAngleSlider;
+   private final ImPlotPlot knucklesPlot = new ImPlotPlot(30);
+   private final ImPlotDoublePlotLine knuckleX1Plot = new ImPlotDoublePlotLine("Right X1");
+   private final ImPlotDoublePlotLine knuckleX2Plot = new ImPlotDoublePlotLine("Right X2");
 
    public RDXDoorTraversal(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2SyncedRobotModel syncedRobot)
    {
@@ -40,6 +45,9 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
                                                                            getDefinition().getLostGraspDetectionHandOpenAngle()::getValue,
                                                                            getDefinition().getLostGraspDetectionHandOpenAngle()::setValue);
       lostGraspDetectionHandOpenAngleSlider.addWidgetAligner(widgetAligner);
+
+      knucklesPlot.getPlotLines().add(knuckleX1Plot);
+      knucklesPlot.getPlotLines().add(knuckleX2Plot);
    }
 
    @Override
@@ -48,6 +56,9 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
       super.update();
 
       updateActionSubtree(this);
+
+      knuckleX1Plot.addValue(state.getRightKnuckleX1().getValue());
+      knuckleX2Plot.addValue(state.getRightKnuckleX2().getValue());
    }
 
    public void updateActionSubtree(RDXBehaviorTreeNode<?, ?> node)
@@ -89,10 +100,12 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
       if (state.arePullRetryNodesPresent())
          pullScrewPrimitiveIsExecuting = state.getPullScrewPrimitiveAction().getIsExecuting();
       ImGui.beginDisabled(state.arePullRetryNodesPresent());
-      ImGui.text("Pull screw primitive node: Executing: %b".formatted(state.getPullScrewPrimitiveAction().getIsExecuting()));
+      ImGui.text("Pull screw primitive node: Executing: %b".formatted(pullScrewPrimitiveIsExecuting));
       ImGui.endDisabled();
 
       ImGui.text("Door hinge joint angle: %.2f%s".formatted(Math.toDegrees(state.getDoorHingeJointAngle().getValue()), EuclidCoreMissingTools.DEGREE_SYMBOL));
+
+      knucklesPlot.render();
 
       super.renderNodeSettingsWidgets();
    }

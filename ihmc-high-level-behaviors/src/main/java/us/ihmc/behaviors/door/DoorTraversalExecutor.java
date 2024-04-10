@@ -76,6 +76,8 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
       updateActionSubtree(this);
 
       state.getDoorHingeJointAngle().setValue(Double.NaN);
+      state.getRightKnuckleX1().setValue(x1KnuckleJoints.get(RobotSide.RIGHT).getQ());
+      state.getRightKnuckleX2().setValue(x2KnuckleJoints.get(RobotSide.RIGHT).getQ());
 
       // TODO: PUSH_DOOR_FRAME_NAME renamed to RIGHT_DOOR_FRAME?
       SceneNode pushDoorFrameNode = sceneGraph.getNamesToNodesMap().get(DoorSceneNodeDefinitions.PUSH_DOOR_FRAME_NAME);
@@ -109,9 +111,8 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
          }
          if (!waitForPullScrewToFinish && state.getPullScrewPrimitiveAction().getIsExecuting())
          {
-            double knuckle1Q = x1KnuckleJoints.get(RobotSide.RIGHT).getQ();
-            double knuckle2Q = x2KnuckleJoints.get(RobotSide.RIGHT).getQ();
-            double handOpenAngle = SakeHandParameters.knuckleJointAnglesToHandOpenAngle(knuckle1Q, knuckle2Q);
+            double handOpenAngle = SakeHandParameters.knuckleJointAnglesToHandOpenAngle(state.getRightKnuckleX1().getValue(),
+                                                                                        state.getRightKnuckleX2().getValue());
 
             double lostGraspDetectionHandOpenAngle = getDefinition().getLostGraspDetectionHandOpenAngle().getValue();
             if (handOpenAngle < lostGraspDetectionHandOpenAngle)

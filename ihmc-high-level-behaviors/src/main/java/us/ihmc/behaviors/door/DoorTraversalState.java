@@ -24,12 +24,16 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    private ScrewPrimitiveActionState pullScrewPrimitiveAction;
 
    private final CRDTUnidirectionalDouble doorHingeJointAngle;
+   private final CRDTUnidirectionalDouble rightKnuckleX1;
+   private final CRDTUnidirectionalDouble rightKnuckleX2;
 
    public DoorTraversalState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new DoorTraversalDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
       doorHingeJointAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      rightKnuckleX1 = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      rightKnuckleX2 = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
    }
 
    @Override
@@ -82,6 +86,8 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       super.toMessage(message.getState());
 
       message.setDoorHingeJointAngle(doorHingeJointAngle.toMessage());
+      message.setRightKnuckleX1(rightKnuckleX1.toMessage());
+      message.setRightKnuckleX2(rightKnuckleX2.toMessage());
    }
 
    public void fromMessage(DoorTraversalStateMessage message)
@@ -91,6 +97,8 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       getDefinition().fromMessage(message.getDefinition());
 
       doorHingeJointAngle.fromMessage(message.getDoorHingeJointAngle());
+      rightKnuckleX1.fromMessage(message.getRightKnuckleX1());
+      rightKnuckleX2.fromMessage(message.getRightKnuckleX2());
    }
 
    public boolean arePullRetryNodesPresent()
@@ -124,5 +132,15 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    public CRDTUnidirectionalDouble getDoorHingeJointAngle()
    {
       return doorHingeJointAngle;
+   }
+
+   public CRDTUnidirectionalDouble getRightKnuckleX1()
+   {
+      return rightKnuckleX1;
+   }
+
+   public CRDTUnidirectionalDouble getRightKnuckleX2()
+   {
+      return rightKnuckleX2;
    }
 }
