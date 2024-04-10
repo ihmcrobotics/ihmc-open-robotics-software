@@ -7,4 +7,6 @@ behavior_msgs/DoorTraversalDefinitionMessage definition
 
 float64 door_hinge_joint_angle
 
+float64 door_handle_distance_from_start
+
 

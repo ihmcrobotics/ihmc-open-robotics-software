@@ -20,6 +20,7 @@ module behavior_msgs
          * The hand open angle to assume we lost the grasp on the object
          */
         double lost_grasp_detection_hand_open_angle;
+        double opened_door_handle_distance_from_start;
       };
     };
   };

@@ -3,17 +3,16 @@ package us.ihmc.behaviors.door;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
-import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -81,6 +80,9 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
       SceneNode pushDoorFrameNode = sceneGraph.getNamesToNodesMap().get(DoorSceneNodeDefinitions.PUSH_DOOR_FRAME_NAME);
       SceneNode pushDoorPanelNode = sceneGraph.getNamesToNodesMap().get(DoorSceneNodeDefinitions.RIGHT_DOOR_PANEL_NAME);
 
+      DetectableSceneNode yoloDoorHandleNode = (DetectableSceneNode) sceneGraph.getNamesToNodesMap().get("YOLO door lever");
+      StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get("doorStaticHandle");
+
       if (pushDoorFrameNode != null && pushDoorPanelNode != null)
       {
          pushDoorPanelPose.setFromReferenceFrame(pushDoorPanelNode.getNodeFrame());
@@ -90,14 +92,8 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
       if (state.getStabilizeDetectionAction() != null && state.getStabilizeDetectionAction().getIsExecuting())
       {
-         for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
-         {
-            if (sceneNode instanceof StaticRelativeSceneNode staticNode && staticNode.getName().contains("door"))
-            {
-               staticNode.clearOffset();
-               staticNode.freeze();
-            }
-         }
+         staticHandleClosedDoor.clearOffset();
+         staticHandleClosedDoor.freeze();
       }
 
       if (state.arePullRetryNodesPresent())
@@ -109,27 +105,47 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
          }
          if (!waitForPullScrewToFinish && state.getPullScrewPrimitiveAction().getIsExecuting())
          {
-            double knuckle1Q = x1KnuckleJoints.get(RobotSide.RIGHT).getQ();
-            double knuckle2Q = x2KnuckleJoints.get(RobotSide.RIGHT).getQ();
-            double handOpenAngle = SakeHandParameters.knuckleJointAnglesToHandOpenAngle(knuckle1Q, knuckle2Q);
-
-            double lostGraspDetectionHandOpenAngle = getDefinition().getLostGraspDetectionHandOpenAngle().getValue();
-            if (handOpenAngle < lostGraspDetectionHandOpenAngle)
+            if (yoloDoorHandleNode != null)
             {
-               state.getLogger().info("""
-                                      Retrying pull door. Hand open angle %.2f%s / %.2f%s degrees.
-                                      Stopping all trajectories.
-                                      Going back to %s.
-                                      """.formatted(Math.toDegrees(handOpenAngle),
-                                                    EuclidCoreMissingTools.DEGREE_SYMBOL,
-                                                    Math.toDegrees(lostGraspDetectionHandOpenAngle),
-                                                    EuclidCoreMissingTools.DEGREE_SYMBOL,
-                                                    state.getWaitToOpenRightHandAction().getDefinition().getName()));
-               ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
-               waitForPullScrewToFinish = true;
-               state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
-               state.getPullScrewPrimitiveAction().setIsExecuting(false);
+               double openedDoorHandleDistanceFromStart = getDefinition().getOpenedDoorHandleDistanceFromStart().getValue();
+               double distanceHandleFromStart = yoloDoorHandleNode.getNodeToParentFrameTransform().getTranslation()
+                                                                  .differenceNorm(staticHandleClosedDoor.getNodeToParentFrameTransform().getTranslation());
+               state.getDoorHandleDistanceFromStart().setValue(distanceHandleFromStart);
+               if (state.getDoorHandleDistanceFromStart().getValue() < openedDoorHandleDistanceFromStart)
+               {
+                  state.getLogger().info("""
+                                         Retrying pull door. Distance door handle from start %.2f%s / %.2f%s m.
+                                         Stopping all trajectories.
+                                         Going back to %s.
+                                         """.formatted(state.getDoorHandleDistanceFromStart() , openedDoorHandleDistanceFromStart, state.getWaitToOpenRightHandAction().getDefinition().getName()));
+                  ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+                  waitForPullScrewToFinish = true;
+                  state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
+                  state.getPullScrewPrimitiveAction().setIsExecuting(false);
+               }
             }
+//            double knuckle1Q = x1KnuckleJoints.get(RobotSide.RIGHT).getQ();
+//            double knuckle2Q = x2KnuckleJoints.get(RobotSide.RIGHT).getQ();
+//            double handOpenAngle = SakeHandParameters.knuckleJointAnglesToHandOpenAngle(knuckle1Q, knuckle2Q);
+//
+//            double lostGraspDetectionHandOpenAngle = getDefinition().getLostGraspDetectionHandOpenAngle().getValue();
+//            if (handOpenAngle < lostGraspDetectionHandOpenAngle)
+//            {
+//               state.getLogger().info("""
+//                                      Retrying pull door. Hand open angle %.2f%s / %.2f%s degrees.
+//                                      Stopping all trajectories.
+//                                      Going back to %s.
+//                                      """.formatted(Math.toDegrees(knuckle1Q),
+//                                                    EuclidCoreMissingTools.DEGREE_SYMBOL,
+//                                                    Math.toDegrees(lostGraspDetectionHandOpenAngle),
+//                                                    EuclidCoreMissingTools.DEGREE_SYMBOL,
+//                                                    state.getWaitToOpenRightHandAction().getDefinition().getName()));
+//               ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+//               waitForPullScrewToFinish = true;
+//               state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
+//               state.getPullScrewPrimitiveAction().setIsExecuting(false);
+//            }
+
          }
       }
    }

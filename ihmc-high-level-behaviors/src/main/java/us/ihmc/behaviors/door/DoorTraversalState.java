@@ -24,12 +24,14 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    private ScrewPrimitiveActionState pullScrewPrimitiveAction;
 
    private final CRDTUnidirectionalDouble doorHingeJointAngle;
+   private final CRDTUnidirectionalDouble doorHandleDistanceFromStart;
 
    public DoorTraversalState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new DoorTraversalDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
       doorHingeJointAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      doorHandleDistanceFromStart = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, 0.0);
    }
 
    @Override
@@ -82,6 +84,7 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       super.toMessage(message.getState());
 
       message.setDoorHingeJointAngle(doorHingeJointAngle.toMessage());
+      message.setDoorHandleDistanceFromStart(doorHandleDistanceFromStart.toMessage());
    }
 
    public void fromMessage(DoorTraversalStateMessage message)
@@ -91,6 +94,7 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       getDefinition().fromMessage(message.getDefinition());
 
       doorHingeJointAngle.fromMessage(message.getDoorHingeJointAngle());
+      doorHandleDistanceFromStart.fromMessage(message.getDoorHandleDistanceFromStart());
    }
 
    public boolean arePullRetryNodesPresent()
@@ -124,5 +128,10 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    public CRDTUnidirectionalDouble getDoorHingeJointAngle()
    {
       return doorHingeJointAngle;
+   }
+
+   public CRDTUnidirectionalDouble getDoorHandleDistanceFromStart()
+   {
+      return doorHandleDistanceFromStart;
    }
 }

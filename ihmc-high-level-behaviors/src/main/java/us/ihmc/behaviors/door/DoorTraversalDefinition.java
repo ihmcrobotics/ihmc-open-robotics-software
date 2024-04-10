@@ -10,12 +10,14 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class DoorTraversalDefinition extends BehaviorTreeNodeDefinition
 {
    private final CRDTUnidirectionalDouble lostGraspDetectionHandOpenAngle;
+   private final CRDTUnidirectionalDouble openedDoorHandleDistanceFromStart;
 
    public DoorTraversalDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 
       lostGraspDetectionHandOpenAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, Math.toRadians(10.0));
+      openedDoorHandleDistanceFromStart = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0);
    }
 
    public void toMessage(DoorTraversalDefinitionMessage message)
@@ -23,6 +25,7 @@ public class DoorTraversalDefinition extends BehaviorTreeNodeDefinition
       super.toMessage(message.getDefinition());
 
       message.setLostGraspDetectionHandOpenAngle(lostGraspDetectionHandOpenAngle.toMessage());
+      message.setOpenedDoorHandleDistanceFromStart(openedDoorHandleDistanceFromStart.toMessage());
    }
 
    public void fromMessage(DoorTraversalDefinitionMessage message)
@@ -30,10 +33,16 @@ public class DoorTraversalDefinition extends BehaviorTreeNodeDefinition
       super.fromMessage(message.getDefinition());
 
       lostGraspDetectionHandOpenAngle.fromMessage(message.getLostGraspDetectionHandOpenAngle());
+      openedDoorHandleDistanceFromStart.fromMessage(message.getOpenedDoorHandleDistanceFromStart());
    }
 
    public CRDTUnidirectionalDouble getLostGraspDetectionHandOpenAngle()
    {
       return lostGraspDetectionHandOpenAngle;
+   }
+
+   public CRDTUnidirectionalDouble getOpenedDoorHandleDistanceFromStart()
+   {
+      return openedDoorHandleDistanceFromStart;
    }
 }

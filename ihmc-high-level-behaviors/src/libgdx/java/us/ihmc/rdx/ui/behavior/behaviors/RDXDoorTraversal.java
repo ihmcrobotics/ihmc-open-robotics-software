@@ -24,6 +24,7 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
    private final DoorTraversalState state;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiSliderDoubleWrapper lostGraspDetectionHandOpenAngleSlider;
+   private final ImGuiSliderDoubleWrapper openedDoorHandleDistanceFromStartSlider;
 
    public RDXDoorTraversal(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ROS2SyncedRobotModel syncedRobot)
    {
@@ -40,6 +41,12 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
                                                                            getDefinition().getLostGraspDetectionHandOpenAngle()::getValue,
                                                                            getDefinition().getLostGraspDetectionHandOpenAngle()::setValue);
       lostGraspDetectionHandOpenAngleSlider.addWidgetAligner(widgetAligner);
+
+      openedDoorHandleDistanceFromStartSlider = new ImGuiSliderDoubleWrapper("Door handle distance from start", "",
+                                                                           0.0, 1.50,
+                                                                           getDefinition().getOpenedDoorHandleDistanceFromStart()::getValue,
+                                                                           getDefinition().getOpenedDoorHandleDistanceFromStart()::setValue);
+      openedDoorHandleDistanceFromStartSlider.addWidgetAligner(widgetAligner);
    }
 
    @Override
@@ -84,6 +91,9 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
       lostGraspDetectionHandOpenAngleSlider.setWidgetText("%.1f%s".formatted(Math.toDegrees(getDefinition().getLostGraspDetectionHandOpenAngle().getValue()),
                                                                              EuclidCoreMissingTools.DEGREE_SYMBOL));
       lostGraspDetectionHandOpenAngleSlider.renderImGuiWidget();
+
+      openedDoorHandleDistanceFromStartSlider.setWidgetText("%.1f".formatted(getDefinition().getOpenedDoorHandleDistanceFromStart().getValue()));
+      openedDoorHandleDistanceFromStartSlider.renderImGuiWidget();
 
       boolean pullScrewPrimitiveIsExecuting = false;
       if (state.arePullRetryNodesPresent())
