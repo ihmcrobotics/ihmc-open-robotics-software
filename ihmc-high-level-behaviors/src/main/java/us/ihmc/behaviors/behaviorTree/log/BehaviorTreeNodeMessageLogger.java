@@ -33,12 +33,14 @@ public class BehaviorTreeNodeMessageLogger extends CRDTUnidirectionalField imple
    {
       checkActorCanModify();
 
+      Instant now = Instant.now();
+
       BehaviorTreeLogMessage logMessage = new BehaviorTreeLogMessage();
-      MessageTools.toMessage(Instant.now(), logMessage.getInstant());
+      MessageTools.toMessage(now, logMessage.getInstant());
       logMessage.setLogLevel(MessageTools.toMessage(level));
       MessageTools.packLongStringToByteSequence(message, logMessage.getLogMessage());
 
-      recentMessages.add(new LogMessage(Instant.now(), level, message));
+      recentMessages.add(new LogMessage(now, level, message));
    }
 
    public void toMessage(us.ihmc.idl.IDLSequence.Object<BehaviorTreeLogMessage> recentLogMessages)
@@ -68,15 +70,13 @@ public class BehaviorTreeNodeMessageLogger extends CRDTUnidirectionalField imple
    {
       if (!isRobotSide()) // Ignore on robot side
       {
-         for (int i = recentLogMessages.size() - 1; i >= 0; i--)
+         for (BehaviorTreeLogMessage logMessage : recentLogMessages)
          {
-            BehaviorTreeLogMessage logMessage = recentLogMessages.get(i);
             Instant messageInstant = MessageTools.toInstant(logMessage.getInstant());
             if (messageInstant.isAfter(lastPrintedTimestamp))
             {
                Level level = MessageTools.fromMessage(logMessage.getLogLevel());
                String message = MessageTools.unpackLongStringFromByteSequence(logMessage.getLogMessage());
-//               LogTools.log(level, 2, message);
                recentMessages.add(new LogMessage(messageInstant, level, message));
 
                lastPrintedTimestamp = messageInstant;
