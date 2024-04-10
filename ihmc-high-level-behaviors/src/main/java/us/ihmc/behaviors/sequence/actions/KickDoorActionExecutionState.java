@@ -3,8 +3,9 @@ package us.ihmc.behaviors.sequence.actions;
 public enum KickDoorActionExecutionState
 {
    STANDING,
-   PREPARING_KICK_FOOT,
+   SWITCHING_HIGH_LEVEL_CONTROLLER_TO_KICK_CONTROLLER,
    EXECUTING_KICKING,
+   SWITCHING_HIGH_LEVEL_CONTROLLER_TO_WALKING_CONTROLLER,
    KICK_COMPLETED;
 
    public static final KickDoorActionExecutionState[] values = values();
