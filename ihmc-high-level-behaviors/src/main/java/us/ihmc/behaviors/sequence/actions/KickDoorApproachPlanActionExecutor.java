@@ -65,7 +65,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
    private final KickInputParameters kickInputParameters = new KickInputParameters(null);
    private final SideDependentList<PoseReferenceFrame> soleFramesForPlanning = new SideDependentList<>();
    private final PoseReferenceFrame centerOfMassControlFrameForPlanning = new PoseReferenceFrame("CenterOfMassControlFrameForPlanning", ReferenceFrame.getWorldFrame());
-   private static final double gravityZ = -9.81;
+   private static final double gravityZ = 9.81; // This needs to be positive for the planner to work
    private final KickDynamicPlanner kickDynamicPlanner;
 
    private final ZUpFrame stateParentZUpFrame;
@@ -222,9 +222,10 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
       liveGoalFeetPoses.get(stanceSide).setIncludingFrame(stanceGoalPose);
 
       FramePose3D kickStartPose = new FramePose3D(soleFramesForPlanning.get(kickSide));
-      kickStartPose.changeFrame(soleFramesForPlanning.get(stanceSide));
-      kickStartPose.getPosition().set(kickDynamicPlanner.getDesiredSwingFootStartNominal());
+//      kickStartPose.changeFrame(soleFramesForPlanning.get(stanceSide));
       kickStartPose.changeFrame(ReferenceFrame.getWorldFrame());
+      kickStartPose.getPosition().set(kickDynamicPlanner.getDesiredSwingFootStartNominal());
+//      kickStartPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       liveGoalFeetPoses.get(kickSide).setIncludingFrame(kickStartPose);
    }

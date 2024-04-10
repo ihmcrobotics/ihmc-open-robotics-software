@@ -52,8 +52,33 @@ public class ActionNodeInitialization
                              .setObjectFrameName(findConvenientParentFrameName(actionSequence, HandPoseActionState.class, indexOfInsertion, sideOfNewAction));
          screwPrimitiveAction.getState().update();
       }
+      else if ( newAction instanceof KickDoorApproachPlanActionState kickDoorApproachPlanAction)
+      {
+         KickDoorApproachPlanActionState nextPreviousFootstepPlanAction = findNextPreviousAction(actionSequence, KickDoorApproachPlanActionState.class, indexOfInsertion, null);
+         if (nextPreviousFootstepPlanAction != null)
+         {
+            kickDoorApproachPlanAction.getDefinition().setParentFrameName(nextPreviousFootstepPlanAction.getDefinition().getParentFrameName());
+         }
+         else
+         {
+            kickDoorApproachPlanAction.getDefinition().setParentFrameName(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getName());
+         }
+
+         kickDoorApproachPlanAction.getDefinition().setSide(sideOfNewAction);
+         kickDoorApproachPlanAction.update();
+      }
       else if ( newAction instanceof KickDoorActionState kickDoorAction)
       {
+         KickDoorActionState nextPreviousFootstepPlanAction = findNextPreviousAction(actionSequence, KickDoorActionState.class, indexOfInsertion, null);
+         if (nextPreviousFootstepPlanAction != null)
+         {
+            kickDoorAction.getDefinition().setParentFrameName(nextPreviousFootstepPlanAction.getDefinition().getParentFrameName());
+         }
+         else
+         {
+            kickDoorAction.getDefinition().setParentFrameName(syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame().getName());
+         }
+
          kickDoorAction.getDefinition().setSide(sideOfNewAction);
          kickDoorAction.update();
       }

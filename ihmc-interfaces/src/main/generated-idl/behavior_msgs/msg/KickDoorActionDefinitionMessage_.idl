@@ -17,6 +17,10 @@ module behavior_msgs
          */
         behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
         /**
+         * Name of the parent frame the footsteps are expressed in
+         */
+        string parent_frame_name;
+        /**
          * Specifies the side of the robot that will execute the kick.
          */
         @defaultValue(value=255)

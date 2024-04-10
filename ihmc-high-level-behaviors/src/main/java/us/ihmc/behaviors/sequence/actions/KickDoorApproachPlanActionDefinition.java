@@ -12,9 +12,10 @@ import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition
+public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition implements SidedObject
 {
    public static final double KICK_IMPULSE = 55.0;
    public static final double KICK_TARGET_DISTANCE = 0.75;
@@ -179,12 +180,23 @@ public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition
       executionMode.fromMessageOrdinal(message.getExecutionMode(), ExecutionMode.values);
       parentFrameName.fromMessage(message.getParentFrameNameAsString());
 
-      kickSide.setValue(RobotSide.fromByte(message.getRobotSide()));
-      kickImpulse.setValue(message.getKickImpulse());
-      kickTargetDistance.setValue(message.getKickTargetDistance());
-      prekickWeightDistribution.setValue(message.getPrekickWeightDistribution());
-      horizontalDistanceFromHandle.setValue(message.getHorizontalDistanceFromHandle());
-      stanceFootWidth.setValue(message.getStanceFootWidth());
+      kickSide.fromMessage(RobotSide.fromByte(message.getRobotSide()));
+      kickImpulse.fromMessage(message.getKickImpulse());
+      kickTargetDistance.fromMessage(message.getKickTargetDistance());
+      prekickWeightDistribution.fromMessage(message.getPrekickWeightDistribution());
+      horizontalDistanceFromHandle.fromMessage(message.getHorizontalDistanceFromHandle());
+      stanceFootWidth.fromMessage(message.getStanceFootWidth());
+   }
+
+   @Override
+   public RobotSide getSide()
+   {
+      return kickSide.getValue();
+   }
+
+   public void setSide(RobotSide kickSide)
+   {
+      this.kickSide.setValue(kickSide);
    }
 
    public double getSwingDuration()

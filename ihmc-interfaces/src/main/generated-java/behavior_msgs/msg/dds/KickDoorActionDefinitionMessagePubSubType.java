@@ -15,7 +15,7 @@ public class KickDoorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "cb3733ceca97d8797814a71e2bd76e33224a96764b9940511f3661056252e333";
+   		return "366578c3b0a680658f3e37f139cf007285c9fe8e78e6de2c5c5c9107e5f3dbf7";
    }
    
    @Override
@@ -54,6 +54,7 @@ public class KickDoorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -79,6 +80,8 @@ public class KickDoorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
 
       current_alignment += behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getParentFrameName().length() + 1;
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -101,6 +104,10 @@ public class KickDoorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    public static void write(behavior_msgs.msg.dds.KickDoorActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
+      if(data.getParentFrameName().length() <= 255)
+      cdr.write_type_d(data.getParentFrameName());else
+          throw new RuntimeException("parent_frame_name field exceeds the maximum length");
+
       cdr.write_type_9(data.getRobotSide());
 
       cdr.write_type_6(data.getKickHeight());
@@ -116,6 +123,7 @@ public class KickDoorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    public static void read(behavior_msgs.msg.dds.KickDoorActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
+      cdr.read_type_d(data.getParentFrameName());	
       data.setRobotSide(cdr.read_type_9());
       	
       data.setKickHeight(cdr.read_type_6());
@@ -134,6 +142,7 @@ public class KickDoorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    {
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
+      ser.write_type_d("parent_frame_name", data.getParentFrameName());
       ser.write_type_9("robot_side", data.getRobotSide());
       ser.write_type_6("kick_height", data.getKickHeight());
       ser.write_type_6("kick_impulse", data.getKickImpulse());
@@ -146,6 +155,7 @@ public class KickDoorActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    {
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
+      ser.read_type_d("parent_frame_name", data.getParentFrameName());
       data.setRobotSide(ser.read_type_9("robot_side"));
       data.setKickHeight(ser.read_type_6("kick_height"));
       data.setKickImpulse(ser.read_type_6("kick_impulse"));

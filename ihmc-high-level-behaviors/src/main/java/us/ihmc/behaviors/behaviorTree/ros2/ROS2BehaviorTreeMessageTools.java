@@ -93,6 +93,12 @@ public class ROS2BehaviorTreeMessageTools
          treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getWaitDurationActions().size());
          waitDurationActionState.toMessage(treeStateMessage.getWaitDurationActions().add());
       }
+      else if (nodeState instanceof KickDoorApproachPlanActionState kickDoorApproachPlanActionState)
+      {
+         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.KICK_DOOR_APPROACH_ACTION);
+         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getKickDoorActions().size());
+         kickDoorApproachPlanActionState.toMessage(treeStateMessage.getKickDoorApproachActions().add());
+      }
       else if (nodeState instanceof KickDoorActionState kickDoorActionState)
       {
          treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.KICK_DOOR_ACTION);
@@ -150,6 +156,10 @@ public class ROS2BehaviorTreeMessageTools
       else if (nodeState instanceof WaitDurationActionState waitDurationActionState)
       {
          waitDurationActionState.fromMessage(subscriptionNode.getWaitDurationActionStateMessage());
+      }
+      else if (nodeState instanceof KickDoorApproachPlanActionState kickDoorApproachPlanActionState)
+      {
+         kickDoorApproachPlanActionState.fromMessage(subscriptionNode.getKickDoorApproachPlanStateMessage());
       }
       else if (nodeState instanceof KickDoorActionState kickDoorActionState)
       {
@@ -243,6 +253,13 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setWaitDurationActionStateMessage(waitDurationActionStateMessage);
             subscriptionNode.setBehaviorTreeNodeStateMessage(waitDurationActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(waitDurationActionStateMessage.getDefinition().getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.KICK_DOOR_APPROACH_ACTION ->
+         {
+            KickDoorApproachPlanStateMessage kickDoorApproachPlanStateMessage = treeStateMessage.getKickDoorApproachActions().get(indexInTypesList);
+            subscriptionNode.setKickDoorApproachPlanStateMessage(kickDoorApproachPlanStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(kickDoorApproachPlanStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(kickDoorApproachPlanStateMessage.getDefinition().getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.KICK_DOOR_ACTION ->
          {

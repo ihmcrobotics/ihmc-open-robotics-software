@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -17,6 +18,8 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
    public static final double KICK_TARGET_DISTANCE = 0.75;
    public static final double PREKICK_WEIGHT_DISTRIBUTION = 0.5;
 
+   private final CRDTUnidirectionalString parentFrameName;
+
    private final CRDTUnidirectionalEnumField<RobotSide> kickSide;
    private final CRDTUnidirectionalDouble kickHeight;
    private final CRDTUnidirectionalDouble kickImpulse;
@@ -24,6 +27,7 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
    private final CRDTUnidirectionalDouble prekickWeightDistribution;
 
    // On disk fields
+   private String onDiskParentFrameName;
    private RobotSide onDiskSide;
    private double onDiskKickHeight;
    private double onDiskKickImpulse;
@@ -33,6 +37,8 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
    public KickDoorActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
+
+      parentFrameName = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, ReferenceFrame.getWorldFrame().getName());
 
       kickSide = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
       kickHeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, KICK_HEIGHT);
@@ -47,6 +53,8 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
    {
       super.saveToFile(jsonNode);
 
+      jsonNode.put("parentFrame", parentFrameName.getValue());
+
       jsonNode.put("side", kickSide.getValue().getLowerCaseName());
       jsonNode.put("kickHeight", kickHeight.getValue());
       jsonNode.put("kickImpulse", kickImpulse.getValue());
@@ -58,6 +66,8 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
    public void loadFromFile(JsonNode jsonNode)
    {
       super.loadFromFile(jsonNode);
+
+      parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
 
       kickSide.setValue(RobotSide.getSideFromString(jsonNode.get("kickSide").textValue()));
       kickHeight.setValue(jsonNode.get("kickHeight").asDouble());
@@ -71,6 +81,8 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
    {
       super.setOnDiskFields();
 
+      onDiskParentFrameName = parentFrameName.getValue();
+
       onDiskSide = kickSide.getValue();
       onDiskKickHeight = kickHeight.getValue();
       onDiskKickImpulse = kickImpulse.getValue();
@@ -83,6 +95,8 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
    {
       super.undoAllNontopologicalChanges();
 
+      parentFrameName.setValue(onDiskParentFrameName);
+
       kickSide.setValue(onDiskSide);
       kickHeight.setValue(onDiskKickHeight);
       kickImpulse.setValue(onDiskKickImpulse);
@@ -94,6 +108,8 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
    public boolean hasChanges()
    {
       boolean unchanged = !super.hasChanges();
+
+      unchanged &= parentFrameName.getValue().equals(onDiskParentFrameName);
 
       unchanged &= kickSide.getValue() == onDiskSide;
       unchanged &= kickHeight.getValue() == onDiskKickHeight;
@@ -108,6 +124,8 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
    {
       super.toMessage(message.getDefinition());
 
+      message.setParentFrameName(parentFrameName.toMessage());
+
       message.setRobotSide(kickSide.toMessage().toByte());
       message.setKickHeight(kickHeight.getValue());
       message.setKickImpulse(kickImpulse.getValue());
@@ -118,6 +136,8 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
    public void fromMessage(KickDoorActionDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
+
+      parentFrameName.fromMessage(message.getParentFrameNameAsString());
 
       kickSide.fromMessage(RobotSide.fromByte(message.getRobotSide()));
       kickHeight.fromMessage(message.getKickHeight());
@@ -135,6 +155,16 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
    public void setSide(RobotSide kickSide)
    {
       this.kickSide.setValue(kickSide);
+   }
+
+   public String getParentFrameName()
+   {
+      return parentFrameName.getValue();
+   }
+
+   public void setParentFrameName(String parentFrameName)
+   {
+      this.parentFrameName.setValue(parentFrameName);
    }
 
    public double getKickHeight()

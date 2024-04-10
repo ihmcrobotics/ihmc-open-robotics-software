@@ -1,6 +1,9 @@
 # Parent definition fields
 behavior_msgs/ActionNodeDefinitionMessage definition
 
+# Name of the parent frame the footsteps are expressed in
+string parent_frame_name
+
 # Specifies the side of the robot that will execute the kick.
 byte robot_side 255
 

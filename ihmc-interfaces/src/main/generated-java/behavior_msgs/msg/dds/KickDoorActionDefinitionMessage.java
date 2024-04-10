@@ -13,6 +13,10 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
             */
    public behavior_msgs.msg.dds.ActionNodeDefinitionMessage definition_;
    /**
+            * Name of the parent frame the footsteps are expressed in
+            */
+   public java.lang.StringBuilder parent_frame_name_;
+   /**
             * Specifies the side of the robot that will execute the kick.
             */
    public byte robot_side_ = (byte) 255;
@@ -36,6 +40,7 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
    public KickDoorActionDefinitionMessage()
    {
       definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
+      parent_frame_name_ = new java.lang.StringBuilder(255);
    }
 
    public KickDoorActionDefinitionMessage(KickDoorActionDefinitionMessage other)
@@ -47,6 +52,9 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
    public void set(KickDoorActionDefinitionMessage other)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      parent_frame_name_.setLength(0);
+      parent_frame_name_.append(other.parent_frame_name_);
+
       robot_side_ = other.robot_side_;
 
       kick_height_ = other.kick_height_;
@@ -66,6 +74,30 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
    public behavior_msgs.msg.dds.ActionNodeDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+   /**
+            * Name of the parent frame the footsteps are expressed in
+            */
+   public void setParentFrameName(java.lang.String parent_frame_name)
+   {
+      parent_frame_name_.setLength(0);
+      parent_frame_name_.append(parent_frame_name);
+   }
+
+   /**
+            * Name of the parent frame the footsteps are expressed in
+            */
+   public java.lang.String getParentFrameNameAsString()
+   {
+      return getParentFrameName().toString();
+   }
+   /**
+            * Name of the parent frame the footsteps are expressed in
+            */
+   public java.lang.StringBuilder getParentFrameName()
+   {
+      return parent_frame_name_;
    }
 
    /**
@@ -162,6 +194,8 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
       if(other == this) return true;
 
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.parent_frame_name_, other.parent_frame_name_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.kick_height_, other.kick_height_, epsilon)) return false;
@@ -186,6 +220,8 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
       KickDoorActionDefinitionMessage otherMyClass = (KickDoorActionDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.parent_frame_name_, otherMyClass.parent_frame_name_)) return false;
+
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
       if(this.kick_height_ != otherMyClass.kick_height_) return false;
@@ -208,6 +244,8 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
       builder.append("KickDoorActionDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
+      builder.append("parent_frame_name=");
+      builder.append(this.parent_frame_name_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
       builder.append("kick_height=");
