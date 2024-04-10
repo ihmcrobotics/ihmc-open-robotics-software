@@ -17,7 +17,7 @@ public class DoorTraversalDefinition extends BehaviorTreeNodeDefinition
       super(crdtInfo, saveFileDirectory);
 
       lostGraspDetectionHandOpenAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, Math.toRadians(10.0));
-      openedDoorHandleDistanceFromStart = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.0);
+      openedDoorHandleDistanceFromStart = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 0.12);
    }
 
    public void toMessage(DoorTraversalDefinitionMessage message)

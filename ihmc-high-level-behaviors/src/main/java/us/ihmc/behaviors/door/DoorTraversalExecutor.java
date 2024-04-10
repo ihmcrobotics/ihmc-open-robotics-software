@@ -7,6 +7,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -30,6 +31,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
    private boolean waitForPullScrewToFinish = false;
+   private boolean waitForGraspToFinish = false;
 
    private transient final FramePose3D pushDoorPanelPose = new FramePose3D();
 
@@ -92,18 +94,21 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
       if (state.getStabilizeDetectionAction() != null && state.getStabilizeDetectionAction().getIsExecuting())
       {
-         staticHandleClosedDoor.clearOffset();
-         staticHandleClosedDoor.freeze();
+         if (staticHandleClosedDoor != null)
+         {
+            staticHandleClosedDoor.clearOffset();
+            staticHandleClosedDoor.freeze();
+         }
       }
 
       if (state.arePullRetryNodesPresent())
       {
          // Here we are preventing the below logic from triggering more than once at a time
-         if (!state.getPullScrewPrimitiveAction().getIsExecuting())
+         if (!state.getPostPullDoorEvaluationAction().getIsExecuting())
          {
             waitForPullScrewToFinish = false;
          }
-         if (!waitForPullScrewToFinish && state.getPullScrewPrimitiveAction().getIsExecuting())
+         if (!waitForPullScrewToFinish && state.getPostPullDoorEvaluationAction().getIsExecuting())
          {
             if (yoloDoorHandleNode != null)
             {
@@ -114,14 +119,13 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
                if (state.getDoorHandleDistanceFromStart().getValue() < openedDoorHandleDistanceFromStart)
                {
                   state.getLogger().info("""
-                                         Retrying pull door. Distance door handle from start %.2f%s / %.2f%s m.
+                                         Retrying pull door. Distance door handle from start %.2f / %.2f [m].
                                          Stopping all trajectories.
                                          Going back to %s.
-                                         """.formatted(state.getDoorHandleDistanceFromStart() , openedDoorHandleDistanceFromStart, state.getWaitToOpenRightHandAction().getDefinition().getName()));
+                                         """.formatted(state.getDoorHandleDistanceFromStart().getValue(), openedDoorHandleDistanceFromStart, state.getWaitToOpenRightHandAction().getDefinition().getName()));
                   ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
                   waitForPullScrewToFinish = true;
                   state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
-                  state.getPullScrewPrimitiveAction().setIsExecuting(false);
                }
             }
 //            double knuckle1Q = x1KnuckleJoints.get(RobotSide.RIGHT).getQ();
@@ -145,7 +149,29 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 //               state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
 //               state.getPullScrewPrimitiveAction().setIsExecuting(false);
 //            }
-
+         }
+         if (!state.getPostGraspEvaluationAction().getIsExecuting())
+         {
+            waitForGraspToFinish = false;
+         }
+         if (!waitForGraspToFinish && state.getPostGraspEvaluationAction().getIsExecuting())
+         {
+            if (staticHandleClosedDoor != null)
+            {
+               double handToHandleDistance = syncedRobot.getFullRobotModel().getHandControlFrame(RobotSide.RIGHT).
+                     getTransformToDesiredFrame(staticHandleClosedDoor.getNodeFrame()).getTranslation().norm();
+               if (handToHandleDistance > 0.19)
+               {
+                  state.getLogger().info("""
+                                      Retrying reach door handle. Distance hand to door handle %.2f / %.2f [m].
+                                      Stopping all trajectories.
+                                      Going back to %s.
+                                      """.formatted(handToHandleDistance, 0.19, state.getWaitToOpenRightHandAction().getDefinition().getName()));
+                  ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+                  waitForGraspToFinish = true;
+                  state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
+               }
+            }
          }
       }
    }

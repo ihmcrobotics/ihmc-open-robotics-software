@@ -17,11 +17,15 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    public static final String STABILIZE_DETECTION = "Stabilize Detection";
    public static final String WAIT_TO_OPEN_RIGHT_HAND = "Wait to open right hand";
    public static final String PULL_SCREW_PRIMITIVE = "Pull Screw primitive";
+   public static final String POST_PULL_DOOR = "Post pull door evaluation";
+   public static final String POST_GRASP_HANDLE = "Evaluate grasp";
 
    private ActionSequenceState actionSequence;
    private WaitDurationActionState stabilizeDetectionAction;
    private WaitDurationActionState waitToOpenRightHandAction;
    private ScrewPrimitiveActionState pullScrewPrimitiveAction;
+   private WaitDurationActionState postGraspEvaluationAction;
+   private WaitDurationActionState postPullDoorEvaluationAction;
 
    private final CRDTUnidirectionalDouble doorHingeJointAngle;
    private final CRDTUnidirectionalDouble doorHandleDistanceFromStart;
@@ -49,15 +53,17 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       stabilizeDetectionAction = null;
       waitToOpenRightHandAction = null;
       pullScrewPrimitiveAction = null;
+      postGraspEvaluationAction = null;
+      postPullDoorEvaluationAction = null;
 
       for (BehaviorTreeNodeState<?> child : node.getChildren())
       {
          if (child instanceof ActionNodeState<?> actionNode)
          {
-            if (actionNode instanceof WaitDurationActionState waitAction
-                && waitAction.getDefinition().getName().equals(STABILIZE_DETECTION))
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(STABILIZE_DETECTION))
             {
-               stabilizeDetectionAction = waitAction;
+               stabilizeDetectionAction = waitDurationAction;
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
                 && waitDurationAction.getDefinition().getName().equals(WAIT_TO_OPEN_RIGHT_HAND))
@@ -68,6 +74,16 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
                 && screwPrimitiveAction.getDefinition().getName().equals(PULL_SCREW_PRIMITIVE))
             {
                pullScrewPrimitiveAction = screwPrimitiveAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(POST_GRASP_HANDLE))
+            {
+               postGraspEvaluationAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(POST_PULL_DOOR))
+            {
+               postPullDoorEvaluationAction = waitDurationAction;
             }
          }
          else
@@ -102,6 +118,8 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       boolean isValid = actionSequence != null;
       isValid &= waitToOpenRightHandAction != null;
       isValid &= pullScrewPrimitiveAction != null;
+      isValid &= postGraspEvaluationAction != null;
+      isValid &= postPullDoorEvaluationAction != null;
       return isValid;
    }
 
@@ -123,6 +141,16 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    public ScrewPrimitiveActionState getPullScrewPrimitiveAction()
    {
       return pullScrewPrimitiveAction;
+   }
+
+   public WaitDurationActionState getPostGraspEvaluationAction()
+   {
+      return postGraspEvaluationAction;
+   }
+
+   public WaitDurationActionState getPostPullDoorEvaluationAction()
+   {
+      return postPullDoorEvaluationAction;
    }
 
    public CRDTUnidirectionalDouble getDoorHingeJointAngle()
