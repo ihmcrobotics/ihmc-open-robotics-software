@@ -1,0 +1,65 @@
+#ifndef __behavior_msgs__msg__KickDoorApproachPlanDefinitionMessage__idl__
+#define __behavior_msgs__msg__KickDoorApproachPlanDefinitionMessage__idl__
+
+#include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::KickDoorApproachPlanDefinitionMessage_")
+      struct KickDoorApproachPlanDefinitionMessage
+      {
+        /**
+         * Parent definition fields
+         */
+        behavior_msgs::msg::dds::ActionNodeDefinitionMessage definition;
+        /**
+         * Name of the parent frame the footsteps are expressed in
+         */
+        string parent_frame_name;
+        /**
+         * Swing duration
+         */
+        double swing_duration;
+        /**
+         * Transfer duration
+         */
+        double transfer_duration;
+        /**
+         * OVERRIDE (0) or QUEUE (1)
+         */
+        long execution_mode;
+        /**
+         * Specifies the side of the robot that will execute the kick.
+         */
+        @defaultValue(value=255)
+        octet robot_side;
+        /**
+         * The impulse with which the kick should be executed.
+         */
+        double kick_impulse;
+        /**
+         * The target distance from the robot to where the kick should be aimed.
+         */
+        double kick_target_distance;
+        /**
+         * The distance towards the inside of the door from where the kick foot should be aligned.
+         */
+        double horizontal_distance_from_handle;
+        /**
+         * The stance foot width.
+         */
+        double stance_foot_width;
+        /**
+         * Weight distribution before the kick. 1.0 means all weight on the kicking foot. Default is 0.5.
+         */
+        double prekick_weight_distribution;
+      };
+    };
+  };
+};
+
+#endif

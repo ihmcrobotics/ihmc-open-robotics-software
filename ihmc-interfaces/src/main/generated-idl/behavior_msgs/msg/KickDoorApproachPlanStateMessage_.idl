@@ -1,0 +1,84 @@
+#ifndef __behavior_msgs__msg__KickDoorApproachPlanStateMessage__idl__
+#define __behavior_msgs__msg__KickDoorApproachPlanStateMessage__idl__
+
+#include "behavior_msgs/msg/./ActionNodeStateMessage_.idl"
+#include "behavior_msgs/msg/./FootstepPlanActionFootstepStateMessage_.idl"
+#include "behavior_msgs/msg/./KickDoorApproachPlanDefinitionMessage_.idl"
+#include "geometry_msgs/msg/./Pose_.idl"
+#include "ihmc_common_msgs/msg/./SE3TrajectoryPointMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet FOOTSTEP_PLANNING =
+      0;
+
+      const octet PLANNING_FAILED =
+      1;
+
+      const octet PLANNING_SUCCEEDED =
+      2;
+
+      const octet PLAN_COMMANDED =
+      3;
+
+
+      @TypeCode(type="behavior_msgs::msg::dds_::KickDoorApproachPlanStateMessage_")
+      struct KickDoorApproachPlanStateMessage
+      {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::ActionNodeStateMessage state;
+        /**
+         * Definition
+         */
+        behavior_msgs::msg::dds::KickDoorApproachPlanDefinitionMessage definition;
+        /**
+         * The footsteps, with a maximum of 50
+         */
+        sequence<behavior_msgs::msg::dds::FootstepPlanActionFootstepStateMessage> footsteps;
+        /**
+         * Left foot goal pose
+         */
+        geometry_msgs::msg::dds::Pose left_foot_goal_pose;
+        /**
+         * Right foot goal pose
+         */
+        geometry_msgs::msg::dds::Pose right_foot_goal_pose;
+        /**
+         * Execution state
+         */
+        octet execution_state;
+        /**
+         * Total number of footsteps; used for walking actions
+         */
+        unsigned short total_number_of_footsteps;
+        /**
+         * Incomplete footsteps; used for walking actions
+         */
+        unsigned short number_of_incomplete_footsteps;
+        /**
+         * Desired left footsteps
+         */
+        sequence<ihmc_common_msgs::msg::dds::SE3TrajectoryPointMessage> desired_left_footsteps;
+        /**
+         * Desired right footsteps
+         */
+        sequence<ihmc_common_msgs::msg::dds::SE3TrajectoryPointMessage> desired_right_footsteps;
+        /**
+         * Current left pose
+         */
+        geometry_msgs::msg::dds::Pose current_left_foot_pose;
+        /**
+         * Current right pose
+         */
+        geometry_msgs::msg::dds::Pose current_right_foot_pose;
+      };
+    };
+  };
+};
+
+#endif

@@ -15,7 +15,7 @@ public class KickDoorActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "3a0ebd8fb98c287c4550e03a76a0419036befcca6abf564b0e87ba5fee59ecee";
+   		return "5bf66e03941840be435c2aa181ac18fb05885d90f6de4f50985c4d6bc276d789";
    }
    
    @Override
