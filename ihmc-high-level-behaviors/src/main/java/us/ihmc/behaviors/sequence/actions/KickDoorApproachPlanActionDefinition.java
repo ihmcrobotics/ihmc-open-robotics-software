@@ -19,6 +19,7 @@ public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition i
 {
    public static final double KICK_IMPULSE = 55.0;
    public static final double KICK_TARGET_DISTANCE = 0.75;
+   public static final double KICK_HEIGHT = 0.55;
    public static final double PREKICK_WEIGHT_DISTRIBUTION = 0.5;
    public static final double HORIZONTAL_DISTANCE_FROM_HANDLE = 0.1;
    public static final double STANCE_FOOT_WIDTH = 0.23;
@@ -30,6 +31,7 @@ public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition i
 
    private final CRDTUnidirectionalEnumField<RobotSide> kickSide;
    private final CRDTUnidirectionalDouble kickImpulse;
+   private final CRDTUnidirectionalDouble kickHeight;
    private final CRDTUnidirectionalDouble kickTargetDistance;
    private final CRDTUnidirectionalDouble prekickWeightDistribution;
    private final CRDTUnidirectionalDouble horizontalDistanceFromHandle;
@@ -42,6 +44,7 @@ public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition i
    private String onDiskParentFrameName;
    private RobotSide onDiskKickSide;
    private double onDiskKickImpulse;
+   private double onDiskKickHeight;
    private double onDiskKickTargetDistance;
    private double onDiskPrekickWeightDistribution;
    private double onDiskHorizontalDistanceFromHandle;
@@ -59,6 +62,7 @@ public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition i
 
       kickSide = new CRDTUnidirectionalEnumField<>(ROS2ActorDesignation.OPERATOR, crdtInfo, RobotSide.LEFT);
       kickImpulse = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, KICK_IMPULSE);
+      kickHeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, KICK_HEIGHT);
       kickTargetDistance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, KICK_TARGET_DISTANCE);
       prekickWeightDistribution = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, PREKICK_WEIGHT_DISTRIBUTION);
       horizontalDistanceFromHandle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, HORIZONTAL_DISTANCE_FROM_HANDLE);
@@ -76,6 +80,7 @@ public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition i
       jsonNode.put("parentFrame", parentFrameName.getValue());
 
       jsonNode.put("kickImpulse", kickImpulse.getValue());
+      jsonNode.put("kickHeight", kickHeight.getValue());
       jsonNode.put("kickTargetDistance", kickTargetDistance.getValue());
       jsonNode.put("prekickWeightDistribution", prekickWeightDistribution.getValue());
       jsonNode.put("horizontalDistanceFromHandle", horizontalDistanceFromHandle.getValue());
@@ -94,6 +99,7 @@ public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition i
       parentFrameName.setValue(jsonNode.get("parentFrame").textValue());
 
       kickImpulse.setValue(jsonNode.get("kickImpulse").asDouble());
+      kickHeight.setValue(jsonNode.get("kickHeight").asDouble());
       kickTargetDistance.setValue(jsonNode.get("kickTargetDistance").asDouble());
       prekickWeightDistribution.setValue(jsonNode.get("prekickWeightDistribution").asDouble());
       horizontalDistanceFromHandle.setValue(jsonNode.get("horizontalDistanceFromHandle").asDouble());
@@ -112,6 +118,7 @@ public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition i
       onDiskParentFrameName = parentFrameName.getValue();
       onDiskKickSide = kickSide.getValue();
       onDiskKickImpulse = kickImpulse.getValue();
+      onDiskKickHeight = kickHeight.getValue();
       onDiskKickTargetDistance = kickTargetDistance.getValue();
       onDiskPrekickWeightDistribution = prekickWeightDistribution.getValue();
       onDiskHorizontalDistanceFromHandle = horizontalDistanceFromHandle.getValue();
@@ -129,6 +136,7 @@ public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition i
       parentFrameName.setValue(onDiskParentFrameName);
       kickSide.setValue(onDiskKickSide);
       kickImpulse.setValue(onDiskKickImpulse);
+      kickHeight.setValue(onDiskKickHeight);
       kickTargetDistance.setValue(onDiskKickTargetDistance);
       prekickWeightDistribution.setValue(onDiskPrekickWeightDistribution);
       horizontalDistanceFromHandle.setValue(onDiskHorizontalDistanceFromHandle);
@@ -146,6 +154,7 @@ public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition i
       unchanged &= parentFrameName.getValue().equals(onDiskParentFrameName);
       unchanged &= kickSide.getValue() == onDiskKickSide;
       unchanged &= kickImpulse.getValue() == onDiskKickImpulse;
+      unchanged &= kickHeight.getValue() == onDiskKickHeight;
       unchanged &= kickTargetDistance.getValue() == onDiskKickTargetDistance;
       unchanged &= prekickWeightDistribution.getValue() == onDiskPrekickWeightDistribution;
       unchanged &= horizontalDistanceFromHandle.getValue() == onDiskHorizontalDistanceFromHandle;
@@ -165,6 +174,7 @@ public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition i
 
       message.setRobotSide(kickSide.toMessage().toByte());
       message.setKickImpulse(kickImpulse.toMessage());
+      message.setKickHeight(kickHeight.toMessage());
       message.setKickTargetDistance(kickTargetDistance.toMessage());
       message.setPrekickWeightDistribution(prekickWeightDistribution.toMessage());
       message.setHorizontalDistanceFromHandle(horizontalDistanceFromHandle.toMessage());
@@ -181,6 +191,7 @@ public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition i
       parentFrameName.fromMessage(message.getParentFrameNameAsString());
 
       kickSide.fromMessage(RobotSide.fromByte(message.getRobotSide()));
+      kickHeight.fromMessage(message.getKickHeight());
       kickImpulse.fromMessage(message.getKickImpulse());
       kickTargetDistance.fromMessage(message.getKickTargetDistance());
       prekickWeightDistribution.fromMessage(message.getPrekickWeightDistribution());
@@ -267,5 +278,10 @@ public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition i
    public CRDTUnidirectionalDouble getStanceFootWidth()
    {
       return stanceFootWidth;
+   }
+
+   public CRDTUnidirectionalDouble getKickHeight()
+   {
+      return kickHeight;
    }
 }

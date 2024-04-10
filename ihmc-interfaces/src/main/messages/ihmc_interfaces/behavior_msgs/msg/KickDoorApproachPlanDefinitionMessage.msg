@@ -17,6 +17,9 @@ int32 execution_mode
 byte robot_side 255
 
 # The impulse with which the kick should be executed.
+float64 kick_height
+
+# The impulse with which the kick should be executed.
 float64 kick_impulse
 
 # The target distance from the robot to where the kick should be aimed.

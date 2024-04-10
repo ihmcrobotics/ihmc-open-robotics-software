@@ -14,6 +14,7 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
 {
    private final KickDoorApproachPlanActionDefinition definition;
    private final ReferenceFrameLibrary referenceFrameLibrary;
+   private final CRDTUnidirectionalPose3D kickGoalPose;
    private final CRDTUnidirectionalPose3D leftFootGoalPose;
    private final CRDTUnidirectionalPose3D rightFootGoalPose;
    private final ReferenceFrame parentFrame;
@@ -33,6 +34,7 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
 
       parentFrame = referenceFrameLibrary.findFrameByName(definition.getParentFrameName());
 
+      kickGoalPose = new CRDTUnidirectionalPose3D(ROS2ActorDesignation.ROBOT, crdtInfo);
       leftFootGoalPose = new CRDTUnidirectionalPose3D(ROS2ActorDesignation.ROBOT, crdtInfo);
       rightFootGoalPose = new CRDTUnidirectionalPose3D(ROS2ActorDesignation.ROBOT, crdtInfo);
       totalNumberOfFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
@@ -56,6 +58,7 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
 
       super.toMessage(message.getState());
 
+      kickGoalPose.toMessage(message.getKickGoalPose());
       leftFootGoalPose.toMessage(message.getLeftFootGoalPose());
       rightFootGoalPose.toMessage(message.getRightFootGoalPose());
       message.setTotalNumberOfFootsteps(totalNumberOfFootsteps.toMessage());
@@ -75,6 +78,7 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
 
       definition.fromMessage(message.getDefinition());
 
+      kickGoalPose.fromMessage(message.getKickGoalPose());
       leftFootGoalPose.fromMessage(message.getLeftFootGoalPose());
       rightFootGoalPose.fromMessage(message.getRightFootGoalPose());
       totalNumberOfFootsteps.fromMessage(message.getTotalNumberOfFootsteps());
@@ -115,6 +119,11 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
    public void setNumberOfIncompleteFootsteps(int numberOfIncompleteFootsteps)
    {
       this.numberOfIncompleteFootsteps.setValue(numberOfIncompleteFootsteps);
+   }
+
+   public CRDTUnidirectionalPose3D getKickGoalPose()
+   {
+      return kickGoalPose;
    }
 
    public CRDTUnidirectionalPose3D getLeftFootGoalPose()

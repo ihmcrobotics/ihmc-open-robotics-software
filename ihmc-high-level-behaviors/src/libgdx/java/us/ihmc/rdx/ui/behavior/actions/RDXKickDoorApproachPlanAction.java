@@ -42,8 +42,6 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class RDXKickDoorApproachPlanAction extends RDXActionNode<KickDoorApproachPlanActionState, KickDoorApproachPlanActionDefinition>
 {
-   private final DRCRobotModel robotModel;
-   private final ROS2SyncedRobotModel syncedRobot;
    private final KickDoorApproachPlanActionState state;
    private final KickDoorApproachPlanActionDefinition definition;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -54,27 +52,21 @@ public class RDXKickDoorApproachPlanAction extends RDXActionNode<KickDoorApproac
    private final ImDoubleWrapper horizontalDistanceFromHandleWidget;
    private final ImDoubleWrapper preKickWeightDistributionWidget;
    private final ImDoubleWrapper stanceFootWidthWidget;
-   private int numberOfAllocatedFootsteps = 0;
+   private final ImDoubleWrapper kickHeightWidget;
    private final SideDependentList<RDXFootstepGraphic> goalFeetGraphics = new SideDependentList<>();
-   private final RDX3DPanelTooltip tooltip;
-   private final ImGuiFootstepsWidget footstepsWidget = new ImGuiFootstepsWidget();
+   private final RDXFootstepGraphic kickGoalGraphic;
 
    public RDXKickDoorApproachPlanAction(long id,
                                         CRDTInfo crdtInfo,
                                         WorkspaceResourceDirectory saveFileDirectory,
                                         RDXBaseUI baseUI,
                                         DRCRobotModel robotModel,
-                                        ROS2SyncedRobotModel syncedRobot,
-                                        ReferenceFrameLibrary referenceFrameLibrary,
-                                        FootstepPlannerParametersBasics footstepPlannerParameters)
+                                        ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(new KickDoorApproachPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
       state = getState();
       definition = getDefinition();
-
-      this.robotModel = robotModel;
-      this.syncedRobot = syncedRobot;
 
       definition.setName("Footstep plan");
 
@@ -100,6 +92,9 @@ public class RDXKickDoorApproachPlanAction extends RDXActionNode<KickDoorApproac
       stanceFootWidthWidget = new ImDoubleWrapper(definition.getStanceFootWidth()::getValue,
                                                   definition.getStanceFootWidth()::setValue,
                                                   imDouble -> ImGui.inputDouble(labels.get("Stance foot width"), imDouble));
+      kickHeightWidget = new ImDoubleWrapper(definition.getKickHeight()::getValue,
+                                                  definition.getKickHeight()::setValue,
+                                                  imDouble -> ImGui.inputDouble(labels.get("Kick height"), imDouble));
 
       for (RobotSide side : RobotSide.values)
       {
@@ -107,8 +102,10 @@ public class RDXKickDoorApproachPlanAction extends RDXActionNode<KickDoorApproac
          goalFootGraphic.create();
          goalFeetGraphics.put(side, goalFootGraphic);
       }
+      kickGoalGraphic = new RDXFootstepGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints(), RobotSide.LEFT);
+      kickGoalGraphic.create();
 
-      tooltip = new RDX3DPanelTooltip(baseUI.getPrimary3DPanel());
+
       baseUI.getPrimary3DPanel().addImGuiOverlayAddition(this::render3DPanelImGuiOverlays);
    }
 
@@ -123,6 +120,7 @@ public class RDXKickDoorApproachPlanAction extends RDXActionNode<KickDoorApproac
 
          // Update arrow graphic geometry
 
+         kickGoalGraphic.setPose(state.getKickGoalPose().getValueReadOnly());
          goalFeetGraphics.get(RobotSide.LEFT).setPose(state.getLeftFootGoalPose().getValueReadOnly());
          goalFeetGraphics.get(RobotSide.RIGHT).setPose(state.getRightFootGoalPose().getValueReadOnly());
       }
@@ -133,7 +131,6 @@ public class RDXKickDoorApproachPlanAction extends RDXActionNode<KickDoorApproac
    {
       super.renderTreeViewIconArea();
 
-      footstepsWidget.render(ImGui.getFrameHeight());
       ImGui.sameLine();
    }
 
@@ -169,6 +166,7 @@ public class RDXKickDoorApproachPlanAction extends RDXActionNode<KickDoorApproac
       preKickWeightDistributionWidget.renderImGuiWidget();
       horizontalDistanceFromHandleWidget.renderImGuiWidget();
       stanceFootWidthWidget.renderImGuiWidget();
+      kickHeightWidget.renderImGuiWidget();
       ImGui.popItemWidth();
       ImGui.text("Execution mode:");
       ImGui.sameLine();
@@ -196,9 +194,11 @@ public class RDXKickDoorApproachPlanAction extends RDXActionNode<KickDoorApproac
       {
          for (RobotSide side : RobotSide.values)
          {
-            goalFeetGraphics.get(side).setHighlighted(footstepsWidget.getIsHovered().get(side));
+            goalFeetGraphics.get(side).setHighlighted(false);
             goalFeetGraphics.get(side).getRenderables(renderables, pool);
          }
+         kickGoalGraphic.setHighlighted(false);
+         kickGoalGraphic.getRenderables(renderables, pool);
       }
    }
 

@@ -15,7 +15,7 @@ public class KickDoorApproachPlanDefinitionMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6cd05c5ccc35db9123d75e869e60679411dfaf2259ac9cbad039b64e1655ea08";
+   		return "8f2dcdf800051a6b949b2be35689079f9520d93925ff6d1311a90b78b9b4f312";
    }
    
    @Override
@@ -73,6 +73,8 @@ public class KickDoorApproachPlanDefinitionMessagePubSubType implements us.ihmc.
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -117,6 +119,9 @@ public class KickDoorApproachPlanDefinitionMessagePubSubType implements us.ihmc.
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -135,6 +140,8 @@ public class KickDoorApproachPlanDefinitionMessagePubSubType implements us.ihmc.
       cdr.write_type_2(data.getExecutionMode());
 
       cdr.write_type_9(data.getRobotSide());
+
+      cdr.write_type_6(data.getKickHeight());
 
       cdr.write_type_6(data.getKickImpulse());
 
@@ -160,6 +167,8 @@ public class KickDoorApproachPlanDefinitionMessagePubSubType implements us.ihmc.
       	
       data.setRobotSide(cdr.read_type_9());
       	
+      data.setKickHeight(cdr.read_type_6());
+      	
       data.setKickImpulse(cdr.read_type_6());
       	
       data.setKickTargetDistance(cdr.read_type_6());
@@ -183,6 +192,7 @@ public class KickDoorApproachPlanDefinitionMessagePubSubType implements us.ihmc.
       ser.write_type_6("transfer_duration", data.getTransferDuration());
       ser.write_type_2("execution_mode", data.getExecutionMode());
       ser.write_type_9("robot_side", data.getRobotSide());
+      ser.write_type_6("kick_height", data.getKickHeight());
       ser.write_type_6("kick_impulse", data.getKickImpulse());
       ser.write_type_6("kick_target_distance", data.getKickTargetDistance());
       ser.write_type_6("horizontal_distance_from_handle", data.getHorizontalDistanceFromHandle());
@@ -200,6 +210,7 @@ public class KickDoorApproachPlanDefinitionMessagePubSubType implements us.ihmc.
       data.setTransferDuration(ser.read_type_6("transfer_duration"));
       data.setExecutionMode(ser.read_type_2("execution_mode"));
       data.setRobotSide(ser.read_type_9("robot_side"));
+      data.setKickHeight(ser.read_type_6("kick_height"));
       data.setKickImpulse(ser.read_type_6("kick_impulse"));
       data.setKickTargetDistance(ser.read_type_6("kick_target_distance"));
       data.setHorizontalDistanceFromHandle(ser.read_type_6("horizontal_distance_from_handle"));

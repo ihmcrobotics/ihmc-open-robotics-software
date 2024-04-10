@@ -105,9 +105,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
                                                                              saveFileDirectory,
                                                                              baseUI,
                                                                              robotModel,
-                                                                             syncedRobot,
-                                                                             referenceFrameLibrary,
-                                                                             footstepPlannerParametersBasics);
+                                                                             referenceFrameLibrary);
          default -> throw new RuntimeException("No return type defined for class " + nodeType.getSimpleName());
       };
    }

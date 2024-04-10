@@ -36,6 +36,10 @@ module behavior_msgs
          */
         behavior_msgs::msg::dds::KickDoorApproachPlanDefinitionMessage definition;
         /**
+         * Kick goal pose
+         */
+        geometry_msgs::msg::dds::Pose kick_goal_pose;
+        /**
          * Left foot goal pose
          */
         geometry_msgs::msg::dds::Pose left_foot_goal_pose;

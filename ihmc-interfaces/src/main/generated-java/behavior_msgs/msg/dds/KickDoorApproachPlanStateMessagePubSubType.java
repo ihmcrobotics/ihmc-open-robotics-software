@@ -15,7 +15,7 @@ public class KickDoorApproachPlanStateMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "61a537c9444792482ecd68daa073eccc3b8255b17eee37ec3f1792e6a77ef49f";
+   		return "468c99e85dede9b13315857e14567916ea49224d68b9f2da5142a0b3e32bbadc";
    }
    
    @Override
@@ -60,6 +60,8 @@ public class KickDoorApproachPlanStateMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
@@ -92,6 +94,8 @@ public class KickDoorApproachPlanStateMessagePubSubType implements us.ihmc.pubsu
       current_alignment += behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.getCdrSerializedSize(data.getState(), current_alignment);
 
       current_alignment += behavior_msgs.msg.dds.KickDoorApproachPlanDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
+
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getKickGoalPose(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getLeftFootGoalPose(), current_alignment);
 
@@ -128,6 +132,7 @@ public class KickDoorApproachPlanStateMessagePubSubType implements us.ihmc.pubsu
    {
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.write(data.getState(), cdr);
       behavior_msgs.msg.dds.KickDoorApproachPlanDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getKickGoalPose(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getLeftFootGoalPose(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getRightFootGoalPose(), cdr);
       cdr.write_type_9(data.getExecutionState());
@@ -152,6 +157,7 @@ public class KickDoorApproachPlanStateMessagePubSubType implements us.ihmc.pubsu
    {
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.KickDoorApproachPlanDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getKickGoalPose(), cdr);	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getLeftFootGoalPose(), cdr);	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getRightFootGoalPose(), cdr);	
       data.setExecutionState(cdr.read_type_9());
@@ -174,6 +180,8 @@ public class KickDoorApproachPlanStateMessagePubSubType implements us.ihmc.pubsu
 
       ser.write_type_a("definition", new behavior_msgs.msg.dds.KickDoorApproachPlanDefinitionMessagePubSubType(), data.getDefinition());
 
+      ser.write_type_a("kick_goal_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getKickGoalPose());
+
       ser.write_type_a("left_foot_goal_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getLeftFootGoalPose());
 
       ser.write_type_a("right_foot_goal_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getRightFootGoalPose());
@@ -195,6 +203,8 @@ public class KickDoorApproachPlanStateMessagePubSubType implements us.ihmc.pubsu
       ser.read_type_a("state", new behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType(), data.getState());
 
       ser.read_type_a("definition", new behavior_msgs.msg.dds.KickDoorApproachPlanDefinitionMessagePubSubType(), data.getDefinition());
+
+      ser.read_type_a("kick_goal_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getKickGoalPose());
 
       ser.read_type_a("left_foot_goal_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getLeftFootGoalPose());
 

@@ -21,6 +21,10 @@ public class KickDoorApproachPlanStateMessage extends Packet<KickDoorApproachPla
             */
    public behavior_msgs.msg.dds.KickDoorApproachPlanDefinitionMessage definition_;
    /**
+            * Kick goal pose
+            */
+   public us.ihmc.euclid.geometry.Pose3D kick_goal_pose_;
+   /**
             * Left foot goal pose
             */
    public us.ihmc.euclid.geometry.Pose3D left_foot_goal_pose_;
@@ -61,6 +65,7 @@ public class KickDoorApproachPlanStateMessage extends Packet<KickDoorApproachPla
    {
       state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.KickDoorApproachPlanDefinitionMessage();
+      kick_goal_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       left_foot_goal_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       right_foot_goal_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       desired_left_footsteps_ = new us.ihmc.idl.IDLSequence.Object<ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage> (100, new ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessagePubSubType());
@@ -80,6 +85,7 @@ public class KickDoorApproachPlanStateMessage extends Packet<KickDoorApproachPla
    {
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.KickDoorApproachPlanDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.kick_goal_pose_, kick_goal_pose_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.left_foot_goal_pose_, left_foot_goal_pose_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.right_foot_goal_pose_, right_foot_goal_pose_);
       execution_state_ = other.execution_state_;
@@ -110,6 +116,15 @@ public class KickDoorApproachPlanStateMessage extends Packet<KickDoorApproachPla
    public behavior_msgs.msg.dds.KickDoorApproachPlanDefinitionMessage getDefinition()
    {
       return definition_;
+   }
+
+
+   /**
+            * Kick goal pose
+            */
+   public us.ihmc.euclid.geometry.Pose3D getKickGoalPose()
+   {
+      return kick_goal_pose_;
    }
 
 
@@ -231,6 +246,7 @@ public class KickDoorApproachPlanStateMessage extends Packet<KickDoorApproachPla
 
       if (!this.state_.epsilonEquals(other.state_, epsilon)) return false;
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
+      if (!this.kick_goal_pose_.epsilonEquals(other.kick_goal_pose_, epsilon)) return false;
       if (!this.left_foot_goal_pose_.epsilonEquals(other.left_foot_goal_pose_, epsilon)) return false;
       if (!this.right_foot_goal_pose_.epsilonEquals(other.right_foot_goal_pose_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.execution_state_, other.execution_state_, epsilon)) return false;
@@ -270,6 +286,7 @@ public class KickDoorApproachPlanStateMessage extends Packet<KickDoorApproachPla
 
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
+      if (!this.kick_goal_pose_.equals(otherMyClass.kick_goal_pose_)) return false;
       if (!this.left_foot_goal_pose_.equals(otherMyClass.left_foot_goal_pose_)) return false;
       if (!this.right_foot_goal_pose_.equals(otherMyClass.right_foot_goal_pose_)) return false;
       if(this.execution_state_ != otherMyClass.execution_state_) return false;
@@ -296,6 +313,8 @@ public class KickDoorApproachPlanStateMessage extends Packet<KickDoorApproachPla
       builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
+      builder.append("kick_goal_pose=");
+      builder.append(this.kick_goal_pose_);      builder.append(", ");
       builder.append("left_foot_goal_pose=");
       builder.append(this.left_foot_goal_pose_);      builder.append(", ");
       builder.append("right_foot_goal_pose=");

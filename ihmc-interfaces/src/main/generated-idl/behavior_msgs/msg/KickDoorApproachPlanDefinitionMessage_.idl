@@ -40,6 +40,10 @@ module behavior_msgs
         /**
          * The impulse with which the kick should be executed.
          */
+        double kick_height;
+        /**
+         * The impulse with which the kick should be executed.
+         */
         double kick_impulse;
         /**
          * The target distance from the robot to where the kick should be aimed.

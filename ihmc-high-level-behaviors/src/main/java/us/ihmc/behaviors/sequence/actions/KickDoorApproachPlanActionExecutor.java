@@ -59,6 +59,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
    private final ResettableExceptionHandlingExecutorService footstepPlanningThread = MissingThreadTools.newSingleThreadExecutor("FootstepPlanning", true, 1);
    private final TypedNotification<FootstepPlan> footstepPlanNotification = new TypedNotification<>();
    private final SideDependentList<FramePose3D> liveGoalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
+   private final FramePose3D liveKickPose = new FramePose3D();
    private final SideDependentList<FramePose3D> startFootPosesForThread = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<FramePose3D> goalFootPosesForThread = new SideDependentList<>(new FramePose3D(), new FramePose3D());
 
@@ -131,6 +132,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
       updateStateParentZUpFrame();
 
       double kickImpulse = definition.getKickImpulse().getValue();
+      double kickHeight = definition.getKickHeight().getValue();
       double kickTargetDistance = definition.getKickTargetDistance().getValue();
       double prekickWeightDistribution = definition.getPrekickWeightDistribution().getValue();
       double kickStanceWidth = definition.getStanceFootWidth().getValue();
@@ -171,6 +173,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
 
       state.getLeftFootGoalPose().getValue().set(liveGoalFeetPoses.get(RobotSide.LEFT));
       state.getRightFootGoalPose().getValue().set(liveGoalFeetPoses.get(RobotSide.RIGHT));
+      state.getKickGoalPose().getValue().set(liveKickPose);
 
       if (state.getCanExecute())
       {
@@ -203,17 +206,24 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
    {
       RobotSide kickSide = definition.getKickSide().getValue();
 
-      FramePose3D kickFootPose = new FramePose3D();
-      kickFootPose.setToZero(stateParentZUpFrame);
+      FramePose3D preKickFootPose = new FramePose3D();
+      preKickFootPose.setToZero(stateParentZUpFrame);
       //FIXME: This is a temp fix until we get stateParentZUpFrame to be the correct frame.
 //      kickFootPose.setX(-definition.getKickTargetDistance().getValue());
 //      kickFootPose.setY(kickSide.negateIfRightSide(definition.getHorizontalDistanceFromHandle().getValue()));
 //      kickFootPose.getOrientation().setToYawOrientation(Math.PI);
-      kickFootPose.setX(definition.getKickTargetDistance().getValue());
-      kickFootPose.setY(-kickSide.negateIfRightSide(definition.getHorizontalDistanceFromHandle().getValue()));
+      preKickFootPose.setX(definition.getKickTargetDistance().getValue());
+      preKickFootPose.setY(-kickSide.negateIfRightSide(definition.getHorizontalDistanceFromHandle().getValue()));
 //      kickFootPose.getOrientation().setToYawOrientation(Math.PI);
-      kickFootPose.changeFrame(ReferenceFrame.getWorldFrame());
-      kickFootPose.getPosition().setZ(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getZ());
+      preKickFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      preKickFootPose.getPosition().setZ(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getZ());
+
+      FramePose3D kickPose = new FramePose3D(preKickFootPose);
+      kickPose.setZ(definition.getKickHeight().getValue());
+      kickPose.changeFrame(stateParentZUpFrame);
+      kickPose.setX(0.0);
+      kickPose.appendPitchRotation(Math.PI / 2.0);
+      kickPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePose3D stanceFootPose = new FramePose3D();
       stanceFootPose.setToZero(stateParentZUpFrame);
@@ -228,10 +238,12 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
       stanceFootPose.getPosition().setZ(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getZ());
 
       FramePose3D centerOfMassPose = new FramePose3D();
-      centerOfMassPose.interpolate(kickFootPose, stanceFootPose, 0.5);
+      centerOfMassPose.interpolate(preKickFootPose, stanceFootPose, 0.5);
 
-      soleFramesForPlanning.get(kickSide).setPoseAndUpdate(kickFootPose);
+      soleFramesForPlanning.get(kickSide).setPoseAndUpdate(preKickFootPose);
       soleFramesForPlanning.get(kickSide.getOppositeSide()).setPoseAndUpdate(stanceFootPose);
+
+      liveKickPose.set(kickPose);
 
       centerOfMassControlFrameForPlanning.setPoseAndUpdate(centerOfMassPose);
    }

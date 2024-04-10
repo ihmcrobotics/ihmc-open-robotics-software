@@ -9,6 +9,9 @@ behavior_msgs/ActionNodeStateMessage state
 # Definition
 behavior_msgs/KickDoorApproachPlanDefinitionMessage definition
 
+# Kick goal pose
+geometry_msgs/Pose kick_goal_pose
+
 # Left foot goal pose
 geometry_msgs/Pose left_foot_goal_pose
 

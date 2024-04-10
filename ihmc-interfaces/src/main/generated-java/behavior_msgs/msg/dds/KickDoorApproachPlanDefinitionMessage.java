@@ -35,6 +35,10 @@ public class KickDoorApproachPlanDefinitionMessage extends Packet<KickDoorApproa
    /**
             * The impulse with which the kick should be executed.
             */
+   public double kick_height_;
+   /**
+            * The impulse with which the kick should be executed.
+            */
    public double kick_impulse_;
    /**
             * The target distance from the robot to where the kick should be aimed.
@@ -78,6 +82,8 @@ public class KickDoorApproachPlanDefinitionMessage extends Packet<KickDoorApproa
       execution_mode_ = other.execution_mode_;
 
       robot_side_ = other.robot_side_;
+
+      kick_height_ = other.kick_height_;
 
       kick_impulse_ = other.kick_impulse_;
 
@@ -187,6 +193,21 @@ public class KickDoorApproachPlanDefinitionMessage extends Packet<KickDoorApproa
    /**
             * The impulse with which the kick should be executed.
             */
+   public void setKickHeight(double kick_height)
+   {
+      kick_height_ = kick_height;
+   }
+   /**
+            * The impulse with which the kick should be executed.
+            */
+   public double getKickHeight()
+   {
+      return kick_height_;
+   }
+
+   /**
+            * The impulse with which the kick should be executed.
+            */
    public void setKickImpulse(double kick_impulse)
    {
       kick_impulse_ = kick_impulse;
@@ -288,6 +309,8 @@ public class KickDoorApproachPlanDefinitionMessage extends Packet<KickDoorApproa
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.robot_side_, other.robot_side_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.kick_height_, other.kick_height_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.kick_impulse_, other.kick_impulse_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.kick_target_distance_, other.kick_target_distance_, epsilon)) return false;
@@ -322,6 +345,8 @@ public class KickDoorApproachPlanDefinitionMessage extends Packet<KickDoorApproa
 
       if(this.robot_side_ != otherMyClass.robot_side_) return false;
 
+      if(this.kick_height_ != otherMyClass.kick_height_) return false;
+
       if(this.kick_impulse_ != otherMyClass.kick_impulse_) return false;
 
       if(this.kick_target_distance_ != otherMyClass.kick_target_distance_) return false;
@@ -354,6 +379,8 @@ public class KickDoorApproachPlanDefinitionMessage extends Packet<KickDoorApproa
       builder.append(this.execution_mode_);      builder.append(", ");
       builder.append("robot_side=");
       builder.append(this.robot_side_);      builder.append(", ");
+      builder.append("kick_height=");
+      builder.append(this.kick_height_);      builder.append(", ");
       builder.append("kick_impulse=");
       builder.append(this.kick_impulse_);      builder.append(", ");
       builder.append("kick_target_distance=");
