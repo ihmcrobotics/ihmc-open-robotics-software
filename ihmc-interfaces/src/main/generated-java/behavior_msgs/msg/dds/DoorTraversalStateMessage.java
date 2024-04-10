@@ -17,6 +17,8 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
             */
    public behavior_msgs.msg.dds.DoorTraversalDefinitionMessage definition_;
    public double door_hinge_joint_angle_;
+   public double right_knuckle_x1_;
+   public double right_knuckle_x2_;
 
    public DoorTraversalStateMessage()
    {
@@ -35,6 +37,10 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.staticCopy(other.state_, state_);
       behavior_msgs.msg.dds.DoorTraversalDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       door_hinge_joint_angle_ = other.door_hinge_joint_angle_;
+
+      right_knuckle_x1_ = other.right_knuckle_x1_;
+
+      right_knuckle_x2_ = other.right_knuckle_x2_;
 
    }
 
@@ -65,6 +71,24 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
       return door_hinge_joint_angle_;
    }
 
+   public void setRightKnuckleX1(double right_knuckle_x1)
+   {
+      right_knuckle_x1_ = right_knuckle_x1;
+   }
+   public double getRightKnuckleX1()
+   {
+      return right_knuckle_x1_;
+   }
+
+   public void setRightKnuckleX2(double right_knuckle_x2)
+   {
+      right_knuckle_x2_ = right_knuckle_x2;
+   }
+   public double getRightKnuckleX2()
+   {
+      return right_knuckle_x2_;
+   }
+
 
    public static Supplier<DoorTraversalStateMessagePubSubType> getPubSubType()
    {
@@ -87,6 +111,10 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
       if (!this.definition_.epsilonEquals(other.definition_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.door_hinge_joint_angle_, other.door_hinge_joint_angle_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.right_knuckle_x1_, other.right_knuckle_x1_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.right_knuckle_x2_, other.right_knuckle_x2_, epsilon)) return false;
+
 
       return true;
    }
@@ -104,6 +132,10 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if(this.door_hinge_joint_angle_ != otherMyClass.door_hinge_joint_angle_) return false;
 
+      if(this.right_knuckle_x1_ != otherMyClass.right_knuckle_x1_) return false;
+
+      if(this.right_knuckle_x2_ != otherMyClass.right_knuckle_x2_) return false;
+
 
       return true;
    }
@@ -119,7 +151,11 @@ public class DoorTraversalStateMessage extends Packet<DoorTraversalStateMessage>
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
       builder.append("door_hinge_joint_angle=");
-      builder.append(this.door_hinge_joint_angle_);
+      builder.append(this.door_hinge_joint_angle_);      builder.append(", ");
+      builder.append("right_knuckle_x1=");
+      builder.append(this.right_knuckle_x1_);      builder.append(", ");
+      builder.append("right_knuckle_x2=");
+      builder.append(this.right_knuckle_x2_);
       builder.append("}");
       return builder.toString();
    }

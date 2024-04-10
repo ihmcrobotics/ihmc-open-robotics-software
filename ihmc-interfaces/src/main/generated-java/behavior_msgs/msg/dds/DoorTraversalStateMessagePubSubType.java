@@ -15,7 +15,7 @@ public class DoorTraversalStateMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ddca5cae592fcf5fd95a78224141f6fc2da8507e4a7a435209c39421d9f2ce42";
+   		return "9acdd0599fa2f946b17d061dd5bbb3f6b008b7d982c4c1afc4cad518a574fd1f";
    }
    
    @Override
@@ -58,6 +58,10 @@ public class DoorTraversalStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -78,6 +82,12 @@ public class DoorTraversalStateMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -88,6 +98,10 @@ public class DoorTraversalStateMessagePubSubType implements us.ihmc.pubsub.Topic
       behavior_msgs.msg.dds.DoorTraversalDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       cdr.write_type_6(data.getDoorHingeJointAngle());
 
+      cdr.write_type_6(data.getRightKnuckleX1());
+
+      cdr.write_type_6(data.getRightKnuckleX2());
+
    }
 
    public static void read(behavior_msgs.msg.dds.DoorTraversalStateMessage data, us.ihmc.idl.CDR cdr)
@@ -95,6 +109,10 @@ public class DoorTraversalStateMessagePubSubType implements us.ihmc.pubsub.Topic
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.DoorTraversalDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       data.setDoorHingeJointAngle(cdr.read_type_6());
+      	
+      data.setRightKnuckleX1(cdr.read_type_6());
+      	
+      data.setRightKnuckleX2(cdr.read_type_6());
       	
 
    }
@@ -107,6 +125,8 @@ public class DoorTraversalStateMessagePubSubType implements us.ihmc.pubsub.Topic
       ser.write_type_a("definition", new behavior_msgs.msg.dds.DoorTraversalDefinitionMessagePubSubType(), data.getDefinition());
 
       ser.write_type_6("door_hinge_joint_angle", data.getDoorHingeJointAngle());
+      ser.write_type_6("right_knuckle_x1", data.getRightKnuckleX1());
+      ser.write_type_6("right_knuckle_x2", data.getRightKnuckleX2());
    }
 
    @Override
@@ -117,6 +137,8 @@ public class DoorTraversalStateMessagePubSubType implements us.ihmc.pubsub.Topic
       ser.read_type_a("definition", new behavior_msgs.msg.dds.DoorTraversalDefinitionMessagePubSubType(), data.getDefinition());
 
       data.setDoorHingeJointAngle(ser.read_type_6("door_hinge_joint_angle"));
+      data.setRightKnuckleX1(ser.read_type_6("right_knuckle_x1"));
+      data.setRightKnuckleX2(ser.read_type_6("right_knuckle_x2"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.DoorTraversalStateMessage src, behavior_msgs.msg.dds.DoorTraversalStateMessage dest)

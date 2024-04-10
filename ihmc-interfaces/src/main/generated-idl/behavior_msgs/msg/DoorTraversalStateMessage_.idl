@@ -22,6 +22,8 @@ module behavior_msgs
          */
         behavior_msgs::msg::dds::DoorTraversalDefinitionMessage definition;
         double door_hinge_joint_angle;
+        double right_knuckle_x1;
+        double right_knuckle_x2;
       };
     };
   };
