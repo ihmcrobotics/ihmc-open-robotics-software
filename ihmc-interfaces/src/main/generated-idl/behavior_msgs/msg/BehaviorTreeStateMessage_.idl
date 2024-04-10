@@ -31,34 +31,34 @@ module behavior_msgs
       2;
 
       const octet CHEST_ORIENTATION_ACTION =
-      10;
+      3;
 
       const octet FOOTSTEP_PLAN_ACTION =
-      11;
+      4;
 
       const octet SAKE_HAND_COMMAND_ACTION =
-      12;
+      5;
 
       const octet HAND_POSE_ACTION =
-      13;
+      6;
 
       const octet HAND_WRENCH_ACTION =
-      14;
+      7;
 
       const octet SCREW_PRIMITIVE_ACTION =
-      15;
+      8;
 
       const octet PELVIS_HEIGHT_PITCH_ACTION =
-      16;
+      9;
 
       const octet WAIT_DURATION_ACTION =
-      17;
+      10;
 
       const octet KICK_DOOR_ACTION =
-      18;
+      11;
 
       const octet KICK_DOOR_APPROACH_ACTION =
-      19;
+      12;
 
 
       /**

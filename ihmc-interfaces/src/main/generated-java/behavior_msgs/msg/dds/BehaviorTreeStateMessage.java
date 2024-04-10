@@ -17,16 +17,16 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public static final byte BASIC_NODE = (byte) 0;
    public static final byte ACTION_SEQUENCE = (byte) 1;
    public static final byte DOOR_TRAVERSAL = (byte) 2;
-   public static final byte CHEST_ORIENTATION_ACTION = (byte) 10;
-   public static final byte FOOTSTEP_PLAN_ACTION = (byte) 11;
-   public static final byte SAKE_HAND_COMMAND_ACTION = (byte) 12;
-   public static final byte HAND_POSE_ACTION = (byte) 13;
-   public static final byte HAND_WRENCH_ACTION = (byte) 14;
-   public static final byte SCREW_PRIMITIVE_ACTION = (byte) 15;
-   public static final byte PELVIS_HEIGHT_PITCH_ACTION = (byte) 16;
-   public static final byte WAIT_DURATION_ACTION = (byte) 17;
-   public static final byte KICK_DOOR_ACTION = (byte) 18;
-   public static final byte KICK_DOOR_APPROACH_ACTION = (byte) 19;
+   public static final byte CHEST_ORIENTATION_ACTION = (byte) 3;
+   public static final byte FOOTSTEP_PLAN_ACTION = (byte) 4;
+   public static final byte SAKE_HAND_COMMAND_ACTION = (byte) 5;
+   public static final byte HAND_POSE_ACTION = (byte) 6;
+   public static final byte HAND_WRENCH_ACTION = (byte) 7;
+   public static final byte SCREW_PRIMITIVE_ACTION = (byte) 8;
+   public static final byte PELVIS_HEIGHT_PITCH_ACTION = (byte) 9;
+   public static final byte WAIT_DURATION_ACTION = (byte) 10;
+   public static final byte KICK_DOOR_ACTION = (byte) 11;
+   public static final byte KICK_DOOR_APPROACH_ACTION = (byte) 12;
    /**
             * Monotonically increasing message ID that matches the CRDTInfo update number
             */
