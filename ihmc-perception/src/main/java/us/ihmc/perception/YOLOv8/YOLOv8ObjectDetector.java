@@ -19,7 +19,7 @@ import java.util.Set;
 
 public class YOLOv8ObjectDetector
 {
-   private static final String ONNX_FILE_NAME = "door_handle_yolo.onnx";
+   private static final String ONNX_FILE_NAME = "handles_and_ebar_yolo.onnx";
    private static final double SCALE_FACTOR = 1.0 / 255.0;
    private static final Size DETECTION_SIZE = new Size(1280, 736);
    private static final int NUMBER_OF_DETECTABLE_CLASSES = YOLOv8DetectionClass.values().length;

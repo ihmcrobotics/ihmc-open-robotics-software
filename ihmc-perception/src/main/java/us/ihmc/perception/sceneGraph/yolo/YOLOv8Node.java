@@ -108,7 +108,7 @@ public class YOLOv8Node extends DetectableSceneNode
 
    public void updatePlanarRegions(PlanarRegionsList planarRegionsList, ROS2Helper ros2Helper)
    {
-      if (getName().toLowerCase(Locale.ROOT).contains("door lever") || getName().toLowerCase(Locale.ROOT).contains("door handle"))
+      if (isDoorComponentNode())
       {
          Point3D objectCentroidInWorld = new Point3D(objectPose.getTranslation());
 
@@ -181,7 +181,10 @@ public class YOLOv8Node extends DetectableSceneNode
 
                double yaw = TupleTools.angle(Axis2D.X, doorLineNormal.getDirection());
 //               double pitch = TupleTools.angle(Axis2D.Y, doorLineNormal.getDirection()) + Math.PI;
-               getObjectPose().getRotation().setYawPitchRoll(yaw, 0.0, doorSide == RobotSide.LEFT ? Math.PI : 0.0);
+               if (getName().toLowerCase().contains("door lever"))
+                  getObjectPose().getRotation().setYawPitchRoll(yaw, 0.0, doorSide == RobotSide.LEFT ? Math.PI : 0.0);
+               else
+                  getObjectPose().getRotation().setToYawOrientation(yaw);
 
                PlanarRegionsList doorPlanarRegionsList = new PlanarRegionsList();
                doorPlanarRegionsList.addPlanarRegion(doorPlanarRegion);
@@ -303,5 +306,12 @@ public class YOLOv8Node extends DetectableSceneNode
    public void setAlpha(double alpha)
    {
       this.alpha = alpha;
+   }
+
+   private boolean isDoorComponentNode()
+   {
+      String name = getName().toLowerCase(Locale.ROOT);
+
+      return name.contains("door lever") || name.contains("door pull handle") || name.contains("door push bar");
    }
 }
