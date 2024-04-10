@@ -126,6 +126,6 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
          return new KickDoorActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, controllerStatusTracker, referenceFrameLibrary, walkingControllerParameters);
       }
 
-      return null;
+      throw new RuntimeException("Node defintion type not found: " + nodeType.getSimpleName());
    }
 }

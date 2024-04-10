@@ -2,6 +2,7 @@ package us.ihmc.rdx.ui.behavior.tree;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeDefinitionRegistry;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateBuilder;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
@@ -10,6 +11,7 @@ import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.actions.*;
@@ -53,108 +55,64 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
    @Override
    public RDXBehaviorTreeNode<?, ?> createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      // Control nodes:
-      if (nodeType == BehaviorTreeNodeDefinition.class)
+      BehaviorTreeDefinitionRegistry nodeEnum = BehaviorTreeDefinitionRegistry.getTypeFromClass(nodeType);
+      if (nodeEnum == null)
       {
-         return new RDXBehaviorTreeNode<>(id, crdtInfo, saveFileDirectory);
-      }
-      if (nodeType == ActionSequenceDefinition.class)
-      {
-         return new RDXActionSequence(id, crdtInfo, saveFileDirectory);
-      }
-      if (nodeType == DoorTraversalDefinition.class)
-      {
-         return new RDXDoorTraversal(id, crdtInfo, saveFileDirectory, syncedRobot);
+         throw new RuntimeException("No known node type for class " + nodeType.getSimpleName());
       }
 
-      // Actions:
-      if (nodeType == ChestOrientationActionDefinition.class)
+      return switch (nodeEnum)
       {
-         return new RDXChestOrientationAction(id,
-                                              crdtInfo,
-                                              saveFileDirectory,
-                                              panel3D,
-                                              robotModel,
-                                              syncedRobot.getFullRobotModel(),
-                                              selectionCollisionModel,
-                                              referenceFrameLibrary);
-      }
-      if (nodeType == FootstepPlanActionDefinition.class)
-      {
-         return new RDXFootstepPlanAction(id,
-                                          crdtInfo,
-                                          saveFileDirectory,
-                                          baseUI,
-                                          robotModel,
-                                          syncedRobot,
-                                          referenceFrameLibrary,
-                                          footstepPlannerParametersBasics);
-      }
-      if (nodeType == HandPoseActionDefinition.class)
-      {
-         return new RDXHandPoseAction(id,
-                                      crdtInfo,
-                                      saveFileDirectory,
-                                      panel3D,
-                                      robotModel,
-                                      syncedRobot,
-                                      selectionCollisionModel,
-                                      referenceFrameLibrary);
-      }
-      if (nodeType == HandWrenchActionDefinition.class)
-      {
-         return new RDXHandWrenchAction(id, crdtInfo, saveFileDirectory);
-      }
-      if (nodeType == ScrewPrimitiveActionDefinition.class)
-      {
-         return new RDXScrewPrimitiveAction(id, crdtInfo, saveFileDirectory, panel3D, referenceFrameLibrary, syncedRobot);
-      }
-      if (nodeType == PelvisHeightPitchActionDefinition.class)
-      {
-         return new RDXPelvisHeightPitchAction(id,
-                                               crdtInfo,
-                                               saveFileDirectory,
-                                               panel3D,
-                                               robotModel,
-                                               syncedRobot.getFullRobotModel(),
-                                               selectionCollisionModel,
-                                               referenceFrameLibrary);
-      }
-      if (nodeType == SakeHandCommandActionDefinition.class)
-      {
-         return new RDXSakeHandCommandAction(id, crdtInfo, saveFileDirectory);
-      }
-      if (nodeType == WaitDurationActionDefinition.class)
-      {
-         return new RDXWaitDurationAction(id, crdtInfo, saveFileDirectory);
-      }
-      if (nodeType == KickDoorActionDefinition.class)
-      {
-         return new RDXKickDoorAction(id,
-                                      crdtInfo,
-                                      saveFileDirectory,
-                                      baseUI,
-                                      robotModel,
-                                      syncedRobot,
-                                      referenceFrameLibrary,
-                                      footstepPlannerParametersBasics);
-      }
-      if (nodeType == KickDoorApproachPlanActionDefinition.class)
-      {
-         return new RDXKickDoorApproachPlanAction(id,
-                                                  crdtInfo,
-                                                  saveFileDirectory,
-                                                  baseUI,
-                                                  robotModel,
-                                                  syncedRobot,
-                                                  referenceFrameLibrary,
-                                                  footstepPlannerParametersBasics);
-      }
-      else
-      {
-         return null;
-      }
+         // Control nodes:
+         case BASIC_NODE -> new RDXBehaviorTreeNode<>(id, crdtInfo, saveFileDirectory);
+         case ACTION_SEQUENCE -> new RDXActionSequence(id, crdtInfo, saveFileDirectory);
+         case DOOR_TRAVERSAL -> new RDXDoorTraversal(id, crdtInfo, saveFileDirectory, syncedRobot);
+         // Actions:
+         case CHEST_ORIENTATION_ACTION -> new RDXChestOrientationAction(id,
+                                                                        crdtInfo,
+                                                                        saveFileDirectory,
+                                                                        panel3D,
+                                                                        robotModel,
+                                                                        syncedRobot.getFullRobotModel(),
+                                                                        selectionCollisionModel,
+                                                                        referenceFrameLibrary);
+         case FOOTSTEP_PLAN_ACTION -> new RDXFootstepPlanAction(id,
+                                                                crdtInfo,
+                                                                saveFileDirectory,
+                                                                baseUI,
+                                                                robotModel,
+                                                                syncedRobot,
+                                                                referenceFrameLibrary,
+                                                                footstepPlannerParametersBasics);
+         case HAND_POSE_ACTION ->
+               new RDXHandPoseAction(id, crdtInfo, saveFileDirectory, panel3D, robotModel, syncedRobot, selectionCollisionModel, referenceFrameLibrary);
+         case HAND_WRENCH_ACTION -> new RDXHandWrenchAction(id, crdtInfo, saveFileDirectory);
+         case SCREW_PRIMITIVE_ACTION -> new RDXScrewPrimitiveAction(id, crdtInfo, saveFileDirectory, panel3D, referenceFrameLibrary, syncedRobot);
+         case PELVIS_HEIGHT_PITCH_ACTION -> new RDXPelvisHeightPitchAction(id,
+                                                                           crdtInfo,
+                                                                           saveFileDirectory,
+                                                                           panel3D,
+                                                                           robotModel,
+                                                                           syncedRobot.getFullRobotModel(),
+                                                                           selectionCollisionModel,
+                                                                           referenceFrameLibrary);
+         case SAKE_HAND_COMMAND_ACTION -> new RDXSakeHandCommandAction(id, crdtInfo, saveFileDirectory);
+         case WAIT_DURATION_ACTION -> new RDXWaitDurationAction(id, crdtInfo, saveFileDirectory);
+         case KICK_DOOR_ACTION ->
+               new RDXKickDoorAction(id, crdtInfo, saveFileDirectory, baseUI, robotModel, syncedRobot, referenceFrameLibrary, footstepPlannerParametersBasics);
+         case KICK_DOOR_APPROACH_ACTION -> new RDXKickDoorApproachPlanAction(id,
+                                                                             crdtInfo,
+                                                                             saveFileDirectory,
+                                                                             baseUI,
+                                                                             robotModel,
+                                                                             syncedRobot,
+                                                                             referenceFrameLibrary,
+                                                                             footstepPlannerParametersBasics);
+         default -> throw new RuntimeException("No return type defined for class " + nodeType.getSimpleName());
+      };
    }
+
+
 
    // This method is in this class because we have a syncedRobot here.
    public void initializeActionNode(@Nullable RDXActionSequence actionSequence,

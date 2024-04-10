@@ -222,10 +222,8 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
       liveGoalFeetPoses.get(stanceSide).setIncludingFrame(stanceGoalPose);
 
       FramePose3D kickStartPose = new FramePose3D(soleFramesForPlanning.get(kickSide));
-//      kickStartPose.changeFrame(soleFramesForPlanning.get(stanceSide));
       kickStartPose.changeFrame(ReferenceFrame.getWorldFrame());
       kickStartPose.getPosition().set(kickDynamicPlanner.getDesiredSwingFootStartNominal());
-//      kickStartPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       liveGoalFeetPoses.get(kickSide).setIncludingFrame(kickStartPose);
    }
