@@ -9,9 +9,6 @@ behavior_msgs/ActionNodeStateMessage state
 # Definition
 behavior_msgs/KickDoorApproachPlanDefinitionMessage definition
 
-# The footsteps, with a maximum of 50
-behavior_msgs/FootstepPlanActionFootstepStateMessage[] footsteps
-
 # Left foot goal pose
 geometry_msgs/Pose left_foot_goal_pose
 

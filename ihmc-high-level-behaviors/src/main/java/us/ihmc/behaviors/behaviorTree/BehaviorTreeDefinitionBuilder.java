@@ -2,14 +2,7 @@ package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
-import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
-import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
-import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
-import us.ihmc.behaviors.sequence.actions.HandWrenchActionDefinition;
-import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionDefinition;
-import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
-import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionDefinition;
-import us.ihmc.behaviors.sequence.actions.WaitDurationActionDefinition;
+import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -36,6 +29,10 @@ public class BehaviorTreeDefinitionBuilder
       if (definitionType == FootstepPlanActionDefinition.class)
       {
          return new FootstepPlanActionDefinition(crdtInfo, saveFileDirectory);
+      }
+      if (definitionType == KickDoorApproachPlanActionDefinition.class)
+      {
+         return new KickDoorApproachPlanActionDefinition(crdtInfo, saveFileDirectory);
       }
       if (definitionType == HandPoseActionDefinition.class)
       {

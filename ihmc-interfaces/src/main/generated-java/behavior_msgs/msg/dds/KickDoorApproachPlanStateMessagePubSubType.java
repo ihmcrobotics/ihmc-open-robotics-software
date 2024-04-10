@@ -15,7 +15,7 @@ public class KickDoorApproachPlanStateMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "02cbee0a296afe41ffd8e462465f1c0a8c85d3293d8ba89f7a7d4d59ba918691";
+   		return "61a537c9444792482ecd68daa073eccc3b8255b17eee37ec3f1792e6a77ef49f";
    }
    
    @Override
@@ -56,9 +56,6 @@ public class KickDoorApproachPlanStateMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += behavior_msgs.msg.dds.KickDoorApproachPlanDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
-      {
-          current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -96,11 +93,6 @@ public class KickDoorApproachPlanStateMessagePubSubType implements us.ihmc.pubsu
 
       current_alignment += behavior_msgs.msg.dds.KickDoorApproachPlanDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getFootsteps().size(); ++i0)
-      {
-          current_alignment += behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessagePubSubType.getCdrSerializedSize(data.getFootsteps().get(i0), current_alignment);}
-
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getLeftFootGoalPose(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getRightFootGoalPose(), current_alignment);
@@ -136,10 +128,6 @@ public class KickDoorApproachPlanStateMessagePubSubType implements us.ihmc.pubsu
    {
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.write(data.getState(), cdr);
       behavior_msgs.msg.dds.KickDoorApproachPlanDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
-      if(data.getFootsteps().size() <= 100)
-      cdr.write_type_e(data.getFootsteps());else
-          throw new RuntimeException("footsteps field exceeds the maximum length");
-
       geometry_msgs.msg.dds.PosePubSubType.write(data.getLeftFootGoalPose(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getRightFootGoalPose(), cdr);
       cdr.write_type_9(data.getExecutionState());
@@ -164,7 +152,6 @@ public class KickDoorApproachPlanStateMessagePubSubType implements us.ihmc.pubsu
    {
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.KickDoorApproachPlanDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
-      cdr.read_type_e(data.getFootsteps());	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getLeftFootGoalPose(), cdr);	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getRightFootGoalPose(), cdr);	
       data.setExecutionState(cdr.read_type_9());
@@ -187,7 +174,6 @@ public class KickDoorApproachPlanStateMessagePubSubType implements us.ihmc.pubsu
 
       ser.write_type_a("definition", new behavior_msgs.msg.dds.KickDoorApproachPlanDefinitionMessagePubSubType(), data.getDefinition());
 
-      ser.write_type_e("footsteps", data.getFootsteps());
       ser.write_type_a("left_foot_goal_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getLeftFootGoalPose());
 
       ser.write_type_a("right_foot_goal_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getRightFootGoalPose());
@@ -210,7 +196,6 @@ public class KickDoorApproachPlanStateMessagePubSubType implements us.ihmc.pubsu
 
       ser.read_type_a("definition", new behavior_msgs.msg.dds.KickDoorApproachPlanDefinitionMessagePubSubType(), data.getDefinition());
 
-      ser.read_type_e("footsteps", data.getFootsteps());
       ser.read_type_a("left_foot_goal_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getLeftFootGoalPose());
 
       ser.read_type_a("right_foot_goal_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getRightFootGoalPose());

@@ -2,7 +2,6 @@
 #define __behavior_msgs__msg__KickDoorApproachPlanStateMessage__idl__
 
 #include "behavior_msgs/msg/./ActionNodeStateMessage_.idl"
-#include "behavior_msgs/msg/./FootstepPlanActionFootstepStateMessage_.idl"
 #include "behavior_msgs/msg/./KickDoorApproachPlanDefinitionMessage_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
 #include "ihmc_common_msgs/msg/./SE3TrajectoryPointMessage_.idl"
@@ -36,10 +35,6 @@ module behavior_msgs
          * Definition
          */
         behavior_msgs::msg::dds::KickDoorApproachPlanDefinitionMessage definition;
-        /**
-         * The footsteps, with a maximum of 50
-         */
-        sequence<behavior_msgs::msg::dds::FootstepPlanActionFootstepStateMessage> footsteps;
         /**
          * Left foot goal pose
          */

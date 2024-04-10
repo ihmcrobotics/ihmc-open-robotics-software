@@ -1,16 +1,10 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.FootstepPlanActionFootstepStateMessage;
-import behavior_msgs.msg.dds.FootstepPlanActionStateMessage;
 import behavior_msgs.msg.dds.KickDoorApproachPlanStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.lists.RecyclingArrayListTools;
-import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -20,11 +14,8 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
 {
    private final KickDoorApproachPlanActionDefinition definition;
    private final ReferenceFrameLibrary referenceFrameLibrary;
-   private int numberOfAllocatedFootsteps = 0;
-   private final RecyclingArrayList<FootstepPlanActionFootstepState> footsteps;
    private final CRDTUnidirectionalPose3D leftFootGoalPose;
    private final CRDTUnidirectionalPose3D rightFootGoalPose;
-   private final SideDependentList<RigidBodyTransform> goalFootstepToGoalTransforms = new SideDependentList<>(() -> new RigidBodyTransform());
    private final ReferenceFrame parentFrame;
    private final CRDTUnidirectionalInteger totalNumberOfFootsteps;
    private final CRDTUnidirectionalInteger numberOfIncompleteFootsteps;
@@ -44,10 +35,6 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
 
       leftFootGoalPose = new CRDTUnidirectionalPose3D(ROS2ActorDesignation.ROBOT, crdtInfo);
       rightFootGoalPose = new CRDTUnidirectionalPose3D(ROS2ActorDesignation.ROBOT, crdtInfo);
-      footsteps = new RecyclingArrayList<>(() ->
-         new FootstepPlanActionFootstepState(referenceFrameLibrary,
-                                             definition.getCRDTParentFrameName(),
-                                             RecyclingArrayListTools.getUnsafe(definition.getFootsteps().getValueUnsafe(), numberOfAllocatedFootsteps++)));
       totalNumberOfFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
       numberOfIncompleteFootsteps = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 0);
       for (RobotSide side : RobotSide.values)
@@ -61,19 +48,6 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
    @Override
    public void update()
    {
-      for (RobotSide side : RobotSide.values)
-      {
-         goalFootstepToGoalTransforms.get(side).getTranslation().setZ(0.0);
-         goalFootstepToGoalTransforms.get(side).getRotation().setYawPitchRoll(goalFootstepToGoalTransforms.get(side).getRotation().getYaw(), 0.0, 0.0);
-      }
-
-      RecyclingArrayListTools.synchronizeSize(footsteps, definition.getFootsteps().getSize());
-
-      for (int i = 0; i < footsteps.size(); i++)
-      {
-         footsteps.get(i).setIndex(i);
-         footsteps.get(i).update();
-      }
    }
 
    public void toMessage(KickDoorApproachPlanStateMessage message)
@@ -91,11 +65,6 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
       currentFootPoses.get(RobotSide.LEFT).toMessage(message.getCurrentLeftFootPose());
       currentFootPoses.get(RobotSide.RIGHT).toMessage(message.getCurrentRightFootPose());
 
-      message.getFootsteps().clear();
-      for (FootstepPlanActionFootstepState footstep : footsteps)
-      {
-         footstep.toMessage(message.getFootsteps().add());
-      }
 
       message.setExecutionState(executionState.toMessage().toByte());
    }
@@ -115,12 +84,6 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
       currentFootPoses.get(RobotSide.LEFT).fromMessage(message.getCurrentLeftFootPose());
       currentFootPoses.get(RobotSide.RIGHT).fromMessage(message.getCurrentRightFootPose());
 
-      footsteps.clear();
-      for (FootstepPlanActionFootstepStateMessage footstep : message.getFootsteps())
-      {
-         footsteps.add().fromMessage(footstep);
-      }
-
       executionState.fromMessage(FootstepPlanActionExecutionState.fromByte(message.getExecutionState()));
    }
 
@@ -132,11 +95,6 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
    public ReferenceFrame getParentFrame()
    {
       return parentFrame;
-   }
-
-   public RecyclingArrayList<FootstepPlanActionFootstepState> getFootsteps()
-   {
-      return footsteps;
    }
 
    public int getTotalNumberOfFootsteps()

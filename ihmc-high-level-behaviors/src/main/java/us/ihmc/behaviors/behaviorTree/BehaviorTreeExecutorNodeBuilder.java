@@ -84,6 +84,19 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
                                                footstepPlanner,
                                                footstepPlannerParameters);
       }
+      if (nodeType == KickDoorApproachPlanActionDefinition.class)
+      {
+         return new KickDoorApproachPlanActionExecutor(id,
+                                                       crdtInfo,
+                                                       saveFileDirectory,
+                                                       ros2ControllerHelper,
+                                                       syncedRobot,
+                                                       controllerStatusTracker,
+                                                       referenceFrameLibrary,
+                                                       walkingControllerParameters,
+                                                       footstepPlanner,
+                                                       footstepPlannerParameters);
+      }
       if (nodeType == HandPoseActionDefinition.class)
       {
          return new HandPoseActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot);
