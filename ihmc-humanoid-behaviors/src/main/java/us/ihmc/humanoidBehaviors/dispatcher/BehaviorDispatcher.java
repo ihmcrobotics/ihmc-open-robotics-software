@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
@@ -73,8 +73,8 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
    private E stopBehaviorKey;
    private E currentBehaviorKey;
 
-   private final IHMCROS2Publisher<BehaviorStatusPacket> behaviorStatusPublisher;
-   private final IHMCROS2Publisher<BehaviorControlModeResponsePacket> behaviorControlModeResponsePublisher;
+   private final ROS2PublisherBasics<BehaviorStatusPacket> behaviorStatusPublisher;
+   private final ROS2PublisherBasics<BehaviorControlModeResponsePacket> behaviorControlModeResponsePublisher;
 
    MessagerAPIFactory apiFactory = new MessagerAPIFactory();
 
@@ -101,8 +101,8 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       addBehavior(stopBehavior, simpleForwardingBehavior);
 
       ROS2Topic outputTopic = IHMCHumanoidBehaviorManager.getOutputTopic(robotName);
-      behaviorStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, BehaviorStatusPacket.class, outputTopic);
-      behaviorControlModeResponsePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, BehaviorControlModeResponsePacket.class, outputTopic);
+      behaviorStatusPublisher = ros2Node.createPublisher(outputTopic.withTypeName(BehaviorStatusPacket.class));
+      behaviorControlModeResponsePublisher = ros2Node.createPublisher(outputTopic.withTypeName(BehaviorControlModeResponsePacket.class));
 
       requestedBehavior.set(null);
 

@@ -8,7 +8,7 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.utilities.ros.RosTools;
@@ -21,8 +21,8 @@ public class ROSiRobotCommandDispatcher implements Runnable
 
    public ROSiRobotCommandDispatcher(String robotName, RealtimeROS2Node realtimeROS2Node, String rosHostIP)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HandDesiredConfigurationMessage.class,
-                                                    ROS2Tools.getControllerInputTopic(robotName), handDesiredConfigurationMessageSubscriber);
+      realtimeROS2Node.createSubscription(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(HandDesiredConfigurationMessage.class),
+                                          handDesiredConfigurationMessageSubscriber);
 
       String rosURI = "http://" + rosHostIP + ":11311";
 

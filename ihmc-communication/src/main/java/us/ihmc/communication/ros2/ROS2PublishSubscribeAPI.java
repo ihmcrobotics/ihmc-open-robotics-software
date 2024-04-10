@@ -4,7 +4,7 @@ import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.ros2.ROS2Topic;
@@ -34,9 +34,9 @@ public interface ROS2PublishSubscribeAPI
 
    public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback);
 
-   public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic);
+   public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic);
 
-   public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic, IHMCROS2Input.MessageFilter<T> messageFilter);
+   public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic, ROS2Input.MessageFilter<T> messageFilter);
 
    public ROS2TypelessInput subscribeTypeless(ROS2Topic<Empty> topic);
 

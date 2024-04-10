@@ -59,6 +59,7 @@ public class ImGuiTools
    public static int WHITE = Color.WHITE.toIntBits();
    public static int GRAY = Color.GRAY.toIntBits();
    public static int RED = Color.RED.toIntBits();
+   public static int CYAN = Color.CYAN.toIntBits();
    public static int PURPLE = new Color(1.0f, 0.0f, 1.0f, 1.0f).toIntBits();
    public static int YELLOW = Color.YELLOW.toIntBits();
    public static int GREEN = Color.GREEN.toIntBits();

@@ -8,7 +8,9 @@ import toolbox_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.ToolboxAPIs;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -17,7 +19,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerAPI;
+import us.ihmc.communication.FootstepPlannerAPI;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
@@ -34,7 +36,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -93,25 +94,25 @@ public class RemoteUIMessageConverter
    private final AtomicReference<FootstepDataListMessage> footstepPlanResponseReference;
    private final AtomicReference<PlanarRegionsList> planarRegionListReference;
 
-   private IHMCRealtimeROS2Publisher<FootstepPlannerActionMessage> plannerActionPublisher;
-   private IHMCRealtimeROS2Publisher<VisibilityGraphsParametersPacket> visibilityGraphsParametersPublisher;
-   private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> plannerParametersPublisher;
-   private IHMCRealtimeROS2Publisher<SwingPlannerParametersPacket> swingPlannerParametersPublisher;
-   private IHMCRealtimeROS2Publisher<SwingPlanningRequestPacket> swingReplanRequestPublisher;
+   private ROS2PublisherBasics<FootstepPlannerActionMessage> plannerActionPublisher;
+   private ROS2PublisherBasics<VisibilityGraphsParametersPacket> visibilityGraphsParametersPublisher;
+   private ROS2PublisherBasics<FootstepPlannerParametersPacket> plannerParametersPublisher;
+   private ROS2PublisherBasics<SwingPlannerParametersPacket> swingPlannerParametersPublisher;
+   private ROS2PublisherBasics<SwingPlanningRequestPacket> swingReplanRequestPublisher;
 
-   private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
-   private IHMCRealtimeROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
-   private IHMCRealtimeROS2Publisher<GoHomeMessage> goHomePublisher;
-   private IHMCRealtimeROS2Publisher<ToolboxStateMessage> walkingPreviewToolboxStatePublisher;
-   private IHMCRealtimeROS2Publisher<WalkingControllerPreviewInputMessage> walkingPreviewRequestPublisher;
+   private ROS2PublisherBasics<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
+   private ROS2PublisherBasics<FootstepDataListMessage> footstepDataListPublisher;
+   private ROS2PublisherBasics<GoHomeMessage> goHomePublisher;
+   private ROS2PublisherBasics<ToolboxStateMessage> walkingPreviewToolboxStatePublisher;
+   private ROS2PublisherBasics<WalkingControllerPreviewInputMessage> walkingPreviewRequestPublisher;
 
-   private IHMCRealtimeROS2Publisher<ArmTrajectoryMessage> armTrajectoryMessagePublisher;
-   private IHMCRealtimeROS2Publisher<HandTrajectoryMessage> handTrajectoryMessagePublisher;
-   private IHMCRealtimeROS2Publisher<FootTrajectoryMessage> footTrajectoryMessagePublisher;
-   private IHMCRealtimeROS2Publisher<ChestTrajectoryMessage> chestTrajectoryMessagePublisher;
-   private IHMCRealtimeROS2Publisher<SpineTrajectoryMessage> spineTrajectoryMessagePublisher;
-   private IHMCRealtimeROS2Publisher<HeadTrajectoryMessage> headTrajectoryMessagePublisher;
-   private IHMCRealtimeROS2Publisher<NeckTrajectoryMessage> neckTrajectoryMessagePublisher;
+   private ROS2PublisherBasics<ArmTrajectoryMessage> armTrajectoryMessagePublisher;
+   private ROS2PublisherBasics<HandTrajectoryMessage> handTrajectoryMessagePublisher;
+   private ROS2PublisherBasics<FootTrajectoryMessage> footTrajectoryMessagePublisher;
+   private ROS2PublisherBasics<ChestTrajectoryMessage> chestTrajectoryMessagePublisher;
+   private ROS2PublisherBasics<SpineTrajectoryMessage> spineTrajectoryMessagePublisher;
+   private ROS2PublisherBasics<HeadTrajectoryMessage> headTrajectoryMessagePublisher;
+   private ROS2PublisherBasics<NeckTrajectoryMessage> neckTrajectoryMessagePublisher;
 
    public static RemoteUIMessageConverter createRemoteConverter(Messager messager, String robotName)
    {
@@ -182,68 +183,51 @@ public class RemoteUIMessageConverter
    private void registerPubSubs(RealtimeROS2Node ros2Node)
    {
       /* footstep planner module outgoing messages */
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningRequestPacket.class,
-                                                    FootstepPlannerAPI.inputTopic(robotName),
-                                           s -> processFootstepPlanningRequestPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningToolboxOutputStatus.class,
-                                                    FootstepPlannerAPI.outputTopic(robotName),
-                                           s -> processFootstepPlanningOutputStatus(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
-                                           s -> processIncomingPlanarRegionMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    OcTreeKeyListMessage.class,
-                                                    REACommunicationProperties.outputTopic,
-                                                    s -> messager.submitMessage(FootstepPlannerMessagerAPI.OcTreeData, s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           FootstepPlannerAPI.swingReplanOutputTopic(robotName),
-                                           s ->
-                                           {
-                                              LogTools.info("Received replanned swing");
-                                              messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, s.takeNextData());
-                                           });
+      ros2Node.createSubscription(FootstepPlannerAPI.inputTopic(robotName).withTypeName(FootstepPlanningRequestPacket.class),
+                                  s -> processFootstepPlanningRequestPacket(s.takeNextData()));
+      ros2Node.createSubscription(FootstepPlannerAPI.outputTopic(robotName).withTypeName(FootstepPlanningToolboxOutputStatus.class),
+                                  s -> processFootstepPlanningOutputStatus(s.takeNextData()));
+      ros2Node.createSubscription(REACommunicationProperties.outputTopic.withTypeName(PlanarRegionsListMessage.class),
+                                  s -> processIncomingPlanarRegionMessage(s.takeNextData()));
+      ros2Node.createSubscription(REACommunicationProperties.outputTopic.withTypeName(OcTreeKeyListMessage.class),
+                                  s -> messager.submitMessage(FootstepPlannerMessagerAPI.OcTreeData, s.takeNextData()));
+      ros2Node.createSubscription(FootstepPlannerAPI.swingReplanOutputTopic(robotName), subscriber ->
+      {
+         LogTools.info("Received replanned swing");
+         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, subscriber.takeNextData());
+      });
 
       /* controller messages */
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName),
-                                           s -> messager.submitMessage(FootstepPlannerMessagerAPI.RobotConfigurationData, s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, ROS2Tools.getControllerOutputTopic(robotName),
-                                           s -> processCapturabilityStatus(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class, ROS2Tools.getControllerOutputTopic(robotName),
-                                           s -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepStatusMessage, s.takeNextData()));
+      ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic(robotName).withTypeName(RobotConfigurationData.class),
+                                  s -> messager.submitMessage(FootstepPlannerMessagerAPI.RobotConfigurationData, s.takeNextData()));
+      ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic(robotName).withTypeName(CapturabilityBasedStatus.class), s -> processCapturabilityStatus(s.takeNextData()));
+      ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic(robotName).withTypeName(FootstepStatusMessage.class),
+                                  s -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepStatusMessage, s.takeNextData()));
 
       ROS2Topic<HeightMapMessage> heightMapOutput = PerceptionAPI.HEIGHT_MAP_OUTPUT;
       new ROS2Callback<>(ros2Node, heightMapOutput, m -> messager.submitMessage(FootstepPlannerMessagerAPI.HeightMapData, m));
 
       /* publishers */
-      plannerParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                      FootstepPlannerParametersPacket.class,
-                                                                      FootstepPlannerAPI.inputTopic(robotName));
-      visibilityGraphsParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                               VisibilityGraphsParametersPacket.class,
-                                                                               FootstepPlannerAPI.inputTopic(robotName));
-      plannerActionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                  FootstepPlannerActionMessage.class,
-                                                                  FootstepPlannerAPI.inputTopic(robotName));
-      swingPlannerParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                           SwingPlannerParametersPacket.class,
-                                                                           ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput());
-      swingReplanRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, SwingPlanningRequestPacket.class, FootstepPlannerAPI.inputTopic(robotName));
+      plannerParametersPublisher = ros2Node.createPublisher(FootstepPlannerAPI.inputTopic(robotName).withTypeName(FootstepPlannerParametersPacket.class));
+      visibilityGraphsParametersPublisher = ros2Node.createPublisher(FootstepPlannerAPI.inputTopic(robotName).withTypeName(VisibilityGraphsParametersPacket.class));
+      plannerActionPublisher = ros2Node.createPublisher(FootstepPlannerAPI.inputTopic(robotName).withTypeName(FootstepPlannerActionMessage.class));
+      swingPlannerParametersPublisher = ros2Node.createPublisher(FootstepPlannerAPI.FOOTSTEP_PLANNER.withRobot(robotName).withInput().withTypeName(SwingPlannerParametersPacket.class));
+      swingReplanRequestPublisher = ros2Node.createPublisher(FootstepPlannerAPI.inputTopic(robotName).withTypeName(SwingPlanningRequestPacket.class));
 
-      footstepPlanningRequestPublisher = ROS2Tools
-            .createPublisherTypeNamed(ros2Node, FootstepPlanningRequestPacket.class, FootstepPlannerAPI.inputTopic(robotName));
-      footstepDataListPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepDataListMessage.class, ROS2Tools.getControllerInputTopic(robotName));
-      goHomePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, GoHomeMessage.class, ROS2Tools.getControllerInputTopic(robotName));
+      footstepPlanningRequestPublisher = ros2Node.createPublisher(FootstepPlannerAPI.inputTopic(robotName).withTypeName(FootstepPlanningRequestPacket.class));
+      footstepDataListPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(FootstepDataListMessage.class));
+      goHomePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(GoHomeMessage.class));
 
-      ROS2Topic controllerPreviewInputTopic = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
-                                                                                   .withInput();
-      walkingPreviewToolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, controllerPreviewInputTopic);
-      walkingPreviewRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WalkingControllerPreviewInputMessage.class, controllerPreviewInputTopic);
-      armTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ArmTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
-      handTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HandTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
-      footTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
-      chestTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ChestTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
-      spineTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, SpineTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
-      headTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HeadTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
-      neckTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, NeckTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
+      ROS2Topic controllerPreviewInputTopic = ToolboxAPIs.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withInput();
+      walkingPreviewToolboxStatePublisher = ros2Node.createPublisher(controllerPreviewInputTopic.withTypeName(ToolboxStateMessage.class));
+      walkingPreviewRequestPublisher = ros2Node.createPublisher(controllerPreviewInputTopic.withTypeName(WalkingControllerPreviewInputMessage.class));
+      armTrajectoryMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(ArmTrajectoryMessage.class));
+      handTrajectoryMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(HandTrajectoryMessage.class));
+      footTrajectoryMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(FootTrajectoryMessage.class));
+      chestTrajectoryMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(ChestTrajectoryMessage.class));
+      spineTrajectoryMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(SpineTrajectoryMessage.class));
+      headTrajectoryMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(HeadTrajectoryMessage.class));
+      neckTrajectoryMessagePublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(NeckTrajectoryMessage.class));
 
       messager.addTopicListener(FootstepPlannerMessagerAPI.ComputePath, request -> requestNewPlan());
       messager.addTopicListener(FootstepPlannerMessagerAPI.ReplanSwing, request ->
@@ -260,10 +244,10 @@ public class RemoteUIMessageConverter
       messager.addTopicListener(FootstepPlannerMessagerAPI.GoHomeTopic, goHomePublisher::publish);
       messager.addTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListPublisher::publish);
 
-      IHMCRealtimeROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher =
-            ROS2Tools.createPublisher(ros2Node,
-                                      BipedalSupportPlanarRegionParametersMessage.class,
-                                      PerceptionAPI.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName).withInput().withType(BipedalSupportPlanarRegionParametersMessage.class));
+      ROS2PublisherBasics<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher
+            = ros2Node.createPublisher(PerceptionAPI.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
+                                                                                   .withInput()
+                                                                                   .withType(BipedalSupportPlanarRegionParametersMessage.class));
 
       messager.addTopicListener(FootstepPlannerMessagerAPI.BipedalSupportRegionsParameters,  message ->
       {
