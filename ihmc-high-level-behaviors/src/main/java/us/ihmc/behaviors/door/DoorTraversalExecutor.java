@@ -7,9 +7,11 @@ import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -29,6 +31,8 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
    private boolean waitForPullScrewToFinish = false;
+
+   private transient final FramePose3D pushDoorPanelPose = new FramePose3D();
 
    public DoorTraversalExecutor(long id,
                                 CRDTInfo crdtInfo,
@@ -70,6 +74,19 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
       super.update();
 
       updateActionSubtree(this);
+
+      state.getDoorHingeJointAngle().setValue(Double.NaN);
+
+      // TODO: PUSH_DOOR_FRAME_NAME renamed to RIGHT_DOOR_FRAME?
+      SceneNode pushDoorFrameNode = sceneGraph.getNamesToNodesMap().get(DoorSceneNodeDefinitions.PUSH_DOOR_FRAME_NAME);
+      SceneNode pushDoorPanelNode = sceneGraph.getNamesToNodesMap().get(DoorSceneNodeDefinitions.RIGHT_DOOR_PANEL_NAME);
+
+      if (pushDoorFrameNode != null && pushDoorPanelNode != null)
+      {
+         pushDoorPanelPose.setFromReferenceFrame(pushDoorPanelNode.getNodeFrame());
+         pushDoorPanelPose.changeFrame(pushDoorFrameNode.getNodeFrame());
+         state.getDoorHingeJointAngle().setValue(pushDoorPanelPose.getOrientation().getYaw());
+      }
 
       if (state.getStabilizeDetectionAction() != null && state.getStabilizeDetectionAction().getIsExecuting())
       {

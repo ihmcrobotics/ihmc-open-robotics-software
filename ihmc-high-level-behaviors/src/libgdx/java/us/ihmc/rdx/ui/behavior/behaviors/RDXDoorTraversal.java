@@ -85,10 +85,14 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
                                                                              EuclidCoreMissingTools.DEGREE_SYMBOL));
       lostGraspDetectionHandOpenAngleSlider.renderImGuiWidget();
 
+      boolean pullScrewPrimitiveIsExecuting = false;
       if (state.arePullRetryNodesPresent())
-      {
-         ImGui.text("Pull screw primitive node: Executing: %b".formatted(state.getPullScrewPrimitiveAction().getIsExecuting()));
-      }
+         pullScrewPrimitiveIsExecuting = state.getPullScrewPrimitiveAction().getIsExecuting();
+      ImGui.beginDisabled(state.arePullRetryNodesPresent());
+      ImGui.text("Pull screw primitive node: Executing: %b".formatted(state.getPullScrewPrimitiveAction().getIsExecuting()));
+      ImGui.endDisabled();
+
+      ImGui.text("Door hinge joint angle: %.2f%s".formatted(Math.toDegrees(state.getDoorHingeJointAngle().getValue()), EuclidCoreMissingTools.DEGREE_SYMBOL));
 
       super.renderNodeSettingsWidgets();
    }

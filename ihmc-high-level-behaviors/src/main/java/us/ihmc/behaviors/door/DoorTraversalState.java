@@ -8,6 +8,8 @@ import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefinition>
@@ -21,9 +23,13 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    private WaitDurationActionState waitToOpenRightHandAction;
    private ScrewPrimitiveActionState pullScrewPrimitiveAction;
 
+   private final CRDTUnidirectionalDouble doorHingeJointAngle;
+
    public DoorTraversalState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new DoorTraversalDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+
+      doorHingeJointAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
    }
 
    @Override
@@ -74,6 +80,8 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       getDefinition().toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
+
+      message.setDoorHingeJointAngle(doorHingeJointAngle.toMessage());
    }
 
    public void fromMessage(DoorTraversalStateMessage message)
@@ -81,6 +89,8 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       super.fromMessage(message.getState());
 
       getDefinition().fromMessage(message.getDefinition());
+
+      doorHingeJointAngle.fromMessage(message.getDoorHingeJointAngle());
    }
 
    public boolean arePullRetryNodesPresent()
@@ -109,5 +119,10 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    public ScrewPrimitiveActionState getPullScrewPrimitiveAction()
    {
       return pullScrewPrimitiveAction;
+   }
+
+   public CRDTUnidirectionalDouble getDoorHingeJointAngle()
+   {
+      return doorHingeJointAngle;
    }
 }
