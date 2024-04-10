@@ -69,7 +69,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
    private static final double gravityZ = 9.81; // This needs to be positive for the planner to work
    private final KickDynamicPlanner kickDynamicPlanner;
 
-   private final ZUpFrame stateParentZUpFrame;
+   private ZUpFrame stateParentZUpFrame;
 
    public KickDoorApproachPlanActionExecutor(long id,
                                              CRDTInfo crdtInfo,
@@ -110,6 +110,17 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
                                                        null);
    }
 
+   private void updateStateParentZUpFrame()
+   {
+      // the parent frame may have been changed.
+      if (stateParentZUpFrame.getParent() != state.getParentFrame())
+      {
+         stateParentZUpFrame.remove();
+         stateParentZUpFrame = new ZUpFrame(state.getParentFrame(), "StateParentZUpFrame");
+      }
+      stateParentZUpFrame.update();
+   }
+
    @Override
    public void update()
    {
@@ -117,7 +128,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
 
       boolean invalidDefinition = false;
 
-      stateParentZUpFrame.update();
+      updateStateParentZUpFrame();
 
       double kickImpulse = definition.getKickImpulse().getValue();
       double kickTargetDistance = definition.getKickTargetDistance().getValue();
