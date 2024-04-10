@@ -49,6 +49,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
    private final SideDependentList<FramePose3D> commandedGoalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
    private final SideDependentList<FramePose3D> syncedFeetPoses = new SideDependentList<>(() -> new FramePose3D());
    private final SideDependentList<Integer> indexOfLastFoot = new SideDependentList<>();
+   private final ReferenceFrameLibrary referenceFrameLibrary;
    private double nominalExecutionDuration;
    private final SideDependentList<TaskspaceTrajectoryTrackingErrorCalculator> trackingCalculators = new SideDependentList<>(
          TaskspaceTrajectoryTrackingErrorCalculator::new);
@@ -86,6 +87,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
       state = getState();
       definition = getDefinition();
 
+      this.referenceFrameLibrary = referenceFrameLibrary;
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
@@ -93,7 +95,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
       this.footstepPlanner = footstepPlanner;
       this.footstepPlannerParameters = footstepPlannerParameters;
 
-      stateParentZUpFrame = new ZUpFrame(state.getParentFrame(), "StateParentZUpFrame");
+      stateParentZUpFrame = new ZUpFrame(referenceFrameLibrary.findFrameByName("RightDoorLeverHandle"), "StateParentZUpFrame");
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -188,17 +190,25 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
 
       FramePose3D kickFootPose = new FramePose3D();
       kickFootPose.setToZero(stateParentZUpFrame);
-      kickFootPose.setX(-definition.getKickTargetDistance().getValue());
-      kickFootPose.setY(kickSide.negateIfRightSide(definition.getHorizontalDistanceFromHandle().getValue()));
-      kickFootPose.getOrientation().setToYawOrientation(Math.PI);
+      //FIXME: This is a temp fix until we get stateParentZUpFrame to be the correct frame.
+//      kickFootPose.setX(-definition.getKickTargetDistance().getValue());
+//      kickFootPose.setY(kickSide.negateIfRightSide(definition.getHorizontalDistanceFromHandle().getValue()));
+//      kickFootPose.getOrientation().setToYawOrientation(Math.PI);
+      kickFootPose.setX(definition.getKickTargetDistance().getValue());
+      kickFootPose.setY(-kickSide.negateIfRightSide(definition.getHorizontalDistanceFromHandle().getValue()));
+//      kickFootPose.getOrientation().setToYawOrientation(Math.PI);
       kickFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       kickFootPose.getPosition().setZ(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getZ());
 
       FramePose3D stanceFootPose = new FramePose3D();
       stanceFootPose.setToZero(stateParentZUpFrame);
-      stanceFootPose.setX(-definition.getKickTargetDistance().getValue());
-      stanceFootPose.setY(kickSide.negateIfRightSide(definition.getHorizontalDistanceFromHandle().getValue() + definition.getStanceFootWidth().getValue()));
-      stanceFootPose.getOrientation().setToYawOrientation(Math.PI);
+      //FIXME: This is a temp fix until we get stateParentZUpFrame to be the correct frame.
+//      stanceFootPose.setX(-definition.getKickTargetDistance().getValue());
+//      stanceFootPose.setY(kickSide.negateIfRightSide(definition.getHorizontalDistanceFromHandle().getValue() + definition.getStanceFootWidth().getValue()));
+//      stanceFootPose.getOrientation().setToYawOrientation(Math.PI);
+      stanceFootPose.setX(definition.getKickTargetDistance().getValue());
+      stanceFootPose.setY(-kickSide.negateIfRightSide(definition.getHorizontalDistanceFromHandle().getValue() + definition.getStanceFootWidth().getValue()));
+//      stanceFootPose.getOrientation().setToYawOrientation(Math.PI);
       stanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       stanceFootPose.getPosition().setZ(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getZ());
 
@@ -218,12 +228,18 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
 
       FramePose3D stanceGoalPose = new FramePose3D(soleFramesForPlanning.get(stanceSide));
       stanceGoalPose.changeFrame(ReferenceFrame.getWorldFrame());
+//      stanceGoalPose.setIncludingFrame(stateParentZUpFrame, stanceGoalPose.getPosition(), stanceGoalPose.getOrientation());
+//      stanceGoalPose.changeFrame(ReferenceFrame.getWorldFrame());
+//      stanceGoalPose.setZ(0.0);
 
       liveGoalFeetPoses.get(stanceSide).setIncludingFrame(stanceGoalPose);
 
       FramePose3D kickStartPose = new FramePose3D(soleFramesForPlanning.get(kickSide));
       kickStartPose.changeFrame(ReferenceFrame.getWorldFrame());
       kickStartPose.getPosition().set(kickDynamicPlanner.getDesiredSwingFootStartNominal());
+//      kickStartPose.setIncludingFrame(stateParentZUpFrame, kickStartPose.getPosition(), kickStartPose.getOrientation());
+//      kickStartPose.changeFrame(ReferenceFrame.getWorldFrame());
+//      kickStartPose.setZ(0.0);
 
       liveGoalFeetPoses.get(kickSide).setIncludingFrame(kickStartPose);
    }
