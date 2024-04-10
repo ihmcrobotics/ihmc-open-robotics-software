@@ -31,7 +31,7 @@ public class KickParameters
    private static final double desiredTouchdownPositionRelativeToTarget = -0.15; // m
    private static final double touchdownHeightSpeed = 1.0; // m /s
 
-   private static final double preShiftWeightDistribution = 0.75; // percentage
+   private double preShiftWeightDistribution = 0.75; // percentage
    private static final double preShiftDuration = 2.5; // s
    private static final double shiftDuration = 0.5; // s // TODO make this a computed value
    private static final double chamberDuration = 0.25; // s
@@ -53,6 +53,11 @@ public class KickParameters
    private static final double maxCMPRate = 5.0;
 
    private final KickingWBCCParameters fastWalkingWBCCParameters = new KickingWBCCParameters();
+
+   public void setPreShiftWeightDistribution(double preShiftWeightDistribution)
+   {
+      this.preShiftWeightDistribution = preShiftWeightDistribution;
+   }
 
    public double getDesiredCoMHeight()
    {

@@ -167,9 +167,13 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
       }
 
       state.setCanExecute(state.areFramesInWorld() && !invalidDefinition);
+      computeGoalFootPosesForKick();
+
+      state.getLeftFootGoalPose().getValue().set(liveGoalFeetPoses.get(RobotSide.LEFT));
+      state.getRightFootGoalPose().getValue().set(liveGoalFeetPoses.get(RobotSide.RIGHT));
+
       if (state.getCanExecute())
       {
-         computeGoalFootPosesForKick();
       }
 
       for (RobotSide side : RobotSide.values)
@@ -268,8 +272,6 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
          state.getCurrentFootPoses().get(side).getValue().set(syncedFeetPoses.get(side));
          state.getDesiredFootPoses().get(side).getValue().clear();
       }
-      state.getLeftFootGoalPose().getValue().set(liveGoalFeetPoses.get(RobotSide.LEFT));
-      state.getRightFootGoalPose().getValue().set(liveGoalFeetPoses.get(RobotSide.RIGHT));
 
       state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
       state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);

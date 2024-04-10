@@ -152,6 +152,7 @@ public class KickDynamicPlanner
    {
       double touchdownDuration = inputParameters.getKickHeight() / kickParameters.getTouchdownHeightSpeed();
       estimatedTouchdownDuration.set(touchdownDuration);
+      kickParameters.setPreShiftWeightDistribution(inputParameters.getPrekickWeightDistribution());
 
       RobotSide supportSide = inputParameters.getKickFootSide().getOppositeSide();
       double omega = Math.sqrt(gravityZ / kickParameters.getDesiredCoMHeight());
