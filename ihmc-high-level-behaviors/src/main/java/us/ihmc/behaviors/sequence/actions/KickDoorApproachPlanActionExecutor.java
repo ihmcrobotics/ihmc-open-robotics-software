@@ -66,7 +66,8 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
    private final KickParameters kickParameters = new KickParameters();
    private final KickInputParameters kickInputParameters = new KickInputParameters(null);
    private final SideDependentList<PoseReferenceFrame> soleFramesForPlanning = new SideDependentList<>();
-   private final PoseReferenceFrame centerOfMassControlFrameForPlanning = new PoseReferenceFrame("CenterOfMassControlFrameForPlanning", ReferenceFrame.getWorldFrame());
+   private final PoseReferenceFrame centerOfMassControlFrameForPlanning = new PoseReferenceFrame("CenterOfMassControlFrameForPlanning",
+                                                                                                 ReferenceFrame.getWorldFrame());
    private static final double gravityZ = 9.81; // This needs to be positive for the planner to work
    private final KickDynamicPlanner kickDynamicPlanner;
 
@@ -96,7 +97,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
       this.footstepPlanner = footstepPlanner;
       this.footstepPlannerParameters = footstepPlannerParameters;
 
-      stateParentZUpFrame = new ZUpFrame(referenceFrameLibrary.findFrameByName(definition.getParentFrameName()), "StateParentZUpFrame");
+      stateParentZUpFrame = new ZUpFrame(state.getParentFrame(), "StateParentZUpFrame");
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -115,11 +116,15 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
 
    private void updateStateParentZUpFrame()
    {
-      // the parent frame may have been changed.
-      if (stateParentZUpFrame.getParent() != state.getParentFrame())
+      // check that the frame is still in the tree
+      if (referenceFrameLibrary.findFrameByName(definition.getParentFrameName()) != null)
       {
-         stateParentZUpFrame.remove();
-         stateParentZUpFrame = new ZUpFrame(state.getParentFrame(), "StateParentZUpFrame");
+         // the parent frame may have been changed.
+         if (stateParentZUpFrame.getParent() != state.getParentFrame())
+         {
+            stateParentZUpFrame.remove();
+            stateParentZUpFrame = new ZUpFrame(state.getParentFrame(), "StateParentZUpFrame");
+         }
       }
       stateParentZUpFrame.update();
    }
@@ -210,13 +215,8 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
 
       FramePose3D preKickFootPose = new FramePose3D();
       preKickFootPose.setToZero(stateParentZUpFrame);
-      //FIXME: This is a temp fix until we get stateParentZUpFrame to be the correct frame.
-//      kickFootPose.setX(-definition.getKickTargetDistance().getValue());
-//      kickFootPose.setY(kickSide.negateIfRightSide(definition.getHorizontalDistanceFromHandle().getValue()));
-//      kickFootPose.getOrientation().setToYawOrientation(Math.PI);
       preKickFootPose.setX(definition.getKickTargetDistance().getValue());
       preKickFootPose.setY(-kickSide.negateIfRightSide(definition.getHorizontalDistanceFromHandle().getValue()));
-//      kickFootPose.getOrientation().setToYawOrientation(Math.PI);
       preKickFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       preKickFootPose.getPosition().setZ(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getZ());
 

@@ -17,7 +17,7 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
    private final CRDTUnidirectionalPose3D kickGoalPose;
    private final CRDTUnidirectionalPose3D leftFootGoalPose;
    private final CRDTUnidirectionalPose3D rightFootGoalPose;
-   private final ReferenceFrame parentFrame;
+   private ReferenceFrame parentFrame;
    private final CRDTUnidirectionalInteger totalNumberOfFootsteps;
    private final CRDTUnidirectionalInteger numberOfIncompleteFootsteps;
    private final SideDependentList<CRDTUnidirectionalSE3Trajectory> desiredFootPoses = new SideDependentList<>();
@@ -50,6 +50,7 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
    @Override
    public void update()
    {
+      parentFrame = referenceFrameLibrary.findFrameByName(definition.getParentFrameName());
    }
 
    public void toMessage(KickDoorApproachPlanStateMessage message)
