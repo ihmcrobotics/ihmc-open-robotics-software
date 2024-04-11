@@ -192,7 +192,7 @@ public class YOLOv8Node extends DetectableSceneNode
                FramePlanarRegionsList doorFramePlanarRegionsList = new FramePlanarRegionsList();
                doorFramePlanarRegionsList.setPlanarRegionsList(doorPlanarRegionsList);
 
-               PerceptionMessageTools.publishFramePlanarRegionsList(doorFramePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
+               PerceptionMessageTools.publishFramePlanarRegionsList(doorFramePlanarRegionsList, PerceptionAPI.PERSPECTIVE_DOOR_RAPID_REGION, ros2Helper);
             }
          }
       }

@@ -41,6 +41,7 @@ import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8DetectionManager;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -513,7 +514,7 @@ public class PerceptionAndAutonomyProcess
 
    public void updatePlanarRegions()
    {
-      if (zedDepthImage != null && zedDepthImage.isAvailable() && zedDepthDemandNode.isDemanded())
+      if (zedDepthImage != null && zedDepthImage.isAvailable() && planarRegionsDemandNode.isDemanded())
       {
          RawImage latestZEDDepthImage = zedDepthImage.get();
 
@@ -551,6 +552,8 @@ public class PerceptionAndAutonomyProcess
          if (doorYoloNode != null)
             doorYoloNode.updatePlanarRegions(planarRegionsInWorldFrame, ros2Helper);
 
+         PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
+
          latestZEDDepthImage.release();
       }
    }
@@ -580,36 +583,26 @@ public class PerceptionAndAutonomyProcess
       zedPointCloudDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
       zedDepthDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_DEPTH);
       zedColorDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_COLOR);
-
       realsenseDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
-
       ousterDepthDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_OUSTER_DEPTH);
       ousterHeightMapDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
       ousterLidarScanDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_LIDAR_SCAN);
-
       for (RobotSide side : RobotSide.values)
          blackflyImageDemandNodes.put(side, new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(side)));
-      blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(ousterDepthDemandNode);
-
       arUcoDetectionDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ARUCO);
-
       centerposeDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_CENTERPOSE);
-
       yoloZEDDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_YOLO_ZED);
       yoloRealsenseDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_YOLO_REALSENSE);
-
       planarRegionsDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_PLANAR_REGIONS);
-      ousterDepthDemandNode.addDependents(planarRegionsDemandNode);
 
       // build the graph
-      zedDepthDemandNode.addDependents(yoloZEDDemandNode);
-      zedColorDemandNode.addDependents(yoloZEDDemandNode);
-      zedDepthDemandNode.addDependents(zedPointCloudDemandNode);
+      blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(ousterDepthDemandNode); // For point cloud coloring
+      zedDepthDemandNode.addDependents(planarRegionsDemandNode); // Using ZED for planar regions
+      zedDepthDemandNode.addDependents(zedPointCloudDemandNode); // Used by global visualizer to demand color & depth
       zedColorDemandNode.addDependents(zedPointCloudDemandNode, centerposeDemandNode);
-
+      planarRegionsDemandNode.addDependents(yoloZEDDemandNode); // Planar region used for door detection
       realsenseDemandNode.addDependents(yoloRealsenseDemandNode);
-
-      blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(arUcoDetectionDemandNode);
+      blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(arUcoDetectionDemandNode); // ArUco set to use Blackfly images
    }
 
    /*
