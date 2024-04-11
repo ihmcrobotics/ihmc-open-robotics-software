@@ -8,8 +8,10 @@ public enum YOLOv8DetectionClass
 {
    DRILL(0, null, null),
    DOOR_LEVER(1, null, null),
-   DOOR_PULL_HANDLE(2, null, null),
-   DOOR_PUSH_BAR(3, null, null);
+   DOOR_KNOB(2, null, null),
+   DOOR_PUSH_BAR(3, null, null),
+   DOOR_PULL_HANDLE(4, null, null),
+   DOOR_PANEL(5, null, null);
 
    private final int classID;
    @Nullable
