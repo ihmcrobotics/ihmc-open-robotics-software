@@ -1,5 +1,6 @@
 package us.ihmc.avatar.sakeGripper;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.SakeHandAPI;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -43,6 +44,7 @@ public class ROS2SakeHandStatus
          commandedHandOpenAngle = SakeHandParameters.handPositionToOpenAngle(sakeHandStatusMessage.getDesiredPositionStatus(),
                                                                              positionLowerLimit,
                                                                              positionUpperLimit);
+         commandedHandOpenAngle = MathTools.clamp(commandedHandOpenAngle, 0.0, SakeHandParameters.MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES);
          currentFingertipGripForce = sakeHandStatusMessage.getRawCurrentTorque() * SakeHandParameters.RAW_SAKE_TORQUE_TO_GRIP_FORCE;
          commandedFingertipGripForceLimit = sakeHandStatusMessage.getRawTorqueLimitStatus() * SakeHandParameters.RAW_SAKE_TORQUE_TO_GRIP_FORCE;
          currentVelocity = sakeHandStatusMessage.getCurrentVelocity();
