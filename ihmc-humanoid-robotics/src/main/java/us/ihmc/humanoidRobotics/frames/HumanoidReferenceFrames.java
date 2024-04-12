@@ -157,7 +157,9 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       {
          for (SpineJointName spineJointName : robotJointNames.getSpineJointNames())
          {
-            this.spineReferenceFrames.put(spineJointName, fullRobotModel.getSpineJoint(spineJointName).getFrameAfterJoint());
+            OneDoFJointBasics spineJoint = fullRobotModel.getSpineJoint(spineJointName);
+            if (spineJoint != null)
+               this.spineReferenceFrames.put(spineJointName, spineJoint.getFrameAfterJoint());
          }
       }
 
