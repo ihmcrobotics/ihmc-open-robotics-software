@@ -1,6 +1,6 @@
 package us.ihmc.rdx.ui.interactable;
 
-import controller_msgs.msg.dds.EtherSnacksSakeHandCommandMessage;
+import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -42,7 +42,7 @@ public class RDXSakeHandWidgets
    private final Notification userChangedFingertipGripForce = new Notification();
    private final Notification calibrateRequested = new Notification();
    private final Notification resetErrorsRequested = new Notification();
-   private final EtherSnacksSakeHandCommandMessage sakeHandDesiredCommandMessage = new EtherSnacksSakeHandCommandMessage();
+   private final SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage = new SakeHandDesiredCommandMessage();
    private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
    private final ImGuiFlashingText calibrateStatusText = new ImGuiFlashingText(ImGuiTools.RED);
    private final ImGuiFlashingText needResetStatusText = new ImGuiFlashingText(ImGuiTools.RED);
@@ -86,32 +86,33 @@ public class RDXSakeHandWidgets
          {
             LogTools.info("Commanding hand open angle %.1f%s".formatted(handOpenAngleDegreesSlider.getDoubleValue(),
                                                                         EuclidCoreMissingTools.DEGREE_SYMBOL));
-            sakeHandDesiredCommandMessage.setDesiredPosition(
-                  SakeHandParameters.normalizeHandOpenAngle(Math.toRadians(handOpenAngleDegreesSlider.getDoubleValue())));
+            sakeHandDesiredCommandMessage.setGripperDesiredPosition(
+                  SakeHandParameters.handOpenAngleToPosition(Math.toRadians(handOpenAngleDegreesSlider.getDoubleValue()),
+                                                             sakeHandStatus.getPositionLowerLimit(),
+                                                             sakeHandStatus.getPositionUpperLimit()));
          }
 
          if (sendForce)
          {
             LogTools.info("Commanding fingertip grip force limit %.1f N".formatted(fingertipGripForceSlider.getDoubleValue()));
-            sakeHandDesiredCommandMessage.setTorqueLimit(
-                  SakeHandParameters.normalizeFingertipGripForceLimit(fingertipGripForceSlider.getDoubleValue()));
+            sakeHandDesiredCommandMessage.setRawGripperTorqueLimit(SakeHandParameters.gripForceToRawTorque(fingertipGripForceSlider.getDoubleValue()));
          }
 
          if (sendCalibrate)
          {
             LogTools.info("Requesting hand calibration");
-            sakeHandDesiredCommandMessage.setCalibrate(true);
+            sakeHandDesiredCommandMessage.setRequestCalibration(true);
          }
 
          if (sendResetErrors)
          {
             LogTools.info("Requesting hand to reset errors");
-            sakeHandDesiredCommandMessage.setReset(true);
+            sakeHandDesiredCommandMessage.setRequestResetErrors(true);
          }
 
          if (sendAngle || sendForce || sendCalibrate || sendResetErrors)
          {
-            communicationHelper.publish(robotName -> ROS2Tools.getEtherSnacksHandCommandTopic(robotName, handSide), sakeHandDesiredCommandMessage);
+            communicationHelper.publish(robotName -> ROS2Tools.getHandSakeCommandTopic(robotName, handSide), sakeHandDesiredCommandMessage);
          }
       }
    }
@@ -161,7 +162,7 @@ public class RDXSakeHandWidgets
       float sliderEnd = ImGui.getColumnWidth();
       float sliderWidth = sliderEnd - sliderStart;
 
-      ImGuiTools.renderSliderOrProgressNotch(sliderStart + (float) (1.0f - currentHandOpenAngleNotchNormal) * sliderWidth, ImGui.getColorU32(ImGuiCol.Text));
+      ImGuiTools.renderSliderOrProgressNotch(sliderStart + (float) currentHandOpenAngleNotchNormal * sliderWidth, ImGui.getColorU32(ImGuiCol.Text));
 
       handOpenAngleDegreesSlider.setWidgetText("%.1f%s".formatted(handOpenAngleDegreesSlider.getDoubleValue(), EuclidCoreMissingTools.DEGREE_SYMBOL));
 

@@ -1,9 +1,9 @@
 package us.ihmc.rdx.ui.teleoperation;
 
-import controller_msgs.msg.dds.EtherSnacksSakeHandCommandMessage;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import imgui.ImGui;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -24,6 +24,7 @@ public class RDXHandConfigurationManager
    private final SideDependentList<RDXIconTexture> handIcons = new SideDependentList<>();
    private final SideDependentList<RDXHandQuickAccessButtons> handQuickAccessButtons = new SideDependentList<>();
    private final SideDependentList<RDXSakeHandWidgets> sakeHandWidgets = new SideDependentList<>();
+   private final SideDependentList<ROS2SakeHandStatus> sakeHandStatus = new SideDependentList<>();
    private CommunicationHelper communicationHelper;
    private String robotName;
 
@@ -46,6 +47,7 @@ public class RDXHandConfigurationManager
             handQuickAccessButtons.put(side, new RDXHandQuickAccessButtons(baseUI, side, openHand, closeHand, calibrateHand, resetHand));
 
             sakeHandWidgets.put(side, new RDXSakeHandWidgets(communicationHelper, syncedRobotModel, side));
+            sakeHandStatus.put(side, syncedRobotModel.getSakeHandStatus().get(side));
          }
       }
    }
@@ -71,27 +73,30 @@ public class RDXHandConfigurationManager
 
    public void publishHandCommand(RobotSide side, @Nullable SakeHandPreset handPreset, boolean calibrate, boolean reset)
    {
-      EtherSnacksSakeHandCommandMessage sakeHandDesiredCommandMessage = new EtherSnacksSakeHandCommandMessage();
+      SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage = new SakeHandDesiredCommandMessage();
       sakeHandDesiredCommandMessage.setRobotSide(side.toByte());
       SakeHandParameters.resetDesiredCommandMessage(sakeHandDesiredCommandMessage);
 
       if (calibrate)
       {
-         sakeHandDesiredCommandMessage.setCalibrate(true);
+         sakeHandDesiredCommandMessage.setRequestCalibration(true);
       }
       else if (reset)
       {
-         sakeHandDesiredCommandMessage.setReset(true);
+         sakeHandDesiredCommandMessage.setRequestResetErrors(true);
       }
       else if (handPreset != null)
       {
-         sakeHandDesiredCommandMessage.setDesiredPosition(
-               SakeHandParameters.normalizeHandOpenAngle(handPreset.getHandOpenAngle()));
-         sakeHandDesiredCommandMessage.setTorqueLimit(
-               SakeHandParameters.normalizeFingertipGripForceLimit(handPreset.getFingertipGripForceLimit()));
+         double handPositionLowerLimit = sakeHandStatus.get(side).getPositionLowerLimit();
+         double handPositionUpperLimit = sakeHandStatus.get(side).getPositionUpperLimit();
+
+         sakeHandDesiredCommandMessage.setGripperDesiredPosition(SakeHandParameters.handOpenAngleToPosition(handPreset.getHandOpenAngle(),
+                                                                                                            handPositionLowerLimit,
+                                                                                                            handPositionUpperLimit));
+         sakeHandDesiredCommandMessage.setRawGripperTorqueLimit(SakeHandParameters.gripForceToRawTorque(handPreset.getFingertipGripForceLimit()));
       }
 
       RDXBaseUI.pushNotification("Commanding hand configuration...");
-      communicationHelper.publish(ROS2Tools.getEtherSnacksHandCommandTopic(robotName, side), sakeHandDesiredCommandMessage);
+      communicationHelper.publish(ROS2Tools.getHandSakeCommandTopic(robotName, side), sakeHandDesiredCommandMessage);
    }
 }

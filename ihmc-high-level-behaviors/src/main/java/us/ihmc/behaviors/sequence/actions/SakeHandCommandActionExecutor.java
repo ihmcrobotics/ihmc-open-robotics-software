@@ -3,6 +3,7 @@ package us.ihmc.behaviors.sequence.actions;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.JointspaceTrajectoryTrackingErrorCalculator;
@@ -29,6 +30,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
    private final SakeHandCommandActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
+   private final SideDependentList<ROS2SakeHandStatus> sakeHandStatus = new SideDependentList<>();
    private final JointspaceTrajectoryTrackingErrorCalculator trackingCalculator = new JointspaceTrajectoryTrackingErrorCalculator();
    private final SideDependentList<RevoluteJoint> x1KnuckleJoints = new SideDependentList<>();
    private final SideDependentList<RevoluteJoint> x2KnuckleJoints = new SideDependentList<>();
@@ -54,6 +56,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
          {
             x1KnuckleJoints.put(side, (RevoluteJoint) syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(0));
             x2KnuckleJoints.put(side, (RevoluteJoint) syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(1));
+            sakeHandStatus.put(side, syncedRobot.getSakeHandStatus().get(side));
          }
       }
    }
@@ -104,11 +107,15 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       }
       else
       {
+         double handPositionLowerLimit = sakeHandStatus.get(definition.getSide()).getPositionLowerLimit();
+         double handPositionUpperLimit = sakeHandStatus.get(definition.getSide()).getPositionUpperLimit();
+
          sakeHandDesiredCommandMessage.setRobotSide(definition.getSide().toByte());
-//         SakeHandParameters.resetDesiredCommandMessage(sakeHandDesiredCommandMessage); FIXME: make this the new ethersnacks message
-         sakeHandDesiredCommandMessage.setNormalizedGripperDesiredPosition(SakeHandParameters.normalizeHandOpenAngle(definition.getHandOpenAngle()));
-         sakeHandDesiredCommandMessage.setNormalizedGripperTorqueLimit(
-                                                       SakeHandParameters.normalizeFingertipGripForceLimit(definition.getFingertipGripForceLimit()));
+         SakeHandParameters.resetDesiredCommandMessage(sakeHandDesiredCommandMessage);
+         sakeHandDesiredCommandMessage.setGripperDesiredPosition(SakeHandParameters.handOpenAngleToPosition(definition.getHandOpenAngle(),
+                                                                                                            handPositionLowerLimit,
+                                                                                                            handPositionUpperLimit));
+         sakeHandDesiredCommandMessage.setRawGripperTorqueLimit(SakeHandParameters.gripForceToRawTorque(definition.getFingertipGripForceLimit()));
          ros2ControllerHelper.publish(robotName -> ROS2Tools.getHandSakeCommandTopic(robotName, definition.getSide()), sakeHandDesiredCommandMessage);
 
          LogTools.info("Commanding hand to open angle %.2f%s with torque limit %.2f N".formatted(Math.toDegrees(definition.getHandOpenAngle()),

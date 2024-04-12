@@ -1,8 +1,6 @@
 package us.ihmc.communication;
 
 import com.eprosima.xmlschemas.fastrtps_profiles.ReliabilityQosKindType;
-import controller_msgs.msg.dds.EtherSnacksSakeHandCommandMessage;
-import controller_msgs.msg.dds.EtherSnacksSakeHandStatusMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
@@ -102,10 +100,6 @@ public class ROS2Tools
                                                                                                                 .withTypeName(SakeHandDesiredCommandMessage.class);
    private static final ROS2Topic<SakeHandStatusMessage> HAND_SAKE_DESIRED_STATUS = HUMANOID_CONTROLLER.withOutput()
                                                                                                        .withTypeName(SakeHandStatusMessage.class);
-   private static final ROS2Topic<EtherSnacksSakeHandCommandMessage> SAKE_HAND_COMMAND = HUMANOID_CONTROLLER.withOutput()
-                                                                                                            .withTypeName(EtherSnacksSakeHandCommandMessage.class);
-   private static final ROS2Topic<EtherSnacksSakeHandStatusMessage> SAKE_HAND_STATUS = HUMANOID_CONTROLLER.withOutput()
-                                                                                                          .withTypeName(EtherSnacksSakeHandStatusMessage.class);
    private static final ROS2Topic<HandJointAnglePacket> HAND_JOINT_ANGLES = HUMANOID_CONTROLLER.withOutput().withTypeName(HandJointAnglePacket.class);
 
    public static final ROS2Topic<Float64> BOX_MASS = IHMC_ROOT.withSuffix("box_mass").withType(Float64.class);
@@ -130,16 +124,6 @@ public class ROS2Tools
    public static ROS2Topic<SakeHandStatusMessage> getHandSakeStatusTopic(String robotName, RobotSide side)
    {
       return HAND_SAKE_DESIRED_STATUS.withRobot(robotName).withSuffix(side.getLowerCaseName());
-   }
-
-   public static ROS2Topic<EtherSnacksSakeHandCommandMessage> getEtherSnacksHandCommandTopic(String robotName, RobotSide side)
-   {
-      return SAKE_HAND_COMMAND.withRobot(robotName).withSuffix(side.getLowerCaseName());
-   }
-
-   public static ROS2Topic<EtherSnacksSakeHandStatusMessage> getEtherSnackHandStatusTopic(String robotName, RobotSide side)
-   {
-      return SAKE_HAND_STATUS.withRobot(robotName).withSuffix(side.getLowerCaseName());
    }
 
    public static ROS2Topic<HandJointAnglePacket> getHandJointAnglesTopic(String robotName)
