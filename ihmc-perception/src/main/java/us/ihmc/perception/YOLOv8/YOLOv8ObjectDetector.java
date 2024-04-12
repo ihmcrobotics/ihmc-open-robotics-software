@@ -146,7 +146,7 @@ public class YOLOv8ObjectDetector
             {
                maskWeights[j] = detectedMaskWeights.get(((long) numberOfMasks * index) + j);
             }
-            detections.add(new YOLOv8Detection(YOLOv8DetectionClass.values()[detectedClassIds.get(index)],
+            detections.add(new YOLOv8Detection(YOLOv8DetectionClass.fromClassID(detectedClassIds.get(index)),
                                                detectedConfidences.get(index),
                                                detectedBoxes.get(index).x() + shiftWidth,
                                                detectedBoxes.get(index).y() + shiftHeight,
