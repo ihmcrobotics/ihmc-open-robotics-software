@@ -1,6 +1,5 @@
 package us.ihmc.sensorProcessing.communication.producers;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import controller_msgs.msg.dds.IMUPacket;
@@ -29,7 +28,6 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    private final List<? extends IMUSensorReadOnly> imuSensorData;
    private final List<? extends ForceSensorDataReadOnly> forceSensorData;
 
-   private List<RobotFrameDataPublisher> robotFrameDataPublishers = new ArrayList<>();
    private final SensorTimestampHolder timestampHolder;
    private final RobotMotionStatusHolder robotMotionStatusHolder;
 
@@ -76,12 +74,6 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
 
       robotConfigurationData.setJointNameHash(RobotConfigurationDataFactory.calculateJointNameHash(jointSensorData, forceSensorData, imuSensorData));
       robotConfigurationDataPublisher = realtimeROS2Node.createPublisher(StateEstimatorAPI.getRobotConfigurationDataTopic(outputTopic));
-
-      // Create RobotFrameDataPublishers here.
-      for (ReferenceFrame frame : frameData)
-      {
-         robotFrameDataPublishers.add(new RobotFrameDataPublisher(frame, realtimeROS2Node, outputTopic));
-      }
    }
 
    @Override
@@ -167,12 +159,6 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       MessageTools.setRobotConfigurationDataSequenceId(robotConfigurationData, this.sequenceId);
 
       robotConfigurationDataPublisher.publish(robotConfigurationData);
-
-      // publish robot frame data
-      for (RobotFrameDataPublisher robotFrameDataPublisher : robotFrameDataPublishers)
-      {
-         robotFrameDataPublisher.publish();
-      }
    }
 
    @Override
