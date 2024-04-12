@@ -124,6 +124,16 @@ public class SakeHandParameters
       return (int) (gripForce / RAW_SAKE_TORQUE_TO_GRIP_FORCE);
    }
 
+   public static double knuckleTorqueToGripForce(double knuckleTorque)
+   {
+      return normalizeKnuckleTorque(knuckleTorque) * FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT;
+   }
+
+   public static double gripForceToKnuckleTorque(double gripForce)
+   {
+      return normalizeFingertipGripForceLimit(gripForce) * KNUCKLE_TORQUE_AT_LIMIT;
+   }
+
    public static void resetDesiredCommandMessage(SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage)
    {
       sakeHandDesiredCommandMessage.setGripperDesiredPosition(Double.NaN);
