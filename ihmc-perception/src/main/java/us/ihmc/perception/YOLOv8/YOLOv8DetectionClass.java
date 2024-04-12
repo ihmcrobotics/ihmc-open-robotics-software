@@ -4,6 +4,9 @@ import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape
 
 import javax.annotation.Nullable;
 
+/**
+ * TODO: replace this with some json that gets downloaded at runtime and cached locally
+ */
 public enum YOLOv8DetectionClass
 {
    DRILL(0, null, null),

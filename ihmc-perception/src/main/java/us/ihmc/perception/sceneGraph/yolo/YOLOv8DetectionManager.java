@@ -50,6 +50,8 @@ public class YOLOv8DetectionManager
    private final Map<YOLOv8DetectionClass, YOLOv8SegmentedDetection> detectedObjects = new ConcurrentHashMap<>();
    private final Map<YOLOv8DetectionClass, YOLOv8SegmentedDetection> candidateDetections = new ConcurrentHashMap<>();
 
+   private YOLOv8DoorNodeManager doorNodeManager = new YOLOv8DoorNodeManager();
+
    private float yoloConfidenceThreshold = 0.5f;
    private float yoloNMSThreshold = 0.1f;
    private float yoloSegmentationThreshold = 0.0f;
@@ -58,7 +60,6 @@ public class YOLOv8DetectionManager
    private ReferenceFrame robotFrame = null;
 
    private boolean destroyed = false;
-   private YOLOv8Node doorYoloNode;
 
    public YOLOv8DetectionManager(ROS2Helper ros2Helper)
    {
@@ -323,6 +324,8 @@ public class YOLOv8DetectionManager
                if (filter.isStableDetectionResult()) // filter has enough samples and detection is stable; add the candidate to scene graph
                {
                   long nodeID = sceneGraph.getNextID().getAndIncrement();
+
+
                   YOLOv8Node newYoloNode = new YOLOv8Node(nodeID,
                                                           "YOLO " + candidateDetection.getDetection().objectClass().toString(),
                                                           candidateDetection.getDetection().objectClass(),
@@ -332,16 +335,14 @@ public class YOLOv8DetectionManager
                   detectedNodes.put(candidateDetection.getDetection().objectClass(), newYoloNode);
                   detectedObjects.put(candidateDetection.getDetection().objectClass(), candidateDetection);
                   candidateDetection.getDetectionFilter().setAcceptanceThreshold(0.2f);
-                  if (newYoloNode.getName().contains("door"))
-                  {
-                     doorYoloNode = newYoloNode;
-                  }
                }
 
                candidateIterator.remove();
             }
          }
       });
+
+      doorNodeManager.updateSceneGraph(sceneGraph);
 
       // Handle existing detections
       Iterator<Entry<YOLOv8DetectionClass, YOLOv8Node>> yoloNodeIterator = detectedNodes.entrySet().iterator();
@@ -366,10 +367,5 @@ public class YOLOv8DetectionManager
             yoloNode.update();
          }
       }
-   }
-
-   public YOLOv8Node getDoorYoloNode()
-   {
-      return doorYoloNode;
    }
 }

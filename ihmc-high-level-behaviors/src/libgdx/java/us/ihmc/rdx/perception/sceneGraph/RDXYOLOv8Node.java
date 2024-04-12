@@ -12,7 +12,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
-import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiInputDoubleWrapper;
@@ -20,7 +19,6 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObject;
 
@@ -76,29 +74,9 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
       objectPoseGraphic.setPoseInWorldFrame(yoloNode.getObjectPose());
    }
 
-   private void createInteractableObject()
+   public RDXInteractableObject createInteractableObject()
    {
-      switch (yoloNode.getDetectionClass())
-      {
-         case DOOR_LEVER ->
-         {
-            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
-            interactableObject.load(DoorSceneNodeDefinitions.DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
-                                    DoorSceneNodeDefinitions.RIGHT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-         }
-         case DOOR_PULL_HANDLE ->
-         {
-            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
-            interactableObject.load(DoorSceneNodeDefinitions.DOOR_PULL_HANDLE_VISUAL_MODEL_FILE_PATH,
-                                    DoorSceneNodeDefinitions.DOOR_PULL_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-         }
-         case DOOR_PUSH_BAR ->
-         {
-            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
-            interactableObject.load(DoorSceneNodeDefinitions.DOOR_EMERGENCY_BAR_VISUAL_MODEL_FILE_PATH,
-                                    DoorSceneNodeDefinitions.LEFT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
-         }
-      }
+      return null;
    }
 
    @Override
@@ -120,7 +98,7 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
       }
       else
       {
-         createInteractableObject();
+         interactableObject = createInteractableObject();
       }
    }
 
