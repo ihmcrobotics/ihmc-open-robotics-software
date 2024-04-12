@@ -5,7 +5,6 @@ import us.ihmc.pubsub.impl.PubSubStats;
 import us.ihmc.pubsub.impl.PublisherStats;
 import us.ihmc.pubsub.impl.SubscriberStats;
 import us.ihmc.rdx.imgui.RDXPanel;
-import us.ihmc.ros2.ROS2Stats;
 import us.ihmc.tools.time.RateCalculator;
 
 public class RDXROS2StatsPanel extends RDXPanel
@@ -22,7 +21,7 @@ public class RDXROS2StatsPanel extends RDXPanel
 
    private void renderImGuiWidgets()
    {
-      ImGui.text("Number of nodes created: %d".formatted(ROS2Stats.NUMBER_OF_NODES_CREATED));
+      ImGui.text("Number of nodes created: %d".formatted(PubSubStats.NUMBER_OF_PARTICIPANTS_CREATED));
       ImGui.text("Number of publishers created: %d".formatted(PubSubStats.PUBLISHER_STATS.size()));
       ImGui.text("Number of subscribers created: %d".formatted(PubSubStats.SUBSCRIBER_STATS.size()));
       ImGui.text("Number of matched subscriptions: %d".formatted(PubSubStats.NUMBER_OF_MATCHED_SUBSCRIPTIONS));
