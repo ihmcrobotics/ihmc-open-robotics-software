@@ -11,7 +11,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
@@ -213,7 +213,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final YoDouble pelvisOrientationScaleFactor = new YoDouble("diagnosticBehaviorPelvisOrientationScaleFactor", registry);
    private final YoDouble bootyShakeTime = new YoDouble("diagnosticBehaviorButtyShakeTime", registry);
 
-   private final IHMCROS2Publisher<StampedPosePacket> stampedPosePublisher;
+   private final ROS2PublisherBasics<StampedPosePacket> stampedPosePublisher;
 
    public DiagnosticBehavior(String robotName, FullHumanoidRobotModel fullRobotModel, YoEnum<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
                              YoDouble yoTime, YoBoolean yoDoubleSupport, ROS2Node ros2Node, WholeBodyControllerParameters wholeBodyControllerParameters, FootstepPlannerParametersBasics footstepPlannerParameters,

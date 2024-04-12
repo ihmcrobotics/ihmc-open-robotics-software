@@ -15,7 +15,8 @@ import quadruped_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.QuadrupedAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -59,7 +60,7 @@ public class QuadrupedSupportPlanarRegionPublisher
    private static final int numberOfRegions = 6;
 
    private final RealtimeROS2Node ros2Node;
-   private final IHMCRealtimeROS2Publisher<PlanarRegionsListMessage> regionPublisher;
+   private final ROS2PublisherBasics<PlanarRegionsListMessage> regionPublisher;
 
    private final AtomicReference<RobotConfigurationData> latestRobotConfigurationData = new AtomicReference<>(null);
    private final AtomicReference<QuadrupedSupportPlanarRegionParametersMessage> latestParametersMessage = new AtomicReference<>(null);
@@ -85,17 +86,12 @@ public class QuadrupedSupportPlanarRegionPublisher
 
       ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "supporting_planar_region_publisher");
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class, ROS2Tools.getQuadrupedControllerOutputTopic(robotName),
-                                                    (NewMessageListener<RobotConfigurationData>) subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
-      regionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                           PlanarRegionsListMessage.class,
-                                                           REACommunicationProperties.subscriberCustomRegionsTopicName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    QuadrupedSupportPlanarRegionParametersMessage.class,
-                                                    ROS2Tools.QUADRUPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
-                                                              .withInput(),
-                                           s -> latestParametersMessage.set(s.takeNextData()));
+      ros2Node.createSubscription(QuadrupedAPI.getQuadrupedControllerOutputTopic(robotName).withTypeName(RobotConfigurationData.class),
+                                  (NewMessageListener<RobotConfigurationData>) subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
+      regionPublisher = ros2Node.createPublisher(REACommunicationProperties.subscriberCustomRegionsTopicName.withTypeName(PlanarRegionsListMessage.class));
+      ros2Node.createSubscription(QuadrupedAPI.QUADRUPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
+                                                                                 .withInput().withTypeName(QuadrupedSupportPlanarRegionParametersMessage.class),
+                                  s -> latestParametersMessage.set(s.takeNextData()));
 
       QuadrupedSupportPlanarRegionParametersMessage defaultParameters = new QuadrupedSupportPlanarRegionParametersMessage();
       defaultParameters.setEnable(true);

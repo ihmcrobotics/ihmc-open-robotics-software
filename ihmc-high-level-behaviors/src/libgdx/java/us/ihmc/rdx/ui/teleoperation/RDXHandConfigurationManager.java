@@ -7,7 +7,7 @@ import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.CommunicationHelper;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.SakeHandAPI;
 import us.ihmc.rdx.tools.RDXIconTexture;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXSakeHandWidgets;
@@ -97,6 +97,6 @@ public class RDXHandConfigurationManager
       }
 
       RDXBaseUI.pushNotification("Commanding hand configuration...");
-      communicationHelper.publish(ROS2Tools.getHandSakeCommandTopic(robotName, side), sakeHandDesiredCommandMessage);
+      communicationHelper.publish(SakeHandAPI.getHandSakeCommandTopic(robotName, side), sakeHandDesiredCommandMessage);
    }
 }

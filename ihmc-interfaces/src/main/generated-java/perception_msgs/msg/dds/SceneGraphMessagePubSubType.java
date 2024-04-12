@@ -15,7 +15,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "5298b7a619427f47224afa9f4c288c9f9295a38a72413355b194a4be10c4ebd3";
+   		return "355f90d94e6fdd1f606b2bb54f547bd40b14ebae1233dd9ef6f46d63aa3789cb";
    }
    
    @Override
@@ -79,6 +79,9 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      {
+          current_alignment += perception_msgs.msg.dds.YOLOv8NodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -138,6 +141,11 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       {
           current_alignment += perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessagePubSubType.getCdrSerializedSize(data.getPrimitiveRigidBodySceneNodes().get(i0), current_alignment);}
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getYoloSceneNodes().size(); ++i0)
+      {
+          current_alignment += perception_msgs.msg.dds.YOLOv8NodeMessagePubSubType.getCdrSerializedSize(data.getYoloSceneNodes().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
@@ -182,6 +190,10 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.write_type_e(data.getPrimitiveRigidBodySceneNodes());else
           throw new RuntimeException("primitive_rigid_body_scene_nodes field exceeds the maximum length");
 
+      if(data.getYoloSceneNodes().size() <= 200)
+      cdr.write_type_e(data.getYoloSceneNodes());else
+          throw new RuntimeException("yolo_scene_nodes field exceeds the maximum length");
+
    }
 
    public static void read(perception_msgs.msg.dds.SceneGraphMessage data, us.ihmc.idl.CDR cdr)
@@ -197,6 +209,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.read_type_e(data.getCenterposeSceneNodes());	
       cdr.read_type_e(data.getStaticRelativeSceneNodes());	
       cdr.read_type_e(data.getPrimitiveRigidBodySceneNodes());	
+      cdr.read_type_e(data.getYoloSceneNodes());	
 
    }
 
@@ -213,6 +226,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.write_type_e("centerpose_scene_nodes", data.getCenterposeSceneNodes());
       ser.write_type_e("static_relative_scene_nodes", data.getStaticRelativeSceneNodes());
       ser.write_type_e("primitive_rigid_body_scene_nodes", data.getPrimitiveRigidBodySceneNodes());
+      ser.write_type_e("yolo_scene_nodes", data.getYoloSceneNodes());
    }
 
    @Override
@@ -228,6 +242,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.read_type_e("centerpose_scene_nodes", data.getCenterposeSceneNodes());
       ser.read_type_e("static_relative_scene_nodes", data.getStaticRelativeSceneNodes());
       ser.read_type_e("primitive_rigid_body_scene_nodes", data.getPrimitiveRigidBodySceneNodes());
+      ser.read_type_e("yolo_scene_nodes", data.getYoloSceneNodes());
    }
 
    public static void staticCopy(perception_msgs.msg.dds.SceneGraphMessage src, perception_msgs.msg.dds.SceneGraphMessage dest)

@@ -21,7 +21,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -231,7 +230,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
             handHybridJointspaceTaskspaceTrajectoryMessage.setRobotSide(definition.getSide().toByte());
             handHybridJointspaceTaskspaceTrajectoryMessage.getTaskspaceTrajectoryMessage().set(se3TrajectoryMessage);
             handHybridJointspaceTaskspaceTrajectoryMessage.getJointspaceTrajectoryMessage().set(jointspaceTrajectoryMessage);
-            LogTools.info("Publishing arm hybrid jointspace taskpace");
+            state.getLogger().info("Publishing arm hybrid jointspace taskpace");
             ros2ControllerHelper.publishToController(handHybridJointspaceTaskspaceTrajectoryMessage);
          }
 
@@ -241,7 +240,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       }
       else
       {
-         LogTools.error("Cannot execute. Frame is not a child of World frame.");
+         state.getLogger().error("Cannot execute. Frame is not a child of World frame.");
       }
    }
 
@@ -251,7 +250,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       armTrajectoryMessage.setRobotSide(definition.getSide().toByte());
       armTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
       armTrajectoryMessage.setForceExecution(true); // Prevent the command being rejected because robot is still finishing up walking
-      LogTools.info("Publishing arm jointspace trajectory");
+      state.getLogger().info("Publishing arm jointspace trajectory");
       ros2ControllerHelper.publishToController(armTrajectoryMessage);
    }
 
@@ -267,7 +266,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       {
          state.setIsExecuting(false);
          state.setFailed(true);
-         LogTools.error("Task execution timed out. Publishing stop all trajectories message.");
+         state.getLogger().error("Task execution timed out. Publishing stop all trajectories message.");
          ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
          return;
       }
@@ -307,7 +306,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    {
       JointspaceTrajectoryMessage jointspaceTrajectoryMessage = buildJointspaceTrajectoryMessage();
 
-      LogTools.info("Disengaging holding hand in taskspace");
+      state.getLogger().info("Disengaging holding hand in taskspace");
       publishJointspaceCommand(jointspaceTrajectoryMessage);
    }
 

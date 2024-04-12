@@ -9,8 +9,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
@@ -72,7 +72,7 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
 
    private ROS2Node ros2Node;
    @SuppressWarnings("rawtypes")
-   private Map<Class<?>, IHMCROS2Publisher> defaultControllerPublishers;
+   private Map<Class<?>, ROS2PublisherBasics> defaultControllerPublishers;
 
    private final AtomicReference<Throwable> lastThrowable = new AtomicReference<>();
 
@@ -577,23 +577,23 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    @SuppressWarnings({"unchecked", "rawtypes"})
    public void publishToController(Object message)
    {
-      IHMCROS2Publisher ihmcros2Publisher = defaultControllerPublishers.get(message.getClass());
-      ihmcros2Publisher.publish(message);
+      ROS2PublisherBasics ROS2PublisherBasics = defaultControllerPublishers.get(message.getClass());
+      ROS2PublisherBasics.publish(message);
    }
 
-   public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
+   public <T> ROS2PublisherBasics<T> createPublisherForController(Class<T> messageType)
    {
-      return createPublisher(messageType, ROS2Tools.getControllerInputTopic(getRobotModel().getSimpleRobotName()));
+      return createPublisher(messageType, HumanoidControllerAPI.getInputTopic(getRobotModel().getSimpleRobotName()));
    }
 
-   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic<?> generator)
+   public <T> ROS2PublisherBasics<T> createPublisher(Class<T> messageType, ROS2Topic<?> generator)
    {
-      return ROS2Tools.createPublisherTypeNamed(ros2Node, messageType, generator);
+      return ros2Node.createPublisher(generator.withTypeName(messageType));
    }
 
-   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, String topicName)
+   public <T> ROS2PublisherBasics<T> createPublisher(Class<T> messageType, String topicName)
    {
-      return ROS2Tools.createPublisher(ros2Node, messageType, topicName);
+      return ros2Node.createPublisher(messageType, topicName);
    }
 
    private ConcurrentLinkedQueue<Command<?, ?>> controllerCommands;
@@ -636,24 +636,24 @@ public class SCS2AvatarTestingSimulation implements YoVariableHolder
    }
 
    @SuppressWarnings("rawtypes")
-   public void setDefaultControllerPublishers(Map<Class<?>, IHMCROS2Publisher> defaultControllerPublishers)
+   public void setDefaultControllerPublishers(Map<Class<?>, ROS2PublisherBasics> defaultControllerPublishers)
    {
       this.defaultControllerPublishers = defaultControllerPublishers;
    }
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      createSubscriber(messageType, ROS2Tools.getControllerOutputTopic(getRobotModel().getSimpleRobotName()), consumer);
+      createSubscriber(messageType, HumanoidControllerAPI.getOutputTopic(getRobotModel().getSimpleRobotName()), consumer);
    }
 
    public <T> void createSubscriber(Class<T> messageType, ROS2Topic<?> generator, ObjectConsumer<T> consumer)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, messageType, generator, s -> consumer.consumeObject(s.takeNextData()));
+      ros2Node.createSubscription(generator.withTypeName(messageType), s -> consumer.consumeObject(s.takeNextData()));
    }
 
    public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
+      ros2Node.createSubscription(messageType, s -> consumer.consumeObject(s.takeNextData()), topicName);
    }
 
    public YoRegistry getEstimatorRegistry()

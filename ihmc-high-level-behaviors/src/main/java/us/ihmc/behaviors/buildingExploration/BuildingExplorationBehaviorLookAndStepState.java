@@ -9,7 +9,7 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -47,7 +47,7 @@ class BuildingExplorationBehaviorLookAndStepState implements State
 
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
-   private final IHMCROS2Input<PoseListMessage> bodyPathSubscription;
+   private final ROS2Input<PoseListMessage> bodyPathSubscription;
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
    private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
 

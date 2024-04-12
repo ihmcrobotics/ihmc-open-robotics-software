@@ -1,6 +1,13 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
-import perception_msgs.msg.dds.*;
+import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
+import perception_msgs.msg.dds.CenterposeNodeMessage;
+import perception_msgs.msg.dds.DetectableSceneNodeMessage;
+import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
+import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
+import perception_msgs.msg.dds.SceneNodeMessage;
+import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
+import perception_msgs.msg.dds.YOLOv8NodeMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +24,7 @@ public class ROS2SceneGraphSubscriptionNode
    private PredefinedRigidBodySceneNodeMessage predefinedRigidBodySceneNodeMessage;
    private ArUcoMarkerNodeMessage arUcoMarkerNodeMessage;
    private CenterposeNodeMessage centerposeNodeMessage;
+   private YOLOv8NodeMessage yoloNodeMessage;
    private StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage;
    private PrimitiveRigidBodySceneNodeMessage primitiveRigidBodySceneNodeMessage;
    private final List<ROS2SceneGraphSubscriptionNode> children = new ArrayList<>();
@@ -29,6 +37,7 @@ public class ROS2SceneGraphSubscriptionNode
       predefinedRigidBodySceneNodeMessage = null;
       arUcoMarkerNodeMessage = null;
       centerposeNodeMessage = null;
+      yoloNodeMessage = null;
       staticRelativeSceneNodeMessage = null;
       children.clear();
    }
@@ -91,6 +100,16 @@ public class ROS2SceneGraphSubscriptionNode
    public void setCenterposeNodeMessage(CenterposeNodeMessage centerposeNodeMessage)
    {
       this.centerposeNodeMessage = centerposeNodeMessage;
+   }
+
+   public YOLOv8NodeMessage getYOLONodeMessage()
+   {
+      return yoloNodeMessage;
+   }
+
+   public void setYOLONodeMessage(YOLOv8NodeMessage yoloNodeMessage)
+   {
+      this.yoloNodeMessage = yoloNodeMessage;
    }
 
    public StaticRelativeSceneNodeMessage getStaticRelativeSceneNodeMessage()

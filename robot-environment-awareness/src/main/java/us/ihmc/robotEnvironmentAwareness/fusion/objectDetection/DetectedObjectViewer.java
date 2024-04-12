@@ -33,7 +33,7 @@ public class DetectedObjectViewer
 
    public DetectedObjectViewer(ROS2Node ros2Node)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getDoorParameterTopic(), this::renderDoor);
+      ros2Node.createSubscription(ROS2Tools.IHMC_ROOT.withTypeName(DoorParameterPacket.class), this::renderDoor);
    }
 
    public void renderDoor(Subscriber<DoorParameterPacket> subscriber)

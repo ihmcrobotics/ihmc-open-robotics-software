@@ -9,7 +9,7 @@ import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.SakeHandAPI;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
@@ -112,7 +112,7 @@ public class RDXSakeHandWidgets
 
          if (sendAngle || sendForce || sendCalibrate || sendResetErrors)
          {
-            communicationHelper.publish(robotName -> ROS2Tools.getHandSakeCommandTopic(robotName, handSide), sakeHandDesiredCommandMessage);
+            communicationHelper.publish(robotName -> SakeHandAPI.getHandSakeCommandTopic(robotName, handSide), sakeHandDesiredCommandMessage);
          }
       }
    }

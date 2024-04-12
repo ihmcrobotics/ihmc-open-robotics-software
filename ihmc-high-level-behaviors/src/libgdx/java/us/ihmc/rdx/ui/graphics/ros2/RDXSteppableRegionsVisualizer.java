@@ -7,7 +7,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
-import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.perception.steppableRegions.SteppableRegionsAPI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
@@ -52,7 +52,7 @@ public class RDXSteppableRegionsVisualizer extends RDXVisualizer
 
    public void setUpForNetworking(ROS2Node ros2Node)
    {
-      new IHMCROS2Callback<>(ros2Node, SteppableRegionsAPI.STEPPABLE_REGIONS_OUTPUT, this::acceptSteppableRegionsCollection);
+      new ROS2Callback<>(ros2Node, SteppableRegionsAPI.STEPPABLE_REGIONS_OUTPUT, this::acceptSteppableRegionsCollection);
    }
 
    public void acceptSteppableRegionsCollection(SteppableRegionsListCollectionMessage steppableRegionsListCollection)

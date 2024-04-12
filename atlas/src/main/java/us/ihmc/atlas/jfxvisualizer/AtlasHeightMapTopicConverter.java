@@ -14,7 +14,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.avatar.ros.RosTfPublisher;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -169,9 +169,7 @@ public class AtlasHeightMapTopicConverter
       zForwardXRightToZUpXForward.appendPitchRotation(Math.PI / 2.0);
       zForwardXRightToZUpXForward.appendYawRotation(-Math.PI / 2.0);
 
-      IHMCROS2Publisher<PlanarRegionsListMessage> regionsPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                                                        PlanarRegionsListMessage.class,
-                                                                                                        REACommunicationProperties.outputTopic);
+      ROS2PublisherBasics<PlanarRegionsListMessage> regionsPublisher = ros2Node.createPublisher(REACommunicationProperties.outputTopic.withTypeName(PlanarRegionsListMessage.class));
 
       RosTfPublisher tfPublisher = new RosTfPublisher(ros1Node, null);
 
