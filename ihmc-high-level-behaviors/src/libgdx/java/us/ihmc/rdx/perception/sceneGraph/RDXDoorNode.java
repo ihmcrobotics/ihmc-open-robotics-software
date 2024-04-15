@@ -17,6 +17,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorHardwareType;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -33,10 +34,11 @@ import java.util.Set;
 public class RDXDoorNode extends RDXSceneNode
 {
    private final DoorNode doorNode;
+   private final ImGuiUniqueLabelMap labels;
    @Nullable
    private RDXInteractableObject interactableObject;
    private final RigidBodyTransform visualModelTransformToWorld = new RigidBodyTransform();
-   private RDXPlanarRegionsGraphic doorPlanarRegionGraphic = new RDXPlanarRegionsGraphic();
+   private final RDXPlanarRegionsGraphic doorPlanarRegionGraphic = new RDXPlanarRegionsGraphic();
 
    private final transient PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private final transient PlanarRegion lastDoorRegion = new PlanarRegion();
@@ -46,10 +48,11 @@ public class RDXDoorNode extends RDXSceneNode
    private int switchSide = 0;
    private RobotSide lastSide;
 
-   public RDXDoorNode(DoorNode yoloDoorNode)
+   public RDXDoorNode(DoorNode yoloDoorNode, ImGuiUniqueLabelMap labels)
    {
       super(yoloDoorNode);
       this.doorNode = yoloDoorNode;
+      this.labels = labels;
 
       doorPlanarRegionGraphic.setBlendOpacity(0.6f);
    }
@@ -61,7 +64,7 @@ public class RDXDoorNode extends RDXSceneNode
       if (!lastDoorRegion.epsilonEquals(doorNode.getDoorPlanarRegion(), 0.1))
       {
          planarRegionsList.clear();
-         doorNode.getDoorPlanarRegion().setRegionId(1111);
+         doorNode.getDoorPlanarRegion().setRegionId(2222);
          planarRegionsList.addPlanarRegion(doorNode.getDoorPlanarRegion());
          doorPlanarRegionGraphic.generateMeshes(planarRegionsList);
 
@@ -132,6 +135,12 @@ public class RDXDoorNode extends RDXSceneNode
    {
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
 
+      if (interactableObject != null)
+      {
+         ImGui.sameLine();
+         ImGui.checkbox(labels.get("Show gizmo"), interactableObject.getSelectablePose3DGizmo().getSelected());
+      }
+
       ImGui.text("Planar region info:");
       ImGui.sameLine();
       if (!planarRegionsList.isEmpty())
@@ -152,7 +161,7 @@ public class RDXDoorNode extends RDXSceneNode
       }
    }
 
-   public RDXInteractableObject createInteractableObject()
+   private RDXInteractableObject createInteractableObject()
    {
       RDXInteractableObject interactableObject = null;
 

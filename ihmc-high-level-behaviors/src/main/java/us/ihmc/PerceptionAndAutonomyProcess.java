@@ -232,7 +232,7 @@ public class PerceptionAndAutonomyProcess
       icpManager = new IterativeClosestPointManager(ros2Helper, sceneGraph);
       icpManager.startWorkers();
 
-      planarRegionsExtractorThread = new RestartableThrottledThread("PlanarRegionsExtractor", 10.0, this::updatePlanarRegions);
+      planarRegionsExtractorThread = new RestartableThrottledThread("PlanarRegionsExtractor", 8.0, this::updatePlanarRegions);
       planarRegionsExtractorThread.start();
    }
 
