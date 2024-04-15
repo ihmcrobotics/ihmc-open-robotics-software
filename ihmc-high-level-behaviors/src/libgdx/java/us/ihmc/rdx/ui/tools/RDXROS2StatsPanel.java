@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import imgui.type.ImBoolean;
+import us.ihmc.pubsub.stats.ParticipantStats;
 import us.ihmc.pubsub.stats.PubSubRateCalculator;
 import us.ihmc.pubsub.stats.PubSubStats;
 import us.ihmc.pubsub.stats.PubSubStatsTools;
@@ -85,7 +86,7 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.tableNextRow();
 
          ImGui.tableNextColumn();
-         ImGui.text("%d".formatted(PubSubStats.NUMBER_OF_PARTICIPANTS_CREATED));
+         ImGui.text("%d".formatted(PubSubStats.PARTICIPANT_STATS.size()));
          ImGui.tableNextColumn();
          ImGui.text("%d".formatted(PubSubStats.PUBLISHER_STATS.size()));
          ImGui.tableNextColumn();
@@ -102,6 +103,31 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.text("%.0f Hz".formatted(receiveFrequency.finiteDifference(PubSubStats.NUMBER_OF_RECEIVED_MESSAGES)));
          ImGui.tableNextColumn();
          ImGui.text(PubSubStatsTools.getHumanReadableDataSize(PubSubStats.LARGEST_MESSAGE_SIZE));
+
+         ImGui.endTable();
+      }
+
+      ImGuiTools.separatorText("Nodes");
+
+      if (ImGui.beginTable(labels.get("Nodes"), 3, tableFlags))
+      {
+         ImGui.tableSetupColumn(labels.get("Node Name"), ImGuiTableColumnFlags.WidthFixed);
+         ImGui.tableSetupColumn(labels.get("Publishers"), ImGuiTableColumnFlags.WidthFixed);
+         ImGui.tableSetupColumn(labels.get("Subscribers"), ImGuiTableColumnFlags.WidthFixed);
+         ImGui.tableSetupScrollFreeze(0, 1);
+         ImGui.tableHeadersRow();
+
+         ImGui.tableNextRow();
+
+         for (ParticipantStats participantStats : PubSubStats.PARTICIPANT_STATS.values())
+         {
+            ImGui.tableNextColumn();
+            ImGui.text(participantStats.getParticipant().getAttributes().getName());
+            ImGui.tableNextColumn();
+            ImGui.text("%d".formatted(participantStats.getPublishers().size()));
+            ImGui.tableNextColumn();
+            ImGui.text("%d".formatted(participantStats.getSubscribers().size()));
+         }
 
          ImGui.endTable();
       }
