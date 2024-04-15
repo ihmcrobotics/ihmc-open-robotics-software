@@ -17,6 +17,7 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
    public static final double KICK_IMPULSE = 55.0;
    public static final double KICK_TARGET_DISTANCE = 0.75;
    public static final double PREKICK_WEIGHT_DISTRIBUTION = 0.5;
+   public static final double STANCE_FOOT_WIDTH = 0.23;
 
    private final CRDTUnidirectionalString parentFrameName;
 
@@ -25,6 +26,7 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
    private final CRDTUnidirectionalDouble kickImpulse;
    private final CRDTUnidirectionalDouble kickTargetDistance;
    private final CRDTUnidirectionalDouble prekickWeightDistribution;
+   private final CRDTUnidirectionalDouble stanceFootWidth;
 
    // On disk fields
    private String onDiskParentFrameName;
@@ -33,6 +35,7 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
    private double onDiskKickImpulse;
    private double onDiskKickTargetDistance;
    private double onDiskPrekickWeightDistribution;
+   private double onDiskStanceFootWidth;
 
    public KickDoorActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -45,7 +48,7 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
       kickImpulse = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, KICK_IMPULSE);
       kickTargetDistance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, KICK_TARGET_DISTANCE);
       prekickWeightDistribution = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, PREKICK_WEIGHT_DISTRIBUTION);
-
+      stanceFootWidth = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, STANCE_FOOT_WIDTH);
    }
 
    @Override
@@ -60,6 +63,7 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
       jsonNode.put("kickImpulse", kickImpulse.getValue());
       jsonNode.put("kickTargetDistance", kickTargetDistance.getValue());
       jsonNode.put("prekickWeightDistribution", prekickWeightDistribution.getValue());
+      jsonNode.put("stanceFootWidth", stanceFootWidth.getValue());
    }
 
    @Override
@@ -74,6 +78,7 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
       kickImpulse.setValue(jsonNode.get("kickImpulse").asDouble());
       kickTargetDistance.setValue(jsonNode.get("kickTargetDistance").asDouble());
       prekickWeightDistribution.setValue(jsonNode.get("prekickWeightDistribution").asDouble());
+      stanceFootWidth.setValue(jsonNode.get("stanceFootWidth").asDouble());
    }
 
    @Override
@@ -88,6 +93,7 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
       onDiskKickImpulse = kickImpulse.getValue();
       onDiskKickTargetDistance = kickTargetDistance.getValue();
       onDiskPrekickWeightDistribution = prekickWeightDistribution.getValue();
+      onDiskStanceFootWidth = stanceFootWidth.getValue();
    }
 
    @Override
@@ -102,6 +108,7 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
       kickImpulse.setValue(onDiskKickImpulse);
       kickTargetDistance.setValue(onDiskKickTargetDistance);
       prekickWeightDistribution.setValue(onDiskPrekickWeightDistribution);
+      stanceFootWidth.setValue(onDiskStanceFootWidth);
    }
 
    @Override
@@ -116,6 +123,7 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
       unchanged &= kickImpulse.getValue() == onDiskKickImpulse;
       unchanged &= kickTargetDistance.getValue() == onDiskKickTargetDistance;
       unchanged &= prekickWeightDistribution.getValue() == onDiskPrekickWeightDistribution;
+      unchanged &= stanceFootWidth.getValue() == onDiskStanceFootWidth;
 
       return !unchanged;
    }
@@ -131,6 +139,7 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
       message.setKickImpulse(kickImpulse.getValue());
       message.setKickTargetDistance(kickTargetDistance.getValue());
       message.setPrekickWeightDistribution(prekickWeightDistribution.getValue());
+      message.setStanceFootWidth(stanceFootWidth.getValue());
    }
 
    public void fromMessage(KickDoorActionDefinitionMessage message)
@@ -144,6 +153,7 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
       kickImpulse.fromMessage(message.getKickImpulse());
       kickTargetDistance.fromMessage(message.getKickTargetDistance());
       prekickWeightDistribution.fromMessage(message.getPrekickWeightDistribution());
+      stanceFootWidth.fromMessage(message.getStanceFootWidth());
    }
 
    @Override
@@ -205,5 +215,10 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
    public void setPrekickWeightDistribution(double prekickWeightDistribution)
    {
       this.prekickWeightDistribution.setValue(prekickWeightDistribution);
+   }
+
+   public double getStanceFootWidth()
+   {
+      return stanceFootWidth.getValue();
    }
 }

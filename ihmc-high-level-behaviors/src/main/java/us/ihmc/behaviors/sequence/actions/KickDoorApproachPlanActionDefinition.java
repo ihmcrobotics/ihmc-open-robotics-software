@@ -18,8 +18,8 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition implements SidedObject
 {
    public static final double KICK_IMPULSE = 55.0;
-   public static final double KICK_TARGET_DISTANCE = 0.75;
    public static final double KICK_HEIGHT = 0.55;
+   public static final double KICK_TARGET_DISTANCE = 0.75;
    public static final double PREKICK_WEIGHT_DISTRIBUTION = 0.5;
    public static final double HORIZONTAL_DISTANCE_FROM_HANDLE = 0.1;
    public static final double STANCE_FOOT_WIDTH = 0.23;

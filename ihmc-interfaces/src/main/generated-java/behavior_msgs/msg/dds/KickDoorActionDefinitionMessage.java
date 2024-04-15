@@ -33,6 +33,10 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
             */
    public double kick_target_distance_;
    /**
+            * The stance foot width.
+            */
+   public double stance_foot_width_;
+   /**
             * Weight distribution before the kick. 1.0 means all weight on the kicking foot. Default is 0.5.
             */
    public double prekick_weight_distribution_;
@@ -62,6 +66,8 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
       kick_impulse_ = other.kick_impulse_;
 
       kick_target_distance_ = other.kick_target_distance_;
+
+      stance_foot_width_ = other.stance_foot_width_;
 
       prekick_weight_distribution_ = other.prekick_weight_distribution_;
 
@@ -161,6 +167,21 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
    }
 
    /**
+            * The stance foot width.
+            */
+   public void setStanceFootWidth(double stance_foot_width)
+   {
+      stance_foot_width_ = stance_foot_width;
+   }
+   /**
+            * The stance foot width.
+            */
+   public double getStanceFootWidth()
+   {
+      return stance_foot_width_;
+   }
+
+   /**
             * Weight distribution before the kick. 1.0 means all weight on the kicking foot. Default is 0.5.
             */
    public void setPrekickWeightDistribution(double prekick_weight_distribution)
@@ -204,6 +225,8 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.kick_target_distance_, other.kick_target_distance_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.stance_foot_width_, other.stance_foot_width_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.prekick_weight_distribution_, other.prekick_weight_distribution_, epsilon)) return false;
 
 
@@ -230,6 +253,8 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
 
       if(this.kick_target_distance_ != otherMyClass.kick_target_distance_) return false;
 
+      if(this.stance_foot_width_ != otherMyClass.stance_foot_width_) return false;
+
       if(this.prekick_weight_distribution_ != otherMyClass.prekick_weight_distribution_) return false;
 
 
@@ -254,6 +279,8 @@ public class KickDoorActionDefinitionMessage extends Packet<KickDoorActionDefini
       builder.append(this.kick_impulse_);      builder.append(", ");
       builder.append("kick_target_distance=");
       builder.append(this.kick_target_distance_);      builder.append(", ");
+      builder.append("stance_foot_width=");
+      builder.append(this.stance_foot_width_);      builder.append(", ");
       builder.append("prekick_weight_distribution=");
       builder.append(this.prekick_weight_distribution_);
       builder.append("}");

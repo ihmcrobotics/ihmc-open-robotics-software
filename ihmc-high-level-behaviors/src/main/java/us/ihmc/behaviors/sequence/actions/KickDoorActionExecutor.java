@@ -1,5 +1,7 @@
 package us.ihmc.behaviors.sequence.actions;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HighLevelStateMessage;
 import controller_msgs.msg.dds.TriggerKickMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -11,7 +13,9 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TriggerKickCommand;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.NonWallTimer;
@@ -32,9 +36,11 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
    private boolean switchToKickControllerMessageSent = false;
    private boolean kickingMessageSent = false;
    private boolean switchToWalkControllerMessageSent = false;
+   private boolean squareUpFootstepsSent = false;
 
    private final NonWallTimer stopwatch = new NonWallTimer();
    private final TriggerKickCommand kickCommand = new TriggerKickCommand();
+   private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
 
    public KickDoorActionExecutor(long id,
                                  CRDTInfo crdtInfo,
@@ -84,7 +90,7 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
    {
       super.triggerActionExecution();
 
-      state.getExecutionState().setValue(KickDoorActionExecutionState.SWITCHING_HIGH_LEVEL_CONTROLLER_TO_KICK_CONTROLLER);
+      state.getExecutionState().setValue(KickDoorActionExecutionState.SWITCHING_TO_KICK_CONTROLLER);
    }
 
    /**
@@ -99,11 +105,12 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
          {
             //Idle until the kick is requested
          }
-         case SWITCHING_HIGH_LEVEL_CONTROLLER_TO_KICK_CONTROLLER ->
+         case SWITCHING_TO_KICK_CONTROLLER ->
          {
             if (!switchToKickControllerMessageSent)
             {
                // The kicking controller must be added with a boolean in the controller factory.
+               state.getLogger().info("Switching to kick controller message.");
                changeHighLevelState(HighLevelControllerName.CUSTOM1);
                switchToKickControllerMessageSent = true;
                stopwatch.reset();
@@ -112,10 +119,10 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
             if (stopwatch.getElapsedTime() >= 0.2)
             {
                stopwatch.reset();
-               state.getExecutionState().setValue(KickDoorActionExecutionState.EXECUTING_KICKING);
+               state.getExecutionState().setValue(KickDoorActionExecutionState.KICKING);
             }
          }
-         case EXECUTING_KICKING ->
+         case KICKING ->
          {
             //Execute the kick
             state.setIsExecuting(true);
@@ -124,28 +131,50 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
             {
                stopwatch.reset();
                kickingMessageSent = true;
-               ros2ControllerHelper.publishToController(kickCommand);
+               state.getLogger().info("Executing kick.");
+//               ros2ControllerHelper.publishToController(kickCommand);
             }
 
             if (stopwatch.getElapsedTime()  >= 2.0)
             {
-               state.setIsExecuting(false);
+               state.getExecutionState().setValue(KickDoorActionExecutionState.SWITCHING_TO_WALKING_CONTROLLER);
                stopwatch.reset();
-               state.getExecutionState().setValue(KickDoorActionExecutionState.SWITCHING_HIGH_LEVEL_CONTROLLER_TO_WALKING_CONTROLLER);
             }
          }
-         case SWITCHING_HIGH_LEVEL_CONTROLLER_TO_WALKING_CONTROLLER ->
+         case SWITCHING_TO_WALKING_CONTROLLER ->
          {
             if (!switchToWalkControllerMessageSent)
             {
+               stopwatch.reset();
+               state.getLogger().info("Sending switch to walking controller message.");
                changeHighLevelState(HighLevelControllerName.WALKING);
                switchToWalkControllerMessageSent = true;
             }
 
             if (stopwatch.getElapsedTime()  >= 0.2)
             {
-               state.getExecutionState().setValue(KickDoorActionExecutionState.STANDING);
+               state.getExecutionState().setValue(KickDoorActionExecutionState.SQUARING_UP);
                stopwatch.reset();
+            }
+         }
+         case SQUARING_UP ->
+         {
+            if (!squareUpFootstepsSent)
+            {
+               stopwatch.reset();
+               state.getLogger().info("Sending square up footsteps.");
+               computeSquaredUpFootsteps();
+               ros2ControllerHelper.publishToController(footstepDataListMessage);
+               squareUpFootstepsSent = true;
+            }
+
+            if (stopwatch.getElapsedTime()  >= 4.0)
+            {
+               state.getExecutionState().setValue(KickDoorActionExecutionState.STANDING);
+               state.setIsExecuting(false);
+               stopwatch.reset();
+               state.getLogger().info("Going back to standing state.");
+               state.setIsExecuting(false);
             }
          }
       }
@@ -172,5 +201,18 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
       kickMessage.setKickTargetDistance(desiredKickDistance);
       kickMessage.setPrekickWeightDistribution(desiredPrekickWeightDistribution);
       commandToPack.setFromMessage(kickMessage);
+   }
+
+   public void computeSquaredUpFootsteps()
+   {
+      FramePose3D kickFootGoalPose = new FramePose3D(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame));
+      kickFootGoalPose.setY(kickSide.negateIfRightSide(definition.getStanceFootWidth()));
+      FootstepDataMessage kickFootStep = HumanoidMessageTools.createFootstepDataMessage(kickSide, kickFootGoalPose);
+      footstepDataListMessage.getFootstepDataList().add().set(kickFootStep);
+
+      FramePose3D supportFootGoalPose = new FramePose3D(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame));
+      supportFootGoalPose.setY(kickSide.negateIfRightSide(-definition.getStanceFootWidth()));
+      FootstepDataMessage supportFootStep = HumanoidMessageTools.createFootstepDataMessage(kickSide.getOppositeSide(), supportFootGoalPose);
+      footstepDataListMessage.getFootstepDataList().add().set(supportFootStep);
    }
 }

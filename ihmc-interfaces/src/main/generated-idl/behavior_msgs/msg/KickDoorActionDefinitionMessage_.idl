@@ -38,6 +38,10 @@ module behavior_msgs
          */
         double kick_target_distance;
         /**
+         * The stance foot width.
+         */
+        double stance_foot_width;
+        /**
          * Weight distribution before the kick. 1.0 means all weight on the kicking foot. Default is 0.5.
          */
         double prekick_weight_distribution;

@@ -16,5 +16,8 @@ float64 kick_impulse
 # The target distance from the robot to where the kick should be aimed.
 float64 kick_target_distance
 
+# The stance foot width.
+float64 stance_foot_width
+
 # Weight distribution before the kick. 1.0 means all weight on the kicking foot. Default is 0.5.
 float64 prekick_weight_distribution
