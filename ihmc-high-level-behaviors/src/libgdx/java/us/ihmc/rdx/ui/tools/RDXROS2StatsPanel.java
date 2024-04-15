@@ -187,6 +187,8 @@ public class RDXROS2StatsPanel extends RDXPanel
    {
       if (subscriberStats.getNumberOfReceivedMessages() > 0 || !hideInactiveTopics.get())
       {
+         subscriberStats.update();
+
          ImGui.tableNextRow();
 
          ImGui.tableNextColumn();
