@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import imgui.type.ImBoolean;
+import us.ihmc.pubsub.publisher.Publisher;
 import us.ihmc.pubsub.stats.CommonStats;
 import us.ihmc.pubsub.stats.ParticipantStats;
 import us.ihmc.pubsub.stats.PubSubRateCalculator;
@@ -11,6 +12,7 @@ import us.ihmc.pubsub.stats.PubSubStats;
 import us.ihmc.pubsub.stats.PubSubStatsTools;
 import us.ihmc.pubsub.stats.PublisherStats;
 import us.ihmc.pubsub.stats.SubscriberStats;
+import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -20,9 +22,9 @@ import java.util.TreeSet;
 
 public class RDXROS2StatsPanel extends RDXPanel
 {
-   private static final Comparator<CommonStats> SORT_COMPARATOR = Comparator.comparing(CommonStats::getLargestMessageSize)
-                                                                            .reversed()
-                                                                            .thenComparing(Object::hashCode);
+   private static final Comparator<CommonStats> LARGEST_MESSAGE_COMPARATOR = Comparator.comparing(CommonStats::getLargestMessageSize)
+                                                                                       .reversed()
+                                                                                       .thenComparingInt(Object::hashCode);
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final PubSubRateCalculator publishFrequency = new PubSubRateCalculator();
@@ -30,8 +32,8 @@ public class RDXROS2StatsPanel extends RDXPanel
 
    private final ImBoolean sortByLargestMessageSize = new ImBoolean(true);
    private final ImBoolean hideInactiveTopics = new ImBoolean(true);
-   private final TreeSet<PublisherStats> sortedPublishers = new TreeSet<>(SORT_COMPARATOR);
-   private final TreeSet<SubscriberStats> sortedSubscribers = new TreeSet<>(SORT_COMPARATOR);
+   private final TreeSet<PublisherStats> sortedPublishers = new TreeSet<>(LARGEST_MESSAGE_COMPARATOR);
+   private final TreeSet<SubscriberStats> sortedSubscribers = new TreeSet<>(LARGEST_MESSAGE_COMPARATOR);
 
    public RDXROS2StatsPanel()
    {
@@ -139,8 +141,9 @@ public class RDXROS2StatsPanel extends RDXPanel
 
       ImGuiTools.separatorText("Publishers");
 
-      if (ImGui.beginTable(labels.get("Publishers"), 8, tableFlags))
+      if (ImGui.beginTable(labels.get("Publishers"), 9, tableFlags))
       {
+         ImGui.tableSetupColumn(labels.get("Node Name"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Topic Name"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Type"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Reliability"), ImGuiTableColumnFlags.WidthFixed);
@@ -155,15 +158,20 @@ public class RDXROS2StatsPanel extends RDXPanel
          if (sortByLargestMessageSize.get())
          {
             sortedPublishers.clear();
-            sortedPublishers.addAll(PubSubStats.PUBLISHER_STATS.values());
+//            for (ParticipantStats participant : PubSubStats.PARTICIPANT_STATS.values())
+//               for (Publisher publisher : participant.getPublishers())
+//                  renderPublisherRow(PubSubStats.PUBLISHER_STATS.get(publisher));
+
+               sortedPublishers.addAll(PubSubStats.PUBLISHER_STATS.values());
 
             for (PublisherStats publisherStats : sortedPublishers)
                renderPublisherRow(publisherStats);
          }
          else
          {
-            for (PublisherStats publisherStats : PubSubStats.PUBLISHER_STATS.values())
-               renderPublisherRow(publisherStats);
+            for (ParticipantStats participant : PubSubStats.PARTICIPANT_STATS.values())
+               for (Publisher publisher : participant.getPublishers())
+                  renderPublisherRow(PubSubStats.PUBLISHER_STATS.get(publisher));
          }
 
          ImGui.endTable();
@@ -171,8 +179,9 @@ public class RDXROS2StatsPanel extends RDXPanel
 
       ImGuiTools.separatorText("Subscribers");
 
-      if (ImGui.beginTable(labels.get("Subscribers"), 8, tableFlags))
+      if (ImGui.beginTable(labels.get("Subscribers"), 9, tableFlags))
       {
+         ImGui.tableSetupColumn(labels.get("Node Name"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Topic Name"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Type"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Reliability"), ImGuiTableColumnFlags.WidthFixed);
@@ -194,8 +203,9 @@ public class RDXROS2StatsPanel extends RDXPanel
          }
          else
          {
-            for (SubscriberStats subscriberStats : PubSubStats.SUBSCRIBER_STATS.values())
-               renderSubscriberRow(subscriberStats);
+            for (ParticipantStats participantStats : PubSubStats.PARTICIPANT_STATS.values())
+               for (Subscriber<?> subscriber : participantStats.getSubscribers())
+                  renderSubscriberRow(PubSubStats.SUBSCRIBER_STATS.get(subscriber));
          }
 
          ImGui.endTable();
@@ -210,6 +220,8 @@ public class RDXROS2StatsPanel extends RDXPanel
 
          ImGui.tableNextRow();
 
+         ImGui.tableNextColumn();
+         ImGui.text(subscriberStats.getParticipant().getAttributes().getName());
          ImGui.tableNextColumn();
          ImGui.text(subscriberStats.getSubscriber().getAttributes().getHumanReadableTopicName());
          ImGui.tableNextColumn();
@@ -237,6 +249,8 @@ public class RDXROS2StatsPanel extends RDXPanel
 
          ImGui.tableNextRow();
 
+         ImGui.tableNextColumn();
+         ImGui.text(publisherStats.getParticipant().getAttributes().getName());
          ImGui.tableNextColumn();
          ImGui.text(publisherStats.getPublisher().getAttributes().getHumanReadableTopicName());
          ImGui.tableNextColumn();
