@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import imgui.type.ImBoolean;
+import us.ihmc.pubsub.stats.CommonStats;
 import us.ihmc.pubsub.stats.ParticipantStats;
 import us.ihmc.pubsub.stats.PubSubRateCalculator;
 import us.ihmc.pubsub.stats.PubSubStats;
@@ -14,19 +15,23 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 
-import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.TreeSet;
 
 public class RDXROS2StatsPanel extends RDXPanel
 {
+   private static final Comparator<CommonStats> SORT_COMPARATOR = Comparator.comparing(CommonStats::getLargestMessageSize)
+                                                                            .reversed()
+                                                                            .thenComparing(Object::hashCode);
+
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final PubSubRateCalculator publishFrequency = new PubSubRateCalculator();
    private final PubSubRateCalculator receiveFrequency = new PubSubRateCalculator();
 
    private final ImBoolean sortByLargestMessageSize = new ImBoolean(true);
    private final ImBoolean hideInactiveTopics = new ImBoolean(true);
-   private final ArrayList<PublisherStats> sortedPublishers = new ArrayList<>();
-   private final ArrayList<SubscriberStats> sortedSubscribers = new ArrayList<>();
+   private final TreeSet<PublisherStats> sortedPublishers = new TreeSet<>(SORT_COMPARATOR);
+   private final TreeSet<SubscriberStats> sortedSubscribers = new TreeSet<>(SORT_COMPARATOR);
 
    public RDXROS2StatsPanel()
    {
@@ -149,14 +154,8 @@ public class RDXROS2StatsPanel extends RDXPanel
 
          if (sortByLargestMessageSize.get())
          {
-            // For when publishers get added
-            if (sortedPublishers.size() < PubSubStats.PUBLISHER_STATS.size())
-            {
-               sortedPublishers.clear();
-               sortedPublishers.addAll(PubSubStats.PUBLISHER_STATS.values());
-            }
-
-            sortedPublishers.sort(Comparator.comparing(PublisherStats::getLargestMessageSize).reversed());
+            sortedPublishers.clear();
+            sortedPublishers.addAll(PubSubStats.PUBLISHER_STATS.values());
 
             for (PublisherStats publisherStats : sortedPublishers)
                renderPublisherRow(publisherStats);
@@ -187,14 +186,8 @@ public class RDXROS2StatsPanel extends RDXPanel
 
          if (sortByLargestMessageSize.get())
          {
-            // For when subscribers get added
-            if (sortedSubscribers.size() < PubSubStats.SUBSCRIBER_STATS.size())
-            {
-               sortedSubscribers.clear();
-               sortedSubscribers.addAll(PubSubStats.SUBSCRIBER_STATS.values());
-            }
-
-            sortedSubscribers.sort(Comparator.comparing(SubscriberStats::getLargestMessageSize).reversed());
+            sortedSubscribers.clear();
+            sortedSubscribers.addAll(PubSubStats.SUBSCRIBER_STATS.values());
 
             for (SubscriberStats subscriberStats : sortedSubscribers)
                renderSubscriberRow(subscriberStats);
