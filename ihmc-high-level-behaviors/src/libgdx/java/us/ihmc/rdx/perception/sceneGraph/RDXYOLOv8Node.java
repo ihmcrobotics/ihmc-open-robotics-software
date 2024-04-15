@@ -8,21 +8,16 @@ import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.imgui.ImGuiInputDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
-import us.ihmc.rdx.ui.interactable.RDXInteractableObject;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
@@ -41,15 +36,9 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
    private final ImInt maskErosionKernelRadius;
    private final ImDouble outlierFilterThreshold;
    private final ImFloat detectionAcceptanceThreshold;
-   private final ImGuiInputDoubleWrapper alphaFilterValueSlider;
 
    private final RDXPointCloudRenderer objectPointCloudRenderer = new RDXPointCloudRenderer();
    private final RDXReferenceFrameGraphic objectPoseGraphic = new RDXReferenceFrameGraphic(0.2);
-
-   @Nullable
-   private RDXInteractableObject interactableObject;
-
-   private RigidBodyTransform visualModelTransformToWorld = new RigidBodyTransform();
 
    public RDXYOLOv8Node(YOLOv8Node yoloNode, ImGuiUniqueLabelMap labels)
    {
@@ -61,22 +50,8 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
       outlierFilterThreshold = new ImDouble(yoloNode.getOutlierFilterThreshold());
       detectionAcceptanceThreshold = new ImFloat(yoloNode.getDetectionAcceptanceThreshold());
 
-      alphaFilterValueSlider = new ImGuiInputDoubleWrapper("Break frequency:",
-                                                           "%.2f",
-                                                           0.05,
-                                                           5.0,
-                                                           yoloNode::getAlpha,
-                                                           yoloNode::setAlpha,
-                                                           yoloNode::freeze);
-      alphaFilterValueSlider.setWidgetWidth(100.0f);
-
       objectPointCloudRenderer.create(5000);
       objectPoseGraphic.setPoseInWorldFrame(yoloNode.getObjectPose());
-   }
-
-   public RDXInteractableObject createInteractableObject()
-   {
-      return null;
    }
 
    @Override
@@ -87,19 +62,6 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
       yoloNode.setMaskErosionKernelRadius(maskErosionKernelRadius.get());
       yoloNode.setOutlierFilterThreshold(outlierFilterThreshold.get());
       yoloNode.setDetectionAcceptanceThreshold(detectionAcceptanceThreshold.get());
-
-      if (interactableObject != null)
-      {
-         visualModelTransformToWorld.getTranslation().set(yoloNode.getFilteredObjectPose().getTranslation());
-         visualModelTransformToWorld.getRotation().set(yoloNode.getFilteredObjectPose().getRotation());
-
-         LibGDXTools.setDiffuseColor(interactableObject.getModelInstance(), Color.WHITE); // TODO: keep?
-         interactableObject.setPose(visualModelTransformToWorld);
-      }
-      else
-      {
-         interactableObject = createInteractableObject();
-      }
    }
 
    @Override
@@ -113,7 +75,6 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
          outlierFilterThreshold.set(MathTools.clamp(outlierFilterThreshold.get(), 0.0, 5.0));
       if (ImGuiTools.volatileInputFloat(labels.get("Detection Acceptance Threshold"), detectionAcceptanceThreshold))
          detectionAcceptanceThreshold.set((float) MathTools.clamp(detectionAcceptanceThreshold.get(), 0.0f, 1.0f));
-      alphaFilterValueSlider.renderImGuiWidget();
    }
 
    @Override
@@ -128,9 +89,6 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
 
       objectPoseGraphic.setPoseInWorldFrame(yoloNode.getObjectPose());
       objectPoseGraphic.getRenderables(renderables, pool);
-
-      if (interactableObject != null)
-         interactableObject.getRenderables(renderables, pool);
    }
 
    @Override
@@ -140,11 +98,5 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
 
       objectPointCloudRenderer.dispose();
       objectPoseGraphic.dispose();
-
-      if (interactableObject != null)
-      {
-         interactableObject.getModelInstance().model.dispose();
-         interactableObject.clear();
-      }
    }
 }

@@ -50,8 +50,6 @@ public class YOLOv8DetectionManager
    private final Map<YOLOv8DetectionClass, YOLOv8SegmentedDetection> detectedObjects = new ConcurrentHashMap<>();
    private final Map<YOLOv8DetectionClass, YOLOv8SegmentedDetection> candidateDetections = new ConcurrentHashMap<>();
 
-   private YOLOv8DoorNodeManager doorNodeManager = new YOLOv8DoorNodeManager();
-
    private float yoloConfidenceThreshold = 0.5f;
    private float yoloNMSThreshold = 0.1f;
    private float yoloSegmentationThreshold = 0.0f;
@@ -63,7 +61,7 @@ public class YOLOv8DetectionManager
 
    public YOLOv8DetectionManager(ROS2Helper ros2Helper)
    {
-      yoloDetectionThread = new RestartableThrottledThread("YOLODetector", 30.0, this::runYOLODetection);
+      yoloDetectionThread = new RestartableThrottledThread("YOLODetector", 60.0, this::runYOLODetection);
       yoloDetectionThread.start();
 
       readyToRunNotification.set();
@@ -341,8 +339,6 @@ public class YOLOv8DetectionManager
             }
          }
       });
-
-      doorNodeManager.updateSceneGraph(sceneGraph);
 
       // Handle existing detections
       Iterator<Entry<YOLOv8DetectionClass, YOLOv8Node>> yoloNodeIterator = detectedNodes.entrySet().iterator();

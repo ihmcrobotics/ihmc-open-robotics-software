@@ -1,4 +1,4 @@
-package us.ihmc.perception.sceneGraph.multiBodies.door;
+package us.ihmc.perception.sceneGraph.rigidBody.doors;
 
 import gnu.trove.map.TIntDoubleMap;
 import gnu.trove.map.hash.TIntDoubleHashMap;

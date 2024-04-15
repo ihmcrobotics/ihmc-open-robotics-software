@@ -26,7 +26,7 @@ public class RDXSceneNode
    {
       this.sceneNode = sceneNode;
       referenceFrameGraphic = new RDXReferenceFrameGraphic(0.05, Color.BLUE);
-      detailsText = "ID: %d, Type: %s".formatted(sceneNode.getID(), sceneNode.getClass().getSuperclass().getSimpleName());
+      detailsText = "ID: %d, Type: %s".formatted(sceneNode.getID(), sceneNode.getClass().getSimpleName());
    }
 
    public void update(SceneGraphModificationQueue modificationQueue)

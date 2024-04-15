@@ -6,6 +6,7 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphSubscriptionNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphTools;
@@ -46,6 +47,10 @@ public class RDXSceneGraphTools
       else if (sceneNodeToCopy instanceof PrimitiveRigidBodySceneNode resizableRigidBodySceneNode)
       {
          return new RDXPrimitiveRigidBodySceneNode(resizableRigidBodySceneNode, panel3D);
+      }
+      else if (sceneNodeToCopy instanceof DoorNode doorNode)
+      {
+         return new RDXDoorNode(doorNode);
       }
       else
       {

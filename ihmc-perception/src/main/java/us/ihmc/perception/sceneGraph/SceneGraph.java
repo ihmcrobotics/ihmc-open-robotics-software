@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeManager;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
@@ -49,6 +50,8 @@ public class SceneGraph
    private transient final TIntObjectMap<CenterposeNode> centerposeDetectedMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
 
+   private DoorNodeManager doorNodeManager = new DoorNodeManager();
+
    public SceneGraph()
    {
       this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME));
@@ -76,6 +79,8 @@ public class SceneGraph
    {
       // This must happen only once per on-robot tick
       detectionFilterCollection.update();
+
+      doorNodeManager.updateSceneGraph(this);
 
       modifyTree(modificationQueue -> updateOnRobotOnly(rootNode, robotPelvisFrame, modificationQueue));
    }

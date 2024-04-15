@@ -1,0 +1,36 @@
+#ifndef __perception_msgs__msg__DoorNodeMessage__idl__
+#define __perception_msgs__msg__DoorNodeMessage__idl__
+
+#include "geometry_msgs/msg/./Point32_.idl"
+#include "geometry_msgs/msg/./Pose_.idl"
+#include "geometry_msgs/msg/./Transform_.idl"
+#include "perception_msgs/msg/./PlanarRegionMessage_.idl"
+#include "perception_msgs/msg/./SceneNodeMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::DoorNodeMessage_")
+      struct DoorNodeMessage
+      {
+        /**
+         * The base scene node information
+         */
+        perception_msgs::msg::dds::SceneNodeMessage scene_node;
+        octet door_hardware_type;
+        geometry_msgs::msg::dds::Pose object_pose;
+        /**
+         * The visual transform to parent
+         */
+        geometry_msgs::msg::dds::Transform visual_transform_to_object_pose;
+        perception_msgs::msg::dds::PlanarRegionMessage door_planar_region;
+        sequence<geometry_msgs::msg::dds::Point32, 5000> presumed_door_point_cloud;
+      };
+    };
+  };
+};
+
+#endif

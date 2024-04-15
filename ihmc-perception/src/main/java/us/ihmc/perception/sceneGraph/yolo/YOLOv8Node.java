@@ -25,10 +25,6 @@ public class YOLOv8Node extends DetectableSceneNode
    // Set this somewhere
    private final RigidBodyTransform centroidToObjectTransform = new RigidBodyTransform();
    private Pose3D objectPose;
-   private Pose3D filteredObjectPose;
-   private final RigidBodyTransform visualTransformToObjectPose = new RigidBodyTransform();
-
-   private double alpha = 0.15;
 
    public YOLOv8Node(long id, String name, YOLOv8DetectionClass detectionClass, List<Point3D32> objectPointCloud, Point3D32 objectCentroid)
    {
@@ -40,10 +36,8 @@ public class YOLOv8Node extends DetectableSceneNode
            detectionClass,
            objectPointCloud,
            objectCentroid,
-           new RigidBodyTransform(),
            new Pose3D(objectCentroid, new RotationMatrix()),
-           new Pose3D(objectCentroid, new RotationMatrix()),
-           new RigidBodyTransform());
+           new Pose3D(objectCentroid, new RotationMatrix()));
    }
 
    public YOLOv8Node(long id,
@@ -55,9 +49,7 @@ public class YOLOv8Node extends DetectableSceneNode
                      List<Point3D32> objectPointCloud,
                      Point3D32 objectCentroid,
                      RigidBodyTransformBasics centroidToObjectTransform,
-                     Pose3D objectPose,
-                     Pose3D filteredObjectPose,
-                     RigidBodyTransformBasics visualTransformToObjectPose)
+                     Pose3D objectPose)
    {
       super(id, name);
 
@@ -69,23 +61,16 @@ public class YOLOv8Node extends DetectableSceneNode
       this.objectCentroid = objectCentroid;
       this.centroidToObjectTransform.set(centroidToObjectTransform);
       this.objectPose = objectPose;
-      this.filteredObjectPose = filteredObjectPose;
-      this.visualTransformToObjectPose.set(visualTransformToObjectPose);
    }
 
    public void update()
    {
       objectPose.getTranslation().set(objectCentroid);
-      objectPose.appendTransform(centroidToObjectTransform);
+//      objectPose.appendTransform(centroidToObjectTransform);
 
-      if (!filteredObjectPose.hasRotation())
-         filteredObjectPose.getRotation().set(objectPose.getRotation());
-
-      filteredObjectPose.interpolate(objectPose, alpha);
-      getNodeToParentFrameTransform().set(filteredObjectPose);
+      getNodeToParentFrameTransform().set(objectPose);
       getNodeFrame().update();
    }
-
 
    public int getMaskErosionKernelRadius()
    {
@@ -166,35 +151,4 @@ public class YOLOv8Node extends DetectableSceneNode
    {
       this.objectPose = objectPose;
    }
-
-   public Pose3D getFilteredObjectPose()
-   {
-      return filteredObjectPose;
-   }
-
-   public void setFilteredObjectPose(Pose3D filteredObjectPose)
-   {
-      this.filteredObjectPose = filteredObjectPose;
-   }
-
-   public RigidBodyTransform getVisualTransformToObjectPose()
-   {
-      return visualTransformToObjectPose;
-   }
-
-   public void setVisualTransformToObjectPose(RigidBodyTransformBasics visualTransformToObjectPose)
-   {
-      this.visualTransformToObjectPose.set(visualTransformToObjectPose);
-   }
-
-   public double getAlpha()
-   {
-      return alpha;
-   }
-
-   public void setAlpha(double alpha)
-   {
-      this.alpha = alpha;
-   }
-
 }

@@ -34,9 +34,9 @@ import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectionUpdater;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8DetectionManager;
-import us.ihmc.perception.sceneGraph.yolo.YOLOv8DoorNode;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
@@ -527,8 +527,8 @@ public class PerceptionAndAutonomyProcess
          planarRegionsInWorldFrame.applyTransform(zedFrameSupplier.get().getTransformToWorldFrame());
 
          for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
-            if (sceneNode instanceof YOLOv8DoorNode doorNode)
-               doorNode.updatePlanarRegions(planarRegionsInWorldFrame, ros2Helper);
+            if (sceneNode instanceof DoorNode doorNode)
+               doorNode.updatePlanarRegions(planarRegionsInWorldFrame);
 
          PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
 
