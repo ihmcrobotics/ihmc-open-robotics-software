@@ -6,18 +6,22 @@ import javax.annotation.Nullable;
 
 public enum YOLOv8DetectionClass
 {
-   DRILL(null, null),
-   DOOR_LEVER(null, null),
-   DOOR_PULL_HANDLE(null, null),
-   DOOR_PUSH_BAR(null, null);
+   DRILL(0, null, null),
+   DOOR_LEVER(1, null, null),
+   DOOR_KNOB(2, null, null),
+   DOOR_PUSH_BAR(3, null, null),
+   DOOR_PULL_HANDLE(4, null, null),
+   DOOR_PANEL(5, null, null);
 
+   private final int classID;
    @Nullable
-   private PrimitiveRigidBodyShape primitiveApproximation;
+   private final PrimitiveRigidBodyShape primitiveApproximation;
+   @Nullable
+   private final String pointCloudFileName;
 
-   private String pointCloudFileName;
-
-   YOLOv8DetectionClass(PrimitiveRigidBodyShape primitiveApproximation, String pointCloudFileName)
+   YOLOv8DetectionClass(int classID, @Nullable PrimitiveRigidBodyShape primitiveApproximation, @Nullable String pointCloudFileName)
    {
+      this.classID = classID;
       this.primitiveApproximation = primitiveApproximation;
       this.pointCloudFileName = pointCloudFileName;
    }
@@ -26,6 +30,7 @@ public enum YOLOv8DetectionClass
     * The corresponding shape is the best primitive approximation of the object determined by Tomasz.
     * For example, a bird is just an ellipsoid, a train is a long box, and a carrot is just a cone.
     * If you disagree, feel free to change the corresponding shape (although you're clearly wrong).
+    *
     * @return the objectively correct approximation of the object as a primitive shape. Null if no approximation is good.
     */
    public PrimitiveRigidBodyShape getPrimitiveApproximation()
@@ -38,9 +43,14 @@ public enum YOLOv8DetectionClass
       return pointCloudFileName;
    }
 
-   public int getClassId()
+   public int getClassID()
    {
-      return ordinal();
+      return classID;
+   }
+
+   public byte toByte()
+   {
+      return (byte) this.ordinal();
    }
 
    public static YOLOv8DetectionClass fromByte(byte enumAsByte)
@@ -48,9 +58,15 @@ public enum YOLOv8DetectionClass
       return values()[enumAsByte];
    }
 
-   public byte toByte()
+   public static YOLOv8DetectionClass fromClassID(int classID)
    {
-      return (byte) this.ordinal();
+      for (YOLOv8DetectionClass detectionClass : values())
+      {
+         if (detectionClass.getClassID() == classID)
+            return detectionClass;
+      }
+
+      return null;
    }
 
    @Override
