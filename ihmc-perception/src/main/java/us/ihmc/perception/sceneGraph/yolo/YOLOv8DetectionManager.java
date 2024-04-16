@@ -322,7 +322,6 @@ public class YOLOv8DetectionManager
                if (filter.isStableDetectionResult()) // filter has enough samples and detection is stable; add the candidate to scene graph
                {
                   long nodeID = sceneGraph.getNextID().getAndIncrement();
-
                   YOLOv8Node newYoloNode = new YOLOv8Node(nodeID,
                                                           "YOLO " + candidateDetection.getDetection().objectClass().toString(),
                                                           candidateDetection.getDetection().objectClass(),
