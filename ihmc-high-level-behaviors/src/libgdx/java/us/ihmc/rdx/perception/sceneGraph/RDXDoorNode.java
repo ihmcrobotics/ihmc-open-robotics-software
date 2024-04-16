@@ -146,8 +146,6 @@ public class RDXDoorNode extends RDXSceneNode
          ImGui.text(planarRegionsList.getPlanarRegion(0).getDebugString());
       else
          ImGui.text("N/A");
-
-      ImGui.text("Has planar region: " + !planarRegionsList.isEmpty());
    }
 
    @Override
