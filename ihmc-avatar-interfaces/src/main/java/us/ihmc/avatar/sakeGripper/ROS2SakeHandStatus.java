@@ -113,6 +113,15 @@ public class ROS2SakeHandStatus
       return errorCodes;
    }
 
+   public String getErrorString()
+   {
+      StringBuilder errorString = new StringBuilder();
+      for (String errorName : SakeHandError.getErrorNames(errorCodes))
+         errorString.append("[").append(errorName).append("]");
+
+      return errorString.toString();
+   }
+
    public int getHandRealtimeTick()
    {
       return handRealtimeTick;
