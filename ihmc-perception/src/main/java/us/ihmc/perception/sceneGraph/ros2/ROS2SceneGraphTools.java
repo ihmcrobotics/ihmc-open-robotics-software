@@ -5,6 +5,7 @@ import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -14,6 +15,7 @@ import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
+import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 
 public class ROS2SceneGraphTools
 {
@@ -70,6 +72,21 @@ public class ROS2SceneGraphTools
                                         subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices(),
                                         subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices(),
                                         subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
+      }
+      else if (nodeType == SceneGraphMessage.YOLO_NODE_TYPE)
+      {
+         sceneNode = new YOLOv8Node(nodeID,
+                                    nodeName,
+                                    subscriptionNode.getYOLONodeMessage().getMaskErosionKernelRadius(),
+                                    subscriptionNode.getYOLONodeMessage().getOutlierFilterThreshold(),
+                                    subscriptionNode.getYOLONodeMessage().getDetectionAcceptanceThreshold(),
+                                    YOLOv8DetectionClass.valueOf(subscriptionNode.getYOLONodeMessage().getDetectionClassAsString()),
+                                    subscriptionNode.getYOLONodeMessage().getObjectPointCloud(),
+                                    subscriptionNode.getYOLONodeMessage().getObjectCentroid(),
+                                    subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform(),
+                                    subscriptionNode.getYOLONodeMessage().getObjectPose(),
+                                    subscriptionNode.getYOLONodeMessage().getFilteredObjectPose(),
+                                    subscriptionNode.getYOLONodeMessage().getVisualTransformToObjectPose());
       }
       else if (nodeType == SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE)
       {

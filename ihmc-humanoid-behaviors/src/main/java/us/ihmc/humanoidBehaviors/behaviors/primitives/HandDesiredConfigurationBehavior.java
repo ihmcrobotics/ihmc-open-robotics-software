@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -23,7 +23,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
    private final YoBoolean trajectoryTimeElapsed;
 
    private final boolean DEBUG = false;
-   private final IHMCROS2Publisher<HandDesiredConfigurationMessage> publisher;
+   private final ROS2PublisherBasics<HandDesiredConfigurationMessage> publisher;
 
    public HandDesiredConfigurationBehavior(String robotName, String name, ROS2Node ros2Node, YoDouble yoTime)
    {

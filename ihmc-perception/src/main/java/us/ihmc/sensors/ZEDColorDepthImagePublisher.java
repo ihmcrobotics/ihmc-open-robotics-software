@@ -2,7 +2,7 @@ package us.ihmc.sensors;
 
 import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.perception.CameraModel;
@@ -15,7 +15,6 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.RestartableThread;
 
@@ -26,9 +25,9 @@ import java.util.concurrent.locks.ReentrantLock;
 public class ZEDColorDepthImagePublisher
 {
    private final ROS2Node ros2Node;
-   private final SideDependentList<IHMCROS2Publisher<ImageMessage>> ros2ColorImagePublishers;
-   private final IHMCROS2Publisher<ImageMessage> ros2DepthImagePublisher;
-   private final IHMCROS2Publisher<ImageMessage> ros2CutOutDepthImagePublisher;
+   private final SideDependentList<ROS2PublisherBasics<ImageMessage>> ros2ColorImagePublishers;
+   private final ROS2PublisherBasics<ImageMessage> ros2DepthImagePublisher;
+   private final ROS2PublisherBasics<ImageMessage> ros2CutOutDepthImagePublisher;
 
    private final SideDependentList<CUDAImageEncoder> imageEncoders = new SideDependentList<>();
 
@@ -58,10 +57,10 @@ public class ZEDColorDepthImagePublisher
                                       ROS2Topic<ImageMessage> cutoutDepthTopic)
    {
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "zed_color_depth_publisher");
-      ros2ColorImagePublishers = new SideDependentList<>(ROS2Tools.createPublisher(ros2Node, colorTopics.get(RobotSide.LEFT), ROS2QosProfile.BEST_EFFORT()),
-                                                         ROS2Tools.createPublisher(ros2Node, colorTopics.get(RobotSide.RIGHT), ROS2QosProfile.BEST_EFFORT()));
-      ros2DepthImagePublisher = ROS2Tools.createPublisher(ros2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
-      ros2CutOutDepthImagePublisher = ROS2Tools.createPublisher(ros2Node, cutoutDepthTopic, ROS2QosProfile.BEST_EFFORT());
+      ros2ColorImagePublishers = new SideDependentList<>(ros2Node.createPublisher(colorTopics.get(RobotSide.LEFT)),
+                                                         ros2Node.createPublisher(colorTopics.get(RobotSide.RIGHT)));
+      ros2DepthImagePublisher = ros2Node.createPublisher(depthTopic);
+      ros2CutOutDepthImagePublisher = ros2Node.createPublisher(cutoutDepthTopic);
 
       publishDepthThread = new RestartableThread("ZEDDepthImagePublisher", this::publishDepthThreadFunction);
       publishDepthThread.start();
@@ -295,10 +294,10 @@ public class ZEDColorDepthImagePublisher
             imageEncoders.get(side).destroy();
          if (nextGpuColorImages.get(side) != null)
             nextGpuColorImages.get(side).release();
-         ros2ColorImagePublishers.get(side).destroy();
+         ros2ColorImagePublishers.get(side).remove();
       }
 
-      ros2DepthImagePublisher.destroy();
+      ros2DepthImagePublisher.remove();
       ros2Node.destroy();
       System.out.println("Destroyed " + getClass().getSimpleName());
    }

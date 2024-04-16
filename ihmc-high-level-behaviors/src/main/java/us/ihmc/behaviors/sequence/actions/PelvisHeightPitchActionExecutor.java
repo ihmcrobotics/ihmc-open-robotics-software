@@ -12,7 +12,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -94,7 +93,7 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
       }
       else
       {
-         LogTools.error("Cannot execute. Frame is not a child of World frame.");
+         state.getLogger().error("Cannot execute. Frame is not a child of World frame.");
       }
    }
 
@@ -108,7 +107,7 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
       {
          state.setIsExecuting(false);
          state.setFailed(true);
-         LogTools.error("Task execution timed out. Publishing stop all trajectories message.");
+         state.getLogger().error("Task execution timed out. Publishing stop all trajectories message.");
          ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
          return;
       }
