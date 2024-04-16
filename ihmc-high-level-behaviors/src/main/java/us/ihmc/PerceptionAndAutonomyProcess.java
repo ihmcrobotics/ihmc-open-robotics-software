@@ -374,7 +374,7 @@ public class PerceptionAndAutonomyProcess
             zedCutOutDepthImage = overlapRemover.removeOverlap(zedDepthImage.get(), 20);
          }
          else
-            zedCutOutDepthImage = zedDepthImage.get();
+            zedCutOutDepthImage = new RawImage(zedDepthImage);
 
          zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
          zedImagePublisher.setNextCutOutDepthImage(zedCutOutDepthImage.get());
