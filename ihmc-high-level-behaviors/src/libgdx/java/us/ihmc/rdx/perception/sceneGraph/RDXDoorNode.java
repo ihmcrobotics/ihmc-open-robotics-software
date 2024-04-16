@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -59,6 +60,17 @@ public class RDXDoorNode extends RDXSceneNode
    @Override
    public void update(SceneGraphModificationQueue modificationQueue)
    {
+      Point3D currentCameraFocus = new Point3D(doorNode.getObjectPose().getTranslation());
+
+      if (interpolatedFocus.getX() == 0)
+      {
+         interpolatedFocus.set(currentCameraFocus);
+      }
+
+      interpolatedFocus.interpolate(currentCameraFocus, 0.01);
+
+      RDXBaseUI.getInstance().getPrimary3DPanel().getCamera3D().setCameraFocusPoint(interpolatedFocus);
+
       // Update door planar region graphic
       if (!lastDoorRegion.epsilonEquals(doorNode.getDoorPlanarRegion(), 0.1))
       {
@@ -131,6 +143,8 @@ public class RDXDoorNode extends RDXSceneNode
 
       doorPlanarRegionGraphic.getRenderables(renderables, pool);
    }
+
+   Point3D interpolatedFocus = new Point3D();
 
    @Override
    public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
