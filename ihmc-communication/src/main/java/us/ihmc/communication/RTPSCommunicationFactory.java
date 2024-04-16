@@ -1,6 +1,5 @@
 package us.ihmc.communication;
 
-import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InterfaceAddress;
@@ -14,26 +13,19 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.SystemUtils;
 import org.apache.commons.net.util.SubnetUtils;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
 import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.log.LogTools;
-import us.ihmc.pubsub.Domain;
-import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.pubsub.attributes.ParticipantAttributes;
-import us.ihmc.pubsub.participant.Participant;
 
 /**
- * Creates and Manages participants
+ * Loads the Domain ID and Subnet Restriction from ~/.ihmc/IHMCNetworkParameters.ini
  */
 public class RTPSCommunicationFactory
 {
    private static final int START_OF_RANDOM_DOMAIN_RANGE = 200;
    private static final List<InterfaceAddress> MACHINE_INTERFACE_ADDRESSES = findInterfaceAddresses();
 
-   private final Domain domain = DomainFactory.getDomain(DomainFactory.PubSubImplementation.FAST_RTPS);
-   private final TIntObjectHashMap<Participant> participants = new TIntObjectHashMap<>();
    private final int defaultDomainID;
    private final InetAddress defaultAddressRestriction;
 
@@ -123,7 +115,6 @@ public class RTPSCommunicationFactory
       defaultAddressRestriction = foundAddressRestriction;
       if (defaultAddressRestriction != null)
          LogTools.info("Setting IP restriction: {}", defaultAddressRestriction.getHostAddress());
-      createParticipant(rtpsDomainID);
    }
 
    private static List<InterfaceAddress> findInterfaceAddresses()
@@ -141,16 +132,6 @@ public class RTPSCommunicationFactory
    }
 
    /**
-    * Returns a handle on the singleton instance of the Domain
-    * 
-    * @return
-    */
-   public Domain getDomain()
-   {
-      return domain;
-   }
-
-   /**
     * Gets the address to restrict network traffic to when using RTPS.
     * 
     * @return
@@ -160,61 +141,8 @@ public class RTPSCommunicationFactory
       return defaultAddressRestriction;
    }
 
-   /**
-    * Returns a participant attached to the domain.
-    */
-   public Participant getOrCreateParticipant(int domainID)
-   {
-      if (!participants.containsKey(domainID))
-      {
-         createParticipant(domainID);
-      }
-      return participants.get(domainID);
-   }
-
-   /**
-    * creates a participant using the default domain ID. The Default domain ID is either loaded from
-    * file or randomly generated in the 800-900 range
-    * 
-    * @return the default participant
-    */
-   public Participant getDefaultParticipant()
-   {
-      return getOrCreateParticipant(defaultDomainID);
-   }
-
-   /**
-    * Creates a participant attached to the domain using the specified domain ID
-    * 
-    * @param domainId the id to use for the domain
-    * @return a new participant attached to the domain
-    */
-   private void createParticipant(int domainId)
-   {
-      ParticipantAttributes attributes = domain.createParticipantAttributes(domainId, RTPSCommunicationFactory.class.getSimpleName());
-      try
-      {
-         participants.put(domainId, domain.createParticipant(attributes));
-      }
-      catch (IOException e)
-      {
-         System.err.println("Could not create pub sub participant.");
-         throw new RuntimeException(e);
-      }
-   }
-
    int getDomainId()
    {
       return defaultDomainID;
-   }
-
-   /**
-    * Quick test method to ensure the factory correctly loads the rtps domain ID.
-    * 
-    * @param args none needed
-    */
-   public static void main(String[] args)
-   {
-      new RTPSCommunicationFactory().getDefaultParticipant();
    }
 }
