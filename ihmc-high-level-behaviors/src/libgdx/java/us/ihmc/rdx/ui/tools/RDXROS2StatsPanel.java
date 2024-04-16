@@ -116,11 +116,12 @@ public class RDXROS2StatsPanel extends RDXPanel
 
       ImGuiTools.separatorText("Nodes");
 
-      if (ImGui.beginTable(labels.get("Nodes"), 3, tableFlags))
+      if (ImGui.beginTable(labels.get("Nodes"), 4, tableFlags))
       {
          ImGui.tableSetupColumn(labels.get("Node Name"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Publishers"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Subscribers"), ImGuiTableColumnFlags.WidthFixed);
+         ImGui.tableSetupColumn(labels.get("Removed"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupScrollFreeze(0, 1);
          ImGui.tableHeadersRow();
 
@@ -134,6 +135,8 @@ public class RDXROS2StatsPanel extends RDXPanel
             ImGui.text("%d".formatted(participantStats.getPublishers().size()));
             ImGui.tableNextColumn();
             ImGui.text("%d".formatted(participantStats.getSubscribers().size()));
+            ImGui.tableNextColumn();
+            ImGui.text("%b".formatted(participantStats.getRemoved()));
          }
 
          ImGui.endTable();
@@ -141,7 +144,7 @@ public class RDXROS2StatsPanel extends RDXPanel
 
       ImGuiTools.separatorText("Publishers");
 
-      if (ImGui.beginTable(labels.get("Publishers"), 9, tableFlags))
+      if (ImGui.beginTable(labels.get("Publishers"), 10, tableFlags))
       {
          ImGui.tableSetupColumn(labels.get("Node Name"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Topic Name"), ImGuiTableColumnFlags.WidthFixed);
@@ -152,6 +155,7 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.tableSetupColumn(labels.get("Frequency"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Largest Message Size"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Current Message Size"));
+         ImGui.tableSetupColumn(labels.get("Removed"));
          ImGui.tableSetupScrollFreeze(0, 1);
          ImGui.tableHeadersRow();
 
@@ -175,7 +179,7 @@ public class RDXROS2StatsPanel extends RDXPanel
 
       ImGuiTools.separatorText("Subscribers");
 
-      if (ImGui.beginTable(labels.get("Subscribers"), 10, tableFlags))
+      if (ImGui.beginTable(labels.get("Subscribers"), 11, tableFlags))
       {
          ImGui.tableSetupColumn(labels.get("Node Name"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Topic Name"), ImGuiTableColumnFlags.WidthFixed);
@@ -187,6 +191,7 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.tableSetupColumn(labels.get("Largest Message Size"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Current Message Size"));
          ImGui.tableSetupColumn(labels.get("Matched"));
+         ImGui.tableSetupColumn(labels.get("Removed"));
          ImGui.tableSetupScrollFreeze(0, 1);
          ImGui.tableHeadersRow();
 
@@ -235,6 +240,8 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableByteSize(publisherStats.getLargestMessageSize())));
          ImGui.tableNextColumn();
          ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableByteSize(publisherStats.getCurrentMessageSize())));
+         ImGui.tableNextColumn();
+         ImGui.text("%b".formatted(publisherStats.getRemoved()));
       }
    }
 
@@ -266,6 +273,8 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableByteSize(subscriberStats.getCurrentMessageSize())));
          ImGui.tableNextColumn();
          ImGui.text("%b".formatted(subscriberStats.getHasMatched()));
+         ImGui.tableNextColumn();
+         ImGui.text("%b".formatted(subscriberStats.getRemoved()));
       }
    }
 }
