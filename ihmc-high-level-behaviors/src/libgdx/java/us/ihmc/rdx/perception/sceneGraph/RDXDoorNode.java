@@ -43,10 +43,9 @@ public class RDXDoorNode extends RDXSceneNode
    private final transient PlanarRegionsList planarRegionsList = new PlanarRegionsList();
    private final transient PlanarRegion lastDoorRegion = new PlanarRegion();
 
-   // TODO: remove these
-   private static final int SWITCH_SIDE_THRESHOLD = 10;
-   private int switchSide = 0;
-   private RobotSide lastSide;
+   private static final int DOOR_LEVER_SWITCH_SIDE_THRESHOLD = 10;
+   private transient int doorLeverSwitchSide = 0;
+   private transient RobotSide doorLeverLastSide;
 
    public RDXDoorNode(DoorNode yoloDoorNode, ImGuiUniqueLabelMap labels)
    {
@@ -85,21 +84,21 @@ public class RDXDoorNode extends RDXSceneNode
 
          RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(doorLeverPointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
 
-         if (lastSide == null)
-            lastSide = doorSide;
+         if (doorLeverLastSide == null)
+            doorLeverLastSide = doorSide;
 
          // Glitch filter
-         if (lastSide != doorSide)
+         if (doorLeverLastSide != doorSide)
          {
-            if (++switchSide > SWITCH_SIDE_THRESHOLD)
+            if (++doorLeverSwitchSide > DOOR_LEVER_SWITCH_SIDE_THRESHOLD)
             {
                // Switch sides
-               switchSide = 0;
+               doorLeverSwitchSide = 0;
                LogTools.info("Door lever switched sides");
             }
             else
             {
-               doorSide = lastSide;
+               doorSide = doorLeverLastSide;
             }
          }
 
