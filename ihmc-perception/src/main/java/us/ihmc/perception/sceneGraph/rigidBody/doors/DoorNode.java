@@ -13,7 +13,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class DoorNode extends SceneNode
 {
-   private DoorHardwareType doorHardwareType;
+   private OpeningMechanismType openingMechanismType;
    private final Pose3D doorHardwarePose = new Pose3D();
    private final RigidBodyTransform doorHardwareVisualTransformToObjectPose = new RigidBodyTransform();
 
@@ -21,41 +21,41 @@ public class DoorNode extends SceneNode
 
    public DoorNode(long id, String name)
    {
-      this(id, name, DoorHardwareType.UNKNOWN, new Pose3D(), new RigidBodyTransform(), new PlanarRegion());
+      this(id, name, OpeningMechanismType.UNKNOWN, new Pose3D(), new RigidBodyTransform(), new PlanarRegion());
    }
 
    public DoorNode(long id,
                    String name,
-                   DoorHardwareType doorHardwareType,
+                   OpeningMechanismType openingMechanismType,
                    Pose3D objectPose,
                    RigidBodyTransformBasics visualTransformToObjectPose,
                    PlanarRegion doorPlanarRegion)
    {
       super(id, name);
-      this.doorHardwareType = doorHardwareType;
+      this.openingMechanismType = openingMechanismType;
       this.doorHardwarePose.set(objectPose);
       this.doorHardwareVisualTransformToObjectPose.set(visualTransformToObjectPose);
       this.doorPlanarRegion.set(doorPlanarRegion);
    }
 
-   public DoorHardwareType getDoorHardwareType()
+   public OpeningMechanismType getOpeningMechanismType()
    {
-      return doorHardwareType;
+      return openingMechanismType;
    }
 
-   public void setDoorHardwareType(DoorHardwareType doorHardwareType)
+   public void setOpeningMechanismType(OpeningMechanismType openingMechanismType)
    {
-      this.doorHardwareType = doorHardwareType;
+      this.openingMechanismType = openingMechanismType;
    }
 
-   public void setDoorHardwareTypeFromYoloClass(YOLOv8DetectionClass yoloClass)
+   public void setOpeningMechanismTypeFromYoloClass(YOLOv8DetectionClass yoloClass)
    {
       switch (yoloClass)
       {
-         case DOOR_LEVER -> setDoorHardwareType(DoorHardwareType.LEVER_HANDLE);
-         case DOOR_KNOB -> setDoorHardwareType(DoorHardwareType.KNOB);
-         case DOOR_PULL_HANDLE -> setDoorHardwareType(DoorHardwareType.PULL_HANDLE);
-         case DOOR_PUSH_BAR -> setDoorHardwareType(DoorHardwareType.PUSH_BAR);
+         case DOOR_LEVER -> setOpeningMechanismType(OpeningMechanismType.LEVER_HANDLE);
+         case DOOR_KNOB -> setOpeningMechanismType(OpeningMechanismType.KNOB);
+         case DOOR_PULL_HANDLE -> setOpeningMechanismType(OpeningMechanismType.PULL_HANDLE);
+         case DOOR_PUSH_BAR -> setOpeningMechanismType(OpeningMechanismType.PUSH_BAR);
       }
    }
 

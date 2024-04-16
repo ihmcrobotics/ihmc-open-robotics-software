@@ -26,8 +26,8 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeReplacement;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorHardwareType;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.OpeningMechanismType;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.ros2.ROS2Input;
 
@@ -160,7 +160,7 @@ public class ROS2SceneGraphSubscription
          }
          if (localNode instanceof DoorNode doorNode)
          {
-            doorNode.setDoorHardwareType(DoorHardwareType.fromByte(subscriptionNode.getDoorNodeMessage().getDoorHardwareType()));
+            doorNode.setOpeningMechanismType(OpeningMechanismType.fromByte(subscriptionNode.getDoorNodeMessage().getOpeningMechanismType()));
             doorNode.setDoorPlanarRegion(PlanarRegionMessageConverter.convertToPlanarRegion(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegion()));
             doorNode.setDoorHardwarePose(subscriptionNode.getDoorNodeMessage().getDoorHardwarePose());
             doorNode.setDoorHardwareVisualTransformToObjectPose(subscriptionNode.getDoorNodeMessage().getVisualTransformToObjectPose());

@@ -1,7 +1,7 @@
 # The base scene node information
 perception_msgs/SceneNodeMessage scene_node
-# The type of door hardware detected
-byte door_hardware_type
+# The type of door opening mechanism detected
+byte opening_mechanism_type
 # The pose of the detected door hardware
 geometry_msgs/Pose door_hardware_pose
 # The visual transform to parent of the door hardware

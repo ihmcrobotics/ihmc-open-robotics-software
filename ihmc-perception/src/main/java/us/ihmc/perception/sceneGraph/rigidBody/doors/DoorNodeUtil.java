@@ -32,7 +32,7 @@ public final class DoorNodeUtil
                   if (yoloNode.getChildren().isEmpty())
                   {
                      DoorNode doorNode = new DoorNode(sceneGraph.getNextID().getAndIncrement(), "Door");
-                     doorNode.setDoorHardwareTypeFromYoloClass(yoloNode.getDetectionClass());
+                     doorNode.setOpeningMechanismTypeFromYoloClass(yoloNode.getDetectionClass());
                      modificationQueue.accept(new SceneGraphNodeAddition(doorNode, yoloNode));
                   }
                   else

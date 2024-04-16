@@ -15,8 +15,8 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorHardwareType;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.OpeningMechanismType;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
@@ -111,7 +111,7 @@ public class ROS2SceneGraphTools
          DoorNodeMessage doorNodeMessage = subscriptionNode.getDoorNodeMessage();
          sceneNode = new DoorNode(nodeID,
                                   nodeName,
-                                  DoorHardwareType.fromByte(subscriptionNode.getDoorNodeMessage().getDoorHardwareType()),
+                                  OpeningMechanismType.fromByte(subscriptionNode.getDoorNodeMessage().getOpeningMechanismType()),
                                   subscriptionNode.getDoorNodeMessage().getDoorHardwarePose(),
                                   doorNodeMessage.getVisualTransformToObjectPose(),
                                   PlanarRegionMessageConverter.convertToPlanarRegion(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegion()));

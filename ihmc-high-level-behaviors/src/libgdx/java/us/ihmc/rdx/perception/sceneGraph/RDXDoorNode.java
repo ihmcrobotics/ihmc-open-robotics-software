@@ -14,9 +14,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorHardwareType;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.OpeningMechanismType;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -84,7 +84,7 @@ public class RDXDoorNode extends RDXSceneNode
 
          RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(doorHardwarePointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
 
-         if (doorNode.getDoorHardwareType() == DoorHardwareType.LEVER_HANDLE)
+         if (doorNode.getOpeningMechanismType() == OpeningMechanismType.LEVER_HANDLE)
          {
             if (doorLeverLastSide == null)
                doorLeverLastSide = doorSide;
@@ -107,7 +107,7 @@ public class RDXDoorNode extends RDXSceneNode
 
          double yaw = TupleTools.angle(Axis2D.X, doorLineNormal.getDirection());
 
-         if (doorNode.getDoorHardwareType() == DoorHardwareType.LEVER_HANDLE)
+         if (doorNode.getOpeningMechanismType() == OpeningMechanismType.LEVER_HANDLE)
             visualModelTransformToWorld.getRotation().setYawPitchRoll(yaw, 0.0, doorSide == RobotSide.LEFT ? Math.PI : 0.0);
          else
             visualModelTransformToWorld.getRotation().setToYawOrientation(yaw);
@@ -165,7 +165,7 @@ public class RDXDoorNode extends RDXSceneNode
    {
       RDXInteractableObject interactableObject = null;
 
-      switch (doorNode.getDoorHardwareType())
+      switch (doorNode.getOpeningMechanismType())
       {
          case LEVER_HANDLE ->
          {

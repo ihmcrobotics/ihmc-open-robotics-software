@@ -20,9 +20,9 @@ module perception_msgs
          */
         perception_msgs::msg::dds::SceneNodeMessage scene_node;
         /**
-         * The type of door hardware detected
+         * The type of door opening mechanism detected
          */
-        octet door_hardware_type;
+        octet opening_mechanism_type;
         /**
          * The pose of the detected door hardware
          */

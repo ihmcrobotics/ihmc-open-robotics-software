@@ -13,9 +13,9 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
             */
    public perception_msgs.msg.dds.SceneNodeMessage scene_node_;
    /**
-            * The type of door hardware detected
+            * The type of door opening mechanism detected
             */
-   public byte door_hardware_type_;
+   public byte opening_mechanism_type_;
    /**
             * The pose of the detected door hardware
             */
@@ -46,7 +46,7 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
    public void set(DoorNodeMessage other)
    {
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.staticCopy(other.scene_node_, scene_node_);
-      door_hardware_type_ = other.door_hardware_type_;
+      opening_mechanism_type_ = other.opening_mechanism_type_;
 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.door_hardware_pose_, door_hardware_pose_);
       geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.visual_transform_to_object_pose_, visual_transform_to_object_pose_);
@@ -63,18 +63,18 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
    }
 
    /**
-            * The type of door hardware detected
+            * The type of door opening mechanism detected
             */
-   public void setDoorHardwareType(byte door_hardware_type)
+   public void setOpeningMechanismType(byte opening_mechanism_type)
    {
-      door_hardware_type_ = door_hardware_type;
+      opening_mechanism_type_ = opening_mechanism_type;
    }
    /**
-            * The type of door hardware detected
+            * The type of door opening mechanism detected
             */
-   public byte getDoorHardwareType()
+   public byte getOpeningMechanismType()
    {
-      return door_hardware_type_;
+      return opening_mechanism_type_;
    }
 
 
@@ -123,7 +123,7 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       if(other == this) return true;
 
       if (!this.scene_node_.epsilonEquals(other.scene_node_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.door_hardware_type_, other.door_hardware_type_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.opening_mechanism_type_, other.opening_mechanism_type_, epsilon)) return false;
 
       if (!this.door_hardware_pose_.epsilonEquals(other.door_hardware_pose_, epsilon)) return false;
       if (!this.visual_transform_to_object_pose_.epsilonEquals(other.visual_transform_to_object_pose_, epsilon)) return false;
@@ -142,7 +142,7 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       DoorNodeMessage otherMyClass = (DoorNodeMessage) other;
 
       if (!this.scene_node_.equals(otherMyClass.scene_node_)) return false;
-      if(this.door_hardware_type_ != otherMyClass.door_hardware_type_) return false;
+      if(this.opening_mechanism_type_ != otherMyClass.opening_mechanism_type_) return false;
 
       if (!this.door_hardware_pose_.equals(otherMyClass.door_hardware_pose_)) return false;
       if (!this.visual_transform_to_object_pose_.equals(otherMyClass.visual_transform_to_object_pose_)) return false;
@@ -159,8 +159,8 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       builder.append("DoorNodeMessage {");
       builder.append("scene_node=");
       builder.append(this.scene_node_);      builder.append(", ");
-      builder.append("door_hardware_type=");
-      builder.append(this.door_hardware_type_);      builder.append(", ");
+      builder.append("opening_mechanism_type=");
+      builder.append(this.opening_mechanism_type_);      builder.append(", ");
       builder.append("door_hardware_pose=");
       builder.append(this.door_hardware_pose_);      builder.append(", ");
       builder.append("visual_transform_to_object_pose=");
