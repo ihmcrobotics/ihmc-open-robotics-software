@@ -5,9 +5,9 @@ import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 
-public class DoorNodeManager
+public final class DoorNodeUtil
 {
-   public void updateSceneGraph(SceneGraph sceneGraph)
+   public static void updateSceneGraph(SceneGraph sceneGraph)
    {
       sceneGraph.modifyTree(modificationQueue ->
       {
