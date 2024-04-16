@@ -323,7 +323,6 @@ public class YOLOv8DetectionManager
                {
                   long nodeID = sceneGraph.getNextID().getAndIncrement();
 
-
                   YOLOv8Node newYoloNode = new YOLOv8Node(nodeID,
                                                           "YOLO " + candidateDetection.getDetection().objectClass().toString(),
                                                           candidateDetection.getDetection().objectClass(),
