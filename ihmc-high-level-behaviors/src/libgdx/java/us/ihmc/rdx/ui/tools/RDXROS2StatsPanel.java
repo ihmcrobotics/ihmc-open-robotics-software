@@ -109,7 +109,7 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.tableNextColumn();
          ImGui.text("%.0f Hz".formatted(receiveFrequency.finiteDifference(PubSubStats.NUMBER_OF_RECEIVED_MESSAGES)));
          ImGui.tableNextColumn();
-         ImGui.text(PubSubStatsTools.getHumanReadableDataSize(PubSubStats.LARGEST_MESSAGE_SIZE));
+         ImGui.text(PubSubStatsTools.getHumanReadableByteSize(PubSubStats.LARGEST_MESSAGE_SIZE));
 
          ImGui.endTable();
       }
@@ -228,13 +228,13 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.tableNextColumn();
          ImGui.text("%d".formatted(publisherStats.getNumberOfPublishedMessages()));
          ImGui.tableNextColumn();
-         ImGui.text("%s/s".formatted(PubSubStatsTools.getHumanReadableDataSize(Math.round(publisherStats.getBandwidth()))));
+         ImGui.text("%s/s".formatted(PubSubStatsTools.getHumanReadableBitSize(Math.round(publisherStats.getBandwidth()))));
          ImGui.tableNextColumn();
          ImGui.text("%.0f Hz".formatted(publisherStats.getPublishFrequency()));
          ImGui.tableNextColumn();
-         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableDataSize(publisherStats.getLargestMessageSize())));
+         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableByteSize(publisherStats.getLargestMessageSize())));
          ImGui.tableNextColumn();
-         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableDataSize(publisherStats.getCurrentMessageSize())));
+         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableByteSize(publisherStats.getCurrentMessageSize())));
       }
    }
 
@@ -257,13 +257,13 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.tableNextColumn();
          ImGui.text("%d".formatted(subscriberStats.getNumberOfReceivedMessages()));
          ImGui.tableNextColumn();
-         ImGui.text("%s/s".formatted(PubSubStatsTools.getHumanReadableDataSize(Math.round(subscriberStats.getBandwidth()))));
+         ImGui.text("%s/s".formatted(PubSubStatsTools.getHumanReadableBitSize(Math.round(subscriberStats.getBandwidth()))));
          ImGui.tableNextColumn();
          ImGui.text("%.0f Hz".formatted(subscriberStats.getReceiveFrequency()));
          ImGui.tableNextColumn();
-         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableDataSize(subscriberStats.getLargestMessageSize())));
+         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableByteSize(subscriberStats.getLargestMessageSize())));
          ImGui.tableNextColumn();
-         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableDataSize(subscriberStats.getCurrentMessageSize())));
+         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableByteSize(subscriberStats.getCurrentMessageSize())));
          ImGui.tableNextColumn();
          ImGui.text("%b".formatted(subscriberStats.getHasMatched()));
       }
