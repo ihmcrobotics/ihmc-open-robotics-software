@@ -5,7 +5,10 @@ import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -17,6 +20,7 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
    private final CRDTUnidirectionalPose3D kickGoalPose;
    private final CRDTUnidirectionalPose3D leftFootGoalPose;
    private final CRDTUnidirectionalPose3D rightFootGoalPose;
+   private final DetachableReferenceFrame doorHandleFrame;
    private ReferenceFrame parentFrame;
    private final CRDTUnidirectionalInteger totalNumberOfFootsteps;
    private final CRDTUnidirectionalInteger numberOfIncompleteFootsteps;
@@ -32,7 +36,9 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
 
       this.referenceFrameLibrary = referenceFrameLibrary;
 
-      parentFrame = referenceFrameLibrary.findFrameByName(definition.getParentFrameName());
+      ZUpFrame stateParentZUpFrame = new ZUpFrame(referenceFrameLibrary.findFrameByName(definition.getParentFrameName()), "StateParentZUpFrame");
+      RigidBodyTransform transformToParent = stateParentZUpFrame.getTransformToParent();
+      doorHandleFrame = new DetachableReferenceFrame(referenceFrameLibrary, transformToParent);
 
       kickGoalPose = new CRDTUnidirectionalPose3D(ROS2ActorDesignation.ROBOT, crdtInfo);
       leftFootGoalPose = new CRDTUnidirectionalPose3D(ROS2ActorDesignation.ROBOT, crdtInfo);
@@ -50,7 +56,8 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
    @Override
    public void update()
    {
-      parentFrame = referenceFrameLibrary.findFrameByName(definition.getParentFrameName());
+      doorHandleFrame.update(definition.getParentFrameName());
+      parentFrame = doorHandleFrame.getReferenceFrame().getParent();
    }
 
    public void toMessage(KickDoorApproachPlanStateMessage message)
@@ -68,7 +75,6 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
       desiredFootPoses.get(RobotSide.RIGHT).toMessage(message.getDesiredRightFootsteps());
       currentFootPoses.get(RobotSide.LEFT).toMessage(message.getCurrentLeftFootPose());
       currentFootPoses.get(RobotSide.RIGHT).toMessage(message.getCurrentRightFootPose());
-
 
       message.setExecutionState(executionState.toMessage().toByte());
    }
@@ -95,6 +101,11 @@ public class KickDoorApproachPlanActionState extends ActionNodeState<KickDoorApp
    public boolean areFramesInWorld()
    {
       return referenceFrameLibrary.containsFrame(definition.getParentFrameName()) && parentFrame.getRootFrame() == ReferenceFrame.getWorldFrame();
+   }
+
+   public DetachableReferenceFrame getDoorHandleFrame()
+   {
+      return doorHandleFrame;
    }
 
    public ReferenceFrame getParentFrame()

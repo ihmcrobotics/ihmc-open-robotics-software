@@ -24,9 +24,9 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -71,7 +71,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
    private static final double gravityZ = 9.81; // This needs to be positive for the planner to work
    private final KickDynamicPlanner kickDynamicPlanner;
 
-   private ZUpFrame stateParentZUpFrame;
+   private final DetachableReferenceFrame doorHandleFrame;
 
    public KickDoorApproachPlanActionExecutor(long id,
                                              CRDTInfo crdtInfo,
@@ -97,7 +97,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
       this.footstepPlanner = footstepPlanner;
       this.footstepPlannerParameters = footstepPlannerParameters;
 
-      stateParentZUpFrame = new ZUpFrame(state.getParentFrame(), "StateParentZUpFrame");
+      doorHandleFrame = state.getDoorHandleFrame();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -114,29 +114,12 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
                                                        null);
    }
 
-   private void updateStateParentZUpFrame()
-   {
-      // check that the frame is still in the tree
-      if (referenceFrameLibrary.findFrameByName(definition.getParentFrameName()) != null)
-      {
-         // the parent frame may have been changed.
-         if (stateParentZUpFrame.getParent() != state.getParentFrame())
-         {
-            stateParentZUpFrame.remove();
-            stateParentZUpFrame = new ZUpFrame(state.getParentFrame(), "StateParentZUpFrame");
-         }
-      }
-      stateParentZUpFrame.update();
-   }
-
    @Override
    public void update()
    {
       super.update();
 
       boolean invalidDefinition = false;
-
-      updateStateParentZUpFrame();
 
       double kickImpulse = definition.getKickImpulse().getValue();
       double kickHeight = definition.getKickHeight().getValue();
@@ -214,7 +197,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
       RobotSide kickSide = definition.getKickSide().getValue();
 
       FramePose3D preKickFootPose = new FramePose3D();
-      preKickFootPose.setToZero(stateParentZUpFrame);
+      preKickFootPose.setToZero(doorHandleFrame.getReferenceFrame());
       preKickFootPose.setX(definition.getKickTargetDistance().getValue());
       preKickFootPose.setY(-kickSide.negateIfRightSide(definition.getHorizontalDistanceFromHandle().getValue()));
       preKickFootPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -222,13 +205,13 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
 
       FramePose3D kickPose = new FramePose3D(preKickFootPose);
       kickPose.setZ(definition.getKickHeight().getValue());
-      kickPose.changeFrame(stateParentZUpFrame);
+      kickPose.changeFrame(doorHandleFrame.getReferenceFrame());
       kickPose.setX(0.0);
       kickPose.appendPitchRotation(Math.PI / 2.0);
       kickPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePose3D stanceFootPose = new FramePose3D();
-      stanceFootPose.setToZero(stateParentZUpFrame);
+      stanceFootPose.setToZero(doorHandleFrame.getReferenceFrame());
       stanceFootPose.setX(definition.getKickTargetDistance().getValue());
       stanceFootPose.setY(-kickSide.negateIfRightSide(definition.getHorizontalDistanceFromHandle().getValue() + definition.getStanceFootWidth().getValue()));
       stanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -293,8 +276,6 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
    @Override
    public void updateCurrentlyExecuting()
    {
-      updateStateParentZUpFrame();
-
       switch (state.getExecutionState().getValue())
       {
          case FOOTSTEP_PLANNING ->
@@ -344,59 +325,64 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
 
       footstepPlanNotification.poll(); // Make sure it's cleared
       footstepPlanningThread.execute(() ->
-      {
-         footstepPlannerParameters.setFinalTurnProximity(1.0);
+                                     {
+                                        footstepPlannerParameters.setFinalTurnProximity(1.0);
 
-         FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
-         footstepPlannerRequest.setPlanBodyPath(false);
-         footstepPlannerRequest.setStartFootPoses(startFootPosesForThread.get(RobotSide.LEFT), startFootPosesForThread.get(RobotSide.RIGHT));
-         // TODO: Set start footholds!!
-         for (RobotSide side : RobotSide.values)
-         {
-            footstepPlannerRequest.setGoalFootPose(side, goalFootPosesForThread.get(side));
-         }
+                                        FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
+                                        footstepPlannerRequest.setPlanBodyPath(false);
+                                        footstepPlannerRequest.setStartFootPoses(startFootPosesForThread.get(RobotSide.LEFT),
+                                                                                 startFootPosesForThread.get(RobotSide.RIGHT));
+                                        // TODO: Set start footholds!!
+                                        for (RobotSide side : RobotSide.values)
+                                        {
+                                           footstepPlannerRequest.setGoalFootPose(side, goalFootPosesForThread.get(side));
+                                        }
 
-         footstepPlannerRequest.setAssumeFlatGround(true); // TODO: Incorporate height map
+                                        footstepPlannerRequest.setAssumeFlatGround(true); // TODO: Incorporate height map
 
-         footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
-         double idealFootstepLength = 0.5;
-         footstepPlanner.getFootstepPlannerParameters().setIdealFootstepLength(idealFootstepLength);
-         footstepPlanner.getFootstepPlannerParameters().setMaximumStepReach(idealFootstepLength);
-         state.getLogger().info("Planning footsteps...");
-         FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
-         FootstepPlan footstepPlan = footstepPlannerOutput.getFootstepPlan();
-         state.getLogger().info("Footstep planner completed with {}, {} step(s)", footstepPlannerOutput.getFootstepPlanningResult(), footstepPlan.getNumberOfSteps());
+                                        footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
+                                        double idealFootstepLength = 0.5;
+                                        footstepPlanner.getFootstepPlannerParameters().setIdealFootstepLength(idealFootstepLength);
+                                        footstepPlanner.getFootstepPlannerParameters().setMaximumStepReach(idealFootstepLength);
+                                        state.getLogger().info("Planning footsteps...");
+                                        FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
+                                        FootstepPlan footstepPlan = footstepPlannerOutput.getFootstepPlan();
+                                        state.getLogger()
+                                             .info("Footstep planner completed with {}, {} step(s)",
+                                                   footstepPlannerOutput.getFootstepPlanningResult(),
+                                                   footstepPlan.getNumberOfSteps());
 
-         if (footstepPlan.getNumberOfSteps() < 1) // failed
-         {
-            FootstepPlannerRejectionReasonReport rejectionReasonReport = new FootstepPlannerRejectionReasonReport(footstepPlanner);
-            rejectionReasonReport.update();
-            for (BipedalFootstepPlannerNodeRejectionReason reason : rejectionReasonReport.getSortedReasons())
-            {
-               double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
-               state.getLogger().info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
-            }
-            state.getLogger().info("Footstep planning failure...");
-            footstepPlanNotification.set(new FootstepPlan());
-         }
-         else
-         {
-            for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
-            {
-               if (i == 0)
-                  footstepPlan.getFootstep(i).setTransferDuration(getDefinition().getTransferDuration() / 2.0);
-               else
-                  footstepPlan.getFootstep(i).setTransferDuration(getDefinition().getTransferDuration());
+                                        if (footstepPlan.getNumberOfSteps() < 1) // failed
+                                        {
+                                           FootstepPlannerRejectionReasonReport rejectionReasonReport = new FootstepPlannerRejectionReasonReport(footstepPlanner);
+                                           rejectionReasonReport.update();
+                                           for (BipedalFootstepPlannerNodeRejectionReason reason : rejectionReasonReport.getSortedReasons())
+                                           {
+                                              double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
+                                              state.getLogger()
+                                                   .info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
+                                           }
+                                           state.getLogger().info("Footstep planning failure...");
+                                           footstepPlanNotification.set(new FootstepPlan());
+                                        }
+                                        else
+                                        {
+                                           for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+                                           {
+                                              if (i == 0)
+                                                 footstepPlan.getFootstep(i).setTransferDuration(getDefinition().getTransferDuration() / 2.0);
+                                              else
+                                                 footstepPlan.getFootstep(i).setTransferDuration(getDefinition().getTransferDuration());
 
-               footstepPlan.getFootstep(i).setSwingDuration(getDefinition().getSwingDuration());
-            }
-            footstepPlanNotification.set(new FootstepPlan(footstepPlan)); // Copy of the output to be safe
-         }
+                                              footstepPlan.getFootstep(i).setSwingDuration(getDefinition().getSwingDuration());
+                                           }
+                                           footstepPlanNotification.set(new FootstepPlan(footstepPlan)); // Copy of the output to be safe
+                                        }
 
-         FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
-         footstepPlannerLogger.logSession();
-         FootstepPlannerLogger.deleteOldLogs();
-      }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+                                        FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
+                                        footstepPlannerLogger.logSession();
+                                        FootstepPlannerLogger.deleteOldLogs();
+                                     }, DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
    private void buildAndSendCommandAndSetDesiredState()
