@@ -41,7 +41,7 @@ public final class DoorNodeUtil
                      {
                         if (childNode instanceof DoorNode doorNode)
                         {
-                           doorNode.setDoorHardwarePose(yoloNode.getObjectPose());
+                           doorNode.setOpeningMechanismPose(yoloNode.getObjectPose());
                         }
                      }
                   }

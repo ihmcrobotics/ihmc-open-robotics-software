@@ -26,11 +26,11 @@ module perception_msgs
         /**
          * The pose of the detected door hardware
          */
-        geometry_msgs::msg::dds::Pose door_hardware_pose;
+        geometry_msgs::msg::dds::Pose opening_mechanism_pose;
         /**
          * The visual transform to parent of the door hardware
          */
-        geometry_msgs::msg::dds::Transform visual_transform_to_object_pose;
+        geometry_msgs::msg::dds::Transform opening_mechanism_visual_transform_to_object_pose;
         /**
          * The planar region we assume is the door panel
          */

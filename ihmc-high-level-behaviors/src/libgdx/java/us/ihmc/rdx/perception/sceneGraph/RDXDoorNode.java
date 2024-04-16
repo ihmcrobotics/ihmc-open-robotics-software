@@ -80,9 +80,9 @@ public class RDXDoorNode extends RDXSceneNode
                                             planarRegionCentroidInWorld.getY(),
                                             doorNode.getDoorPlanarRegion().getNormalX(),
                                             doorNode.getDoorPlanarRegion().getNormalY());
-         Point2D doorHardwarePointInWorld2D = new Point2D(doorNode.getDoorHardwarePose().getTranslation());
+         Point2D openingMechanismPointInWorld2D = new Point2D(doorNode.getOpeningMechanismPose().getTranslation());
 
-         RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(doorHardwarePointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
+         RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(openingMechanismPointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
 
          if (doorNode.getOpeningMechanismType() == OpeningMechanismType.LEVER_HANDLE)
          {
@@ -112,7 +112,7 @@ public class RDXDoorNode extends RDXSceneNode
          else
             visualModelTransformToWorld.getRotation().setToYawOrientation(yaw);
 
-         visualModelTransformToWorld.getTranslation().set(doorNode.getDoorHardwarePose().getTranslation());
+         visualModelTransformToWorld.getTranslation().set(doorNode.getOpeningMechanismPose().getTranslation());
 
          LibGDXTools.setDiffuseColor(interactableObject.getModelInstance(), Color.WHITE); // TODO: keep?
          interactableObject.setPose(visualModelTransformToWorld);

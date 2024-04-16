@@ -112,8 +112,8 @@ public class ROS2SceneGraphTools
          sceneNode = new DoorNode(nodeID,
                                   nodeName,
                                   OpeningMechanismType.fromByte(subscriptionNode.getDoorNodeMessage().getOpeningMechanismType()),
-                                  subscriptionNode.getDoorNodeMessage().getDoorHardwarePose(),
-                                  doorNodeMessage.getVisualTransformToObjectPose(),
+                                  subscriptionNode.getDoorNodeMessage().getOpeningMechanismPose(),
+                                  doorNodeMessage.getOpeningMechanismVisualTransformToObjectPose(),
                                   PlanarRegionMessageConverter.convertToPlanarRegion(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegion()));
       }
       else

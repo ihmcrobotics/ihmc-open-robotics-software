@@ -19,11 +19,11 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
    /**
             * The pose of the detected door hardware
             */
-   public us.ihmc.euclid.geometry.Pose3D door_hardware_pose_;
+   public us.ihmc.euclid.geometry.Pose3D opening_mechanism_pose_;
    /**
             * The visual transform to parent of the door hardware
             */
-   public us.ihmc.euclid.transform.QuaternionBasedTransform visual_transform_to_object_pose_;
+   public us.ihmc.euclid.transform.QuaternionBasedTransform opening_mechanism_visual_transform_to_object_pose_;
    /**
             * The planar region we assume is the door panel
             */
@@ -32,8 +32,8 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
    public DoorNodeMessage()
    {
       scene_node_ = new perception_msgs.msg.dds.SceneNodeMessage();
-      door_hardware_pose_ = new us.ihmc.euclid.geometry.Pose3D();
-      visual_transform_to_object_pose_ = new us.ihmc.euclid.transform.QuaternionBasedTransform();
+      opening_mechanism_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      opening_mechanism_visual_transform_to_object_pose_ = new us.ihmc.euclid.transform.QuaternionBasedTransform();
       door_planar_region_ = new perception_msgs.msg.dds.PlanarRegionMessage();
    }
 
@@ -48,8 +48,8 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.staticCopy(other.scene_node_, scene_node_);
       opening_mechanism_type_ = other.opening_mechanism_type_;
 
-      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.door_hardware_pose_, door_hardware_pose_);
-      geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.visual_transform_to_object_pose_, visual_transform_to_object_pose_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.opening_mechanism_pose_, opening_mechanism_pose_);
+      geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.opening_mechanism_visual_transform_to_object_pose_, opening_mechanism_visual_transform_to_object_pose_);
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.staticCopy(other.door_planar_region_, door_planar_region_);
    }
 
@@ -81,18 +81,18 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
    /**
             * The pose of the detected door hardware
             */
-   public us.ihmc.euclid.geometry.Pose3D getDoorHardwarePose()
+   public us.ihmc.euclid.geometry.Pose3D getOpeningMechanismPose()
    {
-      return door_hardware_pose_;
+      return opening_mechanism_pose_;
    }
 
 
    /**
             * The visual transform to parent of the door hardware
             */
-   public us.ihmc.euclid.transform.QuaternionBasedTransform getVisualTransformToObjectPose()
+   public us.ihmc.euclid.transform.QuaternionBasedTransform getOpeningMechanismVisualTransformToObjectPose()
    {
-      return visual_transform_to_object_pose_;
+      return opening_mechanism_visual_transform_to_object_pose_;
    }
 
 
@@ -125,8 +125,8 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       if (!this.scene_node_.epsilonEquals(other.scene_node_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.opening_mechanism_type_, other.opening_mechanism_type_, epsilon)) return false;
 
-      if (!this.door_hardware_pose_.epsilonEquals(other.door_hardware_pose_, epsilon)) return false;
-      if (!this.visual_transform_to_object_pose_.epsilonEquals(other.visual_transform_to_object_pose_, epsilon)) return false;
+      if (!this.opening_mechanism_pose_.epsilonEquals(other.opening_mechanism_pose_, epsilon)) return false;
+      if (!this.opening_mechanism_visual_transform_to_object_pose_.epsilonEquals(other.opening_mechanism_visual_transform_to_object_pose_, epsilon)) return false;
       if (!this.door_planar_region_.epsilonEquals(other.door_planar_region_, epsilon)) return false;
 
       return true;
@@ -144,8 +144,8 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       if (!this.scene_node_.equals(otherMyClass.scene_node_)) return false;
       if(this.opening_mechanism_type_ != otherMyClass.opening_mechanism_type_) return false;
 
-      if (!this.door_hardware_pose_.equals(otherMyClass.door_hardware_pose_)) return false;
-      if (!this.visual_transform_to_object_pose_.equals(otherMyClass.visual_transform_to_object_pose_)) return false;
+      if (!this.opening_mechanism_pose_.equals(otherMyClass.opening_mechanism_pose_)) return false;
+      if (!this.opening_mechanism_visual_transform_to_object_pose_.equals(otherMyClass.opening_mechanism_visual_transform_to_object_pose_)) return false;
       if (!this.door_planar_region_.equals(otherMyClass.door_planar_region_)) return false;
 
       return true;
@@ -161,10 +161,10 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       builder.append(this.scene_node_);      builder.append(", ");
       builder.append("opening_mechanism_type=");
       builder.append(this.opening_mechanism_type_);      builder.append(", ");
-      builder.append("door_hardware_pose=");
-      builder.append(this.door_hardware_pose_);      builder.append(", ");
-      builder.append("visual_transform_to_object_pose=");
-      builder.append(this.visual_transform_to_object_pose_);      builder.append(", ");
+      builder.append("opening_mechanism_pose=");
+      builder.append(this.opening_mechanism_pose_);      builder.append(", ");
+      builder.append("opening_mechanism_visual_transform_to_object_pose=");
+      builder.append(this.opening_mechanism_visual_transform_to_object_pose_);      builder.append(", ");
       builder.append("door_planar_region=");
       builder.append(this.door_planar_region_);
       builder.append("}");

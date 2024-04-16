@@ -14,8 +14,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 public class DoorNode extends SceneNode
 {
    private OpeningMechanismType openingMechanismType;
-   private final Pose3D doorHardwarePose = new Pose3D();
-   private final RigidBodyTransform doorHardwareVisualTransformToObjectPose = new RigidBodyTransform();
+   private final Pose3D openingMechanismPose = new Pose3D();
+   private final RigidBodyTransform openingMechanismVisualTransformToObjectPose = new RigidBodyTransform();
 
    private final PlanarRegion doorPlanarRegion = new PlanarRegion();
 
@@ -33,8 +33,8 @@ public class DoorNode extends SceneNode
    {
       super(id, name);
       this.openingMechanismType = openingMechanismType;
-      this.doorHardwarePose.set(objectPose);
-      this.doorHardwareVisualTransformToObjectPose.set(visualTransformToObjectPose);
+      this.openingMechanismPose.set(objectPose);
+      this.openingMechanismVisualTransformToObjectPose.set(visualTransformToObjectPose);
       this.doorPlanarRegion.set(doorPlanarRegion);
    }
 
@@ -59,24 +59,24 @@ public class DoorNode extends SceneNode
       }
    }
 
-   public Pose3D getDoorHardwarePose()
+   public Pose3D getOpeningMechanismPose()
    {
-      return doorHardwarePose;
+      return openingMechanismPose;
    }
 
-   public void setDoorHardwarePose(Pose3D pose)
+   public void setOpeningMechanismPose(Pose3D pose)
    {
-      this.doorHardwarePose.set(pose);
+      this.openingMechanismPose.set(pose);
    }
 
-   public RigidBodyTransform getDoorHardwareVisualTransformToObjectPose()
+   public RigidBodyTransform getOpeningMechanismVisualTransformToObjectPose()
    {
-      return doorHardwareVisualTransformToObjectPose;
+      return openingMechanismVisualTransformToObjectPose;
    }
 
-   public void setDoorHardwareVisualTransformToObjectPose(RigidBodyTransformBasics transform)
+   public void setOpeningMechanismVisualTransformToObjectPose(RigidBodyTransformBasics transform)
    {
-      doorHardwareVisualTransformToObjectPose.set(transform);
+      openingMechanismVisualTransformToObjectPose.set(transform);
    }
 
    public PlanarRegion getDoorPlanarRegion()
@@ -91,7 +91,7 @@ public class DoorNode extends SceneNode
 
    public void filterAndSetDoorPlanarRegionFromPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
-      Point3D doorHardwareCentroidInWorld = new Point3D(getDoorHardwarePose().getTranslation());
+      Point3D openingMechanismCentroidInWorld = new Point3D(getOpeningMechanismPose().getTranslation());
 
       if (!planarRegionsList.isEmpty())
       {
@@ -107,7 +107,7 @@ public class DoorNode extends SceneNode
          {
             Point3DReadOnly planarRegionCentroidInWorld = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
 
-            if (planarRegionCentroidInWorld.distance(doorHardwareCentroidInWorld) > epsilon)
+            if (planarRegionCentroidInWorld.distance(openingMechanismCentroidInWorld) > epsilon)
                continue;
 
             // If the planar region is less than 1/4th the area of a door

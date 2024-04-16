@@ -15,7 +15,7 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "f5086b508fca7eff6184d3e8ee0f28658f574164ff51aec2e98b2ca69354faf6";
+   		return "05c86d38bac14526195d81b48232395c48e3f3c59bac7c92d7e55dca06ec2b42";
    }
    
    @Override
@@ -80,9 +80,9 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getDoorHardwarePose(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getOpeningMechanismPose(), current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getCdrSerializedSize(data.getVisualTransformToObjectPose(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getCdrSerializedSize(data.getOpeningMechanismVisualTransformToObjectPose(), current_alignment);
 
       current_alignment += perception_msgs.msg.dds.PlanarRegionMessagePubSubType.getCdrSerializedSize(data.getDoorPlanarRegion(), current_alignment);
 
@@ -95,8 +95,8 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.write(data.getSceneNode(), cdr);
       cdr.write_type_9(data.getOpeningMechanismType());
 
-      geometry_msgs.msg.dds.PosePubSubType.write(data.getDoorHardwarePose(), cdr);
-      geometry_msgs.msg.dds.TransformPubSubType.write(data.getVisualTransformToObjectPose(), cdr);
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getOpeningMechanismPose(), cdr);
+      geometry_msgs.msg.dds.TransformPubSubType.write(data.getOpeningMechanismVisualTransformToObjectPose(), cdr);
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.write(data.getDoorPlanarRegion(), cdr);
    }
 
@@ -105,8 +105,8 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.read(data.getSceneNode(), cdr);	
       data.setOpeningMechanismType(cdr.read_type_9());
       	
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getDoorHardwarePose(), cdr);	
-      geometry_msgs.msg.dds.TransformPubSubType.read(data.getVisualTransformToObjectPose(), cdr);	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getOpeningMechanismPose(), cdr);	
+      geometry_msgs.msg.dds.TransformPubSubType.read(data.getOpeningMechanismVisualTransformToObjectPose(), cdr);	
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.read(data.getDoorPlanarRegion(), cdr);	
 
    }
@@ -117,9 +117,9 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
       ser.write_type_a("scene_node", new perception_msgs.msg.dds.SceneNodeMessagePubSubType(), data.getSceneNode());
 
       ser.write_type_9("opening_mechanism_type", data.getOpeningMechanismType());
-      ser.write_type_a("door_hardware_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getDoorHardwarePose());
+      ser.write_type_a("opening_mechanism_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getOpeningMechanismPose());
 
-      ser.write_type_a("visual_transform_to_object_pose", new geometry_msgs.msg.dds.TransformPubSubType(), data.getVisualTransformToObjectPose());
+      ser.write_type_a("opening_mechanism_visual_transform_to_object_pose", new geometry_msgs.msg.dds.TransformPubSubType(), data.getOpeningMechanismVisualTransformToObjectPose());
 
       ser.write_type_a("door_planar_region", new perception_msgs.msg.dds.PlanarRegionMessagePubSubType(), data.getDoorPlanarRegion());
 
@@ -131,9 +131,9 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
       ser.read_type_a("scene_node", new perception_msgs.msg.dds.SceneNodeMessagePubSubType(), data.getSceneNode());
 
       data.setOpeningMechanismType(ser.read_type_9("opening_mechanism_type"));
-      ser.read_type_a("door_hardware_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getDoorHardwarePose());
+      ser.read_type_a("opening_mechanism_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getOpeningMechanismPose());
 
-      ser.read_type_a("visual_transform_to_object_pose", new geometry_msgs.msg.dds.TransformPubSubType(), data.getVisualTransformToObjectPose());
+      ser.read_type_a("opening_mechanism_visual_transform_to_object_pose", new geometry_msgs.msg.dds.TransformPubSubType(), data.getOpeningMechanismVisualTransformToObjectPose());
 
       ser.read_type_a("door_planar_region", new perception_msgs.msg.dds.PlanarRegionMessagePubSubType(), data.getDoorPlanarRegion());
 
