@@ -158,11 +158,7 @@ public class RDXROS2StatsPanel extends RDXPanel
          if (sortByLargestMessageSize.get())
          {
             sortedPublishers.clear();
-//            for (ParticipantStats participant : PubSubStats.PARTICIPANT_STATS.values())
-//               for (Publisher publisher : participant.getPublishers())
-//                  renderPublisherRow(PubSubStats.PUBLISHER_STATS.get(publisher));
-
-               sortedPublishers.addAll(PubSubStats.PUBLISHER_STATS.values());
+            sortedPublishers.addAll(PubSubStats.PUBLISHER_STATS.values());
 
             for (PublisherStats publisherStats : sortedPublishers)
                renderPublisherRow(publisherStats);
@@ -179,7 +175,7 @@ public class RDXROS2StatsPanel extends RDXPanel
 
       ImGuiTools.separatorText("Subscribers");
 
-      if (ImGui.beginTable(labels.get("Subscribers"), 9, tableFlags))
+      if (ImGui.beginTable(labels.get("Subscribers"), 10, tableFlags))
       {
          ImGui.tableSetupColumn(labels.get("Node Name"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Topic Name"), ImGuiTableColumnFlags.WidthFixed);
@@ -190,6 +186,7 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.tableSetupColumn(labels.get("Frequency"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Largest Message Size"), ImGuiTableColumnFlags.WidthFixed);
          ImGui.tableSetupColumn(labels.get("Current Message Size"));
+         ImGui.tableSetupColumn(labels.get("Matched"));
          ImGui.tableSetupScrollFreeze(0, 1);
          ImGui.tableHeadersRow();
 
@@ -209,35 +206,6 @@ public class RDXROS2StatsPanel extends RDXPanel
          }
 
          ImGui.endTable();
-      }
-   }
-
-   private void renderSubscriberRow(SubscriberStats subscriberStats)
-   {
-      if (subscriberStats.getNumberOfReceivedMessages() > 0 || !hideInactiveTopics.get())
-      {
-         subscriberStats.update();
-
-         ImGui.tableNextRow();
-
-         ImGui.tableNextColumn();
-         ImGui.text(subscriberStats.getParticipant().getAttributes().getName());
-         ImGui.tableNextColumn();
-         ImGui.text(subscriberStats.getSubscriber().getAttributes().getHumanReadableTopicName());
-         ImGui.tableNextColumn();
-         ImGui.text(subscriberStats.getSubscriber().getAttributes().getHumanReadableTopicDataTypeName());
-         ImGui.tableNextColumn();
-         ImGui.text(subscriberStats.getSubscriber().getAttributes().getReliabilityKind().name());
-         ImGui.tableNextColumn();
-         ImGui.text("%d".formatted(subscriberStats.getNumberOfReceivedMessages()));
-         ImGui.tableNextColumn();
-         ImGui.text("%s/s".formatted(PubSubStatsTools.getHumanReadableDataSize(Math.round(subscriberStats.getBandwidth()))));
-         ImGui.tableNextColumn();
-         ImGui.text("%.0f Hz".formatted(subscriberStats.getReceiveFrequency()));
-         ImGui.tableNextColumn();
-         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableDataSize(subscriberStats.getLargestMessageSize())));
-         ImGui.tableNextColumn();
-         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableDataSize(subscriberStats.getCurrentMessageSize())));
       }
    }
 
@@ -267,6 +235,37 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableDataSize(publisherStats.getLargestMessageSize())));
          ImGui.tableNextColumn();
          ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableDataSize(publisherStats.getCurrentMessageSize())));
+      }
+   }
+
+   private void renderSubscriberRow(SubscriberStats subscriberStats)
+   {
+      if (subscriberStats.getNumberOfReceivedMessages() > 0 || !hideInactiveTopics.get())
+      {
+         subscriberStats.update();
+
+         ImGui.tableNextRow();
+
+         ImGui.tableNextColumn();
+         ImGui.text(subscriberStats.getParticipant().getAttributes().getName());
+         ImGui.tableNextColumn();
+         ImGui.text(subscriberStats.getSubscriber().getAttributes().getHumanReadableTopicName());
+         ImGui.tableNextColumn();
+         ImGui.text(subscriberStats.getSubscriber().getAttributes().getHumanReadableTopicDataTypeName());
+         ImGui.tableNextColumn();
+         ImGui.text(subscriberStats.getSubscriber().getAttributes().getReliabilityKind().name());
+         ImGui.tableNextColumn();
+         ImGui.text("%d".formatted(subscriberStats.getNumberOfReceivedMessages()));
+         ImGui.tableNextColumn();
+         ImGui.text("%s/s".formatted(PubSubStatsTools.getHumanReadableDataSize(Math.round(subscriberStats.getBandwidth()))));
+         ImGui.tableNextColumn();
+         ImGui.text("%.0f Hz".formatted(subscriberStats.getReceiveFrequency()));
+         ImGui.tableNextColumn();
+         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableDataSize(subscriberStats.getLargestMessageSize())));
+         ImGui.tableNextColumn();
+         ImGui.text("%s".formatted(PubSubStatsTools.getHumanReadableDataSize(subscriberStats.getCurrentMessageSize())));
+         ImGui.tableNextColumn();
+         ImGui.text("%b".formatted(subscriberStats.getHasMatched()));
       }
    }
 }
