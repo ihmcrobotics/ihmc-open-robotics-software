@@ -97,14 +97,6 @@ public class RDXROS2StatsPanel extends RDXPanel
                      publishersSortedBySize.add(publisherStats);
                   else
                      publishersSortedByName.add(publisherStats);
-
-                  publisherStats.update();
-
-                  numberOfPublications += publisher.getNumberOfPublications();
-                  totalOutgoingBandwidth += publisherStats.getBandwidth();
-
-                  if (publisher.getLargestMessageSize() > largestMessageSize)
-                     largestMessageSize = publisher.getLargestMessageSize();
                }
             }
 
@@ -125,18 +117,33 @@ public class RDXROS2StatsPanel extends RDXPanel
                      subscribersSortedBySize.add(subscriberStats);
                   else
                      subscribersSortedByName.add(subscriberStats);
-
-                  numberOfMatchedSubscriptions += subscriber.hasMatched() ? 1 : 0;
-                  numberOfReceivedMessages += subscriber.getNumberOfReceivedMessages();
-                  totalIncomingBandwidth += subscriberStats.getBandwidth();
-
-                  if (subscriber.getLargestMessageSize() > largestMessageSize)
-                     largestMessageSize = subscriber.getLargestMessageSize();
                }
             }
          }
       }
 
+      for (ROS2PublisherStats publisherStats : publisherStatsMap.values())
+      {
+         publisherStats.update();
+
+         numberOfPublications += publisherStats.getPublisher().getNumberOfPublications();
+         totalOutgoingBandwidth += publisherStats.getBandwidth();
+
+         if (publisherStats.getPublisher().getLargestMessageSize() > largestMessageSize)
+            largestMessageSize = publisherStats.getPublisher().getLargestMessageSize();
+      }
+
+      for (ROS2SubscriberStats subscriberStats : subscriberStatsMap.values())
+      {
+         subscriberStats.update();
+
+         numberOfMatchedSubscriptions += subscriberStats.getSubscriber().hasMatched() ? 1 : 0;
+         numberOfReceivedMessages += subscriberStats.getSubscriber().getNumberOfReceivedMessages();
+         totalIncomingBandwidth += subscriberStats.getBandwidth();
+
+         if (subscriberStats.getSubscriber().getLargestMessageSize() > largestMessageSize)
+            largestMessageSize = subscriberStats.getSubscriber().getLargestMessageSize();
+      }
 
       if (ImGui.beginMenuBar())
       {
@@ -205,11 +212,11 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.tableNextColumn();
          ImGui.text("%.0f Hz".formatted(receiveFrequency.finiteDifference(numberOfReceivedMessages)));
          ImGui.tableNextColumn();
-         ImGui.text(PubSubStatsTools.getHumanReadableByteSize(largestMessageSize));
-         ImGui.tableNextColumn();
          ImGui.text("%s/s".formatted(PubSubStatsTools.getHumanReadableBitSize(Math.round(totalOutgoingBandwidth))));
          ImGui.tableNextColumn();
          ImGui.text("%s/s".formatted(PubSubStatsTools.getHumanReadableBitSize(Math.round(totalIncomingBandwidth))));
+         ImGui.tableNextColumn();
+         ImGui.text(PubSubStatsTools.getHumanReadableByteSize(largestMessageSize));
 
          ImGui.endTable();
       }
@@ -302,8 +309,6 @@ public class RDXROS2StatsPanel extends RDXPanel
    {
       if (publisherStats.getPublisher().getNumberOfPublications() > 0 || !hideInactiveTopics.get())
       {
-         publisherStats.update();
-
          ImGui.tableNextRow();
 
          ImGui.tableNextColumn();
@@ -333,8 +338,6 @@ public class RDXROS2StatsPanel extends RDXPanel
    {
       if (subscriberStats.getSubscriber().getNumberOfReceivedMessages() > 0 || !hideInactiveTopics.get())
       {
-         subscriberStats.update();
-
          ImGui.tableNextRow();
 
          ImGui.tableNextColumn();
