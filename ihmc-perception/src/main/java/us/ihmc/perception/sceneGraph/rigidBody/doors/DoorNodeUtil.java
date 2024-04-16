@@ -7,6 +7,12 @@ import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 
 public final class DoorNodeUtil
 {
+   /**
+    * Creates new door nodes as children of {@link YOLOv8Node}\s which are door components.
+    * If a door node already exists as a child of a YOLO node which is a door component, we update
+    * the pose of the door component in the door node with the detection pose from the YOLO node.
+    * @param sceneGraph the SceneGraph
+    */
    public static void addDoorNodes(SceneGraph sceneGraph)
    {
       sceneGraph.modifyTree(modificationQueue ->
