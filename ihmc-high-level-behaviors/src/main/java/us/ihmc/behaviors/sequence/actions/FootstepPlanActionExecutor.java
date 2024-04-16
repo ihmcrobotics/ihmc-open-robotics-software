@@ -296,7 +296,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
 
          footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
          double idealFootstepLength = 0.5;
-         footstepPlanner.getFootstepPlannerParameters().setIdealFootstepLength(idealFootstepLength);
+         footstepPlanner.getFootstepPlannerParameters().setIdealFootstepLength(idealFootstepLength / 2);
          footstepPlanner.getFootstepPlannerParameters().setMaximumStepReach(idealFootstepLength);
          LogTools.info("Planning footsteps...");
          FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
