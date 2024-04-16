@@ -293,6 +293,8 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
    @Override
    public void updateCurrentlyExecuting()
    {
+      updateStateParentZUpFrame();
+
       switch (state.getExecutionState().getValue())
       {
          case FOOTSTEP_PLANNING ->

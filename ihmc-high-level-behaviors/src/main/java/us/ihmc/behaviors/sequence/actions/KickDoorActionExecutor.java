@@ -12,10 +12,11 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TriggerKickCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.NonWallTimer;
@@ -66,7 +67,8 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
       computeTriggerKickCommand(definition.getKickHeight(),
                                 definition.getKickTargetDistance(),
                                 definition.getKickImpulse(),
-                                definition.getPrekickWeightDistribution(), kickCommand);
+                                definition.getPrekickWeightDistribution(),
+                                kickCommand);
    }
 
    /**
@@ -132,10 +134,10 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
                stopwatch.reset();
                kickingMessageSent = true;
                state.getLogger().info("Executing kick.");
-//               ros2ControllerHelper.publishToController(kickCommand);
+               //               ros2ControllerHelper.publishToController(kickCommand);
             }
 
-            if (stopwatch.getElapsedTime()  >= 2.0)
+            if (stopwatch.getElapsedTime() >= 2.0)
             {
                state.getExecutionState().setValue(KickDoorActionExecutionState.SWITCHING_TO_WALKING_CONTROLLER);
                stopwatch.reset();
@@ -151,7 +153,7 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
                switchToWalkControllerMessageSent = true;
             }
 
-            if (stopwatch.getElapsedTime()  >= 0.2)
+            if (stopwatch.getElapsedTime() >= 0.2)
             {
                state.getExecutionState().setValue(KickDoorActionExecutionState.SQUARING_UP);
                stopwatch.reset();
@@ -168,7 +170,7 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
                squareUpFootstepsSent = true;
             }
 
-            if (stopwatch.getElapsedTime()  >= 4.0)
+            if (stopwatch.getElapsedTime() >= 4.0)
             {
                state.getExecutionState().setValue(KickDoorActionExecutionState.STANDING);
                state.setIsExecuting(false);
@@ -205,13 +207,18 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
 
    public void computeSquaredUpFootsteps()
    {
-      FramePose3D kickFootGoalPose = new FramePose3D(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame));
-      kickFootGoalPose.setY(kickSide.negateIfRightSide(definition.getStanceFootWidth()));
+      MovingReferenceFrame pelvisFrame = syncedRobot.getReferenceFrames().getMidFeetUnderPelvisFrame();
+      FramePose3D kickFootGoalPose = new FramePose3D(pelvisFrame);
+      kickFootGoalPose.setY(kickSide.negateIfRightSide(definition.getStanceFootWidth() / 2.0));
+      kickFootGoalPose.changeFrame(ReferenceFrame.getWorldFrame());
+      kickFootGoalPose.setZ(0.0);
       FootstepDataMessage kickFootStep = HumanoidMessageTools.createFootstepDataMessage(kickSide, kickFootGoalPose);
       footstepDataListMessage.getFootstepDataList().add().set(kickFootStep);
 
-      FramePose3D supportFootGoalPose = new FramePose3D(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame));
-      supportFootGoalPose.setY(kickSide.negateIfRightSide(-definition.getStanceFootWidth()));
+      FramePose3D supportFootGoalPose = new FramePose3D(pelvisFrame);
+      supportFootGoalPose.setY(kickSide.negateIfRightSide(-definition.getStanceFootWidth() / 2.0));
+      supportFootGoalPose.changeFrame(ReferenceFrame.getWorldFrame());
+      supportFootGoalPose.setZ(0.0);
       FootstepDataMessage supportFootStep = HumanoidMessageTools.createFootstepDataMessage(kickSide.getOppositeSide(), supportFootGoalPose);
       footstepDataListMessage.getFootstepDataList().add().set(supportFootStep);
    }
