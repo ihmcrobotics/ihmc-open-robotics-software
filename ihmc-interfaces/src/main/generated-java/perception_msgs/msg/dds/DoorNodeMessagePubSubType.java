@@ -15,7 +15,7 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c444fbe9984229c8f7cdf296caaf1d80d84e708ce1a5ed3f54355e066486d8f2";
+   		return "06e6315af71c3024fd5b627d7c71e487826fa47fd57eefe30fcd30ae7cf0c7ac";
    }
    
    @Override
@@ -62,9 +62,6 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
 
       current_alignment += perception_msgs.msg.dds.PlanarRegionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 5000; ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.Point32PubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -83,16 +80,11 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getObjectPose(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getDoorHardwarePose(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getCdrSerializedSize(data.getVisualTransformToObjectPose(), current_alignment);
 
       current_alignment += perception_msgs.msg.dds.PlanarRegionMessagePubSubType.getCdrSerializedSize(data.getDoorPlanarRegion(), current_alignment);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getPresumedDoorPointCloud().size(); ++i0)
-      {
-          current_alignment += geometry_msgs.msg.dds.Point32PubSubType.getCdrSerializedSize(data.getPresumedDoorPointCloud().get(i0), current_alignment);}
 
 
       return current_alignment - initial_alignment;
@@ -103,13 +95,9 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.write(data.getSceneNode(), cdr);
       cdr.write_type_9(data.getDoorHardwareType());
 
-      geometry_msgs.msg.dds.PosePubSubType.write(data.getObjectPose(), cdr);
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getDoorHardwarePose(), cdr);
       geometry_msgs.msg.dds.TransformPubSubType.write(data.getVisualTransformToObjectPose(), cdr);
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.write(data.getDoorPlanarRegion(), cdr);
-      if(data.getPresumedDoorPointCloud().size() <= 5000)
-      cdr.write_type_e(data.getPresumedDoorPointCloud());else
-          throw new RuntimeException("presumed_door_point_cloud field exceeds the maximum length");
-
    }
 
    public static void read(perception_msgs.msg.dds.DoorNodeMessage data, us.ihmc.idl.CDR cdr)
@@ -117,10 +105,9 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.read(data.getSceneNode(), cdr);	
       data.setDoorHardwareType(cdr.read_type_9());
       	
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getObjectPose(), cdr);	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getDoorHardwarePose(), cdr);	
       geometry_msgs.msg.dds.TransformPubSubType.read(data.getVisualTransformToObjectPose(), cdr);	
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.read(data.getDoorPlanarRegion(), cdr);	
-      cdr.read_type_e(data.getPresumedDoorPointCloud());	
 
    }
 
@@ -130,13 +117,12 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
       ser.write_type_a("scene_node", new perception_msgs.msg.dds.SceneNodeMessagePubSubType(), data.getSceneNode());
 
       ser.write_type_9("door_hardware_type", data.getDoorHardwareType());
-      ser.write_type_a("object_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getObjectPose());
+      ser.write_type_a("door_hardware_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getDoorHardwarePose());
 
       ser.write_type_a("visual_transform_to_object_pose", new geometry_msgs.msg.dds.TransformPubSubType(), data.getVisualTransformToObjectPose());
 
       ser.write_type_a("door_planar_region", new perception_msgs.msg.dds.PlanarRegionMessagePubSubType(), data.getDoorPlanarRegion());
 
-      ser.write_type_e("presumed_door_point_cloud", data.getPresumedDoorPointCloud());
    }
 
    @Override
@@ -145,13 +131,12 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
       ser.read_type_a("scene_node", new perception_msgs.msg.dds.SceneNodeMessagePubSubType(), data.getSceneNode());
 
       data.setDoorHardwareType(ser.read_type_9("door_hardware_type"));
-      ser.read_type_a("object_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getObjectPose());
+      ser.read_type_a("door_hardware_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getDoorHardwarePose());
 
       ser.read_type_a("visual_transform_to_object_pose", new geometry_msgs.msg.dds.TransformPubSubType(), data.getVisualTransformToObjectPose());
 
       ser.read_type_a("door_planar_region", new perception_msgs.msg.dds.PlanarRegionMessagePubSubType(), data.getDoorPlanarRegion());
 
-      ser.read_type_e("presumed_door_point_cloud", data.getPresumedDoorPointCloud());
    }
 
    public static void staticCopy(perception_msgs.msg.dds.DoorNodeMessage src, perception_msgs.msg.dds.DoorNodeMessage dest)

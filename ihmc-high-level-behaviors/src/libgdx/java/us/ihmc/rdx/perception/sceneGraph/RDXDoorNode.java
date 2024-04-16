@@ -80,25 +80,28 @@ public class RDXDoorNode extends RDXSceneNode
                                             planarRegionCentroidInWorld.getY(),
                                             doorNode.getDoorPlanarRegion().getNormalX(),
                                             doorNode.getDoorPlanarRegion().getNormalY());
-         Point2D doorLeverPointInWorld2D = new Point2D(doorNode.getObjectPose().getTranslation());
+         Point2D doorHardwarePointInWorld2D = new Point2D(doorNode.getDoorHardwarePose().getTranslation());
 
-         RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(doorLeverPointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
+         RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(doorHardwarePointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
 
-         if (doorLeverLastSide == null)
-            doorLeverLastSide = doorSide;
-
-         // Glitch filter
-         if (doorLeverLastSide != doorSide)
+         if (doorNode.getDoorHardwareType() == DoorHardwareType.LEVER_HANDLE)
          {
-            if (++doorLeverSwitchSide > DOOR_LEVER_SWITCH_SIDE_THRESHOLD)
+            if (doorLeverLastSide == null)
+               doorLeverLastSide = doorSide;
+
+            // Glitch filter
+            if (doorLeverLastSide != doorSide)
             {
-               // Switch sides
-               doorLeverSwitchSide = 0;
-               LogTools.info("Door lever switched sides");
-            }
-            else
-            {
-               doorSide = doorLeverLastSide;
+               if (++doorLeverSwitchSide > DOOR_LEVER_SWITCH_SIDE_THRESHOLD)
+               {
+                  // Switch sides
+                  doorLeverSwitchSide = 0;
+                  LogTools.info("Door lever switched sides");
+               }
+               else
+               {
+                  doorSide = doorLeverLastSide;
+               }
             }
          }
 
@@ -109,7 +112,7 @@ public class RDXDoorNode extends RDXSceneNode
          else
             visualModelTransformToWorld.getRotation().setToYawOrientation(yaw);
 
-         visualModelTransformToWorld.getTranslation().set(doorNode.getObjectPose().getTranslation());
+         visualModelTransformToWorld.getTranslation().set(doorNode.getDoorHardwarePose().getTranslation());
 
          LibGDXTools.setDiffuseColor(interactableObject.getModelInstance(), Color.WHITE); // TODO: keep?
          interactableObject.setPose(visualModelTransformToWorld);

@@ -530,7 +530,7 @@ public class PerceptionAndAutonomyProcess
          {
           for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
              if (sceneNode instanceof DoorNode doorNode)
-                doorNode.updatePlanarRegions(planarRegionsInWorldFrame);
+                doorNode.filterAndSetDoorPlanarRegionFromPlanarRegionsList(planarRegionsInWorldFrame);
          });
 
          PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);

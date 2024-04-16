@@ -1,7 +1,6 @@
 #ifndef __perception_msgs__msg__DoorNodeMessage__idl__
 #define __perception_msgs__msg__DoorNodeMessage__idl__
 
-#include "geometry_msgs/msg/./Point32_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
 #include "geometry_msgs/msg/./Transform_.idl"
 #include "perception_msgs/msg/./PlanarRegionMessage_.idl"
@@ -20,14 +19,22 @@ module perception_msgs
          * The base scene node information
          */
         perception_msgs::msg::dds::SceneNodeMessage scene_node;
-        octet door_hardware_type;
-        geometry_msgs::msg::dds::Pose object_pose;
         /**
-         * The visual transform to parent
+         * The type of door hardware detected
+         */
+        octet door_hardware_type;
+        /**
+         * The pose of the detected door hardware
+         */
+        geometry_msgs::msg::dds::Pose door_hardware_pose;
+        /**
+         * The visual transform to parent of the door hardware
          */
         geometry_msgs::msg::dds::Transform visual_transform_to_object_pose;
+        /**
+         * The planar region we assume is the door panel
+         */
         perception_msgs::msg::dds::PlanarRegionMessage door_planar_region;
-        sequence<geometry_msgs::msg::dds::Point32, 5000> presumed_door_point_cloud;
       };
     };
   };

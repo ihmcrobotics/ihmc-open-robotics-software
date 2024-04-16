@@ -112,9 +112,9 @@ public class ROS2SceneGraphTools
          sceneNode = new DoorNode(nodeID,
                                   nodeName,
                                   DoorHardwareType.fromByte(subscriptionNode.getDoorNodeMessage().getDoorHardwareType()),
-                                  PlanarRegionMessageConverter.convertToPlanarRegion(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegion()),
-                                  subscriptionNode.getDoorNodeMessage().getObjectPose(),
-                                  doorNodeMessage.getVisualTransformToObjectPose());
+                                  subscriptionNode.getDoorNodeMessage().getDoorHardwarePose(),
+                                  doorNodeMessage.getVisualTransformToObjectPose(),
+                                  PlanarRegionMessageConverter.convertToPlanarRegion(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegion()));
       }
       else
       {

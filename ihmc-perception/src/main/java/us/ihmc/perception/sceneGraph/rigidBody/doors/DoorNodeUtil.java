@@ -15,19 +15,18 @@ public final class DoorNodeUtil
          {
             if (sceneNode instanceof YOLOv8Node yoloNode)
             {
-               boolean doorComponent = switch (yoloNode.getDetectionClass())
+               boolean doorHardwareComponent = switch (yoloNode.getDetectionClass())
                {
                   case DOOR_PULL_HANDLE, DOOR_KNOB, DOOR_PUSH_BAR, DOOR_LEVER -> true;
                   default -> false;
                };
 
-               if (doorComponent)
+               if (doorHardwareComponent)
                {
                   if (yoloNode.getChildren().isEmpty())
                   {
                      DoorNode doorNode = new DoorNode(sceneGraph.getNextID().getAndIncrement(), "Door");
                      doorNode.setDoorHardwareTypeFromYoloClass(yoloNode.getDetectionClass());
-
                      modificationQueue.accept(new SceneGraphNodeAddition(doorNode, yoloNode));
                   }
                   else
@@ -36,7 +35,7 @@ public final class DoorNodeUtil
                      {
                         if (childNode instanceof DoorNode doorNode)
                         {
-                           doorNode.setObjectPose(yoloNode.getObjectPose());
+                           doorNode.setDoorHardwarePose(yoloNode.getObjectPose());
                         }
                      }
                   }

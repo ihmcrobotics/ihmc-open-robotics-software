@@ -14,32 +14,28 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 public class DoorNode extends SceneNode
 {
    private DoorHardwareType doorHardwareType;
+   private final Pose3D doorHardwarePose = new Pose3D();
+   private final RigidBodyTransform doorHardwareVisualTransformToObjectPose = new RigidBodyTransform();
+
    private final PlanarRegion doorPlanarRegion = new PlanarRegion();
-   private final Pose3D objectPose = new Pose3D();
-   private final RigidBodyTransform visualTransformToObjectPose = new RigidBodyTransform();
 
    public DoorNode(long id, String name)
    {
-      this(id,
-           name,
-           DoorHardwareType.UNKNOWN,
-           new PlanarRegion(),
-           new Pose3D(),
-           new RigidBodyTransform());
+      this(id, name, DoorHardwareType.UNKNOWN, new Pose3D(), new RigidBodyTransform(), new PlanarRegion());
    }
 
    public DoorNode(long id,
                    String name,
                    DoorHardwareType doorHardwareType,
-                   PlanarRegion doorPlanarRegion,
                    Pose3D objectPose,
-                   RigidBodyTransformBasics visualTransformToObjectPose)
+                   RigidBodyTransformBasics visualTransformToObjectPose,
+                   PlanarRegion doorPlanarRegion)
    {
       super(id, name);
       this.doorHardwareType = doorHardwareType;
+      this.doorHardwarePose.set(objectPose);
+      this.doorHardwareVisualTransformToObjectPose.set(visualTransformToObjectPose);
       this.doorPlanarRegion.set(doorPlanarRegion);
-      this.objectPose.set(objectPose);
-      this.visualTransformToObjectPose.set(visualTransformToObjectPose);
    }
 
    public DoorHardwareType getDoorHardwareType()
@@ -63,6 +59,26 @@ public class DoorNode extends SceneNode
       }
    }
 
+   public Pose3D getDoorHardwarePose()
+   {
+      return doorHardwarePose;
+   }
+
+   public void setDoorHardwarePose(Pose3D pose)
+   {
+      this.doorHardwarePose.set(pose);
+   }
+
+   public RigidBodyTransform getDoorHardwareVisualTransformToObjectPose()
+   {
+      return doorHardwareVisualTransformToObjectPose;
+   }
+
+   public void setDoorHardwareVisualTransformToObjectPose(RigidBodyTransformBasics transform)
+   {
+      doorHardwareVisualTransformToObjectPose.set(transform);
+   }
+
    public PlanarRegion getDoorPlanarRegion()
    {
       return doorPlanarRegion;
@@ -73,29 +89,9 @@ public class DoorNode extends SceneNode
       this.doorPlanarRegion.set(planarRegion);
    }
 
-   public Pose3D getObjectPose()
+   public void filterAndSetDoorPlanarRegionFromPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
-      return objectPose;
-   }
-
-   public void setObjectPose(Pose3D objectPose)
-   {
-      this.objectPose.set(objectPose);
-   }
-
-   public RigidBodyTransform getVisualTransformToObjectPose()
-   {
-      return visualTransformToObjectPose;
-   }
-
-   public void setVisualTransformToObjectPose(RigidBodyTransformBasics transform)
-   {
-      visualTransformToObjectPose.set(transform);
-   }
-
-   public void updatePlanarRegions(PlanarRegionsList planarRegionsList)
-   {
-      Point3D objectCentroidInWorld = new Point3D(getObjectPose().getTranslation());
+      Point3D doorHardwareCentroidInWorld = new Point3D(getDoorHardwarePose().getTranslation());
 
       if (!planarRegionsList.isEmpty())
       {
@@ -111,7 +107,7 @@ public class DoorNode extends SceneNode
          {
             Point3DReadOnly planarRegionCentroidInWorld = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
 
-            if (planarRegionCentroidInWorld.distance(objectCentroidInWorld) > epsilon)
+            if (planarRegionCentroidInWorld.distance(doorHardwareCentroidInWorld) > epsilon)
                continue;
 
             // If the planar region is less than 1/4th the area of a door
@@ -129,7 +125,7 @@ public class DoorNode extends SceneNode
          }
 
          if (doorPlanarRegion != null)
-            this.doorPlanarRegion.set(doorPlanarRegion);
+            setDoorPlanarRegion(doorPlanarRegion);
       }
    }
 }
