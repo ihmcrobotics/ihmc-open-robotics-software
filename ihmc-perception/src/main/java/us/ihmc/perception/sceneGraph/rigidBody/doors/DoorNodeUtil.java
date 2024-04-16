@@ -7,7 +7,7 @@ import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 
 public final class DoorNodeUtil
 {
-   public static void updateSceneGraph(SceneGraph sceneGraph)
+   public static void addDoorNodes(SceneGraph sceneGraph)
    {
       sceneGraph.modifyTree(modificationQueue ->
       {
@@ -15,16 +15,11 @@ public final class DoorNodeUtil
          {
             if (sceneNode instanceof YOLOv8Node yoloNode)
             {
-               boolean doorComponent = false;
-
-               switch (yoloNode.getDetectionClass())
+               boolean doorComponent = switch (yoloNode.getDetectionClass())
                {
-                  case DOOR_PULL_HANDLE:
-                  case DOOR_KNOB:
-                  case DOOR_PUSH_BAR:
-                  case DOOR_LEVER:
-                     doorComponent = true;
-               }
+                  case DOOR_PULL_HANDLE, DOOR_KNOB, DOOR_PUSH_BAR, DOOR_LEVER -> true;
+                  default -> false;
+               };
 
                if (doorComponent)
                {

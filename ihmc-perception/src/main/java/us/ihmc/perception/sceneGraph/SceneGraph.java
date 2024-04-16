@@ -86,7 +86,7 @@ public class SceneGraph
       // This must happen only once per on-robot tick
       detectionFilterCollection.update();
 
-      DoorNodeUtil.updateSceneGraph(this);
+      DoorNodeUtil.addDoorNodes(this);
 
       modifyTree(modificationQueue -> updateOnRobotOnly(rootNode, robotPelvisFrame, modificationQueue));
    }
