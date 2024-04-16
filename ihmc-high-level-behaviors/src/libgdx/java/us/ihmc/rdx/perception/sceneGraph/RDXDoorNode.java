@@ -60,7 +60,7 @@ public class RDXDoorNode extends RDXSceneNode
    @Override
    public void update(SceneGraphModificationQueue modificationQueue)
    {
-      Point3D currentCameraFocus = new Point3D(doorNode.getObjectPose().getTranslation());
+      Point3D currentCameraFocus = new Point3D(doorNode.getDoorHardwarePose().getTranslation());
 
       if (interpolatedFocus.getX() == 0)
       {
