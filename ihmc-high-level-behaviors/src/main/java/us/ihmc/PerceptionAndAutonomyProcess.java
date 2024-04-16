@@ -526,9 +526,12 @@ public class PerceptionAndAutonomyProcess
          PlanarRegionsList planarRegionsInWorldFrame = framePlanarRegionsList.getPlanarRegionsList().copy();
          planarRegionsInWorldFrame.applyTransform(zedFrameSupplier.get().getTransformToWorldFrame());
 
-         for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
-            if (sceneNode instanceof DoorNode doorNode)
-               doorNode.updatePlanarRegions(planarRegionsInWorldFrame);
+         sceneGraph.modifyTree(modificationQueue ->
+         {
+          for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
+             if (sceneNode instanceof DoorNode doorNode)
+                doorNode.updatePlanarRegions(planarRegionsInWorldFrame);
+         });
 
          PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
 
