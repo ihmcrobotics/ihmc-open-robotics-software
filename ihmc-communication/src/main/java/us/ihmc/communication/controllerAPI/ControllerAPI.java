@@ -76,6 +76,9 @@ public final class ControllerAPI
       inputMessageClasses.add(WholeBodyTrajectoryMessage.class);
       inputMessageClasses.add(WholeBodyStreamingMessage.class);
 
+      // Commands supported by the kicking controller
+      inputMessageClasses.add(TriggerKickMessage.class);
+
       // Statuses supported by bipedal walking controller {@link WalkingControllerState}
       outputMessageClasses.add(CapturabilityBasedStatus.class);
       outputMessageClasses.add(FootstepStatusMessage.class);

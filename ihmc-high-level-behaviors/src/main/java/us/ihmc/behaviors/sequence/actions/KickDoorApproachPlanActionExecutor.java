@@ -72,6 +72,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
    private final KickDynamicPlanner kickDynamicPlanner;
 
    private final DetachableReferenceFrame doorHandleFrame;
+   private ReferenceFrame worldFrame;
 
    public KickDoorApproachPlanActionExecutor(long id,
                                              CRDTInfo crdtInfo,
@@ -98,6 +99,8 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
       this.footstepPlannerParameters = footstepPlannerParameters;
 
       doorHandleFrame = state.getDoorHandleFrame();
+      doorHandleFrame.update(definition.getParentFrameName());
+      worldFrame = doorHandleFrame.getReferenceFrame().getRootFrame();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -118,6 +121,8 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
    public void update()
    {
       super.update();
+
+      worldFrame = doorHandleFrame.getReferenceFrame().getRootFrame();
 
       boolean invalidDefinition = false;
 
@@ -165,14 +170,14 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
       state.getRightFootGoalPose().getValue().set(liveGoalFeetPoses.get(RobotSide.RIGHT));
       state.getKickGoalPose().getValue().set(liveKickPose);
 
-      if (state.getCanExecute())
-      {
-      }
-
       for (RobotSide side : RobotSide.values)
       {
          trackingCalculators.get(side).update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
+      }
+
+      if (state.getCanExecute())
+      {
       }
    }
 
@@ -200,7 +205,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
       preKickFootPose.setToZero(doorHandleFrame.getReferenceFrame());
       preKickFootPose.setX(definition.getKickTargetDistance().getValue());
       preKickFootPose.setY(-kickSide.negateIfRightSide(definition.getHorizontalDistanceFromHandle().getValue()));
-      preKickFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      preKickFootPose.changeFrame(worldFrame);
       preKickFootPose.getPosition().setZ(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getZ());
 
       FramePose3D kickPose = new FramePose3D(preKickFootPose);
@@ -208,16 +213,16 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
       kickPose.changeFrame(doorHandleFrame.getReferenceFrame());
       kickPose.setX(0.0);
       kickPose.appendPitchRotation(Math.PI / 2.0);
-      kickPose.changeFrame(ReferenceFrame.getWorldFrame());
+      kickPose.changeFrame(worldFrame);
 
       FramePose3D stanceFootPose = new FramePose3D();
       stanceFootPose.setToZero(doorHandleFrame.getReferenceFrame());
       stanceFootPose.setX(definition.getKickTargetDistance().getValue());
       stanceFootPose.setY(-kickSide.negateIfRightSide(definition.getHorizontalDistanceFromHandle().getValue() + definition.getStanceFootWidth().getValue()));
-      stanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+      stanceFootPose.changeFrame(worldFrame);
       stanceFootPose.getPosition().setZ(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getZ());
 
-      FramePose3D centerOfMassPose = new FramePose3D();
+      FramePose3D centerOfMassPose = new FramePose3D(worldFrame);
       centerOfMassPose.interpolate(preKickFootPose, stanceFootPose, 0.5);
 
       soleFramesForPlanning.get(kickSide).setPoseAndUpdate(preKickFootPose);

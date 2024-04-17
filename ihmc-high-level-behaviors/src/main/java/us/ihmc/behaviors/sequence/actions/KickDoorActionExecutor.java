@@ -13,7 +13,6 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TriggerKickCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -31,7 +30,6 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
    private final ROS2SyncedRobotModel syncedRobot;
    private final ControllerStatusTracker controllerStatusTracker;
    private final WalkingControllerParameters walkingControllerParameters;
-   private final FramePose3D solePose = new FramePose3D();
    private final RobotSide kickSide;
    private final ReferenceFrameLibrary referenceFrameLibrary;
    private boolean switchToKickControllerMessageSent = false;
@@ -40,7 +38,7 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
    private boolean squareUpFootstepsSent = false;
 
    private final NonWallTimer stopwatch = new NonWallTimer();
-   private final TriggerKickCommand kickCommand = new TriggerKickCommand();
+   private TriggerKickMessage kickMessage = new TriggerKickMessage();
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
 
    public KickDoorActionExecutor(long id,
@@ -64,11 +62,10 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
       this.controllerStatusTracker = controllerStatusTracker;
       this.walkingControllerParameters = walkingControllerParameters;
 
-      computeTriggerKickCommand(definition.getKickHeight(),
-                                definition.getKickTargetDistance(),
-                                definition.getKickImpulse(),
-                                definition.getPrekickWeightDistribution(),
-                                kickCommand);
+      computeKickMessage(definition.getKickHeight(),
+                         definition.getKickTargetDistance(),
+                         definition.getKickImpulse(),
+                         definition.getPrekickWeightDistribution());
    }
 
    /**
@@ -134,7 +131,7 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
                stopwatch.reset();
                kickingMessageSent = true;
                state.getLogger().info("Executing kick.");
-               //               ros2ControllerHelper.publishToController(kickCommand);
+               ros2ControllerHelper.publishToController(kickMessage);
             }
 
             if (stopwatch.getElapsedTime() >= 2.0)
@@ -190,19 +187,16 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
       ros2ControllerHelper.publishToController(highLevelStateMessage);
    }
 
-   public void computeTriggerKickCommand(double kickHeight,
-                                         double desiredKickDistance,
-                                         double desiredKickImpulse,
-                                         double desiredPrekickWeightDistribution,
-                                         TriggerKickCommand commandToPack)
+   public void computeKickMessage(double kickHeight,
+                                  double desiredKickDistance,
+                                  double desiredKickImpulse,
+                                  double desiredPrekickWeightDistribution)
    {
-      TriggerKickMessage kickMessage = new TriggerKickMessage();
       kickMessage.setRobotSide(kickSide.toByte());
       kickMessage.setKickHeight(kickHeight);
       kickMessage.setKickImpulse(desiredKickImpulse);
       kickMessage.setKickTargetDistance(desiredKickDistance);
       kickMessage.setPrekickWeightDistribution(desiredPrekickWeightDistribution);
-      commandToPack.setFromMessage(kickMessage);
    }
 
    public void computeSquaredUpFootsteps()
