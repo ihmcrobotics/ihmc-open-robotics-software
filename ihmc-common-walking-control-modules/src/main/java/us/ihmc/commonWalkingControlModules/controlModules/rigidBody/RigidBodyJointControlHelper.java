@@ -232,13 +232,9 @@ public class RigidBodyJointControlHelper
          {
             allDone = fillAndReinitializeTrajectories(jointIdx) && allDone;
          }
-         else if (trajectoryDone.getBooleanValue())
-         {
-            allDone = true;
-         }
          else
          {
-            allDone = false;
+            allDone = trajectoryDone.getBooleanValue();
          }
 
          if (allDone)
