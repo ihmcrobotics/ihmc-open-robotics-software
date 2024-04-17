@@ -128,7 +128,7 @@ public class DoorNode extends SceneNode
                continue;
 
             // If the planar region is less than 1/5th the area of a door
-            if (planarRegion.getArea() < ((DoorModelParameters.DOOR_PANEL_HEIGHT * DoorModelParameters.DOOR_PANEL_WIDTH) / 5))
+            if (planarRegion.getArea() < ((DoorModelParameters.DOOR_PANEL_HEIGHT * DoorModelParameters.DOOR_PANEL_WIDTH) / 7))
                continue;
 
             if (doorPlanarRegion == null)

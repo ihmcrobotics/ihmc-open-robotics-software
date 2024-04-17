@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.interactable;
 
 import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.model.data.ModelData;
@@ -97,7 +96,7 @@ public class RDXInteractableObject implements RenderableProvider
       return initialObjectTransformToWorld;
    }
 
-   public ModelInstance getModelInstance()
+   public RDXModelInstance getModelInstance()
    {
       return modelInstance;
    }

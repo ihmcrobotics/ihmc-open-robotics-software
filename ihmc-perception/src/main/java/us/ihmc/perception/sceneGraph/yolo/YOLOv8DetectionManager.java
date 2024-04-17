@@ -61,7 +61,7 @@ public class YOLOv8DetectionManager
 
    public YOLOv8DetectionManager(ROS2Helper ros2Helper)
    {
-      yoloDetectionThread = new RestartableThrottledThread("YOLODetector", 30.0, this::runYOLODetection);
+      yoloDetectionThread = new RestartableThrottledThread("YOLODetector", 15.0, this::runYOLODetection);
       yoloDetectionThread.start();
 
       readyToRunNotification.set();

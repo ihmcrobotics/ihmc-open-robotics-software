@@ -27,6 +27,8 @@ import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.scs2.definition.visual.ColorDefinition;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -50,7 +52,8 @@ public class RDXDoorNode extends RDXSceneNode
       this.doorNode = yoloDoorNode;
       this.labels = labels;
 
-      doorPlanarRegionGraphic.setBlendOpacity(0.6f);
+      doorPlanarRegionGraphic.setBlendOpacity(1.0f);
+      doorPlanarRegionGraphic.setDrawNormal(true);
    }
 
    @Override
@@ -74,26 +77,26 @@ public class RDXDoorNode extends RDXSceneNode
 
          RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(openingMechanismPointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
 
-         if (doorNode.getOpeningMechanismType() == OpeningMechanismType.LEVER_HANDLE)
-         {
-            if (doorLeverLastSide == null)
-               doorLeverLastSide = doorSide;
-
-            // Glitch filter
-            if (doorLeverLastSide != doorSide)
-            {
-               if (++doorLeverSwitchSide > DOOR_LEVER_SWITCH_SIDE_THRESHOLD)
-               {
-                  // Switch sides
-                  doorLeverSwitchSide = 0;
-                  LogTools.info("Door lever switched sides");
-               }
-               else
-               {
-                  doorSide = doorLeverLastSide;
-               }
-            }
-         }
+//         if (doorNode.getOpeningMechanismType() == OpeningMechanismType.LEVER_HANDLE)
+//         {
+//            if (doorLeverLastSide == null)
+//               doorLeverLastSide = doorSide;
+//
+//            // Glitch filter
+//            if (doorLeverLastSide != doorSide)
+//            {
+//               if (++doorLeverSwitchSide > DOOR_LEVER_SWITCH_SIDE_THRESHOLD)
+//               {
+//                  // Switch sides
+//                  doorLeverSwitchSide = 0;
+//                  LogTools.info("Door lever switched sides");
+//               }
+//               else
+//               {
+//                  doorSide = doorLeverLastSide;
+//               }
+//            }
+//         }
 
          double yaw = TupleTools.angle(Axis2D.X, doorLineNormal.getDirection());
 
@@ -104,7 +107,10 @@ public class RDXDoorNode extends RDXSceneNode
 
          visualModelTransformToWorld.getTranslation().set(doorNode.getOpeningMechanismPose().getTranslation());
 
-         LibGDXTools.setDiffuseColor(interactableObject.getModelInstance(), Color.WHITE); // TODO: keep?
+//         LibGDXTools.setDiffuseColor(interactableObject.getModelInstance(), Color.WHITE); // TODO: keep?
+//         interactableObject.getModelInstance().setColor(ColorDefinitions.White());
+         interactableObject.getModelInstance().setDiffuseColor(Color.WHITE);
+
          interactableObject.setPose(visualModelTransformToWorld);
       }
       else

@@ -35,12 +35,19 @@ public class RDXIDMappedColorFunction implements Function<Integer, Color>
 
    public Color getColor(int id)
    {
-      return colors.get(Math.abs(id % colors.size()));
+      if (id == 2222) return Color.valueOf("f7ff03");
+      else return Color.valueOf("c83b1eff");
    }
 
    @Override
    public Color apply(Integer id)
    {
       return getColor(id);
+   }
+
+   public static void main(String[] args)
+   {
+      RDXIDMappedColorFunction colorFunction = new RDXIDMappedColorFunction() ;
+      System.out.println(      colorFunction.getColor(333));
    }
 }

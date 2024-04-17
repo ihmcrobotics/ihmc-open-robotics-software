@@ -510,6 +510,7 @@ public class PerceptionAndAutonomyProcess
                                                                      fy,
                                                                      cx,
                                                                      cy);
+            planarRegionsExtractor.getParameters().setMergeRange(4);
 
             planarRegionsExtractor.getDebugger().setEnabled(false);
          }
