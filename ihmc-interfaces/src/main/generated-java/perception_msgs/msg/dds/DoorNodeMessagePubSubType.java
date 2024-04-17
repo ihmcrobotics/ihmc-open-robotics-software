@@ -15,7 +15,7 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "05c86d38bac14526195d81b48232395c48e3f3c59bac7c92d7e55dca06ec2b42";
+   		return "520003a246da435d4862dd81925e34accd89b4daf73c6bfe3ed1146567320523";
    }
    
    @Override
@@ -62,6 +62,8 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
 
       current_alignment += perception_msgs.msg.dds.PlanarRegionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -86,6 +88,9 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
 
       current_alignment += perception_msgs.msg.dds.PlanarRegionMessagePubSubType.getCdrSerializedSize(data.getDoorPlanarRegion(), current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -98,6 +103,8 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
       geometry_msgs.msg.dds.PosePubSubType.write(data.getOpeningMechanismPose(), cdr);
       geometry_msgs.msg.dds.TransformPubSubType.write(data.getOpeningMechanismVisualTransformToObjectPose(), cdr);
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.write(data.getDoorPlanarRegion(), cdr);
+      cdr.write_type_12(data.getDoorPlanarRegionUpdateTimeMillis());
+
    }
 
    public static void read(perception_msgs.msg.dds.DoorNodeMessage data, us.ihmc.idl.CDR cdr)
@@ -108,6 +115,8 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
       geometry_msgs.msg.dds.PosePubSubType.read(data.getOpeningMechanismPose(), cdr);	
       geometry_msgs.msg.dds.TransformPubSubType.read(data.getOpeningMechanismVisualTransformToObjectPose(), cdr);	
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.read(data.getDoorPlanarRegion(), cdr);	
+      data.setDoorPlanarRegionUpdateTimeMillis(cdr.read_type_12());
+      	
 
    }
 
@@ -123,6 +132,7 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
 
       ser.write_type_a("door_planar_region", new perception_msgs.msg.dds.PlanarRegionMessagePubSubType(), data.getDoorPlanarRegion());
 
+      ser.write_type_12("door_planar_region_update_time_millis", data.getDoorPlanarRegionUpdateTimeMillis());
    }
 
    @Override
@@ -137,6 +147,7 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
 
       ser.read_type_a("door_planar_region", new perception_msgs.msg.dds.PlanarRegionMessagePubSubType(), data.getDoorPlanarRegion());
 
+      data.setDoorPlanarRegionUpdateTimeMillis(ser.read_type_12("door_planar_region_update_time_millis"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.DoorNodeMessage src, perception_msgs.msg.dds.DoorNodeMessage dest)

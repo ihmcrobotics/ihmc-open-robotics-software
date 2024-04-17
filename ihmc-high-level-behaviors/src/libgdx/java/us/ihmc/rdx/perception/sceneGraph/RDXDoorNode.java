@@ -23,7 +23,6 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObject;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -39,9 +38,6 @@ public class RDXDoorNode extends RDXSceneNode
    private RDXInteractableObject interactableObject;
    private final RigidBodyTransform visualModelTransformToWorld = new RigidBodyTransform();
    private final RDXPlanarRegionsGraphic doorPlanarRegionGraphic = new RDXPlanarRegionsGraphic();
-
-   private final transient PlanarRegionsList planarRegionsList = new PlanarRegionsList();
-   private final transient PlanarRegion lastDoorRegion = new PlanarRegion();
 
    private static final int DOOR_LEVER_SWITCH_SIDE_THRESHOLD = 10;
    private transient int doorLeverSwitchSide = 0;
@@ -60,15 +56,8 @@ public class RDXDoorNode extends RDXSceneNode
    public void update(SceneGraphModificationQueue modificationQueue)
    {
       // Update door planar region graphic
-      if (!lastDoorRegion.epsilonEquals(doorNode.getDoorPlanarRegion(), 0.1))
-      {
-         planarRegionsList.clear();
-         doorNode.getDoorPlanarRegion().setRegionId(2222);
-         planarRegionsList.addPlanarRegion(doorNode.getDoorPlanarRegion());
-         doorPlanarRegionGraphic.generateMeshes(planarRegionsList);
-
-         lastDoorRegion.set(doorNode.getDoorPlanarRegion());
-      }
+      doorNode.getDoorPlanarRegion().setRegionId(2222);
+      doorPlanarRegionGraphic.generateMeshes(new PlanarRegionsList(doorNode.getDoorPlanarRegion()));
 
       doorPlanarRegionGraphic.update();
 
@@ -145,10 +134,15 @@ public class RDXDoorNode extends RDXSceneNode
 
       ImGui.text("Planar region info:");
       ImGui.sameLine();
-      if (!planarRegionsList.isEmpty())
-         ImGui.text(planarRegionsList.getPlanarRegion(0).getDebugString());
+      if (doorNode.getDoorPlanarRegion() != null && doorNode.getDoorPlanarRegion().getArea() > 0.0)
+      {
+         ImGui.text(doorNode.getDoorPlanarRegion().getDebugString());
+         ImGui.text("Last region update time: " + doorNode.getDoorPlanarRegionUpdateTime());
+      }
       else
+      {
          ImGui.text("N/A");
+      }
    }
 
    @Override

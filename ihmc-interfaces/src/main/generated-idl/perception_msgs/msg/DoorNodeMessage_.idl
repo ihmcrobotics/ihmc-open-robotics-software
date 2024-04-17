@@ -35,6 +35,10 @@ module perception_msgs
          * The planar region we assume is the door panel
          */
         perception_msgs::msg::dds::PlanarRegionMessage door_planar_region;
+        /**
+         * The last time the door planar region was updated
+         */
+        unsigned long long door_planar_region_update_time_millis;
       };
     };
   };

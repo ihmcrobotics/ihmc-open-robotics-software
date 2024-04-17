@@ -8,3 +8,5 @@ geometry_msgs/Pose opening_mechanism_pose
 geometry_msgs/Transform opening_mechanism_visual_transform_to_object_pose
 # The planar region we assume is the door panel
 perception_msgs/PlanarRegionMessage door_planar_region
+# The last time the door planar region was updated
+uint64 door_planar_region_update_time_millis

@@ -161,7 +161,8 @@ public class ROS2SceneGraphSubscription
          if (localNode instanceof DoorNode doorNode)
          {
             doorNode.setOpeningMechanismType(OpeningMechanismType.fromByte(subscriptionNode.getDoorNodeMessage().getOpeningMechanismType()));
-            doorNode.setDoorPlanarRegion(PlanarRegionMessageConverter.convertToPlanarRegion(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegion()));
+            doorNode.getDoorPlanarRegion().set(PlanarRegionMessageConverter.convertToPlanarRegion(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegion()));
+            doorNode.setDoorPlanarRegionUpdateTime(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegionUpdateTimeMillis());
             doorNode.setOpeningMechanismPose(subscriptionNode.getDoorNodeMessage().getOpeningMechanismPose());
             doorNode.setOpeningMechanismVisualTransformToObjectPose(subscriptionNode.getDoorNodeMessage().getOpeningMechanismVisualTransformToObjectPose());
          }

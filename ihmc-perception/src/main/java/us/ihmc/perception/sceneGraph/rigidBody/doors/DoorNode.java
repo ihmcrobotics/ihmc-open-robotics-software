@@ -18,6 +18,7 @@ public class DoorNode extends SceneNode
    private final RigidBodyTransform openingMechanismVisualTransformToObjectPose = new RigidBodyTransform();
 
    private final PlanarRegion doorPlanarRegion = new PlanarRegion();
+   private long doorPlanarRegionUpdateTimeMillis;
 
    public DoorNode(long id, String name)
    {
@@ -89,8 +90,24 @@ public class DoorNode extends SceneNode
       this.doorPlanarRegion.set(planarRegion);
    }
 
+   public long getDoorPlanarRegionUpdateTime()
+   {
+      return doorPlanarRegionUpdateTimeMillis;
+   }
+
+   public void setDoorPlanarRegionUpdateTime(long doorPlanarRegionUpdateTimeMillis)
+   {
+      this.doorPlanarRegionUpdateTimeMillis = doorPlanarRegionUpdateTimeMillis;
+   }
+
    public void filterAndSetDoorPlanarRegionFromPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
+      // Check if the current door planar region is old
+      if (System.currentTimeMillis() - doorPlanarRegionUpdateTimeMillis > 2000)
+      {
+         setDoorPlanarRegion(new PlanarRegion());
+      }
+
       Point3D openingMechanismCentroidInWorld = new Point3D(getOpeningMechanismPose().getTranslation());
 
       if (!planarRegionsList.isEmpty())
@@ -110,8 +127,8 @@ public class DoorNode extends SceneNode
             if (planarRegionCentroidInWorld.distance(openingMechanismCentroidInWorld) > epsilon)
                continue;
 
-            // If the planar region is less than 1/4th the area of a door
-            if (planarRegion.getArea() < ((DoorModelParameters.DOOR_PANEL_HEIGHT * DoorModelParameters.DOOR_PANEL_WIDTH) / 4))
+            // If the planar region is less than 1/5th the area of a door
+            if (planarRegion.getArea() < ((DoorModelParameters.DOOR_PANEL_HEIGHT * DoorModelParameters.DOOR_PANEL_WIDTH) / 5))
                continue;
 
             if (doorPlanarRegion == null)
@@ -125,7 +142,10 @@ public class DoorNode extends SceneNode
          }
 
          if (doorPlanarRegion != null)
+         {
             setDoorPlanarRegion(doorPlanarRegion);
+            setDoorPlanarRegionUpdateTime(System.currentTimeMillis());
+         }
       }
    }
 }

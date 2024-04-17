@@ -28,6 +28,10 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
             * The planar region we assume is the door panel
             */
    public perception_msgs.msg.dds.PlanarRegionMessage door_planar_region_;
+   /**
+            * The last time the door planar region was updated
+            */
+   public long door_planar_region_update_time_millis_;
 
    public DoorNodeMessage()
    {
@@ -51,6 +55,8 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.opening_mechanism_pose_, opening_mechanism_pose_);
       geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.opening_mechanism_visual_transform_to_object_pose_, opening_mechanism_visual_transform_to_object_pose_);
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.staticCopy(other.door_planar_region_, door_planar_region_);
+      door_planar_region_update_time_millis_ = other.door_planar_region_update_time_millis_;
+
    }
 
 
@@ -104,6 +110,21 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       return door_planar_region_;
    }
 
+   /**
+            * The last time the door planar region was updated
+            */
+   public void setDoorPlanarRegionUpdateTimeMillis(long door_planar_region_update_time_millis)
+   {
+      door_planar_region_update_time_millis_ = door_planar_region_update_time_millis;
+   }
+   /**
+            * The last time the door planar region was updated
+            */
+   public long getDoorPlanarRegionUpdateTimeMillis()
+   {
+      return door_planar_region_update_time_millis_;
+   }
+
 
    public static Supplier<DoorNodeMessagePubSubType> getPubSubType()
    {
@@ -128,6 +149,8 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       if (!this.opening_mechanism_pose_.epsilonEquals(other.opening_mechanism_pose_, epsilon)) return false;
       if (!this.opening_mechanism_visual_transform_to_object_pose_.epsilonEquals(other.opening_mechanism_visual_transform_to_object_pose_, epsilon)) return false;
       if (!this.door_planar_region_.epsilonEquals(other.door_planar_region_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.door_planar_region_update_time_millis_, other.door_planar_region_update_time_millis_, epsilon)) return false;
+
 
       return true;
    }
@@ -147,6 +170,8 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       if (!this.opening_mechanism_pose_.equals(otherMyClass.opening_mechanism_pose_)) return false;
       if (!this.opening_mechanism_visual_transform_to_object_pose_.equals(otherMyClass.opening_mechanism_visual_transform_to_object_pose_)) return false;
       if (!this.door_planar_region_.equals(otherMyClass.door_planar_region_)) return false;
+      if(this.door_planar_region_update_time_millis_ != otherMyClass.door_planar_region_update_time_millis_) return false;
+
 
       return true;
    }
@@ -166,7 +191,9 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       builder.append("opening_mechanism_visual_transform_to_object_pose=");
       builder.append(this.opening_mechanism_visual_transform_to_object_pose_);      builder.append(", ");
       builder.append("door_planar_region=");
-      builder.append(this.door_planar_region_);
+      builder.append(this.door_planar_region_);      builder.append(", ");
+      builder.append("door_planar_region_update_time_millis=");
+      builder.append(this.door_planar_region_update_time_millis_);
       builder.append("}");
       return builder.toString();
    }
