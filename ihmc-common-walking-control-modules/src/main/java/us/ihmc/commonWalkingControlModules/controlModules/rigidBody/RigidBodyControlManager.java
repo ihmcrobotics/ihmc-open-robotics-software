@@ -529,7 +529,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       }
       if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
       {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " is already load bearing. Changing contact point must be done first be exiting state.");
+//         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " is already load bearing. Changing contact point must be done first be exiting state.");
          return;
       }
 
@@ -559,7 +559,15 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    {
       if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
       {
-         hold();
+         if (defaultControlMode.getValue() == RigidBodyControlMode.JOINTSPACE && loadBearingControlState.isJointspaceControlActive())
+         {
+            jointspaceControlState.holdCurrentDesired();
+            requestState(jointspaceControlState.getControlMode());
+         }
+         else
+         {
+            hold();
+         }
       }
    }
 

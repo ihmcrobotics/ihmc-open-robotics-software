@@ -18,7 +18,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -74,7 +74,7 @@ public class RDXJoystickBasedStepping
    private final ImDouble turnStepWidth = new ImDouble();
    private final ImDouble turnMaxAngleInward = new ImDouble();
    private final ImDouble turnMaxAngleOutward = new ImDouble();
-   private IHMCROS2Input<CapturabilityBasedStatus> capturabilityBasedStatusInput;
+   private ROS2Input<CapturabilityBasedStatus> capturabilityBasedStatusInput;
    private ROS2ControllerHelper controllerHelper;
    private ROS2SyncedRobotModel syncedRobot;
 

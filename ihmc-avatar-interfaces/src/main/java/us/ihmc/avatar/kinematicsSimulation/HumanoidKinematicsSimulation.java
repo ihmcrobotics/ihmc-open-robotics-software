@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.*;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
@@ -31,6 +32,7 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
@@ -65,7 +67,6 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
@@ -90,6 +91,8 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public class HumanoidKinematicsSimulation
 {
+   public static final ROS2Topic<Empty> KINEMATICS_SIMULATION_HEARTBEAT
+         = ROS2Tools.IHMC_ROOT.withModule("kinematics_simulation").withOutput().withSuffix("heartbeat").withType(Empty.class);
    private static final double GRAVITY_Z = 9.81;
    private static final double LIDAR_SPINDLE_SPEED = 2.5;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -148,8 +151,8 @@ public class HumanoidKinematicsSimulation
       this.kinematicsSimulationParameters = kinematicsSimulationParameters;
 
       // instantiate some existing controller ROS2 API?
-      ros2Node = ROS2Tools.createROS2Node(kinematicsSimulationParameters.getPubSubImplementation(), ROS2Tools.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME);
-      heartbeat = new ROS2Heartbeat(ros2Node, ROS2Tools.KINEMATICS_SIMULATION_HEARTBEAT);
+      ros2Node = ROS2Tools.createROS2Node(kinematicsSimulationParameters.getPubSubImplementation(), HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME);
+      heartbeat = new ROS2Heartbeat(ros2Node, KINEMATICS_SIMULATION_HEARTBEAT);
 
       String robotName = robotModel.getSimpleRobotName();
       fullRobotModel = robotModel.createFullRobotModel();
@@ -251,9 +254,9 @@ public class HumanoidKinematicsSimulation
       if (kinematicsSimulationParameters.isControllerNetworkSubscriberEnabled())
       {
          realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(kinematicsSimulationParameters.getPubSubImplementation(),
-                                                             ROS2Tools.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
-         ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
-         ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+                                                             HumanoidControllerAPI.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
+         ROS2Topic inputTopic = HumanoidControllerAPI.getInputTopic(robotName);
+         ROS2Topic outputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
          ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
                                                                                                    walkingInputManager,
                                                                                                    outputTopic,
@@ -273,13 +276,10 @@ public class HumanoidKinematicsSimulation
                                                                           9,
                                                                           MessageUnpackingTools.createWholeBodyTrajectoryMessageUnpacker());
          controllerNetworkSubscriber.registerSubcriberWithMessageUnpacker(WholeBodyStreamingMessage.class,
-                                                                          inputTopic,
-                                                                          ROS2QosProfile.BEST_EFFORT(),
                                                                           9,
                                                                           MessageUnpackingTools.createWholeBodyStreamingMessageUnpacker());
          controllerNetworkSubscriber.addMessageCollectors(ControllerAPIDefinition.createDefaultMessageIDExtractor(), 3);
          controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
-
          simulatedHandKinematicController = robotModel.createSimulatedHandKinematicController(fullRobotModel, realtimeROS2Node, yoTime);
 
          robotConfigurationDataPublisher = createRobotConfigurationDataPublisher(robotModel.getSimpleRobotName());
@@ -415,8 +415,8 @@ public class HumanoidKinematicsSimulation
       rcdPublisherFactory.setSensorSource(sensorTimestampHolder, rootJointStateOutput, jointSensorOutputs, forceSensorDataHolder, imuSensorOutputs);
       rcdPublisherFactory.setPublishPeriod(0L);
       rcdPublisherFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
-
-      rcdPublisherFactory.setROS2Info(realtimeROS2Node, ROS2Tools.getControllerOutputTopic(robotName));
+      
+      rcdPublisherFactory.setROS2Info(realtimeROS2Node, HumanoidControllerAPI.getOutputTopic(robotName));
 
       return rcdPublisherFactory.createRobotConfigurationDataPublisher();
    }

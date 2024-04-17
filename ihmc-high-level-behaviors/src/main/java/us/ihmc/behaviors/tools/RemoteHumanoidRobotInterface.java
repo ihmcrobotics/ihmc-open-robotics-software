@@ -69,7 +69,7 @@ public class RemoteHumanoidRobotInterface
       this.robotModel = robotModel;
       robotName = robotModel.getSimpleRobotName();
       jointMap = robotModel.getJointMap();
-      topicName = ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName);
+      topicName = HumanoidControllerAPI.HUMANOID_CONTROLLER.withRobot(robotName);
 
       controllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotName);
       publisherMap = new ROS2PublisherMap(ros2Node);
@@ -80,8 +80,8 @@ public class RemoteHumanoidRobotInterface
       HighLevelStateChangeStatusMessage initialState = new HighLevelStateChangeStatusMessage();
       initialState.setInitialHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
       initialState.setEndHighLevelControllerName(HighLevelControllerName.WALKING.toByte());
-      controllerStateInput = new ROS2Input<>(ros2Node, HighLevelStateChangeStatusMessage.class, topicName.withOutput(), initialState, this::acceptStatusChange);
-      capturabilityBasedStatusInput = new ROS2Input<>(ros2Node, CapturabilityBasedStatus.class, topicName.withOutput());
+      controllerStateInput = new ROS2Input<>(ros2Node, HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotName), initialState, this::acceptStatusChange);
+      capturabilityBasedStatusInput = new ROS2Input<>(ros2Node, HumanoidControllerAPI.getTopic(CapturabilityBasedStatus.class, robotName));
 
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
    }
@@ -313,7 +313,7 @@ public class RemoteHumanoidRobotInterface
       stampedPosePacket.setConfidenceFactor(confidenceFactor);
 
       LogTools.debug("Publishing Pose " + pose + " with timestamp " + timestamp);
-      publisherMap.publish(ROS2Tools.getPoseCorrectionTopic(robotName), stampedPosePacket);
+      publisherMap.publish(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName), stampedPosePacket);
    }
 
    public void pauseWalking()

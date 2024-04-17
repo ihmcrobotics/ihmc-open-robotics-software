@@ -7,7 +7,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import geometry_msgs.PoseStamped;
 import imgui.internal.ImGui;
-import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -103,7 +103,7 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
    {
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
 
-      new IHMCROS2Callback<>(ros2Node, PerceptionAPI.MOCAP_RIGID_BODY, (message) ->
+      new ROS2Callback<>(ros2Node, PerceptionAPI.MOCAP_RIGID_BODY, (message) ->
       {
          queueRenderRigidBodyPose(message);
       });

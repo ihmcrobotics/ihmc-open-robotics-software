@@ -3,6 +3,7 @@ package us.ihmc.communication.packets;
 import controller_msgs.msg.dds.*;
 import gnu.trove.list.array.*;
 import ihmc_common_msgs.msg.dds.*;
+import org.apache.logging.log4j.Level;
 import perception_msgs.msg.dds.*;
 import std_msgs.msg.dds.Bool;
 import toolbox_msgs.msg.dds.*;
@@ -1476,6 +1477,7 @@ public class MessageTools
     */
    public static void packLongStringToByteSequence(String longString, IDLSequence.Byte byteSequence)
    {
+      byteSequence.clear();
       byte[] longStringBytes = longString.getBytes(StandardCharsets.US_ASCII);
       byteSequence.addAll(longStringBytes);
    }
@@ -1487,5 +1489,26 @@ public class MessageTools
    {
       byte[] longStringData = byteSequence.toArray();
       return new String(longStringData, StandardCharsets.US_ASCII);
+   }
+
+   public static int toMessage(Level level)
+   {
+      return level.intLevel();
+   }
+
+   public static Level fromMessage(int intLevel)
+   {
+      if (intLevel == Level.FATAL.intLevel())
+         return Level.FATAL;
+      else if (intLevel == Level.ERROR.intLevel())
+         return Level.ERROR;
+      else if (intLevel == Level.WARN.intLevel())
+         return Level.WARN;
+      else if (intLevel == Level.DEBUG.intLevel())
+         return Level.DEBUG;
+      else if (intLevel == Level.TRACE.intLevel())
+         return Level.TRACE;
+      else
+         return Level.INFO;
    }
 }

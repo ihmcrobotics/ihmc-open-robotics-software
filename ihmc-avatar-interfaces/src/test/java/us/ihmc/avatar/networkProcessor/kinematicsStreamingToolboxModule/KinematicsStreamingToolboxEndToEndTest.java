@@ -21,6 +21,7 @@ import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -168,7 +169,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
    public void createToolboxController(DRCRobotModel robotModel)
    {
       String robotName = robotModel.getSimpleRobotName();
-      ROS2Topic<?> controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic<?> controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
       ROS2Topic<?> toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
       ROS2Topic<?> toolboxOutputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
 
@@ -191,14 +192,10 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       toolboxController.setTrajectoryMessagePublisher(simulationTestHelper::publishToController);
       toolboxController.setStreamingMessagePublisher(simulationTestHelper::publishToController);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(toolboxROS2Node,
-                                                    RobotConfigurationData.class,
-                                                    controllerOutputTopic,
-                                                    s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(toolboxROS2Node,
-                                                    CapturabilityBasedStatus.class,
-                                                    controllerOutputTopic,
-                                                    s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
+      toolboxROS2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class),
+                                         s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
+      toolboxROS2Node.createSubscription(controllerOutputTopic.withTypeName(CapturabilityBasedStatus.class),
+                                         s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
       toolboxROS2Node.spin();
    }
 

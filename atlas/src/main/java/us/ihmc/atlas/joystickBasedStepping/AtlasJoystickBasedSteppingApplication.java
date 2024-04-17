@@ -10,7 +10,8 @@ import us.ihmc.avatar.joystickBasedJavaFXController.JoystickBasedSteppingMainUI;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -23,7 +24,7 @@ public class AtlasJoystickBasedSteppingApplication extends ApplicationNoModule
 {
    private JoystickBasedSteppingMainUI ui;
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "ihmc_atlas_xbox_joystick_control");
-   private IHMCROS2Publisher<BDIBehaviorCommandPacket> bdiBehaviorcommandPublisher;
+   private ROS2PublisherBasics<BDIBehaviorCommandPacket> bdiBehaviorcommandPublisher;
 
    @Override
    public void start(Stage primaryStage) throws Exception
@@ -35,7 +36,7 @@ public class AtlasJoystickBasedSteppingApplication extends ApplicationNoModule
       PrintTools.info("-------------------------------------------------------------------");
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_LEFT_NUB_RIGHT_ROBOTIQ, robotTarget, false);
       String robotName = robotModel.getSimpleRobotName();
-      bdiBehaviorcommandPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, BDIBehaviorCommandPacket.class, ROS2Tools.getControllerInputTopic(robotName));
+      bdiBehaviorcommandPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getInputTopic(robotName).withTypeName(BDIBehaviorCommandPacket.class));
       AtlasKickAndPunchMessenger atlasKickAndPunchMessenger = new AtlasKickAndPunchMessenger(ros2Node, robotName);
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();

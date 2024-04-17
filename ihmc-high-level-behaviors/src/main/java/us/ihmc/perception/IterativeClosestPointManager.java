@@ -1,7 +1,7 @@
 package us.ihmc.perception;
 
 import perception_msgs.msg.dds.IterativeClosestPointRequest;
-import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -35,7 +35,7 @@ public class IterativeClosestPointManager
    private final Random random = new Random(System.nanoTime());
    private final ConcurrentHashMap<Long, IterativeClosestPointWorker> nodeIDToWorkerMap = new ConcurrentHashMap<>();
    private final ConcurrentHashMap<IterativeClosestPointWorker, Integer> workerToIterationsMap = new ConcurrentHashMap<>();
-   private final IHMCROS2Input<IterativeClosestPointRequest> requestMessageSubscription;
+   private final ROS2Input<IterativeClosestPointRequest> requestMessageSubscription;
    private final RestartableThrottledThread workerThread;
 
    private List<Point3D32> environmentPointCloud;

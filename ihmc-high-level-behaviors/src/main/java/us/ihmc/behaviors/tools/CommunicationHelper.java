@@ -12,14 +12,14 @@ import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningMo
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.avatar.sensors.realsense.MapsenseTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.IHMCROS2Input;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -189,21 +189,21 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    }
 
    @Override
-   public <T> IHMCROS2Input<T> subscribeToController(Class<T> messageClass)
+   public <T> ROS2Input<T> subscribeToController(Class<T> messageClass)
    {
-      return subscribe(ControllerAPIDefinition.getTopic(messageClass, robotModel.getSimpleRobotName()));
+      return subscribe(HumanoidControllerAPI.getTopic(messageClass, robotModel.getSimpleRobotName()));
    }
 
    // TODO: Move to remote robot interface?
    public <T> void subscribeToControllerViaCallback(Class<T> messageClass, Consumer<T> callback)
    {
-      subscribeViaCallback(ControllerAPIDefinition.getTopic(messageClass, robotModel.getSimpleRobotName()), callback);
+      subscribeViaCallback(HumanoidControllerAPI.getTopic(messageClass, robotModel.getSimpleRobotName()), callback);
    }
 
    @Override
-   public IHMCROS2Input<RobotConfigurationData> subscribeToRobotConfigurationData()
+   public ROS2Input<RobotConfigurationData> subscribeToRobotConfigurationData()
    {
-      return subscribe(ROS2Tools.getRobotConfigurationDataTopic(getRobotName()));
+      return subscribe(StateEstimatorAPI.getRobotConfigurationDataTopic(getRobotName()));
    }
 
    public void subscribeToPlanarRegionsViaCallback(ROS2Topic<PlanarRegionsListMessage> topic, Consumer<PlanarRegionsList> callback)
@@ -216,7 +216,7 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
 
    public Supplier<PlanarRegionsList> subscribeToPlanarRegionsViaReference(ROS2Topic<PlanarRegionsListMessage> topic)
    {
-      IHMCROS2Input<PlanarRegionsListMessage> input = new IHMCROS2Input<>(ros2Helper.getROS2NodeInterface(), topic.getType(), topic);
+      ROS2Input<PlanarRegionsListMessage> input = new ROS2Input<>(ros2Helper.getROS2NodeInterface(), topic.getType(), topic);
       return () -> PlanarRegionMessageConverter.convertToPlanarRegionsList(input.getLatest());
    }
 
@@ -239,7 +239,7 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
 
    public void subscribeToRobotConfigurationDataViaCallback(Consumer<RobotConfigurationData> callback)
    {
-      subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(getRobotModel().getSimpleRobotName()), callback);
+      subscribeViaCallback(StateEstimatorAPI.getRobotConfigurationDataTopic(getRobotModel().getSimpleRobotName()), callback);
    }
 
    @Override
@@ -249,13 +249,13 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    }
 
    @Override
-   public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic)
+   public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic)
    {
       return ros2Helper.subscribe(topic);
    }
 
    @Override
-   public <T> IHMCROS2Input<T> subscribe(ROS2Topic<T> topic, IHMCROS2Input.MessageFilter<T> messageFilter)
+   public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic, ROS2Input.MessageFilter<T> messageFilter)
    {
       return ros2Helper.subscribe(topic, messageFilter);
    }

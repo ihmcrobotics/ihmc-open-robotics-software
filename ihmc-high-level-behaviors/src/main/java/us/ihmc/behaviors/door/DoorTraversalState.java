@@ -9,8 +9,6 @@ import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalNotification;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefinition>
@@ -20,13 +18,9 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    private WaitDurationActionState waitToOpenRightHandAction;
    private ScrewPrimitiveActionState pullScrewPrimitiveAction;
 
-   private final CRDTUnidirectionalNotification retryingPullDoorNotification;
-
    public DoorTraversalState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new DoorTraversalDefinition(crdtInfo, saveFileDirectory), crdtInfo);
-
-      retryingPullDoorNotification = new CRDTUnidirectionalNotification(ROS2ActorDesignation.ROBOT, crdtInfo, this);
    }
 
    @Override
@@ -73,8 +67,6 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       getDefinition().toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
-
-      message.setRetryingPullDoorNotification(retryingPullDoorNotification.toMessage());
    }
 
    public void fromMessage(DoorTraversalStateMessage message)
@@ -82,8 +74,6 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       super.fromMessage(message.getState());
 
       getDefinition().fromMessage(message.getDefinition());
-
-      retryingPullDoorNotification.fromMessage(message.getRetryingPullDoorNotification());
    }
 
    public boolean isTreeStructureValid()
@@ -113,10 +103,5 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    public ScrewPrimitiveActionState getPullScrewPrimitiveAction()
    {
       return pullScrewPrimitiveAction;
-   }
-
-   public CRDTUnidirectionalNotification getRetryingPullDoorNotification()
-   {
-      return retryingPullDoorNotification;
    }
 }
