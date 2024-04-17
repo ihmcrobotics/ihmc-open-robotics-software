@@ -49,14 +49,21 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
     private final YoDouble swingHipPitchKp = new YoDouble("swingHipPitchKp", registry);
     private final YoDouble swingHipPitchKd = new YoDouble("swingHipPitchKd", registry);
 
+    private final YoDouble swingHipRollKp = new YoDouble("swingHipRollKp", registry);
+    private final YoDouble swingHipRollKd = new YoDouble("swingHipRollKd", registry);
+
     private final YoDouble supportPitchKp = new YoDouble("supportPitchKp", registry);
     private final YoDouble supportPitchKd = new YoDouble("supportPitchKd", registry);
+
+    private final YoDouble supportHipRollKp = new YoDouble("supportHipRollKp", registry);
+    private final YoDouble supportHipRollKd = new YoDouble("supportHipRollKd", registry);
 
     private enum LegStateName {Swing, Support};
     private final SideDependentList<StateMachine<LegStateName, State>> legStateMachines = new SideDependentList<>();
     private final SideDependentList<YoBoolean> hasFootHitGround = new SideDependentList<>();
 
     private YoDouble desiredWalkingSpeed = new YoDouble("desiredWalkingSpeed", registry);
+    private YoDouble desiredSideWalkingSpeed = new YoDouble("desiredSideWalkingSpeed", registry);
 
     private YoDouble desiredFootPositionXFromHip = new YoDouble("desiredFootPositionXFromHip", registry);
 
@@ -73,6 +80,7 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
     private final SideDependentList<YoFramePoint3D> currentFootPositions = new SideDependentList<>();
 
     private final YoDouble swingFootStepAdjustmentGain = new YoDouble("swingFootStepAdjustmentGain", registry);
+    private final YoDouble swingFootSideStepAdjustmentGain = new YoDouble("swingFootSideStepAdjustmentGain", registry);
 
     private final YoDouble debug1 = new YoDouble("debug1", registry);
     private final YoDouble debug2 = new YoDouble("debug2", registry);
@@ -80,6 +88,7 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
     private final YoDouble debug4 = new YoDouble("debug4", registry);
 
     private final YoDouble WalkingGain = new YoDouble("WalkingGain", registry);
+    private final YoDouble SideWalkingGain = new YoDouble("SideWalkingGain", registry);
 
 
 
@@ -109,10 +118,20 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
         supportPitchKp.set(250.0);
         supportPitchKd.set(100.0);
 
+        supportHipRollKp.set(500.0);
+        supportHipRollKd.set(100.0);
+
+        swingHipRollKp.set(800.0);
+        swingHipRollKd.set(120.0);
+
+
+
         swingFootStepAdjustmentGain.set(0.55); // 0.65
+        swingFootSideStepAdjustmentGain.set(1.0); // 0.65
         // Setting desired Walking Speed to zero for now
         desiredWalkingSpeed.set(0.0);
         WalkingGain.set(0.06); //0.06
+        SideWalkingGain.set(0.06);
 
 
         // Setting up the leg length controllers
@@ -185,31 +204,51 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
     private class SwingFootState implements State
     {
         private final RobotSide swingSide;
-        private final YoPolynomial swingFootHeightTraj;
+
         private final PDController swingFootHeightController;
         private final PDController swingHipPitchController;
+        private final PDController swingHipRollController;
+
         private final YoDouble swingLegForce;
         private final YoDouble swingHipForce;
+        private final YoDouble swingHipRollForce;
+
+        private final YoPolynomial swingFootHeightTraj;
         private final YoPolynomial swingFootXTraj;
+        private final YoPolynomial swingFootYTraj;
+
+
         private final YoFramePoint3D footPositionAtStart;
-        private final YoDouble footTouchdownPosition;
-        private final YoDouble footDesiredPosition;
+        private final YoDouble footTouchdownPositionX;
+        private final YoDouble footDesiredPositionX;
+
+        private final YoDouble footTouchdownPositionY;
+        private final YoDouble footDesiredPositionY;
 
 
         public SwingFootState(RobotSide swingSide)
         {
             this.swingSide = swingSide;
 
-            swingFootHeightTraj = new YoPolynomial(swingSide.getLowerCaseName() + "SwingFootHeight", 5, registry);
             swingFootHeightController = new PDController(swingFootHeightKp, swingFootHeightKd, swingSide.getLowerCaseName() + "SwingFootHeightController", registry);
             swingHipPitchController = new PDController(swingHipPitchKp, swingHipPitchKd, swingSide.getLowerCaseName() + "swingHipPitchController", registry);
+            swingHipRollController = new PDController( swingHipRollKp, swingHipRollKd, swingSide.getLowerCaseName() + "swingHipRollController", registry);
+
             swingLegForce = new YoDouble(swingSide.getLowerCaseName() + "DesiredLegForce", registry);
             swingHipForce = new YoDouble(swingSide.getLowerCaseName() + "DesiredHipForce", registry);
+            swingHipRollForce = new YoDouble(swingSide.getLowerCaseName() + "DesiredHipRollForce", registry);
 
+            swingFootHeightTraj = new YoPolynomial(swingSide.getLowerCaseName() + "SwingFootHeight", 5, registry);
             swingFootXTraj = new YoPolynomial(swingSide.getLowerCaseName() + "SwingFootX", 4, registry);
+            swingFootYTraj = new YoPolynomial(swingSide.getLowerCaseName() + "SwingFootY", 4, registry);
+
             footPositionAtStart = new YoFramePoint3D(swingSide.getLowerCaseName() + "FootPositionAtStart", controllerRobot.getCenterOfMassFrame(), registry);
-            footTouchdownPosition = new YoDouble(swingSide.getLowerCaseName() + "FootTouchdownPosition", registry);
-            footDesiredPosition = new YoDouble(swingSide.getLowerCaseName() + "FootDesiredPosition", registry);
+            footTouchdownPositionX = new YoDouble(swingSide.getLowerCaseName() + "footTouchdownPositionX", registry);
+            footDesiredPositionX = new YoDouble(swingSide.getLowerCaseName() + "footDesiredPositionX", registry);
+
+            footTouchdownPositionY = new YoDouble(swingSide.getLowerCaseName() + "footTouchdownPositionY", registry);
+            footDesiredPositionY = new YoDouble(swingSide.getLowerCaseName() + "footDesiredPositionY", registry);
+
 
 
         }
@@ -238,7 +277,8 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
                     finalHeight,
                     finalVelocity);
 
-            swingFootXTraj.setCubic(0.0, swingDuration, footPositionAtStart.getX(), computeDesiredTouchdownPosition());
+            swingFootXTraj.setCubic(0.0, swingDuration, footPositionAtStart.getX(), computeDesiredTouchdownPositionX());
+            swingFootYTraj.setCubic(0.0, swingDuration, footPositionAtStart.getY(), computeDesiredTouchdownPositionY(swingSide));
 
         }
 
@@ -263,13 +303,13 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
             // set the desired torque to the knee joint to achieve the desired swing foot height
             controllerRobot.getKneeJoint(swingSide).setTau(swingLegForce.getDoubleValue());
 
-            footTouchdownPosition.set(computeDesiredTouchdownPosition());
-            swingFootXTraj.setCubic(0.0, desiredSwingDuration.getDoubleValue(), footPositionAtStart.getX(), footTouchdownPosition.getDoubleValue());
+            footTouchdownPositionX.set(computeDesiredTouchdownPositionX());
+            swingFootXTraj.setCubic(0.0, desiredSwingDuration.getDoubleValue(), footPositionAtStart.getX(), footTouchdownPositionX.getDoubleValue());
             swingFootXTraj.compute(timeInState);
 
 
             double desiredFootPositionX = swingFootXTraj.getValue();
-            footDesiredPosition.set(desiredFootPositionX);
+            footDesiredPositionX.set(desiredFootPositionX);
             double desiredFootVelocityX = swingFootXTraj.getVelocity();
 
             footPosition.changeFrame(controllerRobot.getCenterOfMassFrame());
@@ -280,7 +320,7 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
             double trial = controllerRobot.getFootVelocityRelativeToCOM(swingSide).getX();
 
 //            velocityDebugR.set(currentFootVelocityX);
-//            velocityDebugC.set(trial);
+//
             double hipForce = swingHipPitchController.compute(currentFootPositionX, desiredFootPositionX, currentFootVelocityX, desiredFootVelocityX);
             swingHipForce.set(-hipForce);
 
@@ -293,15 +333,44 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
 
             footPosition.setZ(0.0);
             footPosition.changeFrame(controllerRobot.getCenterOfMassFrame());
-            footPosition.setX(footTouchdownPosition.getDoubleValue());
+            footPosition.setX(footTouchdownPositionX.getDoubleValue());
             desiredTouchdownPositions.get(swingSide).setMatchingFrame(footPosition);
 
 
+            // Swing hip roll torque calculator
+            footTouchdownPositionY.set(computeDesiredTouchdownPositionY(swingSide));
+            swingFootYTraj.setCubic(0.0, desiredSwingDuration.getDoubleValue(), footPositionAtStart.getY(), footTouchdownPositionY.getDoubleValue());
+            swingFootYTraj.compute(timeInState);
+
+
+            double desiredFootPositionY = swingFootYTraj.getValue();
+            footDesiredPositionY.set(desiredFootPositionY);
+            double desiredFootVelocityY = swingFootYTraj.getVelocity();
+
+            footPosition.changeFrame(controllerRobot.getCenterOfMassFrame());
+            double currentFootPositionY = footPosition.getY();
+
+            debug1.set(currentFootPositionY);
+
+//            double currentFootVelocityY = controllerRobot.getHipRollJoint(swingSide).getQd() * controllerRobot.getLegLength(swingSide);
+            double currentFootVelocityY = controllerRobot.getFootVelocityRelativeToCOM(swingSide).getY();
+            debug2.set(currentFootVelocityY);
+            // why this calculation
+            double trial2 = controllerRobot.getFootVelocityRelativeToCOM(swingSide).getX();
+
+//            velocityDebugR.set(currentFootVelocityX);
+//            velocityDebugC.set(trial);
+            double hipRollForce = swingHipRollController.compute(currentFootPositionY, desiredFootPositionY, currentFootVelocityY, desiredFootVelocityY);
+//            swingHipRollForce.set(swingSide.negateIfRightSide(hipRollForce));
+            swingHipRollForce.set(hipRollForce);
+
+            controllerRobot.getHipRollJoint(swingSide).setTau(swingHipRollForce.getDoubleValue());
+
 
         }
-        private double computeDesiredTouchdownPosition()
+        private double computeDesiredTouchdownPositionX()
         {
-            double currentCoMVelocity = -controllerRobot.getFootVelocityRelativeToCOM(swingSide.getOppositeSide()).getX();
+            double currentCoMVelocityX = -controllerRobot.getFootVelocityRelativeToCOM(swingSide.getOppositeSide()).getX();
 
             // why not do this
             double trial = controllerRobot.getCenterOfMassVelocity().getX();
@@ -309,9 +378,24 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
 //            velocityDebugR.set(currentCoMVelocity);
 //            velocityDebugC.set(trial);
             double omega = Math.sqrt(9.81 / controllerRobot.getCenterOfMassPoint().getZ());
-            double velocityError = currentCoMVelocity - desiredWalkingSpeed.getDoubleValue() ;
-            return swingFootStepAdjustmentGain.getDoubleValue() / omega * currentCoMVelocity + WalkingGain.getDoubleValue() * velocityError;
+            double velocityError = currentCoMVelocityX - desiredWalkingSpeed.getDoubleValue() ;
+            return swingFootStepAdjustmentGain.getDoubleValue() / omega * currentCoMVelocityX + WalkingGain.getDoubleValue() * velocityError;
 //            return 1 / omega * currentCoMVelocity;
+        }
+
+        private double computeDesiredTouchdownPositionY(RobotSide robotSide)
+        {
+//            double currentCoMVelocityY = controllerRobot.getCenterOfMassVelocity().getY();
+            double currentCoMVelocityY = -controllerRobot.getFootVelocityRelativeToCOM(swingSide.getOppositeSide()).getY();
+
+            // why not do this
+            double trial = controllerRobot.getCenterOfMassVelocity().getY();
+
+            double omega = Math.sqrt(9.81 / controllerRobot.getCenterOfMassPoint().getZ());
+            double velocityError = currentCoMVelocityY - desiredSideWalkingSpeed.getDoubleValue() ;
+
+            return swingFootSideStepAdjustmentGain.getDoubleValue() / omega *  currentCoMVelocityY + robotSide.negateIfRightSide(0.05) +  SideWalkingGain.getDoubleValue() * velocityError;
+//          return swingFootSideStepAdjustmentGain.getDoubleValue() / omega *  currentCoMVelocityY + robotSide.negateIfRightSide(0.05);
         }
 
         @Override
@@ -333,16 +417,23 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
         private final RobotSide supportSide;
         private final PDController supportLegLengthController;
         private final PDController supportPitchController;
+        private final PDController supportRollController;
         private final YoDouble supportLegDesiredKneeForce;
         private final YoDouble supportLegFeedbackKneeForce;
+        private final YoDouble supportHipPitchForce;
+        private final YoDouble supportHipRollForce;
+
         public SupportFootState(RobotSide supportSide)
         {
             this.supportSide = supportSide;
 
             supportLegDesiredKneeForce = new YoDouble(supportSide.getShortLowerCaseName() + "SupportLegDesiredKneeForce", registry);
             supportLegFeedbackKneeForce = new YoDouble(supportSide.getLowerCaseName() + "SupportLegFeedbackKneeForce", registry);
+            supportHipPitchForce = new YoDouble(supportSide.getLowerCaseName() + "supportHipPitchForce", registry);
+            supportHipRollForce = new YoDouble(supportSide.getLowerCaseName() + "supportHipRollForce", registry);
             supportLegLengthController = new PDController(supportingLegLengthKp, supportingLegLengthKd, supportSide.getLowerCaseName() + "SupportLegLengthController", registry);
             supportPitchController = new PDController(supportPitchKp, supportPitchKd, supportSide.getLowerCaseName() + "supportPitchController", registry);
+            supportRollController = new PDController(supportHipRollKp, supportHipRollKd, supportSide.getLowerCaseName() + "supportHipRollController", registry);
         }
 
         @Override
@@ -357,20 +448,20 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
             FramePoint3D footPosition = new FramePoint3D(controllerRobot.getFootFrame(supportSide));
             footPosition.changeFrame(controllerRobot.getCenterOfMassFrame());
 
-            debug1.set(footPosition.getZ());
+//            debug1.set(footPosition.getZ());
 
             FramePoint3D comPosition = new FramePoint3D(controllerRobot.getCenterOfMassFrame());
             comPosition.changeFrame(controllerRobot.getFootFrame(supportSide));
 
-            debug2.set(comPosition.getZ());
+//            debug2.set(comPosition.getZ());
 
             FrameVector3D force = new FrameVector3D(footPosition);
             FrameVector3D force2 = new FrameVector3D(comPosition);
             force.setY(0.0);
             force.normalize();
 
-            debug3.set(force.getZ());
-            debug4.set(force2.getZ());
+//            debug3.set(force.getZ());
+//            debug4.set(force2.getZ());
 
             double weight = 9.81 * controllerRobot.getMass();
             force.scale(0.75 * weight / force.getZ()); // TODO fake scal
@@ -383,9 +474,9 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
             double desiredHeightVelocity = 0.0;
 
             // Compute the required torque to stay at the desired leg length
-            double torque = supportLegLengthController.compute(bodyHeight, desiredHeight, bodyHeightVelocity, desiredHeightVelocity);
-            supportLegFeedbackKneeForce.set(torque);
-            supportLegDesiredKneeForce.set(torque + force.norm());
+            double torque_knee = supportLegLengthController.compute(bodyHeight, desiredHeight, bodyHeightVelocity, desiredHeightVelocity);
+            supportLegFeedbackKneeForce.set(torque_knee);
+            supportLegDesiredKneeForce.set(torque_knee + force.norm());
 
             desiredLegForceVectors.get(supportSide).set(desiredLIPMForce);
 
@@ -410,13 +501,20 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
 
             FrameQuaternion base = new FrameQuaternion(controllerRobot.getFloatingJoint().getFrameAfterJoint());
             base.changeFrame(controllerRobot.getWorldFrame());
-            torque = supportPitchController.compute(base.getPitch(), 0.0, controllerRobot.getFloatingJoint().getFrameAfterJoint().getTwistOfFrame().getAngularPartY(), 0.0);
-            controllerRobot.getHipJoint(supportSide).setTau(-torque);
+            double torque_pitch = supportPitchController.compute(base.getPitch(), 0.0, controllerRobot.getFloatingJoint().getFrameAfterJoint().getTwistOfFrame().getAngularPartY(), 0.0);
+            supportHipPitchForce.set(-torque_pitch);
+            controllerRobot.getHipJoint(supportSide).setTau(supportHipPitchForce.getDoubleValue());
+
+            double torque_roll = supportRollController.compute(base.getRoll(), 0.0, controllerRobot.getFloatingJoint().getFrameAfterJoint().getTwistOfFrame().getAngularPartX(), 0.0);
+            supportHipRollForce.set(-torque_roll);
+//            controllerRobot.getHipRollJoint(supportSide).setTau(supportSide.negateIfRightSide(supportHipRollForce.getDoubleValue()));
+            controllerRobot.getHipRollJoint(supportSide).setTau(supportHipRollForce.getDoubleValue());
+
 
 
 
         }
-
+t
         @Override
         public void onExit(double timeInState) {
 

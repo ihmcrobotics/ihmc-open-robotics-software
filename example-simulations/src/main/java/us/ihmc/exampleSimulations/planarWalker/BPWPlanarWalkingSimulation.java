@@ -46,7 +46,7 @@ public class BPWPlanarWalkingSimulation {
 //         add the controller
 //        robot.addController(controller);
         robot.addThrottledController(controller, scs.getDT() * simTicksPerControlTick);
-        
+
         scs.startSimulationThread();
         scs.simulate();
     }

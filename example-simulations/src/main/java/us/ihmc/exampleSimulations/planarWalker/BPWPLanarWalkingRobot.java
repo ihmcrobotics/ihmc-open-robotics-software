@@ -33,6 +33,8 @@ public class BPWPLanarWalkingRobot implements SCS2YoGraphicHolder
 {
     private final SideDependentList<SimPrismaticJoint> kneeJoints;
     private final SideDependentList<SimRevoluteJoint> hipJoints;
+    private final SideDependentList<SimRevoluteJoint> hipRollJoints;
+
 
 //    private final SimRigidBody torso;
 
@@ -62,6 +64,7 @@ public class BPWPLanarWalkingRobot implements SCS2YoGraphicHolder
         worldFrame = robot.getInertialFrame();
         kneeJoints = new SideDependentList<>();
         hipJoints = new SideDependentList<>();
+        hipRollJoints = new SideDependentList<>();
 
         centerOfMassPoint = new YoFramePoint3D("centerOfMassPoint", worldFrame, registry);
         centerOfMassVelocity = new YoFrameVector3D("centerOfMassVelocity", worldFrame, registry);
@@ -74,8 +77,11 @@ public class BPWPLanarWalkingRobot implements SCS2YoGraphicHolder
         {
             SimPrismaticJoint kneeJoint = (SimPrismaticJoint) robot.getJoint(BPWPlanarWalkingRobotDefinition.kneeNames.get(robotSide));
             SimRevoluteJoint hipJoint = (SimRevoluteJoint) robot.getJoint(BPWPlanarWalkingRobotDefinition.hipPitchNames.get(robotSide));
+            SimRevoluteJoint hipRollJoint = (SimRevoluteJoint) robot.getJoint(BPWPlanarWalkingRobotDefinition.hipRollNames.get(robotSide));
+
             kneeJoints.put(robotSide, kneeJoint);
             hipJoints.put(robotSide, hipJoint);
+            hipRollJoints.put(robotSide, hipRollJoint);
 
             footVelocities.put(robotSide, new YoFrameVector3D(robotSide.getLowerCaseName() + "FootVelocity", centerOfMassFrame, registry));
 
@@ -157,6 +163,11 @@ public class BPWPLanarWalkingRobot implements SCS2YoGraphicHolder
     public SimRevoluteJoint getHipJoint(RobotSide robotSide)
     {
         return hipJoints.get(robotSide);
+    }
+
+    public SimRevoluteJoint getHipRollJoint(RobotSide robotSide)
+    {
+        return hipRollJoints.get(robotSide);
     }
 
 //    public SimRigidBody getTorso()
