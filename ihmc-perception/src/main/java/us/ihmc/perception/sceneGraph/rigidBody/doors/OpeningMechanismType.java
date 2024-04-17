@@ -1,6 +1,6 @@
 package us.ihmc.perception.sceneGraph.rigidBody.doors;
 
-public enum DoorHardwareType
+public enum OpeningMechanismType
 {
    UNKNOWN,
    LEVER_HANDLE,
@@ -8,8 +8,8 @@ public enum DoorHardwareType
    PUSH_BAR,
    PULL_HANDLE;
 
-   public static DoorHardwareType fromByte(byte b)
+   public static OpeningMechanismType fromByte(byte b)
    {
-      return DoorHardwareType.values()[b];
+      return OpeningMechanismType.values()[b];
    }
 }

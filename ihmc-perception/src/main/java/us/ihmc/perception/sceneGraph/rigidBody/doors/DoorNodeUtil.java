@@ -7,6 +7,12 @@ import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 
 public final class DoorNodeUtil
 {
+   /**
+    * Creates new door nodes as children of {@link YOLOv8Node}\s which are door components.
+    * If a door node already exists as a child of a YOLO node which is a door component, we update
+    * the pose of the door component in the door node with the detection pose from the YOLO node.
+    * @param sceneGraph the SceneGraph
+    */
    public static void addDoorNodes(SceneGraph sceneGraph)
    {
       sceneGraph.modifyTree(modificationQueue ->
@@ -26,7 +32,7 @@ public final class DoorNodeUtil
                   if (yoloNode.getChildren().isEmpty())
                   {
                      DoorNode doorNode = new DoorNode(sceneGraph.getNextID().getAndIncrement(), "Door");
-                     doorNode.setDoorHardwareTypeFromYoloClass(yoloNode.getDetectionClass());
+                     doorNode.setOpeningMechanismTypeFromYoloClass(yoloNode.getDetectionClass());
                      modificationQueue.accept(new SceneGraphNodeAddition(doorNode, yoloNode));
                   }
                   else
@@ -35,7 +41,7 @@ public final class DoorNodeUtil
                      {
                         if (childNode instanceof DoorNode doorNode)
                         {
-                           doorNode.setDoorHardwarePose(yoloNode.getObjectPose());
+                           doorNode.setOpeningMechanismPose(yoloNode.getObjectPose());
                         }
                      }
                   }
