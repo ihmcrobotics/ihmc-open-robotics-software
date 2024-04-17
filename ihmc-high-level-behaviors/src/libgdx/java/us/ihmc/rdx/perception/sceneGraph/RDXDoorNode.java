@@ -56,17 +56,6 @@ public class RDXDoorNode extends RDXSceneNode
    @Override
    public void update(SceneGraphModificationQueue modificationQueue)
    {
-      Point3D currentCameraFocus = new Point3D(doorNode.getOpeningMechanismPose().getTranslation());
-
-      if (interpolatedFocus.getX() == 0)
-      {
-         interpolatedFocus.set(currentCameraFocus);
-      }
-
-      interpolatedFocus.interpolate(currentCameraFocus, 0.01);
-
-      RDXBaseUI.getInstance().getPrimary3DPanel().getCamera3D().setCameraFocusPoint(interpolatedFocus);
-
       // Update door planar region graphic
       doorNode.getDoorPlanarRegion().setRegionId(2222);
       doorPlanarRegionGraphic.generateMeshes(new PlanarRegionsList(doorNode.getDoorPlanarRegion()));
@@ -132,8 +121,6 @@ public class RDXDoorNode extends RDXSceneNode
 
       doorPlanarRegionGraphic.getRenderables(renderables, pool);
    }
-
-   Point3D interpolatedFocus = new Point3D();
 
    @Override
    public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)

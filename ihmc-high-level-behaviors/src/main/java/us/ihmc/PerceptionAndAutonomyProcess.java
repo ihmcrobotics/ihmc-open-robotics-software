@@ -473,7 +473,7 @@ public class PerceptionAndAutonomyProcess
       if (yoloZEDDemandNode.isDemanded() || yoloRealsenseDemandNode.isDemanded())
       {
          yolov8DetectionManager.updateSceneGraph(sceneGraph);
-         yolov8DetectionManager.setRobotFrame(robotPelvisFrame);
+         yolov8DetectionManager.setRobotFrame(zedFrameSupplier.get());
       }
 
       // Update general stuff

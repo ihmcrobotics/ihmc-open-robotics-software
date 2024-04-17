@@ -85,4 +85,9 @@ public class RDXSceneNode
    {
       return hideGraphics.get();
    }
+
+   public void setHideGraphics(boolean hide)
+   {
+      hideGraphics.set(hide);
+   }
 }

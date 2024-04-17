@@ -54,6 +54,11 @@ public class RDXSceneGraphUI
    private final RDXPrimitiveRigidBodySceneNodeBuilder primitiveRigidBodySceneNodeBuilder;
    private final RDXPrimitiveRigidBodySceneNodeBuilder predefinedPrimitiveRigidBodySceneNodeBuilder;
 
+   public RDXSceneNode getUINode(SceneNode sceneNode)
+   {
+      return uiSceneNodes.get(sceneNode);
+   }
+
    public RDXSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDX3DPanel panel3D)
    {
       sceneGraph = new ROS2SceneGraph(new SceneNode(SceneGraph.ROOT_NODE_ID, SceneGraph.ROOT_NODE_NAME), (sceneGraph, ros2SceneGraphSubscriptionNode) ->
