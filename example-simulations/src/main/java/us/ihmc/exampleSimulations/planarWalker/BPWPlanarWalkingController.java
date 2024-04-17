@@ -514,7 +514,7 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
 
 
         }
-t
+
         @Override
         public void onExit(double timeInState) {
 
