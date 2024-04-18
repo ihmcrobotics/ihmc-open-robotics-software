@@ -21,10 +21,6 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
             */
    public us.ihmc.euclid.geometry.Pose3D opening_mechanism_pose_;
    /**
-            * The visual transform to parent of the door hardware
-            */
-   public us.ihmc.euclid.transform.QuaternionBasedTransform opening_mechanism_visual_transform_to_object_pose_;
-   /**
             * The planar region we assume is the door panel
             */
    public perception_msgs.msg.dds.PlanarRegionMessage door_planar_region_;
@@ -37,7 +33,6 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
    {
       scene_node_ = new perception_msgs.msg.dds.SceneNodeMessage();
       opening_mechanism_pose_ = new us.ihmc.euclid.geometry.Pose3D();
-      opening_mechanism_visual_transform_to_object_pose_ = new us.ihmc.euclid.transform.QuaternionBasedTransform();
       door_planar_region_ = new perception_msgs.msg.dds.PlanarRegionMessage();
    }
 
@@ -53,7 +48,6 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       opening_mechanism_type_ = other.opening_mechanism_type_;
 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.opening_mechanism_pose_, opening_mechanism_pose_);
-      geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.opening_mechanism_visual_transform_to_object_pose_, opening_mechanism_visual_transform_to_object_pose_);
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.staticCopy(other.door_planar_region_, door_planar_region_);
       door_planar_region_update_time_millis_ = other.door_planar_region_update_time_millis_;
 
@@ -90,15 +84,6 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
    public us.ihmc.euclid.geometry.Pose3D getOpeningMechanismPose()
    {
       return opening_mechanism_pose_;
-   }
-
-
-   /**
-            * The visual transform to parent of the door hardware
-            */
-   public us.ihmc.euclid.transform.QuaternionBasedTransform getOpeningMechanismVisualTransformToObjectPose()
-   {
-      return opening_mechanism_visual_transform_to_object_pose_;
    }
 
 
@@ -147,7 +132,6 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.opening_mechanism_type_, other.opening_mechanism_type_, epsilon)) return false;
 
       if (!this.opening_mechanism_pose_.epsilonEquals(other.opening_mechanism_pose_, epsilon)) return false;
-      if (!this.opening_mechanism_visual_transform_to_object_pose_.epsilonEquals(other.opening_mechanism_visual_transform_to_object_pose_, epsilon)) return false;
       if (!this.door_planar_region_.epsilonEquals(other.door_planar_region_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.door_planar_region_update_time_millis_, other.door_planar_region_update_time_millis_, epsilon)) return false;
 
@@ -168,7 +152,6 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       if(this.opening_mechanism_type_ != otherMyClass.opening_mechanism_type_) return false;
 
       if (!this.opening_mechanism_pose_.equals(otherMyClass.opening_mechanism_pose_)) return false;
-      if (!this.opening_mechanism_visual_transform_to_object_pose_.equals(otherMyClass.opening_mechanism_visual_transform_to_object_pose_)) return false;
       if (!this.door_planar_region_.equals(otherMyClass.door_planar_region_)) return false;
       if(this.door_planar_region_update_time_millis_ != otherMyClass.door_planar_region_update_time_millis_) return false;
 
@@ -188,8 +171,6 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       builder.append(this.opening_mechanism_type_);      builder.append(", ");
       builder.append("opening_mechanism_pose=");
       builder.append(this.opening_mechanism_pose_);      builder.append(", ");
-      builder.append("opening_mechanism_visual_transform_to_object_pose=");
-      builder.append(this.opening_mechanism_visual_transform_to_object_pose_);      builder.append(", ");
       builder.append("door_planar_region=");
       builder.append(this.door_planar_region_);      builder.append(", ");
       builder.append("door_planar_region_update_time_millis=");

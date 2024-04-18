@@ -1,6 +1,5 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
-import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
@@ -108,12 +107,10 @@ public class ROS2SceneGraphTools
       }
       else if (nodeType == SceneGraphMessage.DOOR_NODE_TYPE)
       {
-         DoorNodeMessage doorNodeMessage = subscriptionNode.getDoorNodeMessage();
          sceneNode = new DoorNode(nodeID,
                                   nodeName,
                                   OpeningMechanismType.fromByte(subscriptionNode.getDoorNodeMessage().getOpeningMechanismType()),
                                   subscriptionNode.getDoorNodeMessage().getOpeningMechanismPose(),
-                                  doorNodeMessage.getOpeningMechanismVisualTransformToObjectPose(),
                                   PlanarRegionMessageConverter.convertToPlanarRegion(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegion()));
       }
       else

@@ -2,7 +2,6 @@
 #define __perception_msgs__msg__DoorNodeMessage__idl__
 
 #include "geometry_msgs/msg/./Pose_.idl"
-#include "geometry_msgs/msg/./Transform_.idl"
 #include "perception_msgs/msg/./PlanarRegionMessage_.idl"
 #include "perception_msgs/msg/./SceneNodeMessage_.idl"
 module perception_msgs
@@ -27,10 +26,6 @@ module perception_msgs
          * The pose of the detected door hardware
          */
         geometry_msgs::msg::dds::Pose opening_mechanism_pose;
-        /**
-         * The visual transform to parent of the door hardware
-         */
-        geometry_msgs::msg::dds::Transform opening_mechanism_visual_transform_to_object_pose;
         /**
          * The planar region we assume is the door panel
          */

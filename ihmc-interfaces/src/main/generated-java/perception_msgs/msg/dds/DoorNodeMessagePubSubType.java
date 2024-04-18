@@ -15,7 +15,7 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "520003a246da435d4862dd81925e34accd89b4daf73c6bfe3ed1146567320523";
+   		return "10f0b69de6fd26a6fcd74e39ce63cbe7a1e9404f89a9d708f65952a59343939f";
    }
    
    @Override
@@ -58,8 +58,6 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getMaxCdrSerializedSize(current_alignment);
-
       current_alignment += perception_msgs.msg.dds.PlanarRegionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -84,8 +82,6 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getOpeningMechanismPose(), current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getCdrSerializedSize(data.getOpeningMechanismVisualTransformToObjectPose(), current_alignment);
-
       current_alignment += perception_msgs.msg.dds.PlanarRegionMessagePubSubType.getCdrSerializedSize(data.getDoorPlanarRegion(), current_alignment);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -101,7 +97,6 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
       cdr.write_type_9(data.getOpeningMechanismType());
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getOpeningMechanismPose(), cdr);
-      geometry_msgs.msg.dds.TransformPubSubType.write(data.getOpeningMechanismVisualTransformToObjectPose(), cdr);
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.write(data.getDoorPlanarRegion(), cdr);
       cdr.write_type_12(data.getDoorPlanarRegionUpdateTimeMillis());
 
@@ -113,7 +108,6 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
       data.setOpeningMechanismType(cdr.read_type_9());
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getOpeningMechanismPose(), cdr);	
-      geometry_msgs.msg.dds.TransformPubSubType.read(data.getOpeningMechanismVisualTransformToObjectPose(), cdr);	
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.read(data.getDoorPlanarRegion(), cdr);	
       data.setDoorPlanarRegionUpdateTimeMillis(cdr.read_type_12());
       	
@@ -128,8 +122,6 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
       ser.write_type_9("opening_mechanism_type", data.getOpeningMechanismType());
       ser.write_type_a("opening_mechanism_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getOpeningMechanismPose());
 
-      ser.write_type_a("opening_mechanism_visual_transform_to_object_pose", new geometry_msgs.msg.dds.TransformPubSubType(), data.getOpeningMechanismVisualTransformToObjectPose());
-
       ser.write_type_a("door_planar_region", new perception_msgs.msg.dds.PlanarRegionMessagePubSubType(), data.getDoorPlanarRegion());
 
       ser.write_type_12("door_planar_region_update_time_millis", data.getDoorPlanarRegionUpdateTimeMillis());
@@ -142,8 +134,6 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
 
       data.setOpeningMechanismType(ser.read_type_9("opening_mechanism_type"));
       ser.read_type_a("opening_mechanism_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getOpeningMechanismPose());
-
-      ser.read_type_a("opening_mechanism_visual_transform_to_object_pose", new geometry_msgs.msg.dds.TransformPubSubType(), data.getOpeningMechanismVisualTransformToObjectPose());
 
       ser.read_type_a("door_planar_region", new perception_msgs.msg.dds.PlanarRegionMessagePubSubType(), data.getDoorPlanarRegion());
 
