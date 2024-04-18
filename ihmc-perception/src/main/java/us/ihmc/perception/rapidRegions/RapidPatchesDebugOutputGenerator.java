@@ -23,6 +23,8 @@ import static org.bytedeco.opencv.global.opencv_highgui.waitKeyEx;
 
 public class RapidPatchesDebugOutputGenerator
 {
+   private final int DEBUG_SIZE = 800;
+
    private boolean enabled = false;
    private boolean showPointCloud = false;
 
@@ -246,7 +248,7 @@ public class RapidPatchesDebugOutputGenerator
       //      constructCentroidSurfelCloud(patchFeatureGrid.getCxImage(), patchFeatureGrid.getCyImage(), patchFeatureGrid.getCzImage(), patchFeatureGrid.getNxImage(),
 //                                   patchFeatureGrid.getNyImage(), patchFeatureGrid.getNzImage());
 
-      PerceptionDebugTools.displayDepth("Depth", inputDepthImage, 1, 1200);
+      PerceptionDebugTools.displayDepth("Depth", inputDepthImage, 1, DEBUG_SIZE);
       showDebugImage(1);
    }
 
@@ -272,7 +274,7 @@ public class RapidPatchesDebugOutputGenerator
       if (!enabled)
          return;
 
-      PerceptionDebugTools.display("Debug Output", debugImage, delay, 1200);
+      PerceptionDebugTools.display("Debug Output", debugImage, delay, DEBUG_SIZE);
    }
 
    public Mat getDebugImage()
