@@ -6,7 +6,7 @@ import org.bytedeco.opencv.global.opencv_imgcodecs;
 import perception_msgs.msg.dds.ImageMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.MessageTools;
@@ -17,7 +17,6 @@ import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
@@ -31,8 +30,8 @@ import java.util.function.Supplier;
 public class OusterDepthPublisher
 {
    private final RealtimeROS2Node realtimeROS2Node;
-   private final IHMCRealtimeROS2Publisher<ImageMessage> imagePublisher;
-   private final IHMCRealtimeROS2Publisher<LidarScanMessage> lidarScanPublisher;
+   private final ROS2PublisherBasics<ImageMessage> imagePublisher;
+   private final ROS2PublisherBasics<LidarScanMessage> lidarScanPublisher;
 
    private final FramePose3D cameraPose = new FramePose3D();
    private IntPointer compressionParameters;
@@ -55,12 +54,12 @@ public class OusterDepthPublisher
       realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.FAST_RTPS, "ouster_depth_publisher");
 
       LogTools.info("Publishing ROS 2 ImageMessage: {}", imageMessageTopic);
-      imagePublisher = ROS2Tools.createPublisher(realtimeROS2Node, imageMessageTopic, ROS2QosProfile.BEST_EFFORT());
+      imagePublisher = realtimeROS2Node.createPublisher(imageMessageTopic);
 
       if (lidarScanTopic != null)
       {
          LogTools.info("Publishing ROS 2 LidarScanMessage: {}", lidarScanTopic);
-         lidarScanPublisher = ROS2Tools.createPublisher(realtimeROS2Node, lidarScanTopic, ROS2QosProfile.BEST_EFFORT());
+         lidarScanPublisher = realtimeROS2Node.createPublisher(lidarScanTopic);
       }
       else
       {

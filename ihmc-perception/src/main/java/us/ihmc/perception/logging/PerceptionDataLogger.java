@@ -12,6 +12,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -25,7 +26,6 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
 
@@ -262,7 +262,7 @@ public class PerceptionDataLogger
       // Add callback for Robot Configuration Data
       if (channels.get(PerceptionLoggerConstants.ROBOT_CONFIGURATION_DATA_NAME).isEnabled())
       {
-         var robotConfigurationDataSubscription = ros2Helper.subscribe(ROS2Tools.getRobotConfigurationDataTopic(simpleRobotName));
+         var robotConfigurationDataSubscription = ros2Helper.subscribe(StateEstimatorAPI.getRobotConfigurationDataTopic(simpleRobotName));
          robotConfigurationDataSubscription.addCallback(this::logRobotConfigurationData);
          runnablesToStopLogging.addLast(robotConfigurationDataSubscription::destroy);
       }
@@ -317,7 +317,7 @@ public class PerceptionDataLogger
       {
          SampleInfo sampleInfo = new SampleInfo();
          byteArrays.put(PerceptionLoggerConstants.OUSTER_DEPTH_NAME, new byte[PerceptionLoggerConstants.FLOAT_BUFFER_SIZE]);
-         ROS2Tools.createCallbackSubscription(realtimeROS2Node, PerceptionAPI.OUSTER_DEPTH_IMAGE, ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
+         realtimeROS2Node.createSubscription(PerceptionAPI.OUSTER_DEPTH_IMAGE, (subscriber) ->
          {
             LogTools.info("Depth Map Received");
 
@@ -332,7 +332,7 @@ public class PerceptionDataLogger
       LogTools.info("MoCap Logging Enabled: " + channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled());
       if (channels.get(PerceptionLoggerConstants.MOCAP_RIGID_BODY_POSITION).isEnabled())
       {
-         ROS2Tools.createCallbackSubscription(realtimeROS2Node, PerceptionAPI.MOCAP_RIGID_BODY, ROS2QosProfile.BEST_EFFORT(), (subscriber) ->
+         realtimeROS2Node.createSubscription(PerceptionAPI.MOCAP_RIGID_BODY, (subscriber) ->
          {
             Pose3D transformMessage = new Pose3D();
             subscriber.takeNextData(transformMessage, new SampleInfo());

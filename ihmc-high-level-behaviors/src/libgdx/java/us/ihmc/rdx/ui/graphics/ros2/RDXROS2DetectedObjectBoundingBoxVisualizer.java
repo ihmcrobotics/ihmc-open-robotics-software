@@ -13,7 +13,7 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import perception_msgs.msg.dds.DetectedObjectPacket;
-import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -40,7 +40,7 @@ import java.util.Set;
 public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXVisualizer
 {
    private final ROS2Topic<DetectedObjectPacket> topic;
-   private final IHMCROS2Input<DetectedObjectPacket> subscription;
+   private final ROS2Input<DetectedObjectPacket> subscription;
    private final RDXFocusBasedCamera camera;
    private ModelInstance markerModelInstance;
    private final MeshDataBuilder meshDataBuilder = new MeshDataBuilder();

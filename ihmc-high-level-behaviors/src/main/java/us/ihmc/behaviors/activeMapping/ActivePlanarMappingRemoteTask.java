@@ -5,7 +5,7 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
@@ -48,9 +48,9 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
 
       this.walkingStatusMessage.get().setWalkingStatus(WalkingStatus.COMPLETED.toByte());
       this.terrainPlanningDebugger = new TerrainPlanningDebugger(ros2Node, null);
-      this.controllerFootstepDataTopic = ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
       this.continuousPlanningParameters = continuousPlanningParameters;
-      swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
+      this.swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
+      this.controllerFootstepDataTopic = HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
 
       continuousPlanner = new ContinuousPlannerForPlanarRegions(referenceFrames);
       publisherMap = new ROS2PublisherMap(ros2Node);
@@ -58,7 +58,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
       ros2Helper.subscribeViaCallback(terrainRegionsTopic, this::onPlanarRegionsReceived);
       //ros2Helper.subscribeViaCallback(PerceptionAPI.OUSTER_DEPTH_IMAGE, this::onOusterDepthReceived);
 
-      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingStatusMessage.class, robotModel.getSimpleRobotName()), this::walkingStatusReceived);
+      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, robotModel.getSimpleRobotName()), this::walkingStatusReceived);
 
       executorService.scheduleAtFixedRate(this::updateActiveMappingPlan, 0, PLANNING_PERIOD_MS, TimeUnit.MILLISECONDS);
       executorService.scheduleAtFixedRate(this::generalUpdate, 0, UPDATE_PERIOD_MS, TimeUnit.MILLISECONDS);

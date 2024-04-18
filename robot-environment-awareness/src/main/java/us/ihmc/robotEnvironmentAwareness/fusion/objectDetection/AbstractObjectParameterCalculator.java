@@ -8,7 +8,7 @@ import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.msg.dds.RegionOfInterest;
 import us.ihmc.commons.MathTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
@@ -28,14 +28,14 @@ public abstract class AbstractObjectParameterCalculator<T extends Packet<?>>
    protected final RegionOfInterest objectROI = new RegionOfInterest();
 
    private final Class<T> messageType;
-   private final IHMCROS2Publisher<T> packetPublisher;
+   private final ROS2PublisherBasics<T> packetPublisher;
    protected final AtomicReference<T> newPacket = new AtomicReference<>(null);
 
    public AbstractObjectParameterCalculator(ROS2Node ros2Node, Class<T> messageType)
    {
       this.messageType = messageType;
       pointCloudToCalculate = new ArrayList<Point3DBasics>();
-      packetPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, messageType, ROS2Tools.IHMC_ROOT);
+      packetPublisher = ros2Node.createPublisher(ROS2Tools.IHMC_ROOT.withTypeName(messageType));
       newPacket.set(ROS2TopicNameTools.newMessageInstance(messageType));
    }
 
