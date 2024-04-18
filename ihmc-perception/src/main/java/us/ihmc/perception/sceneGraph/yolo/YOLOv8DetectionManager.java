@@ -19,6 +19,7 @@ import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.tools.time.FrequencyCalculator;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -55,6 +56,8 @@ public class YOLOv8DetectionManager
    private float yoloSegmentationThreshold = 0.0f;
    private float candidateAcceptanceThreshold = 0.6f;
 
+   private final Set<YOLOv8DetectionClass> targetDetections = new HashSet<>();
+
    private ReferenceFrame robotFrame = null;
 
    private boolean destroyed = false;
@@ -73,6 +76,10 @@ public class YOLOv8DetectionManager
          yoloNMSThreshold = parametersMessage.getNonMaximumSuppressionThreshold();
          yoloSegmentationThreshold = parametersMessage.getSegmentationThreshold();
          candidateAcceptanceThreshold = parametersMessage.getCandidateAcceptanceThreshold();
+
+         targetDetections.clear();
+         for (int i = 0; i < parametersMessage.getTargetDetectionClasses().size(); ++i)
+            targetDetections.add(YOLOv8DetectionClass.fromByte(parametersMessage.getTargetDetectionClasses().get(i)));
       });
    }
 
@@ -173,7 +180,7 @@ public class YOLOv8DetectionManager
       YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImage, yoloConfidenceThreshold, yoloNMSThreshold);
 
       // Extract stuff from the results
-      Map<YOLOv8Detection, RawImage> objectMasks = yoloResults.getSegmentationImages(yoloSegmentationThreshold);
+      Map<YOLOv8Detection, RawImage> objectMasks = yoloResults.getTargetSegmentationImages(yoloSegmentationThreshold, targetDetections);
       Set<YOLOv8Detection> newDetections = yoloResults.getDetections();
 
       // match new detections to existing detections

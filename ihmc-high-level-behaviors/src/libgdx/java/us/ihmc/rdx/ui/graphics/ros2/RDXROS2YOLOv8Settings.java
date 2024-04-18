@@ -3,11 +3,17 @@ package us.ihmc.rdx.ui.graphics.ros2;
 import imgui.ImGui;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
+import org.apache.commons.lang.ArrayUtils;
 import perception_msgs.msg.dds.YOLOv8ParametersMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 public class RDXROS2YOLOv8Settings extends RDXVisualizer
 {
@@ -20,6 +26,8 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
    private final ImFloat maskThreshold = new ImFloat(0.0f);
    private final ImFloat candidateAcceptanceThreshold = new ImFloat(0.6f);
    private final ImInt selectedSensor = new ImInt(0); // 0 = ZED, 1 = Realsense
+
+   private final Set<YOLOv8DetectionClass> targetDetections = new HashSet<>();
 
    private final ROS2Heartbeat demandYOLOv8ICPZed;
    private final ROS2Heartbeat demandYOLOv8ICPRealsense;
@@ -54,6 +62,36 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
       if (ImGui.sliderFloat("candidateAcceptanceThreshold", candidateAcceptanceThreshold.getData(), 0.0f, 1.0f))
          parameterChanged = true;
 
+      if (ImGui.collapsingHeader("Target Detection Classes"))
+      {
+         if (ImGui.button("Select All"))
+         {
+            targetDetections.addAll(Arrays.asList(YOLOv8DetectionClass.values()));
+            parameterChanged = true;
+         }
+         ImGui.sameLine();
+         if (ImGui.button("Unselect All"))
+         {
+            targetDetections.clear();
+            parameterChanged = true;
+         }
+
+         ImGui.indent();
+         for (YOLOv8DetectionClass detectionClass : YOLOv8DetectionClass.values())
+         {
+            if (ImGui.checkbox(detectionClass.toString(), targetDetections.contains(detectionClass)))
+            {
+               if (targetDetections.contains(detectionClass))
+                  targetDetections.remove(detectionClass);
+               else
+                  targetDetections.add(detectionClass);
+
+               parameterChanged = true;
+            }
+         }
+         ImGui.unindent();
+      }
+
       if (parameterChanged)
       {
          YOLOv8ParametersMessage message = new YOLOv8ParametersMessage();
@@ -61,6 +99,12 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
          message.setNonMaximumSuppressionThreshold(nmsThreshold.get());
          message.setSegmentationThreshold(maskThreshold.get());
          message.setCandidateAcceptanceThreshold(candidateAcceptanceThreshold.get());
+
+         // Conversion of Set<YOLOv8DetectionClass> -> Stream<byte> -> Byte[] -> byte[]
+         byte[] targetDetectionArray = ArrayUtils.toPrimitive(targetDetections.stream().map(YOLOv8DetectionClass::toByte).toArray(Byte[]::new));
+         message.getTargetDetectionClasses().clear();
+         message.getTargetDetectionClasses().addAll(targetDetectionArray);
+
          ros2.publish(PerceptionAPI.YOLO_PARAMETERS, message);
       }
    }
