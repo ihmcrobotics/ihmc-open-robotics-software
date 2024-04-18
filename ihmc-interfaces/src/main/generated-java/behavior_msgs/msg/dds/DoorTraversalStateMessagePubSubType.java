@@ -15,7 +15,7 @@ public class DoorTraversalStateMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b5fc645714f37f0eead27ba3b2043e6e78c456658cc5a35a211769d5b697a12a";
+   		return "2cc7acded398adae489c38e0a4a6c3ea11d63145301af8de4a7bbdf1acf237dd";
    }
    
    @Override
@@ -56,7 +56,9 @@ public class DoorTraversalStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += behavior_msgs.msg.dds.DoorTraversalDefinitionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       return current_alignment - initial_alignment;
@@ -75,7 +77,10 @@ public class DoorTraversalStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       current_alignment += behavior_msgs.msg.dds.DoorTraversalDefinitionMessagePubSubType.getCdrSerializedSize(data.getDefinition(), current_alignment);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
 
@@ -86,7 +91,9 @@ public class DoorTraversalStateMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.write(data.getState(), cdr);
       behavior_msgs.msg.dds.DoorTraversalDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
-      cdr.write_type_7(data.getRetryingPullDoorNotification());
+      cdr.write_type_6(data.getDoorHingeJointAngle());
+
+      cdr.write_type_6(data.getDoorHandleDistanceFromStart());
 
    }
 
@@ -94,7 +101,9 @@ public class DoorTraversalStateMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.read(data.getState(), cdr);	
       behavior_msgs.msg.dds.DoorTraversalDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
-      data.setRetryingPullDoorNotification(cdr.read_type_7());
+      data.setDoorHingeJointAngle(cdr.read_type_6());
+      	
+      data.setDoorHandleDistanceFromStart(cdr.read_type_6());
       	
 
    }
@@ -106,7 +115,8 @@ public class DoorTraversalStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       ser.write_type_a("definition", new behavior_msgs.msg.dds.DoorTraversalDefinitionMessagePubSubType(), data.getDefinition());
 
-      ser.write_type_7("retrying_pull_door_notification", data.getRetryingPullDoorNotification());
+      ser.write_type_6("door_hinge_joint_angle", data.getDoorHingeJointAngle());
+      ser.write_type_6("door_handle_distance_from_start", data.getDoorHandleDistanceFromStart());
    }
 
    @Override
@@ -116,7 +126,8 @@ public class DoorTraversalStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       ser.read_type_a("definition", new behavior_msgs.msg.dds.DoorTraversalDefinitionMessagePubSubType(), data.getDefinition());
 
-      data.setRetryingPullDoorNotification(ser.read_type_7("retrying_pull_door_notification"));
+      data.setDoorHingeJointAngle(ser.read_type_6("door_hinge_joint_angle"));
+      data.setDoorHandleDistanceFromStart(ser.read_type_6("door_handle_distance_from_start"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.DoorTraversalStateMessage src, behavior_msgs.msg.dds.DoorTraversalStateMessage dest)

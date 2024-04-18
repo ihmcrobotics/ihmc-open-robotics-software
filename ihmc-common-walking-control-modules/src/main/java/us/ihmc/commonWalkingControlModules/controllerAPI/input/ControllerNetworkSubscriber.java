@@ -10,8 +10,8 @@ import controller_msgs.msg.dds.InvalidPacketNotificationPacket;
 import ihmc_common_msgs.msg.dds.MessageCollection;
 import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -21,7 +21,6 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
 
@@ -58,7 +57,7 @@ public class ControllerNetworkSubscriber
     * Local buffers for each message to ensure proper copying from the controller thread to the
     * communication thread.
     */
-   private final Map<Class<? extends Settable<?>>, IHMCROS2Publisher<?>> statusMessagePublisherMap = new HashMap<>();
+   private final Map<Class<? extends Settable<?>>, ROS2PublisherBasics<?>> statusMessagePublisherMap = new HashMap<>();
 
    private final ROS2NodeInterface ros2Node;
 
@@ -95,26 +94,9 @@ public class ControllerNetworkSubscriber
                                                                             int expectedMessageSize,
                                                                             MessageUnpacker<T> messageUnpacker)
    {
-      registerSubcriberWithMessageUnpacker(multipleMessageType, inputTopic, expectedMessageSize, messageUnpacker);
-   }
-
-   public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
-                                                                            ROS2Topic<?> inputTopic,
-                                                                            int expectedMessageSize,
-                                                                            MessageUnpacker<T> messageUnpacker)
-   {
-      registerSubcriberWithMessageUnpacker(multipleMessageType, inputTopic, null, expectedMessageSize, messageUnpacker);
-   }
-
-   public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
-                                                                            ROS2Topic<?> inputTopic,
-                                                                            ROS2QosProfile qosProfile,
-                                                                            int expectedMessageSize,
-                                                                            MessageUnpacker<T> messageUnpacker)
-   {
       final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
-      ROS2Topic<T> topicName = inputTopic.withTypeName(multipleMessageType);
+      ROS2Topic<T> topic = inputTopic.withTypeName(multipleMessageType).withQoS(ControllerAPI.getQoS(multipleMessageType));
       try
       {
          T localInstance = multipleMessageType.newInstance();
@@ -124,19 +106,7 @@ public class ControllerNetworkSubscriber
             unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, localInstance);
          };
 
-         if (qosProfile == null)
-         {
-            ROS2Tools.createCallbackSubscription(ros2Node, multipleMessageType, topicName, messageListener);
-         }
-         else
-         {
-            ROS2Tools.createCallbackSubscription(ros2Node,
-                                                 multipleMessageType,
-                                                 topicName.toString(),
-                                                 messageListener,
-                                                 qosProfile,
-                                                 ROS2Tools.RUNTIME_EXCEPTION);
-         }
+         ros2Node.createSubscription(topic, messageListener);
       }
       catch (InstantiationException | IllegalAccessException e)
       {
@@ -179,7 +149,7 @@ public class ControllerNetworkSubscriber
 
    public void addMessageCollectors(MessageIDExtractor messageIDExtractor, int numberOfSimultaneousCollectionsToSupport)
    {
-      IHMCROS2Publisher<MessageCollectionNotification> publisher = createPublisher(MessageCollectionNotification.class);
+      ROS2PublisherBasics<MessageCollectionNotification> publisher = createPublisher(MessageCollectionNotification.class);
       listOfSupportedStatusMessages.add(MessageCollectionNotification.class);
 
       for (int i = 0; i < numberOfSimultaneousCollectionsToSupport; i++)
@@ -190,7 +160,7 @@ public class ControllerNetworkSubscriber
       MessageCollection messageCollection = new MessageCollection();
 
       ROS2Topic<MessageCollection> topicName = inputTopic.withTypeName(MessageCollection.class);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, MessageCollection.class, topicName, s ->
+      ros2Node.createSubscription(topicName.withTypeName(MessageCollection.class), s ->
       {
          s.takeNextData(messageCollection, null);
 
@@ -244,7 +214,7 @@ public class ControllerNetworkSubscriber
          T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
          ROS2Topic<?> topicName = inputTopic.withTypeName(messageClass);
 
-         ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, messageClass, topicName, s ->
+         ros2Node.createSubscription(topicName.withTypeName(messageClass), s ->
          {
             s.takeNextData(messageLocalInstance, null);
             receivedMessage(messageLocalInstance);
@@ -252,10 +222,10 @@ public class ControllerNetworkSubscriber
       }
    }
 
-   private <T extends Settable<T>> IHMCROS2Publisher<T> createPublisher(Class<T> messageClass)
+   private <T extends Settable<T>> ROS2PublisherBasics<T> createPublisher(Class<T> messageClass)
    {
       ROS2Topic<T> topicName = outputTopic.withTypeName(messageClass);
-      IHMCROS2Publisher<T> publisher = ROS2Tools.createPublisherTypeNamed(ros2Node, messageClass, topicName);
+      ROS2PublisherBasics<T> publisher = ros2Node.createPublisher(topicName.withTypeName(messageClass));
       return publisher;
    }
 
@@ -328,7 +298,7 @@ public class ControllerNetworkSubscriber
    @SuppressWarnings("unchecked")
    private <T> void publishStatusMessage(T message)
    {
-      IHMCROS2Publisher<T> publisher = (IHMCROS2Publisher<T>) statusMessagePublisherMap.get(message.getClass());
+      ROS2PublisherBasics<T> publisher = (ROS2PublisherBasics<T>) statusMessagePublisherMap.get(message.getClass());
       publisher.publish(message);
    }
 

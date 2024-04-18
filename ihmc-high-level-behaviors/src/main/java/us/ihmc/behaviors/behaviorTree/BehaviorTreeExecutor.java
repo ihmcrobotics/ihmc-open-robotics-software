@@ -8,6 +8,7 @@ import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeExtensionSubtreeRebuilder;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 
 public class BehaviorTreeExecutor
@@ -22,9 +23,11 @@ public class BehaviorTreeExecutor
    public BehaviorTreeExecutor(DRCRobotModel robotModel,
                                ROS2SyncedRobotModel syncedRobot,
                                ReferenceFrameLibrary referenceFrameLibrary,
+                               SceneGraph sceneGraph,
                                ROS2ControllerHelper ros2ControllerHelper)
    {
       nodeBuilder = new BehaviorTreeExecutorNodeBuilder(robotModel, ros2ControllerHelper, syncedRobot, referenceFrameLibrary, latestStandingRobotConfiguration);
+      nodeBuilder = new BehaviorTreeExecutorNodeBuilder(robotModel, ros2ControllerHelper, syncedRobot, referenceFrameLibrary, sceneGraph);
       treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode, crdtInfo);
 
       behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, crdtInfo, null);

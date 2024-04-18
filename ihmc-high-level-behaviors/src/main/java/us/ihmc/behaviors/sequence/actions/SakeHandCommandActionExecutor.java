@@ -7,9 +7,8 @@ import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.JointspaceTrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.SakeHandAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -85,7 +84,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       trackingCalculator.addJointData(x2KnuckleJoints.get(definition.getSide()).getQ(), goalKnuckleJointAngle);
       trackingCalculator.applyTolerance(definition.getInitialSatisfactionHandAngleTolerance());
 
-      LogTools.info("x1: %.2f%s  x2: %.2f%s  Goal open angle: %.2f%s Error: %.2f%s"
+      state.getLogger().info("x1: %.2f%s  x2: %.2f%s  Goal open angle: %.2f%s Error: %.2f%s"
                           .formatted(Math.toDegrees(x1KnuckleJoints.get(definition.getSide()).getQ()),
                                      EuclidCoreMissingTools.DEGREE_SYMBOL,
                                      Math.toDegrees(x2KnuckleJoints.get(definition.getSide()).getQ()),
@@ -97,7 +96,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
 
       if (trackingCalculator.isWithinPositionTolerance())
       {
-         LogTools.info("Gripper is already at the desired position. Proceeding to next action. (Error: %.2f)"
+         state.getLogger().info("Gripper is already at the desired position. Proceeding to next action. (Error: %.2f)"
                              .formatted(trackingCalculator.getTotalAbsolutePositionError()));
          state.setNominalExecutionDuration(0.0);
          state.setPositionDistanceToGoalTolerance(definition.getInitialSatisfactionHandAngleTolerance());
@@ -109,9 +108,9 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
          sakeHandDesiredCommandMessage.setNormalizedGripperDesiredPosition(SakeHandParameters.normalizeHandOpenAngle(definition.getHandOpenAngle()));
          sakeHandDesiredCommandMessage.setNormalizedGripperTorqueLimit(
                                                        SakeHandParameters.normalizeFingertipGripForceLimit(definition.getFingertipGripForceLimit()));
-         ros2ControllerHelper.publish(robotName -> ROS2Tools.getHandSakeCommandTopic(robotName, definition.getSide()), sakeHandDesiredCommandMessage);
+         ros2ControllerHelper.publish(robotName -> SakeHandAPI.getHandSakeCommandTopic(robotName, definition.getSide()), sakeHandDesiredCommandMessage);
 
-         LogTools.info("Commanding hand to open angle %.2f%s with torque limit %.2f N".formatted(Math.toDegrees(definition.getHandOpenAngle()),
+         state.getLogger().info("Commanding hand to open angle %.2f%s with torque limit %.2f N".formatted(Math.toDegrees(definition.getHandOpenAngle()),
                                                                                                  EuclidCoreMissingTools.DEGREE_SYMBOL,
                                                                                                  definition.getFingertipGripForceLimit()));
 
@@ -138,7 +137,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       {
          state.setFailed(true);
          state.setIsExecuting(false);
-         LogTools.error("Task execution timed out.");
+         state.getLogger().error("Task execution timed out.");
       }
       else if (!state.getCommandedJointTrajectories().isEmpty())
       {

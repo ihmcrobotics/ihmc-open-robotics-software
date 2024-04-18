@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import perception_msgs.msg.dds.DoorLocationPacket;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -17,8 +17,8 @@ public class TestDoorOpenBehaviorService extends AbstractBehavior
    private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
  //  private final FiducialDetectorBehaviorService fiducialDetectorBehaviorService;
 
-   private IHMCROS2Publisher<DoorLocationPacket> doorToBehaviorPublisher;
-   private IHMCROS2Publisher<DoorLocationPacket> doorToUIPublisher;
+   private ROS2PublisherBasics<DoorLocationPacket> doorToBehaviorPublisher;
+   private ROS2PublisherBasics<DoorLocationPacket> doorToUIPublisher;
 
    public TestDoorOpenBehaviorService(String robotName, String yoNamePrefix, ROS2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {

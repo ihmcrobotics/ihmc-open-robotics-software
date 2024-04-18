@@ -49,6 +49,8 @@ public class HandWrenchActionExecutor extends ActionNodeExecutor<HandWrenchActio
    {
       super.triggerActionExecution();
 
+      state.getLogger().info("Executing hand trajectory command.");
+
       HandWrenchTrajectoryMessage handWrenchTrajectoryMessage = new HandWrenchTrajectoryMessage();
       handWrenchTrajectoryMessage.setRobotSide(getDefinition().getSide().toByte());
       handWrenchTrajectoryMessage.setForceExecution(true);

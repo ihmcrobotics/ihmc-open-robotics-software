@@ -4,11 +4,10 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -19,7 +18,6 @@ import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.perception.gpuHeightMap.HeightMapKernel;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParametersBasics;
@@ -53,14 +51,16 @@ public class RemoteHeightMapUpdater
    {
       this.ros2Node = ros2Node;
 
-      IHMCRealtimeROS2Publisher<HeightMapMessage> heightMapPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.HEIGHT_MAP_OUTPUT);
-      ROS2Tools.createCallbackSubscription(ros2Node, PerceptionAPI.HEIGHT_MAP_STATE_REQUEST, m -> consumeStateRequestMessage(m.readNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node, ControllerAPIDefinition.getTopic(WalkingStatusMessage.class, robotName), m -> consumeWalkingStatusMessage(m.readNextData()));
+      ROS2PublisherBasics<HeightMapMessage> heightMapPublisher = ros2Node.createPublisher(PerceptionAPI.HEIGHT_MAP_OUTPUT);
+      ros2Node.createSubscription(PerceptionAPI.HEIGHT_MAP_STATE_REQUEST, subscriber -> consumeStateRequestMessage(subscriber.readNextData()));
+      ros2Node.createSubscription(HumanoidControllerAPI.getTopic(WalkingStatusMessage.class, robotName),
+                                  subscriber -> consumeWalkingStatusMessage(subscriber.readNextData()));
 
       heightMapUpdater = new HeightMapUpdater();
       heightMapUpdater.attachHeightMapConsumer(heightMapPublisher::publish);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, PerceptionAPI.OUSTER_LIDAR_SCAN, ROS2QosProfile.BEST_EFFORT(), new NewMessageListener<LidarScanMessage>()
+      //            FramePose3D ousterPose = new FramePose3D(ReferenceFrame.getWorldFrame(), data.getLidarPosition(), data.getLidarOrientation());
+      ros2Node.createSubscription(PerceptionAPI.OUSTER_LIDAR_SCAN, new NewMessageListener<LidarScanMessage>()
       {
          @Override
          public void onNewDataMessage(Subscriber<LidarScanMessage> subscriber)

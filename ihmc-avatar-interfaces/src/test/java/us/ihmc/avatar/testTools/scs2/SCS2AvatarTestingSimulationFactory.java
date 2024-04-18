@@ -13,7 +13,8 @@ import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.ObjectConsumer;
@@ -37,7 +38,7 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
    private final ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "ihmc_simulation_test_helper");
 
    @SuppressWarnings("rawtypes")
-   private final Map<Class<?>, IHMCROS2Publisher> defaultControllerPublishers = new HashMap<>();
+   private final Map<Class<?>, ROS2PublisherBasics> defaultControllerPublishers = new HashMap<>();
 
    public static SCS2AvatarTestingSimulation createDefaultTestSimulation(DRCRobotModel robotModel, SimulationTestingParameters simulationTestingParameters)
    {
@@ -83,7 +84,7 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       for (Class<? extends Command<?, ?>> command : controllerSupportedCommands)
       {
          Class<?> messageClass = ROS2TopicNameTools.newMessageInstance(command).getMessageClass();
-         IHMCROS2Publisher<?> defaultPublisher = createPublisherForController(messageClass);
+         ROS2PublisherBasics<?> defaultPublisher = createPublisherForController(messageClass);
          defaultControllerPublishers.put(messageClass, defaultPublisher);
       }
 
@@ -92,7 +93,7 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       for (Class<? extends Command<?, ?>> command : stepGeneratorSupportedCommands)
       {
          Class<?> messageClass = ROS2TopicNameTools.newMessageInstance(command).getMessageClass();
-         IHMCROS2Publisher<?> defaultPublisher = createPublisherForController(messageClass);
+         ROS2PublisherBasics<?> defaultPublisher = createPublisherForController(messageClass);
          defaultControllerPublishers.put(messageClass, defaultPublisher);
       }
 
@@ -157,33 +158,33 @@ public class SCS2AvatarTestingSimulationFactory extends SCS2AvatarSimulationFact
       this.keepSCSUp.set(keepSCSUp);
    }
 
-   public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
+   public <T> ROS2PublisherBasics<T> createPublisherForController(Class<T> messageType)
    {
-      return createPublisher(messageType, ROS2Tools.getControllerInputTopic(robotModel.get().getSimpleRobotName()));
+      return createPublisher(messageType, HumanoidControllerAPI.getInputTopic(robotModel.get().getSimpleRobotName()));
    }
 
-   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic<?> generator)
+   public <T> ROS2PublisherBasics<T> createPublisher(Class<T> messageType, ROS2Topic<?> generator)
    {
-      return ROS2Tools.createPublisherTypeNamed(ros2Node, messageType, generator);
+      return ros2Node.createPublisher(generator.withTypeName(messageType));
    }
 
-   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, String topicName)
+   public <T> ROS2PublisherBasics<T> createPublisher(Class<T> messageType, String topicName)
    {
-      return ROS2Tools.createPublisher(ros2Node, messageType, topicName);
+      return ros2Node.createPublisher(messageType, topicName);
    }
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      createSubscriber(messageType, ROS2Tools.getControllerOutputTopic(robotModel.get().getSimpleRobotName()), consumer);
+      createSubscriber(messageType, HumanoidControllerAPI.getOutputTopic(robotModel.get().getSimpleRobotName()), consumer);
    }
 
    public <T> void createSubscriber(Class<T> messageType, ROS2Topic<?> generator, ObjectConsumer<T> consumer)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, messageType, generator, s -> consumer.consumeObject(s.takeNextData()));
+      ros2Node.createSubscription(generator.withTypeName(messageType), s -> consumer.consumeObject(s.takeNextData()));
    }
 
    public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
+      ros2Node.createSubscription(messageType, s -> consumer.consumeObject(s.takeNextData()), topicName);
    }
 }

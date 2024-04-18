@@ -40,7 +40,7 @@ public class RobotDefinitionLoader
 {
    public static final String DEFAULT_ROOT_BODY_NAME = "elevator";
 
-   public static RobotDefinition loadURDFModel(InputStream stream,
+   public static RobotDefinition loadURDFModel(InputStream inputStream,
                                                Collection<String> resourceDirectories,
                                                ClassLoader classLoader,
                                                String modelName,
@@ -48,7 +48,7 @@ public class RobotDefinitionLoader
                                                JointNameMap<?> jointNameMap,
                                                boolean removeCollisionMeshes)
    {
-      return loadURDFModel(stream,
+      return loadURDFModel(inputStream,
                            resourceDirectories,
                            classLoader,
                            modelName,
@@ -58,7 +58,7 @@ public class RobotDefinitionLoader
                            URDFTools.DEFAULT_URDF_PARSER_PROPERTIES);
    }
 
-   public static RobotDefinition loadURDFModel(InputStream stream,
+   public static RobotDefinition loadURDFModel(InputStream inputStream,
                                                Collection<String> resourceDirectories,
                                                ClassLoader classLoader,
                                                String modelName,
@@ -69,7 +69,7 @@ public class RobotDefinitionLoader
    {
       try
       {
-         URDFModel urdfRoot = URDFTools.loadURDFModel(stream, resourceDirectories, classLoader);
+         URDFModel urdfRoot = URDFTools.loadURDFModel(inputStream, resourceDirectories, classLoader);
          RobotDefinition robotDefinition = URDFTools.toRobotDefinition(urdfRoot, urdfParserProperties);
          // By default SDFTools names the root body "rootBody", for backward compatibility it is renamed "elevator".
          robotDefinition.getRootBodyDefinition().setName(DEFAULT_ROOT_BODY_NAME);

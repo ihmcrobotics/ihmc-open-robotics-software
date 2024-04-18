@@ -8,12 +8,11 @@ import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import us.ihmc.avatar.logging.PlanarRegionsListLogger;
 import us.ihmc.avatar.logging.PlanarRegionsReplayBuffer;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.StepGeneratorAPIDefinition;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -62,7 +61,7 @@ public class PlanarRegionMappingHandler
 
    private ROS2Node ros2Node = null;
    private ROS2Helper ros2Helper = null;
-   private IHMCROS2Publisher<PlanarRegionsListMessage> controllerRegionsPublisher;
+   private ROS2PublisherBasics<PlanarRegionsListMessage> controllerRegionsPublisher;
 
    private final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                         getClass(),
@@ -137,10 +136,10 @@ public class PlanarRegionMappingHandler
          this.ros2Helper = new ROS2Helper(ros2Node);
 
          launchMapper();
-         controllerRegionsPublisher = ROS2Tools.createPublisher(ros2Node, StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, simpleRobotName));
+         controllerRegionsPublisher = ros2Node.createPublisher(StepGeneratorAPIDefinition.getTopic(PlanarRegionsListMessage.class, simpleRobotName));
          ros2Helper.subscribeViaCallback(PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, latestIncomingRegions::set);
 
-         ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), message ->
+         ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, simpleRobotName), message ->
          {
             setEnableLiveMode(false);
             resetMap();

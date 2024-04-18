@@ -11,7 +11,7 @@ import org.bytedeco.zed.SL_CalibrationParameters;
 import org.bytedeco.zed.SL_InitParameters;
 import org.bytedeco.zed.SL_RuntimeParameters;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
@@ -29,7 +29,6 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
 import javax.annotation.Nullable;
@@ -68,8 +67,8 @@ public class ZEDColorStereoDepthPublisher
    private final ImageMessage depthImageMessage = new ImageMessage();
    private final AtomicReference<Instant> colorImageAcquisitionTime = new AtomicReference<>();
    private final AtomicReference<Instant> depthImageAcquisitionTime = new AtomicReference<>();
-   private final SideDependentList<IHMCROS2Publisher<ImageMessage>> ros2ColorImagePublishers;
-   private final IHMCROS2Publisher<ImageMessage> ros2DepthImagePublisher;
+   private final SideDependentList<ROS2PublisherBasics<ImageMessage>> ros2ColorImagePublishers;
+   private final ROS2PublisherBasics<ImageMessage> ros2DepthImagePublisher;
    private final ROS2Node ros2Node;
    private final CUDAImageEncoder imageEncoder;
    // Frame poses of left and right cameras of ZED. Depth is always in the left pose.
@@ -156,9 +155,9 @@ public class ZEDColorStereoDepthPublisher
 
       // Setup ROS stuff
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "zed2_node");
-      ros2ColorImagePublishers = new SideDependentList<>(ROS2Tools.createPublisher(ros2Node, colorTopics.get(RobotSide.LEFT), ROS2QosProfile.BEST_EFFORT()),
-                                                         ROS2Tools.createPublisher(ros2Node, colorTopics.get(RobotSide.RIGHT), ROS2QosProfile.BEST_EFFORT()));
-      ros2DepthImagePublisher = ROS2Tools.createPublisher(ros2Node, depthTopic, ROS2QosProfile.BEST_EFFORT());
+      ros2ColorImagePublishers = new SideDependentList<>(ros2Node.createPublisher(colorTopics.get(RobotSide.LEFT)),
+                                                         ros2Node.createPublisher(colorTopics.get(RobotSide.RIGHT)));
+      ros2DepthImagePublisher = ros2Node.createPublisher(depthTopic);
 
       // Setup other things
       imageEncoder = new CUDAImageEncoder();

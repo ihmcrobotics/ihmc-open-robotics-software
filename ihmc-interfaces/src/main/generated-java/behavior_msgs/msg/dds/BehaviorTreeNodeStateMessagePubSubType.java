@@ -15,7 +15,7 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "94587e6fbd64d5b22d3605f1e1a1a9b5534c6a54c9ee3ab75ec35a3cd882f824";
+   		return "95906c3a1ef0d62b6b3398195c9ddabe66933bcbe2fcdc7ee6ca18794ef1f995";
    }
    
    @Override
@@ -58,6 +58,9 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.BehaviorTreeLogMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -79,6 +82,11 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
 
       current_alignment += ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.getCdrSerializedSize(data.getConfirmableRequest(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getRecentLogMessages().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.BehaviorTreeLogMessagePubSubType.getCdrSerializedSize(data.getRecentLogMessages().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
@@ -90,6 +98,10 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
       cdr.write_type_7(data.getIsActive());
 
       ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.write(data.getConfirmableRequest(), cdr);
+      if(data.getRecentLogMessages().size() <= 50)
+      cdr.write_type_e(data.getRecentLogMessages());else
+          throw new RuntimeException("recent_log_messages field exceeds the maximum length");
+
    }
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage data, us.ihmc.idl.CDR cdr)
@@ -99,6 +111,7 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
       data.setIsActive(cdr.read_type_7());
       	
       ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.read(data.getConfirmableRequest(), cdr);	
+      cdr.read_type_e(data.getRecentLogMessages());	
 
    }
 
@@ -109,6 +122,7 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
       ser.write_type_7("is_active", data.getIsActive());
       ser.write_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
 
+      ser.write_type_e("recent_log_messages", data.getRecentLogMessages());
    }
 
    @Override
@@ -118,6 +132,7 @@ public class BehaviorTreeNodeStateMessagePubSubType implements us.ihmc.pubsub.To
       data.setIsActive(ser.read_type_7("is_active"));
       ser.read_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
 
+      ser.read_type_e("recent_log_messages", data.getRecentLogMessages());
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage src, behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage dest)

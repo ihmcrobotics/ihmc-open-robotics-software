@@ -8,6 +8,7 @@
 #include "perception_msgs/msg/./PrimitiveRigidBodySceneNodeMessage_.idl"
 #include "perception_msgs/msg/./SceneNodeMessage_.idl"
 #include "perception_msgs/msg/./StaticRelativeSceneNodeMessage_.idl"
+#include "perception_msgs/msg/./YOLOv8NodeMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -34,6 +35,9 @@ module perception_msgs
 
       const octet PRIMITIVE_RIGID_BODY_NODE_TYPE =
       6;
+
+      const octet YOLO_NODE_TYPE =
+      7;
 
 
       /**
@@ -87,6 +91,10 @@ module perception_msgs
          * Reshapable rigid body scene nodes
          */
         sequence<perception_msgs::msg::dds::PrimitiveRigidBodySceneNodeMessage, 200> primitive_rigid_body_scene_nodes;
+        /**
+         * YOLO scene nodes
+         */
+        sequence<perception_msgs::msg::dds::YOLOv8NodeMessage, 200> yolo_scene_nodes;
       };
     };
   };

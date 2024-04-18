@@ -6,6 +6,7 @@ import org.ros.message.Time;
 import sensor_msgs.PointCloud2;
 import std_msgs.Header;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -62,7 +63,8 @@ public class AtlasROS1MappingTopics
 
       AtomicReference<RobotConfigurationData> robotConfigurationDataHolder = new AtomicReference<>(new RobotConfigurationData());
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "atlas_topics2");
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic("Atlas"), s -> robotConfigurationDataHolder.set(s.takeNextData()));
+      ros2Node.createSubscription(HumanoidControllerAPI.getOutputTopic("Atlas").withTypeName(RobotConfigurationData.class),
+                                  s -> robotConfigurationDataHolder.set(s.takeNextData()));
 
       ros1Node.execute();
 

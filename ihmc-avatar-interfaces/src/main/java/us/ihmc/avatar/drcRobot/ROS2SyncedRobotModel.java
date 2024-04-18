@@ -3,7 +3,7 @@ package us.ihmc.avatar.drcRobot;
 import controller_msgs.msg.dds.HandJointAnglePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
@@ -29,8 +29,7 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
       super(robotModel, fullRobotModel, robotModel.getHandModels(), robotModel.getSensorInformation());
 
       robotConfigurationDataInput = new ROS2Input<>(ros2Node,
-                                                    RobotConfigurationData.class,
-                                                    ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
+                                                    StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
                                                     robotConfigurationData,
                                                     message ->
                                                     {
@@ -42,7 +41,7 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
       for (RobotSide robotSide : RobotSide.values)
       {
          handJointAnglePacketInputs.set(robotSide, new ROS2Input<>(ros2Node,
-                                                                   ROS2Tools.getHandJointAnglesTopic(robotModel.getSimpleRobotName()),
+                                                                   StateEstimatorAPI.getHandJointAnglesTopic(robotModel.getSimpleRobotName()),
                                                                    null,
                                                                    message -> robotSide.toByte() == message.getRobotSide()));
          sakeHandStatus.put(robotSide, new ROS2SakeHandStatus(ros2Node, robotModel.getSimpleRobotName(), robotSide));

@@ -11,13 +11,13 @@ import gnu.trove.list.array.TFloatArrayList;
 import scan_to_cloud.PointCloud2WithSource;
 import sensor_msgs.PointCloud2;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.perception.filters.CollidingScanPointFilter;
 import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.RangeScanPointFilter;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
@@ -60,7 +60,7 @@ public class LidarScanPublisher
 
    private RobotROSClockCalculator rosClockCalculator = null;
 
-   private final IHMCROS2Publisher<LidarScanMessage> lidarScanPublisher;
+   private final ROS2PublisherBasics<LidarScanMessage> lidarScanPublisher;
 
    private int maximumNumberOfPoints = DEFAULT_MAX_NUMBER_OF_POINTS;
    private RangeScanPointFilter rangeFilter = null;
@@ -72,7 +72,7 @@ public class LidarScanPublisher
 
    public LidarScanPublisher(String lidarName, FullRobotModelFactory modelFactory, ROS2NodeInterface ros2Node)
    {
-      this(lidarName, modelFactory, ros2Node, ROS2QosProfile.DEFAULT());
+      this(lidarName, modelFactory, ros2Node, ROS2QosProfile.RELIABLE());
    }
 
    public LidarScanPublisher(String lidarName, FullRobotModelFactory modelFactory, ROS2NodeInterface ros2Node, ROS2QosProfile qosProfile)
@@ -82,7 +82,7 @@ public class LidarScanPublisher
 
    public LidarScanPublisher(FullRobotModelFactory modelFactory, SensorFrameFactory sensorFrameFactory, ROS2NodeInterface ros2Node)
    {
-      this(modelFactory, sensorFrameFactory, ros2Node, ROS2QosProfile.DEFAULT());
+      this(modelFactory, sensorFrameFactory, ros2Node, ROS2QosProfile.RELIABLE());
    }
 
    public LidarScanPublisher(FullRobotModelFactory modelFactory, SensorFrameFactory sensorFrameFactory, ROS2NodeInterface ros2Node, ROS2QosProfile qosProfile)
@@ -92,7 +92,7 @@ public class LidarScanPublisher
 
    public LidarScanPublisher(String robotName, FullRobotModel fullRobotModel, SensorFrameFactory sensorFrameFactory, ROS2NodeInterface ros2Node)
    {
-      this(robotName, fullRobotModel, sensorFrameFactory, ros2Node, ROS2QosProfile.DEFAULT());
+      this(robotName, fullRobotModel, sensorFrameFactory, ros2Node, ROS2QosProfile.RELIABLE());
    }
 
    public LidarScanPublisher(String robotName,
@@ -105,10 +105,9 @@ public class LidarScanPublisher
       this.fullRobotModel = fullRobotModel;
       lidarSensorFrame = sensorFrameFactory.setupSensorFrame(fullRobotModel);
 
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           ROS2Tools.getRobotConfigurationDataTopic(robotName),
-                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-      lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, PerceptionAPI.MULTISENSE_LIDAR_SCAN, qosProfile);
+      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
+                                  s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+      lidarScanPublisher = ros2Node.createPublisher(PerceptionAPI.MULTISENSE_LIDAR_SCAN);
    }
 
    public void setMaximumNumberOfPoints(int maximumNumberOfPoints)

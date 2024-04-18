@@ -16,6 +16,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -32,16 +33,20 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
    private final WalkingControllerParameters walkingControllerParameters;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private RobotConfigurationData latestStandingRobotConfiguration;
+   private final SceneGraph sceneGraph;
 
    public BehaviorTreeExecutorNodeBuilder(DRCRobotModel robotModel,
                                           ROS2ControllerHelper ros2ControllerHelper,
                                           ROS2SyncedRobotModel syncedRobot,
                                           ReferenceFrameLibrary referenceFrameLibrary,
-                                          RobotConfigurationData latestStandingRobotConfiguration)
+                                          RobotConfigurationData latestStandingRobotConfiguration,
+                                          ReferenceFrameLibrary referenceFrameLibrary,
+                                          SceneGraph sceneGraph)
    {
       this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.referenceFrameLibrary = referenceFrameLibrary;
+      this.sceneGraph = sceneGraph;
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.latestStandingRobotConfiguration = latestStandingRobotConfiguration;
 
@@ -65,7 +70,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       }
       if (nodeType == DoorTraversalDefinition.class)
       {
-         return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory, syncedRobot);
+         return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
       }
       if (nodeType == ChestOrientationActionDefinition.class)
       {
@@ -81,7 +86,9 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
                                                controllerStatusTracker,
                                                referenceFrameLibrary,
                                                walkingControllerParameters,
-                                               footstepPlanner, footstepPlannerParameters, latestStandingRobotConfiguration);
+                                               footstepPlanner,
+                                               footstepPlannerParameters,
+                                               latestStandingRobotConfiguration);
       }
       if (nodeType == HandPoseActionDefinition.class)
       {

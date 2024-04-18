@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
-import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.TaskspaceTrajectoryTrackingErrorCalculator;
@@ -12,7 +11,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -27,7 +25,6 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
    private final FramePose3D desiredPelvisPose = new FramePose3D();
    private final FramePose3D syncedPelvisPose = new FramePose3D();
    private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
-   private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
 
    public PelvisHeightPitchActionExecutor(long id,
                                           CRDTInfo crdtInfo,
@@ -94,7 +91,7 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
       }
       else
       {
-         LogTools.error("Cannot execute. Frame is not a child of World frame.");
+         state.getLogger().error("Cannot execute. Frame is not a child of World frame.");
       }
    }
 
@@ -108,8 +105,7 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
       {
          state.setIsExecuting(false);
          state.setFailed(true);
-         LogTools.error("Task execution timed out. Publishing stop all trajectories message.");
-         ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+         state.getLogger().error("Task execution timed out.");
          return;
       }
 

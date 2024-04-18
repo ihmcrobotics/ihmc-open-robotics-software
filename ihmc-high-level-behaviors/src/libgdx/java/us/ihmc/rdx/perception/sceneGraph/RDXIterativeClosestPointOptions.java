@@ -13,8 +13,8 @@ import perception_msgs.msg.dds.DetectedObjectPacket;
 import perception_msgs.msg.dds.IterativeClosestPointRequest;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.communication.IHMCROS2Input;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2Input;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -38,8 +38,8 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
    private final RDXPrimitiveRigidBodySceneNode requestingNode;
    private final ROS2Node ros2Node;
    private final ROS2Helper ros2Helper;
-   private final IHMCROS2Publisher<IterativeClosestPointRequest> requestPublisher;
-   private final IHMCROS2Input<DetectedObjectPacket> resultSubscription;
+   private final ROS2PublisherBasics<IterativeClosestPointRequest> requestPublisher;
+   private final ROS2Input<DetectedObjectPacket> resultSubscription;
    private final RestartableThrottledThread updateThread;
 
    private final ImGuiUniqueLabelMap labels;
@@ -66,7 +66,7 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
       this.labels = labels;
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "primitive_scene_node_" + requestingNode.getSceneNode().getID());
       ros2Helper = new ROS2Helper(ros2Node);
-      requestPublisher = new IHMCROS2Publisher<>(ros2Node, PerceptionAPI.ICP_REQUEST);
+      requestPublisher = ros2Node.createPublisher(PerceptionAPI.ICP_REQUEST);
       resultSubscription = ros2Helper.subscribe(PerceptionAPI.ICP_RESULT, message -> message.getId() == requestingNode.getSceneNode().getID());
       objectPointCloudRenderer.create(ICP_MAX_POINTS);
       segmentationRenderer.create(ICP_MAX_POINTS);
@@ -183,7 +183,7 @@ public class RDXIterativeClosestPointOptions implements RenderableProvider
       segmentationRenderer.dispose();
       icpFrameGraphic.dispose();
 
-      requestPublisher.destroy();
+      requestPublisher.remove();
       ros2Node.destroy();
    }
 
