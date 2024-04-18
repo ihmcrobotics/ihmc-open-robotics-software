@@ -9,22 +9,24 @@ import javax.annotation.Nullable;
  */
 public enum YOLOv8DetectionClass
 {
-   DRILL(0, null, null),
-   DOOR_LEVER(1, null, null),
-   DOOR_KNOB(2, null, null),
-   DOOR_PUSH_BAR(3, null, null),
-   DOOR_PULL_HANDLE(4, null, null),
-   DOOR_PANEL(5, null, null);
+   DRILL(0, "YOLODrill", null, null),
+   DOOR_LEVER(1, "YOLODoorLever", null, null),
+   DOOR_KNOB(2, "YOLODoorKnob", null, null),
+   DOOR_PUSH_BAR(3, "YOLOPushBar", null, null),
+   DOOR_PULL_HANDLE(4, "YOLOPullHandle", null, null),
+   DOOR_PANEL(5, "YOLODoorPanel", null, null);
 
    private final int classID;
+   private final String defaultNodeName;
    @Nullable
    private final PrimitiveRigidBodyShape primitiveApproximation;
    @Nullable
    private final String pointCloudFileName;
 
-   YOLOv8DetectionClass(int classID, @Nullable PrimitiveRigidBodyShape primitiveApproximation, @Nullable String pointCloudFileName)
+   YOLOv8DetectionClass(int classID, String defaultNodeName, @Nullable PrimitiveRigidBodyShape primitiveApproximation, @Nullable String pointCloudFileName)
    {
       this.classID = classID;
+      this.defaultNodeName = defaultNodeName;
       this.primitiveApproximation = primitiveApproximation;
       this.pointCloudFileName = pointCloudFileName;
    }
@@ -49,6 +51,11 @@ public enum YOLOv8DetectionClass
    public int getClassID()
    {
       return classID;
+   }
+
+   public String getDefaultNodeName()
+   {
+      return defaultNodeName;
    }
 
    public byte toByte()

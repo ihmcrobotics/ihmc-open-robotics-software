@@ -77,8 +77,6 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      super.getRenderables(renderables, pool, sceneLevels);
-
       List<Point3D32> renderablePointCloud = yoloNode.getObjectPointCloud();
       objectPointCloudRenderer.setPointsToRender(renderablePointCloud, Color.GREEN);
       objectPointCloudRenderer.updateMesh();

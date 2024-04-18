@@ -10,6 +10,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
+import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -26,11 +27,16 @@ public class RDXDoorNode extends RDXSceneNode
 {
    private final DoorNode doorNode;
    private final ImGuiUniqueLabelMap labels;
+
+   // Door opening mechanism
    @Nullable
-   private RDXInteractableObject interactableObject;
-   private final RigidBodyTransform visualModelTransformToWorld = new RigidBodyTransform();
-   private final RDXPlanarRegionsGraphic doorPlanarRegionGraphic = new RDXPlanarRegionsGraphic();
+   private RDXInteractableObject doorOpeningMechanismInteractable;
+   private final RigidBodyTransform doorOpeningMechanismVisualModelTransform = new RigidBodyTransform();
    private final RDXReferenceFrameGraphic doorOpeningMechanismFrameGraphic = new RDXReferenceFrameGraphic(0.2);
+//   private final ImGuiFlashingText doorOpeningMechanismInteractableSelectedFlashingText = new ImGuiFlashingText();
+
+   // Door planar region
+   private final RDXPlanarRegionsGraphic doorPlanarRegionGraphic = new RDXPlanarRegionsGraphic();
 
    public RDXDoorNode(DoorNode yoloDoorNode, ImGuiUniqueLabelMap labels)
    {
@@ -51,28 +57,35 @@ public class RDXDoorNode extends RDXSceneNode
       doorPlanarRegionGraphic.generateMeshes(new PlanarRegionsList(doorNode.getDoorPlanarRegion()));
       doorPlanarRegionGraphic.update();
 
-      if (interactableObject != null)
+      if (doorOpeningMechanismInteractable != null)
       {
-         visualModelTransformToWorld.set(doorNode.getOpeningMechanismPose3D());
-         LibGDXTools.setDiffuseColor(interactableObject.getModelInstance(), Color.WHITE); // TODO: keep?
-         interactableObject.setPose(visualModelTransformToWorld);
+         doorOpeningMechanismVisualModelTransform.set(doorNode.getOpeningMechanismPose3D());
+         LibGDXTools.setDiffuseColor(doorOpeningMechanismInteractable.getModelInstance(), Color.WHITE); // TODO: keep?
+         doorOpeningMechanismInteractable.setPose(doorOpeningMechanismVisualModelTransform);
       }
       else
       {
-         interactableObject = createInteractableObject();
+         doorOpeningMechanismInteractable = createInteractableObject();
       }
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (interactableObject != null)
-         interactableObject.getRenderables(renderables, pool);
+      if (doorOpeningMechanismInteractable != null && doorNode.getDoorPlanarRegion().getArea() > 0.0)
+      {
+         doorOpeningMechanismInteractable.getRenderables(renderables, pool);
+         doorPlanarRegionGraphic.getRenderables(renderables, pool);
 
-      doorPlanarRegionGraphic.getRenderables(renderables, pool);
-
-      doorOpeningMechanismFrameGraphic.setPoseInWorldFrame(doorNode.getOpeningMechanismPose3D());
-      doorOpeningMechanismFrameGraphic.getRenderables(renderables, pool);
+         // If the gizmo is NOT selected/enabled only then do we update the pose of the
+         // door opening mechanism interactable. We want the user to be able to move the interactable
+         // around if the gizmo is enabled
+         if (!doorOpeningMechanismInteractable.getSelectablePose3DGizmo().getSelected().get())
+         {
+            doorOpeningMechanismFrameGraphic.setPoseInWorldFrame(doorNode.getOpeningMechanismPose3D());
+            doorOpeningMechanismFrameGraphic.getRenderables(renderables, pool);
+         }
+      }
    }
 
    @Override
@@ -80,10 +93,15 @@ public class RDXDoorNode extends RDXSceneNode
    {
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
 
-      if (interactableObject != null)
+      if (doorOpeningMechanismInteractable != null)
       {
          ImGui.sameLine();
-         ImGui.checkbox(labels.get("Show gizmo"), interactableObject.getSelectablePose3DGizmo().getSelected());
+         ImGui.checkbox(labels.get("Show gizmo"), doorOpeningMechanismInteractable.getSelectablePose3DGizmo().getSelected());
+
+         if (doorOpeningMechanismInteractable.getSelectablePose3DGizmo().isSelected())
+         {
+            ImGui.text("Gizmo is enabled - the door opening mechanism pose will not update");
+         }
       }
 
       ImGui.text("Planar region info:");
@@ -102,10 +120,10 @@ public class RDXDoorNode extends RDXSceneNode
    @Override
    public void destroy()
    {
-      if (interactableObject != null)
+      if (doorOpeningMechanismInteractable != null)
       {
-         interactableObject.getModelInstance().model.dispose();
-         interactableObject.clear();
+         doorOpeningMechanismInteractable.getModelInstance().model.dispose();
+         doorOpeningMechanismInteractable.clear();
       }
 
       doorPlanarRegionGraphic.destroy();
@@ -137,6 +155,10 @@ public class RDXDoorNode extends RDXSceneNode
                                     DoorSceneNodeDefinitions.LEFT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
          }
       }
+
+      // Disable the gizmo by default
+      if (interactableObject != null)
+         interactableObject.getSelectablePose3DGizmo().setSelected(false);
 
       return interactableObject;
    }
