@@ -18,6 +18,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObject;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import javax.annotation.Nullable;
@@ -27,6 +28,13 @@ public class RDXDoorNode extends RDXSceneNode
 {
    private final DoorNode doorNode;
    private final ImGuiUniqueLabelMap labels;
+   private PlanarRegion hackPlanarRegion = new PlanarRegion();
+
+   public void setHackPlanarRegion(PlanarRegion planarRegion)
+   {
+      hackPlanarRegion.set(planarRegion);
+      doorNode.setDoorPlanarRegion(planarRegion);
+   }
 
    // Door opening mechanism
    @Nullable

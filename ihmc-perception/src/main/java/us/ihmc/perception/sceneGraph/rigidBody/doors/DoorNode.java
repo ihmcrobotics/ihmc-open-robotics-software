@@ -99,7 +99,7 @@ public class DoorNode extends SceneNode
 
       if (!planarRegionsList.isEmpty())
       {
-         float epsilon = 0.75f;
+         float epsilon = 0.85f;
 
          // TODO: fixme doesn't work
          //            PlanarRegion doorPlanarRegion = planarRegionsList.findClosestPlanarRegionToPointByProjectionOntoXYPlane(doorLeverPointInWorld.getX(),
@@ -114,9 +114,9 @@ public class DoorNode extends SceneNode
             if (planarRegionCentroidInWorld.distance(openingMechanismPoint3D) > epsilon)
                continue;
 
-            // If the planar region is less than 1/5th the area of a door
-            if (planarRegion.getArea() < ((DoorModelParameters.DOOR_PANEL_HEIGHT * DoorModelParameters.DOOR_PANEL_WIDTH) / 7))
-               continue;
+//            // If the planar region is less than 1/5th the area of a door
+//            if (planarRegion.getArea() < ((DoorModelParameters.DOOR_PANEL_HEIGHT * DoorModelParameters.DOOR_PANEL_WIDTH) / 11))
+//               continue;
 
             if (doorPlanarRegion == null)
             {
@@ -150,6 +150,8 @@ public class DoorNode extends SceneNode
          roll += doorSide == RobotSide.LEFT ? Math.PI : 0.0;
       openingMechanismPose3D.getTranslation().set(openingMechanismPoint3D);
       openingMechanismPose3D.getRotation().setYawPitchRoll(yaw, pitch, roll);
+
+      System.out.println(doorPlanarRegionUpdateTimeMillis);
 
       getNodeToParentFrameTransform().getRotation().set(openingMechanismPose3D.getRotation());
       getNodeFrame().update();

@@ -40,16 +40,16 @@ public final class DoorNodeUtil
                      doorNode.setOpeningMechanismTypeFromYoloClass(yoloNode.getDetectionClass());
                      modificationQueue.accept(new SceneGraphNodeAddition(doorNode, yoloNode));
 
-                     SceneNode doorStaticNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
-                                                                            "doorStaticHandle",
-                                                                            sceneGraph.getIDToNodeMap(),
-                                                                            doorNode.getID(),
-                                                                            new RigidBodyTransform(),
-                                                                            DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
-                                                                            DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM,
-                                                                            DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN);
-                     LogTools.info("Adding doorStaticHandle to scene graph.");
-                     modificationQueue.accept(new SceneGraphNodeAddition(doorStaticNode, doorNode));
+//                     SceneNode doorStaticNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
+//                                                                            "doorStaticHandle",
+//                                                                            sceneGraph.getIDToNodeMap(),
+//                                                                            doorNode.getID(),
+//                                                                            new RigidBodyTransform(),
+//                                                                            DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
+//                                                                            DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM,
+//                                                                            DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN);
+//                     LogTools.info("Adding doorStaticHandle to scene graph.");
+//                     modificationQueue.accept(new SceneGraphNodeAddition(doorStaticNode, doorNode));
                   }
                   else
                   {
