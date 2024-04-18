@@ -2,6 +2,7 @@ package us.ihmc.behaviors.sequence.actions;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.HighLevelStateMessage;
 import controller_msgs.msg.dds.TriggerKickMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -15,9 +16,11 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.tools.NonWallTimer;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -62,10 +65,7 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
       this.controllerStatusTracker = controllerStatusTracker;
       this.walkingControllerParameters = walkingControllerParameters;
 
-      computeKickMessage(definition.getKickHeight(),
-                         definition.getKickTargetDistance(),
-                         definition.getKickImpulse(),
-                         definition.getPrekickWeightDistribution());
+      computeKickMessage();
    }
 
    /**
@@ -131,10 +131,11 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
                stopwatch.reset();
                kickingMessageSent = true;
                state.getLogger().info("Executing kick.");
+               computeKickMessage();
                ros2ControllerHelper.publishToController(kickMessage);
             }
 
-            if (stopwatch.getElapsedTime() >= 2.0)
+            if (stopwatch.getElapsedTime() >= 6.0)
             {
                state.getExecutionState().setValue(KickDoorActionExecutionState.SWITCHING_TO_WALKING_CONTROLLER);
                stopwatch.reset();
@@ -187,16 +188,13 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
       ros2ControllerHelper.publishToController(highLevelStateMessage);
    }
 
-   public void computeKickMessage(double kickHeight,
-                                  double desiredKickDistance,
-                                  double desiredKickImpulse,
-                                  double desiredPrekickWeightDistribution)
+   public void computeKickMessage()
    {
       kickMessage.setRobotSide(kickSide.toByte());
-      kickMessage.setKickHeight(kickHeight);
-      kickMessage.setKickImpulse(desiredKickImpulse);
-      kickMessage.setKickTargetDistance(desiredKickDistance);
-      kickMessage.setPrekickWeightDistribution(desiredPrekickWeightDistribution);
+      kickMessage.setKickHeight(definition.getKickHeight());
+      kickMessage.setKickImpulse(definition.getKickImpulse());
+      kickMessage.setKickTargetDistance( definition.getKickTargetDistance());
+      kickMessage.setPrekickWeightDistribution(definition.getPrekickWeightDistribution());
    }
 
    public void computeSquaredUpFootsteps()

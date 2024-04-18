@@ -22,7 +22,7 @@ public class KickingWBCCParameters
    private final static double chamberFootWeight = 50.0;
 
    private final PID3DGains touchdownFootGains = new DefaultPID3DGains();
-   private final static double touchdownFootWeight = 50.0;
+   private final static double touchdownFootWeight = 150.0;
 
    private final PID3DGains settlingFootGains = new DefaultPID3DGains();
 

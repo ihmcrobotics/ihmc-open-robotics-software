@@ -24,6 +24,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -208,7 +209,9 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
       preKickFootPose.changeFrame(worldFrame);
       preKickFootPose.getPosition().setZ(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getZ());
 
+
       FramePose3D kickPose = new FramePose3D(preKickFootPose);
+      kickPose.changeFrame(syncedRobot.getReferenceFrames().getMidFeetZUpFrame());
       kickPose.setZ(definition.getKickHeight().getValue());
       kickPose.changeFrame(doorHandleFrame.getReferenceFrame());
       kickPose.setX(0.0);

@@ -58,7 +58,7 @@ public class KickDoorActionDefinition extends ActionNodeDefinition implements Si
 
       jsonNode.put("parentFrame", parentFrameName.getValue());
 
-      jsonNode.put("side", kickSide.getValue().getLowerCaseName());
+      jsonNode.put("kickSide", kickSide.getValue().getLowerCaseName());
       jsonNode.put("kickHeight", kickHeight.getValue());
       jsonNode.put("kickImpulse", kickImpulse.getValue());
       jsonNode.put("kickTargetDistance", kickTargetDistance.getValue());

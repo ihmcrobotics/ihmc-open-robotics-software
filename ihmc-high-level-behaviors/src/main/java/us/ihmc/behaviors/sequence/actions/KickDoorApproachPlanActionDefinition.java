@@ -85,7 +85,7 @@ public class KickDoorApproachPlanActionDefinition extends ActionNodeDefinition i
       jsonNode.put("prekickWeightDistribution", prekickWeightDistribution.getValue());
       jsonNode.put("horizontalDistanceFromHandle", horizontalDistanceFromHandle.getValue());
       jsonNode.put("stanceFootWidth", stanceFootWidth.getValue());
-      jsonNode.put("kickSide", kickSide.getValue().toString());
+      jsonNode.put("kickSide", kickSide.getValue().getLowerCaseName());
    }
 
    @Override
