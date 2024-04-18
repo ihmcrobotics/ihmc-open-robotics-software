@@ -2,6 +2,7 @@ package us.ihmc.communication.controllerAPI;
 
 import controller_msgs.msg.dds.*;
 import ihmc_common_msgs.msg.dds.MessageCollection;
+import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.interfaces.Settable;
@@ -93,6 +94,8 @@ public final class ControllerAPI
       outputMessageClasses.add(FootstepQueueStatusMessage.class);
       outputMessageClasses.add(QueuedFootstepStatusMessage.class);
       outputMessageClasses.add(WrenchTrajectoryStatusMessage.class);
+      outputMessageClasses.add(InvalidPacketNotificationPacket.class);
+      outputMessageClasses.add(MessageCollectionNotification.class);
 
       // Statuses supported by multi-contact controller, not in this repo
       outputMessageClasses.add(MultiContactBalanceStatus.class);
@@ -135,6 +138,8 @@ public final class ControllerAPI
           || messageClass.equals(JointDesiredOutputMessage.class)
           || messageClass.equals(RobotDesiredConfigurationData.class)
           || messageClass.equals(FootstepQueueStatusMessage.class)
+          || messageClass.equals(InvalidPacketNotificationPacket.class)
+          || messageClass.equals(MessageCollectionNotification.class)
           || messageClass.equals(MultiContactBalanceStatus.class))
             return ROS2QosProfile.BEST_EFFORT();
 
