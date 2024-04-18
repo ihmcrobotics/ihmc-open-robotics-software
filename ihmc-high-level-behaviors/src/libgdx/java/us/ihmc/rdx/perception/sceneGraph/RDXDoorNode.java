@@ -154,6 +154,12 @@ public class RDXDoorNode extends RDXSceneNode
             interactableObject.load(DoorSceneNodeDefinitions.DOOR_EMERGENCY_BAR_VISUAL_MODEL_FILE_PATH,
                                     DoorSceneNodeDefinitions.LEFT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
          }
+         case KNOB ->
+         {
+            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+            interactableObject.load(DoorSceneNodeDefinitions.DOOR_KNOB_VISUAL_MODEL_FILE_PATH,
+                                    DoorSceneNodeDefinitions.DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         }
       }
 
       // Disable the gizmo by default
