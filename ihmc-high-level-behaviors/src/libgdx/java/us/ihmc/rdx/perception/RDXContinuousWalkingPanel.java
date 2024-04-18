@@ -17,10 +17,8 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.Axis3D;
@@ -42,6 +40,7 @@ import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
@@ -66,7 +65,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
 
    private RDXStancePoseSelectionPanel stancePoseSelectionPanel;
    private final StancePoseCalculator stancePoseCalculator;
-   private final IHMCROS2Publisher<ContinuousWalkingCommandMessage> commandPublisher;
+   private final ROS2PublisherBasics<ContinuousWalkingCommandMessage> commandPublisher;
 
    private static final int numberOfKnotPoints = 12;
    private static final int maxIterationsOptimization = 100;
@@ -103,10 +102,10 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
-      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()),
+      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()),
                                       this::onControllerFootstepsReceived);
 
-      commandPublisher = ROS2Tools.createPublisher(ros2Helper.getROS2NodeInterface(), ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND);
+      commandPublisher = ros2Helper.getROS2NodeInterface().createPublisher(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND);
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> groundContactPoints = syncedRobot.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints();
       SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
@@ -125,7 +124,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
                                                                syncedRobot.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
 
 
-      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingControllerFailureStatusMessage.class,
+      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class,
                                                                        syncedRobot.getRobotModel().getSimpleRobotName()), message ->
                                       {
                                          terrainPlanningDebugger.reset();
@@ -152,7 +151,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
       this.ros2Helper = ros2Helper;
       this.swingPlannerParameters = robotModel.getSwingPlannerParameters();
       this.swingTrajectoryParameters = robotModel.getWalkingControllerParameters().getSwingTrajectoryParameters();
-      this.commandPublisher = ROS2Tools.createPublisher(ros2Helper.getROS2NodeInterface(), ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND);
+      this.commandPublisher = ros2Helper.getROS2NodeInterface().createPublisher(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND);
       this.stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(stancePoseCalculator);
       this.terrainPlanningDebugger = new RDXTerrainPlanningDebugger(ros2Helper,
                                                                     monteCarloPlannerParameters,
@@ -161,9 +160,9 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
-      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName()),
+      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName()),
                                       this::onControllerFootstepsReceived);
-      ros2Helper.subscribeViaCallback(ControllerAPIDefinition.getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()), message ->
+      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()), message ->
       {
          terrainPlanningDebugger.reset();
       });
