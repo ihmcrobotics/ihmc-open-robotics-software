@@ -147,8 +147,11 @@ public class DoorNode extends SceneNode
       double pitch = 0.0;
       double roll = 0.0;
       if (openingMechanismType == OpeningMechanismType.LEVER_HANDLE)
-         roll = doorSide == RobotSide.LEFT ? Math.PI : 0.0;
+         roll += doorSide == RobotSide.LEFT ? Math.PI : 0.0;
       openingMechanismPose3D.getTranslation().set(openingMechanismPoint3D);
       openingMechanismPose3D.getRotation().setYawPitchRoll(yaw, pitch, roll);
+
+      getNodeToParentFrameTransform().getRotation().set(openingMechanismPose3D.getRotation());
+      getNodeFrame().update();
    }
 }
