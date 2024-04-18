@@ -181,7 +181,7 @@ public class YOLOv8DetectionManager
 
       // Extract stuff from the results
       Map<YOLOv8Detection, RawImage> objectMasks = yoloResults.getTargetSegmentationImages(yoloSegmentationThreshold, targetDetections);
-      Set<YOLOv8Detection> newDetections = yoloResults.getDetections();
+      Set<YOLOv8Detection> newDetections = objectMasks.keySet();
 
       // match new detections to existing detections
       Point3D robotPoint = new Point3D(robotFrame.getTransformToWorldFrame().getTranslation());
