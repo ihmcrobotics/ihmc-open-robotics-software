@@ -61,7 +61,6 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private final RecyclingArrayList<FrameVector3D> linearVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final RecyclingArrayList<FrameVector3D> angularVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final TDoubleArrayList trajectoryTimes = new TDoubleArrayList();
-   private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
    private final int numberOfJoints = HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS;
    private int numberOfPoints;
    private double rotationRadius;
@@ -443,8 +442,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
       {
          state.setIsExecuting(false);
          state.setFailed(true);
-         state.getLogger().error("Task execution timed out. Publishing stop all trajectories message.");
-         ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+         state.getLogger().error("Task execution timed out.");
          return;
       }
 
