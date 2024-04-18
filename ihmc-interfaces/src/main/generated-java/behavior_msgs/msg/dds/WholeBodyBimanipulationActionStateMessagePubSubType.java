@@ -15,7 +15,7 @@ public class WholeBodyBimanipulationActionStateMessagePubSubType implements us.i
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-      return "ec78b3be688bb78f23c7e070d7864786a59428c212c10f82079940bf1b653574";
+      return "f250a823e02bd21fbab6e28f0b3f39cd334299a3e4cdbb350d047f1c24347994";
    }
    
    @Override
@@ -81,6 +81,7 @@ public class WholeBodyBimanipulationActionStateMessagePubSubType implements us.i
 
       current_alignment += ((23) * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 

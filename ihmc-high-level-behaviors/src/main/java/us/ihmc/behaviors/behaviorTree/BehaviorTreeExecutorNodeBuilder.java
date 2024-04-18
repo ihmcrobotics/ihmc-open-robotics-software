@@ -40,7 +40,6 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
                                           ROS2SyncedRobotModel syncedRobot,
                                           ReferenceFrameLibrary referenceFrameLibrary,
                                           RobotConfigurationData latestStandingRobotConfiguration,
-                                          ReferenceFrameLibrary referenceFrameLibrary,
                                           SceneGraph sceneGraph)
    {
       this.robotModel = robotModel;

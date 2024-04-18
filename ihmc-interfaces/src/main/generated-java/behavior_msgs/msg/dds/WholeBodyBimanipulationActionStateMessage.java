@@ -57,7 +57,9 @@ public class WholeBodyBimanipulationActionStateMessage extends Packet<WholeBodyB
       solution_quality_ = other.solution_quality_;
 
       force_latest_standing_configuration_update_ = other.force_latest_standing_configuration_update_;
+
    }
+
 
    /**
     * Parent state fields
@@ -107,7 +109,6 @@ public class WholeBodyBimanipulationActionStateMessage extends Packet<WholeBodyB
    {
       force_latest_standing_configuration_update_ = force_latest_standing_configuration_update;
    }
-
    /**
     * Force the latest standing configuration update
     */
@@ -115,6 +116,7 @@ public class WholeBodyBimanipulationActionStateMessage extends Packet<WholeBodyB
    {
       return force_latest_standing_configuration_update_;
    }
+
 
    public static Supplier<WholeBodyBimanipulationActionStateMessagePubSubType> getPubSubType()
    {
@@ -147,6 +149,7 @@ public class WholeBodyBimanipulationActionStateMessage extends Packet<WholeBodyB
                                                      epsilon))
          return false;
 
+
       return true;
    }
 
@@ -168,8 +171,9 @@ public class WholeBodyBimanipulationActionStateMessage extends Packet<WholeBodyB
       }
       if(this.solution_quality_ != otherMyClass.solution_quality_) return false;
 
-      if(this.force_latest_standing_configuration_update_ != otherMyClass.force_latest_standing_configuration_update_)
+      if (this.force_latest_standing_configuration_update_ != otherMyClass.force_latest_standing_configuration_update_)
          return false;
+
 
       return true;
    }

@@ -26,8 +26,12 @@ public class BehaviorTreeExecutor
                                SceneGraph sceneGraph,
                                ROS2ControllerHelper ros2ControllerHelper)
    {
-      nodeBuilder = new BehaviorTreeExecutorNodeBuilder(robotModel, ros2ControllerHelper, syncedRobot, referenceFrameLibrary, latestStandingRobotConfiguration);
-      nodeBuilder = new BehaviorTreeExecutorNodeBuilder(robotModel, ros2ControllerHelper, syncedRobot, referenceFrameLibrary, sceneGraph);
+      nodeBuilder = new BehaviorTreeExecutorNodeBuilder(robotModel,
+                                                        ros2ControllerHelper,
+                                                        syncedRobot,
+                                                        referenceFrameLibrary,
+                                                        latestStandingRobotConfiguration,
+                                                        sceneGraph);
       treeRebuilder = new BehaviorTreeExtensionSubtreeRebuilder(this::getRootNode, crdtInfo);
 
       behaviorTreeState = new BehaviorTreeState(nodeBuilder, treeRebuilder, this::getRootNode, crdtInfo, null);
