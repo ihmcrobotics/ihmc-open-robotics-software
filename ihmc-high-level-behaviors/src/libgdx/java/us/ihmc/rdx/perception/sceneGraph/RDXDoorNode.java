@@ -5,30 +5,20 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import us.ihmc.euclid.Axis2D;
-import us.ihmc.euclid.geometry.Line2D;
-import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.OpeningMechanismType;
+import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObject;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.scs2.definition.visual.ColorDefinition;
-import us.ihmc.scs2.definition.visual.ColorDefinitions;
 
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -37,14 +27,16 @@ public class RDXDoorNode extends RDXSceneNode
 {
    private final DoorNode doorNode;
    private final ImGuiUniqueLabelMap labels;
-   @Nullable
-   private RDXInteractableObject interactableObject;
-   private final RigidBodyTransform visualModelTransformToWorld = new RigidBodyTransform();
-   private final RDXPlanarRegionsGraphic doorPlanarRegionGraphic = new RDXPlanarRegionsGraphic();
 
-   private static final int DOOR_LEVER_SWITCH_SIDE_THRESHOLD = 10;
-   private transient int doorLeverSwitchSide = 0;
-   private transient RobotSide doorLeverLastSide;
+   // Door opening mechanism
+   @Nullable
+   private RDXInteractableObject doorOpeningMechanismInteractable;
+   private final RigidBodyTransform doorOpeningMechanismVisualModelTransform = new RigidBodyTransform();
+   private final RDXReferenceFrameGraphic doorOpeningMechanismFrameGraphic = new RDXReferenceFrameGraphic(0.2);
+//   private final ImGuiFlashingText doorOpeningMechanismInteractableSelectedFlashingText = new ImGuiFlashingText();
+
+   // Door planar region
+   private final RDXPlanarRegionsGraphic doorPlanarRegionGraphic = new RDXPlanarRegionsGraphic();
 
    public RDXDoorNode(DoorNode yoloDoorNode, ImGuiUniqueLabelMap labels)
    {
@@ -52,80 +44,48 @@ public class RDXDoorNode extends RDXSceneNode
       this.doorNode = yoloDoorNode;
       this.labels = labels;
 
-      doorPlanarRegionGraphic.setBlendOpacity(1.0f);
-      doorPlanarRegionGraphic.setDrawNormal(true);
+      doorPlanarRegionGraphic.setBlendOpacity(0.6f);
+      doorOpeningMechanismFrameGraphic.setPoseInWorldFrame(doorNode.getOpeningMechanismPose3D());
    }
 
    @Override
    public void update(SceneGraphModificationQueue modificationQueue)
    {
       // Update door planar region graphic
+      // We set a constant region ID just to get a consistent color in the planar region graphic
       doorNode.getDoorPlanarRegion().setRegionId(2222);
       doorPlanarRegionGraphic.generateMeshes(new PlanarRegionsList(doorNode.getDoorPlanarRegion()));
-
       doorPlanarRegionGraphic.update();
 
-      if (interactableObject != null)
+      if (doorOpeningMechanismInteractable != null)
       {
-         Point3DReadOnly planarRegionCentroidInWorld = PlanarRegionTools.getCentroid3DInWorld(doorNode.getDoorPlanarRegion());
-
-         Line2D doorLineNormal = new Line2D(planarRegionCentroidInWorld.getX(),
-                                            planarRegionCentroidInWorld.getY(),
-                                            doorNode.getDoorPlanarRegion().getNormalX(),
-                                            doorNode.getDoorPlanarRegion().getNormalY());
-         Point2D openingMechanismPointInWorld2D = new Point2D(doorNode.getOpeningMechanismPose().getTranslation());
-
-         RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(openingMechanismPointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
-
-//         if (doorNode.getOpeningMechanismType() == OpeningMechanismType.LEVER_HANDLE)
-//         {
-//            if (doorLeverLastSide == null)
-//               doorLeverLastSide = doorSide;
-//
-//            // Glitch filter
-//            if (doorLeverLastSide != doorSide)
-//            {
-//               if (++doorLeverSwitchSide > DOOR_LEVER_SWITCH_SIDE_THRESHOLD)
-//               {
-//                  // Switch sides
-//                  doorLeverSwitchSide = 0;
-//                  LogTools.info("Door lever switched sides");
-//               }
-//               else
-//               {
-//                  doorSide = doorLeverLastSide;
-//               }
-//            }
-//         }
-
-         double yaw = TupleTools.angle(Axis2D.X, doorLineNormal.getDirection());
-
-         if (doorNode.getOpeningMechanismType() == OpeningMechanismType.LEVER_HANDLE)
-            visualModelTransformToWorld.getRotation().setYawPitchRoll(yaw, 0.0, doorSide == RobotSide.LEFT ? Math.PI : 0.0);
-         else
-            visualModelTransformToWorld.getRotation().setToYawOrientation(yaw);
-
-         visualModelTransformToWorld.getTranslation().set(doorNode.getOpeningMechanismPose().getTranslation());
-
-//         LibGDXTools.setDiffuseColor(interactableObject.getModelInstance(), Color.WHITE); // TODO: keep?
-//         interactableObject.getModelInstance().setColor(ColorDefinitions.White());
-         interactableObject.getModelInstance().setDiffuseColor(Color.WHITE);
-
-         interactableObject.setPose(visualModelTransformToWorld);
+         doorOpeningMechanismVisualModelTransform.set(doorNode.getOpeningMechanismPose3D());
+         LibGDXTools.setDiffuseColor(doorOpeningMechanismInteractable.getModelInstance(), Color.WHITE); // TODO: keep?
+         doorOpeningMechanismInteractable.setPose(doorOpeningMechanismVisualModelTransform);
       }
       else
       {
-         interactableObject = createInteractableObject();
+         doorOpeningMechanismInteractable = createInteractableObject();
       }
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      if (interactableObject != null)
-         interactableObject.getRenderables(renderables, pool);
+      if (doorOpeningMechanismInteractable != null && doorNode.getDoorPlanarRegion().getArea() > 0.0)
+      {
+         doorOpeningMechanismInteractable.getRenderables(renderables, pool);
+         doorPlanarRegionGraphic.getRenderables(renderables, pool);
 
-      doorPlanarRegionGraphic.getRenderables(renderables, pool);
+         // If the gizmo is NOT selected/enabled only then do we update the pose of the
+         // door opening mechanism interactable. We want the user to be able to move the interactable
+         // around if the gizmo is enabled
+         if (!doorOpeningMechanismInteractable.getSelectablePose3DGizmo().getSelected().get())
+         {
+            doorOpeningMechanismFrameGraphic.setPoseInWorldFrame(doorNode.getOpeningMechanismPose3D());
+            doorOpeningMechanismFrameGraphic.getRenderables(renderables, pool);
+         }
+      }
    }
 
    @Override
@@ -133,10 +93,15 @@ public class RDXDoorNode extends RDXSceneNode
    {
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
 
-      if (interactableObject != null)
+      if (doorOpeningMechanismInteractable != null)
       {
          ImGui.sameLine();
-         ImGui.checkbox(labels.get("Show gizmo"), interactableObject.getSelectablePose3DGizmo().getSelected());
+         ImGui.checkbox(labels.get("Show gizmo"), doorOpeningMechanismInteractable.getSelectablePose3DGizmo().getSelected());
+
+         if (doorOpeningMechanismInteractable.getSelectablePose3DGizmo().isSelected())
+         {
+            ImGui.text("Gizmo is enabled - the door opening mechanism pose will not update");
+         }
       }
 
       ImGui.text("Planar region info:");
@@ -155,11 +120,14 @@ public class RDXDoorNode extends RDXSceneNode
    @Override
    public void destroy()
    {
-      if (interactableObject != null)
+      if (doorOpeningMechanismInteractable != null)
       {
-         interactableObject.getModelInstance().model.dispose();
-         interactableObject.clear();
+         doorOpeningMechanismInteractable.getModelInstance().model.dispose();
+         doorOpeningMechanismInteractable.clear();
       }
+
+      doorPlanarRegionGraphic.destroy();
+      doorOpeningMechanismFrameGraphic.dispose();
    }
 
    private RDXInteractableObject createInteractableObject()
@@ -186,7 +154,17 @@ public class RDXDoorNode extends RDXSceneNode
             interactableObject.load(DoorSceneNodeDefinitions.DOOR_EMERGENCY_BAR_VISUAL_MODEL_FILE_PATH,
                                     DoorSceneNodeDefinitions.LEFT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
          }
+         case KNOB ->
+         {
+            interactableObject = new RDXInteractableObject(RDXBaseUI.getInstance());
+            interactableObject.load(DoorSceneNodeDefinitions.DOOR_KNOB_VISUAL_MODEL_FILE_PATH,
+                                    DoorSceneNodeDefinitions.DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+         }
       }
+
+      // Disable the gizmo by default
+      if (interactableObject != null)
+         interactableObject.getSelectablePose3DGizmo().setSelected(false);
 
       return interactableObject;
    }

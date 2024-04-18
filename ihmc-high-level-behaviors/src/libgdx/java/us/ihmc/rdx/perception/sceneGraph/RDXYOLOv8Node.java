@@ -16,7 +16,6 @@ import us.ihmc.rdx.RDXPointCloudRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 
 import java.util.List;
 import java.util.Set;
@@ -38,7 +37,6 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
    private final ImFloat detectionAcceptanceThreshold;
 
    private final RDXPointCloudRenderer objectPointCloudRenderer = new RDXPointCloudRenderer();
-   private final RDXReferenceFrameGraphic objectPoseGraphic = new RDXReferenceFrameGraphic(0.2);
 
    public RDXYOLOv8Node(YOLOv8Node yoloNode, ImGuiUniqueLabelMap labels)
    {
@@ -51,7 +49,6 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
       detectionAcceptanceThreshold = new ImFloat(yoloNode.getDetectionAcceptanceThreshold());
 
       objectPointCloudRenderer.create(5000);
-      objectPoseGraphic.setPoseInWorldFrame(yoloNode.getObjectPose());
    }
 
    @Override
@@ -80,15 +77,10 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      super.getRenderables(renderables, pool, sceneLevels);
-
       List<Point3D32> renderablePointCloud = yoloNode.getObjectPointCloud();
       objectPointCloudRenderer.setPointsToRender(renderablePointCloud, Color.GREEN);
       objectPointCloudRenderer.updateMesh();
       objectPointCloudRenderer.getRenderables(renderables, pool);
-
-      objectPoseGraphic.setPoseInWorldFrame(yoloNode.getObjectPose());
-      objectPoseGraphic.getRenderables(renderables, pool);
    }
 
    @Override
@@ -97,6 +89,5 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
       super.destroy();
 
       objectPointCloudRenderer.dispose();
-      objectPoseGraphic.dispose();
    }
 }

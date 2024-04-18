@@ -1,9 +1,14 @@
 package us.ihmc.perception.sceneGraph.rigidBody.doors;
 
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
+import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
+
+import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions.*;
 
 public final class DoorNodeUtil
 {
@@ -34,6 +39,17 @@ public final class DoorNodeUtil
                      DoorNode doorNode = new DoorNode(sceneGraph.getNextID().getAndIncrement(), "Door");
                      doorNode.setOpeningMechanismTypeFromYoloClass(yoloNode.getDetectionClass());
                      modificationQueue.accept(new SceneGraphNodeAddition(doorNode, yoloNode));
+
+                     SceneNode doorStaticNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                                            "doorStaticHandle",
+                                                                            sceneGraph.getIDToNodeMap(),
+                                                                            doorNode.getID(),
+                                                                            new RigidBodyTransform(),
+                                                                            DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
+                                                                            DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM,
+                                                                            DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN);
+                     LogTools.info("Adding doorStaticHandle to scene graph.");
+                     modificationQueue.accept(new SceneGraphNodeAddition(doorStaticNode, doorNode));
                   }
                   else
                   {
@@ -41,7 +57,7 @@ public final class DoorNodeUtil
                      {
                         if (childNode instanceof DoorNode doorNode)
                         {
-                           doorNode.setOpeningMechanismPose(yoloNode.getObjectPose());
+                           doorNode.setOpeningMechanismPoint3D(yoloNode.getObjectPose().getTranslation());
                         }
                      }
                   }

@@ -5,11 +5,11 @@ perception_msgs/SceneNodeMessage scene_node
 # The type of door opening mechanism detected
 int8 opening_mechanism_type
 
-# The pose of the detected door hardware
-geometry_msgs/Pose opening_mechanism_pose
+# The 3D point of the detected door hardware
+geometry_msgs/Point opening_mechanism_point
 
-# The visual transform to parent of the door hardware
-geometry_msgs/Transform opening_mechanism_visual_transform_to_object_pose
+# The pose of the detected door hardware wrt the door planar region
+geometry_msgs/Pose opening_mechanism_pose
 
 # The planar region we assume is the door panel
 perception_msgs/PlanarRegionMessage door_planar_region
