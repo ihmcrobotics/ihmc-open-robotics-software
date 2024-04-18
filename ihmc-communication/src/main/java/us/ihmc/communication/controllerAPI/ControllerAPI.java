@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import ihmc_common_msgs.msg.dds.MessageCollection;
 import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -72,6 +73,20 @@ public final class ControllerAPI
       // Command supported by the joint-space controller JointspacePositionControllerState
       inputMessageClasses.add(WholeBodyJointspaceTrajectoryMessage.class);
 
+      // Commands supported by the kinematics toolbox
+      inputMessageClasses.add(KinematicsToolboxCenterOfMassMessage.class);
+      inputMessageClasses.add(KinematicsToolboxRigidBodyMessage.class);
+      inputMessageClasses.add(KinematicsToolboxOneDoFJointMessage.class);
+      inputMessageClasses.add(KinematicsToolboxConfigurationMessage.class);
+      inputMessageClasses.add(KinematicsToolboxSupportRegionMessage.class);
+      inputMessageClasses.add(KinematicsToolboxPrivilegedConfigurationMessage.class);
+      inputMessageClasses.add(KinematicsToolboxInputCollectionMessage.class);
+      inputMessageClasses.add(HumanoidKinematicsToolboxConfigurationMessage.class);
+
+      // Commands supported by the kinematics streaming toolbox
+      inputMessageClasses.add(KinematicsStreamingToolboxInputMessage.class);
+      inputMessageClasses.add(KinematicsStreamingToolboxConfigurationMessage.class);
+
       // Input messages that don't have a corresponding command
       inputMessageClasses.add(MessageCollection.class);
       inputMessageClasses.add(WholeBodyTrajectoryMessage.class);
@@ -96,6 +111,9 @@ public final class ControllerAPI
       outputMessageClasses.add(WrenchTrajectoryStatusMessage.class);
       outputMessageClasses.add(InvalidPacketNotificationPacket.class);
       outputMessageClasses.add(MessageCollectionNotification.class);
+
+      // Statuses supported by the kinematics toolbox
+      outputMessageClasses.add(KinematicsToolboxOutputStatus.class);
 
       // Statuses supported by multi-contact controller, not in this repo
       outputMessageClasses.add(MultiContactBalanceStatus.class);
@@ -138,8 +156,6 @@ public final class ControllerAPI
           || messageClass.equals(JointDesiredOutputMessage.class)
           || messageClass.equals(RobotDesiredConfigurationData.class)
           || messageClass.equals(FootstepQueueStatusMessage.class)
-          || messageClass.equals(InvalidPacketNotificationPacket.class)
-          || messageClass.equals(MessageCollectionNotification.class)
           || messageClass.equals(MultiContactBalanceStatus.class))
             return ROS2QosProfile.BEST_EFFORT();
 
