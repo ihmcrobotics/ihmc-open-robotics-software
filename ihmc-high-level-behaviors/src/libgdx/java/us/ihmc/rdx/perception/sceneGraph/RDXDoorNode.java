@@ -14,6 +14,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.interactable.RDXInteractableObject;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -29,6 +30,7 @@ public class RDXDoorNode extends RDXSceneNode
    private RDXInteractableObject interactableObject;
    private final RigidBodyTransform visualModelTransformToWorld = new RigidBodyTransform();
    private final RDXPlanarRegionsGraphic doorPlanarRegionGraphic = new RDXPlanarRegionsGraphic();
+   private final RDXReferenceFrameGraphic doorOpeningMechanismFrameGraphic = new RDXReferenceFrameGraphic(0.2);
 
    public RDXDoorNode(DoorNode yoloDoorNode, ImGuiUniqueLabelMap labels)
    {
@@ -37,6 +39,7 @@ public class RDXDoorNode extends RDXSceneNode
       this.labels = labels;
 
       doorPlanarRegionGraphic.setBlendOpacity(0.6f);
+      doorOpeningMechanismFrameGraphic.setPoseInWorldFrame(doorNode.getOpeningMechanismPose3D());
    }
 
    @Override
@@ -50,7 +53,7 @@ public class RDXDoorNode extends RDXSceneNode
 
       if (interactableObject != null)
       {
-         visualModelTransformToWorld.set(doorNode.getOpeningMechanismPose());
+         visualModelTransformToWorld.set(doorNode.getOpeningMechanismPose3D());
          LibGDXTools.setDiffuseColor(interactableObject.getModelInstance(), Color.WHITE); // TODO: keep?
          interactableObject.setPose(visualModelTransformToWorld);
       }
@@ -67,6 +70,9 @@ public class RDXDoorNode extends RDXSceneNode
          interactableObject.getRenderables(renderables, pool);
 
       doorPlanarRegionGraphic.getRenderables(renderables, pool);
+
+      doorOpeningMechanismFrameGraphic.setPoseInWorldFrame(doorNode.getOpeningMechanismPose3D());
+      doorOpeningMechanismFrameGraphic.getRenderables(renderables, pool);
    }
 
    @Override
@@ -101,6 +107,9 @@ public class RDXDoorNode extends RDXSceneNode
          interactableObject.getModelInstance().model.dispose();
          interactableObject.clear();
       }
+
+      doorPlanarRegionGraphic.destroy();
+      doorOpeningMechanismFrameGraphic.dispose();
    }
 
    private RDXInteractableObject createInteractableObject()

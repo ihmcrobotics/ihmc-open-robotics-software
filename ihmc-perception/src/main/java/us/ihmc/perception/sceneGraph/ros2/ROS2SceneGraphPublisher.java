@@ -183,7 +183,8 @@ public class ROS2SceneGraphPublisher
          doorNodeMessage.setOpeningMechanismType((byte) doorNode.getOpeningMechanismType().ordinal());
          doorNodeMessage.getDoorPlanarRegion().set(PlanarRegionMessageConverter.convertToPlanarRegionMessage(doorNode.getDoorPlanarRegion()));
          doorNodeMessage.setDoorPlanarRegionUpdateTimeMillis(doorNode.getDoorPlanarRegionUpdateTime());
-         doorNodeMessage.getOpeningMechanismPose().set(doorNode.getOpeningMechanismPose());
+         doorNodeMessage.getOpeningMechanismPoint().set(doorNode.getOpeningMechanismPoint3D());
+         doorNodeMessage.getOpeningMechanismPose().set(doorNode.getOpeningMechanismPose3D());
 
          sceneNodeMessage = doorNodeMessage.getSceneNode();
       }

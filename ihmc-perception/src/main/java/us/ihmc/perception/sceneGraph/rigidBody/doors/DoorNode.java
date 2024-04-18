@@ -17,22 +17,15 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class DoorNode extends SceneNode
 {
    private OpeningMechanismType openingMechanismType;
-   private final Pose3D openingMechanismPose = new Pose3D();
+   private final Point3D openingMechanismPoint3D = new Point3D();
+   private final Pose3D openingMechanismPose3D = new Pose3D();
 
    private final PlanarRegion doorPlanarRegion = new PlanarRegion();
    private long doorPlanarRegionUpdateTimeMillis;
 
    public DoorNode(long id, String name)
    {
-      this(id, name, OpeningMechanismType.UNKNOWN, new Pose3D(), new PlanarRegion());
-   }
-
-   public DoorNode(long id, String name, OpeningMechanismType openingMechanismType, Pose3D objectPose, PlanarRegion doorPlanarRegion)
-   {
       super(id, name);
-      this.openingMechanismType = openingMechanismType;
-      this.openingMechanismPose.set(objectPose);
-      this.doorPlanarRegion.set(doorPlanarRegion);
    }
 
    public OpeningMechanismType getOpeningMechanismType()
@@ -56,14 +49,24 @@ public class DoorNode extends SceneNode
       }
    }
 
-   public Pose3D getOpeningMechanismPose()
+   public Point3D getOpeningMechanismPoint3D()
    {
-      return openingMechanismPose;
+      return openingMechanismPoint3D;
    }
 
-   public void setOpeningMechanismPose(Pose3D pose)
+   public void setOpeningMechanismPoint3D(Point3D point3D)
    {
-      this.openingMechanismPose.set(pose);
+      this.openingMechanismPoint3D.set(point3D);
+   }
+
+   public Pose3D getOpeningMechanismPose3D()
+   {
+      return openingMechanismPose3D;
+   }
+
+   public void setOpeningMechanismPose3D(Pose3D pose3D)
+   {
+      this.openingMechanismPose3D.set(pose3D);
    }
 
    public PlanarRegion getDoorPlanarRegion()
@@ -94,8 +97,6 @@ public class DoorNode extends SceneNode
          setDoorPlanarRegion(new PlanarRegion());
       }
 
-      Point3D openingMechanismCentroidInWorld = new Point3D(getOpeningMechanismPose().getTranslation());
-
       if (!planarRegionsList.isEmpty())
       {
          float epsilon = 0.75f;
@@ -110,7 +111,7 @@ public class DoorNode extends SceneNode
          {
             Point3DReadOnly planarRegionCentroidInWorld = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
 
-            if (planarRegionCentroidInWorld.distance(openingMechanismCentroidInWorld) > epsilon)
+            if (planarRegionCentroidInWorld.distance(openingMechanismPoint3D) > epsilon)
                continue;
 
             // If the planar region is less than 1/5th the area of a door
@@ -140,13 +141,14 @@ public class DoorNode extends SceneNode
                                          planarRegionCentroidInWorld.getY(),
                                          doorPlanarRegion.getNormalX(),
                                          doorPlanarRegion.getNormalY());
-      Point2D openingMechanismPointInWorld2D = new Point2D(getOpeningMechanismPose().getTranslation());
+      Point2D openingMechanismPointInWorld2D = new Point2D(openingMechanismPoint3D);
       RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(openingMechanismPointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
       double yaw = TupleTools.angle(Axis2D.X, doorLineNormal.getDirection());
       double pitch = 0.0;
       double roll = 0.0;
       if (openingMechanismType == OpeningMechanismType.LEVER_HANDLE)
          roll = doorSide == RobotSide.LEFT ? Math.PI : 0.0;
-      openingMechanismPose.getRotation().setYawPitchRoll(yaw, pitch, roll);
+      openingMechanismPose3D.getTranslation().set(openingMechanismPoint3D);
+      openingMechanismPose3D.getRotation().setYawPitchRoll(yaw, pitch, roll);
    }
 }
