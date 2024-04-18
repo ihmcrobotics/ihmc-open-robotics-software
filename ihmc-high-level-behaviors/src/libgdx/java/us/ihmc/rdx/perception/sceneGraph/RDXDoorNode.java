@@ -56,6 +56,7 @@ public class RDXDoorNode extends RDXSceneNode
    public void update(SceneGraphModificationQueue modificationQueue)
    {
       // Update door planar region graphic
+      // We set a constant region ID just to get a consistent color in the planar region graphic
       doorNode.getDoorPlanarRegion().setRegionId(2222);
       doorPlanarRegionGraphic.generateMeshes(new PlanarRegionsList(doorNode.getDoorPlanarRegion()));
 
