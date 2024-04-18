@@ -97,7 +97,7 @@ public class ImGuiScrollableLogArea
       ImGui.endChild();
       ImGui.popStyleColor();
 
-      if (ImGui.checkbox(labels.get("Scroll to End"), scrollToEnd))
+      if (ImGui.checkbox(labels.get("Keep log scrolled to end"), scrollToEnd))
          if (scrollToEnd.get())
             wouldScrollToEnd.set();
    }

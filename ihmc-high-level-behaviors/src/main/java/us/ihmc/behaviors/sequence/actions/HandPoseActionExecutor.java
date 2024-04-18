@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
-import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.QueueableMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
@@ -41,7 +40,6 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    private final RigidBodyTransform chestToPelvisZeroAngles = new RigidBodyTransform();
    private final FramePose3D chestInPelvis = new FramePose3D();
    private final FramePose3D goalChestFrame = new FramePose3D();
-   private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
 
    public HandPoseActionExecutor(long id,
                                  CRDTInfo crdtInfo,
@@ -266,8 +264,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       {
          state.setIsExecuting(false);
          state.setFailed(true);
-         state.getLogger().error("Task execution timed out. Publishing stop all trajectories message.");
-         ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+         state.getLogger().error("Task execution timed out.");
          return;
       }
 
