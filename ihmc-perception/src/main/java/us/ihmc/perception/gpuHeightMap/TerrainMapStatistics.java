@@ -3,7 +3,6 @@ package us.ihmc.perception.gpuHeightMap;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
-import us.ihmc.log.LogTools;
 import us.ihmc.tools.IHMCCommonPaths;
 
 import java.io.File;
@@ -38,6 +37,10 @@ public class TerrainMapStatistics
 
       try
       {
+         if (!Files.exists(IHMCCommonPaths.LOGS_DIRECTORY))
+         {
+            Files.createDirectory(IHMCCommonPaths.LOGS_DIRECTORY);
+         }
          if(!Files.exists(IHMCCommonPaths.TERRAIN_MAP_DIRECTORY))
          {
             Files.createDirectory(IHMCCommonPaths.TERRAIN_MAP_DIRECTORY);
