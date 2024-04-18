@@ -73,26 +73,26 @@ public class RDXDoorNode extends RDXSceneNode
 
          RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(openingMechanismPointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
 
-         if (doorNode.getOpeningMechanismType() == OpeningMechanismType.LEVER_HANDLE)
-         {
-            if (doorLeverLastSide == null)
-               doorLeverLastSide = doorSide;
-
-            // Glitch filter
-            if (doorLeverLastSide != doorSide)
-            {
-               if (++doorLeverSwitchSide > DOOR_LEVER_SWITCH_SIDE_THRESHOLD)
-               {
-                  // Switch sides
-                  doorLeverSwitchSide = 0;
-                  LogTools.info("Door lever switched sides");
-               }
-               else
-               {
-                  doorSide = doorLeverLastSide;
-               }
-            }
-         }
+//         if (doorNode.getOpeningMechanismType() == OpeningMechanismType.LEVER_HANDLE)
+//         {
+//            if (doorLeverLastSide == null)
+//               doorLeverLastSide = doorSide;
+//
+//            // Glitch filter
+//            if (doorLeverLastSide != doorSide)
+//            {
+//               if (++doorLeverSwitchSide > DOOR_LEVER_SWITCH_SIDE_THRESHOLD)
+//               {
+//                  // Switch sides
+//                  doorLeverSwitchSide = 0;
+//                  LogTools.info("Door lever switched sides");
+//               }
+//               else
+//               {
+//                  doorSide = doorLeverLastSide;
+//               }
+//            }
+//         }
 
          double yaw = TupleTools.angle(Axis2D.X, doorLineNormal.getDirection());
 
