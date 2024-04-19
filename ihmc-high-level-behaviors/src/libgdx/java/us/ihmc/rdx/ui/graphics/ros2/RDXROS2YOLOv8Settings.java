@@ -5,11 +5,13 @@ import imgui.type.ImFloat;
 import imgui.type.ImInt;
 import org.apache.commons.lang.ArrayUtils;
 import perception_msgs.msg.dds.YOLOv8ParametersMessage;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.tools.thread.Throttler;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -18,6 +20,7 @@ import java.util.Set;
 public class RDXROS2YOLOv8Settings extends RDXVisualizer
 {
    private static final String[] AVAILABLE_SENSORS = {"ZED", "D455"};
+   private static final double MESSAGE_PUBLISH_PERIOD = 2; // publish messages every 2 seconds
 
    private final ROS2PublishSubscribeAPI ros2;
 
@@ -32,6 +35,9 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
    private final ROS2Heartbeat demandYOLOv8ICPZed;
    private final ROS2Heartbeat demandYOLOv8ICPRealsense;
 
+   private final Throttler messagePublishThrottler = new Throttler().setPeriod(MESSAGE_PUBLISH_PERIOD);
+   private final Notification parametersChanged = new Notification();
+
    public RDXROS2YOLOv8Settings(String title, ROS2PublishSubscribeAPI ros2)
    {
       super(title);
@@ -40,6 +46,9 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
 
       demandYOLOv8ICPZed = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_YOLO_ZED);
       demandYOLOv8ICPRealsense = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_YOLO_REALSENSE);
+
+      // Select all target detections at beginning
+      targetDetections.addAll(Arrays.asList(YOLOv8DetectionClass.values()));
    }
 
    @Override
@@ -52,28 +61,27 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
       demandYOLOv8ICPZed.setAlive(isActive() && selectedSensor.get() == 0);
       demandYOLOv8ICPRealsense.setAlive(isActive() && selectedSensor.get() == 1);
 
-      boolean parameterChanged = false;
       if (ImGui.sliderFloat("confidenceThreshold", confidenceThreshold.getData(), 0.0f, 1.0f))
-         parameterChanged = true;
+         parametersChanged.set();
       if (ImGui.sliderFloat("nmsThreshold", nmsThreshold.getData(), 0.0f, 1.0f))
-         parameterChanged = true;
+         parametersChanged.set();
       if (ImGui.sliderFloat("maskThreshold", maskThreshold.getData(), -1.0f, 1.0f))
-         parameterChanged = true;
+         parametersChanged.set();
       if (ImGui.sliderFloat("candidateAcceptanceThreshold", candidateAcceptanceThreshold.getData(), 0.0f, 1.0f))
-         parameterChanged = true;
+         parametersChanged.set();
 
       if (ImGui.collapsingHeader("Target Detection Classes"))
       {
          if (ImGui.button("Select All"))
          {
             targetDetections.addAll(Arrays.asList(YOLOv8DetectionClass.values()));
-            parameterChanged = true;
+            parametersChanged.set();
          }
          ImGui.sameLine();
          if (ImGui.button("Unselect All"))
          {
             targetDetections.clear();
-            parameterChanged = true;
+            parametersChanged.set();
          }
 
          ImGui.indent();
@@ -86,13 +94,20 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
                else
                   targetDetections.add(detectionClass);
 
-               parameterChanged = true;
+               parametersChanged.set();
             }
          }
          ImGui.unindent();
       }
+   }
 
-      if (parameterChanged)
+   @Override
+   public void update()
+   {
+      super.update();
+
+      // Publish a settings message if user changed a setting or enough time has passed since last publication
+      if (parametersChanged.poll() || messagePublishThrottler.run())
       {
          YOLOv8ParametersMessage message = new YOLOv8ParametersMessage();
          message.setConfidenceThreshold(confidenceThreshold.get());
