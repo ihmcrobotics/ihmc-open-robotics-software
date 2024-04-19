@@ -255,7 +255,6 @@ public class KickDynamicPlanner
 
       CapturePointTools.computeDesiredCapturePointPosition(omega, -kickMotionDuration, acpInWorldBeforeImpact, desiredStanceCoP, acpAfterShift);
 
-      //////// Begin "the lines above" ////////
       ALIPTools.computeCenterOfMassPosition(-kickMotionDuration,
                                             omega,
                                             totalMass,
@@ -280,7 +279,6 @@ public class KickDynamicPlanner
       RobotSide supportSide = kickSide.getOppositeSide();
       double shiftDuration = kickParameters.getShiftDuration();
       double exponential = Math.exp(omega * shiftDuration);
-      //      double initialWeightDistribution = inputParameters.getPrekickWeightDistribution();
 
       ReferenceFrame supportSoleFrame = soleFrames.get(supportSide);
       // from the y icp dynamics, we can figure out what the necessary distribution between the stance and swing foot are for weight for the constant cop
