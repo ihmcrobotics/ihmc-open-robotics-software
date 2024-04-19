@@ -31,6 +31,9 @@ import java.util.Map;
 import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.SLEEP;
 import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.STREAMING;
 
+/**
+ * The main class for setting up the IK streaming controller.
+ */
 public class KinematicsStreamingToolboxController extends ToolboxController
 {
    public enum KSTState
@@ -90,7 +93,9 @@ public class KinematicsStreamingToolboxController extends ToolboxController
                            yoGraphicsListRegistry,
                            registry);
 
+      // Sleep state does pretty much nothing.
       sleepState = new KSTSleepState(tools);
+      // Streaming state is where the magic happens.
       streamingState = new KSTStreamingState(tools);
 
       stateMachine = createStateMachine(time);

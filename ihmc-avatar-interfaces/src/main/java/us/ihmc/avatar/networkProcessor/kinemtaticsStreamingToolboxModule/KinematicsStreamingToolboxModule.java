@@ -26,6 +26,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class is a toolbox module that provides the ability to stream kinematics commands to the robot.
+ * <p>
+ * It's useful to understand the API of the IK streaming.
+ * </p>
+ * <p>
+ * Typically extended for each robot, the final implementation contains a main to run as a standalone app.
+ * </p>
+ */
 public class KinematicsStreamingToolboxModule extends ToolboxModule
 {
    protected final KinematicsStreamingToolboxController controller;
