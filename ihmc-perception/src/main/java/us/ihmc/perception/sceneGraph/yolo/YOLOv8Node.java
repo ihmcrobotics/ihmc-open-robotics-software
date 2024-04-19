@@ -44,7 +44,7 @@ public class YOLOv8Node extends DetectableSceneNode
    private Pose3D filteredObjectPose;
    private final RigidBodyTransform visualTransformToObjectPose = new RigidBodyTransform();
 
-   private double alpha = 0.15;
+   private double alpha = 0.30;
 
    public YOLOv8Node(long id, String name, YOLOv8DetectionClass detectionClass, List<Point3D32> objectPointCloud, Point3D32 objectCentroid)
    {
