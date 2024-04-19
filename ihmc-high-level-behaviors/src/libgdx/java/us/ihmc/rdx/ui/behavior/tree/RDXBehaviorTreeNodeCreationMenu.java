@@ -10,6 +10,7 @@ import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
@@ -84,12 +85,22 @@ public class RDXBehaviorTreeNodeCreationMenu
          {
             if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
             {
-               RDXBehaviorTreeNode<?, ?> loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, topologyOperationQueue);
+               try
+               {
+                  RDXBehaviorTreeNode<?, ?> loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, topologyOperationQueue);
+                  BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
+                        = BehaviorTreeNodeInsertionDefinition.build(loadedNode, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
 
-               BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
-                   = BehaviorTreeNodeInsertionDefinition.build(loadedNode, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
-
-               complete(insertionDefinition);
+                  complete(insertionDefinition);
+               }
+               catch (Exception e)
+               {
+                  LogTools.error("""
+                                 Error loading {}.
+                                 Please run the JSON sanitizer in debug mode with the NullPointerException breakpoint enabled.
+                                 Error: {}
+                                 """, textToDisplay, e.getMessage());
+               }
             }
          }
 
@@ -244,7 +255,15 @@ public class RDXBehaviorTreeNodeCreationMenu
       indexedTreeFiles.clear();
       for (WorkspaceResourceFile queryContainedFile : treeFilesDirectory.queryContainedFiles())
       {
-         indexedTreeFiles.add(new RDXAvailableBehaviorTreeFile(queryContainedFile, referenceFrameLibrary));
+         RDXAvailableBehaviorTreeFile treeFile = new RDXAvailableBehaviorTreeFile(queryContainedFile, referenceFrameLibrary);
+         if (treeFile.getName() != null && treeFile.getNotes() != null)
+         {
+            indexedTreeFiles.add(treeFile);
+         }
+         else
+         {
+            LogTools.error("Failed to load {}", queryContainedFile.getFileName());
+         }
       }
    }
 }

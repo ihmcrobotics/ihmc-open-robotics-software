@@ -41,6 +41,7 @@ import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8DetectionManager;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -104,8 +105,9 @@ public class PerceptionAndAutonomyProcess
    private static final ROS2Topic<ImageMessage> BLACKFLY_IMAGE_TOPIC = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT);
 
    private final ROS2Helper ros2Helper;
-   private final Supplier<ReferenceFrame> ousterFrameSupplier;
+   private final Supplier<ReferenceFrame> zedFrameSupplier;
    private final Supplier<ReferenceFrame> realsenseFrameSupplier;
+   private final Supplier<ReferenceFrame> ousterFrameSupplier;
 
    private ROS2DemandGraphNode zedPointCloudDemandNode;
    private ROS2DemandGraphNode zedColorDemandNode;
@@ -187,8 +189,9 @@ public class PerceptionAndAutonomyProcess
                                        ReferenceFrame zed2iLeftCameraFrame)
    {
       this.ros2Helper = ros2Helper;
-      this.ousterFrameSupplier = ousterFrameSupplier;
+      this.zedFrameSupplier = zedFrameSupplier;
       this.realsenseFrameSupplier = realsenseFrameSupplier;
+      this.ousterFrameSupplier = ousterFrameSupplier;
 
       initializeDependencyGraph(ros2Helper);
 
@@ -511,18 +514,18 @@ public class PerceptionAndAutonomyProcess
 
    public void updatePlanarRegions()
    {
-      if (realsenseDepthImage != null && realsenseDepthImage.isAvailable() && planarRegionsDemandNode.isDemanded())
+      if (zedDepthImage != null && zedDepthImage.isAvailable() && planarRegionsDemandNode.isDemanded())
       {
-         RawImage latestRealsenseDepthImage = realsenseDepthImage.get();
+         RawImage latestZEDDepthImage = zedDepthImage.get();
 
          if (planarRegionsExtractor == null)
          {
-            int imageHeight = latestRealsenseDepthImage.getImageHeight();
-            int imageWidth = latestRealsenseDepthImage.getImageWidth();
-            double fx = latestRealsenseDepthImage.getFocalLengthX();
-            double fy = latestRealsenseDepthImage.getFocalLengthY();
-            double cx = latestRealsenseDepthImage.getPrincipalPointX();
-            double cy = latestRealsenseDepthImage.getPrincipalPointY();
+            int imageHeight = latestZEDDepthImage.getImageHeight();
+            int imageWidth = latestZEDDepthImage.getImageWidth();
+            double fx = latestZEDDepthImage.getFocalLengthX();
+            double fy = latestZEDDepthImage.getFocalLengthY();
+            double cx = latestZEDDepthImage.getPrincipalPointX();
+            double cy = latestZEDDepthImage.getPrincipalPointY();
             planarRegionsExtractor = new RapidPlanarRegionsExtractor(openCLManager,
                                                                      imageHeight,
                                                                      imageWidth,
@@ -537,19 +540,21 @@ public class PerceptionAndAutonomyProcess
          FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
 
          // TODO: Get rid of BytedecoImage, RapidPlanarRegionsExtractor requires it
-         BytedecoImage bytedecoImage = new BytedecoImage(latestRealsenseDepthImage.getCpuImageMat());
+         BytedecoImage bytedecoImage = new BytedecoImage(latestZEDDepthImage.getCpuImageMat());
          bytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-         planarRegionsExtractor.update(bytedecoImage, realsenseFrameSupplier.get(), framePlanarRegionsList);
+         planarRegionsExtractor.update(bytedecoImage, zedFrameSupplier.get(), framePlanarRegionsList);
          planarRegionsExtractor.setProcessing(false);
          bytedecoImage.destroy(openCLManager);
 
          PlanarRegionsList planarRegionsInWorldFrame = framePlanarRegionsList.getPlanarRegionsList().copy();
-         planarRegionsInWorldFrame.applyTransform(realsenseFrameSupplier.get().getTransformToWorldFrame());
+         planarRegionsInWorldFrame.applyTransform(zedFrameSupplier.get().getTransformToWorldFrame());
 
          if (doorYoloNode != null)
             doorYoloNode.updatePlanarRegions(planarRegionsInWorldFrame, ros2Helper);
 
-         latestRealsenseDepthImage.release();
+         PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
+
+         latestZEDDepthImage.release();
       }
    }
 
@@ -578,36 +583,26 @@ public class PerceptionAndAutonomyProcess
       zedPointCloudDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
       zedDepthDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_DEPTH);
       zedColorDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_COLOR);
-
       realsenseDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
-
       ousterDepthDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_OUSTER_DEPTH);
       ousterHeightMapDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
       ousterLidarScanDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_LIDAR_SCAN);
-
       for (RobotSide side : RobotSide.values)
          blackflyImageDemandNodes.put(side, new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(side)));
-      blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(ousterDepthDemandNode);
-
       arUcoDetectionDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ARUCO);
-
       centerposeDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_CENTERPOSE);
-
       yoloZEDDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_YOLO_ZED);
       yoloRealsenseDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_YOLO_REALSENSE);
-
       planarRegionsDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_PLANAR_REGIONS);
-      ousterDepthDemandNode.addDependents(planarRegionsDemandNode);
 
       // build the graph
-      zedDepthDemandNode.addDependents(yoloZEDDemandNode);
-      zedColorDemandNode.addDependents(yoloZEDDemandNode);
-      zedDepthDemandNode.addDependents(zedPointCloudDemandNode);
+      blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(ousterDepthDemandNode); // For point cloud coloring
+      zedDepthDemandNode.addDependents(planarRegionsDemandNode); // Using ZED for planar regions
+      zedDepthDemandNode.addDependents(zedPointCloudDemandNode); // Used by global visualizer to demand color & depth
       zedColorDemandNode.addDependents(zedPointCloudDemandNode, centerposeDemandNode);
-
+      planarRegionsDemandNode.addDependents(yoloZEDDemandNode); // Planar region used for door detection
       realsenseDemandNode.addDependents(yoloRealsenseDemandNode);
-
-      blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(arUcoDetectionDemandNode);
+      blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(arUcoDetectionDemandNode); // ArUco set to use Blackfly images
    }
 
    /*

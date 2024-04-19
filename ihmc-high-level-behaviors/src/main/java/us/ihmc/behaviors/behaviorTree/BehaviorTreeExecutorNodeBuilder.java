@@ -65,7 +65,7 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       }
       if (nodeType == DoorTraversalDefinition.class)
       {
-         return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory, syncedRobot, sceneGraph);
+         return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
       }
       if (nodeType == ChestOrientationActionDefinition.class)
       {
