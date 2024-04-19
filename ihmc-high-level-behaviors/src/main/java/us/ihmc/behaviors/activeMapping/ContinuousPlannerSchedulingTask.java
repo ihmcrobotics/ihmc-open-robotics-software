@@ -1,12 +1,14 @@
 package us.ihmc.behaviors.activeMapping;
 
 import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepQueueStatusMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -33,14 +35,13 @@ import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ContinuousPlannerSchedulingTask
 {
-   private final static int MAX_STEPS_PER_SESSION = 20;
+   private final static int MAX_STEPS_PER_SESSION = 50;
    private final static long CONTINUOUS_PLANNING_DELAY_MS = 16;
 
    private ContinuousWalkingState state = ContinuousWalkingState.NOT_STARTED;
