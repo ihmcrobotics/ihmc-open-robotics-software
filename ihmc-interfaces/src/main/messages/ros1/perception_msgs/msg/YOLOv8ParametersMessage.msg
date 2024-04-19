@@ -10,4 +10,7 @@ float32 segmentation_threshold
 # Percentage of updates a candidate must be detected in to be accepted
 float32 candidate_acceptance_threshold
 
+# List of YOLOv8DetectionClass values that YOLO should detect
+int8[] target_detection_classes
+
 

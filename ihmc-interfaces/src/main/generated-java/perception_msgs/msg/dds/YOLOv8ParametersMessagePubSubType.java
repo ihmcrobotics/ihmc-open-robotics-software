@@ -15,7 +15,7 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "85922194f776f2eadae82de9c7b57041b7156864458f8f9f00d8529f8ac096bf";
+   		return "1ace564eb205859a161234c4b74df0b2d523dd1be241e487c5f4f2f8535af970";
    }
    
    @Override
@@ -60,6 +60,8 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -85,6 +87,10 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getTargetDetectionClasses().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -99,6 +105,10 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       cdr.write_type_5(data.getCandidateAcceptanceThreshold());
 
+      if(data.getTargetDetectionClasses().size() <= 100)
+      cdr.write_type_e(data.getTargetDetectionClasses());else
+          throw new RuntimeException("target_detection_classes field exceeds the maximum length");
+
    }
 
    public static void read(perception_msgs.msg.dds.YOLOv8ParametersMessage data, us.ihmc.idl.CDR cdr)
@@ -111,6 +121,7 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
       	
       data.setCandidateAcceptanceThreshold(cdr.read_type_5());
       	
+      cdr.read_type_e(data.getTargetDetectionClasses());	
 
    }
 
@@ -121,6 +132,7 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
       ser.write_type_5("non_maximum_suppression_threshold", data.getNonMaximumSuppressionThreshold());
       ser.write_type_5("segmentation_threshold", data.getSegmentationThreshold());
       ser.write_type_5("candidate_acceptance_threshold", data.getCandidateAcceptanceThreshold());
+      ser.write_type_e("target_detection_classes", data.getTargetDetectionClasses());
    }
 
    @Override
@@ -130,6 +142,7 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
       data.setNonMaximumSuppressionThreshold(ser.read_type_5("non_maximum_suppression_threshold"));
       data.setSegmentationThreshold(ser.read_type_5("segmentation_threshold"));
       data.setCandidateAcceptanceThreshold(ser.read_type_5("candidate_acceptance_threshold"));
+      ser.read_type_e("target_detection_classes", data.getTargetDetectionClasses());
    }
 
    public static void staticCopy(perception_msgs.msg.dds.YOLOv8ParametersMessage src, perception_msgs.msg.dds.YOLOv8ParametersMessage dest)
