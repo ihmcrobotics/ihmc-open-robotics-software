@@ -10,6 +10,7 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.tools.thread.Throttler;
 
@@ -84,10 +85,9 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
             parametersChanged.set();
          }
 
-         ImGui.indent();
          for (YOLOv8DetectionClass detectionClass : YOLOv8DetectionClass.values())
          {
-            if (ImGui.checkbox(detectionClass.toString(), targetDetections.contains(detectionClass)))
+            if (ImGuiTools.smallCheckbox(detectionClass.toString(), targetDetections.contains(detectionClass)))
             {
                if (targetDetections.contains(detectionClass))
                   targetDetections.remove(detectionClass);
@@ -97,7 +97,6 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
                parametersChanged.set();
             }
          }
-         ImGui.unindent();
       }
    }
 

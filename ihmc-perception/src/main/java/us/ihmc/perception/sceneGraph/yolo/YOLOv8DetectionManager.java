@@ -56,7 +56,7 @@ public class YOLOv8DetectionManager
    private float yoloSegmentationThreshold = 0.0f;
    private float candidateAcceptanceThreshold = 0.6f;
 
-   private final Set<YOLOv8DetectionClass> targetDetections = new HashSet<>();
+   private Set<YOLOv8DetectionClass> targetDetections = new HashSet<>();
 
    private ReferenceFrame robotFrame = null;
 
@@ -77,9 +77,12 @@ public class YOLOv8DetectionManager
          yoloSegmentationThreshold = parametersMessage.getSegmentationThreshold();
          candidateAcceptanceThreshold = parametersMessage.getCandidateAcceptanceThreshold();
 
-         targetDetections.clear();
+         // Create a new set of target detections to use
+         Set<YOLOv8DetectionClass> newTargetDetections = new HashSet<>(parametersMessage.getTargetDetectionClasses().size());
          for (int i = 0; i < parametersMessage.getTargetDetectionClasses().size(); ++i)
-            targetDetections.add(YOLOv8DetectionClass.fromByte(parametersMessage.getTargetDetectionClasses().get(i)));
+            newTargetDetections.add(YOLOv8DetectionClass.fromByte(parametersMessage.getTargetDetectionClasses().get(i)));
+
+         targetDetections = newTargetDetections;
       });
    }
 
