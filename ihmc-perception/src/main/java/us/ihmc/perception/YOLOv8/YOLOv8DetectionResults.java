@@ -75,6 +75,24 @@ public class YOLOv8DetectionResults
       return segmentationImages;
    }
 
+   public Map<YOLOv8Detection, RawImage> getTargetSegmentationImages(float maskThreshold, Set<YOLOv8DetectionClass> targetClasses)
+   {
+      Map<YOLOv8Detection, RawImage> segmentationImages = new HashMap<>();
+
+      for (YOLOv8Detection detection : detections)
+      {
+         if (targetClasses.contains(detection.objectClass()))
+         {
+            Mat floatMaskMat = getFloatMaskMat(detection);
+            Mat booleanMaskMat = getBooleanMaskMat(detection, floatMaskMat, maskThreshold);
+            segmentationImages.put(detection, createRawImageWithMat(booleanMaskMat));
+            floatMaskMat.close();
+         }
+      }
+
+      return segmentationImages;
+   }
+
    public Map<YOLOv8Detection, RawImage> getICPSegmentationImages(float maskThreshold)
    {
       Map<YOLOv8Detection, RawImage> segmentationImages = new HashMap<>();
