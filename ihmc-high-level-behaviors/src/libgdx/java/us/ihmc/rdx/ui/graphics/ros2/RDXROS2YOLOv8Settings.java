@@ -3,7 +3,6 @@ package us.ihmc.rdx.ui.graphics.ros2;
 import imgui.ImGui;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
-import org.apache.commons.lang.ArrayUtils;
 import perception_msgs.msg.dds.YOLOv8ParametersMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
@@ -114,10 +113,9 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
          message.setSegmentationThreshold(maskThreshold.get());
          message.setCandidateAcceptanceThreshold(candidateAcceptanceThreshold.get());
 
-         // Conversion of Set<YOLOv8DetectionClass> -> Stream<byte> -> Byte[] -> byte[]
-         byte[] targetDetectionArray = ArrayUtils.toPrimitive(targetDetections.stream().map(YOLOv8DetectionClass::toByte).toArray(Byte[]::new));
          message.getTargetDetectionClasses().clear();
-         message.getTargetDetectionClasses().addAll(targetDetectionArray);
+         for (YOLOv8DetectionClass targetDetection : targetDetections)
+            message.getTargetDetectionClasses().add(targetDetection.toByte());
 
          ros2.publish(PerceptionAPI.YOLO_PARAMETERS, message);
       }
