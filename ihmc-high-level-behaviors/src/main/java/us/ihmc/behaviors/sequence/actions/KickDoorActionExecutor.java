@@ -2,9 +2,8 @@ package us.ihmc.behaviors.sequence.actions;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import controller_msgs.msg.dds.HighLevelStateMessage;
-import controller_msgs.msg.dds.TriggerKickMessage;
+import controller_msgs.msg.dds.KickDoorMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
@@ -16,11 +15,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.tools.NonWallTimer;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -41,7 +38,7 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
    private boolean squareUpFootstepsSent = false;
 
    private final NonWallTimer stopwatch = new NonWallTimer();
-   private TriggerKickMessage kickMessage = new TriggerKickMessage();
+   private KickDoorMessage kickMessage = new KickDoorMessage();
    private final FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
 
    public KickDoorActionExecutor(long id,
@@ -193,7 +190,7 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
       kickMessage.setRobotSide(kickSide.toByte());
       kickMessage.setKickHeight(definition.getKickHeight());
       kickMessage.setKickImpulse(definition.getKickImpulse());
-      kickMessage.setKickTargetDistance( definition.getKickTargetDistance());
+      kickMessage.setKickTargetDistance(definition.getKickTargetDistance());
       kickMessage.setPrekickWeightDistribution(definition.getPrekickWeightDistribution());
    }
 

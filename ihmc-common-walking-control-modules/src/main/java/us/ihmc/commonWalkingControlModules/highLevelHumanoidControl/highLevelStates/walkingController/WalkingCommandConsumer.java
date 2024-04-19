@@ -123,7 +123,7 @@ public class WalkingCommandConsumer
       commandsToRegister.add(CenterOfMassTrajectoryCommand.class);
       commandsToRegister.add(AbortWalkingCommand.class);
       commandsToRegister.add(PrepareForLocomotionCommand.class);
-      commandsToRegister.add(TriggerKickCommand.class);
+      commandsToRegister.add(KickDoorCommand.class);
       commandsToRegister.add(DirectionalControlInputCommand.class);
       commandsToRegister.add(FastWalkingGaitParametersCommand.class);
 
@@ -573,12 +573,12 @@ public class WalkingCommandConsumer
       abortWalkingRequested.set(commandConsumerWithDelayBuffers.pollNewestCommand(AbortWalkingCommand.class).isAbortWalkingRequested());
    }
 
-   public TriggerKickCommand consumeTriggerKickCommands()
+   public KickDoorCommand consumeTriggerKickCommands()
    {
-      if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(TriggerKickCommand.class))
+      if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(KickDoorCommand.class))
          return null;
 
-      TriggerKickCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(TriggerKickCommand.class);
+      KickDoorCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(KickDoorCommand.class);
       return command;
    }
 

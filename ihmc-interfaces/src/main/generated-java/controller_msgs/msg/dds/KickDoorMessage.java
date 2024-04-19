@@ -10,7 +10,7 @@ import us.ihmc.pubsub.TopicDataType;
        * This message is part of the IHMC whole-body controller API.
        * This message is used to trigger a donkey (back) kick. The robot should be in an appropriate position to execute the kick.
        */
-public class TriggerKickMessage extends Packet<TriggerKickMessage> implements Settable<TriggerKickMessage>, EpsilonComparable<TriggerKickMessage>
+public class KickDoorMessage extends Packet<KickDoorMessage> implements Settable<KickDoorMessage>, EpsilonComparable<KickDoorMessage>
 {
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
@@ -43,17 +43,17 @@ public class TriggerKickMessage extends Packet<TriggerKickMessage> implements Se
             */
    public double prekick_weight_distribution_;
 
-   public TriggerKickMessage()
+   public KickDoorMessage()
    {
    }
 
-   public TriggerKickMessage(TriggerKickMessage other)
+   public KickDoorMessage(KickDoorMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(TriggerKickMessage other)
+   public void set(KickDoorMessage other)
    {
       sequence_id_ = other.sequence_id_;
 
@@ -177,19 +177,19 @@ public class TriggerKickMessage extends Packet<TriggerKickMessage> implements Se
    }
 
 
-   public static Supplier<TriggerKickMessagePubSubType> getPubSubType()
+   public static Supplier<KickDoorMessagePubSubType> getPubSubType()
    {
-      return TriggerKickMessagePubSubType::new;
+      return KickDoorMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return TriggerKickMessagePubSubType::new;
+      return KickDoorMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(TriggerKickMessage other, double epsilon)
+   public boolean epsilonEquals(KickDoorMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -217,9 +217,9 @@ public class TriggerKickMessage extends Packet<TriggerKickMessage> implements Se
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof TriggerKickMessage)) return false;
+      if(!(other instanceof KickDoorMessage)) return false;
 
-      TriggerKickMessage otherMyClass = (TriggerKickMessage) other;
+      KickDoorMessage otherMyClass = (KickDoorMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
@@ -244,7 +244,7 @@ public class TriggerKickMessage extends Packet<TriggerKickMessage> implements Se
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("TriggerKickMessage {");
+      builder.append("KickDoorMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("robot_side=");

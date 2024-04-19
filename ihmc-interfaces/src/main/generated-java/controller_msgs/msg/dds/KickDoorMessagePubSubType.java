@@ -2,20 +2,20 @@ package controller_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "TriggerKickMessage" defined in "TriggerKickMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "KickDoorMessage" defined in "KickDoorMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from TriggerKickMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit TriggerKickMessage_.idl instead.
+* This file was automatically generated from KickDoorMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit KickDoorMessage_.idl instead.
 *
 */
-public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.TriggerKickMessage>
+public class KickDoorMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.KickDoorMessage>
 {
-   public static final java.lang.String name = "controller_msgs::msg::dds_::TriggerKickMessage_";
+   public static final java.lang.String name = "controller_msgs::msg::dds_::KickDoorMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "60d1adda16bc13fae6bca562cfca24a13f70658c3d5a25cb2f68dd8ba55645d2";
+   		return "b1357ce9e113f26ceb2843a82d4f242f1fc1bb1d286d3b3469528444c5669609";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.TriggerKickMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.KickDoorMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.TriggerKickMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.KickDoorMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -70,12 +70,12 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.TriggerKickMessage data)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.KickDoorMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.TriggerKickMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.KickDoorMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -104,7 +104,7 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       return current_alignment - initial_alignment;
    }
 
-   public static void write(controller_msgs.msg.dds.TriggerKickMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(controller_msgs.msg.dds.KickDoorMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_4(data.getSequenceId());
 
@@ -122,7 +122,7 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
 
    }
 
-   public static void read(controller_msgs.msg.dds.TriggerKickMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(controller_msgs.msg.dds.KickDoorMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
       	
@@ -142,7 +142,7 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    }
 
    @Override
-   public final void serialize(controller_msgs.msg.dds.TriggerKickMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(controller_msgs.msg.dds.KickDoorMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("robot_side", data.getRobotSide());
@@ -154,7 +154,7 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.TriggerKickMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.KickDoorMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setRobotSide(ser.read_type_9("robot_side"));
@@ -165,15 +165,15 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       data.setPrekickWeightDistribution(ser.read_type_6("prekick_weight_distribution"));
    }
 
-   public static void staticCopy(controller_msgs.msg.dds.TriggerKickMessage src, controller_msgs.msg.dds.TriggerKickMessage dest)
+   public static void staticCopy(controller_msgs.msg.dds.KickDoorMessage src, controller_msgs.msg.dds.KickDoorMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public controller_msgs.msg.dds.TriggerKickMessage createData()
+   public controller_msgs.msg.dds.KickDoorMessage createData()
    {
-      return new controller_msgs.msg.dds.TriggerKickMessage();
+      return new controller_msgs.msg.dds.KickDoorMessage();
    }
    @Override
    public int getTypeSize()
@@ -187,24 +187,24 @@ public class TriggerKickMessagePubSubType implements us.ihmc.pubsub.TopicDataTyp
       return name;
    }
    
-   public void serialize(controller_msgs.msg.dds.TriggerKickMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(controller_msgs.msg.dds.KickDoorMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(controller_msgs.msg.dds.TriggerKickMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(controller_msgs.msg.dds.KickDoorMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(controller_msgs.msg.dds.TriggerKickMessage src, controller_msgs.msg.dds.TriggerKickMessage dest)
+   public void copy(controller_msgs.msg.dds.KickDoorMessage src, controller_msgs.msg.dds.KickDoorMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public TriggerKickMessagePubSubType newInstance()
+   public KickDoorMessagePubSubType newInstance()
    {
-      return new TriggerKickMessagePubSubType();
+      return new KickDoorMessagePubSubType();
    }
 }

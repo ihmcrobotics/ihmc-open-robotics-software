@@ -1,5 +1,5 @@
-#ifndef __controller_msgs__msg__TriggerKickMessage__idl__
-#define __controller_msgs__msg__TriggerKickMessage__idl__
+#ifndef __controller_msgs__msg__KickDoorMessage__idl__
+#define __controller_msgs__msg__KickDoorMessage__idl__
 
 module controller_msgs
 {
@@ -18,8 +18,8 @@ module controller_msgs
        * This message is part of the IHMC whole-body controller API.
        * This message is used to trigger a donkey (back) kick. The robot should be in an appropriate position to execute the kick.
        */
-      @TypeCode(type="controller_msgs::msg::dds_::TriggerKickMessage_")
-      struct TriggerKickMessage
+      @TypeCode(type="controller_msgs::msg::dds_::KickDoorMessage_")
+      struct KickDoorMessage
       {
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.

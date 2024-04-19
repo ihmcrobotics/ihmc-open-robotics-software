@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.donkeyKick;
 
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.TriggerKickCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.KickDoorCommand;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -24,7 +24,7 @@ public class KickInputParameters
       kickTargetDistance = new YoDouble("inputKickTargetDistance", registry);
       prekickWeightDistribution = new YoDouble("inputPrekickWeightDistribution", registry);
 
-      // These default parameters are generally overwritten with set(TriggerKickCommand kickMessage)
+      // These default parameters are generally overwritten with set(KickDoorCommand kickMessage)
       kickFootSide.set(RobotSide.LEFT);
       kickHeight.set(0.55);
       kickImpulse.set(55.0);
@@ -85,7 +85,7 @@ public class KickInputParameters
       this.prekickWeightDistribution.set(prekickWeightDistribution);
    }
 
-   public void set(TriggerKickCommand kickMessage)
+   public void set(KickDoorCommand kickMessage)
    {
       setKickFootSide(kickMessage.getRobotSide());
       setKickHeight(kickMessage.getKickHeight());

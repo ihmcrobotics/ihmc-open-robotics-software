@@ -1,10 +1,10 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.TriggerKickMessage;
+import controller_msgs.msg.dds.KickDoorMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class TriggerKickCommand implements Command<TriggerKickCommand, TriggerKickMessage>
+public class KickDoorCommand implements Command<KickDoorCommand, KickDoorMessage>
 {
    private long sequenceId;
    private boolean triggerKickRequested = false;
@@ -27,7 +27,7 @@ public class TriggerKickCommand implements Command<TriggerKickCommand, TriggerKi
    }
 
    @Override
-   public void set(TriggerKickCommand other)
+   public void set(KickDoorCommand other)
    {
       sequenceId = other.sequenceId;
       triggerKickRequested = other.triggerKickRequested;
@@ -39,7 +39,7 @@ public class TriggerKickCommand implements Command<TriggerKickCommand, TriggerKi
    }
 
    @Override
-   public void setFromMessage(TriggerKickMessage message)
+   public void setFromMessage(KickDoorMessage message)
    {
       sequenceId = message.getSequenceId();
       triggerKickRequested = true;
@@ -106,9 +106,9 @@ public class TriggerKickCommand implements Command<TriggerKickCommand, TriggerKi
    }
 
    @Override
-   public Class<TriggerKickMessage> getMessageClass()
+   public Class<KickDoorMessage> getMessageClass()
    {
-      return TriggerKickMessage.class;
+      return KickDoorMessage.class;
    }
 
    @Override
