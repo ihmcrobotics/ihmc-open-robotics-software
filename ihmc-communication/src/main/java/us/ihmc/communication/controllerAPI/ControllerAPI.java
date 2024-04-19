@@ -2,7 +2,9 @@ package us.ihmc.communication.controllerAPI;
 
 import controller_msgs.msg.dds.*;
 import ihmc_common_msgs.msg.dds.MessageCollection;
+import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -71,6 +73,20 @@ public final class ControllerAPI
       // Command supported by the joint-space controller JointspacePositionControllerState
       inputMessageClasses.add(WholeBodyJointspaceTrajectoryMessage.class);
 
+      // Commands supported by the kinematics toolbox
+      inputMessageClasses.add(KinematicsToolboxCenterOfMassMessage.class);
+      inputMessageClasses.add(KinematicsToolboxRigidBodyMessage.class);
+      inputMessageClasses.add(KinematicsToolboxOneDoFJointMessage.class);
+      inputMessageClasses.add(KinematicsToolboxConfigurationMessage.class);
+      inputMessageClasses.add(KinematicsToolboxSupportRegionMessage.class);
+      inputMessageClasses.add(KinematicsToolboxPrivilegedConfigurationMessage.class);
+      inputMessageClasses.add(KinematicsToolboxInputCollectionMessage.class);
+      inputMessageClasses.add(HumanoidKinematicsToolboxConfigurationMessage.class);
+
+      // Commands supported by the kinematics streaming toolbox
+      inputMessageClasses.add(KinematicsStreamingToolboxInputMessage.class);
+      inputMessageClasses.add(KinematicsStreamingToolboxConfigurationMessage.class);
+
       // Input messages that don't have a corresponding command
       inputMessageClasses.add(MessageCollection.class);
       inputMessageClasses.add(WholeBodyTrajectoryMessage.class);
@@ -93,6 +109,11 @@ public final class ControllerAPI
       outputMessageClasses.add(FootstepQueueStatusMessage.class);
       outputMessageClasses.add(QueuedFootstepStatusMessage.class);
       outputMessageClasses.add(WrenchTrajectoryStatusMessage.class);
+      outputMessageClasses.add(InvalidPacketNotificationPacket.class);
+      outputMessageClasses.add(MessageCollectionNotification.class);
+
+      // Statuses supported by the kinematics toolbox
+      outputMessageClasses.add(KinematicsToolboxOutputStatus.class);
 
       // Statuses supported by multi-contact controller, not in this repo
       outputMessageClasses.add(MultiContactBalanceStatus.class);

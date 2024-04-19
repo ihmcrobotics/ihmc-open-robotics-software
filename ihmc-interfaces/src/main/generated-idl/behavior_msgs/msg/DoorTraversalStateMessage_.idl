@@ -21,6 +21,8 @@ module behavior_msgs
          * Definition
          */
         behavior_msgs::msg::dds::DoorTraversalDefinitionMessage definition;
+        double door_hinge_joint_angle;
+        double door_handle_distance_from_start;
       };
     };
   };

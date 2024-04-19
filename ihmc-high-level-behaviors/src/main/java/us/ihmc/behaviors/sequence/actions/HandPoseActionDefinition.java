@@ -205,20 +205,28 @@ public class HandPoseActionDefinition extends ActionNodeDefinition implements Si
 
       unchanged &= side.getValue() == onDiskSide;
       unchanged &= trajectoryDuration.getValue() == onDiskTrajectoryDuration;
-      unchanged &= holdPoseInWorldLater.getValue() == onDiskHoldPoseInWorldLater;
-      unchanged &= jointspaceOnly.getValue() == onDiskJointspaceOnly;
       unchanged &= usePredefinedJointAngles.getValue() == onDiskUsePredefinedJointAngles;
-      unchanged &= preset.getValue() == onDiskPreset;
-      if (preset.getValue() == null)
-         for (int i = 0; i < jointAngles.getLength(); i++)
-            unchanged &= jointAngles.getValueReadOnly(i) == onDiskJointAngles[i];
-      unchanged &= palmParentFrameName.getValue().equals(onDiskPalmParentFrameName);
-      unchanged &= palmTransformToParent.getValueReadOnly().equals(onDiskPalmTransformToParent);
-      unchanged &= linearPositionWeight.getValue() == onDiskLinearPositionWeight;
-      unchanged &= angularPositionWeight.getValue() == onDiskAngularPositionWeight;
+
+      if (usePredefinedJointAngles.getValue()) // Only mark changed for relevant fields
+      {
+         unchanged &= preset.getValue() == onDiskPreset;
+         if (preset.getValue() == null)
+            for (int i = 0; i < jointAngles.getLength(); i++)
+               unchanged &= jointAngles.getValueReadOnly(i) == onDiskJointAngles[i];
+      }
+      else
+      {
+         unchanged &= holdPoseInWorldLater.getValue() == onDiskHoldPoseInWorldLater;
+         unchanged &= jointspaceOnly.getValue() == onDiskJointspaceOnly;
+         unchanged &= palmParentFrameName.getValue().equals(onDiskPalmParentFrameName);
+         unchanged &= palmTransformToParent.getValueReadOnly().equals(onDiskPalmTransformToParent);
+         unchanged &= linearPositionWeight.getValue() == onDiskLinearPositionWeight;
+         unchanged &= angularPositionWeight.getValue() == onDiskAngularPositionWeight;
+         unchanged &= positionErrorTolerance.getValue() == onDiskPositionErrorTolerance;
+         unchanged &= orientationErrorTolerance.getValue() == onDiskOrientationErrorTolerance;
+      }
+
       unchanged &= jointspaceWeight.getValue() == onDiskJointspaceWeight;
-      unchanged &= positionErrorTolerance.getValue() == onDiskPositionErrorTolerance;
-      unchanged &= orientationErrorTolerance.getValue() == onDiskOrientationErrorTolerance;
 
       return !unchanged;
    }
