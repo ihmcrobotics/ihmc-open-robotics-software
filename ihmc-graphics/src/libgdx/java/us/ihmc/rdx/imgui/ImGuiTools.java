@@ -261,6 +261,26 @@ public class ImGuiTools
       return ImGui.sliderScalar(label, ImGuiDataType.U32, imInt, minValue, maxValue, format, imGuiSliderFlags);
    }
 
+   public static boolean smallCheckbox(String label, ImBoolean checked)
+   {
+      float backupFramePaddingX = ImGui.getStyle().getFramePaddingX();
+      float backupFramePaddingY = ImGui.getStyle().getFramePaddingY();
+      ImGui.getStyle().setFramePadding(backupFramePaddingX, 0.0f);
+      boolean pressed = ImGui.checkbox(label, checked);
+      ImGui.getStyle().setFramePadding(backupFramePaddingX, backupFramePaddingY);
+      return pressed;
+   }
+
+   public static boolean smallCheckbox(String label, boolean checked)
+   {
+      float backupFramePaddingX = ImGui.getStyle().getFramePaddingX();
+      float backupFramePaddingY = ImGui.getStyle().getFramePaddingY();
+      ImGui.getStyle().setFramePadding(backupFramePaddingX, 0.0f);
+      boolean pressed = ImGui.checkbox(label, checked);
+      ImGui.getStyle().setFramePadding(backupFramePaddingX, backupFramePaddingY);
+      return pressed;
+   }
+
    /**
     * Returns true if the user presses Enter, but unlike the EnterReturnsTrue flag,
     * using this method, the currently input text can be retrieved without the
