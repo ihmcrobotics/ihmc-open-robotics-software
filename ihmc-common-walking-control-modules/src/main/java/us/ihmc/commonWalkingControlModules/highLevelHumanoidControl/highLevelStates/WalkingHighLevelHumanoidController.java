@@ -189,10 +189,15 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
-         ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
-         RigidBodyBasics handBaseBody = chest != null ? chest : pelvis;
-         RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, handBaseBody, handControlFrame, chestBodyFrame);
-         bodyManagers.add(handManager);
+
+         // FIXME Added this when the robot had only one arm, that means the other hand is null
+         if (hand != null)
+         {
+            ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
+            RigidBodyBasics handBaseBody = chest != null ? chest : pelvis;
+            RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, handBaseBody, handControlFrame, chestBodyFrame);
+            bodyManagers.add(handManager);
+         }
       }
 
       for (RigidBodyControlManager manager : bodyManagers)
