@@ -24,8 +24,8 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
    private final ImBoolean hideChest = new ImBoolean(false);
    private final Supplier<RDXFocusBasedCamera> cameraForTrackingSupplier;
    private RDXFocusBasedCamera cameraForTracking;
-   private final Point3D previousRobotMidFeetUnderPelvis = new Point3D();
-   private final Point3D latestRobotMidFeetUnderPelvis = new Point3D();
+//   private final Point3D previousRobotMidFeetUnderPelvis = new Point3D();
+//   private final Point3D latestRobotMidFeetUnderPelvis = new Point3D();
    private final Point3D robotTranslationDifference = new Point3D();
    private final DRCRobotModel robotModel;
    private final String chestName;
@@ -55,7 +55,7 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
       this.syncedRobot = syncedRobot;
       this.cameraForTrackingSupplier = cameraForTrackingSupplier;
       syncedRobot.addRobotConfigurationDataReceivedCallback(frequencyPlot::recordEvent);
-      previousRobotMidFeetUnderPelvis.setToNaN();
+//      previousRobotMidFeetUnderPelvis.setToNaN();
       chestName = robotModel.getJointMap().getChestName();
    }
 
@@ -76,16 +76,16 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
       {
          super.update();
 
-         if (cameraForTracking != null && trackRobot.get())
-         {
-            latestRobotMidFeetUnderPelvis.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getPosition());
-            if (!previousRobotMidFeetUnderPelvis.containsNaN())
-            {
-               robotTranslationDifference.sub(latestRobotMidFeetUnderPelvis, previousRobotMidFeetUnderPelvis);
-               cameraForTracking.translateCameraFocusPoint(robotTranslationDifference);
-            }
-            previousRobotMidFeetUnderPelvis.set(latestRobotMidFeetUnderPelvis);
-         }
+//         if (cameraForTracking != null && trackRobot.get())
+//         {
+//            latestRobotMidFeetUnderPelvis.set(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getPosition());
+//            if (!previousRobotMidFeetUnderPelvis.containsNaN())
+//            {
+//               robotTranslationDifference.sub(latestRobotMidFeetUnderPelvis, previousRobotMidFeetUnderPelvis);
+//               cameraForTracking.translateCameraFocusPoint(robotTranslationDifference);
+//            }
+//            previousRobotMidFeetUnderPelvis.set(latestRobotMidFeetUnderPelvis);
+//         }
 
          if (hideChest.get())
          {
@@ -119,11 +119,11 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
       ImGuiTools.previousWidgetTooltip("Moves the camera focus point to the robot's current location.\n (Ctrl + P)");
       ImGui.sameLine();
 
-      if (ImGui.checkbox(labels.get("Track robot"), trackRobot))
-      {
-         if (!trackRobot.get())
-            previousRobotMidFeetUnderPelvis.setToNaN();
-      }
+//      if (ImGui.checkbox(labels.get("Track robot"), trackRobot))
+//      {
+//         if (!trackRobot.get())
+//            previousRobotMidFeetUnderPelvis.setToNaN();
+//      }
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Hide chest"), hideChest);
       if (isRobotLoaded() && opacitySlider.render(0.0f, 1.0f))

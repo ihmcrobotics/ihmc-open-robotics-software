@@ -267,13 +267,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       listOfControllableRigidBodies.add(desiredFullRobotModel.getHead());
       listOfControllableRigidBodies.add(desiredFullRobotModel.getChest());
-      listOfControllableRigidBodies.add(desiredFullRobotModel.getPelvis());
+//      listOfControllableRigidBodies.add(desiredFullRobotModel.getPelvis());
 
       for (RobotSide robotSide : RobotSide.values)
       {
          listOfControllableRigidBodies.add(desiredFullRobotModel.getHand(robotSide));
          listOfControllableRigidBodies.add(desiredFullRobotModel.getForearm(robotSide));
-         listOfControllableRigidBodies.add(desiredFullRobotModel.getFoot(robotSide));
+//         listOfControllableRigidBodies.add(desiredFullRobotModel.getFoot(robotSide));
       }
 
       // Some robots may not have some the bodies.
