@@ -136,12 +136,12 @@ def load_and_plot(data, planner, time_horizon, aggregate_data=True):
 
 if __name__ == "__main__":
     # increase font size of everything
-    plt.rc('font', size=14)
-    plt.rc('axes', labelsize=14)
-    plt.rc('xtick', labelsize=14)
-    plt.rc('ytick', labelsize=14)
-    plt.rc('legend', fontsize=14)
-    plt.rc('figure', titlesize=14)
+    plt.rc('font', size=22)
+    plt.rc('axes', labelsize=22)
+    plt.rc('xtick', labelsize=22)
+    plt.rc('ytick', labelsize=22)
+    plt.rc('legend', fontsize=22)
+    plt.rc('figure', titlesize=22)
 
     # increase plot thickness
     plt.rc('lines', linewidth=2)
@@ -157,21 +157,21 @@ if __name__ == "__main__":
 
     file_name = "data/asfp_console_1.txt"
 
-    plt.figure(figsize=(10, 10))
+    plt.figure(figsize=(12, 12))
 
     plot_time_horizon = 0.8
     mcfp_time_horizon = 1.25
     asfp_time_horizon = 1.5
 
-    load_and_plot(data, "ASFP", asfp_time_horizon, aggregate_data=True)
-    load_and_plot(data, "MCFP", mcfp_time_horizon, aggregate_data=True)
+    # load_and_plot(data, "ASFP", asfp_time_horizon, aggregate_data=False)
+    load_and_plot(data, "MCFP", mcfp_time_horizon, aggregate_data=False)
 
 
     plt.xlabel("Time (s)")
     plt.ylabel("Plan Quality Score")
-    # plt.xlim(0, plot_time_horizon)
+    plt.xlim(0, plot_time_horizon)
     # plt.ylim(0, 1.2)
     plt.grid()
-    plt.legend()
+    # plt.legend()
 
     plt.show()
