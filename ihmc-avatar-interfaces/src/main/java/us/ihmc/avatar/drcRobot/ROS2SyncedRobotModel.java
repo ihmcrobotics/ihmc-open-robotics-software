@@ -33,7 +33,8 @@ public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
                                                     robotConfigurationData,
                                                     message ->
                                                     {
-                                                       FullRobotModelUtils.checkJointNameHash(jointNameHash, message.getJointNameHash());
+                                                       // TODO(AM): check reason for mismatch in hash code
+                                                       // FullRobotModelUtils.checkJointNameHash(jointNameHash, message.getJointNameHash());
                                                        return true;
                                                     });
       robotConfigurationDataInput.addCallback(message -> resetDataReceptionTimer());

@@ -197,7 +197,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       {
          if (desiredFullRobotModel.getHand(robotSide) != null)
             setupVisualization(desiredFullRobotModel.getHand(robotSide));
-         setupVisualization(desiredFullRobotModel.getFoot(robotSide));
+         if (desiredFullRobotModel.getFoot(robotSide) != null)
+            setupVisualization(desiredFullRobotModel.getFoot(robotSide));
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -214,7 +215,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          endEffectorToPrimaryBaseMap.put(desiredFullRobotModel.getPelvis(), desiredFullRobotModel.getFoot(robotSide));
       }
 
-      populateDefaultJointLimitReductionFactors();
+//      populateDefaultJointLimitReductionFactors();
    }
 
    /**
@@ -251,13 +252,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       listOfControllableRigidBodies.add(desiredFullRobotModel.getHead());
       listOfControllableRigidBodies.add(desiredFullRobotModel.getChest());
-      listOfControllableRigidBodies.add(desiredFullRobotModel.getPelvis());
+//      listOfControllableRigidBodies.add(desiredFullRobotModel.getPelvis());
 
       for (RobotSide robotSide : RobotSide.values)
       {
          listOfControllableRigidBodies.add(desiredFullRobotModel.getHand(robotSide));
          listOfControllableRigidBodies.add(desiredFullRobotModel.getForearm(robotSide));
-         listOfControllableRigidBodies.add(desiredFullRobotModel.getFoot(robotSide));
+//         listOfControllableRigidBodies.add(desiredFullRobotModel.getFoot(robotSide));
       }
 
       // Some robots may not have some the bodies.

@@ -107,12 +107,6 @@ public class RDXWholeBodyIKManager
             handRigidBodyCommands.put(side, rigidBodyCommand);
          }
 
-         KinematicsToolboxRigidBodyCommand rigidBodyCommand = feetRigidBodyCommands.get(side);
-         rigidBodyCommand.setEndEffector(wholeBodyIKSolver.getDesiredFullRobotModel().getFoot(side));
-         rigidBodyCommand.getControlFramePose().setToZero(wholeBodyIKSolver.getDesiredFullRobotModel().getSoleFrame(side));
-         rigidBodyCommand.getControlFramePose().changeFrame(wholeBodyIKSolver.getDesiredFullRobotModel().getFoot(side).getBodyFixedFrame());
-         rigidBodyCommand.getWeightMatrix().setLinearWeights(20.0, 20.0, 20.0);
-         rigidBodyCommand.getWeightMatrix().setAngularWeights(1.0, 1.0, 1.0);
       }
       chestRigidBodyCommand.setEndEffector(wholeBodyIKSolver.getDesiredFullRobotModel().getChest());
       chestRigidBodyCommand.getControlFramePose().setToZero(wholeBodyIKSolver.getDesiredFullRobotModel().getChest().getParentJoint().getFrameAfterJoint());
