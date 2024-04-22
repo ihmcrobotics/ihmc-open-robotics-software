@@ -443,8 +443,8 @@ public class RDXBaseUI
             ImGui.sameLine();
             if (ImGui.button(labels.get("Reset##FontSize")))
             {
-               settings.setFontSize(imguiFontSize.get());
                imguiFontSize.set(ImGuiTools.DEFAULT_FONT_SIZE);
+               settings.setFontSize(imguiFontSize.get());
                ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
             }
 
