@@ -1,6 +1,5 @@
 package us.ihmc.perception.opencl;
 
-import io.netty.buffer.ByteBuf;
 import org.apache.commons.lang3.StringUtils;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.opencl.*;
@@ -366,6 +365,11 @@ public class OpenCLManager
    {
       OpenCLTools.checkReturnCode(clReleaseMemObject(bufferObject));
       bufferObjects.remove(bufferObject);
+   }
+
+   public void join()
+   {
+      OpenCLTools.checkReturnCode(clFinish(commandQueue));
    }
 
    public void destroy()

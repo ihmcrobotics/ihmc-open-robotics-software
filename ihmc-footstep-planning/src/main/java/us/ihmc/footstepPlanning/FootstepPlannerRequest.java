@@ -535,4 +535,23 @@ public class FootstepPlannerRequest
       if (other.referencePlan != null)
          this.referencePlan = new FootstepPlan(other.referencePlan);
    }
+
+   public String toString()
+   {
+      StringBuilder builder = new StringBuilder();
+
+      builder.append("Footstep Planner Request: [")
+             .append("Stance Side: ").append(this.requestedInitialStanceSide).append(", ")
+             .append("Start Pose (Left): Position: ").append(startFootPoses.get(RobotSide.LEFT).getPosition()).append(", ")
+             .append("Start Pose (Right): Position: ").append(startFootPoses.get(RobotSide.RIGHT).getPosition()).append(", ")
+             .append("Goal Pose (Left): Position: ").append(goalFootPoses.get(RobotSide.LEFT).getPosition()).append(", ")
+             .append("Goal Pose (Right): Position: ").append(goalFootPoses.get(RobotSide.RIGHT).getPosition()).append(", ")
+             .append("Assume Flat Ground: ").append(this.assumeFlatGround).append(", ")
+             .append("Snap Goal Steps: ").append(this.snapGoalSteps).append(", ")
+             .append("Perform AStar Search: ").append(this.performAStarSearch).append(", ")
+             .append("Timeout: ").append(this.timeout);
+
+      builder.append("]\n");
+      return builder.toString();
+   }
 }

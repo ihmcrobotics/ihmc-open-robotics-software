@@ -78,7 +78,7 @@ public class RDXImNodesBehaviorTreeUI
 
    public void renderImGuiWidgets()
    {
-      ImGui.pushFont(ImGuiTools.getNodeFont());
+      ImGui.pushFont(ImGuiTools.getSmallFont());
       ImNodes.beginNodeEditor();
       ArrayList<Pair<Integer, Integer>> links = new ArrayList<>();
       renderNodeAndChildren(rootNode, -1, links);

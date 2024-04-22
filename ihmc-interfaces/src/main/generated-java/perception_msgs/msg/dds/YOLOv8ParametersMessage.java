@@ -21,9 +21,15 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
             * Percentage of updates a candidate must be detected in to be accepted
             */
    public float candidate_acceptance_threshold_;
+   /**
+            * List of YOLOv8DetectionClass values that YOLO should detect
+            */
+   public us.ihmc.idl.IDLSequence.Byte  target_detection_classes_;
 
    public YOLOv8ParametersMessage()
    {
+      target_detection_classes_ = new us.ihmc.idl.IDLSequence.Byte (100, "type_9");
+
    }
 
    public YOLOv8ParametersMessage(YOLOv8ParametersMessage other)
@@ -42,6 +48,7 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
 
       candidate_acceptance_threshold_ = other.candidate_acceptance_threshold_;
 
+      target_detection_classes_.set(other.target_detection_classes_);
    }
 
    /**
@@ -93,6 +100,15 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
    }
 
 
+   /**
+            * List of YOLOv8DetectionClass values that YOLO should detect
+            */
+   public us.ihmc.idl.IDLSequence.Byte  getTargetDetectionClasses()
+   {
+      return target_detection_classes_;
+   }
+
+
    public static Supplier<YOLOv8ParametersMessagePubSubType> getPubSubType()
    {
       return YOLOv8ParametersMessagePubSubType::new;
@@ -118,6 +134,8 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.candidate_acceptance_threshold_, other.candidate_acceptance_threshold_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.target_detection_classes_, other.target_detection_classes_, epsilon)) return false;
+
 
       return true;
    }
@@ -139,6 +157,7 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
 
       if(this.candidate_acceptance_threshold_ != otherMyClass.candidate_acceptance_threshold_) return false;
 
+      if (!this.target_detection_classes_.equals(otherMyClass.target_detection_classes_)) return false;
 
       return true;
    }
@@ -156,7 +175,9 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
       builder.append("segmentation_threshold=");
       builder.append(this.segmentation_threshold_);      builder.append(", ");
       builder.append("candidate_acceptance_threshold=");
-      builder.append(this.candidate_acceptance_threshold_);
+      builder.append(this.candidate_acceptance_threshold_);      builder.append(", ");
+      builder.append("target_detection_classes=");
+      builder.append(this.target_detection_classes_);
       builder.append("}");
       return builder.toString();
    }
