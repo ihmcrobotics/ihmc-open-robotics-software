@@ -3,8 +3,14 @@ package us.ihmc.rdx.imgui;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import imgui.*;
-import imgui.flag.*;
+import imgui.ImFont;
+import imgui.ImGui;
+import imgui.ImGuiIO;
+import imgui.ImGuiStyle;
+import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiConfigFlags;
+import imgui.flag.ImGuiDockNodeFlags;
+import imgui.flag.ImGuiInputTextFlags;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.type.ImString;
@@ -14,16 +20,21 @@ import org.lwjgl.opengl.KHRDebug;
 import org.lwjgl.system.Callback;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.tools.LibGDXApplicationCreator;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.ImGuiConfigurationLocation;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.RDXImGuiLayoutManager;
-import us.ihmc.tools.io.*;
+import us.ihmc.tools.io.HybridResourceDirectory;
+import us.ihmc.tools.io.HybridResourceFile;
+import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.resources.ResourceTools;
 
 import java.nio.file.Path;
-import java.util.*;
+import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 
 public class RDXImGuiWindowAndDockSystem
@@ -180,6 +191,19 @@ public class RDXImGuiWindowAndDockSystem
       }
 
       ImGui.separator();
+
+      // Allow the panel menu to be scrolled with the mouse wheel
+      if (ImGui.isWindowHovered())
+      {
+         ImGuiIO io = ImGui.getIO();
+
+         if (Math.abs(io.getMouseWheel()) >= 1.0f)
+         {
+            io.setMousePos(io.getMousePosX(), io.getMousePosY() + (-io.getMouseWheel() * 20));
+            io.setWantSetMousePos(true);
+         }
+      }
+
       panelManager.renderPanelMenu();
    }
 
