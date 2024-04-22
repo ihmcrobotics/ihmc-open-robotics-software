@@ -13,7 +13,7 @@
     "upperBound" : 400
   },
   "Timeout duration" : {
-    "value" : 0.50276,
+    "value" : 0.03,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
