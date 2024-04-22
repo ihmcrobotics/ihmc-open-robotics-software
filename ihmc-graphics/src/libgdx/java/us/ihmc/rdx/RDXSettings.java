@@ -1,6 +1,7 @@
 package us.ihmc.rdx;
 
 import us.ihmc.log.LogTools;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
 import us.ihmc.tools.IHMCCommonPaths;
 
@@ -28,7 +29,7 @@ public class RDXSettings
    private boolean vsync = false;
    private int foregroundFPSLimit = 240;
    private int libGDXLogLevel = 2;
-   private int fontSize = 13;
+   private int fontSize = ImGuiTools.DEFAULT_FONT_SIZE;
    private String themeName = "LIGHT";
    private float view3DBackgroundShade = RDX3DSceneTools.CLEAR_COLOR;
 
