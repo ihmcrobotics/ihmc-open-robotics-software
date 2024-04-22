@@ -17,6 +17,8 @@ int8 STATIC_RELATIVE_NODE_TYPE=5
 
 int8 PRIMITIVE_RIGID_BODY_NODE_TYPE=6
 
+int8 YOLO_NODE_TYPE=7
+
 # The ID to assign to the next instantiated node
 uint32 next_id
 
@@ -48,5 +50,8 @@ perception_msgs/StaticRelativeSceneNodeMessage[] static_relative_scene_nodes
 
 # Reshapable rigid body scene nodes
 perception_msgs/PrimitiveRigidBodySceneNodeMessage[] primitive_rigid_body_scene_nodes
+
+# YOLO scene nodes
+perception_msgs/YOLOv8NodeMessage[] yolo_scene_nodes
 
 

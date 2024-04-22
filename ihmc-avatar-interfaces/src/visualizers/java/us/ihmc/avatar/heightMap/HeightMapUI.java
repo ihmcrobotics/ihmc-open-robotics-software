@@ -26,7 +26,6 @@ import us.ihmc.perception.gpuHeightMap.HeightMapKernel;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapFilterParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
@@ -76,7 +75,7 @@ public abstract class HeightMapUI extends ApplicationNoModule
       DRCRobotModel robotModel = getRobotModel();
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, PerceptionAPI.OUSTER_LIDAR_SCAN, ROS2QosProfile.BEST_EFFORT(), new NewMessageListener<LidarScanMessage>()
+      ros2Node.createSubscription(PerceptionAPI.OUSTER_LIDAR_SCAN, new NewMessageListener<LidarScanMessage>()
       {
          @Override
          public void onNewDataMessage(Subscriber<LidarScanMessage> subscriber)
@@ -98,8 +97,8 @@ public abstract class HeightMapUI extends ApplicationNoModule
 
             messager.submitMessage(HeightMapMessagerAPI.PointCloudData, inputData);
          }
-      } );
-      /*
+      });
+   /*
       ROS2Tools.createCallbackSubscription(ros2Node, PerceptionAPI.OUSTER_DEPTH_IMAGE, ROS2QosProfile.BEST_EFFORT(), new NewMessageListener<ImageMessage>()
       {
          @Override

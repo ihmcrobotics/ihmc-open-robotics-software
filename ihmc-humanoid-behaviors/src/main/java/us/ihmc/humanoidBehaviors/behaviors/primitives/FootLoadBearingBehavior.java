@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
 import controller_msgs.msg.dds.FootLoadBearingMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -10,7 +10,7 @@ public class FootLoadBearingBehavior extends AbstractBehavior
 {
    private final YoBoolean packetHasBeenSent = new YoBoolean("packetHasBeenSent" + behaviorName, registry);
    private FootLoadBearingMessage outgoingFootLoadBearingMessage;
-   private final IHMCROS2Publisher<FootLoadBearingMessage> publisher;
+   private final ROS2PublisherBasics<FootLoadBearingMessage> publisher;
 
    public FootLoadBearingBehavior(String robotName, ROS2Node ros2Node)
    {

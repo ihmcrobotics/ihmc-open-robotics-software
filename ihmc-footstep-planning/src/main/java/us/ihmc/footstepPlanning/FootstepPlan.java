@@ -96,4 +96,22 @@ public class FootstepPlan implements FootstepPlanReadOnly
    {
       footsteps.remove(footstepIndex);
    }
+
+   public String toString()
+   {
+      StringBuilder builder = new StringBuilder();
+      builder.append("Footstep Plan: ").append("Steps: ").append(getNumberOfSteps()).append("\n");
+
+      for (PlannedFootstep footstep : footsteps)
+      {
+         builder.append("\t").append("[Step Side: ")
+                .append(footstep.getRobotSide())
+                .append(", Position: ")
+                .append(footstep.getFootstepPose().getPosition())
+                .append(footstep.getFootstepPose().getOrientation())
+               .append("]\n");
+      }
+      builder.append("\n");
+      return builder.toString();
+   }
 }

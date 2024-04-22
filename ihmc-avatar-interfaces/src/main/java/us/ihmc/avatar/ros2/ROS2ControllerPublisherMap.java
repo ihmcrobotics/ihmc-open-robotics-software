@@ -1,6 +1,6 @@
 package us.ihmc.avatar.ros2;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2NodeInterface;
@@ -29,7 +29,7 @@ public class ROS2ControllerPublisherMap
       ROS2Topic topic = topicMap.get(message.getClass());
       if (topic == null)
       {
-         topic = ControllerAPIDefinition.getTopic(message.getClass(), robotName);
+         topic = HumanoidControllerAPI.getTopic(message.getClass(), robotName);
          topicMap.put(message.getClass(), topic);
       }
       publisherMap.publish(topic, message);

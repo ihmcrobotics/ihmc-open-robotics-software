@@ -1,13 +1,21 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import perception_msgs.msg.dds.*;
-import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.ros2.ROS2Input;
+import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
+import perception_msgs.msg.dds.CenterposeNodeMessage;
+import perception_msgs.msg.dds.DetectableSceneNodeMessage;
+import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
+import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
+import perception_msgs.msg.dds.SceneGraphMessage;
+import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
+import perception_msgs.msg.dds.YOLOv8NodeMessage;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -17,6 +25,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeReplacement;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 
 import java.util.function.BiFunction;
 
@@ -25,7 +34,7 @@ import java.util.function.BiFunction;
  */
 public class ROS2SceneGraphSubscription
 {
-   private final IHMCROS2Input<SceneGraphMessage> sceneGraphSubscription;
+   private final ROS2Input<SceneGraphMessage> sceneGraphSubscription;
    private final SceneGraph sceneGraph;
    private final BiFunction<SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier;
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
@@ -131,6 +140,19 @@ public class ROS2SceneGraphSubscription
             centerposeNode.setVertices2D(subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices());
             centerposeNode.setEnableTracking(subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
          }
+         if (localNode instanceof YOLOv8Node yoloNode)
+         {
+            yoloNode.setMaskErosionKernelRadius(subscriptionNode.getYOLONodeMessage().getMaskErosionKernelRadius());
+            yoloNode.setOutlierFilterThreshold(subscriptionNode.getYOLONodeMessage().getOutlierFilterThreshold());
+            yoloNode.setDetectionAcceptanceThreshold(subscriptionNode.getYOLONodeMessage().getDetectionAcceptanceThreshold());
+            yoloNode.setDetectionClass(YOLOv8DetectionClass.valueOf(subscriptionNode.getYOLONodeMessage().getDetectionClassAsString()));
+            yoloNode.setObjectPointCloud(subscriptionNode.getYOLONodeMessage().getObjectPointCloud());
+            yoloNode.setCentroidToObjectTransform(subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform());
+            yoloNode.setObjectPose(subscriptionNode.getYOLONodeMessage().getObjectPose());
+            yoloNode.setFilteredObjectPose(subscriptionNode.getYOLONodeMessage().getFilteredObjectPose());
+            yoloNode.setVisualTransformToObjectPose(subscriptionNode.getYOLONodeMessage().getVisualTransformToObjectPose());
+            yoloNode.setAlpha(subscriptionNode.getYOLONodeMessage().getAlphaFilter());
+         }
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
          {
             staticRelativeSceneNode.setDistanceToDisableTracking(subscriptionNode.getStaticRelativeSceneNodeMessage().getDistanceToDisableTracking());
@@ -208,6 +230,13 @@ public class ROS2SceneGraphSubscription
             subscriptionNode.setDetectableSceneNodeMessage(centerposeNodeMessage.getDetectableSceneNode());
             subscriptionNode.setSceneNodeMessage(centerposeNodeMessage.getDetectableSceneNode().getSceneNode());
          }
+         case SceneGraphMessage.YOLO_NODE_TYPE ->
+         {
+            YOLOv8NodeMessage yoloNodeMessage = sceneGraphMessage.getYoloSceneNodes().get(indexInTypesList);
+            subscriptionNode.setYOLONodeMessage(yoloNodeMessage);
+            subscriptionNode.setDetectableSceneNodeMessage(yoloNodeMessage.getDetectableSceneNode());
+            subscriptionNode.setSceneNodeMessage(yoloNodeMessage.getDetectableSceneNode().getSceneNode());
+         }
          case SceneGraphMessage.STATIC_RELATIVE_NODE_TYPE ->
          {
             StaticRelativeSceneNodeMessage staticRelativeSceneNodeMessage = sceneGraphMessage.getStaticRelativeSceneNodes().get(indexInTypesList);
@@ -237,7 +266,7 @@ public class ROS2SceneGraphSubscription
       sceneGraphSubscription.destroy();
    }
 
-   public IHMCROS2Input<SceneGraphMessage> getSceneGraphSubscription()
+   public ROS2Input<SceneGraphMessage> getSceneGraphSubscription()
    {
       return sceneGraphSubscription;
    }

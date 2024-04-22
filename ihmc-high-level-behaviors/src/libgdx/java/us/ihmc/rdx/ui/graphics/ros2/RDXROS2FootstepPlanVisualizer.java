@@ -58,15 +58,12 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
    {
       subscribed = true;
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, StringTools.titleToSnakeCase(titleBeforeAdditions));
-      ROS2Tools.createCallbackSubscription(ros2Node, this.topic, this::queueFootstepDataListMessage);
+      ros2Node.createSubscription(this.topic, this::queueFootstepDataListMessage);
    }
 
    private void queueFootstepDataListMessage(Subscriber<FootstepDataListMessage> subscriber)
    {
-      synchronized (syncObject)
-      {
-
-      }
+      footstepDataListMessage.set(subscriber.takeNextData());
    }
 
    @Override
@@ -78,7 +75,7 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
    @Override
    public void update()
    {
-
+      super.update();
    }
 
    @Override

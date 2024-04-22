@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -48,7 +48,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(null);
    private final SideDependentList<MovingReferenceFrame> soleFrames;
    private final ReferenceFrame midFootZUpFrame;
-   private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
+   private final ROS2PublisherBasics<FootstepDataListMessage> footstepPublisher;
 
    public RepeatedlyWalkFootstepListBehavior(String robotName, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames, YoRegistry parentRegistry)
    {

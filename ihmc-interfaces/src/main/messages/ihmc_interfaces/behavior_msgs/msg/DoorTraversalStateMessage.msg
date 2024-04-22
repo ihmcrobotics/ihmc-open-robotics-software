@@ -4,5 +4,6 @@ behavior_msgs/BehaviorTreeNodeStateMessage state
 # Definition
 behavior_msgs/DoorTraversalDefinitionMessage definition
 
-# Used to tell the operator that the robot is retrying the pull door
-bool retrying_pull_door_notification
+float64 door_hinge_joint_angle
+
+float64 door_handle_distance_from_start

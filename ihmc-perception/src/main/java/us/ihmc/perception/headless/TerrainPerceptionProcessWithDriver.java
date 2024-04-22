@@ -7,8 +7,8 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -38,8 +38,6 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.Throttler;
 
 import java.time.Instant;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -170,13 +168,10 @@ public class TerrainPerceptionProcessWithDriver
 
       depthBytedecoImage = new BytedecoImage(realsense.getDepthWidth(), realsense.getDepthHeight(), opencv_core.CV_16UC1);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class,
-                                                    ROS2Tools.getRobotConfigurationDataTopic(robotName),
-                                                    s ->
-                                                    {
-                                                       s.takeNextData(robotConfigurationData, null);
-                                                    });
+      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName).withTypeName(RobotConfigurationData.class), s ->
+      {
+         s.takeNextData(robotConfigurationData, null);
+      });
 
       Runtime.getRuntime().addShutdownHook(new Thread(this::destroy, "Shutdown"));
    }
@@ -211,6 +206,7 @@ public class TerrainPerceptionProcessWithDriver
     */
    private void update()
    {
+      ros2PropertySetGroup.update();
       if (realsense.readFrameData())
       {
          realsense.updateDataBytePointers();
@@ -232,7 +228,7 @@ public class TerrainPerceptionProcessWithDriver
             humanoidPerception.initializeBodyCollisionFilter(fullRobotModel, collisionBoxProvider);
             humanoidPerception.initializeRealsenseDepthImage(realsense.getDepthHeight(), realsense.getDepthWidth());
             humanoidPerception.initializePerspectiveRapidRegionsExtractor(realsense.getDepthCameraIntrinsics());
-            humanoidPerception.initializeHeightMapExtractor(realsense.getDepthCameraIntrinsics());
+            humanoidPerception.initializeHeightMapExtractor(referenceFrames, realsense.getDepthCameraIntrinsics());
             humanoidPerception.getRapidRegionsExtractor().setEnabled(true);
 
             ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);

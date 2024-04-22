@@ -94,6 +94,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
    public void update(RigidBodyTransform zUpFrameToWorld,
                       BytePointer heightMapPointer,
+                      float heightOffset,
                       float gridCenterX,
                       float gridCenterY,
                       int centerIndex,
@@ -119,7 +120,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
             int vertexIndex = heightIndex * FLOATS_PER_CELL;
             int height = heightMapPointer.getShort(heightIndex * 2L) & 0xFFFF;
             float zPosition = ((float) height / heightScalingFactor);
-            zPosition -= 3.2768f;
+            zPosition -= heightOffset;
 
             spritePoint.set(xPosition, yPosition, zPosition);
             intermediateVertexBuffer[vertexIndex] = (float) spritePoint.getX();

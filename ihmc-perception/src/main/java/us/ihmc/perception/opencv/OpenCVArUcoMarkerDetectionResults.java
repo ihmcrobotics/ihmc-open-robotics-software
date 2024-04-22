@@ -9,14 +9,14 @@ import org.bytedeco.opencv.global.opencv_objdetect;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.MatVector;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.matrix.LinearTransform3D;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
 
@@ -40,12 +40,22 @@ public class OpenCVArUcoMarkerDetectionResults
    private transient final Mat objectPoints;
    private transient final BytePointer objectPointsDataPointer;
    private transient final Mat rotationVector;
-   private transient final Mat rotationMatrix;
    private transient final Mat translationVector;
-   private transient final LinearTransform3D euclidLinearTransform = new LinearTransform3D();
-   private transient final Point3D euclidPosition = new Point3D();
-   private transient final FramePose3D markerPose = new FramePose3D();
    private transient final Scalar defaultBorderColor;
+
+   private transient final Pose3D markerPose = new Pose3D();
+
+   // This is a temp variable, and is not used to store state
+   private transient final FramePose3D tempMarkerPose = new FramePose3D();
+
+   // The weird conversion of axes are because sensor frame is assumed x forward z up, but image frame is z forward, x right. This means z in image is
+   // x in sensor, and x in image is -y in sensor.
+   private static final RigidBodyTransform sensorToImageTransform = new RigidBodyTransform();
+   static
+   {
+      sensorToImageTransform.appendRollRotation(-Math.PI / 2.0);
+      sensorToImageTransform.appendPitchRotation(Math.PI / 2.0);
+   }
 
    public OpenCVArUcoMarkerDetectionResults()
    {
@@ -63,7 +73,6 @@ public class OpenCVArUcoMarkerDetectionResults
       objectPoints = new Mat(4, 1, opencv_core.CV_32FC3);
       objectPointsDataPointer = objectPoints.ptr();
       rotationVector = new Mat(3, 1, opencv_core.CV_64FC1);
-      rotationMatrix = new Mat(3, 3, opencv_core.CV_64FC1);
       translationVector = new Mat(3, 1, opencv_core.CV_64FC1);
       defaultBorderColor = new Scalar(0, 0, 255, 0);
    }
@@ -108,73 +117,62 @@ public class OpenCVArUcoMarkerDetectionResults
    /**
     * Get the pose of an ArUco marker. Use with {@link #isDetected} to make sure
     * the ID is currently detected first.
+    * Returns whether the pose was successfully found.
     */
-   public void getPose(int markerID,
-                       double markerSize,
-                       ReferenceFrame sensorFrame,
-                       ReferenceFrame desiredFrame,
-                       RigidBodyTransform transformToDesiredFrameToPack)
+   public boolean getPose(int markerID,
+                          double markerSize,
+                          ReferenceFrame sensorFrame,
+                          ReferenceFrame desiredFrame,
+                          RigidBodyTransformBasics transformToDesiredFrameToPack)
    {
-      updateMarkerPose(markerID, markerSize);
-      markerPose.setIncludingFrame(sensorFrame, euclidPosition, euclidLinearTransform.getAsQuaternion());
-      markerPose.changeFrame(desiredFrame);
-      markerPose.get(transformToDesiredFrameToPack);
+      return getPose(markerID, markerSize, sensorFrame, desiredFrame, transformToDesiredFrameToPack.getTranslation(), transformToDesiredFrameToPack.getRotation());
    }
 
    /**
     * Get the pose of an ArUco marker. Use with {@link #isDetected} to make sure
     * the ID is currently detected first.
+    * Returns whether the pose was successfully found.
     */
-   public void getPose(int markerID,
-                       double markerSize,
-                       ReferenceFrame sensorFrame,
-                       ReferenceFrame desiredFrame,
-                       Point3D translationToPack,
-                       Quaternion orientationToPack)
+   public boolean getPose(int markerID,
+                          double markerSize,
+                          ReferenceFrame sensorFrame,
+                          ReferenceFrame desiredFrame,
+                          Tuple3DBasics translationToPack,
+                          Orientation3DBasics orientationToPack)
    {
-      updateMarkerPose(markerID, markerSize);
-      markerPose.setIncludingFrame(sensorFrame, euclidPosition, euclidLinearTransform.getAsQuaternion());
-      markerPose.changeFrame(desiredFrame);
-      markerPose.get(orientationToPack, translationToPack);
+      boolean success = updateMarkerPose(markerID, markerSize, markerPose);
+      tempMarkerPose.setIncludingFrame(sensorFrame, markerPose);
+      tempMarkerPose.changeFrame(desiredFrame);
+      tempMarkerPose.get(orientationToPack, translationToPack);
+      return success;
    }
 
    /**
     * Get the pose of an ArUco marker. Use with {@link #isDetected} to make sure
     * the ID is currently detected first.
+    * Returns whether the pose was successfully found.
     */
-   public Pose3DReadOnly getPoseInSensorFrame(int markerID, double markerSize, ReferenceFrame sensorFrame)
+   public boolean getPoseInSensorFrame(int markerID, double markerSize, Pose3DBasics poseToPack)
    {
-      updateMarkerPose(markerID, markerSize);
-      markerPose.setIncludingFrame(sensorFrame, euclidPosition, euclidLinearTransform.getAsQuaternion());
-      return markerPose;
+      boolean success = updateMarkerPose(markerID, markerSize, markerPose);
+      poseToPack.set(markerPose);
+      return success;
    }
-
-   /**
-    * Get the pose of an ArUco marker. Use with {@link #isDetected} to make sure
-    * the ID is currently detected first.
-    */
-   public void getPose(int markerID, double markerSize, Pose3DBasics poseToPack)
-   {
-      updateMarkerPose(markerID, markerSize);
-      poseToPack.set(euclidPosition, euclidLinearTransform.getAsQuaternion());
-   }
-
-   /**
-    * Get the pose of an ArUco marker. Use with {@link #isDetected} to make sure
-    * the ID is currently detected first.
-    */
-   public void getPose(int markerID, double markerSize, RigidBodyTransform transformToSensor)
-   {
-      updateMarkerPose(markerID, markerSize);
-      transformToSensor.set(euclidLinearTransform.getAsQuaternion(), euclidPosition);
-   }
-
+   
    /**
     * Estimates the pose of the single marker ID.
-    * Multiple markers of the same ID is not supported.
+    * Multiple markers of the same ID are not supported.
+    * Returns whether the pose was successfully found.
     */
-   private void updateMarkerPose(int markerID, double markerSize)
+   private boolean updateMarkerPose(int markerID, double markerSize, Pose3DBasics poseToPack)
    {
+      if (!isDetected(markerID))
+      {
+         LogTools.error("Marker ID is invalid.");
+         poseToPack.setToNaN();
+         return false;
+      }
+
       /**
        * ArUco corner layout:
        * First corner is top left of marker.
@@ -191,44 +189,27 @@ public class OpenCVArUcoMarkerDetectionResults
       long cornersSize = corners.size();
       if (cornersIndex >= cornersSize)
       { // This happens sometimes. There is a bug somewhere, potentially to do with threading, but I can't find it. - @dcalvert
-         LogTools.error("Corners index {} is >= the vector size {}. Can't update the pose of this marker this frame.",
-                        cornersIndex, cornersSize);
+         LogTools.error("Corners index {} is >= the vector size {}. Can't update the pose of this marker this frame.", cornersIndex, cornersSize);
+         poseToPack.setToNaN();
+         return false;
       }
       else
       {
          Mat markerCorners = corners.get(cornersIndex);
          opencv_calib3d.solvePnP(objectPoints, markerCorners, cameraMatrix, distortionCoefficients, rotationVector, translationVector);
 
-         // Couldn't figure out why we had to apply these transforms here and below, but it works.
          double rx = rotationVector.ptr(0).getDouble();
          double ry = rotationVector.ptr(0).getDouble(Double.BYTES);
          double rz = rotationVector.ptr(0).getDouble(2 * Double.BYTES);
-         rotationVector.ptr(0).putDouble(rz);
-         rotationVector.ptr(0).putDouble(Double.BYTES, -rx);
-         rotationVector.ptr(0).putDouble(2 * Double.BYTES, -ry);
-
-         opencv_calib3d.Rodrigues(rotationVector, rotationMatrix);
-
-         BytePointer basePtr = rotationMatrix.ptr(0);
-         euclidLinearTransform.set(basePtr.getDouble(),
-                                   basePtr.getDouble(Double.BYTES),
-                                   basePtr.getDouble(2 * Double.BYTES),
-                                   basePtr.getDouble(3 * Double.BYTES),
-                                   basePtr.getDouble(4 * Double.BYTES),
-                                   basePtr.getDouble(5 * Double.BYTES),
-                                   basePtr.getDouble(6 * Double.BYTES),
-                                   basePtr.getDouble(7 * Double.BYTES),
-                                   basePtr.getDouble(8 * Double.BYTES));
-         // These are probably because the coordinate system we define ourselves now for the solvePnP method,
-         // probably why they did it,so the way we define it must be different to the way it was internally
-         // in estimatePoseSingleMarkers.
-         euclidLinearTransform.appendRollRotation(-Math.PI / 2.0);
-         euclidLinearTransform.appendPitchRotation(Math.PI / 2.0);
 
          double x = translationVector.ptr(0).getDouble();
          double y = translationVector.ptr(0).getDouble(Double.BYTES);
          double z = translationVector.ptr(0).getDouble(2 * Double.BYTES);
-         euclidPosition.set(z, -x, -y);
+
+         poseToPack.getPosition().set(x, y, z);
+         poseToPack.getOrientation().setRotationVector(rx, ry, rz);
+         poseToPack.applyTransform(sensorToImageTransform);
+         return true;
       }
    }
 

@@ -33,6 +33,7 @@ mainDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
 //   api("us.ihmc:ihmc-footstep-planning:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
+   api("us.ihmc:ihmc-parameter-estimation:source")
 }
 
 testDependencies {

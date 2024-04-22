@@ -56,7 +56,7 @@ public class ROS2IntraProcessExample
          }
       }, (subscriber, info) -> {
          System.out.println("Subscription matched!: " + subscriber.getAttributes().getTopicName() + " " + info.getStatus().name());
-      }, "/robot_configuration_data", ROS2QosProfile.DEFAULT());
+      }, "/robot_configuration_data", ROS2QosProfile.RELIABLE());
       Thread.currentThread().join();
    }
 

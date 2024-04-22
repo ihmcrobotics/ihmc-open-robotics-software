@@ -23,7 +23,6 @@ import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
-import java.io.IOException;
 import java.time.Instant;
 
 /**
@@ -63,14 +62,7 @@ public class RDXWebcamROS2PublisherDemo
             realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "videopub");
 
             ROS2Topic<BigVideoPacket> bigVideoTestTopic = PerceptionAPI.BIG_VIDEO_TEST;
-            try
-            {
-               publisher = realtimeROS2Node.createPublisher(BigVideoPacket.getPubSubType().get(), bigVideoTestTopic.getName(), ROS2QosProfile.BEST_EFFORT());
-            }
-            catch (IOException e)
-            {
-               throw new RuntimeException(e);
-            }
+            publisher = realtimeROS2Node.createPublisher(BigVideoPacket.getPubSubType().get(), bigVideoTestTopic.getName(), ROS2QosProfile.BEST_EFFORT());
             realtimeROS2Node.spin();
 
             webcamReader.create();

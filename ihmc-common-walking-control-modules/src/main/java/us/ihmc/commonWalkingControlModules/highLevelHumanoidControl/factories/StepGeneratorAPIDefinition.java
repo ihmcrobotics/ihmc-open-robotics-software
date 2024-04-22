@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorInputCommand;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ContinuousStepGeneratorParametersCommand;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
@@ -61,12 +61,12 @@ public class StepGeneratorAPIDefinition
 
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ROS2Tools.getControllerInputTopic(robotName);
+      return HumanoidControllerAPI.getInputTopic(robotName);
    }
 
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ROS2Tools.getControllerOutputTopic(robotName);
+      return HumanoidControllerAPI.getOutputTopic(robotName);
    }
 
    public static <T> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)

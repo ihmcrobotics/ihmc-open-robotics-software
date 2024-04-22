@@ -12,7 +12,6 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -34,7 +33,6 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -105,7 +103,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       boolean invalidDefinition = definitionGoalStancePoint.geometricallyEquals(definitionGoalFocalPoint, 1e-4);
 
       if (invalidDefinition)
-         LogTools.error("Approach point can not be in the same place as the focus point.");
+         state.getLogger().error("Approach point can not be in the same place as the focus point.");
 
       state.setCanExecute(state.areFramesInWorld() && !invalidDefinition);
       if (state.getCanExecute() && !definition.getIsManuallyPlaced())
@@ -214,7 +212,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       }
       else
       {
-         LogTools.error("Cannot execute. Frame is not a child of World frame.");
+         state.getLogger().error("Cannot execute. Frame is not a child of World frame.");
       }
    }
 
@@ -243,7 +241,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          }
          case PLANNING_FAILED ->
          {
-            LogTools.error("No planned steps to execute!");
+            state.getLogger().error("No planned steps to execute!");
             state.setIsExecuting(false);
             state.setFailed(true);
          }
@@ -300,10 +298,10 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          double idealFootstepLength = 0.5;
          footstepPlanner.getFootstepPlannerParameters().setIdealFootstepLength(idealFootstepLength);
          footstepPlanner.getFootstepPlannerParameters().setMaximumStepReach(idealFootstepLength);
-         LogTools.info("Planning footsteps...");
+         state.getLogger().info("Planning footsteps...");
          FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
          FootstepPlan footstepPlan = footstepPlannerOutput.getFootstepPlan();
-         LogTools.info("Footstep planner completed with {}, {} step(s)", footstepPlannerOutput.getFootstepPlanningResult(), footstepPlan.getNumberOfSteps());
+         state.getLogger().info("Footstep planner completed with {}, {} step(s)", footstepPlannerOutput.getFootstepPlanningResult(), footstepPlan.getNumberOfSteps());
 
          if (footstepPlan.getNumberOfSteps() < 1) // failed
          {
@@ -312,9 +310,9 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
             for (BipedalFootstepPlannerNodeRejectionReason reason : rejectionReasonReport.getSortedReasons())
             {
                double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
-               LogTools.info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
+               state.getLogger().info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
             }
-            LogTools.info("Footstep planning failure...");
+            state.getLogger().info("Footstep planning failure...");
             footstepPlanNotification.set(new FootstepPlan());
          }
          else
@@ -346,7 +344,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       footstepDataListMessage.setFinalTransferDuration(finalTransferDuration);
       footstepDataListMessage.getQueueingProperties().setExecutionMode(definition.getExecutionMode().getValue().toByte());
       footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
-      LogTools.info("Commanding {} footsteps", footstepDataListMessage.getFootstepDataList().size());
+      state.getLogger().info("Commanding {} footsteps", footstepDataListMessage.getFootstepDataList().size());
       ros2ControllerHelper.publishToController(footstepDataListMessage);
       for (RobotSide side : RobotSide.values)
       {
@@ -424,7 +422,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       if (hitTimeLimit)
       {
          state.setFailed(true);
-         LogTools.info("Walking failed. (time limit)");
+         state.getLogger().info("Walking failed. (time limit)");
       }
       state.setNominalExecutionDuration(nominalExecutionDuration);
       state.setElapsedExecutionTime(trackingCalculators.get(RobotSide.LEFT).getElapsedTime());

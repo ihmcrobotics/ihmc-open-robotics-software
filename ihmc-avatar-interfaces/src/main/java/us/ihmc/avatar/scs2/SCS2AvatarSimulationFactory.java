@@ -46,7 +46,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.HeightMap;
@@ -127,6 +128,7 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Integer> simulationDataBufferSize = new OptionalFactoryField<>("simulationDataBufferSize", 8192);
    protected final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
    protected final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
+   protected  final OptionalFactoryField<Boolean> createRigidBodyMutators = new OptionalFactoryField<>("createRigidBodyMutators", false);
    protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
                                                                                                                               (in,
                                                                                                                                out) -> new SCS2OutputWriter(in,
@@ -309,6 +311,13 @@ public class SCS2AvatarSimulationFactory
                                                                         robotModel.getEstimatorDT(),
                                                                         robot.getControllerManager().getControllerInput()),
                                    robotModel.getEstimatorDT());
+      if (createRigidBodyMutators.hasValue() && createRigidBodyMutators.get())
+      {
+         robot.addThrottledController(new SCS2RobotRigidBodyMutator(robot,
+                                                                    simulationConstructionSet.getTime(),
+                                                                    robotModel.getEstimatorDT()),
+                                      robotModel.getEstimatorDT());
+      }
 
       for (Robot secondaryRobot : secondaryRobots.get())
          simulationConstructionSet.addRobot(secondaryRobot);
@@ -345,15 +354,6 @@ public class SCS2AvatarSimulationFactory
       else
          sensorReaderFactory = SCS2SensorReaderFactory.newSensorReaderFactory(controllerInput, stateEstimatorParameters);
 
-      ROS2Topic<?> outputTopic = null;
-      ROS2Topic<?> inputTopic = null;
-
-      if (realtimeROS2Node.hasBeenSet())
-      {
-         outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-         inputTopic = ROS2Tools.getControllerInputTopic(robotName);
-      }
-
       if (externalPelvisCorrectorSubscriber.hasValue())
       {
          pelvisPoseCorrectionCommunicator = externalPelvisCorrectorSubscriber.get();
@@ -362,11 +362,9 @@ public class SCS2AvatarSimulationFactory
       {
          if (realtimeROS2Node.hasBeenSet())
          {
-            pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeROS2Node.get(), outputTopic);
-            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node.get(),
-                                                          StampedPosePacket.class,
-                                                          inputTopic,
-                                                          s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
+            pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeROS2Node.get(), robotName);
+            realtimeROS2Node.get().createSubscription(StateEstimatorAPI.getTopic(StampedPosePacket.class, robotName),
+                                        s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
          }
       }
 
@@ -868,6 +866,11 @@ public class SCS2AvatarSimulationFactory
    public void setUsePerfectSensors(boolean usePerfectSensors)
    {
       this.usePerfectSensors.set(usePerfectSensors);
+   }
+
+   public void setCreateRigidBodyMutators(boolean createRigidBodyMutators)
+   {
+      this.createRigidBodyMutators.set(createRigidBodyMutators);
    }
 
    public void setOutputWriterFactory(SCS2JointDesiredOutputWriterFactory outputWriterFactory)

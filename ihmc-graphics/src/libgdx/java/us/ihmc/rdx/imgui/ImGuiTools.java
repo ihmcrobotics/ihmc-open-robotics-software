@@ -73,6 +73,7 @@ public class ImGuiTools
    public static int WHITE = Color.WHITE.toIntBits();
    public static int GRAY = Color.GRAY.toIntBits();
    public static int RED = Color.RED.toIntBits();
+   public static int CYAN = Color.CYAN.toIntBits();
    public static int PURPLE = new Color(1.0f, 0.0f, 1.0f, 1.0f).toIntBits();
    public static int YELLOW = Color.YELLOW.toIntBits();
    public static int GREEN = Color.GREEN.toIntBits();
@@ -272,6 +273,26 @@ public class ImGuiTools
    public static boolean sliderInt(String label, ImInt imInt, int minValue, int maxValue, String format, int imGuiSliderFlags)
    {
       return ImGui.sliderScalar(label, ImGuiDataType.U32, imInt, minValue, maxValue, format, imGuiSliderFlags);
+   }
+
+   public static boolean smallCheckbox(String label, ImBoolean checked)
+   {
+      float backupFramePaddingX = ImGui.getStyle().getFramePaddingX();
+      float backupFramePaddingY = ImGui.getStyle().getFramePaddingY();
+      ImGui.getStyle().setFramePadding(backupFramePaddingX, 0.0f);
+      boolean pressed = ImGui.checkbox(label, checked);
+      ImGui.getStyle().setFramePadding(backupFramePaddingX, backupFramePaddingY);
+      return pressed;
+   }
+
+   public static boolean smallCheckbox(String label, boolean checked)
+   {
+      float backupFramePaddingX = ImGui.getStyle().getFramePaddingX();
+      float backupFramePaddingY = ImGui.getStyle().getFramePaddingY();
+      ImGui.getStyle().setFramePadding(backupFramePaddingX, 0.0f);
+      boolean pressed = ImGui.checkbox(label, checked);
+      ImGui.getStyle().setFramePadding(backupFramePaddingX, backupFramePaddingY);
+      return pressed;
    }
 
    /**

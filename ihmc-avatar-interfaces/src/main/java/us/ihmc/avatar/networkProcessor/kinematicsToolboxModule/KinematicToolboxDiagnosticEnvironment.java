@@ -8,6 +8,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -46,7 +47,7 @@ public class KinematicToolboxDiagnosticEnvironment
       RobotConfigurationDataPublisherFactory factory = new RobotConfigurationDataPublisherFactory();
       factory.setDefinitionsToPublish(humanoidFullRobotModel);
       factory.setSensorSource(humanoidFullRobotModel, new ForceSensorDataHolder(forceSensorDefinitionList), sensorOutputMapReadOnly);
-      factory.setROS2Info(realtimeROS2Node, ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()));
+      factory.setROS2Info(realtimeROS2Node, HumanoidControllerAPI.getOutputTopic(drcRobotModel.getSimpleRobotName()));
       RobotConfigurationDataPublisher robotConfigurationDataPublisher = factory.createRobotConfigurationDataPublisher();
 
       PeriodicNonRealtimeThreadScheduler scheduler2 = new PeriodicNonRealtimeThreadScheduler(threadName);
