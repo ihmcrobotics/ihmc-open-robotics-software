@@ -22,10 +22,10 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXKeyBindings;
 import us.ihmc.rdx.RDXSettings;
 import us.ihmc.rdx.imgui.ImGuiFrequencyDisplay;
-import us.ihmc.rdx.imgui.RDXPanelManager;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
+import us.ihmc.rdx.imgui.RDXPanelManager;
 import us.ihmc.rdx.input.RDXInputMode;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
@@ -396,7 +396,7 @@ public class RDXBaseUI
             }
 
             ImGui.sameLine();
-            if (ImGui.button("Reset"))
+            if (ImGui.button(labels.get("Reset##BackgroundShade")))
             {
                view3DBackgroundShade.set(RDX3DSceneTools.CLEAR_COLOR);
                settings.setView3DBackgroundShade((float) view3DBackgroundShade.get());
@@ -425,21 +425,6 @@ public class RDXBaseUI
                ImGui.popItemFlag();
             }
 
-            // Fifth row (font scale)
-            ImGui.tableNextRow();
-            ImGui.tableSetColumnIndex(0);
-            ImGui.alignTextToFramePadding();
-            ImGui.text("Font scale: ");
-            ImGui.tableSetColumnIndex(1);
-            if (ImGuiTools.sliderDouble(labels.get("##imguiFontScaleSlider"), imguiFontScale, 1.0, 2.0, "%.1f")) {
-               settings.setImguiFontScale(imguiFontScale.get());
-            }
-            // Change the font scale after you've let go of the slider
-            if (ImGui.isItemDeactivatedAfterEdit())
-            {
-               ImGui.getIO().setFontGlobalScale((float) imguiFontScale.get());
-            }
-
             // Sixth row (font size)
             ImGui.tableNextRow();
             ImGui.tableSetColumnIndex(0);
@@ -453,6 +438,12 @@ public class RDXBaseUI
             // Change the font scale after you've let go of the slider
             if (ImGui.isItemDeactivatedAfterEdit())
             {
+               ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
+            }
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("Reset##FontSize")))
+            {
+               imguiFontSize.set(ImGuiTools.DEFAULT_FONT_SIZE);
                ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
             }
 
