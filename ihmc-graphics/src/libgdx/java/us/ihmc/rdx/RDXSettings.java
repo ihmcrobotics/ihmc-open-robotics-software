@@ -28,7 +28,7 @@ public class RDXSettings
    private boolean vsync = false;
    private int foregroundFPSLimit = 240;
    private int libGDXLogLevel = 2;
-   private double imguiFontScale = 1.0;
+   private int fontSize = 13;
    private String themeName = "LIGHT";
    private float view3DBackgroundShade = RDX3DSceneTools.CLEAR_COLOR;
 
@@ -76,14 +76,14 @@ public class RDXSettings
       saveAsync();
    }
 
-   public double getImguiFontScale()
+   public int getFontSize()
    {
-      return imguiFontScale;
+      return fontSize;
    }
 
-   public void setImguiFontScale(double imguiFontScale)
+   public void setFontSize(int fontSize)
    {
-      this.imguiFontScale = imguiFontScale;
+      this.fontSize = fontSize;
       saveAsync();
    }
 
@@ -125,7 +125,7 @@ public class RDXSettings
       properties.setProperty("vsync", String.valueOf(vsync));
       properties.setProperty("foregroundFPSLimit", String.valueOf(foregroundFPSLimit));
       properties.setProperty("libgdxLogLevel", String.valueOf(libGDXLogLevel));
-      properties.setProperty("imguiFontScale", String.valueOf(imguiFontScale));
+      properties.setProperty("fontSize", String.valueOf(fontSize));
       properties.setProperty("themeName", String.valueOf(themeName));
       properties.setProperty("view3DBackgroundShade", String.valueOf(view3DBackgroundShade));
 
@@ -172,7 +172,7 @@ public class RDXSettings
          vsync = Boolean.parseBoolean(properties.getProperty("vsync"));
          foregroundFPSLimit = Integer.parseInt(properties.getProperty("foregroundFPSLimit"));
          libGDXLogLevel = Integer.parseInt(properties.getProperty("libgdxLogLevel"));
-         imguiFontScale = Double.parseDouble(properties.getProperty("imguiFontScale"));
+         fontSize = Integer.parseInt(properties.getProperty("fontSize"));
          themeName = properties.getProperty("themeName");
          view3DBackgroundShade = Float.parseFloat(properties.getProperty("view3DBackgroundShade"));
       }

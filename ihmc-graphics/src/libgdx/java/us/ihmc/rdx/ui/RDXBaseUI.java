@@ -116,7 +116,6 @@ public class RDXBaseUI
    private final ImBoolean modelSceneMouseCollisionEnabled = new ImBoolean(false);
    private final ImDouble view3DBackgroundShade = new ImDouble(RDX3DSceneTools.CLEAR_COLOR);
    private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
-   private final ImDouble imguiFontScale = new ImDouble(1.0);
    private final ImInt imguiFontSize = new ImInt(ImGuiTools.DEFAULT_FONT_SIZE);
    private final RDXImGuiLayoutManager layoutManager;
    private final RDXKeyBindings keyBindings = new RDXKeyBindings();
@@ -221,7 +220,7 @@ public class RDXBaseUI
       vsync.set(settings.vsyncEnabled());
       foregroundFPSLimit.set(settings.getForegroundFPSLimit());
       libGDXLogLevel.set(settings.getLibGDXLogLevel());
-      imguiFontScale.set(settings.getImguiFontScale());
+      imguiFontSize.set(settings.getFontSize());
       try
       {
          theme = Theme.valueOf(settings.getThemeName());
@@ -278,7 +277,7 @@ public class RDXBaseUI
 
       imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
       setTheme(theme); // TODO: move theme stuff to RDXImGuiWindowAndDockSystem?
-      ImGui.getIO().setFontGlobalScale((float) imguiFontScale.get());
+      ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
 
@@ -438,11 +437,13 @@ public class RDXBaseUI
             // Change the font scale after you've let go of the slider
             if (ImGui.isItemDeactivatedAfterEdit())
             {
+               settings.setFontSize(imguiFontSize.get());
                ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
             }
             ImGui.sameLine();
             if (ImGui.button(labels.get("Reset##FontSize")))
             {
+               settings.setFontSize(imguiFontSize.get());
                imguiFontSize.set(ImGuiTools.DEFAULT_FONT_SIZE);
                ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
             }
