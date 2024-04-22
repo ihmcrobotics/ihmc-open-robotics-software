@@ -18,7 +18,7 @@ import us.ihmc.avatar.networkProcessor.lidarScanPublisher.ScanPointFilterList;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -83,7 +83,7 @@ public class StereoVisionPointCloudPublisher
 
    public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, ROS2NodeInterface ros2Node, ROS2Topic<StereoVisionPointCloudMessage> topic)
    {
-      this(modelFactory, ros2Node, topic, ROS2QosProfile.DEFAULT());
+      this(modelFactory, ros2Node, topic, ROS2QosProfile.RELIABLE());
    }
 
    public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory,
@@ -99,7 +99,7 @@ public class StereoVisionPointCloudPublisher
                                           ROS2NodeInterface ros2Node,
                                           ROS2Topic<StereoVisionPointCloudMessage> topic)
    {
-      this(robotName, fullRobotModel, ros2Node, topic, ROS2QosProfile.DEFAULT());
+      this(robotName, fullRobotModel, ros2Node, topic, ROS2QosProfile.RELIABLE());
    }
 
    public StereoVisionPointCloudPublisher(String robotName,
@@ -111,11 +111,10 @@ public class StereoVisionPointCloudPublisher
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
 
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           ROS2Tools.getRobotConfigurationDataTopic(robotName),
-                                           s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
+      ros2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
+                                  s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
       LogTools.info("Creating stereo point cloud publisher. Topic name: {}", topic.getName());
-      pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, topic, qosProfile)::publish;
+      pointcloudPublisher = ros2Node.createPublisher(topic)::publish;
    }
 
    public void setMaximumNumberOfPoints(int maximumNumberOfPoints)

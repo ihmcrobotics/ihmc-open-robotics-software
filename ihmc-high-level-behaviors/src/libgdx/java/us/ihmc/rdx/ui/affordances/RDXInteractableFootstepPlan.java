@@ -21,11 +21,9 @@ import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepP
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -42,7 +40,6 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class RDXInteractableFootstepPlan implements RenderableProvider
 {
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ControllerStatusTracker controllerStatusTracker;
    private final RecyclingArrayList<RDXInteractableFootstep> footsteps = new RecyclingArrayList<>(this::newPlannedFootstep);
    private RDXInteractableFootstep selectedFootstep;
@@ -272,6 +269,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       messageList.setDefaultTransferDuration(locomotionParameters.getTransferTime());
       messageList.setAreFootstepsAdjustable(locomotionParameters.getAreFootstepsAdjustable());
 
+      RDXBaseUI.pushNotification("Commanding %d footsteps...".formatted(messageList.getFootstepDataList().size()));
       communicationHelper.publishToController(messageList);
 
       clear();

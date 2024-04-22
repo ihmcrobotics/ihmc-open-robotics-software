@@ -8,7 +8,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sharedControl.ProMPAssistant;
 import us.ihmc.behaviors.sharedControl.TeleoperationAssistant;
-import us.ihmc.communication.IHMCROS2Input;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
@@ -38,7 +38,7 @@ import java.util.Map;
 public class RDXVRSharedControl implements TeleoperationAssistant
 {
    private final ROS2PublishSubscribeAPI ros2;
-//   private final IHMCROS2Input<SceneGraphMessage> sceneGraphSubscription;
+//   private final ROS2Input<SceneGraphMessage> sceneGraphSubscription;
    private final ImBoolean enabledReplay;
    private final ImBoolean enabledIKStreaming;
    private final ImBoolean enabled = new ImBoolean(false);

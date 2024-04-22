@@ -1,30 +1,13 @@
 package us.ihmc.commonWalkingControlModules.inverseKinematics;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.ejml.data.DMatrixRMaj;
-
 import gnu.trove.list.array.TIntArrayList;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.ActivationState;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsSolution;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.WholeBodyControllerBoundCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPVariableSubstitution;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.*;
 import us.ihmc.convexOptimization.exceptions.NoConvergenceException;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolverWithInactiveVariables;
@@ -35,11 +18,16 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.robotics.screwTheory.RigidBodyTwistCalculator;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class InverseKinematicsOptimizationControlModule implements SCS2YoGraphicHolder
 {
@@ -67,6 +55,11 @@ public class InverseKinematicsOptimizationControlModule implements SCS2YoGraphic
 
    private final InverseKinematicsSolution inverseKinematicsSolution;
    private final WholeBodyControlCoreToolbox toolbox;
+
+   /**
+    * Used to compute the achieved velocities from the QP output.
+    */
+   private final RigidBodyTwistCalculator rigidBodyTwistCalculator;
 
    public InverseKinematicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoRegistry parentRegistry)
    {
@@ -118,6 +111,10 @@ public class InverseKinematicsOptimizationControlModule implements SCS2YoGraphic
          qpSolver.setAccelerationRegularizationWeight(optimizationSettings.getJointAccelerationWeight());
       }
 
+      rigidBodyTwistCalculator = toolbox.getRigidBodyTwistCalculator();
+      // Binding the output of the QP to the rigid-body twist calculator. Doing that only once.
+      rigidBodyTwistCalculator.useAllJointVelocityMatrix(qpSolver.getJointVelocities());
+
       parentRegistry.addChild(registry);
    }
 
@@ -157,7 +154,7 @@ public class InverseKinematicsOptimizationControlModule implements SCS2YoGraphic
          if (!hasNotConvergedInPast.getBooleanValue())
          {
             LogTools.warn("First failure for the optimization " + e.getClass().getSimpleName() + ". Only reporting the first failure, see failure counter: "
-                  + hasNotConvergedCounts.getFullNameString());
+                          + hasNotConvergedCounts.getFullNameString());
          }
 
          hasNotConvergedInPast.set(true);
@@ -167,11 +164,12 @@ public class InverseKinematicsOptimizationControlModule implements SCS2YoGraphic
       }
 
       DMatrixRMaj jointVelocities = qpSolver.getJointVelocities();
-      MomentumReadOnly centroidalMomentumSoltuion = motionQPInputCalculator.computeCentroidalMomentumFromSolution(jointVelocities);
+      MomentumReadOnly centroidalMomentumSolution = motionQPInputCalculator.computeCentroidalMomentumFromSolution(jointVelocities);
       inverseKinematicsSolution.setJointVelocities(jointVelocities);
       if (computeJointTorques.getValue())
          inverseKinematicsSolution.setJointTorques(toolbox.getGravityGradientCalculator().getTauMatrix());
-      inverseKinematicsSolution.setCentroidalMomentumSolution(centroidalMomentumSoltuion);
+      inverseKinematicsSolution.setCentroidalMomentumSolution(centroidalMomentumSolution);
+      rigidBodyTwistCalculator.reset();
 
       if (noConvergenceException != null)
          throw new InverseKinematicsOptimizationException(noConvergenceException, inverseKinematicsSolution);

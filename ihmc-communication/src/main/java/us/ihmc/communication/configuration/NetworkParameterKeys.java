@@ -2,12 +2,18 @@ package us.ihmc.communication.configuration;
 
 public enum NetworkParameterKeys
 {
+   @Deprecated
    robotController("Hostname/IP of the robot controller.", "127.0.0.1", true),
+   @Deprecated
    networkManager("Hostname/IP of the network manager, as seen from the communication shaper.", "127.0.0.1", true),
 
+   @Deprecated
    rosURI("Fully qualified ROS master URI.", "http://127.0.0.1:11311", false),
+   @Deprecated
    head("Hostname/IP of the head.", "", true),
+   @Deprecated
    leftHand("Hostname/IP of the left hand.", "", true),
+   @Deprecated
    rightHand("Hostname/IP of the right hand.", "", true),
 
    RTPSDomainID("RTPS Domain ID used for rtps publishers and subscribers", "-1", false),

@@ -15,7 +15,7 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "66299e2334d9945cf5c6f6b24fd4d4dbed7875823b6097ba9ea1377898d29725";
+   		return "2702287f770d3992565d62e2d618da1f177ca11fd6f0d6dcf28bcee91888e8b5";
    }
    
    @Override
@@ -75,6 +75,10 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -121,6 +125,12 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -151,6 +161,10 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
 
       cdr.write_type_6(data.getJointspaceWeight());
 
+      cdr.write_type_6(data.getPositionErrorTolerance());
+
+      cdr.write_type_6(data.getOrientationErrorTolerance());
+
    }
 
    public static void read(behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
@@ -176,6 +190,10 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
       	
       data.setJointspaceWeight(cdr.read_type_6());
       	
+      data.setPositionErrorTolerance(cdr.read_type_6());
+      	
+      data.setOrientationErrorTolerance(cdr.read_type_6());
+      	
 
    }
 
@@ -196,6 +214,8 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
       ser.write_type_6("linear_position_weight", data.getLinearPositionWeight());
       ser.write_type_6("angular_position_weight", data.getAngularPositionWeight());
       ser.write_type_6("jointspace_weight", data.getJointspaceWeight());
+      ser.write_type_6("position_error_tolerance", data.getPositionErrorTolerance());
+      ser.write_type_6("orientation_error_tolerance", data.getOrientationErrorTolerance());
    }
 
    @Override
@@ -215,6 +235,8 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
       data.setLinearPositionWeight(ser.read_type_6("linear_position_weight"));
       data.setAngularPositionWeight(ser.read_type_6("angular_position_weight"));
       data.setJointspaceWeight(ser.read_type_6("jointspace_weight"));
+      data.setPositionErrorTolerance(ser.read_type_6("position_error_tolerance"));
+      data.setOrientationErrorTolerance(ser.read_type_6("orientation_error_tolerance"));
    }
 
    public static void staticCopy(behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessage src, behavior_msgs.msg.dds.ScrewPrimitiveActionDefinitionMessage dest)

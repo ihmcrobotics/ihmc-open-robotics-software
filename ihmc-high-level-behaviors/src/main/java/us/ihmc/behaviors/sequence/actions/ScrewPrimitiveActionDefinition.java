@@ -7,6 +7,7 @@ import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
 import us.ihmc.tools.io.JSONTools;
@@ -14,6 +15,9 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition implements SidedObject
 {
+   public static final double DEFAULT_POSITION_ERROR_TOLERANCE = 0.15;
+   public static final double DEFAULT_ORIENTATION_ERROR_TOLERANCE = Math.toRadians(10.0);
+
    private final CRDTUnidirectionalEnumField<RobotSide> side;
    private final CRDTUnidirectionalString objectFrameName;
    private final CRDTUnidirectionalRigidBodyTransform screwAxisPoseInObjectFrame;
@@ -27,6 +31,23 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    private final CRDTUnidirectionalDouble linearPositionWeight;
    private final CRDTUnidirectionalDouble angularPositionWeight;
    private final CRDTUnidirectionalDouble jointspaceWeight;
+   private final CRDTUnidirectionalDouble positionErrorTolerance;
+   private final CRDTUnidirectionalDouble orientationErrorTolerance;
+
+   // On disk fields
+   private RobotSide onDiskSide;
+   private String onDiskObjectFrameName;
+   private final RigidBodyTransform onDiskScrewAxisPoseInObjectFrame = new RigidBodyTransform();
+   private double onDiskTranslation;
+   private double onDiskRotation;
+   private double onDiskMaxLinearVelocity;
+   private double onDiskMaxAngularVelocity;
+   private boolean onDiskJointspaceOnly;
+   private double onDiskLinearPositionWeight;
+   private double onDiskAngularPositionWeight;
+   private double onDiskJointspaceWeight;
+   private double onDiskPositionErrorTolerance;
+   private double onDiskOrientationErrorTolerance;
 
    public ScrewPrimitiveActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
@@ -43,6 +64,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       linearPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
       angularPositionWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
       jointspaceWeight = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, -1.0);
+      positionErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_POSITION_ERROR_TOLERANCE);
+      orientationErrorTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, DEFAULT_ORIENTATION_ERROR_TOLERANCE);
    }
 
    @Override
@@ -61,6 +84,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       jsonNode.put("linearPositionWeight", linearPositionWeight.getValue());
       jsonNode.put("angularPositionWeight", angularPositionWeight.getValue());
       jsonNode.put("jointspaceWeight", jointspaceWeight.getValue());
+      jsonNode.put("positionErrorTolerance", Double.parseDouble("%.3f".formatted(positionErrorTolerance.getValue())));
+      jsonNode.put("orientationErrorToleranceDegrees", Double.parseDouble("%.3f".formatted(Math.toDegrees(orientationErrorTolerance.getValue()))));
    }
 
    @Override
@@ -79,6 +104,70 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       linearPositionWeight.setValue(jsonNode.get("linearPositionWeight").asDouble());
       angularPositionWeight.setValue(jsonNode.get("angularPositionWeight").asDouble());
       jointspaceWeight.setValue(jsonNode.get("jointspaceWeight").asDouble());
+      positionErrorTolerance.setValue(jsonNode.get("positionErrorTolerance").asDouble());
+      orientationErrorTolerance.setValue(Math.toRadians(jsonNode.get("orientationErrorToleranceDegrees").asDouble()));
+   }
+
+   @Override
+   public void setOnDiskFields()
+   {
+      super.setOnDiskFields();
+
+      onDiskSide = side.getValue();
+      onDiskObjectFrameName = objectFrameName.getValue();
+      onDiskScrewAxisPoseInObjectFrame.set(screwAxisPoseInObjectFrame.getValueReadOnly());
+      onDiskTranslation = translation.getValue();
+      onDiskRotation = rotation.getValue();
+      onDiskMaxLinearVelocity = maxLinearVelocity.getValue();
+      onDiskMaxAngularVelocity = maxAngularVelocity.getValue();
+      onDiskJointspaceOnly = jointspaceOnly.getValue();
+      onDiskLinearPositionWeight = linearPositionWeight.getValue();
+      onDiskAngularPositionWeight = angularPositionWeight.getValue();
+      onDiskJointspaceWeight = jointspaceWeight.getValue();
+      onDiskPositionErrorTolerance = positionErrorTolerance.getValue();
+      onDiskOrientationErrorTolerance = orientationErrorTolerance.getValue();
+   }
+
+   @Override
+   public void undoAllNontopologicalChanges()
+   {
+      super.undoAllNontopologicalChanges();
+
+      side.setValue(onDiskSide);
+      objectFrameName.setValue(onDiskObjectFrameName);
+      screwAxisPoseInObjectFrame.getValue().set(onDiskScrewAxisPoseInObjectFrame);
+      translation.setValue(onDiskTranslation);
+      rotation.setValue(onDiskRotation);
+      maxLinearVelocity.setValue(onDiskMaxLinearVelocity);
+      maxAngularVelocity.setValue(onDiskMaxAngularVelocity);
+      jointspaceOnly.setValue(onDiskJointspaceOnly);
+      linearPositionWeight.setValue(onDiskLinearPositionWeight);
+      angularPositionWeight.setValue(onDiskAngularPositionWeight);
+      jointspaceWeight.setValue(onDiskJointspaceWeight);
+      positionErrorTolerance.setValue(onDiskPositionErrorTolerance);
+      orientationErrorTolerance.setValue(onDiskOrientationErrorTolerance);
+   }
+
+   @Override
+   public boolean hasChanges()
+   {
+      boolean unchanged = !super.hasChanges();
+
+      unchanged &= side.getValue() == onDiskSide;
+      unchanged &= objectFrameName.getValue().equals(onDiskObjectFrameName);
+      unchanged &= screwAxisPoseInObjectFrame.getValueReadOnly().equals(onDiskScrewAxisPoseInObjectFrame);
+      unchanged &= translation.getValue() == onDiskTranslation;
+      unchanged &= rotation.getValue() == onDiskRotation;
+      unchanged &= maxLinearVelocity.getValue() == onDiskMaxLinearVelocity;
+      unchanged &= maxAngularVelocity.getValue() == onDiskMaxAngularVelocity;
+      unchanged &= jointspaceOnly.getValue() == onDiskJointspaceOnly;
+      unchanged &= linearPositionWeight.getValue() == onDiskLinearPositionWeight;
+      unchanged &= angularPositionWeight.getValue() == onDiskAngularPositionWeight;
+      unchanged &= jointspaceWeight.getValue() == onDiskJointspaceWeight;
+      unchanged &= positionErrorTolerance.getValue() == onDiskPositionErrorTolerance;
+      unchanged &= orientationErrorTolerance.getValue() == onDiskOrientationErrorTolerance;
+
+      return !unchanged;
    }
 
    public void toMessage(ScrewPrimitiveActionDefinitionMessage message)
@@ -96,6 +185,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       message.setLinearPositionWeight(linearPositionWeight.toMessage());
       message.setAngularPositionWeight(angularPositionWeight.toMessage());
       message.setJointspaceWeight(jointspaceWeight.toMessage());
+      message.setPositionErrorTolerance(positionErrorTolerance.toMessage());
+      message.setOrientationErrorTolerance(orientationErrorTolerance.toMessage());
    }
 
    public void fromMessage(ScrewPrimitiveActionDefinitionMessage message)
@@ -113,6 +204,8 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
       linearPositionWeight.fromMessage(message.getLinearPositionWeight());
       angularPositionWeight.fromMessage(message.getAngularPositionWeight());
       jointspaceWeight.fromMessage(message.getJointspaceWeight());
+      positionErrorTolerance.fromMessage(message.getPositionErrorTolerance());
+      orientationErrorTolerance.fromMessage(message.getOrientationErrorTolerance());
    }
 
    @Override
@@ -219,5 +312,25 @@ public class ScrewPrimitiveActionDefinition extends ActionNodeDefinition impleme
    public void setJointspaceWeight(double jointspaceWeight)
    {
       this.jointspaceWeight.setValue(jointspaceWeight);
+   }
+
+   public double getPositionErrorTolerance()
+   {
+      return positionErrorTolerance.getValue();
+   }
+
+   public void setPositionErrorTolerance(double positionErrorTolerance)
+   {
+      this.positionErrorTolerance.setValue(positionErrorTolerance);
+   }
+
+   public double getOrientationErrorTolerance()
+   {
+      return orientationErrorTolerance.getValue();
+   }
+
+   public void setOrientationErrorTolerance(double orientationErrorTolerance)
+   {
+      this.orientationErrorTolerance.setValue(orientationErrorTolerance);
    }
 }

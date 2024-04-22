@@ -13,6 +13,11 @@ public interface MonteCarloFootstepPlannerParametersBasics extends MonteCarloFoo
       set(MonteCarloFootstepPlannerParameters.reset, reset);
    }
 
+   default void setNodesPerMeter(double nodesPerMeter)
+   {
+      set(MonteCarloFootstepPlannerParameters.nodesPerMeter, nodesPerMeter);
+   }
+
    default void setNumberOfIterations(int numberOfIterations)
    {
       set(MonteCarloFootstepPlannerParameters.numberOfIterations, numberOfIterations);

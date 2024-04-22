@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 public class PerceptionBasedContinuousWalking
 {
-   private ContinuousPlanner.PlanningMode mode = ContinuousPlanner.PlanningMode.WALK_TO_GOAL;
+   private ContinuousPlanner.PlanningMode mode = ContinuousPlanner.PlanningMode.FAST_HIKING;
 
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2Helper ros2Helper;

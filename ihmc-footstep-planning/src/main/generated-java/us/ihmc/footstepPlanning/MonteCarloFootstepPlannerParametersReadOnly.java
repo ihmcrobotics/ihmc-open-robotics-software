@@ -15,6 +15,11 @@ public interface MonteCarloFootstepPlannerParametersReadOnly extends StoredPrope
       return get(reset);
    }
 
+   default double getNodesPerMeter()
+   {
+      return get(nodesPerMeter);
+   }
+
    default int getNumberOfIterations()
    {
       return get(numberOfIterations);

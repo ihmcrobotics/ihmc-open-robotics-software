@@ -18,16 +18,12 @@ public class RDXVisualizerWithHeartbeat
    private final RDXVisualizer visualizer;
    @Nullable
    private ROS2Heartbeat heartbeat = null;
-   // List of heartbeats that should be set alive when this class's heartbeat is alive
-   private final RDXVisualizerWithHeartbeat[] dependentVisualizers;
 
    public RDXVisualizerWithHeartbeat(@Nullable ROS2Node node,
                                      @Nullable ROS2Topic<Empty> heartbeatTopic,
-                                     RDXVisualizer visualizer,
-                                     RDXVisualizerWithHeartbeat... dependentVisualizers)
+                                     RDXVisualizer visualizer)
    {
       this.visualizer = visualizer;
-      this.dependentVisualizers = dependentVisualizers;
       if (heartbeatTopic != null)
       {
          heartbeat = new ROS2Heartbeat(node, heartbeatTopic);
@@ -45,27 +41,12 @@ public class RDXVisualizerWithHeartbeat
       visualizer.renderImGuiWidgets();
 
       if (heartbeat != null)
-      {
          heartbeat.setAlive(visualizer.isActive());
-
-         for (RDXVisualizerWithHeartbeat dependentVisualizer : dependentVisualizers)
-         {
-            if (dependentVisualizer.getHeartbeat() != null && !dependentVisualizer.isActive())
-            {
-               dependentVisualizer.getHeartbeat().setAlive(visualizer.isActive());
-            }
-         }
-      }
    }
 
    public void update()
    {
       visualizer.update();
-   }
-
-   public RDXPanel getPanel()
-   {
-      return visualizer.getPanel();
    }
 
    public boolean isActive()
@@ -76,11 +57,6 @@ public class RDXVisualizerWithHeartbeat
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       visualizer.getRenderables(renderables, pool, sceneLevels);
-   }
-
-   public ROS2Heartbeat getHeartbeat()
-   {
-      return heartbeat;
    }
 
    public void destroy()

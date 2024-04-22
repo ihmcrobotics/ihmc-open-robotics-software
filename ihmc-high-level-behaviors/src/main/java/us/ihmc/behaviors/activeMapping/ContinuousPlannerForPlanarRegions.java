@@ -42,7 +42,7 @@ public class ContinuousPlannerForPlanarRegions
       this.referenceFrames = referenceFrames;
    }
 
-   public void setGoalWaypointPoses()
+   public void setGoalWaypointPoses(float nominalStanceWidth)
    {
       robotLocation.set((startingStancePose.get(RobotSide.LEFT).getX() + startingStancePose.get(RobotSide.RIGHT).getX()) / 2.0f,
                         (startingStancePose.get(RobotSide.LEFT).getY() + startingStancePose.get(RobotSide.RIGHT).getY()) / 2.0f);
@@ -70,8 +70,8 @@ public class ContinuousPlannerForPlanarRegions
       Pose3D goalPoseToUse = new Pose3D(goalPosition.getX(), goalPosition.getY(), 0.0, 0.0, 0.0, yawRobotToGoal);
       goalStancePose.get(RobotSide.LEFT).set(goalPoseToUse);
       goalStancePose.get(RobotSide.RIGHT).set(goalPoseToUse);
-      goalStancePose.get(RobotSide.LEFT).prependTranslation(0.0, 0.12, 0.0);
-      goalStancePose.get(RobotSide.RIGHT).prependTranslation(0.0, -0.12, 0.0);
+      goalStancePose.get(RobotSide.LEFT).prependTranslation(0.0, nominalStanceWidth, 0.0);
+      goalStancePose.get(RobotSide.RIGHT).prependTranslation(0.0, -nominalStanceWidth, 0.0);
    }
 
    public void planBodyPathWithPlanarRegionMap(PlanarRegionMap planarRegionMap)

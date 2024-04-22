@@ -15,7 +15,7 @@ public class ActionSequenceStateMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d891da308515d481835d81b9684a61714ca8fa2028b436c7f1b15e603507afef";
+   		return "1ed3c3f29adf0677c8ad7a6e55ec6b4694c391105a6fc7038c7e334860947980";
    }
    
    @Override

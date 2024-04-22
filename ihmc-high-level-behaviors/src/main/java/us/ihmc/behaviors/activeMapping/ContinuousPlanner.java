@@ -11,7 +11,6 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
@@ -38,7 +37,7 @@ public class ContinuousPlanner
 {
    public enum PlanningMode
    {
-      EXECUTE_AND_PAUSE, FRONTIER_EXPANSION, ACTIVE_SEARCH, WALK_TO_GOAL, RANDOM_WALK
+      EXECUTE_AND_PAUSE, FRONTIER_EXPANSION, ACTIVE_SEARCH, FAST_HIKING
    }
 
    private ContinuousGoalGenerator goalGenerator = new ContinuousGoalGenerator(0.0, 5.0, 0.0, 5.0);
@@ -76,10 +75,14 @@ public class ContinuousPlanner
    private boolean resetMonteCarloFootstepPlanner = false;
    private boolean active;
 
+   float xRandomMargin = 0.2f;
+   float nominalStanceWidth = 0.22f;
+
    public ContinuousPlanner(DRCRobotModel robotModel,
                             HumanoidReferenceFrames humanoidReferenceFrames,
                             PlanningMode mode,
                             ContinuousWalkingParameters continuousWalkingParameters,
+                            MonteCarloFootstepPlannerParameters monteCarloPlannerParameters,
                             TerrainPlanningDebugger debugger)
    {
       this.swingPlannerParameters = robotModel.getSwingPlannerParameters();
@@ -92,7 +95,7 @@ public class ContinuousPlanner
       this.active = true;
       this.mode = mode;
 
-      this.monteCarloFootstepPlannerParameters = new MonteCarloFootstepPlannerParameters();
+      this.monteCarloFootstepPlannerParameters = monteCarloPlannerParameters;
       this.footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel, "ForContinuousWalking");
       this.logger = new FootstepPlannerLogger(footstepPlanner);
       this.monteCarloFootstepPlanner = new MonteCarloFootstepPlanner(monteCarloFootstepPlannerParameters,
@@ -316,20 +319,13 @@ public class ContinuousPlanner
    {
       switch (this.mode)
       {
-         case WALK_TO_GOAL:
+         case FAST_HIKING:
             ContinuousPlanningTools.setRandomizedStraightGoalPoses(walkingStartMidPose,
                                                                    startingStancePose,
                                                                    goalStancePose,
                                                                    (float) continuousWalkingParameters.getGoalPoseForwardDistance(),
-                                                                   (float) continuousWalkingParameters.getGoalPoseUpDistance());
-            break;
-         case RANDOM_WALK:
-            goalGenerator.updateCurrentPosition(new Point3D(startingStancePose.get(RobotSide.LEFT).getPosition()));
-            ContinuousPlanningTools.setRandomGoalWithinBounds(goalGenerator.getNextLocation(),
-                                                              startingStancePose,
-                                                              goalStancePose,
-                                                              (float) continuousWalkingParameters.getGoalPoseForwardDistance(),
-                                                              (float) continuousWalkingParameters.getGoalPoseUpDistance());
+                                                                   xRandomMargin,
+                                                                   (float) continuousWalkingParameters.getGoalPoseUpDistance(), nominalStanceWidth);
             break;
       }
    }

@@ -9,7 +9,7 @@ import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
-from footstep_dataset_loader import visualize_plan
+from footstep_dataset_visualizer import visualize_plan
 from hdf5_reader import *
 
 from tqdm import tqdm

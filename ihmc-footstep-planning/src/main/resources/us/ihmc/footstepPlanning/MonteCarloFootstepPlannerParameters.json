@@ -1,6 +1,7 @@
 {
   "title" : "MonteCarloFootstepPlannerParameters",
   "Reset" : false,
+  "Nodes per meter" : 50.0,
   "Number of iterations" : {
     "value" : 90,
     "lowerBound" : 1,
@@ -12,7 +13,7 @@
     "upperBound" : 400
   },
   "Timeout duration" : {
-    "value" : 0.50276,
+    "value" : 0.03,
     "lowerBound" : 0.01,
     "upperBound" : 1.0
   },
@@ -57,7 +58,7 @@
     "upperBound" : 5.0
   },
   "Initial value cutoff" : {
-    "value" : 162,
+    "value" : 200,
     "lowerBound" : -1000,
     "upperBound" : 1000
   },

@@ -1,21 +1,39 @@
 package us.ihmc.communication;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
+import controller_msgs.msg.dds.ConcaveHullFactoryParametersStringMessage;
+import controller_msgs.msg.dds.RigidBodyTransformMessage;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
-import perception_msgs.msg.dds.*;
+import perception_msgs.msg.dds.ArUcoMarkerPoses;
+import perception_msgs.msg.dds.BigVideoPacket;
+import perception_msgs.msg.dds.DetectedObjectPacket;
+import perception_msgs.msg.dds.DoorLocationPacket;
+import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
+import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
+import perception_msgs.msg.dds.HeightMapMessage;
+import perception_msgs.msg.dds.HeightMapStateRequestMessage;
+import perception_msgs.msg.dds.ImageMessage;
+import perception_msgs.msg.dds.IterativeClosestPointRequest;
+import perception_msgs.msg.dds.LidarScanMessage;
+import perception_msgs.msg.dds.PlanarRegionsListMessage;
+import perception_msgs.msg.dds.PolygonizerParametersStringMessage;
+import perception_msgs.msg.dds.REAStateRequestMessage;
+import perception_msgs.msg.dds.SceneGraphMessage;
+import perception_msgs.msg.dds.VideoPacket;
+import perception_msgs.msg.dds.YOLOv8ParametersMessage;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.*;
+import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.ros2.ROS2Topic;
 
-public class PerceptionAPI
+public final class PerceptionAPI
 {
-   public static final String IHMC_TOPIC_PREFIX = "ihmc";
-
    public static final String REA_NODE_NAME = "REA_module";
    public static final String GPU_REA_NODE_NAME = "GPU_based_REA_module";
    public static final String MAPPING_MODULE_NODE_NAME = "mapping_module";
@@ -42,7 +60,7 @@ public class PerceptionAPI
    public static final String T265_NAME = "t265";
    public static final String MULTISENSE_NAME = "multisense";
 
-   public static final ROS2Topic<?> IHMC_ROOT = new ROS2Topic<>().withPrefix(IHMC_TOPIC_PREFIX);
+   public static final ROS2Topic<?> IHMC_ROOT = ROS2Tools.IHMC_ROOT;
    public static final ROS2Topic<?> HEIGHT_QUADTREE_TOOLBOX = IHMC_ROOT.withModule(HEIGHT_QUADTREE_TOOLBOX_MODULE_NAME);
    public static final ROS2Topic<?> FIDUCIAL_DETECTOR_TOOLBOX = IHMC_ROOT.withModule(FIDUCIAL_MODULE_NAME);
    public static final ROS2Topic<?> FIDUCIAL_DETECTOR_TOOLBOX_INPUT = FIDUCIAL_DETECTOR_TOOLBOX.withInput();
@@ -77,49 +95,52 @@ public class PerceptionAPI
    public static final ROS2Topic<PolygonizerParametersStringMessage> POLYGONIZER_PARAMETERS = REA.withInput()
                                                                                                  .withType(PolygonizerParametersStringMessage.class)
                                                                                                  .withSuffix("polygonizer_parameters");
-
-   public static final ROS2Topic<VideoPacket> VIDEO = IHMC_ROOT.withTypeName(VideoPacket.class);
-   public static final ROS2Topic<BigVideoPacket> BIG_VIDEO = IHMC_ROOT.withTypeName(BigVideoPacket.class);
-   public static final ROS2Topic<VideoPacket> D435_VIDEO = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("video");
-   public static final ROS2Topic<ImageMessage> D435_COLOR_IMAGE = IHMC_ROOT.withModule(D435_NAME).withType(ImageMessage.class).withSuffix("video");
-   public static final ROS2Topic<ImageMessage> D435_DEPTH_IMAGE = IHMC_ROOT.withModule(D435_NAME).withType(ImageMessage.class).withSuffix("depth");
-   public static final ROS2Topic<VideoPacket> D435_DEPTH = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("depth");
-   public static final ROS2Topic<VideoPacket> L515_VIDEO = IHMC_ROOT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("video");
-   public static final ROS2Topic<ImageMessage> L515_COLOR_IMAGE = IHMC_ROOT.withModule(L515_NAME).withTypeName(ImageMessage.class).withSuffix("color");
-   public static final ROS2Topic<BigVideoPacket> L515_DEPTH_LARGE = IHMC_ROOT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("depth");
-   public static final ROS2Topic<VideoPacket> L515_DEPTH = IHMC_ROOT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("depth");
-   public static final ROS2Topic<ImageMessage> L515_DEPTH_IMAGE = IHMC_ROOT.withModule(L515_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
-   public static final ROS2Topic<ImageMessage> D455_DEPTH_IMAGE = IHMC_ROOT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
-   public static final ROS2Topic<ImageMessage> D455_COLOR_IMAGE = IHMC_ROOT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("color");
-   public static final ROS2Topic<BigVideoPacket> D455_DEPTH_LARGE = IHMC_ROOT.withModule(D455_NAME).withType(BigVideoPacket.class).withSuffix("depth");
+   public static final ROS2Topic<?> BEST_EFFORT = IHMC_ROOT.withQoS(ROS2QosProfile.BEST_EFFORT());
+   public static final ROS2Topic<VideoPacket> VIDEO = BEST_EFFORT.withTypeName(VideoPacket.class);
+   public static final ROS2Topic<BigVideoPacket> BIG_VIDEO = BEST_EFFORT.withTypeName(BigVideoPacket.class).withQoS(ROS2QosProfile.BEST_EFFORT());
+   public static final ROS2Topic<VideoPacket> D435_VIDEO = BEST_EFFORT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("video");
+   public static final ROS2Topic<ImageMessage> D435_COLOR_IMAGE = BEST_EFFORT.withModule(D435_NAME).withType(ImageMessage.class).withSuffix("video");
+   public static final ROS2Topic<ImageMessage> D435_DEPTH_IMAGE = BEST_EFFORT.withModule(D435_NAME).withType(ImageMessage.class).withSuffix("depth");
+   public static final ROS2Topic<VideoPacket> D435_DEPTH = BEST_EFFORT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("depth");
+   public static final ROS2Topic<VideoPacket> L515_VIDEO = BEST_EFFORT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("video");
+   public static final ROS2Topic<ImageMessage> L515_COLOR_IMAGE = BEST_EFFORT.withModule(L515_NAME).withTypeName(ImageMessage.class).withSuffix("color");
+   public static final ROS2Topic<BigVideoPacket> L515_DEPTH_LARGE = BEST_EFFORT.withModule(L515_NAME).withType(BigVideoPacket.class).withSuffix("depth");
+   public static final ROS2Topic<VideoPacket> L515_DEPTH = BEST_EFFORT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> L515_DEPTH_IMAGE = BEST_EFFORT.withModule(L515_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> D455_DEPTH_IMAGE = BEST_EFFORT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> D455_COLOR_IMAGE = BEST_EFFORT.withModule(D455_NAME).withTypeName(ImageMessage.class).withSuffix("color");
+   public static final ROS2Topic<BigVideoPacket> D455_DEPTH_LARGE = BEST_EFFORT.withModule(D455_NAME).withType(BigVideoPacket.class).withSuffix("depth");
 
    public static final ROS2Topic<ImageMessage> TERRAIN_DEBUG_IMAGE
-         = IHMC_ROOT.withModule(L515_NAME).withType(ImageMessage.class).withSuffix("terrain_debug_image");
-   public static final ROS2Topic<BigVideoPacket> L515_DEBUG_EXTRACTION = IHMC_ROOT.withModule(L515_NAME)
+         = BEST_EFFORT.withModule(L515_NAME).withType(ImageMessage.class).withSuffix("terrain_debug_image");
+   public static final ROS2Topic<BigVideoPacket> L515_DEBUG_EXTRACTION = BEST_EFFORT.withModule(L515_NAME)
                                                                                   .withType(BigVideoPacket.class)
                                                                                   .withSuffix("debug_extraction");
    public static final ROS2Topic<Empty> REQUEST_REALSENSE_POINT_CLOUD = PERCEPTION_MODULE.withSuffix("request_realsense_point_cloud").withType(Empty.class);
-   public static final SideDependentList<ROS2Topic<BigVideoPacket>> BLACKFLY_VIDEO = new SideDependentList<>(IHMC_ROOT.withModule(BLACKFLY_NAME + "left")
-                                                                                                                      .withType(BigVideoPacket.class)
-                                                                                                                      .withSuffix("video"),
-                                                                                                             IHMC_ROOT.withModule(BLACKFLY_NAME + "right")
-                                                                                                                      .withType(BigVideoPacket.class)
-                                                                                                                      .withSuffix("video"));
+   public static final SideDependentList<ROS2Topic<BigVideoPacket>> BLACKFLY_VIDEO = new SideDependentList<>(BEST_EFFORT.withModule(BLACKFLY_NAME + "left")
+                                                                                                                        .withType(BigVideoPacket.class)
+                                                                                                                        .withSuffix("video"),
+                                                                                                             BEST_EFFORT.withModule(BLACKFLY_NAME + "right")
+                                                                                                                        .withType(BigVideoPacket.class)
+                                                                                                                        .withSuffix("video"));
    public static final SideDependentList<ROS2Topic<ImageMessage>> BLACKFLY_FISHEYE_COLOR_IMAGE
-         = new SideDependentList<>(IHMC_ROOT.withModule(BLACKFLY_NAME + "_fisheye")
-                                            .withType(ImageMessage.class)
-                                            .withSuffix("left"),
-                                   IHMC_ROOT.withModule(BLACKFLY_NAME + "_fisheye")
-                                            .withType(ImageMessage.class)
-                                            .withSuffix("right"));
+         = new SideDependentList<>(BEST_EFFORT.withModule(BLACKFLY_NAME + "_fisheye")
+                                              .withType(ImageMessage.class)
+                                              .withSuffix("left"),
+                                   BEST_EFFORT.withModule(BLACKFLY_NAME + "_fisheye")
+                                              .withType(ImageMessage.class)
+                                              .withSuffix("right"));
    public static final SideDependentList<ROS2Topic<Empty>> REQUEST_BLACKFLY_COLOR_IMAGE
          = new SideDependentList<>(PERCEPTION_MODULE.withSuffix("request_left_blackfly_color").withType(Empty.class),
                                    PERCEPTION_MODULE.withSuffix("request_right_blackfly_color").withType(Empty.class));
 
-   public static final ROS2Topic<BigVideoPacket> OUSTER_DEPTH_LARGE = IHMC_ROOT.withModule("ouster").withType(BigVideoPacket.class).withSuffix("depth");
-   public static final ROS2Topic<VideoPacket> OUSTER_DEPTH = IHMC_ROOT.withModule("ouster").withType(VideoPacket.class).withSuffix("depth");
-   public static final ROS2Topic<ImageMessage> OUSTER_DEPTH_IMAGE = IHMC_ROOT.withModule("ouster").withTypeName(ImageMessage.class).withSuffix("depth");
-   public static final ROS2Topic<BigVideoPacket> BIG_VIDEO_TEST = IHMC_ROOT.withModule(BLACKFLY_NAME).withType(BigVideoPacket.class).withSuffix("test");
+   public static final ROS2Topic<BigVideoPacket> OUSTER_DEPTH_LARGE = BEST_EFFORT.withModule("ouster").withType(BigVideoPacket.class).withSuffix("depth");
+   public static final ROS2Topic<VideoPacket> OUSTER_DEPTH = BEST_EFFORT.withModule("ouster").withType(VideoPacket.class).withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> OUSTER_DEPTH_IMAGE = BEST_EFFORT.withModule("ouster")
+                                                                               .withTypeName(ImageMessage.class)
+                                                                               .withSuffix("depth")
+                                                                               .withQoS(ROS2QosProfile.BEST_EFFORT());
+   public static final ROS2Topic<BigVideoPacket> BIG_VIDEO_TEST = BEST_EFFORT.withModule(BLACKFLY_NAME).withType(BigVideoPacket.class).withSuffix("test");
    public static final ROS2Topic<Empty> REQUEST_OUSTER_DEPTH = PERCEPTION_MODULE.withSuffix("request_ouster_depth").withType(Empty.class);
 
    public static final ROS2Topic<Empty> REQUEST_ZED_COLOR = PERCEPTION_MODULE.withSuffix("request_zed_color").withType(Empty.class);
@@ -127,34 +148,42 @@ public class PerceptionAPI
    public static final ROS2Topic<Empty> REQUEST_ZED_POINT_CLOUD = PERCEPTION_MODULE.withSuffix("request_zed_point_cloud").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_CENTERPOSE = PERCEPTION_MODULE.withSuffix("request_centerpose").withType(Empty.class);
    public static final ROS2Topic<DetectedObjectPacket> CENTERPOSE_DETECTED_OBJECT = IHMC_ROOT.withModule("centerpose").withType(DetectedObjectPacket.class);
+   public static final ROS2Topic<Empty> REQUEST_YOLO_ZED = PERCEPTION_MODULE.withSuffix("request_yolo_zed").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_YOLO_REALSENSE = PERCEPTION_MODULE.withSuffix("request_yolo_realsense").withType(Empty.class);
    public static final ROS2Topic<ImageMessage> ZED2_STEREO_COLOR = IHMC_ROOT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("color_stereo");
-   public static final SideDependentList<ROS2Topic<ImageMessage>> ZED2_COLOR_IMAGES = new SideDependentList<>(IHMC_ROOT.withModule(ZED2_NAME)
-                                                                                                                       .withType(ImageMessage.class)
-                                                                                                                       .withSuffix("left_color"),
-                                                                                                              IHMC_ROOT.withModule(ZED2_NAME)
-                                                                                                                       .withType(ImageMessage.class)
-                                                                                                                       .withSuffix("right_color"));
-   public static final ROS2Topic<ImageMessage> ZED2_DEPTH = IHMC_ROOT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("depth");
+   public static final SideDependentList<ROS2Topic<ImageMessage>> ZED2_COLOR_IMAGES = new SideDependentList<>(BEST_EFFORT.withModule(ZED2_NAME)
+                                                                                                                         .withType(ImageMessage.class)
+                                                                                                                         .withSuffix("left_color"),
+                                                                                                              BEST_EFFORT.withModule(ZED2_NAME)
+                                                                                                                         .withType(ImageMessage.class)
+                                                                                                                         .withSuffix("right_color"));
+   public static final ROS2Topic<ImageMessage> ZED2_DEPTH = BEST_EFFORT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("depth");
    public static final ROS2Topic<IterativeClosestPointRequest> ICP_REQUEST = IHMC_ROOT.withModule("iterative_closest_point")
                                                                                       .withSuffix("request")
                                                                                       .withType(IterativeClosestPointRequest.class);
    public static final ROS2Topic<DetectedObjectPacket> ICP_RESULT = IHMC_ROOT.withModule("iterative_closest_point")
                                                                              .withSuffix("result")
                                                                              .withType(DetectedObjectPacket.class);
+   public static final ROS2Topic<Empty> REQUEST_PLANAR_REGIONS = IHMC_ROOT.withModule("planar_regions")
+                                                                          .withSuffix("request")
+                                                                          .withType(Empty.class);
+   public static final ROS2Topic<YOLOv8ParametersMessage> YOLO_PARAMETERS = IHMC_ROOT.withModule("yolo")
+                                                                                     .withSuffix("parameters")
+                                                                                     .withType(YOLOv8ParametersMessage.class);
 
    public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
-   public static final ROS2Topic<FusedSensorHeadPointCloudMessage> FUSED_SENSOR_HEAD_POINT_CLOUD = IHMC_ROOT.withTypeName(FusedSensorHeadPointCloudMessage.class);
-   public static final ROS2Topic<FusedSensorHeadPointCloudMessage> D435_COLORED_POINT_CLOUD = IHMC_ROOT.withType(FusedSensorHeadPointCloudMessage.class)
-                                                                                                       .withSuffix("d435_color");
-   public static final ROS2Topic<FusedSensorHeadPointCloudMessage> OUSTER_POINT_CLOUD = IHMC_ROOT.withType(FusedSensorHeadPointCloudMessage.class)
-                                                                                                 .withSuffix("ouster");
-   public static final ROS2Topic<LidarScanMessage> OUSTER_LIDAR_SCAN = IHMC_ROOT.withType(LidarScanMessage.class).withSuffix("ouster");
-   public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_STEREO_POINT_CLOUD = IHMC_ROOT.withTypeName(StereoVisionPointCloudMessage.class);
+   public static final ROS2Topic<FusedSensorHeadPointCloudMessage> FUSED_SENSOR_HEAD_POINT_CLOUD = BEST_EFFORT.withTypeName(FusedSensorHeadPointCloudMessage.class);
+   public static final ROS2Topic<FusedSensorHeadPointCloudMessage> D435_COLORED_POINT_CLOUD = BEST_EFFORT.withType(FusedSensorHeadPointCloudMessage.class)
+                                                                                                         .withSuffix("d435_color");
+   public static final ROS2Topic<FusedSensorHeadPointCloudMessage> OUSTER_POINT_CLOUD = BEST_EFFORT.withType(FusedSensorHeadPointCloudMessage.class)
+                                                                                                   .withSuffix("ouster");
+   public static final ROS2Topic<LidarScanMessage> OUSTER_LIDAR_SCAN = BEST_EFFORT.withType(LidarScanMessage.class).withSuffix("ouster");
+   public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_STEREO_POINT_CLOUD = BEST_EFFORT.withTypeName(StereoVisionPointCloudMessage.class);
 
-   public static final ROS2Topic<StereoVisionPointCloudMessage> D435_POINT_CLOUD = IHMC_ROOT.withSuffix(D435_NAME)
-                                                                                            .withTypeName(StereoVisionPointCloudMessage.class);
-   public static final ROS2Topic<StereoVisionPointCloudMessage> L515_POINT_CLOUD = IHMC_ROOT.withSuffix(L515_NAME)
-                                                                                            .withTypeName(StereoVisionPointCloudMessage.class);
+   public static final ROS2Topic<StereoVisionPointCloudMessage> D435_POINT_CLOUD = BEST_EFFORT.withSuffix(D435_NAME)
+                                                                                              .withTypeName(StereoVisionPointCloudMessage.class);
+   public static final ROS2Topic<StereoVisionPointCloudMessage> L515_POINT_CLOUD = BEST_EFFORT.withSuffix(L515_NAME)
+                                                                                              .withTypeName(StereoVisionPointCloudMessage.class);
    public static final ROS2Topic<StampedPosePacket> T265_POSE = IHMC_ROOT.withSuffix(T265_NAME).withTypeName(StampedPosePacket.class);
 
    public static final ROS2IOTopicPair<SceneGraphMessage> SCENE_GRAPH = new ROS2IOTopicPair<>(SCENE_GRAPH_MODULE.withTypeName(SceneGraphMessage.class));
@@ -179,7 +208,10 @@ public class PerceptionAPI
     *  They are prre filtered using the polygonizer, segmentation, and concave hull filtering parameters. There is no need for delay compensation. */
 
    public static final ROS2Topic<FramePlanarRegionsListMessage> PERSPECTIVE_RAPID_REGIONS
-         = PERCEPTION_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class).withSuffix("perspective");
+         = PERCEPTION_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class).withSuffix("perspective").withQoS(ROS2QosProfile.BEST_EFFORT());
+
+   public static final ROS2Topic<FramePlanarRegionsListMessage> PERSPECTIVE_DOOR_RAPID_REGION
+         = PERCEPTION_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class).withSuffix("perspective_door").withQoS(ROS2QosProfile.BEST_EFFORT());
 
    public static final ROS2Topic<FramePlanarRegionsListMessage> SPHERICAL_RAPID_REGIONS_WITH_POSE = PERCEPTION_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class).withSuffix("spherical");
    public static final ROS2Topic<PlanarRegionsListMessage> SPHERICAL_RAPID_REGIONS = PERCEPTION_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class).withSuffix("spherical");

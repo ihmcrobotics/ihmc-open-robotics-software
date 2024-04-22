@@ -32,8 +32,7 @@ public class SwingPlannerTools
    private static Vector3D infiniteWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
    private static FrameVector3D zeroVector = new FrameVector3D();
 
-   public static List<EnumMap<Axis3D, List<PolynomialReadOnly>>> computeTrajectories(SwingPlannerParametersBasics swingPlannerParameters,
-                                                                                     SwingTrajectoryParameters swingTrajectoryParameters,
+   public static List<EnumMap<Axis3D, List<PolynomialReadOnly>>> computeTrajectories(SwingTrajectoryParameters swingTrajectoryParameters,
                                                                                      PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator,
                                                                                      SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses,
                                                                                      FootstepPlan footstepPlan)
@@ -50,7 +49,7 @@ public class SwingPlannerTools
          startOfSwingPose.set((i < 2 ? initialStanceFootPoses.get(footstep.getRobotSide()) : footstepPlan.getFootstep(i - 2).getFootstepPose()));
          endOfSwingPose.set(footstep.getFootstepPose());
 
-         EnumMap<Axis3D, List<PolynomialReadOnly>> swingTrajectory = computeTrajectory(swingPlannerParameters, swingTrajectoryParameters,
+         EnumMap<Axis3D, List<PolynomialReadOnly>> swingTrajectory = computeTrajectory(swingTrajectoryParameters,
                                                                                        positionTrajectoryGenerator,
                                                                                        startOfSwingPose,
                                                                                        endOfSwingPose,
@@ -61,8 +60,7 @@ public class SwingPlannerTools
       return swingTrajectories;
    }
 
-   public static EnumMap<Axis3D, List<PolynomialReadOnly>> computeTrajectory(SwingPlannerParametersBasics swingPlannerParameters,
-                                                                             SwingTrajectoryParameters swingTrajectoryParameters,
+   public static EnumMap<Axis3D, List<PolynomialReadOnly>> computeTrajectory(SwingTrajectoryParameters swingTrajectoryParameters,
                                                                              PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator,
                                                                              FramePose3D startOfSwingPose,
                                                                              FramePose3D endOfSwingPose,
@@ -78,7 +76,7 @@ public class SwingPlannerTools
       if (defaultTrajectoryUsed)
       {
          List<FramePoint3D> defaultWaypoints = new ArrayList<>();
-         double[] defaultWaypointProportions = new double[] {0.15, 0.85};
+         double[] defaultWaypointProportions = swingTrajectoryParameters.getSwingWaypointProportions();
          double defaultSwingHeightFromStanceFoot = swingTrajectoryParameters.getDefaultSwingHeight();
 
          for (int i = 0; i < 2; i++)

@@ -7,8 +7,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -24,6 +22,7 @@ import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2PublisherBasics;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,24 +52,26 @@ public class TerrainPlanningDebugger
    private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
    private ContinuousWalkingStatusMessage statusMessage = new ContinuousWalkingStatusMessage();
 
-   private IHMCROS2Publisher<FootstepDataListMessage> publisherForUI;
-   private IHMCROS2Publisher<ContinuousWalkingStatusMessage> statusPublisher;
-   private IHMCROS2Publisher<FootstepDataListMessage> monteCarloPlanPublisherForUI;
-   private IHMCROS2Publisher<PoseListMessage> startAndGoalPublisherForUI;
-   private IHMCROS2Publisher<PoseListMessage> monteCarloNodesPublisherForUI;
+   private ROS2PublisherBasics<FootstepDataListMessage> publisherForUI;
+   private ROS2PublisherBasics<ContinuousWalkingStatusMessage> statusPublisher;
+   private ROS2PublisherBasics<FootstepDataListMessage> monteCarloPlanPublisherForUI;
+   private ROS2PublisherBasics<PoseListMessage> startAndGoalPublisherForUI;
+   private ROS2PublisherBasics<PoseListMessage> monteCarloNodesPublisherForUI;
    private MonteCarloFootstepPlannerRequest request;
+   private MonteCarloFootstepPlannerParameters parameters;
 
    private Mat contactHeatMapImage;
 
-   public TerrainPlanningDebugger(ROS2Node ros2Node)
+   public TerrainPlanningDebugger(ROS2Node ros2Node, MonteCarloFootstepPlannerParameters parameters)
    {
+      this.parameters = parameters;
       if (ros2Node != null)
       {
-         publisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousWalkingAPI.PLANNED_FOOTSTEPS);
-         statusPublisher = ROS2Tools.createPublisher(ros2Node, ContinuousWalkingAPI.CONTINUOUS_WALKING_STATUS);
-         monteCarloPlanPublisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN);
-         startAndGoalPublisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS);
-         monteCarloNodesPublisherForUI = ROS2Tools.createPublisher(ros2Node, ContinuousWalkingAPI.MONTE_CARLO_TREE_NODES);
+         publisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.PLANNED_FOOTSTEPS);
+         statusPublisher = ros2Node.createPublisher(ContinuousWalkingAPI.CONTINUOUS_WALKING_STATUS);
+         monteCarloPlanPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN);
+         startAndGoalPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS);
+         monteCarloNodesPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.MONTE_CARLO_TREE_NODES);
       }
    }
 
@@ -80,8 +81,8 @@ public class TerrainPlanningDebugger
          return;
 
       this.request = request;
-      this.offsetX = (int) (request.getTerrainMapData().getHeightMapCenter().getX() * 50.0f);
-      this.offsetY = (int) (request.getTerrainMapData().getHeightMapCenter().getY() * 50.0f);
+      this.offsetX = (int) (request.getTerrainMapData().getHeightMapCenter().getX() * parameters.getNodesPerMeter());
+      this.offsetY = (int) (request.getTerrainMapData().getHeightMapCenter().getY() * parameters.getNodesPerMeter());
       refresh(request.getTerrainMapData());
    }
 
@@ -90,8 +91,8 @@ public class TerrainPlanningDebugger
       if (!enabled)
          return;
 
-      this.offsetX = (int) (terrainMapData.getHeightMapCenter().getX() * 50.0f);
-      this.offsetY = (int) (terrainMapData.getHeightMapCenter().getY() * 50.0f);
+      this.offsetX = (int) (terrainMapData.getHeightMapCenter().getX() * parameters.getNodesPerMeter());
+      this.offsetY = (int) (terrainMapData.getHeightMapCenter().getY() * parameters.getNodesPerMeter());
 
       PerceptionDebugTools.convertDepthCopyToColor(terrainMapData.getHeightMap().clone(), heightMapColorImage);
       opencv_imgproc.resize(heightMapColorImage, heightMapColorImage, new Size(scaledWidth, scaledHeight));
@@ -201,7 +202,7 @@ public class TerrainPlanningDebugger
          else if (mode == 2)
             LogTools.debug(String.format("Start: %d, %d", (int) point.getX(), (int) point.getY()));
 
-         PerceptionDebugTools.plotTiltedRectangle(image, point, (float) -pose.getYaw(), 2 * scale, mode);
+         PerceptionDebugTools.plotTiltedRectangle(image, point, (float) -pose.getYaw(), 2 * scale, mode, 50);
       }
    }
 
@@ -216,7 +217,7 @@ public class TerrainPlanningDebugger
                                     plan.getFootstep(i).getFootstepPose().getPosition().getY(),
                                     plan.getFootstep(i).getFootstepPose().getYaw());
          Point2D point = new Point2D((pose.getX() * 50 - offsetX) * scale, (pose.getY() * 50 - offsetY) * scale);
-         PerceptionDebugTools.plotTiltedRectangle(image, point, -pose.getZ32(), 2 * scale, plan.getFootstep(i).getRobotSide() == RobotSide.LEFT ? -1 : 1);
+         PerceptionDebugTools.plotTiltedRectangle(image, point, -pose.getZ32(), 50, 2 * scale, plan.getFootstep(i).getRobotSide() == RobotSide.LEFT ? -1 : 1);
       }
    }
 
@@ -252,6 +253,9 @@ public class TerrainPlanningDebugger
 
    public void publishMonteCarloNodesForVisualization(MonteCarloTreeNode root, TerrainMapData terrainMap)
    {
+      if (root == null)
+         return;
+
       ArrayList<Pose3D> poses = new ArrayList<>();
 
       addChildPosesToList(root, terrainMap, poses);

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
+import controller_msgs.msg.dds.WrenchTrajectoryStatusMessage;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -528,7 +529,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       }
       if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
       {
-         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " is already load bearing. Changing contact point must be done first be exiting state.");
+//         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " is already load bearing. Changing contact point must be done first be exiting state.");
          return;
       }
 
@@ -558,7 +559,15 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    {
       if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
       {
-         hold();
+         if (defaultControlMode.getValue() == RigidBodyControlMode.JOINTSPACE && loadBearingControlState.isJointspaceControlActive())
+         {
+            jointspaceControlState.holdCurrentDesired();
+            requestState(jointspaceControlState.getControlMode());
+         }
+         else
+         {
+            hold();
+         }
       }
    }
 
@@ -662,6 +671,11 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    public Object pollStatusToReport()
    {
       return stateMachine.getCurrentState().pollStatusToReport();
+   }
+
+   public Object pollWrenchStatusToReport()
+   {
+      return externalWrenchManager.pollStatusToReport();
    }
 
    public RigidBodyTaskspaceControlState getTaskspaceControlState()

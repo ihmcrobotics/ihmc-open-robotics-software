@@ -7,8 +7,10 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
+import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
@@ -83,12 +85,22 @@ public class RDXBehaviorTreeNodeCreationMenu
          {
             if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
             {
-               RDXBehaviorTreeNode<?, ?> loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, topologyOperationQueue);
+               try
+               {
+                  RDXBehaviorTreeNode<?, ?> loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, topologyOperationQueue);
+                  BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
+                        = BehaviorTreeNodeInsertionDefinition.build(loadedNode, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
 
-               BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
-                   = BehaviorTreeNodeInsertionDefinition.build(loadedNode, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
-
-               complete(insertionDefinition);
+                  complete(insertionDefinition);
+               }
+               catch (Exception e)
+               {
+                  LogTools.error("""
+                                 Error loading {}.
+                                 Please run the JSON sanitizer in debug mode with the NullPointerException breakpoint enabled.
+                                 Error: {}
+                                 """, textToDisplay, e.getMessage());
+               }
             }
          }
 
@@ -98,6 +110,12 @@ public class RDXBehaviorTreeNodeCreationMenu
          if (ImGui.isItemHovered())
          {
             ImGui.beginTooltip();
+
+            if (!indexedTreeFile.getNotes().isEmpty())
+            {
+               ImGui.text(indexedTreeFile.getNotes());
+               ImGui.spacing();
+            }
 
             ImGui.text("Reference frames:");
 
@@ -125,11 +143,6 @@ public class RDXBehaviorTreeNodeCreationMenu
       ImGui.unindent();
       ImGui.spacing();
 
-      if (ImGui.button(labels.get("Refresh File List")))
-      {
-         reindexDirectory();
-      }
-
       ImGui.separator();
 
       ImGui.pushFont(ImGuiTools.getSmallBoldFont());
@@ -138,7 +151,10 @@ public class RDXBehaviorTreeNodeCreationMenu
       ImGui.indent();
 
       if (relativeNode != null)
+      {
          renderNodeCreationClickable(relativeNode, insertionType, "Basic Node", BehaviorTreeNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Door Traversal", DoorTraversalDefinition.class, null);
+      }
       if (insertionType == BehaviorTreeNodeInsertionType.INSERT_ROOT)
          renderNodeCreationClickable(relativeNode, insertionType, "Action Sequence", ActionSequenceDefinition.class, null);
 
@@ -166,7 +182,6 @@ public class RDXBehaviorTreeNodeCreationMenu
             ImGui.sameLine();
             renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), SakeHandCommandActionDefinition.class, side);
          }
-         renderNodeCreationClickable(relativeNode, insertionType, "Arm Joint Angles", ArmJointAnglesActionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Chest Orientation", ChestOrientationActionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Pelvis Height", PelvisHeightPitchActionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitDurationActionDefinition.class, null);
@@ -229,12 +244,20 @@ public class RDXBehaviorTreeNodeCreationMenu
       insertionDefinition.getNodeToInsert().setTreeWidgetExpanded(true);
    }
 
-   private void reindexDirectory()
+   public void reindexDirectory()
    {
       indexedTreeFiles.clear();
       for (WorkspaceResourceFile queryContainedFile : treeFilesDirectory.queryContainedFiles())
       {
-         indexedTreeFiles.add(new RDXAvailableBehaviorTreeFile(queryContainedFile, referenceFrameLibrary));
+         RDXAvailableBehaviorTreeFile treeFile = new RDXAvailableBehaviorTreeFile(queryContainedFile, referenceFrameLibrary);
+         if (treeFile.getName() != null && treeFile.getNotes() != null)
+         {
+            indexedTreeFiles.add(treeFile);
+         }
+         else
+         {
+            LogTools.error("Failed to load {}", queryContainedFile.getFileName());
+         }
       }
    }
 }

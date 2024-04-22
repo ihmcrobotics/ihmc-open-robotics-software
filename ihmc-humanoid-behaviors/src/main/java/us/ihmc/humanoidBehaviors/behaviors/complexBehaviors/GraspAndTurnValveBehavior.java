@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -45,7 +45,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
    //   private final PassPacketBehavior passPacketBehavior;
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final IHMCROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
+   private final ROS2PublisherBasics<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
 
    public GraspAndTurnValveBehavior(String robotName, YoDouble yoTime, ROS2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {

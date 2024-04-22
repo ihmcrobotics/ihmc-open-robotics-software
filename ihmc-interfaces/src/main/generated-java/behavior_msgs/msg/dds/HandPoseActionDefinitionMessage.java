@@ -25,6 +25,22 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_parent_;
    /**
+            * Whether the rigid body is controlled in jointspace (true) or taskspace (false)
+            */
+   public boolean joint_space_control_;
+   /**
+            * Whether to use predefined joint angles
+            */
+   public boolean use_predefined_joint_angles_;
+   /**
+            * Preset arm configuration
+            */
+   public int preset_;
+   /**
+            * Joint angles
+            */
+   public double[] joint_angles_;
+   /**
             * The trajectory duration
             */
    public double trajectory_duration_;
@@ -32,19 +48,19 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
             * Whether maintaining the rigid body controlled in world after the action is complete
             */
    public boolean hold_pose_in_world_;
-   /**
-            * Whether the rigid body is controlled in jointspace (true) or taskspace (false)
-            */
-   public boolean joint_space_control_;
    public double linear_position_weight_;
    public double angular_position_weight_;
    public double jointspace_weight_;
+   public double position_error_tolerance_;
+   public double orientation_error_tolerance_;
 
    public HandPoseActionDefinitionMessage()
    {
       definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       parent_frame_name_ = new java.lang.StringBuilder(255);
       transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
+      joint_angles_ = new double[7];
+
    }
 
    public HandPoseActionDefinitionMessage(HandPoseActionDefinitionMessage other)
@@ -62,17 +78,31 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       parent_frame_name_.append(other.parent_frame_name_);
 
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_parent_, transform_to_parent_);
+      joint_space_control_ = other.joint_space_control_;
+
+      use_predefined_joint_angles_ = other.use_predefined_joint_angles_;
+
+      preset_ = other.preset_;
+
+      for(int i1 = 0; i1 < joint_angles_.length; ++i1)
+      {
+            joint_angles_[i1] = other.joint_angles_[i1];
+
+      }
+
       trajectory_duration_ = other.trajectory_duration_;
 
       hold_pose_in_world_ = other.hold_pose_in_world_;
-
-      joint_space_control_ = other.joint_space_control_;
 
       linear_position_weight_ = other.linear_position_weight_;
 
       angular_position_weight_ = other.angular_position_weight_;
 
       jointspace_weight_ = other.jointspace_weight_;
+
+      position_error_tolerance_ = other.position_error_tolerance_;
+
+      orientation_error_tolerance_ = other.orientation_error_tolerance_;
 
    }
 
@@ -134,6 +164,60 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
    }
 
    /**
+            * Whether the rigid body is controlled in jointspace (true) or taskspace (false)
+            */
+   public void setJointSpaceControl(boolean joint_space_control)
+   {
+      joint_space_control_ = joint_space_control;
+   }
+   /**
+            * Whether the rigid body is controlled in jointspace (true) or taskspace (false)
+            */
+   public boolean getJointSpaceControl()
+   {
+      return joint_space_control_;
+   }
+
+   /**
+            * Whether to use predefined joint angles
+            */
+   public void setUsePredefinedJointAngles(boolean use_predefined_joint_angles)
+   {
+      use_predefined_joint_angles_ = use_predefined_joint_angles;
+   }
+   /**
+            * Whether to use predefined joint angles
+            */
+   public boolean getUsePredefinedJointAngles()
+   {
+      return use_predefined_joint_angles_;
+   }
+
+   /**
+            * Preset arm configuration
+            */
+   public void setPreset(int preset)
+   {
+      preset_ = preset;
+   }
+   /**
+            * Preset arm configuration
+            */
+   public int getPreset()
+   {
+      return preset_;
+   }
+
+
+   /**
+            * Joint angles
+            */
+   public double[] getJointAngles()
+   {
+      return joint_angles_;
+   }
+
+   /**
             * The trajectory duration
             */
    public void setTrajectoryDuration(double trajectory_duration)
@@ -163,21 +247,6 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       return hold_pose_in_world_;
    }
 
-   /**
-            * Whether the rigid body is controlled in jointspace (true) or taskspace (false)
-            */
-   public void setJointSpaceControl(boolean joint_space_control)
-   {
-      joint_space_control_ = joint_space_control;
-   }
-   /**
-            * Whether the rigid body is controlled in jointspace (true) or taskspace (false)
-            */
-   public boolean getJointSpaceControl()
-   {
-      return joint_space_control_;
-   }
-
    public void setLinearPositionWeight(double linear_position_weight)
    {
       linear_position_weight_ = linear_position_weight;
@@ -205,6 +274,24 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       return jointspace_weight_;
    }
 
+   public void setPositionErrorTolerance(double position_error_tolerance)
+   {
+      position_error_tolerance_ = position_error_tolerance;
+   }
+   public double getPositionErrorTolerance()
+   {
+      return position_error_tolerance_;
+   }
+
+   public void setOrientationErrorTolerance(double orientation_error_tolerance)
+   {
+      orientation_error_tolerance_ = orientation_error_tolerance;
+   }
+   public double getOrientationErrorTolerance()
+   {
+      return orientation_error_tolerance_;
+   }
+
 
    public static Supplier<HandPoseActionDefinitionMessagePubSubType> getPubSubType()
    {
@@ -229,17 +316,30 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.parent_frame_name_, other.parent_frame_name_, epsilon)) return false;
 
       if (!this.transform_to_parent_.epsilonEquals(other.transform_to_parent_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.joint_space_control_, other.joint_space_control_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_predefined_joint_angles_, other.use_predefined_joint_angles_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.preset_, other.preset_, epsilon)) return false;
+
+      for(int i3 = 0; i3 < joint_angles_.length; ++i3)
+      {
+                if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_angles_[i3], other.joint_angles_[i3], epsilon)) return false;
+      }
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trajectory_duration_, other.trajectory_duration_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.hold_pose_in_world_, other.hold_pose_in_world_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.joint_space_control_, other.joint_space_control_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.linear_position_weight_, other.linear_position_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.angular_position_weight_, other.angular_position_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.jointspace_weight_, other.jointspace_weight_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.position_error_tolerance_, other.position_error_tolerance_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.orientation_error_tolerance_, other.orientation_error_tolerance_, epsilon)) return false;
 
 
       return true;
@@ -260,17 +360,30 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       if (!us.ihmc.idl.IDLTools.equals(this.parent_frame_name_, otherMyClass.parent_frame_name_)) return false;
 
       if (!this.transform_to_parent_.equals(otherMyClass.transform_to_parent_)) return false;
+      if(this.joint_space_control_ != otherMyClass.joint_space_control_) return false;
+
+      if(this.use_predefined_joint_angles_ != otherMyClass.use_predefined_joint_angles_) return false;
+
+      if(this.preset_ != otherMyClass.preset_) return false;
+
+      for(int i5 = 0; i5 < joint_angles_.length; ++i5)
+      {
+                if(this.joint_angles_[i5] != otherMyClass.joint_angles_[i5]) return false;
+
+      }
       if(this.trajectory_duration_ != otherMyClass.trajectory_duration_) return false;
 
       if(this.hold_pose_in_world_ != otherMyClass.hold_pose_in_world_) return false;
-
-      if(this.joint_space_control_ != otherMyClass.joint_space_control_) return false;
 
       if(this.linear_position_weight_ != otherMyClass.linear_position_weight_) return false;
 
       if(this.angular_position_weight_ != otherMyClass.angular_position_weight_) return false;
 
       if(this.jointspace_weight_ != otherMyClass.jointspace_weight_) return false;
+
+      if(this.position_error_tolerance_ != otherMyClass.position_error_tolerance_) return false;
+
+      if(this.orientation_error_tolerance_ != otherMyClass.orientation_error_tolerance_) return false;
 
 
       return true;
@@ -290,18 +403,28 @@ public class HandPoseActionDefinitionMessage extends Packet<HandPoseActionDefini
       builder.append(this.parent_frame_name_);      builder.append(", ");
       builder.append("transform_to_parent=");
       builder.append(this.transform_to_parent_);      builder.append(", ");
+      builder.append("joint_space_control=");
+      builder.append(this.joint_space_control_);      builder.append(", ");
+      builder.append("use_predefined_joint_angles=");
+      builder.append(this.use_predefined_joint_angles_);      builder.append(", ");
+      builder.append("preset=");
+      builder.append(this.preset_);      builder.append(", ");
+      builder.append("joint_angles=");
+      builder.append(java.util.Arrays.toString(this.joint_angles_));      builder.append(", ");
       builder.append("trajectory_duration=");
       builder.append(this.trajectory_duration_);      builder.append(", ");
       builder.append("hold_pose_in_world=");
       builder.append(this.hold_pose_in_world_);      builder.append(", ");
-      builder.append("joint_space_control=");
-      builder.append(this.joint_space_control_);      builder.append(", ");
       builder.append("linear_position_weight=");
       builder.append(this.linear_position_weight_);      builder.append(", ");
       builder.append("angular_position_weight=");
       builder.append(this.angular_position_weight_);      builder.append(", ");
       builder.append("jointspace_weight=");
-      builder.append(this.jointspace_weight_);
+      builder.append(this.jointspace_weight_);      builder.append(", ");
+      builder.append("position_error_tolerance=");
+      builder.append(this.position_error_tolerance_);      builder.append(", ");
+      builder.append("orientation_error_tolerance=");
+      builder.append(this.orientation_error_tolerance_);
       builder.append("}");
       return builder.toString();
    }

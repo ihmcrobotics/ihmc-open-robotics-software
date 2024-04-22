@@ -1,8 +1,11 @@
 package us.ihmc.avatar.colorVision;
 
 import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_cudawarping;
+import org.bytedeco.opencv.opencv_core.GpuMat;
+import org.bytedeco.opencv.opencv_core.Size;
 import perception_msgs.msg.dds.ImageMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
@@ -17,7 +20,6 @@ import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.RestartableThread;
 
@@ -29,7 +31,7 @@ public class BlackflyImagePublisher
 {
    private final ROS2Node ros2Node;
    private final ROS2StoredPropertySet<IntrinsicCameraMatrixProperties> ousterFisheyeColoringIntrinsicsROS2;
-   private final IHMCROS2Publisher<ImageMessage> ros2DistoredImagePublisher;
+   private final ROS2PublisherBasics<ImageMessage> ros2DistoredImagePublisher;
 
    private final CUDAImageEncoder imageEncoder = new CUDAImageEncoder();
 
@@ -40,15 +42,19 @@ public class BlackflyImagePublisher
    private final Lock imagePublishLock = new ReentrantLock();
    private final Condition newImageAvailable = imagePublishLock.newCondition();
 
-   public BlackflyImagePublisher(BlackflyLensProperties lensProperties, ROS2Topic<ImageMessage> distortedImageTopic)
+   private float publishedImageScaleFactor = 1.0f;
+
+   public BlackflyImagePublisher(BlackflyLensProperties lensProperties, ROS2Topic<ImageMessage> distortedImageTopic, float publishedImageScaleFactor)
    {
       IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics = SensorHeadParameters.loadOusterFisheyeColoringIntrinsicsOnRobot(lensProperties);
 
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "blackfly_publisher");
-      ros2DistoredImagePublisher = ROS2Tools.createPublisher(ros2Node, distortedImageTopic, ROS2QosProfile.BEST_EFFORT());
+      ros2DistoredImagePublisher = ros2Node.createPublisher(distortedImageTopic);
       ousterFisheyeColoringIntrinsicsROS2 = new ROS2StoredPropertySet<>(new ROS2Helper(ros2Node),
                                                                         DualBlackflyComms.OUSTER_FISHEYE_COLORING_INTRINSICS,
                                                                         ousterFisheyeColoringIntrinsics);
+
+      this.publishedImageScaleFactor = publishedImageScaleFactor;
 
       publishDistoredColorThread = new RestartableThread("BlackflyDistortedImagePublisher", this::distortedImagePublisherThreadFunction);
       publishDistoredColorThread.start();
@@ -84,13 +90,21 @@ public class BlackflyImagePublisher
 
       if (imageToPublish != null && !imageToPublish.isEmpty() && imageToPublish.getSequenceNumber() != lastImageSequenceNumber)
       {
+         // Scale image by publishedImageScaleFactor to reduce size over the network
+         GpuMat scaledImageMat = new GpuMat();
+
+         int scaledWidth = Math.round(imageToPublish.getImageWidth() * publishedImageScaleFactor);
+         int scaledHeight = Math.round(imageToPublish.getImageHeight() * publishedImageScaleFactor);
+
+         opencv_cudawarping.resize(imageToPublish.getGpuImageMat(), scaledImageMat, new Size(scaledWidth, scaledHeight));
+
          // Compress image
-         BytePointer distortedImageJPEGPointer = new BytePointer((long) imageToPublish.getImageHeight() * imageToPublish.getImageWidth());
-         imageEncoder.encodeBGR(imageToPublish.getGpuImageMat().data(),
+         BytePointer distortedImageJPEGPointer = new BytePointer((long) scaledImageMat.rows() * scaledImageMat.cols());
+         imageEncoder.encodeBGR(scaledImageMat.data(),
                                 distortedImageJPEGPointer,
-                                imageToPublish.getImageWidth(),
-                                imageToPublish.getImageHeight(),
-                                imageToPublish.getGpuImageMat().step());
+                                scaledWidth,
+                                scaledHeight,
+                                scaledImageMat.step());
          
          // Publish intrinsics
          ousterFisheyeColoringIntrinsicsROS2.updateAndPublishThrottledStatus();
@@ -100,12 +114,12 @@ public class BlackflyImagePublisher
          ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(distortedImageJPEGPointer.limit());
          imageMessageDataPacker.pack(distortedImageMessage, distortedImageJPEGPointer);
          MessageTools.toMessage(imageToPublish.getAcquisitionTime(), distortedImageMessage.getAcquisitionTime());
-         distortedImageMessage.setFocalLengthXPixels(imageToPublish.getFocalLengthX());
-         distortedImageMessage.setFocalLengthYPixels(imageToPublish.getFocalLengthY());
-         distortedImageMessage.setPrincipalPointXPixels(imageToPublish.getPrincipalPointX());
-         distortedImageMessage.setPrincipalPointYPixels(imageToPublish.getPrincipalPointY());
-         distortedImageMessage.setImageWidth(imageToPublish.getImageWidth());
-         distortedImageMessage.setImageHeight(imageToPublish.getImageHeight());
+         distortedImageMessage.setFocalLengthXPixels(imageToPublish.getFocalLengthX() * publishedImageScaleFactor);
+         distortedImageMessage.setFocalLengthYPixels(imageToPublish.getFocalLengthY() * publishedImageScaleFactor);
+         distortedImageMessage.setPrincipalPointXPixels(imageToPublish.getPrincipalPointX() * publishedImageScaleFactor);
+         distortedImageMessage.setPrincipalPointYPixels(imageToPublish.getPrincipalPointY() * publishedImageScaleFactor);
+         distortedImageMessage.setImageWidth(scaledWidth);
+         distortedImageMessage.setImageHeight(scaledHeight);
          distortedImageMessage.getPosition().set(imageToPublish.getPosition());
          distortedImageMessage.getOrientation().set(imageToPublish.getOrientation());
          distortedImageMessage.setSequenceNumber(imageToPublish.getSequenceNumber());
@@ -117,6 +131,7 @@ public class BlackflyImagePublisher
 
          // Close stuff
          distortedImageJPEGPointer.close();
+         scaledImageMat.close();
          imageToPublish.release();
       }
    }
@@ -168,7 +183,7 @@ public class BlackflyImagePublisher
          nextGpuDistortedImage.release();
 
       imageEncoder.destroy();
-      ros2DistoredImagePublisher.destroy();
+      ros2DistoredImagePublisher.remove();
       ros2Node.destroy();
       System.out.println("Destroyed " + getClass().getSimpleName());
    }

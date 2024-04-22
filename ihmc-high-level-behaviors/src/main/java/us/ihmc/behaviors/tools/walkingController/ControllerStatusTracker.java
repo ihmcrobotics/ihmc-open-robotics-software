@@ -3,8 +3,8 @@ package us.ihmc.behaviors.tools.walkingController;
 import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.IHMCROS2Callback;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.log.LogToolsWriteOnly;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.tools.Timer;
@@ -17,7 +17,7 @@ import us.ihmc.tools.thread.Throttler;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition.getTopic;
+import static us.ihmc.communication.HumanoidControllerAPI.getTopic;
 
 /**
  * A class to keep track of the controller by listening to its ROS 2 status API.
@@ -42,6 +42,7 @@ public class ControllerStatusTracker
    private final Throttler notWalkingStateAnymoreCallbackThrottler = new Throttler();
 
    private final List<Notification> abortedListeners = new ArrayList<>();
+   private CapturabilityBasedStatus latestCapturabilityBasedStatus;
 
    public ControllerStatusTracker(LogToolsWriteOnly statusLogger, ROS2NodeInterface ros2Node, String robotName)
    {
@@ -50,13 +51,13 @@ public class ControllerStatusTracker
 
       finishedWalkingNotification.set();
 
-      new IHMCROS2Callback<>(ros2Node, ROS2Tools.getRobotConfigurationDataTopic(robotName), this::acceptRobotConfigurationData);
-      new IHMCROS2Callback<>(ros2Node, getTopic(HighLevelStateChangeStatusMessage.class, robotName), this::acceptHighLevelStateChangeStatusMessage);
-      new IHMCROS2Callback<>(ros2Node, getTopic(WalkingControllerFailureStatusMessage.class, robotName), this::acceptWalkingControllerFailureStatusMessage);
-      new IHMCROS2Callback<>(ros2Node, getTopic(PlanOffsetStatus.class, robotName), this::acceptPlanOffsetStatus);
-      new IHMCROS2Callback<>(ros2Node, getTopic(ControllerCrashNotificationPacket.class, robotName), this::acceptControllerCrashNotificationPacket);
-      new IHMCROS2Callback<>(ros2Node, getTopic(CapturabilityBasedStatus.class, robotName), this::acceptCapturabilityBasedStatus);
-      new IHMCROS2Callback<>(ros2Node, getTopic(WalkingStatusMessage.class, robotName), this::acceptWalkingStatusMessage);
+      new ROS2Callback<>(ros2Node, StateEstimatorAPI.getRobotConfigurationDataTopic(robotName), this::acceptRobotConfigurationData);
+      new ROS2Callback<>(ros2Node, getTopic(HighLevelStateChangeStatusMessage.class, robotName), this::acceptHighLevelStateChangeStatusMessage);
+      new ROS2Callback<>(ros2Node, getTopic(WalkingControllerFailureStatusMessage.class, robotName), this::acceptWalkingControllerFailureStatusMessage);
+      new ROS2Callback<>(ros2Node, getTopic(PlanOffsetStatus.class, robotName), this::acceptPlanOffsetStatus);
+      new ROS2Callback<>(ros2Node, getTopic(ControllerCrashNotificationPacket.class, robotName), this::acceptControllerCrashNotificationPacket);
+      new ROS2Callback<>(ros2Node, getTopic(CapturabilityBasedStatus.class, robotName), this::acceptCapturabilityBasedStatus);
+      new ROS2Callback<>(ros2Node, getTopic(WalkingStatusMessage.class, robotName), this::acceptWalkingStatusMessage);
    }
 
    public void registerAbortedListener(Notification abortedListener)
@@ -122,8 +123,9 @@ public class ControllerStatusTracker
       footstepTracker.reset();
    }
 
-   private void acceptCapturabilityBasedStatus(CapturabilityBasedStatus message)
+   private void acceptCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)
    {
+      this.latestCapturabilityBasedStatus = capturabilityBasedStatus;
       capturabilityBasedStatusTimer.reset();
    }
 
@@ -211,5 +213,10 @@ public class ControllerStatusTracker
       {
          reset();
       }
+   }
+
+   public CapturabilityBasedStatus getLatestCapturabilityBasedStatus()
+   {
+      return latestCapturabilityBasedStatus;
    }
 }

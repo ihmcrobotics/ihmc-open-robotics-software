@@ -22,9 +22,11 @@ public class ContinuousPlanningTools
                                                      SideDependentList<FramePose3D> stancePose,
                                                      SideDependentList<FramePose3D> goalPose,
                                                      float xDistance,
-                                                     float zDistance)
+                                                     float xRandomMargin,
+                                                     float zDistance,
+                                                     float nominalStanceWidth)
    {
-      float offsetX = (float) (Math.random() * 0.2 - 0.1);
+      float offsetX = (float) (Math.random() * xRandomMargin - xRandomMargin / 2.0f);
 
       FramePose3D finalGoalMidPose = new FramePose3D();
       finalGoalMidPose.interpolate(stancePose.get(RobotSide.LEFT), stancePose.get(RobotSide.RIGHT), 0.5);
@@ -45,39 +47,61 @@ public class ContinuousPlanningTools
          goalPose.get(side).appendTranslation(xWalkDistance + xDistance + offsetX, 0, finalGoalMidPose.getZ() + zDistance - walkingStartPose.getZ());
       }
 
-      goalPose.get(RobotSide.LEFT).appendTranslation(0.0, 0.11, 0.0);
-      goalPose.get(RobotSide.RIGHT).appendTranslation(0.0, -0.11, 0.0);
+      goalPose.get(RobotSide.LEFT).appendTranslation(0.0, nominalStanceWidth / 2.0f, 0.0);
+      goalPose.get(RobotSide.RIGHT).appendTranslation(0.0, -nominalStanceWidth / 2.0f, 0.0);
    }
 
-   public static void setRandomGoalWithinBounds(Point2D generatedGoalLocation,
-                                                SideDependentList<FramePose3D> startPose,
-                                                SideDependentList<FramePose3D> goalPose,
-                                                float xDistance,
-                                                float offsetZ)
+   public static void generateSensorZUpToStraightGoalFootPoses(HeightMapData latestHeightMapData,
+                                                               RigidBodyTransform sensorZUpToWorldTransform,
+                                                               SideDependentList<FramePose3D> startPoseToPack,
+                                                               SideDependentList<FramePose3D> goalPoseToPack,
+                                                               Random random,
+                                                               double xDistance,
+                                                               double xMargin,
+                                                               double yBound,
+                                                               double zOffset,
+                                                               double nominalStanceWidth)
    {
+      double heightAtStartPose = latestHeightMapData.getHeightAt(sensorZUpToWorldTransform.getTranslation().getX(),
+                                                                 sensorZUpToWorldTransform.getTranslation().getY());
+      double heightAtGoalPose = latestHeightMapData.getHeightAt(sensorZUpToWorldTransform.getTranslation().getX() + xDistance + xMargin / 2.0,
+                                                                sensorZUpToWorldTransform.getTranslation().getY());
 
-      FramePose3D goalMidPose = new FramePose3D();
-      goalMidPose.getTranslation().set(generatedGoalLocation.getX(), generatedGoalLocation.getY(), 0.0);
-
-      // compute yaw as direction from start to goal
-      double offsetYaw = Math.atan2(goalPose.get(RobotSide.LEFT).getY() - startPose.get(RobotSide.LEFT).getY(),
-                                    goalPose.get(RobotSide.LEFT).getX() - startPose.get(RobotSide.LEFT).getX()) + Math.random() * 0.2 - 0.1;
-
-      for (RobotSide side : RobotSide.values)
+      if (heightAtStartPose == Double.NaN || heightAtGoalPose == Double.NaN)
       {
-         goalPose.get(side).getPosition().set(goalMidPose.getPosition());
-         goalPose.get(side).getOrientation().setYawPitchRoll(offsetYaw, 0, 0);
+         LogTools.error("Height at start or goal pose is NaN");
       }
+      else
+      {
+         // set start pose to be below the camera
+         startPoseToPack.get(RobotSide.LEFT).set(sensorZUpToWorldTransform);
+         startPoseToPack.get(RobotSide.LEFT).appendTranslation(0.0, nominalStanceWidth / 2.0f, heightAtStartPose + zOffset);
 
-      goalPose.get(RobotSide.LEFT).appendTranslation(0.0, 0.11, 0.0);
-      goalPose.get(RobotSide.RIGHT).appendTranslation(0.0, -0.11, 0.0);
+         startPoseToPack.get(RobotSide.RIGHT).set(sensorZUpToWorldTransform);
+         startPoseToPack.get(RobotSide.RIGHT).appendTranslation(0.0, -nominalStanceWidth / 2.0f, heightAtStartPose + zOffset);
+
+         // set goal pose to be 1.65m in front of the camera
+         goalPoseToPack.get(RobotSide.LEFT).set(sensorZUpToWorldTransform);
+
+         if (random != null)
+            goalPoseToPack.get(RobotSide.LEFT).appendTranslation(random.nextDouble(xDistance - xMargin / 2.0f, xDistance + xMargin / 2.0f),
+                                                                 random.nextDouble(-yBound, yBound),
+                                                                 heightAtGoalPose + zOffset);
+         else
+            goalPoseToPack.get(RobotSide.LEFT).appendTranslation(xDistance, nominalStanceWidth / 2.0f, heightAtGoalPose + zOffset);
+
+         goalPoseToPack.get(RobotSide.RIGHT).set(goalPoseToPack.get(RobotSide.LEFT));
+         goalPoseToPack.get(RobotSide.RIGHT).appendTranslation(0.0, -nominalStanceWidth / 2.0f, 0.0);
+      }
    }
 
    public static Pose2D getNearestUnexploredNode(PlanarRegionsList planarRegionMap,
                                                  Point2DReadOnly gridOrigin,
                                                  Pose2D robotPose,
                                                  int gridSize,
-                                                 float resolution)
+                                                 float resolution,
+                                                 float minimumDistanceToNode,
+                                                   float maximumYawDifference)
    {
       Pose2D goalPose = new Pose2D(gridOrigin, 0.0);
       Point2D robotLocation = new Point2D(robotPose.getX(), robotPose.getY());
@@ -102,7 +126,8 @@ public class ContinuousPlanningTools
                float distanceToNode = (float) currentPoint.distance(robotLocation);
                float yawRobotToGoal = (float) Math.atan2(currentPoint.getY() - robotLocation.getY(), currentPoint.getX() - robotLocation.getX());
 
-               if (distanceToNode < nearestDistance && distanceToNode > 0.3 && Math.abs(yawRobotToGoal - robotYaw) < Math.PI / 2.5f)
+               // Math.PI / 2.5 should be the maximum yaw difference between the robot and the goal
+               if (distanceToNode < nearestDistance && distanceToNode > minimumDistanceToNode && Math.abs(yawRobotToGoal - robotYaw) < maximumYawDifference)
                {
                   goalPose.set(point.getX(), point.getY(), yawRobotToGoal);
                   nearestDistance = distanceToNode;
@@ -112,45 +137,5 @@ public class ContinuousPlanningTools
       }
 
       return goalPose;
-   }
-
-   public static void generateSensorZUpToStraightGoalFootPoses(HeightMapData latestHeightMapData,
-                                                               RigidBodyTransform sensorZUpToWorldTransform,
-                                                               SideDependentList<FramePose3D> startPoseToPack,
-                                                               SideDependentList<FramePose3D> goalPoseToPack,
-                                                               Random random)
-   {
-      double heightAtStartPose = latestHeightMapData.getHeightAt(sensorZUpToWorldTransform.getTranslation().getX(),
-                                                                 sensorZUpToWorldTransform.getTranslation().getY());
-      double heightAtGoalPose = latestHeightMapData.getHeightAt(sensorZUpToWorldTransform.getTranslation().getX() + 1.65,
-                                                                sensorZUpToWorldTransform.getTranslation().getY());
-
-      if (heightAtStartPose == Double.NaN || heightAtGoalPose == Double.NaN)
-      {
-         LogTools.error("Height at start or goal pose is NaN");
-      }
-      else
-      {
-         // set start pose to be below the camera
-         startPoseToPack.get(RobotSide.LEFT).set(sensorZUpToWorldTransform);
-         startPoseToPack.get(RobotSide.LEFT).appendTranslation(0.0, 0.0, heightAtStartPose + 0.1);
-
-         startPoseToPack.get(RobotSide.RIGHT).set(sensorZUpToWorldTransform);
-         startPoseToPack.get(RobotSide.RIGHT).appendTranslation(0.0, -0.2, heightAtStartPose + 0.1);
-
-         // set goal pose to be 1.65m in front of the camera
-         goalPoseToPack.get(RobotSide.LEFT).set(sensorZUpToWorldTransform);
-
-         if (random != null)
-            goalPoseToPack.get(RobotSide.LEFT).appendTranslation(random.nextDouble(1.35, 1.65), random.nextDouble(-1.0, 1.0), heightAtGoalPose + 0.1);
-         else
-            goalPoseToPack.get(RobotSide.LEFT).appendTranslation(1.5f, 0.0f, heightAtGoalPose + 0.1);
-
-         goalPoseToPack.get(RobotSide.RIGHT).set(goalPoseToPack.get(RobotSide.LEFT));
-         goalPoseToPack.get(RobotSide.RIGHT).appendTranslation(0.0, -0.2, 0.0);
-
-         LogTools.info("Start Poses: {} {}", startPoseToPack.get(RobotSide.LEFT).getPosition(), startPoseToPack.get(RobotSide.RIGHT).getPosition());
-         LogTools.info("Goal Poses: {} {}", goalPoseToPack.get(RobotSide.LEFT).getPosition(), goalPoseToPack.get(RobotSide.RIGHT).getPosition());
-      }
    }
 }

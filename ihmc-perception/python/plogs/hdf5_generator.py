@@ -147,3 +147,23 @@ def resample_poses_quaternion(data, src_grp, dst_grp, time_group, block_size=10)
     for i in range(0, len(times), block_size):
         data.create_dataset(dst_grp + 'position/' + str(int(i/10)), shape=poses_tvec_resampled[i:i+block_size].shape, data=poses_tvec_resampled[i:i+block_size])
         data.create_dataset(dst_grp + 'orientation/' + str(int(i/10)), shape=poses_qvec_resampled[i:i+block_size].shape, data=poses_qvec_resampled[i:i+block_size])
+
+
+def log_height_maps(data, height_maps, dataset):
+    index = 0
+    for height_map in height_maps:
+        log_height_map(data, height_map, dataset + str(index))
+        index += 1
+
+def log_height_map(data, height_map, dataset):
+
+    height_map = (height_map - 6.5536) * 10000
+    height_map = np.array(height_map).astype(np.uint16)
+
+    encoded_img = np.array((cv2.imencode('.png', height_map))[1])
+    data.create_dataset(dataset, shape=encoded_img.shape, data=encoded_img)
+
+    print("Written: ", dataset, height_map.shape, encoded_img.shape)
+
+
+

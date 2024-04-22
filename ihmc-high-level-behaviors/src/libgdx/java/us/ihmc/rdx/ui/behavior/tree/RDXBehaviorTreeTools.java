@@ -44,4 +44,15 @@ public class RDXBehaviorTreeTools
          return findActionSequenceAncestor(node.getParent());
       }
    }
+
+   public static void clearOtherNodeSelections(RDXBehaviorTreeNode<?, ?> anyNode)
+   {
+      runForEntireTree(anyNode, node ->
+      {
+         if (node != anyNode)
+         {
+            node.clearSelections();
+         }
+      });
+   }
 }

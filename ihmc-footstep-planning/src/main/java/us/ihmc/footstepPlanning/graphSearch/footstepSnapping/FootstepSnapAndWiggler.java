@@ -11,10 +11,12 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapSnapWiggler;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
@@ -26,6 +28,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    private double flatGroundHeight = 0.0;
 
    private final HashSet<DiscreteFootstep> snappedFootsteps = new HashSet<>();
+   private final HashMap<DiscreteFootstep, FootstepSnapData> manuallySnappedFootsteps = new HashMap<>();
 
    private final FootstepPlannerEnvironmentHandler environmentHandler;
 
@@ -33,7 +36,9 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    private final HeightMapSnapWiggler heightMapSnapWiggler;
 
    // Use this by default
-   public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters, FootstepPlannerEnvironmentHandler environmentHandler)
+   public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
+                                 FootstepPlannerParametersReadOnly parameters,
+                                 FootstepPlannerEnvironmentHandler environmentHandler)
    {
       this(footPolygonsInSoleFrame, parameters, null, environmentHandler,null, null);
    }
@@ -66,6 +71,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    {
       snappedFootsteps.forEach(DiscreteFootstep::clearSnapData);
       snappedFootsteps.clear();
+      manuallySnappedFootsteps.clear();
    }
 
    public FootstepSnapData snapFootstep(DiscreteFootstep footstep)
@@ -90,26 +96,35 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
          return snapData;
       }
-      else if (environmentHandler.flatGroundMode())
+      else if (manuallySnappedFootsteps.containsKey(footstep))
       {
-         return FootstepSnapData.identityData(flatGroundHeight);
+         FootstepSnapData snapData = manuallySnappedFootsteps.get(footstep);
+         footstep.setSnapData(snapData);
+         return snapData;
       }
       else
       {
-         FootstepSnapData snapData = computeSnapTransform(footstep, stanceStep);
-         footstep.setSnapData(snapData);
-         snappedFootsteps.add(footstep);
-
-         if (snapData.getSnapTransform().containsNaN())
+         if (environmentHandler.flatGroundMode())
          {
+            return FootstepSnapData.identityData(flatGroundHeight);
+         }
+         else
+         {
+            FootstepSnapData snapData = computeSnapTransform(footstep, stanceStep);
+            footstep.setSnapData(snapData);
+            snappedFootsteps.add(footstep);
+
+            if (snapData.getSnapTransform().containsNaN())
+            {
+               return snapData;
+            }
+            else if (computeWiggleTransform)
+            {
+               computeWiggleTransform(footstep, stanceStep, snapData);
+            }
+
             return snapData;
          }
-         else if (computeWiggleTransform)
-         {
-            computeWiggleTransform(footstep, stanceStep, snapData);
-         }
-
-         return snapData;
       }
    }
 
@@ -129,6 +144,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    {
       footstep.setSnapData(snapData);
       snappedFootsteps.add(footstep);
+      manuallySnappedFootsteps.put(footstep, snapData);
    }
 
    protected void computeWiggleTransform(DiscreteFootstep footstepToWiggle, DiscreteFootstep stanceStep, FootstepSnapData snapData)

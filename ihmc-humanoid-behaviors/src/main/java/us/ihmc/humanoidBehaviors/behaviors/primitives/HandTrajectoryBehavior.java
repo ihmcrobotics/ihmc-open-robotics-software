@@ -7,7 +7,7 @@ import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.TrajectoryExecutionStatus;
@@ -34,8 +34,8 @@ public class HandTrajectoryBehavior extends AbstractBehavior
    protected final YoBoolean hasStatusBeenReceived;
    private final YoBoolean isDone;
 
-   private final IHMCROS2Publisher<HandTrajectoryMessage> handTrajectoryPublisher;
-   private final IHMCROS2Publisher<StopAllTrajectoryMessage> stopAllTrajectoryPublisher;
+   private final ROS2PublisherBasics<HandTrajectoryMessage> handTrajectoryPublisher;
+   private final ROS2PublisherBasics<StopAllTrajectoryMessage> stopAllTrajectoryPublisher;
    private final ConcurrentListeningQueue<JointspaceTrajectoryStatusMessage> jointSpaceTrajectoryStatus = new ConcurrentListeningQueue<>(10);
    private final ConcurrentListeningQueue<TaskspaceTrajectoryStatusMessage> taskSpaceTrajectoryStatus = new ConcurrentListeningQueue<>(10);
 

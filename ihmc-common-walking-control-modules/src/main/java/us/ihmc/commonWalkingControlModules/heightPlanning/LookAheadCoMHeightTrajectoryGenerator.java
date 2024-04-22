@@ -51,7 +51,7 @@ public class LookAheadCoMHeightTrajectoryGenerator implements SCS2YoGraphicHolde
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean initializeToCurrent = new YoBoolean("initializeCoMHeightToCurrent", registry);
-   private final BooleanProvider processGoHome = new BooleanParameter("ProcessGoHome", registry, false);
+   private final BooleanProvider processGoHome = new BooleanParameter("ProcessGoHome", registry, true);
 
    private final HeightOffsetHandler heightOffsetHandler;
    private final YoEnum<RobotSide> supportLegSide = new YoEnum<>("supportLegSide", registry, RobotSide.class);

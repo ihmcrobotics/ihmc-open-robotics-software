@@ -123,7 +123,8 @@ public class RigidBodyJointControlHelper
          if (enableFunctionGenerators)
          {
             functionGenerators.add(new YoFunctionGeneratorNew(prefix + "_" + jointName + "_FG", time, registry));
-            functionGeneratorErrorCalculator.addTrajectorySignal(functionGenerators.get(jointIdx), jointsToControl[jointIdx]);
+            int jointIdxFinal = jointIdx;
+            functionGeneratorErrorCalculator.addTrajectorySignal(functionGenerators.get(jointIdx), () -> getJointDesiredPosition(jointIdxFinal), jointsToControl[jointIdx]);
          }
       }
 
@@ -231,13 +232,9 @@ public class RigidBodyJointControlHelper
          {
             allDone = fillAndReinitializeTrajectories(jointIdx) && allDone;
          }
-         else if (trajectoryDone.getBooleanValue())
-         {
-            allDone = true;
-         }
          else
          {
-            allDone = false;
+            allDone = trajectoryDone.getBooleanValue();
          }
 
          if (allDone)

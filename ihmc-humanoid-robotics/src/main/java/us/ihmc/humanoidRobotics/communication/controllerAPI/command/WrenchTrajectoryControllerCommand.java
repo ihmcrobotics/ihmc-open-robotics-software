@@ -261,4 +261,14 @@ public class WrenchTrajectoryControllerCommand extends QueueableCommand<WrenchTr
    {
       return sequenceId;
    }
+
+   public double getTrajectoryStartTime()
+   {
+      return trajectoryPointTimes.get(0);
+   }
+
+   public double getTrajectoryEndTime()
+   {
+      return trajectoryPointTimes.get(trajectoryPointTimes.size() - 1);
+   }
 }

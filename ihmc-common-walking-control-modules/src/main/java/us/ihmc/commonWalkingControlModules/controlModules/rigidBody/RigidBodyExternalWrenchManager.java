@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
+import controller_msgs.msg.dds.WrenchTrajectoryStatusMessage;
+import us.ihmc.commonWalkingControlModules.controlModules.WrenchTrajectoryStatusMessageHelper;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
@@ -34,6 +36,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class RigidBodyExternalWrenchManager extends RigidBodyControlState
 {
    private final ExternalWrenchCommand externalWrenchCommand = new ExternalWrenchCommand();
+   private final WrenchTrajectoryStatusMessageHelper wrenchStatusHelper;
 
    private final YoInteger numberOfPointsInQueue;
    private final YoInteger numberOfPointsInGenerator;
@@ -82,6 +85,7 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
                                                                        ReferenceFrame.getWorldFrame(),
                                                                        registry);
       trajectoryGenerator.clear(baseFrame);
+      wrenchStatusHelper = new WrenchTrajectoryStatusMessageHelper(bodyToControl);
    }
 
    private void setDefaultControlFrame()
@@ -141,6 +145,7 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
       numberOfPointsInQueue.set(getNumberOfPointsInQueue());
       numberOfPointsInGenerator.set(getNumberOfPointsInGenerator());
       numberOfPoints.set(numberOfPointsInQueue.getIntegerValue() + numberOfPointsInGenerator.getIntegerValue());
+      wrenchStatusHelper.updateWithTimeInTrajectory(timeInTrajectory);
 
       updateGraphics();
    }
@@ -222,6 +227,7 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
             return false;
       }
 
+      wrenchStatusHelper.registerNewTrajectory(command);
       return true;
    }
 
@@ -257,12 +263,12 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
 
    private boolean checkTime(double time)
    {
-      if (time <= getLastTrajectoryPointTime())
+      boolean timeValid = time >= getLastTrajectoryPointTime();
+      if (!timeValid)
       {
          LogTools.warn(warningPrefix + "Time in trajectory must be strictly increasing.");
-         return false;
       }
-      return true;
+      return timeValid;
    }
 
    @Override
@@ -298,7 +304,6 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
       numberOfPointsInGenerator.set(0);
       numberOfPoints.set(0);
       trajectoryDone.set(true);
-      resetLastCommandId();
 
       trajectoryGenerator.clear(baseFrame);
       setDefaultControlFrame();
@@ -318,5 +323,11 @@ public class RigidBodyExternalWrenchManager extends RigidBodyControlState
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       return null;
+   }
+
+   @Override
+   public Object pollStatusToReport()
+   {
+      return wrenchStatusHelper.pollStatusMessage();
    }
 }

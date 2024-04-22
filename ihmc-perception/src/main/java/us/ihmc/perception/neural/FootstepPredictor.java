@@ -211,9 +211,9 @@ public class FootstepPredictor
          LogTools.info("Inference time: {} ms", (endTime - startTime) / 1000000.0);
 
          // plot and display the image using imshow, brighten the image
-         PerceptionDebugTools.plotRectangle(display, new Point2D(startPositions.get(i)), 4, new Scalar(0, 0, 0, 255));
-         PerceptionDebugTools.plotRectangle(display, new Point2D(goalPositions.get(i)), 4, new Scalar(255, 255, 255, 255));
-         PerceptionDebugTools.plotFootsteps(display, output, 2);
+         PerceptionDebugTools.plotRectangle(display, new Point2D(startPositions.get(i)), 50, 4, new Scalar(0, 0, 0, 255));
+         PerceptionDebugTools.plotRectangle(display, new Point2D(goalPositions.get(i)), 50, 4, new Scalar(255, 255, 255, 255));
+         PerceptionDebugTools.plotFootsteps(display, output, 2, 50);
          opencv_imgproc.resize(display, display, new org.bytedeco.opencv.opencv_core.Size(1000, 1000));
          imshow("Display", display);
          int code = waitKeyEx(0);

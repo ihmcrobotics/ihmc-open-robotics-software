@@ -12,9 +12,15 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -26,7 +32,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.log.LogTools;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -92,22 +98,79 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    {
       super.update();
 
+      Point3DReadOnly definitionGoalStancePoint = definition.getGoalStancePoint().getValueReadOnly();
+      Point3DReadOnly definitionGoalFocalPoint = definition.getGoalFocalPoint().getValueReadOnly();
+      boolean invalidDefinition = definitionGoalStancePoint.geometricallyEquals(definitionGoalFocalPoint, 1e-4);
+
+      if (invalidDefinition)
+         state.getLogger().error("Approach point can not be in the same place as the focus point.");
+
+      state.setCanExecute(state.areFramesInWorld() && !invalidDefinition);
+      if (state.getCanExecute() && !definition.getIsManuallyPlaced())
+      {
+         FramePoint3D frameStancePoint = new FramePoint3D();
+         frameStancePoint.setIncludingFrame(state.getParentFrame(), definitionGoalStancePoint);
+         frameStancePoint.changeFrame(ReferenceFrame.getWorldFrame());
+
+         FramePoint3D frameFocalPoint = new FramePoint3D();
+         frameFocalPoint.setIncludingFrame(state.getParentFrame(), definitionGoalFocalPoint);
+         frameFocalPoint.changeFrame(ReferenceFrame.getWorldFrame());
+
+         double stancePointToFocalPointDistance = frameStancePoint.distance(frameFocalPoint);
+
+         Plane3D zUpPlane = new Plane3D();
+         zUpPlane.getPoint().set(frameFocalPoint);
+         zUpPlane.getNormal().set(Axis3D.Z);
+
+         Vector3D stancePointVector = new Vector3D();
+         stancePointVector.sub(frameStancePoint, frameFocalPoint);
+         stancePointVector.normalize();
+         if (Math.abs(stancePointVector.getZ()) == 1.0) // This would be undefined
+            frameStancePoint.set(frameStancePoint.getZ(), 0.0, 0.0); // Flip to a random direction so we don't crash
+
+         // Project so we can find the horizon level approach point
+         zUpPlane.orthogonalProjection(frameStancePoint);
+
+         Vector3D snappedStancePointVector = new Vector3D();
+         snappedStancePointVector.sub(frameStancePoint, frameFocalPoint);
+         snappedStancePointVector.normalize();
+         snappedStancePointVector.scale(stancePointToFocalPointDistance);
+
+         Vector3D snappedFocalPointVector = new Vector3D();
+         snappedFocalPointVector.set(snappedStancePointVector);
+         snappedFocalPointVector.negate();
+
+         RotationMatrix stanceOrientation = new RotationMatrix();
+         EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.X, snappedFocalPointVector, stanceOrientation);
+
+         FramePoint3D frameSnappedStancePoint = new FramePoint3D();
+         frameSnappedStancePoint.setIncludingFrame(frameFocalPoint);
+         frameSnappedStancePoint.add(snappedStancePointVector);
+
+         FramePose3D snappedGoalStancePose = new FramePose3D();
+         snappedGoalStancePose.getTranslation().set(frameSnappedStancePoint);
+         snappedGoalStancePose.getTranslation().setZ(syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame).getZ());
+         snappedGoalStancePose.getRotation().set(stanceOrientation);
+         snappedGoalStancePose.changeFrame(state.getParentFrame());
+
+         state.getGoalToParentTransform().getValue().set(snappedGoalStancePose);
+         state.getGoalFrame().getReferenceFrame().update();
+
+         for (RobotSide side : RobotSide.values)
+         {
+            state.copyDefinitionToGoalFoostepToGoalTransform(side);
+
+            liveGoalFeetPoses.get(side)
+                             .setIncludingFrame(state.getGoalFrame().getReferenceFrame(),
+                                                state.getGoalFootstepToGoalTransform(side));
+            liveGoalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+         }
+      }
+
       for (RobotSide side : RobotSide.values)
       {
          trackingCalculators.get(side).update(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp()));
          syncedFeetPoses.get(side).setFromReferenceFrame(syncedRobot.getReferenceFrames().getSoleFrame(side));
-      }
-
-      state.setCanExecute(state.areFramesInWorld());
-      if (state.getCanExecute() && !definition.getIsManuallyPlaced())
-      {
-         for (RobotSide side : RobotSide.values)
-         {
-            liveGoalFeetPoses.get(side)
-                             .setIncludingFrame(state.getGoalFrame().getReferenceFrame(),
-                                                getDefinition().getGoalFootstepToGoalTransform(side).getValueReadOnly());
-            liveGoalFeetPoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
-         }
       }
    }
 
@@ -149,7 +212,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       }
       else
       {
-         LogTools.error("Cannot execute. Frame is not a child of World frame.");
+         state.getLogger().error("Cannot execute. Frame is not a child of World frame.");
       }
    }
 
@@ -178,7 +241,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          }
          case PLANNING_FAILED ->
          {
-            LogTools.error("No planned steps to execute!");
+            state.getLogger().error("No planned steps to execute!");
             state.setIsExecuting(false);
             state.setFailed(true);
          }
@@ -235,10 +298,10 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          double idealFootstepLength = 0.5;
          footstepPlanner.getFootstepPlannerParameters().setIdealFootstepLength(idealFootstepLength);
          footstepPlanner.getFootstepPlannerParameters().setMaximumStepReach(idealFootstepLength);
-         LogTools.info("Planning footsteps...");
+         state.getLogger().info("Planning footsteps...");
          FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
          FootstepPlan footstepPlan = footstepPlannerOutput.getFootstepPlan();
-         LogTools.info("Footstep planner completed with {}, {} step(s)", footstepPlannerOutput.getFootstepPlanningResult(), footstepPlan.getNumberOfSteps());
+         state.getLogger().info("Footstep planner completed with {}, {} step(s)", footstepPlannerOutput.getFootstepPlanningResult(), footstepPlan.getNumberOfSteps());
 
          if (footstepPlan.getNumberOfSteps() < 1) // failed
          {
@@ -247,9 +310,9 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
             for (BipedalFootstepPlannerNodeRejectionReason reason : rejectionReasonReport.getSortedReasons())
             {
                double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
-               LogTools.info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
+               state.getLogger().info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
             }
-            LogTools.info("Footstep planning failure...");
+            state.getLogger().info("Footstep planning failure...");
             footstepPlanNotification.set(new FootstepPlan());
          }
          else
@@ -279,9 +342,9 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                                                                                                                     definition.getTransferDuration());
       double finalTransferDuration = 0.01; // We don't want any unecessary pauses at the end; but it can't be 0
       footstepDataListMessage.setFinalTransferDuration(finalTransferDuration);
-      footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+      footstepDataListMessage.getQueueingProperties().setExecutionMode(definition.getExecutionMode().getValue().toByte());
       footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
-      LogTools.info("Commanding {} footsteps", footstepDataListMessage.getFootstepDataList().size());
+      state.getLogger().info("Commanding {} footsteps", footstepDataListMessage.getFootstepDataList().size());
       ros2ControllerHelper.publishToController(footstepDataListMessage);
       for (RobotSide side : RobotSide.values)
       {
@@ -359,7 +422,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       if (hitTimeLimit)
       {
          state.setFailed(true);
-         LogTools.info("Walking failed. (time limit)");
+         state.getLogger().info("Walking failed. (time limit)");
       }
       state.setNominalExecutionDuration(nominalExecutionDuration);
       state.setElapsedExecutionTime(trackingCalculators.get(RobotSide.LEFT).getElapsedTime());

@@ -254,7 +254,7 @@ public class PerceptionDebugTools
          {
             double height = heightMapData.getHeightAt(i, j);
             //if (height > 0.0001)
-               matString.append(String.format("%.1f", height)).append(" ");
+            matString.append(String.format("%.1f", height)).append(" ");
             //else
             //   matString.append("||||").append(" ");
          }
@@ -303,7 +303,7 @@ public class PerceptionDebugTools
       if (screenSize != -1)
       {
          int finalRows = screenSize;
-         int finalCols = (int)((float) screenSize / (float) image.rows() * (float) image.cols());
+         int finalCols = (int) ((float) screenSize / (float) image.rows() * (float) image.cols());
          LogTools.debug(String.format("Image Size: %d x %d Display Size: %d x %d", finalRows, finalCols, image.rows(), image.cols()));
          opencv_highgui.resizeWindow(tag, finalCols, finalRows);
       }
@@ -399,7 +399,7 @@ public class PerceptionDebugTools
       return proj;
    }
 
-   public static void plotFootsteps(Mat displayImage, FMatrixRMaj linearOutput, int size)
+   public static void plotFootsteps(Mat displayImage, FMatrixRMaj linearOutput, int size, int nodesPerMeter)
    {
       Scalar leftColor = new Scalar(0, 255, 255, 0);
       Scalar rightColor = new Scalar(0, 0, 255, 0);
@@ -407,7 +407,7 @@ public class PerceptionDebugTools
       for (int i = 0; i < linearOutput.getNumElements() / 2; i++)
       {
          Point2D point = new Point2D(linearOutput.get(2 * i, 0), linearOutput.get(2 * i + 1, 0));
-         Point2D positionOnMap = new Point2D(point.getY() * 50 + displayImage.rows() / 2, point.getX() * 50 + displayImage.cols() / 2);
+         Point2D positionOnMap = new Point2D(point.getY() * nodesPerMeter + displayImage.rows() / 2, point.getX() * nodesPerMeter + displayImage.cols() / 2);
          opencv_imgproc.rectangle(displayImage,
                                   new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size),
                                   new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size),
@@ -418,12 +418,12 @@ public class PerceptionDebugTools
       }
    }
 
-   public static void plotRectangle(Mat displayImage, Point2D point, int size, Scalar color)
+   public static void plotRectangle(Mat displayImage, Point2D point, int nodesPerMeter, int size, Scalar color)
    {
-      LogTools.info("Plotting Node: Footstep: {} {}", (int) (point.getY() * 50 + displayImage.rows() / 2), (int) (point.getX() * 50 + displayImage.cols() / 2));
+      LogTools.info("Plotting Node: Footstep: {} {}", (int) (point.getY() * nodesPerMeter + displayImage.rows() / 2), (int) (point.getX() * nodesPerMeter + displayImage.cols() / 2));
 
       // just like plotFootsteps
-      Point2D positionOnMap = new Point2D(point.getY() * 50 + displayImage.rows() / 2, point.getX() * 50 + displayImage.cols() / 2);
+      Point2D positionOnMap = new Point2D(point.getY() * nodesPerMeter + displayImage.rows() / 2, point.getX() * nodesPerMeter + displayImage.cols() / 2);
       opencv_imgproc.rectangle(displayImage,
                                new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size),
                                new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size),
@@ -448,11 +448,11 @@ public class PerceptionDebugTools
                                0);
    }
 
-   public static void plotTiltedRectangle(Mat displayImage, Point2D origin, float yaw, int size, int side)
+   public static void plotTiltedRectangle(Mat displayImage, Point2D origin, float yaw, int size, int side, int nodesPerMeter)
    {
       LogTools.debug("Footstep Plotted: {} {} {}",
-                     (int) (origin.getY() * 50 + displayImage.rows() / 2),
-                     (int) (origin.getX() * 50 + displayImage.cols() / 2),
+                     (int) (origin.getY() * nodesPerMeter + displayImage.rows() / 2),
+                     (int) (origin.getX() * nodesPerMeter + displayImage.cols() / 2),
                      side);
 
       Scalar color;
@@ -477,7 +477,7 @@ public class PerceptionDebugTools
       }
 
       // just like plotFootsteps
-      //Point2D positionOnMap = new Point2D(origin.getY() * 50 + displayImage.rows() / 2, origin.getX() * 50 + displayImage.cols() / 2);
+      //Point2D positionOnMap = new Point2D(origin.getY() * nodesPerMeter + displayImage.rows() / 2, origin.getX() * nodesPerMeter + displayImage.cols() / 2);
       //opencv_imgproc.rectangle(displayImage,
       //                         new Point((int) positionOnMap.getX() - size, (int) positionOnMap.getY() - size * 2),
       //                         new Point((int) positionOnMap.getX() + size, (int) positionOnMap.getY() + size * 2),
@@ -495,10 +495,7 @@ public class PerceptionDebugTools
       double yaw = imageCoordinatesWithYaw.getZ();
 
       // Create the footstep rectangle using the position and orientation
-      Point3D[] points = {new Point3D(-length, -width, 0),
-                          new Point3D(-length, width, 0),
-                          new Point3D(length, width, 0),
-                          new Point3D(length, -width, 0)};
+      Point3D[] points = {new Point3D(-length, -width, 0), new Point3D(-length, width, 0), new Point3D(length, width, 0), new Point3D(length, -width, 0)};
 
       Quaternion quat = new Quaternion();
       quat.setYawPitchRoll(yaw + Math.PI / 2, 0, 0);

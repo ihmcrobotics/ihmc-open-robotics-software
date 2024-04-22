@@ -22,10 +22,10 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXKeyBindings;
 import us.ihmc.rdx.RDXSettings;
 import us.ihmc.rdx.imgui.ImGuiFrequencyDisplay;
-import us.ihmc.rdx.imgui.RDXPanelManager;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
+import us.ihmc.rdx.imgui.RDXPanelManager;
 import us.ihmc.rdx.input.RDXInputMode;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
@@ -116,7 +116,7 @@ public class RDXBaseUI
    private final ImBoolean modelSceneMouseCollisionEnabled = new ImBoolean(false);
    private final ImDouble view3DBackgroundShade = new ImDouble(RDX3DSceneTools.CLEAR_COLOR);
    private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
-   private final ImDouble imguiFontScale = new ImDouble(1.0);
+   private final ImInt imguiFontSize = new ImInt(ImGuiTools.DEFAULT_FONT_SIZE);
    private final RDXImGuiLayoutManager layoutManager;
    private final RDXKeyBindings keyBindings = new RDXKeyBindings();
    private long renderIndex = 0;
@@ -220,7 +220,7 @@ public class RDXBaseUI
       vsync.set(settings.vsyncEnabled());
       foregroundFPSLimit.set(settings.getForegroundFPSLimit());
       libGDXLogLevel.set(settings.getLibGDXLogLevel());
-      imguiFontScale.set(settings.getImguiFontScale());
+      imguiFontSize.set(settings.getFontSize());
       try
       {
          theme = Theme.valueOf(settings.getThemeName());
@@ -277,7 +277,7 @@ public class RDXBaseUI
 
       imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
       setTheme(theme); // TODO: move theme stuff to RDXImGuiWindowAndDockSystem?
-      ImGui.getIO().setFontGlobalScale((float) imguiFontScale.get());
+      ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
 
@@ -351,9 +351,11 @@ public class RDXBaseUI
                   case 2 -> logLevelName = "Info";
                   case 3 -> logLevelName = "Debug";
                }
-               if (ImGui.radioButton(labels.get(logLevelName), Gdx.app.getLogLevel() == i)) {
+               if (ImGui.radioButton(labels.get(logLevelName), Gdx.app.getLogLevel() == i))
+               {
                   settings.setLibGDXLogLevel(i);
                   Gdx.app.setLogLevel(i);
+                  ImGui.closeCurrentPopup();
                }
                ImGui.sameLine();
             }
@@ -366,9 +368,11 @@ public class RDXBaseUI
             ImGui.tableSetColumnIndex(1);
             for (int i = 0; i < Theme.values().length; i++)
             {
-               if (ImGui.radioButton(labels.get(StringUtils.capitalize(Theme.values()[i].name().toLowerCase())), this.theme == Theme.values()[i])) {
+               if (ImGui.radioButton(labels.get(StringUtils.capitalize(Theme.values()[i].name().toLowerCase())), this.theme == Theme.values()[i]))
+               {
                   Theme newTheme = Theme.values()[i];
                   setTheme(newTheme);
+                  ImGui.closeCurrentPopup();
                }
                if (i < Theme.values().length - 1)
                   ImGui.sameLine();
@@ -380,7 +384,8 @@ public class RDXBaseUI
             ImGui.alignTextToFramePadding();
             ImGui.text("Background shade: ");
             ImGui.tableSetColumnIndex(1);
-            if (ImGuiTools.sliderDouble(labels.get("##view3DBackgroundShadeSlider"), view3DBackgroundShade, 0.0f, 1.0f)) {
+            if (ImGuiTools.sliderDouble(labels.get("##view3DBackgroundShadeSlider"), view3DBackgroundShade, 0.0f, 1.0f))
+            {
                setView3DBackgroundShade((float) view3DBackgroundShade.get());
             }
             // Only update the settings (which saves to disk) after you've let go of the slider
@@ -390,7 +395,7 @@ public class RDXBaseUI
             }
 
             ImGui.sameLine();
-            if (ImGui.button("Reset"))
+            if (ImGui.button(labels.get("Reset##BackgroundShade")))
             {
                view3DBackgroundShade.set(RDX3DSceneTools.CLEAR_COLOR);
                settings.setView3DBackgroundShade((float) view3DBackgroundShade.get());
@@ -419,30 +424,39 @@ public class RDXBaseUI
                ImGui.popItemFlag();
             }
 
-            // Fifth row (font scale)
+            // Fifth row (font size)
             ImGui.tableNextRow();
             ImGui.tableSetColumnIndex(0);
             ImGui.alignTextToFramePadding();
-            ImGui.text("Font scale: ");
+            ImGui.text("Font size: ");
             ImGui.tableSetColumnIndex(1);
-            if (ImGuiTools.sliderDouble(labels.get("##imguiFontScaleSlider"), imguiFontScale, 1.0, 2.0, "%.1f")) {
-               settings.setImguiFontScale(imguiFontScale.get());
+            if (ImGui.sliderInt(labels.getHidden("fontSize"), imguiFontSize.getData(), ImGuiTools.SMALLEST_FONT_SIZE, ImGuiTools.LARGEST_FONT_SIZE, "%d"))
+            {
+//               ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
             }
             // Change the font scale after you've let go of the slider
             if (ImGui.isItemDeactivatedAfterEdit())
             {
-               ImGui.getIO().setFontGlobalScale((float) imguiFontScale.get());
+               settings.setFontSize(imguiFontSize.get());
+               ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
+            }
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("Reset##FontSize")))
+            {
+               imguiFontSize.set(ImGuiTools.DEFAULT_FONT_SIZE);
+               settings.setFontSize(imguiFontSize.get());
+               ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
             }
 
             ImGui.endTable();
          }
 
          /* Start checkbox settings */
-         if (ImGui.checkbox(labels.get("Frame rate plot"), plotFrameRate))
+         if (ImGui.menuItem(labels.get("Frame rate plot"), null, plotFrameRate))
          {
             settings.setPlotFrameRate(plotFrameRate.get());
          }
-         if (ImGui.checkbox(labels.get("Vsync"), vsync))
+         if (ImGui.menuItem(labels.get("Vsync"), null, vsync))
          {
             settings.setVsync(vsync.get());
             Gdx.graphics.setForegroundFPS(Integer.MAX_VALUE);
@@ -451,7 +465,7 @@ public class RDXBaseUI
 
          ImGui.separator(); // Environment section
          boolean renderingGroundTruthEnvironment = primaryScene.getSceneLevelsToRender().contains(RDXSceneLevel.GROUND_TRUTH);
-         if (ImGui.checkbox(labels.get("Render Ground Truth Environment"), renderingGroundTruthEnvironment))
+         if (ImGui.menuItem(labels.get("Render Ground Truth Environment"), null, renderingGroundTruthEnvironment))
          {
             if (renderingGroundTruthEnvironment)
                primaryScene.getSceneLevelsToRender().remove(RDXSceneLevel.GROUND_TRUTH);
@@ -459,7 +473,7 @@ public class RDXBaseUI
                primaryScene.getSceneLevelsToRender().add(RDXSceneLevel.GROUND_TRUTH);
          }
          boolean renderingModelEnvironment = primaryScene.getSceneLevelsToRender().contains(RDXSceneLevel.MODEL);
-         if (ImGui.checkbox(labels.get("Render Model Environment"), renderingModelEnvironment))
+         if (ImGui.menuItem(labels.get("Render Model Environment"), null, renderingModelEnvironment))
          {
             if (renderingModelEnvironment)
                primaryScene.getSceneLevelsToRender().remove(RDXSceneLevel.MODEL);
@@ -467,7 +481,7 @@ public class RDXBaseUI
                primaryScene.getSceneLevelsToRender().add(RDXSceneLevel.MODEL);
          }
          boolean renderingVirtualEnvironment = primaryScene.getSceneLevelsToRender().contains(RDXSceneLevel.VIRTUAL);
-         if (ImGui.checkbox(labels.get("Render Virtual Environment"), renderingVirtualEnvironment))
+         if (ImGui.menuItem(labels.get("Render Virtual Environment"), null, renderingVirtualEnvironment))
          {
             if (renderingVirtualEnvironment)
                primaryScene.getSceneLevelsToRender().remove(RDXSceneLevel.VIRTUAL);
@@ -475,11 +489,11 @@ public class RDXBaseUI
                primaryScene.getSceneLevelsToRender().add(RDXSceneLevel.VIRTUAL);
          }
          ImGui.separator(); // Mouse behavior section
-         if (ImGui.checkbox(labels.get("Model scene mouse collision enabled"), modelSceneMouseCollisionEnabled))
+         if (ImGui.menuItem(labels.get("Model scene mouse collision enabled"), null, modelSceneMouseCollisionEnabled))
          {
             setModelSceneMouseCollisionEnabled(modelSceneMouseCollisionEnabled.get());
          }
-         if (ImGui.checkbox(labels.get("Middle-click view orbit"), middleClickOrbit))
+         if (ImGui.menuItem(labels.get("Middle-click view orbit"), null, middleClickOrbit))
          {
             setUseMiddleClickViewOrbit(middleClickOrbit.get());
          }
@@ -647,5 +661,10 @@ public class RDXBaseUI
          case CLASSIC -> ImGui.styleColorsClassic();
       }
       this.theme = theme;
+   }
+
+   public static void pushNotification(String text)
+   {
+      instance.getPrimary3DPanel().getNotificationManager().pushNotification(2, text);
    }
 }

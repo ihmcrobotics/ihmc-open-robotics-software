@@ -1,7 +1,7 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
 import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
-import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2NodeInterface;
@@ -11,8 +11,8 @@ public class RDXROS2FramePlanarRegionsVisualizer extends RDXPlanarRegionsVisuali
 {
    public RDXROS2FramePlanarRegionsVisualizer(String title, ROS2NodeInterface ros2Node, ROS2Topic<FramePlanarRegionsListMessage> topic)
    {
-      super(title + " (ROS 2)", topic.getName());
-      new IHMCROS2Callback<>(ros2Node, topic, this::acceptMessage);
+      super(title, topic.getName());
+      new ROS2Callback<>(ros2Node, topic, this::acceptMessage);
    }
 
    private void acceptMessage(FramePlanarRegionsListMessage framePlanarRegionsListMessage)

@@ -25,7 +25,7 @@ public class MonteCarloFootstepPlanningTest
 
    private OpenCLManager openCLManager = new OpenCLManager();
    private MonteCarloFootstepPlannerParameters plannerParameters = new MonteCarloFootstepPlannerParameters();
-   private TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(null);
+   private TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(null, plannerParameters);
    private MonteCarloFootstepPlanner planner = new MonteCarloFootstepPlanner(plannerParameters, PlannerTools.createFootPolygons(0.2, 0.1, 0.08), debugger);
    private CameraIntrinsics cameraIntrinsics = new CameraIntrinsics();
    private RapidHeightMapExtractor heightMapExtractor = new RapidHeightMapExtractor(openCLManager);

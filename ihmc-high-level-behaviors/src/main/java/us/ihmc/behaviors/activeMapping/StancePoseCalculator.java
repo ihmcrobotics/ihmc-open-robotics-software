@@ -5,10 +5,11 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -18,11 +19,15 @@ import java.util.ArrayList;
 
 public class StancePoseCalculator
 {
+   public static final float CONTACT_COST_WEIGHT = 10.0f;
+   public static final float MAX_CONTACT_VALUE = 255.0f;
+   public static final float NOMINAL_STANCE_DISTANCE = 0.5f;
+
    private int windowSize = 5;
-   private float resolution = 0.08f;
-   private float maxWidth = 0.5f;
-   private float maxLength = 0.5f;
-   private float maxYaw = 0.1f;
+   private double resolution = 0.08f;
+   private double maxWidth = 0.5f;
+   private double maxLength = 0.5f;
+   private double maxYaw = 0.1f;
 
    private HeightMapPolygonSnapper heightMapPolygonSnapper;
 
@@ -32,11 +37,14 @@ public class StancePoseCalculator
    private SideDependentList<Pose3D> bestPose3Ds = new SideDependentList<>(new Pose3D(), new Pose3D());
    private SideDependentList<FramePose3D> bestFramePoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
 
-   public StancePoseCalculator(float maxWidth, float maxLength, float maxYaw)
+   private final SideDependentList<ConvexPolygon2D> footPolygons;
+
+   public StancePoseCalculator(double maxWidth, double maxLength, double maxYaw, SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.maxWidth = maxWidth;
       this.maxLength = maxLength;
       this.maxYaw = maxYaw;
+      this.footPolygons = footPolygons;
       this.heightMapPolygonSnapper = new HeightMapPolygonSnapper();
    }
 
@@ -61,15 +69,15 @@ public class StancePoseCalculator
    public void insertCandidatePoses(ArrayList<FramePose3D> poses, FramePose3D goalPose, RobotSide side)
    {
       poses.clear();
-      float multiplier = side == RobotSide.LEFT ? -1 : 1;
+      double multiplier = side == RobotSide.LEFT ? -1 : 1;
 
       // sample left and right poses around the provided goal pose and check if they are valid in the height map
       for (int i = -windowSize; i < windowSize; i++)
       {
          for (int j = 0; j < windowSize; j++)
          {
-            float x = i * resolution;
-            float y = j * resolution * multiplier;
+            double x = i * resolution;
+            double y = j * resolution * multiplier;
 
             FramePose3D pose = new FramePose3D(goalPose);
             pose.appendTranslation(x, y, 0);
@@ -88,14 +96,14 @@ public class StancePoseCalculator
       {
          for (FramePose3D rightPose : rightPoses)
          {
-            float heightLeft = terrainMap.getHeightInWorld(leftPose.getPosition().getX32(), leftPose.getPosition().getY32());
-            float heightRight = terrainMap.getHeightInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32());
+            double heightLeft = terrainMap.getHeightInWorld(leftPose.getPosition().getX32(), leftPose.getPosition().getY32());
+            double heightRight = terrainMap.getHeightInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32());
 
-            float contactCostLeft = Math.abs(255.0f - terrainMap.getContactScoreInWorld(leftPose.getPosition().getX32(), leftPose.getPosition().getY32()));
-            float contactCostRight = Math.abs(255.0f - terrainMap.getContactScoreInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32()));
+            double contactCostLeft = Math.abs(MAX_CONTACT_VALUE - terrainMap.getContactScoreInWorld(leftPose.getPosition().getX32(), leftPose.getPosition().getY32()));
+            double contactCostRight = Math.abs(MAX_CONTACT_VALUE - terrainMap.getContactScoreInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32()));
 
-            cost = Math.abs(0.5f - leftPose.getPositionDistance(rightPose));
-            cost += 10.0f * (contactCostLeft + contactCostRight);
+            cost = Math.abs(NOMINAL_STANCE_DISTANCE - leftPose.getPositionDistance(rightPose));
+            cost += CONTACT_COST_WEIGHT * (contactCostLeft + contactCostRight);
 
             leftPose.setZ(heightLeft);
             rightPose.setZ(heightRight);
@@ -114,13 +122,12 @@ public class StancePoseCalculator
    {
       for (RobotSide side : RobotSide.values)
       {
-         snapToEnvironment(environmentHandler, bestFramePoses.get(side));
+         snapToEnvironment(environmentHandler, bestFramePoses.get(side), footPolygons.get(side));
       }
    }
 
-   private void snapToEnvironment(FootstepPlannerEnvironmentHandler environmentHandler, FramePose3D poseToSnap)
+   private void snapToEnvironment(FootstepPlannerEnvironmentHandler environmentHandler, FramePose3D poseToSnap, ConvexPolygon2D footPolygon)
    {
-      ConvexPolygon2D footPolygon = PlannerTools.createFootPolygon(0.25, 0.12, 0.08);
       footPolygon.applyTransform(poseToSnap);
 
       RigidBodyTransform snapTransform = heightMapPolygonSnapper.snapPolygonToHeightMap(footPolygon, environmentHandler, 0.05, Math.toRadians(45.0));
@@ -159,6 +166,21 @@ public class StancePoseCalculator
       double yAxisZ = -surfaceNormal.getY() * xAxisX;
 
       transformToPack.getRotation().set(xAxisX, yAxisX, surfaceNormal.getX(), xAxisY, yAxisY, surfaceNormal.getY(), xAxisZ, yAxisZ, surfaceNormal.getZ());
+   }
+
+   public void snapPosesToTerrainMapData(TerrainMapData terrainMapData)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         snapToTerrainMap(terrainMapData, bestFramePoses.get(side));
+      }
+   }
+
+   private void snapToTerrainMap(TerrainMapData terrainMapData, FramePose3D poseToSnap)
+   {
+      UnitVector3DReadOnly normal = terrainMapData.computeSurfaceNormalInWorld((float) poseToSnap.getX(), (float) poseToSnap.getY(), 1);
+      RigidBodyTransform snapTransform = createTransformToMatchSurfaceNormalPreserveX(normal);
+      poseToSnap.applyTransform(snapTransform);
    }
 
    public ArrayList<FramePose3D> getLeftPoses()

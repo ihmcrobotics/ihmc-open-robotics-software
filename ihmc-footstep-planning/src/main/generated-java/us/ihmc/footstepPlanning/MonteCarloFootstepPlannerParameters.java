@@ -19,6 +19,7 @@ public class MonteCarloFootstepPlannerParameters extends StoredPropertySet imple
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final BooleanStoredPropertyKey reset = keys.addBooleanKey("Reset");
+   public static final DoubleStoredPropertyKey nodesPerMeter = keys.addDoubleKey("Nodes per meter");
    public static final IntegerStoredPropertyKey numberOfIterations = keys.addIntegerKey("Number of iterations");
    public static final IntegerStoredPropertyKey numberOfSimulations = keys.addIntegerKey("Number of simulations");
    public static final DoubleStoredPropertyKey timeoutDuration = keys.addDoubleKey("Timeout duration");

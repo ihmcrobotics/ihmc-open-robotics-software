@@ -66,6 +66,7 @@ public class ReferenceFrameLibrary
       return false;
    }
 
+   /** @return the frame matching the name or null if the library does not contain it */
    @Nullable
    public ReferenceFrame findFrameByName(String referenceFrameName)
    {

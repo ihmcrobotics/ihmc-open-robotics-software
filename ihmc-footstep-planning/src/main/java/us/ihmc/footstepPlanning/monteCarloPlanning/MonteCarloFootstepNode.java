@@ -33,13 +33,11 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
    public ArrayList<MonteCarloFootstepNode> getAvailableStates(MonteCarloFootstepPlannerRequest request, MonteCarloFootstepPlannerParameters parameters)
    {
       ArrayList<MonteCarloFootstepNode> availableStates = new ArrayList<>();
-
-      //MonteCarloPlannerTools.getFootstepActionGrid(actions, robotSide == RobotSide.LEFT ? -1 : 1);
-      MonteCarloPlannerTools.getFootstepActionSet(parameters, actions, state.getZ32(), robotSide == RobotSide.LEFT ? -1 : 1);
+      MonteCarloPlannerTools.populateFootstepActionSet(parameters, actions, state.getZ32(), robotSide == RobotSide.LEFT ? -1 : 1);
 
       for (Vector3D action : actions)
       {
-         if (checkActionBoundaries(action, request.getTerrainMapData().getLocalGridSize()) && checkReachability(request, parameters, action))
+         if (checkReachability(request, parameters, action))
          {
             MonteCarloFootstepNode nodeToInsert = computeActionResult(action);
             availableStates.add(nodeToInsert);
@@ -49,14 +47,6 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
       return availableStates;
    }
 
-   public boolean checkActionBoundaries(Vector3DReadOnly action, int gridWidth)
-   {
-      Point3D newPosition = new Point3D();
-      newPosition.add(state, action);
-      return true;
-      //      return MonteCarloPlannerTools.isWithinGridBoundaries(new Point2D(newPosition.getX() + (double) gridWidth / 2, newPosition.getY() + (double) gridWidth / 2), gridWidth);
-   }
-
    public boolean checkReachability(MonteCarloFootstepPlannerRequest request, MonteCarloFootstepPlannerParameters parameters, Vector3DReadOnly action)
    {
       Point2D newPosition = new Point2D();
@@ -64,8 +54,8 @@ public class MonteCarloFootstepNode extends MonteCarloTreeNode
       Vector2D positionAction = new Vector2D(action.getX(), action.getY()); // yaw is the z-component, not used
 
       newPosition.add(previousPosition, positionAction);
-      newPosition.scale(1.0 / 50.0);
-      previousPosition.scale(1.0 / 50.0);
+      newPosition.scale(1.0 / parameters.getNodesPerMeter());
+      previousPosition.scale(1.0 / parameters.getNodesPerMeter());
 
       double previousHeight = request.getTerrainMapData().getHeightInWorld((float) previousPosition.getX(), (float) previousPosition.getY());
       double currentHeight = request.getTerrainMapData().getHeightInWorld((float) newPosition.getX(), (float) newPosition.getY());
