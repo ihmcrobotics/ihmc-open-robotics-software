@@ -4,7 +4,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 public interface RobotVersion
 {
-   boolean hasArm(RobotSide robotSide);
+   default boolean hasArm(RobotSide robotSide)
+   {
+      return false;
+   }
 
    default boolean hasBothArms()
    {
