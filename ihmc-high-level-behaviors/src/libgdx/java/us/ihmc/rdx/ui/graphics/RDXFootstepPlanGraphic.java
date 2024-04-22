@@ -10,6 +10,8 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepQueueStatusMessage;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.exceptions.OutdatedPolygonException;
@@ -18,12 +20,15 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.RDX3DSituatedText;
 import us.ihmc.rdx.mesh.RDXIDMappedColorFunction;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
+import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -31,6 +36,8 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
 import java.util.function.Function;
 
 public class RDXFootstepPlanGraphic implements RenderableProvider
@@ -40,10 +47,12 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
    // visualization options
    private final Function<Integer, Color> colorFunction = new RDXIDMappedColorFunction();
    private final SideDependentList<Color> footstepColors = new SideDependentList<>();
+
    {
       footstepColors.set(RobotSide.LEFT, new Color(RDXFootstepGraphic.LEFT_FOOT_RED_COLOR));
       footstepColors.set(RobotSide.RIGHT, new Color(RDXFootstepGraphic.RIGHT_FOOT_GREEN_COLOR));
    }
+
    private final SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
    private volatile Runnable buildMeshAndCreateModelInstance = null;
 
@@ -57,6 +66,7 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
                                                                                                                 ReferenceFrame.getWorldFrame(),
                                                                                                                 tempTransform);
    private final FramePose3D textFramePose = new FramePose3D();
+   private final RecyclingArrayList<RDXSwingTrajectoryGraphic> trajectoryGraphics = new RecyclingArrayList<>(RDXSwingTrajectoryGraphic::new);
    private boolean isEmpty = true;
 
    public RDXFootstepPlanGraphic(SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints)
@@ -65,6 +75,17 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
       {
          ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
          controllerFootGroundContactPoints.get(robotSide).forEach(defaultFoothold::addVertex);
+         defaultFoothold.update();
+         defaultContactPoints.put(robotSide, defaultFoothold);
+      }
+   }
+
+   public RDXFootstepPlanGraphic(SideDependentList<ConvexPolygon2D> footPolygons)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
+         footPolygons.get(robotSide).getPolygonVerticesView().forEach(defaultFoothold::addVertex);
          defaultFoothold.update();
          defaultContactPoints.put(robotSide, defaultFoothold);
       }
@@ -216,6 +237,27 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
       };
    }
 
+   public void updateTrajectoriesFromPlan(FootstepPlan footstepPlan, List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories)
+   {
+      trajectoryGraphics.clear();
+      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+      {
+         PlannedFootstep plannedStep = footstepPlan.getFootstep(i);
+         EnumMap<Axis3D, List<PolynomialReadOnly>> swingTrajectory;
+
+         if (i < swingTrajectories.size())
+            swingTrajectory = swingTrajectories.get(i);
+         else
+            swingTrajectory = null;
+
+         if (swingTrajectory != null)
+         {
+            RDXSwingTrajectoryGraphic trajectoryGraphic = trajectoryGraphics.add();
+            trajectoryGraphic.updateTrajectoryModel(plannedStep, swingTrajectory);
+         }
+      }
+   }
+
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
@@ -225,6 +267,11 @@ public class RDXFootstepPlanGraphic implements RenderableProvider
          for (RDX3DSituatedText textRenderable : textRenderables)
          {
             textRenderable.getRenderables(renderables, pool);
+         }
+
+         for (RDXSwingTrajectoryGraphic trajectoryGraphic : trajectoryGraphics)
+         {
+            trajectoryGraphic.getRenderables(renderables, pool);
          }
       }
    }
