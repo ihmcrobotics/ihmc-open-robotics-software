@@ -28,13 +28,10 @@ import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
-import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.nio.file.Paths;
 import java.util.ArrayDeque;
 import java.util.HashMap;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -49,9 +46,6 @@ public class PerceptionDataLogger
 
    private final CommunicationMode communicationMode;
    private final ArrayDeque<Runnable> runnablesToStopLogging = new ArrayDeque<>();
-   private final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
-                                                                                                        getClass(),
-                                                                                                        ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
    private HDF5Manager hdf5Manager;
@@ -69,9 +63,6 @@ public class PerceptionDataLogger
 
    public PerceptionDataLogger()
    {
-      //      ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
-      //      ros2PropertySetGroup.registerStoredPropertySet(PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS, parameters);
-
       communicationMode = CommunicationMode.INTERPROCESS;
    }
 
@@ -192,7 +183,7 @@ public class PerceptionDataLogger
    {
       if (hdf5Manager != null)
       {
-//         logResiduals();
+         //         logResiduals();
 
          try
          {
@@ -356,8 +347,6 @@ public class PerceptionDataLogger
       realtimeROS2Node.spin();
 
       runnablesToStopLogging.addLast(realtimeROS2Node::destroy);
-
-      executorService.scheduleAtFixedRate(this::collectStatistics, 0, 10, TimeUnit.MILLISECONDS);
    }
 
    public void stopLogging()
@@ -366,21 +355,6 @@ public class PerceptionDataLogger
 
       for (PerceptionLogChannel channel : channels.values())
       {
-         if (channel.isEnabled())
-         {
-            boolean termination = false;
-            try
-            {
-               termination = executorService.awaitTermination(500, TimeUnit.MILLISECONDS);
-            }
-            catch (InterruptedException e)
-            {
-               throw new RuntimeException(e);
-            }
-
-            LogTools.warn("Perception Logger: Thread Terminated [{}]: {}", channel.getName(), termination);
-         }
-
          channel.resetIndex();
          channel.resetCount();
 
@@ -545,18 +519,15 @@ public class PerceptionDataLogger
 
    public void storeBytesFromPointer(String namespace, BytePointer bytePointer)
    {
-      executorService.submit(() ->
-                             {
-                                synchronized (hdf5Manager)
-                                {
-                                   Group group = hdf5Manager.createOrGetGroup(namespace);
+      synchronized (hdf5Manager)
+      {
+         Group group = hdf5Manager.createOrGetGroup(namespace);
 
-                                   int imageCount = channels.get(namespace).getCount();
-                                   channels.get(namespace).incrementCount();
+         int imageCount = channels.get(namespace).getCount();
+         channels.get(namespace).incrementCount();
 
-                                   hdf5Tools.storeBytes(group, imageCount, bytePointer);
-                                }
-                             });
+         hdf5Tools.storeBytes(group, imageCount, bytePointer);
+      }
    }
 
    public void storeFloatsFromPointer(String namespace, FloatPointer floatPointer, int rows, int columns)
@@ -574,21 +545,18 @@ public class PerceptionDataLogger
 
    public void storeLongsFromPointer(String namespace, LongPointer longPointer, int columns)
    {
-      executorService.submit(() ->
-                             {
-                                synchronized (hdf5Manager)
-                                {
-                                   Group group = hdf5Manager.createOrGetGroup(namespace);
+      synchronized (hdf5Manager)
+      {
+         Group group = hdf5Manager.createOrGetGroup(namespace);
 
-                                   int count = channels.get(namespace).getCount();
-                                   int blockSize = channels.get(namespace).getBlockSize();
-                                   channels.get(namespace).incrementCount();
+         int count = channels.get(namespace).getCount();
+         int blockSize = channels.get(namespace).getBlockSize();
+         channels.get(namespace).incrementCount();
 
-                                   hdf5Tools.storeLongArray2D(group, count, longPointer, blockSize, columns);
-                                   longPointer.position(0);
-                                   longPointer.limit(0);
-                                }
-                             });
+         hdf5Tools.storeLongArray2D(group, count, longPointer, blockSize, columns);
+         longPointer.position(0);
+         longPointer.limit(0);
+      }
    }
 
    public void storeLongs(String namespace, long value)
@@ -597,7 +565,7 @@ public class PerceptionDataLogger
       pointer.limit(pointer.limit() + 1);
       pointer.put(pointer.limit(), value);
 
-      if (pointer.limit()>= channels.get(namespace).getBlockSize())
+      if (pointer.limit() >= channels.get(namespace).getBlockSize())
       {
          storeLongsFromPointer(namespace, pointer, channels.get(namespace).getFrameSize());
       }
@@ -675,11 +643,20 @@ public class PerceptionDataLogger
       channels.get(name).setEnabled(enabled);
    }
 
+   public void printStats()
+   {
+      for (String channelName : channels.keySet())
+      {
+         PerceptionLogChannel channel = channels.get(channelName);
+         LogTools.info(String.format("Channel: %s Enabled: %s Count: %d Index: %d", channelName, channel.isEnabled(), channel.getCount(), channel.getIndex()));
+      }
+   }
+
    public static void main(String[] args)
    {
       String defaultLogDirectory = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toString();
       String logDirectory = System.getProperty("perception.log.directory", defaultLogDirectory);
-      String logFileName = HDF5Tools.generateLogFileName();
+      String logFileName = HDF5Tools.generateFileName();
 
       PerceptionDataLogger logger = new PerceptionDataLogger();
 
