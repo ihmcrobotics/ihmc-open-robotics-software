@@ -12,7 +12,7 @@ import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeUtil;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
 
 import java.util.ArrayList;
@@ -86,7 +86,7 @@ public class SceneGraph
       // This must happen only once per on-robot tick
       detectionFilterCollection.update();
 
-      DoorNodeUtil.addDoorNodes(this);
+      DoorNodeTools.addDoorNodes(this);
 
       modifyTree(modificationQueue -> updateOnRobotOnly(rootNode, robotPelvisFrame, modificationQueue));
    }

@@ -10,7 +10,7 @@ import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 
 import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions.*;
 
-public final class DoorNodeUtil
+public final class DoorNodeTools
 {
    /**
     * Creates new door nodes as children of {@link YOLOv8Node}\s which are door components.
