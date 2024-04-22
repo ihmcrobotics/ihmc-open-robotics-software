@@ -425,7 +425,7 @@ public class RDXBaseUI
                ImGui.popItemFlag();
             }
 
-            // Sixth row (font size)
+            // Fifth row (font size)
             ImGui.tableNextRow();
             ImGui.tableSetColumnIndex(0);
             ImGui.alignTextToFramePadding();
