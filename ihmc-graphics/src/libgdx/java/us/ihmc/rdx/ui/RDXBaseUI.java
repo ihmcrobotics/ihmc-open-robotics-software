@@ -22,10 +22,10 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXKeyBindings;
 import us.ihmc.rdx.RDXSettings;
 import us.ihmc.rdx.imgui.ImGuiFrequencyDisplay;
-import us.ihmc.rdx.imgui.RDXPanelManager;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
+import us.ihmc.rdx.imgui.RDXPanelManager;
 import us.ihmc.rdx.input.RDXInputMode;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
@@ -116,7 +116,7 @@ public class RDXBaseUI
    private final ImBoolean modelSceneMouseCollisionEnabled = new ImBoolean(false);
    private final ImDouble view3DBackgroundShade = new ImDouble(RDX3DSceneTools.CLEAR_COLOR);
    private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
-   private final ImDouble imguiFontScale = new ImDouble(1.0);
+   private final ImInt imguiFontSize = new ImInt(ImGuiTools.DEFAULT_FONT_SIZE);
    private final RDXImGuiLayoutManager layoutManager;
    private final RDXKeyBindings keyBindings = new RDXKeyBindings();
    private long renderIndex = 0;
@@ -220,7 +220,7 @@ public class RDXBaseUI
       vsync.set(settings.vsyncEnabled());
       foregroundFPSLimit.set(settings.getForegroundFPSLimit());
       libGDXLogLevel.set(settings.getLibGDXLogLevel());
-      imguiFontScale.set(settings.getImguiFontScale());
+      imguiFontSize.set(settings.getFontSize());
       try
       {
          theme = Theme.valueOf(settings.getThemeName());
@@ -277,7 +277,7 @@ public class RDXBaseUI
 
       imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
       setTheme(theme); // TODO: move theme stuff to RDXImGuiWindowAndDockSystem?
-      ImGui.getIO().setFontGlobalScale((float) imguiFontScale.get());
+      ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
 
@@ -395,7 +395,7 @@ public class RDXBaseUI
             }
 
             ImGui.sameLine();
-            if (ImGui.button("Reset"))
+            if (ImGui.button(labels.get("Reset##BackgroundShade")))
             {
                view3DBackgroundShade.set(RDX3DSceneTools.CLEAR_COLOR);
                settings.setView3DBackgroundShade((float) view3DBackgroundShade.get());
@@ -424,19 +424,28 @@ public class RDXBaseUI
                ImGui.popItemFlag();
             }
 
-            // Fifth row (font scale)
+            // Fifth row (font size)
             ImGui.tableNextRow();
             ImGui.tableSetColumnIndex(0);
             ImGui.alignTextToFramePadding();
-            ImGui.text("Font scale: ");
+            ImGui.text("Font size: ");
             ImGui.tableSetColumnIndex(1);
-            if (ImGuiTools.sliderDouble(labels.get("##imguiFontScaleSlider"), imguiFontScale, 1.0, 2.0, "%.1f")) {
-               settings.setImguiFontScale(imguiFontScale.get());
+            if (ImGui.sliderInt(labels.getHidden("fontSize"), imguiFontSize.getData(), ImGuiTools.SMALLEST_FONT_SIZE, ImGuiTools.LARGEST_FONT_SIZE, "%d"))
+            {
+//               ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
             }
             // Change the font scale after you've let go of the slider
             if (ImGui.isItemDeactivatedAfterEdit())
             {
-               ImGui.getIO().setFontGlobalScale((float) imguiFontScale.get());
+               settings.setFontSize(imguiFontSize.get());
+               ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
+            }
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("Reset##FontSize")))
+            {
+               imguiFontSize.set(ImGuiTools.DEFAULT_FONT_SIZE);
+               settings.setFontSize(imguiFontSize.get());
+               ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
             }
 
             ImGui.endTable();

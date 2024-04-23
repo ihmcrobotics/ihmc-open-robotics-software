@@ -411,3 +411,9 @@ float64 rms_min_error_to_penalize -11.1
 # When using a height map, snapping is done by taking all the points inside the polygon, then removing points below
 # z_max - dz, where z_max is the highest point and dz is this value.
 float64 height_map_snap_threshold -11.1
+
+# When using a height map, scaling the foot polygon is done as a safety margin for collisions with the height map
+float64 scaled_foot_polygon_percentage -11.1
+
+# When using a height map, a distance is set that determines if a cliff is detected or not
+float64 cliff_height_threshold -11.1

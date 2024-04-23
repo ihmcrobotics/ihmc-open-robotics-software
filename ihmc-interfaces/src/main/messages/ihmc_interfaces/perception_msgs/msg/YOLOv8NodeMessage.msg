@@ -8,7 +8,7 @@ int32 mask_erosion_kernel_radius
 float64 outlier_filter_threshold
 float32 detection_acceptance_threshold
 
-# Detection formation
+# Detection information
 string detection_class
 float64 confidence
 geometry_msgs/Point32[<=5000] object_point_cloud

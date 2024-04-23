@@ -1,13 +1,7 @@
 package us.ihmc.footstepPlanning.swing;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.mutable.MutableInt;
-
 import gnu.trove.list.array.TDoubleArrayList;
+import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.AdaptiveSwingTimingTools;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
@@ -31,18 +25,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.*;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
-import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -57,6 +46,11 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class CollisionFreeSwingCalculator
 {
@@ -85,6 +79,7 @@ public class CollisionFreeSwingCalculator
    private final List<FramePoint3D> defaultWaypoints = new ArrayList<>();
    private final List<FramePoint3D> modifiedWaypoints = new ArrayList<>();
 
+   private final SwingKnotOptimizationResult swingKnotOptimizationResult = new SwingKnotOptimizationResult();
    private final ExpandingPolytopeAlgorithm collisionDetector = new ExpandingPolytopeAlgorithm();
    private final List<Vector3D> collisionGradients = new ArrayList<>();
    private final List<Vector3D> convolvedGradients = new ArrayList<>();
@@ -265,7 +260,10 @@ public class CollisionFreeSwingCalculator
 
          initializeKnotPoints();
          // FIXME figure out how to avoid using the height map data when possible.
+
+         swingKnotOptimizationResult.reset();
          optimizeKnotPoints(planarRegionsList, heightMapData);
+         //LogTools.info("Swing Knot Result: [{}]", swingKnotOptimizationResult.toString());
 
          if (!collisionFound.getValue())
          {
@@ -357,7 +355,7 @@ public class CollisionFreeSwingCalculator
    {
       collisionFound.set(false);
       planPhase.set(PlanPhase.PERFORM_COLLISION_CHECK);
-      int maxIterations = 30;
+      int maxIterations = 15;
 
       for (int i = 0; i < maxIterations; i++)
       {
@@ -370,6 +368,7 @@ public class CollisionFreeSwingCalculator
 
             // collision gradient
             boolean collisionDetected = knotPoint.doCollisionCheck(collisionDetector, planarRegionsList, heightMapData);
+            swingKnotOptimizationResult.setKnotCollisions(j, collisionDetected);
             if (collisionDetected)
             {
                collisionFound.set(true);
@@ -423,6 +422,7 @@ public class CollisionFreeSwingCalculator
 
             swingKnotPoints.get(j).project(convolvedGradients.get(j));
             swingKnotPoints.get(j).shiftWaypoint(convolvedGradients.get(j));
+            swingKnotOptimizationResult.setKnotDisplacement(j, convolvedGradients.get(j));
 
             if (visualize)
             {
@@ -541,7 +541,7 @@ public class CollisionFreeSwingCalculator
             tickAndUpdatable.tickAndUpdate();
       }
 
-      return copySwingTrajectories(positionTrajectoryGenerator.getTrajectories(), footstep.getCustomWaypointPositions().size() + 1);
+      return SwingPlannerTools.copySwingTrajectories(positionTrajectoryGenerator.getTrajectories(), footstep.getCustomWaypointPositions().size() + 1);
    }
 
    private void initializeGraphics(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)
@@ -642,34 +642,5 @@ public class CollisionFreeSwingCalculator
          soleFramePose.setToNaN();
          footPolygonViz.update();
       }
-   }
-
-   public static EnumMap<Axis3D, List<PolynomialReadOnly>> copySwingTrajectories(EnumMap<Axis3D, ArrayList<YoPolynomial>> trajectories)
-   {
-      return copySwingTrajectories(trajectories, trajectories.get(Axis3D.X).size());
-
-   }
-
-   public static EnumMap<Axis3D, List<PolynomialReadOnly>> copySwingTrajectories(EnumMap<Axis3D, ArrayList<YoPolynomial>> trajectories, int trajectoriesToCopy)
-   {
-      EnumMap<Axis3D, List<PolynomialReadOnly>> copy = new EnumMap<>(Axis3D.class);
-         trajectories.keySet().forEach(axis ->
-                                       {
-                                          List<PolynomialReadOnly> listCopy = new ArrayList<>();
-                                          for (int i = 0; i < trajectoriesToCopy; i++)
-                                          {
-                                             PolynomialReadOnly polynomialReadOnly = trajectories.get(axis).get(i);
-                                             double duration = polynomialReadOnly.getTimeInterval().getDuration();
-                                             if (Double.isNaN(duration) || duration < 1e-4)
-                                                continue;
-
-                                             Polynomial polynomialCopy = new Polynomial(polynomialReadOnly.getNumberOfCoefficients());
-                                             polynomialCopy.set(polynomialReadOnly);
-                                             listCopy.add(polynomialCopy);
-                                          }
-                                          copy.put(axis, listCopy);
-                                       });
-
-      return copy;
    }
 }
