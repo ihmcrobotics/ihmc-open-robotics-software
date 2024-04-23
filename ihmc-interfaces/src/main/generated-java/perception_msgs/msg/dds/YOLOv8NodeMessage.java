@@ -22,7 +22,7 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
    public double outlier_filter_threshold_;
    public float detection_acceptance_threshold_;
    /**
-            * Detection formation
+            * Detection information
             */
    public java.lang.StringBuilder detection_class_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D32>  object_point_cloud_;
@@ -123,7 +123,7 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
    }
 
    /**
-            * Detection formation
+            * Detection information
             */
    public void setDetectionClass(java.lang.String detection_class)
    {
@@ -132,14 +132,14 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
    }
 
    /**
-            * Detection formation
+            * Detection information
             */
    public java.lang.String getDetectionClassAsString()
    {
       return getDetectionClass().toString();
    }
    /**
-            * Detection formation
+            * Detection information
             */
    public java.lang.StringBuilder getDetectionClass()
    {
