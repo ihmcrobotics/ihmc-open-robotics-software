@@ -10,6 +10,7 @@ float32 detection_acceptance_threshold
 
 # Detection formation
 string detection_class
+float64 confidence
 geometry_msgs/Point32[<=5000] object_point_cloud
 geometry_msgs/Point32 object_centroid
 geometry_msgs/Transform centroid_to_object_transform

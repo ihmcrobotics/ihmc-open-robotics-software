@@ -32,6 +32,7 @@ module perception_msgs
          * Detection formation
          */
         string detection_class;
+        double confidence;
         sequence<geometry_msgs::msg::dds::Point32, 5000> object_point_cloud;
         geometry_msgs::msg::dds::Point32 object_centroid;
         geometry_msgs::msg::dds::Transform centroid_to_object_transform;

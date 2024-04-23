@@ -35,6 +35,7 @@ public class YOLOv8Node extends DetectableSceneNode
 
    // Read from YOLO manager, write to RDX
    private YOLOv8DetectionClass detectionClass;
+   private double confidence;
    private List<Point3D32> objectPointCloud;
    private Point3D32 objectCentroid;
 
@@ -46,7 +47,7 @@ public class YOLOv8Node extends DetectableSceneNode
 
    private double alpha = 0.30;
 
-   public YOLOv8Node(long id, String name, YOLOv8DetectionClass detectionClass, List<Point3D32> objectPointCloud, Point3D32 objectCentroid)
+   public YOLOv8Node(long id, String name, YOLOv8DetectionClass detectionClass, double confidence, List<Point3D32> objectPointCloud, Point3D32 objectCentroid)
    {
       this(id,
            name,
@@ -54,6 +55,7 @@ public class YOLOv8Node extends DetectableSceneNode
            2.0,
            0.2f,
            detectionClass,
+           confidence,
            objectPointCloud,
            objectCentroid,
            new RigidBodyTransform(),
@@ -68,6 +70,7 @@ public class YOLOv8Node extends DetectableSceneNode
                      double outlierFilterThreshold,
                      float detectionAcceptanceThreshold,
                      YOLOv8DetectionClass detectionClass,
+                     double confidence,
                      List<Point3D32> objectPointCloud,
                      Point3D32 objectCentroid,
                      RigidBodyTransformBasics centroidToObjectTransform,
@@ -81,6 +84,7 @@ public class YOLOv8Node extends DetectableSceneNode
       this.outlierFilterThreshold = outlierFilterThreshold;
       this.detectionAcceptanceThreshold = detectionAcceptanceThreshold;
       this.detectionClass = detectionClass;
+      this.confidence = confidence;
       this.objectPointCloud = objectPointCloud;
       this.objectCentroid = objectCentroid;
       this.centroidToObjectTransform.set(centroidToObjectTransform);
@@ -236,6 +240,16 @@ public class YOLOv8Node extends DetectableSceneNode
    public void setDetectionClass(YOLOv8DetectionClass detectionClass)
    {
       this.detectionClass = detectionClass;
+   }
+
+   public double getConfidence()
+   {
+      return confidence;
+   }
+
+   public void setConfidence(double confidence)
+   {
+      this.confidence = confidence;
    }
 
    public List<Point3D32> getObjectPointCloud()

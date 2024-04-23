@@ -146,6 +146,7 @@ public class ROS2SceneGraphSubscription
             yoloNode.setOutlierFilterThreshold(subscriptionNode.getYOLONodeMessage().getOutlierFilterThreshold());
             yoloNode.setDetectionAcceptanceThreshold(subscriptionNode.getYOLONodeMessage().getDetectionAcceptanceThreshold());
             yoloNode.setDetectionClass(YOLOv8DetectionClass.valueOf(subscriptionNode.getYOLONodeMessage().getDetectionClassAsString()));
+            yoloNode.setConfidence(subscriptionNode.getYOLONodeMessage().getConfidence());
             yoloNode.setObjectPointCloud(subscriptionNode.getYOLONodeMessage().getObjectPointCloud());
             yoloNode.setCentroidToObjectTransform(subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform());
             yoloNode.setObjectPose(subscriptionNode.getYOLONodeMessage().getObjectPose());

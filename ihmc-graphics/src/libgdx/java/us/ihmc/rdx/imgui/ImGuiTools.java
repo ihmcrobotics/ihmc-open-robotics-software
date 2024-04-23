@@ -9,6 +9,7 @@ import imgui.type.*;
 import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL41;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.tools.string.StringTools;
 
@@ -137,32 +138,20 @@ public class ImGuiTools
    }
 
    /**
-    * Method for getting color ranging from green to red based on value inputted (greater value = more red)
-    * Values at which color changes are provided using the colorSwitchValues varargs.
-    * e.g.
-    *    greenToRedGradiatedColor(0.5, 0.7, 0.9) -> returns green color       (0.5 < 0.7)
-    *    greenToRedGradiatedColor(0.8, 0.7, 0.9) -> returns orange-ish color  (0.7 < 0.8 < 0.9)
-    *    greenToRedGradiatedColor(1.0, 0.7, 0.9) -> returns red color         (1.0 > 0.9)
+    * Method for getting color ranging from green to red based on an input value,
+    * and the values at which the input should result in green and red.
     *
     * @param value The value which determines returned color
-    * @param colorSwitchValues values at which color changes (if given 3 values, color will switch from green -> yellow -> orange -> red)
+    * @param valueAtGreen The value at which returned color will be green
+    * @param valueAtRed The value at which returned color will be red
     * @return Integer value representing color
     */
-   public static int greenToRedGradiatedColor(double value, double... colorSwitchValues)
+   public static int greenRedGradientColor(double value, double valueAtGreen, double valueAtRed)
    {
-      float redValue = 0.0f;
-      float greenValue = 1.0f;
-
-      for (double switchValue : colorSwitchValues)
-      {
-         if (value < switchValue)
-            break;
-
-         redValue = 1.0f;
-         greenValue -= 1.0 / colorSwitchValues.length;
-      }
-
-      return new Color(redValue, greenValue, 0.0f, 0.5f).toIntBits();
+      double valueRange = valueAtGreen - valueAtRed;
+      double greenStrength = MathTools.clamp((value - valueAtRed) / valueRange, 0.0, 1.0);
+      double redStrength = 1.0 - greenStrength;
+      return new Color((float) redStrength, (float) greenStrength, 0.0f, 1.0f).toIntBits();
    }
 
    public static int nextWidgetIndex()
