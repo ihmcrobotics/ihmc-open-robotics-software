@@ -34,7 +34,7 @@ public class CenterOfMassStabilityRegionCalculatorVisualizer
       scs2.start(true, true, false);
 
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      CenterOfMassStaticStabilityRegionCalculator calculator = new CenterOfMassStaticStabilityRegionCalculator(1.0, scs2.getRootRegistry(), graphicsListRegistry);
+      CenterOfMassStaticStabilityRegionCalculator calculator = new CenterOfMassStaticStabilityRegionCalculator("", 1.0, scs2.getRootRegistry(), graphicsListRegistry);
       calculator.updateContactState(input);
 
       List<YoGraphicDefinition> graphicDefinitions = YoGraphicConversionTools.toYoGraphicDefinitions(graphicsListRegistry);

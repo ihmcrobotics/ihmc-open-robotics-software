@@ -169,7 +169,9 @@ public class CenterOfMassStabilityMarginOptimizationModule
    {
       clear();
 
-      /* Compute contact point positions and corresponding basis vectors */
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      //////////////////////////////// Compute contact point positions and corresponding basis vectors ////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       numberOfContactPoints = contactState.getNumberOfContactPoints();
 
@@ -194,7 +196,9 @@ public class CenterOfMassStabilityMarginOptimizationModule
          }
       }
 
-      /* Compute nominal equality constraint to enforce static equilibrium */
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////// Compute nominal equality constraint to enforce static equilibrium ///////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       nominalDecisionVariables = LINEAR_DIMENSIONS * contactState.getNumberOfContactPoints() + CoM_DIMENSIONS;
       Aeq.reshape(STATIC_EQUILIBRIUM_CONSTRAINTS, nominalDecisionVariables);
@@ -225,7 +229,9 @@ public class CenterOfMassStabilityMarginOptimizationModule
       Aeq.set(4, cx_index, mg);
       beq.set(2, 0, mg);
 
-      /* Compute map from positive x to nominal x */
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////// Compute map from positive x to nominal x ///////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       rhoDecisionVariables = NUM_BASIS_VECTORS * contactState.getNumberOfContactPoints() + 2 * CoM_DIMENSIONS;
       rhoToForce.reshape(nominalDecisionVariables, rhoDecisionVariables);
@@ -254,11 +260,15 @@ public class CenterOfMassStabilityMarginOptimizationModule
       rhoToForce.set(cx_index, cx_neg_index, -1.0);
       rhoToForce.set(cy_index, cy_neg_index, -1.0);
 
-      /* Assemble nominal augmented inequality constraint */
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////// Assemble nominal augmented inequality constraint ///////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+      // Actuation constraint C f <= d, where f = [f_0x, f_0y, f_0z, f_1x... ] are teh ground reaction forces in world frame
       DMatrixRMaj A_actuation = contactState.getActuationConstraintMatrix();
       DMatrixRMaj b_actuation = contactState.getActuationConstraintVector();
 
+      // Ain [f c] <= bin  ---> diag(Aeq, -Aeq, A_actuation) [f c] <= [beq -beq b_actuation]
       Ain.reshape(2 * Aeq.getNumRows() + A_actuation.getNumRows(), nominalDecisionVariables);
       bin.reshape(2 * beq.getNumRows() + b_actuation.getNumRows(), 1);
 
@@ -270,7 +280,10 @@ public class CenterOfMassStabilityMarginOptimizationModule
       MatrixTools.setMatrixBlock(bin, beq.getNumRows(), 0, beq, 0, 0, beq.getNumRows(), beq.getNumCols(), -1.0);
       MatrixTools.setMatrixBlock(bin, 2 * beq.getNumRows(), 0, b_actuation, 0, 0, b_actuation.getNumRows(), b_actuation.getNumCols(), 1.0);
 
-      /* Compute solver augmented inequality constraint */
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      //////////////////////////////////////// Compute solver augmented inequality constraint ////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       Ain_rho.reshape(Ain.getNumRows(), rhoDecisionVariables);
       CommonOps_DDRM.mult(Ain, rhoToForce, Ain_rho);
@@ -308,6 +321,11 @@ public class CenterOfMassStabilityMarginOptimizationModule
       return foundSolution;
    }
 
+   public LinearProgramSolver getLinearProgramSolver()
+   {
+      return linearProgramSolver;
+   }
+
    public boolean foundSolution()
    {
       return foundSolution;
@@ -323,6 +341,14 @@ public class CenterOfMassStabilityMarginOptimizationModule
       resolvedForceToPack.setX(solutionForce.get(LINEAR_DIMENSIONS * contactIdx + Axis3D.X.ordinal()));
       resolvedForceToPack.setY(solutionForce.get(LINEAR_DIMENSIONS * contactIdx + Axis3D.Y.ordinal()));
       resolvedForceToPack.setZ(solutionForce.get(LINEAR_DIMENSIONS * contactIdx + Axis3D.Z.ordinal()));
+   }
+
+   /**
+    * Returns the optimized (3n_c + 2) x 1 vector of forces and CoM, [f_0x f_0y f_0z f_1x ... f_nz c_x c_y]
+    */
+   public DMatrixRMaj getOptimizedForceAndCoM()
+   {
+      return solutionForce;
    }
 
    int getNumberOfContactPoints()
