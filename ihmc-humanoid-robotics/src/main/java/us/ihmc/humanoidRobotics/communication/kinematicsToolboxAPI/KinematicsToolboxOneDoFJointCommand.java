@@ -48,6 +48,21 @@ public class KinematicsToolboxOneDoFJointCommand implements Command<KinematicsTo
       weight = message.getWeight();
    }
 
+   public void setJoint(OneDoFJointBasics joint)
+   {
+      this.joint = joint;
+   }
+
+   public void setDesiredPosition(double desiredPosition)
+   {
+      this.desiredPosition = desiredPosition;
+   }
+
+   public void setWeight(double weight)
+   {
+      this.weight = weight;
+   }
+
    public OneDoFJointBasics getJoint()
    {
       return joint;
