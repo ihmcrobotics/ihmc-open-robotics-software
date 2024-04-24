@@ -17,13 +17,12 @@ import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
 import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.interfaces.Controller;
@@ -51,8 +50,8 @@ public abstract class KinematicsStreamingRTControllerTest
 
    protected YoRegistry toolboxRegistry;
    protected SCS2AvatarTestingSimulation simulationTestHelper;
-   private IHMCROS2Publisher<KinematicsStreamingToolboxInputMessage> inputPublisher;
-   private IHMCROS2Publisher<ToolboxStateMessage> statePublisher;
+   private ROS2PublisherBasics<KinematicsStreamingToolboxInputMessage> inputPublisher;
+   private ROS2PublisherBasics<ToolboxStateMessage> statePublisher;
 
    private Robot ghost;
 
@@ -97,8 +96,8 @@ public abstract class KinematicsStreamingRTControllerTest
       ROS2Topic<?> toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
       ROS2Topic<?> toolboxOutputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
 
-      inputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsStreamingToolboxInputMessage.class, toolboxInputTopic);
-      statePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxInputTopic);
+      inputPublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(KinematicsStreamingToolboxInputMessage.class));
+      statePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ToolboxStateMessage.class));
 
       // TODO Maybe add the ghost robot again?
 

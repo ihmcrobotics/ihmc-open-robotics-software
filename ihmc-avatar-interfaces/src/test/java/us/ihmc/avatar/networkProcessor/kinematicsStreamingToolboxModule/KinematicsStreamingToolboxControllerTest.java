@@ -28,7 +28,6 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -56,6 +55,7 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
@@ -161,13 +161,12 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       RealtimeROS2Node toolboxROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
       new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxROS2Node);
-      ROS2PublisherBasics<WholeBodyTrajectoryMessage> trajectoryOutputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                                                                   WholeBodyTrajectoryMessage.class,
-                                                                                                                   controllerInputTopic);
+
+      ROS2PublisherBasics<WholeBodyTrajectoryMessage> trajectoryOutputPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(
+            WholeBodyTrajectoryMessage.class));
       toolboxController.setTrajectoryMessagePublisher(trajectoryOutputPublisher::publish);
-      ROS2PublisherBasics<WholeBodyStreamingMessage> streamingOutputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                                                                 WholeBodyStreamingMessage.class,
-                                                                                                                 controllerInputTopic);
+      ROS2PublisherBasics<WholeBodyStreamingMessage> streamingOutputPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(
+            WholeBodyStreamingMessage.class));
       toolboxController.setStreamingMessagePublisher(streamingOutputPublisher::publish);
       ROS2PublisherBasics<WholeBodyTrajectoryMessage> outputPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(WholeBodyTrajectoryMessage.class));
       toolboxController.setTrajectoryMessagePublisher(outputPublisher::publish);
@@ -175,7 +174,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
       toolboxController.setRobotStateUpdater(robotStateUpdater);
       ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class),
-                                  s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
+                                  s -> robotStateUpdater.setRobotConfigurationData(s.takeNextData()));
       ros2Node.createSubscription(controllerOutputTopic.withTypeName(CapturabilityBasedStatus.class),
                                   s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
 

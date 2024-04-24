@@ -248,7 +248,7 @@ public class IKStreamingRTPluginFactory
          walkingOutputManager.attachStatusMessageListener(CapturabilityBasedStatus.class, kinematicsStreamingToolboxController::updateCapturabilityBasedStatus);
 
          ToolboxStateMessage message = new ToolboxStateMessage();
-         ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, ToolboxStateMessage.class, inputTopic, s ->
+         ros2Node.createSubscription(inputTopic.withTypeName(ToolboxStateMessage.class), s ->
          {
             s.takeNextData(message, null);
             newToolboxStateRequestedRef.set(ToolboxState.fromByte(message.getRequestedToolboxState()));

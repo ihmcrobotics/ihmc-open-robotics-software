@@ -200,7 +200,8 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
       toolboxController.setRobotStateUpdater(robotStateUpdater);
       toolboxROS2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class),
-                                         s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
+                                         s ->robotStateUpdater.setRobotConfigurationData(s.takeNextData()));
+
       toolboxROS2Node.createSubscription(controllerOutputTopic.withTypeName(CapturabilityBasedStatus.class),
                                          s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
       toolboxROS2Node.spin();
