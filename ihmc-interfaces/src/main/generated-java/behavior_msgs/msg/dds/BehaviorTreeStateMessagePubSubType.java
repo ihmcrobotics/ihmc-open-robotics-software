@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-      return "5c04950719534aa2adc0ffa62a141e58620881248a67568907cc4dea4caa0cc9";
+      return "5a0b133716202b6ff17ba1b37d08a81f3f5391c9aa2a37dfdf560a8cdc218034";
    }
    
    @Override
@@ -279,8 +279,8 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.read_type_e(data.getHandPoseActions());	
       cdr.read_type_e(data.getHandWrenchActions());	
       cdr.read_type_e(data.getScrewPrimitiveActions());	
-      cdr.read_type_e(data.getPelvisHeightActions());	
-      cdr.read_type_e(data.getWaitDurationActions());
+      cdr.read_type_e(data.getPelvisHeightActions());
+      cdr.read_type_e(data.getWaitDurationActions());	
       cdr.read_type_e(data.getWholebodyBimanipulationAction());	
 
    }

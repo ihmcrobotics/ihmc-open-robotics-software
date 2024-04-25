@@ -58,7 +58,7 @@ public class WholeBodyBimanipulationActionExecutor extends ActionNodeExecutor<Wh
                                                 ROS2SyncedRobotModel syncedRobot,
                                                 RobotConfigurationData latestStandingRobotConfiguration)
    {
-      super(new WholeBodyBimanipulationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+      super(new WholeBodyBimanipulationActionState(robotModel, id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
       state = getState();
       definition = getDefinition();

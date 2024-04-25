@@ -4,9 +4,9 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
@@ -85,7 +85,7 @@ public class RDXBehaviorTreeNodeCreationMenu
          {
             if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
             {
-               loadIndexedTreeFile(indexedTreeFile, relativeNode, insertionType);
+               loadIndexedTreeFile(indexedTreeFile, relativeNode, insertionType, textToDisplay);
             }
          }
 
@@ -187,7 +187,11 @@ public class RDXBehaviorTreeNodeCreationMenu
          ImGui.unindent();
       }
    }
-   public void loadIndexedTreeFile(RDXAvailableBehaviorTreeFile indexedTreeFile, RDXBehaviorTreeNode<?, ?> relativeNode, BehaviorTreeNodeInsertionType insertionType)
+
+   public void loadIndexedTreeFile(RDXAvailableBehaviorTreeFile indexedTreeFile,
+                                   RDXBehaviorTreeNode<?, ?> relativeNode,
+                                   BehaviorTreeNodeInsertionType insertionType,
+                                   String textToDisplay)
    {
       try
       {
@@ -216,7 +220,7 @@ public class RDXBehaviorTreeNodeCreationMenu
             break; // Exit the loop once the match is found.
          }
       }
-      loadIndexedTreeFile(loadFile, tree.getRootNode(), BehaviorTreeNodeInsertionType.INSERT_ROOT);
+      loadIndexedTreeFile(loadFile, tree.getRootNode(), BehaviorTreeNodeInsertionType.INSERT_ROOT, "");
    }
 
    private void renderNodeCreationClickable(RDXBehaviorTreeNode<?, ?> relativeNode,

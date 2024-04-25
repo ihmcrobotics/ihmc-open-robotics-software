@@ -34,7 +34,7 @@ public class WholeBodyBimanipulationActionStateMessage extends Packet<WholeBodyB
    {
       state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
       definition_ = new behavior_msgs.msg.dds.WholeBodyBimanipulationActionDefinitionMessage();
-      joint_angles_ = new double[23];
+      joint_angles_ = new double[35];
 
    }
 

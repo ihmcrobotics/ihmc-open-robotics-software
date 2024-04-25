@@ -24,7 +24,7 @@ module behavior_msgs
         /**
          * Joint angles
          */
-        double joint_angles[23];
+        double joint_angles[35];
         /**
          * Quality of the IK solution
          */

@@ -75,7 +75,7 @@ public class RDXWholeBodyBimanipulationAction extends RDXActionNode<WholeBodyBim
                                            RobotCollisionModel selectionCollisionModel,
                                            ROS2SyncedRobotModel syncedRobot)
    {
-      super(new WholeBodyBimanipulationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+      super(new WholeBodyBimanipulationActionState(robotModel, id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
       state = getState();
       definition = getDefinition();

@@ -1,9 +1,12 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.WholeBodyBimanipulationActionStateMessage;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -15,8 +18,13 @@ public class WholeBodyBimanipulationActionState extends ActionNodeState<WholeBod
    private final CRDTUnidirectionalDoubleArray jointAngles;
    private final CRDTUnidirectionalDouble solutionQuality;
    private final CRDTBidirectionalBoolean forceLatestStandingRobotConfigurationUpdate;
+   private final int maxNumOfJoints;
 
-   public WholeBodyBimanipulationActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
+   public WholeBodyBimanipulationActionState(DRCRobotModel robotModel,
+                                             long id,
+                                             CRDTInfo crdtInfo,
+                                             WorkspaceResourceDirectory saveFileDirectory,
+                                             ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(id, new WholeBodyBimanipulationActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
@@ -28,7 +36,10 @@ public class WholeBodyBimanipulationActionState extends ActionNodeState<WholeBod
          handFrames.put(side, handFrame);
       }
 
-      jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, WholeBodyBimanipulationActionDefinition.MAX_NUMBER_OF_JOINTS);
+      OneDoFJointBasics[] desiredOneDoFJointsExcludingHands = FullRobotModelUtils.getAllJointsExcludingHands(robotModel.createFullRobotModel());
+      maxNumOfJoints = desiredOneDoFJointsExcludingHands.length;
+
+      jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, maxNumOfJoints);
       solutionQuality = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
       forceLatestStandingRobotConfigurationUpdate = new CRDTBidirectionalBoolean(this, false);
    }
@@ -56,7 +67,7 @@ public class WholeBodyBimanipulationActionState extends ActionNodeState<WholeBod
 
       super.toMessage(message.getState());
 
-      for (int i = 0; i < WholeBodyBimanipulationActionDefinition.MAX_NUMBER_OF_JOINTS; i++)
+      for (int i = 0; i < maxNumOfJoints; i++)
       {
          jointAngles.toMessage(message.getJointAngles());
       }
@@ -92,7 +103,7 @@ public class WholeBodyBimanipulationActionState extends ActionNodeState<WholeBod
 
    public void setJointAngles(double[] value)
    {
-      for (int i = 0; i < WholeBodyBimanipulationActionDefinition.MAX_NUMBER_OF_JOINTS; i++)
+      for (int i = 0; i < maxNumOfJoints; i++)
       {
          jointAngles.getValue()[i] = value[i];
       }
