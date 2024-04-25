@@ -171,17 +171,14 @@ public class RDXTeleoperationManager extends RDXPanel
 
       wholeBodyIKManager = new RDXWholeBodyIKManager(robotModel, teleoperationParameters, desiredRobot, ros2Helper, syncedRobot, controllerStatusTracker);
 
-      if (robotHasArms)
-      {
-         // create the manager for the desired arm setpoints
-         armManager = new RDXArmManager(communicationHelper,
-                                        robotModel,
-                                        syncedRobot,
-                                        desiredRobot,
-                                        teleoperationParameters,
-                                        interactableHands,
-                                        wholeBodyIKManager::getEnabled);
-      }
+      // create the manager for the desired arm setpoints
+      armManager = new RDXArmManager(communicationHelper,
+                                     robotModel,
+                                     syncedRobot,
+                                     desiredRobot,
+                                     teleoperationParameters,
+                                     interactableHands,
+                                     wholeBodyIKManager::getEnabled);
 
       RDXBaseUI.getInstance().getKeyBindings().register("Delete all Interactables", "Shift + Escape");
    }

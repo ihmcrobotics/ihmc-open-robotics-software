@@ -1,0 +1,63 @@
+#ifndef __behavior_msgs__msg__ContinuousWalkingCommandMessage__idl__
+#define __behavior_msgs__msg__ContinuousWalkingCommandMessage__idl__
+
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::ContinuousWalkingCommandMessage_")
+      struct ContinuousWalkingCommandMessage
+      {
+        /**
+         * flag to enable/disable publishing to controller
+         */
+        boolean publish_to_controller;
+        /**
+         * flag to enable/disable continuous walking state machine
+         */
+        boolean enable_continuous_walking;
+        /**
+         * number of steps to send to controller
+         */
+        unsigned short number_of_steps_to_send;
+        /**
+         * forward joystick value
+         */
+        double forward_value;
+        /**
+         * lateral joystick value
+         */
+        double lateral_value;
+        /**
+         * turning joystick value
+         */
+        double turning_value;
+        /**
+         * flag to enable/disable hybrid planning
+         */
+        boolean use_hybrid_planner;
+        /**
+         * flag to enable/disable planning with astar planner
+         */
+        boolean use_astar_footstep_planner;
+        /**
+         * flag to enable/disable planning with monte-carlo footstep planner
+         */
+        boolean use_monte_carlo_footstep_planner;
+        /**
+         * flag to enable/disable using previous plan as reference
+         */
+        boolean use_previous_plan_as_reference;
+        /**
+         * flag to enable/disable using monte-carlo plan as reference
+         */
+        boolean use_monte_carlo_plan_as_reference;
+      };
+    };
+  };
+};
+
+#endif

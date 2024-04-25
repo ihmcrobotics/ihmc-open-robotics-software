@@ -4,6 +4,7 @@
 #include "perception_msgs/msg/./ArUcoMarkerNodeMessage_.idl"
 #include "perception_msgs/msg/./CenterposeNodeMessage_.idl"
 #include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
+#include "perception_msgs/msg/./DoorNodeMessage_.idl"
 #include "perception_msgs/msg/./PredefinedRigidBodySceneNodeMessage_.idl"
 #include "perception_msgs/msg/./PrimitiveRigidBodySceneNodeMessage_.idl"
 #include "perception_msgs/msg/./SceneNodeMessage_.idl"
@@ -38,6 +39,9 @@ module perception_msgs
 
       const octet YOLO_NODE_TYPE =
       7;
+
+      const octet DOOR_NODE_TYPE =
+      8;
 
 
       /**
@@ -95,6 +99,10 @@ module perception_msgs
          * YOLO scene nodes
          */
         sequence<perception_msgs::msg::dds::YOLOv8NodeMessage, 200> yolo_scene_nodes;
+        /**
+         * Door scene nodes
+         */
+        sequence<perception_msgs::msg::dds::DoorNodeMessage, 200> door_scene_nodes;
       };
     };
   };

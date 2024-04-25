@@ -104,4 +104,6 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  minimumDistanceFromCliffBottoms              = keys.addDoubleKey ("Min distance from cliff bottoms", 0.0);
    public static final DoubleStoredPropertyKey  cliffTopHeightToAvoid                        = keys.addDoubleKey ("Cliff top height to avoid", Double.MAX_VALUE);
    public static final DoubleStoredPropertyKey  minimumDistanceFromCliffTops                 = keys.addDoubleKey ("Min distance from cliff tops", 0.0);
+   public static final DoubleStoredPropertyKey  scaledFootPolygonPercentage                  = keys.addDoubleKey("Scaled foot polygon percentage", 1.25);
+   public static final DoubleStoredPropertyKey  cliffHeightThreshold                         = keys.addDoubleKey("Cliff height threshold", 0.025);
 }

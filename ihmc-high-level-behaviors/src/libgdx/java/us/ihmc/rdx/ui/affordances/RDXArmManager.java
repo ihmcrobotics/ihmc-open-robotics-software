@@ -102,10 +102,13 @@ public class RDXArmManager
 
       for (RobotSide side : RobotSide.values)
       {
-         armIKSolvers.put(side, new ArmIKSolver(side, robotModel.getJointMap(), syncedRobot.getFullRobotModel()));
-         ArmJointName[] armJointNames = robotModel.getJointMap().getArmJointNames(side);
-         desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot.getDesiredFullRobotModel(), side, armJointNames));
-         this.armJointNames.put(side, armJointNames);
+         if (robotModel.getRobotVersion().hasArm(side))
+         {
+            armIKSolvers.put(side, new ArmIKSolver(side, robotModel.getJointMap(), syncedRobot.getFullRobotModel()));
+            ArmJointName[] armJointNames = robotModel.getJointMap().getArmJointNames(side);
+            desiredRobotArmJoints.put(side, FullRobotModelUtils.getArmJoints(desiredRobot.getDesiredFullRobotModel(), side, armJointNames));
+            this.armJointNames.put(side, armJointNames);
+         }
       }
 
       for (int i = 0; i < PresetArmConfiguration.values.length; i++)

@@ -19,6 +19,7 @@ import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.tools.time.FrequencyCalculator;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -55,10 +56,11 @@ public class YOLOv8DetectionManager
    private float yoloSegmentationThreshold = 0.0f;
    private float candidateAcceptanceThreshold = 0.6f;
 
+   private Set<YOLOv8DetectionClass> targetDetections = new HashSet<>();
+
    private ReferenceFrame robotFrame = null;
 
    private boolean destroyed = false;
-   private YOLOv8Node doorYoloNode;
 
    public YOLOv8DetectionManager(ROS2Helper ros2Helper)
    {
@@ -73,6 +75,13 @@ public class YOLOv8DetectionManager
          yoloNMSThreshold = parametersMessage.getNonMaximumSuppressionThreshold();
          yoloSegmentationThreshold = parametersMessage.getSegmentationThreshold();
          candidateAcceptanceThreshold = parametersMessage.getCandidateAcceptanceThreshold();
+
+         // Create a new set of target detections to use
+         Set<YOLOv8DetectionClass> newTargetDetections = new HashSet<>(parametersMessage.getTargetDetectionClasses().size());
+         for (int i = 0; i < parametersMessage.getTargetDetectionClasses().size(); ++i)
+            newTargetDetections.add(YOLOv8DetectionClass.fromByte(parametersMessage.getTargetDetectionClasses().get(i)));
+
+         targetDetections = newTargetDetections;
       });
    }
 
@@ -173,8 +182,8 @@ public class YOLOv8DetectionManager
       YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImage, yoloConfidenceThreshold, yoloNMSThreshold);
 
       // Extract stuff from the results
-      Map<YOLOv8Detection, RawImage> objectMasks = yoloResults.getSegmentationImages(yoloSegmentationThreshold);
-      Set<YOLOv8Detection> newDetections = yoloResults.getDetections();
+      Map<YOLOv8Detection, RawImage> objectMasks = yoloResults.getTargetSegmentationImages(yoloSegmentationThreshold, targetDetections);
+      Set<YOLOv8Detection> newDetections = objectMasks.keySet();
 
       // match new detections to existing detections
       Point3D robotPoint = new Point3D(robotFrame.getTransformToWorldFrame().getTranslation());
@@ -324,18 +333,15 @@ public class YOLOv8DetectionManager
                {
                   long nodeID = sceneGraph.getNextID().getAndIncrement();
                   YOLOv8Node newYoloNode = new YOLOv8Node(nodeID,
-                                                          "YOLO " + candidateDetection.getDetection().objectClass().toString(),
+                                                          candidateDetection.getDetection().objectClass().getDefaultNodeName(),
                                                           candidateDetection.getDetection().objectClass(),
+                                                          candidateDetection.getDetection().confidence(),
                                                           candidateDetection.getObjectPointCloud(),
                                                           candidateDetection.getCentroid());
                   modificationQueue.accept(new SceneGraphNodeAddition(newYoloNode, sceneGraph.getRootNode()));
                   detectedNodes.put(candidateDetection.getDetection().objectClass(), newYoloNode);
                   detectedObjects.put(candidateDetection.getDetection().objectClass(), candidateDetection);
                   candidateDetection.getDetectionFilter().setAcceptanceThreshold(0.2f);
-                  if (newYoloNode.getName().contains("door"))
-                  {
-                     doorYoloNode = newYoloNode;
-                  }
                }
 
                candidateIterator.remove();
@@ -363,13 +369,9 @@ public class YOLOv8DetectionManager
 
             yoloNode.setObjectPointCloud(detection.getObjectPointCloud());
             yoloNode.setObjectCentroid(detection.getCentroid());
+            yoloNode.setConfidence(detection.getDetection().confidence());
             yoloNode.update();
          }
       }
-   }
-
-   public YOLOv8Node getDoorYoloNode()
-   {
-      return doorYoloNode;
    }
 }

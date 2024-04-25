@@ -5,10 +5,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepPlannerBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.collision.PlanarRegionFootstepPlannerBodyCollisionDetector;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -30,18 +27,20 @@ public class FootstepChecker implements FootstepCheckerInterface
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    public static final String rejectionReasonVariable = "rejectionReason";
+   private static final boolean USE_GPU_DATA_FOR_SNAPPING = false;
 
    private static final double traversabilityThresholdCenter = 0.08;
    private static final double traversabilityThresholdPerimeter = 0.02;
 
    private final FootstepPlannerParametersReadOnly parameters;
-   private final FootstepSnapperReadOnly snapper;
+   private final PlanarRegionFootstepSnapAndWiggler snapper;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final ConvexPolygon2D tmpFootPolygon = new ConvexPolygon2D();
 
-   private final PlanarRegionCliffAvoider cliffAvoider;
-   private final PlanarRegionObstacleBetweenStepsChecker obstacleBetweenStepsChecker;
-   private final PlanarRegionFootstepPlannerBodyCollisionDetector collisionDetector;
+   private final HeightMapCliffAvoider heightMapCliffAvoider;
+   private final PlanarRegionCliffAvoider planarRegionCliffAvoider;
+   private final ObstacleBetweenStepsChecker obstacleBetweenStepsChecker;
+   private final FootstepPlannerBodyCollisionDetector collisionDetector;
    private final FootstepPoseHeuristicChecker heuristicPoseChecker;
    private final FootstepPoseReachabilityChecker reachabilityChecker;
 
@@ -60,16 +59,17 @@ public class FootstepChecker implements FootstepCheckerInterface
 
    public FootstepChecker(FootstepPlannerParametersReadOnly parameters,
                           SideDependentList<ConvexPolygon2D> footPolygons,
-                          FootstepSnapperReadOnly snapper,
+                          PlanarRegionFootstepSnapAndWiggler snapper,
                           StepReachabilityData stepReachabilityData,
                           YoRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.snapper = snapper;
       this.footPolygons = footPolygons;
-      this.cliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper, footPolygons);
-      this.obstacleBetweenStepsChecker = new PlanarRegionObstacleBetweenStepsChecker(parameters, snapper);
-      this.collisionDetector = new PlanarRegionFootstepPlannerBodyCollisionDetector(parameters);
+      this.heightMapCliffAvoider = new HeightMapCliffAvoider(parameters, snapper, footPolygons, registry);
+      this.planarRegionCliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper, footPolygons);
+      this.obstacleBetweenStepsChecker = new ObstacleBetweenStepsChecker(parameters, snapper);
+      this.collisionDetector = new FootstepPlannerBodyCollisionDetector(parameters);
       this.heuristicPoseChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
       this.reachabilityChecker = new FootstepPoseReachabilityChecker(parameters, snapper, stepReachabilityData, registry);
       parentRegistry.addChild(registry);
@@ -120,10 +120,35 @@ public class FootstepChecker implements FootstepCheckerInterface
       }
 
       // Snap footstep to height map/planar regions
-      FootstepSnapDataReadOnly snapData = snapper.snapFootstep(candidateStep, stanceStep, parameters.getWiggleWhilePlanning());
-      candidateStepSnapData.set(snapData);
+      FootstepSnapData snapData;
+
+      if (USE_GPU_DATA_FOR_SNAPPING)
+      {
+         // TODO compute these from GPU data
+         RigidBodyTransform snapTransform = new RigidBodyTransform();
+         ConvexPolygon2D croppedFoothold = new ConvexPolygon2D();
+
+         snapData = new FootstepSnapData(snapTransform, croppedFoothold);
+         snapper.addSnapData(candidateStep, snapData);
+      }
+      else
+      {
+         snapData = snapper.snapFootstep(candidateStep, stanceStep, parameters.getWiggleWhilePlanning());
+         candidateStepSnapData.set(snapData);
+         achievedDeltaInside.set(snapData.getAchievedInsideDelta());
+      }
+
       heuristicPoseChecker.setApproximateStepDimensions(candidateStep, stanceStep);
-      achievedDeltaInside.set(snapData.getAchievedInsideDelta());
+
+      BipedalFootstepPlannerNodeRejectionReason poseRejectionReason;
+
+      // Check height map cliff avoidance
+      //heightMapCliffAvoider.setHeightMapData(heightMapData);
+      if (!heightMapCliffAvoider.isStepValid(candidateStep, stanceStep))
+      {
+         poseRejectionReason =  BipedalFootstepPlannerNodeRejectionReason.STEP_ON_CLIFF_EDGE;
+         rejectionReason.set(poseRejectionReason);
+      }
 
       // Check step placement
       if (!assumeFlatGround && !isStepPlacementValid(candidateStep, snapData))
@@ -132,7 +157,6 @@ public class FootstepChecker implements FootstepCheckerInterface
       }
 
       // Check snapped footstep placement
-      BipedalFootstepPlannerNodeRejectionReason poseRejectionReason;
       if (parameters.getUseStepReachabilityMap())
       {
          poseRejectionReason = reachabilityChecker.checkStepValidity(candidateStep, stanceStep);
@@ -215,7 +239,7 @@ public class FootstepChecker implements FootstepCheckerInterface
    private boolean isCollisionFree(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep, DiscreteFootstep startOfSwing)
    {
       // Check for ankle collision
-      if(!cliffAvoider.isStepValid(candidateStep))
+      if(!planarRegionCliffAvoider.isStepValid(candidateStep))
       {
          rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
          return false;
@@ -283,9 +307,10 @@ public class FootstepChecker implements FootstepCheckerInterface
    public void setPlanarRegions(PlanarRegionsList regionsForCollisionChecking)
    {
       this.regionsForCollisionChecking = regionsForCollisionChecking;
-      collisionDetector.setPlanarRegionsList(regionsForCollisionChecking);
-      obstacleBetweenStepsChecker.setPlanarRegions(regionsForCollisionChecking);
-      cliffAvoider.setPlanarRegionsList(regionsForCollisionChecking);
+      planarRegionCliffAvoider.setPlanarRegionsList(regionsForCollisionChecking);
+
+      // This should already be done elsewhere, but add this clear here for redundancy
+      snapper.clearSnapData();
    }
 
    private void clearLoggedVariables()

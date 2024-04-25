@@ -1,19 +1,16 @@
 package us.ihmc.footstepPlanning.graphSearch.collision;
 
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
-import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.HeightMapCollisionDetector;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.function.DoubleSupplier;
 
 public class FootstepPlannerBodyCollisionDetector
@@ -22,7 +19,7 @@ public class FootstepPlannerBodyCollisionDetector
    private final HashMap<LatticePoint, EuclidShape3DCollisionResult> collisionDataHolder = new HashMap<>();
 
    private HeightMapData heightMapData;
-   private final Box3D bodyBox = new Box3D();
+   private final FrameBox3D bodyBox = new FrameBox3D();
 
    private final DoubleSupplier bodyBoxDepth;
    private final DoubleSupplier bodyBoxWidth;

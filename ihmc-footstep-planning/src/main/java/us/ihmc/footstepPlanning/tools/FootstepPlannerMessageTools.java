@@ -111,6 +111,8 @@ public class FootstepPlannerMessageTools
       packet.setRmsErrorCost(parameters.getRMSErrorCost());
       packet.setRmsMinErrorToPenalize(parameters.getRMSMinErrorToPenalize());
       packet.setHeightMapSnapThreshold(parameters.getHeightMapSnapThreshold());
+      packet.setCliffHeightThreshold(parameters.getCliffHeightThreshold());
+      packet.setScaledFootPolygonPercentage(parameters.getScaledFootPolygonPercentage());
 
       packet.setAStarHeuristicsWeight(parameters.getAStarHeuristicsWeight().getValue());
       packet.setYawWeight(parameters.getYawWeight());

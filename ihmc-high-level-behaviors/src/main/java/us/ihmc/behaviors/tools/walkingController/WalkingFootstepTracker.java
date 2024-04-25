@@ -2,7 +2,6 @@ package us.ihmc.behaviors.tools.walkingController;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.thread.TypedNotification;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -10,6 +9,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Subscription;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,9 +25,9 @@ import static us.ihmc.tools.string.StringTools.format;
  */
 public class WalkingFootstepTracker
 {
-   private final ROS2Callback<FootstepDataListMessage> footstepDataListSubscriber;
-   private final ROS2Callback<FootstepStatusMessage> footstepStatusSubscriber;
-   private final ROS2Callback<FootstepQueueStatusMessage> footstepQueueStatusSubscriber;
+   private final ROS2Subscription<FootstepDataListMessage> footstepDataListSubscriber;
+   private final ROS2Subscription<FootstepStatusMessage> footstepStatusSubscriber;
+   private final ROS2Subscription<FootstepQueueStatusMessage> footstepQueueStatusSubscriber;
 
    private final ArrayList<FootstepDataMessage> footsteps = new ArrayList<>();
    private List<QueuedFootstepStatusMessage> queuedFootsteps = new ArrayList<>();
@@ -40,15 +40,12 @@ public class WalkingFootstepTracker
 
    public WalkingFootstepTracker(ROS2NodeInterface ros2Node, String robotName)
    {
-      footstepDataListSubscriber = new ROS2Callback<>(ros2Node,
-                                                          getTopic(FootstepDataListMessage.class, robotName),
-                                                          this::interceptFootstepDataListMessage);
-      footstepStatusSubscriber = new ROS2Callback<>(ros2Node,
-                                                        getTopic(FootstepStatusMessage.class, robotName),
-                                                        this::acceptFootstepStatusMessage);
-      footstepQueueStatusSubscriber = new ROS2Callback<>(ros2Node,
-                                                             getTopic(FootstepQueueStatusMessage.class, robotName),
-                                                             this::acceptFootstepQueueStatusMessage);
+      footstepDataListSubscriber = ros2Node.createSubscription2(getTopic(FootstepDataListMessage.class, robotName),
+                                                                this::interceptFootstepDataListMessage);
+      footstepStatusSubscriber = ros2Node.createSubscription2(getTopic(FootstepStatusMessage.class, robotName),
+                                                              this::acceptFootstepStatusMessage);
+      footstepQueueStatusSubscriber = ros2Node.createSubscription2(getTopic(FootstepQueueStatusMessage.class, robotName),
+                                                                   this::acceptFootstepQueueStatusMessage);
    }
 
    public void registerFootstepQueuedMessageListener(TypedNotification<FootstepQueueStatusMessage> footstepQueueListener)
@@ -168,8 +165,8 @@ public class WalkingFootstepTracker
 
    public void destroy()
    {
-      footstepDataListSubscriber.destroy();
-      footstepStatusSubscriber.destroy();
-      footstepQueueStatusSubscriber.destroy();
+      footstepDataListSubscriber.remove();
+      footstepStatusSubscriber.remove();
+      footstepQueueStatusSubscriber.remove();
    }
 }
