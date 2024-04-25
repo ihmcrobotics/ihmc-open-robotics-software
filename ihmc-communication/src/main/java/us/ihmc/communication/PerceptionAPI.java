@@ -212,9 +212,6 @@ public final class PerceptionAPI
    public static final ROS2Topic<FramePlanarRegionsListMessage> PERSPECTIVE_RAPID_REGIONS
          = PERCEPTION_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class).withSuffix("perspective").withQoS(ROS2QosProfile.BEST_EFFORT());
 
-   public static final ROS2Topic<FramePlanarRegionsListMessage> PERSPECTIVE_DOOR_RAPID_REGION
-         = PERCEPTION_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class).withSuffix("perspective_door").withQoS(ROS2QosProfile.BEST_EFFORT());
-
    public static final ROS2Topic<FramePlanarRegionsListMessage> SPHERICAL_RAPID_REGIONS_WITH_POSE = PERCEPTION_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class).withSuffix("spherical");
    public static final ROS2Topic<PlanarRegionsListMessage> SPHERICAL_RAPID_REGIONS = PERCEPTION_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class).withSuffix("spherical");
 

@@ -46,7 +46,6 @@ public class RDXInteractableObject implements RenderableProvider
    {
       ModelData objectModel = RDXModelLoader.loadModelData(modelFileName);
       modelInstance = new RDXModelInstance(new Model(objectModel));
-      selectablePose3DGizmo.getSelected().set(true);
    }
 
    public void load(String modelFileName, RigidBodyTransform visualModelTransform)
@@ -54,7 +53,6 @@ public class RDXInteractableObject implements RenderableProvider
       ModelData objectModel = RDXModelLoader.loadModelData(modelFileName);
       modelInstance = new RDXModelInstance(new Model(objectModel));
       modelInstanceFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(objectFrame, visualModelTransform);
-      selectablePose3DGizmo.getSelected().set(true);
    }
 
    public void clear()
@@ -102,6 +100,11 @@ public class RDXInteractableObject implements RenderableProvider
    public ModelInstance getModelInstance()
    {
       return modelInstance;
+   }
+
+   public RDXSelectablePose3DGizmo getSelectablePose3DGizmo()
+   {
+      return selectablePose3DGizmo;
    }
 
    public void setInitialPose()

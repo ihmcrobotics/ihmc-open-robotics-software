@@ -9,6 +9,7 @@ import imgui.type.ImBoolean;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 
@@ -16,6 +17,8 @@ import java.util.Set;
 
 public class RDXSceneNode
 {
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+
    private final SceneNode sceneNode;
    private final RDXReferenceFrameGraphic referenceFrameGraphic;
    private final String detailsText;
@@ -26,7 +29,7 @@ public class RDXSceneNode
    {
       this.sceneNode = sceneNode;
       referenceFrameGraphic = new RDXReferenceFrameGraphic(0.05, Color.BLUE);
-      detailsText = "ID: %d, Type: %s".formatted(sceneNode.getID(), sceneNode.getClass().getSuperclass().getSimpleName());
+      detailsText = "ID: %d, Type: %s".formatted(sceneNode.getID(), sceneNode.getClass().getSimpleName());
    }
 
    public void update(SceneGraphModificationQueue modificationQueue)
@@ -40,17 +43,16 @@ public class RDXSceneNode
 
       if (sceneNode != sceneGraph.getRootNode()) // Don't allow removing root node
       {
-         if (ImGui.button("Remove##" + sceneNode.getID()))
+         if (ImGui.button(labels.get("Remove")))
          {
             remove();
          }
          if (!(this instanceof RDXArUcoMarkerNode))
          {
             ImGui.sameLine();
-            ImGui.checkbox("Hide Graphics", hideGraphics);
+            ImGui.checkbox(labels.get("Hide Graphics"), hideGraphics);
          }
       }
-
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
