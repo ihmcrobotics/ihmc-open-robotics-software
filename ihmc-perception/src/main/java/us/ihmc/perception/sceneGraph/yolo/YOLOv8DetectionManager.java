@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -75,6 +76,7 @@ public class YOLOv8DetectionManager
    private final Condition newImageAvailable = newImageLock.newCondition();
    private final Notification readyToSegment = new Notification();
    private final FrequencyCalculator yoloFrequencyCalculator = new FrequencyCalculator();
+   private final Executor segmentationAndMatchingExecutor = ThreadTools.newSingleThreadExecutor("SegmentAndMatchYOLOResults");
 
    private final Map<YOLOv8DetectionClass, YOLOv8Node> detectedNodes = new ConcurrentHashMap<>();
    private final Map<YOLOv8DetectionClass, YOLOv8SegmentedDetection> detectedObjects = new ConcurrentHashMap<>();
@@ -200,7 +202,7 @@ public class YOLOv8DetectionManager
       {
          YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImageCopy, yoloConfidenceThreshold, yoloNMSThreshold);
          if (readyToSegment.poll())
-            segmentAndMatchDetections(yoloResults, depthImageCopy.get(), robotFrame);
+            segmentAndMatchDetections(yoloResults, depthImageCopy.get(), robotFrame); // non-blocking call
          if (annotatedImageDemandNode.isDemanded())
             annotateAndPublishImage(yoloResults, colorImageCopy.get());
       }
@@ -208,7 +210,7 @@ public class YOLOv8DetectionManager
 
    private void segmentAndMatchDetections(YOLOv8DetectionResults yoloResults, RawImage depthImage, ReferenceFrame robotFrame)
    {
-      ThreadTools.startAThread(() ->
+      segmentationAndMatchingExecutor.execute(() ->
       {
          yoloFrequencyCalculator.ping();
 
@@ -345,7 +347,7 @@ public class YOLOv8DetectionManager
          depthImage.release();
 
          readyToSegment.set();
-      }, "SegmentAndMatchYOLOResults");
+      });
    }
 
    public void annotateAndPublishImage(YOLOv8DetectionResults yoloResults, RawImage colorImage)
