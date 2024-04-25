@@ -31,14 +31,6 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
    public us.ihmc.euclid.transform.QuaternionBasedTransform centroid_to_object_transform_;
    public us.ihmc.euclid.geometry.Pose3D object_pose_;
    public us.ihmc.euclid.geometry.Pose3D filtered_object_pose_;
-   /**
-            * The visual transform to parent
-            */
-   public us.ihmc.euclid.transform.QuaternionBasedTransform visual_transform_to_object_pose_;
-   /**
-            * Alpha filter for transform interpolation
-            */
-   public float alpha_filter_;
 
    public YOLOv8NodeMessage()
    {
@@ -49,7 +41,6 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       centroid_to_object_transform_ = new us.ihmc.euclid.transform.QuaternionBasedTransform();
       object_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       filtered_object_pose_ = new us.ihmc.euclid.geometry.Pose3D();
-      visual_transform_to_object_pose_ = new us.ihmc.euclid.transform.QuaternionBasedTransform();
 
    }
 
@@ -78,9 +69,6 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.centroid_to_object_transform_, centroid_to_object_transform_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.object_pose_, object_pose_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.filtered_object_pose_, filtered_object_pose_);
-      geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.visual_transform_to_object_pose_, visual_transform_to_object_pose_);
-      alpha_filter_ = other.alpha_filter_;
-
    }
 
 
@@ -189,30 +177,6 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
    }
 
 
-   /**
-            * The visual transform to parent
-            */
-   public us.ihmc.euclid.transform.QuaternionBasedTransform getVisualTransformToObjectPose()
-   {
-      return visual_transform_to_object_pose_;
-   }
-
-   /**
-            * Alpha filter for transform interpolation
-            */
-   public void setAlphaFilter(float alpha_filter)
-   {
-      alpha_filter_ = alpha_filter;
-   }
-   /**
-            * Alpha filter for transform interpolation
-            */
-   public float getAlphaFilter()
-   {
-      return alpha_filter_;
-   }
-
-
    public static Supplier<YOLOv8NodeMessagePubSubType> getPubSubType()
    {
       return YOLOv8NodeMessagePubSubType::new;
@@ -252,9 +216,6 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       if (!this.centroid_to_object_transform_.epsilonEquals(other.centroid_to_object_transform_, epsilon)) return false;
       if (!this.object_pose_.epsilonEquals(other.object_pose_, epsilon)) return false;
       if (!this.filtered_object_pose_.epsilonEquals(other.filtered_object_pose_, epsilon)) return false;
-      if (!this.visual_transform_to_object_pose_.epsilonEquals(other.visual_transform_to_object_pose_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.alpha_filter_, other.alpha_filter_, epsilon)) return false;
-
 
       return true;
    }
@@ -284,9 +245,6 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       if (!this.centroid_to_object_transform_.equals(otherMyClass.centroid_to_object_transform_)) return false;
       if (!this.object_pose_.equals(otherMyClass.object_pose_)) return false;
       if (!this.filtered_object_pose_.equals(otherMyClass.filtered_object_pose_)) return false;
-      if (!this.visual_transform_to_object_pose_.equals(otherMyClass.visual_transform_to_object_pose_)) return false;
-      if(this.alpha_filter_ != otherMyClass.alpha_filter_) return false;
-
 
       return true;
    }
@@ -318,11 +276,7 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       builder.append("object_pose=");
       builder.append(this.object_pose_);      builder.append(", ");
       builder.append("filtered_object_pose=");
-      builder.append(this.filtered_object_pose_);      builder.append(", ");
-      builder.append("visual_transform_to_object_pose=");
-      builder.append(this.visual_transform_to_object_pose_);      builder.append(", ");
-      builder.append("alpha_filter=");
-      builder.append(this.alpha_filter_);
+      builder.append(this.filtered_object_pose_);
       builder.append("}");
       return builder.toString();
    }

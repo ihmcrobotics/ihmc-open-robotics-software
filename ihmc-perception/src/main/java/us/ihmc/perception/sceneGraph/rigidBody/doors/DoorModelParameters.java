@@ -1,4 +1,4 @@
-package us.ihmc.perception.sceneGraph.multiBodies.door;
+package us.ihmc.perception.sceneGraph.rigidBody.doors;
 
 import us.ihmc.perception.sceneGraph.SceneObjectDefinitions;
 

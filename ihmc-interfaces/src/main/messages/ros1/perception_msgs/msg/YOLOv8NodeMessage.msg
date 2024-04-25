@@ -25,10 +25,4 @@ geometry_msgs/Pose object_pose
 
 geometry_msgs/Pose filtered_object_pose
 
-# The visual transform to parent
-geometry_msgs/Transform visual_transform_to_object_pose
-
-# Alpha filter for transform interpolation
-float32 alpha_filter
-
 

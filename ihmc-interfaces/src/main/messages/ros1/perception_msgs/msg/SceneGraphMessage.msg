@@ -19,6 +19,8 @@ int8 PRIMITIVE_RIGID_BODY_NODE_TYPE=6
 
 int8 YOLO_NODE_TYPE=7
 
+int8 DOOR_NODE_TYPE=8
+
 # The ID to assign to the next instantiated node
 uint32 next_id
 
@@ -53,5 +55,8 @@ perception_msgs/PrimitiveRigidBodySceneNodeMessage[] primitive_rigid_body_scene_
 
 # YOLO scene nodes
 perception_msgs/YOLOv8NodeMessage[] yolo_scene_nodes
+
+# Door scene nodes
+perception_msgs/DoorNodeMessage[] door_scene_nodes
 
 

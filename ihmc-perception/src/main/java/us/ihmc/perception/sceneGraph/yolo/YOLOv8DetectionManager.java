@@ -61,7 +61,6 @@ public class YOLOv8DetectionManager
    private ReferenceFrame robotFrame = null;
 
    private boolean destroyed = false;
-   private YOLOv8Node doorYoloNode;
 
    public YOLOv8DetectionManager(ROS2Helper ros2Helper)
    {
@@ -334,7 +333,7 @@ public class YOLOv8DetectionManager
                {
                   long nodeID = sceneGraph.getNextID().getAndIncrement();
                   YOLOv8Node newYoloNode = new YOLOv8Node(nodeID,
-                                                          "YOLO " + candidateDetection.getDetection().objectClass().toString(),
+                                                          candidateDetection.getDetection().objectClass().getDefaultNodeName(),
                                                           candidateDetection.getDetection().objectClass(),
                                                           candidateDetection.getDetection().confidence(),
                                                           candidateDetection.getObjectPointCloud(),
@@ -343,10 +342,6 @@ public class YOLOv8DetectionManager
                   detectedNodes.put(candidateDetection.getDetection().objectClass(), newYoloNode);
                   detectedObjects.put(candidateDetection.getDetection().objectClass(), candidateDetection);
                   candidateDetection.getDetectionFilter().setAcceptanceThreshold(0.2f);
-                  if (newYoloNode.getName().contains("door"))
-                  {
-                     doorYoloNode = newYoloNode;
-                  }
                }
 
                candidateIterator.remove();
@@ -378,10 +373,5 @@ public class YOLOv8DetectionManager
             yoloNode.update();
          }
       }
-   }
-
-   public YOLOv8Node getDoorYoloNode()
-   {
-      return doorYoloNode;
    }
 }
