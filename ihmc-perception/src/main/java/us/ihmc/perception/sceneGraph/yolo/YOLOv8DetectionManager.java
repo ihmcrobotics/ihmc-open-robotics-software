@@ -200,11 +200,17 @@ public class YOLOv8DetectionManager
 
       if (colorImageCopy != null && depthImageCopy != null && robotFrame != null && !destroyed)
       {
-         YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImageCopy, yoloConfidenceThreshold, yoloNMSThreshold);
-         if (readyToSegment.poll())
-            segmentAndMatchDetections(yoloResults, depthImageCopy.get(), robotFrame); // non-blocking call
-         if (annotatedImageDemandNode.isDemanded())
-            annotateAndPublishImage(yoloResults, colorImageCopy.get());
+         if (readyToSegment.peek() || annotatedImageDemandNode.isDemanded())
+         {
+            YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImageCopy, yoloConfidenceThreshold, yoloNMSThreshold);
+            if (readyToSegment.poll())
+               segmentAndMatchDetections(yoloResults, depthImageCopy.get(), robotFrame); // non-blocking call
+            if (annotatedImageDemandNode.isDemanded())
+               annotateAndPublishImage(yoloResults, colorImageCopy.get());
+         }
+
+         colorImageCopy.release();
+         depthImageCopy.release();
       }
    }
 
