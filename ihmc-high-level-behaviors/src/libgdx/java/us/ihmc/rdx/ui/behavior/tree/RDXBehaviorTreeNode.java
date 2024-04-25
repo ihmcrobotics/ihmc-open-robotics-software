@@ -227,6 +227,8 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    public void renderNodeSettingsWidgets()
    {
+      logArea.renderImGuiWidgets();
+
       ImGui.text("Notes:");
       notesText.set(definition.getNotes());
       ImGui.setNextItemWidth(ImGui.getColumnWidth());
@@ -234,8 +236,6 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
       {
          definition.setNotes(notesText.get());
       }
-
-      logArea.renderImGuiWidgets();
    }
 
    public void clearSelections()

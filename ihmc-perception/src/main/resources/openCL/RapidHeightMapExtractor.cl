@@ -31,6 +31,10 @@
 #define STEPPING_CONTACT_THRESHOLD 30
 #define CONTACT_WINDOW_SIZE 31
 #define SPATIAL_ALPHA 32
+#define SEARCH_SKIP_SIZE 33
+#define VERTICAL_SEARCH_SIZE 34
+#define VERTICAL_SEARCH_RESOLUTION 35
+#define FAST_SEARCH_SIZE 36
 
 #define VERTICAL_FOV M_PI_2_F
 #define HORIZONTAL_FOV (2.0f * M_PI_F)
@@ -198,7 +202,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
 
    float currentAverageHeight = 0.0f;
    float averageHeightZ = 0.0f;
-   float3 cellCenterInZUp = (float3) (0.0f, 0.0f, 0.0f);
+   float3 cellCenterInZUp = (float3) (0.0f, 0.0f, 0.5f);
    cellCenterInZUp.xy = indices_to_coordinate((int2) (xIndex, yIndex),
                                                (float2) (0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
                                                params[LOCAL_CELL_SIZE],
@@ -212,6 +216,9 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
    float maxX = cellCenterInZUp.x + halfCellWidth;
    float minY = cellCenterInZUp.y - halfCellWidth;
    float maxY = cellCenterInZUp.y + halfCellWidth;
+
+   int count = 0;
+   int skip = (int) params[SEARCH_SKIP_SIZE];
 
    float3 cellCenterInSensor = transformPoint3D32_2(
       cellCenterInZUp,
@@ -236,24 +243,16 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
       projectedPoint = perspective_projection(cellCenterInSensorZfwd, params);
    }
 
-   int count = 0;
-   for (int pitch_count_offset = - (int) (params[SEARCH_WINDOW_HEIGHT] / 2); pitch_count_offset <  (int) (params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitch_count_offset+=3)
+   for (int pitch_count_offset = - ((int) params[SEARCH_WINDOW_HEIGHT] / 2); pitch_count_offset < ((int) params[SEARCH_WINDOW_HEIGHT] / 2 + 1); pitch_count_offset+=skip)
    {
-      for (int yaw_count_offset = - (int) (params[SEARCH_WINDOW_WIDTH] / 2); yaw_count_offset <  (int) (params[SEARCH_WINDOW_WIDTH] / 2 + 1); yaw_count_offset+=3)
+      int pitch_count = projectedPoint.y + pitch_count_offset;
+      for (int yaw_count_offset = - ((int) params[SEARCH_WINDOW_WIDTH] / 2); yaw_count_offset <  ((int) params[SEARCH_WINDOW_WIDTH] / 2) + 1; yaw_count_offset+=skip)
       {
          int yaw_count = projectedPoint.x + yaw_count_offset;
-         int pitch_count = projectedPoint.y + pitch_count_offset;
-
          if ((yaw_count >= 0) && (yaw_count < (int)params[DEPTH_INPUT_WIDTH]) && (pitch_count >= 0) && (pitch_count < (int)params[DEPTH_INPUT_HEIGHT]))
          {
             float depth = ((float)read_imageui(in, (int2) (yaw_count, pitch_count)).x) / (float) 1000;
-//            if (depth > 2.0f || depth < 0.75f)
-//            {
-//               continue;
-//            }
-
             float3 queryPointInSensor;
-            float3 queryPointInZUp;
             if (params[MODE] == 0) // Spherical
             {
                queryPointInSensor = back_project_spherical(yaw_count, pitch_count, depth, params);
@@ -263,12 +262,12 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
                queryPointInSensor = back_project_perspective((int2) (yaw_count, pitch_count), depth, params);
             }
 
-            queryPointInZUp = transformPoint3D32_2(
-            queryPointInSensor,
-            (float3)(sensorToZUpFrameTf[0], sensorToZUpFrameTf[1], sensorToZUpFrameTf[2]),
-            (float3)(sensorToZUpFrameTf[4], sensorToZUpFrameTf[5], sensorToZUpFrameTf[6]),
-            (float3)(sensorToZUpFrameTf[8], sensorToZUpFrameTf[9], sensorToZUpFrameTf[10]),
-            (float3)(sensorToZUpFrameTf[3], sensorToZUpFrameTf[7], sensorToZUpFrameTf[11]));
+            float3 queryPointInZUp = transformPoint3D32_2(
+               queryPointInSensor,
+               (float3)(sensorToZUpFrameTf[0], sensorToZUpFrameTf[1], sensorToZUpFrameTf[2]),
+               (float3)(sensorToZUpFrameTf[4], sensorToZUpFrameTf[5], sensorToZUpFrameTf[6]),
+               (float3)(sensorToZUpFrameTf[8], sensorToZUpFrameTf[9], sensorToZUpFrameTf[10]),
+               (float3)(sensorToZUpFrameTf[3], sensorToZUpFrameTf[7], sensorToZUpFrameTf[11]));
 
             if (queryPointInZUp.x > minX && queryPointInZUp.x < maxX && queryPointInZUp.y > minY && queryPointInZUp.y < maxY)
             {
@@ -276,7 +275,7 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
                if (count > 1)
                {
                   currentAverageHeight = averageHeightZ / (float)(count);
-                  if (fabs(queryPointInZUp.z - currentAverageHeight) > 0.05)
+                  if (fabs(queryPointInZUp.z - currentAverageHeight) > 0.1)
                   {
                      continue;
                   }
@@ -287,8 +286,6 @@ void kernel heightMapUpdateKernel(read_write image2d_t in,
          }
       }
    }
-
-   int cellsPerAxis = (int)params[LOCAL_CELLS_PER_AXIS];
 
    if (count > 0)
    {
@@ -385,7 +382,7 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    write_imageui(globalMap, (int2)(yIndex, xIndex), (uint4)((int)(finalHeight * params[HEIGHT_SCALING_FACTOR]), 0, 0, 0));
 }
 
-void kernel croppingKernel(read_write image2d_t heightMap,
+void kernel croppingKernelZUp(read_write image2d_t heightMap,
                               read_write image2d_t croppedMap,
                               global float *params,
                               global float *zUpToWorldFrameTf)
@@ -421,6 +418,36 @@ void kernel croppingKernel(read_write image2d_t heightMap,
    if (globalCellIndex.x >= 0 && globalCellIndex.x < globalMapSize.x && globalCellIndex.y >= 0 && globalCellIndex.y < globalMapSize.y)
    {
       uint height = read_imageui(heightMap, (int2)(globalCellIndex.y, globalCellIndex.x)).x;
+      write_imageui(croppedMap, (int2)(yIndex, xIndex), (uint4)(height, 0, 0, 0));
+   }
+   else
+   {
+      write_imageui(croppedMap, (int2)(yIndex, xIndex), (uint4)(0, 0, 0, 0));
+   }
+}
+
+void kernel croppingKernel(read_write image2d_t inputMap,
+                           read_write image2d_t croppedMap,
+                           global float *params)
+{
+   int xIndex = get_global_id(0);
+   int yIndex = get_global_id(1);
+
+   int2 globalMapSize = (int2) (params[GLOBAL_CELLS_PER_AXIS], params[GLOBAL_CELLS_PER_AXIS]);
+
+   int2 globalSensorIndex = coordinate_to_indices(
+      (float2)(params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]),
+      (float2)(0, 0), // params[HEIGHT_MAP_CENTER_X], params[HEIGHT_MAP_CENTER_Y]
+      params[GLOBAL_CELL_SIZE],
+      params[GLOBAL_CENTER_INDEX]);
+
+   int2 globalCellIndex = (int2) (globalSensorIndex.x + xIndex - params[CROPPED_WINDOW_CENTER_INDEX],
+                                    globalSensorIndex.y + yIndex - params[CROPPED_WINDOW_CENTER_INDEX]);
+
+   // check if global cell index is within bounds
+   if (globalCellIndex.x >= 0 && globalCellIndex.x < globalMapSize.x && globalCellIndex.y >= 0 && globalCellIndex.y < globalMapSize.y)
+   {
+      uint height = read_imageui(inputMap, (int2)(globalCellIndex.y, globalCellIndex.x)).x;
       write_imageui(croppedMap, (int2)(yIndex, xIndex), (uint4)(height, 0, 0, 0));
    }
    else
@@ -511,9 +538,13 @@ void kernel contactMapKernel(read_write image2d_t terrainCost,
                // Euclidean distance
                uint distance = sqrt((float)(i * i + j * j));
 
-               if (distance < closestDistance)
+               if (distance < closestDistance && distance > 3.0f)
                {
                   closestDistance = distance;
+               }
+               else if (distance < 3.0f)
+               {
+                  closestDistance = 0;
                }
             }
 //            score += read_imageui(terrainCost, (int2) (xIndex + i, yIndex + j)).x;

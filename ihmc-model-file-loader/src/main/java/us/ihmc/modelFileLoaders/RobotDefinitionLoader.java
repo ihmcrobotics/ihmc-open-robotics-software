@@ -1,15 +1,6 @@
 package us.ihmc.modelFileLoaders;
 
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-
-import javax.xml.bind.JAXBException;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
@@ -36,11 +27,18 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
 
+import javax.xml.bind.JAXBException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+
 public class RobotDefinitionLoader
 {
    public static final String DEFAULT_ROOT_BODY_NAME = "elevator";
 
-   public static RobotDefinition loadURDFModel(InputStream stream,
+   public static RobotDefinition loadURDFModel(InputStream inputStream,
                                                Collection<String> resourceDirectories,
                                                ClassLoader classLoader,
                                                String modelName,
@@ -48,7 +46,7 @@ public class RobotDefinitionLoader
                                                JointNameMap<?> jointNameMap,
                                                boolean removeCollisionMeshes)
    {
-      return loadURDFModel(stream,
+      return loadURDFModel(inputStream,
                            resourceDirectories,
                            classLoader,
                            modelName,
@@ -58,7 +56,7 @@ public class RobotDefinitionLoader
                            URDFTools.DEFAULT_URDF_PARSER_PROPERTIES);
    }
 
-   public static RobotDefinition loadURDFModel(InputStream stream,
+   public static RobotDefinition loadURDFModel(InputStream inputStream,
                                                Collection<String> resourceDirectories,
                                                ClassLoader classLoader,
                                                String modelName,
@@ -69,7 +67,7 @@ public class RobotDefinitionLoader
    {
       try
       {
-         URDFModel urdfRoot = URDFTools.loadURDFModel(stream, resourceDirectories, classLoader);
+         URDFModel urdfRoot = URDFTools.loadURDFModel(inputStream, resourceDirectories, classLoader, urdfParserProperties);
          RobotDefinition robotDefinition = URDFTools.toRobotDefinition(urdfRoot, urdfParserProperties);
          // By default SDFTools names the root body "rootBody", for backward compatibility it is renamed "elevator".
          robotDefinition.getRootBodyDefinition().setName(DEFAULT_ROOT_BODY_NAME);
@@ -248,7 +246,7 @@ public class RobotDefinitionLoader
    private static boolean isJointInNeedOfReducedGains(String jointName)
    {
       return jointName.contains("f0") || jointName.contains("f1") || jointName.contains("f2") || jointName.contains("f3") || jointName.contains("palm")
-            || jointName.contains("finger");
+             || jointName.contains("finger");
    }
 
    public static void addGroundContactPoints(RobotDefinition robotDefinition, ContactPointDefinitionHolder contactPointHolder)

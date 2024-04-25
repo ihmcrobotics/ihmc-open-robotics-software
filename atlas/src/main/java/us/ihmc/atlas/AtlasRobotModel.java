@@ -602,6 +602,7 @@ public class AtlasRobotModel implements DRCRobotModel
       return new DefaultLogModelProvider<>(SDFModelLoader.class,
                                            jointMap.getModelName(),
                                            selectedVersion.getSdfFileAsStream(),
+                                           null,
                                            selectedVersion.getResourceDirectories());
    }
 

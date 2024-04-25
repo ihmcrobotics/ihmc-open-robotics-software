@@ -6,7 +6,7 @@ public interface RobotVersion
 {
    default boolean hasArm(RobotSide robotSide)
    {
-      return true;
+      return false;
    }
 
    default boolean hasBothArms()

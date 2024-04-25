@@ -3,14 +3,14 @@ package us.ihmc.behaviors.simulation.door;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
-import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.Box3DDefinition;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 
-import static us.ihmc.perception.sceneGraph.multiBodies.door.DoorModelParameters.*;
+import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters.*;
 
 /**
  * This is a door panel with optional ArUco markers.

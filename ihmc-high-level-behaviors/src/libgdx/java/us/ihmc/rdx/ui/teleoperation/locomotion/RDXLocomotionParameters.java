@@ -39,6 +39,11 @@ public class RDXLocomotionParameters extends StoredPropertySet
       return get(assumeFlatGround);
    }
 
+   public void setAssumeFlatGround(boolean assumeFlatGroundFlag)
+   {
+      set(assumeFlatGround, assumeFlatGroundFlag);
+   }
+
    public boolean getAreFootstepsAdjustable()
    {
       return get(areFootstepsAdjustable);
