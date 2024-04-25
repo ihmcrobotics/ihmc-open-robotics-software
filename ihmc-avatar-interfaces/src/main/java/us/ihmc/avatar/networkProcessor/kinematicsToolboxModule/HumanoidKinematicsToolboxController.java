@@ -379,6 +379,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          rootJointTransform.preMultiply(rotationRelocation);
          rootJoint.getJointPose().set(rootJointTransform);
       }
+      else
+      {
+         initializePrivilegedConfiguration();
+      }
 
       // Initialize the initialCenterOfMassPosition and initialFootPoses to match the current state of the robot.
       updateCoMPositionAndFootPoses();
