@@ -52,6 +52,8 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
       outlierFilterThreshold = new ImDouble(yoloNode.getOutlierFilterThreshold());
       detectionAcceptanceThreshold = new ImFloat(yoloNode.getDetectionAcceptanceThreshold());
 
+      confidencePlot.setYScale(0.0f, 1.0f);
+
       objectPointCloudRenderer.create(5000);
    }
 
