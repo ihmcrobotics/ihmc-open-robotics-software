@@ -4,6 +4,8 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import imgui.type.ImDouble;
 import imgui.type.ImFloat;
 import imgui.type.ImInt;
@@ -13,6 +15,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -35,6 +38,7 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
    private final ImInt maskErosionKernelRadius;
    private final ImDouble outlierFilterThreshold;
    private final ImFloat detectionAcceptanceThreshold;
+   private final ImGuiPlot confidencePlot = new ImGuiPlot("Confidence", 1000, 230, 22);
 
    private final RDXPointCloudRenderer objectPointCloudRenderer = new RDXPointCloudRenderer();
 
@@ -47,6 +51,8 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
       maskErosionKernelRadius = new ImInt(yoloNode.getMaskErosionKernelRadius());
       outlierFilterThreshold = new ImDouble(yoloNode.getOutlierFilterThreshold());
       detectionAcceptanceThreshold = new ImFloat(yoloNode.getDetectionAcceptanceThreshold());
+
+      confidencePlot.setYScale(0.0f, 1.0f);
 
       objectPointCloudRenderer.create(5000);
    }
@@ -65,6 +71,11 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
    public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
+
+      confidencePlot.setWidth((int) (0.65 * ImGui.getWindowWidth()));
+      ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.greenRedGradientColor((float) yoloNode.getConfidence(), 1.0f, 0.0f));
+      confidencePlot.render(yoloNode.getConfidence());
+      ImGui.popStyleColor();
 
       if (ImGuiTools.volatileInputInt(labels.get("Mask Erosion Kernel Radius"), maskErosionKernelRadius))
          maskErosionKernelRadius.set(MathTools.clamp(maskErosionKernelRadius.get(), 0, 10));
