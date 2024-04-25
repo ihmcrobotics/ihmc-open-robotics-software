@@ -1,6 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.input;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Box3D;
@@ -12,6 +11,7 @@ import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class KSTInputFilter
@@ -27,6 +27,8 @@ public class KSTInputFilter
    private final YoFrameQuaternion bbxOrientation = new YoFrameQuaternion(namePrefix + "BBXOrientation", worldFrame, registry);
    private final MidFootZUpGroundFrame midFeetZUpFrame;
 
+   private final YoBoolean enableBBXFilter = new YoBoolean(namePrefix + "EnableBBXFilter", registry);
+
    private final YoDouble maxLinearDelta = new YoDouble(namePrefix + "MaxLinearDelta", registry);
    private final YoDouble maxAngularDelta = new YoDouble(namePrefix + "MaxAngularDelta", registry);
    private final YoDouble maxLinearVelocity = new YoDouble(namePrefix + "MaxLinearVelocity", registry);
@@ -35,6 +37,7 @@ public class KSTInputFilter
    public KSTInputFilter(FullHumanoidRobotModel fullRobotModel, KinematicsStreamingToolboxParameters parameters, YoRegistry parentRegistry)
    {
       midFeetZUpFrame = new MidFootZUpGroundFrame("midFeetZUpFrame", fullRobotModel.getSoleFrame(RobotSide.LEFT), fullRobotModel.getSoleFrame(RobotSide.RIGHT));
+      enableBBXFilter.set(parameters.isUseBBXInputFilter());
       if (parameters.getInputFilterBBXSize() != null)
          bbxSize.set(parameters.getInputFilterBBXSize());
       bbxOffset = new YoFramePoint3D(namePrefix + "BBXCenter", midFeetZUpFrame, registry);
@@ -62,7 +65,7 @@ public class KSTInputFilter
 
    public boolean isInputValid(KinematicsToolboxRigidBodyCommand input, KinematicsToolboxRigidBodyCommand previousInput)
    {
-      if (!boundingBox.isPointInside(input.getDesiredPose().getPosition()))
+      if (enableBBXFilter.getValue() && !boundingBox.isPointInside(input.getDesiredPose().getPosition()))
          return false;
 
       if (previousInput != null)
