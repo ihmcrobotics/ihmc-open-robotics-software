@@ -1,29 +1,40 @@
 package us.ihmc.perception.sceneGraph.yolo;
 
-import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import org.bytedeco.opencv.opencv_core.Size;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.YOLOv8.YOLOv8Detection;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionResults;
 import us.ihmc.perception.YOLOv8.YOLOv8ObjectDetector;
+import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.filters.DetectionFilter;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
+import us.ihmc.perception.tools.ImageMessageDataPacker;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.tools.time.FrequencyCalculator;
@@ -40,9 +51,18 @@ import java.util.concurrent.locks.ReentrantLock;
 
 public class YOLOv8DetectionManager
 {
+   private static final int FONT = opencv_imgproc.FONT_HERSHEY_DUPLEX;
+   private static final double FONT_SCALE = 1.5;
+   private static final int FONT_THICKNESS = 2;
+   private static final int LINE_TYPE = opencv_imgproc.LINE_4;
+   private static final Scalar BOUNDING_BOX_COLOR = new Scalar(0.0, 196.0, 0.0, 255.0);
+
    private final OpenCLManager openCLManager = new OpenCLManager();
    private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor(openCLManager);
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter(openCLManager);
+
+   private final ROS2DemandGraphNode annotatedImageDemandNode;
+   private final ROS2PublisherBasics<ImageMessage> annotatedImagePublisher;
 
    private final YOLOv8ObjectDetector yoloDetector = new YOLOv8ObjectDetector();
    private RawImage colorImage = null;
@@ -71,8 +91,13 @@ public class YOLOv8DetectionManager
 
    private boolean destroyed = false;
 
-   public YOLOv8DetectionManager(ROS2Helper ros2Helper)
+   public YOLOv8DetectionManager(ROS2Helper ros2Helper, ROS2DemandGraphNode annotatedImageDemandNode)
    {
+      this.annotatedImageDemandNode = annotatedImageDemandNode;
+
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "yolo_detection_manager");
+      annotatedImagePublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_ANNOTATED_IMAGE);
+
       yoloDetectionThread = new RestartableThrottledThread("YOLODetector", 30.0, this::runYOLODetection);
       yoloDetectionThread.start();
 
@@ -175,12 +200,9 @@ public class YOLOv8DetectionManager
       {
          YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImageCopy, yoloConfidenceThreshold, yoloNMSThreshold);
          if (readyToSegment.poll())
-            segmentAndMatchDetections(yoloResults, depthImageCopy, robotFrame);
-         if (true)
-
-
-         colorImageCopy.release();
-         depthImageCopy.release();
+            segmentAndMatchDetections(yoloResults, depthImageCopy.get(), robotFrame);
+         if (annotatedImageDemandNode.isDemanded())
+            annotateAndPublishImage(yoloResults, colorImageCopy.get());
       }
    }
 
@@ -188,8 +210,6 @@ public class YOLOv8DetectionManager
    {
       ThreadTools.startAThread(() ->
       {
-         depthImage.get();
-
          yoloFrequencyCalculator.ping();
 
          // Extract stuff from the results
@@ -322,26 +342,65 @@ public class YOLOv8DetectionManager
          for (RawImage mask : objectMasks.values())
             mask.release();
          yoloResults.destroy();
-      }, "SegmentAndMatchYOLOResults");
+         depthImage.release();
 
-      readyToSegment.set();
+         readyToSegment.set();
+      }, "SegmentAndMatchYOLOResults");
    }
 
-   public void publishDetectionImage(RawImage colorImage, YOLOv8DetectionResults yoloResults)
+   public void annotateAndPublishImage(YOLOv8DetectionResults yoloResults, RawImage colorImage)
    {
-      Mat resultMat = new Mat(colorImage.getCpuImageMat());
+      Mat resultMat = colorImage.getCpuImageMat().clone();
 
       Set<YOLOv8Detection> detections = yoloResults.getDetections();
-      detections.forEach(detection ->
-                         {
-                            int topLeftX = detection.x() - (detection.width() / 2);
-                            int topLeftY = detection.y() - (detection.height() / 2);
+      detections.stream().filter(detection -> detection.confidence() >= yoloConfidenceThreshold).forEach(detection ->
+      {
+         String text = String.format("%s: %.2f", detection.objectClass().toString(), detection.confidence());
 
-                            Rect boundingBox = new Rect(topLeftX, topLeftY, detection.width(), detection.height());
-                            opencv_imgproc.rectangle(resultMat, boundingBox, new Scalar(0.0, 255.0, 0.0, 255.0));
-                         });
+         // Draw the bounding box
+         Rect boundingBox = new Rect(detection.x(), detection.y(), detection.width(), detection.height());
+         opencv_imgproc.rectangle(resultMat, boundingBox, BOUNDING_BOX_COLOR, 5, LINE_TYPE, 0);
 
+         // Draw text background
+         Size textSize = opencv_imgproc.getTextSize(text, FONT, FONT_SCALE, FONT_THICKNESS, new IntPointer());
+         Rect textBox = new Rect(detection.x(), detection.y() - textSize.height(), textSize.width(), textSize.height());
+         opencv_imgproc.rectangle(resultMat, textBox, BOUNDING_BOX_COLOR, opencv_imgproc.FILLED, LINE_TYPE, 0);
 
+         opencv_imgproc.putText(resultMat,
+                                text,
+                                new Point(detection.x(), detection.y()),
+                                opencv_imgproc.CV_FONT_HERSHEY_DUPLEX,
+                                FONT_SCALE,
+                                new Scalar(255.0, 255.0, 255.0, 255.0),
+                                FONT_THICKNESS,
+                                LINE_TYPE,
+                                false);
+      });
+
+      BytePointer annotatedImagePointer = new BytePointer();
+      opencv_imgcodecs.imencode(".jpg", resultMat, annotatedImagePointer); // for some reason using CUDAImageEncoder broke YOLO's CUDNN
+
+      ImageMessage imageMessage = new ImageMessage();
+      ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(annotatedImagePointer.limit());
+      imageMessageDataPacker.pack(imageMessage, annotatedImagePointer);
+      MessageTools.toMessage(colorImage.getAcquisitionTime(), imageMessage.getAcquisitionTime());
+      imageMessage.setFocalLengthXPixels(colorImage.getFocalLengthX());
+      imageMessage.setFocalLengthYPixels(colorImage.getFocalLengthY());
+      imageMessage.setPrincipalPointXPixels(colorImage.getPrincipalPointX());
+      imageMessage.setPrincipalPointYPixels(colorImage.getPrincipalPointY());
+      imageMessage.setImageWidth(colorImage.getImageWidth());
+      imageMessage.setImageHeight(colorImage.getImageHeight());
+      imageMessage.getPosition().set(colorImage.getPosition());
+      imageMessage.getOrientation().set(colorImage.getOrientation());
+      imageMessage.setSequenceNumber(colorImage.getSequenceNumber());
+      imageMessage.setDepthDiscretization(colorImage.getDepthDiscretization());
+      CameraModel.PINHOLE.packMessageFormat(imageMessage);
+      ImageMessageFormat.COLOR_JPEG_BGR8.packMessageFormat(imageMessage);
+
+      annotatedImagePublisher.publish(imageMessage);
+
+      resultMat.close();
+      colorImage.release();
    }
 
    public void updateSceneGraph(ROS2SceneGraph sceneGraph)

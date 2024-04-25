@@ -150,6 +150,7 @@ public class PerceptionAndAutonomyProcess
    private ROS2DemandGraphNode centerposeDemandNode;
 
    private final YOLOv8DetectionManager yolov8DetectionManager;
+   private ROS2DemandGraphNode yoloAnnotatedImageDemandNode;
    private ROS2DemandGraphNode yoloZEDDemandNode;
    private ROS2DemandGraphNode yoloRealsenseDemandNode;
 
@@ -227,7 +228,7 @@ public class PerceptionAndAutonomyProcess
 
       centerposeDetectionManager = new CenterposeDetectionManager(ros2Helper);
 
-      yolov8DetectionManager = new YOLOv8DetectionManager(ros2Helper);
+      yolov8DetectionManager = new YOLOv8DetectionManager(ros2Helper, yoloAnnotatedImageDemandNode);
 
       icpManager = new IterativeClosestPointManager(ros2Helper, sceneGraph);
       icpManager.startWorkers();
@@ -323,6 +324,7 @@ public class PerceptionAndAutonomyProcess
       blackflyImageDemandNodes.forEach(ROS2DemandGraphNode::destroy);
       arUcoDetectionDemandNode.destroy();
       centerposeDemandNode.destroy();
+      yoloAnnotatedImageDemandNode.destroy();
       yoloZEDDemandNode.destroy();
       yoloRealsenseDemandNode.destroy();
       planarRegionsDemandNode.destroy();
@@ -572,6 +574,7 @@ public class PerceptionAndAutonomyProcess
          blackflyImageDemandNodes.put(side, new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(side)));
       arUcoDetectionDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ARUCO);
       centerposeDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_CENTERPOSE);
+      yoloAnnotatedImageDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_YOLO_ANNOTATED_IMAGE);
       yoloZEDDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_YOLO_ZED);
       yoloRealsenseDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_YOLO_REALSENSE);
       planarRegionsDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_PLANAR_REGIONS);
