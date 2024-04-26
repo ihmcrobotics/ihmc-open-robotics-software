@@ -1,7 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinematicsStreamingToolboxModule;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import javafx.application.Platform;
@@ -29,7 +28,9 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
@@ -160,29 +161,32 @@ public abstract class KinematicsStreamingToolboxControllerTest
       toolboxOutputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
 
       RealtimeROS2Node toolboxROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
-      new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxROS2Node);
+      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(toolboxInputTopic,
+                                                                                                commandInputManager,
+                                                                                                toolboxOutputTopic,
+                                                                                                statusOutputManager,
+                                                                                                toolboxROS2Node);
 
-      ROS2PublisherBasics<WholeBodyTrajectoryMessage> trajectoryOutputPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(
-            WholeBodyTrajectoryMessage.class));
+      ROS2PublisherBasics<WholeBodyTrajectoryMessage> trajectoryOutputPublisher = ros2Node.createPublisher(ControllerAPI.getTopic(controllerInputTopic,
+                                                                                                                                  WholeBodyTrajectoryMessage.class));
       toolboxController.setTrajectoryMessagePublisher(trajectoryOutputPublisher::publish);
-      ROS2PublisherBasics<WholeBodyStreamingMessage> streamingOutputPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(
-            WholeBodyStreamingMessage.class));
+      ROS2PublisherBasics<WholeBodyStreamingMessage> streamingOutputPublisher = ros2Node.createPublisher(ControllerAPI.getTopic(controllerInputTopic,
+                                                                                                                                WholeBodyStreamingMessage.class));
       toolboxController.setStreamingMessagePublisher(streamingOutputPublisher::publish);
-      ROS2PublisherBasics<WholeBodyTrajectoryMessage> outputPublisher = ros2Node.createPublisher(controllerInputTopic.withTypeName(WholeBodyTrajectoryMessage.class));
-      toolboxController.setTrajectoryMessagePublisher(outputPublisher::publish);
 
       RobotConfigurationDataBasedUpdater robotStateUpdater = new RobotConfigurationDataBasedUpdater();
       toolboxController.setRobotStateUpdater(robotStateUpdater);
-      ros2Node.createSubscription(controllerOutputTopic.withTypeName(RobotConfigurationData.class),
-                                  s -> robotStateUpdater.setRobotConfigurationData(s.takeNextData()));
-      ros2Node.createSubscription(controllerOutputTopic.withTypeName(CapturabilityBasedStatus.class),
-                                  s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
+      toolboxROS2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
+                                         s -> robotStateUpdater.setRobotConfigurationData(s.takeNextData()));
 
-      inputPublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(KinematicsStreamingToolboxInputMessage.class));
+      toolboxROS2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic, CapturabilityBasedStatus.class),
+                                         s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
+
+      inputPublisher = ros2Node.createPublisher(ControllerAPI.getTopic(toolboxInputTopic, KinematicsStreamingToolboxInputMessage.class));
       statePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ToolboxStateMessage.class));
 
       AtomicReference<KinematicsToolboxOutputStatus> toolboxViz = new AtomicReference<>(null);
-      ros2Node.createSubscription(toolboxOutputTopic.withTypeName(KinematicsToolboxOutputStatus.class), s -> toolboxViz.set(s.takeNextData()));
+      ros2Node.createSubscription(ControllerAPI.getTopic(toolboxOutputTopic, KinematicsToolboxOutputStatus.class), s -> toolboxViz.set(s.takeNextData()));
 
       Controller toolboxUpdater = new Controller()
       {

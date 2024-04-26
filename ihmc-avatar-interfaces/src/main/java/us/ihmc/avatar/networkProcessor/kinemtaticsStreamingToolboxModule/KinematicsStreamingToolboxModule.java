@@ -7,11 +7,10 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
-import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.communication.ToolboxAPIs;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
@@ -22,6 +21,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
@@ -198,21 +198,21 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
    public static ROS2Topic<KinematicsStreamingToolboxConfigurationMessage> getInputStreamingConfigurationTopic(String robotName)
    {
-      return getInputTopic(robotName).withTypeName(KinematicsStreamingToolboxConfigurationMessage.class);
+      return ControllerAPI.getTopic(getInputTopic(robotName), KinematicsStreamingToolboxConfigurationMessage.class);
    }
 
    public static ROS2Topic<KinematicsToolboxConfigurationMessage> getInputToolboxConfigurationTopic(String robotName)
    {
-      return getInputTopic(robotName).withTypeName(KinematicsToolboxConfigurationMessage.class);
+      return ControllerAPI.getTopic(getInputTopic(robotName), KinematicsToolboxConfigurationMessage.class);
    }
 
    public static ROS2Topic<KinematicsToolboxOutputStatus> getOutputStatusTopic(String robotName)
    {
-      return getOutputTopic(robotName).withTypeName(KinematicsToolboxOutputStatus.class);
+      return ControllerAPI.getTopic(getOutputTopic(robotName), KinematicsToolboxOutputStatus.class);
    }
 
    public static ROS2Topic<ControllerCrashNotificationPacket> getOutputCrashNotificationTopic(String robotName)
    {
-      return getOutputTopic(robotName).withTypeName(ControllerCrashNotificationPacket.class);
+      return ControllerAPI.getTopic(getOutputTopic(robotName), ControllerCrashNotificationPacket.class);
    }
 }
