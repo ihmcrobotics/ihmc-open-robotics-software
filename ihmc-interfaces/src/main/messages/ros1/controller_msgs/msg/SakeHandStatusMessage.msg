@@ -35,8 +35,8 @@ float64 raw_torque_limit_status
 bool torque_on_status
 
 # Rotation velocity of the Dynamixel, in rad/s
-# Positive = closing hand (CCW rotation)
-# Negative = opening hand (CW rotation)
+# Positive = opening hand (CCW rotation)
+# Negative = closing hand (CW rotation)
 float64 current_velocity
 
 # Dynamixel's error codes

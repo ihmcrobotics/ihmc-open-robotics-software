@@ -51,8 +51,8 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
    public boolean torque_on_status_;
    /**
             * Rotation velocity of the Dynamixel, in rad/s
-            * Positive = closing hand (CCW rotation)
-            * Negative = opening hand (CW rotation)
+            * Positive = opening hand (CCW rotation)
+            * Negative = closing hand (CW rotation)
             */
    public double current_velocity_;
    /**
@@ -247,8 +247,8 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
 
    /**
             * Rotation velocity of the Dynamixel, in rad/s
-            * Positive = closing hand (CCW rotation)
-            * Negative = opening hand (CW rotation)
+            * Positive = opening hand (CCW rotation)
+            * Negative = closing hand (CW rotation)
             */
    public void setCurrentVelocity(double current_velocity)
    {
@@ -256,8 +256,8 @@ public class SakeHandStatusMessage extends Packet<SakeHandStatusMessage> impleme
    }
    /**
             * Rotation velocity of the Dynamixel, in rad/s
-            * Positive = closing hand (CCW rotation)
-            * Negative = opening hand (CW rotation)
+            * Positive = opening hand (CCW rotation)
+            * Negative = closing hand (CW rotation)
             */
    public double getCurrentVelocity()
    {

@@ -107,12 +107,12 @@ public class SakeHandParameters
 
    public static double handOpenAngleToPosition(double handOpenAngle, double positionLowerLimit, double positionUpperLimit)
    {
-      return (1.0 - normalizeHandOpenAngle(handOpenAngle)) * (positionUpperLimit - positionLowerLimit) + positionLowerLimit;
+      return normalizeHandOpenAngle(handOpenAngle) * (positionUpperLimit - positionLowerLimit) + positionLowerLimit;
    }
 
    public static double handPositionToOpenAngle(double handPosition, double positionLowerLimit, double positionUpperLimit)
    {
-      return (1.0 - normalizeHandPosition(handPosition, positionLowerLimit, positionUpperLimit)) * Math.toRadians(MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES);
+      return normalizeHandPosition(handPosition, positionLowerLimit, positionUpperLimit) * Math.toRadians(MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES);
    }
 
    public static double handPositionToKnuckleJointAngle(double handPosition, double positionLowerLimit, double positionUpperLimit)

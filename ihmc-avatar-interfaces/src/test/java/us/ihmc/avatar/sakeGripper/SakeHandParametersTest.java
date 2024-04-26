@@ -55,11 +55,11 @@ public class SakeHandParametersTest
    @Test
    public void testNormalizeHandPosition()
    {
-      double normalizedOpenPosition = normalizeHandPosition(POSITION_LOWER_LIMIT, POSITION_LOWER_LIMIT, POSITION_UPPER_LIMIT);
-      assertEquals(0.0, normalizedOpenPosition, EPSILON);
+      double normalizedOpenPosition = normalizeHandPosition(POSITION_UPPER_LIMIT, POSITION_LOWER_LIMIT, POSITION_UPPER_LIMIT);
+      assertEquals(1.0, normalizedOpenPosition, EPSILON);
 
-      double normalizedClosedPosition = normalizeHandPosition(POSITION_UPPER_LIMIT, POSITION_LOWER_LIMIT, POSITION_UPPER_LIMIT);
-      assertEquals(1.0, normalizedClosedPosition, EPSILON);
+      double normalizedClosedPosition = normalizeHandPosition(POSITION_LOWER_LIMIT, POSITION_LOWER_LIMIT, POSITION_UPPER_LIMIT);
+      assertEquals(0.0, normalizedClosedPosition, EPSILON);
 
       double normalizedInBetweenPosition = normalizeHandPosition(3.597185, POSITION_LOWER_LIMIT, POSITION_UPPER_LIMIT);
       assertEquals(0.3, normalizedInBetweenPosition, EPSILON);
@@ -69,26 +69,26 @@ public class SakeHandParametersTest
    public void testHandOpenAngleToPosition()
    {
       double openPosition = handOpenAngleToPosition(Math.toRadians(MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES), POSITION_LOWER_LIMIT, POSITION_UPPER_LIMIT);
-      assertEquals(POSITION_LOWER_LIMIT, openPosition, EPSILON);
+      assertEquals(POSITION_UPPER_LIMIT, openPosition, EPSILON);
 
       double closedPosition = handOpenAngleToPosition(0.0, POSITION_LOWER_LIMIT, POSITION_UPPER_LIMIT);
-      assertEquals(POSITION_UPPER_LIMIT, closedPosition, EPSILON);
+      assertEquals(POSITION_LOWER_LIMIT, closedPosition, EPSILON);
 
       double inBetweenPosition = handOpenAngleToPosition(Math.toRadians(63.0), POSITION_LOWER_LIMIT, POSITION_UPPER_LIMIT);
-      double trueValue = 0.7 * (POSITION_UPPER_LIMIT - POSITION_LOWER_LIMIT) + POSITION_LOWER_LIMIT;
+      double trueValue = 0.3 * (POSITION_UPPER_LIMIT - POSITION_LOWER_LIMIT) + POSITION_LOWER_LIMIT;
       assertEquals(trueValue, inBetweenPosition, EPSILON);
    }
 
    @Test
    public void testHandPositionToOpenAngle()
    {
-      double openAngle = handPositionToOpenAngle(POSITION_LOWER_LIMIT, POSITION_LOWER_LIMIT, POSITION_UPPER_LIMIT);
+      double openAngle = handPositionToOpenAngle(POSITION_UPPER_LIMIT, POSITION_LOWER_LIMIT, POSITION_UPPER_LIMIT);
       assertEquals(Math.toRadians(MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES), openAngle, EPSILON);
 
-      double closedAngle = handPositionToOpenAngle(POSITION_UPPER_LIMIT, POSITION_LOWER_LIMIT, POSITION_UPPER_LIMIT);
+      double closedAngle = handPositionToOpenAngle(POSITION_LOWER_LIMIT, POSITION_LOWER_LIMIT, POSITION_UPPER_LIMIT);
       assertEquals(0.0, closedAngle, EPSILON);
 
-      double position = 0.7 * (POSITION_UPPER_LIMIT - POSITION_LOWER_LIMIT) + POSITION_LOWER_LIMIT;
+      double position = 0.3 * (POSITION_UPPER_LIMIT - POSITION_LOWER_LIMIT) + POSITION_LOWER_LIMIT;
       double inBetweenAngle = handPositionToOpenAngle(position, POSITION_LOWER_LIMIT, POSITION_UPPER_LIMIT);
       assertEquals(Math.toRadians(63.0), inBetweenAngle, EPSILON);
    }
