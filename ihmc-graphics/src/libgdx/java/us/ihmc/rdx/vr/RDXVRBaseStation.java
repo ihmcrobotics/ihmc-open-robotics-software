@@ -14,7 +14,7 @@ public class RDXVRBaseStation extends RDXVRTrackedDevice
       setConnected(true);
    }
 
-   public void update(TrackedDevicePose.Buffer trackedDevicePoses)
+   public void update(TrackedDevicePoseParsed[] trackedDevicePoses)
    {
       setConnected(VRSystem.VRSystem_IsTrackedDeviceConnected(VR.k_unTrackedDeviceIndex_Hmd));
 

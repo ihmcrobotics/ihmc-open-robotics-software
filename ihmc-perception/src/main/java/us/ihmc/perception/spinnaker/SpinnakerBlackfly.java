@@ -10,6 +10,8 @@ import org.bytedeco.spinnaker.Spinnaker_C.spinNodeHandle;
 import org.bytedeco.spinnaker.Spinnaker_C.spinNodeMapHandle;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
 
+import java.util.List;
+
 import static us.ihmc.perception.spinnaker.SpinnakerBlackflyTools.printOnError;
 
 /**
@@ -127,6 +129,7 @@ public class SpinnakerBlackfly
       Spinnaker_C.spinIntegerSetValue(heightNode, height);
    }
 
+
    public void setOffset(int xOffset, int yOffset)
    {
       spinNodeHandle xOffsetNode = new spinNodeHandle();
@@ -136,6 +139,18 @@ public class SpinnakerBlackfly
       spinNodeHandle yOffsetNode = new spinNodeHandle();
       printOnError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetY"), yOffsetNode), "Getting OffsetY node map node");
       Spinnaker_C.spinIntegerSetValue(yOffsetNode, yOffset);
+
+//      spinNodeHandle yOffsetGet = new spinNodeHandle();
+//      Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetY"), yOffsetGet);
+//      LongPointer yOffsetPointer = new LongPointer();
+//      Spinnaker_C.spinIntegerGetValue(yOffsetGet, yOffsetPointer);
+//      System.out.println("yOffsetPointer " + yOffsetPointer.get());
+//
+//      spinNodeHandle xOffsetGet = new spinNodeHandle();
+//      Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetX"), yOffsetGet);
+//      LongPointer xOffsetPointer = new LongPointer();
+//      Spinnaker_C.spinIntegerGetValue(xOffsetGet, xOffsetPointer);
+//      System.out.println("xOffsetPointer " + xOffsetPointer.get());
    }
 
    // http://softwareservices.flir.com/Spinnaker/latest/_programmer_guide.html#Setting_Exposure_Time

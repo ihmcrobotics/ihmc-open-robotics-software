@@ -64,7 +64,8 @@ public class KinematicsToolboxOutputConverter
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
-         armJoints.put(robotSide, MultiBodySystemTools.createOneDoFJointPath(chest, hand));
+         if (hand != null)
+            armJoints.put(robotSide, MultiBodySystemTools.createOneDoFJointPath(chest, hand));
       }
    }
 
@@ -114,6 +115,9 @@ public class KinematicsToolboxOutputConverter
       checkIfDataHasBeenSet();
 
       OneDoFJointBasics[] joints = armJoints.get(robotSide);
+      if (joints == null)
+         return;
+
       int numberOfArmJoints = joints.length;
       ArmTrajectoryMessage armTrajectoryMessage = select(robotSide, output.getLeftArmTrajectoryMessage(), output.getRightArmTrajectoryMessage());
       armTrajectoryMessage.setRobotSide(robotSide.toByte());
@@ -157,6 +161,8 @@ public class KinematicsToolboxOutputConverter
 
       // TODO Add the option to define the control frame in the API instead of hardcoding it here.
       MovingReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
+      if (handControlFrame == null)
+         return;
       desiredPose.setToZero(handControlFrame);
       desiredPose.changeFrame(worldFrame);
       spatialVelocity(handControlFrame, worldFrame, enableVelocity, desiredSpatialVelocity);

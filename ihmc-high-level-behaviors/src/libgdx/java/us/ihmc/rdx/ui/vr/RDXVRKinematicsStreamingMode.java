@@ -13,11 +13,11 @@ import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.DeprecatedAPIs;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
@@ -33,15 +33,16 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.motionRetargeting.VRTrackedSegmentType;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.tools.KinematicsRecordReplay;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
+import us.ihmc.rdx.vr.RDXVRTrackedDevice;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -92,7 +93,7 @@ public class RDXVRKinematicsStreamingMode
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
    private final SceneGraph sceneGraph;
-   private KinematicsStreamingToolboxModule toolbox;
+//   private KinematicsStreamingToolboxModule toolbox;
 
    private final ImBoolean controlArmsOnly = new ImBoolean(false);
    private ReferenceFrame pelvisFrame;
@@ -156,18 +157,36 @@ public class RDXVRKinematicsStreamingMode
 
       KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
       parameters.setDefault();
-      parameters.setPublishingPeriod(0.030); // Publishing period in seconds.
-      parameters.setDefaultChestMessageAngularWeight(0.15, 0.15, 0.02);
-      parameters.setDefaultLinearRateLimit(3.0);
-      parameters.setDefaultAngularRateLimit(30.0);
+      parameters.setPublishingPeriod(0.015); // Publishing period in seconds.
+      parameters.setDefaultChestMessageAngularWeight(1.0, 1.0, 0.5);
+      parameters.setDefaultPelvisMessageLinearWeight(10.0, 10.0, 15.0);
+      parameters.setDefaultLinearRateLimit(10.0);
+      parameters.setDefaultAngularRateLimit(100.0);
+      parameters.setDefaultLinearWeight(10.0);
+      parameters.setDefaultAngularWeight(0.1);
+      parameters.setInputPoseLPFBreakFrequency(15.0);
+      parameters.setInputPoseCorrectionDuration(0.05); // Need to send inputs at 30Hz.
+      parameters.setInputStateEstimatorType(KinematicsStreamingToolboxParameters.InputStateEstimatorType.FBC_STYLE);
+
+      parameters.setMinimizeAngularMomentum(true);
+      parameters.setMinimizeLinearMomentum(true);
+      parameters.setAngularMomentumWeight(0.25);
+      parameters.setLinearMomentumWeight(0.25);
+
       parameters.getDefaultConfiguration().setEnableLeftHandTaskspace(false);
       parameters.getDefaultConfiguration().setEnableRightHandTaskspace(false);
       parameters.getDefaultConfiguration().setEnableNeckJointspace(false);
+      parameters.getDefaultSolverConfiguration().setJointVelocityWeight(0.05);
+      parameters.getDefaultSolverConfiguration().setEnableJointVelocityLimits(false);
       parameters.setUseStreamingPublisher(true);
 
-      boolean startYoVariableServer = false;
-      toolbox = new KinematicsStreamingToolboxModule(robotModel, parameters, startYoVariableServer, PubSubImplementation.FAST_RTPS);
-      ((KinematicsStreamingToolboxController) toolbox.getToolboxController()).setInitialRobotConfigurationNamedMap(createInitialConfiguration(robotModel));
+      boolean startYoVariableServer = true;
+
+//      toolbox = new KinematicsStreamingToolboxModule(robotModel, parameters, startYoVariableServer, PubSubImplementation.FAST_RTPS);
+//      ((KinematicsStreamingToolboxController) toolbox.getToolboxController()).setInitialRobotConfigurationNamedMap(createInitialConfiguration(robotModel));
+
+      RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "Right A button");
+      RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "Left A button");
    }
 
    private Map<String, Double> createInitialConfiguration(DRCRobotModel robotModel)
@@ -293,11 +312,18 @@ public class RDXVRKinematicsStreamingMode
             toolboxInputMessage.setStreamToController(streamToController.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
-         toolboxInputMessage.setTimestamp(System.nanoTime());
+//         toolboxInputMessage.setTimestamp();
+
+         long now = System.nanoTime();
+         System.out.println((now - lastPublish) * 1e-9);
+         lastPublish = now;
+
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
       }
    }
+
+   private long lastPublish;
 
    private void handleTrackedSegment(RDXVRContext vrContext,
                                      KinematicsStreamingToolboxInputMessage toolboxInputMessage,
@@ -329,21 +355,30 @@ public class RDXVRKinematicsStreamingMode
                      default -> throw new IllegalStateException(
                            "Unexpected VR-tracked segment: " + segmentType);
                   };
+            if (controlledSegment != null)
+            {
             KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
-                                                                               trackedSegmentDesiredFrame.get(segmentType.getSegmentName()).getReferenceFrame(),
+                                                                                  trackedSegmentDesiredFrame.get(segmentType.getSegmentName())
+                                                                                                            .getReferenceFrame(),
                                                                                segmentType.getSegmentName(),
                                                                                segmentType.getPositionWeight(),
                                                                                segmentType.getOrientationWeight());
             toolboxInputMessage.getInputs().add().set(message);
+            }
          });
       }
       else if (segmentType.getSegmentName().contains("Hand"))
       {
          vrContext.getController(segmentType.getSegmentSide()).runIfConnected(controller ->
          {
+            MovingReferenceFrame endEffectorFrame = ghostFullRobotModel.getEndEffectorFrame(segmentType.getSegmentSide(), LimbName.ARM);
+            if (endEffectorFrame == null)
+               return;
+
+            controller.getXForwardZUpControllerFrame().update();
             controllerFrameGraphics.get(segmentType.getSegmentSide())
                                    .setToReferenceFrame(controller.getXForwardZUpControllerFrame());
-            handFrameGraphics.get(segmentType.getSegmentSide()).setToReferenceFrame(ghostFullRobotModel.getEndEffectorFrame(segmentType.getSegmentSide(), LimbName.ARM));
+            handFrameGraphics.get(segmentType.getSegmentSide()).setToReferenceFrame(endEffectorFrame);
             KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(ghostFullRobotModel.getHand(
                                                                                      segmentType.getSegmentSide()),
                                                                                handDesiredControlFrames.get(
@@ -353,7 +388,18 @@ public class RDXVRKinematicsStreamingMode
                                                                                segmentType.getOrientationWeight());
             message.getControlFramePositionInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getPosition());
             message.getControlFrameOrientationInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getOrientation());
+
+            message.setHasLinearVelocity(true);
+            message.getLinearVelocityInWorld().set(controller.getLinearVelocity());
+            message.setHasAngularVelocity(true);
+            message.getAngularVelocityInWorld().set(controller.getAngularVelocity());
+//            message.getDesiredOrientationInWorld().transform(message.getAngularVelocityInWorld());
+
             toolboxInputMessage.getInputs().add().set(message);
+
+
+            toolboxInputMessage.setTimestamp(controller.getLastPollTimeNanos());
+
          });
       }
    }
@@ -454,14 +500,12 @@ public class RDXVRKinematicsStreamingMode
 
    public void renderImGuiWidgets()
    {
-      if (controllerModel == RDXVRControllerModel.FOCUS3)
-         ImGui.text("X Button");
-      else
-         ImGui.text("Left A Button");
-      ImGui.sameLine();
+//      if (controllerModel == RDXVRControllerModel.FOCUS3)
+//         ImGui.text("X Button");
+//      else
+//         ImGui.text("Left A Button");
       ImGui.checkbox(labels.get("Control/Stop Robot"), streamToController);
-      ImGui.text("Right A Button");
-      ImGui.sameLine();
+//      ImGui.text("Right A Button");
       if (ImGui.checkbox(labels.get("Kinematics streaming"), enabled))
       {
          setEnabled(enabled.get());
@@ -544,7 +588,7 @@ public class RDXVRKinematicsStreamingMode
 
    public void destroy()
    {
-      toolbox.closeAndDispose();
+//      toolbox.closeAndDispose();
       ghostRobotGraphic.destroy();
       for (RobotSide side : RobotSide.values)
       {

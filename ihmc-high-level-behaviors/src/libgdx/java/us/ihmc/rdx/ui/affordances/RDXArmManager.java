@@ -1,6 +1,11 @@
 package us.ihmc.rdx.ui.affordances;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import ihmc_common_msgs.msg.dds.QueueableMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryMessage;
 import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
@@ -19,7 +24,6 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -122,11 +126,6 @@ public class RDXArmManager
    public void create(RDXBaseUI baseUI)
    {
       panelHandWrenchIndicator = new RDX3DPanelHandWrenchIndicator(baseUI.getPrimary3DPanel());
-      baseUI.getPrimary3DPanel().addImGuiOverlayAddition(() ->
-      {
-         if (indicateWrenchOnScreen.get())
-            panelHandWrenchIndicator.renderImGuiOverlay();
-      });
 
       handManager.create(baseUI, communicationHelper, syncedRobot);
    }
@@ -260,7 +259,13 @@ public class RDXArmManager
          taskspaceTrajectoryFrame = syncedRobot.getReferenceFrames().getChestFrame();
       }
 
-      ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen);
+      if (ImGui.checkbox(labels.get("Hand wrench magnitudes on 3D View"), indicateWrenchOnScreen))
+      {
+         if (indicateWrenchOnScreen.get())
+            RDXBaseUI.getInstance().getPrimary3DPanel().addOverlayPanel("Hand wrenches", () -> panelHandWrenchIndicator.renderImGuiOverlay());
+         else
+            RDXBaseUI.getInstance().getPrimary3DPanel().removeOverlayPanel("Hand wrenches");
+      }
 
       // Pop up warning if notification is set
       if (showWarningNotification.peekHasValue() && showWarningNotification.poll())

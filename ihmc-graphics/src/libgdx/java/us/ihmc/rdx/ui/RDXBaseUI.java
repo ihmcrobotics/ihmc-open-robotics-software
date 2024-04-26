@@ -285,8 +285,8 @@ public class RDXBaseUI
       primaryScene.addRenderableProvider(vrManager::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
       primary3DPanel.addImGui3DViewPickCalculator(vrManager::calculate3DViewPick);
       primary3DPanel.addImGui3DViewInputProcessor(vrManager::process3DViewInput);
-      imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Thread Debugger", vrManager::renderImGuiDebugWidgets);
-      imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Settings", vrManager::renderImGuiTunerWidgets);
+//      imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Thread Debugger", vrManager::renderImGuiDebugWidgets);
+//      imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Settings", vrManager::renderImGuiTunerWidgets);
 
       keyBindings.register("Show key bindings", "Tab");
    }
@@ -331,8 +331,6 @@ public class RDXBaseUI
       }
       if (ImGui.beginMenu("Settings"))
       {
-         ImGui.pushItemWidth(80.0f);
-
          if (ImGui.beginTable("settingsTable", 2, ImGuiTableFlags.None))
          {
             // First row (libgdx log level)
@@ -507,27 +505,27 @@ public class RDXBaseUI
          ImGui.endMenu();
       }
 
+      vrManager.renderMenuBar();
+
       frameRateDisplay.ping();
 
       if (plotFrameRate.get())
       {
          // Currently we manually tune this value when we change the stuff in the status a
-         float menuBarStatusWidth = 320.0f;
+         float menuBarStatusWidth = 212.0f;
          ImGui.sameLine(ImGui.getWindowSizeX() - menuBarStatusWidth);
          frameRateDisplay.renderPlot();
       }
       else
       {
-         float menuBarStatusWidth = 212.0f;
+         float menuBarStatusWidth = 110.0f;
          ImGui.sameLine(ImGui.getWindowSizeX() - menuBarStatusWidth);
       }
 
       frameRateDisplay.renderHz();
 
       ImGui.text(FormattingTools.getFormattedDecimal2D(runTime.totalElapsed()) + " s");
-      float enoughWidthForVRButton = 100.0f; // Currently we manually tune this value
-      ImGui.sameLine(ImGui.getWindowSizeX() - enoughWidthForVRButton);
-      vrManager.renderImGuiEnableWidget();
+
       ImGui.endMainMenuBar();
    }
 
@@ -661,6 +659,11 @@ public class RDXBaseUI
          case CLASSIC -> ImGui.styleColorsClassic();
       }
       this.theme = theme;
+   }
+
+   public Theme getTheme()
+   {
+      return theme;
    }
 
    public static void pushNotification(String text)

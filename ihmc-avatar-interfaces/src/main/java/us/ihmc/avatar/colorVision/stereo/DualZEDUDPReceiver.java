@@ -1,25 +1,47 @@
-package us.ihmc.avatar.colorVision;
+package us.ihmc.avatar.colorVision.stereo;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.ImageDimensions;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.time.FrequencyStatisticPrinter;
+import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 
-import static us.ihmc.avatar.colorVision.DualBlackflyUDPSender.DATAGRAM_MAX_LENGTH;
+import static us.ihmc.avatar.colorVision.stereo.DualBlackflyUDPSender.DATAGRAM_MAX_LENGTH;
 
-public class DualBlackflyUDPReceiver
+public class DualZEDUDPReceiver
 {
    private final SideDependentList<Thread> receiveThreads = new SideDependentList<>();
-   private volatile boolean running;
+   private volatile boolean running = false;
+   private volatile boolean connected = false;
 
+   private final SideDependentList<String> addresses = new SideDependentList<>();
    private final SideDependentList<byte[]> imageBuffers = new SideDependentList<>();
    private final SideDependentList<ImageDimensions> imageDimensions = new SideDependentList<>(ImageDimensions::new);
+   private final SideDependentList<FrequencyCalculator> frequencyCalculators;
+
+   public DualZEDUDPReceiver()
+   {
+      frequencyCalculators = new SideDependentList<>();
+      frequencyCalculators.put(RobotSide.LEFT, new FrequencyCalculator(10));
+      frequencyCalculators.put(RobotSide.RIGHT, new FrequencyCalculator(10));
+
+      addresses.put(RobotSide.LEFT, "172.16.66.230");
+      addresses.put(RobotSide.RIGHT, "172.16.66.230");
+   }
+
+   public boolean connected()
+   {
+      return connected;
+   }
 
    public void start()
    {
@@ -29,10 +51,8 @@ public class DualBlackflyUDPReceiver
       {
          Thread receiveThread = new Thread(() ->
          {
-            SocketAddress socketAddress = new InetSocketAddress(side == RobotSide.LEFT ? "192.1.0.1" : "192.1.0.1",
-                                                                side == RobotSide.LEFT ?
-                                                                      DualBlackflyUDPSender.LEFT_UDP_PORT :
-                                                                      DualBlackflyUDPSender.RIGHT_UDP_PORT);
+            SocketAddress socketAddress = new InetSocketAddress(addresses.get(side),
+                                                                side == RobotSide.LEFT ? DualZEDUDPSender.LEFT_UDP_PORT : DualZEDUDPSender.RIGHT_UDP_PORT);
             DatagramSocket socket;
 
             try
@@ -41,7 +61,8 @@ public class DualBlackflyUDPReceiver
             }
             catch (SocketException e)
             {
-               LogTools.error("Unable to bind to address for blackfly UDP streaming: "  + socketAddress);
+               e.printStackTrace();
+               LogTools.error("Unable to bind to address for ZED UDP streaming: " + socketAddress);
                return;
             }
 
@@ -54,11 +75,16 @@ public class DualBlackflyUDPReceiver
             {
                try
                {
+                  socket.setSoTimeout(1000);
                   socket.receive(packet);
+                  connected = true;
                }
                catch (IOException e)
                {
                   LogTools.error(e);
+                  connected = false;
+                  running = false;
+                  break;
                }
 
                ByteBuffer datagramBuffer = ByteBuffer.wrap(buffer);
@@ -89,10 +115,14 @@ public class DualBlackflyUDPReceiver
                {
                   imageBuffer[fragmentDataOffset + i] = datagramBuffer.get(fragmentHeaderLength + i);
                }
+
+               frequencyCalculators.get(side).ping();
             }
 
             socket.disconnect();
             socket.close();
+
+            connected = false;
          });
 
          receiveThreads.put(side, receiveThread);
@@ -107,6 +137,11 @@ public class DualBlackflyUDPReceiver
 
       for (Thread receiveThread : receiveThreads)
       {
+         if (receiveThread == null)
+         {
+            continue;
+         }
+
          try
          {
             receiveThread.join();
@@ -116,6 +151,16 @@ public class DualBlackflyUDPReceiver
             LogTools.error(e);
          }
       }
+   }
+
+   public void setAddress(RobotSide side, String address)
+   {
+      addresses.put(side, address);
+   }
+
+   public SideDependentList<String> getAddresses()
+   {
+      return addresses;
    }
 
    public SideDependentList<byte[]> getImageBuffers()
@@ -128,13 +173,18 @@ public class DualBlackflyUDPReceiver
       return imageDimensions;
    }
 
+   public SideDependentList<FrequencyCalculator> getFrequencyCalculators()
+   {
+      return frequencyCalculators;
+   }
+
    public static void main(String[] args)
    {
-      DualBlackflyUDPReceiver dualBlackflyUDPReceiver = new DualBlackflyUDPReceiver();
+      DualZEDUDPReceiver dualZEDUDPReceiver = new DualZEDUDPReceiver();
 
-      dualBlackflyUDPReceiver.start();
+      dualZEDUDPReceiver.start();
 
-      Runtime.getRuntime().addShutdownHook(new Thread(dualBlackflyUDPReceiver::stop));
+      Runtime.getRuntime().addShutdownHook(new Thread(dualZEDUDPReceiver::stop));
 
       ThreadTools.sleepForever();
    }
