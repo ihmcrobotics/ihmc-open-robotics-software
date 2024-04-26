@@ -28,6 +28,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
    private RigidBodyBasics endEffector;
 
    private final FramePose3D desiredPose = new FramePose3D();
+   private boolean hasDesiredVelocity;
    private final SpatialVector desiredVelocity = new SpatialVector();
    private final FramePose3D controlFramePose = new FramePose3D();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
@@ -44,6 +45,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       controlFramePose.setToNaN(ReferenceFrame.getWorldFrame());
       selectionMatrix.resetSelection();
       weightMatrix.clear();
+      hasDesiredVelocity = false;
    }
 
    @Override
@@ -57,6 +59,8 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       controlFramePose.setIncludingFrame(other.controlFramePose);
       selectionMatrix.set(other.selectionMatrix);
       weightMatrix.set(other.weightMatrix);
+
+      hasDesiredVelocity = other.hasDesiredVelocity;
    }
 
    @Override
@@ -97,11 +101,19 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       ReferenceFrame angularWeightFrame = referenceFrameHashCodeResolver.getReferenceFrame(angularWeight.getWeightFrameId());
       ReferenceFrame linearWeightFrame = referenceFrameHashCodeResolver.getReferenceFrame(linearWeight.getWeightFrameId());
       weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
+
+      hasDesiredVelocity = message.getHasAngularVelocity() && message.getHasLinearVelocity();
+      desiredVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getAngularVelocityInWorld(), message.getLinearVelocityInWorld());
    }
 
    public void setEndEffector(RigidBodyBasics endEffector)
    {
       this.endEffector = endEffector;
+   }
+
+   public void setHasDesiredVelocity(boolean hasDesiredVelocity)
+   {
+      this.hasDesiredVelocity = hasDesiredVelocity;
    }
 
    public RigidBodyBasics getEndEffector()
@@ -132,6 +144,11 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
    public FramePose3D getControlFramePose()
    {
       return controlFramePose;
+   }
+
+   public boolean getHasDesiredVelocity()
+   {
+      return hasDesiredVelocity;
    }
 
    @Override

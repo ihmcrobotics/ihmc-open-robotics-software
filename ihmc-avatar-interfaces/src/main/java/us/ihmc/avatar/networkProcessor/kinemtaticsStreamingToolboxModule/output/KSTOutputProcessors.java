@@ -1,7 +1,5 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,9 +26,9 @@ public class KSTOutputProcessors implements KSTOutputProcessor
    }
 
    @Override
-   public void update(double time, boolean wasStreaming, boolean isStreaming, KinematicsToolboxOutputStatus latestOutput)
+   public void update(double time, boolean wasStreaming, boolean isStreaming, KSTOutputDataReadOnly latestOutput)
    {
-      KinematicsToolboxOutputStatus previousOutput = latestOutput;
+      KSTOutputDataReadOnly previousOutput = latestOutput;
 
       for (int i = 0; i < outputProcessors.size(); i++)
       {
@@ -41,7 +39,7 @@ public class KSTOutputProcessors implements KSTOutputProcessor
    }
 
    @Override
-   public KinematicsToolboxOutputStatus getProcessedOutput()
+   public KSTOutputDataReadOnly getProcessedOutput()
    {
       if (outputProcessors.isEmpty())
          return null;

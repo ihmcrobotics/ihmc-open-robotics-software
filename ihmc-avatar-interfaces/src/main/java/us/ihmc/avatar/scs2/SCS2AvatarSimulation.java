@@ -1,7 +1,5 @@
 package us.ihmc.avatar.scs2;
 
-import java.util.Objects;
-
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarStepGeneratorThread;
@@ -10,6 +8,7 @@ import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.DisposableRobotController;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.IKStreamingRTPluginFactory.IKStreamingRTThread;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
@@ -32,6 +31,8 @@ import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.Objects;
+
 public class SCS2AvatarSimulation
 {
    private static final double CAMERA_PITCH_FROM_ROBOT = Math.toRadians(-15.0);
@@ -48,6 +49,7 @@ public class SCS2AvatarSimulation
    private AvatarEstimatorThread estimatorThread;
    private AvatarControllerThread controllerThread;
    private AvatarStepGeneratorThread stepGeneratorThread;
+   private IKStreamingRTThread ikStreamingRTThread;
    private JointDesiredOutputWriter outputWriter;
    private SimulatedDRCRobotTimeProvider simulatedRobotTimeProvider;
    private FullHumanoidRobotModel controllerFullRobotModel;
@@ -208,6 +210,7 @@ public class SCS2AvatarSimulation
    }
 
    // GUI controls:
+
    /**
     * Align the camera to look at the robot root joint from the front using a default latitude.
     * <p>
@@ -236,7 +239,7 @@ public class SCS2AvatarSimulation
     * <p>
     * Note that calling this method will cancel the camera tracking of a node.
     * </p>
-    * 
+    *
     * @param focus the new focus position.
     */
    public void setCameraFocusPosition(Point3DReadOnly focus)
@@ -269,7 +272,7 @@ public class SCS2AvatarSimulation
     * <p>
     * The camera is rotated during this operation such that the focus point remains unchanged.
     * </p>
-    * 
+    *
     * @param position the new camera position.
     */
    public void setCameraPosition(Point3DReadOnly position)
@@ -282,7 +285,7 @@ public class SCS2AvatarSimulation
     * <p>
     * The camera is rotated during this operation such that the focus point remains unchanged.
     * </p>
-    * 
+    *
     * @param x the x-coordinate of the new camera location.
     * @param y the y-coordinate of the new camera location.
     * @param z the z-coordinate of the new camera location.
@@ -301,7 +304,7 @@ public class SCS2AvatarSimulation
     * <p>
     * Note that calling this method will cancel the camera tracking of a node.
     * </p>
-    * 
+    *
     * @param cameraFocus    the new focus position (where the camera is looking at).
     * @param cameraPosition the new camerate position.
     */
@@ -429,6 +432,16 @@ public class SCS2AvatarSimulation
    public AvatarStepGeneratorThread getStepGeneratorThread()
    {
       return stepGeneratorThread;
+   }
+
+   public void setIKStreamingRTThread(IKStreamingRTThread ikStreamingRTThread)
+   {
+      this.ikStreamingRTThread = ikStreamingRTThread;
+   }
+
+   public IKStreamingRTThread getIKStreamingRTThread()
+   {
+      return ikStreamingRTThread;
    }
 
    public void setOutputWriter(JointDesiredOutputWriter outputWriter)

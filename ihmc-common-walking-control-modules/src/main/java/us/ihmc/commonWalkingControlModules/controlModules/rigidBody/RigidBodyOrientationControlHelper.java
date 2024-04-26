@@ -187,7 +187,8 @@ public class RigidBodyOrientationControlHelper
       feedbackControlCommand.setControlFrameFixedInEndEffector(controlFrameOrientation);
    }
 
-   public static void modifyControlFrame(FrameQuaternionBasics desiredOrientationToModify, QuaternionReadOnly previousControlFrameOrientation,
+   public static void modifyControlFrame(FrameQuaternionBasics desiredOrientationToModify,
+                                         QuaternionReadOnly previousControlFrameOrientation,
                                          QuaternionReadOnly newControlFrameOrientation)
    {
       desiredOrientationToModify.multiplyConjugateOther(previousControlFrameOrientation);
@@ -408,13 +409,13 @@ public class RigidBodyOrientationControlHelper
       else if (command.getTrajectoryFrame() != trajectoryGenerator.getReferenceFrame())
       {
          LogTools.warn(warningPrefix + "Was executing in " + trajectoryGenerator.getReferenceFrame() + " can not switch to " + command.getTrajectoryFrame()
-               + " without override.");
+                       + " without override.");
          return false;
       }
       else if (!selectionMatrix.equals(command.getSelectionMatrix()))
       {
          LogTools.warn(warningPrefix + "Received a change of selection matrix without an override. Was\n" + selectionMatrix + "\nRequested\n"
-               + command.getSelectionMatrix());
+                       + command.getSelectionMatrix());
          return false;
       }
 
@@ -425,18 +426,19 @@ public class RigidBodyOrientationControlHelper
       {
          this.streamTimestampOffset.set(streamTimestampOffset);
          this.streamTimestampSource.set(streamTimestampSource);
-      
-         if (trajectoryPoints.getNumberOfTrajectoryPoints() != 1)
+
+         if (trajectoryPoints.getNumberOfTrajectoryPoints() == 0 || trajectoryPoints.getNumberOfTrajectoryPoints() > 2)
          {
-            LogTools.warn("When streaming, trajectories should contain only 1 trajectory point, was: " + trajectoryPoints.getNumberOfTrajectoryPoints());
+            LogTools.warn(
+                  "When streaming, trajectories should contain either 1 or 2 trajectory point(s), was: " + trajectoryPoints.getNumberOfTrajectoryPoints());
             return false;
          }
 
-         FrameSO3TrajectoryPoint trajectoryPoint = trajectoryPoints.getTrajectoryPoint(0);
+         FrameSO3TrajectoryPoint firstPoint = trajectoryPoints.getTrajectoryPoint(0);
 
-         if (trajectoryPoint.getTime() != 0.0)
+         if (firstPoint.getTime() != 0.0)
          {
-            LogTools.warn("When streaming, the trajectory point should have a time of zero, was: " + trajectoryPoint.getTime());
+            LogTools.warn("When streaming, the trajectory point should have a time of zero, was: " + firstPoint.getTime());
             return false;
          }
 
@@ -445,7 +447,7 @@ public class RigidBodyOrientationControlHelper
          if (initialPoint == null)
             return false;
 
-         initialPoint.setIncludingFrame(trajectoryPoint);
+         initialPoint.setIncludingFrame(firstPoint);
          if (!Double.isNaN(streamTimestampOffset))
             initialPoint.setTime(streamTimestampOffset - streamTimeOffset);
 
@@ -454,11 +456,27 @@ public class RigidBodyOrientationControlHelper
          if (integratedPoint == null)
             return false;
 
-         integratedPoint.setIncludingFrame(initialPoint);
-         integratedRotationVector.setAndScale(command.getStreamIntegrationDuration(), integratedPoint.getAngularVelocity());
-         integratedOrientation.setRotationVector(integratedRotationVector);
-         integratedOrientation.append(integratedPoint.getOrientation());
-         integratedPoint.getOrientation().set(integratedOrientation);
+         if (trajectoryPoints.getNumberOfTrajectoryPoints() == 1)
+         { // No extrapolation provided, so we do it here.
+            integratedPoint.setIncludingFrame(initialPoint);
+            integratedRotationVector.setAndScale(command.getStreamIntegrationDuration(), integratedPoint.getAngularVelocity());
+            integratedOrientation.setRotationVector(integratedRotationVector);
+            integratedOrientation.append(integratedPoint.getOrientation());
+            integratedPoint.getOrientation().set(integratedOrientation);
+         }
+         else
+         { // Extrapolation provided, so we use it.
+            FrameSO3TrajectoryPoint secondPoint = trajectoryPoints.getTrajectoryPoint(1);
+
+            if (secondPoint.getTime() != command.getStreamIntegrationDuration())
+            {
+               LogTools.warn("When streaming, the second trajectory point should have a time equal to the integration duration, was: " + secondPoint.getTime());
+               return false;
+            }
+
+            integratedPoint.setIncludingFrame(secondPoint);
+         }
+
          integratedPoint.setTime(command.getStreamIntegrationDuration() + initialPoint.getTime());
       }
       else

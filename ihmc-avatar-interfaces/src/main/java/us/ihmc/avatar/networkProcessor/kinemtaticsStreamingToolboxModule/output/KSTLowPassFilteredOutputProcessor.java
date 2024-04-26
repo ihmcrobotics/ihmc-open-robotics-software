@@ -1,8 +1,6 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTools;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.YoKinematicsToolboxOutputStatus;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -23,6 +21,7 @@ public class KSTLowPassFilteredOutputProcessor implements KSTOutputProcessor
 
       FullHumanoidRobotModel desiredFullRobotModel = tools.getDesiredFullRobotModel();
       filteredRobotState = new YoKinematicsToolboxOutputStatus("lpf", desiredFullRobotModel, registry);
+      filteredRobotState.createAccelerationState();
    }
 
    @Override
@@ -33,7 +32,7 @@ public class KSTLowPassFilteredOutputProcessor implements KSTOutputProcessor
    }
 
    @Override
-   public void update(double time, boolean wasStreaming, boolean isStreaming, KinematicsToolboxOutputStatus latestOutput)
+   public void update(double time, boolean wasStreaming, boolean isStreaming, KSTOutputDataReadOnly latestOutput)
    {
       if (resetFilter)
       {
@@ -43,13 +42,13 @@ public class KSTLowPassFilteredOutputProcessor implements KSTOutputProcessor
       else
       {
          double alphaFilter = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), updateDT);
-         filteredRobotState.interpolate(latestOutput, filteredRobotState.getStatus(), alphaFilter);
+         filteredRobotState.interpolate(latestOutput, filteredRobotState, alphaFilter);
       }
    }
 
    @Override
-   public KinematicsToolboxOutputStatus getProcessedOutput()
+   public KSTOutputDataReadOnly getProcessedOutput()
    {
-      return filteredRobotState.getStatus();
+      return filteredRobotState;
    }
 }

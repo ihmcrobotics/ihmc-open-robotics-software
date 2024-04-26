@@ -2,13 +2,14 @@ package us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI;
 
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 
 public class KinematicsStreamingToolboxConfigurationCommand
       implements Command<KinematicsStreamingToolboxConfigurationCommand, KinematicsStreamingToolboxConfigurationMessage>
 {
+   public static final long WORLD_FRAME_ID = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
    private long sequenceId = -1;
 
    private boolean lockPelvis = false;
@@ -23,10 +24,10 @@ public class KinematicsStreamingToolboxConfigurationCommand
    private boolean enableChestTaskspace = true;
    private boolean enablePelvisTaskspace = true;
 
-   private ReferenceFrame leftHandTrajectoryFrame = ReferenceFrame.getWorldFrame();
-   private ReferenceFrame rightHandTrajectoryFrame = ReferenceFrame.getWorldFrame();
-   private ReferenceFrame chestTrajectoryFrame = ReferenceFrame.getWorldFrame();
-   private ReferenceFrame pelvisTrajectoryFrame = ReferenceFrame.getWorldFrame();
+   private long leftHandTrajectoryFrameId = WORLD_FRAME_ID;
+   private long rightHandTrajectoryFrameId = WORLD_FRAME_ID;
+   private long chestTrajectoryFrameId = WORLD_FRAME_ID;
+   private long pelvisTrajectoryFrameId = WORLD_FRAME_ID;
 
    public KinematicsStreamingToolboxConfigurationCommand()
    {
@@ -48,10 +49,10 @@ public class KinematicsStreamingToolboxConfigurationCommand
       enableChestTaskspace = true;
       enablePelvisTaskspace = true;
 
-      leftHandTrajectoryFrame = ReferenceFrame.getWorldFrame();
-      rightHandTrajectoryFrame = ReferenceFrame.getWorldFrame();
-      chestTrajectoryFrame = ReferenceFrame.getWorldFrame();
-      pelvisTrajectoryFrame = ReferenceFrame.getWorldFrame();
+      leftHandTrajectoryFrameId = WORLD_FRAME_ID;
+      rightHandTrajectoryFrameId = WORLD_FRAME_ID;
+      chestTrajectoryFrameId = WORLD_FRAME_ID;
+      pelvisTrajectoryFrameId = WORLD_FRAME_ID;
    }
 
    @Override
@@ -70,19 +71,14 @@ public class KinematicsStreamingToolboxConfigurationCommand
       enableChestTaskspace = other.enableChestTaskspace;
       enablePelvisTaskspace = other.enablePelvisTaskspace;
 
-      leftHandTrajectoryFrame = other.leftHandTrajectoryFrame;
-      rightHandTrajectoryFrame = other.rightHandTrajectoryFrame;
-      chestTrajectoryFrame = other.chestTrajectoryFrame;
-      pelvisTrajectoryFrame = other.pelvisTrajectoryFrame;
+      leftHandTrajectoryFrameId = other.leftHandTrajectoryFrameId;
+      rightHandTrajectoryFrameId = other.rightHandTrajectoryFrameId;
+      chestTrajectoryFrameId = other.chestTrajectoryFrameId;
+      pelvisTrajectoryFrameId = other.pelvisTrajectoryFrameId;
    }
 
    @Override
    public void setFromMessage(KinematicsStreamingToolboxConfigurationMessage message)
-   {
-      set(message, null);
-   }
-
-   public void set(KinematicsStreamingToolboxConfigurationMessage message, ReferenceFrameHashCodeResolver referenceFrameResolver)
    {
       clear();
 
@@ -100,13 +96,10 @@ public class KinematicsStreamingToolboxConfigurationCommand
       enableChestTaskspace = message.getEnableChestTaskspace();
       enablePelvisTaskspace = message.getEnablePelvisTaskspace();
 
-      if (referenceFrameResolver != null)
-      {
-         leftHandTrajectoryFrame = referenceFrameResolver.getReferenceFrame(message.getLeftHandTrajectoryFrameId());
-         rightHandTrajectoryFrame = referenceFrameResolver.getReferenceFrame(message.getRightHandTrajectoryFrameId());
-         chestTrajectoryFrame = referenceFrameResolver.getReferenceFrame(message.getChestTrajectoryFrameId());
-         pelvisTrajectoryFrame = referenceFrameResolver.getReferenceFrame(message.getPelvisTrajectoryFrameId());
-      }
+      leftHandTrajectoryFrameId = message.getLeftHandTrajectoryFrameId();
+      rightHandTrajectoryFrameId = message.getRightHandTrajectoryFrameId();
+      chestTrajectoryFrameId = message.getChestTrajectoryFrameId();
+      pelvisTrajectoryFrameId = message.getPelvisTrajectoryFrameId();
    }
 
    @Override
@@ -170,29 +163,29 @@ public class KinematicsStreamingToolboxConfigurationCommand
       return enablePelvisTaskspace;
    }
 
-   public ReferenceFrame getHandTrajectoryFrame(RobotSide robotSide)
+   public long getHandTrajectoryFrameId(RobotSide robotSide)
    {
-      return robotSide == RobotSide.LEFT ? leftHandTrajectoryFrame : rightHandTrajectoryFrame;
-   }
-   
-   public ReferenceFrame getLeftHandTrajectoryFrame()
-   {
-      return leftHandTrajectoryFrame;
+      return robotSide == RobotSide.LEFT ? leftHandTrajectoryFrameId : rightHandTrajectoryFrameId;
    }
 
-   public ReferenceFrame getRightHandTrajectoryFrame()
+   public long getLeftHandTrajectoryFrameId()
    {
-      return rightHandTrajectoryFrame;
+      return leftHandTrajectoryFrameId;
    }
 
-   public ReferenceFrame getChestTrajectoryFrame()
+   public long getRightHandTrajectoryFrameId()
    {
-      return chestTrajectoryFrame;
+      return rightHandTrajectoryFrameId;
    }
 
-   public ReferenceFrame getPelvisTrajectoryFrame()
+   public long getChestTrajectoryFrameId()
    {
-      return pelvisTrajectoryFrame;
+      return chestTrajectoryFrameId;
+   }
+
+   public long getPelvisTrajectoryFrameId()
+   {
+      return pelvisTrajectoryFrameId;
    }
 
    @Override

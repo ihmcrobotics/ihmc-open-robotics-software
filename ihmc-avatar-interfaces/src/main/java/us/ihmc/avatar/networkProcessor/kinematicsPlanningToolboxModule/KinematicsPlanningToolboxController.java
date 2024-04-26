@@ -1,28 +1,13 @@
 package us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.fest.swing.util.Pair;
-
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import toolbox_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
+import org.fest.swing.util.Pair;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.*;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -56,6 +41,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class KinematicsPlanningToolboxController extends ToolboxController
 {
@@ -101,8 +92,11 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
    private final SolutionQualityConvergenceDetector solutionQualityConvergenceDetector;
 
-   public KinematicsPlanningToolboxController(DRCRobotModel drcRobotModel, FullHumanoidRobotModel fullRobotModel, CommandInputManager commandInputManager,
-                                              StatusMessageOutputManager statusOutputManager, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public KinematicsPlanningToolboxController(DRCRobotModel drcRobotModel,
+                                              FullHumanoidRobotModel fullRobotModel,
+                                              CommandInputManager commandInputManager,
+                                              StatusMessageOutputManager statusOutputManager,
+                                              YoGraphicsListRegistry yoGraphicsListRegistry,
                                               YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
@@ -135,10 +129,10 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       ikController = new HumanoidKinematicsToolboxController(ikCommandInputManager,
                                                              statusOutputManager,
                                                              fullRobotModel,
-                                                             drcRobotModel,
                                                              updateDT,
                                                              yoGraphicsListRegistry,
                                                              parentRegistry);
+      ikController.setDesiredRobotStateUpdater(((rootJoint, oneDoFJoints) -> true)); // Sharing the same desired robot state with the IK controller. Just need to notify it that it gets updated.
       ikCommandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(fullRobotModel, ikController.getDesiredReferenceFrames()));
       initialRobotConfiguration = MessageTools.createKinematicsToolboxOutputStatus(ikController.getDesiredOneDoFJoints());
 
@@ -147,7 +141,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
       SolutionQualityConvergenceSettings optimizationSettings = new KinematicsPlanningToolboxOptimizationSettings();
       solutionQualityConvergenceDetector = new SolutionQualityConvergenceDetector(optimizationSettings, parentRegistry);
-
    }
 
    @Override
@@ -180,7 +173,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
 
          KinematicsToolboxConfigurationCommand configurationCommand = command.getKinematicsConfigurationCommand();
          this.configurationCommand.set(configurationCommand);
-
       }
       else
       {
@@ -403,8 +395,8 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          }
          else if (!checkKeyFrameTimes(command.getWayPointTimes()))
          {
-            throw new RuntimeException(command.getClass().getSimpleName()
-                  + " must have same key frame times with the first KinematicsPlanningToolboxRigidBodyMessage.");
+            throw new RuntimeException(
+                  command.getClass().getSimpleName() + " must have same key frame times with the first KinematicsPlanningToolboxRigidBodyMessage.");
          }
       }
 
@@ -421,8 +413,8 @@ public class KinematicsPlanningToolboxController extends ToolboxController
          }
 
          if (!checkKeyFrameTimes(centerOfMassCommand.get().getWayPointTimes()))
-            throw new RuntimeException(centerOfMassCommand.get().getClass().getSimpleName()
-                  + " must have same key frame times with KinematicsPlanningToolboxRigidBodyMessage.");
+            throw new RuntimeException(
+                  centerOfMassCommand.get().getClass().getSimpleName() + " must have same key frame times with KinematicsPlanningToolboxRigidBodyMessage.");
       }
       else
       {
@@ -491,8 +483,9 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    {
       isDone.set(true);
 
-      boolean isOptimalSolution = (solution.getPlanId() == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME) ? false
-            : true;
+      boolean isOptimalSolution = (solution.getPlanId() == KinematicsPlanningToolboxOutputStatus.KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME) ?
+            false :
+            true;
 
       generateTrajectoriesToPreview(false);
       if (isVelocityLimitExceeded() && useKeyFrameTimeOptimizerIfJointVelocityExceedLimits)
@@ -601,8 +594,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
       KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(currentRobotConfiguration, rootJoint, allJointsExcludingHands);
       MessageTools.packDesiredJointState(initialRobotConfiguration, rootJoint, allJointsExcludingHands);
 
-      ikController.updateRobotConfigurationData(currentRobotConfiguration);
-
       CapturabilityBasedStatus capturabilityBasedStatus = latestCapturabilityBasedStatusReference.get();
 
       if (capturabilityBasedStatus == null)
@@ -649,11 +640,6 @@ public class KinematicsPlanningToolboxController extends ToolboxController
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
    {
       latestCapturabilityBasedStatusReference.set(newStatus);
-   }
-
-   public CommonHumanoidReferenceFrames getCurrentReferenceFrames()
-   {
-      return ikController.getCurrentReferenceFrames();
    }
 
    public CommonHumanoidReferenceFrames getDesiredReferenceFrames()
