@@ -96,8 +96,8 @@ import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLev
 public class SCS2AvatarSimulationFactory
 {
    protected final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
-   protected final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>(
-         "highLevelHumanoidControllerFactory");
+   protected final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory
+         = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
    protected final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
 
    protected final OptionalFactoryField<Boolean> enableSCS1YoGraphics = new OptionalFactoryField<Boolean>("enableSCS1YoGraphics", false);
@@ -108,17 +108,14 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity", -9.81);
    protected final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer", false);
    protected final OptionalFactoryField<Boolean> logToFile = new OptionalFactoryField<>("logToFile", false);
-   protected final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>(
-         "externalPelvisCorrectorSubscriber");
+   protected final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber
+         = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
    protected final OptionalFactoryField<Integer> simulationDataBufferSize = new OptionalFactoryField<>("simulationDataBufferSize", 8192);
    protected final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
    protected final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
    protected  final OptionalFactoryField<Boolean> createRigidBodyMutators = new OptionalFactoryField<>("createRigidBodyMutators", false);
-   protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
-                                                                                                                              (in, out) -> new SCS2OutputWriter(
-                                                                                                                                    in,
-                                                                                                                                    out,
-                                                                                                                                    true));
+   protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory
+         = new OptionalFactoryField<>("outputWriterFactory", (in, out) -> new SCS2OutputWriter(in, out, true));
    protected final OptionalFactoryField<HighLevelControllerName> initialState = new OptionalFactoryField<>("initialControllerState", WALKING);
    protected final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", false);
    protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
@@ -128,8 +125,8 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Boolean> useImpulseBasedPhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
    protected final OptionalFactoryField<Boolean> useBulletPhysicsEngine = new OptionalFactoryField<>("useBulletPhysicsEngine", false);
    protected final OptionalFactoryField<Consumer<RobotDefinition>> bulletCollisionMutator = new OptionalFactoryField<>("bulletCollisionMutator");
-   protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters = new OptionalFactoryField<>(
-         "impulseBasedPhysicsEngineParameters");
+   protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters
+         = new OptionalFactoryField<>("impulseBasedPhysicsEngineParameters");
    protected final OptionalFactoryField<GroundContactModelParameters> groundContactModelParameters = new OptionalFactoryField<>("groundContactModelParameters");
    protected final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
    protected final OptionalFactoryField<Boolean> useRobotDefinitionCollisions = new OptionalFactoryField<>("useRobotDefinitionCollisions", false);
@@ -138,13 +135,13 @@ public class SCS2AvatarSimulationFactory
 
    private final OptionalFactoryField<Boolean> useHeadingAndVelocityScript = new OptionalFactoryField<>("useHeadingAndVelocityScript");
    private final OptionalFactoryField<HeightMap> heightMapForFootstepZ = new OptionalFactoryField<>("heightMapForFootstepZ");
-   private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParameters = new OptionalFactoryField<>(
-         "headingAndVelocityEvaluationScriptParameters");
-   private final OptionalFactoryField<StateEstimatorControllerFactory> secondaryStateEstimatorFactory = new OptionalFactoryField<>(
-         "SecondaryStateEstimatorFactory");
+   private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParameters
+         = new OptionalFactoryField<>("headingAndVelocityEvaluationScriptParameters");
+   private final OptionalFactoryField<StateEstimatorControllerFactory> secondaryStateEstimatorFactory
+         = new OptionalFactoryField<>("SecondaryStateEstimatorFactory");
    private final OptionalFactoryField<Boolean> createIKStreamingRealTimeController = new OptionalFactoryField<>("createIKStreamingRealTimeController", false);
-   private final OptionalFactoryField<KinematicsStreamingToolboxParameters> ikStreamingParameters = new OptionalFactoryField<>("ikStreamingParameters",
-                                                                                                                               KinematicsStreamingToolboxParameters.defaultParameters());
+   private final OptionalFactoryField<KinematicsStreamingToolboxParameters> ikStreamingParameters
+         = new OptionalFactoryField<>("ikStreamingParameters", KinematicsStreamingToolboxParameters.defaultParameters());
 
    // TO CONSTRUCT
    protected RobotDefinition robotDefinition;
@@ -532,25 +529,25 @@ public class SCS2AvatarSimulationFactory
       if (simulationOutputWriter != null)
       {
          estimatorTask.addRunnableOnSchedulerThread(() ->
-                                                    {
-                                                       if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
-                                                          simulationOutputWriter.writeAfter();
-                                                    });
+         {
+            if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
+               simulationOutputWriter.writeAfter();
+         });
       }
       // Previously done in estimator thread read
       SensorReader sensorReader = estimatorThread.getSensorReader();
       estimatorTask.addRunnableOnSchedulerThread(() ->
-                                                 {
-                                                    long newTimestamp = sensorReader.read(masterContext.getSensorDataContext());
-                                                    masterContext.setTimestamp(newTimestamp);
-                                                 });
+      {
+         long newTimestamp = sensorReader.read(masterContext.getSensorDataContext());
+         masterContext.setTimestamp(newTimestamp);
+      });
       if (simulationOutputWriter != null)
       {
          estimatorTask.addRunnableOnSchedulerThread(() ->
-                                                    {
-                                                       if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
-                                                          simulationOutputWriter.writeBefore(estimatorThread.getHumanoidRobotContextData().getTimestamp());
-                                                    });
+         {
+            if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
+               simulationOutputWriter.writeBefore(estimatorThread.getHumanoidRobotContextData().getTimestamp());
+         });
       }
 
       List<HumanoidRobotControlTask> tasks = new ArrayList<>();
