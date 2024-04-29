@@ -7,7 +7,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.perception.RDXDualBlackflySphericalProjection;
+import us.ihmc.rdx.perception.RDXDualBlackflyProjection;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class RDXVRStereoVision
@@ -15,7 +15,7 @@ public class RDXVRStereoVision
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    private final ImBoolean enabled = new ImBoolean(false);
-   private final RDXDualBlackflySphericalProjection dualBlackflySphericalProjection;
+   private final RDXDualBlackflyProjection dualBlackflySphericalProjection;
    private final ImGuiFlashingText reconnectingText = new ImGuiFlashingText(ImGuiTools.DARK_ORANGE);
    private final ImGuiFlashingText leftConnectedStatusCircle = new ImGuiFlashingText(ImGuiTools.DARK_GREEN);
    private final ImGuiFlashingText rightConnectedStatusCircle = new ImGuiFlashingText(ImGuiTools.DARK_GREEN);
@@ -24,7 +24,7 @@ public class RDXVRStereoVision
 
    public RDXVRStereoVision(HumanoidReferenceFrames currentRobotFrames)
    {
-      dualBlackflySphericalProjection = new RDXDualBlackflySphericalProjection(currentRobotFrames);
+      dualBlackflySphericalProjection = new RDXDualBlackflyProjection(currentRobotFrames);
    }
 
    public boolean isEnabled()
@@ -112,7 +112,7 @@ public class RDXVRStereoVision
       }
    }
 
-   public RDXDualBlackflySphericalProjection getDualBlackflySphericalProjection()
+   public RDXDualBlackflyProjection getDualBlackflySphericalProjection()
    {
       return dualBlackflySphericalProjection;
    }

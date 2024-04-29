@@ -45,7 +45,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 
-public class RDXDualBlackflySphericalProjection
+public class RDXDualBlackflyProjection
 {
    private enum RDXProjectionType
    {
@@ -85,6 +85,9 @@ public class RDXDualBlackflySphericalProjection
    private final ImDouble cameraYawOffsetCalibration = new ImDouble(0.0);
    private final ImDouble cameraPitchOffsetCalibration = new ImDouble(0.0);
    private final ImDouble cameraRollOffsetCalibration = new ImDouble(0.0);
+
+   private final RDXDualBlackflyProjectionSettings projectionSettings = new RDXDualBlackflyProjectionSettings();
+
    private final SideDependentList<RDXReferenceFrameGraphic> eyeFrameGraphics = new SideDependentList<>();
 
    private final SideDependentList<AtomicReference<PixmapTextureData>> newTextureMapDatas = new SideDependentList<>(new AtomicReference<>(null),
@@ -94,7 +97,7 @@ public class RDXDualBlackflySphericalProjection
 
    private final SideDependentList<RigidBodyTransform> camerasToStereoMidPoint = new SideDependentList<>();
 
-   public RDXDualBlackflySphericalProjection(HumanoidReferenceFrames currentRobotFrames)
+   public RDXDualBlackflyProjection(HumanoidReferenceFrames currentRobotFrames)
    {
       this.baseUI = RDXBaseUI.getInstance();
       this.robotZUpFrame = currentRobotFrames.getMidFootZUpGroundFrame();
@@ -139,6 +142,8 @@ public class RDXDualBlackflySphericalProjection
 
    public void renderControls()
    {
+      projectionSettings.renderControls(projectionShapes.get(RobotSide.LEFT));
+
       ImGui.checkbox(labels.get("Lock projection shapes on robot"), projectionShapesLockOnRobot);
       ImGui.checkbox(labels.get("Show left projection"), showLeftProjectionShape);
       ImGui.checkbox(labels.get("Show right projection"), showRightProjectionShape);
@@ -243,18 +248,18 @@ public class RDXDualBlackflySphericalProjection
       reconnecting = true;
 
       reconnectThread = new Thread(() ->
-                                   {
-                                      do
-                                      {
-                                         RDXBaseUI.pushNotification("Dual Blackfly stereo client reconnecting...");
+      {
+         do
+         {
+            RDXBaseUI.pushNotification("Dual Blackfly stereo client reconnecting...");
 
-                                         dualBlackflyUDPReceiver.stop();
-                                         dualBlackflyUDPReceiver.start();
+            dualBlackflyUDPReceiver.stop();
+            dualBlackflyUDPReceiver.start();
 
-                                         ThreadTools.sleep(5000);
-                                      }
-                                      while (reconnecting && !dualBlackflyUDPReceiver.connected());
-                                   }, getClass().getName() + "-ReconnectThread");
+            ThreadTools.sleep(5000);
+         }
+         while (reconnecting && !dualBlackflyUDPReceiver.connected());
+      }, getClass().getName() + "-ReconnectThread");
 
       reconnectThread.start();
    }
@@ -280,21 +285,18 @@ public class RDXDualBlackflySphericalProjection
    {
       startReconnectThread();
       textureUpdateFuture = executorService.scheduleAtFixedRate(() ->
-                                                                {
-                                                                   for (RobotSide side : RobotSide.values)
-                                                                   {
-                                                                      byte[] imageByteArray = dualBlackflyUDPReceiver.getImageBuffers().get(side);
+      {
+         for (RobotSide side : RobotSide.values)
+         {
+            byte[] imageByteArray = dualBlackflyUDPReceiver.getImageBuffers().get(side);
 
-                                                                      if (imageByteArray != null)
-                                                                      {
+            if (imageByteArray != null)
+            {
 
-                                                                         newTextureMapDatas.get(side)
-                                                                                           .set(generateNewTextureMapData(imageByteArray,
-                                                                                                                          dualBlackflyUDPReceiver.getImageDimensions()
-                                                                                                                                                 .get(side)));
-                                                                      }
-                                                                   }
-                                                                }, 0, 20, java.util.concurrent.TimeUnit.MILLISECONDS);
+               newTextureMapDatas.get(side).set(generateNewTextureMapData(imageByteArray, dualBlackflyUDPReceiver.getImageDimensions().get(side)));
+            }
+         }
+      }, 0, 20, java.util.concurrent.TimeUnit.MILLISECONDS);
    }
 
    public void disable()
