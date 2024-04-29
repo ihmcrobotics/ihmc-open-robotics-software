@@ -18,6 +18,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
@@ -46,6 +48,8 @@ public class WalkingControllerState extends HighLevelControllerState
    private final BooleanParameter useCoPObjective = new BooleanParameter("UseCenterOfPressureObjectiveFromPlanner", registry, false);
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
+
+   private final SideDependentList<HumanoidKinematicsSimulationContactStateHolder> contactStateHoldersForKinematicsOnly = new SideDependentList<>();
 
    public WalkingControllerState(CommandInputManager commandInputManager,
                                  StatusMessageOutputManager statusOutputManager,
@@ -90,6 +94,15 @@ public class WalkingControllerState extends HighLevelControllerState
       walkingController.initialize();
       linearMomentumRateControlModule.reset();
       requestIntegratorReset = true;
+
+      if (controllerToolbox.isKinematicsOnly())
+      {
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            contactStateHoldersForKinematicsOnly.put(robotSide, HumanoidKinematicsSimulationContactStateHolder.holdAtCurrent(
+                  highLevelHumanoidControllerFactory.get().getHighLevelHumanoidControllerToolbox().getFootContactStates().get(robotSide)));
+         }
+      }
    }
 
    @Override

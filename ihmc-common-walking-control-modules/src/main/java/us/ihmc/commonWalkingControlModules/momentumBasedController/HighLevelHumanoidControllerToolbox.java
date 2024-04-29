@@ -108,6 +108,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final YoDouble yoTime;
    private final double controlDT;
    private final double gravity;
+   private final boolean kinematicsOnly;
 
    private final SideDependentList<CenterOfMassReferenceFrame> handCenterOfMassFrames;
    private final SideDependentList<YoFrameVector3D> wristRawMeasuredForces;
@@ -188,6 +189,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                              double omega0,
                                              SideDependentList<ContactableFoot> feet,
                                              double controlDT,
+                                             boolean kinematicsOnly,
                                              List<Updatable> updatables,
                                              List<ContactablePlaneBody> contactableBodies,
                                              YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -215,6 +217,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       this.referenceFrames = referenceFrames;
       this.controlDT = controlDT;
       this.gravity = gravityZ;
+      this.kinematicsOnly = kinematicsOnly;
       this.yoTime = yoTime;
       this.omega0.set(omega0);
 
@@ -814,6 +817,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public double getControlDT()
    {
       return controlDT;
+   }
+
+   public boolean isKinematicsOnly()
+   {
+      return kinematicsOnly;
    }
 
    public FullHumanoidRobotModel getFullRobotModel()

@@ -1,5 +1,7 @@
 package us.ihmc.avatar.scs2;
 
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.WalkingStatusMessage;
 import gnu.trove.map.TObjectDoubleMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
@@ -9,6 +11,7 @@ import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.*;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
+import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationContactStateHolder;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.IKStreamingRTPluginFactory;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.IKStreamingRTPluginFactory.IKStreamingRTThread;
@@ -26,6 +29,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.Compo
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
 import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.HeightMap;
@@ -111,6 +115,7 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Integer> simulationDataBufferSize = new OptionalFactoryField<>("simulationDataBufferSize", 8192);
    protected final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
    protected final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
+   protected final OptionalFactoryField<Boolean> kinematicsOnly = new OptionalFactoryField<>("kinematicsOnly", false);
    protected  final OptionalFactoryField<Boolean> createRigidBodyMutators = new OptionalFactoryField<>("createRigidBodyMutators", false);
    protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory
          = new OptionalFactoryField<>("outputWriterFactory", (in, out) -> new SCS2OutputWriter(in, out, true));
@@ -162,6 +167,7 @@ public class SCS2AvatarSimulationFactory
    protected final String terrainCollisionName = "terrain";
 
    private IKStreamingRTPluginFactory ikStreamingRealTimePluginFactory;
+   private final SideDependentList<HumanoidKinematicsSimulationContactStateHolder> contactStateHoldersForKinematicsOnly = new SideDependentList<>();
 
    public SCS2AvatarSimulation createAvatarSimulation()
    {
@@ -396,7 +402,8 @@ public class SCS2AvatarSimulationFactory
                                                     contextDataFactory,
                                                     null,
                                                     ros2Node,
-                                                    gravity.get());
+                                                    gravity.get(),
+                                                    kinematicsOnly.get());
       if (enableSCS1YoGraphics.get())
          simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(controllerThread.getSCS1YoGraphicsListRegistry()));
       if (enableSCS2YoGraphics.get())
@@ -511,12 +518,13 @@ public class SCS2AvatarSimulationFactory
 
       if (realtimeROS2Node.hasBeenSet())
       {
-         handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get());
+         handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get(), kinematicsOnly.get());
 
          if (handControlThread != null)
          {
             List<String> fingerJointNames = handControlThread.getControlledOneDoFJoints().stream().map(JointReadOnly::getName).collect(Collectors.toList());
-            SimulatedHandSensorReader handSensorReader = new SCS2SimulatedHandSensorReader(robot.getControllerManager().getControllerInput(), fingerJointNames);
+            SimulatedHandSensorReader handSensorReader = new SCS2SimulatedHandSensorReader(robot.getControllerManager().getControllerInput(),
+                                                                                           fingerJointNames);
             SimulatedHandOutputWriter handOutputWriter = new SCS2SimulatedHandOutputWriter(robot.getControllerManager().getControllerInput(),
                                                                                            robot.getControllerManager().getControllerOutput());
             handControlTask = new SimulatedHandControlTask(handSensorReader, handControlThread, handOutputWriter, handControlDivisor, simulationDT.get());
@@ -633,6 +641,14 @@ public class SCS2AvatarSimulationFactory
          }
       }
 
+      if (kinematicsOnly.get())
+      {
+
+         StatusMessageOutputManager statusOutputManager = highLevelHumanoidControllerFactory.get().getStatusOutputManager();
+         statusOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::processFootstepStatus);
+         statusOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, this::processWalkingStatus);
+      }
+
       List<MirroredYoVariableRegistry> mirroredRegistries = new ArrayList<>();
       mirroredRegistries.add(setupWithMirroredRegistry(estimatorThread.getYoRegistry(), estimatorTask, robotController.getYoRegistry()));
       mirroredRegistries.add(setupWithMirroredRegistry(controllerThread.getYoVariableRegistry(), controllerTask, robotController.getYoRegistry()));
@@ -661,6 +677,15 @@ public class SCS2AvatarSimulationFactory
             stepGeneratorThread.initialize();
             //            ikStreamingRTThread.initialize(); // TODO Not sure if that's needed.
             masterContext.set(estimatorThread.getHumanoidRobotContextData());
+
+            if (kinematicsOnly.get())
+            {
+               for (RobotSide robotSide : RobotSide.values)
+               {
+                  contactStateHoldersForKinematicsOnly.put(robotSide, HumanoidKinematicsSimulationContactStateHolder.holdAtCurrent(
+                        highLevelHumanoidControllerFactory.get().getHighLevelHumanoidControllerToolbox().getFootContactStates().get(robotSide)));
+               }
+            }
 
             robotController.initialize();
             mirroredRegistries.forEach(mirror -> mirror.updateValuesFromOriginal()); // Pushing the tasks values to the simulation's variables
@@ -905,6 +930,11 @@ public class SCS2AvatarSimulationFactory
    public void setUsePerfectSensors(boolean usePerfectSensors)
    {
       this.usePerfectSensors.set(usePerfectSensors);
+   }
+
+   public void setKinematicsOnly(boolean kinematicsOnly)
+   {
+      this.kinematicsOnly.set(kinematicsOnly);
    }
 
    public void setCreateRigidBodyMutators(boolean createRigidBodyMutators)

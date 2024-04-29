@@ -96,7 +96,8 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                  HumanoidRobotContextDataFactory contextDataFactory,
                                  DRCOutputProcessor outputProcessor,
                                  RealtimeROS2Node realtimeROS2Node,
-                                 double gravity)
+                                 double gravity,
+                                 boolean kinematicsOnly)
    {
       controllerFullRobotModel = robotModel.createFullRobotModel();
       if (robotInitialSetup != null)
@@ -151,6 +152,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                   desiredJointDataHolder,
                                                   yoGraphicsListRegistry,
                                                   registry,
+                                                  kinematicsOnly,
                                                   arrayOfJointsToIgnore);
 
       createControllerRobotMotionStatusUpdater(controllerFactory, robotMotionStatusHolder);
@@ -225,6 +227,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                             JointDesiredOutputListBasics lowLevelControllerOutput,
                                                             YoGraphicsListRegistry yoGraphicsListRegistry,
                                                             YoRegistry registry,
+                                                            boolean kinematicsOnly,
                                                             JointBasics... jointsToIgnore)
    {
       if (CREATE_COM_CALIBRATION_TOOL)
@@ -246,6 +249,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       HumanoidHighLevelControllerManager robotController = controllerFactory.getController(controllerModel,
                                                                                            controlDT,
                                                                                            gravity,
+                                                                                           kinematicsOnly,
                                                                                            yoTime,
                                                                                            yoGraphicsListRegistry,
                                                                                            sensorInformation,
