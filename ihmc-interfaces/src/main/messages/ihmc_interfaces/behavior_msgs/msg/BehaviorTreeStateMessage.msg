@@ -38,7 +38,7 @@ behavior_msgs/BasicNodeStateMessage[<=200] basic_nodes
 
 behavior_msgs/ActionSequenceStateMessage[<=200] action_sequences
 
-behavior_msgs/WholeBodyCoordinationStateMessage[<=200] whole_body_coordinations
+behavior_msgs/WholeBodyCoordinatorStateMessage[<=200] whole_body_coordinators
 
 behavior_msgs/DoorTraversalStateMessage[<=200] door_traversals
 
