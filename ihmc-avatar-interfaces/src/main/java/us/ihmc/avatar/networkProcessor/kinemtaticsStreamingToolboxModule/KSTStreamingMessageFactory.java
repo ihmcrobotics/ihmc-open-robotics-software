@@ -147,6 +147,9 @@ public class KSTStreamingMessageFactory
    {
       checkIfDataHasBeenSet();
 
+      if (armJoints.get(robotSide) == null)
+         return;
+
       JointspaceStreamingMessage streamingMessage = select(robotSide, output.getLeftArmStreamingMessage(), output.getRightArmStreamingMessage());
       computeJointspaceMessage(armJoints.get(robotSide),
                                enableVelocity.getValue(),
@@ -187,6 +190,8 @@ public class KSTStreamingMessageFactory
 
       // TODO Add the option to define the control frame in the API instead of hard-coding it here.
       RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
+      if (hand == null)
+         return;
       MovingReferenceFrame handBodyFixedFrame = hand.getBodyFixedFrame();
       MovingReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
       desiredPose.setToZero(handControlFrame);
