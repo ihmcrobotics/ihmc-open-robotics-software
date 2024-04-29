@@ -17,4 +17,7 @@ string next_action_rejection_tooltip
 # Request manual execution of the next action
 bool manual_execution_requested
 
+# The user requested kinematic simulation preview time
+float64 preview_requested_time
+
 

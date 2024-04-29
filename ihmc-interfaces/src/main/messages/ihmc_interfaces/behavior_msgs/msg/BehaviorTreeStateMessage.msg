@@ -5,7 +5,6 @@
 
 byte BASIC_NODE = 0
 byte ACTION_SEQUENCE = 1
-byte WHOLE_BODY_COORDINATION = 2
 byte DOOR_TRAVERSAL = 3
 
 byte CHEST_ORIENTATION_ACTION = 10
@@ -37,8 +36,6 @@ uint32[<=1000] behavior_tree_indices
 behavior_msgs/BasicNodeStateMessage[<=200] basic_nodes
 
 behavior_msgs/ActionSequenceStateMessage[<=200] action_sequences
-
-behavior_msgs/WholeBodyCoordinatorStateMessage[<=200] whole_body_coordinators
 
 behavior_msgs/DoorTraversalStateMessage[<=200] door_traversals
 

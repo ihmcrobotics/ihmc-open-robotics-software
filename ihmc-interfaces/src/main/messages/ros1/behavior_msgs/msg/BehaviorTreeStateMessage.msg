@@ -7,8 +7,6 @@ int8 BASIC_NODE=0
 
 int8 ACTION_SEQUENCE=1
 
-int8 WHOLE_BODY_COORDINATION=2
-
 int8 DOOR_TRAVERSAL=3
 
 int8 CHEST_ORIENTATION_ACTION=10
@@ -47,8 +45,6 @@ uint32[] behavior_tree_indices
 behavior_msgs/BasicNodeStateMessage[] basic_nodes
 
 behavior_msgs/ActionSequenceStateMessage[] action_sequences
-
-behavior_msgs/WholeBodyCoordinatorStateMessage[] whole_body_coordinators
 
 behavior_msgs/DoorTraversalStateMessage[] door_traversals
 

@@ -37,6 +37,10 @@ module behavior_msgs
          * Request manual execution of the next action
          */
         boolean manual_execution_requested;
+        /**
+         * The user requested kinematic simulation preview time
+         */
+        double preview_requested_time;
       };
     };
   };

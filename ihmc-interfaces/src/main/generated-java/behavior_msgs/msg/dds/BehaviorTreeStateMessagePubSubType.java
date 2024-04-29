@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2d7a5e5e017789f9da413532b77de0edb78f5ff7895e5173c287bb1c79df58d5";
+   		return "800b160bfeea7677c046ecff01aad1c09936859712a6a06120ed012ca26579a7";
    }
    
    @Override
@@ -68,9 +68,6 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.ActionSequenceStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
-      {
-          current_alignment += behavior_msgs.msg.dds.WholeBodyCoordinatorStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -136,11 +133,6 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       for(int i0 = 0; i0 < data.getActionSequences().size(); ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.ActionSequenceStateMessagePubSubType.getCdrSerializedSize(data.getActionSequences().get(i0), current_alignment);}
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getWholeBodyCoordinators().size(); ++i0)
-      {
-          current_alignment += behavior_msgs.msg.dds.WholeBodyCoordinatorStateMessagePubSubType.getCdrSerializedSize(data.getWholeBodyCoordinators().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getDoorTraversals().size(); ++i0)
@@ -214,10 +206,6 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_e(data.getActionSequences());else
           throw new RuntimeException("action_sequences field exceeds the maximum length");
 
-      if(data.getWholeBodyCoordinators().size() <= 200)
-      cdr.write_type_e(data.getWholeBodyCoordinators());else
-          throw new RuntimeException("whole_body_coordinators field exceeds the maximum length");
-
       if(data.getDoorTraversals().size() <= 200)
       cdr.write_type_e(data.getDoorTraversals());else
           throw new RuntimeException("door_traversals field exceeds the maximum length");
@@ -267,7 +255,6 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.read_type_e(data.getBehaviorTreeIndices());	
       cdr.read_type_e(data.getBasicNodes());	
       cdr.read_type_e(data.getActionSequences());	
-      cdr.read_type_e(data.getWholeBodyCoordinators());	
       cdr.read_type_e(data.getDoorTraversals());	
       cdr.read_type_e(data.getChestOrientationActions());	
       cdr.read_type_e(data.getFootstepPlanActions());	
@@ -291,7 +278,6 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.write_type_e("behavior_tree_indices", data.getBehaviorTreeIndices());
       ser.write_type_e("basic_nodes", data.getBasicNodes());
       ser.write_type_e("action_sequences", data.getActionSequences());
-      ser.write_type_e("whole_body_coordinators", data.getWholeBodyCoordinators());
       ser.write_type_e("door_traversals", data.getDoorTraversals());
       ser.write_type_e("chest_orientation_actions", data.getChestOrientationActions());
       ser.write_type_e("footstep_plan_actions", data.getFootstepPlanActions());
@@ -314,7 +300,6 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.read_type_e("behavior_tree_indices", data.getBehaviorTreeIndices());
       ser.read_type_e("basic_nodes", data.getBasicNodes());
       ser.read_type_e("action_sequences", data.getActionSequences());
-      ser.read_type_e("whole_body_coordinators", data.getWholeBodyCoordinators());
       ser.read_type_e("door_traversals", data.getDoorTraversals());
       ser.read_type_e("chest_orientation_actions", data.getChestOrientationActions());
       ser.read_type_e("footstep_plan_actions", data.getFootstepPlanActions());

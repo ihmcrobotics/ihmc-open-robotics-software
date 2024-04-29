@@ -19,6 +19,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
    private final CRDTBidirectionalInteger executionNextIndex;
    private final CRDTUnidirectionalNotification manualExecutionRequested;
    private final CRDTUnidirectionalString nextActionRejectionTooltip;
+   private final CRDTUnidirectionalDouble previewRequestedTime;
 
    private transient final MutableInt actionIndex = new MutableInt();
    private final List<ActionNodeState<?>> actionChildren = new ArrayList<>();
@@ -31,6 +32,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       executionNextIndex = new CRDTBidirectionalInteger(this, 0);
       manualExecutionRequested = new CRDTUnidirectionalNotification(ROS2ActorDesignation.OPERATOR, crdtInfo, this);
       nextActionRejectionTooltip = new CRDTUnidirectionalString(ROS2ActorDesignation.ROBOT, crdtInfo, "");
+      previewRequestedTime = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.0);
    }
 
    @Override
@@ -69,6 +71,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       message.setExecutionNextIndex(executionNextIndex.toMessage());
       message.setManualExecutionRequested(manualExecutionRequested.toMessage());
       message.setNextActionRejectionTooltip(nextActionRejectionTooltip.toMessage());
+      message.setPreviewRequestedTime(previewRequestedTime.toMessage());
    }
 
    public void fromMessage(ActionSequenceStateMessage message)
@@ -81,6 +84,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       executionNextIndex.fromMessage(message.getExecutionNextIndex());
       manualExecutionRequested.fromMessage(message.getManualExecutionRequested());
       nextActionRejectionTooltip.fromMessage(message.getNextActionRejectionTooltipAsString());
+      previewRequestedTime.fromMessage(message.getPreviewRequestedTime());
    }
 
    @Nullable
@@ -164,5 +168,10 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
    public List<ActionNodeState<?>> getActionChildren()
    {
       return actionChildren;
+   }
+
+   public CRDTUnidirectionalDouble getPreviewRequestedTime()
+   {
+      return previewRequestedTime;
    }
 }
