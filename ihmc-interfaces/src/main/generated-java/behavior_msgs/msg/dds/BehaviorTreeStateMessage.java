@@ -16,7 +16,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 {
    public static final byte BASIC_NODE = (byte) 0;
    public static final byte ACTION_SEQUENCE = (byte) 1;
-   public static final byte DOOR_TRAVERSAL = (byte) 3;
+   public static final byte DOOR_TRAVERSAL = (byte) 2;
    public static final byte CHEST_ORIENTATION_ACTION = (byte) 10;
    public static final byte FOOTSTEP_PLAN_ACTION = (byte) 11;
    public static final byte SAKE_HAND_COMMAND_ACTION = (byte) 12;
