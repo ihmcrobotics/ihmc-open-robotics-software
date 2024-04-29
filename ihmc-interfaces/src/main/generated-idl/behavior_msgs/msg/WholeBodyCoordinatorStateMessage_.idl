@@ -1,0 +1,28 @@
+#ifndef __behavior_msgs__msg__WholeBodyCoordinatorStateMessage__idl__
+#define __behavior_msgs__msg__WholeBodyCoordinatorStateMessage__idl__
+
+#include "behavior_msgs/msg/./BehaviorTreeNodeStateMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::WholeBodyCoordinatorStateMessage_")
+      struct WholeBodyCoordinatorStateMessage
+      {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::BehaviorTreeNodeStateMessage state;
+        /**
+         * The user requested kinematic simulation preview time
+         */
+        double preview_requested_time;
+      };
+    };
+  };
+};
+
+#endif
