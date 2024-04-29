@@ -60,7 +60,7 @@ public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSens
 
    public default ReferenceFrame getSituationalAwarenessCameraFrame(RobotSide side, CommonHumanoidReferenceFrames referenceFrames)
    {
-      return ReferenceFrameTools.constructFrameWithChangingTransformToParent("situationalAwarenessLeftCamera",
+      return ReferenceFrameTools.constructFrameWithChangingTransformToParent("situationalAwareness%sCamera".formatted(side.getPascalCaseName()),
                                                                              getSituationalAwarenessCameraParentFrame(side, referenceFrames),
                                                                              getSituationalAwarenessCameraTransform(side));
    }

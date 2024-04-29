@@ -243,7 +243,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          situationalAwarenessCameraFrame.set(RobotSide.RIGHT, sensorInformation.getSituationalAwarenessCameraFrame(RobotSide.RIGHT, this));
          experimentalCameraFrame = sensorInformation.getExperimentalCameraFrame(this);
          ousterLidarFrame = sensorInformation.getOusterLidarFrame(this);
-         steppingCameraZUpFrame = sensorInformation.getSteppingCameraZUpFrame(this);
+         steppingCameraZUpFrame = new ZUpFrame(steppingCameraFrame, "steppingCameraZUp");
       }
    }
 
