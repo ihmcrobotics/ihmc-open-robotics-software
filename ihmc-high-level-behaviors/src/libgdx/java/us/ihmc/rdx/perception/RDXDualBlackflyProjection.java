@@ -8,8 +8,6 @@ import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import imgui.type.ImBoolean;
-import imgui.type.ImDouble;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -56,9 +54,6 @@ public class RDXDualBlackflyProjection
 
    private final RDXBaseUI baseUI;
    private final SideDependentList<RDXProjectionShape> projectionShapes = new SideDependentList<>();
-   private final ImBoolean projectionShapesLockOnRobot = new ImBoolean(false);
-   private final ImBoolean showLeftProjectionShape = new ImBoolean(true);
-   private final ImBoolean showRightProjectionShape = new ImBoolean(true);
    private final SideDependentList<RigidBodyTransform> projectionShapePoses = new SideDependentList<>(side -> new RigidBodyTransform());
    private final ReferenceFrame robotZUpFrame;
    private final SideDependentList<ReferenceFrame> robotCameraFrames = new SideDependentList<>();
@@ -70,21 +65,6 @@ public class RDXDualBlackflyProjection
 
    private volatile boolean reconnecting = false;
    private Thread reconnectThread;
-
-   // Offset tunable through the GUI to allow user tweaking the pose of the projection
-   private final ImDouble projectionXOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble projectionYOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble projectionZOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble projectionYawOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble projectionPitchOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble projectionRollOffsetCalibration = new ImDouble(0.0);
-   // Offset tunable through the GUI to allow user tweaking the pose of the projection
-   private final ImDouble cameraXOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble cameraYOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble cameraZOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble cameraYawOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble cameraPitchOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble cameraRollOffsetCalibration = new ImDouble(0.0);
 
    private final RDXDualBlackflyProjectionSettings projectionSettings = new RDXDualBlackflyProjectionSettings();
 
@@ -118,12 +98,12 @@ public class RDXDualBlackflyProjection
          camerasToStereoMidPoint.set(side, cameraToStereoMidPoint);
       }
 
-      cameraXOffsetCalibration.set(camerasToStereoMidPoint.get(RobotSide.LEFT).getTranslationX());
-      cameraYOffsetCalibration.set(camerasToStereoMidPoint.get(RobotSide.LEFT).getTranslationY());
-      cameraZOffsetCalibration.set(camerasToStereoMidPoint.get(RobotSide.LEFT).getTranslationZ());
-      cameraYawOffsetCalibration.set(camerasToStereoMidPoint.get(RobotSide.LEFT).getRotation().getYaw());
-      cameraPitchOffsetCalibration.set(camerasToStereoMidPoint.get(RobotSide.LEFT).getRotation().getPitch());
-      cameraRollOffsetCalibration.set(camerasToStereoMidPoint.get(RobotSide.LEFT).getRotation().getRoll());
+      projectionSettings.cameraXOffsetCalibration.set(camerasToStereoMidPoint.get(RobotSide.LEFT).getTranslationX());
+      projectionSettings.cameraYOffsetCalibration.set(camerasToStereoMidPoint.get(RobotSide.LEFT).getTranslationY());
+      projectionSettings.cameraZOffsetCalibration.set(camerasToStereoMidPoint.get(RobotSide.LEFT).getTranslationZ());
+      projectionSettings.cameraYawOffsetCalibration.set(camerasToStereoMidPoint.get(RobotSide.LEFT).getRotation().getYaw());
+      projectionSettings.cameraPitchOffsetCalibration.set(camerasToStereoMidPoint.get(RobotSide.LEFT).getRotation().getPitch());
+      projectionSettings.cameraRollOffsetCalibration.set(camerasToStereoMidPoint.get(RobotSide.LEFT).getRotation().getRoll());
 
       RigidBodyTransform diff = new RigidBodyTransform();
       diff.set(camerasToStereoMidPoint.get(RobotSide.LEFT));
@@ -142,25 +122,13 @@ public class RDXDualBlackflyProjection
 
    public void renderControls()
    {
-      projectionSettings.renderControls(projectionShapes.get(RobotSide.LEFT));
+      projectionSettings.renderControls();
 
-      ImGui.checkbox(labels.get("Lock projection shapes on robot"), projectionShapesLockOnRobot);
-      ImGui.checkbox(labels.get("Show left projection"), showLeftProjectionShape);
-      ImGui.checkbox(labels.get("Show right projection"), showRightProjectionShape);
-      ImGuiTools.sliderDouble("Projection X offset", projectionXOffsetCalibration, -4, 4);
-      ImGuiTools.sliderDouble("Projection Y offset", projectionYOffsetCalibration, -0.2, 0.2);
-      ImGuiTools.sliderDouble("Projection Z offset", projectionZOffsetCalibration, -4, 4);
-      ImGuiTools.sliderDouble("Projection yaw offset", projectionYawOffsetCalibration, -Math.toRadians(15.0), Math.toRadians(15.0));
-      ImGuiTools.sliderDouble("Projection pitch offset", projectionPitchOffsetCalibration, -Math.toRadians(15.0), Math.toRadians(15.0));
-      ImGuiTools.sliderDouble("Projection roll offset", projectionRollOffsetCalibration, -Math.toRadians(15.0), Math.toRadians(15.0));
-      ImGuiTools.sliderDouble("Camera X offset", cameraXOffsetCalibration, -0.05, 0.05);
-      ImGuiTools.sliderDouble("Camera Y offset", cameraYOffsetCalibration, 0.00, 0.12);
-      ImGuiTools.sliderDouble("Camera Z offset", cameraZOffsetCalibration, -0.05, 0.05);
-      ImGuiTools.sliderDouble("Camera Yaw offset", cameraYawOffsetCalibration, -0.05, 0.05);
-      ImGuiTools.sliderDouble("Camera Pitch offset", cameraPitchOffsetCalibration, -0.05, 0.05);
-      ImGuiTools.sliderDouble("Camera Roll offset", cameraRollOffsetCalibration, -0.05, 0.05);
       ImGui.separator();
       projectionShapes.get(RobotSide.LEFT).renderImGuiWidgets();
+
+      ImGuiTools.separatorText("Save/Load");
+      projectionSettings.renderIOControls(projectionShapes.get(RobotSide.LEFT));
 
       updateParameters();
    }
@@ -219,10 +187,14 @@ public class RDXDualBlackflyProjection
 
       camerasToStereoMidPoint.get(RobotSide.LEFT)
                              .getTranslation()
-                             .set(cameraXOffsetCalibration.get(), cameraYOffsetCalibration.get(), cameraZOffsetCalibration.get());
+                             .set(projectionSettings.cameraXOffsetCalibration.get(),
+                                  projectionSettings.cameraYOffsetCalibration.get(),
+                                  projectionSettings.cameraZOffsetCalibration.get());
       camerasToStereoMidPoint.get(RobotSide.LEFT)
                              .getRotation()
-                             .setYawPitchRoll(cameraYawOffsetCalibration.get(), cameraPitchOffsetCalibration.get(), cameraRollOffsetCalibration.get());
+                             .setYawPitchRoll(projectionSettings.cameraYawOffsetCalibration.get(),
+                                              projectionSettings.cameraPitchOffsetCalibration.get(),
+                                              projectionSettings.cameraRollOffsetCalibration.get());
       camerasToStereoMidPoint.get(RobotSide.RIGHT).setAndInvert(camerasToStereoMidPoint.get(RobotSide.LEFT));
    }
 
@@ -342,7 +314,7 @@ public class RDXDualBlackflyProjection
       for (RobotSide side : RobotSide.values)
       {
          RigidBodyTransform pose = projectionShapePoses.get(side);
-         if (projectionShapesLockOnRobot.get())
+         if (projectionSettings.projectionShapesLockOnRobot.get())
          {
             pose.set(stereoMidPointFrame.getTransformToRoot());
          }
@@ -360,12 +332,12 @@ public class RDXDualBlackflyProjection
             pose.setToZero();
          }
 
-         pose.appendTranslation(projectionXOffsetCalibration.get(),
-                                side.negateIfLeftSide(projectionYOffsetCalibration.get()),
-                                projectionZOffsetCalibration.get());
-         pose.getRotation().appendYawRotation(side.negateIfRightSide(projectionYawOffsetCalibration.get()));
-         pose.getRotation().appendPitchRotation(side.negateIfRightSide(projectionPitchOffsetCalibration.get()));
-         pose.getRotation().appendRollRotation(side.negateIfRightSide(projectionRollOffsetCalibration.get()));
+         pose.appendTranslation(projectionSettings.projectionXOffsetCalibration.get(),
+                                side.negateIfLeftSide(projectionSettings.projectionYOffsetCalibration.get()),
+                                projectionSettings.projectionZOffsetCalibration.get());
+         pose.getRotation().appendYawRotation(side.negateIfRightSide(projectionSettings.projectionYawOffsetCalibration.get()));
+         pose.getRotation().appendPitchRotation(side.negateIfRightSide(projectionSettings.projectionPitchOffsetCalibration.get()));
+         pose.getRotation().appendRollRotation(side.negateIfRightSide(projectionSettings.projectionRollOffsetCalibration.get()));
 
          LibGDXTools.toLibGDX(pose, projectionShapes.get(side).getModelInstance().transform);
       }
@@ -410,9 +382,9 @@ public class RDXDualBlackflyProjection
       }
       else
       {
-         if (showRightProjectionShape.get())
+         if (projectionSettings.showRightProjectionShape.get())
             projectionShapes.get(RobotSide.RIGHT).getRenderables(renderables, pool);
-         if (showLeftProjectionShape.get())
+         if (projectionSettings.showLeftProjectionShape.get())
             projectionShapes.get(RobotSide.LEFT).getRenderables(renderables, pool);
 
          if (baseUI.getVRManager().isVRReady())

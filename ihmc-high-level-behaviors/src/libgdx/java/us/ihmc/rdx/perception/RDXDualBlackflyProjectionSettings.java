@@ -63,21 +63,21 @@ public class RDXDualBlackflyProjectionSettings
 
    private static int deleteRetries = 0;
 
-   private final ImBoolean projectionShapesLockOnRobot = new ImBoolean(false);
-   private final ImBoolean showLeftProjectionShape = new ImBoolean(true);
-   private final ImBoolean showRightProjectionShape = new ImBoolean(true);
-   private final ImDouble projectionXOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble projectionYOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble projectionZOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble projectionYawOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble projectionPitchOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble projectionRollOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble cameraXOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble cameraYOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble cameraZOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble cameraYawOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble cameraPitchOffsetCalibration = new ImDouble(0.0);
-   private final ImDouble cameraRollOffsetCalibration = new ImDouble(0.0);
+   protected final ImBoolean projectionShapesLockOnRobot = new ImBoolean(false);
+   protected final ImBoolean showLeftProjectionShape = new ImBoolean(true);
+   protected final ImBoolean showRightProjectionShape = new ImBoolean(true);
+   protected final ImDouble projectionXOffsetCalibration = new ImDouble(0.0);
+   protected final ImDouble projectionYOffsetCalibration = new ImDouble(0.0);
+   protected final ImDouble projectionZOffsetCalibration = new ImDouble(0.0);
+   protected final ImDouble projectionYawOffsetCalibration = new ImDouble(0.0);
+   protected final ImDouble projectionPitchOffsetCalibration = new ImDouble(0.0);
+   protected final ImDouble projectionRollOffsetCalibration = new ImDouble(0.0);
+   protected final ImDouble cameraXOffsetCalibration = new ImDouble(0.0);
+   protected final ImDouble cameraYOffsetCalibration = new ImDouble(0.0);
+   protected final ImDouble cameraZOffsetCalibration = new ImDouble(0.0);
+   protected final ImDouble cameraYawOffsetCalibration = new ImDouble(0.0);
+   protected final ImDouble cameraPitchOffsetCalibration = new ImDouble(0.0);
+   protected final ImDouble cameraRollOffsetCalibration = new ImDouble(0.0);
 
    private final ImString presetFileName = new ImString();
    private final ImInt selectedPreset = new ImInt(0);
@@ -251,7 +251,7 @@ public class RDXDualBlackflyProjectionSettings
       }
    }
 
-   public boolean renderControls(RDXProjectionShape projectionShape)
+   public boolean renderControls()
    {
       boolean updated = false;
 
@@ -279,6 +279,11 @@ public class RDXDualBlackflyProjectionSettings
          // TODO: visually show it's unsaved
       }
 
+      return updated;
+   }
+
+   public boolean renderIOControls(RDXProjectionShape projectionShape)
+   {
       ImGuiTools.inputText(labels.get("Preset name"), presetFileName);
       ImGui.sameLine();
       if (ImGui.button(labels.get("Save")))
@@ -300,7 +305,7 @@ public class RDXDualBlackflyProjectionSettings
          try
          {
             load(projectionShape, presetFileNameToLoad);
-            updated = true;
+            return true;
          }
          catch (IOException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e)
          {
@@ -309,6 +314,6 @@ public class RDXDualBlackflyProjectionSettings
          }
       }
 
-      return updated;
+      return false;
    }
 }
