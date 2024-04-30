@@ -229,6 +229,8 @@ public class RDXDualBlackflyProjectionSettings
             {
                try
                {
+                  field.setAccessible(true);
+                  setMethod.setAccessible(true);
                   setMethod.invoke(field.get(projectionShape), setParam);
                }
                catch (Exception e)
