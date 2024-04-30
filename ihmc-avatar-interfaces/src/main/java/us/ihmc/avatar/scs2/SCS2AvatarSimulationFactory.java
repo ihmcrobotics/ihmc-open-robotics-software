@@ -782,18 +782,21 @@ public class SCS2AvatarSimulationFactory
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
-      ArrayList<String> additionalContactRigidBodyNames = contactPointParameters.getAdditionalContactRigidBodyNames();
-      ArrayList<String> additionalContactNames = contactPointParameters.getAdditionalContactNames();
-      ArrayList<RigidBodyTransform> additionalContactTransforms = contactPointParameters.getAdditionalContactTransforms();
-
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
-      contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
-      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
-                                                       contactPointParameters.getControllerToeContactLines());
-      for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
-         contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i),
-                                                            additionalContactNames.get(i),
-                                                            additionalContactTransforms.get(i));
+      if (contactPointParameters != null)
+      {
+         ArrayList<String> additionalContactRigidBodyNames = contactPointParameters.getAdditionalContactRigidBodyNames();
+         ArrayList<String> additionalContactNames = contactPointParameters.getAdditionalContactNames();
+         ArrayList<RigidBodyTransform> additionalContactTransforms = contactPointParameters.getAdditionalContactTransforms();
+
+         contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
+         contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
+                                                          contactPointParameters.getControllerToeContactLines());
+         for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
+            contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i),
+                                                               additionalContactNames.get(i),
+                                                               additionalContactTransforms.get(i));
+      }
 
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
                                                                                                     feetForceSensorNames,

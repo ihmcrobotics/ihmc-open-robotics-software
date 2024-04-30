@@ -4,9 +4,8 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.Kinemat
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
@@ -25,7 +24,7 @@ public class KSTInputFilter
    private final YoFramePoint3D bbxOffset;
    private final YoFramePoint3D bbxPosition = new YoFramePoint3D(namePrefix + "BBXPosition", worldFrame, registry);
    private final YoFrameQuaternion bbxOrientation = new YoFrameQuaternion(namePrefix + "BBXOrientation", worldFrame, registry);
-   private final MidFootZUpGroundFrame midFeetZUpFrame;
+   private final MovingReferenceFrame pelvisFrame;
 
    private final YoBoolean enableBBXFilter = new YoBoolean(namePrefix + "EnableBBXFilter", registry);
 
@@ -36,11 +35,11 @@ public class KSTInputFilter
 
    public KSTInputFilter(FullHumanoidRobotModel fullRobotModel, KinematicsStreamingToolboxParameters parameters, YoRegistry parentRegistry)
    {
-      midFeetZUpFrame = new MidFootZUpGroundFrame("midFeetZUpFrame", fullRobotModel.getSoleFrame(RobotSide.LEFT), fullRobotModel.getSoleFrame(RobotSide.RIGHT));
+      pelvisFrame = fullRobotModel.getPelvis().getBodyFixedFrame();
       enableBBXFilter.set(parameters.isUseBBXInputFilter());
       if (parameters.getInputFilterBBXSize() != null)
          bbxSize.set(parameters.getInputFilterBBXSize());
-      bbxOffset = new YoFramePoint3D(namePrefix + "BBXCenter", midFeetZUpFrame, registry);
+      bbxOffset = new YoFramePoint3D(namePrefix + "BBXCenter", pelvisFrame, registry);
       if (parameters.getInputFilterBBXCenter() != null)
          bbxOffset.set(parameters.getInputFilterBBXCenter());
 
@@ -56,9 +55,9 @@ public class KSTInputFilter
 
    public void update()
    {
-      midFeetZUpFrame.update();
+      pelvisFrame.update();
       bbxPosition.setMatchingFrame(bbxOffset);
-      bbxOrientation.setToYawOrientation(midFeetZUpFrame.getTransformToRoot().getRotation().getYaw());
+      bbxOrientation.setToYawOrientation(pelvisFrame.getTransformToWorldFrame().getRotation().getYaw());
       boundingBox.getPose().set(bbxOrientation, bbxPosition);
       boundingBox.getSize().set(bbxSize);
    }

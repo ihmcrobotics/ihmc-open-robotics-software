@@ -179,8 +179,8 @@ public abstract class KinematicsStreamingToolboxControllerTest
       toolboxROS2Node.createSubscription(StateEstimatorAPI.getRobotConfigurationDataTopic(robotName),
                                          s -> robotStateUpdater.setRobotConfigurationData(s.takeNextData()));
 
-      toolboxROS2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic, CapturabilityBasedStatus.class),
-                                         s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
+//      toolboxROS2Node.createSubscription(ControllerAPI.getTopic(controllerOutputTopic, CapturabilityBasedStatus.class),
+//                                         s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
 
       inputPublisher = ros2Node.createPublisher(ControllerAPI.getTopic(toolboxInputTopic, KinematicsStreamingToolboxInputMessage.class));
       statePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ToolboxStateMessage.class));
@@ -231,7 +231,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       RobotDefinition robotDefinition = new RobotDefinition(robotModel.getRobotDefinition());
       robotDefinition.ignoreAllJoints();
-      addCollisionVisuals(robotModel, collisionModel, robotDefinition);
+//      addCollisionVisuals(robotModel, collisionModel, robotDefinition);
       robot = new Robot(robotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME);
       createToolboxController(robotModel, null, collisionModel);
 
@@ -329,7 +329,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       setupNoWalkingController(robotModel.getHumanoidRobotKinematicsCollisionModel());
       FullHumanoidRobotModel fullRobotModelAtInitialConfiguration = createFullRobotModelAtInitialConfiguration(robotModel);
       toolboxController.setRobotStateUpdater(IKRobotStateUpdater.wrap(extractRobotConfigurationData(fullRobotModelAtInitialConfiguration)));
-      toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(fullRobotModelAtInitialConfiguration, robotModel, true, true));
+//      toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(fullRobotModelAtInitialConfiguration, robotModel, true, true));
 
       List<Collidable> collidables = robotModel.getHumanoidRobotKinematicsCollisionModel().getRobotCollidables(desiredFullRobotModel.getElevator());
 

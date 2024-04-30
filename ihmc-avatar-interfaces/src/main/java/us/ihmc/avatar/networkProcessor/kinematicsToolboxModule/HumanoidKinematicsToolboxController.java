@@ -212,24 +212,25 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       {
          if (desiredFullRobotModel.getHand(robotSide) != null)
             setupVisualization(desiredFullRobotModel.getHand(robotSide));
-         setupVisualization(desiredFullRobotModel.getFoot(robotSide));
+         if (desiredFullRobotModel.getFoot(robotSide) != null)
+            setupVisualization(desiredFullRobotModel.getFoot(robotSide));
       }
 
       for (RobotSide robotSide : RobotSide.values)
       {
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-         isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
-         initialFootPoses.put(robotSide, new YoFramePose3D(sidePrefix + "FootInitial", worldFrame, registry));
+//         isFootInSupport.put(robotSide, new YoBoolean("is" + side + "FootInSupport", registry));
+//         initialFootPoses.put(robotSide, new YoFramePose3D(sidePrefix + "FootInitial", worldFrame, registry));
       }
 
       for (RobotSide robotSide : RobotSide.values)
       {
          endEffectorToPrimaryBaseMap.put(desiredFullRobotModel.getChest(), desiredFullRobotModel.getHand(robotSide));
-         endEffectorToPrimaryBaseMap.put(desiredFullRobotModel.getPelvis(), desiredFullRobotModel.getFoot(robotSide));
+//         endEffectorToPrimaryBaseMap.put(desiredFullRobotModel.getPelvis(), desiredFullRobotModel.getFoot(robotSide));
       }
 
-      populateDefaultJointLimitReductionFactors();
+//      populateDefaultJointLimitReductionFactors();
    }
 
    /**
@@ -354,7 +355,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       else
       {
          for (RobotSide robotSide : RobotSide.values)
-            isFootInSupport.get(robotSide).set(true);
+            if (isFootInSupport.get(robotSide) != null)
+               isFootInSupport.get(robotSide).set(true);
       }
 
       if (initialRobotConfigurationMap != null)
@@ -505,7 +507,8 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
-         initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
+         if (foot != null)
+            initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
       }
    }
 
@@ -732,7 +735,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    @Override
    protected void getAdditionalFeedbackControlCommands(FeedbackControlCommandBuffer bufferToPack)
    {
-      addHoldSupportFootCommands(bufferToPack);
+//      addHoldSupportFootCommands(bufferToPack);
       addHoldSupportRigidBodyCommands(bufferToPack);
       addHoldCenterOfMassXYCommand(bufferToPack);
    }
@@ -740,7 +743,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    @Override
    protected void getAdditionalInverseKinematicsCommands(InverseKinematicsCommandBuffer bufferToPack)
    {
-      addJointLimitReductionCommand(bufferToPack);
+//      addJointLimitReductionCommand(bufferToPack);
    }
 
    public YoDouble getMomentumWeight()
