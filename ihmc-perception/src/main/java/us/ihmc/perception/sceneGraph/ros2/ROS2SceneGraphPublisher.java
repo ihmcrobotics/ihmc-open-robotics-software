@@ -139,6 +139,7 @@ public class ROS2SceneGraphPublisher
             yoloNodeMessage.setOutlierFilterThreshold(yoloNode.getOutlierFilterThreshold());
             yoloNodeMessage.setDetectionAcceptanceThreshold(yoloNode.getDetectionAcceptanceThreshold());
             yoloNodeMessage.setDetectionClass(yoloNode.getDetectionClass().name());
+            yoloNodeMessage.setConfidence(yoloNode.getConfidence());
             // set point cloud
             yoloNodeMessage.getObjectPointCloud().clear();
             for (int i = 0; i < 5000 && i < yoloNode.getObjectPointCloud().size(); i++)

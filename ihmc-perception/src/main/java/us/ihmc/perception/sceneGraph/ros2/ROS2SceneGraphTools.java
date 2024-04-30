@@ -84,6 +84,7 @@ public class ROS2SceneGraphTools
                                     subscriptionNode.getYOLONodeMessage().getOutlierFilterThreshold(),
                                     subscriptionNode.getYOLONodeMessage().getDetectionAcceptanceThreshold(),
                                     YOLOv8DetectionClass.valueOf(subscriptionNode.getYOLONodeMessage().getDetectionClassAsString()),
+                                    subscriptionNode.getYOLONodeMessage().getConfidence(),
                                     subscriptionNode.getYOLONodeMessage().getObjectPointCloud(),
                                     subscriptionNode.getYOLONodeMessage().getObjectCentroid(),
                                     subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform(),

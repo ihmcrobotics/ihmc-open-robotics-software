@@ -13,6 +13,8 @@ float32 detection_acceptance_threshold
 # Detection information
 string detection_class
 
+float64 confidence
+
 geometry_msgs/Point32[] object_point_cloud
 
 geometry_msgs/Point32 object_centroid

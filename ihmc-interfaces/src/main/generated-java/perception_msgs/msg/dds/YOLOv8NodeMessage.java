@@ -25,6 +25,7 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
             * Detection information
             */
    public java.lang.StringBuilder detection_class_;
+   public double confidence_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D32>  object_point_cloud_;
    public us.ihmc.euclid.tuple3D.Point3D32 object_centroid_;
    public us.ihmc.euclid.transform.QuaternionBasedTransform centroid_to_object_transform_;
@@ -60,6 +61,8 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
 
       detection_class_.setLength(0);
       detection_class_.append(other.detection_class_);
+
+      confidence_ = other.confidence_;
 
       object_point_cloud_.set(other.object_point_cloud_);
       geometry_msgs.msg.dds.Point32PubSubType.staticCopy(other.object_centroid_, object_centroid_);
@@ -134,6 +137,15 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       return detection_class_;
    }
 
+   public void setConfidence(double confidence)
+   {
+      confidence_ = confidence;
+   }
+   public double getConfidence()
+   {
+      return confidence_;
+   }
+
 
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D32>  getObjectPointCloud()
    {
@@ -191,6 +203,8 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.detection_class_, other.detection_class_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.confidence_, other.confidence_, epsilon)) return false;
+
       if (this.object_point_cloud_.size() != other.object_point_cloud_.size()) { return false; }
       else
       {
@@ -224,6 +238,8 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
 
       if (!us.ihmc.idl.IDLTools.equals(this.detection_class_, otherMyClass.detection_class_)) return false;
 
+      if(this.confidence_ != otherMyClass.confidence_) return false;
+
       if (!this.object_point_cloud_.equals(otherMyClass.object_point_cloud_)) return false;
       if (!this.object_centroid_.equals(otherMyClass.object_centroid_)) return false;
       if (!this.centroid_to_object_transform_.equals(otherMyClass.centroid_to_object_transform_)) return false;
@@ -249,6 +265,8 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       builder.append(this.detection_acceptance_threshold_);      builder.append(", ");
       builder.append("detection_class=");
       builder.append(this.detection_class_);      builder.append(", ");
+      builder.append("confidence=");
+      builder.append(this.confidence_);      builder.append(", ");
       builder.append("object_point_cloud=");
       builder.append(this.object_point_cloud_);      builder.append(", ");
       builder.append("object_centroid=");
