@@ -20,6 +20,9 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** This class should manage VR as part of the ImGuiBasedUI. */
 public class RDXVRManager
 {
@@ -52,10 +55,14 @@ public class RDXVRManager
    private final Notification waitOnPosesNotification = new Notification();
    private volatile boolean waitGetPosesThreadRunning = false;
    private final RDXVRTeleporter teleporter = new RDXVRTeleporter();
+   private final List<RDXVRTrackerRoleManager> trackerRoleManagers = new ArrayList<>();
 
    public void create()
    {
       teleporter.create(context);
+
+      for (RDXVRTracker tracker : context.getTrackers().values())
+         trackerRoleManagers.add(new RDXVRTrackerRoleManager(context, tracker));
    }
 
    /**
@@ -146,6 +153,19 @@ public class RDXVRManager
                synchronized (syncObject)
                {
                   context.pollEvents(); // FIXME: Potential bug is that the poses get updated in the above thread while they're being used in here
+
+                  List<Integer> newTrackersIndices = context.getNewTrackersIndices();
+                  for (int newTrackerIndex : newTrackersIndices)
+                  {
+                     trackerRoleManagers.add(new RDXVRTrackerRoleManager(context, context.getTrackers().get(newTrackerIndex)));
+                  }
+                  if (context.isRolesResetPending())
+                  {
+                     for (var trackerRoleManager : trackerRoleManagers)
+                     {
+                        trackerRoleManager.reset();
+                     }
+                  }
                }
             }
          }
@@ -268,7 +288,13 @@ public class RDXVRManager
             context.getHeadsetRenderable(renderables, pool);
          }
          context.getControllerRenderables(renderables, pool);
-         context.getTrackerRenderables(renderables, pool);
+         for (var trackerRoleManager : trackerRoleManagers)
+         {
+            if (!trackerRoleManager.isRoleAssigned())
+               trackerRoleManager.getRedModelInstance().getRenderables(renderables, pool);
+            else
+               context.getTrackerRenderables(trackerRoleManager.getTrackerIndex(), renderables, pool);
+         }
          if (showScenePoseGizmo.get())
             scenePoseGizmo.getRenderables(renderables, pool);
       }

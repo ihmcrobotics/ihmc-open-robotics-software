@@ -188,15 +188,14 @@ public class RDXVRKinematicsStreamingMode
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         // TODO: Extract preset configuration to robot model
-         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), 0.5);
-         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(0.13));
-         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), 0.13);
-         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), -1.0);
+         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH).getQ());
+         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL).getQ());
+         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_YAW).getQ());
+         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.ELBOW_PITCH).getQ());
 
-         initialConfigurationMap.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.58);
-         initialConfigurationMap.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 0.55 + 0.672);
-         initialConfigurationMap.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.64);
+         initialConfigurationMap.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), syncedRobot.getFullRobotModel().getLegJoint(robotSide, LegJointName.HIP_PITCH).getQ());
+         initialConfigurationMap.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), syncedRobot.getFullRobotModel().getLegJoint(robotSide, LegJointName.KNEE_PITCH).getQ());
+         initialConfigurationMap.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), syncedRobot.getFullRobotModel().getLegJoint(robotSide, LegJointName.ANKLE_PITCH).getQ());
       }
 
       return initialConfigurationMap;
@@ -249,7 +248,7 @@ public class RDXVRKinematicsStreamingMode
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
-         Set<String> additionalTrackedSegments = vrContext.getBodySegmentsWithTrackers();
+         Set<String> additionalTrackedSegments = vrContext.getAssignedTrackerRoles();
          for (VRTrackedSegmentType segmentType : VRTrackedSegmentType.values())
             handleTrackedSegment(vrContext, toolboxInputMessage, segmentType, additionalTrackedSegments);
 
@@ -323,8 +322,8 @@ public class RDXVRKinematicsStreamingMode
             trackerFrameGraphics.get(segmentType.getSegmentName()).setToReferenceFrame(trackedSegmentDesiredFrame.get(segmentType.getSegmentName()).getReferenceFrame());
             RigidBodyBasics controlledSegment = switch (segmentType)
                   {
-                     case LEFT_FOREARM -> ghostFullRobotModel.getForearm(RobotSide.LEFT);
-                     case RIGHT_FOREARM -> ghostFullRobotModel.getForearm(RobotSide.RIGHT);
+                     case LEFT_WRIST -> ghostFullRobotModel.getForearm(RobotSide.LEFT);
+                     case RIGHT_WRIST -> ghostFullRobotModel.getForearm(RobotSide.RIGHT);
                      case CHEST -> ghostFullRobotModel.getChest();
                      default -> throw new IllegalStateException(
                            "Unexpected VR-tracked segment: " + segmentType);

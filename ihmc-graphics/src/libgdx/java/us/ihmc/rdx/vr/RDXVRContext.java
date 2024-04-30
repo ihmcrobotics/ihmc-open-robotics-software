@@ -1,7 +1,6 @@
 package us.ihmc.rdx.vr;
 
 import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
-import static org.lwjgl.openvr.VRSystem.VRSystem_GetStringTrackedDeviceProperty;
 
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
@@ -36,16 +35,6 @@ import us.ihmc.tools.io.*;
  */
 public class RDXVRContext
 {
-   // TODO. remove body segments names and serial number once integrated openxr. Use tracker role instead
-   private static final Map<String, String> TRACKER_SERIAL_MAP = new HashMap<String, String>()
-   {
-      {
-         put("LHR-6680BD50", "chest");
-         put("LHR-743512BE", "leftForeArm");
-         put("LHR-41A915A6", "rightForeArm");
-      }
-   }; // must use serial number, tracker role is not supported in org.lwjgl.openvr.VR
-
    // couple of scratch buffers
    private final IntBuffer errorPointer = BufferUtils.newIntBuffer(1);
    private final IntBuffer widthPointer = BufferUtils.newIntBuffer(1);
@@ -99,8 +88,21 @@ public class RDXVRContext
    private final RDXVRHeadset headset = new RDXVRHeadset(vrPlayAreaYUpZBackFrame);
    private final SideDependentList<RDXVRController> controllers = new SideDependentList<>(new RDXVRController(RobotSide.LEFT, vrPlayAreaYUpZBackFrame),
                                                                                           new RDXVRController(RobotSide.RIGHT, vrPlayAreaYUpZBackFrame));
-   private final Map<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
-   private final Map<String, RDXVRTracker> trackers = new HashMap<>();
+   private final Map<Integer, RDXVRTracker> trackers =  new HashMap<>();
+   private final Map<String, Integer> trackersRoleMap = new HashMap<>();
+   private final SortedSet<String> availableTrackerRoles = new TreeSet<>()
+   {
+      {
+         add("chest");
+         add("waist");
+         add("leftWrist");
+         add("rightWrist");
+         add("leftAnkle");
+         add("rightAnkle");
+      }
+   };
+   private final List<Integer> newTrackerIndices = new ArrayList<>();
+   private boolean rolesResetPending = false;
 
    public void initSystem()
    {
@@ -147,17 +149,14 @@ public class RDXVRContext
       {
          controllers.get(side).initSystem();
       }
-      // TODO: Bindings for /user/gamepad
-      int[] deviceIndices = new int[TRACKER_SERIAL_MAP.size()];
-      IntBuffer trackerIndices = IntBuffer.wrap(deviceIndices);
+
+      int[] trackerIndices = new int[5]; // only 5 trackers can be connected to a dongle
+      IntBuffer trackerIndicesBuffer = IntBuffer.wrap(trackerIndices);
       int numberOfTrackers = VRSystem.VRSystem_GetSortedTrackedDeviceIndicesOfClass(
-            VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker, trackerIndices, -1);
+            VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker, trackerIndicesBuffer, -1);
       for (int i = 0; i < numberOfTrackers; i++) {
-         int deviceIndex = trackerIndices.get(i);
-         if (!trackers.containsKey(getTrackedBodySegment(getSerialNumber(deviceIndex))))
-         {
-            trackers.put(getTrackedBodySegment(getSerialNumber(deviceIndex)), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
-         }
+         int deviceIndex = trackerIndicesBuffer.get(i);
+         trackers.put(deviceIndex, new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
       }
 
       activeActionSets = VRActiveActionSet.create(1);
@@ -208,22 +207,23 @@ public class RDXVRContext
          controllers.get(side).update(trackedDevicePoses);
       }
 
-      while (VRSystem.VRSystem_PollNextEvent(event))
+      while (VRSystem.VRSystem_PollNextEvent(event)) // a tracker is connected after initialization
       {
          int deviceIndex = event.trackedDeviceIndex();
-         if (!trackers.containsKey(getTrackedBodySegment(getSerialNumber(deviceIndex))))
+         if (!trackers.containsKey(deviceIndex))
          {
             int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
             if (deviceClass == VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker)
             {
-               trackers.put(getTrackedBodySegment(getSerialNumber(deviceIndex)), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
+               trackers.put(deviceIndex, new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
+               newTrackerIndices.add(deviceIndex);
             }
          }
       }
 
-      for (Map.Entry<String, RDXVRTracker> entryTracker : trackers.entrySet())
+      for (var tracker : trackers.entrySet())
       {
-         entryTracker.getValue().update(trackedDevicePoses);
+         tracker.getValue().update(trackedDevicePoses);
       }
 
       for (Consumer<RDXVRContext> vrPickCalculator : vrPickCalculators)
@@ -238,17 +238,6 @@ public class RDXVRContext
       {
          vrInputProcessor.accept(this);
       }
-   }
-
-   private String getSerialNumber(int index)
-   {
-      String serialNumber = VRSystem_GetStringTrackedDeviceProperty(index, VR.ETrackedDeviceProperty_Prop_SerialNumber_String, null);
-      return serialNumber;
-   }
-
-   private String getTrackedBodySegment(String serialNumber)
-   {
-      return TRACKER_SERIAL_MAP.get(serialNumber);
    }
 
    /**
@@ -341,23 +330,20 @@ public class RDXVRContext
       }
    }
 
-   public void getTrackerRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getTrackerRenderables(int index, Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (RDXVRTracker tracker : trackers.values())
+      ModelInstance modelInstance = trackers.get(index).getModelInstance();
+      if (modelInstance != null)
       {
-         ModelInstance modelInstance = tracker.getModelInstance();
-         if (modelInstance != null)
-         {
-            modelInstance.getRenderables(renderables, pool);
-         }
+         modelInstance.getRenderables(renderables, pool);
       }
    }
 
-   public void getBaseStationRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getTrackersRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (RDXVRBaseStation baseStation : baseStations.values())
+      for (var tracker : trackers.entrySet())
       {
-         ModelInstance modelInstance = baseStation.getModelInstance();
+         ModelInstance modelInstance = tracker.getValue().getModelInstance();
          if (modelInstance != null)
          {
             modelInstance.getRenderables(renderables, pool);
@@ -375,19 +361,66 @@ public class RDXVRContext
       return headset;
    }
 
-   public RDXVRTracker getTracker(String bodySegment)
+   public void setTrackerRole(String role, int index)
    {
-      return trackers.get(bodySegment);
+      trackersRoleMap.put(role, index);
    }
 
-   public Set<String> getBodySegmentsWithTrackers()
+   public RDXVRTracker getTracker(String role)
    {
-      return trackers.keySet();
+      return trackers.get(trackersRoleMap.get(role));
    }
 
-   public Collection<RDXVRBaseStation> getBaseStations()
+   public Map<Integer, RDXVRTracker> getTrackers()
    {
-      return baseStations.values();
+      return trackers;
+   }
+
+   public Set<String> getAssignedTrackerRoles()
+   {
+      return trackersRoleMap.keySet();
+   }
+
+   public SortedSet<String> getAvailableTrackerRoles()
+   {
+      return availableTrackerRoles;
+   }
+
+   public void setTrackerRoleAsUnavailable(String role)
+   {
+      availableTrackerRoles.remove(role);
+   }
+
+   public void setTrackerRoleAsAvailable(String role)
+   {
+      availableTrackerRoles.add(role);
+   }
+
+   public void resetTrackerRoles()
+   {
+      trackersRoleMap.clear();
+      availableTrackerRoles.clear();
+      availableTrackerRoles.add("chest");
+      availableTrackerRoles.add("waist");
+      availableTrackerRoles.add("leftWrist");
+      availableTrackerRoles.add("rightWrist");
+      availableTrackerRoles.add("leftAnkle");
+      availableTrackerRoles.add("rightAnkle");
+      rolesResetPending = true;
+   }
+
+   public boolean isRolesResetPending()
+   {
+      boolean reset = rolesResetPending;
+      rolesResetPending = false;
+      return reset;
+   }
+
+   public List<Integer> getNewTrackersIndices()
+   {
+      List<Integer> indices = new ArrayList<>(newTrackerIndices);
+      newTrackerIndices.clear();
+      return indices;
    }
 
    public SideDependentList<RDXVREye> getEyes()
