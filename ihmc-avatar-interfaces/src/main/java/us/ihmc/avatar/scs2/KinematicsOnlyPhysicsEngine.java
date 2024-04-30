@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -84,25 +85,35 @@ public class KinematicsOnlyPhysicsEngine implements PhysicsEngine
       for (Robot robot : robotList)
       {
          robot.getControllerManager().updateControllers(currentTime);
-         robot.getControllerManager().writeControllerOutputForAllJoints(JointStateType.values());
-         robot.updateFrames();
+//         robot.getControllerManager().writeControllerOutputForAllJoints(JointStateType.values());
+//         robot.updateFrames();
       }
 
       HighLevelHumanoidControllerToolbox controllerToolbox = highLevelHumanoidControllerFactory.getHighLevelHumanoidControllerToolbox();
       WholeBodyControllerCore controllerCore = highLevelHumanoidControllerFactory.getWholeBodyControllerCoreFactory().getWholeBodyControllerCore();
 
-      controllerToolbox.getFullRobotModel().getRootJoint().setJointAcceleration(0, controllerCore.getOutputForRootJoint().getDesiredAcceleration());
-      JointDesiredOutputListReadOnly jointDesiredOutputList = controllerCore.getOutputForLowLevelController();
-
-      for (OneDoFJointBasics joint : controllerToolbox.getControlledOneDoFJoints())
+      RootJointDesiredConfigurationDataReadOnly outputForRootJoint = controllerCore.getOutputForRootJoint();
+      if (outputForRootJoint.getDesiredAcceleration().getNumCols() > 0) // It's not ready for the first ticks
       {
-         JointDesiredOutputReadOnly jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
-         joint.setQdd(jointDesiredOutput.getDesiredAcceleration());
-         joint.setTau(jointDesiredOutput.getDesiredTorque());
+         controllerToolbox.getFullRobotModel().getRootJoint().setJointAcceleration(0, outputForRootJoint.getDesiredAcceleration());
+         JointDesiredOutputListReadOnly jointDesiredOutputList = controllerCore.getOutputForLowLevelController();
+
+         for (OneDoFJointBasics joint : controllerToolbox.getControlledOneDoFJoints())
+         {
+            JointDesiredOutputReadOnly jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
+            joint.setQdd(jointDesiredOutput.getDesiredAcceleration());
+            joint.setTau(jointDesiredOutput.getDesiredTorque());
+         }
+
+         integrator.setIntegrationDT(dt);
+         integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
       }
 
-      integrator.setIntegrationDT(dt);
-      integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
+      for (Robot robot : robotList)
+      {
+         robot.getControllerManager().writeControllerOutputForAllJoints(JointStateType.values());
+         robot.updateFrames();
+      }
    }
 
    @Override
