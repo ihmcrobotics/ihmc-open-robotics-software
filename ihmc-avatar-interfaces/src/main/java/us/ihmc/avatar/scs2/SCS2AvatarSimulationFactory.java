@@ -254,7 +254,11 @@ public class SCS2AvatarSimulationFactory
 
       PhysicsEngineFactory physicsEngineFactory;
 
-      if (useImpulseBasedPhysicsEngine.hasValue() && useImpulseBasedPhysicsEngine.get())
+      if (kinematicsOnly.get())
+      {
+         physicsEngineFactory = KinematicsOnlyPhysicsEngine::new;
+      }
+      else if (useImpulseBasedPhysicsEngine.hasValue() && useImpulseBasedPhysicsEngine.get())
       {
          physicsEngineFactory = (inertialFrame, rootRegistry) ->
          {
@@ -403,6 +407,12 @@ public class SCS2AvatarSimulationFactory
          simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(controllerThread.getSCS1YoGraphicsListRegistry()));
       if (enableSCS2YoGraphics.get())
          simulationConstructionSet.addYoGraphic(controllerThread.getSCS2YoGraphics());
+
+      if (kinematicsOnly.get())
+      {
+         KinematicsOnlyPhysicsEngine physicsEngine = (KinematicsOnlyPhysicsEngine) simulationConstructionSet.getPhysicsEngine();
+         physicsEngine.setHighLevelHumanoidControllerFactory(highLevelHumanoidControllerFactory.get());
+      }
    }
 
    private void setupStepGeneratorThread()
@@ -909,6 +919,7 @@ public class SCS2AvatarSimulationFactory
       this.usePerfectSensors.set(usePerfectSensors);
    }
 
+   /** Must be used with perfect sensors. */
    public void setKinematicsOnly(boolean kinematicsOnly)
    {
       this.kinematicsOnly.set(kinematicsOnly);
