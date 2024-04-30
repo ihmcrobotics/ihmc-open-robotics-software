@@ -11,14 +11,19 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.robot.RobotStateDefinition;
+import us.ihmc.scs2.definition.state.interfaces.JointStateBasics;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngine;
 import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
+import us.ihmc.scs2.simulation.screwTools.SingleRobotFirstOrderIntegrator;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -26,7 +31,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class KinematicsOnlyPhysicsEngine implements PhysicsEngine
 {
    private final ReferenceFrame inertialFrame;
-   private final MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator();
+//   private final MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator();
+   private final SingleRobotFirstOrderIntegrator integrator = new SingleRobotFirstOrderIntegrator();
    private final YoRegistry rootRegistry;
    private final YoRegistry physicsEngineRegistry = new YoRegistry(getClass().getSimpleName());
    private final List<Robot> robotList = new ArrayList<>();
@@ -82,37 +88,19 @@ public class KinematicsOnlyPhysicsEngine implements PhysicsEngine
          return;
       }
 
-      for (Robot robot : robotList)
-      {
-         robot.getControllerManager().updateControllers(currentTime);
-//         robot.getControllerManager().writeControllerOutputForAllJoints(JointStateType.values());
-//         robot.updateFrames();
-      }
-
       HighLevelHumanoidControllerToolbox controllerToolbox = highLevelHumanoidControllerFactory.getHighLevelHumanoidControllerToolbox();
       WholeBodyControllerCore controllerCore = highLevelHumanoidControllerFactory.getWholeBodyControllerCoreFactory().getWholeBodyControllerCore();
-
       RootJointDesiredConfigurationDataReadOnly outputForRootJoint = controllerCore.getOutputForRootJoint();
-      if (outputForRootJoint.getDesiredAcceleration().getNumCols() > 0) // It's not ready for the first ticks
-      {
-         controllerToolbox.getFullRobotModel().getRootJoint().setJointAcceleration(0, outputForRootJoint.getDesiredAcceleration());
-         JointDesiredOutputListReadOnly jointDesiredOutputList = controllerCore.getOutputForLowLevelController();
-
-         for (OneDoFJointBasics joint : controllerToolbox.getControlledOneDoFJoints())
-         {
-            JointDesiredOutputReadOnly jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
-            joint.setQdd(jointDesiredOutput.getDesiredAcceleration());
-            joint.setTau(jointDesiredOutput.getDesiredTorque());
-         }
-
-         integrator.setIntegrationDT(dt);
-         integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
-      }
 
       for (Robot robot : robotList)
       {
-         robot.getControllerManager().writeControllerOutputForAllJoints(JointStateType.values());
          robot.updateFrames();
+         robot.getControllerManager().updateControllers(currentTime);
+         robot.getControllerManager().writeControllerOutputForAllJoints(JointStateType.values());
+
+//         robot.get
+
+         integrator.integrate(dt, robot);
       }
    }
 
