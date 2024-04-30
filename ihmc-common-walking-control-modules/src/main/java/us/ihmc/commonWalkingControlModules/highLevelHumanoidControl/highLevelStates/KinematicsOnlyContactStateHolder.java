@@ -18,8 +18,7 @@ import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 /**
- * Provides virtual ground reaction forces to keep the feet from flying away
- * when doing kinematics only simulations.
+ * Used with {@link KinematicsOnlyVirtualGroundReactionManager}.
  */
 public class KinematicsOnlyContactStateHolder
 {

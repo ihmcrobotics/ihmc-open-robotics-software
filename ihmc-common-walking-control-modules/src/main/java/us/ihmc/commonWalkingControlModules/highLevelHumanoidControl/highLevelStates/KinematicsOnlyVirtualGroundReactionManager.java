@@ -12,7 +12,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 /**
  * Provides virtual ground reaction forces to keep the feet from flying away
- * when doing kinematics only simulations.
+ * when doing kinematics only simulations. It does this by feeding in controlled spatial
+ * acceleration commands for the feet into the controller to keep them in place
+ * when they are nominally supposed to be in contact with the ground.
  */
 public class KinematicsOnlyVirtualGroundReactionManager
 {
