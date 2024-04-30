@@ -1,15 +1,6 @@
 package us.ihmc.modelFileLoaders;
 
-import java.io.InputStream;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.function.Consumer;
-import java.util.function.Predicate;
-
-import javax.xml.bind.JAXBException;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
-
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.partNames.ContactPointDefinitionHolder;
@@ -17,16 +8,7 @@ import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
-import us.ihmc.scs2.definition.robot.ExternalWrenchPointDefinition;
-import us.ihmc.scs2.definition.robot.GroundContactPointDefinition;
-import us.ihmc.scs2.definition.robot.JointDefinition;
-import us.ihmc.scs2.definition.robot.KinematicPointDefinition;
-import us.ihmc.scs2.definition.robot.OneDoFJointDefinition;
-import us.ihmc.scs2.definition.robot.PrismaticJointDefinition;
-import us.ihmc.scs2.definition.robot.RevoluteJointDefinition;
-import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
-import us.ihmc.scs2.definition.robot.RobotDefinition;
-import us.ihmc.scs2.definition.robot.SensorDefinition;
+import us.ihmc.scs2.definition.robot.*;
 import us.ihmc.scs2.definition.robot.sdf.SDFTools;
 import us.ihmc.scs2.definition.robot.sdf.items.SDFRoot;
 import us.ihmc.scs2.definition.robot.urdf.URDFTools;
@@ -35,6 +17,13 @@ import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinitionFactory;
+
+import javax.xml.bind.JAXBException;
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class RobotDefinitionLoader
 {
@@ -69,7 +58,7 @@ public class RobotDefinitionLoader
    {
       try
       {
-         URDFModel urdfRoot = URDFTools.loadURDFModel(inputStream, resourceDirectories, classLoader);
+         URDFModel urdfRoot = URDFTools.loadURDFModel(inputStream, resourceDirectories, classLoader, urdfParserProperties);
          RobotDefinition robotDefinition = URDFTools.toRobotDefinition(urdfRoot, urdfParserProperties);
          // By default SDFTools names the root body "rootBody", for backward compatibility it is renamed "elevator".
          robotDefinition.getRootBodyDefinition().setName(DEFAULT_ROOT_BODY_NAME);
@@ -248,7 +237,7 @@ public class RobotDefinitionLoader
    private static boolean isJointInNeedOfReducedGains(String jointName)
    {
       return jointName.contains("f0") || jointName.contains("f1") || jointName.contains("f2") || jointName.contains("f3") || jointName.contains("palm")
-            || jointName.contains("finger");
+             || jointName.contains("finger");
    }
 
    public static void addGroundContactPoints(RobotDefinition robotDefinition, ContactPointDefinitionHolder contactPointHolder)

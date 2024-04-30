@@ -150,6 +150,8 @@ public final class PerceptionAPI
    public static final ROS2Topic<DetectedObjectPacket> CENTERPOSE_DETECTED_OBJECT = IHMC_ROOT.withModule("centerpose").withType(DetectedObjectPacket.class);
    public static final ROS2Topic<Empty> REQUEST_YOLO_ZED = PERCEPTION_MODULE.withSuffix("request_yolo_zed").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_YOLO_REALSENSE = PERCEPTION_MODULE.withSuffix("request_yolo_realsense").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_YOLO_ANNOTATED_IMAGE = PERCEPTION_MODULE.withSuffix("request_yolo_image").withType(Empty.class);
+   public static final ROS2Topic<ImageMessage> YOLO_ANNOTATED_IMAGE = PERCEPTION_MODULE.withModule("yolo").withType(ImageMessage.class).withSuffix("annotated_image");
    public static final ROS2Topic<ImageMessage> ZED2_STEREO_COLOR = IHMC_ROOT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("color_stereo");
    public static final SideDependentList<ROS2Topic<ImageMessage>> ZED2_COLOR_IMAGES = new SideDependentList<>(BEST_EFFORT.withModule(ZED2_NAME)
                                                                                                                          .withType(ImageMessage.class)
@@ -209,9 +211,6 @@ public final class PerceptionAPI
 
    public static final ROS2Topic<FramePlanarRegionsListMessage> PERSPECTIVE_RAPID_REGIONS
          = PERCEPTION_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class).withSuffix("perspective").withQoS(ROS2QosProfile.BEST_EFFORT());
-
-   public static final ROS2Topic<FramePlanarRegionsListMessage> PERSPECTIVE_DOOR_RAPID_REGION
-         = PERCEPTION_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class).withSuffix("perspective_door").withQoS(ROS2QosProfile.BEST_EFFORT());
 
    public static final ROS2Topic<FramePlanarRegionsListMessage> SPHERICAL_RAPID_REGIONS_WITH_POSE = PERCEPTION_MODULE.withOutput().withTypeName(FramePlanarRegionsListMessage.class).withSuffix("spherical");
    public static final ROS2Topic<PlanarRegionsListMessage> SPHERICAL_RAPID_REGIONS = PERCEPTION_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class).withSuffix("spherical");

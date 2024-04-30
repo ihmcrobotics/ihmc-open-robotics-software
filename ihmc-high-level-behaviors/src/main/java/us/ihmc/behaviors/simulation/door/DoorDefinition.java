@@ -15,7 +15,7 @@ import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimPrismaticJoint;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRevoluteJoint;
 
-import static us.ihmc.perception.sceneGraph.multiBodies.door.DoorModelParameters.*;
+import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters.*;
 
 /**
  * SCS 2 definition of the door we have in the lab.

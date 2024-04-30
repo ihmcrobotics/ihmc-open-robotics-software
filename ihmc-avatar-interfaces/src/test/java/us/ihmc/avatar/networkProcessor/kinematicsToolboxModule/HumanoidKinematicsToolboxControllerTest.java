@@ -1,25 +1,17 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
-import static us.ihmc.robotics.Assert.assertTrue;
-import static us.ihmc.robotics.Assert.fail;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.stream.Collectors;
-
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
-
-import toolbox_msgs.msg.dds.*;
+import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
@@ -80,6 +72,12 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
+import static us.ihmc.robotics.Assert.assertTrue;
+
 @Tag("humanoid-toolbox")
 public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRobotTestInterface
 {
@@ -89,6 +87,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
    private static final MaterialDefinition ghostMaterial = new MaterialDefinition(ColorDefinitions.Yellow().derive(0, 1, 1, 0.25));
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
+
    static
    {
       simulationTestingParameters.setDataBufferSize(1 << 16);
@@ -139,7 +138,6 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       toolboxController = new HumanoidKinematicsToolboxController(commandInputManager,
                                                                   statusOutputManager,
                                                                   desiredFullRobotModel,
-                                                                  getRobotModel(),
                                                                   updateDT,
                                                                   yoGraphicsListRegistry,
                                                                   mainRegistry);
@@ -237,7 +235,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       commandInputManager.submitMessage(holdRigidBodyCurrentPose(initialFullRobotModel.getHand(RobotSide.RIGHT)));
 
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
-      toolboxController.updateRobotConfigurationData(robotConfigurationData);
+      toolboxController.setDesiredRobotStateUpdater(IKRobotStateUpdater.wrap(robotConfigurationData));
       toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(initialFullRobotModel, getRobotModel(), true, true));
 
       int numberOfIterations = 250;
@@ -280,7 +278,8 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          }
 
          { // Setup CoM message
-            KinematicsToolboxCenterOfMassMessage message = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCenterOfMass3D(randomizedFullRobotModel));
+            KinematicsToolboxCenterOfMassMessage message = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCenterOfMass3D(
+                  randomizedFullRobotModel));
             SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
             selectionMatrix.selectZAxis(false);
             message.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
@@ -294,7 +293,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          commandInputManager.submitMessage(configurationMessage);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
-         toolboxController.updateRobotConfigurationData(robotConfigurationData);
+         toolboxController.setDesiredRobotStateUpdater(IKRobotStateUpdater.wrap(robotConfigurationData));
          toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(randomizedFullRobotModel, getRobotModel(), true, true));
 
          int numberOfIterations = 100;
@@ -342,7 +341,8 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          }
 
          { // Setup CoM message
-            KinematicsToolboxCenterOfMassMessage message = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCenterOfMass3D(randomizedFullRobotModel));
+            KinematicsToolboxCenterOfMassMessage message = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCenterOfMass3D(
+                  randomizedFullRobotModel));
             SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
             selectionMatrix.selectZAxis(false);
             message.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
@@ -356,7 +356,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          commandInputManager.submitMessage(configurationMessage);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
-         toolboxController.updateRobotConfigurationData(robotConfigurationData);
+         toolboxController.setDesiredRobotStateUpdater(IKRobotStateUpdater.wrap(robotConfigurationData));
          toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(randomizedFullRobotModel, getRobotModel(), true, true));
 
          int numberOfIterations = 150;
@@ -429,7 +429,8 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          }
 
          { // Setup CoM message
-            KinematicsToolboxCenterOfMassMessage message = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCenterOfMass3D(randomizedFullRobotModel));
+            KinematicsToolboxCenterOfMassMessage message = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCenterOfMass3D(
+                  randomizedFullRobotModel));
             SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
             selectionMatrix.selectZAxis(false);
             message.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
@@ -443,7 +444,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          commandInputManager.submitMessage(configurationMessage);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
-         toolboxController.updateRobotConfigurationData(robotConfigurationData);
+         toolboxController.setDesiredRobotStateUpdater(IKRobotStateUpdater.wrap(robotConfigurationData));
          toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(randomizedFullRobotModel, getRobotModel(), true, false));
 
          int numberOfIterations = 350;
@@ -513,7 +514,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          commandInputManager.submitMessage(shiftBodyMessage(initialFullRobotModel.getHand(RobotSide.RIGHT), shift, 5.0));
 
          RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
-         toolboxController.updateRobotConfigurationData(robotConfigurationData);
+         toolboxController.setDesiredRobotStateUpdater(IKRobotStateUpdater.wrap(robotConfigurationData));
          toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(initialFullRobotModel, getRobotModel(), true, true));
 
          int numberOfIterations = 250;
@@ -545,7 +546,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          commandInputManager.submitMessage(shiftBodyMessage(initialFullRobotModel.getHand(RobotSide.RIGHT), shift, 5.0));
 
          RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(initialFullRobotModel);
-         toolboxController.updateRobotConfigurationData(robotConfigurationData);
+         toolboxController.setDesiredRobotStateUpdater(IKRobotStateUpdater.wrap(robotConfigurationData));
          toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(initialFullRobotModel, getRobotModel(), true, true));
 
          int numberOfIterations = 250;
@@ -829,10 +830,16 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
       Object<Point3D> leftFootSupportPolygon2d = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
       Object<Point3D> rightFootSupportPolygon2d = capturabilityBasedStatus.getRightFootSupportPolygon3d();
       if (isLeftFootInSupport)
-         contactableFeet.get(RobotSide.LEFT).getContactPointsCopy().stream().peek(cp -> cp.changeFrame(worldFrame))
+         contactableFeet.get(RobotSide.LEFT)
+                        .getContactPointsCopy()
+                        .stream()
+                        .peek(cp -> cp.changeFrame(worldFrame))
                         .forEach(cp -> leftFootSupportPolygon2d.add().set(cp.getX(), cp.getY(), 0.0));
       if (isRightFootInSupport)
-         contactableFeet.get(RobotSide.RIGHT).getContactPointsCopy().stream().peek(cp -> cp.changeFrame(worldFrame))
+         contactableFeet.get(RobotSide.RIGHT)
+                        .getContactPointsCopy()
+                        .stream()
+                        .peek(cp -> cp.changeFrame(worldFrame))
                         .forEach(cp -> rightFootSupportPolygon2d.add().set(cp.getX(), cp.getY(), 0.0));
       return capturabilityBasedStatus;
    }

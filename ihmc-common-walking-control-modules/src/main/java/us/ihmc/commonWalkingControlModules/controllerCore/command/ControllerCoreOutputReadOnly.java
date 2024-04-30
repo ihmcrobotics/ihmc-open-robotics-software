@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -25,12 +26,38 @@ public interface ControllerCoreOutputReadOnly
    /**
     * Typically used to obtain the desired center of pressures for the feet.
     */
-   public abstract void getDesiredCenterOfPressure(FramePoint2DBasics copToPack, RigidBodyBasics rigidBody);
+   void getDesiredCenterOfPressure(FramePoint2DBasics copToPack, RigidBodyBasics rigidBody);
 
    /**
     * Typically used to obtain the desired external wrench for the feet.
     */
-   public abstract boolean getDesiredExternalWrench(WrenchBasics desiredExternalWrenchToPack, RigidBodyBasics rigidBody);
+   boolean getDesiredExternalWrench(WrenchBasics desiredExternalWrenchToPack, RigidBodyBasics rigidBody);
+
+   /**
+    * Retrieves the linear momentum obtained after the optimization problem has been solved.
+    * <p>
+    * This is only available for the inverse kinematics.
+    * </p>
+    * <p>
+    * It is useful to compare against the desired momentum that provided to the controller core as input.
+    * </p>
+    *
+    * @return the linear momentum after optimization.
+    */
+   FrameVector3DReadOnly getLinearMomentum();
+
+   /**
+    * Retrieves the angular momentum obtained after the optimization problem has been solved.
+    * <p>
+    * This is only available for the inverse kinematics.
+    * </p>
+    * <p>
+    * It is useful to compare against the desired momentum that provided to the controller core as input.
+    * </p>
+    *
+    * @return the angular momentum after optimization.
+    */
+   FrameVector3DReadOnly getAngularMomentum();
 
    /**
     * Retrieves the linear momentum rate obtained after the optimization problem has been solved.
@@ -42,12 +69,16 @@ public interface ControllerCoreOutputReadOnly
     * It is useful to compare against the desired momentum rate that provided to the controller core as
     * input.
     * </p>
-    * 
-    * @param linearMomentumRateToPack the linear momentum rate after optimization.
+    *
+    * @return the linear momentum rate after optimization.
     */
-   public abstract void getLinearMomentumRate(FrameVector3DBasics linearMomentumRateToPack);
+   FrameVector3DReadOnly getLinearMomentumRate();
 
-   
+   default void getLinearMomentumRate(FrameVector3DBasics linearMomentumRateToPack)
+   {
+      linearMomentumRateToPack.setIncludingFrame(getLinearMomentumRate());
+   }
+
    /**
     * Retrieves the angular momentum rate obtained after the optimization problem has been solved.
     * <p>
@@ -58,13 +89,16 @@ public interface ControllerCoreOutputReadOnly
     * It is useful to compare against the desired momentum rate that provided to the controller core as
     * input.
     * </p>
-    * 
-    * @param linearMomentumRateToPack the angular momentum rate after optimization.
+    *
+    * @return the angular momentum rate after optimization.
     */
-   public abstract void getAngularMomentumRate(FrameVector3DBasics angularMomentumRateToPack);
+   FrameVector3DReadOnly getAngularMomentumRate();
 
-   
-   
+   default void getAngularMomentumRate(FrameVector3DBasics angularMomentumRateToPack)
+   {
+      angularMomentumRateToPack.setIncludingFrame(getAngularMomentumRate());
+   }
+
    /**
     * Retrieves the desired state for the root joint.
     * <p>
@@ -72,19 +106,18 @@ public interface ControllerCoreOutputReadOnly
     * {@link #getLowLevelOneDoFJointDesiredDataHolder()} it completes information to entire robot
     * desired state.
     * </p>
-    * 
+    *
     * @return the root joint desired state data.
     */
-   public abstract RootJointDesiredConfigurationDataReadOnly getRootJointDesiredConfigurationData();
+   RootJointDesiredConfigurationDataReadOnly getRootJointDesiredConfigurationData();
 
    /**
     * Retrieves the desired state for the robot joints.
     * <p>
     * It contains all the information needed to the low-level controller of each joint.
     * </p>
-    * 
+    *
     * @return the desired state of the robot joints.
     */
-   public abstract JointDesiredOutputListReadOnly getLowLevelOneDoFJointDesiredDataHolder();
-
+   JointDesiredOutputListReadOnly getLowLevelOneDoFJointDesiredDataHolder();
 }

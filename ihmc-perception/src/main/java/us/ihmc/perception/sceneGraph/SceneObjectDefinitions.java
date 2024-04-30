@@ -1,6 +1,6 @@
 package us.ihmc.perception.sceneGraph;
 
-import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 
 import java.util.function.Function;

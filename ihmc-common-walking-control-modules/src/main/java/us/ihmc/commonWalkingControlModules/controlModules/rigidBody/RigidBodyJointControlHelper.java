@@ -1,9 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValidationTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
@@ -26,6 +22,10 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Manages providing jointspace feedback control commands for the ancestor joints of a rigid body,
@@ -411,32 +411,53 @@ public class RigidBodyJointControlHelper
 
          if (command.getExecutionMode() == ExecutionMode.STREAM)
          {
-            if (trajectoryPoints.getNumberOfTrajectoryPoints() != 1)
+            if (trajectoryPoints.getNumberOfTrajectoryPoints() == 0 || trajectoryPoints.getNumberOfTrajectoryPoints() > 2)
             {
-               LogTools.warn("When streaming, trajectories should contain only 1 trajectory point, was: " + trajectoryPoints.getNumberOfTrajectoryPoints());
+               LogTools.warn(
+                     "When streaming, trajectories should contain either 1 or 2 trajectory point(s), was: " + trajectoryPoints.getNumberOfTrajectoryPoints());
                return false;
             }
 
-            OneDoFTrajectoryPoint trajectoryPoint = trajectoryPoints.getTrajectoryPoint(0);
+            OneDoFTrajectoryPoint firstPoint = trajectoryPoints.getTrajectoryPoint(0);
 
-            if (trajectoryPoint.getTime() != 0.0)
+            if (firstPoint.getTime() != 0.0)
             {
-               LogTools.warn("When streaming, the trajectory point should have a time of zero, was: " + trajectoryPoint.getTime());
+               LogTools.warn("When streaming, the trajectory point should have a time of zero, was: " + firstPoint.getTime());
                return false;
             }
 
             // When a message is delayed during shipping over network, timeOffset > streamTimestampOffset.getValue().
             // This new time will put the trajectory point in the past, closer to when it should have been received.
             double t0 = Double.isNaN(streamTimestampOffset) ? 0.0 : streamTimestampOffset - streamTimeOffset;
-            double q0 = trajectoryPoint.getPosition();
-            double qd0 = trajectoryPoint.getVelocity();
+            double q0 = firstPoint.getPosition();
+            double qd0 = firstPoint.getVelocity();
 
             if (!queuePoint(q0, qd0, t0, jointIdx))
                return false;
 
             double t1 = command.getStreamIntegrationDuration() + t0;
-            double qd1 = trajectoryPoint.getVelocity();
-            double q1 = trajectoryPoint.getPosition() + command.getStreamIntegrationDuration() * qd1;
+            double q1;
+            double qd1;
+
+            if (trajectoryPoints.getNumberOfTrajectoryPoints() == 1)
+            { // No extrapolation provided, so we do it here.
+               qd1 = firstPoint.getVelocity();
+               q1 = firstPoint.getPosition() + command.getStreamIntegrationDuration() * qd1;
+            }
+            else
+            { // Extrapolation provided, so we use it.
+               OneDoFTrajectoryPoint secondPoint = trajectoryPoints.getTrajectoryPoint(1);
+
+               if (secondPoint.getTime() != command.getStreamIntegrationDuration())
+               {
+                  LogTools.warn(
+                        "When streaming, the second trajectory point should have a time equal to the integration duration, was: " + secondPoint.getTime());
+                  return false;
+               }
+
+               q1 = secondPoint.getPosition();
+               qd1 = secondPoint.getVelocity();
+            }
 
             if (!queuePoint(q1, qd1, t1, jointIdx))
                return false;
