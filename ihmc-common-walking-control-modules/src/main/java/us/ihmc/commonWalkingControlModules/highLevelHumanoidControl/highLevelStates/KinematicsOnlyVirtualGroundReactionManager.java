@@ -10,7 +10,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class KinematicsOnlyVirtualGroundReaction
+/**
+ * Provides virtual ground reaction forces to keep the feet from flying away
+ * when doing kinematics only simulations.
+ */
+public class KinematicsOnlyVirtualGroundReactionManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -20,9 +24,9 @@ public class KinematicsOnlyVirtualGroundReaction
    private final FramePose3D desiredFootstep = new FramePose3D();
    private final InverseDynamicsCommandList inverseDynamicsContactHolderCommandList = new InverseDynamicsCommandList();
 
-   public KinematicsOnlyVirtualGroundReaction(HighLevelHumanoidControllerToolbox controllerToolbox,
-                                              StatusMessageOutputManager statusOutputManager,
-                                              WalkingHighLevelHumanoidController walkingController)
+   public KinematicsOnlyVirtualGroundReactionManager(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                                     StatusMessageOutputManager statusOutputManager,
+                                                     WalkingHighLevelHumanoidController walkingController)
    {
       this.controllerToolbox = controllerToolbox;
       this.walkingController = walkingController;

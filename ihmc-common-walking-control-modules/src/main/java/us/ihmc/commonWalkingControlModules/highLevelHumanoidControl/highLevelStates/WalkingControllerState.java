@@ -47,7 +47,7 @@ public class WalkingControllerState extends HighLevelControllerState
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   private final KinematicsOnlyVirtualGroundReaction kinematicsOnlyVirtualGroundReaction;
+   private final KinematicsOnlyVirtualGroundReactionManager kinematicsOnlyVirtualGroundReactionManager;
 
    public WalkingControllerState(CommandInputManager commandInputManager,
                                  StatusMessageOutputManager statusOutputManager,
@@ -81,9 +81,9 @@ public class WalkingControllerState extends HighLevelControllerState
       linearMomentumRateControlModule = controllerCoreFactory.getOrCreateLinearMomentumRateControlModule(registry);
 
       if (controllerToolbox.isKinematicsOnly())
-         kinematicsOnlyVirtualGroundReaction = new KinematicsOnlyVirtualGroundReaction(controllerToolbox, statusOutputManager, walkingController);
+         kinematicsOnlyVirtualGroundReactionManager = new KinematicsOnlyVirtualGroundReactionManager(controllerToolbox, statusOutputManager, walkingController);
       else
-         kinematicsOnlyVirtualGroundReaction = null;
+         kinematicsOnlyVirtualGroundReactionManager = null;
 
       registry.addChild(walkingController.getYoVariableRegistry());
    }
@@ -102,9 +102,9 @@ public class WalkingControllerState extends HighLevelControllerState
    @Override
    public void doAction(double timeInState)
    {
-      if (kinematicsOnlyVirtualGroundReaction != null)
+      if (kinematicsOnlyVirtualGroundReactionManager != null)
       {
-         kinematicsOnlyVirtualGroundReaction.update();
+         kinematicsOnlyVirtualGroundReactionManager.update();
       }
 
       walkingController.doAction();
@@ -122,9 +122,9 @@ public class WalkingControllerState extends HighLevelControllerState
       {
          controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getCenterOfPressureCommand());
       }
-      if (kinematicsOnlyVirtualGroundReaction != null)
+      if (kinematicsOnlyVirtualGroundReactionManager != null)
       {
-         controllerCoreCommand.addInverseDynamicsCommand(kinematicsOnlyVirtualGroundReaction.getInverseDynamicsContactHolderCommandList());
+         controllerCoreCommand.addInverseDynamicsCommand(kinematicsOnlyVirtualGroundReactionManager.getInverseDynamicsContactHolderCommandList());
       }
 
       JointDesiredOutputList stateSpecificJointSettings = getStateSpecificJointSettings();

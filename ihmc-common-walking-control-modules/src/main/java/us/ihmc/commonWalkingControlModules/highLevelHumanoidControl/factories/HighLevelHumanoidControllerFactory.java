@@ -456,7 +456,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                            ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                                            CenterOfMassDataHolderReadOnly centerOfMassDataHolderForController,
                                                            CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                                           JointDesiredOutputListBasics lowLevelControllerOutput, JointBasics... jointsToIgnore)
+                                                           JointDesiredOutputListBasics lowLevelControllerOutput,
+                                                           JointBasics... jointsToIgnore)
    {
       YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPosition", registry);
       YoBoolean usingEstimatorCoMVelocity = new YoBoolean("usingEstimatorCoMVelocity", registry);
