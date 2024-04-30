@@ -18,8 +18,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
@@ -49,7 +47,7 @@ public class WalkingControllerState extends HighLevelControllerState
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   private final SideDependentList<HumanoidKinematicsSimulationContactStateHolder> contactStateHoldersForKinematicsOnly = new SideDependentList<>();
+   private final KinematicsOnlyVirtualGroundReaction kinematicsOnlyVirtualGroundReaction;
 
    public WalkingControllerState(CommandInputManager commandInputManager,
                                  StatusMessageOutputManager statusOutputManager,
@@ -82,6 +80,11 @@ public class WalkingControllerState extends HighLevelControllerState
       //      linearMomentumRateControlModule = new LinearMomentumRateControlModule(controllerToolbox, walkingControllerParameters, registry);
       linearMomentumRateControlModule = controllerCoreFactory.getOrCreateLinearMomentumRateControlModule(registry);
 
+      if (controllerToolbox.isKinematicsOnly())
+         kinematicsOnlyVirtualGroundReaction = new KinematicsOnlyVirtualGroundReaction(controllerToolbox, statusOutputManager, walkingController);
+      else
+         kinematicsOnlyVirtualGroundReaction = null;
+
       registry.addChild(walkingController.getYoVariableRegistry());
    }
 
@@ -94,20 +97,16 @@ public class WalkingControllerState extends HighLevelControllerState
       walkingController.initialize();
       linearMomentumRateControlModule.reset();
       requestIntegratorReset = true;
-
-      if (controllerToolbox.isKinematicsOnly())
-      {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            contactStateHoldersForKinematicsOnly.put(robotSide, HumanoidKinematicsSimulationContactStateHolder.holdAtCurrent(
-                  highLevelHumanoidControllerFactory.get().getHighLevelHumanoidControllerToolbox().getFootContactStates().get(robotSide)));
-         }
-      }
    }
 
    @Override
    public void doAction(double timeInState)
    {
+      if (kinematicsOnlyVirtualGroundReaction != null)
+      {
+         kinematicsOnlyVirtualGroundReaction.update();
+      }
+
       walkingController.doAction();
 
       linearMomentumRateControlModule.setInputFromWalkingStateMachine(walkingController.getLinearMomentumRateControlModuleInput());
@@ -122,6 +121,10 @@ public class WalkingControllerState extends HighLevelControllerState
       if (useCoPObjective.getValue())
       {
          controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getCenterOfPressureCommand());
+      }
+      if (kinematicsOnlyVirtualGroundReaction != null)
+      {
+         controllerCoreCommand.addInverseDynamicsCommand(kinematicsOnlyVirtualGroundReaction.getInverseDynamicsContactHolderCommandList());
       }
 
       JointDesiredOutputList stateSpecificJointSettings = getStateSpecificJointSettings();

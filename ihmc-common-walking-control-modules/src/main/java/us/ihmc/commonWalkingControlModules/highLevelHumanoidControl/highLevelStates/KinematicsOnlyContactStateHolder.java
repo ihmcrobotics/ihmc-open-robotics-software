@@ -1,4 +1,4 @@
-package us.ihmc.avatar.kinematicsSimulation;
+package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
@@ -17,7 +17,11 @@ import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
-public class HumanoidKinematicsSimulationContactStateHolder
+/**
+ * Provides virtual ground reaction forces to keep the feet from flying away
+ * when doing kinematics only simulations.
+ */
+public class KinematicsOnlyContactStateHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -36,14 +40,14 @@ public class HumanoidKinematicsSimulationContactStateHolder
    private final InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
    private final FramePoint3D desiredContactPoint;
 
-   public static HumanoidKinematicsSimulationContactStateHolder holdAtCurrent(PlaneContactState contactStateToHold)
+   public static KinematicsOnlyContactStateHolder holdAtCurrent(PlaneContactState contactStateToHold)
    {
       FramePose3D desiredPose = new FramePose3D(contactStateToHold.getPlaneFrame());
       desiredPose.changeFrame(worldFrame);
-      return new HumanoidKinematicsSimulationContactStateHolder(contactStateToHold, desiredPose);
+      return new KinematicsOnlyContactStateHolder(contactStateToHold, desiredPose);
    }
 
-   public HumanoidKinematicsSimulationContactStateHolder(PlaneContactState contactStateToHold, FramePose3DReadOnly desiredPlaneFramePose)
+   public KinematicsOnlyContactStateHolder(PlaneContactState contactStateToHold, FramePose3DReadOnly desiredPlaneFramePose)
    {
       this.contactStateToHold = contactStateToHold;
       currentPlaneFrame = (MovingReferenceFrame) contactStateToHold.getPlaneFrame();

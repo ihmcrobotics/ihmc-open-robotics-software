@@ -11,7 +11,7 @@ import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.*;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
-import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationContactStateHolder;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.KinematicsOnlyContactStateHolder;
 import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.IKStreamingRTPluginFactory;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.IKStreamingRTPluginFactory.IKStreamingRTThread;
@@ -167,7 +167,6 @@ public class SCS2AvatarSimulationFactory
    protected final String terrainCollisionName = "terrain";
 
    private IKStreamingRTPluginFactory ikStreamingRealTimePluginFactory;
-   private final SideDependentList<HumanoidKinematicsSimulationContactStateHolder> contactStateHoldersForKinematicsOnly = new SideDependentList<>();
 
    public SCS2AvatarSimulation createAvatarSimulation()
    {
@@ -641,14 +640,6 @@ public class SCS2AvatarSimulationFactory
          }
       }
 
-      if (kinematicsOnly.get())
-      {
-
-         StatusMessageOutputManager statusOutputManager = highLevelHumanoidControllerFactory.get().getStatusOutputManager();
-         statusOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::processFootstepStatus);
-         statusOutputManager.attachStatusMessageListener(WalkingStatusMessage.class, this::processWalkingStatus);
-      }
-
       List<MirroredYoVariableRegistry> mirroredRegistries = new ArrayList<>();
       mirroredRegistries.add(setupWithMirroredRegistry(estimatorThread.getYoRegistry(), estimatorTask, robotController.getYoRegistry()));
       mirroredRegistries.add(setupWithMirroredRegistry(controllerThread.getYoVariableRegistry(), controllerTask, robotController.getYoRegistry()));
@@ -677,15 +668,6 @@ public class SCS2AvatarSimulationFactory
             stepGeneratorThread.initialize();
             //            ikStreamingRTThread.initialize(); // TODO Not sure if that's needed.
             masterContext.set(estimatorThread.getHumanoidRobotContextData());
-
-            if (kinematicsOnly.get())
-            {
-               for (RobotSide robotSide : RobotSide.values)
-               {
-                  contactStateHoldersForKinematicsOnly.put(robotSide, HumanoidKinematicsSimulationContactStateHolder.holdAtCurrent(
-                        highLevelHumanoidControllerFactory.get().getHighLevelHumanoidControllerToolbox().getFootContactStates().get(robotSide)));
-               }
-            }
 
             robotController.initialize();
             mirroredRegistries.forEach(mirror -> mirror.updateValuesFromOriginal()); // Pushing the tasks values to the simulation's variables
