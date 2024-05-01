@@ -32,19 +32,12 @@ module perception_msgs
          * Detection information
          */
         string detection_class;
+        double confidence;
         sequence<geometry_msgs::msg::dds::Point32, 5000> object_point_cloud;
         geometry_msgs::msg::dds::Point32 object_centroid;
         geometry_msgs::msg::dds::Transform centroid_to_object_transform;
         geometry_msgs::msg::dds::Pose object_pose;
         geometry_msgs::msg::dds::Pose filtered_object_pose;
-        /**
-         * The visual transform to parent
-         */
-        geometry_msgs::msg::dds::Transform visual_transform_to_object_pose;
-        /**
-         * Alpha filter for transform interpolation
-         */
-        float alpha_filter;
       };
     };
   };

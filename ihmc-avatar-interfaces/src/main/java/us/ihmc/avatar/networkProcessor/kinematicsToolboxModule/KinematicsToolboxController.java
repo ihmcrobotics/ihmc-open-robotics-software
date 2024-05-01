@@ -1,38 +1,23 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD;
-import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL;
-import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
-
-import java.awt.Color;
-import java.util.*;
-
+import controller_msgs.msg.dds.RobotConfigurationData;
+import gnu.trove.map.hash.TObjectDoubleHashMap;
 import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataHolderReadOnly;
-import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
-import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.ActivationState;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPoint3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
@@ -62,13 +47,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxSupportRegionCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInputCollectionCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxOneDoFJointCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -94,6 +73,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.awt.*;
+import java.util.List;
+import java.util.*;
+
+import static toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus.*;
 
 /**
  * {@code KinematicsToolboxController} is used as a whole-body inverse kinematics solver.
@@ -122,9 +107,13 @@ public class KinematicsToolboxController extends ToolboxController
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   /** Reference to the desired robot's root body. */
+   /**
+    * Reference to the desired robot's root body.
+    */
    protected final RigidBodyBasics rootBody;
-   /** Reference to the desired robot's floating joint. */
+   /**
+    * Reference to the desired robot's floating joint.
+    */
    protected final FloatingJointBasics rootJoint;
    private final double totalRobotMass;
    /**
@@ -140,9 +129,13 @@ public class KinematicsToolboxController extends ToolboxController
     */
    protected final ReferenceFrame centerOfMassFrame;
 
-   /** The same set of gains is used for controlling any part of the desired robot body. */
+   /**
+    * The same set of gains is used for controlling any part of the desired robot body.
+    */
    private final YoPIDSE3Gains spatialGains = new DefaultYoPIDSE3Gains("GenericSpatialGains", GainCoupling.XYZ, false, registry);
-   /** The same set of gains is used for controlling any joint of the desired robot body. */
+   /**
+    * The same set of gains is used for controlling any joint of the desired robot body.
+    */
    private final YoPIDGains jointGains = new YoPIDGains("GenericJointGains", registry);
 
    private JointTorqueSoftLimitWeightCalculator jointTorqueMinimizationWeightCalculator;
@@ -151,7 +144,9 @@ public class KinematicsToolboxController extends ToolboxController
     * runtime using {@link KinematicsToolboxConfigurationMessage}.
     */
    private final KinematicsToolboxOptimizationSettings optimizationSettings = new KinematicsToolboxOptimizationSettings();
-   /** Command carrying the current optimization settings. */
+   /**
+    * Command carrying the current optimization settings.
+    */
    private final InverseKinematicsOptimizationSettingsCommand activeOptimizationSettings = new InverseKinematicsOptimizationSettingsCommand();
    /**
     * The controller core command is the single object used to pass the desired inputs to the
@@ -182,9 +177,13 @@ public class KinematicsToolboxController extends ToolboxController
     * used to quickly see if the solution is viable. It is sent back to the caller only.
     */
    private final KinematicsToolboxOutputStatus inverseKinematicsSolution;
-   /** Variable to keep track of when the last solution was published. */
+   /**
+    * Variable to keep track of when the last solution was published.
+    */
    private final YoDouble timeLastSolutionPublished = new YoDouble("timeLastSolutionPublished", registry);
-   /** Specifies time interval for publishing the solution. */
+   /**
+    * Specifies time interval for publishing the solution.
+    */
    private final YoDouble publishSolutionPeriod = new YoDouble("publishSolutionPeriod", registry);
    /**
     * This is the current estimate of the solution quality that is calculated based on the tracking
@@ -250,38 +249,51 @@ public class KinematicsToolboxController extends ToolboxController
    protected final YoGraphicPosition desiredCenterOfMassGraphic, currentCenterOfMassGraphic;
 
    /**
-    * Reference to the most recent robot configuration received from the controller. It is used for
-    * initializing the {@link #desiredOneDoFJoints} before starting the optimization process.
+    * This updater is used to initialize the state of the desired robot to the initial configuration.
+    * This should be used only once at initialization.
     */
-   private final ConcurrentCopier<RobotConfigurationData> concurrentRobotConfigurationDataCopier = new ConcurrentCopier<>(RobotConfigurationData::new);
-   protected final RobotConfigurationData robotConfigurationDataInternal = new RobotConfigurationData();
+   protected IKRobotStateUpdater desiredRobotStateUpdater;
 
-   /** Command buffer used to keep track of the current commands submitted by the user. */
+   /**
+    * Command buffer used to keep track of the current commands submitted by the user.
+    */
    private final FeedbackControlCommandBuffer userFBCommands = new FeedbackControlCommandBuffer();
-   /** Command buffer used to keep track of the commands previously submitted by the user. */
+   /**
+    * Command buffer used to keep track of the commands previously submitted by the user.
+    */
    private final FeedbackControlCommandBuffer previousUserFBCommands = new FeedbackControlCommandBuffer();
 
    private final YoBoolean isUserProvidingSupportPolygon = new YoBoolean("isUserProvidingSupportPolygon", registry);
 
-   /** Intermediate variable for garbage-free operation. */
+   /**
+    * Intermediate variable for garbage-free operation.
+    */
    private final List<FramePoint3DReadOnly> contactPointLocations = new ArrayList<>();
-   /** The active support polygon updated from the most recent robot configuration. */
+   /**
+    * The active support polygon updated from the most recent robot configuration.
+    */
    protected final ConvexPolygon2D supportPolygon = new ConvexPolygon2D();
    /**
     * The active support polygon shrunk by the distance {@code centerOfMassSafeMargin}. This represents
     * the convex horizontal region that the center of mass is constrained to.
     */
    protected final RecyclingArrayList<Point2D> shrunkSupportPolygonVertices = new RecyclingArrayList<>(Point2D.class);
-   /** Helper used for shrink the support polygon. */
+   /**
+    * Helper used for shrink the support polygon.
+    */
    private final ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
    private final FrameConvexPolygon2D newSupportPolygon = new FrameConvexPolygon2D();
    protected final ConvexPolygon2D shrunkSupportPolygon = new ConvexPolygon2D();
    private final FramePoint3D centerOfMass = new FramePoint3D();
-   /** Distance to shrink the support polygon for safety purpose. */
+   /**
+    * Distance to shrink the support polygon for safety purpose.
+    */
    private final YoDouble centerOfMassSafeMargin = new YoDouble("centerOfMassSafeMargin",
                                                                 "Describes the minimum distance away from the support polygon's edges.",
                                                                 registry);
-   /** The total mass of the robot. */
+   /**
+    * The total mass of the robot.
+    */
    private final double robotMass;
 
    /**
@@ -302,9 +314,13 @@ public class KinematicsToolboxController extends ToolboxController
     */
    private final YoBoolean preserveUserCommandHistory = new YoBoolean("preserveUserCommandHistory", registry);
 
-   /** Represents the collision model of the robot. */
+   /**
+    * Represents the collision model of the robot.
+    */
    private final List<Collidable> robotCollidables = new ArrayList<>();
-   /** List of static collidables (fixed in world) that the robot can collide with. */
+   /**
+    * List of static collidables (fixed in world) that the robot can collide with.
+    */
    private final List<Collidable> staticCollidables = new ArrayList<>();
    /**
     * User parameter updated via {@link KinematicsToolboxConfigurationMessage}. Collision is only
@@ -314,9 +330,12 @@ public class KinematicsToolboxController extends ToolboxController
    private final YoBoolean enableStaticCollisionAvoidance = new YoBoolean("enableStaticCollisionAvoidance", registry);
    private final RecyclingArrayList<CollisionResult> collisionResults = new RecyclingArrayList<>(CollisionResult::new);
    private final RecyclingArrayList<KinematicsCollisionFrame> collisionFrames = new RecyclingArrayList<>(SupplierBuilder.indexedSupplier(collisionIndex ->
-   {
-      return new KinematicsCollisionFrame("collisionFrame" + collisionIndex, worldFrame);
-   }));
+                                                                                                                                         {
+                                                                                                                                            return new KinematicsCollisionFrame(
+                                                                                                                                                  "collisionFrame"
+                                                                                                                                                  + collisionIndex,
+                                                                                                                                                  worldFrame);
+                                                                                                                                         }));
    /**
     * Threshold for activating collision response, i.e. when 2 collidables are within a distance that
     * is less than this value, only then the solver handles it. This is for reducing computational
@@ -326,38 +345,60 @@ public class KinematicsToolboxController extends ToolboxController
    private final YoDouble collisionMinDistance = new YoDouble("collisionMinDistance", registry);
    private final YoDouble maxSelfCollisionResolutionVelocity = new YoDouble("maxSelfCollisionResolutionVelocity", registry);
    private final YoDouble maxStaticCollisionResolutionVelocity = new YoDouble("maxStaticCollisionResolutionVelocity", registry);
-   /** Sets the maximum number of collisions to create YoVariables for. */
+   /**
+    * Sets the maximum number of collisions to create YoVariables for.
+    */
    private final int numberOfCollisionsToVisualize = 20;
-   /** Debug variable. */
+   /**
+    * Debug variable.
+    */
    private final YoDouble[] yoCollisionDistances = new YoDouble[numberOfCollisionsToVisualize];
-   /** Debug variable. */
+   /**
+    * Debug variable.
+    */
    private final YoFramePoint3D[] yoCollisionPointAs = new YoFramePoint3D[numberOfCollisionsToVisualize];
-   /** Debug variable. */
+   /**
+    * Debug variable.
+    */
    private final YoFramePoint3D[] yoCollisionPointBs = new YoFramePoint3D[numberOfCollisionsToVisualize];
-   /** Debug variable. */
+   /**
+    * Debug variable.
+    */
    private final YoFramePose3D[] yoCollisionFramePoses = new YoFramePose3D[numberOfCollisionsToVisualize];
-   /** Timer to debug computational load. */
-   private final ThreadTimer threadTimer;
+   /**
+    * Timer to debug computational load.
+    */
+   protected final ThreadTimer threadTimer;
 
    /**
-    * When {@code true}, the solver will add an objective to minimize the overall angular momentum
-    * generated. This is not recommended when using this toolbox as an IK solver as it'll increase the
-    * number of iterations before converging.
+    * When {@code true}, the solver will add an objective to minimize the overall angular momentum generated.
+    * This is not recommended when using this toolbox as an IK solver as it'll increase the number of iterations before converging.
     */
    private final YoBoolean minimizeAngularMomentum = new YoBoolean("minimizeAngularMomentum", registry);
    /**
-    * When {@code true}, the solver will add an objective to minimize the overall linear momentum
-    * generated. This is not recommended when using this toolbox as an IK solver as it'll increase the
-    * number of iterations before converging.
+    * When {@code true}, the solver will add an objective to minimize the overall linear momentum generated.
+    * This is not recommended when using this toolbox as an IK solver as it'll increase the number of iterations before converging.
     */
    private final YoBoolean minimizeLinearMomentum = new YoBoolean("minimizeLinearMomentum", registry);
    /**
-    * The weight to be used for minimizing the angular momentum, around 0.1 seems good for a robot that
-    * is about 130kg.
+    * The weight to be used for minimizing the angular momentum, around 0.1 seems good for a robot that is about 130kg.
     */
    private final YoDouble angularMomentumWeight = new YoDouble("angularMomentumWeight", registry);
    private final YoDouble linearMomentumWeight = new YoDouble("linearMomentumWeight", registry);
    private final MomentumCommand momentumCommand = new MomentumCommand();
+   /**
+    * When {@code true}, the solver will add an objective to minimize the overall rate of change of angular momentum generated.
+    * This is not recommended when using this toolbox as an IK solver as it'll increase the number of iterations before converging.
+    */
+   private final YoBoolean minimizeAngularMomentumRate = new YoBoolean("minimizeAngularMomentumRate", registry);
+   /**
+    * When {@code true}, the solver will add an objective to minimize the overall rate of change of linear momentum generated.
+    * This is not recommended when using this toolbox as an IK solver as it'll increase the number of iterations before converging.
+    */
+   private final YoBoolean minimizeLinearMomentumRate = new YoBoolean("minimizeLinearMomentumRate", registry);
+   private final YoDouble angularMomentumRateWeight = new YoDouble("angularMomentumRateWeight", registry);
+   private final YoDouble linearMomentumRateWeight = new YoDouble("linearMomentumRateWeight", registry);
+   private final MomentumCommand momentumCommandForRateMinimization = new MomentumCommand();
 
    /**
     * @param commandInputManager     the message/command barrier used by this controller. Submit
@@ -366,7 +407,7 @@ public class KinematicsToolboxController extends ToolboxController
     * @param statusOutputManager     the output interface used by this controller.
     * @param rootJoint               the underactuated floating root joint of the multi-body system.
     *                                Can be {@code null} in the case all the joints are actuated.
-    * @param desiredOneDoFJoints            the actuated joints of the system. The inverse kinematics will
+    * @param desiredOneDoFJoints     the actuated joints of the system. The inverse kinematics will
     *                                only use these joints during the optimization.
     * @param controllableRigidBodies the sublist of rigid-bodies that can be controlled by the user.
     *                                Can be {@code null} in the case all rigid-body should be
@@ -477,7 +518,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    /**
     * Sets up the robot configuration this IK should start from when initializing.
-    * 
+    *
     * @param initialRobotConfigurationMap the map from joint to initial joint position.
     */
    public void setInitialRobotConfiguration(Map<OneDoFJointBasics, Double> initialRobotConfigurationMap)
@@ -494,7 +535,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    /**
     * Sets up the robot configuration this IK should start from when initializing.
-    * 
+    *
     * @param jointNameToInitialJointPosition the map from joint name to initial joint position.
     */
    public void setInitialRobotConfigurationNamedMap(Map<String, Double> jointNameToInitialJointPosition)
@@ -516,7 +557,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    /**
     * Registers a new robot collidable to be used with this solver for preventing collisions.
-    * 
+    *
     * @param collidable the new robot collidable to consider.
     */
    public void registerRobotCollidable(Collidable collidable)
@@ -526,7 +567,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    /**
     * Registers new robot collidables to be used with this solver for preventing collisions.
-    * 
+    *
     * @param collidables the new robot collidables to consider.
     */
    public void registerRobotCollidables(Collidable... collidables)
@@ -537,7 +578,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    /**
     * Registers new robot collidables to be used with this solver for preventing collisions.
-    * 
+    *
     * @param collidables the new robot collidables to consider.
     */
    public void registerRobotCollidables(Iterable<? extends Collidable> collidables)
@@ -552,7 +593,7 @@ public class KinematicsToolboxController extends ToolboxController
     * The robot can collide with static collidables. The pose of a static collidable is assumed to be
     * constant.
     * </p>
-    * 
+    *
     * @param collidable the new static collidable to consider.
     */
    public void registerStaticCollidable(Collidable collidable)
@@ -566,7 +607,7 @@ public class KinematicsToolboxController extends ToolboxController
     * The robot can collide with static collidables. The pose of a static collidable is assumed to be
     * constant.
     * </p>
-    * 
+    *
     * @param collidables the new static collidables to consider.
     */
    public void registerStaticCollidables(Collidable... collidables)
@@ -580,7 +621,7 @@ public class KinematicsToolboxController extends ToolboxController
     * The robot can collide with static collidables. The pose of a static collidable is assumed to be
     * constant.
     * </p>
-    * 
+    *
     * @param collidables the new static collidables to consider.
     */
    public void registerStaticCollidables(Iterable<? extends Collidable> collidables)
@@ -592,7 +633,7 @@ public class KinematicsToolboxController extends ToolboxController
    /**
     * This is where the end-effectors needing a visualization are registered, if you need more, add it
     * there.
-    * 
+    *
     * @param rigidBodies all the rigid bodies for which the desired and actual pose will be displayed
     *                    using graphical coordinate systems.
     */
@@ -636,7 +677,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    /**
     * Creating the controller core which is the main piece of this solver.
-    * 
+    *
     * @param controllableRigidBodies
     * @return the controller core that will run for the desired robot model in {@link #desiredOneDoFJoints}.
     */
@@ -673,7 +714,7 @@ public class KinematicsToolboxController extends ToolboxController
    /**
     * Convenience method to create the template necessary for the controller core to create all the
     * necessary feedback controllers.
-    * 
+    *
     * @param controllableRigidBodies the collection of all the rigid-bodies that will be controllable
     *                                by the user. If it is {@code null}, then all the rigid-bodies of
     *                                the robot will be controllable.
@@ -708,8 +749,8 @@ public class KinematicsToolboxController extends ToolboxController
     * </p>
     *
     * @return {@code true} if this controller is good to go and solve a new problem. It needs to have
-    *         received at least once a robot configuration from the controller, otherwise this will
-    *         fail and prevent the user from using this toolbox.
+    *       received at least once a robot configuration from the controller, otherwise this will
+    *       fail and prevent the user from using this toolbox.
     */
    @Override
    public boolean initialize()
@@ -725,48 +766,54 @@ public class KinematicsToolboxController extends ToolboxController
       return success;
    }
 
+   protected boolean firstTick = true;
+
    protected boolean initializeInternal()
    {
-      threadTimer.clear();
-      userFBCommands.clear();
-      previousUserFBCommands.clear();
-      isUserProvidingSupportPolygon.set(false);
+      firstTick = true;
+      resetInternalData();
 
-      RobotConfigurationData robotConfigurationData = concurrentRobotConfigurationDataCopier.getCopyForReading();
-      boolean hasRobotConfigurationData = robotConfigurationData != null;
-
-      if (!hasRobotConfigurationData)
+      boolean wasRobotUpdated = desiredRobotStateUpdater.updateRobotConfiguration(rootJoint, desiredOneDoFJoints);
+      if (!wasRobotUpdated)
       {
          commandInputManager.clearAllCommands();
       }
       else
       {
-         robotConfigurationDataInternal.set(robotConfigurationData);
-
-         // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
-         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationDataInternal, rootJoint, desiredOneDoFJoints);
-         if (initialRobotConfigurationMap != null)
-         {
-            initialRobotConfigurationMap.forEachEntry((joint, q_priv) ->
-            {
-               joint.setQ(q_priv);
-               return true;
-            });
-         }
-
-         // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
-         snapPrivilegedConfigurationToCurrent();
-         privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
-         privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
+         initializePrivilegedConfiguration();
          // It is required to update the tools now as it is only done at the end of each iteration.
          updateTools();
       }
 
+      return wasRobotUpdated;
+   }
+
+   protected void initializePrivilegedConfiguration()
+   {
+      if (initialRobotConfigurationMap != null)
+      {
+         initialRobotConfigurationMap.forEachEntry((joint, q_priv) ->
+                                                   {
+                                                      joint.setQ(q_priv);
+                                                      return true;
+                                                   });
+      }
+
+      // Sets the privileged configuration to match the current robot configuration such that the solution will be as close as possible to the current robot configuration.
+      snapPrivilegedConfigurationToCurrent();
+   }
+
+   protected void resetInternalData()
+   {
+      threadTimer.clear();
+      userFBCommands.clear();
+      previousUserFBCommands.clear();
+      isUserProvidingSupportPolygon.set(false);
       // By default, always constrain the center of mass according to the current support polygon (if defined).
       enableSupportPolygonConstraint.set(true);
       inverseKinematicsSolution.getSupportRegion().clear();
-
-      return hasRobotConfigurationData;
+      privilegedWeight.set(DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT);
+      privilegedConfigurationGain.set(DEFAULT_PRIVILEGED_CONFIGURATION_GAIN);
    }
 
    /**
@@ -815,11 +862,29 @@ public class KinematicsToolboxController extends ToolboxController
          inverseKinematicsCommandBuffer.addMomentumCommand().set(momentumCommand);
       }
 
+      if (!firstTick && (minimizeAngularMomentumRate.getValue() || minimizeLinearMomentumRate.getValue()))
+      {
+         // TODO Probably need to scale the weights based on the update DT.
+         momentumCommandForRateMinimization.setWeight(angularMomentumRateWeight.getValue(), linearMomentumRateWeight.getValue());
+         if (!minimizeAngularMomentumRate.getValue())
+            momentumCommandForRateMinimization.setSelectionMatrixForLinearControl();
+         else if (!minimizeLinearMomentumRate.getValue())
+            momentumCommandForRateMinimization.setSelectionMatrixForAngularControl();
+         else
+            momentumCommandForRateMinimization.setSelectionMatrixToIdentity();
+         inverseKinematicsCommandBuffer.addMomentumCommand().set(momentumCommandForRateMinimization);
+      }
+
       /*
        * Submitting and requesting the controller core to run the feedback controllers, formulate and
        * solve the optimization problem for this control tick.
        */
       controllerCore.compute(controllerCoreCommand);
+
+      ControllerCoreOutput controllerCoreOutput = controllerCore.getControllerCoreOutput();
+
+      // Update the momentum command to be used for the next control tick.
+      momentumCommandForRateMinimization.setMomentum(controllerCoreOutput.getAngularMomentum(), controllerCoreOutput.getLinearMomentum());
 
       // Calculating the solution quality based on sum of all the active feedback controllers' output velocity.
       solutionQuality.set(solutionQualityCalculator.calculateSolutionQuality(feedbackControllerDataHolder, totalRobotMass, 1.0 / GLOBAL_PROPORTIONAL_GAIN));
@@ -833,7 +898,7 @@ public class KinematicsToolboxController extends ToolboxController
       currentCenterOfMassGraphic.update();
 
       // Updating the the robot state from the current solution, initializing the next control tick.
-      KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCore.getControllerCoreOutput(), rootJoint, desiredOneDoFJoints);
+      KinematicsToolboxHelper.setRobotStateFromControllerCoreOutput(controllerCoreOutput, rootJoint, desiredOneDoFJoints);
       updateVisualization();
 
       inverseKinematicsSolution.setCurrentToolboxState(CURRENT_TOOLBOX_STATE_RUNNING);
@@ -855,6 +920,8 @@ public class KinematicsToolboxController extends ToolboxController
          reportMessage(inverseKinematicsSolution);
          timeLastSolutionPublished.set(currentTime);
       }
+
+      firstTick = false;
       threadTimer.stop();
    }
 
@@ -871,7 +938,7 @@ public class KinematicsToolboxController extends ToolboxController
    /**
     * Checking if there is any new command available, in which case they polled from the
     * {@link #commandInputManager} and processed to update the state of the current optimization run.
-    * 
+    *
     * @param ikCommandBufferToPack the buffer used to store the inverse kinematics commands to be
     *                              executed for this control tick.
     * @param fbCommandBufferToPack the buffer used to store the feedback control commands to be
@@ -1322,7 +1389,7 @@ public class KinematicsToolboxController extends ToolboxController
 
    /**
     * Calculates and sets up the list of constraints to submit to the solver to prevent collisions.
-    * 
+    *
     * @param collisions   the previously computed collisions.
     * @param bufferToPack buffer used to store the constraints to submit to the controller core.
     */
@@ -1449,7 +1516,7 @@ public class KinematicsToolboxController extends ToolboxController
     * Creates a {@code PrivilegedConfigurationCommand} to update the privileged joint angles to match
     * the current state of {@link #desiredOneDoFJoints}.
     */
-   private void snapPrivilegedConfigurationToCurrent()
+   protected void snapPrivilegedConfigurationToCurrent()
    {
       privilegedConfigurationCommand.clear();
       for (int i = 0; i < desiredOneDoFJoints.length; i++)
@@ -1462,10 +1529,9 @@ public class KinematicsToolboxController extends ToolboxController
       submitPrivilegedConfigurationCommand = true;
    }
 
-   public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
+   public void setDesiredRobotStateUpdater(IKRobotStateUpdater desiredRobotStateUpdater)
    {
-      concurrentRobotConfigurationDataCopier.getCopyForWriting().set(newConfigurationData);
-      concurrentRobotConfigurationDataCopier.commit();
+      this.desiredRobotStateUpdater = desiredRobotStateUpdater;
    }
 
    public boolean isUserControllingRigidBody(RigidBodyBasics rigidBody)
@@ -1512,8 +1578,8 @@ public class KinematicsToolboxController extends ToolboxController
 
    public boolean isUserControllingCenterOfMass()
    {
-      return !userFBCommands.getCenterOfMassFeedbackControlCommandBuffer().isEmpty()
-             || !previousUserFBCommands.getCenterOfMassFeedbackControlCommandBuffer().isEmpty();
+      return !userFBCommands.getCenterOfMassFeedbackControlCommandBuffer().isEmpty() || !previousUserFBCommands.getCenterOfMassFeedbackControlCommandBuffer()
+                                                                                                               .isEmpty();
    }
 
    public boolean isUserProvidingSupportPolygon()
@@ -1613,6 +1679,38 @@ public class KinematicsToolboxController extends ToolboxController
       linearMomentumWeight.set(weight);
    }
 
+   public void minimizeMomentumRate(boolean enableAngular, boolean enableLinear)
+   {
+      minimizeAngularMomentumRate(enableAngular);
+      minimizeLinearMomentumRate(enableLinear);
+   }
+
+   public void minimizeAngularMomentumRate(boolean enable)
+   {
+      minimizeAngularMomentumRate.set(enable);
+   }
+
+   public void minimizeLinearMomentumRate(boolean enable)
+   {
+      minimizeLinearMomentumRate.set(enable);
+   }
+
+   public void setMomentumRateWeight(double angularWeight, double linearWeight)
+   {
+      setAngularMomentumRateWeight(angularWeight);
+      setLinearMomentumRateWeight(linearWeight);
+   }
+
+   public void setAngularMomentumRateWeight(double weight)
+   {
+      angularMomentumRateWeight.set(weight);
+   }
+
+   public void setLinearMomentumRateWeight(double weight)
+   {
+      linearMomentumRateWeight.set(weight);
+   }
+
    public void setEnableSelfCollisionAvoidance(boolean enableSelfCollisionAvoidance)
    {
       this.enableSelfCollisionAvoidance.set(enableSelfCollisionAvoidance);
@@ -1646,5 +1744,78 @@ public class KinematicsToolboxController extends ToolboxController
    public TObjectDoubleHashMap<OneDoFJointBasics> getInitialRobotConfigurationMap()
    {
       return initialRobotConfigurationMap;
+   }
+
+   public interface IKRobotStateUpdater
+   {
+      /**
+       * Updates the configuration of the joints passed as arguments.
+       *
+       * @param rootJoint    the root joint of the robot. Maybe be {@code null}.
+       * @param oneDoFJoints the 1-DoF of the robot.
+       * @return {@code true} if the configuration was updated, {@code false} otherwise.
+       */
+      boolean updateRobotConfiguration(FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints);
+
+      /**
+       * Wraps a single robot configuration data to be used to update the IK internal robot.
+       * Good for test purposes.
+       *
+       * @param robotConfigurationData
+       * @return
+       */
+      static IKRobotStateUpdater wrap(RobotConfigurationData robotConfigurationData)
+      {
+         return (rootJoint, oneDoFJoints) ->
+         {
+            KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationData, rootJoint, oneDoFJoints);
+            return true;
+         };
+      }
+   }
+
+   public static class RobotConfigurationDataBasedUpdater implements IKRobotStateUpdater
+   {
+      /**
+       * Reference to the most recent robot configuration received from the controller. It is used for
+       * initializing the {@link #desiredOneDoFJoints} before starting the optimization process.
+       */
+      private final ConcurrentCopier<RobotConfigurationData> concurrentRobotConfigurationDataCopier = new ConcurrentCopier<>(RobotConfigurationData::new);
+      protected final RobotConfigurationData robotConfigurationDataInternal = new RobotConfigurationData();
+
+      public RobotConfigurationDataBasedUpdater()
+      {
+      }
+
+      @Override
+      public boolean updateRobotConfiguration(FloatingJointBasics rootJoint, OneDoFJointBasics[] oneDoFJoints)
+      {
+         RobotConfigurationData robotConfigurationData = concurrentRobotConfigurationDataCopier.getCopyForReading();
+
+         if (robotConfigurationData == null)
+            return false;
+
+         robotConfigurationDataInternal.set(robotConfigurationData);
+         // Initializes this desired robot to the most recent robot configuration data received from the walking controller.
+         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(robotConfigurationDataInternal, rootJoint, oneDoFJoints);
+         return true;
+      }
+
+      public void setRobotConfigurationData(RobotConfigurationData newConfigurationData)
+      {
+         concurrentRobotConfigurationDataCopier.getCopyForWriting().set(newConfigurationData);
+         concurrentRobotConfigurationDataCopier.commit();
+      }
+
+      public RobotConfigurationData getLastRobotConfigurationData()
+      {
+         RobotConfigurationData robotConfigurationData = concurrentRobotConfigurationDataCopier.getCopyForReading();
+
+         if (robotConfigurationData == null)
+            return null;
+
+         robotConfigurationDataInternal.set(robotConfigurationData);
+         return robotConfigurationDataInternal;
+      }
    }
 }

@@ -20,6 +20,14 @@ geometry_msgs/Point desired_position_in_world
 # The data is assumed to be expressed in world frame.
 geometry_msgs/Quaternion desired_orientation_in_world
 
+bool has_linear_velocity
+
+geometry_msgs/Vector3 linear_velocity_in_world
+
+bool has_angular_velocity
+
+geometry_msgs/Vector3 angular_velocity_in_world
+
 # This is the position of the control frame's origin expressed in endEffector.getBodyFixedFrame().
 # By default, the control frame is coincident to endEffector.getBodyFixedFrame().
 # The control frame is rigidly attached to the end-effector.
