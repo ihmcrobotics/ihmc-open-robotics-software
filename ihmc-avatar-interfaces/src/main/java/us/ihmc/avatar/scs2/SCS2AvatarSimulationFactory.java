@@ -58,6 +58,7 @@ import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.parameters.ContactParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
+import us.ihmc.scs2.simulation.physicsEngine.DoNothingPhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
 import us.ihmc.scs2.simulation.physicsEngine.contactPointBased.ContactPointBasedPhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.impulseBased.ImpulseBasedPhysicsEngine;
@@ -256,7 +257,8 @@ public class SCS2AvatarSimulationFactory
 
       if (kinematicsOnly.get())
       {
-         physicsEngineFactory = KinematicsOnlyPhysicsEngine::new;
+//         physicsEngineFactory = KinematicsOnlyPhysicsEngine::new;
+         physicsEngineFactory = DoNothingPhysicsEngine::new;
       }
       else if (useImpulseBasedPhysicsEngine.hasValue() && useImpulseBasedPhysicsEngine.get())
       {
@@ -410,8 +412,8 @@ public class SCS2AvatarSimulationFactory
 
       if (kinematicsOnly.get())
       {
-         KinematicsOnlyPhysicsEngine physicsEngine = (KinematicsOnlyPhysicsEngine) simulationConstructionSet.getPhysicsEngine();
-         physicsEngine.setHighLevelHumanoidControllerFactory(highLevelHumanoidControllerFactory.get());
+//         KinematicsOnlyPhysicsEngine physicsEngine = (KinematicsOnlyPhysicsEngine) simulationConstructionSet.getPhysicsEngine();
+//         physicsEngine.setHighLevelHumanoidControllerFactory(highLevelHumanoidControllerFactory.get());
       }
    }
 
