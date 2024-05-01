@@ -1,12 +1,18 @@
 package us.ihmc.avatar.scs2;
 
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.scs2.definition.controller.ControllerInput;
 import us.ihmc.scs2.definition.controller.ControllerOutput;
+import us.ihmc.scs2.definition.state.interfaces.JointStateBasics;
 import us.ihmc.scs2.definition.state.interfaces.OneDoFJointStateBasics;
+import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.controller.SimControllerInput;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.SimFloatingRootJoint;
+import us.ihmc.scs2.simulation.robot.multiBodySystem.SimSixDoFJoint;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
@@ -29,6 +35,8 @@ public class SCS2KinematicsOnlyOutputWriter implements JointDesiredOutputWriter
    private final boolean writeBeforeEstimatorTick;
    private final List<JointController> jointControllers = new ArrayList<>();
    private final Map<String, JointController> jointControllerMap = new HashMap<>();
+   private JointDesiredOutputBasics floatingJointDesiredOutput;
+   private JointStateBasics floatingJointState;
 
    public SCS2KinematicsOnlyOutputWriter(ControllerInput controllerInput,
                                          ControllerOutput controllerOutput,
@@ -43,6 +51,19 @@ public class SCS2KinematicsOnlyOutputWriter implements JointDesiredOutputWriter
    public void setJointDesiredOutputList(JointDesiredOutputListBasics jointDesiredOutputList)
    {
       jointControllers.clear();
+
+      SimControllerInput simControllerInput = (SimControllerInput) controllerInput;
+      Robot robot = (Robot) simControllerInput.getInput();
+      SimFloatingRootJoint floatingJoint = (SimFloatingRootJoint) robot.getRootBody().getChildrenJoints().get(0);
+//      for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
+//      {
+//         if (jointDesiredOutputList.getOneDoFJoint(i).getName().equals(floatingJoint.getName()))
+//         {
+//            floatingJointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(i);
+//         }
+//      }
+
+      floatingJointState = controllerOutput.getJointOutput(floatingJoint.getName());
 
       for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
       {
@@ -148,6 +169,12 @@ public class SCS2KinematicsOnlyOutputWriter implements JointDesiredOutputWriter
       @Override
       public void doControl()
       {
+//         double initialQ = jointDesiredOutput.getDesiredPosition();
+//         double initialQd = jointDesiredOutput.getDesiredVelocity();
+//         double qdd = jointDesiredOutput.getDesiredAcceleration();
+
+
+
          if (jointDesiredOutput.hasDesiredTorque())
             simInput.setEffort(jointDesiredOutput.getDesiredTorque());
          if (jointDesiredOutput.hasDesiredAcceleration())
@@ -156,6 +183,8 @@ public class SCS2KinematicsOnlyOutputWriter implements JointDesiredOutputWriter
             simInput.setVelocity(jointDesiredOutput.getDesiredVelocity());
          if (jointDesiredOutput.hasDesiredPosition())
             simInput.setConfiguration(jointDesiredOutput.getDesiredPosition());
+//         else
+//            LogTools.error("hmm");
       }
    }
 

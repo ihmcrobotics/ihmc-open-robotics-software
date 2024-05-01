@@ -88,9 +88,9 @@ public class KinematicsOnlyPhysicsEngine implements PhysicsEngine
          return;
       }
 
-      HighLevelHumanoidControllerToolbox controllerToolbox = highLevelHumanoidControllerFactory.getHighLevelHumanoidControllerToolbox();
-      WholeBodyControllerCore controllerCore = highLevelHumanoidControllerFactory.getWholeBodyControllerCoreFactory().getWholeBodyControllerCore();
-      RootJointDesiredConfigurationDataReadOnly outputForRootJoint = controllerCore.getOutputForRootJoint();
+//      HighLevelHumanoidControllerToolbox controllerToolbox = highLevelHumanoidControllerFactory.getHighLevelHumanoidControllerToolbox();
+//      WholeBodyControllerCore controllerCore = highLevelHumanoidControllerFactory.getWholeBodyControllerCoreFactory().getWholeBodyControllerCore();
+//      RootJointDesiredConfigurationDataReadOnly outputForRootJoint = controllerCore.getOutputForRootJoint();
 
       for (Robot robot : robotList)
       {

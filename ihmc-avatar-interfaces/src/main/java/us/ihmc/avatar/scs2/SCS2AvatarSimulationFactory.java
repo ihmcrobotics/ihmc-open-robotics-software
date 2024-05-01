@@ -257,8 +257,8 @@ public class SCS2AvatarSimulationFactory
 
       if (kinematicsOnly.get())
       {
-//         physicsEngineFactory = KinematicsOnlyPhysicsEngine::new;
-         physicsEngineFactory = DoNothingPhysicsEngine::new;
+         physicsEngineFactory = KinematicsOnlyPhysicsEngine::new;
+//         physicsEngineFactory = DoNothingPhysicsEngine::new;
       }
       else if (useImpulseBasedPhysicsEngine.hasValue() && useImpulseBasedPhysicsEngine.get())
       {
