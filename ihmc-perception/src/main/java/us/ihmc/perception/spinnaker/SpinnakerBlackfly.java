@@ -9,6 +9,8 @@ import org.bytedeco.spinnaker.Spinnaker_C.spinImage;
 import org.bytedeco.spinnaker.Spinnaker_C.spinNodeHandle;
 import org.bytedeco.spinnaker.Spinnaker_C.spinNodeMapHandle;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
+import org.bytedeco.spinnaker.global.Spinnaker_C.spinExposureAutoEnums;
+import org.bytedeco.spinnaker.global.Spinnaker_C.spinExposureModeEnums;
 
 import static us.ihmc.perception.spinnaker.SpinnakerBlackflyTools.printOnError;
 
@@ -139,14 +141,23 @@ public class SpinnakerBlackfly
    }
 
    // http://softwareservices.flir.com/Spinnaker/latest/_programmer_guide.html#Setting_Exposure_Time
-   public void setExposure(int exposureTimeNs)
+   public void setExposure(float exposureTimeMicroSecs)
    {
-      // TODO: finish
+      // Disable auto exposure
       spinNodeHandle exposureAutoHandle = new spinNodeHandle();
       printOnError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("ExposureAuto"), exposureAutoHandle), "Getting ExposureAuto node map node");
-      Spinnaker_C.spinIntegerSetValue(exposureAutoHandle, 0);
+      printOnError(Spinnaker_C.spinEnumerationSetEnumValue(exposureAutoHandle, spinExposureAutoEnums.ExposureAuto_Off.value), "Could not set ExposureAuto");
 
+      // Set timed exposure mode
+      spinNodeHandle exposureModeHandle = new spinNodeHandle();
+      printOnError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("ExposureMode"), exposureModeHandle), "Getting ExposureMode node map node");
+      printOnError(Spinnaker_C.spinEnumerationSetEnumValue(exposureModeHandle, spinExposureModeEnums.ExposureMode_Timed.value), "Could not set ExposureMode");
 
+      // Set timed exposure value
+      spinNodeHandle exposureTimeHandle = new spinNodeHandle();
+      printOnError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("ExposureTime"), exposureTimeHandle), "Getting ExposureTime node map node");
+      // This has to be a float, the docs were unclear
+      printOnError(Spinnaker_C.spinFloatSetValue(exposureTimeHandle, exposureTimeMicroSecs), "Unable to set ExposureTime");
    }
 
    public void startAcquiringImages()
