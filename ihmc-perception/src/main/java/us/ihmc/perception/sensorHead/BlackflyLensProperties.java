@@ -14,6 +14,9 @@ public enum BlackflyLensProperties
                                0.0007021),
    /**
     * S/N = 17403057
+    * <p>
+    *    Calibration was done by Mainstream Autonomy.
+    * </p>
     */
    BFLY_U3_23S6C_FE185C086HA_1_17403057_MSA_CALIBRATED(459.58214914178149,
                                                        459.47282333478574,
@@ -25,6 +28,9 @@ public enum BlackflyLensProperties
                                                        0.00054295260928293441),
    /**
     * S/N = 17372478
+    * <p>
+    *    Calibration was done by Mainstream Autonomy.
+    * </p>
     */
    BFLY_U3_23S6C_FE185C086HA_1_17372478_MSA_CALIBRATED(458.94767822937951,
                                                        458.82725101993947,
