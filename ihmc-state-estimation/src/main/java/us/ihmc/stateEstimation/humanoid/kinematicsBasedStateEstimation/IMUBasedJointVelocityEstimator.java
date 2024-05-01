@@ -14,6 +14,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -40,6 +41,9 @@ public class IMUBasedJointVelocityEstimator
 
    private final int degreesOfFreedom;
 
+   private final YoBoolean[] calibrate;
+   private final YoDouble[] bias;
+
    public IMUBasedJointVelocityEstimator(IMUSensorReadOnly parentIMU, IMUSensorReadOnly childIMU, YoRegistry registry) throws IllegalArgumentException
    {
       this.parentIMU = parentIMU;
@@ -60,12 +64,19 @@ public class IMUBasedJointVelocityEstimator
       jointVelocitiesFromIMU = new YoDouble[degreesOfFreedom];
 
       int dof = 0;
+      calibrate = new YoBoolean[joints.length];
+      bias = new YoDouble[joints.length];
 
       for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
       {
+
          JointBasics joint = joints[jointIndex];
 
          String jointName = joint.getName();
+
+         calibrate[jointIndex] = new YoBoolean("calibrate" + jointName, registry);
+         calibrate[jointIndex].set(true);
+         bias[jointIndex] = new YoDouble("bias" + jointName, registry);
 
          if (joint.getDegreesOfFreedom() == 0)
          {
@@ -121,6 +132,12 @@ public class IMUBasedJointVelocityEstimator
       {
          double qd_IMU = qd_estimated.get(i, 0);
          jointVelocitiesFromIMU[i].set(qd_IMU);
+
+         if (calibrate[i].getValue())
+         {
+            calibrate[i].set(false);
+            bias[i].set(jointVelocitiesFromIMU[i].getDoubleValue());
+         }
       }
    }
 
@@ -141,6 +158,6 @@ public class IMUBasedJointVelocityEstimator
 
    public double getEstimatedVelocity(int dofIndex)
    {
-      return jointVelocitiesFromIMU[dofIndex].getValue();
+      return jointVelocitiesFromIMU[dofIndex].getValue() - bias[dofIndex].getValue();
    }
 }
