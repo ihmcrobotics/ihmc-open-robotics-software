@@ -14,7 +14,11 @@ import us.ihmc.tools.time.FrequencyStatisticPrinter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Properties;
 
@@ -60,129 +64,128 @@ public class DualBlackflyUDPSender
       double xOffset = (originalWidth - croppedHeight) / 2 + Integer.parseInt(properties.getProperty("xoffset"));
       double yOffset = (originalHeight - croppedHeight) / 2 - Integer.parseInt(properties.getProperty("yoffset"));
 
+      float exposureTimeUs = Float.parseFloat(properties.getProperty("exposureTimeUs"));
+
       System.out.println("originalWidth " + originalWidth);
       System.out.println("originalHeight " + originalHeight);
       System.out.println("croppedHeight " + croppedHeight);
       System.out.println("croppedWidth " + croppedWidth);
       System.out.println("xOffset " + xOffset);
       System.out.println("yOffset " + yOffset);
+      System.out.println("exposureTimeUs " + exposureTimeUs);
 
       for (RobotSide side : RobotSide.values())
       {
-
          Thread publishThread = new Thread(() ->
-                                           {
-                                              SpinnakerBlackfly spinnakerBlackfly = spinnakerBlackflyManager.createSpinnakerBlackfly(
-                                                    side == RobotSide.LEFT ? LEFT_SERIAL_NUMBER : RIGHT_SERIAL_NUMBER,
-                                                    (int) croppedWidth,
-                                                    (int) croppedHeight,
-                                                    (int) xOffset,
-                                                    (int) yOffset);
+         {
+            SpinnakerBlackfly spinnakerBlackfly = spinnakerBlackflyManager.createSpinnakerBlackfly(
+                  side == RobotSide.LEFT ? LEFT_SERIAL_NUMBER : RIGHT_SERIAL_NUMBER,
+                  (int) croppedWidth,
+                  (int) croppedHeight,
+                  (int) xOffset,
+                  (int) yOffset,
+                  exposureTimeUs);
 
-                                              DatagramSocket socket;
-                                              try
-                                              {
-                                                 socket = new DatagramSocket();
-                                              }
-                                              catch (SocketException e)
-                                              {
-                                                 LogTools.error(e);
-                                                 return;
-                                              }
-                                              InetAddress address;
-                                              try
-                                              {
-                                                 address = InetAddress.getByName(
-                                                       side == RobotSide.LEFT ? LEFT_DESTINATION_IP_ADDRESS : RIGHT_DESTINATION_IP_ADDRESS);
-                                              }
-                                              catch (UnknownHostException e)
-                                              {
-                                                 LogTools.error(e);
-                                                 return;
-                                              }
+            DatagramSocket socket;
+            try
+            {
+               socket = new DatagramSocket();
+            }
+            catch (SocketException e)
+            {
+               LogTools.error(e);
+               return;
+            }
+            InetAddress address;
+            try
+            {
+               address = InetAddress.getByName(side == RobotSide.LEFT ? LEFT_DESTINATION_IP_ADDRESS : RIGHT_DESTINATION_IP_ADDRESS);
+            }
+            catch (UnknownHostException e)
+            {
+               LogTools.error(e);
+               return;
+            }
 
-                                              FrequencyStatisticPrinter frequencyStatisticPrinter = new FrequencyStatisticPrinter();
+            FrequencyStatisticPrinter frequencyStatisticPrinter = new FrequencyStatisticPrinter();
 
-                                              int frameNumber = 0;
+            int frameNumber = 0;
 
-                                              while (running)
-                                              {
-                                                 spinImage spinImage = new spinImage();
+            while (running)
+            {
+               spinImage spinImage = new spinImage();
 
-                                                 spinnakerBlackfly.getNextImage(spinImage);
+               spinnakerBlackfly.getNextImage(spinImage);
 
-                                                 int width = spinnakerBlackfly.getWidth(spinImage);
-                                                 int height = spinnakerBlackfly.getHeight(spinImage);
-                                                 int imageFrameSize = width * height;
+               int width = spinnakerBlackfly.getWidth(spinImage);
+               int height = spinnakerBlackfly.getHeight(spinImage);
+               int imageFrameSize = width * height;
 
-                                                 BytePointer spinImageData = new BytePointer(imageFrameSize);
-                                                 spinnakerBlackfly.setPointerToSpinImageData(spinImage, spinImageData);
+               BytePointer spinImageData = new BytePointer(imageFrameSize);
+               spinnakerBlackfly.setPointerToSpinImageData(spinImage, spinImageData);
 
-                                                 int latestImageDataLength = (int) spinImageData.limit();
-                                                 byte[] imageData = new byte[latestImageDataLength];
-                                                 spinImageData.get(imageData, 0, latestImageDataLength);
+               int latestImageDataLength = (int) spinImageData.limit();
+               byte[] imageData = new byte[latestImageDataLength];
+               spinImageData.get(imageData, 0, latestImageDataLength);
 
-                                                 int numberOfDatagramFragments = (int) Math.ceil((double) latestImageDataLength / DATAGRAM_MAX_LENGTH);
+               int numberOfDatagramFragments = (int) Math.ceil((double) latestImageDataLength / DATAGRAM_MAX_LENGTH);
 
-                                                 for (int fragment = 0; fragment < numberOfDatagramFragments; fragment++)
-                                                 {
-                                                    int fragmentHeaderLength = 1 + 4 + 4 + 4 + 4 + 4 + 4;
-                                                    int maxFragmentDataLength = DATAGRAM_MAX_LENGTH - fragmentHeaderLength;
-                                                    int fragmentDataOffset = fragment * maxFragmentDataLength;
-                                                    int fragmentDataLength = Math.min(maxFragmentDataLength, latestImageDataLength - fragmentDataOffset);
-                                                    int datagramLength = fragmentHeaderLength + fragmentDataLength;
+               for (int fragment = 0; fragment < numberOfDatagramFragments; fragment++)
+               {
+                  int fragmentHeaderLength = 1 + 4 + 4 + 4 + 4 + 4 + 4;
+                  int maxFragmentDataLength = DATAGRAM_MAX_LENGTH - fragmentHeaderLength;
+                  int fragmentDataOffset = fragment * maxFragmentDataLength;
+                  int fragmentDataLength = Math.min(maxFragmentDataLength, latestImageDataLength - fragmentDataOffset);
+                  int datagramLength = fragmentHeaderLength + fragmentDataLength;
 
-                                                    byte[] datagramData = new byte[DATAGRAM_MAX_LENGTH];
-                                                    ByteBuffer datagramBuffer = ByteBuffer.wrap(datagramData);
+                  byte[] datagramData = new byte[DATAGRAM_MAX_LENGTH];
+                  ByteBuffer datagramBuffer = ByteBuffer.wrap(datagramData);
 
-                                                    // Sanity check
-                                                    if (datagramLength > DATAGRAM_MAX_LENGTH)
-                                                       throw new RuntimeException("Too many bytes");
+                  // Sanity check
+                  if (datagramLength > DATAGRAM_MAX_LENGTH)
+                     throw new RuntimeException("Too many bytes");
 
-                                                    // Write header data
-                                                    {
-                                                       datagramBuffer.put(side.toByte());
-                                                       datagramBuffer.putInt(width);
-                                                       datagramBuffer.putInt(height);
-                                                       datagramBuffer.putInt(latestImageDataLength);
-                                                       datagramBuffer.putInt(frameNumber);
-                                                       datagramBuffer.putInt(fragment);
-                                                       datagramBuffer.putInt(fragmentDataLength);
-                                                    }
+                  // Write header data
+                  {
+                     datagramBuffer.put(side.toByte());
+                     datagramBuffer.putInt(width);
+                     datagramBuffer.putInt(height);
+                     datagramBuffer.putInt(latestImageDataLength);
+                     datagramBuffer.putInt(frameNumber);
+                     datagramBuffer.putInt(fragment);
+                     datagramBuffer.putInt(fragmentDataLength);
+                  }
 
-                                                    // Write fragment data
-                                                    {
-                                                       for (int i = 0; i < fragmentDataLength; i++)
-                                                       {
-                                                          datagramBuffer.put(imageData[fragmentDataOffset + i]);
-                                                       }
-                                                    }
+                  // Write fragment data
+                  {
+                     for (int i = 0; i < fragmentDataLength; i++)
+                     {
+                        datagramBuffer.put(imageData[fragmentDataOffset + i]);
+                     }
+                  }
 
-                                                    DatagramPacket packet = new DatagramPacket(datagramData,
-                                                                                               datagramLength,
-                                                                                               address,
-                                                                                               side == RobotSide.LEFT ? LEFT_UDP_PORT : RIGHT_UDP_PORT);
-                                                    try
-                                                    {
-                                                       socket.send(packet);
-                                                    }
-                                                    catch (IOException e)
-                                                    {
-                                                       LogTools.error(e);
-                                                    }
-                                                 }
+                  DatagramPacket packet = new DatagramPacket(datagramData, datagramLength, address, side == RobotSide.LEFT ? LEFT_UDP_PORT : RIGHT_UDP_PORT);
+                  try
+                  {
+                     socket.send(packet);
+                  }
+                  catch (IOException e)
+                  {
+                     LogTools.error(e);
+                  }
+               }
 
-                                                 spinnakerBlackfly.releaseImage(spinImage);
+               spinnakerBlackfly.releaseImage(spinImage);
 
-                                                 frameNumber++;
+               frameNumber++;
 
-                                                 frequencyStatisticPrinter.ping();
-                                              }
+               frequencyStatisticPrinter.ping();
+            }
 
-                                              spinnakerBlackfly.stopAcquiringImages();
+            spinnakerBlackfly.stopAcquiringImages();
 
-                                              socket.close();
-                                           });
+            socket.close();
+         });
 
          publishThreads.put(side, publishThread);
 
