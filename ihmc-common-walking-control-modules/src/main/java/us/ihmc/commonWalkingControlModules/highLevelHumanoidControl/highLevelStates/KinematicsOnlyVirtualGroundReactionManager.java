@@ -35,6 +35,11 @@ public class KinematicsOnlyVirtualGroundReactionManager
 
       statusOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::processFootstepStatus);
 
+   }
+
+   /** Needs to be done after walking controller is initialized. */
+   public void initialize()
+   {
       for (RobotSide robotSide : RobotSide.values)
       {
          contactStateHolders.put(robotSide,

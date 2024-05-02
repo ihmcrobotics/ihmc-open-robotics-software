@@ -97,6 +97,9 @@ public class WalkingControllerState extends HighLevelControllerState
       walkingController.initialize();
       linearMomentumRateControlModule.reset();
       requestIntegratorReset = true;
+
+      if (kinematicsOnlyVirtualGroundReactionManager != null)
+         kinematicsOnlyVirtualGroundReactionManager.initialize();
    }
 
    @Override
