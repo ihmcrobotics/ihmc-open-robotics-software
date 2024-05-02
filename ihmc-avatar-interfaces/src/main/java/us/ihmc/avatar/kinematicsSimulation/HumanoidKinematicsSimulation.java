@@ -90,7 +90,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-@Deprecated
 public class HumanoidKinematicsSimulation
 {
    public static final ROS2Topic<Empty> KINEMATICS_SIMULATION_HEARTBEAT
@@ -615,5 +614,10 @@ public class HumanoidKinematicsSimulation
    public YoRegistry getYoRegistry()
    {
       return registry;
+   }
+
+   public CommandInputManager getWalkingInputManager()
+   {
+      return walkingInputManager;
    }
 }
