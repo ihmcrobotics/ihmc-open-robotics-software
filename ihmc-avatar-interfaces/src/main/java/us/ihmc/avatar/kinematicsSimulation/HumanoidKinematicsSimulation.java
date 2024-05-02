@@ -615,9 +615,4 @@ public class HumanoidKinematicsSimulation
    {
       return registry;
    }
-
-   public CommandInputManager getWalkingInputManager()
-   {
-      return walkingInputManager;
-   }
 }

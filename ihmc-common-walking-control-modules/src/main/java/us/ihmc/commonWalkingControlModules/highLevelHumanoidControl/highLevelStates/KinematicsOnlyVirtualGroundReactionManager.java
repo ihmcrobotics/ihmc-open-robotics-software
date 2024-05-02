@@ -62,7 +62,6 @@ public class KinematicsOnlyVirtualGroundReactionManager
          case FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED ->
             contactStateHolders.put(side,
                                     new KinematicsOnlyContactStateHolder(controllerToolbox.getFootContactStates().get(side), desiredFootstep));
-
       }
    }
 

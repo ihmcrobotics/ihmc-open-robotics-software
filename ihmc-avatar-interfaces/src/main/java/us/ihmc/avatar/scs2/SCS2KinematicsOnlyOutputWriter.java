@@ -21,7 +21,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * This class is used to pass desired accelerations through
+ * This class is used to pass desired accelerations through for
+ * kinematics only simulations.
  */
 public class SCS2KinematicsOnlyOutputWriter implements JointDesiredOutputWriter
 {
@@ -162,14 +163,8 @@ public class SCS2KinematicsOnlyOutputWriter implements JointDesiredOutputWriter
       @Override
       public void doControl()
       {
-//         if (jointDesiredOutput.hasDesiredTorque())
-//            simInput.setEffort(jointDesiredOutput.getDesiredTorque());
          if (jointDesiredOutput.hasDesiredAcceleration())
             simInput.setAcceleration(jointDesiredOutput.getDesiredAcceleration());
-//         if (jointDesiredOutput.hasDesiredVelocity())
-//            simInput.setVelocity(jointDesiredOutput.getDesiredVelocity());
-//         if (jointDesiredOutput.hasDesiredPosition())
-//            simInput.setConfiguration(jointDesiredOutput.getDesiredPosition());
       }
    }
 

@@ -58,7 +58,6 @@ import us.ihmc.scs2.session.Session;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
 import us.ihmc.scs2.simulation.parameters.ContactParametersReadOnly;
 import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
-import us.ihmc.scs2.simulation.physicsEngine.DoNothingPhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
 import us.ihmc.scs2.simulation.physicsEngine.contactPointBased.ContactPointBasedPhysicsEngine;
 import us.ihmc.scs2.simulation.physicsEngine.impulseBased.ImpulseBasedPhysicsEngine;
@@ -95,27 +94,30 @@ import static us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLev
 public class SCS2AvatarSimulationFactory
 {
    protected final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
-   protected final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory
-         = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
+   protected final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>(
+         "highLevelHumanoidControllerFactory");
    protected final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
 
-   protected final OptionalFactoryField<Boolean> enableSCS1YoGraphics = new OptionalFactoryField<>("enableSCS1YoGraphics", false);
-   protected final OptionalFactoryField<Boolean> enableSCS2YoGraphics = new OptionalFactoryField<>("enableSCS2YoGraphics", true);
+   protected final OptionalFactoryField<Boolean> enableSCS1YoGraphics = new OptionalFactoryField<Boolean>("enableSCS1YoGraphics", false);
+   protected final OptionalFactoryField<Boolean> enableSCS2YoGraphics = new OptionalFactoryField<Boolean>("enableSCS2YoGraphics", true);
    protected final OptionalFactoryField<RealtimeROS2Node> realtimeROS2Node = new OptionalFactoryField<>("realtimeROS2Node");
    protected final OptionalFactoryField<Double> simulationDT = new OptionalFactoryField<>("simulationDT");
    protected final OptionalFactoryField<RobotInitialSetup<HumanoidFloatingRootJointRobot>> robotInitialSetup = new OptionalFactoryField<>("robotInitialSetup");
    protected final OptionalFactoryField<Double> gravity = new OptionalFactoryField<>("gravity", -9.81);
    protected final OptionalFactoryField<Boolean> createYoVariableServer = new OptionalFactoryField<>("createYoVariableServer", false);
    protected final OptionalFactoryField<Boolean> logToFile = new OptionalFactoryField<>("logToFile", false);
-   protected final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber
-         = new OptionalFactoryField<>("externalPelvisCorrectorSubscriber");
+   protected final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisCorrectorSubscriber = new OptionalFactoryField<>(
+         "externalPelvisCorrectorSubscriber");
    protected final OptionalFactoryField<Integer> simulationDataBufferSize = new OptionalFactoryField<>("simulationDataBufferSize", 8192);
    protected final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
    protected final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
    protected final OptionalFactoryField<Boolean> kinematicsOnly = new OptionalFactoryField<>("kinematicsOnly", false);
    protected  final OptionalFactoryField<Boolean> createRigidBodyMutators = new OptionalFactoryField<>("createRigidBodyMutators", false);
-   protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory
-         = new OptionalFactoryField<>("outputWriterFactory", (in, out) -> new SCS2OutputWriter(in, out, true));
+   protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
+                                                                                                                              (in, out) -> new SCS2OutputWriter(
+                                                                                                                                    in,
+                                                                                                                                    out,
+                                                                                                                                    true));
    protected final OptionalFactoryField<HighLevelControllerName> initialState = new OptionalFactoryField<>("initialControllerState", WALKING);
    protected final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", false);
    protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
@@ -125,8 +127,8 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Boolean> useImpulseBasedPhysicsEngine = new OptionalFactoryField<>("useImpulseBasePhysicsEngine", false);
    protected final OptionalFactoryField<Boolean> useBulletPhysicsEngine = new OptionalFactoryField<>("useBulletPhysicsEngine", false);
    protected final OptionalFactoryField<Consumer<RobotDefinition>> bulletCollisionMutator = new OptionalFactoryField<>("bulletCollisionMutator");
-   protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters
-         = new OptionalFactoryField<>("impulseBasedPhysicsEngineParameters");
+   protected final OptionalFactoryField<ContactParametersReadOnly> impulseBasedPhysicsEngineContactParameters = new OptionalFactoryField<>(
+         "impulseBasedPhysicsEngineParameters");
    protected final OptionalFactoryField<GroundContactModelParameters> groundContactModelParameters = new OptionalFactoryField<>("groundContactModelParameters");
    protected final OptionalFactoryField<Boolean> enableSimulatedRobotDamping = new OptionalFactoryField<>("enableSimulatedRobotDamping", true);
    protected final OptionalFactoryField<Boolean> useRobotDefinitionCollisions = new OptionalFactoryField<>("useRobotDefinitionCollisions", false);
@@ -135,13 +137,13 @@ public class SCS2AvatarSimulationFactory
 
    private final OptionalFactoryField<Boolean> useHeadingAndVelocityScript = new OptionalFactoryField<>("useHeadingAndVelocityScript");
    private final OptionalFactoryField<HeightMap> heightMapForFootstepZ = new OptionalFactoryField<>("heightMapForFootstepZ");
-   private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParameters
-         = new OptionalFactoryField<>("headingAndVelocityEvaluationScriptParameters");
-   private final OptionalFactoryField<StateEstimatorControllerFactory> secondaryStateEstimatorFactory
-         = new OptionalFactoryField<>("SecondaryStateEstimatorFactory");
+   private final OptionalFactoryField<HeadingAndVelocityEvaluationScriptParameters> headingAndVelocityEvaluationScriptParameters = new OptionalFactoryField<>(
+         "headingAndVelocityEvaluationScriptParameters");
+   private final OptionalFactoryField<StateEstimatorControllerFactory> secondaryStateEstimatorFactory = new OptionalFactoryField<>(
+         "SecondaryStateEstimatorFactory");
    private final OptionalFactoryField<Boolean> createIKStreamingRealTimeController = new OptionalFactoryField<>("createIKStreamingRealTimeController", false);
-   private final OptionalFactoryField<KinematicsStreamingToolboxParameters> ikStreamingParameters
-         = new OptionalFactoryField<>("ikStreamingParameters", KinematicsStreamingToolboxParameters.defaultParameters());
+   private final OptionalFactoryField<KinematicsStreamingToolboxParameters> ikStreamingParameters = new OptionalFactoryField<>("ikStreamingParameters",
+                                                                                                                               KinematicsStreamingToolboxParameters.defaultParameters());
 
    // TO CONSTRUCT
    protected RobotDefinition robotDefinition;
@@ -258,7 +260,6 @@ public class SCS2AvatarSimulationFactory
       if (kinematicsOnly.get())
       {
          physicsEngineFactory = KinematicsOnlyPhysicsEngine::new;
-//         physicsEngineFactory = DoNothingPhysicsEngine::new;
       }
       else if (useImpulseBasedPhysicsEngine.hasValue() && useImpulseBasedPhysicsEngine.get())
       {

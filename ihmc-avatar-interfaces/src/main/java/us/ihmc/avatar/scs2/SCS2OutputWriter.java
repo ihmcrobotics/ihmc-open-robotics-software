@@ -23,13 +23,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-/**
- * Used to apply some corruption to the desired torque, velocity, and position outputs
- * from the controller and apply PD control on the torque to track them. These torques
- * then get passed on to the simulation for physics calculation.
- *
- * This class also tracks unstable velocities with some counters.
- */
 public class SCS2OutputWriter implements JointDesiredOutputWriter
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
