@@ -558,7 +558,7 @@ public class SCS2AvatarSimulationFactory
                                                           simulationOutputWriter.writeBefore(estimatorThread.getHumanoidRobotContextData().getTimestamp());
                                                     });
       }
-      
+
       List<HumanoidRobotControlTask> tasks = new ArrayList<>();
       tasks.add(estimatorTask);
       tasks.add(controllerTask);
