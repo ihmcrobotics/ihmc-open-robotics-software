@@ -162,14 +162,14 @@ public class SCS2KinematicsOnlyOutputWriter implements JointDesiredOutputWriter
       @Override
       public void doControl()
       {
-         if (jointDesiredOutput.hasDesiredTorque())
-            simInput.setEffort(jointDesiredOutput.getDesiredTorque());
+//         if (jointDesiredOutput.hasDesiredTorque())
+//            simInput.setEffort(jointDesiredOutput.getDesiredTorque());
          if (jointDesiredOutput.hasDesiredAcceleration())
             simInput.setAcceleration(jointDesiredOutput.getDesiredAcceleration());
-         if (jointDesiredOutput.hasDesiredVelocity())
-            simInput.setVelocity(jointDesiredOutput.getDesiredVelocity());
-         if (jointDesiredOutput.hasDesiredPosition())
-            simInput.setConfiguration(jointDesiredOutput.getDesiredPosition());
+//         if (jointDesiredOutput.hasDesiredVelocity())
+//            simInput.setVelocity(jointDesiredOutput.getDesiredVelocity());
+//         if (jointDesiredOutput.hasDesiredPosition())
+//            simInput.setConfiguration(jointDesiredOutput.getDesiredPosition());
       }
    }
 
