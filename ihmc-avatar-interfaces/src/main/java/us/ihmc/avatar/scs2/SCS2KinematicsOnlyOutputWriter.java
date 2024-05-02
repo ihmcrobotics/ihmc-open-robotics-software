@@ -107,8 +107,6 @@ public class SCS2KinematicsOnlyOutputWriter implements JointDesiredOutputWriter
    protected void write()
    {
       simFloatingRootJoint.setJointAcceleration(0, outputForRootJoint.getDesiredAcceleration());
-//      simFloatingRootJoint.setJointVelocity(0, outputForRootJoint.getDesiredVelocity());
-//      simFloatingRootJoint.set(0, outputForRootJoint.getDesiredVelocity());
 
       for (int i = 0; i < jointControllers.size(); i++)
       {
