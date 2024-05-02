@@ -25,6 +25,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -44,6 +45,7 @@ import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.ControllerInput;
@@ -410,12 +412,6 @@ public class SCS2AvatarSimulationFactory
          simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(controllerThread.getSCS1YoGraphicsListRegistry()));
       if (enableSCS2YoGraphics.get())
          simulationConstructionSet.addYoGraphic(controllerThread.getSCS2YoGraphics());
-
-      if (kinematicsOnly.get())
-      {
-//         KinematicsOnlyPhysicsEngine physicsEngine = (KinematicsOnlyPhysicsEngine) simulationConstructionSet.getPhysicsEngine();
-//         physicsEngine.setHighLevelHumanoidControllerFactory(highLevelHumanoidControllerFactory.get());
-      }
    }
 
    private void setupStepGeneratorThread()
@@ -542,27 +538,27 @@ public class SCS2AvatarSimulationFactory
       if (simulationOutputWriter != null)
       {
          estimatorTask.addRunnableOnSchedulerThread(() ->
-         {
-            if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
-               simulationOutputWriter.writeAfter();
-         });
+                                                    {
+                                                       if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
+                                                          simulationOutputWriter.writeAfter();
+                                                    });
       }
       // Previously done in estimator thread read
       SensorReader sensorReader = estimatorThread.getSensorReader();
       estimatorTask.addRunnableOnSchedulerThread(() ->
-      {
-         long newTimestamp = sensorReader.read(masterContext.getSensorDataContext());
-         masterContext.setTimestamp(newTimestamp);
-      });
+                                                 {
+                                                    long newTimestamp = sensorReader.read(masterContext.getSensorDataContext());
+                                                    masterContext.setTimestamp(newTimestamp);
+                                                 });
       if (simulationOutputWriter != null)
       {
          estimatorTask.addRunnableOnSchedulerThread(() ->
-         {
-            if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
-               simulationOutputWriter.writeBefore(estimatorThread.getHumanoidRobotContextData().getTimestamp());
-         });
+                                                    {
+                                                       if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
+                                                          simulationOutputWriter.writeBefore(estimatorThread.getHumanoidRobotContextData().getTimestamp());
+                                                    });
       }
-
+      
       List<HumanoidRobotControlTask> tasks = new ArrayList<>();
       tasks.add(estimatorTask);
       tasks.add(controllerTask);
