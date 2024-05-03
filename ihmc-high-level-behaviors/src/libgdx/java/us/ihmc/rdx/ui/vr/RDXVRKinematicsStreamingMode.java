@@ -13,11 +13,13 @@ import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.DeprecatedAPIs;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
@@ -42,7 +44,6 @@ import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.tools.KinematicsRecordReplay;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
-import us.ihmc.rdx.vr.RDXVRTrackedDevice;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.partNames.ArmJointName;
@@ -88,12 +89,12 @@ public class RDXVRKinematicsStreamingMode
    private final SideDependentList<RDXReferenceFrameGraphic> handFrameGraphics = new SideDependentList<>();
    private final Map<String, MutableReferenceFrame> trackedSegmentDesiredFrame = new HashMap<>();
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
-   private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
+   private final ImBoolean showReferenceFrameGraphics = new ImBoolean(false);
    private final ImBoolean streamToController = new ImBoolean(false);
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
    private final SceneGraph sceneGraph;
-//   private KinematicsStreamingToolboxModule toolbox;
+   private KinematicsStreamingToolboxModule toolbox;
 
    private final ImBoolean controlArmsOnly = new ImBoolean(false);
    private ReferenceFrame pelvisFrame;
@@ -182,8 +183,8 @@ public class RDXVRKinematicsStreamingMode
 
       boolean startYoVariableServer = true;
 
-//      toolbox = new KinematicsStreamingToolboxModule(robotModel, parameters, startYoVariableServer, PubSubImplementation.FAST_RTPS);
-//      ((KinematicsStreamingToolboxController) toolbox.getToolboxController()).setInitialRobotConfigurationNamedMap(createInitialConfiguration(robotModel));
+      toolbox = new KinematicsStreamingToolboxModule(robotModel, parameters, startYoVariableServer, DomainFactory.PubSubImplementation.FAST_RTPS);
+      ((KinematicsStreamingToolboxController) toolbox.getToolboxController()).setInitialRobotConfigurationNamedMap(createInitialConfiguration(robotModel));
 
       RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "Right A button");
       RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "Left A button");
@@ -586,9 +587,19 @@ public class RDXVRKinematicsStreamingMode
       }
    }
 
+   public boolean isStreaming()
+   {
+      return streamToController.get();
+   }
+
+   public void visualizeIKPreviewGraphic(boolean visualize)
+   {
+      ghostRobotGraphic.setActive(visualize);
+   }
+
    public void destroy()
    {
-//      toolbox.closeAndDispose();
+      toolbox.closeAndDispose();
       ghostRobotGraphic.destroy();
       for (RobotSide side : RobotSide.values)
       {
