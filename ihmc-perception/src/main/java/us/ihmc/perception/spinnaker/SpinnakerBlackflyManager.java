@@ -3,7 +3,11 @@ package us.ihmc.perception.spinnaker;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.LongPointer;
 import org.bytedeco.javacpp.SizeTPointer;
-import org.bytedeco.spinnaker.Spinnaker_C.*;
+import org.bytedeco.spinnaker.Spinnaker_C.spinCamera;
+import org.bytedeco.spinnaker.Spinnaker_C.spinCameraList;
+import org.bytedeco.spinnaker.Spinnaker_C.spinNodeHandle;
+import org.bytedeco.spinnaker.Spinnaker_C.spinNodeMapHandle;
+import org.bytedeco.spinnaker.Spinnaker_C.spinSystem;
 import org.bytedeco.spinnaker.global.Spinnaker_C;
 
 import java.util.HashMap;
@@ -45,7 +49,7 @@ public class SpinnakerBlackflyManager
       return spinnakerBlackfly;
    }
 
-   public SpinnakerBlackfly createSpinnakerBlackfly(String serialNumber, int width, int height, int xOffset, int yOffset)
+   public SpinnakerBlackfly createSpinnakerBlackfly(String serialNumber, int width, int height, int xOffset, int yOffset, float exposureTimeMicroSecs)
    {
       spinCamera spinCamera = new spinCamera();
       printOnError(spinCameraListGetBySerial(spinCameraList, new BytePointer(serialNumber), spinCamera), "Unable to create spinCamera from serial number!");
@@ -58,6 +62,7 @@ public class SpinnakerBlackflyManager
       spinnakerBlackfly.setPixelFormat(Spinnaker_C.spinPixelFormatEnums.PixelFormat_BayerRG8);
       spinnakerBlackfly.setResolution(width, height);
       spinnakerBlackfly.setOffset(xOffset, yOffset);
+      spinnakerBlackfly.setExposure(exposureTimeMicroSecs);
       // We only want the newest image for the lowest latency possible
       spinnakerBlackfly.setBufferHandlingMode(spinTLStreamBufferHandlingModeEnums.StreamBufferHandlingMode_NewestOnly);
       spinnakerBlackfly.startAcquiringImages();

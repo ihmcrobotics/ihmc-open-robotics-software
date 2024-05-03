@@ -43,7 +43,8 @@ public class DualBlackflyUDPSender
                 1936 - 600,
                 (1464 / 2) + 200,
                 600 / 2,
-                (1464 / 2) + (200 / 2) + 100); // +100 for getting rid of the realsense
+                (1464 / 2) + (200 / 2) + 100,
+                6000); // +100 for getting rid of the realsense
 
             DatagramSocket socket;
             try
