@@ -152,7 +152,7 @@ public class RDXVRKinematicsStreamingMode
          ikControlFramePoses.put(side, ikControlFramePose);
       }
 
-//      status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
+      status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
 
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled);
 
