@@ -56,18 +56,12 @@ public class RDXWholeBodyIKManager
    private final ControllerStatusTracker controllerStatusTracker;
    private final OneDoFJointBasics[] desiredOneDoFJointsExcludingHands;
    private SideDependentList<RDXInteractableHand> interactableHands;
-   private SideDependentList<RDXInteractableFoot> interactableFeet;
    private RDXInteractableRobotLink interactableChest;
-   private RDXInteractableRobotLink interactablePelvis;
    private final SideDependentList<FramePose3DChangedTracker> desiredHandPoseChangedTrackers = new SideDependentList<>();
-   private final SideDependentList<FramePose3DChangedTracker> desiredFootPoseChangedTrackers = new SideDependentList<>();
    private FramePose3DChangedTracker desiredChestPoseChangedTracker;
-   private FramePose3DChangedTracker desiredPelvisPoseChangedTracker;
    private final HumanoidKinematicsSolver wholeBodyIKSolver;
    private final SideDependentList<KinematicsToolboxRigidBodyCommand> handRigidBodyCommands = new SideDependentList<>();
    private final KinematicsToolboxRigidBodyCommand chestRigidBodyCommand = new KinematicsToolboxRigidBodyCommand();
-   private final KinematicsToolboxRigidBodyCommand pelvisRigidBodyCommand = new KinematicsToolboxRigidBodyCommand();
-   private final SideDependentList<KinematicsToolboxRigidBodyCommand> feetRigidBodyCommands = new SideDependentList<>(KinematicsToolboxRigidBodyCommand::new);
    private final WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
    private volatile boolean readyToSolve = true;
    private volatile boolean readyToCopySolution = false;
@@ -113,11 +107,6 @@ public class RDXWholeBodyIKManager
       chestRigidBodyCommand.getControlFramePose().changeFrame(wholeBodyIKSolver.getDesiredFullRobotModel().getChest().getBodyFixedFrame());
       chestRigidBodyCommand.getWeightMatrix().setLinearWeights(20.0, 20.0, 20.0);
       chestRigidBodyCommand.getWeightMatrix().setAngularWeights(1.0, 1.0, 1.0);
-      pelvisRigidBodyCommand.setEndEffector(wholeBodyIKSolver.getDesiredFullRobotModel().getPelvis());
-      pelvisRigidBodyCommand.getControlFramePose().setToZero(wholeBodyIKSolver.getDesiredFullRobotModel().getPelvis().getParentJoint().getFrameAfterJoint());
-      pelvisRigidBodyCommand.getControlFramePose().changeFrame(wholeBodyIKSolver.getDesiredFullRobotModel().getPelvis().getBodyFixedFrame());
-      pelvisRigidBodyCommand.getWeightMatrix().setLinearWeights(20.0, 20.0, 20.0);
-      pelvisRigidBodyCommand.getWeightMatrix().setAngularWeights(1.0, 1.0, 1.0);
    }
 
    public void setInteractables(SideDependentList<RDXInteractableHand> interactableHands,
@@ -126,16 +115,11 @@ public class RDXWholeBodyIKManager
                                 RDXInteractableRobotLink interactablePelvis)
    {
       this.interactableHands = interactableHands;
-      this.interactableFeet = interactableFeet;
       this.interactableChest = interactableChest;
-      this.interactablePelvis = interactablePelvis;
 
       for (RobotSide side : interactableHands.sides())
          desiredHandPoseChangedTrackers.put(side, new FramePose3DChangedTracker(interactableHands.get(side).getPose()));
-      for (RobotSide side : RobotSide.values)
-         desiredFootPoseChangedTrackers.put(side, new FramePose3DChangedTracker(interactableFeet.get(side).getPose()));
       desiredChestPoseChangedTracker = new FramePose3DChangedTracker(interactableChest.getPose());
-      desiredPelvisPoseChangedTracker = new FramePose3DChangedTracker(interactablePelvis.getPose());
    }
 
    public void update()
@@ -146,13 +130,8 @@ public class RDXWholeBodyIKManager
          for (RobotSide side : interactableHands.sides())
             if (!interactableHands.get(side).isDeleted())
                desiredsChanged |= desiredHandPoseChangedTrackers.get(side).hasChanged();
-         for (RobotSide side : RobotSide.values)
-            if (!interactableFeet.get(side).isDeleted())
-               desiredsChanged |= desiredFootPoseChangedTrackers.get(side).hasChanged();
          if (!interactableChest.isDeleted())
             desiredsChanged |= desiredChestPoseChangedTracker.hasChanged();
-         if (!interactablePelvis.isDeleted())
-            desiredsChanged |= desiredPelvisPoseChangedTracker.hasChanged();
 
          if (desiredsChanged)
          {
@@ -171,24 +150,10 @@ public class RDXWholeBodyIKManager
                   wholeBodyIKSolver.submit(rigidBodyCommand);
                }
             }
-            for (RobotSide side : RobotSide.values)
-            {
-               if (!interactableFeet.get(side).isDeleted())
-               {
-                  KinematicsToolboxRigidBodyCommand rigidBodyCommand = feetRigidBodyCommands.get(side);
-                  rigidBodyCommand.getDesiredPose().setFromReferenceFrame(interactableFeet.get(side).getControlReferenceFrame());
-                  wholeBodyIKSolver.submit(rigidBodyCommand);
-               }
-            }
             if (!interactableChest.isDeleted())
             {
                chestRigidBodyCommand.getDesiredPose().setFromReferenceFrame(interactableChest.getControlReferenceFrame());
                wholeBodyIKSolver.submit(chestRigidBodyCommand);
-            }
-            if (!interactablePelvis.isDeleted())
-            {
-               pelvisRigidBodyCommand.getDesiredPose().setFromReferenceFrame(interactablePelvis.getControlReferenceFrame());
-               wholeBodyIKSolver.submit(pelvisRigidBodyCommand);
             }
 
             // We solve on a thread because the solver can take some milliseconds
@@ -237,10 +202,6 @@ public class RDXWholeBodyIKManager
 
          populateArmTrajectoryMessage(wholeBodyTrajectoryMessage.getLeftArmTrajectoryMessage(), RobotSide.LEFT);
          populateArmTrajectoryMessage(wholeBodyTrajectoryMessage.getRightArmTrajectoryMessage(), RobotSide.RIGHT);
-         if (!interactableFeet.get(RobotSide.LEFT).isDeleted())
-            populateLegTrajectoryMessage(wholeBodyTrajectoryMessage.getLeftLegTrajectoryMessage(), RobotSide.LEFT);
-         if (!interactableFeet.get(RobotSide.RIGHT).isDeleted())
-            populateLegTrajectoryMessage(wholeBodyTrajectoryMessage.getRightLegTrajectoryMessage(), RobotSide.RIGHT);
 
          SpineTrajectoryMessage spineTrajectoryMessage = wholeBodyTrajectoryMessage.getSpineTrajectoryMessage();
          spineTrajectoryMessage.getJointspaceTrajectory().getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
@@ -323,9 +284,6 @@ public class RDXWholeBodyIKManager
    {
       for (RobotSide side : interactableHands.sides())
          desiredHandPoseChangedTrackers.get(side).markAsChanged();
-      for (RobotSide side : RobotSide.values)
-         desiredFootPoseChangedTrackers.get(side).markAsChanged();
       desiredChestPoseChangedTracker.markAsChanged();
-      desiredPelvisPoseChangedTracker.markAsChanged();
    }
 }
