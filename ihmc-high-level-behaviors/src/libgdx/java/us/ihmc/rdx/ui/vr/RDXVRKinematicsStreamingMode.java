@@ -94,7 +94,7 @@ public class RDXVRKinematicsStreamingMode
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
    private final SceneGraph sceneGraph;
-   private KinematicsStreamingToolboxModule toolbox;
+//   private KinematicsStreamingToolboxModule toolbox;
 
    private final ImBoolean controlArmsOnly = new ImBoolean(false);
    private ReferenceFrame pelvisFrame;
@@ -152,7 +152,7 @@ public class RDXVRKinematicsStreamingMode
          ikControlFramePoses.put(side, ikControlFramePose);
       }
 
-      status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
+//      status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
 
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled);
 
@@ -183,8 +183,8 @@ public class RDXVRKinematicsStreamingMode
 
       boolean startYoVariableServer = true;
 
-      toolbox = new KinematicsStreamingToolboxModule(robotModel, parameters, startYoVariableServer, DomainFactory.PubSubImplementation.FAST_RTPS);
-      ((KinematicsStreamingToolboxController) toolbox.getToolboxController()).setInitialRobotConfigurationNamedMap(createInitialConfiguration(robotModel));
+//      toolbox = new KinematicsStreamingToolboxModule(robotModel, parameters, startYoVariableServer, DomainFactory.PubSubImplementation.FAST_RTPS);
+//      ((KinematicsStreamingToolboxController) toolbox.getToolboxController()).setInitialRobotConfigurationNamedMap(createInitialConfiguration(robotModel));
 
       RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "Right A button");
       RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "Left A button");
@@ -599,7 +599,7 @@ public class RDXVRKinematicsStreamingMode
 
    public void destroy()
    {
-      toolbox.closeAndDispose();
+//      toolbox.closeAndDispose();
       ghostRobotGraphic.destroy();
       for (RobotSide side : RobotSide.values)
       {

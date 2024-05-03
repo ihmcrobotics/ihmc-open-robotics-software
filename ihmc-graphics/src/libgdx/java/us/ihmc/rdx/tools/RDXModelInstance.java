@@ -83,9 +83,4 @@ public class RDXModelInstance extends ModelInstance
          setOpacity(colorGDX.a);
       }
    }
-
-   public float getCurrentOpacity()
-   {
-      return currentOpacity;
-   }
 }
