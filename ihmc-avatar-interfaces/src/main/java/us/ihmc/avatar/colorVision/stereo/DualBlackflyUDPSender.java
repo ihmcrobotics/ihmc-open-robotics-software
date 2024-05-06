@@ -9,6 +9,7 @@ import us.ihmc.perception.spinnaker.SpinnakerBlackfly;
 import us.ihmc.perception.spinnaker.SpinnakerBlackflyManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.time.FrequencyStatisticPrinter;
 
 import java.io.File;
@@ -26,6 +27,7 @@ public class DualBlackflyUDPSender
 {
    private static final String LEFT_SERIAL_NUMBER = "17372478";
    private static final String RIGHT_SERIAL_NUMBER = "17403057";
+   private static final BlackflyModelProperties BLACKFLY_MODEL = BlackflyModelProperties.BFLY_U3_23S6C;
    private static final String LEFT_DESTINATION_IP_ADDRESS = System.getProperty("blackfly.left.udp.dest.address", "127.0.0.1");
    private static final String RIGHT_DESTINATION_IP_ADDRESS = System.getProperty("blackfly.right.udp.dest.address", "127.0.0.1");
    public static final int LEFT_UDP_PORT = 9200;
@@ -36,48 +38,70 @@ public class DualBlackflyUDPSender
    private final SideDependentList<Thread> publishThreads = new SideDependentList<>();
    private volatile boolean running;
 
-   private File blackflyPropsFile = new File(System.getProperty("user.home"), "blackfly.properties");
+   private final File propertiesFile = new File(IHMCCommonPaths.VR_DIRECTORY_NAME, getClass().getSimpleName() + ".properties");
 
-   public void start(BlackflyModelProperties blackflyModelProperties)
+   public void start()
    {
-      Properties properties = new Properties();
-      try
-      {
-         properties.load(new FileInputStream(blackflyPropsFile));
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
-      }
-
       running = true;
 
       SpinnakerBlackflyManager spinnakerBlackflyManager = new SpinnakerBlackflyManager();
 
-      double originalWidth = blackflyModelProperties.getImageWidthPixels();
-      double originalHeight = blackflyModelProperties.getImageHeightPixels();
+      double originalWidth = BLACKFLY_MODEL.getImageWidthPixels();
+      double originalHeight = BLACKFLY_MODEL.getImageHeightPixels();
 
-      double croppedHeight = Integer.parseInt(properties.getProperty("croppedHeight"));
-      double yOffset = Double.parseDouble(properties.getProperty("yoffset"));
-      float exposureTimeUs = Float.parseFloat(properties.getProperty("exposureTimeUs"));
+      double croppedHeight = originalHeight;
+      double xOffset = 0.0;
+      double yOffset = 0.0;
+      float exposureTimeUs = 6000.0f;
 
-      System.out.println("originalWidth " + originalWidth);
-      System.out.println("originalHeight " + originalHeight);
-      System.out.println("croppedHeight " + croppedHeight);
-      System.out.println("exposureTimeUs " + exposureTimeUs);
-      System.out.println("yOffset " + yOffset);
+      if (propertiesFile.exists())
+      {
+         Properties properties = new Properties();
+
+         try
+         {
+            properties.load(new FileInputStream(propertiesFile));
+         }
+         catch (IOException e)
+         {
+            LogTools.error(e);
+         }
+
+         try
+         {
+            croppedHeight = Integer.parseInt(properties.getProperty("croppedHeight"));
+            xOffset = Double.parseDouble(properties.getProperty("xOffset"));
+            yOffset = Double.parseDouble(properties.getProperty("yOffset"));
+            exposureTimeUs = Float.parseFloat(properties.getProperty("exposureTimeUs"));
+         }
+         catch (NumberFormatException e)
+         {
+            LogTools.error(e);
+         }
+      }
+
+      LogTools.info("originalWidth " + originalWidth);
+      LogTools.info("originalHeight " + originalHeight);
+      LogTools.info("croppedHeight " + croppedHeight);
+      LogTools.info("exposureTimeUs " + exposureTimeUs);
+      LogTools.info("xOffset " + xOffset);
+      LogTools.info("yOffset " + yOffset);
 
       for (RobotSide side : RobotSide.values())
       {
+         double finalCroppedHeight = croppedHeight;
+         double finalXOffset = xOffset;
+         double finalYOffset = yOffset;
+         float finalExposureTimeUs = exposureTimeUs;
          Thread publishThread = new Thread(() ->
          {
             SpinnakerBlackfly spinnakerBlackfly = spinnakerBlackflyManager.createSpinnakerBlackfly(
                   side == RobotSide.LEFT ? LEFT_SERIAL_NUMBER : RIGHT_SERIAL_NUMBER,
-                  (int) blackflyModelProperties.getImageWidthPixels(),
-                  (int) croppedHeight,
-                  (int) 0,
-                  (int) yOffset,
-                  exposureTimeUs);
+                  (int) originalWidth,
+                  (int) finalCroppedHeight,
+                  (int) finalXOffset,
+                  (int) finalYOffset,
+                  finalExposureTimeUs);
 
             DatagramSocket socket;
             try
@@ -122,7 +146,7 @@ public class DualBlackflyUDPSender
                byte[] imageData = new byte[latestImageDataLength];
                spinImageData.get(imageData, 0, latestImageDataLength);
 
-               int imageFrameSizeWithPadding = (int) (width * blackflyModelProperties.getImageHeightPixels());
+               int imageFrameSizeWithPadding = (int) (width * originalHeight);
                byte[] imageDataWithPadding = new byte[imageFrameSizeWithPadding];
 
                int paddingOffset = (imageFrameSizeWithPadding - imageFrameSize);
@@ -138,8 +162,6 @@ public class DualBlackflyUDPSender
                      imageDataWithPadding[i] = imageData[i - (paddingOffset)];
                   }
                }
-
-               System.out.println("paddingOffset " + paddingOffset);
 
                int numberOfDatagramFragments = (int) Math.ceil((double) imageFrameSizeWithPadding / DATAGRAM_MAX_LENGTH);
 
@@ -227,7 +249,7 @@ public class DualBlackflyUDPSender
    {
       DualBlackflyUDPSender dualBlackflyUDPSender = new DualBlackflyUDPSender();
 
-      dualBlackflyUDPSender.start(BlackflyModelProperties.BFLY_U3_23S6C);
+      dualBlackflyUDPSender.start();
 
       Runtime.getRuntime().addShutdownHook(new Thread(dualBlackflyUDPSender::stop));
 

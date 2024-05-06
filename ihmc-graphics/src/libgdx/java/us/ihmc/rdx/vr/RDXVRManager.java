@@ -210,7 +210,7 @@ public class RDXVRManager
 
             ThreadTools.startAThread(() ->
             {
-               ThreadTools.sleep(3000);
+               ThreadTools.sleep(5000);
 
                if (isVRReady())
                {

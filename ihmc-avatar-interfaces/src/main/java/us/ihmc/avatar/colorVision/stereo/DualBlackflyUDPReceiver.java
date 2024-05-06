@@ -8,7 +8,11 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.io.IOException;
-import java.net.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 
 import static us.ihmc.avatar.colorVision.stereo.DualBlackflyUDPSender.DATAGRAM_MAX_LENGTH;
@@ -46,82 +50,82 @@ public class DualBlackflyUDPReceiver
       for (RobotSide side : RobotSide.values)
       {
          Thread receiveThread = new Thread(() ->
-                                           {
-                                              SocketAddress socketAddress = new InetSocketAddress(addresses.get(side),
-                                                                                                  side == RobotSide.LEFT ?
-                                                                                                        DualBlackflyUDPSender.LEFT_UDP_PORT :
-                                                                                                        DualBlackflyUDPSender.RIGHT_UDP_PORT);
-                                              DatagramSocket socket;
+         {
+            SocketAddress socketAddress = new InetSocketAddress(addresses.get(side),
+                                                                side == RobotSide.LEFT ?
+                                                                      DualBlackflyUDPSender.LEFT_UDP_PORT :
+                                                                      DualBlackflyUDPSender.RIGHT_UDP_PORT);
+            DatagramSocket socket;
 
-                                              try
-                                              {
-                                                 socket = new DatagramSocket(socketAddress);
-                                              }
-                                              catch (SocketException e)
-                                              {
-                                                 e.printStackTrace();
-                                                 LogTools.error("Unable to bind to address for Blackfly UDP streaming: " + socketAddress);
-                                                 return;
-                                              }
+            try
+            {
+               socket = new DatagramSocket(socketAddress);
+            }
+            catch (SocketException e)
+            {
+               e.printStackTrace();
+               LogTools.error("Unable to bind to address for Blackfly UDP streaming: " + socketAddress);
+               return;
+            }
 
-                                              LogTools.info("Connecting to: " + socketAddress);
+            LogTools.info("Connecting to: " + socketAddress);
 
-                                              byte[] buffer = new byte[(int) ((Math.pow(2, 16)) - 1)];
-                                              DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+            byte[] buffer = new byte[(int) ((Math.pow(2, 16)) - 1)];
+            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
 
-                                              while (running)
-                                              {
-                                                 try
-                                                 {
-                                                    socket.setSoTimeout(1000);
-                                                    socket.receive(packet);
-                                                    connected = true;
-                                                 }
-                                                 catch (IOException e)
-                                                 {
-                                                    LogTools.error(e);
-                                                    connected = false;
-                                                    running = false;
-                                                    break;
-                                                 }
+            while (running)
+            {
+               try
+               {
+                  socket.setSoTimeout(1000);
+                  socket.receive(packet);
+                  connected = true;
+               }
+               catch (IOException e)
+               {
+                  LogTools.error(e);
+                  connected = false;
+                  running = false;
+                  break;
+               }
 
-                                                 ByteBuffer datagramBuffer = ByteBuffer.wrap(buffer);
-                                                 int fragmentHeaderLength = 1 + 4 + 4 + 4 + 4 + 4 + 4;
-                                                 RobotSide sideFromDatagram = RobotSide.fromByte(datagramBuffer.get());
-                                                 int width = datagramBuffer.getInt();
-                                                 int height = datagramBuffer.getInt();
-                                                 int imageBytes = datagramBuffer.getInt();
-                                                 int frameNumber = datagramBuffer.getInt();
-                                                 int fragment = datagramBuffer.getInt();
-                                                 int fragmentDataLength = datagramBuffer.getInt();
-                                                 byte[] fragmentDataBytes = new byte[fragmentDataLength];
-                                                 int maxFragmentDataLength = DATAGRAM_MAX_LENGTH - fragmentHeaderLength;
-                                                 int fragmentDataOffset = fragment * maxFragmentDataLength;
+               ByteBuffer datagramBuffer = ByteBuffer.wrap(buffer);
+               int fragmentHeaderLength = 1 + 4 + 4 + 4 + 4 + 4 + 4;
+               RobotSide sideFromDatagram = RobotSide.fromByte(datagramBuffer.get());
+               int width = datagramBuffer.getInt();
+               int height = datagramBuffer.getInt();
+               int imageBytes = datagramBuffer.getInt();
+               int frameNumber = datagramBuffer.getInt();
+               int fragment = datagramBuffer.getInt();
+               int fragmentDataLength = datagramBuffer.getInt();
+               byte[] fragmentDataBytes = new byte[fragmentDataLength];
+               int maxFragmentDataLength = DATAGRAM_MAX_LENGTH - fragmentHeaderLength;
+               int fragmentDataOffset = fragment * maxFragmentDataLength;
 
-                                                 byte[] imageBuffer = imageBuffers.get(sideFromDatagram);
+               byte[] imageBuffer = imageBuffers.get(sideFromDatagram);
 
-                                                 if (imageBuffer == null || imageBuffer.length != imageBytes)
-                                                 {
-                                                    imageBuffer = new byte[imageBytes];
-                                                    imageBuffers.put(sideFromDatagram, imageBuffer);
-                                                 }
+               if (imageBuffer == null || imageBuffer.length != imageBytes)
+               {
+                  imageBuffer = new byte[imageBytes];
+                  imageBuffers.put(sideFromDatagram, imageBuffer);
+               }
 
-                                                 imageDimensions.get(sideFromDatagram).setImageWidth(width);
-                                                 imageDimensions.get(sideFromDatagram).setImageHeight(height);
+               imageDimensions.get(sideFromDatagram).setImageWidth(width);
+               imageDimensions.get(sideFromDatagram).setImageHeight(height);
 
-                                                 for (int i = 0; i < fragmentDataLength; i++)
-                                                 {
-                                                    imageBuffer[fragmentDataOffset + i] = datagramBuffer.get(fragmentHeaderLength + i);
-                                                 }
+               for (int i = 0; i < fragmentDataLength; i++)
+               {
+                  imageBuffer[fragmentDataOffset + i] = datagramBuffer.get(fragmentHeaderLength + i);
+               }
 
-                                                 frequencyCalculators.get(side).ping();
-                                              }
+               frequencyCalculators.get(side).ping();
+            }
 
-                                              socket.disconnect();
-                                              socket.close();
+            socket.disconnect();
+            socket.close();
 
-                                              connected = false;
-                                           });
+            connected = false;
+         });
 
          receiveThreads.put(side, receiveThread);
 
