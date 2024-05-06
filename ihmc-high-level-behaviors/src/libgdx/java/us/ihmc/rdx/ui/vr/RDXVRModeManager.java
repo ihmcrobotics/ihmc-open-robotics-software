@@ -42,14 +42,19 @@ public class RDXVRModeManager
    private final FramePose3D vrModeControls3DPanelPose = new FramePose3D();
    private RDXROS2RobotVisualizer robotVisualizer;
 
-   public void create(RDXBaseUI baseUI, ROS2SyncedRobotModel syncedRobot, RDXROS2RobotVisualizer robotVisualizer, ROS2ControllerHelper controllerHelper)
+   public void create(RDXBaseUI baseUI,
+                      ROS2SyncedRobotModel syncedRobot,
+                      RDXROS2RobotVisualizer robotVisualizer,
+                      ROS2ControllerHelper controllerHelper,
+                      boolean createKinematicsStreamingToolboxModule)
    {
-      create(baseUI, syncedRobot, robotVisualizer, controllerHelper, new DefaultRetargetingParameters(), new SceneGraph());
-   }
-
-   public void create(RDXBaseUI baseUI, ROS2SyncedRobotModel syncedRobot, RDXROS2RobotVisualizer robotVisualizer, ROS2ControllerHelper controllerHelper, RetargetingParameters retargetingParameters)
-   {
-      create(baseUI, syncedRobot, robotVisualizer, controllerHelper, retargetingParameters, new SceneGraph());
+      create(baseUI,
+             syncedRobot,
+             robotVisualizer,
+             controllerHelper,
+             new DefaultRetargetingParameters(),
+             new SceneGraph(),
+             createKinematicsStreamingToolboxModule);
    }
 
    public void create(RDXBaseUI baseUI,
@@ -57,7 +62,18 @@ public class RDXVRModeManager
                       RDXROS2RobotVisualizer robotVisualizer,
                       ROS2ControllerHelper controllerHelper,
                       RetargetingParameters retargetingParameters,
-                      SceneGraph sceneGraph)
+                      boolean createKinematicsStreamingToolboxModule)
+   {
+      create(baseUI, syncedRobot, robotVisualizer, controllerHelper, retargetingParameters, new SceneGraph(), createKinematicsStreamingToolboxModule);
+   }
+
+   public void create(RDXBaseUI baseUI,
+                      ROS2SyncedRobotModel syncedRobot,
+                      RDXROS2RobotVisualizer robotVisualizer,
+                      ROS2ControllerHelper controllerHelper,
+                      RetargetingParameters retargetingParameters,
+                      SceneGraph sceneGraph,
+                      boolean createKinematicsStreamingToolboxModule)
    {
       this.robotVisualizer = robotVisualizer;
 
@@ -67,7 +83,7 @@ public class RDXVRModeManager
       if (syncedRobot.getRobotModel().getRobotVersion().hasArm(RobotSide.LEFT) || syncedRobot.getRobotModel().getRobotVersion().hasArm(RobotSide.RIGHT))
       {
          kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot, controllerHelper, retargetingParameters, sceneGraph);
-         kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
+         kinematicsStreamingMode.create(baseUI.getVRManager().getContext(), createKinematicsStreamingToolboxModule);
       }
 
       joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
