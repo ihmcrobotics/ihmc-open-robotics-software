@@ -193,7 +193,7 @@ public class RDXVRController extends RDXVRTrackedDevice
       gripActionData = InputAnalogActionData.create();
    }
 
-   public void update(TrackedDevicePoseParsed[] trackedDevicePoses)
+   public void update(RDXVRTrackedDevicePose[] trackedDevicePoses)
    {
       VRInput.VRInput_GetOriginTrackedDeviceInfo(inputSourceHandle.get(0), inputOriginInfo.get(0));
       setDeviceIndex(inputOriginInfo.trackedDeviceIndex());

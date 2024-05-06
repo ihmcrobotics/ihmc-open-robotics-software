@@ -40,7 +40,7 @@ public class RDXVRTracker extends RDXVRTrackedDevice
                                                                                 trackerYBackZLeftXRightToXForwardZUp);
    }
 
-   public void update(TrackedDevicePoseParsed[] trackedDevicePoses)
+   public void update(RDXVRTrackedDevicePose[] trackedDevicePoses)
    {
       setConnected(getDeviceIndex() != VR.k_unTrackedDeviceIndexInvalid);
 

@@ -44,7 +44,7 @@ public class RDXVRHeadset extends RDXVRTrackedDevice
       VRInput.VRInput_GetInputSourceHandle("/user/head", inputSourceHandle);
    }
 
-   public void update(TrackedDevicePoseParsed[] trackedDevicePoses)
+   public void update(RDXVRTrackedDevicePose[] trackedDevicePoses)
    {
       setConnected(VRSystem.VRSystem_IsTrackedDeviceConnected(VR.k_unTrackedDeviceIndex_Hmd));
 

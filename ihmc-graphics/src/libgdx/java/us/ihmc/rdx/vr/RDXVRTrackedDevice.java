@@ -36,7 +36,7 @@ public abstract class RDXVRTrackedDevice
                                                                                             deviceToPlayAreaTransform);
    }
 
-   protected void update(TrackedDevicePoseParsed[] trackedDevicePoses)
+   protected void update(RDXVRTrackedDevicePose[] trackedDevicePoses)
    {
       if (isConnected)
       {

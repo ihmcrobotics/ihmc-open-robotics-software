@@ -73,7 +73,7 @@ public class RDXVRContext
    private final SideDependentList<RDXVREye> eyes = new SideDependentList<>();
 
    // internal native objects to get device poses
-   private final AtomicReference<TrackedDevicePoseParsed[]> trackedDevicePosesParsedRef = new AtomicReference<>();
+   private final AtomicReference<RDXVRTrackedDevicePose[]> trackedDevicePosesParsedRef = new AtomicReference<>();
    private TrackedDevicePose.Buffer trackedDevicePoses;
    private TrackedDevicePose.Buffer trackedDeviceGamePoses;
 
@@ -250,10 +250,10 @@ public class RDXVRContext
 
       //      VRCompositor.VRCompositor_GetLastPoses(trackedDevicePoses, trackedDeviceGamePoses); // Is there a way to wait better?
       long measurementTimestamp = (long) (openvrTime * 1.0e9);
-      TrackedDevicePoseParsed[] temp = new TrackedDevicePoseParsed[VR.k_unMaxTrackedDeviceCount];
+      RDXVRTrackedDevicePose[] temp = new RDXVRTrackedDevicePose[VR.k_unMaxTrackedDeviceCount];
       for (int i = 0; i < temp.length; i++)
       {
-         temp[i] = new TrackedDevicePoseParsed(measurementTimestamp, trackedDevicePoses, i);
+         temp[i] = new RDXVRTrackedDevicePose(measurementTimestamp, trackedDevicePoses, i);
       }
       trackedDevicePosesParsedRef.set(temp);
    }
@@ -264,7 +264,7 @@ public class RDXVRContext
     */
    public void pollEvents()
    {
-      TrackedDevicePoseParsed[] newTrackedDevicePosesParsed = trackedDevicePosesParsedRef.getAndSet(null);
+      RDXVRTrackedDevicePose[] newTrackedDevicePosesParsed = trackedDevicePosesParsedRef.getAndSet(null);
 
       if (newTrackedDevicePosesParsed == null)
          return;
