@@ -11,9 +11,14 @@ import us.ihmc.motionRetargeting.DefaultRetargetingParameters;
 import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
+import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
+import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -33,23 +38,26 @@ public class RDXVRModeManager
    private RDXVRModeControls vrModeControls;
    private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private RDXROS2RobotVisualizer robotVisualizer;
 
-   public void create(RDXBaseUI baseUI, ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper controllerHelper)
+   public void create(RDXBaseUI baseUI, ROS2SyncedRobotModel syncedRobot, RDXROS2RobotVisualizer robotVisualizer, ROS2ControllerHelper controllerHelper)
    {
-      create(baseUI, syncedRobot, controllerHelper, new DefaultRetargetingParameters(), new SceneGraph());
+      create(baseUI, syncedRobot, robotVisualizer, controllerHelper, new DefaultRetargetingParameters(), new SceneGraph());
    }
 
-   public void create(RDXBaseUI baseUI, ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper controllerHelper, RetargetingParameters retargetingParameters)
+   public void create(RDXBaseUI baseUI, ROS2SyncedRobotModel syncedRobot, RDXROS2RobotVisualizer robotVisualizer, ROS2ControllerHelper controllerHelper, RetargetingParameters retargetingParameters)
    {
-      create(baseUI, syncedRobot, controllerHelper, retargetingParameters, new SceneGraph());
+      create(baseUI, syncedRobot, robotVisualizer, controllerHelper, retargetingParameters, new SceneGraph());
    }
 
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
+                      RDXROS2RobotVisualizer robotVisualizer,
                       ROS2ControllerHelper controllerHelper,
                       RetargetingParameters retargetingParameters,
                       SceneGraph sceneGraph)
    {
+      this.robotVisualizer = robotVisualizer;
       handPlacedFootstepMode = new RDXVRHandPlacedFootstepMode();
       handPlacedFootstepMode.create(syncedRobot.getRobotModel(), controllerHelper);
 
@@ -113,6 +121,19 @@ public class RDXVRModeManager
       //      leftHandPanel.update();
       joystickBasedStepping.update(mode == RDXVRMode.JOYSTICK_WALKING);
       vrModeControls.update();
+
+      // fade robot graphics if in stereo vision mode
+      if (kinematicsStreamingMode.isStreaming() && stereoVision.isEnabled())
+      {
+         kinematicsStreamingMode.visualizeIKPreviewGraphic(false);
+         robotVisualizer.fadeVisuals(0.0f, 0.01f);
+      }
+      else
+      {
+         kinematicsStreamingMode.visualizeIKPreviewGraphic(true);
+         robotVisualizer.fadeVisuals(1.0f, 0.01f);
+      }
+
    }
 
    public void renderImGuiWidgets()
