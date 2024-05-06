@@ -12,8 +12,6 @@ import org.bytedeco.spinnaker.global.Spinnaker_C;
 import org.bytedeco.spinnaker.global.Spinnaker_C.spinExposureAutoEnums;
 import org.bytedeco.spinnaker.global.Spinnaker_C.spinExposureModeEnums;
 
-import java.util.List;
-
 import static us.ihmc.perception.spinnaker.SpinnakerBlackflyTools.printOnError;
 
 /**
@@ -141,18 +139,6 @@ public class SpinnakerBlackfly
       spinNodeHandle yOffsetNode = new spinNodeHandle();
       printOnError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetY"), yOffsetNode), "Getting OffsetY node map node");
       printOnError(Spinnaker_C.spinIntegerSetValue(yOffsetNode, yOffset), "Could not set y offset");
-
-//      spinNodeHandle yOffsetGet = new spinNodeHandle();
-//      Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetY"), yOffsetGet);
-//      LongPointer yOffsetPointer = new LongPointer(1);
-//      Spinnaker_C.spinIntegerGetValue(yOffsetGet, yOffsetPointer);
-//      System.out.println("yOffsetPointer " + yOffsetPointer.get());
-//
-//      spinNodeHandle xOffsetGet = new spinNodeHandle();
-//      Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetX"), yOffsetGet);
-//      LongPointer xOffsetPointer = new LongPointer(1);
-//      Spinnaker_C.spinIntegerGetValue(xOffsetGet, xOffsetPointer);
-//      System.out.println("xOffsetPointer " + xOffsetPointer.get());
    }
 
    // http://softwareservices.flir.com/Spinnaker/latest/_programmer_guide.html#Setting_Exposure_Time

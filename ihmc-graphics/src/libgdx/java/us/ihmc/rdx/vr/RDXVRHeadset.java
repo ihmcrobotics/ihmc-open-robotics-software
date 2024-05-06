@@ -1,7 +1,9 @@
 package us.ihmc.rdx.vr;
 
 import com.badlogic.gdx.utils.BufferUtils;
-import org.lwjgl.openvr.*;
+import org.lwjgl.openvr.VR;
+import org.lwjgl.openvr.VRInput;
+import org.lwjgl.openvr.VRSystem;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
