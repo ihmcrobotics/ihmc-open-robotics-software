@@ -142,7 +142,10 @@ public class RDXVRTrackerRoleManager
                      vrContext.setTrackerRoleAsUnavailable(role.getKey());
                      roleActivationMap.forEach((otherRoleKey, isActive) -> {
                         if (!otherRoleKey.equals(role.getKey()) && isActive)
+                        {
                            roleActivationMap.put(otherRoleKey, false);
+                           vrContext.setTrackerRoleAsAvailable(otherRoleKey);
+                        }
                      });
                   }
                   else
