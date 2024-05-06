@@ -156,7 +156,7 @@ public class RDXArmManager
          boolean desiredHandPoseChanged = false;
          for (RobotSide side : interactableHands.sides())
          {
-            if (interactableHands.get(side) == null || syncedRobot.getHandWrenchCalculators().get(side) == null)
+            if (syncedRobot.getHandWrenchCalculators().get(side) == null)
                continue;
 
             // wrench expressed in wrist pitch body fixed-frame
