@@ -32,7 +32,7 @@ public class RDX3DOverlayPanel
       float startY = previousActiveWindowY + 10;
       ImGui.setNextWindowPos(startX, startY);
       ImGui.setNextWindowBgAlpha(windowActiveLerp);
-      int windowFlags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse;
+      int windowFlags = ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse | ImGuiWindowFlags.NoMove;
       ImGui.begin(labels.get(panelName), windowFlags);
 
       if (ImGui.isWindowHovered(ImGuiHoveredFlags.ChildWindows | ImGuiHoveredFlags.AllowWhenBlockedByActiveItem | ImGuiHoveredFlags.AllowWhenBlockedByPopup))
