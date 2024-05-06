@@ -136,21 +136,21 @@ public class SpinnakerBlackfly
    {
       spinNodeHandle xOffsetNode = new spinNodeHandle();
       printOnError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetX"), xOffsetNode), "Getting OffsetX node map node");
-      Spinnaker_C.spinIntegerSetValue(xOffsetNode, xOffset);
+      printOnError(Spinnaker_C.spinIntegerSetValue(xOffsetNode, xOffset), "Could not set x offset");
 
       spinNodeHandle yOffsetNode = new spinNodeHandle();
       printOnError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetY"), yOffsetNode), "Getting OffsetY node map node");
-      Spinnaker_C.spinIntegerSetValue(yOffsetNode, yOffset);
+      printOnError(Spinnaker_C.spinIntegerSetValue(yOffsetNode, yOffset), "Could not set y offset");
 
 //      spinNodeHandle yOffsetGet = new spinNodeHandle();
 //      Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetY"), yOffsetGet);
-//      LongPointer yOffsetPointer = new LongPointer();
+//      LongPointer yOffsetPointer = new LongPointer(1);
 //      Spinnaker_C.spinIntegerGetValue(yOffsetGet, yOffsetPointer);
 //      System.out.println("yOffsetPointer " + yOffsetPointer.get());
 //
 //      spinNodeHandle xOffsetGet = new spinNodeHandle();
 //      Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetX"), yOffsetGet);
-//      LongPointer xOffsetPointer = new LongPointer();
+//      LongPointer xOffsetPointer = new LongPointer(1);
 //      Spinnaker_C.spinIntegerGetValue(xOffsetGet, xOffsetPointer);
 //      System.out.println("xOffsetPointer " + xOffsetPointer.get());
    }

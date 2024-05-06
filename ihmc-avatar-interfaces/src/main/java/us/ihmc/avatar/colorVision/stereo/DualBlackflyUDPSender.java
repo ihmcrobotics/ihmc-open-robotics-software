@@ -24,8 +24,8 @@ import java.util.Properties;
 
 public class DualBlackflyUDPSender
 {
-   private static final String LEFT_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "17403057");
-   private static final String RIGHT_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "17372478");
+   private static final String LEFT_SERIAL_NUMBER = "17372478";
+   private static final String RIGHT_SERIAL_NUMBER = "17403057";
    private static final String LEFT_DESTINATION_IP_ADDRESS = System.getProperty("blackfly.left.udp.dest.address", "127.0.0.1");
    private static final String RIGHT_DESTINATION_IP_ADDRESS = System.getProperty("blackfly.right.udp.dest.address", "127.0.0.1");
    public static final int LEFT_UDP_PORT = 9200;
@@ -56,23 +56,16 @@ public class DualBlackflyUDPSender
 
       double originalWidth = blackflyModelProperties.getImageWidthPixels();
       double originalHeight = blackflyModelProperties.getImageHeightPixels();
-      double aspectRatio = originalWidth / originalHeight;
 
       double croppedHeight = Integer.parseInt(properties.getProperty("croppedHeight"));
-      double croppedWidth = croppedHeight * aspectRatio;
-
-      double xOffset = (originalWidth - croppedHeight) / 2 + Integer.parseInt(properties.getProperty("xoffset"));
-      double yOffset = (originalHeight - croppedHeight) / 2 - Integer.parseInt(properties.getProperty("yoffset"));
-
+      double yOffset = Double.parseDouble(properties.getProperty("yoffset"));
       float exposureTimeUs = Float.parseFloat(properties.getProperty("exposureTimeUs"));
 
       System.out.println("originalWidth " + originalWidth);
       System.out.println("originalHeight " + originalHeight);
       System.out.println("croppedHeight " + croppedHeight);
-      System.out.println("croppedWidth " + croppedWidth);
-      System.out.println("xOffset " + xOffset);
-      System.out.println("yOffset " + yOffset);
       System.out.println("exposureTimeUs " + exposureTimeUs);
+      System.out.println("yOffset " + yOffset);
 
       for (RobotSide side : RobotSide.values())
       {
@@ -80,9 +73,9 @@ public class DualBlackflyUDPSender
          {
             SpinnakerBlackfly spinnakerBlackfly = spinnakerBlackflyManager.createSpinnakerBlackfly(
                   side == RobotSide.LEFT ? LEFT_SERIAL_NUMBER : RIGHT_SERIAL_NUMBER,
-                  (int) croppedWidth,
+                  (int) blackflyModelProperties.getImageWidthPixels(),
                   (int) croppedHeight,
-                  (int) xOffset,
+                  (int) 0,
                   (int) yOffset,
                   exposureTimeUs);
 
@@ -125,17 +118,37 @@ public class DualBlackflyUDPSender
                spinnakerBlackfly.setPointerToSpinImageData(spinImage, spinImageData);
 
                int latestImageDataLength = (int) spinImageData.limit();
+
                byte[] imageData = new byte[latestImageDataLength];
                spinImageData.get(imageData, 0, latestImageDataLength);
 
-               int numberOfDatagramFragments = (int) Math.ceil((double) latestImageDataLength / DATAGRAM_MAX_LENGTH);
+               int imageFrameSizeWithPadding = (int) (width * blackflyModelProperties.getImageHeightPixels());
+               byte[] imageDataWithPadding = new byte[imageFrameSizeWithPadding];
+
+               int paddingOffset = (imageFrameSizeWithPadding - imageFrameSize);
+
+               for (int i = 0; i < imageDataWithPadding.length; i++)
+               {
+                  if (i < paddingOffset)
+                  {
+                     imageDataWithPadding[i] = 0;
+                  }
+                  else
+                  {
+                     imageDataWithPadding[i] = imageData[i - (paddingOffset)];
+                  }
+               }
+
+               System.out.println("paddingOffset " + paddingOffset);
+
+               int numberOfDatagramFragments = (int) Math.ceil((double) imageFrameSizeWithPadding / DATAGRAM_MAX_LENGTH);
 
                for (int fragment = 0; fragment < numberOfDatagramFragments; fragment++)
                {
                   int fragmentHeaderLength = 1 + 4 + 4 + 4 + 4 + 4 + 4;
                   int maxFragmentDataLength = DATAGRAM_MAX_LENGTH - fragmentHeaderLength;
                   int fragmentDataOffset = fragment * maxFragmentDataLength;
-                  int fragmentDataLength = Math.min(maxFragmentDataLength, latestImageDataLength - fragmentDataOffset);
+                  int fragmentDataLength = Math.min(maxFragmentDataLength, imageFrameSizeWithPadding - fragmentDataOffset);
                   int datagramLength = fragmentHeaderLength + fragmentDataLength;
 
                   byte[] datagramData = new byte[DATAGRAM_MAX_LENGTH];
@@ -150,7 +163,7 @@ public class DualBlackflyUDPSender
                      datagramBuffer.put(side.toByte());
                      datagramBuffer.putInt(width);
                      datagramBuffer.putInt(height);
-                     datagramBuffer.putInt(latestImageDataLength);
+                     datagramBuffer.putInt(imageFrameSizeWithPadding);
                      datagramBuffer.putInt(frameNumber);
                      datagramBuffer.putInt(fragment);
                      datagramBuffer.putInt(fragmentDataLength);
@@ -160,7 +173,7 @@ public class DualBlackflyUDPSender
                   {
                      for (int i = 0; i < fragmentDataLength; i++)
                      {
-                        datagramBuffer.put(imageData[fragmentDataOffset + i]);
+                        datagramBuffer.put(imageDataWithPadding[fragmentDataOffset + i]);
                      }
                   }
 
@@ -214,7 +227,7 @@ public class DualBlackflyUDPSender
    {
       DualBlackflyUDPSender dualBlackflyUDPSender = new DualBlackflyUDPSender();
 
-      dualBlackflyUDPSender.start(BlackflyModelProperties.BFS_U3_27S5C);
+      dualBlackflyUDPSender.start(BlackflyModelProperties.BFLY_U3_23S6C);
 
       Runtime.getRuntime().addShutdownHook(new Thread(dualBlackflyUDPSender::stop));
 
