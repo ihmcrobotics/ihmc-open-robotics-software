@@ -133,7 +133,6 @@ public final class PerceptionAPI
    public static final SideDependentList<ROS2Topic<Empty>> REQUEST_BLACKFLY_COLOR_IMAGE
          = new SideDependentList<>(PERCEPTION_MODULE.withSuffix("request_left_blackfly_color").withType(Empty.class),
                                    PERCEPTION_MODULE.withSuffix("request_right_blackfly_color").withType(Empty.class));
-   public static final ROS2Topic<Empty> REQUEST_BLACKFLY_STEREO = PERCEPTION_MODULE.withSuffix("request_blackfly_stereo").withType(Empty.class);
 
    public static final ROS2Topic<BigVideoPacket> OUSTER_DEPTH_LARGE = BEST_EFFORT.withModule("ouster").withType(BigVideoPacket.class).withSuffix("depth");
    public static final ROS2Topic<VideoPacket> OUSTER_DEPTH = BEST_EFFORT.withModule("ouster").withType(VideoPacket.class).withSuffix("depth");
