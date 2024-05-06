@@ -69,7 +69,6 @@ public class SensorHeadParameters
    }
 
    public static final RigidBodyTransform FISHEYE_RIGHT_TO_FISHEYE_LEFT_TRANSFORM_ON_TESTBED = new RigidBodyTransform();
-
    static
    {
       // This is the transform [x, y, z, qx, qy, qz, qw] as estimated by MSA calibration: [0.061508, 0.000184, 0.004143, -0.000360, 0.002948, -0.004588, 0.999985].
