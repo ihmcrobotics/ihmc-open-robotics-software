@@ -55,7 +55,7 @@ public class MonteCarloFootstepPlanningTest
 
       Mat contactMap = heightMapExtractor.getGlobalContactImage();
 
-      TerrainMapData terrainMapData = new TerrainMapData(heightMap, contactMap, null);
+      TerrainMapData terrainMapData = new TerrainMapData(heightMap, contactMap);
 
       MonteCarloFootstepPlannerRequest request = new MonteCarloFootstepPlannerRequest();
       request.setStartFootPose(RobotSide.LEFT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.5, -0.3, 0.0), new Quaternion()));

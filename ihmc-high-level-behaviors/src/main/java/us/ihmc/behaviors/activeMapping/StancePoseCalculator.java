@@ -6,7 +6,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -46,13 +48,13 @@ public class StancePoseCalculator
       this.heightMapPolygonSnapper = new HeightMapPolygonSnapper();
    }
 
-   public SideDependentList<FramePose3D> calculateStancePoses(FramePose3D goalPose, TerrainMapData terrainMap, HeightMapData heightMapData)
+   public SideDependentList<FramePose3D> getStancePoses(FramePose3D goalPose, TerrainMapData terrainMap, FootstepPlannerEnvironmentHandler environmentHandler)
    {
       reset();
       insertCandidatePoses(leftPoses, goalPose, RobotSide.LEFT);
       insertCandidatePoses(rightPoses, goalPose, RobotSide.RIGHT);
       searchForOptimalGoalStance(leftPoses, rightPoses, goalPose, terrainMap);
-      snapPosesToHeightMapData(heightMapData);
+      snapPosesToEnvironment(environmentHandler);
       return new SideDependentList<>(bestFramePoses.get(RobotSide.LEFT), bestFramePoses.get(RobotSide.RIGHT));
    }
 
@@ -116,34 +118,19 @@ public class StancePoseCalculator
       }
    }
 
-   public void snapPosesToHeightMapData(HeightMapData heightMapData)
+   public void snapPosesToEnvironment(FootstepPlannerEnvironmentHandler environmentHandler)
    {
       for (RobotSide side : RobotSide.values)
       {
-         snapToHeightMap(heightMapData, bestFramePoses.get(side), footPolygons.get(side));
+         snapToEnvironment(environmentHandler, bestFramePoses.get(side), footPolygons.get(side));
       }
    }
 
-   public void snapPosesToTerrainMapData(TerrainMapData terrainMapData)
-   {
-      for (RobotSide side : RobotSide.values)
-      {
-         snapToTerrainMap(terrainMapData, bestFramePoses.get(side));
-      }
-   }
-
-   private void snapToTerrainMap(TerrainMapData terrainMapData, FramePose3D poseToSnap)
-   {
-      UnitVector3DBasics normal = terrainMapData.computeSurfaceNormalInWorld((float) poseToSnap.getX(), (float) poseToSnap.getY(), 1);
-      RigidBodyTransform snapTransform = createTransformToMatchSurfaceNormalPreserveX(normal);
-      poseToSnap.applyTransform(snapTransform);
-   }
-
-   private void snapToHeightMap(HeightMapData heightMapData, FramePose3D poseToSnap, ConvexPolygon2D footPolygon)
+   private void snapToEnvironment(FootstepPlannerEnvironmentHandler environmentHandler, FramePose3D poseToSnap, ConvexPolygon2D footPolygon)
    {
       footPolygon.applyTransform(poseToSnap);
 
-      RigidBodyTransform snapTransform = heightMapPolygonSnapper.snapPolygonToHeightMap(footPolygon, heightMapData, 0.05, Math.toRadians(45));
+      RigidBodyTransform snapTransform = heightMapPolygonSnapper.snapPolygonToHeightMap(footPolygon, environmentHandler, 0.05, Math.toRadians(45.0));
 
       if (snapTransform != null)
       {
@@ -179,6 +166,21 @@ public class StancePoseCalculator
       double yAxisZ = -surfaceNormal.getY() * xAxisX;
 
       transformToPack.getRotation().set(xAxisX, yAxisX, surfaceNormal.getX(), xAxisY, yAxisY, surfaceNormal.getY(), xAxisZ, yAxisZ, surfaceNormal.getZ());
+   }
+
+   public void snapPosesToTerrainMapData(TerrainMapData terrainMapData)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         snapToTerrainMap(terrainMapData, bestFramePoses.get(side));
+      }
+   }
+
+   private void snapToTerrainMap(TerrainMapData terrainMapData, FramePose3D poseToSnap)
+   {
+      UnitVector3DReadOnly normal = terrainMapData.computeSurfaceNormalInWorld((float) poseToSnap.getX(), (float) poseToSnap.getY(), 1);
+      RigidBodyTransform snapTransform = createTransformToMatchSurfaceNormalPreserveX(normal);
+      poseToSnap.applyTransform(snapTransform);
    }
 
    public ArrayList<FramePose3D> getLeftPoses()
