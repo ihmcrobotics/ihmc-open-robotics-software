@@ -35,8 +35,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRPickResult;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -46,7 +46,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
-import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
 
 public class RDX3DSituatedImGuiPanel
 {
@@ -72,9 +71,9 @@ public class RDX3DSituatedImGuiPanel
    private final RigidBodyTransform transform = new RigidBodyTransform();
    private final RigidBodyTransform graphicsXRightYDownToCenterXThroughZUpTransform = new RigidBodyTransform();
    private final ReferenceFrame centerXThroughZUpFrame
-      = ReferenceFrameTools.constructFrameWithChangingTransformToParent("centerXThroughZUpFrame" + INDEX.getAndIncrement(),
-                                                                        ReferenceFrame.getWorldFrame(),
-                                                                        transform);
+         = ReferenceFrameTools.constructFrameWithChangingTransformToParent("centerXThroughZUpFrame" + INDEX.getAndIncrement(),
+                                                                           ReferenceFrame.getWorldFrame(),
+                                                                           transform);
    private final ReferenceFrame graphicsXRightYDownFrame
          = ReferenceFrameTools.constructFrameWithChangingTransformToParent("graphicsXRightYDownFrame" + INDEX.getAndIncrement(),
                                                                            centerXThroughZUpFrame,
@@ -204,7 +203,7 @@ public class RDX3DSituatedImGuiPanel
       ImGui.setNextWindowSize(pixelsWidth, pixelsHeight);
 
       int windowFlags = ImGuiWindowFlags.None;
-//      windowFlags |= ImGuiWindowFlags.NoBackground;
+      //      windowFlags |= ImGuiWindowFlags.NoBackground;
 
       if (useTransparentBackground)
          ImGui.pushStyleColor(ImGuiCol.WindowBg, backgroundColor);
