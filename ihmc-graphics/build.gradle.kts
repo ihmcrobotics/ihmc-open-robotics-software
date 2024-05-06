@@ -88,8 +88,6 @@ libgdxDependencies {
    api("org.bytedeco:opencv:$opencvVersion:linux-x86_64")
    api("org.bytedeco:opencv:$opencvVersion:linux-arm64")
    api("org.bytedeco:opencv:$opencvVersion:windows-x86_64")
-
-   api("us.ihmc:ihmc-realtime:1.6.0")
 }
 
 libgdxTestDependencies {
