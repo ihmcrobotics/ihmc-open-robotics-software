@@ -3,11 +3,11 @@ package us.ihmc.rdx.vr;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.utils.BufferUtils;
-import org.lwjgl.openvr.*;
+import org.lwjgl.openvr.VR;
+import org.lwjgl.openvr.VRSystem;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
@@ -26,9 +26,8 @@ public abstract class RDXVRTrackedDevice
    private final RigidBodyTransform tempOpenVRToWorldTransform = new RigidBodyTransform();
    private ModelInstance modelInstance = null;
    private long lastPollTimeNanos;
-   private Vector3D trackedLinearVelocity = new Vector3D();
-   private Vector3D trackedAngularVelocity = new Vector3D();
-
+   private final Vector3D trackedLinearVelocity = new Vector3D();
+   private final Vector3D trackedAngularVelocity = new Vector3D();
 
    public RDXVRTrackedDevice(ReferenceFrame vrPlayAreaYUpZBackFrame)
    {
@@ -153,8 +152,6 @@ public abstract class RDXVRTrackedDevice
    {
       return deviceIndex;
    }
-
-
 
    public Vector3D getLinearVelocity()
    {
