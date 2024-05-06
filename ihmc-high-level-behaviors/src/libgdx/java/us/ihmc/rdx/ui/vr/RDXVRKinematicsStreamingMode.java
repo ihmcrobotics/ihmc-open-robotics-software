@@ -313,9 +313,7 @@ public class RDXVRKinematicsStreamingMode
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
 //         toolboxInputMessage.setTimestamp();
 
-         long now = System.nanoTime();
-         System.out.println((now - lastPublish) * 1e-9);
-         lastPublish = now;
+         lastPublish = System.nanoTime();
 
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
