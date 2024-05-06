@@ -491,12 +491,8 @@ public class RDXVRKinematicsStreamingMode
 
    public void renderImGuiWidgets()
    {
-//      if (controllerModel == RDXVRControllerModel.FOCUS3)
-//         ImGui.text("X Button");
-//      else
-//         ImGui.text("Left A Button");
       ImGui.checkbox(labels.get("Control/Stop Robot"), streamToController);
-//      ImGui.text("Right A Button");
+      
       if (ImGui.checkbox(labels.get("Kinematics streaming"), enabled))
       {
          setEnabled(enabled.get());
