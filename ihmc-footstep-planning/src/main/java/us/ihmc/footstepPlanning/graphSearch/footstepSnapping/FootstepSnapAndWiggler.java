@@ -25,7 +25,6 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    private final FootstepPlannerParametersReadOnly parameters;
 
    private final WiggleParameters wiggleParameters = new WiggleParameters();
-   private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
    private double flatGroundHeight = 0.0;
 
    private final HashSet<DiscreteFootstep> snappedFootsteps = new HashSet<>();
@@ -133,7 +132,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    {
       return heightMapSnapper.computeSnapData(footstepToSnap,
                                               footPolygonsInSoleFrame.get(footstepToSnap.getRobotSide()),
-                                              environmentHandler.getHeightMap(),
+                                              environmentHandler,
                                               parameters.getHeightMapSnapThreshold(),
                                               parameters.getMinimumSurfaceInclineRadians());
    }
@@ -151,7 +150,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    protected void computeWiggleTransform(DiscreteFootstep footstepToWiggle, DiscreteFootstep stanceStep, FootstepSnapData snapData)
    {
       heightMapSnapWiggler.computeWiggleTransform(footstepToWiggle,
-                                                  environmentHandler.getHeightMap(),
+                                                  environmentHandler,
                                                   snapData,
                                                   parameters.getHeightMapSnapThreshold(),
                                                   parameters.getMinimumSurfaceInclineRadians());

@@ -100,7 +100,6 @@ public class FootstepPlanningModuleLauncher
    {
       String moduleName = robotModel.getSimpleRobotName();
 
-      VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters(suffix);
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();
