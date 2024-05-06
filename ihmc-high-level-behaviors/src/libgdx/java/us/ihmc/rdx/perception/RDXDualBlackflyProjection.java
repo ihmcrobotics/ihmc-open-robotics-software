@@ -122,12 +122,12 @@ public class RDXDualBlackflyProjection
 
    public void renderControls()
    {
-      projectionSettings.renderControls();
+      projectionSettings.renderProjectionControls();
 
       ImGui.separator();
       projectionShapes.get(RobotSide.LEFT).renderImGuiWidgets();
 
-      ImGuiTools.separatorText("Save/Load");
+      ImGuiTools.separatorText("Save / Load");
       projectionSettings.renderIOControls(projectionShapes.get(RobotSide.LEFT));
 
       updateParameters();

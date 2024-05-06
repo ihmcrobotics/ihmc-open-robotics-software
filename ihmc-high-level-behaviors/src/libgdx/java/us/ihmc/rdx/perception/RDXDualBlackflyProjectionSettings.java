@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -26,6 +27,7 @@ import java.util.concurrent.CompletableFuture;
 
 public class RDXDualBlackflyProjectionSettings
 {
+   private static final Path SETTINGS_DIRECTORY = IHMCCommonPaths.VR_DIRECTORY.resolve(RDXDualBlackflyProjectionSettings.class.getSimpleName());
    private static List<String> availablePresets = new ArrayList<>();
 
    static
@@ -36,7 +38,7 @@ public class RDXDualBlackflyProjectionSettings
          while (RDXBaseUI.getInstance() != null)
          {
             List<String> newAvailablePresets = new ArrayList<>();
-            File directory = IHMCCommonPaths.VR_DIRECTORY.toFile();
+            File directory = SETTINGS_DIRECTORY.toFile();
             directory.mkdirs();
 
             File[] files = directory.listFiles();
@@ -96,10 +98,10 @@ public class RDXDualBlackflyProjectionSettings
 
       RDXBaseUI.pushNotification("Saving projection settings preset: " + presetFileName);
 
-      File vrSettingsPath = IHMCCommonPaths.VR_DIRECTORY.toFile();
+      File vrSettingsPath = SETTINGS_DIRECTORY.toFile();
       vrSettingsPath.mkdirs();
 
-      File vrStereoVisionSettingsFile = IHMCCommonPaths.VR_DIRECTORY.resolve(presetFileName).toFile();
+      File vrStereoVisionSettingsFile = SETTINGS_DIRECTORY.resolve(presetFileName).toFile();
 
       if (!vrStereoVisionSettingsFile.exists())
          vrStereoVisionSettingsFile.createNewFile();
@@ -152,7 +154,7 @@ public class RDXDualBlackflyProjectionSettings
    public void load(RDXProjectionShape projectionShape, String presetFileName)
          throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException
    {
-      File file = IHMCCommonPaths.VR_DIRECTORY.resolve(presetFileName).toFile();
+      File file = SETTINGS_DIRECTORY.resolve(presetFileName).toFile();
 
       if (!file.exists())
       {
@@ -251,7 +253,7 @@ public class RDXDualBlackflyProjectionSettings
       }
    }
 
-   public boolean renderControls()
+   public boolean renderProjectionControls()
    {
       boolean updated = false;
 
@@ -282,7 +284,7 @@ public class RDXDualBlackflyProjectionSettings
       return updated;
    }
 
-   public boolean renderIOControls(RDXProjectionShape projectionShape)
+   public void renderIOControls(RDXProjectionShape projectionShape)
    {
       ImGuiTools.inputText(labels.get("Preset name"), presetFileName);
       ImGui.sameLine();
@@ -305,7 +307,6 @@ public class RDXDualBlackflyProjectionSettings
          try
          {
             load(projectionShape, presetFileNameToLoad);
-            return true;
          }
          catch (IOException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e)
          {
@@ -313,7 +314,5 @@ public class RDXDualBlackflyProjectionSettings
             LogTools.error(e);
          }
       }
-
-      return false;
    }
 }
