@@ -117,8 +117,7 @@ public abstract class RDXVRTrackedDevice
 
    public String getModelName()
    {
-      String modelName = VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex, VR.ETrackedDeviceProperty_Prop_RenderModelName_String, errorCode);
-      return modelName;
+      return VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex, VR.ETrackedDeviceProperty_Prop_RenderModelName_String, errorCode);
    }
 
    public ReferenceFrame getDeviceYUpZBackFrame()
