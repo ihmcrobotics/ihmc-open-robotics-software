@@ -350,13 +350,13 @@ public class RDXVRKinematicsStreamingMode
                   };
             if (controlledSegment != null)
             {
-            KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
+               KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
                                                                                   trackedSegmentDesiredFrame.get(segmentType.getSegmentName())
                                                                                                             .getReferenceFrame(),
-                                                                               segmentType.getSegmentName(),
-                                                                               segmentType.getPositionWeight(),
-                                                                               segmentType.getOrientationWeight());
-            toolboxInputMessage.getInputs().add().set(message);
+                                                                                  segmentType.getSegmentName(),
+                                                                                  segmentType.getPositionWeight(),
+                                                                                  segmentType.getOrientationWeight());
+               toolboxInputMessage.getInputs().add().set(message);
             }
          });
       }
