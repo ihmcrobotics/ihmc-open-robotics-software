@@ -159,8 +159,6 @@ public class RDXBaseUI
 
       this.windowTitle = windowTitle = windowTitle == null ? classForLoading.getSimpleName() : windowTitle;
 
-      loadSettings();
-
       configurationExtraPath = "configurations/" + windowTitle.replaceAll(" ", "");
       configurationBaseDirectory = new HybridResourceDirectory(IHMCCommonPaths.DOT_IHMC_DIRECTORY, classForLoading, "/").resolve(configurationExtraPath);
 
@@ -217,13 +215,13 @@ public class RDXBaseUI
          LogTools.error("Unable to load RDXSettings.ini", e);
       }
       plotFrameRate.set(settings.plotFrameRateEnabled());
-      vsync.set(settings.vsyncEnabled());
-      foregroundFPSLimit.set(settings.getForegroundFPSLimit());
+      setVsync(settings.vsyncEnabled());
+      setForegroundFPSLimit(settings.getForegroundFPSLimit());
       libGDXLogLevel.set(settings.getLibGDXLogLevel());
       imguiFontSize.set(settings.getFontSize());
       try
       {
-         theme = Theme.valueOf(settings.getThemeName());
+         setTheme(Theme.valueOf(settings.getThemeName()));
       }
       catch (IllegalArgumentException e)
       {
@@ -245,7 +243,7 @@ public class RDXBaseUI
       Lwjgl3ApplicationConfiguration applicationConfiguration = LibGDXApplicationCreator.getDefaultConfiguration(windowTitle);
       // Hide the window at the beginning. If you don't do this, you get a window frame
       // with the contents behind the window displayed for a few seconds, which is really
-      // consifusing and error-prone.
+      // confusing and error-prone.
       applicationConfiguration.setInitialVisible(false);
       LibGDXApplicationCreator.launchGDXApplication(applicationConfiguration,
                                                     applicationAdapter);
@@ -276,7 +274,6 @@ public class RDXBaseUI
       primaryScene.addCoordinateFrame(0.3);
 
       imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
-      setTheme(theme); // TODO: move theme stuff to RDXImGuiWindowAndDockSystem?
       ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
@@ -285,6 +282,8 @@ public class RDXBaseUI
       primaryScene.addRenderableProvider(vrManager::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
       primary3DPanel.addImGui3DViewPickCalculator(vrManager::calculate3DViewPick);
       primary3DPanel.addImGui3DViewInputProcessor(vrManager::process3DViewInput);
+
+      loadSettings();
 
       keyBindings.register("Show key bindings", "Tab");
    }
@@ -410,9 +409,16 @@ public class RDXBaseUI
                ImGui.pushStyleVar(ImGuiStyleVar.Alpha, ImGui.getStyle().getAlpha() * 0.5f);
             }
             ImGui.tableSetColumnIndex(1);
-            if (ImGuiTools.sliderInt(labels.get("##foregroundFPSLimitSlider"), foregroundFPSLimit, 15, 240)) {
+            if (foregroundFPSLimit.get() < 15) // Enforce it so you can't make it so laggy inputs don't work
+               foregroundFPSLimit.set(15);
+            if (ImGuiTools.sliderInt(labels.get("##foregroundFPSLimitSlider"), foregroundFPSLimit, 15, 240))
+            {
+               // Only update the FPS limit once the slider isn't active anymore
+            }
+            else if (!ImGui.isItemActive() && settings.getForegroundFPSLimit() != foregroundFPSLimit.get())
+            {
                settings.setForegroundFPSLimit(foregroundFPSLimit.get());
-               Gdx.graphics.setForegroundFPS(foregroundFPSLimit.get());
+               setForegroundFPSLimit(foregroundFPSLimit.get());
             }
             if (vsync.get())
             {
