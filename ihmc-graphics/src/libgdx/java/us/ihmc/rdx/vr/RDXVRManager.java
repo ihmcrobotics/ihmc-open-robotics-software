@@ -187,7 +187,6 @@ public class RDXVRManager
       {
          ImGuiTools.separatorText("Controls");
          renderEnableCheckbox();
-         ImGui.menuItem(labels.get("Controllers only"), "", controllersOnly);
 
          ImGuiTools.separatorText("Status");
          ImGui.text("Connected headset: " + (isVRReady() ? context.getHeadset().getModelName() : "None"));
