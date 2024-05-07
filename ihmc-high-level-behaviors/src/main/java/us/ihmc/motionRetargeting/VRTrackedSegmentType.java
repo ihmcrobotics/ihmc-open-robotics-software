@@ -5,11 +5,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public enum VRTrackedSegmentType
 {
    // Hands defaults are 20 and 1. Reduce the orientation to 0.25 for the nub forearms
-   LEFT_HAND("leftHand", RobotSide.LEFT, 20.0, 0.25),
-   RIGHT_HAND("rightHand", RobotSide.RIGHT, 20.0, 0.25),
-   LEFT_WRIST("leftWrist", RobotSide.LEFT, 0.0, 1),
-   RIGHT_WRIST("rightWrist", RobotSide.RIGHT, 0.0, 1),
-   CHEST("chest", null,0.0, 10);
+   LEFT_HAND("Left Hand", RobotSide.LEFT, 20.0, 0.25),
+   RIGHT_HAND("Right Hand", RobotSide.RIGHT, 20.0, 0.25),
+   LEFT_WRIST("Left Wrist", RobotSide.LEFT, 0.0, 1),
+   RIGHT_WRIST("RightWrist", RobotSide.RIGHT, 0.0, 1),
+   CHEST("Chest", null, 0.0, 10),
+   WAIST("Waist", null, 0.0, 10);
 
    private String segmentName;
    private RobotSide robotSide;

@@ -14,6 +14,8 @@ import us.ihmc.rdx.tools.LibGDXTools;
 
 import java.util.function.Consumer;
 
+import static org.lwjgl.openvr.VRSystem.VRSystem_GetStringTrackedDeviceProperty;
+
 public class RDXVRTracker extends RDXVRTrackedDevice
 {
    private static final RigidBodyTransformReadOnly trackerYBackZLeftXRightToXForwardZUp = new RigidBodyTransform(
@@ -78,5 +80,10 @@ public class RDXVRTracker extends RDXVRTrackedDevice
    public String toString()
    {
       return getModelName() + " (" + getDeviceIndex() + ")";
+   }
+
+   public String getSerialNumber()
+   {
+      return VRSystem_GetStringTrackedDeviceProperty(getDeviceIndex(), VR.ETrackedDeviceProperty_Prop_SerialNumber_String, null);
    }
 }

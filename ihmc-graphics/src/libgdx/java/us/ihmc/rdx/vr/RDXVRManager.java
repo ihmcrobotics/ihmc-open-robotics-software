@@ -23,6 +23,7 @@ import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class RDXVRManager
@@ -155,10 +156,26 @@ public class RDXVRManager
                // pollEventsFrequencyCalculator.ping();
                context.pollEvents(); // FIXME: Potential bug is that the poses get updated in the above thread while they're being used in here
 
-               List<Integer> newTrackersIndices = context.getNewTrackersIndices();
-               for (int newTrackerIndex : newTrackersIndices)
+               List<String> newTrackersSerialNumbers = context.getNewTrackersSerialNumbers();
+               for (String newSerialNumber : newTrackersSerialNumbers)
                {
-                  trackerRoleManagers.add(new RDXVRTrackerRoleManager(context, context.getTrackers().get(newTrackerIndex)));
+                  trackerRoleManagers.add(new RDXVRTrackerRoleManager(context, context.getTrackers().get(newSerialNumber)));
+               }
+               List<String> removedTrackersSerialNumbers = context.getRemovedTrackersSerialNumbers();
+               for (String removedSerialNumber : removedTrackersSerialNumbers)
+               {
+                  for (int i = 0; i < trackerRoleManagers.size(); i++)
+                  {
+                     if (Objects.equals(trackerRoleManagers.get(i).getTrackerSerialNumber(), removedSerialNumber))
+                     {
+                        String assignedRole = trackerRoleManagers.get(i).getAssignedRole();
+                        if (assignedRole != null)
+                        {
+                           context.setTrackerRoleAsAvailable(assignedRole);
+                        }
+                        trackerRoleManagers.remove(i);
+                     }
+                  }
                }
                if (context.isRolesResetPending())
                {
@@ -344,7 +361,7 @@ public class RDXVRManager
             if (!trackerRoleManager.isRoleAssigned())
                trackerRoleManager.getRedModelInstance().getRenderables(renderables, pool);
             else
-               context.getTrackerRenderables(trackerRoleManager.getTrackerIndex(), renderables, pool);
+               context.getTrackerRenderables(trackerRoleManager.getTrackerSerialNumber(), renderables, pool);
          }
          if (showScenePoseGizmo.get())
             scenePoseGizmo.getRenderables(renderables, pool);

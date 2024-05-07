@@ -1,5 +1,10 @@
 package us.ihmc.rdx.vr;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
@@ -10,9 +15,13 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.input.ImGuiMouseDragData;
+import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
+import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.gizmo.DynamicLibGDXModel;
+import us.ihmc.rdx.ui.gizmo.RDXGizmoTools;
 import us.ihmc.robotics.interaction.SixDoFSelection;
 import us.ihmc.robotics.interaction.SphereRayIntersection;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -91,7 +100,7 @@ public class RDXVRTrackerRoleManager
       boundingSphereIntersection.update(0.2, tracker.getXForwardZUpTrackerFrame().getTransformToWorldFrame());
       if (boundingSphereIntersection.intersect(pickRay))
       {
-         modelSphereIntersection.update(0.08, tracker.getXForwardZUpTrackerFrame().getTransformToWorldFrame());
+         modelSphereIntersection.update(0.06, tracker.getXForwardZUpTrackerFrame().getTransformToWorldFrame());
          boolean hoveringCenterSphere = modelSphereIntersection.intersect(pickRay);
          double distance = modelSphereIntersection.getFirstIntersectionToPack().distance(pickRay.getPoint());
          if (hoveringCenterSphere && distance < closestCollisionDistance)
@@ -106,6 +115,8 @@ public class RDXVRTrackerRoleManager
    public void process3DViewInput(ImGui3DViewInput input)
    {
       isTrackerHovered = pickResult == input.getClosestPick();
+      uninitializedModelInstance.setOpacity(isTrackerHovered ? 1.0f : 0.5f);
+
       if (isTrackerHovered && input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
       {
          queuePopupToOpen = true;
@@ -122,7 +133,7 @@ public class RDXVRTrackerRoleManager
 
       if (ImGui.beginPopup(labels.get("Popup")))
       {
-         String formattedText = String.format("Tracker %d Role: ", tracker.getDeviceIndex() - 2); // remove the 2 controllers to get tracker index from SteamVR
+         String formattedText = String.format("Tracker %s Role: ", tracker.getSerialNumber());
          imgui.ImGui.text(formattedText);
          for (var role : roleActivationMap.entrySet())
          {
@@ -195,8 +206,20 @@ public class RDXVRTrackerRoleManager
       return uninitializedModelInstance;
    }
 
-   public int getTrackerIndex()
+   public String getTrackerSerialNumber()
    {
-      return tracker.getDeviceIndex();
+      return tracker.getSerialNumber();
+   }
+
+   public String getAssignedRole()
+   {
+     for (var roleEntry : roleActivationMap.entrySet())
+     {
+        if (roleEntry.getValue())
+        {
+           return roleEntry.getKey();
+        }
+     }
+     return null;
    }
 }
