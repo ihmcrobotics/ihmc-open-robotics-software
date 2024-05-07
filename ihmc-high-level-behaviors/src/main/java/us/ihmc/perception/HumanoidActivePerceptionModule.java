@@ -4,14 +4,15 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ActivePlanarMappingRemoteTask;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
-import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
-import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
-import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloWaypointAgent;
-import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlanningWorld;
+import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlanningWorld;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloWaypointAgent;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
@@ -51,9 +52,9 @@ public class HumanoidActivePerceptionModule
                                                                          ros2Node, referenceFrames, () -> {}, true);
    }
 
-   public void initializeContinuousPlannerSchedulingTask(DRCRobotModel robotModel, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames, ContinuousPlanner.PlanningMode mode)
+   public void initializeContinuousPlannerSchedulingTask(DRCRobotModel robotModel, ROS2Helper ros2Helper, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames, ContinuousPlanner.PlanningMode mode)
    {
-      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel, ros2Node, referenceFrames, continuousPlanningParameters, mode);
+      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel, ros2Helper, ros2Node, referenceFrames, continuousPlanningParameters, mode);
    }
 
    public void update(ReferenceFrame sensorFrame, boolean display)

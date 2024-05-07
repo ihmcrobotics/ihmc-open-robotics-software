@@ -1,13 +1,17 @@
 package us.ihmc.behaviors.activeMapping;
 
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.headless.TerrainPerceptionProcessWithDriver;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
@@ -53,8 +57,11 @@ public class PerceptionBasedContinuousWalking
                                                               syncedRobot.getReferenceFrames(),
                                                               syncedRobot::update);
 
+      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotModel.getSimpleRobotName()),
+                                      this::stopIfRobotFallin);
+
       activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters(), continuousPlanningParameters);
-      activePerceptionModule.initializeContinuousPlannerSchedulingTask(robotModel, ros2Node, syncedRobot.getReferenceFrames(), mode);
+      activePerceptionModule.initializeContinuousPlannerSchedulingTask(robotModel, ros2Helper, ros2Node, syncedRobot.getReferenceFrames(), mode);
 
       ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.CONTINUOUS_WALKING_PARAMETERS, continuousPlanningParameters);
       ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.FOOTSTEP_PLANNING_PARAMETERS, activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getFootstepPlannerParameters());
@@ -67,6 +74,15 @@ public class PerceptionBasedContinuousWalking
       executorService.scheduleAtFixedRate(this::update, 500, 100, TimeUnit.MILLISECONDS);
 
       ThreadTools.sleepForever();
+   }
+
+   private void stopIfRobotFallin(HighLevelStateChangeStatusMessage message)
+   {
+      HighLevelControllerName initialState = HighLevelControllerName.fromByte(message.getInitialHighLevelControllerName());
+      HighLevelControllerName endState = HighLevelControllerName.fromByte(message.getEndHighLevelControllerName());
+
+      LogTools.info("Initla State: " + initialState.toString());
+      LogTools.info("End State: " + endState.toString());
    }
 
    public void update()
