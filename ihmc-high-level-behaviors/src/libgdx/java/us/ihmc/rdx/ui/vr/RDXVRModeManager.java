@@ -29,9 +29,7 @@ import java.util.Set;
  */
 public class RDXVRModeManager
 {
-   private RDXVRHandPlacedFootstepMode handPlacedFootstepMode;
    private RDXVRKinematicsStreamingMode kinematicsStreamingMode;
-   private RDXJoystickBasedStepping joystickBasedStepping;
    private RDX3DSituatedImGuiPanel leftHandPanel;
    private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -62,17 +60,11 @@ public class RDXVRModeManager
                       RetargetingParameters retargetingParameters,
                       SceneGraph sceneGraph)
    {
-      handPlacedFootstepMode = new RDXVRHandPlacedFootstepMode();
-      handPlacedFootstepMode.create(syncedRobot.getRobotModel(), controllerHelper);
-
       if (syncedRobot.getRobotModel().getRobotVersion().hasBothArms())
       {
          kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot, controllerHelper, retargetingParameters, sceneGraph);
          kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
       }
-
-      joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
-      joystickBasedStepping.create(baseUI, controllerHelper, syncedRobot);
 
       baseUI.getImGuiPanelManager().addPanel("VR Mode Manager", this::renderImGuiWidgets);
 
@@ -107,7 +99,6 @@ public class RDXVRModeManager
 
       switch (mode)
       {
-         case FOOTSTEP_PLACEMENT -> handPlacedFootstepMode.processVRInput(vrContext);
          case WHOLE_BODY_IK_STREAMING ->
          {
             if (kinematicsStreamingMode != null)
@@ -121,7 +112,6 @@ public class RDXVRModeManager
       if (kinematicsStreamingMode != null)
          kinematicsStreamingMode.update(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING);
       leftHandPanel.update();
-      joystickBasedStepping.update(mode == RDXVRMode.JOYSTICK_WALKING);
    }
 
    private void renderImGuiWidgets()
@@ -171,18 +161,10 @@ public class RDXVRModeManager
          {
             ImGui.text("Press right joystick button to teleport the playspace to the robot's location.");
          }
-         case FOOTSTEP_PLACEMENT ->
-         {
-            handPlacedFootstepMode.renderImGuiWidgets();
-         }
          case WHOLE_BODY_IK_STREAMING ->
          {
             if (kinematicsStreamingMode != null)
                kinematicsStreamingMode.renderImGuiWidgets();
-         }
-         case JOYSTICK_WALKING ->
-         {
-            joystickBasedStepping.renderImGuiWidgets();
          }
       }
    }
@@ -193,18 +175,10 @@ public class RDXVRModeManager
       {
          switch (mode)
          {
-            case FOOTSTEP_PLACEMENT ->
-            {
-               handPlacedFootstepMode.getRenderables(renderables, pool);
-            }
             case WHOLE_BODY_IK_STREAMING ->
             {
                if (kinematicsStreamingMode != null)
                   kinematicsStreamingMode.getVirtualRenderables(renderables, pool, sceneLevels);
-            }
-            case JOYSTICK_WALKING ->
-            {
-               joystickBasedStepping.getRenderables(renderables, pool);
             }
          }
 
@@ -220,7 +194,6 @@ public class RDXVRModeManager
       leftHandPanel.dispose();
       if (kinematicsStreamingMode != null)
          kinematicsStreamingMode.destroy();
-      joystickBasedStepping.destroy();
    }
 
    public RDXVRKinematicsStreamingMode getKinematicsStreamingMode()
@@ -248,8 +221,4 @@ public class RDXVRModeManager
       this.panelPlacementMode = panelPlacementMode;
    }
 
-   public RDXVRHandPlacedFootstepMode getHandPlacedFootstepMode()
-   {
-      return handPlacedFootstepMode;
-   }
 }
