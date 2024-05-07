@@ -66,11 +66,11 @@ public class RDXValveIndexStereoPassthroughDemo
 
             cameraReaderThread.start();
 
-            for (RobotSide side : RobotSide.values)
-               projectionSpheres.get(side).create();
-            updateProjectionSettings();
-            for (RobotSide side : RobotSide.values)
-               projectionSpheres.get(side).rebuildUVSphereMesh();
+//            for (RobotSide side : RobotSide.values)
+//               projectionSpheres.get(side).create();
+//            updateProjectionSettings();
+//            for (RobotSide side : RobotSide.values)
+//               projectionSpheres.get(side).rebuildUVSphereMesh();
             baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
 
             baseUI.getImGuiPanelManager().addPanel("Projection controls", this::renderControls);
@@ -111,7 +111,7 @@ public class RDXValveIndexStereoPassthroughDemo
                   eyeImage.copyTo(displayMat);
                   Texture texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
 
-                  projectionSpheres.get(side).updateTexture(texture);
+//                  projectionSpheres.get(side).updateTexture(texture);
 
                   displayMat.close();
                   pixmap.dispose();
@@ -160,7 +160,7 @@ public class RDXValveIndexStereoPassthroughDemo
             {
                for (RobotSide side : RobotSide.values)
                {
-                  projectionSpheres.get(side).rebuildUVSphereMesh();
+//                  projectionSpheres.get(side).rebuildUVSphereMesh();
                }
             }
          }
@@ -169,11 +169,11 @@ public class RDXValveIndexStereoPassthroughDemo
          {
             for (RobotSide side : RobotSide.values)
             {
-               projectionSpheres.get(side).getSphereRadius().set(sphereRadius);
-               projectionSpheres.get(side).getFocalLengthX().set(projectionScale);
-               projectionSpheres.get(side).getFocalLengthY().set(projectionScale);
-               projectionSpheres.get(side).getPrinciplePointX().set(principlePointX);
-               projectionSpheres.get(side).getPrinciplePointY().set(principlePointY);
+//               projectionSpheres.get(side).getSphereRadius().set(sphereRadius);
+//               projectionSpheres.get(side).getFocalLengthX().set(projectionScale);
+//               projectionSpheres.get(side).getFocalLengthY().set(projectionScale);
+//               projectionSpheres.get(side).getPrinciplePointX().set(principlePointX);
+//               projectionSpheres.get(side).getPrinciplePointY().set(principlePointY);
             }
          }
 

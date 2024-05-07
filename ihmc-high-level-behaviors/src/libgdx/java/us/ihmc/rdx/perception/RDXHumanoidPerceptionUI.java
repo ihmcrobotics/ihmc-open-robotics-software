@@ -85,7 +85,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
    private final ImBoolean enableRapidRegions = new ImBoolean(false);
    private final ImBoolean enableSphericalRapidRegions = new ImBoolean(false);
-   private final ImBoolean enableGPUHeightMap = new ImBoolean(true);
+   private final ImBoolean enableGPUHeightMap = new ImBoolean(false);
    private final ImBoolean enableMapRegions = new ImBoolean(false);
 
    private ImFloat thresholdHeight = new ImFloat(1.0f);

@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.PerceptionDebugTools;
@@ -41,8 +42,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
    private final SideDependentList<RDXFootstepGraphic> footstepGraphics;
 
    private StancePoseCalculator stancePoseCalculator;
-   private TerrainMapData terrainMapData;
-   private HeightMapData heightMapData;
+   private final FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
    private ImGui3DViewInput latestInput;
 
    private boolean placed = false;
@@ -67,8 +67,8 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
    public void update(SideDependentList<FramePose3D> goalPoses, TerrainMapData terrainMapData, HeightMapData heightMapData)
    {
-      this.heightMapData = heightMapData;
-      this.terrainMapData = terrainMapData;
+      environmentHandler.setHeightMap(heightMapData);
+      environmentHandler.setTerrainMapData(terrainMapData);
 
       boolean panel3DIsHovered = latestInput != null && latestInput.isWindowHovered();
       if (panel3DIsHovered && ImGui.isKeyPressed('P'))
@@ -84,15 +84,16 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
    private void updatePoses()
    {
-      if (terrainMapData != null)
+      if (environmentHandler.hasTerrainMapData())
       {
+         TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
          double height = terrainMapData.getHeightInWorld(latestPose.getTranslation().getX32(), latestPose.getTranslation().getY32());
          double contactScore = terrainMapData.getContactScoreInWorld(latestPose.getTranslation().getX32(), latestPose.getTranslation().getY32());
 
          if (selectionActive)
          {
             latestPose.getTranslation().setZ(height);
-            stancePoses.set(stancePoseCalculator.calculateStancePoses(latestPose, terrainMapData, heightMapData));
+            stancePoses.set(stancePoseCalculator.getStancePoses(latestPose, terrainMapData, environmentHandler));
             for (RobotSide robotSide : RobotSide.values)
             {
                footstepGraphics.get(robotSide).setPose(stancePoses.get(robotSide));
@@ -167,6 +168,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
    public void renderImGuiWidgets()
    {
+      TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
       if (ImGui.button("Print Contact Map"))
       {
          PerceptionDebugTools.printMat("Contact Map", terrainMapData.getContactMap(), 4);
