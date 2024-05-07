@@ -364,22 +364,22 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
          if (hasMultiContactBalanceStatus)
             throw new UnsupportedOperationException("Initial robot configuration is not supported with multi-contact context.");
 
-         computeSupportZUpTransform(desiredFullRobotModel, initialTransform); // The robot is at the current initial configuration.
+//         computeSupportZUpTransform(desiredFullRobotModel, initialTransform); // The robot is at the current initial configuration.
 
          initializePrivilegedConfiguration(); // The robot is now at the privileged configuration.
-         rootJoint.getJointPose().setToZero();
-         desiredFullRobotModel.updateFrames();
-         computeSupportZUpTransform(desiredFullRobotModel, desiredTransform); // The robot is at the privileged configuration.
+//         rootJoint.getJointPose().setToZero();
+//         desiredFullRobotModel.updateFrames();
+//         computeSupportZUpTransform(desiredFullRobotModel, desiredTransform); // The robot is at the privileged configuration.
 
-         rootJointTransform.setAndInvert(desiredTransform);
-         rootJointTransform.multiply(initialTransform);
+//         rootJointTransform.setAndInvert(desiredTransform);
+//         rootJointTransform.multiply(initialTransform);
          // Any yaw-rotation needs to be applied at the desiredFrame's origin. rotationRelocation is used to relocate where the rotation is happening.
-         rotationRelocation.setAndInvert(rootJoint.getJointPose());
-         rotationRelocation.multiply(desiredTransform);
+//         rotationRelocation.setAndInvert(rootJoint.getJointPose());
+//         rotationRelocation.multiply(desiredTransform);
 
-         rootJointTransform.multiplyInvertOther(rotationRelocation);
-         rootJointTransform.preMultiply(rotationRelocation);
-         rootJoint.getJointPose().set(rootJointTransform);
+//         rootJointTransform.multiplyInvertOther(rotationRelocation);
+//         rootJointTransform.preMultiply(rotationRelocation);
+//         rootJoint.getJointPose().set(rootJointTransform);
       }
       else
       {

@@ -34,7 +34,7 @@ import us.ihmc.ros2.ROS2TopicNameTools;
  */
 public class ControllerNetworkSubscriber
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
 
    /** The input API to which the received messages should be submitted. */
    private final CommandInputManager controllerCommandInputManager;
