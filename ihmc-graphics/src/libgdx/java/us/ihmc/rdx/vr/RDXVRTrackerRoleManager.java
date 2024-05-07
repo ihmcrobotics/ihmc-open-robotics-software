@@ -5,6 +5,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
@@ -165,7 +166,7 @@ public class RDXVRTrackerRoleManager
          {
             vrContext.resetTrackerRoles();
          }
-         if (ImGui.menuItem("Close"))
+         if (ImGui.menuItem("Close") || ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
             ImGui.closeCurrentPopup();
          ImGui.endPopup();
       }
