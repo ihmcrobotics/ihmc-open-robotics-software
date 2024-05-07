@@ -67,4 +67,14 @@ public interface ContinuousWalkingParametersBasics extends ContinuousWalkingPara
    {
       set(ContinuousWalkingParameters.logFootstepPlans, logFootstepPlans);
    }
+
+   default void setDefaultOperatingMode(boolean defaultOperatingMode)
+   {
+      set(ContinuousWalkingParameters.defaultOperatingMode, defaultOperatingMode);
+   }
+
+   default void setDisableUpdatingHeightMap(boolean disableUpdatingHeightMap)
+   {
+      set(ContinuousWalkingParameters.disableUpdatingHeightMap, disableUpdatingHeightMap);
+   }
 }
