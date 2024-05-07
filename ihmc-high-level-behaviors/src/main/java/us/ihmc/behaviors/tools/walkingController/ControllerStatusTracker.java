@@ -103,7 +103,6 @@ public class ControllerStatusTracker
       statusLogger.info("Controller state changed from {} to {}", initialState, endState);
       latestKnownState = endState;
       footstepTracker.reset();
-      System.out.println("The fuckkkkkkkkkkkkkkkkkkkkkkkk");
    }
 
    private void acceptWalkingControllerFailureStatusMessage(WalkingControllerFailureStatusMessage message)

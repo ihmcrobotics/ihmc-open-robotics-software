@@ -97,18 +97,17 @@ public class ContinuousPlannerSchedulingTask
       this.referenceFrames = referenceFrames;
       this.parameters = parameters;
       this.monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
+      String simpleRobotName = robotModel.getSimpleRobotName();
 
       debugger = new TerrainPlanningDebugger(ros2Node, monteCarloPlannerParameters);
-      controllerFootstepDataTopic = HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
+      controllerFootstepDataTopic = HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, simpleRobotName);
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
 
-      pauseWalkingPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(PauseWalkingMessage.class, robotModel.getSimpleRobotName()));
+      pauseWalkingPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(PauseWalkingMessage.class, simpleRobotName));
 
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()),
-                                      this::footstepStatusReceived);
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, robotModel.getSimpleRobotName()),
-                                      this::footstepQueueStatusReceived);
+      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
+      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND, commandMessage::set);
 
       this.continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, mode, parameters, monteCarloPlannerParameters, debugger);
@@ -133,8 +132,7 @@ public class ContinuousPlannerSchedulingTask
    {
       continuousPlanner.syncParametersCallback();
 
-      if (!parameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking()
-      )
+      if (!parameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
       {
          state = ContinuousWalkingState.NOT_STARTED;
 
@@ -196,8 +194,6 @@ public class ContinuousPlannerSchedulingTask
       }
    }
 
-   FramePose3D temp = new FramePose3D();
-
    public void handleStateMachine()
    {
       /*
@@ -212,14 +208,11 @@ public class ContinuousPlannerSchedulingTask
          {
             continuousPlanner.getImminentStanceFromLatestStatus(footstepStatusMessage, controllerQueue);
          }
-         else
-         {
-
-         }
 
          debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
          continuousPlanner.setGoalWaypointPoses();
          continuousPlanner.planToGoal(commandMessage.get());
+
          if (commandMessage.get().getUseHybridPlanner() || commandMessage.get().getUseMonteCarloFootstepPlanner() || commandMessage.get().getUseMonteCarloPlanAsReference())
          {
             debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
@@ -232,7 +225,6 @@ public class ContinuousPlannerSchedulingTask
          }
          else
          {
-            // TODO: Add replanning. Replanned plan valid only until the foot lands.
             state = ContinuousWalkingState.WAITING_TO_LAND;
             LogTools.error(message = String.format("State: [%s]: Planning failed... will try again when current step is completed", state));
             statistics.appendString(message);
