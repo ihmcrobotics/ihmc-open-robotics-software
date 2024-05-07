@@ -23,6 +23,7 @@ import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class RDXVRManager
 {
@@ -208,9 +209,24 @@ public class RDXVRManager
          renderEnableCheckbox();
 
          ImGuiTools.separatorText("Status");
-         ImGui.text("Connected headset: " + (isVRReady() ? context.getHeadset().getModelName() : "None"));
-         ImGui.text("Connected controllers: " + (isVRReady() ? StringUtils.join(context.getControllers(), ", ") : "None"));
-         ImGui.text("Connected trackers: " + (isVRReady() ? StringUtils.join(context.getTrackers(), ", ") : "None"));
+         if (isVRReady())
+         {
+            ImGui.text("Connected headset: " + context.getHeadset().getModelName());
+            ImGui.text("Connected controllers: " + StringUtils.join(context.getControllers()
+                                                                           .values()
+                                                                           .stream()
+                                                                           .filter(RDXVRTrackedDevice::isConnected)
+                                                                           .collect(Collectors.toList()), ", "));
+            ImGui.text("Connected trackers: " + StringUtils.join(context.getTrackers()
+                                                                        .values()
+                                                                        .stream()
+                                                                        .filter(RDXVRTrackedDevice::isConnected)
+                                                                        .collect(Collectors.toList()), ", "));
+         }
+         else
+         {
+            ImGui.text("VR not enabled");
+         }
 
          if (ImGui.collapsingHeader(labels.get("Debug")))
             renderDebugPlots();
