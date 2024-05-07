@@ -133,7 +133,7 @@ public class RDXVRTrackerRoleManager
                   imgui.ImGui.pushStyleColor(ImGuiCol.Button, 0.0f, 0.0f, 1.0f, 0.5f);
                   changedColorRoleButton.replace(role.getKey(), true);
                }
-               if (imgui.ImGui.button(labels.get(role.getKey()) + "##" + "Role"))
+               if (imgui.ImGui.button(labels.get(role.getKey()) + "##" + "Role", 100f, 0f))
                {
                   role.setValue(!role.getValue());
                   if (role.getValue())
@@ -161,7 +161,7 @@ public class RDXVRTrackerRoleManager
             }
          }
          ImGui.separator();
-         if (imgui.ImGui.button(labels.get("Reset All Roles")))
+         if (imgui.ImGui.button(labels.get("Reset All Roles"), 100f, 0f))
          {
             vrContext.resetTrackerRoles();
          }
