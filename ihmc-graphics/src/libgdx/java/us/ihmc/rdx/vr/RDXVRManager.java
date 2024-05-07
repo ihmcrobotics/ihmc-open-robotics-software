@@ -120,11 +120,6 @@ public class RDXVRManager
                context.setupEyes();
             }
 
-            if (!Boolean.parseBoolean(System.getProperty("rdx.free.spin")))
-            {
-               baseUI.setForegroundFPSLimit(350); // TODO: Do something better with this
-            }
-            baseUI.setVsync(false); // important to disable vsync for VR
             scenePoseGizmo = new RDXPose3DGizmo(context.getTeleportFrameIHMCZUp(), context.getTeleportIHMCZUpToIHMCZUpWorld());
             scenePoseGizmo.create(baseUI.getPrimary3DPanel());
             contextInitialized = true;
