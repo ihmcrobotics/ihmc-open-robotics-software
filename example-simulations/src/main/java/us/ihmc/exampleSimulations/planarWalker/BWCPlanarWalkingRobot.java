@@ -64,8 +64,8 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
 
     RigidBodyDefinition thigh = new RigidBodyDefinition(name);
     thigh.setMass(thighMass);
-    thigh.setMomentOfInertia(thighInertia);  // Assuming there's a method to just set the inertia
-    thigh.setCenterOfMassOffset(comOffset);  // Assuming there's a method to set the center of mass offset
+    thigh.setMomentOfInertia(thighInertia);
+    thigh.setCenterOfMassOffset(comOffset);
     return thigh;
   }
 
@@ -125,14 +125,16 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
         hipInertia.scale(0.01);
         SimRigidBodyBasics hipSuccessor = new SimRigidBody("HipBody", hipJoint, hipInertia, 1.0, new Vector3D(0, 0, -0.1));
         hipJoint.setSuccessor(hipSuccessor);
-        hipJoints.put(robotSide, hipJoint);  // Store the newly created joint in the map
+        hipJoints.put(robotSide, hipJoint);
       }
 
       if (hipJoint.getSuccessor() == null)
       {
         // Ensure there is a successor body
         RigidBodyDefinition thigh = BWCPlanarWalkingRobotDefinition.createThigh(robotSide.getCamelCaseName() + "Thigh");
-        SimRigidBodyBasics thighRigidBody = new SimRigidBody(thigh);
+        //        SimRigidBodyBasics thighRigidBody = new SimRigidBody(thigh);
+        SimRigidBodyBasics thighRigidBody = new SimRigidBody(thigh, hipJoint);
+
         hipJoint.setSuccessor(thighRigidBody);
       }
 
@@ -144,7 +146,8 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
 
       // Create the successor for the knee joint
       RigidBodyDefinition shin = BWCPlanarWalkingRobotDefinition.createShin(robotSide.getCamelCaseName() + "Shin");
-      SimRigidBodyBasics shinRigidBody = new SimRigidBody(shin);
+      //      SimRigidBodyBasics shinRigidBody = new SimRigidBody(shin);
+      SimRigidBodyBasics shinRigidBody = new SimRigidBody(shin, kneeJoint);
       kneeJoint.setSuccessor(shinRigidBody);
 
       footMassLocal = Math.max(footMassLocal, shinRigidBody.getInertia().getMass());
@@ -262,19 +265,47 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
     centerOfMassVelocity.setMatchingFrame(centerOfMassFrame.getTwistOfFrame().getLinearPart());
   }
 
+  //  @Override public YoGraphicDefinition getSCS2YoGraphics()
+  //  {
+  //    YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+  //    group.addChild(newYoGraphicCoordinateSystem3D("BasePoint",
+  //    floatingJoint.getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.25)); for (RobotSide robotSide :
+  //    RobotSide.values())
+  //    {
+  //      group.addChild(newYoGraphicPoint3D(robotSide.getLowerCaseName() + "GroundPoint",
+  //          kneeJoints.get(robotSide).getAuxiliaryData().getGroundContactPoints().get(0).getPose().getPosition(),
+  //          0.01, DarkOrange()));
+  //      group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "KneeFrame",
+  //          kneeJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
+  //      group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "HipFrame",
+  //          hipJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
+  //    }
+  //    group.setVisible(true);
+  //    return group;
+  //  }
+
   @Override public YoGraphicDefinition getSCS2YoGraphics()
   {
     YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-    group.addChild(newYoGraphicCoordinateSystem3D("BasePoint", floatingJoint.getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.25));
+
     for (RobotSide robotSide : RobotSide.values())
     {
-      group.addChild(newYoGraphicPoint3D(robotSide.getLowerCaseName() + "GroundPoint",
-          kneeJoints.get(robotSide).getAuxiliaryData().getGroundContactPoints().get(0).getPose().getPosition(), 0.01,
-          DarkOrange()));
-      group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "KneeFrame",
-          kneeJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
-      group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "HipFrame",
-          hipJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
+      // Safe access to kinematic points and ground contact points
+      if (!hipJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().isEmpty() &&
+          !kneeJoints.get(robotSide).getAuxiliaryData().getGroundContactPoints().isEmpty())
+      {
+        group.addChild(newYoGraphicPoint3D(robotSide.getLowerCaseName() + "GroundPoint",
+            kneeJoints.get(robotSide).getAuxiliaryData().getGroundContactPoints().get(0).getPose().getPosition(), 0.01,
+            DarkOrange()));
+        group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "KneeFrame",
+            kneeJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
+        group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "HipFrame",
+            hipJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
+      }
+      else
+      {
+        System.out.println("Warning: Kinematic or contact points data missing for " + robotSide);
+      }
     }
     group.setVisible(true);
     return group;
