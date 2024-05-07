@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
@@ -259,12 +258,12 @@ public class IKStreamingRTPluginFactory
          HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(desiredFullRobotModel.getOneDoFJoints().length);
          ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(desiredFullRobotModel.getForceSensorDefinitions()));
          CenterOfMassDataHolder centerOfMassDataHolderForController = new CenterOfMassDataHolder();
-         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(desiredFullRobotModel);
+         //         CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator = new CenterOfPressureDataHolder(desiredFullRobotModel);
          LowLevelOneDoFJointDesiredDataHolder desiredJointDataHolder = new LowLevelOneDoFJointDesiredDataHolder(desiredFullRobotModel.getControllableOneDoFJoints());
          RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
          contextDataFactory.setForceSensorDataHolder(forceSensorDataHolderForController);
          contextDataFactory.setCenterOfMassDataHolder(centerOfMassDataHolderForController);
-         contextDataFactory.setCenterOfPressureDataHolder(centerOfPressureDataHolderForEstimator);
+         contextDataFactory.setCenterOfPressureDataHolder(null);
          contextDataFactory.setRobotMotionStatusHolder(robotMotionStatusHolder);
          contextDataFactory.setJointDesiredOutputList(desiredJointDataHolder);
          contextDataFactory.setProcessedJointData(processedJointData);
