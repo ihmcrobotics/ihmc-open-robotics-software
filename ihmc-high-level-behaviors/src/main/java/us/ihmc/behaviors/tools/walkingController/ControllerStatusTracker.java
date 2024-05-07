@@ -199,7 +199,7 @@ public class ControllerStatusTracker
          }
       }
    }
-   
+
    public void addNotWalkingStateAnymoreCallback(Runnable callback)
    {
       notWalkingStateAnymoreCallbacks.add(callback);
