@@ -1,22 +1,17 @@
 package us.ihmc.behaviors.tools.walkingController;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
-import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
-import controller_msgs.msg.dds.PlanOffsetStatus;
+import controller_msgs.msg.dds.*;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
-import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.StateEstimatorAPI;
+import us.ihmc.ros2.ROS2Callback;
+import us.ihmc.log.LogToolsWriteOnly;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.tools.Timer;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
-import us.ihmc.log.LogToolsWriteOnly;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.sensorProcessing.model.RobotMotionStatus;
-import us.ihmc.tools.Timer;
 import us.ihmc.tools.thread.Throttler;
 
 import java.util.ArrayList;
