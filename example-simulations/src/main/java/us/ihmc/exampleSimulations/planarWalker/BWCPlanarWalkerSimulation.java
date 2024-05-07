@@ -31,7 +31,6 @@ public class BWCPlanarWalkerSimulation
       scs.setBufferRecordTickPeriod(simTicksPerControlTick);
 //      scs.getGravity().setToZero();
 
-
       BWCPlanarWalkingRobotDefinition robotDefinition = new BWCPlanarWalkingRobotDefinition();
       Robot robot = new Robot(robotDefinition, scs.getInertialFrame());
       scs.addRobot(robot);
@@ -66,18 +65,20 @@ public class BWCPlanarWalkerSimulation
 
       scs.startSimulationThread();
       scs.simulate();
-
    }
 
-   public static void main(String[] args) {
-      try {
-         System.out.println("Starting BWCPlanarWalkerSimulation...");
-         new BWCPlanarWalkerSimulation();
-         System.out.println("Simulation setup complete. Running...");
-      } catch (Exception e) {
-         System.err.println("Error occurred during simulation setup or execution:");
-         e.printStackTrace();
-      }
+   public static void main(String[] args)
+   {
+     try
+     {
+       System.out.println("Starting BWCPlanarWalkerSimulation...");
+       new BWCPlanarWalkerSimulation();
+       System.out.println("Simulation setup complete. Running...");
+     }
+     catch (Exception e)
+     {
+       System.err.println("Error occurred during simulation setup or execution:");
+       e.printStackTrace();
+     }
    }
-
 }

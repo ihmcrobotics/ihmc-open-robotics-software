@@ -67,7 +67,6 @@ public class BWCPlanarWalkingController implements Controller, SCS2YoGraphicHold
    private final YoDouble armPitchKp = new YoDouble("armPitchKp", registry);
    private final YoDouble armPitchKd = new YoDouble("armPitchKd", registry);
 
-
    public BWCPlanarWalkingController(BWCPlanarWalkingRobot controllerRobot, RobotSide initialSwingSide)
    {
       this.controllerRobot = controllerRobot;
@@ -101,10 +100,9 @@ public class BWCPlanarWalkingController implements Controller, SCS2YoGraphicHold
       desiredWalkingVelocity.set(0.0); // Default walking velocity in m/s (example value)
 
       // Value for Arms
-      armPitchKp.set(100.0); // Example gain values
+      armPitchKp.set(100.0);  // Example gain values
       armPitchKd.set(10.0);
       armPitchController = new PDController(armPitchKp, armPitchKd, "armPitchController", registry);
-
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -131,11 +129,10 @@ public class BWCPlanarWalkingController implements Controller, SCS2YoGraphicHold
       registry.addChild(controllerRobot.getYoRegistry());
    }
 
-   private double computeDesiredArmPosition(RobotSide side) {
-
-      return 0.0; // Arms to aim for a neutral position of 0 radians
+   private double computeDesiredArmPosition(RobotSide side)
+   {
+     return 0.0;  // Arms to aim for a neutral position of 0 radians
    }
-
 
    @Override
    public YoRegistry getYoRegistry()
@@ -148,19 +145,19 @@ public class BWCPlanarWalkingController implements Controller, SCS2YoGraphicHold
    {
       controllerRobot.update();
 
-      for (RobotSide robotSide : RobotSide.values) {
-         legStateMachines.get(robotSide).doActionAndTransition();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+        legStateMachines.get(robotSide).doActionAndTransition();
 
-         // Control code for the arms, using the armPitchController
-         double currentPitch = controllerRobot.getArmJoint(robotSide).getQ();
-         double desiredPitch = computeDesiredArmPosition(robotSide);
-         double currentVelocity = controllerRobot.getArmJoint(robotSide).getQd();
-         double desiredVelocity = 0;
+        // Control code for the arms, using the armPitchController
+        double currentPitch = controllerRobot.getArmJoint(robotSide).getQ();
+        double desiredPitch = computeDesiredArmPosition(robotSide);
+        double currentVelocity = controllerRobot.getArmJoint(robotSide).getQd();
+        double desiredVelocity = 0;
 
-         double controlEffort = armPitchController.compute(currentPitch, desiredPitch, currentVelocity, desiredVelocity);
-         controllerRobot.getArmJoint(robotSide).setTau(controlEffort);
+        double controlEffort = armPitchController.compute(currentPitch, desiredPitch, currentVelocity, desiredVelocity);
+        controllerRobot.getArmJoint(robotSide).setTau(controlEffort);
       }
-
    }
 
    private class StartSwingCondition implements StateTransitionCondition
@@ -233,16 +230,11 @@ public class BWCPlanarWalkingController implements Controller, SCS2YoGraphicHold
          double initialVelocity = 0.0;
          double finalHeight = 0.0;
          double finalVelocity = 0.0;
-         swingFootHeightTrajectory.setQuarticUsingWayPoint(initialTime,
-                 0.5 * swingDuration,
-                 swingDuration,
-                 initialHeight,
-                 initialVelocity,
-                 desiredSwingHeight.getDoubleValue(),
-                 finalHeight,
-                 finalVelocity);
+         swingFootHeightTrajectory.setQuarticUsingWayPoint(initialTime, 0.5 * swingDuration, swingDuration,
+             initialHeight, initialVelocity, desiredSwingHeight.getDoubleValue(), finalHeight, finalVelocity);
 
-//         swingFootXTrajectory.setCubic(0.0, swingDuration, footPositionAtStart.getX(), computeDesiredTouchdownPosition());
+         //         swingFootXTrajectory.setCubic(0.0, swingDuration, footPositionAtStart.getX(),
+         //         computeDesiredTouchdownPosition());
          swingFootXTrajectory.setCubic(0.0, swingDuration, footPositionAtStart.getX(), computeCapturePointBasedTouchdownPosition());
       }
 
