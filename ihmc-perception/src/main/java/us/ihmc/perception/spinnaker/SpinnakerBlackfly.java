@@ -21,7 +21,6 @@ import static us.ihmc.perception.spinnaker.SpinnakerBlackflyTools.printOnError;
  */
 public class SpinnakerBlackfly
 {
-
    private final spinCamera spinCamera;
    private final String serialNumber;
    private final spinNodeMapHandle cameraNodeMap = new spinNodeMapHandle();
@@ -55,6 +54,7 @@ public class SpinnakerBlackfly
 
    /**
     * Set the buffer handling mode
+    *
     * @see Spinnaker_C.spinTLStreamBufferHandlingModeEnums
     */
    public void setBufferHandlingMode(Spinnaker_C.spinTLStreamBufferHandlingModeEnums bufferHandlingMode)
@@ -66,7 +66,7 @@ public class SpinnakerBlackfly
       String bufferHandlingModeString = bufferHandlingMode.toString();
       String selectorString = bufferHandlingModeString.substring(bufferHandlingModeString.lastIndexOf("_") + 1);
       printOnError(Spinnaker_C.spinEnumerationGetEntryByName(bufferHandlingModeNode, new BytePointer(selectorString), setBufferHandlingMode),
-                    "Getting stream buffer handling mode entry by name: " + selectorString);
+                   "Getting stream buffer handling mode entry by name: " + selectorString);
       LongPointer bufferHandlingModePointer = new LongPointer(1);
       printOnError(Spinnaker_C.spinEnumerationEntryGetIntValue(setBufferHandlingMode, bufferHandlingModePointer),
                    "Getting stream buffer handling mode int value");
@@ -93,7 +93,7 @@ public class SpinnakerBlackfly
       String acquisitionModeString = acquisitionMode.toString();
       String selectorString = acquisitionModeString.substring(acquisitionModeString.lastIndexOf("_") + 1);
       printOnError(Spinnaker_C.spinEnumerationGetEntryByName(acquisitionModeNode, new BytePointer(selectorString), setAcquisitionMode),
-                    "Getting acquisition mode entry by name: " + selectorString);
+                   "Getting acquisition mode entry by name: " + selectorString);
       LongPointer acquisitionModePointer = new LongPointer(1);
       printOnError(Spinnaker_C.spinEnumerationEntryGetIntValue(setAcquisitionMode, acquisitionModePointer), "Getting acquisition mode int value");
       printOnError(Spinnaker_C.spinEnumerationSetIntValue(acquisitionModeNode, acquisitionModePointer.get()), "Setting acquisition mode int value");
@@ -112,7 +112,7 @@ public class SpinnakerBlackfly
       String pixelFormatString = pixelFormat.toString();
       String selectorString = pixelFormatString.substring(pixelFormatString.lastIndexOf("_") + 1);
       printOnError(Spinnaker_C.spinEnumerationGetEntryByName(pixelFormatNode, new BytePointer(selectorString), pixelFormatEntryNodeHandle),
-                    "Getting pixel format entry by name: " + selectorString);
+                   "Getting pixel format entry by name: " + selectorString);
       LongPointer ptrPixelFormat = new LongPointer(1L);
       printOnError(Spinnaker_C.spinEnumerationEntryGetIntValue(pixelFormatEntryNodeHandle, ptrPixelFormat), "Getting pixel format int value");
       printOnError(Spinnaker_C.spinEnumerationSetIntValue(pixelFormatNode, ptrPixelFormat.get()), "Setting pixel format int value");
@@ -133,11 +133,11 @@ public class SpinnakerBlackfly
    {
       spinNodeHandle xOffsetNode = new spinNodeHandle();
       printOnError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetX"), xOffsetNode), "Getting OffsetX node map node");
-      Spinnaker_C.spinIntegerSetValue(xOffsetNode, xOffset);
+      printOnError(Spinnaker_C.spinIntegerSetValue(xOffsetNode, xOffset), "Could not set x offset");
 
       spinNodeHandle yOffsetNode = new spinNodeHandle();
       printOnError(Spinnaker_C.spinNodeMapGetNode(cameraNodeMap, new BytePointer("OffsetY"), yOffsetNode), "Getting OffsetY node map node");
-      Spinnaker_C.spinIntegerSetValue(yOffsetNode, yOffset);
+      printOnError(Spinnaker_C.spinIntegerSetValue(yOffsetNode, yOffset), "Could not set y offset");
    }
 
    // http://softwareservices.flir.com/Spinnaker/latest/_programmer_guide.html#Setting_Exposure_Time

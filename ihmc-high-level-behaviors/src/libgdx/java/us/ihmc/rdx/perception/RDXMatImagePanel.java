@@ -34,7 +34,7 @@ public class RDXMatImagePanel
    {
       if (imagePanel.getIsShowing().get())
       {
-         image.put(rgbImage);
+         image.copyTo(rgbImage);
          display();
       }
    }

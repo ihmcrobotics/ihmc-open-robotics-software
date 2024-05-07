@@ -84,7 +84,7 @@ public class ZEDColorDepthImageRetriever
 
       zedGrabThread = new RestartableThread("ZEDImageGrabber", () ->
       {
-         if (depthDemandNode.isDemanded() || colorDemandNode.isDemanded())
+         if (depthDemandNode == null || colorDemandNode == null || depthDemandNode.isDemanded() || colorDemandNode.isDemanded())
          {
             if (!initialized)
             {

@@ -6,7 +6,7 @@ import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
 
-public class DualBlackflyComms
+public class BlackflyComms
 {
    private static final String MODULE_NAME = "dual_blackfly";
    private static final ROS2Topic<?> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule(MODULE_NAME);

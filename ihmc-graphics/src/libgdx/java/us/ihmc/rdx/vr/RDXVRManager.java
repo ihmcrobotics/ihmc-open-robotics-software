@@ -5,24 +5,26 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import org.apache.commons.lang3.StringUtils;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.rdx.imgui.ImGuiPlot;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.time.FrequencyCalculator;
 
-/** This class should manage VR as part of the ImGuiBasedUI. */
 public class RDXVRManager
 {
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+
    private final RDXVRContext context = new RDXVRContext();
    private Notification contextCreatedNotification;
    private boolean contextInitialized = false;
@@ -31,23 +33,22 @@ public class RDXVRManager
    private final Object syncObject = new Object();
    private final ImBoolean showScenePoseGizmo = new ImBoolean(false);
    private RDXPose3DGizmo scenePoseGizmo;
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean vrEnabled = new ImBoolean(false);
    private final Notification posesReady = new Notification();
    private volatile boolean waitingOnPoses = false;
-   private ImGuiPlot vrFPSPlot = new ImGuiPlot(labels.get("VR FPS Hz"), 1000, 300, 50);
+   private ImGuiPlot vrFPSPlot = new ImGuiPlot(labels.get("VR FPS Hz"), 1000, 180, 50);
    private FrequencyCalculator vrFPSCalculator = new FrequencyCalculator();
-   private ImGuiPlot waitGetPosesPlot = new ImGuiPlot(labels.get("Wait Get Poses Hz"), 1000, 300, 50);
-   private ImGuiPlot waitGetToRenderDelayPlot = new ImGuiPlot(labels.get("WaitGetToRender Delay"), 1000, 300, 50);
+   private ImGuiPlot waitGetPosesPlot = new ImGuiPlot(labels.get("Wait Get Poses Hz"), 1000, 180, 50);
+   private ImGuiPlot waitGetToRenderDelayPlot = new ImGuiPlot(labels.get("WaitGetToRender Delay"), 1000, 180, 50);
    private final Stopwatch waitGetToRenderStopwatch = new Stopwatch();
    private volatile double waitGetToRenderDuration = Double.NaN;
    private FrequencyCalculator waitGetPosesFrequencyCalculator = new FrequencyCalculator();
-   private ImGuiPlot pollEventsPlot = new ImGuiPlot(labels.get("Poll Events Hz"), 1000, 300, 50);
+   private ImGuiPlot pollEventsPlot = new ImGuiPlot(labels.get("Poll Events Hz"), 1000, 180, 50);
    private FrequencyCalculator pollEventsFrequencyCalculator = new FrequencyCalculator();
-   private ImGuiPlot contextInitializedPlot = new ImGuiPlot(labels.get("contextInitialized"), 1000, 300, 50);
-   private ImGuiPlot initSystemCountPlot = new ImGuiPlot(labels.get("initSystemCount"), 1000, 300, 50);
+   private ImGuiPlot contextInitializedPlot = new ImGuiPlot(labels.get("contextInitialized"), 1000, 180, 50);
+   private ImGuiPlot initSystemCountPlot = new ImGuiPlot(labels.get("initSystemCount"), 1000, 180, 50);
    private volatile int initSystemCount = 0;
-   private ImGuiPlot setupEyesCountPlot = new ImGuiPlot(labels.get("setupEyesCount"), 1000, 300, 50);
+   private ImGuiPlot setupEyesCountPlot = new ImGuiPlot(labels.get("setupEyesCount"), 1000, 180, 50);
    private volatile int setupEyesCount = 0;
    private final Notification waitOnPosesNotification = new Notification();
    private volatile boolean waitGetPosesThreadRunning = false;
@@ -92,9 +93,9 @@ public class RDXVRManager
             contextCreatedNotification = new Notification();
             MissingThreadTools.startAsDaemon(getClass().getSimpleName() + "-initSystem", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
             {
-               initSystemCount++;
                synchronized (syncObject)
                {
+                  initSystemCount++;
                   context.initSystem();
                }
                contextCreatedNotification.set();
@@ -103,9 +104,10 @@ public class RDXVRManager
          if (contextCreatedNotification != null && contextCreatedNotification.poll())
          {
             initializing = false;
-            setupEyesCount++;
+
             synchronized (syncObject)
             {
+               setupEyesCount++;
                context.setupEyes();
             }
 
@@ -140,13 +142,10 @@ public class RDXVRManager
                waitingOnPoses = false;
             }
 
-            if (posesReadyThisFrame)
+//            if (posesReadyThisFrame)
             {
-               pollEventsFrequencyCalculator.ping();
-               synchronized (syncObject)
-               {
+//               pollEventsFrequencyCalculator.ping();
                   context.pollEvents(); // FIXME: Potential bug is that the poses get updated in the above thread while they're being used in here
-               }
             }
          }
       }
@@ -180,25 +179,60 @@ public class RDXVRManager
       }
    }
 
-   public void renderImGuiEnableWidget()
+   public void renderMenuBar()
    {
-      if (ImGui.checkbox(labels.get("VR Enabled"), vrEnabled))
+      ImGui.setNextWindowSize(350.0f, 250.0f);
+      if (ImGui.beginMenu(labels.get("VR")))
       {
-         if (vrEnabled.get())
-            LogTools.info("Enabling VR");
-         else
-            LogTools.info("Disabling VR");
-      }
-      if (ImGui.isItemHovered())
-      {
-         float right = ImGui.getWindowPosX() + ImGui.getWindowSizeX();
-         float y = ImGui.getItemRectMaxY();
-         ImGui.setNextWindowPos(right - 600, y); // prevent the tooltip from creating a new window
-         ImGui.setTooltip("It is recommended to start SteamVR and power on the VR controllers before clicking this button.");
+         ImGuiTools.separatorText("Controls");
+         renderEnableCheckbox();
+
+         ImGuiTools.separatorText("Status");
+         ImGui.text("Connected headset: " + (isVRReady() ? context.getHeadset().getModelName() : "None"));
+         ImGui.text("Connected controllers: " + (isVRReady() ? StringUtils.join(context.getControllers(), ", ") : "None"));
+
+         if (ImGui.collapsingHeader(labels.get("Debug")))
+            renderDebugPlots();
+
+         ImGui.endMenu();
       }
    }
 
-   public void renderImGuiDebugWidgets()
+   public void renderEnableCheckbox()
+   {
+      if (ImGui.menuItem(labels.get("VR Enabled"), "", vrEnabled))
+      {
+         if (vrEnabled.get())
+         {
+            RDXBaseUI.pushNotification("Enabling VR...");
+
+            ThreadTools.startAThread(() ->
+            {
+               ThreadTools.sleep(5000);
+
+               if (isVRReady())
+               {
+                  RDXBaseUI.pushNotification("VR enabled");
+               }
+               else
+               {
+                  RDXBaseUI.pushNotification("Unable to enable VR");
+                  vrEnabled.set(false);
+               }
+            }, getClass().getName() + "VREnableMonitor");
+         }
+         else
+         {
+            RDXBaseUI.pushNotification("VR disabled");
+         }
+      }
+      if (ImGui.isItemHovered())
+      {
+         ImGui.setTooltip("Start SteamVR and turn on controllers before enabling.");
+      }
+   }
+
+   public void renderDebugPlots()
    {
       ImGui.checkbox(labels.get("Show scene pose gizmo"), showScenePoseGizmo);
       contextInitializedPlot.render(contextInitialized ? 1.0 : 0.0);
@@ -277,11 +311,6 @@ public class RDXVRManager
    public RDXVRContext getContext()
    {
       return context;
-   }
-
-   public ImBoolean getVREnabled()
-   {
-      return vrEnabled;
    }
 
    public RDXVRTeleporter getTeleporter()
