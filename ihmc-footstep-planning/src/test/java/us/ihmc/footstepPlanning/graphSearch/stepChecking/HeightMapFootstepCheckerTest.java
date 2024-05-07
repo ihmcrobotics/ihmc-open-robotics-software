@@ -71,7 +71,7 @@ public class HeightMapFootstepCheckerTest
 
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       FootstepSnapAndWiggler snapper = new TestSnapper(environmentHandler);
-      HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, snapper, null, registry);
+      HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, environmentHandler, snapper, null, registry);
       environmentHandler.setHeightMap(heightMapData);
       checker.setHeightMapData(heightMapData);
 
@@ -156,7 +156,7 @@ public class HeightMapFootstepCheckerTest
 
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       FootstepSnapAndWiggler snapper = new TestSnapper(environmentHandler);
-      HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, snapper, null, registry);
+      HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, environmentHandler, snapper, null, registry);
       checker.setHeightMapData(heightMapData);
       environmentHandler.setHeightMap(heightMapData);
 
@@ -227,7 +227,7 @@ public class HeightMapFootstepCheckerTest
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       FootstepSnapAndWiggler snapper = new TestSnapper(environmentHandler);
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
-      HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, snapper, null, registry);
+      HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, environmentHandler, snapper, null, registry);
 
       // the checker should check for limits in z-height, pitch, and roll.
       // the valid ranges for x, y, and yaw should be considered in the node expansion.
@@ -248,7 +248,7 @@ public class HeightMapFootstepCheckerTest
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       FootstepSnapAndWiggler snapper = new TestSnapper(environmentHandler);
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
-      HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, snapper, null, registry);
+      HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, environmentHandler, snapper, null, registry);
 
       DiscreteFootstep step0 = new DiscreteFootstep(0.0, -0.3, 0.0, RobotSide.RIGHT);
       DiscreteFootstep step1 = new DiscreteFootstep(0.0, 0.0, 0.0, RobotSide.LEFT);
@@ -264,7 +264,7 @@ public class HeightMapFootstepCheckerTest
    {
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
-      HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, new TestSnapper(environmentHandler), null, registry);
+      HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, environmentHandler, new TestSnapper(environmentHandler), null, registry);
       DiscreteFootstep leftNode0 = new DiscreteFootstep(0.0, 0.0, 0.0, RobotSide.LEFT);
       DiscreteFootstep leftNode1 = new DiscreteFootstep(5.0, 0.0, 2.0, RobotSide.LEFT);
       DiscreteFootstep rightNode0 = new DiscreteFootstep(-1.0, 0.0, -2.5, RobotSide.RIGHT);
@@ -292,7 +292,7 @@ public class HeightMapFootstepCheckerTest
 
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       FootstepSnapAndWiggler snapper = new TestSnapper(environmentHandler);
-      HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, snapper, null, registry);
+      HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, environmentHandler, snapper, null, registry);
 
       // add planar regions, otherwise will always be valid
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
@@ -335,7 +335,7 @@ public class HeightMapFootstepCheckerTest
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       FootstepSnapAndWiggler snapper = new TestSnapper(environmentHandler);
-      HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, snapper, null, registry);
+      HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, environmentHandler, snapper, null, registry);
 
       // add planar regions, otherwise will always be valid
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
@@ -454,7 +454,7 @@ public class HeightMapFootstepCheckerTest
       double footWidth = 0.1;
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
 
-      HeightMapFootstepChecker nodeChecker = new HeightMapFootstepChecker(parameters, footPolygons, snapper, null, registry);
+      HeightMapFootstepChecker nodeChecker = new HeightMapFootstepChecker(parameters, footPolygons, environmentHandler, snapper, null, registry);
       nodeChecker.setHeightMapData(heightMapData);
       environmentHandler.setHeightMap(heightMapData);
       snapper.clearSnapData();
@@ -617,7 +617,7 @@ public class HeightMapFootstepCheckerTest
 
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters, environmentHandler);
-      HeightMapFootstepChecker checker = new HeightMapFootstepChecker(footstepPlannerParameters, footPolygons, snapper, null, new YoRegistry("testRegistry"));
+      HeightMapFootstepChecker checker = new HeightMapFootstepChecker(footstepPlannerParameters, footPolygons, environmentHandler, snapper, null, new YoRegistry("testRegistry"));
 
       DiscreteFootstep step0 = new DiscreteFootstep(0.0, -0.2, 0.0, RobotSide.RIGHT);
       DiscreteFootstep step1 = new DiscreteFootstep(0.0, 0.1, 0.0, RobotSide.LEFT);

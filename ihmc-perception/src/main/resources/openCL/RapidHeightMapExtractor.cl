@@ -617,7 +617,8 @@ void kernel computeSnappedValuesKernel(global float* params,
                                 read_write image2d_t snapped_height_map,
                                 read_write image2d_t snapped_normal_x_map,
                                 read_write image2d_t snapped_normal_y_map,
-                                read_write image2d_t snapped_normal_z_map)
+                                read_write image2d_t snapped_normal_z_map,
+                                read_write image2d_t snapped_area_fraction)
 {
     // Remember, these are x and y in image coordinates, not world
     int idx_x = get_global_id(0); // column, top left
@@ -795,7 +796,7 @@ void kernel computeSnappedValuesKernel(global float* params,
 
     // TODO include this?
     // snap_height = getZOnPlane(foot_position, (float3) (x_solution, y_solution, z_solution), normal);
-    int snap_height_int = (snap_height * params[SNAP_HEIGHT_OFFSET]) * params[SNAP_HEIGHT_SCALING_FACTOR];
+    int snap_height_int = (snap_height + params[SNAP_HEIGHT_OFFSET]) * params[SNAP_HEIGHT_SCALING_FACTOR];
 
     /////////////// Make sure there's enough step area.
 
@@ -809,18 +810,24 @@ void kernel computeSnappedValuesKernel(global float* params,
     //////////// Check to make sure we're not stepping too near a cliff base or top
     if (!failed)
     {
-        int cliff_start_height_to_avoid_int = (params[CLIFF_START_HEIGHT_TO_AVOID] + params[SNAP_HEIGHT_OFFSET]) * params[SNAP_HEIGHT_SCALING_FACTOR];
-        int cliff_end_height_to_avoid_int = (params[CLIFF_END_HEIGHT_TO_AVOID] + params[SNAP_HEIGHT_OFFSET]) * params[SNAP_HEIGHT_SCALING_FACTOR];
+        int cliff_start_height_to_avoid_int = (params[CLIFF_START_HEIGHT_TO_AVOID]) * params[SNAP_HEIGHT_SCALING_FACTOR];
+        int cliff_end_height_to_avoid_int = (params[CLIFF_END_HEIGHT_TO_AVOID]) * params[SNAP_HEIGHT_SCALING_FACTOR];
 
         float cliff_search_offset = max_dimension / 2.0f + max(params[MIN_DISTANCE_FROM_CLIFF_BOTTOMS], params[MIN_DISTANCE_FROM_CLIFF_TOPS]);
         float cliff_search_offset_squared = cliff_search_offset * cliff_search_offset;
         int cliff_offset_indices = (int) ceil(cliff_search_offset / map_resolution);
-        float min_distance_from_tops = params[MIN_DISTANCE_FROM_CLIFF_TOPS] * params[MIN_DISTANCE_FROM_CLIFF_TOPS];
+        float min_distance_from_tops_squared = params[MIN_DISTANCE_FROM_CLIFF_TOPS] * params[MIN_DISTANCE_FROM_CLIFF_TOPS];
 
         int min_x = max(map_key.x - cliff_offset_indices, 0);
         int max_x = min(map_key.x + cliff_offset_indices + 1, map_cells_per_side_for_checking);
         int min_y = max(map_key.y - cliff_offset_indices, 0);
         int max_y = min(map_key.y + cliff_offset_indices + 1, map_cells_per_side_for_checking);
+
+        bool should_print = false;//idx_x == 50 && idx_y == 50;
+        if (should_print)
+        {
+            printf("searching for cliffs. Min x = %d, max x = %d, min y = %d, max y = %d. cliff start height %d, cliff end height %d\n", min_x, max_x, min_y, max_y, cliff_start_height_to_avoid_int, cliff_end_height_to_avoid_int);
+        }
 
         // search for a cliff base that's too close
         for (int x_query = min_x; x_query < max_x; x_query++)
@@ -829,8 +836,8 @@ void kernel computeSnappedValuesKernel(global float* params,
             {
                 float2 vector_to_point_from_foot = map_resolution * (float2) ((float) (x_query - map_key.x), (float) (y_query - map_key.y));
                 float distance_to_point_squared = dot(vector_to_point_from_foot, vector_to_point_from_foot);
-                // skip this cell if it's too far away from the foot, but also skip it if it's within the foot.
-                if (distance_to_point_squared > cliff_search_offset_squared || distance_to_point_squared < foot_search_radius_squared)
+                // skip this cell if it's too far away from the foot // , but also skip it if it's within the foot.
+                if (distance_to_point_squared > cliff_search_offset_squared)
                     continue;
 
                 // get the height at this offset point.
@@ -839,6 +846,10 @@ void kernel computeSnappedValuesKernel(global float* params,
 
                 // compute the relative height at this point, compared to the height contained in the current cell.
                 int relative_height_of_query_int = query_height_int - snap_height_int;
+                if (should_print)
+                {
+                   printf("actually checking if a cliff now. relative height is %d\n", relative_height_of_query_int);
+                }
 
                 if (relative_height_of_query_int > cliff_start_height_to_avoid_int)
                 {
@@ -856,7 +867,7 @@ void kernel computeSnappedValuesKernel(global float* params,
                 }
                 else if (relative_height_of_query_int < -cliff_start_height_to_avoid_int)
                 {
-                    if (distance_to_point_squared < min_distance_from_tops)
+                    if (distance_to_point_squared < min_distance_from_tops_squared)
                     {
                         // we're too close to the cliff top!
                         snap_result = CLIFF_TOP;
@@ -871,12 +882,19 @@ void kernel computeSnappedValuesKernel(global float* params,
         }
     }
 
+    uint area_fraction =  255 * n / max_points_possible_under_support;
+    // note these are switched to align with world
+    uint normal_x_int = (uint) (255 * (normal.y + 1.0f) / 2.0f);
+    uint normal_y_int = (uint) (255 * (normal.x + 1.0f) / 2.0f);
+    uint normal_z_int = (uint) (255 * (normal.z + 1.0f) / 2.0f);
     int2 storage_key = (int2) (idx_x, idx_y);
+
     write_imageui(steppable_map, storage_key, (uint4)(snap_result,0,0,0));
     write_imageui(snapped_height_map, storage_key, (uint4)(snap_height_int, 0, 0, 0));
-    write_imageui(snapped_normal_x_map, storage_key, (uint4)((int)(normal.x * params[SNAP_HEIGHT_SCALING_FACTOR]), 0, 0, 0));
-    write_imageui(snapped_normal_y_map, storage_key, (uint4)((int)(normal.y * params[SNAP_HEIGHT_SCALING_FACTOR]), 0, 0, 0));
-    write_imageui(snapped_normal_z_map, storage_key, (uint4)((int)(normal.z * params[SNAP_HEIGHT_SCALING_FACTOR]), 0, 0, 0));
+    write_imageui(snapped_normal_x_map, storage_key, (uint4)(normal_x_int, 0, 0, 0));
+    write_imageui(snapped_normal_y_map, storage_key, (uint4)(normal_y_int, 0, 0, 0));
+    write_imageui(snapped_normal_z_map, storage_key, (uint4)(normal_z_int, 0, 0, 0));
+    write_imageui(snapped_area_fraction, storage_key, (uint4)(area_fraction, 0, 0, 0));
 }
 
 void kernel computeSteppabilityConnectionsKernel(global float* params,

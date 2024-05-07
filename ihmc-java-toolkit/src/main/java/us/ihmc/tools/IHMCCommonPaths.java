@@ -17,6 +17,9 @@ public class IHMCCommonPaths
    public static final String PERCEPTION_LOGS_DIRECTORY_NAME = "perception";
    public static final Path PERCEPTION_LOGS_DIRECTORY = LOGS_DIRECTORY.resolve(PERCEPTION_LOGS_DIRECTORY_NAME);
 
+   public static final String VR_DIRECTORY_NAME = "vr";
+   public static final Path VR_DIRECTORY = DOT_IHMC_DIRECTORY.resolve(VR_DIRECTORY_NAME);
+
    public static final String PLANNING_DIRECTORY_NAME = "planning";
    public static final Path PLANNING_DIRECTORY = LOGS_DIRECTORY.resolve(PLANNING_DIRECTORY_NAME);
 
