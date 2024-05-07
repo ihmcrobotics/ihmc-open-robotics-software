@@ -8,7 +8,7 @@ public enum VRTrackedSegmentType
    LEFT_HAND("Left Hand", RobotSide.LEFT, 20.0, 0.25),
    RIGHT_HAND("Right Hand", RobotSide.RIGHT, 20.0, 0.25),
    LEFT_WRIST("Left Wrist", RobotSide.LEFT, 0.0, 1),
-   RIGHT_WRIST("RightWrist", RobotSide.RIGHT, 0.0, 1),
+   RIGHT_WRIST("Right Wrist", RobotSide.RIGHT, 0.0, 1),
    CHEST("Chest", null, 0.0, 10),
    WAIST("Waist", null, 0.0, 10);
 
