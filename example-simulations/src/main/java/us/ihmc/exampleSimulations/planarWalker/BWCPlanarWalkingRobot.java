@@ -54,27 +54,28 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
   private final YoFrameVector3D centerOfMassVelocity;
   private SimRigidBodyBasics torsoBodyDefinition;
 
-
-  private RigidBodyDefinition createThigh(String name) {
+  private RigidBodyDefinition createThigh(String name)
+  {
     double thighMass = BWCPlanarWalkingRobotDefinition.THIGH_MASS;
     Matrix3D thighInertia = new Matrix3D();
     thighInertia.setIdentity();
     thighInertia.scale(BWCPlanarWalkingRobotDefinition.THIGH_INERTIA_SCALE);
-    Vector3D comOffset = new Vector3D(0, 0, -0.25); // Center of mass offset
+    Vector3D comOffset = new Vector3D(0, 0, -0.25);  // Center of mass offset
 
     RigidBodyDefinition thigh = new RigidBodyDefinition(name);
     thigh.setMass(thighMass);
-    thigh.setMomentOfInertia(thighInertia); // Assuming there's a method to just set the inertia
-    thigh.setCenterOfMassOffset(comOffset); // Assuming there's a method to set the center of mass offset
+    thigh.setMomentOfInertia(thighInertia);  // Assuming there's a method to just set the inertia
+    thigh.setCenterOfMassOffset(comOffset);  // Assuming there's a method to set the center of mass offset
     return thigh;
   }
 
-  private RigidBodyDefinition createShin(String name) {
+  private RigidBodyDefinition createShin(String name)
+  {
     double shinMass = BWCPlanarWalkingRobotDefinition.SHIN_MASS;
     Matrix3D shinInertia = new Matrix3D();
     shinInertia.setIdentity();
     shinInertia.scale(BWCPlanarWalkingRobotDefinition.SHIN_INERTIA_SCALE);
-    Vector3D comOffset = new Vector3D(0, 0, -0.25); // Center of mass offset
+    Vector3D comOffset = new Vector3D(0, 0, -0.25);  // Center of mass offset
 
     RigidBodyDefinition shin = new RigidBodyDefinition(name);
     shin.setMass(shinMass);
@@ -107,26 +108,28 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
     initializeJoints();
   }
 
-  private void initializeJoints() {
+  private void initializeJoints()
+  {
     double footMassLocal = 0.0;
 
-    for (RobotSide robotSide : RobotSide.values()) {
-      // Check if the hip joint for this side has already been created and stored in hipJoints
+    for (RobotSide robotSide : RobotSide.values())
+    {
       SimRevoluteJoint hipJoint = hipJoints.get(robotSide);
 
-      if (hipJoint == null) {
+      if (hipJoint == null)
+      {
         // If not, create and initialize the hip joint
         hipJoint = new SimRevoluteJoint(robotSide.getCamelCaseName() + "Hip", this.torsoBodyDefinition, new Vector3D(0, 1, 0));
         Matrix3D hipInertia = new Matrix3D();
         hipInertia.setIdentity();
-        hipInertia.scale(0.01);  // Adjust inertia as needed
+        hipInertia.scale(0.01);
         SimRigidBodyBasics hipSuccessor = new SimRigidBody("HipBody", hipJoint, hipInertia, 1.0, new Vector3D(0, 0, -0.1));
         hipJoint.setSuccessor(hipSuccessor);
         hipJoints.put(robotSide, hipJoint);  // Store the newly created joint in the map
       }
 
-      // In BWCPlanarWalkingRobot.java within the initializeJoints method:
-      if (hipJoint.getSuccessor() == null) {
+      if (hipJoint.getSuccessor() == null)
+      {
         // Ensure there is a successor body
         RigidBodyDefinition thigh = BWCPlanarWalkingRobotDefinition.createThigh(robotSide.getCamelCaseName() + "Thigh");
         SimRigidBodyBasics thighRigidBody = new SimRigidBody(thigh);
@@ -154,7 +157,8 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
   {
     for (RobotSide side : RobotSide.values())
     {
-      SimRevoluteJoint armJoint = new SimRevoluteJoint(side.getCamelCaseName() + "Arm", this.torsoBodyDefinition, new Vector3D(0, 1, 0));
+      SimRevoluteJoint armJoint =
+          new SimRevoluteJoint(side.getCamelCaseName() + "Arm", this.torsoBodyDefinition, new Vector3D(0, 1, 0));
       armJoints.put(side, armJoint);
     }
   }
@@ -265,11 +269,12 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
     for (RobotSide robotSide : RobotSide.values())
     {
       group.addChild(newYoGraphicPoint3D(robotSide.getLowerCaseName() + "GroundPoint",
-              kneeJoints.get(robotSide).getAuxiliaryData().getGroundContactPoints().get(0).getPose().getPosition(), 0.01, DarkOrange()));
+          kneeJoints.get(robotSide).getAuxiliaryData().getGroundContactPoints().get(0).getPose().getPosition(), 0.01,
+          DarkOrange()));
       group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "KneeFrame",
-              kneeJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
+          kneeJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
       group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "HipFrame",
-              hipJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
+          hipJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
     }
     group.setVisible(true);
     return group;

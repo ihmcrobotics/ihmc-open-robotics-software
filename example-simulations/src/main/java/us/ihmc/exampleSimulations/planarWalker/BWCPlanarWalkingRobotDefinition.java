@@ -29,7 +29,6 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
    public static final String leftShinName = "l_shin";
    public static final String rightShinName = "r_shin";
 
-
    public static final double THIGH_MASS = 1.0;
    public static final double THIGH_INERTIA_SCALE = 0.01;
    public static final double SHIN_MASS = 0.8;
@@ -114,7 +113,8 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
         // Create and attach arm
         RigidBodyDefinition arm = createArm(robotSide.getCamelCaseName() + "Arm");
         Vector3D shoulderOffset = new Vector3D(0.0, robotSide.negateIfRightSide(0.1), torsoHeight / 2.0);
-        RevoluteJointDefinition shoulderJoint = new RevoluteJointDefinition(robotSide.getCamelCaseName() + "Shoulder", shoulderOffset, Axis3D.Y);
+        RevoluteJointDefinition shoulderJoint =
+            new RevoluteJointDefinition(robotSide.getCamelCaseName() + "Shoulder", shoulderOffset, Axis3D.Y);
         shoulderJoint.setDamping(0.1);
         torsoBodyDefinition.addChildJoint(shoulderJoint);
         shoulderJoint.setSuccessor(arm);
@@ -122,7 +122,8 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
         // Create and attach hand
         RigidBodyDefinition hand = createHand(robotSide.getCamelCaseName() + "Hand");
         Vector3D wristOffset = new Vector3D(0.0, 0.0, -0.4);  // Assuming arm length is 0.4
-        RevoluteJointDefinition wristJoint = new RevoluteJointDefinition(robotSide.getCamelCaseName() + "Wrist", wristOffset, Axis3D.Y);
+        RevoluteJointDefinition wristJoint =
+            new RevoluteJointDefinition(robotSide.getCamelCaseName() + "Wrist", wristOffset, Axis3D.Y);
         wristJoint.setDamping(0.1);
         arm.addChildJoint(wristJoint);
         wristJoint.setSuccessor(hand);
