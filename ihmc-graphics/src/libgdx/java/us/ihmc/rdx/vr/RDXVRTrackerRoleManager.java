@@ -37,7 +37,7 @@ public class RDXVRTrackerRoleManager
    private double closestCollisionDistance;
    private final SphereRayIntersection boundingSphereIntersection = new SphereRayIntersection();
    private final SphereRayIntersection modelSphereIntersection = new SphereRayIntersection();
-   private RDXModelInstance uninitializedModelInstance;
+   private final RDXModelInstance uninitializedModelInstance;
 
    public RDXVRTrackerRoleManager(RDXVRContext vrContext, RDXVRTracker tracker)
    {
@@ -63,7 +63,7 @@ public class RDXVRTrackerRoleManager
       boolean isWindowHovered = ImGui.isWindowHovered();
       ImGuiMouseDragData manipulationDragData = input.getMouseDragData(ImGuiMouseButton.Left);
 
-      // Here we are trying to avoid unecessary computation in collision calculation by filtering out
+      // Here we are trying to avoid unnecessary computation in collision calculation by filtering out
       // some common scenarios where we don't need to calculate the pick, which can be expensive
       if (isWindowHovered && (!manipulationDragData.isDragging() || manipulationDragData.getDragJustStarted()))
       {
@@ -121,7 +121,7 @@ public class RDXVRTrackerRoleManager
 
       if (ImGui.beginPopup(labels.get("Popup")))
       {
-         String formattedText = String.format("Tracker %d Role: ", tracker.getDeviceIndex() - 2); //remove the 2 controllers to get tracker index from SteamVR
+         String formattedText = String.format("Tracker %d Role: ", tracker.getDeviceIndex() - 2); // remove the 2 controllers to get tracker index from SteamVR
          imgui.ImGui.text(formattedText);
          for (var role : roleActivationMap.entrySet())
          {
@@ -140,7 +140,8 @@ public class RDXVRTrackerRoleManager
                   {
                      vrContext.setTrackerRole(role.getKey(), tracker.getDeviceIndex());
                      vrContext.setTrackerRoleAsUnavailable(role.getKey());
-                     roleActivationMap.forEach((otherRoleKey, isActive) -> {
+                     roleActivationMap.forEach((otherRoleKey, isActive) ->
+                     {
                         if (!otherRoleKey.equals(role.getKey()) && isActive)
                         {
                            roleActivationMap.put(otherRoleKey, false);
@@ -160,7 +161,7 @@ public class RDXVRTrackerRoleManager
             }
          }
          ImGui.separator();
-         if(imgui.ImGui.button(labels.get("Reset All Roles")))
+         if (imgui.ImGui.button(labels.get("Reset All Roles")))
          {
             vrContext.resetTrackerRoles();
          }
