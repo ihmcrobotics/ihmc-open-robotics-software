@@ -6,6 +6,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.geometry.Cylinder3DDefinition;
 import us.ihmc.scs2.definition.geometry.Ellipsoid3DDefinition;
 import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.robot.*;
@@ -59,6 +60,13 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
       torsoBodyDefinition = createTorso();
       floatingBaseDefinition.setSuccessor(torsoBodyDefinition);
 
+      // Head Definition
+      RigidBodyDefinition head = createHead();
+      RevoluteJointDefinition neckJoint = new RevoluteJointDefinition("neck", new Vector3D(0.0, 0.0, torsoHeight), Axis3D.X);
+      neckJoint.setSuccessor(head);
+      torsoBodyDefinition.addChildJoint(neckJoint);
+
+
       KinematicPointDefinition basePoseDefintion = new KinematicPointDefinition("_base");
       floatingBaseDefinition.addKinematicPointDefinition(basePoseDefintion);
 
@@ -96,6 +104,24 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
          // create the contact points for the feet.
          GroundContactPointDefinition footContactPoint = new GroundContactPointDefinition(robotSide.getLowerCaseName() + "_gc_point", new Vector3D(0.0, 0.0, -shinLength / 2.0));
          kneeJointDefinition.addGroundContactPointDefinition(footContactPoint);
+      }
+
+      for (RobotSide robotSide : RobotSide.values) {
+         // Create and attach arm
+         RigidBodyDefinition arm = createArm(robotSide.getCamelCaseName() + "Arm");
+         Vector3D shoulderOffset = new Vector3D(0.0, robotSide.negateIfRightSide(0.1), torsoHeight / 2.0);
+         RevoluteJointDefinition shoulderJoint = new RevoluteJointDefinition(robotSide.getCamelCaseName() + "Shoulder", shoulderOffset, Axis3D.Y);
+         shoulderJoint.setDamping(0.1);
+         torsoBodyDefinition.addChildJoint(shoulderJoint);
+         shoulderJoint.setSuccessor(arm);
+
+         // Create and attach hand
+         RigidBodyDefinition hand = createHand(robotSide.getCamelCaseName() + "Hand");
+         Vector3D wristOffset = new Vector3D(0.0, 0.0, -0.4);  // Assuming arm length is 0.4
+         RevoluteJointDefinition wristJoint = new RevoluteJointDefinition(robotSide.getCamelCaseName() + "Wrist", wristOffset, Axis3D.Y);
+         wristJoint.setDamping(0.1);
+         arm.addChildJoint(wristJoint);
+         wristJoint.setSuccessor(hand);
       }
 
       // TODO add some kind of collisions. Could be a collision shape. Could be a contact point.
@@ -151,4 +177,50 @@ public class BWCPlanarWalkingRobotDefinition extends RobotDefinition
 
       return shinDefinition;
    }
+
+   private RigidBodyDefinition createHead() {
+      double headMass = 3.0;
+      MomentOfInertiaDefinition headMOI = new MomentOfInertiaDefinition(0.1, 0.1, 0.1);
+
+      RigidBodyDefinition headDefinition = new RigidBodyDefinition("head");
+      headDefinition.setMass(headMass);
+      headDefinition.setMomentOfInertia(headMOI);
+
+      GeometryDefinition headGeometry = new Ellipsoid3DDefinition(0.1, 0.1, 0.15);
+      VisualDefinition headVisual = new VisualDefinition(headGeometry, ColorDefinition.rgb(Color.BLUE.getRGB()));
+
+      headDefinition.addVisualDefinition(headVisual);
+      return headDefinition;
+   }
+
+   private RigidBodyDefinition createArm(String name) {
+      double armMass = 2.0;
+      MomentOfInertiaDefinition armMOI = new MomentOfInertiaDefinition(0.2, 0.2, 0.02);
+
+      RigidBodyDefinition armDefinition = new RigidBodyDefinition(name);
+      armDefinition.setMass(armMass);
+      armDefinition.setMomentOfInertia(armMOI);
+
+      GeometryDefinition armGeometry = new Cylinder3DDefinition(0.05, 0.4);  // Cylinder length and radius)
+      VisualDefinition armVisual = new VisualDefinition(armGeometry, ColorDefinition.rgb(Color.GRAY.getRGB()));
+
+      armDefinition.addVisualDefinition(armVisual);
+      return armDefinition;
+   }
+
+   private RigidBodyDefinition createHand(String name) {
+      double handMass = 0.5;
+      MomentOfInertiaDefinition handMOI = new MomentOfInertiaDefinition(0.05, 0.05, 0.05);
+
+      RigidBodyDefinition handDefinition = new RigidBodyDefinition(name);
+      handDefinition.setMass(handMass);
+      handDefinition.setMomentOfInertia(handMOI);
+
+      GeometryDefinition handGeometry = new Ellipsoid3DDefinition(0.05, 0.05, 0.1);
+      VisualDefinition handVisual = new VisualDefinition(handGeometry, ColorDefinition.rgb(Color.GREEN.getRGB()));
+
+      handDefinition.addVisualDefinition(handVisual);
+      return handDefinition;
+   }
+
 }
