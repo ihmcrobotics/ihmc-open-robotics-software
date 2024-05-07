@@ -210,6 +210,7 @@ public class RDXVRManager
          ImGuiTools.separatorText("Status");
          ImGui.text("Connected headset: " + (isVRReady() ? context.getHeadset().getModelName() : "None"));
          ImGui.text("Connected controllers: " + (isVRReady() ? StringUtils.join(context.getControllers(), ", ") : "None"));
+         ImGui.text("Connected trackers: " + (isVRReady() ? StringUtils.join(context.getTrackers(), ", ") : "None"));
 
          if (ImGui.collapsingHeader(labels.get("Debug")))
             renderDebugPlots();

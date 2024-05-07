@@ -73,4 +73,10 @@ public class RDXVRTracker extends RDXVRTrackedDevice
    {
       return xForwardZUpTrackerFrame;
    }
+
+   @Override
+   public String toString()
+   {
+      return getModelName() + " (" + getDeviceIndex() + ")";
+   }
 }
