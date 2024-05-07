@@ -34,7 +34,6 @@ public class RDXVRManager
    private final ImBoolean showScenePoseGizmo = new ImBoolean(false);
    private RDXPose3DGizmo scenePoseGizmo;
    private final ImBoolean vrEnabled = new ImBoolean(false);
-   private final ImBoolean controllersOnly = new ImBoolean(false);
    private final Notification posesReady = new Notification();
    private volatile boolean waitingOnPoses = false;
    private ImGuiPlot vrFPSPlot = new ImGuiPlot(labels.get("VR FPS Hz"), 1000, 180, 50);
