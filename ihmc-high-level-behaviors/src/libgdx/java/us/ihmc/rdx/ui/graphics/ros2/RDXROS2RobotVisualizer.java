@@ -46,6 +46,7 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
    private RDXInteractableRealsenseD455 interactableRealsenseD455;
    private SideDependentList<RDXInteractableBlackflyFujinon> interactableBlackflyFujinons = new SideDependentList<>();
    private RDXInteractableZED2i interactableZED2i;
+   private boolean isFading = false;
 
    public RDXROS2RobotVisualizer(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, ROS2SyncedRobotModel syncedRobot)
    {
@@ -231,6 +232,7 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
    {
       if (finalOpacity != opacitySlider.getFloatValue())
       {
+         isFading = true;
          float newOpacity = (opacitySlider.getFloatValue() > finalOpacity) ? Math.max(opacitySlider.getFloatValue() - opacityVariation, finalOpacity) : Math.min(opacitySlider.getFloatValue() + opacityVariation, finalOpacity);
          opacitySlider.setFloatValue(newOpacity);
          setOpacity(newOpacity);
@@ -239,5 +241,14 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
          interactableBlackflyFujinons.forEach((side, blackflyFujinon) -> blackflyFujinon.getInteractableFrameModel().getModelInstance().setOpacity(newOpacity));
          interactableZED2i.getInteractableFrameModel().getModelInstance().setOpacity(newOpacity);
       }
+      else
+      {
+         isFading = false;
+      }
+   }
+
+   public boolean isFading()
+   {
+      return isFading;
    }
 }

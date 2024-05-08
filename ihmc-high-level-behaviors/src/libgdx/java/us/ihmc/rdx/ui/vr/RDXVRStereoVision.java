@@ -21,6 +21,7 @@ public class RDXVRStereoVision
    private final ImGuiFlashingText rightConnectedStatusCircle = new ImGuiFlashingText(ImGuiTools.DARK_GREEN);
    private final ImString leftConnectionAddress = new ImString();
    private final ImString rightConnectionAddress = new ImString();
+   private boolean justDisabled = false;
 
    public RDXVRStereoVision(HumanoidReferenceFrames currentRobotFrames)
    {
@@ -48,6 +49,7 @@ public class RDXVRStereoVision
          if (!enabled.get())
          {
             dualBlackflySphericalProjection.disable();
+            justDisabled = true;
          }
       }
 
@@ -115,5 +117,15 @@ public class RDXVRStereoVision
    public RDXDualBlackflyProjection getDualBlackflySphericalProjection()
    {
       return dualBlackflySphericalProjection;
+   }
+
+   public boolean justDisabled()
+   {
+      if (justDisabled)
+      {
+         justDisabled = false;
+         return true;
+      }
+      return false;
    }
 }

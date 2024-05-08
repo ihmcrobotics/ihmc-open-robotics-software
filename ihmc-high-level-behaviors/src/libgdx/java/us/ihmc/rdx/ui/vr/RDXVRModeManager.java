@@ -144,10 +144,11 @@ public class RDXVRModeManager
          kinematicsStreamingMode.visualizeIKPreviewGraphic(false);
          robotVisualizer.fadeVisuals(0.0f, 0.01f);
       }
-      else if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING)
+      else if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING && (stereoVision.justDisabled() || kinematicsStreamingMode.streamingJustDisabled()|| robotVisualizer.isFading()))
       {
-         kinematicsStreamingMode.visualizeIKPreviewGraphic(true);
-         robotVisualizer.fadeVisuals(1.0f, 0.01f);
+         robotVisualizer.fadeVisuals(1.0f, 0.05f);
+         if (!robotVisualizer.isFading())
+            kinematicsStreamingMode.visualizeIKPreviewGraphic(true);
       }
    }
 

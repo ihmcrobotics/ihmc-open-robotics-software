@@ -92,6 +92,7 @@ public class RDXVRKinematicsStreamingMode
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(false);
    private final ImBoolean streamToController = new ImBoolean(false);
+   private boolean streamingJustDisabled = false;
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
    private final SceneGraph sceneGraph;
@@ -242,6 +243,7 @@ public class RDXVRKinematicsStreamingMode
          if (aButton.bChanged() && !aButton.bState())
          {
             streamToController.set(!streamToController.get());
+            streamingJustDisabled = !streamToController.get();
          }
 
          // NOTE: Implement hand open close for controller trigger button.
@@ -357,6 +359,7 @@ public class RDXVRKinematicsStreamingMode
                      case LEFT_WRIST -> ghostFullRobotModel.getForearm(RobotSide.LEFT);
                      case RIGHT_WRIST -> ghostFullRobotModel.getForearm(RobotSide.RIGHT);
                      case CHEST -> ghostFullRobotModel.getChest();
+                     case WAIST -> ghostFullRobotModel.getPelvis();
                      default -> throw new IllegalStateException(
                            "Unexpected VR-tracked segment: " + segmentType);
                   };
@@ -467,7 +470,10 @@ public class RDXVRKinematicsStreamingMode
       else
       {
          if (!enabled.get())
+         {
             streamToController.set(false);
+            streamingJustDisabled = true;
+         }
 
          if (enabled.get() || kinematicsRecorder.isReplaying())
          {
@@ -588,6 +594,16 @@ public class RDXVRKinematicsStreamingMode
    public boolean isStreaming()
    {
       return streamToController.get();
+   }
+
+   public boolean streamingJustDisabled()
+   {
+      if (streamingJustDisabled)
+      {
+         streamingJustDisabled = false;
+         return true;
+      }
+      return false;
    }
 
    public void visualizeIKPreviewGraphic(boolean visualize)

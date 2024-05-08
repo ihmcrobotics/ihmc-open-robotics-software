@@ -120,7 +120,7 @@ public class RDXVRContext
                                                                                                               vrPlayAreaYUpZBackFrame));
    private final Map<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
    private final Map<String, RDXVRTracker> trackers =  new HashMap<>();
-   private final Map<String, String> trackersRoleMap = new HashMap<>();
+   private final Map<String, String> trackersRoleMap = new HashMap<>(); // <role, serial number>
    private final SortedSet<String> availableTrackerRoles = new TreeSet<>()
    {
       {
@@ -482,6 +482,7 @@ public class RDXVRContext
    public void setTrackerRoleAsAvailable(String role)
    {
       availableTrackerRoles.add(role);
+      trackersRoleMap.remove(role);
    }
 
    public void resetTrackerRoles()
