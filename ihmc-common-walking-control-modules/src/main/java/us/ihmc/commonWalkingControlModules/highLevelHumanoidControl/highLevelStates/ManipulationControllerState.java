@@ -369,6 +369,7 @@ public class ManipulationControllerState extends HighLevelControllerState
          ChestTrajectoryCommand command = commandInputManager.pollNewestCommand(ChestTrajectoryCommand.class);
          SO3TrajectoryControllerCommand so3Trajectory = command.getSO3Trajectory();
          so3Trajectory.setSequenceId(command.getSequenceId());
+         so3Trajectory.setTrajectoryFrame(ReferenceFrame.getWorldFrame());
          chestManager.handleTaskspaceTrajectoryCommand(so3Trajectory);
       }
       if (commandInputManager.isNewCommandAvailable(SpineTrajectoryCommand.class))
