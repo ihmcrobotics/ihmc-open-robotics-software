@@ -144,7 +144,7 @@ public class RDXVRModeManager
          kinematicsStreamingMode.visualizeIKPreviewGraphic(false);
          robotVisualizer.fadeVisuals(0.0f, 0.01f);
       }
-      else
+      else if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING)
       {
          kinematicsStreamingMode.visualizeIKPreviewGraphic(true);
          robotVisualizer.fadeVisuals(1.0f, 0.01f);
