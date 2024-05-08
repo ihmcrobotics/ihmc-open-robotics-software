@@ -78,17 +78,12 @@ public class PerceptionBasedContinuousWalking
 
    private void highLevelStateChangeStatusReceived(HighLevelStateChangeStatusMessage message)
    {
-      HighLevelControllerName startState = HighLevelControllerName.fromByte(message.getInitialHighLevelControllerName());
       HighLevelControllerName endState = HighLevelControllerName.fromByte(message.getEndHighLevelControllerName());
 
       if (continuousWalkingParameters.getDefaultOperatingMode())
       {
-//         This should only get called when the state changes, so we shouldn't need this
-//         if (startState != endState)
-//         {
-            continuousWalkingParameters.setDisableUpdatingHeightMap(endState == HighLevelControllerName.FREEZE_STATE);
-            RapidHeightMapExtractor.getHeightMapParameters().setResetHeightMap(endState == HighLevelControllerName.STAND_TRANSITION_STATE);
-//         }
+         continuousWalkingParameters.setDisableUpdatingHeightMap(endState == HighLevelControllerName.FREEZE_STATE);
+         RapidHeightMapExtractor.getHeightMapParameters().setResetHeightMap(endState == HighLevelControllerName.STAND_TRANSITION_STATE);
       }
    }
 
@@ -108,8 +103,6 @@ public class PerceptionBasedContinuousWalking
          activePerceptionModule.getContinuousPlannerSchedulingTask().setLatestHeightMapData(perceptionTask.getHumanoidPerceptionModule().getLatestHeightMapData());
          activePerceptionModule.getContinuousPlannerSchedulingTask().setTerrainMapData(perceptionTask.getHumanoidPerceptionModule().getRapidHeightMapExtractor()
                                                                                                      .getTerrainMapData());
-
-         perceptionTask.getHumanoidPerceptionModule().getRapidHeightMapExtractor().reset();
          perceptionTask.getHumanoidPerceptionModule().setIsHeightMapDataBeingProcessed(false);
       }
    }

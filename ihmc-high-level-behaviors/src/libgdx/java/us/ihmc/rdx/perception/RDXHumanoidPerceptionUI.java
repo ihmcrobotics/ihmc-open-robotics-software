@@ -94,7 +94,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    {
       super(WINDOW_NAME);
       setRenderMethod(this::renderImGuiWidgets);
-      this.remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper, this);
+      this.remotePerceptionUI = new RDXRemotePerceptionUI(ros2Helper);
       this.terrainGridGraphic = new RDXTerrainGridGraphic();
 
       if (humanoidPerception != null)

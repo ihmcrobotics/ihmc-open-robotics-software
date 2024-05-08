@@ -16,15 +16,12 @@ import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.sensorHead.SensorHeadParameters;
 import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParameters;
 import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
-import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 
 public class RDXRemotePerceptionUI
 {
-   private RDXPanel panel;
-
    private final SteppableRegionCalculatorParameters steppableRegionCalculatorParameters = new SteppableRegionCalculatorParameters();
    private final PerceptionConfigurationParameters perceptionConfigurationParameters = new PerceptionConfigurationParameters();
    private final ContinuousWalkingParameters continuousWalkingParameters = new ContinuousWalkingParameters();
@@ -47,12 +44,6 @@ public class RDXRemotePerceptionUI
    private IntrinsicCameraMatrixProperties ousterFisheyeColoringIntrinsics;
 
    private final ImGuiRemoteROS2StoredPropertySetGroup remotePropertySets;
-
-   public RDXRemotePerceptionUI(ROS2Helper ros2Helper, RDXPanel panel)
-   {
-      this(ros2Helper);
-      this.panel = panel;
-   }
 
    public RDXRemotePerceptionUI(ROS2Helper ros2Helper)
    {
