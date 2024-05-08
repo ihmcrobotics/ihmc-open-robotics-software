@@ -246,43 +246,54 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
     return footVelocity.get(robotSide);
   }
 
-  public void update()
-  {
+//  public void update()
+//  {
+//    centerOfMassZUpFrame.update();
+//    for (RobotSide robotSide : RobotSide.values())
+//    {
+//      // update the current leg length
+//      double restingLegLength = (BWCPlanarWalkingRobotDefinition.thighLength + BWCPlanarWalkingRobotDefinition.shinLength) / 2.0;
+//      double currentLegLength = restingLegLength - kneeJoints.get(robotSide).getQ();
+//      legLengths.get(robotSide).set(currentLegLength);
+//      footFrames.get(robotSide).update();
+//      Twist footTwist = new Twist();
+//      footFrames.get(robotSide).getTwistRelativeToOther(centerOfMassFrame, footTwist);
+//      footVelocity.get(robotSide).setMatchingFrame(footTwist.getLinearPart());
+//    }
+//
+//    centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
+//    centerOfMassVelocity.setMatchingFrame(centerOfMassFrame.getTwistOfFrame().getLinearPart());
+//  }
+
+  public void update() {
     centerOfMassZUpFrame.update();
-    for (RobotSide robotSide : RobotSide.values())
-    {
-      // update the current leg length
+    for (RobotSide robotSide : RobotSide.values()) {
+      // Ensure legLengths and other lists are initialized and have entries for this robotSide
+      if (legLengths.get(robotSide) == null) {
+        System.err.println("Warning: legLengths not initialized for " + robotSide);
+        continue; // Skip this iteration if data is missing
+      }
+
+      // Current leg length calculation
       double restingLegLength = (BWCPlanarWalkingRobotDefinition.thighLength + BWCPlanarWalkingRobotDefinition.shinLength) / 2.0;
       double currentLegLength = restingLegLength - kneeJoints.get(robotSide).getQ();
       legLengths.get(robotSide).set(currentLegLength);
-      footFrames.get(robotSide).update();
-      Twist footTwist = new Twist();
-      footFrames.get(robotSide).getTwistRelativeToOther(centerOfMassFrame, footTwist);
-      footVelocity.get(robotSide).setMatchingFrame(footTwist.getLinearPart());
+
+      // Update footFrames and calculate foot velocity
+      if (footFrames.get(robotSide) != null) {
+        footFrames.get(robotSide).update();
+        Twist footTwist = new Twist();
+        footFrames.get(robotSide).getTwistRelativeToOther(centerOfMassFrame, footTwist);
+        footVelocity.get(robotSide).setMatchingFrame(footTwist.getLinearPart());
+      } else {
+        System.err.println("Warning: footFrames not initialized for " + robotSide);
+      }
     }
 
     centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
     centerOfMassVelocity.setMatchingFrame(centerOfMassFrame.getTwistOfFrame().getLinearPart());
   }
 
-  //  @Override public YoGraphicDefinition getSCS2YoGraphics()
-  //  {
-  //    YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-  //    group.addChild(newYoGraphicCoordinateSystem3D("BasePoint",
-  //    floatingJoint.getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.25)); for (RobotSide robotSide :
-  //    RobotSide.values())
-  //    {
-  //      group.addChild(newYoGraphicPoint3D(robotSide.getLowerCaseName() + "GroundPoint",
-  //          kneeJoints.get(robotSide).getAuxiliaryData().getGroundContactPoints().get(0).getPose().getPosition(),
-  //          0.01, DarkOrange()));
-  //      group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "KneeFrame",
-  //          kneeJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
-  //      group.addChild(newYoGraphicCoordinateSystem3D(robotSide.getLowerCaseName() + "HipFrame",
-  //          hipJoints.get(robotSide).getAuxiliaryData().getKinematicPoints().get(0).getPose(), 0.075));
-  //    }
-  //    group.setVisible(true);
-  //    return group;
-  //  }
 
   @Override public YoGraphicDefinition getSCS2YoGraphics()
   {

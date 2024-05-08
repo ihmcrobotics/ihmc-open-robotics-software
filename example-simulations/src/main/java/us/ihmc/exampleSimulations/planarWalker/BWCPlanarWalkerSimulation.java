@@ -18,8 +18,7 @@ public class BWCPlanarWalkerSimulation
     {
       int simTicksPerControlTick = 3;
       ContactPointBasedContactParameters contactParameters = ContactPointBasedContactParameters.defaultParameters();
-      PhysicsEngineFactory physicsEngineFactory =
-          PhysicsEngineFactory.newContactPointBasedPhysicsEngineFactory(contactParameters);
+      PhysicsEngineFactory physicsEngineFactory = PhysicsEngineFactory.newContactPointBasedPhysicsEngineFactory(contactParameters);
       SimulationConstructionSet2 scs = new SimulationConstructionSet2("bloop", physicsEngineFactory);
       scs.setBufferRecordTickPeriod(simTicksPerControlTick);
 
@@ -29,16 +28,30 @@ public class BWCPlanarWalkerSimulation
       scs.addTerrainObject(new SlopeGroundDefinition(0.0));
 
       BWCPlanarWalkingRobot controllerRobot = new BWCPlanarWalkingRobot(robot, scs.getTime());
+
       if (controllerRobot.getYoRegistry() == null)
       {
         throw new RuntimeException("Registry setup failed: YoRegistry is null.");
       }
 
-      scs.addYoGraphic(controllerRobot.getSCS2YoGraphics());
-
       BWCPlanarWalkingController controller = new BWCPlanarWalkingController(controllerRobot, RobotSide.LEFT);
+      scs.addYoGraphic(controllerRobot.getSCS2YoGraphics());
       scs.addYoGraphic(controller.getSCS2YoGraphics());
       robot.addThrottledController(controller, scs.getDT() * simTicksPerControlTick);
+
+      PushRobotControllerSCS2 pushRobotController = new PushRobotControllerSCS2(scs.getTime(),
+                                                                                robot,
+                                                                                controllerRobot.getFloatingJoint().getName(),
+                                                                                new Vector3D());
+
+      pushRobotController.addPushButtonToSCS(scs);
+      pushRobotController.setPushDelay(0.0);
+      pushRobotController.setPushForceDirection(new Vector3D(1.0, 0.0, 0.0));
+      pushRobotController.setPushForceMagnitude(50.00);
+      pushRobotController.setPushDuration(0.2);
+
+      scs.addRegistry(pushRobotController.getYoRegistry());
+      scs.addYoGraphic(pushRobotController.getForceVizDefinition());
 
       scs.startSimulationThread();
       scs.simulate();
@@ -50,56 +63,6 @@ public class BWCPlanarWalkerSimulation
       e.printStackTrace();
     }
   }
-
-  //    public BWCPlanarWalkerSimulation()
-  //   {
-  //      int simTicksPerControlTick = 3;
-  //
-  //
-  //      ContactPointBasedContactParameters contactParameters = ContactPointBasedContactParameters.defaultParameters();
-  //
-  //      PhysicsEngineFactory physicsEngineFactory =
-  //      PhysicsEngineFactory.newContactPointBasedPhysicsEngineFactory(contactParameters);
-  ////      PhysicsEngineFactory physicsEngineFactory = PhysicsEngineFactory.newContactPointBasedPhysicsEngineFactory();
-  //      SimulationConstructionSet2 scs = new SimulationConstructionSet2("bloop", physicsEngineFactory);
-  //      scs.setBufferRecordTickPeriod(simTicksPerControlTick);
-  ////      scs.getGravity().setToZero();
-  //
-  //      BWCPlanarWalkingRobotDefinition robotDefinition = new BWCPlanarWalkingRobotDefinition();
-  //      Robot robot = new Robot(robotDefinition, scs.getInertialFrame());
-  //      scs.addRobot(robot);
-  //      scs.addTerrainObject(new SlopeGroundDefinition(0.0));
-  //
-  //      // set up the controller robot that has convenience methods for us to do control things with.
-  //      BWCPlanarWalkingRobot controllerRobot = new BWCPlanarWalkingRobot(robot, scs.getTime());
-  //
-  //      // create the robot controller
-  //      BWCPlanarWalkingController controller = new BWCPlanarWalkingController(controllerRobot, RobotSide.LEFT);
-  //
-  //      scs.addYoGraphic(controllerRobot.getSCS2YoGraphics());
-  //      scs.addYoGraphic(controller.getSCS2YoGraphics());
-  //
-  //      // set the controller to control the robot.
-  //      robot.addThrottledController(controller, scs.getDT() * simTicksPerControlTick);
-  //
-  //
-  //      PushRobotControllerSCS2 pushRobotController = new PushRobotControllerSCS2(scs.getTime(),
-  //                                                                                robot,
-  //                                                                                controllerRobot.getFloatingJoint().getName(),
-  //                                                                                new Vector3D());
-  //      pushRobotController.addPushButtonToSCS(scs);
-  //      pushRobotController.setPushDelay(0.0);
-  //      pushRobotController.setPushForceDirection(new Vector3D(1.0, 0.0, 0.0));
-  //      pushRobotController.setPushForceMagnitude(50.00);
-  //      pushRobotController.setPushDuration(0.2);
-  //
-  //      scs.addRegistry(pushRobotController.getYoRegistry());
-  //      scs.addYoGraphic(pushRobotController.getForceVizDefinition());
-  //
-  //
-  //      scs.startSimulationThread();
-  //      scs.simulate();
-  //   }
 
   public static void main(String[] args)
   {
