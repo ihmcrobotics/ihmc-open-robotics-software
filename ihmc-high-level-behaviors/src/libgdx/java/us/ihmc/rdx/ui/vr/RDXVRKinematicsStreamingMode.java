@@ -24,6 +24,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
@@ -139,7 +140,8 @@ public class RDXVRKinematicsStreamingMode
          if (side == RobotSide.LEFT)
          {
             ikControlFramePose.getPosition().setAndNegate(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.LEFT_HAND));
-            ikControlFramePose.getOrientation().setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.LEFT_HAND));
+            YawPitchRoll yprFromTracker = retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.LEFT_HAND);
+            ikControlFramePose.getOrientation().setAndInvert(yprFromTracker);
          }
          else
          {
