@@ -12,12 +12,17 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.avatar.colorVision.DualBlackflyUDPReceiver;
+import us.ihmc.avatar.colorVision.stereo.DualBlackflyUDPReceiver;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.graphicsDescription.TexCoord2f;
 import us.ihmc.perception.ImageDimensions;
+import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.perception.RDXProjectionHemisphere.FisheyeTextureCalculator;
+import us.ihmc.rdx.perception.RDXProjectionHemisphere.FisheyeTextureCalculator.CameraOrientation;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -25,16 +30,17 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 public class RDXDualBlackflySphericalProjectionDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(RDXProjectionSphere::new);
+   private final SideDependentList<RDXProjectionHemisphere> projectionSpheres = new SideDependentList<>(RDXProjectionHemisphere::new);
    private final ImDouble pupillaryDistance = new ImDouble(0.67);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final RigidBodyTransform leftEyePose = new RigidBodyTransform();
 
-//   private final DualBlackflyReader dualBlackflyReader = new DualBlackflyReader();
+   //   private final DualBlackflyReader dualBlackflyReader = new DualBlackflyReader();
    private final DualBlackflyUDPReceiver dualBlackflyUDPReceiver = new DualBlackflyUDPReceiver();
 
    public RDXDualBlackflySphericalProjectionDemo()
@@ -46,7 +52,7 @@ public class RDXDualBlackflySphericalProjectionDemo
          {
             try
             {
-//               dualBlackflyReader.start();
+               //               dualBlackflyReader.start();
                dualBlackflyUDPReceiver.start();
             }
             catch (Exception e)
@@ -58,8 +64,8 @@ public class RDXDualBlackflySphericalProjectionDemo
 
             baseUI.create();
 
-            projectionSpheres.get(RobotSide.LEFT).create();
-            projectionSpheres.get(RobotSide.RIGHT).create();
+            projectionSpheres.get(RobotSide.LEFT).updateMeshLazy();
+            projectionSpheres.get(RobotSide.RIGHT).updateMeshLazy();
 
             baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
 
@@ -74,6 +80,30 @@ public class RDXDualBlackflySphericalProjectionDemo
                ImGui.text("Right:");
                projectionSpheres.get(RobotSide.RIGHT).renderImGuiWidgets();
             });
+
+            for (RobotSide side : RobotSide.values)
+            {
+               RDXProjectionHemisphere projectionHemisphere = (RDXProjectionHemisphere) projectionSpheres.get(side);
+               BiConsumer<Point3DReadOnly[], TexCoord2f[]> textureCoordinateCalculator = projectionHemisphere.getTextureCoordinateCalculator();
+
+               if (!(textureCoordinateCalculator instanceof FisheyeTextureCalculator))
+               {
+                  BlackflyLensProperties properties = side == RobotSide.LEFT ?
+                        BlackflyLensProperties.BFLY_U3_23S6C_FE185C086HA_1_17403057_MSA_CALIBRATED :
+                        BlackflyLensProperties.BFLY_U3_23S6C_FE185C086HA_1_17372478_MSA_CALIBRATED;
+                  textureCoordinateCalculator = new FisheyeTextureCalculator(CameraOrientation.X_DEPTH_POSITIVE,
+                                                                             properties.getFocalLengthXForUndistortion(),
+                                                                             properties.getFocalLengthYForUndistortion(),
+                                                                             properties.getPrincipalPointXForUndistortion(),
+                                                                             properties.getPrincipalPointYForUndistortion(),
+                                                                             properties.getK1ForUndistortion(),
+                                                                             properties.getK2ForUndistortion(),
+                                                                             properties.getK3ForUndistortion(),
+                                                                             properties.getK4ForUndistortion(),
+                                                                             Math.toRadians(185.0));
+                  projectionHemisphere.setTextureCoordinateCalculator(textureCoordinateCalculator);
+               }
+            }
          }
 
          private void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
@@ -93,10 +123,10 @@ public class RDXDualBlackflySphericalProjectionDemo
          {
             for (RobotSide side : RobotSide.values)
             {
-//               DualBlackflyReader.SpinnakerBlackflyReaderThread readerThread = dualBlackflyReader.getSpinnakerBlackflyReaderThreads().get(side);
+               //               DualBlackflyReader.SpinnakerBlackflyReaderThread readerThread = dualBlackflyReader.getSpinnakerBlackflyReaderThreads().get(side);
                byte[] imageBuffer = dualBlackflyUDPReceiver.getImageBuffers().get(side);
 
-//               AtomicReference<BytePointer> latestImage = readerThread.getLatestImageDataPointer();
+               //               AtomicReference<BytePointer> latestImage = readerThread.getLatestImageDataPointer();
                if (imageBuffer != null)
                {
                   ImageDimensions imageDimensions = dualBlackflyUDPReceiver.getImageDimensions().get(side);
@@ -112,7 +142,8 @@ public class RDXDualBlackflySphericalProjectionDemo
                   opencv_imgproc.cvtColor(mat, rgba8Mat, opencv_imgproc.COLOR_BayerBG2RGBA);
                   Texture texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
 
-                  projectionSpheres.get(side).updateTexture(texture);
+                  projectionSpheres.get(side).updateMeshLazy();
+                  projectionSpheres.get(side).updateTexture(texture, 1.0f);
 
                   rgba8Mat.close();
                   pixmap.dispose();
@@ -131,7 +162,7 @@ public class RDXDualBlackflySphericalProjectionDemo
          @Override
          public void dispose()
          {
-//            dualBlackflyReader.stop();
+            //            dualBlackflyReader.stop();
             dualBlackflyUDPReceiver.stop();
             baseUI.dispose();
          }

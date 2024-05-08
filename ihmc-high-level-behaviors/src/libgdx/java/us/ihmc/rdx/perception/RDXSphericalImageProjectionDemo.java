@@ -21,7 +21,7 @@ import java.util.Set;
 public class RDXSphericalImageProjectionDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(RDXProjectionSphere::new);
+   private final SideDependentList<RDXProjectionSphere> projectionSpheres = new SideDependentList<>(/*RDXProjectionSphere::new*/);
    private final SideDependentList<RDXIconTexture> imageTextures = new SideDependentList<>();
    private final ImDouble pupillaryDistance = new ImDouble(0.180724);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -39,8 +39,8 @@ public class RDXSphericalImageProjectionDemo
             for (RobotSide side : RobotSide.values)
             {
                imageTextures.put(side, new RDXIconTexture("/images/blackflytest%s.jpg".formatted(side.getLowerCaseName())));
-               projectionSpheres.get(side).create();
-               projectionSpheres.get(side).updateTexture(imageTextures.get(side).getTexture());
+               projectionSpheres.get(side).updateMeshLazy();
+               projectionSpheres.get(side).updateTexture(imageTextures.get(side).getTexture(), 1.0f);
             }
 
             baseUI.getPrimaryScene().addRenderableProvider(this::getRenderables);
