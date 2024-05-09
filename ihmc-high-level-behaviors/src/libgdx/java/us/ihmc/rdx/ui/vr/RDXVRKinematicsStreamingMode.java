@@ -22,9 +22,7 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
@@ -137,17 +135,10 @@ public class RDXVRKinematicsStreamingMode
          controllerFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          handDesiredControlFrames.put(side, new MutableReferenceFrame(vrContext.getController(side).getXForwardZUpControllerFrame()));
          Pose3D ikControlFramePose = new Pose3D();
-         if (side == RobotSide.LEFT)
-         {
-            ikControlFramePose.getPosition().setAndNegate(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.LEFT_HAND));
-            YawPitchRoll yprFromTracker = retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.LEFT_HAND);
-            ikControlFramePose.getOrientation().setAndInvert(yprFromTracker);
-         }
-         else
-         {
-            ikControlFramePose.getPosition().setAndNegate(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.RIGHT_HAND));
-            ikControlFramePose.getOrientation().setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.RIGHT_HAND));
-         }
+
+         ikControlFramePose.getPosition().setAndNegate(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.getHandEnum(side)));
+         ikControlFramePose.getOrientation().setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.getHandEnum(side)));
+
          ikControlFramePoses.put(side, ikControlFramePose);
       }
 
@@ -358,6 +349,13 @@ public class RDXVRKinematicsStreamingMode
                                                                               {
                                                                                  controllerFrameGraphics.get(segmentType.getSegmentSide())
                                                                                                         .setToReferenceFrame(controller.getXForwardZUpControllerFrame());
+                                                                                 // Rotate the controller frame graphic to match the retargeting parameters
+                                                                                 controllerFrameGraphics.get(segmentType.getSegmentSide())
+                                                                                                        .getFramePose3D()
+                                                                                                        .appendOrientation(retargetingParameters.getYawPitchRollFromTracker(
+                                                                                                              VRTrackedSegmentType.getHandEnum(segmentType.getSegmentSide())));
+                                                                                 controllerFrameGraphics.get(segmentType.getSegmentSide())
+                                                                                                        .updateFromFramePose();
                                                                                  handFrameGraphics.get(segmentType.getSegmentSide())
                                                                                                   .setToReferenceFrame(ghostFullRobotModel.getEndEffectorFrame(
                                                                                                         segmentType.getSegmentSide(),
