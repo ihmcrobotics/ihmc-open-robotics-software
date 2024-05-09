@@ -19,7 +19,7 @@ import us.ihmc.tools.property.StoredPropertySetReadOnly;
  *
  * If the constant paths have changed, change them in this file and run the main to regenerate.
  */
-public class ContinuousWalkingParameters extends StoredPropertySet implements ContinuousWalkingParametersBasics
+public class ContinuousHikingParameters extends StoredPropertySet implements ContinuousHikingParametersBasics
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
@@ -41,7 +41,7 @@ public class ContinuousWalkingParameters extends StoredPropertySet implements Co
    /**
     * Loads this property set.
     */
-   public ContinuousWalkingParameters()
+   public ContinuousHikingParameters()
    {
       this("");
    }
@@ -49,29 +49,29 @@ public class ContinuousWalkingParameters extends StoredPropertySet implements Co
    /**
     * Loads an alternate version of this property set in the same folder.
     */
-   public ContinuousWalkingParameters(String versionSuffix)
+   public ContinuousHikingParameters(String versionSuffix)
    {
-      this(ContinuousWalkingParameters.class, versionSuffix);
+      this(ContinuousHikingParameters.class, versionSuffix);
    }
 
    /**
     * Loads an alternate version of this property set in other folders.
     */
-   public ContinuousWalkingParameters(Class<?> classForLoading, String versionSuffix)
+   public ContinuousHikingParameters(Class<?> classForLoading, String versionSuffix)
    {
-      super(keys, classForLoading, ContinuousWalkingParameters.class, versionSuffix);
+      super(keys, classForLoading, ContinuousHikingParameters.class, versionSuffix);
       load();
    }
 
-   public ContinuousWalkingParameters(StoredPropertySetReadOnly other)
+   public ContinuousHikingParameters(StoredPropertySetReadOnly other)
    {
-      super(keys, ContinuousWalkingParameters.class, other.getCurrentVersionSuffix());
+      super(keys, ContinuousHikingParameters.class, other.getCurrentVersionSuffix());
       set(other);
    }
 
    public static void main(String[] args)
    {
-      StoredPropertySet parameters = new StoredPropertySet(keys, ContinuousWalkingParameters.class);
+      StoredPropertySet parameters = new StoredPropertySet(keys, ContinuousHikingParameters.class);
       parameters.generateJavaFiles();
    }
 }

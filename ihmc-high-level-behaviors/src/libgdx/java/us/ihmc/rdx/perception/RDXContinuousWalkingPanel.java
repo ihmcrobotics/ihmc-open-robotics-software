@@ -14,7 +14,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
@@ -77,7 +77,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
    private HumanoidActivePerceptionModule activePerceptionModule;
    private SwingPlannerParametersBasics swingPlannerParameters;
    private SwingTrajectoryParameters swingTrajectoryParameters;
-   private ContinuousWalkingParameters continuousWalkingParameters;
+   private ContinuousHikingParameters continuousHikingParameters;
    private Controller currentController;
 
    private boolean currentControllerConnected;
@@ -85,7 +85,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
    public RDXContinuousWalkingPanel(ROS2Helper ros2Helper,
                                     HumanoidActivePerceptionModule activePerceptionModule,
                                     ROS2SyncedRobotModel syncedRobot,
-                                    ContinuousWalkingParameters continuousWalkingParameters,
+                                    ContinuousHikingParameters continuousHikingParameters,
                                     SwingPlannerParametersBasics swingPlannerParameters,
                                     SwingTrajectoryParameters swingTrajectoryParameters,
                                     MonteCarloFootstepPlannerParameters monteCarloPlannerParameters)
@@ -97,7 +97,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
       this.activePerceptionModule = activePerceptionModule;
       this.swingPlannerParameters = swingPlannerParameters;
       this.swingTrajectoryParameters = swingTrajectoryParameters;
-      this.continuousWalkingParameters = continuousWalkingParameters;
+      this.continuousHikingParameters = continuousHikingParameters;
 
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
@@ -281,7 +281,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
       }
 
       // Only allow Continuous Walking if the CTRL key is held and the check box is checked
-      if (continuousWalkingParameters != null && continuousWalkingParameters.getEnableContinuousWalking())
+      if (continuousHikingParameters != null && continuousHikingParameters.getEnableContinuousWalking())
       {
          commandMessage.setEnableContinuousWalking(walkingEnabled);
          commandMessage.setPublishToController(ImGui.getIO().getKeyAlt());

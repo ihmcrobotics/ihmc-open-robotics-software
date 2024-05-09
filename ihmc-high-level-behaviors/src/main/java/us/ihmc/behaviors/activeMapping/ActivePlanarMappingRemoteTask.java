@@ -29,14 +29,14 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
    private final ROS2Topic controllerFootstepDataTopic;
 
    private ContinuousPlannerForPlanarRegions continuousPlanner;
-   private final ContinuousWalkingParameters continuousPlanningParameters;
+   private final ContinuousHikingParameters continuousHikingParameters;
    private final SwingPlannerParametersBasics swingFootPlannerParameters;
    private TerrainPlanningDebugger terrainPlanningDebugger;
 
 
    public ActivePlanarMappingRemoteTask(String simpleRobotName,
                                         DRCRobotModel robotModel,
-                                        ContinuousWalkingParameters continuousPlanningParameters,
+                                        ContinuousHikingParameters continuousHikingParameters,
                                         ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic,
                                         ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic,
                                         ROS2Node ros2Node,
@@ -48,7 +48,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
 
       this.walkingStatusMessage.get().setWalkingStatus(WalkingStatus.COMPLETED.toByte());
       this.terrainPlanningDebugger = new TerrainPlanningDebugger(ros2Node, null);
-      this.continuousPlanningParameters = continuousPlanningParameters;
+      this.continuousHikingParameters = continuousHikingParameters;
       this.swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
       this.controllerFootstepDataTopic = HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName());
 
@@ -93,7 +93,7 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
     */
    private void updateActiveMappingPlan()
    {
-      if (continuousPlanningParameters.getEnableContinuousWalking())
+      if (continuousHikingParameters.getEnableContinuousWalking())
       {
          if (walkingStatusMessage.get() != null)
          {

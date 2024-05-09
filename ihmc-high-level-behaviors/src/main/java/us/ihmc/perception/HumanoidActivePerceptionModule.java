@@ -3,9 +3,9 @@ package us.ihmc.perception;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ActivePlanarMappingRemoteTask;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
-import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -32,29 +32,40 @@ public class HumanoidActivePerceptionModule
    private ActivePlanarMappingRemoteTask activePlaneMappingRemoteThread;
    private ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
 
-   private PerceptionConfigurationParameters perceptionConfigurationParameters;
-   private final ContinuousWalkingParameters continuousPlanningParameters;
+   private final PerceptionConfigurationParameters perceptionConfigurationParameters;
 
-   public HumanoidActivePerceptionModule(PerceptionConfigurationParameters perceptionConfigurationParameters,
-                                         ContinuousWalkingParameters continuousWalkingParameters)
+   public HumanoidActivePerceptionModule(PerceptionConfigurationParameters perceptionConfigurationParameters)
    {
       this.perceptionConfigurationParameters = perceptionConfigurationParameters;
-      this.continuousPlanningParameters = continuousWalkingParameters;
    }
 
-   public void initializeActivePlaneMappingTask(String robotName, DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, ROS2Node ros2Node)
+   public void initializeActivePlaneMappingTask(String robotName,
+                                                DRCRobotModel robotModel,
+                                                HumanoidReferenceFrames referenceFrames,
+                                                ROS2Node ros2Node,
+                                                ContinuousHikingParameters continuousHikingParameters)
    {
       LogTools.info("Initializing Active Mapping Process");
-      activePlaneMappingRemoteThread = new ActivePlanarMappingRemoteTask(robotName, robotModel,
-                                                                         continuousPlanningParameters,
+      activePlaneMappingRemoteThread = new ActivePlanarMappingRemoteTask(robotName,
+                                                                         robotModel, continuousHikingParameters,
                                                                          PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
                                                                          PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
-                                                                         ros2Node, referenceFrames, () -> {}, true);
+                                                                         ros2Node,
+                                                                         referenceFrames,
+                                                                         () ->
+                                                                         {
+                                                                         },
+                                                                         true);
    }
 
-   public void initializeContinuousPlannerSchedulingTask(DRCRobotModel robotModel, ROS2Helper ros2Helper, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames, ContinuousPlanner.PlanningMode mode)
+   public void initializeContinuousHikingSchedulingTask(DRCRobotModel robotModel,
+                                                        ROS2Helper ros2Helper,
+                                                        ROS2Node ros2Node,
+                                                        HumanoidReferenceFrames referenceFrames,
+                                                        ContinuousHikingParameters continuousHikingParameters,
+                                                        ContinuousPlanner.PlanningMode mode)
    {
-      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel, ros2Helper, ros2Node, referenceFrames, continuousPlanningParameters, mode);
+      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel, ros2Helper, ros2Node, referenceFrames, continuousHikingParameters, mode);
    }
 
    public void update(ReferenceFrame sensorFrame, boolean display)

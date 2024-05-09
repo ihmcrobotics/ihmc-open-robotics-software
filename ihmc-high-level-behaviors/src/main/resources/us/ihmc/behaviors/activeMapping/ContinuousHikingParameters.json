@@ -1,0 +1,17 @@
+{
+  "title" : "ContinuousHikingParameters",
+  "Enable continuous walking" : false,
+  "Shortcut is pressed" : false,
+  "Step publisher enabled" : false,
+  "Override entire queue each step" : false,
+  "Number of steps to send" : 0,
+  "Goal pose forward distance" : 0.0,
+  "Goal pose up distance" : 0.0,
+  "Swing time" : 0.0,
+  "Transfer time" : 0.0,
+  "Planner timeout fraction" : 0.0,
+  "Planning without reference timeout" : 0.0,
+  "Log footstep plans" : false,
+  "Default operating mode" : false,
+  "Disable updating height map" : false
+}
