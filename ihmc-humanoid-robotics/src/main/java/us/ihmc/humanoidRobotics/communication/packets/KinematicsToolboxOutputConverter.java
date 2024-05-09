@@ -216,7 +216,7 @@ public class KinematicsToolboxOutputConverter
 
    public void computeChestTrajectoryMessage()
    {
-      computeChestTrajectoryMessage(referenceFrames.getPelvisZUpFrame());
+      computeChestTrajectoryMessage(referenceFrames.getChestFrame());
    }
 
    public void computeChestTrajectoryMessage(ReferenceFrame trajectoryFrame)
