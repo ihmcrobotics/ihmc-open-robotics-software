@@ -85,7 +85,6 @@ public class TerrainPerceptionProcessWithDriver
    private final RealsenseConfiguration realsenseConfiguration;
    private final RealsenseDevice realsense;
    private final BytedecoImage depthBytedecoImage;
-   private final Runnable syncedRobotUpdater;
    private final RobotConfigurationData robotConfigurationData;
    private final FullHumanoidRobotModel fullRobotModel;
    private final CollisionBoxProvider collisionBoxProvider;
@@ -120,10 +119,8 @@ public class TerrainPerceptionProcessWithDriver
                                              ROS2Topic<ImageMessage> depthTopic,
                                              ROS2Topic<ImageMessage> colorTopic,
                                              ROS2Topic<FramePlanarRegionsListMessage> frameRegionsTopic,
-                                             HumanoidReferenceFrames referenceFrames,
-                                             Runnable syncedRobotUpdater)
+                                             HumanoidReferenceFrames referenceFrames)
    {
-      this.syncedRobotUpdater = syncedRobotUpdater;
       this.ros2PropertySetGroup = ros2PropertySetGroup;
       this.ros2Helper = ros2Helper;
       this.realsenseConfiguration = realsenseConfiguration;
@@ -249,7 +246,7 @@ public class TerrainPerceptionProcessWithDriver
          }
 
          // Important not to store as a field, as update() needs to be called each frame
-         syncedRobotUpdater.run();
+         referenceFrames.updateFrames();
          ReferenceFrame cameraFrame = referenceFrames.getSteppingCameraFrame();
          ReferenceFrame cameraZUpFrame = referenceFrames.getSteppingCameraZUpFrame();
 
