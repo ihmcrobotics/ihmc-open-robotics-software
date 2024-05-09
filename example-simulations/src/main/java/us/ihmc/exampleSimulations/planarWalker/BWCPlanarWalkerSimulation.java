@@ -18,7 +18,8 @@ public class BWCPlanarWalkerSimulation
     {
       int simTicksPerControlTick = 3;
       ContactPointBasedContactParameters contactParameters = ContactPointBasedContactParameters.defaultParameters();
-      PhysicsEngineFactory physicsEngineFactory = PhysicsEngineFactory.newContactPointBasedPhysicsEngineFactory(contactParameters);
+      PhysicsEngineFactory physicsEngineFactory =
+          PhysicsEngineFactory.newContactPointBasedPhysicsEngineFactory(contactParameters);
       SimulationConstructionSet2 scs = new SimulationConstructionSet2("bloop", physicsEngineFactory);
       scs.setBufferRecordTickPeriod(simTicksPerControlTick);
 
@@ -39,10 +40,8 @@ public class BWCPlanarWalkerSimulation
       scs.addYoGraphic(controller.getSCS2YoGraphics());
       robot.addThrottledController(controller, scs.getDT() * simTicksPerControlTick);
 
-      PushRobotControllerSCS2 pushRobotController = new PushRobotControllerSCS2(scs.getTime(),
-                                                                                robot,
-                                                                                controllerRobot.getFloatingJoint().getName(),
-                                                                                new Vector3D());
+      PushRobotControllerSCS2 pushRobotController = new PushRobotControllerSCS2(
+          scs.getTime(), robot, controllerRobot.getFloatingJoint().getName(), new Vector3D());
 
       pushRobotController.addPushButtonToSCS(scs);
       pushRobotController.setPushDelay(0.0);

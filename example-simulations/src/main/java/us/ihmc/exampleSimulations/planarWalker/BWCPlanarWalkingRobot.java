@@ -5,9 +5,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.SimRigidBody;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
+import us.ihmc.scs2.definition.robot.GroundContactPointDefinition;
 import us.ihmc.exampleSimulations.planarWalker.BWCPlanarWalkingRobotDefinition;
 import us.ihmc.mecano.frames.FixedMovingReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -106,19 +108,72 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
     this.centerOfMassVelocity = new YoFrameVector3D("centerOfMassVelocity", worldFrame, registry);
 
     initializeJoints();
+    initializeLegLengths();
+    initializeFootFrames();
+    initializeFootVelocity();
+    ensureGroundContactPointsInitialized();
   }
+
+//  private void initializeJoints()
+//  {
+//    double footMassLocal = 0.0;
+//
+//    for (RobotSide robotSide : RobotSide.values())
+//    {
+//      SimRevoluteJoint hipJoint = hipJoints.get(robotSide);
+//
+//      if (hipJoint == null)
+//      {
+//        // If not, create and initialize the hip joint
+//        hipJoint = new SimRevoluteJoint(robotSide.getCamelCaseName() + "Hip", this.torsoBodyDefinition, new Vector3D(0, 1, 0));
+//        Matrix3D hipInertia = new Matrix3D();
+//        hipInertia.setIdentity();
+//        hipInertia.scale(0.01);
+//        SimRigidBodyBasics hipSuccessor = new SimRigidBody("HipBody", hipJoint, hipInertia, 1.0, new Vector3D(0, 0, -0.1));
+//        hipJoint.setSuccessor(hipSuccessor);
+//        hipJoints.put(robotSide, hipJoint);
+//      }
+//
+//      if (hipJoint.getSuccessor() == null)
+//      {
+//        // Ensure there is a successor body
+//        RigidBodyDefinition thigh = BWCPlanarWalkingRobotDefinition.createThigh(robotSide.getCamelCaseName() + "Thigh");
+//        SimRigidBodyBasics thighRigidBody = new SimRigidBody(thigh, hipJoint);
+//        hipJoint.setSuccessor(thighRigidBody);
+//      }
+//
+//      // Initialize Ground Contact Points directly using the constructor
+//      if (hipJoint.getAuxiliaryData().getGroundContactPoints().isEmpty()) {
+//        RigidBodyTransform transformToParent = new RigidBodyTransform(); // Specify the correct transformation
+//        String contactPointName = "HipContactPoint_" + robotSide;
+//        GroundContactPoint contactPoint = new GroundContactPoint(contactPointName, hipJoint, transformToParent);
+//        hipJoint.getAuxiliaryData().addGroundContactPoint(contactPoint);
+//      }
+//
+//      // Create the knee joint
+//      Vector3D jointOffset = new Vector3D(0, 0, -0.1);
+//      Vector3D jointAxis = new Vector3D(0, 0, 1);
+//      SimPrismaticJoint kneeJoint = new SimPrismaticJoint(robotSide.getCamelCaseName() + "Knee", hipJoint.getSuccessor(), jointOffset, jointAxis);
+//      kneeJoints.put(robotSide, kneeJoint);
+//
+//      // Create the successor for the knee joint
+//      RigidBodyDefinition shin = BWCPlanarWalkingRobotDefinition.createShin(robotSide.getCamelCaseName() + "Shin");
+//      SimRigidBodyBasics shinRigidBody = new SimRigidBody(shin, kneeJoint);
+//      kneeJoint.setSuccessor(shinRigidBody);
+//      footMassLocal = Math.max(footMassLocal, shinRigidBody.getInertia().getMass());
+//    }
+//
+//    this.footMass = footMassLocal;
+//  }
 
   private void initializeJoints()
   {
     double footMassLocal = 0.0;
 
-    for (RobotSide robotSide : RobotSide.values())
-    {
+    for (RobotSide robotSide : RobotSide.values()) {
       SimRevoluteJoint hipJoint = hipJoints.get(robotSide);
 
-      if (hipJoint == null)
-      {
-        // If not, create and initialize the hip joint
+      if (hipJoint == null) {
         hipJoint = new SimRevoluteJoint(robotSide.getCamelCaseName() + "Hip", this.torsoBodyDefinition, new Vector3D(0, 1, 0));
         Matrix3D hipInertia = new Matrix3D();
         hipInertia.setIdentity();
@@ -128,40 +183,112 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
         hipJoints.put(robotSide, hipJoint);
       }
 
-      if (hipJoint.getSuccessor() == null)
-      {
-        // Ensure there is a successor body
-        RigidBodyDefinition thigh = BWCPlanarWalkingRobotDefinition.createThigh(robotSide.getCamelCaseName() + "Thigh");
-        //        SimRigidBodyBasics thighRigidBody = new SimRigidBody(thigh);
+      // Check if successor is properly initialized
+      if (hipJoint.getSuccessor() == null) {
+        RigidBodyDefinition thigh = createThigh(robotSide.getCamelCaseName() + "Thigh");
         SimRigidBodyBasics thighRigidBody = new SimRigidBody(thigh, hipJoint);
-
         hipJoint.setSuccessor(thighRigidBody);
       }
 
-      // Create the knee joint
       Vector3D jointOffset = new Vector3D(0, 0, -0.1);
       Vector3D jointAxis = new Vector3D(0, 0, 1);
       SimPrismaticJoint kneeJoint = new SimPrismaticJoint(robotSide.getCamelCaseName() + "Knee", hipJoint.getSuccessor(), jointOffset, jointAxis);
       kneeJoints.put(robotSide, kneeJoint);
 
-      // Create the successor for the knee joint
-      RigidBodyDefinition shin = BWCPlanarWalkingRobotDefinition.createShin(robotSide.getCamelCaseName() + "Shin");
-      //      SimRigidBodyBasics shinRigidBody = new SimRigidBody(shin);
-      SimRigidBodyBasics shinRigidBody = new SimRigidBody(shin, kneeJoint);
-      kneeJoint.setSuccessor(shinRigidBody);
+      if (kneeJoint == null) {
+        throw new IllegalStateException("Knee joint not initialized for " + robotSide);
+      }
 
-      footMassLocal = Math.max(footMassLocal, shinRigidBody.getInertia().getMass());
     }
 
     this.footMass = footMassLocal;
+  }
+
+  private void initializeLegLengths()
+  {
+    for (RobotSide side : RobotSide.values())
+    {
+      double thighLength = BWCPlanarWalkingRobotDefinition.thighLength;
+      double shinLength = BWCPlanarWalkingRobotDefinition.shinLength;
+      double totalLegLength = thighLength + shinLength;
+
+      YoDouble legLength = new YoDouble(side.getCamelCaseName() + "LegLength", registry);
+      legLength.set(totalLegLength);
+      legLengths.put(side, legLength);
+    }
+  }
+
+  // Initialize ground contact points
+  private void ensureGroundContactPointsInitialized()
+  {
+    for (RobotSide side : RobotSide.values()) {
+      SimRevoluteJoint joint = hipJoints.get(side);
+      if (joint == null) {
+        System.err.println("Critical error: Hip joint not initialized for side: " + side);
+        continue;
+      }
+
+      if (joint.getAuxiliaryData().getGroundContactPoints().isEmpty()) {
+        System.out.println("Initializing ground contact point for side: " + side);
+        RigidBodyTransform transformToParent = new RigidBodyTransform();
+        GroundContactPointDefinition pointDef = new GroundContactPointDefinition(side.getCamelCaseName() + "HipContactPoint", transformToParent);
+        joint.getAuxiliaryData().addGroundContactPoint(pointDef);
+        // Additional validation to ensure the point was added
+        if (joint.getAuxiliaryData().getGroundContactPoints().isEmpty()) {
+          System.err.println("Failed to initialize ground contact point for side: " + side);
+        } else {
+          System.out.println("Successfully initialized ground contact point for side: " + side);
+        }
+      } else {
+        System.out.println("Ground contact point already initialized for side: " + side);
+      }
+    }
+  }
+
+  private void initializeFootFrames() {
+    for (RobotSide robotSide : RobotSide.values())
+    {
+      try {
+        MovingReferenceFrame footFrame = getFootFrameFromRobot(robotSide);
+        if (footFrame != null) {
+          footFrames.put(robotSide, footFrame);
+        } else {
+          System.err.println("Warning: Foot frame not initialized for " + robotSide);
+        }
+      } catch (ClassCastException e) {
+        System.err.println("Error initializing foot frames for " + robotSide + ": " + e.getMessage());
+      }
+    }
+  }
+
+  private MovingReferenceFrame getFootFrameFromRobot(RobotSide robotSide) {
+    SimPrismaticJoint kneeJoint = kneeJoints.get(robotSide);
+    if (kneeJoint == null) {
+      throw new IllegalStateException("Knee joint not initialized for " + robotSide);
+    }
+    ReferenceFrame frame = kneeJoint.getFrameAfterJoint();
+    if (frame instanceof MovingReferenceFrame) {
+      return (MovingReferenceFrame) frame;
+    } else {
+      throw new ClassCastException("The frame after the knee joint is not a MovingReferenceFrame");
+    }
+  }
+
+  private void initializeFootVelocity() {
+    for (RobotSide robotSide : RobotSide.values()) {
+      if (footVelocity.get(robotSide) == null) {
+        YoFrameVector3D newFootVelocity = new YoFrameVector3D(robotSide.getCamelCaseName() + "FootVelocity", centerOfMassFrame, registry);
+        footVelocity.put(robotSide, newFootVelocity);
+        System.out.println("Initialized foot velocity for " + robotSide);
+      }
+    }
   }
 
   private void initializeArmJoints()
   {
     for (RobotSide side : RobotSide.values())
     {
-      SimRevoluteJoint armJoint =
-          new SimRevoluteJoint(side.getCamelCaseName() + "Arm", this.torsoBodyDefinition, new Vector3D(0, 1, 0));
+      SimRevoluteJoint armJoint = new SimRevoluteJoint(side.getCamelCaseName() + "Arm", this.torsoBodyDefinition, new Vector3D(0, 1, 0));
       armJoints.put(side, armJoint);
     }
   }
@@ -181,9 +308,13 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
     return floatingJoint;
   }
 
-  public GroundContactPoint getGroundContactPoint(RobotSide robotSide)
-  {
-    return kneeJoints.get(robotSide).getAuxiliaryData().getGroundContactPoints().get(0);
+  public GroundContactPoint getGroundContactPoint(RobotSide robotSide) {
+    var auxData = kneeJoints.get(robotSide).getAuxiliaryData();
+    if (auxData.getGroundContactPoints().isEmpty()) {
+      System.err.println("Warning: No ground contact points initialized for " + robotSide);
+      return null;
+    }
+    return auxData.getGroundContactPoints().get(0);
   }
 
   public DoubleProvider getTime()
@@ -246,32 +377,34 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
     return footVelocity.get(robotSide);
   }
 
-//  public void update()
-//  {
-//    centerOfMassZUpFrame.update();
-//    for (RobotSide robotSide : RobotSide.values())
-//    {
-//      // update the current leg length
-//      double restingLegLength = (BWCPlanarWalkingRobotDefinition.thighLength + BWCPlanarWalkingRobotDefinition.shinLength) / 2.0;
-//      double currentLegLength = restingLegLength - kneeJoints.get(robotSide).getQ();
-//      legLengths.get(robotSide).set(currentLegLength);
-//      footFrames.get(robotSide).update();
-//      Twist footTwist = new Twist();
-//      footFrames.get(robotSide).getTwistRelativeToOther(centerOfMassFrame, footTwist);
-//      footVelocity.get(robotSide).setMatchingFrame(footTwist.getLinearPart());
-//    }
-//
-//    centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
-//    centerOfMassVelocity.setMatchingFrame(centerOfMassFrame.getTwistOfFrame().getLinearPart());
-//  }
+  //  public void update()
+  //  {
+  //    centerOfMassZUpFrame.update();
+  //    for (RobotSide robotSide : RobotSide.values())
+  //    {
+  //      // update the current leg length
+  //      double restingLegLength = (BWCPlanarWalkingRobotDefinition.thighLength +
+  //      BWCPlanarWalkingRobotDefinition.shinLength) / 2.0; double currentLegLength = restingLegLength -
+  //      kneeJoints.get(robotSide).getQ(); legLengths.get(robotSide).set(currentLegLength);
+  //      footFrames.get(robotSide).update();
+  //      Twist footTwist = new Twist();
+  //      footFrames.get(robotSide).getTwistRelativeToOther(centerOfMassFrame, footTwist);
+  //      footVelocity.get(robotSide).setMatchingFrame(footTwist.getLinearPart());
+  //    }
+  //
+  //    centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
+  //    centerOfMassVelocity.setMatchingFrame(centerOfMassFrame.getTwistOfFrame().getLinearPart());
+  //  }
 
-  public void update() {
+  public void update()
+  {
     centerOfMassZUpFrame.update();
-    for (RobotSide robotSide : RobotSide.values()) {
+    for (RobotSide robotSide : RobotSide.values())
+    {
       // Ensure legLengths and other lists are initialized and have entries for this robotSide
-      if (legLengths.get(robotSide) == null) {
-        System.err.println("Warning: legLengths not initialized for " + robotSide);
-        continue; // Skip this iteration if data is missing
+      if (legLengths.get(robotSide) == null || footVelocity.get(robotSide) == null) {
+        System.err.println("Warning: Leg lengths or foot velocities not initialized for " + robotSide);
+        continue;  // Skip this iteration if data is missing
       }
 
       // Current leg length calculation
@@ -280,20 +413,21 @@ public class BWCPlanarWalkingRobot implements SCS2YoGraphicHolder
       legLengths.get(robotSide).set(currentLegLength);
 
       // Update footFrames and calculate foot velocity
-      if (footFrames.get(robotSide) != null) {
+      if (footFrames.get(robotSide) != null)
+      {
         footFrames.get(robotSide).update();
         Twist footTwist = new Twist();
         footFrames.get(robotSide).getTwistRelativeToOther(centerOfMassFrame, footTwist);
         footVelocity.get(robotSide).setMatchingFrame(footTwist.getLinearPart());
-      } else {
+      }
+      else
+      {
         System.err.println("Warning: footFrames not initialized for " + robotSide);
       }
     }
-
     centerOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
     centerOfMassVelocity.setMatchingFrame(centerOfMassFrame.getTwistOfFrame().getLinearPart());
   }
-
 
   @Override public YoGraphicDefinition getSCS2YoGraphics()
   {
