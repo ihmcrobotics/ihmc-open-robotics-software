@@ -292,6 +292,7 @@ public class ManipulationControllerState extends HighLevelControllerState
          handControlFrames.get(robotSide).update();
       }
 
+      consumePelvisCommands();
       consumeHeadCommands();
       consumeChestCommands();
       consumeGoHomeMessages();
@@ -395,6 +396,12 @@ public class ManipulationControllerState extends HighLevelControllerState
          jointspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
          chestManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand);
       }
+   }
+
+   private void consumePelvisCommands()
+   {
+      // TODO (AM): Alex is fixed base for now, no pelvis commands
+      commandInputManager.clearCommands(PelvisTrajectoryCommand.class);
    }
 
    private void consumeGoHomeMessages()
@@ -518,6 +525,7 @@ public class ManipulationControllerState extends HighLevelControllerState
             handManager.handleDesiredAccelerationsCommand(desiredAccelerations);
          }
       }
+
    }
 
    @Override
