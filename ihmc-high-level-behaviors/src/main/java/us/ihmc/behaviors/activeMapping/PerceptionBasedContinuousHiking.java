@@ -17,6 +17,7 @@ import us.ihmc.perception.headless.TerrainPerceptionProcessWithDriver;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -39,7 +40,7 @@ public class PerceptionBasedContinuousHiking
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "nadia_terrain_perception_node");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(robotModel.createFullRobotModel());
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(robotModel.createFullRobotModel(), robotModel.getSensorInformation());
 
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
 
