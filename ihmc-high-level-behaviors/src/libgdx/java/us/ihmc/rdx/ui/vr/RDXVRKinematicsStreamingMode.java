@@ -349,13 +349,8 @@ public class RDXVRKinematicsStreamingMode
                                                                               {
                                                                                  controllerFrameGraphics.get(segmentType.getSegmentSide())
                                                                                                         .setToReferenceFrame(controller.getXForwardZUpControllerFrame());
-                                                                                 // Rotate the controller frame graphic to match the retargeting parameters
-                                                                                 controllerFrameGraphics.get(segmentType.getSegmentSide())
-                                                                                                        .getFramePose3D()
-                                                                                                        .appendOrientation(retargetingParameters.getYawPitchRollFromTracker(
-                                                                                                              VRTrackedSegmentType.getHandEnum(segmentType.getSegmentSide())));
-                                                                                 controllerFrameGraphics.get(segmentType.getSegmentSide())
-                                                                                                        .updateFromFramePose();
+                                                                                 // Update the controller frame graphic to match the retargeting parameters
+                                                                                 adjustControllerFrameGraphic(segmentType.getSegmentSide());
                                                                                  handFrameGraphics.get(segmentType.getSegmentSide())
                                                                                                   .setToReferenceFrame(ghostFullRobotModel.getEndEffectorFrame(
                                                                                                         segmentType.getSegmentSide(),
@@ -592,5 +587,17 @@ public class RDXVRKinematicsStreamingMode
       }
       rightIndex++;
       return handConfigurations[rightIndex % handConfigurations.length];
+   }
+
+   /**
+    * Rotates and translates the controller frame graphic based on the pose change from the retargeting parameters. The retargeting parameters change the IK
+    * control frame pose, so the controller frame graphic is updated to reflect that.
+    * */
+   private void adjustControllerFrameGraphic(RobotSide side)
+   {
+      RDXReferenceFrameGraphic controllerFrameGraphic = controllerFrameGraphics.get(side);
+      controllerFrameGraphic.getFramePose3D().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.getHandEnum(side)));
+      controllerFrameGraphic.getFramePose3D().appendTranslation(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.getHandEnum(side)));
+      controllerFrameGraphic.updateFromFramePose();
    }
 }
