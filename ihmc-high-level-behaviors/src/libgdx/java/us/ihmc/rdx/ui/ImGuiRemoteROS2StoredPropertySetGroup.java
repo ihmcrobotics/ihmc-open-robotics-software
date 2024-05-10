@@ -33,7 +33,7 @@ public class ImGuiRemoteROS2StoredPropertySetGroup
          if (ImGui.collapsingHeader(remotePropertySet.getStoredPropertySet().getTitle()))
          {
             ImGui.indent();
-            remotePropertySet.renderImGuiWidgets();
+            remotePropertySet.renderImGuiWidgetsWithUpdateButton();
             ImGui.unindent();
          }
       }
