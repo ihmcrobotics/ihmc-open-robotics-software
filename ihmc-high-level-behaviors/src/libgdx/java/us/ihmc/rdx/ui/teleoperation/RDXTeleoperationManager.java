@@ -37,6 +37,7 @@ import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
+import us.ihmc.robotics.interaction.SixDoFSelection;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -205,6 +206,11 @@ public class RDXTeleoperationManager extends RDXPanel
                {
                   interactableChest = new RDXInteractableRobotLink();
                   interactableChest.create(robotCollidable, syncedRobot.getReferenceFrames().getChestFrame(), modelFileName, baseUI.getPrimary3DPanel());
+                  // The chest cannot translate, and there is no spine roll actuator.
+                  interactableChest.disableDoF(SixDoFSelection.LINEAR_X);
+                  interactableChest.disableDoF(SixDoFSelection.LINEAR_Y);
+                  interactableChest.disableDoF(SixDoFSelection.LINEAR_Z);
+                  interactableChest.disableDoF(SixDoFSelection.ANGULAR_X);
                   interactableChest.setActionExecutor(() ->
                                                       {
                                                          if (!wholeBodyIKManager.getEnabled())
