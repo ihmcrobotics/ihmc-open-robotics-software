@@ -9,6 +9,7 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -118,6 +119,17 @@ public class HumanoidRobotContextData implements InPlaceCopyable<HumanoidRobotCo
       robotMotionStatusHolder = new RobotMotionStatusHolder();
       jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
       sensorDataContext = new SensorDataContext(fullRobotModel);
+   }
+
+   public HumanoidRobotContextData(FullRobotModel fullRobotModel)
+   {
+      processedJointData = new HumanoidRobotContextJointData(fullRobotModel.getOneDoFJoints().length);
+      forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
+      centerOfMassDataHolder = new CenterOfMassDataHolder();
+      robotMotionStatusHolder = new RobotMotionStatusHolder();
+      jointDesiredOutputList = new LowLevelOneDoFJointDesiredDataHolder(fullRobotModel.getControllableOneDoFJoints());
+      sensorDataContext = new SensorDataContext(fullRobotModel);
+      centerOfPressureDataHolder = new CenterOfPressureDataHolder();
    }
 
    public HumanoidRobotContextData(List<OneDoFJointBasics> joints)
