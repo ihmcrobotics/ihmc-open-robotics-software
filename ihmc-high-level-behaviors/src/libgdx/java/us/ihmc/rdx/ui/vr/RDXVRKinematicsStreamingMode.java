@@ -100,10 +100,12 @@ public class RDXVRKinematicsStreamingMode
    private KinematicsStreamingToolboxModule toolbox;
 
    private final ImBoolean controlArmsOnly = new ImBoolean(false);
-   private ReferenceFrame pelvisFrame;
-   private final RigidBodyTransform pelvisTransformToWorld = new RigidBodyTransform();
-   private ReferenceFrame chestFrame;
-   private final RigidBodyTransform chestTransformToWorld = new RigidBodyTransform();
+   private ReferenceFrame initialPelvisFrame;
+   private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
+   private ReferenceFrame initialChestFrame;
+   private final RigidBodyTransform initialChestTransformToWorld = new RigidBodyTransform();
+   private RigidBodyTransform initialWaistTrackerTransformToWorld;
+   private MutableReferenceFrame waistTrackerFrame;
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
    private int leftIndex = -1;
@@ -287,15 +289,16 @@ public class RDXVRKinematicsStreamingMode
 
          if (controlArmsOnly.get())
          {
-            if (pelvisFrame == null)
+            if (initialPelvisFrame == null)
             {
-               pelvisTransformToWorld.set(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
-               pelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), pelvisTransformToWorld);
+               initialPelvisTransformToWorld.set(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
+               initialPelvisFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                             initialPelvisTransformToWorld);
             }
 
             KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
             message.setEndEffectorHashCode(ghostFullRobotModel.getPelvis().hashCode());
-            tempFramePose.setToZero(pelvisFrame);
+            tempFramePose.setToZero(initialPelvisFrame);
             tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
             message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
             message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
@@ -304,15 +307,16 @@ public class RDXVRKinematicsStreamingMode
 
             toolboxInputMessage.getInputs().add().set(message);
 
-            if (chestFrame == null)
+            if (initialChestFrame == null)
             {
-               chestTransformToWorld.set(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame().getTransformToWorldFrame());
-               chestFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), chestTransformToWorld);
+               initialChestTransformToWorld.set(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame().getTransformToWorldFrame());
+               initialChestFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                            initialChestTransformToWorld);
             }
 
             message = new KinematicsToolboxRigidBodyMessage();
             message.setEndEffectorHashCode(ghostFullRobotModel.getChest().hashCode());
-            tempFramePose.setToZero(chestFrame);
+            tempFramePose.setToZero(initialChestFrame);
             tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
             message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
             message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0));
@@ -337,31 +341,76 @@ public class RDXVRKinematicsStreamingMode
                                      VRTrackedSegmentType segmentType,
                                      Set<String> additionalTrackedSegments)
    {
+      // VR Trackers
       if (additionalTrackedSegments.contains(segmentType.getSegmentName()) && !controlArmsOnly.get())
       {
          vrContext.getTracker(segmentType.getSegmentName()).runIfConnected(tracker ->
          {
+            switch (segmentType)
+            {
+               case WAIST ->
+               {
+                  //stream variation from start
+                  if (waistTrackerFrame == null)
+                  {
+                     if (initialPelvisFrame == null)
+                     {
+                        initialPelvisTransformToWorld.set(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
+                        initialPelvisFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                                      initialPelvisTransformToWorld);
+                     }
+                     waistTrackerFrame = new MutableReferenceFrame(tracker.getXForwardZUpTrackerFrame());
+                     waistTrackerFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(segmentType));
+                     waistTrackerFrame.getReferenceFrame().update();
+
+                     initialWaistTrackerTransformToWorld = new RigidBodyTransform(waistTrackerFrame.getReferenceFrame().getTransformToWorldFrame());
+                  }
+                  // Calculate the variation of the tracker's frame from its initial value
+                  RigidBodyTransform waistTrackerVariationFromInitialValue = new RigidBodyTransform(waistTrackerFrame.getReferenceFrame()
+                                                                                                                     .getTransformToWorldFrame());
+                  initialWaistTrackerTransformToWorld.inverseTransform(waistTrackerVariationFromInitialValue);
+                  double scalingRobotHumanWaistHeight = initialPelvisTransformToWorld.getTranslationZ() / initialWaistTrackerTransformToWorld.getTranslationZ();
+                  waistTrackerVariationFromInitialValue.getTranslation()
+                                                       .setZ(scalingRobotHumanWaistHeight * waistTrackerVariationFromInitialValue.getTranslationZ());
+
+                  // Concatenate the initial pelvis transform with the variation
+                  RigidBodyTransform combinedTransformToWorld = new RigidBodyTransform(initialPelvisTransformToWorld);
+                  combinedTransformToWorld.multiply(waistTrackerVariationFromInitialValue);
+                  FramePose3D combinedFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(), combinedTransformToWorld);
+                  combinedFramePose.changeFrame(waistTrackerFrame.getReferenceFrame());
+
+                  MutableReferenceFrame waistReferenceFrame = new MutableReferenceFrame(waistTrackerFrame.getReferenceFrame());
+                  waistReferenceFrame.update(rigidBodyTransform -> rigidBodyTransform.set(new RigidBodyTransform(combinedFramePose.getRotation(),
+                                                                                                                 combinedFramePose.getTranslation())));
+                  // Update the tracked segment's desired frame with the combined transform
+                  trackedSegmentDesiredFrame.put(segmentType.getSegmentName(), waistReferenceFrame);
+               }
+               default ->
+               {
+                  if (!trackedSegmentDesiredFrame.containsKey(segmentType.getSegmentName()))
+                  {
+                     MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(tracker.getXForwardZUpTrackerFrame());
+                     trackerDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(segmentType));
+                     trackerDesiredControlFrame.getReferenceFrame().update();
+                     trackedSegmentDesiredFrame.put(segmentType.getSegmentName(), trackerDesiredControlFrame);
+                  }
+               }
+            }
             if (!trackerFrameGraphics.containsKey(segmentType.getSegmentName()))
             {
                trackerFrameGraphics.put(segmentType.getSegmentName(),
                                         new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
             }
-            if (!trackedSegmentDesiredFrame.containsKey(segmentType.getSegmentName()))
-            {
-               MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(tracker.getXForwardZUpTrackerFrame());
-               trackerDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(segmentType));
-               trackerDesiredControlFrame.getReferenceFrame().update();
-               trackedSegmentDesiredFrame.put(segmentType.getSegmentName(), trackerDesiredControlFrame);
-            }
-            trackerFrameGraphics.get(segmentType.getSegmentName()).setToReferenceFrame(trackedSegmentDesiredFrame.get(segmentType.getSegmentName()).getReferenceFrame());
+            trackerFrameGraphics.get(segmentType.getSegmentName())
+                                .setToReferenceFrame(trackedSegmentDesiredFrame.get(segmentType.getSegmentName()).getReferenceFrame());
+
             RigidBodyBasics controlledSegment = switch (segmentType)
                   {
                      case LEFT_WRIST -> ghostFullRobotModel.getForearm(RobotSide.LEFT);
                      case RIGHT_WRIST -> ghostFullRobotModel.getForearm(RobotSide.RIGHT);
                      case CHEST -> ghostFullRobotModel.getChest();
                      case WAIST -> ghostFullRobotModel.getPelvis();
-                     default -> throw new IllegalStateException(
-                           "Unexpected VR-tracked segment: " + segmentType);
+                     default -> throw new IllegalStateException("Unexpected VR-tracked segment: " + segmentType);
                   };
             if (controlledSegment != null)
             {
@@ -375,6 +424,7 @@ public class RDXVRKinematicsStreamingMode
             }
          });
       }
+      // VR Controllers
       else if (segmentType.getSegmentName().contains("Hand"))
       {
          vrContext.getController(segmentType.getSegmentSide()).runIfConnected(controller ->
@@ -401,7 +451,6 @@ public class RDXVRKinematicsStreamingMode
             message.getLinearVelocityInWorld().set(controller.getLinearVelocity());
             message.setHasAngularVelocity(true);
             message.getAngularVelocityInWorld().set(controller.getAngularVelocity());
-//            message.getDesiredOrientationInWorld().transform(message.getAngularVelocityInWorld());
 
             toolboxInputMessage.getInputs().add().set(message);
             toolboxInputMessage.setTimestamp(controller.getLastPollTimeNanos());
@@ -514,13 +563,22 @@ public class RDXVRKinematicsStreamingMode
       if (ImGui.checkbox(labels.get("Kinematics streaming"), enabled))
       {
          setEnabled(enabled.get());
+         {
+            if (enabled.get())
+            {
+               initialPelvisFrame = null;
+               initialChestFrame = null;
+               waistTrackerFrame = null;
+            }
+         }
       }
       if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
       {
          if (controlArmsOnly.get())
          {
-            pelvisFrame = null;
-            chestFrame = null;
+            initialPelvisFrame = null;
+            initialChestFrame = null;
+            waistTrackerFrame = null;
          }
       }
 
