@@ -69,4 +69,14 @@ public interface ContinuousWalkingParametersReadOnly extends StoredPropertySetRe
    {
       return get(logFootstepPlans);
    }
+
+   default boolean getDefaultMode()
+   {
+      return get(defaultMode);
+   }
+
+   default boolean getDisableUpdatingHeightMap()
+   {
+      return get(disableUpdatingHeightMap);
+   }
 }

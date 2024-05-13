@@ -30,6 +30,8 @@ public class ContinuousWalkingParameters extends StoredPropertySet implements Co
    public static final DoubleStoredPropertyKey plannerTimeoutFraction = keys.addDoubleKey("Planner timeout fraction");
    public static final DoubleStoredPropertyKey planningWithoutReferenceTimeout = keys.addDoubleKey("Planning without reference timeout");
    public static final BooleanStoredPropertyKey logFootstepPlans = keys.addBooleanKey("Log footstep plans");
+   public static final BooleanStoredPropertyKey defaultMode = keys.addBooleanKey("Default mode");
+   public static final BooleanStoredPropertyKey disableUpdatingHeightMap = keys.addBooleanKey("Disable updating height map");
 
    /**
     * Loads this property set.

@@ -1,14 +1,18 @@
 package us.ihmc.behaviors.activeMapping;
 
+import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySetGroup;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.headless.TerrainPerceptionProcessWithDriver;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.pubsub.DomainFactory;
@@ -56,6 +60,9 @@ public class PerceptionBasedContinuousHiking
       activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters());
       activePerceptionModule.initializeContinuousPlannerSchedulingTask(robotModel, ros2Node, syncedRobot.getReferenceFrames(), continuousPlanningParameters, mode);
 
+      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(HighLevelStateChangeStatusMessage.class, robotModel.getSimpleRobotName()),
+                                      this::highLevelStateChangeStatusReceived);
+
       ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.CONTINUOUS_WALKING_PARAMETERS, continuousPlanningParameters);
       ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.FOOTSTEP_PLANNING_PARAMETERS, activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getFootstepPlannerParameters());
       ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.SWING_PLANNING_PARAMETERS, activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getSwingPlannerParameters());
@@ -69,9 +76,23 @@ public class PerceptionBasedContinuousHiking
       ThreadTools.sleepForever();
    }
 
+   private void highLevelStateChangeStatusReceived(HighLevelStateChangeStatusMessage message)
+   {
+      HighLevelControllerName endState = HighLevelControllerName.fromByte(message.getEndHighLevelControllerName());
+
+      if (continuousPlanningParameters.getDefaultMode())
+      {
+         continuousPlanningParameters.setDisableUpdatingHeightMap(endState == HighLevelControllerName.FREEZE_STATE);
+         RapidHeightMapExtractor.getHeightMapParameters().setResetHeightMap(endState == HighLevelControllerName.STAND_TRANSITION_STATE);
+      }
+   }
+
    public void update()
    {
       ros2PropertySetGroup.update();
+
+      if (continuousPlanningParameters.getDisableUpdatingHeightMap())
+         return;
 
       if (perceptionTask.getHumanoidPerceptionModule().getRapidRegionsExtractor() == null)
          return;
