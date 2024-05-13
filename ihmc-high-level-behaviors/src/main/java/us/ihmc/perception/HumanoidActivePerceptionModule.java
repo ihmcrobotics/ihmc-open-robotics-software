@@ -4,14 +4,14 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ActivePlanarMappingRemoteTask;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
-import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask;
-import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
-import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloWaypointAgent;
-import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlanningWorld;
+import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlanningWorld;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloWaypointAgent;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
@@ -32,28 +32,39 @@ public class HumanoidActivePerceptionModule
    private ContinuousPlannerSchedulingTask continuousPlannerSchedulingTask;
 
    private PerceptionConfigurationParameters perceptionConfigurationParameters;
-   private final ContinuousWalkingParameters continuousPlanningParameters;
 
-   public HumanoidActivePerceptionModule(PerceptionConfigurationParameters perceptionConfigurationParameters,
-                                         ContinuousWalkingParameters continuousWalkingParameters)
+   public HumanoidActivePerceptionModule(PerceptionConfigurationParameters perceptionConfigurationParameters)
    {
       this.perceptionConfigurationParameters = perceptionConfigurationParameters;
-      this.continuousPlanningParameters = continuousWalkingParameters;
    }
 
-   public void initializeActivePlaneMappingTask(String robotName, DRCRobotModel robotModel, HumanoidReferenceFrames referenceFrames, ROS2Node ros2Node)
+   public void initializeActivePlaneMappingTask(String robotName,
+                                                DRCRobotModel robotModel,
+                                                HumanoidReferenceFrames referenceFrames,
+                                                ROS2Node ros2Node,
+                                                ContinuousWalkingParameters continuousWalkingParameters)
    {
       LogTools.info("Initializing Active Mapping Process");
-      activePlaneMappingRemoteThread = new ActivePlanarMappingRemoteTask(robotName, robotModel,
-                                                                         continuousPlanningParameters,
+      activePlaneMappingRemoteThread = new ActivePlanarMappingRemoteTask(robotName,
+                                                                         robotModel,
+                                                                         continuousWalkingParameters,
                                                                          PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
                                                                          PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE,
-                                                                         ros2Node, referenceFrames, () -> {}, true);
+                                                                         ros2Node,
+                                                                         referenceFrames,
+                                                                         () ->
+                                                                         {
+                                                                         },
+                                                                         true);
    }
 
-   public void initializeContinuousPlannerSchedulingTask(DRCRobotModel robotModel, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames, ContinuousPlanner.PlanningMode mode)
+   public void initializeContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
+                                                         ROS2Node ros2Node,
+                                                         HumanoidReferenceFrames referenceFrames,
+                                                         ContinuousWalkingParameters continuousWalkingParameters,
+                                                         ContinuousPlanner.PlanningMode mode)
    {
-      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel, ros2Node, referenceFrames, continuousPlanningParameters, mode);
+      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel, ros2Node, referenceFrames, continuousWalkingParameters, mode);
    }
 
    public void update(ReferenceFrame sensorFrame, boolean display)
