@@ -5,6 +5,7 @@ import org.ejml.data.DMatrixRMaj;
 import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 
@@ -12,6 +13,8 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
 {
    private long sequenceId;
    private final FramePoint3D desiredPosition = new FramePoint3D();
+   private boolean hasDesiredVelocity;
+   private final FrameVector3D desiredVelocity = new FrameVector3D();
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
    private final DMatrixRMaj weightVector = new DMatrixRMaj(3, 1);
 
@@ -20,6 +23,8 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
    {
       sequenceId = 0;
       desiredPosition.setToNaN(ReferenceFrame.getWorldFrame());
+      hasDesiredVelocity = false;
+      desiredVelocity.setToNaN(ReferenceFrame.getWorldFrame());
       selectionMatrix.resetSelection();
       weightVector.zero();
    }
@@ -29,6 +34,8 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
    {
       sequenceId = other.sequenceId;
       desiredPosition.setIncludingFrame(other.desiredPosition);
+      hasDesiredVelocity = other.hasDesiredVelocity;
+      desiredVelocity.setIncludingFrame(other.desiredVelocity);
       selectionMatrix.set(other.selectionMatrix);
       weightVector.set(other.weightVector);
    }
@@ -43,6 +50,8 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
       }
       sequenceId = message.getSequenceId();
       desiredPosition.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredPositionInWorld());
+      hasDesiredVelocity = message.getHasDesiredLinearVelocity();
+      desiredVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredLinearVelocityInWorld());
       selectionMatrix.clearSelection();
       selectionMatrix.clearSelection();
       selectionMatrix.selectXAxis(message.getSelectionMatrix().getXSelected());
@@ -61,6 +70,11 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
       }
    }
 
+   public void setHasDesiredVelocity(boolean hasDesiredVelocity)
+   {
+      this.hasDesiredVelocity = hasDesiredVelocity;
+   }
+
    public DMatrixRMaj getWeightVector()
    {
       return weightVector;
@@ -74,6 +88,16 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
    public FramePoint3D getDesiredPosition()
    {
       return desiredPosition;
+   }
+
+   public boolean getHasDesiredVelocity()
+   {
+      return hasDesiredVelocity;
+   }
+
+   public FrameVector3D getDesiredVelocity()
+   {
+      return desiredVelocity;
    }
 
    @Override

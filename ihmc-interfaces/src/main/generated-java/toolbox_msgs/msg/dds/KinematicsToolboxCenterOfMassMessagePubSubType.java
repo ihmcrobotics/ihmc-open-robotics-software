@@ -15,7 +15,7 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "736062f0129adf531ab61e6bb8773f2ff95083022cb01b7cc5b7be8b4e956044";
+   		return "4c778150ace485088f1b5f3faad9274a24fa2fd6a0dea6dd958220e2b413b9c8";
    }
    
    @Override
@@ -85,7 +85,7 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getLinearVelocityInWorld(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredLinearVelocityInWorld(), current_alignment);
 
       current_alignment += ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getCdrSerializedSize(data.getSelectionMatrix(), current_alignment);
 
@@ -100,9 +100,9 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
       cdr.write_type_4(data.getSequenceId());
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredPositionInWorld(), cdr);
-      cdr.write_type_7(data.getHasLinearVelocity());
+      cdr.write_type_7(data.getHasDesiredLinearVelocity());
 
-      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getLinearVelocityInWorld(), cdr);
+      geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredLinearVelocityInWorld(), cdr);
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.write(data.getSelectionMatrix(), cdr);
       ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.write(data.getWeights(), cdr);
    }
@@ -112,9 +112,9 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
       data.setSequenceId(cdr.read_type_4());
       	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredPositionInWorld(), cdr);	
-      data.setHasLinearVelocity(cdr.read_type_7());
+      data.setHasDesiredLinearVelocity(cdr.read_type_7());
       	
-      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLinearVelocityInWorld(), cdr);	
+      geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredLinearVelocityInWorld(), cdr);	
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getSelectionMatrix(), cdr);	
       ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.read(data.getWeights(), cdr);	
 
@@ -126,8 +126,8 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_a("desired_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredPositionInWorld());
 
-      ser.write_type_7("has_linear_velocity", data.getHasLinearVelocity());
-      ser.write_type_a("linear_velocity_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearVelocityInWorld());
+      ser.write_type_7("has_desired_linear_velocity", data.getHasDesiredLinearVelocity());
+      ser.write_type_a("desired_linear_velocity_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredLinearVelocityInWorld());
 
       ser.write_type_a("selection_matrix", new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());
 
@@ -141,8 +141,8 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_a("desired_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredPositionInWorld());
 
-      data.setHasLinearVelocity(ser.read_type_7("has_linear_velocity"));
-      ser.read_type_a("linear_velocity_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearVelocityInWorld());
+      data.setHasDesiredLinearVelocity(ser.read_type_7("has_desired_linear_velocity"));
+      ser.read_type_a("desired_linear_velocity_in_world", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredLinearVelocityInWorld());
 
       ser.read_type_a("selection_matrix", new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());
 

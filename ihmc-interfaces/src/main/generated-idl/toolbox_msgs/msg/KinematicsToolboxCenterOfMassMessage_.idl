@@ -31,11 +31,11 @@ module toolbox_msgs
         /**
          * Whether the desired linear velocity is defined.
          */
-        boolean has_linear_velocity;
+        boolean has_desired_linear_velocity;
         /**
          * The desired linear velocity of the control frame's origin.
          */
-        geometry_msgs::msg::dds::Vector3 linear_velocity_in_world;
+        geometry_msgs::msg::dds::Vector3 desired_linear_velocity_in_world;
         /**
          * The selection matrix is used to determinate which degree of freedom of the center of mass
          * should be controlled.

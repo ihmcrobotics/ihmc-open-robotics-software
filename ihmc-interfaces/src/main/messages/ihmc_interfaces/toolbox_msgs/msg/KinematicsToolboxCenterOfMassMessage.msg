@@ -8,9 +8,9 @@ uint32 sequence_id
 # The data is assumed to be expressed in world frame.
 geometry_msgs/Point desired_position_in_world
 # Whether the desired linear velocity is defined.
-bool has_linear_velocity
+bool has_desired_linear_velocity
 # The desired linear velocity of the control frame's origin.
-geometry_msgs/Vector3 linear_velocity_in_world
+geometry_msgs/Vector3 desired_linear_velocity_in_world
 # The selection matrix is used to determinate which degree of freedom of the center of mass
 # should be controlled.
 # The selection frame coming along with the given selection matrix is used to determine to what

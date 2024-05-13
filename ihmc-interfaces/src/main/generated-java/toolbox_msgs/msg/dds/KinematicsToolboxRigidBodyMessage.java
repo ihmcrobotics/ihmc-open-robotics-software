@@ -38,19 +38,19 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    /**
             * Whether the desired linear velocity is defined.
             */
-   public boolean has_linear_velocity_;
+   public boolean has_desired_linear_velocity_;
    /**
             * The desired linear velocity of the control frame's origin.
             */
-   public us.ihmc.euclid.tuple3D.Vector3D linear_velocity_in_world_;
+   public us.ihmc.euclid.tuple3D.Vector3D desired_linear_velocity_in_world_;
    /**
             * Whether the desired angular velocity is defined.
             */
-   public boolean has_angular_velocity_;
+   public boolean has_desired_angular_velocity_;
    /**
             * The desired angular velocity of the control frame.
             */
-   public us.ihmc.euclid.tuple3D.Vector3D angular_velocity_in_world_;
+   public us.ihmc.euclid.tuple3D.Vector3D desired_angular_velocity_in_world_;
    /**
             * This is the position of the control frame's origin expressed in endEffector.getBodyFixedFrame().
             * By default, the control frame is coincident to endEffector.getBodyFixedFrame().
@@ -97,8 +97,8 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    {
       desired_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
       desired_orientation_in_world_ = new us.ihmc.euclid.tuple4D.Quaternion();
-      linear_velocity_in_world_ = new us.ihmc.euclid.tuple3D.Vector3D();
-      angular_velocity_in_world_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      desired_linear_velocity_in_world_ = new us.ihmc.euclid.tuple3D.Vector3D();
+      desired_angular_velocity_in_world_ = new us.ihmc.euclid.tuple3D.Vector3D();
       control_frame_position_in_end_effector_ = new us.ihmc.euclid.tuple3D.Point3D();
       control_frame_orientation_in_end_effector_ = new us.ihmc.euclid.tuple4D.Quaternion();
       angular_selection_matrix_ = new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage();
@@ -121,12 +121,12 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_position_in_world_, desired_position_in_world_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.desired_orientation_in_world_, desired_orientation_in_world_);
-      has_linear_velocity_ = other.has_linear_velocity_;
+      has_desired_linear_velocity_ = other.has_desired_linear_velocity_;
 
-      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.linear_velocity_in_world_, linear_velocity_in_world_);
-      has_angular_velocity_ = other.has_angular_velocity_;
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_linear_velocity_in_world_, desired_linear_velocity_in_world_);
+      has_desired_angular_velocity_ = other.has_desired_angular_velocity_;
 
-      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.angular_velocity_in_world_, angular_velocity_in_world_);
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_angular_velocity_in_world_, desired_angular_velocity_in_world_);
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.control_frame_position_in_end_effector_, control_frame_position_in_end_effector_);
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.control_frame_orientation_in_end_effector_, control_frame_orientation_in_end_effector_);
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.angular_selection_matrix_, angular_selection_matrix_);
@@ -194,49 +194,49 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
    /**
             * Whether the desired linear velocity is defined.
             */
-   public void setHasLinearVelocity(boolean has_linear_velocity)
+   public void setHasDesiredLinearVelocity(boolean has_desired_linear_velocity)
    {
-      has_linear_velocity_ = has_linear_velocity;
+      has_desired_linear_velocity_ = has_desired_linear_velocity;
    }
    /**
             * Whether the desired linear velocity is defined.
             */
-   public boolean getHasLinearVelocity()
+   public boolean getHasDesiredLinearVelocity()
    {
-      return has_linear_velocity_;
+      return has_desired_linear_velocity_;
    }
 
 
    /**
             * The desired linear velocity of the control frame's origin.
             */
-   public us.ihmc.euclid.tuple3D.Vector3D getLinearVelocityInWorld()
+   public us.ihmc.euclid.tuple3D.Vector3D getDesiredLinearVelocityInWorld()
    {
-      return linear_velocity_in_world_;
+      return desired_linear_velocity_in_world_;
    }
 
    /**
             * Whether the desired angular velocity is defined.
             */
-   public void setHasAngularVelocity(boolean has_angular_velocity)
+   public void setHasDesiredAngularVelocity(boolean has_desired_angular_velocity)
    {
-      has_angular_velocity_ = has_angular_velocity;
+      has_desired_angular_velocity_ = has_desired_angular_velocity;
    }
    /**
             * Whether the desired angular velocity is defined.
             */
-   public boolean getHasAngularVelocity()
+   public boolean getHasDesiredAngularVelocity()
    {
-      return has_angular_velocity_;
+      return has_desired_angular_velocity_;
    }
 
 
    /**
             * The desired angular velocity of the control frame.
             */
-   public us.ihmc.euclid.tuple3D.Vector3D getAngularVelocityInWorld()
+   public us.ihmc.euclid.tuple3D.Vector3D getDesiredAngularVelocityInWorld()
    {
-      return angular_velocity_in_world_;
+      return desired_angular_velocity_in_world_;
    }
 
 
@@ -334,12 +334,12 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
       if (!this.desired_position_in_world_.epsilonEquals(other.desired_position_in_world_, epsilon)) return false;
       if (!this.desired_orientation_in_world_.epsilonEquals(other.desired_orientation_in_world_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_linear_velocity_, other.has_linear_velocity_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_desired_linear_velocity_, other.has_desired_linear_velocity_, epsilon)) return false;
 
-      if (!this.linear_velocity_in_world_.epsilonEquals(other.linear_velocity_in_world_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_angular_velocity_, other.has_angular_velocity_, epsilon)) return false;
+      if (!this.desired_linear_velocity_in_world_.epsilonEquals(other.desired_linear_velocity_in_world_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_desired_angular_velocity_, other.has_desired_angular_velocity_, epsilon)) return false;
 
-      if (!this.angular_velocity_in_world_.epsilonEquals(other.angular_velocity_in_world_, epsilon)) return false;
+      if (!this.desired_angular_velocity_in_world_.epsilonEquals(other.desired_angular_velocity_in_world_, epsilon)) return false;
       if (!this.control_frame_position_in_end_effector_.epsilonEquals(other.control_frame_position_in_end_effector_, epsilon)) return false;
       if (!this.control_frame_orientation_in_end_effector_.epsilonEquals(other.control_frame_orientation_in_end_effector_, epsilon)) return false;
       if (!this.angular_selection_matrix_.epsilonEquals(other.angular_selection_matrix_, epsilon)) return false;
@@ -365,12 +365,12 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
       if (!this.desired_position_in_world_.equals(otherMyClass.desired_position_in_world_)) return false;
       if (!this.desired_orientation_in_world_.equals(otherMyClass.desired_orientation_in_world_)) return false;
-      if(this.has_linear_velocity_ != otherMyClass.has_linear_velocity_) return false;
+      if(this.has_desired_linear_velocity_ != otherMyClass.has_desired_linear_velocity_) return false;
 
-      if (!this.linear_velocity_in_world_.equals(otherMyClass.linear_velocity_in_world_)) return false;
-      if(this.has_angular_velocity_ != otherMyClass.has_angular_velocity_) return false;
+      if (!this.desired_linear_velocity_in_world_.equals(otherMyClass.desired_linear_velocity_in_world_)) return false;
+      if(this.has_desired_angular_velocity_ != otherMyClass.has_desired_angular_velocity_) return false;
 
-      if (!this.angular_velocity_in_world_.equals(otherMyClass.angular_velocity_in_world_)) return false;
+      if (!this.desired_angular_velocity_in_world_.equals(otherMyClass.desired_angular_velocity_in_world_)) return false;
       if (!this.control_frame_position_in_end_effector_.equals(otherMyClass.control_frame_position_in_end_effector_)) return false;
       if (!this.control_frame_orientation_in_end_effector_.equals(otherMyClass.control_frame_orientation_in_end_effector_)) return false;
       if (!this.angular_selection_matrix_.equals(otherMyClass.angular_selection_matrix_)) return false;
@@ -395,14 +395,14 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       builder.append(this.desired_position_in_world_);      builder.append(", ");
       builder.append("desired_orientation_in_world=");
       builder.append(this.desired_orientation_in_world_);      builder.append(", ");
-      builder.append("has_linear_velocity=");
-      builder.append(this.has_linear_velocity_);      builder.append(", ");
-      builder.append("linear_velocity_in_world=");
-      builder.append(this.linear_velocity_in_world_);      builder.append(", ");
-      builder.append("has_angular_velocity=");
-      builder.append(this.has_angular_velocity_);      builder.append(", ");
-      builder.append("angular_velocity_in_world=");
-      builder.append(this.angular_velocity_in_world_);      builder.append(", ");
+      builder.append("has_desired_linear_velocity=");
+      builder.append(this.has_desired_linear_velocity_);      builder.append(", ");
+      builder.append("desired_linear_velocity_in_world=");
+      builder.append(this.desired_linear_velocity_in_world_);      builder.append(", ");
+      builder.append("has_desired_angular_velocity=");
+      builder.append(this.has_desired_angular_velocity_);      builder.append(", ");
+      builder.append("desired_angular_velocity_in_world=");
+      builder.append(this.desired_angular_velocity_in_world_);      builder.append(", ");
       builder.append("control_frame_position_in_end_effector=");
       builder.append(this.control_frame_position_in_end_effector_);      builder.append(", ");
       builder.append("control_frame_orientation_in_end_effector=");
