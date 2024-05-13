@@ -15,7 +15,7 @@ public class KinematicsToolboxInputCollectionMessagePubSubType implements us.ihm
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "c769e55d2ae133bfca9f1ae369e9e6e0145ed274fce8aba2a65ab8345b23e8f5";
+   		return "79c0d16e83b7602bc748f3753a6bf6c467ecea9fd9c201532a842ace9c32a706";
    }
    
    @Override

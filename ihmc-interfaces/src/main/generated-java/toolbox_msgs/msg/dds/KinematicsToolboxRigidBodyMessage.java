@@ -35,9 +35,21 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
             * The data is assumed to be expressed in world frame.
             */
    public us.ihmc.euclid.tuple4D.Quaternion desired_orientation_in_world_;
+   /**
+            * Whether the desired linear velocity is defined.
+            */
    public boolean has_linear_velocity_;
+   /**
+            * The desired linear velocity of the control frame's origin.
+            */
    public us.ihmc.euclid.tuple3D.Vector3D linear_velocity_in_world_;
+   /**
+            * Whether the desired angular velocity is defined.
+            */
    public boolean has_angular_velocity_;
+   /**
+            * The desired angular velocity of the control frame.
+            */
    public us.ihmc.euclid.tuple3D.Vector3D angular_velocity_in_world_;
    /**
             * This is the position of the control frame's origin expressed in endEffector.getBodyFixedFrame().
@@ -179,31 +191,49 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       return desired_orientation_in_world_;
    }
 
+   /**
+            * Whether the desired linear velocity is defined.
+            */
    public void setHasLinearVelocity(boolean has_linear_velocity)
    {
       has_linear_velocity_ = has_linear_velocity;
    }
+   /**
+            * Whether the desired linear velocity is defined.
+            */
    public boolean getHasLinearVelocity()
    {
       return has_linear_velocity_;
    }
 
 
+   /**
+            * The desired linear velocity of the control frame's origin.
+            */
    public us.ihmc.euclid.tuple3D.Vector3D getLinearVelocityInWorld()
    {
       return linear_velocity_in_world_;
    }
 
+   /**
+            * Whether the desired angular velocity is defined.
+            */
    public void setHasAngularVelocity(boolean has_angular_velocity)
    {
       has_angular_velocity_ = has_angular_velocity;
    }
+   /**
+            * Whether the desired angular velocity is defined.
+            */
    public boolean getHasAngularVelocity()
    {
       return has_angular_velocity_;
    }
 
 
+   /**
+            * The desired angular velocity of the control frame.
+            */
    public us.ihmc.euclid.tuple3D.Vector3D getAngularVelocityInWorld()
    {
       return angular_velocity_in_world_;

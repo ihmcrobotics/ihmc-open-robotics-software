@@ -2,6 +2,7 @@
 #define __toolbox_msgs__msg__KinematicsToolboxCenterOfMassMessage__idl__
 
 #include "geometry_msgs/msg/./Point_.idl"
+#include "geometry_msgs/msg/./Vector3_.idl"
 #include "ihmc_common_msgs/msg/./SelectionMatrix3DMessage_.idl"
 #include "ihmc_common_msgs/msg/./WeightMatrix3DMessage_.idl"
 module toolbox_msgs
@@ -27,6 +28,14 @@ module toolbox_msgs
          * The data is assumed to be expressed in world frame.
          */
         geometry_msgs::msg::dds::Point desired_position_in_world;
+        /**
+         * Whether the desired linear velocity is defined.
+         */
+        boolean has_linear_velocity;
+        /**
+         * The desired linear velocity of the control frame's origin.
+         */
+        geometry_msgs::msg::dds::Vector3 linear_velocity_in_world;
         /**
          * The selection matrix is used to determinate which degree of freedom of the center of mass
          * should be controlled.

@@ -15,7 +15,7 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "3aa12b68ff0ca8b8fb903de4c748a1684dd6fef0a114b419761ea66dedc7004c";
+   		return "04873f7857ccb0e70093b31e420f4a36ea155e6084d87539ab5f6978e50e3bca";
    }
    
    @Override
@@ -67,6 +67,10 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
       {
           current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -103,6 +107,11 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
       {
           current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessagePubSubType.getCdrSerializedSize(data.getInputs().get(i0), current_alignment);}
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType.getCdrSerializedSize(data.getCenterOfMassInput(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -125,6 +134,9 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
       cdr.write_type_e(data.getInputs());else
           throw new RuntimeException("inputs field exceeds the maximum length");
 
+      cdr.write_type_7(data.getUseCenterOfMassInput());
+
+      toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType.write(data.getCenterOfMassInput(), cdr);
    }
 
    public static void read(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage data, us.ihmc.idl.CDR cdr)
@@ -142,6 +154,9 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
       data.setLinearRateLimitation(cdr.read_type_6());
       	
       cdr.read_type_e(data.getInputs());	
+      data.setUseCenterOfMassInput(cdr.read_type_7());
+      	
+      toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType.read(data.getCenterOfMassInput(), cdr);	
 
    }
 
@@ -155,6 +170,9 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
       ser.write_type_6("angular_rate_limitation", data.getAngularRateLimitation());
       ser.write_type_6("linear_rate_limitation", data.getLinearRateLimitation());
       ser.write_type_e("inputs", data.getInputs());
+      ser.write_type_7("use_center_of_mass_input", data.getUseCenterOfMassInput());
+      ser.write_type_a("center_of_mass_input", new toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType(), data.getCenterOfMassInput());
+
    }
 
    @Override
@@ -167,6 +185,9 @@ public class KinematicsStreamingToolboxInputMessagePubSubType implements us.ihmc
       data.setAngularRateLimitation(ser.read_type_6("angular_rate_limitation"));
       data.setLinearRateLimitation(ser.read_type_6("linear_rate_limitation"));
       ser.read_type_e("inputs", data.getInputs());
+      data.setUseCenterOfMassInput(ser.read_type_7("use_center_of_mass_input"));
+      ser.read_type_a("center_of_mass_input", new toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType(), data.getCenterOfMassInput());
+
    }
 
    public static void staticCopy(toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage src, toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage dest)

@@ -18,9 +18,13 @@ geometry_msgs/Point desired_position_in_world
 # The data is assumed to be expressed in world frame.
 geometry_msgs/Quaternion desired_orientation_in_world
 
+# Whether the desired linear velocity is defined.
 bool has_linear_velocity
+# The desired linear velocity of the control frame's origin.
 geometry_msgs/Vector3 linear_velocity_in_world
+# Whether the desired angular velocity is defined.
 bool has_angular_velocity
+# The desired angular velocity of the control frame.
 geometry_msgs/Vector3 angular_velocity_in_world
 
 # This is the position of the control frame's origin expressed in endEffector.getBodyFixedFrame().
