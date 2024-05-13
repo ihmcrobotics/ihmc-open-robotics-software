@@ -10,7 +10,7 @@ public enum VRTrackedSegmentType
    LEFT_WRIST("Left Wrist", RobotSide.LEFT, 0.0, 1),
    RIGHT_WRIST("Right Wrist", RobotSide.RIGHT, 0.0, 1),
    CHEST("Chest", null, 0.0, 10),
-   WAIST("Waist", null, 10, 1);
+   WAIST("Waist", null, 10, 0.1);
 
    private String segmentName;
    private RobotSide robotSide;

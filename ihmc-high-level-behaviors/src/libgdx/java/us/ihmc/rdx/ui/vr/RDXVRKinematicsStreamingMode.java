@@ -350,7 +350,6 @@ public class RDXVRKinematicsStreamingMode
             {
                case WAIST ->
                {
-                  //stream variation from start
                   if (waistTrackerFrame == null)
                   {
                      if (initialPelvisFrame == null)
@@ -382,7 +381,7 @@ public class RDXVRKinematicsStreamingMode
                   MutableReferenceFrame waistReferenceFrame = new MutableReferenceFrame(waistTrackerFrame.getReferenceFrame());
                   waistReferenceFrame.update(rigidBodyTransform -> rigidBodyTransform.set(new RigidBodyTransform(combinedFramePose.getRotation(),
                                                                                                                  combinedFramePose.getTranslation())));
-                  // Update the tracked segment's desired frame with the combined transform
+                  // Update the tracked segment's desired frame
                   trackedSegmentDesiredFrame.put(segmentType.getSegmentName(), waistReferenceFrame);
                }
                default ->
@@ -563,14 +562,6 @@ public class RDXVRKinematicsStreamingMode
       if (ImGui.checkbox(labels.get("Kinematics streaming"), enabled))
       {
          setEnabled(enabled.get());
-         {
-            if (enabled.get())
-            {
-               initialPelvisFrame = null;
-               initialChestFrame = null;
-               waistTrackerFrame = null;
-            }
-         }
       }
       if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
       {
@@ -607,6 +598,9 @@ public class RDXVRKinematicsStreamingMode
       {
          wakeUpToolbox();
          kinematicsRecorder.setReplay(false); //check no concurrency replay and streaming
+         initialPelvisFrame = null;
+         initialChestFrame = null;
+         waistTrackerFrame = null;
       }
    }
 

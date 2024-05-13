@@ -183,6 +183,20 @@ public class RDXVRContext
          controller.initSystem();
       }
 
+      int[] deviceIndices = new int[5]; // maximum number of trackers per dongle
+      IntBuffer trackerIndices = IntBuffer.wrap(deviceIndices);
+      int numberOfTrackers = VRSystem.VRSystem_GetSortedTrackedDeviceIndicesOfClass(VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker,
+                                                                                    trackerIndices,
+                                                                                    -1);
+      for (int i = 0; i < numberOfTrackers; i++)
+      {
+         int deviceIndex = trackerIndices.get(i);
+         if (!trackers.containsKey(getSerialNumber(deviceIndex)))
+         {
+            trackers.put(getSerialNumber(deviceIndex), new RDXVRTracker(vrPlayAreaYUpZBackFrame, deviceIndex));
+         }
+      }
+
       activeActionSets = VRActiveActionSet.create(1);
       activeActionSets.ulActionSet(mainActionSetHandle.get(0));
       activeActionSets.ulRestrictedToDevice(VR.k_ulInvalidInputValueHandle);
