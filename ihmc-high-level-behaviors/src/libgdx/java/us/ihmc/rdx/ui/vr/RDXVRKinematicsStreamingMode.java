@@ -386,8 +386,8 @@ public class RDXVRKinematicsStreamingMode
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
       // Check if controllers or trackers have been occluded in that frame and reset by default to the World origin
-      if (tempFramePose.getPosition().getZ() < 0.05)
-         streamToController.set(false);
+      //      if (tempFramePose.getPosition().getZ() < 0.05)
+      //         streamToController.set(false);
       // record motion if in recording mode
       kinematicsRecorder.framePoseToRecord(tempFramePose, frameName);
       if (kinematicsRecorder.isReplaying())
@@ -594,7 +594,7 @@ public class RDXVRKinematicsStreamingMode
    /**
     * Rotates and translates the controller frame graphic based on the pose change from the retargeting parameters. The retargeting parameters change the IK
     * control frame pose, so the controller frame graphic is updated to reflect that.
-    * */
+    */
    private void adjustControllerFrameGraphic(RobotSide side)
    {
       RDXReferenceFrameGraphic controllerFrameGraphic = controllerFrameGraphics.get(side);
