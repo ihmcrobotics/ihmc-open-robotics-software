@@ -16,7 +16,8 @@ public enum ArmJointName
    SECOND_WRIST_PITCH,
    ELBOW_ROLL,
    ELBOW_YAW,
-   WRIST_YAW;
+   WRIST_YAW,
+   GRIPPER_YAW;
 
    public static final ArmJointName[] values = values();
 

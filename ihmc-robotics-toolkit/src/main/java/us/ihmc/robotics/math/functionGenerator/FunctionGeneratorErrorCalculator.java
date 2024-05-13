@@ -110,7 +110,7 @@ public class FunctionGeneratorErrorCalculator
 
          if (counter.getValue() % controlTicksPerSample == 0)
          {
-            positionErrorsSq.set(counter.getValue() / controlTicksPerSample, EuclidCoreTools.square(baselineDesiredValue.getValue() + functionGenerator.getValue() - joint.getQ()));
+            positionErrorsSq.set(counter.getValue() / controlTicksPerSample, EuclidCoreTools.square(baselineDesiredValue.getValue() - joint.getQ()));
             velocityErrorsSq.set(counter.getValue() / controlTicksPerSample, EuclidCoreTools.square(functionGenerator.getValueDot() - joint.getQd()));
             rmsPositionError.set(Math.sqrt(positionErrorsSq.sum() / samplesPerPeriod));
             rmsVelocityError.set(Math.sqrt(velocityErrorsSq.sum() / samplesPerPeriod));
