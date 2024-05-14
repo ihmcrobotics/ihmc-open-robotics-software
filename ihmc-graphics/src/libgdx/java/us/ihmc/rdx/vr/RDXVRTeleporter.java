@@ -13,9 +13,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDXVRTeleporter
 {
@@ -156,7 +154,7 @@ public class RDXVRTeleporter
       }
    }
 
-   public void setRobotCameraReferenceFrames(ReferenceFrame cameraReferenceFrame)
+   public void setRobotCameraReferenceFrame(ReferenceFrame cameraReferenceFrame)
    {
       robotCameraReferenceFrame = cameraReferenceFrame;
    }
