@@ -103,7 +103,7 @@ public abstract class RDXVRTrackedDevice
 
             deviceYUpZBackFrame.getTransformToDesiredFrame(tempOpenVRToWorldTransform, ReferenceFrame.getWorldFrame());
             LibGDXTools.toLibGDX(tempOpenVRToWorldTransform, modelInstance.transform);
-//            deviceToPlayAreaTransform.transform(trackedAngularVelocity);
+
             deviceYUpZBackFrame.getParent().getTransformToRoot().transform(trackedLinearVelocity);
             deviceYUpZBackFrame.getParent().getTransformToRoot().transform(trackedAngularVelocity);
          }

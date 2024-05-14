@@ -24,6 +24,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
@@ -53,6 +54,7 @@ import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -88,7 +90,7 @@ public class RDXVRKinematicsStreamingMode
    private final SideDependentList<RDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
    private final SideDependentList<Pose3D> ikControlFramePoses = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> handFrameGraphics = new SideDependentList<>();
-   private final Map<String, MutableReferenceFrame> trackedSegmentDesiredFrame = new HashMap<>();
+   private final Map<String, MutableReferenceFrame> trackerReferenceFrames = new HashMap<>();
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(false);
    private final ImBoolean streamToController = new ImBoolean(false);
@@ -96,6 +98,7 @@ public class RDXVRKinematicsStreamingMode
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
    private final SceneGraph sceneGraph;
+   private RDXVRContext vrContext;
    @Nullable
    private KinematicsStreamingToolboxModule toolbox;
 
@@ -104,8 +107,7 @@ public class RDXVRKinematicsStreamingMode
    private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
    private ReferenceFrame initialChestFrame;
    private final RigidBodyTransform initialChestTransformToWorld = new RigidBodyTransform();
-   private RigidBodyTransform initialWaistTrackerTransformToWorld;
-   private MutableReferenceFrame waistTrackerFrame;
+   private RDXVRMotionRetargeting motionRetargeting;
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
    private int leftIndex = -1;
@@ -114,6 +116,7 @@ public class RDXVRKinematicsStreamingMode
 
    public RDXVRKinematicsStreamingMode(ROS2SyncedRobotModel syncedRobot,
                                        ROS2ControllerHelper ros2ControllerHelper,
+                                       RDXVRContext vrContext,
                                        RetargetingParameters retargetingParameters,
                                        SceneGraph sceneGraph)
    {
@@ -122,9 +125,10 @@ public class RDXVRKinematicsStreamingMode
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.retargetingParameters = retargetingParameters;
       this.sceneGraph = sceneGraph;
+      this.vrContext = vrContext;
    }
 
-   public void create(RDXVRContext vrContext, boolean createToolbox)
+   public void create(boolean createToolbox)
    {
       RobotDefinition ghostRobotDefinition = new RobotDefinition(syncedRobot.getRobotModel().getRobotDefinition());
       MaterialDefinition material = new MaterialDefinition(ColorDefinitions.parse("0xDEE934").derive(0.0, 1.0, 1.0, 0.5));
@@ -160,6 +164,7 @@ public class RDXVRKinematicsStreamingMode
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
 
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled);
+      motionRetargeting = new RDXVRMotionRetargeting(syncedRobot, trackerReferenceFrames, retargetingParameters);
 
       KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
       parameters.setDefault();
@@ -235,7 +240,7 @@ public class RDXVRKinematicsStreamingMode
       return initialConfigurationMap;
    }
 
-   public void processVRInput(RDXVRContext vrContext)
+   public void processVRInput()
    {
       if (controllerModel == RDXVRControllerModel.UNKNOWN)
          controllerModel = vrContext.getControllerModel();
@@ -285,184 +290,151 @@ public class RDXVRKinematicsStreamingMode
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          Set<String> additionalTrackedSegments = vrContext.getAssignedTrackerRoles();
          for (VRTrackedSegmentType segmentType : VRTrackedSegmentType.values())
-            handleTrackedSegment(vrContext, toolboxInputMessage, segmentType, additionalTrackedSegments);
+         {
+            // VR Controllers
+            if (segmentType.getSegmentName().contains("Hand"))
+            {
+               vrContext.getController(segmentType.getSegmentSide()).runIfConnected(controller ->
+               {
+                  MovingReferenceFrame endEffectorFrame = ghostFullRobotModel.getEndEffectorFrame(segmentType.getSegmentSide(), LimbName.ARM);
+                  if (endEffectorFrame == null)
+                     return;
+
+                  controller.getXForwardZUpControllerFrame().update();
+                  controllerFrameGraphics.get(segmentType.getSegmentSide())
+                                         .setToReferenceFrame(controller.getXForwardZUpControllerFrame());
+                  handFrameGraphics.get(segmentType.getSegmentSide()).setToReferenceFrame(endEffectorFrame);
+                  KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(ghostFullRobotModel.getHand(
+                                                                                           segmentType.getSegmentSide()),
+                                                                                     handDesiredControlFrames.get(
+                                                                                           segmentType.getSegmentSide()).getReferenceFrame(),
+                                                                                     segmentType.getSegmentName(),
+                                                                                     segmentType.getPositionWeight(),
+                                                                                     segmentType.getOrientationWeight());
+                  message.getControlFramePositionInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getPosition());
+                  message.getControlFrameOrientationInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getOrientation());
+
+                  message.setHasLinearVelocity(true);
+                  message.getLinearVelocityInWorld().set(controller.getLinearVelocity());
+                  message.setHasAngularVelocity(true);
+                  message.getAngularVelocityInWorld().set(controller.getAngularVelocity());
+
+                  toolboxInputMessage.getInputs().add().set(message);
+                  toolboxInputMessage.setTimestamp(controller.getLastPollTimeNanos());
+               });
+            }
+            // VR Trackers
+            else if (additionalTrackedSegments.contains(segmentType.getSegmentName()) && !controlArmsOnly.get())
+            {
+               vrContext.getTracker(segmentType.getSegmentName()).runIfConnected(tracker ->
+               {
+                  if (!trackerReferenceFrames.containsKey(segmentType.getSegmentName()))
+                  {
+                     MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(tracker.getXForwardZUpTrackerFrame());
+                     trackerDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(segmentType));
+                     trackerDesiredControlFrame.getReferenceFrame().update();
+                     trackerReferenceFrames.put(segmentType.getSegmentName(), trackerDesiredControlFrame);
+                  }
+                  if (!trackerFrameGraphics.containsKey(segmentType.getSegmentName()))
+                  {
+                     trackerFrameGraphics.put(segmentType.getSegmentName(),
+                                              new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
+                  }
+                  trackerFrameGraphics.get(segmentType.getSegmentName())
+                                      .setToReferenceFrame(trackerReferenceFrames.get(segmentType.getSegmentName()).getReferenceFrame());
+               });
+            }
+         }
+
+         // Correct values from trackers using retargeting techniques
+         motionRetargeting.computeDesiredValues();
+         for (VRTrackedSegmentType segmentType : motionRetargeting.getControlledSegments())
+         {
+            if (additionalTrackedSegments.contains(segmentType.getSegmentName()) && !controlArmsOnly.get())
+            {
+               RigidBodyBasics controlledSegment = getControlledSegment(segmentType);
+               if (controlledSegment != null)
+               {
+                  KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
+                                                                                     motionRetargeting.getDesiredFrame(segmentType),
+                                                                                     segmentType.getSegmentName(),
+                                                                                     segmentType.getPositionWeight(),
+                                                                                     segmentType.getOrientationWeight());
+                  toolboxInputMessage.getInputs().add().set(message);
+               }
+            }
+         }
 
          if (controlArmsOnly.get())
-         {
-            if (initialPelvisFrame == null)
-            {
-               initialPelvisTransformToWorld.set(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
-               initialPelvisFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                             initialPelvisTransformToWorld);
-            }
-
-            KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
-            message.setEndEffectorHashCode(ghostFullRobotModel.getPelvis().hashCode());
-            tempFramePose.setToZero(initialPelvisFrame);
-            tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-            message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
-            message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
-            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
-            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
-
-            toolboxInputMessage.getInputs().add().set(message);
-
-            if (initialChestFrame == null)
-            {
-               initialChestTransformToWorld.set(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame().getTransformToWorldFrame());
-               initialChestFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                            initialChestTransformToWorld);
-            }
-
-            message = new KinematicsToolboxRigidBodyMessage();
-            message.setEndEffectorHashCode(ghostFullRobotModel.getChest().hashCode());
-            tempFramePose.setToZero(initialChestFrame);
-            tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-            message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
-            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0));
-            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(10));
-
-            toolboxInputMessage.getInputs().add().set(message);
+         { // If option 'Control Arms Only' is active, lock pelvis and chest to current pose
+            lockChestAndPelvis(toolboxInputMessage);
          }
 
          if (enabled.get())
             toolboxInputMessage.setStreamToController(streamToController.get());
          else
             toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
-//         toolboxInputMessage.setTimestamp();
 
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
          outputFrequencyPlot.recordEvent();
       }
    }
 
-   private void handleTrackedSegment(RDXVRContext vrContext,
-                                     KinematicsStreamingToolboxInputMessage toolboxInputMessage,
-                                     VRTrackedSegmentType segmentType,
-                                     Set<String> additionalTrackedSegments)
+   private void lockChestAndPelvis(KinematicsStreamingToolboxInputMessage toolboxInputMessage)
    {
-      // VR Trackers
-      if (additionalTrackedSegments.contains(segmentType.getSegmentName()) && !controlArmsOnly.get())
+      if (initialPelvisFrame == null)
       {
-         vrContext.getTracker(segmentType.getSegmentName()).runIfConnected(tracker ->
-         {
-            switch (segmentType)
-            {
-               case WAIST ->
-               {
-                  if (waistTrackerFrame == null)
-                  {
-                     if (initialPelvisFrame == null)
-                     {
-                        initialPelvisTransformToWorld.set(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
-                        initialPelvisFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                                      initialPelvisTransformToWorld);
-                     }
-                     waistTrackerFrame = new MutableReferenceFrame(tracker.getXForwardZUpTrackerFrame());
-                     waistTrackerFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(segmentType));
-                     waistTrackerFrame.getReferenceFrame().update();
-
-                     initialWaistTrackerTransformToWorld = new RigidBodyTransform(waistTrackerFrame.getReferenceFrame().getTransformToWorldFrame());
-                  }
-                  // Calculate the variation of the tracker's frame from its initial value
-                  RigidBodyTransform waistTrackerVariationFromInitialValue = new RigidBodyTransform(waistTrackerFrame.getReferenceFrame()
-                                                                                                                     .getTransformToWorldFrame());
-                  initialWaistTrackerTransformToWorld.inverseTransform(waistTrackerVariationFromInitialValue);
-                  double scalingRobotHumanWaistHeight = initialPelvisTransformToWorld.getTranslationZ() / initialWaistTrackerTransformToWorld.getTranslationZ();
-                  waistTrackerVariationFromInitialValue.getTranslation()
-                                                       .setZ(scalingRobotHumanWaistHeight * waistTrackerVariationFromInitialValue.getTranslationZ());
-
-                  // Concatenate the initial pelvis transform with the variation
-                  RigidBodyTransform combinedTransformToWorld = new RigidBodyTransform(initialPelvisTransformToWorld);
-                  combinedTransformToWorld.multiply(waistTrackerVariationFromInitialValue);
-                  FramePose3D combinedFramePose = new FramePose3D(ReferenceFrame.getWorldFrame(), combinedTransformToWorld);
-                  combinedFramePose.changeFrame(waistTrackerFrame.getReferenceFrame());
-
-                  MutableReferenceFrame waistReferenceFrame = new MutableReferenceFrame(waistTrackerFrame.getReferenceFrame());
-                  waistReferenceFrame.update(rigidBodyTransform -> rigidBodyTransform.set(new RigidBodyTransform(combinedFramePose.getRotation(),
-                                                                                                                 combinedFramePose.getTranslation())));
-                  // Update the tracked segment's desired frame
-                  trackedSegmentDesiredFrame.put(segmentType.getSegmentName(), waistReferenceFrame);
-               }
-               default ->
-               {
-                  if (!trackedSegmentDesiredFrame.containsKey(segmentType.getSegmentName()))
-                  {
-                     MutableReferenceFrame trackerDesiredControlFrame = new MutableReferenceFrame(tracker.getXForwardZUpTrackerFrame());
-                     trackerDesiredControlFrame.getTransformToParent().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(segmentType));
-                     trackerDesiredControlFrame.getReferenceFrame().update();
-                     trackedSegmentDesiredFrame.put(segmentType.getSegmentName(), trackerDesiredControlFrame);
-                  }
-               }
-            }
-            if (!trackerFrameGraphics.containsKey(segmentType.getSegmentName()))
-            {
-               trackerFrameGraphics.put(segmentType.getSegmentName(),
-                                        new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
-            }
-            trackerFrameGraphics.get(segmentType.getSegmentName())
-                                .setToReferenceFrame(trackedSegmentDesiredFrame.get(segmentType.getSegmentName()).getReferenceFrame());
-
-            RigidBodyBasics controlledSegment = switch (segmentType)
-                  {
-                     case LEFT_WRIST -> ghostFullRobotModel.getForearm(RobotSide.LEFT);
-                     case RIGHT_WRIST -> ghostFullRobotModel.getForearm(RobotSide.RIGHT);
-                     case CHEST -> ghostFullRobotModel.getChest();
-                     case WAIST -> ghostFullRobotModel.getPelvis();
-                     default -> throw new IllegalStateException("Unexpected VR-tracked segment: " + segmentType);
-                  };
-            if (controlledSegment != null)
-            {
-               KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(controlledSegment,
-                                                                                  trackedSegmentDesiredFrame.get(segmentType.getSegmentName())
-                                                                                                            .getReferenceFrame(),
-                                                                                  segmentType.getSegmentName(),
-                                                                                  segmentType.getPositionWeight(),
-                                                                                  segmentType.getOrientationWeight());
-               toolboxInputMessage.getInputs().add().set(message);
-            }
-         });
+         initialPelvisTransformToWorld.set(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
+         initialPelvisFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                       initialPelvisTransformToWorld);
       }
-      // VR Controllers
-      else if (segmentType.getSegmentName().contains("Hand"))
+
+      KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
+      message.setEndEffectorHashCode(ghostFullRobotModel.getPelvis().hashCode());
+      tempFramePose.setToZero(initialPelvisFrame);
+      tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
+      message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
+      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
+      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
+
+      toolboxInputMessage.getInputs().add().set(message);
+
+      if (initialChestFrame == null)
       {
-         vrContext.getController(segmentType.getSegmentSide()).runIfConnected(controller ->
-         {
-            MovingReferenceFrame endEffectorFrame = ghostFullRobotModel.getEndEffectorFrame(segmentType.getSegmentSide(), LimbName.ARM);
-            if (endEffectorFrame == null)
-               return;
-
-            controller.getXForwardZUpControllerFrame().update();
-            controllerFrameGraphics.get(segmentType.getSegmentSide())
-                                   .setToReferenceFrame(controller.getXForwardZUpControllerFrame());
-            handFrameGraphics.get(segmentType.getSegmentSide()).setToReferenceFrame(endEffectorFrame);
-            KinematicsToolboxRigidBodyMessage message = createRigidBodyMessage(ghostFullRobotModel.getHand(
-                                                                                     segmentType.getSegmentSide()),
-                                                                               handDesiredControlFrames.get(
-                                                                                     segmentType.getSegmentSide()).getReferenceFrame(),
-                                                                               segmentType.getSegmentName(),
-                                                                               segmentType.getPositionWeight(),
-                                                                               segmentType.getOrientationWeight());
-            message.getControlFramePositionInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getPosition());
-            message.getControlFrameOrientationInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getOrientation());
-
-            message.setHasLinearVelocity(true);
-            message.getLinearVelocityInWorld().set(controller.getLinearVelocity());
-            message.setHasAngularVelocity(true);
-            message.getAngularVelocityInWorld().set(controller.getAngularVelocity());
-
-            toolboxInputMessage.getInputs().add().set(message);
-            toolboxInputMessage.setTimestamp(controller.getLastPollTimeNanos());
-
-         });
+         initialChestTransformToWorld.set(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame().getTransformToWorldFrame());
+         initialChestFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                      initialChestTransformToWorld);
       }
+
+      message = new KinematicsToolboxRigidBodyMessage();
+      message.setEndEffectorHashCode(ghostFullRobotModel.getChest().hashCode());
+      tempFramePose.setToZero(initialChestFrame);
+      tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
+      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0));
+      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(10));
+
+      toolboxInputMessage.getInputs().add().set(message);
+   }
+
+   private RigidBodyBasics getControlledSegment(VRTrackedSegmentType segmentType)
+   {
+      return switch (segmentType)
+      {
+         case LEFT_WRIST -> ghostFullRobotModel.getForearm(RobotSide.LEFT);
+         case RIGHT_WRIST -> ghostFullRobotModel.getForearm(RobotSide.RIGHT);
+         case CHEST -> ghostFullRobotModel.getChest();
+         case WAIST -> ghostFullRobotModel.getPelvis();
+         default -> throw new IllegalStateException("Unexpected VR-tracked segment: " + segmentType);
+      };
    }
 
    private KinematicsToolboxRigidBodyMessage createRigidBodyMessage(RigidBodyBasics segment,
                                                                     ReferenceFrame desiredControlFrame,
                                                                     String frameName,
-                                                                    double positionWeight,
-                                                                    double orientationWeight)
+                                                                    Vector3D positionWeight,
+                                                                    Vector3D orientationWeight)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
       message.setEndEffectorHashCode(segment.hashCode());
@@ -470,10 +442,7 @@ public class RDXVRKinematicsStreamingMode
       tempFramePose.setToZero(desiredControlFrame);
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      // Check if controllers or trackers have been occluded in that frame and reset by default to the World origin
-      if (tempFramePose.getPosition().getZ() < 0.05)
-         streamToController.set(false);
-      // record motion if in recording mode
+      // Record motion if in recording mode
       kinematicsRecorder.framePoseToRecord(tempFramePose, frameName);
       if (kinematicsRecorder.isReplaying())
          kinematicsRecorder.framePoseToPack(tempFramePose); //get values of tempFramePose from replay
@@ -481,32 +450,24 @@ public class RDXVRKinematicsStreamingMode
       message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
       message.getDesiredPositionInWorld().set(tempFramePose.getPosition());
 
-      if (!Double.isNaN(positionWeight))
-      {
-         if (positionWeight == 0.0)
-         {
-            message.getLinearSelectionMatrix().setXSelected(false);
-            message.getLinearSelectionMatrix().setYSelected(false);
-            message.getLinearSelectionMatrix().setZSelected(false);
-         }
-         else
-         {
-            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(positionWeight));
-         }
-      }
-      if (!Double.isNaN(orientationWeight))
-      {
-         if (orientationWeight == 0.0)
-         {
-            message.getAngularSelectionMatrix().setXSelected(false);
-            message.getAngularSelectionMatrix().setYSelected(false);
-            message.getAngularSelectionMatrix().setZSelected(false);
-         }
-         else
-         {
-            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(orientationWeight));
-         }
-      }
+      WeightMatrix3D linearWeightMatrix = new WeightMatrix3D();
+      message.getLinearSelectionMatrix().setXSelected(positionWeight.getX() != 0.0);
+      message.getLinearSelectionMatrix().setYSelected(positionWeight.getY() != 0.0);
+      linearWeightMatrix.setXAxisWeight(positionWeight.getX());
+      linearWeightMatrix.setYAxisWeight(positionWeight.getY());
+      message.getLinearSelectionMatrix().setZSelected(positionWeight.getZ() != 0.0);
+      linearWeightMatrix.setZAxisWeight(positionWeight.getZ());
+      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(linearWeightMatrix));
+
+      WeightMatrix3D angularWeightMatrix = new WeightMatrix3D();
+      message.getAngularSelectionMatrix().setXSelected(orientationWeight.getX() != 0.0);
+      angularWeightMatrix.setXAxisWeight(orientationWeight.getX());
+      message.getAngularSelectionMatrix().setYSelected(orientationWeight.getY() != 0.0);
+      angularWeightMatrix.setYAxisWeight(orientationWeight.getY());
+      message.getAngularSelectionMatrix().setZSelected(orientationWeight.getZ() != 0.0);
+      angularWeightMatrix.setZAxisWeight(orientationWeight.getZ());
+      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(angularWeightMatrix));
+
       return message;
    }
 
@@ -539,7 +500,7 @@ public class RDXVRKinematicsStreamingMode
                }
                else
                {
-                  // update IK ghost robot
+                  // Update IK ghost robot
                   ghostFullRobotModel.getRootJoint().setJointPosition(latestStatus.getDesiredRootPosition());
                   ghostFullRobotModel.getRootJoint().setJointOrientation(latestStatus.getDesiredRootOrientation());
                   for (int i = 0; i < ghostOneDoFJointsExcludingHands.length; i++)
@@ -569,7 +530,7 @@ public class RDXVRKinematicsStreamingMode
          {
             initialPelvisFrame = null;
             initialChestFrame = null;
-            waistTrackerFrame = null;
+            motionRetargeting.reset();
          }
       }
 
@@ -597,31 +558,17 @@ public class RDXVRKinematicsStreamingMode
       if (enabled)
       {
          wakeUpToolbox();
-         kinematicsRecorder.setReplay(false); //check no concurrency replay and streaming
+         kinematicsRecorder.setReplay(false); // Check no concurrency replay and streaming
          initialPelvisFrame = null;
          initialChestFrame = null;
-         waistTrackerFrame = null;
+         motionRetargeting.reset();
       }
-   }
-
-   private void reinitializeToolbox()
-   {
-      ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
-      toolboxStateMessage.setRequestedToolboxState(ToolboxState.REINITIALIZE.toByte());
-      ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStateTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxStateMessage);
    }
 
    private void wakeUpToolbox()
    {
       ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
       toolboxStateMessage.setRequestedToolboxState(ToolboxState.WAKE_UP.toByte());
-      ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStateTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxStateMessage);
-   }
-
-   private void sleepToolbox()
-   {
-      ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
-      toolboxStateMessage.setRequestedToolboxState(ToolboxState.SLEEP.toByte());
       ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStateTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxStateMessage);
    }
 

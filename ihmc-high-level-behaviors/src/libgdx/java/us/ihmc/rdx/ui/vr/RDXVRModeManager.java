@@ -82,8 +82,12 @@ public class RDXVRModeManager
 
       if (syncedRobot.getRobotModel().getRobotVersion().hasArm(RobotSide.LEFT) || syncedRobot.getRobotModel().getRobotVersion().hasArm(RobotSide.RIGHT))
       {
-         kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot, controllerHelper, retargetingParameters, sceneGraph);
-         kinematicsStreamingMode.create(baseUI.getVRManager().getContext(), createKinematicsStreamingToolboxModule);
+         kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot,
+                                                                    controllerHelper,
+                                                                    baseUI.getVRManager().getContext(),
+                                                                    retargetingParameters,
+                                                                    sceneGraph);
+         kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule);
       }
 
       joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
@@ -124,7 +128,7 @@ public class RDXVRModeManager
          case WHOLE_BODY_IK_STREAMING ->
          {
             if (kinematicsStreamingMode != null)
-               kinematicsStreamingMode.processVRInput(vrContext);
+               kinematicsStreamingMode.processVRInput();
          }
       }
    }
