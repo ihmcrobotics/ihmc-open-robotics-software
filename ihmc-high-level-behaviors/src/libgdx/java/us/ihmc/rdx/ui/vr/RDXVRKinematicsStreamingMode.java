@@ -381,6 +381,7 @@ public class RDXVRKinematicsStreamingMode
                                                                                     {
                                                                                        executeScriptedMotion.set(false);
                                                                                        scriptedTrajectoryTime = 0.0;
+                                                                                       scriptedTrajectory.setDone(false);
                                                                                     }
                                                                                     else
                                                                                     {

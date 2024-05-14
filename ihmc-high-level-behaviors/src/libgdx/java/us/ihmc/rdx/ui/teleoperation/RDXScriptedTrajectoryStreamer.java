@@ -26,16 +26,17 @@ public class RDXScriptedTrajectoryStreamer
       return isDone;
    }
 
+   public void setDone(boolean isDone)
+   {
+      this.isDone = isDone;
+   }
+
    public void handCirclesMotion(double t)
    {
-      if (t > trajectoryTime)
+      if (t >= trajectoryTime)
       {
          isDone = true;
          return;
-      }
-      else
-      {
-         isDone = false;
       }
 
       double circleRadius = 0.25;
