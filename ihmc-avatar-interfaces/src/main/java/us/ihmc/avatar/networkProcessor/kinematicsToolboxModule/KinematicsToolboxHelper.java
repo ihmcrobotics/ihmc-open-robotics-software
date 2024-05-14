@@ -57,9 +57,9 @@ public class KinematicsToolboxHelper
                                           CenterOfMassFeedbackControlCommand feedbackControlCommandToPack)
    {
       feedbackControlCommandToPack.setGains(gains);
-      feedbackControlCommandToPack.setWeightsForSolver(command.getWeightVector());
+      feedbackControlCommandToPack.setWeightsForSolver(command.getWeightMatrix());
       feedbackControlCommandToPack.setSelectionMatrix(command.getSelectionMatrix());
-      feedbackControlCommandToPack.setInverseKinematics(command.getDesiredPosition(), zeroVector3D);
+      feedbackControlCommandToPack.setInverseKinematics(command.getDesiredPosition(), command.getDesiredVelocity());
    }
 
    /**

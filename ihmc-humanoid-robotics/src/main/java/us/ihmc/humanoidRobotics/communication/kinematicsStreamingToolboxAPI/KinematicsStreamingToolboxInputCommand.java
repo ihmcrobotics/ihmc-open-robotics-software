@@ -132,6 +132,17 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
       return null;
    }
 
+   public void setUseCenterOfMassInput(boolean useCenterOfMassInput)
+   {
+      this.useCenterOfMassInput = useCenterOfMassInput;
+   }
+
+   public void setCenterOfMassInput(KinematicsToolboxCenterOfMassCommand centerOfMassInput)
+   {
+      this.centerOfMassInput.set(centerOfMassInput);
+      useCenterOfMassInput = true;
+   }
+
    public boolean hasCenterOfMassInput()
    {
       return useCenterOfMassInput;
