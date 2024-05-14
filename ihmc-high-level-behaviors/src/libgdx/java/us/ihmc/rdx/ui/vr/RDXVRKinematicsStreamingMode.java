@@ -68,6 +68,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static us.ihmc.motionRetargeting.VRTrackedSegmentType.CHEST;
+import static us.ihmc.motionRetargeting.VRTrackedSegmentType.WAIST;
+
 public class RDXVRKinematicsStreamingMode
 {
    private static final double FRAME_AXIS_GRAPHICS_LENGTH = 0.2;
@@ -365,9 +368,15 @@ public class RDXVRKinematicsStreamingMode
             }
          }
 
+         if (additionalTrackedSegments.contains(CHEST.getSegmentName()) && !additionalTrackedSegments.contains(WAIST.getSegmentName()))
+         { // If using only the chest tracker, lock the pelvis pose to avoid weird poses
+            lockPelvis(toolboxInputMessage);
+         }
+
          if (controlArmsOnly.get())
          { // If option 'Control Arms Only' is active, lock pelvis and chest to current pose
-            lockChestAndPelvis(toolboxInputMessage);
+            lockChest(toolboxInputMessage);
+            lockPelvis(toolboxInputMessage);
          }
 
          if (enabled.get())
@@ -380,7 +389,27 @@ public class RDXVRKinematicsStreamingMode
       }
    }
 
-   private void lockChestAndPelvis(KinematicsStreamingToolboxInputMessage toolboxInputMessage)
+   private void lockChest(KinematicsStreamingToolboxInputMessage toolboxInputMessage)
+   {
+      if (initialChestFrame == null)
+      {
+         initialChestTransformToWorld.set(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame().getTransformToWorldFrame());
+         initialChestFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                      initialChestTransformToWorld);
+      }
+
+      KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
+      message.setEndEffectorHashCode(ghostFullRobotModel.getChest().hashCode());
+      tempFramePose.setToZero(initialChestFrame);
+      tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+      message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
+      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0));
+      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(10));
+
+      toolboxInputMessage.getInputs().add().set(message);
+   }
+
+   private void lockPelvis(KinematicsStreamingToolboxInputMessage toolboxInputMessage)
    {
       if (initialPelvisFrame == null)
       {
@@ -397,23 +426,6 @@ public class RDXVRKinematicsStreamingMode
       message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
       message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50));
-
-      toolboxInputMessage.getInputs().add().set(message);
-
-      if (initialChestFrame == null)
-      {
-         initialChestTransformToWorld.set(syncedRobot.getFullRobotModel().getChest().getBodyFixedFrame().getTransformToWorldFrame());
-         initialChestFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
-                                                                                                      initialChestTransformToWorld);
-      }
-
-      message = new KinematicsToolboxRigidBodyMessage();
-      message.setEndEffectorHashCode(ghostFullRobotModel.getChest().hashCode());
-      tempFramePose.setToZero(initialChestFrame);
-      tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-      message.getDesiredOrientationInWorld().set(tempFramePose.getOrientation());
-      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(0));
-      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(10));
 
       toolboxInputMessage.getInputs().add().set(message);
    }

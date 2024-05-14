@@ -87,8 +87,8 @@ public class RDXVRMotionRetargeting
 
          newPelvisFramePose.changeFrame(ReferenceFrame.getWorldFrame());
          newPelvisFramePose.set(combinedTransformToWorld);
-         // zero roll orientation variation as it can lead to very unnatural motions (at least when in double support)
-         newPelvisFramePose.changeFrame(syncedRobot.getFullRobotModel().getPelvis().getParentJoint().getFrameAfterJoint());
+//         // zero roll orientation variation as it can lead to very unnatural motions (at least when in double support)
+         newPelvisFramePose.changeFrame(trackerReferenceFrames.get(WAIST.getSegmentName()).getReferenceFrame());
          newPelvisFramePose.getRotation().setToRollOrientation(0.0);
          newPelvisFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
