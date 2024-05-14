@@ -42,4 +42,12 @@ public enum VRTrackedSegmentType
    {
       return orientationWeight;
    }
+
+   public static VRTrackedSegmentType getHandEnum(RobotSide side)
+   {
+      if(side == RobotSide.LEFT)
+         return VRTrackedSegmentType.LEFT_HAND;
+      else
+         return VRTrackedSegmentType.RIGHT_HAND;
+   }
 }

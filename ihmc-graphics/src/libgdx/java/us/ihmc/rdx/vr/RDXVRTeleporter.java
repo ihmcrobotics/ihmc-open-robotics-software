@@ -13,9 +13,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.LibGDXTools;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class RDXVRTeleporter
 {
@@ -31,7 +29,7 @@ public class RDXVRTeleporter
    private double lastTouchpadY = Double.NaN;
 
    // Reference frame of cameras to be set from syncedRobot (used for teleporting vr viewPoint to robot position)
-   private final SideDependentList<ReferenceFrame> robotCameraReferenceFrames = new SideDependentList<>();
+   private ReferenceFrame robotCameraReferenceFrame = ReferenceFrame.getWorldFrame();
 
    public void create(RDXVRContext context)
    {
@@ -90,7 +88,7 @@ public class RDXVRTeleporter
            }
 
            // Pressed right joystick button
-           if (!robotCameraReferenceFrames.isEmpty() && controller.getJoystickIsCentered() && joystickButton.bChanged() && !joystickButton.bState())
+           if (robotCameraReferenceFrame != null && controller.getJoystickIsCentered() && joystickButton.bChanged() && !joystickButton.bState())
            {
               snapToCameraView(vrContext);
            }
@@ -130,14 +128,6 @@ public class RDXVRTeleporter
 
    private void snapToCameraView(RDXVRContext vrContext)
    {
-      RigidBodyTransform leftCameraFrameTransform = new RigidBodyTransform(robotCameraReferenceFrames.get(RobotSide.LEFT).getTransformToParent());
-      RigidBodyTransform rightCameraFrameTransform = new RigidBodyTransform(robotCameraReferenceFrames.get(RobotSide.RIGHT).getTransformToParent());
-      RigidBodyTransform leftToMidCamerasFrameTransform = new RigidBodyTransform(leftCameraFrameTransform);
-      rightCameraFrameTransform.getTranslation().sub(leftCameraFrameTransform.getTranslation());
-      rightCameraFrameTransform.getTranslation().scale(0.5);
-      leftToMidCamerasFrameTransform.getTranslation().add(rightCameraFrameTransform.getTranslation());
-      ReferenceFrame robotCameraReferenceFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(robotCameraReferenceFrames.get(RobotSide.LEFT).getParent(), leftToMidCamerasFrameTransform);
-
       vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
        {
           xyYawHeadsetToTeleportTransform.setIdentity();
@@ -164,9 +154,8 @@ public class RDXVRTeleporter
       }
    }
 
-   public void setRobotCameraReferenceFrames(ReferenceFrame leftCameraReferenceFrame, ReferenceFrame rightCameraReferenceFrame)
+   public void setRobotCameraReferenceFrame(ReferenceFrame cameraReferenceFrame)
    {
-      robotCameraReferenceFrames.put(RobotSide.LEFT, leftCameraReferenceFrame);
-      robotCameraReferenceFrames.put(RobotSide.RIGHT, rightCameraReferenceFrame);
+      robotCameraReferenceFrame = cameraReferenceFrame;
    }
 }

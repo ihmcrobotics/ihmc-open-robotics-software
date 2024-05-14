@@ -33,7 +33,7 @@ public class RDXVRModeManager
    private RDX3DSituatedImGuiPanel leftHandPanel;
    private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private RDXVRMode mode = RDXVRMode.INPUTS_DISABLED;
+   private RDXVRMode mode = RDXVRMode.WHOLE_BODY_IK_STREAMING;
    private RDXVRPanelPlacementMode panelPlacementMode = RDXVRPanelPlacementMode.MANUAL_PLACEMENT;
    private boolean renderPanel;
    private final ImBoolean showFloatingVideoPanel = new ImBoolean(false);

@@ -22,7 +22,6 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -136,16 +135,10 @@ public class RDXVRKinematicsStreamingMode
          controllerFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
          handDesiredControlFrames.put(side, new MutableReferenceFrame(vrContext.getController(side).getXForwardZUpControllerFrame()));
          Pose3D ikControlFramePose = new Pose3D();
-         if (side == RobotSide.LEFT)
-         {
-            ikControlFramePose.getPosition().setAndNegate(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.LEFT_HAND));
-            ikControlFramePose.getOrientation().setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.LEFT_HAND));
-         }
-         else
-         {
-            ikControlFramePose.getPosition().setAndNegate(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.RIGHT_HAND));
-            ikControlFramePose.getOrientation().setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.RIGHT_HAND));
-         }
+
+         ikControlFramePose.getPosition().setAndNegate(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.getHandEnum(side)));
+         ikControlFramePose.getOrientation().setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.getHandEnum(side)));
+
          ikControlFramePoses.put(side, ikControlFramePose);
       }
 
@@ -356,6 +349,8 @@ public class RDXVRKinematicsStreamingMode
                                                                               {
                                                                                  controllerFrameGraphics.get(segmentType.getSegmentSide())
                                                                                                         .setToReferenceFrame(controller.getXForwardZUpControllerFrame());
+                                                                                 // Update the controller frame graphic to match the retargeting parameters
+                                                                                 adjustControllerFrameGraphic(segmentType.getSegmentSide());
                                                                                  handFrameGraphics.get(segmentType.getSegmentSide())
                                                                                                   .setToReferenceFrame(ghostFullRobotModel.getEndEffectorFrame(
                                                                                                         segmentType.getSegmentSide(),
@@ -391,8 +386,8 @@ public class RDXVRKinematicsStreamingMode
       tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
       // Check if controllers or trackers have been occluded in that frame and reset by default to the World origin
-      if (tempFramePose.getPosition().getZ() < 0.05)
-         streamToController.set(false);
+      //      if (tempFramePose.getPosition().getZ() < 0.05)
+      //         streamToController.set(false);
       // record motion if in recording mode
       kinematicsRecorder.framePoseToRecord(tempFramePose, frameName);
       if (kinematicsRecorder.isReplaying())
@@ -490,14 +485,16 @@ public class RDXVRKinematicsStreamingMode
       {
          setEnabled(enabled.get());
       }
-      if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
-      {
+
+      // TODO (CD): Add this back in when we have a torso
+//      if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
+//      {
          if (controlArmsOnly.get())
          {
             pelvisFrame = null;
             chestFrame = null;
          }
-      }
+//      }
 
       ghostRobotGraphic.renderImGuiWidgets();
       // add widgets for recording/replaying motion in VR
@@ -592,5 +589,17 @@ public class RDXVRKinematicsStreamingMode
       }
       rightIndex++;
       return handConfigurations[rightIndex % handConfigurations.length];
+   }
+
+   /**
+    * Rotates and translates the controller frame graphic based on the pose change from the retargeting parameters. The retargeting parameters change the IK
+    * control frame pose, so the controller frame graphic is updated to reflect that.
+    */
+   private void adjustControllerFrameGraphic(RobotSide side)
+   {
+      RDXReferenceFrameGraphic controllerFrameGraphic = controllerFrameGraphics.get(side);
+      controllerFrameGraphic.getFramePose3D().appendOrientation(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.getHandEnum(side)));
+      controllerFrameGraphic.getFramePose3D().appendTranslation(retargetingParameters.getTranslationFromTracker(VRTrackedSegmentType.getHandEnum(side)));
+      controllerFrameGraphic.updateFromFramePose();
    }
 }
