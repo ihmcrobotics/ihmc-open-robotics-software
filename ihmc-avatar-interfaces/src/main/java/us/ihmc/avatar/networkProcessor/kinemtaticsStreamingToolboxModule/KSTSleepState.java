@@ -25,7 +25,6 @@ public class KSTSleepState implements State
    {
       if (!ikController.hasBeenInitialized())
       {
-         tools.pollInputCommand();
          tools.getCommandInputManager().clearAllCommands();
          ikController.update();
       }

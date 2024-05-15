@@ -1,17 +1,11 @@
 package us.ihmc.avatar.reachabilityMap;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Random;
-import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
+import controller_msgs.msg.dds.RobotConfigurationData;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.ActivationState;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -46,6 +40,13 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Random;
+import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 public class ReachabilityMapSolver
 {
@@ -96,6 +97,7 @@ public class ReachabilityMapSolver
 
       defaultArmConfiguration = RobotConfigurationDataFactory.create(robotArmJoints, new ForceSensorDefinition[0], new IMUDefinition[0]);
       RobotConfigurationDataFactory.packJointState(defaultArmConfiguration, robotArmJoints);
+      kinematicsToolboxController.setDesiredRobotStateUpdater(IKRobotStateUpdater.wrap(defaultArmConfiguration));
 
       maximumNumberOfIterations.set(DEFAULT_MAX_NUMBER_OF_ITERATIONS);
       solutionQualityThreshold.set(DEFAULT_QUALITY_THRESHOLD);
@@ -164,16 +166,16 @@ public class ReachabilityMapSolver
       if (considerJointTorqueLimits)
       {
          addSolutionValidityChecker(joints ->
-         {
-            for (OneDoFJointReadOnly joint : joints)
-            {
-               if (joint.getTau() > joint.getEffortLimitUpper())
-                  return false;
-               if (joint.getTau() < joint.getEffortLimitLower())
-                  return false;
-            }
-            return true;
-         });
+                                    {
+                                       for (OneDoFJointReadOnly joint : joints)
+                                       {
+                                          if (joint.getTau() > joint.getEffortLimitUpper())
+                                             return false;
+                                          if (joint.getTau() < joint.getEffortLimitLower())
+                                             return false;
+                                       }
+                                       return true;
+                                    });
       }
    }
 
@@ -252,8 +254,6 @@ public class ReachabilityMapSolver
       double solutionQualityLast = Double.NaN;
       double solutionQualityBeforeLast = Double.NaN;
       int iteration = 0;
-
-      kinematicsToolboxController.updateRobotConfigurationData(defaultArmConfiguration);
 
       while (!isSolutionGood && iteration < maximumNumberOfIterations)
       {

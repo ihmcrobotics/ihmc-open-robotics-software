@@ -9,7 +9,7 @@ import us.ihmc.tools.Timer;
  */
 public class ImGuiFlashingText
 {
-   private static final double PERIOD = 1.0;
+   private double period = 1.0;
    private final Timer timer = new Timer();
    private boolean flashState = false;
    private final int flashColor;
@@ -43,10 +43,15 @@ public class ImGuiFlashingText
 
    private void update()
    {
-      if (!timer.isRunning(PERIOD))
+      if (!timer.isRunning(period))
       {
          timer.reset();
          flashState = !flashState;
       }
+   }
+
+   public void setPeriod(double period)
+   {
+      this.period = period;
    }
 }

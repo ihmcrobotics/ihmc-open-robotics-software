@@ -15,7 +15,7 @@ public class JointspaceStreamingMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ed43ac2c280c168387bec45fd8c328590629d7a917e57b8e946b85e2456294ee";
+   		return "2d854d26a98d413d12e4876e4a3c49d12568bfde430ba156116fc7613011bcb3";
    }
    
    @Override
@@ -56,6 +56,8 @@ public class JointspaceStreamingMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (12 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (12 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -77,6 +79,10 @@ public class JointspaceStreamingMessagePubSubType implements us.ihmc.pubsub.Topi
       current_alignment += (data.getVelocities().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getAccelerations().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -91,12 +97,17 @@ public class JointspaceStreamingMessagePubSubType implements us.ihmc.pubsub.Topi
       cdr.write_type_e(data.getVelocities());else
           throw new RuntimeException("velocities field exceeds the maximum length");
 
+      if(data.getAccelerations().size() <= 12)
+      cdr.write_type_e(data.getAccelerations());else
+          throw new RuntimeException("accelerations field exceeds the maximum length");
+
    }
 
    public static void read(controller_msgs.msg.dds.JointspaceStreamingMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.read_type_e(data.getPositions());	
       cdr.read_type_e(data.getVelocities());	
+      cdr.read_type_e(data.getAccelerations());	
 
    }
 
@@ -105,6 +116,7 @@ public class JointspaceStreamingMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       ser.write_type_e("positions", data.getPositions());
       ser.write_type_e("velocities", data.getVelocities());
+      ser.write_type_e("accelerations", data.getAccelerations());
    }
 
    @Override
@@ -112,6 +124,7 @@ public class JointspaceStreamingMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       ser.read_type_e("positions", data.getPositions());
       ser.read_type_e("velocities", data.getVelocities());
+      ser.read_type_e("accelerations", data.getAccelerations());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.JointspaceStreamingMessage src, controller_msgs.msg.dds.JointspaceStreamingMessage dest)

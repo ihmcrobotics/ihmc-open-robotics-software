@@ -15,6 +15,7 @@ public class RDXInteractableTools
          if (visualDefinition.getGeometryDefinition() instanceof ModelFileGeometryDefinition)
          {
             modelFileGeometryDefinition = (ModelFileGeometryDefinition) visualDefinition.getGeometryDefinition();
+            break;
          }
       }
       if (modelFileGeometryDefinition == null || modelFileGeometryDefinition.getFileName() == null)

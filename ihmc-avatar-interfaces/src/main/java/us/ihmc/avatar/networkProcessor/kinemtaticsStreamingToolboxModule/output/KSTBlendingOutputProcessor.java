@@ -1,9 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTools;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.YoKinematicsToolboxOutputStatus;
 import us.ihmc.commons.MathTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -32,6 +30,7 @@ public class KSTBlendingOutputProcessor implements KSTOutputProcessor
       FullHumanoidRobotModel desiredFullRobotModel = tools.getDesiredFullRobotModel();
       initialRobotState = new YoKinematicsToolboxOutputStatus("initial", desiredFullRobotModel, registry);
       blendedRobotState = new YoKinematicsToolboxOutputStatus("blended", desiredFullRobotModel, registry);
+      blendedRobotState.createAccelerationState();
    }
 
    @Override
@@ -43,7 +42,7 @@ public class KSTBlendingOutputProcessor implements KSTOutputProcessor
    }
 
    @Override
-   public void update(double time, boolean wasStreaming, boolean isStreaming, KinematicsToolboxOutputStatus latestOutput)
+   public void update(double time, boolean wasStreaming, boolean isStreaming, KSTOutputDataReadOnly latestOutput)
    {
       if (isStreaming)
       {
@@ -58,8 +57,7 @@ public class KSTBlendingOutputProcessor implements KSTOutputProcessor
          if (timeInBlending < streamingBlendingDuration.getValue())
          {
             double alpha = MathTools.clamp(timeInBlending / streamingBlendingDuration.getValue(), 0.0, 1.0);
-            double alphaDot = 1.0 / streamingBlendingDuration.getValue();
-            blendedRobotState.interpolate(initialRobotState.getStatus(), latestOutput, alpha, alphaDot);
+            blendedRobotState.interpolate(initialRobotState, latestOutput, alpha);
          }
          else
          {
@@ -69,9 +67,9 @@ public class KSTBlendingOutputProcessor implements KSTOutputProcessor
    }
 
    @Override
-   public KinematicsToolboxOutputStatus getProcessedOutput()
+   public KSTOutputDataReadOnly getProcessedOutput()
    {
-      return blendedRobotState.getStatus();
+      return blendedRobotState;
    }
 
    public DoubleProvider getBlendingDuration()

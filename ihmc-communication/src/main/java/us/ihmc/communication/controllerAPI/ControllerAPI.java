@@ -2,23 +2,28 @@ package us.ihmc.communication.controllerAPI;
 
 import controller_msgs.msg.dds.*;
 import ihmc_common_msgs.msg.dds.MessageCollection;
+import ihmc_common_msgs.msg.dds.MessageCollectionNotification;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 
-import java.util.HashSet;
+import java.util.*;
 
 /**
  * Base API for the IHMC control API.
- *
+ * <p>
  * For the humanoid controller, see {@link us.ihmc.communication.HumanoidControllerAPI}.
  */
 public final class ControllerAPI
 {
-   public static final HashSet<Class<?>> inputMessageClasses = new HashSet<>();
-   public static final HashSet<Class<? extends Settable<?>>> outputMessageClasses = new HashSet<>();
+   public static final Set<Class<?>> inputMessageClasses = new HashSet<>();
+   public static final Set<Class<? extends Settable<?>>> outputMessageClasses = new HashSet<>();
+
+   public static final Map<Class<?>, ROS2QosProfile> inputMessageClassSpecificQoS = new HashMap<>();
+   public static final Map<Class<?>, ROS2QosProfile> outputMessageClassSpecificQoS = new HashMap<>();
 
    static
    {
@@ -71,6 +76,20 @@ public final class ControllerAPI
       // Command supported by the joint-space controller JointspacePositionControllerState
       inputMessageClasses.add(WholeBodyJointspaceTrajectoryMessage.class);
 
+      // Commands supported by the kinematics toolbox
+      inputMessageClasses.add(KinematicsToolboxCenterOfMassMessage.class);
+      inputMessageClasses.add(KinematicsToolboxRigidBodyMessage.class);
+      inputMessageClasses.add(KinematicsToolboxOneDoFJointMessage.class);
+      inputMessageClasses.add(KinematicsToolboxConfigurationMessage.class);
+      inputMessageClasses.add(KinematicsToolboxSupportRegionMessage.class);
+      inputMessageClasses.add(KinematicsToolboxPrivilegedConfigurationMessage.class);
+      inputMessageClasses.add(KinematicsToolboxInputCollectionMessage.class);
+      inputMessageClasses.add(HumanoidKinematicsToolboxConfigurationMessage.class);
+
+      // Commands supported by the kinematics streaming toolbox
+      inputMessageClasses.add(KinematicsStreamingToolboxInputMessage.class);
+      inputMessageClasses.add(KinematicsStreamingToolboxConfigurationMessage.class);
+
       // Input messages that don't have a corresponding command
       inputMessageClasses.add(MessageCollection.class);
       inputMessageClasses.add(WholeBodyTrajectoryMessage.class);
@@ -93,10 +112,26 @@ public final class ControllerAPI
       outputMessageClasses.add(FootstepQueueStatusMessage.class);
       outputMessageClasses.add(QueuedFootstepStatusMessage.class);
       outputMessageClasses.add(WrenchTrajectoryStatusMessage.class);
+      outputMessageClasses.add(InvalidPacketNotificationPacket.class);
+      outputMessageClasses.add(MessageCollectionNotification.class);
+
+      // Statuses supported by the kinematics toolbox
+      outputMessageClasses.add(KinematicsToolboxOutputStatus.class);
 
       // Statuses supported by multi-contact controller, not in this repo
       outputMessageClasses.add(MultiContactBalanceStatus.class);
       outputMessageClasses.add(MultiContactTrajectoryStatus.class);
+
+      // Setting the input messages with specific QoS
+      inputMessageClassSpecificQoS.put(WholeBodyStreamingMessage.class, ROS2QosProfile.BEST_EFFORT());
+      inputMessageClassSpecificQoS.put(KinematicsStreamingToolboxInputMessage.class, ROS2QosProfile.BEST_EFFORT());
+
+      // Setting the output messages with specific QoS
+      outputMessageClassSpecificQoS.put(CapturabilityBasedStatus.class, ROS2QosProfile.BEST_EFFORT());
+      outputMessageClassSpecificQoS.put(JointDesiredOutputMessage.class, ROS2QosProfile.BEST_EFFORT());
+      outputMessageClassSpecificQoS.put(RobotDesiredConfigurationData.class, ROS2QosProfile.BEST_EFFORT());
+      outputMessageClassSpecificQoS.put(FootstepQueueStatusMessage.class, ROS2QosProfile.BEST_EFFORT());
+      outputMessageClassSpecificQoS.put(MultiContactBalanceStatus.class, ROS2QosProfile.BEST_EFFORT());
    }
 
    public static ROS2Topic<?> getBaseTopic(String controlModuleName, String robotName)
@@ -121,28 +156,10 @@ public final class ControllerAPI
    public static ROS2QosProfile getQoS(Class<?> messageClass)
    {
       if (inputMessageClasses.contains(messageClass))
-      {
-         // Streaming commands should be best effort
-         if (messageClass.equals(WholeBodyStreamingMessage.class))
-            return ROS2QosProfile.BEST_EFFORT();
-
-         return ROS2QosProfile.RELIABLE();
-      }
+         return Objects.requireNonNullElse(inputMessageClassSpecificQoS.get(messageClass), ROS2QosProfile.RELIABLE());
       else if (outputMessageClasses.contains(messageClass))
-      {
-         // Periodic topics are should be best effort
-         if (messageClass.equals(CapturabilityBasedStatus.class)
-          || messageClass.equals(JointDesiredOutputMessage.class)
-          || messageClass.equals(RobotDesiredConfigurationData.class)
-          || messageClass.equals(FootstepQueueStatusMessage.class)
-          || messageClass.equals(MultiContactBalanceStatus.class))
-            return ROS2QosProfile.BEST_EFFORT();
-
-         return ROS2QosProfile.RELIABLE();
-      }
+         return Objects.requireNonNullElse(outputMessageClassSpecificQoS.get(messageClass), ROS2QosProfile.RELIABLE());
       else
-      {
          return ROS2QosProfile.DEFAULT();
-      }
    }
 }

@@ -38,17 +38,29 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
             */
    public byte current_toolbox_state_;
    public int joint_name_hash_;
+   /**
+            * Desired joint positions.
+            */
    public us.ihmc.idl.IDLSequence.Float  desired_joint_angles_;
+   /**
+            * Desired root joint position in world frame.
+            */
    public us.ihmc.euclid.tuple3D.Point3D desired_root_position_;
+   /**
+            * Desired root joint orientation in world frame.
+            */
    public us.ihmc.euclid.tuple4D.Quaternion desired_root_orientation_;
    /**
-            * Desired joint velocities might be empty.
+            * Desired joint velocities.
             */
    public us.ihmc.idl.IDLSequence.Float  desired_joint_velocities_;
    /**
-            * Desired twist of root might be empty.
+            * Desired linear velocity of the root joint expressed in local frame.
             */
    public us.ihmc.euclid.tuple3D.Vector3D desired_root_linear_velocity_;
+   /**
+            * Desired angular velocity of the root joint expressed in local frame.
+            */
    public us.ihmc.euclid.tuple3D.Vector3D desired_root_angular_velocity_;
    /**
             * Support region used by the toolbox
@@ -135,18 +147,27 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    }
 
 
+   /**
+            * Desired joint positions.
+            */
    public us.ihmc.idl.IDLSequence.Float  getDesiredJointAngles()
    {
       return desired_joint_angles_;
    }
 
 
+   /**
+            * Desired root joint position in world frame.
+            */
    public us.ihmc.euclid.tuple3D.Point3D getDesiredRootPosition()
    {
       return desired_root_position_;
    }
 
 
+   /**
+            * Desired root joint orientation in world frame.
+            */
    public us.ihmc.euclid.tuple4D.Quaternion getDesiredRootOrientation()
    {
       return desired_root_orientation_;
@@ -154,7 +175,7 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
 
    /**
-            * Desired joint velocities might be empty.
+            * Desired joint velocities.
             */
    public us.ihmc.idl.IDLSequence.Float  getDesiredJointVelocities()
    {
@@ -163,7 +184,7 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
 
    /**
-            * Desired twist of root might be empty.
+            * Desired linear velocity of the root joint expressed in local frame.
             */
    public us.ihmc.euclid.tuple3D.Vector3D getDesiredRootLinearVelocity()
    {
@@ -171,6 +192,9 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    }
 
 
+   /**
+            * Desired angular velocity of the root joint expressed in local frame.
+            */
    public us.ihmc.euclid.tuple3D.Vector3D getDesiredRootAngularVelocity()
    {
       return desired_root_angular_velocity_;

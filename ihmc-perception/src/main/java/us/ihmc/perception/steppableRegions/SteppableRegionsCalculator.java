@@ -26,7 +26,6 @@ import java.util.Random;
 public class SteppableRegionsCalculator
 {
    private static final int maxRecursionDepth = 500;
-   public enum SnapResult { SNAP_FAILED, CLIFF_TOP, CLIFF_BOTTOM, NOT_ENOUGH_AREA, VALID}
 
    public static SteppableRegionsEnvironmentModel createEnvironmentByMergingCellsIntoRegions(BytedecoImage steppability,
                                                                                              BytedecoImage snappedHeight,
@@ -345,7 +344,9 @@ public class SteppableRegionsCalculator
                   isBorderCell = false;
 
                double z = snappedHeight.getFloat(x, y);
-               Vector3D normal = new Vector3D(snappedNormalX.getFloat(x, y), snappedNormalY.getFloat(x, y), snappedNormalZ.getFloat(x, y));
+               Vector3D normal = new Vector3D(normalValueAsFloat(snappedNormalX, x, y),
+                                              normalValueAsFloat(snappedNormalY, x, y),
+                                              normalValueAsFloat(snappedNormalZ, x, y));
                SteppableCell cell = new SteppableCell(x, y, z, normal, cellsPerSide, isBorderCell);
                steppableRegionsToConvert.addUnexpandedSteppableCell(cell);
             }
@@ -363,6 +364,11 @@ public class SteppableRegionsCalculator
       }
 
       return steppableRegionsToConvert;
+   }
+
+   private static float normalValueAsFloat(BytedecoImage image, int x, int y)
+   {
+      return ((float) ((image.getBytedecoOpenCVMat().ptr(x, y).get() & 0xFF))) * 2 / 255 - 1.0f;
    }
 
    private static void recursivelyAddNeighbors(SteppableCell cellToExpand,
