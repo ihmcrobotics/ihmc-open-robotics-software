@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.motionRetargeting.VRTrackedSegmentType;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
@@ -37,6 +38,7 @@ public class RDXVRMotionRetargeting
    private final FramePose3D newPelvisFramePose = new FramePose3D();
    private final Map<VRTrackedSegmentType, ReferenceFrame> desiredFrames = new HashMap<>();
    private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
+   private final Point3D centerOfMassDesiredXYInWorld = new Point3D();
    private boolean initialValue = true;
 
    public RDXVRMotionRetargeting(ROS2SyncedRobotModel syncedRobot, Map<String, MutableReferenceFrame> trackerReferenceFrames,
@@ -45,6 +47,9 @@ public class RDXVRMotionRetargeting
       this.syncedRobot = syncedRobot;
       this.retargetingParameters = retargetingParameters;
       this.trackerReferenceFrames = trackerReferenceFrames;
+
+      // Start CoM at midFeetZUp frame
+      centerOfMassDesiredXYInWorld.set(syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation());
    }
 
    public void computeDesiredValues()
@@ -140,11 +145,12 @@ public class RDXVRMotionRetargeting
          Vector3D feetVector = new Vector3D();
          feetVector.sub(rightFootXYInWorld, leftFootXYInWorld);
 
-         Point3D centerOfMassDesiredXYInWorld = new Point3D(feetVector);
+         LogTools.info("MidFeet: {}", syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation());
+         LogTools.info("COM: {}", centerOfMassDesiredXYInWorld);
+         LogTools.info("Offset: {}", normalizedOffset);
+         centerOfMassDesiredXYInWorld.set(feetVector);
          centerOfMassDesiredXYInWorld.scale(normalizedOffset);
          centerOfMassDesiredXYInWorld.add(leftFootXYInWorld);
-
-         //create KinematicsToolboxCenterOfMassMessage and add to InputMessage
       }
    }
 
@@ -166,8 +172,8 @@ public class RDXVRMotionRetargeting
    {
       initialValue = true;
       desiredFrames.clear();
-      // reset CoM to midFeetZUp
-
+      // Reset CoM to midFeetZUp frame
+      centerOfMassDesiredXYInWorld.set(syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation());
    }
 
    public Set<VRTrackedSegmentType> getControlledSegments()
@@ -178,5 +184,10 @@ public class RDXVRMotionRetargeting
    public ReferenceFrame getDesiredFrame(VRTrackedSegmentType segment)
    {
       return desiredFrames.get(segment);
+   }
+
+   public Point3D getDesiredCenterOfMassXYInWorld()
+   {
+      return centerOfMassDesiredXYInWorld;
    }
 }

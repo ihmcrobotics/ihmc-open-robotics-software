@@ -6,10 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import toolbox_msgs.msg.dds.ToolboxStateMessage;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
@@ -68,8 +65,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import static us.ihmc.motionRetargeting.VRTrackedSegmentType.CHEST;
-import static us.ihmc.motionRetargeting.VRTrackedSegmentType.WAIST;
+import static us.ihmc.communication.packets.MessageTools.toFrameId;
+import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
 
 public class RDXVRKinematicsStreamingMode
 {
@@ -115,7 +112,6 @@ public class RDXVRKinematicsStreamingMode
    private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
    private int leftIndex = -1;
    private int rightIndex = -1;
-   private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
 
    public RDXVRKinematicsStreamingMode(ROS2SyncedRobotModel syncedRobot,
                                        ROS2ControllerHelper ros2ControllerHelper,
@@ -201,8 +197,16 @@ public class RDXVRKinematicsStreamingMode
          ((KinematicsStreamingToolboxController) toolbox.getToolboxController()).setInitialRobotConfigurationNamedMap(createInitialConfiguration(robotModel));
       }
 
-      RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "Right A button");
-      RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "Left A button");
+      if (vrContext.getControllerModel() == RDXVRControllerModel.FOCUS3)
+      {
+         RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "A button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "X button");
+      }
+      else
+      {
+         RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "Right A button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "Left A button");
+      }
    }
 
    private Map<String, Double> createInitialConfiguration(DRCRobotModel robotModel)
@@ -245,8 +249,6 @@ public class RDXVRKinematicsStreamingMode
 
    public void processVRInput()
    {
-      if (controllerModel == RDXVRControllerModel.UNKNOWN)
-         controllerModel = vrContext.getControllerModel();
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
       {
          InputDigitalActionData aButton = controller.getAButtonActionData();
@@ -364,19 +366,38 @@ public class RDXVRKinematicsStreamingMode
                                                                                      segmentType.getPositionWeight(),
                                                                                      segmentType.getOrientationWeight());
                   toolboxInputMessage.getInputs().add().set(message);
+                  // TODO. figure out how we can set this correctly after retargeting computation, or if we even need it
+                  //toolboxInputMessage.setTimestamp(tracker.getLastPollTimeNanos());
                }
             }
          }
 
-         if (additionalTrackedSegments.contains(CHEST.getSegmentName()) && !additionalTrackedSegments.contains(WAIST.getSegmentName()))
-         { // If using only the chest tracker, lock the pelvis pose to avoid weird poses
-            lockPelvis(toolboxInputMessage);
-         }
-
+         additionalTrackedSegments = vrContext.getAssignedTrackerRoles();
          if (controlArmsOnly.get())
          { // If option 'Control Arms Only' is active, lock pelvis and chest to current pose
             lockChest(toolboxInputMessage);
             lockPelvis(toolboxInputMessage);
+         }
+         else if (additionalTrackedSegments.contains(CHEST.getSegmentName()) && !additionalTrackedSegments.contains(WAIST.getSegmentName()))
+         { // If using only the chest tracker, lock the pelvis pose to avoid weird poses
+            lockPelvis(toolboxInputMessage);
+         }
+         else if (additionalTrackedSegments.contains(WAIST.getSegmentName()) &&
+             additionalTrackedSegments.contains(LEFT_ANKLE.getSegmentName()) &&
+             additionalTrackedSegments.contains(RIGHT_ANKLE.getSegmentName()))
+         {   // If using ankles and waist tracker, create a CoM message for the toolbox
+            KinematicsToolboxCenterOfMassMessage comMessage = new KinematicsToolboxCenterOfMassMessage();
+            comMessage.setHasDesiredLinearVelocity(false);
+            comMessage.getDesiredPositionInWorld().set(motionRetargeting.getDesiredCenterOfMassXYInWorld());
+            comMessage.getSelectionMatrix().setSelectionFrameId(toFrameId(ReferenceFrame.getWorldFrame()));
+            comMessage.getSelectionMatrix().setXSelected(true);
+            comMessage.getSelectionMatrix().setYSelected(true);
+            comMessage.getSelectionMatrix().setZSelected(false);
+            comMessage.getWeights().setXWeight(1.0);
+            comMessage.getWeights().setYWeight(1.0);
+
+            toolboxInputMessage.setUseCenterOfMassInput(true);
+            toolboxInputMessage.getCenterOfMassInput().set(comMessage);
          }
 
          if (enabled.get())
@@ -538,12 +559,7 @@ public class RDXVRKinematicsStreamingMode
       }
       if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
       {
-         if (controlArmsOnly.get())
-         {
-            initialPelvisFrame = null;
-            initialChestFrame = null;
-            motionRetargeting.reset();
-         }
+         setEnabled(false);
       }
 
       ghostRobotGraphic.renderImGuiWidgets();

@@ -10,6 +10,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -23,7 +24,6 @@ import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class RDXVRManager
@@ -151,26 +151,28 @@ public class RDXVRManager
                // pollEventsFrequencyCalculator.ping();
                context.pollEvents(); // FIXME: Potential bug is that the poses get updated in the above thread while they're being used in here
 
-               List<String> newTrackersSerialNumbers = context.getNewTrackersSerialNumbers();
-               for (String newSerialNumber : newTrackersSerialNumbers)
-               {
-                  trackerRoleManagers.add(new RDXVRTrackerRoleManager(context, context.getTrackers().get(newSerialNumber)));
-               }
                List<String> removedTrackersSerialNumbers = context.getRemovedTrackersSerialNumbers();
                for (String removedSerialNumber : removedTrackersSerialNumbers)
                {
                   for (int i = 0; i < trackerRoleManagers.size(); i++)
                   {
-                     if (Objects.equals(trackerRoleManagers.get(i).getTrackerSerialNumber(), removedSerialNumber))
+                     if (trackerRoleManagers.get(i).getTrackerSerialNumber().equals(removedSerialNumber))
                      {
                         String assignedRole = trackerRoleManagers.get(i).getAssignedRole();
                         if (assignedRole != null)
                         {
                            context.setTrackerRoleAsAvailable(assignedRole);
+                           trackerRoleManagers.remove(i);
                         }
-                        trackerRoleManagers.remove(i);
                      }
                   }
+                  context.getTrackers().remove(removedSerialNumber);
+                  LogTools.warn("Tracker {} removed", removedSerialNumber);
+               }
+               List<String> newTrackersSerialNumbers = context.getNewTrackersSerialNumbers();
+               for (String newSerialNumber : newTrackersSerialNumbers)
+               {
+                  trackerRoleManagers.add(new RDXVRTrackerRoleManager(context, context.getTrackers().get(newSerialNumber)));
                }
                if (context.isRolesResetPending())
                {

@@ -305,9 +305,8 @@ public class RDXVRContext
             {
                if (trackers.containsKey(getSerialNumber(event.trackedDeviceIndex())))
                {
-                  trackers.remove(getSerialNumber(deviceIndex));
                   removedTrackerSerialNumber.add(getSerialNumber(deviceIndex));
-                  LogTools.warn("Tracker {} disconnected and removed", getSerialNumber(deviceIndex));
+                  LogTools.warn("Tracker {} disconnected", getSerialNumber(deviceIndex));
                }
             }
          }
