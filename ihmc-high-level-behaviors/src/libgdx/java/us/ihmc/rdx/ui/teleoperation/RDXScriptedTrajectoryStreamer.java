@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 public class RDXScriptedTrajectoryStreamer
 {
    private final double trajectoryTime;
-   private SideDependentList<MultipleWaypointsPoseTrajectoryGenerator> multipleWaypointsTrajectories;
+   private final SideDependentList<MultipleWaypointsPoseTrajectoryGenerator> multipleWaypointsTrajectories = new SideDependentList<>();
    private boolean isDone = false;
    private boolean isInitialized = false;
    private final SideDependentList<FramePoint3D> handPositions = new SideDependentList<>(side -> new FramePoint3D());
@@ -31,11 +31,10 @@ public class RDXScriptedTrajectoryStreamer
       this.trajectoryTime = trajectoryTime;
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-      for (RobotSide robotSide : RobotSide.values)
+      for (RobotSide side : RobotSide.values)
       {
-         multipleWaypointsTrajectories.put(robotSide, new MultipleWaypointsPoseTrajectoryGenerator("scriptedTrajectory", 3, registry));
-         multipleWaypointsTrajectories.get(robotSide).clear(ReferenceFrame.getWorldFrame());
-         multipleWaypointsTrajectories.get(robotSide).initialize();
+         multipleWaypointsTrajectories.put(side, new MultipleWaypointsPoseTrajectoryGenerator(side.getLowerCaseName() + "_scriptedTrajectory", 3, registry));
+         multipleWaypointsTrajectories.get(side).clear(ReferenceFrame.getWorldFrame());
       }
    }
 
@@ -83,6 +82,7 @@ public class RDXScriptedTrajectoryStreamer
                                                              new FramePose3D(ReferenceFrame.getWorldFrame(), endPose),
                                                              new FrameVector3D(),
                                                              new FrameVector3D());
+            multipleWaypointsTrajectories.get(side).initialize();
          }
          isInitialized = true;
       }
