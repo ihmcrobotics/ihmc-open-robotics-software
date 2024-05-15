@@ -1,5 +1,10 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
@@ -40,15 +45,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class ManipulationControllerState extends HighLevelControllerState
 {
@@ -323,6 +324,9 @@ public class ManipulationControllerState extends HighLevelControllerState
          controllerCoreCommand.addFeedbackControlCommand(handManagers.get(robotSide).getFeedbackControlCommand());
          controllerCoreCommand.addInverseDynamicsCommand(handManagers.get(robotSide).getInverseDynamicsCommand());
       }
+
+      JointDesiredOutputList stateSpecificJointSettings = getStateSpecificJointSettings();
+      controllerCoreCommand.completeLowLevelJointData(stateSpecificJointSettings);
 
       controllerCoreTimer.startMeasurement();
       controllerCore.compute(controllerCoreCommand);
