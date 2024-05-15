@@ -162,8 +162,8 @@ public class RDXVRManager
                         if (assignedRole != null)
                         {
                            context.setTrackerRoleAsAvailable(assignedRole);
-                           trackerRoleManagers.remove(i);
                         }
+                        trackerRoleManagers.remove(i);
                      }
                   }
                   context.getTrackers().remove(removedSerialNumber);

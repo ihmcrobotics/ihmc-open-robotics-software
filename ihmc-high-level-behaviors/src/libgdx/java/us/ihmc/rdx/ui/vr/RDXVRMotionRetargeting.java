@@ -39,7 +39,7 @@ public class RDXVRMotionRetargeting
    private final Map<VRTrackedSegmentType, ReferenceFrame> desiredFrames = new HashMap<>();
    private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
    private final Point3D centerOfMassDesiredXYInWorld = new Point3D();
-   private boolean initialValue = true;
+   private ReferenceFrame initialPelvisFrame;
 
    public RDXVRMotionRetargeting(ROS2SyncedRobotModel syncedRobot, Map<String, MutableReferenceFrame> trackerReferenceFrames,
                                  RetargetingParameters retargetingParameters)
@@ -58,8 +58,6 @@ public class RDXVRMotionRetargeting
       retargetPelvis();
       retargetCoM();
       alignDesiredFramesWithOtherReferences();
-
-      initialValue = false;
    }
 
    /**
@@ -70,9 +68,11 @@ public class RDXVRMotionRetargeting
    {
       if (trackerReferenceFrames.containsKey(WAIST.getSegmentName()))
       {
-         if (initialValue)
+         if (initialPelvisFrame == null)
          {
             initialPelvisTransformToWorld.set(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame().getTransformToWorldFrame());
+            initialPelvisFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
+                                                                                                          initialPelvisTransformToWorld);
             initialWaistTrackerTransformToWorld.set(trackerReferenceFrames.get(WAIST.getSegmentName()).getReferenceFrame().getTransformToWorldFrame());
          }
          // Calculate the variation of the tracker's frame from its initial value
@@ -92,9 +92,9 @@ public class RDXVRMotionRetargeting
 
          newPelvisFramePose.changeFrame(ReferenceFrame.getWorldFrame());
          newPelvisFramePose.set(combinedTransformToWorld);
-//         // zero roll orientation variation as it can lead to very unnatural motions (at least when in double support)
-         newPelvisFramePose.changeFrame(trackerReferenceFrames.get(WAIST.getSegmentName()).getReferenceFrame());
-         newPelvisFramePose.getRotation().setToRollOrientation(0.0);
+         // Zero roll orientation variation as it can lead to very unnatural motions (at least when in double support)
+         newPelvisFramePose.changeFrame(initialPelvisFrame);
+         newPelvisFramePose.getRotation().setYawPitchRoll(newPelvisFramePose.getRotation().getYaw(), newPelvisFramePose.getRotation().getPitch(),0.0);
          newPelvisFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
          desiredFrames.put(WAIST, ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), newPelvisFramePose));
@@ -170,7 +170,7 @@ public class RDXVRMotionRetargeting
 
    public void reset()
    {
-      initialValue = true;
+      initialPelvisFrame = null;
       desiredFrames.clear();
       // Reset CoM to midFeetZUp frame
       centerOfMassDesiredXYInWorld.set(syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation());
