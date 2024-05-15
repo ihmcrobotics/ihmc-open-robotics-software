@@ -102,8 +102,8 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       ReferenceFrame linearWeightFrame = referenceFrameHashCodeResolver.getReferenceFrame(linearWeight.getWeightFrameId());
       weightMatrix.setWeightFrames(angularWeightFrame, linearWeightFrame);
 
-      hasDesiredVelocity = message.getHasAngularVelocity() && message.getHasLinearVelocity();
-      desiredVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getAngularVelocityInWorld(), message.getLinearVelocityInWorld());
+      hasDesiredVelocity = message.getHasDesiredAngularVelocity() && message.getHasDesiredLinearVelocity();
+      desiredVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredAngularVelocityInWorld(), message.getDesiredLinearVelocityInWorld());
    }
 
    public void setEndEffector(RigidBodyBasics endEffector)

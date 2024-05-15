@@ -53,10 +53,20 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
             * to the robot's end-effectors.
             */
    public us.ihmc.idl.IDLSequence.Object<toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage>  inputs_;
+   /**
+            * When true, the solver will use the center of mass input to control the robot's center of mass.
+            */
+   public boolean use_center_of_mass_input_;
+   /**
+            * The (optional) input for controlling the center of mass of the robot.
+            * If use_center_of_mass_input is false, this message is ignored.
+            */
+   public toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage center_of_mass_input_;
 
    public KinematicsStreamingToolboxInputMessage()
    {
       inputs_ = new us.ihmc.idl.IDLSequence.Object<toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage> (10, new toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessagePubSubType());
+      center_of_mass_input_ = new toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage();
 
    }
 
@@ -81,6 +91,9 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
       linear_rate_limitation_ = other.linear_rate_limitation_;
 
       inputs_.set(other.inputs_);
+      use_center_of_mass_input_ = other.use_center_of_mass_input_;
+
+      toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessagePubSubType.staticCopy(other.center_of_mass_input_, center_of_mass_input_);
    }
 
    /**
@@ -207,6 +220,31 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
       return inputs_;
    }
 
+   /**
+            * When true, the solver will use the center of mass input to control the robot's center of mass.
+            */
+   public void setUseCenterOfMassInput(boolean use_center_of_mass_input)
+   {
+      use_center_of_mass_input_ = use_center_of_mass_input;
+   }
+   /**
+            * When true, the solver will use the center of mass input to control the robot's center of mass.
+            */
+   public boolean getUseCenterOfMassInput()
+   {
+      return use_center_of_mass_input_;
+   }
+
+
+   /**
+            * The (optional) input for controlling the center of mass of the robot.
+            * If use_center_of_mass_input is false, this message is ignored.
+            */
+   public toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage getCenterOfMassInput()
+   {
+      return center_of_mass_input_;
+   }
+
 
    public static Supplier<KinematicsStreamingToolboxInputMessagePubSubType> getPubSubType()
    {
@@ -244,6 +282,9 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
          {  if (!this.inputs_.get(i).epsilonEquals(other.inputs_.get(i), epsilon)) return false; }
       }
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_center_of_mass_input_, other.use_center_of_mass_input_, epsilon)) return false;
+
+      if (!this.center_of_mass_input_.epsilonEquals(other.center_of_mass_input_, epsilon)) return false;
 
       return true;
    }
@@ -270,6 +311,9 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
       if(this.linear_rate_limitation_ != otherMyClass.linear_rate_limitation_) return false;
 
       if (!this.inputs_.equals(otherMyClass.inputs_)) return false;
+      if(this.use_center_of_mass_input_ != otherMyClass.use_center_of_mass_input_) return false;
+
+      if (!this.center_of_mass_input_.equals(otherMyClass.center_of_mass_input_)) return false;
 
       return true;
    }
@@ -293,7 +337,11 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
       builder.append("linear_rate_limitation=");
       builder.append(this.linear_rate_limitation_);      builder.append(", ");
       builder.append("inputs=");
-      builder.append(this.inputs_);
+      builder.append(this.inputs_);      builder.append(", ");
+      builder.append("use_center_of_mass_input=");
+      builder.append(this.use_center_of_mass_input_);      builder.append(", ");
+      builder.append("center_of_mass_input=");
+      builder.append(this.center_of_mass_input_);
       builder.append("}");
       return builder.toString();
    }

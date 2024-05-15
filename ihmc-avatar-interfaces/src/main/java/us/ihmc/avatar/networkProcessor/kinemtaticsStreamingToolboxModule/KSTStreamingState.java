@@ -14,9 +14,12 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -44,7 +47,12 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -115,6 +123,7 @@ public class KSTStreamingState implements State
     */
    private final Map<RigidBodyBasics, YoDouble> rigidBodyControlStartTimeMap = new HashMap<>();
    private final YoDouble[] rigidBodyControlStartTimeArray;
+   private final YoDouble centerOfMassControlStartTime = new YoDouble("centerOfMassControlStartTime", registry);
 
    /**
     * Buffer of commands used to slowly decay objectives for end-effector that have been discontinued.
@@ -403,6 +412,7 @@ public class KSTStreamingState implements State
 
       for (YoDouble rigidBodyControlStartTime : rigidBodyControlStartTimeArray)
          rigidBodyControlStartTime.setToNaN();
+      centerOfMassControlStartTime.setToNaN();
 
       //      System.gc(); // TODO This needs to be removed.
    }
@@ -472,14 +482,7 @@ public class KSTStreamingState implements State
             YoDouble startTime = rigidBodyControlStartTimeMap.get(rigidBodyInput.getEndEffector());
             if (startTime.isNaN())
                startTime.set(timeInState);
-
-            double controlDuration = timeInState - startTime.getValue();
-
-            if (controlDuration < streamingBlendingDuration.getValue())
-            {
-               double blendingFactor = MathTools.clamp(controlDuration / streamingBlendingDuration.getValue(), 0.0, 1.0);
-               rigidBodyInput.getWeightMatrix().scale(blendingFactor);
-            }
+            blendWeightMatrix(rigidBodyInput.getWeightMatrix(), timeInState, startTime.getValue(), streamingBlendingDuration.getValue());
 
             // Update the list of bodies that are not controlled this tick
             uncontrolledRigidBodies.remove(rigidBodyInput.getEndEffector());
@@ -490,6 +493,20 @@ public class KSTStreamingState implements State
             rigidBodyControlStartTimeMap.get(uncontrolledRigidBodies.get(i)).setToNaN();
          }
 
+         if (latestInput.hasCenterOfMassInput())
+         {
+            KinematicsToolboxCenterOfMassCommand centerOfMassInput = latestInput.getCenterOfMassInput();
+            // TODO Maybe the CoM task should have its own default weight value.
+            setDefaultWeightIfNeeded(centerOfMassInput.getSelectionMatrix(), centerOfMassInput.getWeightMatrix(), defaultLinearWeight.getValue());
+            if (centerOfMassControlStartTime.isNaN())
+               centerOfMassControlStartTime.set(timeInState);
+            blendWeightMatrix(centerOfMassInput.getWeightMatrix(), timeInState, centerOfMassControlStartTime.getValue(), streamingBlendingDuration.getValue());
+         }
+         else
+         {
+            centerOfMassControlStartTime.setToNaN();
+         }
+
          if (!latestInput.getStreamToController() && latestInput.getNumberOfInputs() == 0 && tools.hasPreviousInput())
          {
             /*
@@ -497,7 +514,14 @@ public class KSTStreamingState implements State
              * Only then we remember the last inputs and use them to finish this session.
              * Without this, the robot would go to its privileged configuration.
              */
-            latestInput.addInputs(tools.getPreviousInput().getInputs());
+            KinematicsStreamingToolboxInputCommand previousInput = tools.getPreviousInput();
+            latestInput.addInputs(previousInput.getInputs());
+
+            if (previousInput.hasCenterOfMassInput())
+               latestInput.setCenterOfMassInput(previousInput.getCenterOfMassInput());
+            else
+               latestInput.setUseCenterOfMassInput(false);
+
             filteredInputs.set(latestInput);
          }
          else if (tools.hasNewInputCommand())
@@ -533,6 +557,19 @@ public class KSTStreamingState implements State
             if (estimatedVelocity != null)
                filteredInput.getDesiredVelocity().set(estimatedVelocity);
             ikCommandInputManager.submitCommand(filteredInput);
+         }
+
+         if (filteredInputs.hasCenterOfMassInput())
+         {
+            KinematicsToolboxCenterOfMassCommand centerOfMassInput = filteredInputs.getCenterOfMassInput();
+            KSTInputStateEstimator inputStateEstimator = inputStateEstimatorsMap.get(activeInputStateEstimator.getValue());
+            FramePoint3DReadOnly estimatedPose = inputStateEstimator.getEstimatedCoMPosition();
+            FrameVector3DReadOnly estimatedVelocity = inputStateEstimator.getEstimatedCoMVelocity();
+            if (estimatedPose != null)
+               centerOfMassInput.getDesiredPosition().set(estimatedPose);
+            if (estimatedVelocity != null)
+               centerOfMassInput.getDesiredVelocity().set(estimatedVelocity);
+            ikCommandInputManager.submitCommand(centerOfMassInput);
          }
 
          if (!latestInput.hasInputFor(head))
@@ -716,6 +753,22 @@ public class KSTStreamingState implements State
       {
          if (Double.isNaN(weightMatrix.getZ()) || weightMatrix.getZ() <= 0.0)
             weightMatrix.setZAxisWeight(defaultWeight);
+      }
+   }
+
+   private static void blendWeightMatrix(WeightMatrix6D weightMatrix, double currentTime, double startTime, double blendingDuration)
+   {
+      blendWeightMatrix(weightMatrix.getLinearPart(), currentTime, startTime, blendingDuration);
+      blendWeightMatrix(weightMatrix.getAngularPart(), currentTime, startTime, blendingDuration);
+   }
+
+   private static void blendWeightMatrix(WeightMatrix3D weightMatrix, double currentTime, double startTime, double blendingDuration)
+   {
+      double controlDuration = currentTime - startTime;
+      if (controlDuration < blendingDuration)
+      { // Blend the weight matrix to smoothly activate the objective.
+         double blendingFactor = MathTools.clamp(controlDuration / blendingDuration, 0.0, 1.0);
+         weightMatrix.scale(blendingFactor);
       }
    }
 

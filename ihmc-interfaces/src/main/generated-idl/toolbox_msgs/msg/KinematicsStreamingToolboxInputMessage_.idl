@@ -1,6 +1,7 @@
 #ifndef __toolbox_msgs__msg__KinematicsStreamingToolboxInputMessage__idl__
 #define __toolbox_msgs__msg__KinematicsStreamingToolboxInputMessage__idl__
 
+#include "toolbox_msgs/msg/./KinematicsToolboxCenterOfMassMessage_.idl"
 #include "toolbox_msgs/msg/./KinematicsToolboxRigidBodyMessage_.idl"
 module toolbox_msgs
 {
@@ -60,6 +61,15 @@ module toolbox_msgs
          * to the robot's end-effectors.
          */
         sequence<toolbox_msgs::msg::dds::KinematicsToolboxRigidBodyMessage, 10> inputs;
+        /**
+         * When true, the solver will use the center of mass input to control the robot's center of mass.
+         */
+        boolean use_center_of_mass_input;
+        /**
+         * The (optional) input for controlling the center of mass of the robot.
+         * If use_center_of_mass_input is false, this message is ignored.
+         */
+        toolbox_msgs::msg::dds::KinematicsToolboxCenterOfMassMessage center_of_mass_input;
       };
     };
   };

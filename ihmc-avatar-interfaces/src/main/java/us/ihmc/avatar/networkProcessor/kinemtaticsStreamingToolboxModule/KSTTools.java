@@ -30,12 +30,15 @@ import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialVectorBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -276,7 +279,24 @@ public class KSTTools
 
          for (int i = latestInput.getNumberOfInputs() - 1; i >= 0; i--)
          {
-            if (!inputFilter.isInputValid(latestInput.getInput(i), hasPreviousInput.getValue() ? previousInput.getInput(i) : null))
+            KinematicsToolboxRigidBodyCommand latestEndEffectorInput = latestInput.getInput(i);
+            RigidBodyBasics endEffector = latestEndEffectorInput.getEndEffector();
+            KinematicsToolboxRigidBodyCommand previousEndEffectorInput = hasPreviousInput.getValue() ? previousInput.getInputFor(endEffector) : null;
+
+            if (!inputFilter.isInputValid(latestEndEffectorInput, previousEndEffectorInput))
+               invalidUserInput.set(true);
+         }
+
+         if (latestInput.hasCenterOfMassInput())
+         {
+            KinematicsToolboxCenterOfMassCommand latestCenterOfMassInput = latestInput.getCenterOfMassInput();
+            KinematicsToolboxCenterOfMassCommand previousCenterOfMassInput;
+            if (hasPreviousInput.getValue() && previousInput.hasCenterOfMassInput())
+               previousCenterOfMassInput = previousInput.getCenterOfMassInput();
+            else
+               previousCenterOfMassInput = null;
+
+            if (!inputFilter.isInputValid(latestCenterOfMassInput, previousCenterOfMassInput))
                invalidUserInput.set(true);
          }
 

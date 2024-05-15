@@ -22,6 +22,14 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
             */
    public us.ihmc.euclid.tuple3D.Point3D desired_position_in_world_;
    /**
+            * Whether the desired linear velocity is defined.
+            */
+   public boolean has_desired_linear_velocity_;
+   /**
+            * The desired linear velocity of the control frame's origin.
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D desired_linear_velocity_in_world_;
+   /**
             * The selection matrix is used to determinate which degree of freedom of the center of mass
             * should be controlled.
             * The selection frame coming along with the given selection matrix is used to determine to what
@@ -42,6 +50,7 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
    public KinematicsToolboxCenterOfMassMessage()
    {
       desired_position_in_world_ = new us.ihmc.euclid.tuple3D.Point3D();
+      desired_linear_velocity_in_world_ = new us.ihmc.euclid.tuple3D.Vector3D();
       selection_matrix_ = new ihmc_common_msgs.msg.dds.SelectionMatrix3DMessage();
       weights_ = new ihmc_common_msgs.msg.dds.WeightMatrix3DMessage();
    }
@@ -57,6 +66,9 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       sequence_id_ = other.sequence_id_;
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.desired_position_in_world_, desired_position_in_world_);
+      has_desired_linear_velocity_ = other.has_desired_linear_velocity_;
+
+      geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_linear_velocity_in_world_, desired_linear_velocity_in_world_);
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.selection_matrix_, selection_matrix_);
       ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.staticCopy(other.weights_, weights_);
    }
@@ -84,6 +96,30 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
    public us.ihmc.euclid.tuple3D.Point3D getDesiredPositionInWorld()
    {
       return desired_position_in_world_;
+   }
+
+   /**
+            * Whether the desired linear velocity is defined.
+            */
+   public void setHasDesiredLinearVelocity(boolean has_desired_linear_velocity)
+   {
+      has_desired_linear_velocity_ = has_desired_linear_velocity;
+   }
+   /**
+            * Whether the desired linear velocity is defined.
+            */
+   public boolean getHasDesiredLinearVelocity()
+   {
+      return has_desired_linear_velocity_;
+   }
+
+
+   /**
+            * The desired linear velocity of the control frame's origin.
+            */
+   public us.ihmc.euclid.tuple3D.Vector3D getDesiredLinearVelocityInWorld()
+   {
+      return desired_linear_velocity_in_world_;
    }
 
 
@@ -134,6 +170,9 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
       if (!this.desired_position_in_world_.epsilonEquals(other.desired_position_in_world_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.has_desired_linear_velocity_, other.has_desired_linear_velocity_, epsilon)) return false;
+
+      if (!this.desired_linear_velocity_in_world_.epsilonEquals(other.desired_linear_velocity_in_world_, epsilon)) return false;
       if (!this.selection_matrix_.epsilonEquals(other.selection_matrix_, epsilon)) return false;
       if (!this.weights_.epsilonEquals(other.weights_, epsilon)) return false;
 
@@ -152,6 +191,9 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
       if (!this.desired_position_in_world_.equals(otherMyClass.desired_position_in_world_)) return false;
+      if(this.has_desired_linear_velocity_ != otherMyClass.has_desired_linear_velocity_) return false;
+
+      if (!this.desired_linear_velocity_in_world_.equals(otherMyClass.desired_linear_velocity_in_world_)) return false;
       if (!this.selection_matrix_.equals(otherMyClass.selection_matrix_)) return false;
       if (!this.weights_.equals(otherMyClass.weights_)) return false;
 
@@ -168,6 +210,10 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("desired_position_in_world=");
       builder.append(this.desired_position_in_world_);      builder.append(", ");
+      builder.append("has_desired_linear_velocity=");
+      builder.append(this.has_desired_linear_velocity_);      builder.append(", ");
+      builder.append("desired_linear_velocity_in_world=");
+      builder.append(this.desired_linear_velocity_in_world_);      builder.append(", ");
       builder.append("selection_matrix=");
       builder.append(this.selection_matrix_);      builder.append(", ");
       builder.append("weights=");

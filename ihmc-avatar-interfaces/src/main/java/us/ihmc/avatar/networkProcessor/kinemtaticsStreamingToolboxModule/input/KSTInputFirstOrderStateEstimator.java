@@ -4,14 +4,15 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTool
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePose3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -32,6 +33,7 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
 
    private final Map<RigidBodyReadOnly, SingleEndEffectorEstimator> inputPoseEstimators = new HashMap<>();
    private final SingleEndEffectorEstimator[] inputPoseEstimatorsArray;
+   private final CenterOfMassEstimator centerOfMassEstimator;
    private final YoDouble inputVelocityDecayDuration = new YoDouble("inputVelocityDecayDuration", registry);
    private final YoDouble inputsFilterBreakFrequency = new YoDouble("inputsFilterBreakFrequency", registry);
    private final double updateDT;
@@ -50,6 +52,7 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
          inputPoseEstimators.put(endEffector, new SingleEndEffectorEstimator(endEffector, inputsAlphaProvider, registry));
       }
       inputPoseEstimatorsArray = inputPoseEstimators.values().toArray(new SingleEndEffectorEstimator[0]);
+      centerOfMassEstimator = new CenterOfMassEstimator(inputsAlphaProvider, registry);
 
       inputsFilterBreakFrequency.set(parameters.getInputPoseLPFBreakFrequency());
       inputVelocityDecayDuration.set(parameters.getInputVelocityDecayDuration());
@@ -64,6 +67,7 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
       {
          inputPoseEstimator.reset();
       }
+      centerOfMassEstimator.reset();
    }
 
    /**
@@ -96,6 +100,12 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
       return inputPoseEstimator.getOutputPose();
    }
 
+   @Override
+   public FramePoint3DReadOnly getEstimatedCoMPosition()
+   {
+      return centerOfMassEstimator.getOutputPosition();
+   }
+
    private void updatePose(boolean isNewInput, KinematicsStreamingToolboxInputCommand inputCommandToFilter)
    {
       if (isNewInput)
@@ -108,6 +118,9 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
             if (inputPoseEstimator != null)
                inputPoseEstimator.updateInput(input.getDesiredPose());
          }
+
+         if (inputCommandToFilter.hasCenterOfMassInput())
+            centerOfMassEstimator.updateInput(inputCommandToFilter.getCenterOfMassInput().getDesiredPosition());
       }
       else
       {
@@ -119,6 +132,9 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
             if (inputPoseEstimator != null)
                inputPoseEstimator.extrapolateInput(updateDT);
          }
+
+         if (inputCommandToFilter.hasCenterOfMassInput())
+            centerOfMassEstimator.extrapolateInput(updateDT);
       }
    }
 
@@ -133,6 +149,7 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
          {
             singleEndEffectorEstimator.resetVelocity();
          }
+         centerOfMassEstimator.resetVelocity();
       }
       else if (isNewInput)
       { // New input, let's update the velocities
@@ -167,17 +184,29 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
                   inputPoseEstimator.resetVelocity();
             }
          }
+
+         if (currentRawInputCommand.hasCenterOfMassInput() && previousRawInputCommand.hasCenterOfMassInput())
+         {
+            KinematicsToolboxCenterOfMassCommand currentCoMInput = currentRawInputCommand.getCenterOfMassInput();
+            KinematicsToolboxCenterOfMassCommand previousCoMInput = previousRawInputCommand.getCenterOfMassInput();
+            centerOfMassEstimator.estimateVelocity(timeInterval, previousCoMInput.getDesiredPosition(), currentCoMInput.getDesiredPosition());
+         }
+         else
+         {
+            centerOfMassEstimator.resetVelocity();
+         }
       }
       else
       { // No new input, let's decay the velocities
          for (SingleEndEffectorEstimator singleEndEffectorEstimator : inputPoseEstimatorsArray)
          {
-            singleEndEffectorEstimator.decayInputVelocity(updateDT / inputVelocityDecayDuration.getDoubleValue());
+            singleEndEffectorEstimator.decayInputVelocity(updateDT / inputVelocityDecayDuration.getValue());
          }
+         centerOfMassEstimator.decayInputVelocity(updateDT / inputVelocityDecayDuration.getValue());
       }
    }
 
-   public static class SingleEndEffectorEstimator
+   private static class SingleEndEffectorEstimator
    {
       private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       private final YoFramePose3D rawInputPose;
@@ -237,8 +266,15 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
 
       public void extrapolateInput(double integrationDT)
       {
-         KSTTools.integrateLinearVelocity(integrationDT, rawExtrapolatedInputPose.getPosition(), decayingInputSpatialVelocity.getLinearPart(), rawExtrapolatedInputPose.getPosition());
-         KSTTools.integrateAngularVelocity(integrationDT, rawExtrapolatedInputPose.getOrientation(), decayingInputSpatialVelocity.getAngularPart(), false, rawExtrapolatedInputPose.getOrientation());
+         KSTTools.integrateLinearVelocity(integrationDT,
+                                          rawExtrapolatedInputPose.getPosition(),
+                                          decayingInputSpatialVelocity.getLinearPart(),
+                                          rawExtrapolatedInputPose.getPosition());
+         KSTTools.integrateAngularVelocity(integrationDT,
+                                           rawExtrapolatedInputPose.getOrientation(),
+                                           decayingInputSpatialVelocity.getAngularPart(),
+                                           false,
+                                           rawExtrapolatedInputPose.getOrientation());
          filteredExtrapolatedInputPose.update();
       }
 
@@ -265,6 +301,81 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
       public FramePose3DReadOnly getOutputPose()
       {
          return filteredExtrapolatedInputPose;
+      }
+   }
+
+   private static class CenterOfMassEstimator
+   {
+      private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+      private final YoFramePoint3D rawInputPosition;
+      private final YoFramePoint3D rawExtrapolatedInputPosition;
+      private final AlphaFilteredYoFramePoint filteredExtrapolatedInputPosition;
+
+      private final YoFrameVector3D rawInputLinearVelocity;
+      private final YoFrameVector3D decayingInputLinearVelocity;
+      private final YoDouble inputVelocityDecayFactor;
+
+      public CenterOfMassEstimator(DoubleProvider inputsAlphaProvider, YoRegistry registry)
+      {
+         rawInputPosition = new YoFramePoint3D("CoMInput_FOF_RawPosition", worldFrame, registry);
+         rawExtrapolatedInputPosition = new YoFramePoint3D("CoMInput_FOF_RawExtrapolatedPosition", worldFrame, registry);
+         filteredExtrapolatedInputPosition = new AlphaFilteredYoFramePoint("CoMInput_FOF_FilteredExtrapolatedPosition",
+                                                                           "",
+                                                                           registry,
+                                                                           inputsAlphaProvider,
+                                                                           rawExtrapolatedInputPosition);
+         rawInputLinearVelocity = new YoFrameVector3D("CoMInput_FOF_RawLinearVelocity", worldFrame, registry);
+         decayingInputLinearVelocity = new YoFrameVector3D("CoMInput_FOF_DecayingLinearVelocity", worldFrame, registry);
+         inputVelocityDecayFactor = new YoDouble("CoMInput_FOF_InputVelocityDecayFactor", registry);
+      }
+
+      public void reset()
+      {
+         rawInputPosition.setToNaN();
+         rawExtrapolatedInputPosition.setToNaN();
+         filteredExtrapolatedInputPosition.setToNaN();
+         filteredExtrapolatedInputPosition.reset();
+
+         resetVelocity();
+      }
+
+      private void resetVelocity()
+      {
+         rawInputLinearVelocity.setToZero();
+         decayingInputLinearVelocity.setToZero();
+         inputVelocityDecayFactor.set(0.0);
+      }
+
+      public void updateInput(FramePoint3DReadOnly position)
+      {
+         rawInputPosition.set(position);
+         rawExtrapolatedInputPosition.set(position);
+         filteredExtrapolatedInputPosition.update();
+      }
+
+      public void extrapolateInput(double integrationDT)
+      {
+         KSTTools.integrateLinearVelocity(integrationDT, rawInputPosition, rawInputLinearVelocity, rawExtrapolatedInputPosition);
+         filteredExtrapolatedInputPosition.update();
+      }
+
+      public void decayInputVelocity(double decayIncrement)
+      {
+         double alpha = Math.min(1.0, inputVelocityDecayFactor.getDoubleValue() + decayIncrement);
+         inputVelocityDecayFactor.set(alpha);
+         decayingInputLinearVelocity.interpolate(rawInputLinearVelocity, EuclidCoreTools.zeroVector3D, alpha);
+      }
+
+      public void estimateVelocity(double dt, FramePoint3DReadOnly previousPosition, FramePoint3DReadOnly currentPosition)
+      {
+         KSTTools.computeLinearVelocity(dt, previousPosition, currentPosition, rawInputLinearVelocity);
+         decayingInputLinearVelocity.set(rawInputLinearVelocity);
+         inputVelocityDecayFactor.set(0.0);
+      }
+
+      public FramePoint3DReadOnly getOutputPosition()
+      {
+         return rawInputPosition;
       }
    }
 }

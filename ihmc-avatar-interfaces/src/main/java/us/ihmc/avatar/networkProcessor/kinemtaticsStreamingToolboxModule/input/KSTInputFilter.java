@@ -3,6 +3,7 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.input;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.MidFootZUpGroundFrame;
@@ -61,6 +62,28 @@ public class KSTInputFilter
       bbxOrientation.setToYawOrientation(midFeetZUpFrame.getTransformToRoot().getRotation().getYaw());
       boundingBox.getPose().set(bbxOrientation, bbxPosition);
       boundingBox.getSize().set(bbxSize);
+   }
+
+   public boolean isInputValid(KinematicsToolboxCenterOfMassCommand input, KinematicsToolboxCenterOfMassCommand previousInput)
+   {
+      if (enableBBXFilter.getValue() && !boundingBox.isPointInside(input.getDesiredPosition()))
+         return false;
+
+      if (previousInput != null)
+      {
+         double linearDelta = input.getDesiredPosition().distance(previousInput.getDesiredPosition());
+         if (linearDelta > maxLinearDelta.getValue())
+            return false;
+      }
+
+      if (input.getHasDesiredVelocity())
+      {
+         double linearVelocity = input.getDesiredVelocity().norm();
+         if (linearVelocity > maxLinearVelocity.getValue())
+            return false;
+      }
+
+      return true;
    }
 
    public boolean isInputValid(KinematicsToolboxRigidBodyCommand input, KinematicsToolboxRigidBodyCommand previousInput)

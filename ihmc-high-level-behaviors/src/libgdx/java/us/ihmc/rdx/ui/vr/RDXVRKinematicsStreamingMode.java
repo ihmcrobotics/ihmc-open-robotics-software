@@ -317,10 +317,10 @@ public class RDXVRKinematicsStreamingMode
                   message.getControlFramePositionInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getPosition());
                   message.getControlFrameOrientationInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getOrientation());
 
-                  message.setHasLinearVelocity(true);
-                  message.getLinearVelocityInWorld().set(controller.getLinearVelocity());
-                  message.setHasAngularVelocity(true);
-                  message.getAngularVelocityInWorld().set(controller.getAngularVelocity());
+                  message.setHasDesiredLinearVelocity(true);
+                  message.getDesiredLinearVelocityInWorld().set(controller.getLinearVelocity());
+                  message.setHasDesiredAngularVelocity(true);
+                  message.getDesiredAngularVelocityInWorld().set(controller.getAngularVelocity());
 
                   toolboxInputMessage.getInputs().add().set(message);
                   toolboxInputMessage.setTimestamp(controller.getLastPollTimeNanos());
