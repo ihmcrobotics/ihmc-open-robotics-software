@@ -66,7 +66,6 @@ public class RDXScriptedTrajectoryStreamer
             Pose3D midPose = new Pose3D(0.0, side.negateIfRightSide(0.6), 0.2, 0.0, -Math.PI / 2.0, side.negateIfRightSide(Math.PI / 2.0));
             Pose3D endPose = new Pose3D(startPose);
 
-            multipleWaypointsTrajectories.get(side).initialize();
             multipleWaypointsTrajectories.get(side)
                                          .appendPoseWaypoint(0.0,
                                                              new FramePose3D(ReferenceFrame.getWorldFrame(), startPose),
@@ -90,7 +89,7 @@ public class RDXScriptedTrajectoryStreamer
       // Compute the point along the trajectory
       for (RobotSide robotSide : RobotSide.values)
       {
-         multipleWaypointsTrajectories.get(robotSide).compute(trajectoryTime);
+         multipleWaypointsTrajectories.get(robotSide).compute(time);
          handPose.put(robotSide, multipleWaypointsTrajectories.get(robotSide).getPose());
       }
    }
