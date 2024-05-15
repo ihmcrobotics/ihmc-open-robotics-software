@@ -3,6 +3,7 @@ package us.ihmc.perception.filters;
 import gnu.trove.iterator.TFloatIterator;
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.linked.TFloatLinkedList;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 

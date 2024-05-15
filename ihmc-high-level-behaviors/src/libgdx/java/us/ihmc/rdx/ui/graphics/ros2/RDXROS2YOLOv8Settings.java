@@ -27,7 +27,7 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
    private final ImFloat confidenceThreshold = new ImFloat(0.3f);
    private final ImFloat nmsThreshold = new ImFloat(0.1f);
    private final ImFloat maskThreshold = new ImFloat(0.0f);
-   private final ImFloat candidateAcceptanceThreshold = new ImFloat(0.3f);
+   private final ImFloat candidateAcceptanceThreshold = new ImFloat(0.6f);
    private final ImInt selectedSensor = new ImInt(0); // 0 = ZED, 1 = Realsense
 
    private final Set<YOLOv8DetectionClass> targetDetections = new HashSet<>();

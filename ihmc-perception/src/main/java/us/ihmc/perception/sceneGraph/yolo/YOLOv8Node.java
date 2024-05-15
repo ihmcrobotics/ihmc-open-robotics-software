@@ -33,7 +33,7 @@ public class YOLOv8Node extends DetectableSceneNode
            name,
            2,
            2.0,
-           0.1f,
+           0.2f,
            detectionClass,
            confidence,
            objectPointCloud,
