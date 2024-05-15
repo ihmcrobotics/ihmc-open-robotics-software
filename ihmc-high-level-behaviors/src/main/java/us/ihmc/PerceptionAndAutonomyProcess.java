@@ -363,23 +363,20 @@ public class PerceptionAndAutonomyProcess
          if (yoloZEDDemandNode.isDemanded())
             yolov8DetectionManager.setDetectionImages(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
 
-         RawImage zedCutOutDepthImage;
          if (depthOverlapRemovalDemandNode.isDemanded() && realsenseDemandNode.isDemanded() && realsenseDepthImage != null)
          {
-            zedCutOutDepthImage = overlapRemover.removeOverlap(zedDepthImage.get(), 20);
+            RawImage zedCutOutDepthImage = overlapRemover.removeOverlap(zedDepthImage.get(), 20);
+            zedImagePublisher.setNextCutOutDepthImage(zedCutOutDepthImage.get());
+            zedCutOutDepthImage.release();
          }
-         else
-            zedCutOutDepthImage = new RawImage(zedDepthImage);
 
          zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
-         zedImagePublisher.setNextCutOutDepthImage(zedCutOutDepthImage.get());
          for (RobotSide side : RobotSide.values)
          {
             zedImagePublisher.setNextColorImage(zedColorImages.get(side).get(), side);
          }
 
          zedDepthImage.release();
-         zedCutOutDepthImage.release();
          zedColorImages.forEach(RawImage::release);
       }
       else

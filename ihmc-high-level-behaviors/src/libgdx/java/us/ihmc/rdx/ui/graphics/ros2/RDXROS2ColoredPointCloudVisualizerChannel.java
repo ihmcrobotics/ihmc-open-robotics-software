@@ -33,7 +33,7 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
 {
    protected final ImageMessage imageMessage = new ImageMessage();
    private final SampleInfo sampleInfo = new SampleInfo();
-   private final ROS2Topic<ImageMessage> topic;
+   private ROS2Topic<ImageMessage> topic;
    private final ImPlotFrequencyPlot frequencyPlot;
    private final ImPlotDoublePlot delayPlot;
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
@@ -250,5 +250,10 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    public ByteBuffer getOusterBeamAzimuthAnglesBuffer()
    {
       return ousterBeamAzimuthAnglesBuffer;
+   }
+
+   public void setTopic(ROS2Topic<ImageMessage> topic)
+   {
+      this.topic = topic;
    }
 }
