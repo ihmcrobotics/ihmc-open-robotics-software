@@ -385,9 +385,15 @@ public class RDXVRKinematicsStreamingMode
                                                                                     }
                                                                                     else
                                                                                     {
-                                                                                       message.getControlFramePositionInEndEffector()
-                                                                                              .set(scriptedTrajectory.getHandPosition(segmentType.getSegmentSide(),
-                                                                                                                                      scriptedTrajectoryTime));
+//                                                                                       message.getDesiredPositionInWorld().set(scriptedTrajectory.getHandPosition(
+//                                                                                             segmentType.getSegmentSide(),
+//                                                                                             scriptedTrajectoryTime));
+                                                                                       message.getDesiredPositionInWorld().set(scriptedTrajectory.getHandPose(
+                                                                                             segmentType.getSegmentSide(),
+                                                                                             scriptedTrajectoryTime).getPosition());
+                                                                                       message.getDesiredOrientationInWorld().set(scriptedTrajectory.getHandPose(
+                                                                                             segmentType.getSegmentSide(),
+                                                                                             scriptedTrajectoryTime).getOrientation());
                                                                                        scriptedTrajectoryTime += streamPeriod;
                                                                                     }
                                                                                  }
