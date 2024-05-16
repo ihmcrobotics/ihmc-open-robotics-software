@@ -2,10 +2,7 @@ package us.ihmc.rdx.ui.teleoperation;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -17,14 +14,17 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class RDXScriptedTrajectoryStreamer
 {
    private final double trajectoryTime;
-   private final SideDependentList<MultipleWaypointsPoseTrajectoryGenerator> multipleWaypointsTrajectories = new SideDependentList<>();
+   private final SideDependentList<MultipleWaypointsPoseTrajectoryGenerator> multiWaypointTrajectories = new SideDependentList<>();
    private boolean isDone = false;
-   private boolean isInitialized = false;
-   private final SideDependentList<FramePoint3D> handPositions = new SideDependentList<>(side -> new FramePoint3D());
-   private final SideDependentList<FramePose3DReadOnly> handPose = new SideDependentList<>(side -> new FramePose3D());
+   private boolean initialize = false;
+   private final SideDependentList<FramePoint3D> currentHandPositions = new SideDependentList<>(side -> new FramePoint3D());
+   private final SideDependentList<FramePose3DReadOnly> currentHandPoses = new SideDependentList<>(side -> new FramePose3D());
 
    public RDXScriptedTrajectoryStreamer(double trajectoryTime)
    {
@@ -33,9 +33,14 @@ public class RDXScriptedTrajectoryStreamer
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       for (RobotSide side : RobotSide.values)
       {
-         multipleWaypointsTrajectories.put(side, new MultipleWaypointsPoseTrajectoryGenerator(side.getLowerCaseName() + "_scriptedTrajectory", 3, registry));
-         multipleWaypointsTrajectories.get(side).clear(ReferenceFrame.getWorldFrame());
+         multiWaypointTrajectories.put(side, new MultipleWaypointsPoseTrajectoryGenerator(side.getLowerCaseName() + "_scriptedTrajectory", 17, registry));
+         multiWaypointTrajectories.get(side).clear(ReferenceFrame.getWorldFrame());
       }
+   }
+
+   public enum ScriptedTrajectoryType
+   {
+      HAND_CIRCLES, STRETCH_OUT_ARMS
    }
 
    public boolean isDone()
@@ -48,7 +53,50 @@ public class RDXScriptedTrajectoryStreamer
       this.isDone = isDone;
    }
 
-   public void stretchOutArms(double time)
+   private SideDependentList<List<FramePose3D>> getPoseWaypoints(ScriptedTrajectoryType trajectoryType)
+   {
+      SideDependentList<List<FramePose3D>> poseWaypoints = new SideDependentList<>();
+
+      for (RobotSide side : RobotSide.values)
+      {
+         switch (trajectoryType)
+         {
+            case STRETCH_OUT_ARMS:
+               poseWaypoints.put(side,
+                                 List.of(new FramePose3D(new Pose3D(0.3, side.negateIfRightSide(0.2), 0.2, 0.0, -Math.PI / 2.0, 0.0)),
+                                         new FramePose3D(new Pose3D(0.0, -0.6, 0.2, 0.0, -Math.PI / 2.0, Math.PI / 2.0)),
+                                         new FramePose3D(new Pose3D(0.3, side.negateIfRightSide(0.2), 0.2, 0.0, -Math.PI / 2.0, 0.0))));
+               break;
+            case HAND_CIRCLES:
+               getCircleWaypoints(poseWaypoints, 17);
+            default:
+               throw new RuntimeException("Unhandled trajectory type: " + trajectoryType);
+         }
+      }
+      return poseWaypoints;
+   }
+
+   private void createAndInitializeTrajectory(SideDependentList<List<FramePose3D>> poseWaypoints)
+   {
+      for (RobotSide side : RobotSide.values)
+      {
+         double numberOfWaypoints = poseWaypoints.get(side).size();
+
+         for (FramePose3D poseWaypoint : poseWaypoints.get(side))
+         {
+            // This assumes the waypoints are equally spaced in time.
+            double timeAtWayPoint = poseWaypoints.get(side).indexOf(poseWaypoint) * trajectoryTime / (numberOfWaypoints - 1.0);
+            multiWaypointTrajectories.get(side)
+                                     .appendPoseWaypoint(timeAtWayPoint,
+                                                         new FramePose3D(ReferenceFrame.getWorldFrame(), poseWaypoint),
+                                                         new FrameVector3D(),
+                                                         new FrameVector3D());
+         }
+         multiWaypointTrajectories.get(side).initialize();
+      }
+   }
+
+   private void computeHandPoseWaypoint(RobotSide robotSide, double time)
    {
       if (time >= trajectoryTime)
       {
@@ -56,52 +104,24 @@ public class RDXScriptedTrajectoryStreamer
          return;
       }
 
-      // Initialize the trajectory
-      if (!isInitialized)
-      {
-
-         for (RobotSide side : RobotSide.values)
-         {
-            Pose3D startPose = new Pose3D(0.3, side.negateIfRightSide(0.2), 0.2, 0.0, -Math.PI / 2.0, 0.0);
-            Pose3D midPose = new Pose3D(0.0, side.negateIfRightSide(0.6), 0.2, 0.0, -Math.PI / 2.0, side.negateIfRightSide(Math.PI / 2.0));
-            Pose3D endPose = new Pose3D(startPose);
-
-            multipleWaypointsTrajectories.get(side)
-                                         .appendPoseWaypoint(0.0,
-                                                             new FramePose3D(ReferenceFrame.getWorldFrame(), startPose),
-                                                             new FrameVector3D(),
-                                                             new FrameVector3D());
-            multipleWaypointsTrajectories.get(side)
-                                         .appendPoseWaypoint(trajectoryTime / 2.0,
-                                                             new FramePose3D(ReferenceFrame.getWorldFrame(), midPose),
-                                                             new FrameVector3D(),
-                                                             new FrameVector3D());
-            multipleWaypointsTrajectories.get(side)
-                                         .appendPoseWaypoint(trajectoryTime,
-                                                             new FramePose3D(ReferenceFrame.getWorldFrame(), endPose),
-                                                             new FrameVector3D(),
-                                                             new FrameVector3D());
-            multipleWaypointsTrajectories.get(side).initialize();
-         }
-         isInitialized = true;
-      }
-
-      // Compute the point along the trajectory
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         multipleWaypointsTrajectories.get(robotSide).compute(time);
-         handPose.put(robotSide, multipleWaypointsTrajectories.get(robotSide).getPose());
-      }
+      multiWaypointTrajectories.get(robotSide).compute(time);
+      currentHandPoses.put(robotSide, multiWaypointTrajectories.get(robotSide).getPose());
    }
 
-   public void handCirclesMotion(double t)
+   public FramePose3DReadOnly getHandPose(RobotSide robotSide, ScriptedTrajectoryType trajectoryType, double time)
    {
-      if (t >= trajectoryTime)
+      if (!initialize)
       {
-         isDone = true;
-         return;
+         createAndInitializeTrajectory(getPoseWaypoints(trajectoryType));
+         initialize = true;
       }
+      computeHandPoseWaypoint(robotSide, time);
 
+      return currentHandPoses.get(robotSide);
+   }
+
+   private void getCircleWaypoints(SideDependentList<List<FramePose3D>> poseWaypoints, int numberOfWaypoints)
+   {
       double circleRadius = 0.25;
       double circleFrequency = 0.25;
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(side -> new Point3D(0.3, side.negateIfRightSide(0.225), 0.0));
@@ -109,37 +129,26 @@ public class RDXScriptedTrajectoryStreamer
             new Vector3D(0.0, 0.0, 0.0) :
             new Vector3D());
 
-      //      for (double t = 0.0; t < trajectoryTime; t += streamPeriod)
-
       for (RobotSide robotSide : RobotSide.values)
       {
-         handPositions.put(robotSide,
-                           circlePositionAt(t,
-                                            robotSide.negateIfRightSide(circleFrequency),
-                                            circleRadius,
-                                            circleCenters.get(robotSide),
-                                            circleCenterVelocities.get(robotSide)));
+         ArrayList<FramePose3D> sidedPoseWaypointList = new ArrayList<>();
+         for (double i = 0; i < numberOfWaypoints; i++)
+         {
+            double time = i * trajectoryTime / (numberOfWaypoints - 1.0);
+            FramePoint3D position = circlePositionAt(time, circleFrequency, circleRadius, circleCenters.get(robotSide), circleCenterVelocities.get(robotSide));
+            FrameQuaternion orientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0, 1.0);
+            sidedPoseWaypointList.add(new FramePose3D(position, orientation));
+         }
+         poseWaypoints.put(robotSide, sidedPoseWaypointList);
       }
    }
 
-   public FramePoint3D getHandPosition(RobotSide robotSide, double time)
-   {
-      handCirclesMotion(time);
-      return handPositions.get(robotSide);
-   }
-
-   public FramePose3DReadOnly getHandPose(RobotSide robotSide, double time)
-   {
-      stretchOutArms(time);
-      return handPose.get(robotSide);
-   }
-
-   public static FramePoint3D circlePositionAt(double time, double frequency, double radius, Point3DReadOnly center)
+   private static FramePoint3D circlePositionAt(double time, double frequency, double radius, Point3DReadOnly center)
    {
       return circlePositionAt(time, frequency, radius, center, new Vector3D());
    }
 
-   public static FramePoint3D circlePositionAt(double time, double frequency, double radius, Point3DReadOnly center, Vector3DReadOnly centerVelocity)
+   private static FramePoint3D circlePositionAt(double time, double frequency, double radius, Point3DReadOnly center, Vector3DReadOnly centerVelocity)
    {
       double angle = 2.0 * Math.PI * frequency * time;
       Vector3D offset = new Vector3D(Axis3D.Z);
@@ -149,10 +158,5 @@ public class RDXScriptedTrajectoryStreamer
       position.add(center, offset);
       position.scaleAdd(time, centerVelocity, position);
       return position;
-   }
-
-   public enum ScriptedTrajectoryType
-   {
-      CIRCLE
    }
 }

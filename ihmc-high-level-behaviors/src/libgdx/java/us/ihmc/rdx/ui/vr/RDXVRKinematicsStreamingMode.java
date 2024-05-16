@@ -16,6 +16,7 @@ import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.rdx.ui.teleoperation.RDXScriptedTrajectoryStreamer;
+import us.ihmc.rdx.ui.teleoperation.RDXScriptedTrajectoryStreamer.ScriptedTrajectoryType;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.DeprecatedAPIs;
 import us.ihmc.communication.packets.MessageTools;
@@ -385,15 +386,19 @@ public class RDXVRKinematicsStreamingMode
                                                                                     }
                                                                                     else
                                                                                     {
-//                                                                                       message.getDesiredPositionInWorld().set(scriptedTrajectory.getHandPosition(
-//                                                                                             segmentType.getSegmentSide(),
-//                                                                                             scriptedTrajectoryTime));
-                                                                                       message.getDesiredPositionInWorld().set(scriptedTrajectory.getHandPose(
-                                                                                             segmentType.getSegmentSide(),
-                                                                                             scriptedTrajectoryTime).getPosition());
-                                                                                       message.getDesiredOrientationInWorld().set(scriptedTrajectory.getHandPose(
-                                                                                             segmentType.getSegmentSide(),
-                                                                                             scriptedTrajectoryTime).getOrientation());
+                                                                                       //                                                                                       message.getDesiredPositionInWorld().set(scriptedTrajectory.getHandPosition(
+                                                                                       //                                                                                             segmentType.getSegmentSide(),
+                                                                                       //                                                                                             scriptedTrajectoryTime));
+                                                                                       message.getDesiredPositionInWorld()
+                                                                                              .set(scriptedTrajectory.getHandPose(segmentType.getSegmentSide(),
+                                                                                                                                  ScriptedTrajectoryType.STRETCH_OUT_ARMS,
+                                                                                                                                  scriptedTrajectoryTime)
+                                                                                                                     .getPosition());
+                                                                                       message.getDesiredOrientationInWorld()
+                                                                                              .set(scriptedTrajectory.getHandPose(segmentType.getSegmentSide(),
+                                                                                                                                  ScriptedTrajectoryType.STRETCH_OUT_ARMS,
+                                                                                                                                  scriptedTrajectoryTime)
+                                                                                                                     .getOrientation());
                                                                                        scriptedTrajectoryTime += streamPeriod;
                                                                                     }
                                                                                  }
