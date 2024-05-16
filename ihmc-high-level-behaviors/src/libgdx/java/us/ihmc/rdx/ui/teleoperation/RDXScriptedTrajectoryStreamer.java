@@ -64,11 +64,13 @@ public class RDXScriptedTrajectoryStreamer
             case STRETCH_OUT_ARMS:
                poseWaypoints.put(side,
                                  List.of(new FramePose3D(new Pose3D(0.3, side.negateIfRightSide(0.2), 0.2, 0.0, -Math.PI / 2.0, 0.0)),
-                                         new FramePose3D(new Pose3D(0.0, -0.6, 0.2, 0.0, -Math.PI / 2.0, Math.PI / 2.0)),
+                                         new FramePose3D(new Pose3D(0.0, side.negateIfRightSide(0.6), 0.2, 0.0, -Math.PI / 2.0, side.negateIfRightSide(Math.PI / 2.0))),
                                          new FramePose3D(new Pose3D(0.3, side.negateIfRightSide(0.2), 0.2, 0.0, -Math.PI / 2.0, 0.0))));
                break;
             case HAND_CIRCLES:
+               //TODO: this is really choppy with 0 velocity at all the waypoints, consider adjusting or removing
                getCircleWaypoints(poseWaypoints, 17);
+               break;
             default:
                throw new RuntimeException("Unhandled trajectory type: " + trajectoryType);
          }
@@ -82,13 +84,14 @@ public class RDXScriptedTrajectoryStreamer
       {
          double numberOfWaypoints = poseWaypoints.get(side).size();
 
-         for (FramePose3D poseWaypoint : poseWaypoints.get(side))
+         for (int i =0; i < numberOfWaypoints; i++)
          {
             // This assumes the waypoints are equally spaced in time.
-            double timeAtWayPoint = poseWaypoints.get(side).indexOf(poseWaypoint) * trajectoryTime / (numberOfWaypoints - 1.0);
+            double timeAtWayPoint = i * trajectoryTime / (numberOfWaypoints - 1.0);
+            System.out.println("time at waypoint = " + timeAtWayPoint);
             multiWaypointTrajectories.get(side)
                                      .appendPoseWaypoint(timeAtWayPoint,
-                                                         new FramePose3D(ReferenceFrame.getWorldFrame(), poseWaypoint),
+                                                         new FramePose3D(ReferenceFrame.getWorldFrame(), poseWaypoints.get(side).get(i)),
                                                          new FrameVector3D(),
                                                          new FrameVector3D());
          }
