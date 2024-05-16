@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.controlModules.multiContact;
 
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+
 /**
  * Interface for modifying the whole-body posture of the robot.
  * Setpoints from this class are propagated down to the respective control modules for root joint position/orientation and joint angles.
@@ -50,6 +53,21 @@ public interface WholeBodyPostureAdjustmentProvider
     */
    double getFloatingBaseAccelerationOffsetZ();
 
+   /**
+    * Desired orientation offset of the floating-base (pelvis). Used in ControllerPelvisOrientationManager
+    */
+   void packFloatingBaseOrientationOffset(FrameQuaternionBasics orientationOffsetToPack);
+
+   /**
+    * Desired angular velocity offset of the floating-base (pelvis). Used in ControllerPelvisOrientationManager
+    */
+   void packFloatingBaseAngularVelocityOffset(FrameVector3DBasics angularVelocityToPack);
+
+   /**
+    * Desired angular acceleration offset of the floating-base (pelvis). Used in ControllerPelvisOrientationManager
+    */
+   void packFloatingBaseAngularAccelerationOffset(FrameVector3DBasics angularAccelerationToPack);
+
    static WholeBodyPostureAdjustmentProvider createZeroPostureAdjustmentProvider()
    {
       return new WholeBodyPostureAdjustmentProvider()
@@ -99,6 +117,24 @@ public interface WholeBodyPostureAdjustmentProvider
          public double getFloatingBaseAccelerationOffsetZ()
          {
             return 0.0;
+         }
+
+         @Override
+         public void packFloatingBaseOrientationOffset(FrameQuaternionBasics orientationToPack)
+         {
+            orientationToPack.setToZero();
+         }
+
+         @Override
+         public void packFloatingBaseAngularVelocityOffset(FrameVector3DBasics angularVelocityToPack)
+         {
+            angularVelocityToPack.setToZero();
+         }
+
+         @Override
+         public void packFloatingBaseAngularAccelerationOffset(FrameVector3DBasics angularAccelerationToPack)
+         {
+            angularAccelerationToPack.setToZero();
          }
       };
    }

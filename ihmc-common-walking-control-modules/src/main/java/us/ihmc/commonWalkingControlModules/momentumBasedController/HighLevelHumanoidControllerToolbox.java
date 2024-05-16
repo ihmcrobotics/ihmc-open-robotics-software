@@ -429,6 +429,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
       centerOfMassStateProvider.updateState(); // Needs to be updated before the frames, as it is need to update the CoM frame.
       referenceFrames.updateFrames();
+      postureAdjustmentProvider.update();
 
       if (referenceFramesVisualizer != null)
          referenceFramesVisualizer.update();
@@ -450,8 +451,6 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                handWrenchCalculators.get(robotSide).compute();
          }
       }
-
-      postureAdjustmentProvider.update();
 
       for (int i = 0; i < updatables.size(); i++)
          updatables.get(i).update(yoTime.getDoubleValue());
@@ -1116,7 +1115,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    public void setupDiagnosticPostureAdjustmentProvider()
    {
-      postureAdjustmentProvider = new DiagnosticPostureAdjustmentCalculator(controlledOneDoFJoints, controlDT, registry);
+      postureAdjustmentProvider = new DiagnosticPostureAdjustmentCalculator(controlledOneDoFJoints, referenceFrames.getMidFeetZUpFrame(), controlDT, registry);
    }
 
    public WholeBodyPostureAdjustmentProvider getPostureAdjustmentProvider()

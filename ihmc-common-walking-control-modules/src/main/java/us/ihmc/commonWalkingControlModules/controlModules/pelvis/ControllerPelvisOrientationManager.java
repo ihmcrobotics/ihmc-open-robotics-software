@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.pelvis;
 
+import us.ihmc.commonWalkingControlModules.controlModules.multiContact.WholeBodyPostureAdjustmentProvider;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -64,6 +65,11 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
    private final ReferenceFrame nextSoleZUpFrame;
    private final ReferenceFrame nextSoleFrame;
 
+   private final WholeBodyPostureAdjustmentProvider postureAdjustmentProvider;
+   private final FrameQuaternion pelvisOrientationOffset = new FrameQuaternion();
+   private final FrameVector3D pelvisAngularVelocityOffset = new FrameVector3D();
+   private final FrameVector3D pelvisAngularAccelerationOffset = new FrameVector3D();
+
    public ControllerPelvisOrientationManager(PID3DGainsReadOnly gains, HighLevelHumanoidControllerToolbox controllerToolbox, YoRegistry parentRegistry)
    {
       yoTime = controllerToolbox.getYoTime();
@@ -71,6 +77,7 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       midFeetZUpGroundFrame = referenceFrames.getMidFootZUpGroundFrame();
       soleZUpFrames = referenceFrames.getSoleZUpFrames();
       pelvisFrame = referenceFrames.getPelvisFrame();
+      postureAdjustmentProvider = controllerToolbox.getPostureAdjustmentProvider();
 
       pelvisOrientationTrajectoryGenerator = new SimpleOrientationTrajectoryGenerator("pelvis", true, worldFrame, registry);
 
@@ -161,6 +168,21 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
       double deltaTimeOffset = yoTime.getDoubleValue() - initialPelvisOrientationOffsetTime.getDoubleValue();
       pelvisOrientationOffsetTrajectoryGenerator.compute(deltaTimeOffset);
       pelvisOrientationOffsetTrajectoryGenerator.getAngularData(tempOrientation, tempAngularVelocity, tempAngularAcceleration);
+
+      if (postureAdjustmentProvider.isEnabled())
+      {
+         postureAdjustmentProvider.packFloatingBaseOrientationOffset(pelvisOrientationOffset);
+         postureAdjustmentProvider.packFloatingBaseAngularVelocityOffset(pelvisAngularVelocityOffset);
+         postureAdjustmentProvider.packFloatingBaseAngularAccelerationOffset(pelvisAngularAccelerationOffset);
+
+         tempOrientation.changeFrame(pelvisOrientationOffset.getReferenceFrame());
+         tempAngularVelocity.changeFrame(pelvisOrientationOffset.getReferenceFrame());
+         tempAngularAcceleration.changeFrame(pelvisOrientationOffset.getReferenceFrame());
+
+         tempOrientation.append(pelvisOrientationOffset);
+         tempAngularVelocity.add(pelvisAngularVelocityOffset);
+         tempAngularAcceleration.add(pelvisAngularAccelerationOffset);
+      }
 
       tempOrientation.changeFrame(worldFrame);
       tempAngularVelocity.changeFrame(worldFrame);
