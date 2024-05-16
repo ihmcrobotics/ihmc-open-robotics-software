@@ -9,7 +9,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -20,21 +22,26 @@ import java.util.List;
 public class RDXScriptedTrajectoryStreamer
 {
    private final double trajectoryTime;
-   private final SideDependentList<MultipleWaypointsPoseTrajectoryGenerator> multiWaypointTrajectories = new SideDependentList<>();
+   private final SideDependentList<MultipleWaypointsPoseTrajectoryGenerator> multiWaypointPoseTrajectories = new SideDependentList<>();
+   private final SideDependentList<MultipleWaypointsTrajectoryGenerator> multiWaypointJointTrajectories = new SideDependentList<>();
    private boolean isDone = false;
    private boolean initialize = false;
-   private final SideDependentList<FramePoint3D> currentHandPositions = new SideDependentList<>(side -> new FramePoint3D());
-   private final SideDependentList<FramePose3DReadOnly> currentHandPoses = new SideDependentList<>(side -> new FramePose3D());
+   private final SideDependentList<FramePose3DReadOnly> desiredHandPoses = new SideDependentList<>(side -> new FramePose3D());
+   private final SideDependentList<OneDoFJointBasics[]> armJoints;
 
-   public RDXScriptedTrajectoryStreamer(double trajectoryTime)
+   public RDXScriptedTrajectoryStreamer(SideDependentList<OneDoFJointBasics[]> armJoints, double trajectoryTime)
    {
       this.trajectoryTime = trajectoryTime;
+      this.armJoints = armJoints;
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       for (RobotSide side : RobotSide.values)
       {
-         multiWaypointTrajectories.put(side, new MultipleWaypointsPoseTrajectoryGenerator(side.getLowerCaseName() + "_scriptedTrajectory", 17, registry));
-         multiWaypointTrajectories.get(side).clear(ReferenceFrame.getWorldFrame());
+         multiWaypointPoseTrajectories.put(side, new MultipleWaypointsPoseTrajectoryGenerator(side.getLowerCaseName() + "_scriptedPoseTrajectory", 17, registry));
+         multiWaypointPoseTrajectories.get(side).clear(ReferenceFrame.getWorldFrame());
+
+         multiWaypointJointTrajectories.put(side, new MultipleWaypointsTrajectoryGenerator(side.getLowerCaseName() + "_scriptedJointTrajectory", 17, registry));
+         multiWaypointJointTrajectories.get(side).clear();
       }
    }
 
@@ -64,7 +71,7 @@ public class RDXScriptedTrajectoryStreamer
             case STRETCH_OUT_ARMS:
                poseWaypoints.put(side,
                                  List.of(new FramePose3D(new Pose3D(0.3, side.negateIfRightSide(0.2), 0.2, 0.0, -Math.PI / 2.0, 0.0)),
-                                         new FramePose3D(new Pose3D(0.0, side.negateIfRightSide(0.6), 0.2, 0.0, -Math.PI / 2.0, side.negateIfRightSide(Math.PI / 2.0))),
+                                         new FramePose3D(new Pose3D(0.0, side.negateIfRightSide(0.8), 0.2, 0.0, -Math.PI / 2.0, side.negateIfRightSide(Math.PI / 2.0))),
                                          new FramePose3D(new Pose3D(0.3, side.negateIfRightSide(0.2), 0.2, 0.0, -Math.PI / 2.0, 0.0))));
                break;
             case HAND_CIRCLES:
@@ -89,13 +96,13 @@ public class RDXScriptedTrajectoryStreamer
             // This assumes the waypoints are equally spaced in time.
             double timeAtWayPoint = i * trajectoryTime / (numberOfWaypoints - 1.0);
             System.out.println("time at waypoint = " + timeAtWayPoint);
-            multiWaypointTrajectories.get(side)
-                                     .appendPoseWaypoint(timeAtWayPoint,
+            multiWaypointPoseTrajectories.get(side)
+                                         .appendPoseWaypoint(timeAtWayPoint,
                                                          new FramePose3D(ReferenceFrame.getWorldFrame(), poseWaypoints.get(side).get(i)),
                                                          new FrameVector3D(),
                                                          new FrameVector3D());
          }
-         multiWaypointTrajectories.get(side).initialize();
+         multiWaypointPoseTrajectories.get(side).initialize();
       }
    }
 
@@ -107,8 +114,8 @@ public class RDXScriptedTrajectoryStreamer
          return;
       }
 
-      multiWaypointTrajectories.get(robotSide).compute(time);
-      currentHandPoses.put(robotSide, multiWaypointTrajectories.get(robotSide).getPose());
+      multiWaypointPoseTrajectories.get(robotSide).compute(time);
+      desiredHandPoses.put(robotSide, multiWaypointPoseTrajectories.get(robotSide).getPose());
    }
 
    public FramePose3DReadOnly getHandPose(RobotSide robotSide, ScriptedTrajectoryType trajectoryType, double time)
@@ -120,7 +127,13 @@ public class RDXScriptedTrajectoryStreamer
       }
       computeHandPoseWaypoint(robotSide, time);
 
-      return currentHandPoses.get(robotSide);
+      return desiredHandPoses.get(robotSide);
+   }
+
+   public double getJointAngle(RobotSide side, ScriptedTrajectoryType scriptedTrajectoryType, double scriptedTrajectoryTime, int i)
+   {
+      //TODO: Implement this method
+      return 0;
    }
 
    private void getCircleWaypoints(SideDependentList<List<FramePose3D>> poseWaypoints, int numberOfWaypoints)
