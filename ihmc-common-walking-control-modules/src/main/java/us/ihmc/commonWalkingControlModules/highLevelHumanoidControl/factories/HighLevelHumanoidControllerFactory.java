@@ -543,7 +543,9 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          createQueuedControllerCommandGenerator(controllerCommands);
       if (createUserDesiredControllerCommandGenerator)
          createUserDesiredControllerCommandGenerator();
-      controllerToolbox.setupDiagnosticPostureAdjustmentProvider();
+
+//      controllerToolbox.setupDiagnosticPostureAdjustmentProvider();
+      controllerToolbox.setupMultiContactPostureAdjustmentProvider();
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();

@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.contact.HandWrenchCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.multiContact.DiagnosticPostureAdjustmentCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.multiContact.MultiContactPostureAdjustmentCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.multiContact.WholeBodyPostureAdjustmentProvider;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -1116,6 +1117,11 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    public void setupDiagnosticPostureAdjustmentProvider()
    {
       postureAdjustmentProvider = new DiagnosticPostureAdjustmentCalculator(controlledOneDoFJoints, referenceFrames.getMidFeetZUpFrame(), controlDT, registry);
+   }
+
+   public void setupMultiContactPostureAdjustmentProvider()
+   {
+      postureAdjustmentProvider = new MultiContactPostureAdjustmentCalculator(multiContactRegionCalculator, wholeBodyContactState, registry);
    }
 
    public WholeBodyPostureAdjustmentProvider getPostureAdjustmentProvider()
