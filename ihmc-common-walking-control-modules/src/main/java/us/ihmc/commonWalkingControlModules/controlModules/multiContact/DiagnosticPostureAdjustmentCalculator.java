@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.multiContact;
 
-import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorNew;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -8,29 +7,23 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WholeBodyPostureAdjustmentCalculator implements WholeBodyPostureAdjustmentProvider
+public class DiagnosticPostureAdjustmentCalculator implements WholeBodyPostureAdjustmentProvider
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final HighLevelHumanoidControllerToolbox controllerToolbox;
-
-   /* Diagnostic tools */
    private final YoFunctionGeneratorNew[] functionGenerators;
    private final Map<String, YoFunctionGeneratorNew> jointNameToGenerator = new HashMap<>();
 
-   public WholeBodyPostureAdjustmentCalculator(HighLevelHumanoidControllerToolbox controllerToolbox)
+   public DiagnosticPostureAdjustmentCalculator(OneDoFJointBasics[] oneDoFJoints, double controlDT, YoRegistry parentRegistry)
    {
-      this.controllerToolbox = controllerToolbox;
-
-      OneDoFJointBasics[] oneDoFJoints = controllerToolbox.getControlledOneDoFJoints();
       functionGenerators = new YoFunctionGeneratorNew[oneDoFJoints.length];
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         functionGenerators[i] = new YoFunctionGeneratorNew("mc_posture_" + oneDoFJoints[i].getName(), controllerToolbox.getControlDT(), registry);
+         functionGenerators[i] = new YoFunctionGeneratorNew("diagnostic_posture_" + oneDoFJoints[i].getName(), controlDT, registry);
          jointNameToGenerator.put(oneDoFJoints[i].getName(), functionGenerators[i]);
       }
 
-      controllerToolbox.getYoVariableRegistry().addChild(registry);
+      parentRegistry.addChild(registry);
    }
 
    public void update()
@@ -50,12 +43,18 @@ public class WholeBodyPostureAdjustmentCalculator implements WholeBodyPostureAdj
    @Override
    public double getDesiredJointPositionOffset(String jointName)
    {
-      return 0;
+      return jointNameToGenerator.get(jointName).getValue();
    }
 
    @Override
    public double getDesiredJointVelocityOffset(String jointName)
    {
-      return 0;
+      return jointNameToGenerator.get(jointName).getValueDot();
+   }
+
+   @Override
+   public double getDesiredJointAccelerationOffset(String jointName)
+   {
+      return jointNameToGenerator.get(jointName).getValueDot();
    }
 }

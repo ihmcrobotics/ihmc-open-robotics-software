@@ -6,6 +6,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.contact.HandWrenchCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
+import us.ihmc.commonWalkingControlModules.controlModules.multiContact.DiagnosticPostureAdjustmentCalculator;
+import us.ihmc.commonWalkingControlModules.controlModules.multiContact.WholeBodyPostureAdjustmentProvider;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
@@ -171,6 +173,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final CenterOfMassStabilityMarginRegionCalculator multiContactRegionCalculator;
    private final YoBoolean updateWholeBodyContactState = new YoBoolean("updateWholeBodyContactState", registry);
    private final WholeBodyContactState wholeBodyContactState;
+
+   private WholeBodyPostureAdjustmentProvider postureAdjustmentProvider = WholeBodyPostureAdjustmentProvider.createZeroPostureAdjustmentProvider();
 
    private final ExecutionTimer multiContactCoMTimer = new ExecutionTimer("multiContactCoMTotalTimer", registry);
    private final ExecutionTimer contactStateUpdateTimer = new ExecutionTimer("contactStateUpdateTimer", registry);
@@ -446,6 +450,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                handWrenchCalculators.get(robotSide).compute();
          }
       }
+
+      postureAdjustmentProvider.update();
 
       for (int i = 0; i < updatables.size(); i++)
          updatables.get(i).update(yoTime.getDoubleValue());
@@ -1106,6 +1112,16 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       }
 
       multiContactCoMTimer.stopMeasurement();
+   }
+
+   public void setupDiagnosticPostureAdjustmentProvider()
+   {
+      postureAdjustmentProvider = new DiagnosticPostureAdjustmentCalculator(controlledOneDoFJoints, controlDT, registry);
+   }
+
+   public WholeBodyPostureAdjustmentProvider getPostureAdjustmentProvider()
+   {
+      return postureAdjustmentProvider;
    }
 
    @Override

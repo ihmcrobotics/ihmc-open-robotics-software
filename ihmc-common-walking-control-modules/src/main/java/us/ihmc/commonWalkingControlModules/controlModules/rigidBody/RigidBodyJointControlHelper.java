@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
 import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValidationTools;
+import us.ihmc.commonWalkingControlModules.controlModules.multiContact.WholeBodyPostureAdjustmentProvider;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
 import us.ihmc.commons.Conversions;
@@ -71,6 +72,7 @@ public class RigidBodyJointControlHelper
    private final List<PIDGainsReadOnly> gains = new ArrayList<>();
    private final List<YoFunctionGeneratorNew> functionGenerators = new ArrayList<>();
    private final FunctionGeneratorErrorCalculator functionGeneratorErrorCalculator;
+   private final WholeBodyPostureAdjustmentProvider postureAdjustmentProvider;
 
    private final YoBoolean hasWeights;
    private final YoBoolean hasGains;
@@ -83,7 +85,13 @@ public class RigidBodyJointControlHelper
 
    private final DoubleProvider time;
 
-   public RigidBodyJointControlHelper(String bodyName, OneDoFJointBasics[] jointsToControl, DoubleProvider time, double controlDT, boolean enableFunctionGenerators, YoRegistry parentRegistry)
+   public RigidBodyJointControlHelper(String bodyName,
+                                      OneDoFJointBasics[] jointsToControl,
+                                      DoubleProvider time,
+                                      double controlDT,
+                                      boolean enableFunctionGenerators,
+                                      WholeBodyPostureAdjustmentProvider postureAdjustmentProvider,
+                                      YoRegistry parentRegistry)
    {
       warningPrefix = shortName + " for " + bodyName + ": ";
       registry = new YoRegistry(bodyName + shortName);
@@ -98,6 +106,7 @@ public class RigidBodyJointControlHelper
       hasGains = new YoBoolean(prefix + "HasGains", registry);
       usingWeightFromMessage = new YoBoolean(prefix + "UsingWeightFromMessage", registry);
       functionGeneratorErrorCalculator = enableFunctionGenerators ? new FunctionGeneratorErrorCalculator(bodyName, controlDT, registry) : null;
+      this.postureAdjustmentProvider = postureAdjustmentProvider;
 
       for (int jointIdx = 0; jointIdx < jointsToControl.length; jointIdx++)
       {
@@ -620,6 +629,10 @@ public class RigidBodyJointControlHelper
       {
          desiredPosition += functionGenerators.get(jointIdx).getValue();
       }
+      if (postureAdjustmentProvider.isEnabled())
+      {
+         desiredPosition += postureAdjustmentProvider.getDesiredJointPositionOffset(joints[jointIdx].getName());
+      }
       return desiredPosition;
    }
 
@@ -638,6 +651,10 @@ public class RigidBodyJointControlHelper
       {
          desiredVelocity += functionGenerators.get(jointIdx).getValueDot();
       }
+      if (postureAdjustmentProvider.isEnabled())
+      {
+         desiredVelocity += postureAdjustmentProvider.getDesiredJointVelocityOffset(joints[jointIdx].getName());
+      }
       return desiredVelocity;
    }
 
@@ -647,6 +664,10 @@ public class RigidBodyJointControlHelper
       if (!functionGenerators.isEmpty())
       {
          desiredAcceleration += functionGenerators.get(jointIdx).getValueDDot();
+      }
+      if (postureAdjustmentProvider.isEnabled())
+      {
+         desiredAcceleration += postureAdjustmentProvider.getDesiredJointAccelerationOffset(joints[jointIdx].getName());
       }
       return desiredAcceleration;
    }
