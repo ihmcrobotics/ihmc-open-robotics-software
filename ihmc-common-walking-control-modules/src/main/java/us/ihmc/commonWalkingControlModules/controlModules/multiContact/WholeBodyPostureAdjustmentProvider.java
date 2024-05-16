@@ -12,6 +12,12 @@ public interface WholeBodyPostureAdjustmentProvider
 
    double getDesiredJointAccelerationOffset(String jointName);
 
+   double getFloatingBasePositionOffsetZ();
+
+   double getFloatingBaseVelocityOffsetZ();
+
+   double getFloatingBaseAccelerationOffsetZ();
+
    static WholeBodyPostureAdjustmentProvider createZeroPostureAdjustmentProvider()
    {
       return new WholeBodyPostureAdjustmentProvider()
@@ -41,6 +47,24 @@ public interface WholeBodyPostureAdjustmentProvider
 
          @Override
          public double getDesiredJointAccelerationOffset(String jointName)
+         {
+            return 0.0;
+         }
+
+         @Override
+         public double getFloatingBasePositionOffsetZ()
+         {
+            return 0.0;
+         }
+
+         @Override
+         public double getFloatingBaseVelocityOffsetZ()
+         {
+            return 0.0;
+         }
+
+         @Override
+         public double getFloatingBaseAccelerationOffsetZ()
          {
             return 0.0;
          }

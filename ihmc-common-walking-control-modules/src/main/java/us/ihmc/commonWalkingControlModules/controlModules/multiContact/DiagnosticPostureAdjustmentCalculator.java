@@ -10,17 +10,23 @@ import java.util.Map;
 public class DiagnosticPostureAdjustmentCalculator implements WholeBodyPostureAdjustmentProvider
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final YoFunctionGeneratorNew[] functionGenerators;
-   private final Map<String, YoFunctionGeneratorNew> jointNameToGenerator = new HashMap<>();
+
+   private final YoFunctionGeneratorNew[] oneDoFJointFunctionGenerators;
+   private final YoFunctionGeneratorNew pelvisHeightFunctionGenerator;
+
+   private final Map<String, YoFunctionGeneratorNew> oneDoFJointNameToGenerator = new HashMap<>();
 
    public DiagnosticPostureAdjustmentCalculator(OneDoFJointBasics[] oneDoFJoints, double controlDT, YoRegistry parentRegistry)
    {
-      functionGenerators = new YoFunctionGeneratorNew[oneDoFJoints.length];
+      oneDoFJointFunctionGenerators = new YoFunctionGeneratorNew[oneDoFJoints.length];
+
+      String prefix = "diagnostic_posture_";
+      pelvisHeightFunctionGenerator = new YoFunctionGeneratorNew(prefix + "PelvisHeight", controlDT, registry);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
-         functionGenerators[i] = new YoFunctionGeneratorNew("diagnostic_posture_" + oneDoFJoints[i].getName(), controlDT, registry);
-         jointNameToGenerator.put(oneDoFJoints[i].getName(), functionGenerators[i]);
+         oneDoFJointFunctionGenerators[i] = new YoFunctionGeneratorNew(prefix + oneDoFJoints[i].getName(), controlDT, registry);
+         oneDoFJointNameToGenerator.put(oneDoFJoints[i].getName(), oneDoFJointFunctionGenerators[i]);
       }
 
       parentRegistry.addChild(registry);
@@ -28,9 +34,11 @@ public class DiagnosticPostureAdjustmentCalculator implements WholeBodyPostureAd
 
    public void update()
    {
-      for (int i = 0; i < functionGenerators.length; i++)
+      pelvisHeightFunctionGenerator.update();
+
+      for (int i = 0; i < oneDoFJointFunctionGenerators.length; i++)
       {
-         functionGenerators[i].update();
+         oneDoFJointFunctionGenerators[i].update();
       }
    }
 
@@ -43,18 +51,36 @@ public class DiagnosticPostureAdjustmentCalculator implements WholeBodyPostureAd
    @Override
    public double getDesiredJointPositionOffset(String jointName)
    {
-      return jointNameToGenerator.get(jointName).getValue();
+      return oneDoFJointNameToGenerator.get(jointName).getValue();
    }
 
    @Override
    public double getDesiredJointVelocityOffset(String jointName)
    {
-      return jointNameToGenerator.get(jointName).getValueDot();
+      return oneDoFJointNameToGenerator.get(jointName).getValueDot();
    }
 
    @Override
    public double getDesiredJointAccelerationOffset(String jointName)
    {
-      return jointNameToGenerator.get(jointName).getValueDot();
+      return oneDoFJointNameToGenerator.get(jointName).getValueDDot();
+   }
+
+   @Override
+   public double getFloatingBasePositionOffsetZ()
+   {
+      return pelvisHeightFunctionGenerator.getValue();
+   }
+
+   @Override
+   public double getFloatingBaseVelocityOffsetZ()
+   {
+      return pelvisHeightFunctionGenerator.getValueDot();
+   }
+
+   @Override
+   public double getFloatingBaseAccelerationOffsetZ()
+   {
+      return pelvisHeightFunctionGenerator.getValueDDot();
    }
 }
