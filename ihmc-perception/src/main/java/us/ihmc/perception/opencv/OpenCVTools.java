@@ -4,6 +4,7 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacv.Java2DFrameUtils;
 import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_cudaarithm;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.*;
@@ -137,6 +138,44 @@ public class OpenCVTools
       double sigmaY = sigmaX;
       int borderType = opencv_core.BORDER_DEFAULT;
       opencv_imgproc.GaussianBlur(sourceImage, destinationImage, gaussianKernelSize, sigmaX, sigmaY, borderType);
+   }
+
+   /**
+    * Like OpenCV's inRange() function, but for GPU mats
+    * @param sourceMat Source mat
+    * @param lowerBound lower boundary
+    * @param upperBound upper boundary
+    * @return An CV_8UC1 mask of same size as the sourceMat
+    */
+   public static GpuMat cudaInRange(GpuMat sourceMat, Scalar lowerBound, Scalar upperBound)
+   {
+      int numberOfChannels = sourceMat.channels();
+      if (numberOfChannels > 4)
+         throw new IllegalArgumentException("The source Mat cannot have more than 4 channels");
+
+      GpuMat resultMat = new GpuMat(sourceMat.size(), opencv_core.CV_8UC1, new Scalar(255.0));
+
+      GpuMatVector sourceMatChannels = new GpuMatVector();
+      opencv_cudaarithm.split(sourceMat, sourceMatChannels);
+
+      GpuMat lowerBoundChannel = new GpuMat(sourceMat.size(), opencv_core.CV_8UC1);
+      GpuMat upperBoundChannel= new GpuMat(sourceMat.size(), opencv_core.CV_8UC1);
+      GpuMat inRangeChannel = new GpuMat(sourceMat.size(), opencv_core.CV_8UC1);
+
+      for (int i = 0; i < numberOfChannels; ++i)
+      {
+         GpuMat channel = sourceMatChannels.get(i);
+         // threshold the lower bound
+         opencv_cudaarithm.threshold(channel, lowerBoundChannel, lowerBound.get(i), 255.0, opencv_imgproc.THRESH_BINARY);
+         // threshold the upper bound
+         opencv_cudaarithm.threshold(channel, upperBoundChannel, upperBound.get(i), 255.0, opencv_imgproc.THRESH_BINARY_INV);
+         // bitwise AND to get inRange result
+         opencv_cudaarithm.bitwise_and(upperBoundChannel, lowerBoundChannel, inRangeChannel);
+         // bitwise AND with current result to get final result
+         opencv_cudaarithm.bitwise_and(inRangeChannel, resultMat, resultMat);
+      }
+
+      return resultMat;
    }
 
    public static Mat convertBufferedImageToMat(BufferedImage image)
