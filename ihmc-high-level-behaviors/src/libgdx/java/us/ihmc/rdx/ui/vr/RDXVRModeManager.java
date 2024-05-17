@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.thread.Notification;
@@ -18,7 +19,6 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDX3DSituatedImGuiPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -30,6 +30,7 @@ import java.util.Set;
 public class RDXVRModeManager
 {
    private RDXVRKinematicsStreamingMode kinematicsStreamingMode;
+   private RDXScriptedMotionMode scriptedMotionMode;
    private RDX3DSituatedImGuiPanel leftHandPanel;
    private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -64,6 +65,9 @@ public class RDXVRModeManager
       {
          kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot, controllerHelper, retargetingParameters, sceneGraph);
          kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
+
+         scriptedMotionMode = new RDXScriptedMotionMode(syncedRobot, controllerHelper, retargetingParameters, sceneGraph);
+         scriptedMotionMode.create(baseUI.getVRManager().getContext());
       }
 
       baseUI.getImGuiPanelManager().addPanel("VR Mode Manager", this::renderImGuiWidgets);
@@ -97,12 +101,34 @@ public class RDXVRModeManager
          });
       }
 
+      vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
+                                                             {
+                                                                InputDigitalActionData bButton = controller.getBButtonActionData();
+                                                                if (bButton.bChanged() && !bButton.bState())
+                                                                {
+                                                                   //TODO: switch modes here instead of executing scripted
+                                                                   if (mode == RDXVRMode.SCRIPTED_MOTION && !scriptedMotionMode.isScriptedMotionExecuting())
+                                                                   {
+                                                                      mode = RDXVRMode.WHOLE_BODY_IK_STREAMING;
+                                                                   }
+                                                                   else if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING)
+                                                                   {
+                                                                      mode = RDXVRMode.SCRIPTED_MOTION;
+                                                                   }
+                                                                }
+                                                             });
+
       switch (mode)
       {
          case WHOLE_BODY_IK_STREAMING ->
          {
             if (kinematicsStreamingMode != null)
                kinematicsStreamingMode.processVRInput(vrContext);
+         }
+         case SCRIPTED_MOTION ->
+         {
+            if (scriptedMotionMode != null)
+               scriptedMotionMode.processVRInput(vrContext);
          }
       }
    }
@@ -111,6 +137,8 @@ public class RDXVRModeManager
    {
       if (kinematicsStreamingMode != null)
          kinematicsStreamingMode.update(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING);
+      if (scriptedMotionMode != null)
+         scriptedMotionMode.update(mode == RDXVRMode.SCRIPTED_MOTION);
       leftHandPanel.update();
    }
 
@@ -119,6 +147,7 @@ public class RDXVRModeManager
       ImGui.text("Teleport: Right B button");
       ImGui.text("Adjust user Z height: Right touchpad up/down");
       ImGui.text("ImGui panels: Point and use right trigger to click and drag");
+
       if (ImGui.checkbox(labels.get("Floating video panel"), showFloatingVideoPanel))
       {
          if (showFloatingVideoPanel.get())
@@ -142,17 +171,13 @@ public class RDXVRModeManager
       {
          mode = RDXVRMode.INPUTS_DISABLED;
       }
-      if (ImGui.radioButton(labels.get("Footstep placement"), mode == RDXVRMode.FOOTSTEP_PLACEMENT))
-      {
-         mode = RDXVRMode.FOOTSTEP_PLACEMENT;
-      }
       if (ImGui.radioButton(labels.get("Whole body IK streaming"), mode == RDXVRMode.WHOLE_BODY_IK_STREAMING))
       {
          mode = RDXVRMode.WHOLE_BODY_IK_STREAMING;
       }
-      if (ImGui.radioButton(labels.get("Joystick walking"), mode == RDXVRMode.JOYSTICK_WALKING))
+      if (ImGui.radioButton(labels.get("Scripted motion"), mode == RDXVRMode.SCRIPTED_MOTION))
       {
-         mode = RDXVRMode.JOYSTICK_WALKING;
+         mode = RDXVRMode.SCRIPTED_MOTION;
       }
 
       switch (mode)
@@ -165,6 +190,11 @@ public class RDXVRModeManager
          {
             if (kinematicsStreamingMode != null)
                kinematicsStreamingMode.renderImGuiWidgets();
+         }
+         case SCRIPTED_MOTION ->
+         {
+            if (scriptedMotionMode != null)
+               scriptedMotionMode.renderImGuiWidgets();
          }
       }
    }

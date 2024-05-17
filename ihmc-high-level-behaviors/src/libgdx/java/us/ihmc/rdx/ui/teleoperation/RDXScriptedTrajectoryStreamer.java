@@ -1,5 +1,8 @@
 package us.ihmc.rdx.ui.teleoperation;
 
+import controller_msgs.msg.dds.ArmTrajectoryMessage;
+import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.*;
@@ -9,6 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
@@ -47,7 +51,7 @@ public class RDXScriptedTrajectoryStreamer
 
    public enum ScriptedTrajectoryType
    {
-      HAND_CIRCLES, STRETCH_OUT_ARMS
+      HAND_CIRCLES, STRETCH_OUT_ARMS, JOINT_RANGE_OF_MOTION
    }
 
    public boolean isDone()
@@ -70,9 +74,9 @@ public class RDXScriptedTrajectoryStreamer
          {
             case STRETCH_OUT_ARMS:
                poseWaypoints.put(side,
-                                 List.of(new FramePose3D(new Pose3D(0.3, side.negateIfRightSide(0.2), 0.2, 0.0, -Math.PI / 2.0, 0.0)),
-                                         new FramePose3D(new Pose3D(0.0, side.negateIfRightSide(0.8), 0.2, 0.0, -Math.PI / 2.0, side.negateIfRightSide(Math.PI / 2.0))),
-                                         new FramePose3D(new Pose3D(0.3, side.negateIfRightSide(0.2), 0.2, 0.0, -Math.PI / 2.0, 0.0))));
+                                 List.of(new FramePose3D(new Pose3D(0.3, side.negateIfRightSide(0.2), 0.2, 0.0, 0.0, 0.0)),
+                                         new FramePose3D(new Pose3D(0.0, side.negateIfRightSide(1.0), 0.2, 0.0, 0.0, side.negateIfRightSide(Math.PI / 2.0))),
+                                         new FramePose3D(new Pose3D(0.3, side.negateIfRightSide(0.2), 0.2, 0.0, 0.0, 0.0))));
                break;
             case HAND_CIRCLES:
                //TODO: this is really choppy with 0 velocity at all the waypoints, consider adjusting or removing
@@ -85,7 +89,20 @@ public class RDXScriptedTrajectoryStreamer
       return poseWaypoints;
    }
 
-   private void createAndInitializeTrajectory(SideDependentList<List<FramePose3D>> poseWaypoints)
+   private List<List<Double>> getJointAngleWaypoints(ScriptedTrajectoryType trajectoryType)
+   {
+      switch (trajectoryType)
+      {
+         case JOINT_RANGE_OF_MOTION:
+            return List.of(List.of(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                           List.of(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
+                           List.of(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
+         default:
+            throw new RuntimeException("Unhandled trajectory type: " + trajectoryType);
+      }
+   }
+
+   private void createAndInitializePoseTrajectory(SideDependentList<List<FramePose3D>> poseWaypoints)
    {
       for (RobotSide side : RobotSide.values)
       {
@@ -118,11 +135,49 @@ public class RDXScriptedTrajectoryStreamer
       desiredHandPoses.put(robotSide, multiWaypointPoseTrajectories.get(robotSide).getPose());
    }
 
+   public void packHandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessageToPack, RobotSide robotSide, ScriptedTrajectoryType trajectoryType, double time)
+   {
+      handTrajectoryMessageToPack.setSequenceId(0); // Does this matter?
+      handTrajectoryMessageToPack.setRobotSide(robotSide.toByte());
+      handTrajectoryMessageToPack.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
+      handTrajectoryMessageToPack.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
+
+      SideDependentList<List<FramePose3D>> poseWaypoints = getPoseWaypoints(trajectoryType);
+      for (int i = 0; i < poseWaypoints.get(robotSide).size(); i++)
+      {
+         FramePose3D poseWaypoint = poseWaypoints.get(robotSide).get(i);
+         double timeAtWayPoint = i * trajectoryTime / (poseWaypoints.get(robotSide).size() - 1.0);
+         handTrajectoryMessageToPack.getSe3Trajectory()
+                                    .getTaskspaceTrajectoryPoints()
+                                    .add()
+                                    .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(timeAtWayPoint,
+                                                                                              poseWaypoint.getPosition(),
+                                                                                              poseWaypoint.getOrientation(),
+                                                                                              new Vector3D(),
+                                                                                              new Vector3D()));
+      }
+   }
+
+   public void packArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage, RobotSide robotSide, ScriptedTrajectoryType scriptedTrajectoryType, double scriptedTrajectoryTime)
+   {
+      //TODO: Implement this method
+      armTrajectoryMessage.setSequenceId(0);
+      armTrajectoryMessage.setRobotSide(robotSide.toByte());
+      OneDoFJointTrajectoryMessage jointTrajectoryMessage = armTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add();
+
+//      for ()
+//      {
+//         jointTrajectoryMessage.getTrajectoryPoints().add().setTime(scriptedTrajectoryTime).setPosition(0.0).setVelocity(0.0);
+//      }
+
+   }
+
+   /** Gets the hand pose at one time instance from a trajectory that is generated on the first call of this method. Good for getting poses for IK streaming. */
    public FramePose3DReadOnly getHandPose(RobotSide robotSide, ScriptedTrajectoryType trajectoryType, double time)
    {
       if (!initialize)
       {
-         createAndInitializeTrajectory(getPoseWaypoints(trajectoryType));
+         createAndInitializePoseTrajectory(getPoseWaypoints(trajectoryType));
          initialize = true;
       }
       computeHandPoseWaypoint(robotSide, time);

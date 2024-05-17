@@ -7,20 +7,14 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.initialSetup.RobotInitialSetup;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTools;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
-import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.rdx.ui.teleoperation.RDXScriptedTrajectoryStreamer;
-import us.ihmc.rdx.ui.teleoperation.RDXScriptedTrajectoryStreamer.ScriptedTrajectoryType;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.DeprecatedAPIs;
 import us.ihmc.communication.packets.MessageTools;
@@ -64,11 +58,8 @@ import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class RDXVRKinematicsStreamingMode
 {
@@ -82,7 +73,6 @@ public class RDXVRKinematicsStreamingMode
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
-   private final ImBoolean executeScriptedMotion = new ImBoolean(false);
    private ROS2Input<KinematicsToolboxOutputStatus> status;
    private final double streamPeriod = UnitConversions.hertzToSeconds(120.0);
    private final Throttler toolboxInputStreamRateLimiter = new Throttler();
@@ -97,15 +87,9 @@ public class RDXVRKinematicsStreamingMode
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
    private final ImBoolean streamToController = new ImBoolean(false);
-   private final ImBoolean taskspaceScriptedTrajectory = new ImBoolean(true);
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
    private final SceneGraph sceneGraph;
-   private final RDXScriptedTrajectoryStreamer scriptedTrajectory;
-   private final SideDependentList<RigidBodyBasics> hands = new SideDependentList<>();
-   private double scriptedTrajectoryTime = 0.0;
-   private final SideDependentList<OneDoFJointBasics[]> armJoints = new SideDependentList<>();
-   private final SideDependentList<List<KinematicsToolboxOneDoFJointMessage>> armJointMessages = new SideDependentList<>();
    //   private KinematicsStreamingToolboxModule toolbox;
 
    private final ImBoolean controlArmsOnly = new ImBoolean(true);
@@ -129,8 +113,6 @@ public class RDXVRKinematicsStreamingMode
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.retargetingParameters = retargetingParameters;
       this.sceneGraph = sceneGraph;
-
-      scriptedTrajectory = new RDXScriptedTrajectoryStreamer(armJoints, 5.0);
    }
 
    public void create(RDXVRContext vrContext)
@@ -158,20 +140,6 @@ public class RDXVRKinematicsStreamingMode
          ikControlFramePose.getOrientation().setAndInvert(retargetingParameters.getYawPitchRollFromTracker(VRTrackedSegmentType.getHandEnum(side)));
 
          ikControlFramePoses.put(side, ikControlFramePose);
-      }
-
-      // Initialize the armJointMessages to zero.
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         RigidBodyBasics hand = ghostFullRobotModel.getHand(robotSide);
-         RigidBodyBasics chest = ghostFullRobotModel.getChest();
-         OneDoFJointBasics[] joints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
-         hands.put(robotSide, hand);
-         armJoints.put(robotSide, joints);
-         armJointMessages.put(robotSide,
-                              Stream.of(joints)
-                                    .map(joint -> KinematicsToolboxMessageFactory.newOneDoFJointMessage(joint, 10.0, 0.0))
-                                    .collect(Collectors.toList()));
       }
 
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
@@ -238,12 +206,6 @@ public class RDXVRKinematicsStreamingMode
                                                                 if (aButton.bChanged() && !aButton.bState())
                                                                 {
                                                                    streamToController.set(!streamToController.get());
-                                                                }
-
-                                                                InputDigitalActionData bButton = controller.getBButtonActionData();
-                                                                if (bButton.bChanged() && !bButton.bState())
-                                                                {
-                                                                   executeScriptedMotion.set(!executeScriptedMotion.get());
                                                                 }
 
                                                                 // NOTE: Implement hand open close for controller trigger button.
@@ -339,7 +301,7 @@ public class RDXVRKinematicsStreamingMode
                                      VRTrackedSegmentType segmentType,
                                      Set<String> additionalTrackedSegments)
    {
-      if (additionalTrackedSegments.contains(segmentType.getSegmentName()) && !controlArmsOnly.get() && !executeScriptedMotion.get())
+      if (additionalTrackedSegments.contains(segmentType.getSegmentName()) && !controlArmsOnly.get())
       {
          vrContext.getTracker(segmentType.getSegmentName()).runIfConnected(tracker ->
                                                                            {
@@ -400,56 +362,14 @@ public class RDXVRKinematicsStreamingMode
                                                                                        segmentType.getSegmentName(),
                                                                                        segmentType.getPositionWeight(),
                                                                                        segmentType.getOrientationWeight());
-                                                                                 if (executeScriptedMotion.get())
-                                                                                 {
-                                                                                    // Ignore controllers and track a scripted trajectory
-                                                                                    if (scriptedTrajectory.isDone())
-                                                                                    {
-                                                                                       executeScriptedMotion.set(false);
-                                                                                       scriptedTrajectoryTime = 0.0;
-                                                                                       scriptedTrajectory.setDone(false);
-                                                                                    }
-                                                                                    else
-                                                                                    {
-                                                                                       if(taskspaceScriptedTrajectory.get())
-                                                                                       {
-                                                                                          message.getDesiredPositionInWorld()
-                                                                                                 .set(scriptedTrajectory.getHandPose(segmentType.getSegmentSide(),
-                                                                                                                                     ScriptedTrajectoryType.STRETCH_OUT_ARMS,
-                                                                                                                                     scriptedTrajectoryTime)
-                                                                                                                        .getPosition());
-                                                                                          message.getDesiredOrientationInWorld()
-                                                                                                 .set(scriptedTrajectory.getHandPose(segmentType.getSegmentSide(),
-                                                                                                                                     ScriptedTrajectoryType.STRETCH_OUT_ARMS,
-                                                                                                                                     scriptedTrajectoryTime)
-                                                                                                                        .getOrientation());
-                                                                                       }
-                                                                                       else
-                                                                                       {
-                                                                                          List<KinematicsToolboxOneDoFJointMessage> jointMessages = armJointMessages.get(
-                                                                                                segmentType.getSegmentSide());
-                                                                                          for (int i = 0; i < jointMessages.size(); i++)
-                                                                                          {
-                                                                                             jointMessages.get(i).setDesiredPosition(
-                                                                                                   scriptedTrajectory.getJointAngle(segmentType.getSegmentSide(),
-                                                                                                                                    ScriptedTrajectoryType.STRETCH_OUT_ARMS,
-                                                                                                                                    scriptedTrajectoryTime,
-                                                                                                                                    i));
-                                                                                          }
-                                                                                       }
-                                                                                       scriptedTrajectoryTime += streamPeriod;
-                                                                                    }
-                                                                                 }
-                                                                                 else
-                                                                                 {
-                                                                                    // Normal streaming/tracking of controllers
-                                                                                    message.getControlFramePositionInEndEffector()
-                                                                                           .set(ikControlFramePoses.get(segmentType.getSegmentSide())
-                                                                                                                   .getPosition());
-                                                                                    message.getControlFrameOrientationInEndEffector()
-                                                                                           .set(ikControlFramePoses.get(segmentType.getSegmentSide())
-                                                                                                                   .getOrientation());
-                                                                                 }
+
+                                                                                 message.getControlFramePositionInEndEffector()
+                                                                                        .set(ikControlFramePoses.get(segmentType.getSegmentSide())
+                                                                                                                .getPosition());
+                                                                                 message.getControlFrameOrientationInEndEffector()
+                                                                                        .set(ikControlFramePoses.get(segmentType.getSegmentSide())
+                                                                                                                .getOrientation());
+
                                                                                  toolboxInputMessage.getInputs().add().set(message);
                                                                               });
       }
@@ -567,10 +487,6 @@ public class RDXVRKinematicsStreamingMode
       {
          setEnabled(enabled.get());
       }
-
-      ImGui.text("Left B Button");
-      ImGui.sameLine();
-      ImGui.checkbox(labels.get("Execute Hand Circles"), executeScriptedMotion);
 
       // TODO (CD): Add this back in when we have a torso
       //      if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
