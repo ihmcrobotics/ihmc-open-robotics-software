@@ -445,10 +445,10 @@ public class FootstepPlannerLogger
       FileTools.ensureFileExists(filePath);
 
       // This uses a try-with-resources to make sure the BufferedOutputStream is closed properly
-      try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath.toFile())))
+      try (BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(filePath.toFile())))
       {
-         bos.write(fileContents);
-         bos.flush();
+         bufferedOutputStream.write(fileContents);
+         bufferedOutputStream.flush();
       }
       catch (IOException e)
       {
