@@ -214,6 +214,8 @@ public class ContinuousPlannerSchedulingTask
          debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
          continuousPlanner.setGoalWaypointPoses();
          continuousPlanner.planToGoal(commandMessage.get());
+         continuousPlanner.logFootStePlan();
+
          if (commandMessage.get().getUseHybridPlanner() || commandMessage.get().getUseMonteCarloFootstepPlanner() || commandMessage.get().getUseMonteCarloPlanAsReference())
          {
             debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());

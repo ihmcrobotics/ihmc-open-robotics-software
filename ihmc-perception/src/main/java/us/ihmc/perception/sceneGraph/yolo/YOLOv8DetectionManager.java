@@ -272,7 +272,7 @@ public class YOLOv8DetectionManager
             if (bestMatchDetection != null)
             {
                detectedObjects.replace(bestMatchDetection.getDetection().objectClass(), bestMatchDetection);
-               filter.registerDetection();
+               filter.registerDetection(bestMatchDetection.getDetection().confidence());
             }
             filter.setHistoryLength((int) yoloFrequencyCalculator.getFrequency());
             filter.update();
@@ -319,7 +319,7 @@ public class YOLOv8DetectionManager
             if (bestMatchDetection != null)
             {
                candidateDetections.replace(bestMatchDetection.getDetection().objectClass(), bestMatchDetection);
-               filter.registerDetection();
+               filter.registerDetection(bestMatchDetection.getDetection().confidence());
             }
 
             filter.setHistoryLength((int) yoloFrequencyCalculator.getFrequency());
@@ -330,7 +330,7 @@ public class YOLOv8DetectionManager
          for (YOLOv8Detection newDetection : newDetections)
          {
             DetectionFilter filter = new DetectionFilter((int) yoloFrequencyCalculator.getFrequency(), candidateAcceptanceThreshold);
-            filter.registerDetection();
+            filter.registerDetection(newDetection.confidence());
             filter.update();
 
             YOLOv8SegmentedDetection segmentedNewDetection = new YOLOv8SegmentedDetection(newDetection,

@@ -312,10 +312,7 @@ public class ContinuousPlanner
    {
       if (continuousWalkingParameters.getLogFootstepPlans())
       {
-          LogTools.info("Logging Session");
-          LogTools.error("------------------------------------------- Start Time");
           logger.logSession();
-          LogTools.error("------------------------------------------- End Time");
       }
    }
 
