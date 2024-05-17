@@ -1,11 +1,14 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
-import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotModels.JointHashCodeResolver;
 import us.ihmc.robotModels.RigidBodyHashCodeResolver;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.frames.ReferenceFrames;
@@ -14,17 +17,23 @@ public class KinematicsStreamingToolboxCommandConverter implements CommandConver
 {
    private final RigidBodyHashCodeResolver desiredRigidBodyHashCodeResolver;
    private final ReferenceFrameHashCodeResolver desiredReferenceFrameHashCodeResolver;
+   private final JointHashCodeResolver jointHashCodeResolver;
 
    public KinematicsStreamingToolboxCommandConverter(FullHumanoidRobotModel desiredFullRobotModel, ReferenceFrames desiredReferenceFrames)
    {
       desiredRigidBodyHashCodeResolver = new RigidBodyHashCodeResolver(desiredFullRobotModel);
       desiredReferenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(desiredFullRobotModel, desiredReferenceFrames);
+      jointHashCodeResolver = new JointHashCodeResolver(desiredFullRobotModel);
    }
 
    @Override
    public <C extends Command<?, M>, M extends Settable<M>> boolean isConvertible(C command, M message)
    {
-      return message instanceof KinematicsStreamingToolboxInputMessage;
+      if (message instanceof KinematicsStreamingToolboxInputMessage)
+         return true;
+      if (message instanceof KinematicsToolboxPrivilegedConfigurationMessage)
+         return true;
+      return false;
    }
 
    @Override
@@ -35,6 +44,12 @@ public class KinematicsStreamingToolboxCommandConverter implements CommandConver
          KinematicsStreamingToolboxInputCommand inputCommand = (KinematicsStreamingToolboxInputCommand) command;
          KinematicsStreamingToolboxInputMessage inputMessage = (KinematicsStreamingToolboxInputMessage) message;
          inputCommand.set(inputMessage, desiredRigidBodyHashCodeResolver, desiredReferenceFrameHashCodeResolver);
+      }
+      else if (message instanceof KinematicsToolboxPrivilegedConfigurationMessage)
+      {
+         KinematicsToolboxPrivilegedConfigurationMessage privConfMessage = (KinematicsToolboxPrivilegedConfigurationMessage) message;
+         KinematicsToolboxPrivilegedConfigurationCommand privConfCommand = (KinematicsToolboxPrivilegedConfigurationCommand) command;
+         privConfCommand.set(privConfMessage, jointHashCodeResolver);
       }
    }
 }

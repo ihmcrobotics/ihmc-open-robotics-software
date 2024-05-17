@@ -22,6 +22,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -563,6 +564,11 @@ public class RDXVRKinematicsStreamingMode
          }
          wakeUpToolbox();
          reinitializeToolbox();
+         KinematicsToolboxPrivilegedConfigurationMessage message = KinematicsToolboxMessageFactory.privilegedConfigurationFromFullRobotModel(syncedRobot.getFullRobotModel());
+         message.setUsePrivilegedRootJointPosition(true);
+         message.setUsePrivilegedRootJointOrientation(true);
+         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingPrivilegedConfigurationTopic(syncedRobot.getRobotModel()
+                                                                                                                                .getSimpleRobotName()), message);
          kinematicsRecorder.setReplay(false); // Check no concurrency replay and streaming
          initialPelvisFrame = null;
          initialChestFrame = null;

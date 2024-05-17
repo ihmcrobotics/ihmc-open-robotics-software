@@ -142,14 +142,15 @@ public class RDXVRModeManager
       joystickBasedStepping.update(mode == RDXVRMode.JOYSTICK_WALKING);
       vrModeControls.update();
 
-      // fade robot graphics if in stereo vision mode
+      // Fade robot graphics
       if (kinematicsStreamingMode.isStreaming() && stereoVision.isEnabled())
-      {
+      { // Fade graphics out if in stereo vision mode while streaming
          kinematicsStreamingMode.visualizeIKPreviewGraphic(false);
          robotVisualizer.fadeVisuals(0.0f, 0.01f);
       }
-      else if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING && (stereoVision.justDisabled() || kinematicsStreamingMode.streamingJustDisabled()|| robotVisualizer.isFading()))
-      {
+      else if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING && (stereoVision.justDisabled() || kinematicsStreamingMode.streamingJustDisabled()
+                                                             || robotVisualizer.isFading()))
+      { // Fade graphics in if either stereo vision or streaming are exited
          robotVisualizer.fadeVisuals(1.0f, 0.05f);
          if (!robotVisualizer.isFading())
             kinematicsStreamingMode.visualizeIKPreviewGraphic(true);
