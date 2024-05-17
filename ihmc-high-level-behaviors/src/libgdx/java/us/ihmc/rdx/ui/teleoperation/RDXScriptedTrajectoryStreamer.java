@@ -5,7 +5,11 @@ import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -16,6 +20,9 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.generators.OneDoFTrajectoryPointCalculator;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -41,7 +48,8 @@ public class RDXScriptedTrajectoryStreamer
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       for (RobotSide side : RobotSide.values)
       {
-         multiWaypointPoseTrajectories.put(side, new MultipleWaypointsPoseTrajectoryGenerator(side.getLowerCaseName() + "_scriptedPoseTrajectory", 17, registry));
+         multiWaypointPoseTrajectories.put(side,
+                                           new MultipleWaypointsPoseTrajectoryGenerator(side.getLowerCaseName() + "_scriptedPoseTrajectory", 17, registry));
          multiWaypointPoseTrajectories.get(side).clear(ReferenceFrame.getWorldFrame());
 
          multiWaypointJointTrajectories.put(side, new MultipleWaypointsTrajectoryGenerator(side.getLowerCaseName() + "_scriptedJointTrajectory", 17, registry));
@@ -51,7 +59,7 @@ public class RDXScriptedTrajectoryStreamer
 
    public enum ScriptedTrajectoryType
    {
-      HAND_CIRCLES, STRETCH_OUT_ARMS, JOINT_RANGE_OF_MOTION
+      HAND_CIRCLES, STRETCH_OUT_ARMS, JOINT_RANGE_OF_MOTION, JOINT_TRAJECTORY_TEST
    }
 
    public boolean isDone()
@@ -75,7 +83,7 @@ public class RDXScriptedTrajectoryStreamer
             case STRETCH_OUT_ARMS:
                poseWaypoints.put(side,
                                  List.of(new FramePose3D(new Pose3D(0.3, side.negateIfRightSide(0.2), 0.2, 0.0, 0.0, 0.0)),
-                                         new FramePose3D(new Pose3D(0.0, side.negateIfRightSide(1.0), 0.2, 0.0, 0.0, side.negateIfRightSide(Math.PI / 2.0))),
+                                         new FramePose3D(new Pose3D(0.0, side.negateIfRightSide(1.0), 0.4, side.negateIfRightSide(Math.PI / 2.0), 0.0, 0.0)),
                                          new FramePose3D(new Pose3D(0.3, side.negateIfRightSide(0.2), 0.2, 0.0, 0.0, 0.0))));
                break;
             case HAND_CIRCLES:
@@ -89,17 +97,43 @@ public class RDXScriptedTrajectoryStreamer
       return poseWaypoints;
    }
 
-   private List<List<Double>> getJointAngleWaypoints(ScriptedTrajectoryType trajectoryType)
+   private SideDependentList<List<List<Double>>> getArmJointWaypoints(ScriptedTrajectoryType trajectoryType)
    {
-      switch (trajectoryType)
+      SideDependentList<List<List<Double>>> armJointWaypoints = new SideDependentList<>();
+
+      // It's easier to use the left arm's limits and then negate the roll and yaw actuators for the right arm.
+      double[] upperLimits = new double[armJoints.get(RobotSide.LEFT).length];
+      double[] lowerLimits = new double[armJoints.get(RobotSide.LEFT).length];
+      double epsilon = 1e-3;
+      for (int jointIndex = 0; jointIndex < armJoints.get(RobotSide.LEFT).length; jointIndex++)
       {
-         case JOINT_RANGE_OF_MOTION:
-            return List.of(List.of(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
-                           List.of(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
-                           List.of(0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0));
-         default:
-            throw new RuntimeException("Unhandled trajectory type: " + trajectoryType);
+         // Epsilon is used to ensure the trajectory generator does not exceed the joint limits.
+         upperLimits[jointIndex] = armJoints.get(RobotSide.LEFT)[jointIndex].getJointLimitUpper() - epsilon;
+         lowerLimits[jointIndex] = armJoints.get(RobotSide.LEFT)[jointIndex].getJointLimitLower() + epsilon;
       }
+
+      for (RobotSide side : RobotSide.values)
+      {
+         switch (trajectoryType)
+         {
+            case JOINT_RANGE_OF_MOTION:
+               armJointWaypoints.put(side,
+                                     List.of(List.of(0.5, side.negateIfRightSide(0.13), 0.13, -1.0, 0.0, 0.0, 0.0),
+                                             List.of(upperLimits[0], side.negateIfRightSide(-0.1), side.negateIfRightSide(-1.5), 0.0, 0.0, 0.0, 0.0),
+                                             List.of(lowerLimits[0], side.negateIfRightSide(upperLimits[1]), 0.0, 0.0, 0.0, 0.0, 0.0),
+                                             List.of(0.5, side.negateIfRightSide(0.13), 0.13, -1.0, 0.0, 0.0, 0.0)));
+               break;
+            case JOINT_TRAJECTORY_TEST:
+               armJointWaypoints.put(side,
+                                     List.of(List.of(0.5, side.negateIfRightSide(0.13), 0.13, -1.0, 0.0, 0.0, 0.0),
+                                             List.of(0.0, side.negateIfRightSide(0.0), 0.0, 0.0, 0.0, 0.0, 0.0),
+                                             List.of(0.5, side.negateIfRightSide(0.13), 0.13, -1.0, 0.0, 0.0, 0.0)));
+               break;
+            default:
+               throw new RuntimeException("Unhandled trajectory type: " + trajectoryType);
+         }
+      }
+      return armJointWaypoints;
    }
 
    private void createAndInitializePoseTrajectory(SideDependentList<List<FramePose3D>> poseWaypoints)
@@ -108,16 +142,16 @@ public class RDXScriptedTrajectoryStreamer
       {
          double numberOfWaypoints = poseWaypoints.get(side).size();
 
-         for (int i =0; i < numberOfWaypoints; i++)
+         for (int i = 0; i < numberOfWaypoints; i++)
          {
             // This assumes the waypoints are equally spaced in time.
             double timeAtWayPoint = i * trajectoryTime / (numberOfWaypoints - 1.0);
             System.out.println("time at waypoint = " + timeAtWayPoint);
             multiWaypointPoseTrajectories.get(side)
                                          .appendPoseWaypoint(timeAtWayPoint,
-                                                         new FramePose3D(ReferenceFrame.getWorldFrame(), poseWaypoints.get(side).get(i)),
-                                                         new FrameVector3D(),
-                                                         new FrameVector3D());
+                                                             new FramePose3D(ReferenceFrame.getWorldFrame(), poseWaypoints.get(side).get(i)),
+                                                             new FrameVector3D(),
+                                                             new FrameVector3D());
          }
          multiWaypointPoseTrajectories.get(side).initialize();
       }
@@ -135,7 +169,10 @@ public class RDXScriptedTrajectoryStreamer
       desiredHandPoses.put(robotSide, multiWaypointPoseTrajectories.get(robotSide).getPose());
    }
 
-   public void packHandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessageToPack, RobotSide robotSide, ScriptedTrajectoryType trajectoryType, double time)
+   public void packHandTrajectoryMessage(HandTrajectoryMessage handTrajectoryMessageToPack,
+                                         RobotSide robotSide,
+                                         ScriptedTrajectoryType trajectoryType,
+                                         double time)
    {
       handTrajectoryMessageToPack.setSequenceId(0); // Does this matter?
       handTrajectoryMessageToPack.setRobotSide(robotSide.toByte());
@@ -143,10 +180,12 @@ public class RDXScriptedTrajectoryStreamer
       handTrajectoryMessageToPack.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
 
       SideDependentList<List<FramePose3D>> poseWaypoints = getPoseWaypoints(trajectoryType);
-      for (int i = 0; i < poseWaypoints.get(robotSide).size(); i++)
+      double numberOfWaypoints = poseWaypoints.get(robotSide).size();
+
+      for (int i = 0; i < numberOfWaypoints; i++)
       {
          FramePose3D poseWaypoint = poseWaypoints.get(robotSide).get(i);
-         double timeAtWayPoint = i * trajectoryTime / (poseWaypoints.get(robotSide).size() - 1.0);
+         double timeAtWayPoint = i * trajectoryTime / (numberOfWaypoints - 1.0);
          handTrajectoryMessageToPack.getSe3Trajectory()
                                     .getTaskspaceTrajectoryPoints()
                                     .add()
@@ -158,18 +197,44 @@ public class RDXScriptedTrajectoryStreamer
       }
    }
 
-   public void packArmTrajectoryMessage(ArmTrajectoryMessage armTrajectoryMessage, RobotSide robotSide, ScriptedTrajectoryType scriptedTrajectoryType, double scriptedTrajectoryTime)
+   public ArmTrajectoryMessage generateArmTrajectoryMessage(ScriptedTrajectoryType trajectoryType, double trajectoryTime, RobotSide robotSide)
    {
-      //TODO: Implement this method
-      armTrajectoryMessage.setSequenceId(0);
-      armTrajectoryMessage.setRobotSide(robotSide.toByte());
-      OneDoFJointTrajectoryMessage jointTrajectoryMessage = armTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add();
+      OneDoFJointBasics[] sidedArmJoints = armJoints.get(robotSide);
+      List<List<Double>> jointAngleWaypoints = getArmJointWaypoints(trajectoryType).get(robotSide);
+      int numberOfTrajectoryPoints = jointAngleWaypoints.size();
+      int numberOfJoints = sidedArmJoints.length;
 
-//      for ()
-//      {
-//         jointTrajectoryMessage.getTrajectoryPoints().add().setTime(scriptedTrajectoryTime).setPosition(0.0).setVelocity(0.0);
-//      }
+      ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide);
+      OneDoFTrajectoryPointCalculator trajectoryPoint1DCalculator = new OneDoFTrajectoryPointCalculator();
 
+      for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
+      {
+         OneDoFJointBasics joint = sidedArmJoints[jointIndex];
+         OneDoFJointTrajectoryMessage jointTrajectoryMessage = armTrajectoryMessage.getJointspaceTrajectory().getJointTrajectoryMessages().add();
+
+         trajectoryPoint1DCalculator.clear();
+
+         for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
+         {
+            double desiredJointPosition = jointAngleWaypoints.get(trajectoryPointIndex).get(jointIndex);
+            trajectoryPoint1DCalculator.appendTrajectoryPoint(desiredJointPosition);
+         }
+
+         trajectoryPoint1DCalculator.compute(trajectoryTime);
+         OneDoFTrajectoryPointList trajectoryData = trajectoryPoint1DCalculator.getTrajectoryData();
+         trajectoryData.addTimeOffset(trajectoryTime / (numberOfTrajectoryPoints - 1.0));
+
+         for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
+         {
+            OneDoFTrajectoryPoint trajectoryPoint = trajectoryData.getTrajectoryPoint(trajectoryPointIndex);
+            jointTrajectoryMessage.getTrajectoryPoints()
+                                  .add()
+                                  .set(HumanoidMessageTools.createTrajectoryPoint1DMessage(trajectoryPoint.getTime(),
+                                                                                           trajectoryPoint.getPosition(),
+                                                                                           trajectoryPoint.getVelocity()));
+         }
+      }
+      return armTrajectoryMessage;
    }
 
    /** Gets the hand pose at one time instance from a trajectory that is generated on the first call of this method. Good for getting poses for IK streaming. */

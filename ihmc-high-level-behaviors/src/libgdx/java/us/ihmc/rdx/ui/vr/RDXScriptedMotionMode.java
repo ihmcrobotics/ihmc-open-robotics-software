@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.vr;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
+import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
@@ -11,6 +12,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -29,12 +31,11 @@ import us.ihmc.rdx.ui.teleoperation.RDXScriptedTrajectoryStreamer.ScriptedTrajec
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.tools.UnitConversions;
-import us.ihmc.tools.thread.Throttler;
 
 import java.util.HashMap;
 import java.util.List;
@@ -55,10 +56,9 @@ public class RDXScriptedMotionMode
    private final Map<String, MutableReferenceFrame> trackedSegmentDesiredFrame = new HashMap<>();
    private final ImBoolean streamToController = new ImBoolean(false);
    private final SceneGraph sceneGraph;
-   private final RDXScriptedTrajectoryStreamer scriptedTrajectory;
+   private RDXScriptedTrajectoryStreamer scriptedTrajectory;
    private final SideDependentList<RigidBodyBasics> hands = new SideDependentList<>();
    private final double scriptedTrajectoryDuration = 5.0;
-   private final SideDependentList<OneDoFJointBasics[]> armJoints = new SideDependentList<>();
    private final SideDependentList<List<KinematicsToolboxOneDoFJointMessage>> armJointMessages = new SideDependentList<>();
 
    private ReferenceFrame chestFrame;
@@ -70,22 +70,20 @@ public class RDXScriptedMotionMode
 
    public RDXScriptedMotionMode(ROS2SyncedRobotModel syncedRobot,
                                 ROS2ControllerHelper ros2ControllerHelper,
-                                RetargetingParameters retargetingParameters,
                                 SceneGraph sceneGraph)
    {
       this.syncedRobot = syncedRobot;
       this.robotModel = syncedRobot.getRobotModel();
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.sceneGraph = sceneGraph;
-
-      scriptedTrajectory = new RDXScriptedTrajectoryStreamer(armJoints, scriptedTrajectoryDuration);
    }
 
    public void create(RDXVRContext vrContext)
    {
       fullRobotModel = syncedRobot.getFullRobotModel();
 
-      // Initialize the armJointMessages to zero.
+      // Get all the joints in each arm
+      SideDependentList<OneDoFJointBasics[]> armJoints = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
@@ -93,24 +91,46 @@ public class RDXScriptedMotionMode
          OneDoFJointBasics[] joints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
          hands.put(robotSide, hand);
          armJoints.put(robotSide, joints);
-         armJointMessages.put(robotSide,
-                              Stream.of(joints)
-                                    .map(joint -> KinematicsToolboxMessageFactory.newOneDoFJointMessage(joint, 10.0, 0.0))
-                                    .collect(Collectors.toList()));
       }
+
+      scriptedTrajectory = new RDXScriptedTrajectoryStreamer(armJoints, scriptedTrajectoryDuration);
 
       //TODO: Add additional logic for joint space trajectories
       // Check for completion of the trajectories.
-      ros2ControllerHelper.subscribeToControllerViaCallback(TaskspaceTrajectoryStatusMessage.class, message ->
-      {
-         if (message.getEndEffectorName().toString().equals(fullRobotModel.getHand(RobotSide.LEFT).getName()))
-         {
-            if (message.getTrajectoryExecutionStatus() == TaskspaceTrajectoryStatusMessage.TRAJECTORY_EXECUTION_STATUS_COMPLETED)
-            {
-               streamToController.set(false);
-            }
-         }
-      });
+      ros2ControllerHelper.subscribeViaCallback(HumanoidControllerAPI.getOutputTopic(robotModel.getSimpleRobotName())
+                                                                     .withTypeName(TaskspaceTrajectoryStatusMessage.class), message ->
+                                                {
+                                                   if (message.getEndEffectorName().toString().equals(fullRobotModel.getHand(RobotSide.LEFT).getName()))
+                                                   {
+                                                      if (message.getTrajectoryExecutionStatus()
+                                                          == TaskspaceTrajectoryStatusMessage.TRAJECTORY_EXECUTION_STATUS_COMPLETED)
+                                                      {
+                                                         streamToController.set(false);
+                                                         // Reset this boolean for the next messages
+                                                         isTrajectoryMessageSent = false;
+                                                      }
+                                                   }
+                                                });
+
+      ros2ControllerHelper.subscribeViaCallback(HumanoidControllerAPI.getOutputTopic(robotModel.getSimpleRobotName())
+                                                                     .withTypeName(JointspaceTrajectoryStatusMessage.class), message ->
+                                                {
+                                                   if (message.getJointNames()
+                                                              .getString(0)
+                                                              .equals(fullRobotModel.getArmJoint(RobotSide.LEFT, ArmJointName.SHOULDER_PITCH).getName())
+                                                       || message.getJointNames()
+                                                                 .getString(0)
+                                                                 .equals(fullRobotModel.getArmJoint(RobotSide.RIGHT, ArmJointName.SHOULDER_PITCH).getName()))
+                                                   {
+                                                      if (message.getTrajectoryExecutionStatus()
+                                                          == JointspaceTrajectoryStatusMessage.TRAJECTORY_EXECUTION_STATUS_COMPLETED)
+                                                      {
+                                                         streamToController.set(false);
+                                                         // Reset this boolean for the next messages
+                                                         isTrajectoryMessageSent = false;
+                                                      }
+                                                   }
+                                                });
    }
 
    public void processVRInput(RDXVRContext vrContext)
@@ -169,11 +189,9 @@ public class RDXScriptedMotionMode
                ros2ControllerHelper.publishToController(handTrajectoryMessage);
                break;
             case JOINT_RANGE_OF_MOTION:
-               ArmTrajectoryMessage armTrajectoryMessage = new ArmTrajectoryMessage();
-               scriptedTrajectory.packArmTrajectoryMessage(armTrajectoryMessage,
-                                                           robotSide,
-                                                           ScriptedTrajectoryType.JOINT_RANGE_OF_MOTION,
-                                                           scriptedTrajectoryDuration);
+               ArmTrajectoryMessage armTrajectoryMessage = scriptedTrajectory.generateArmTrajectoryMessage(ScriptedTrajectoryType.JOINT_RANGE_OF_MOTION,
+                                                                                                           scriptedTrajectoryDuration,
+                                                                                                           robotSide);
                ros2ControllerHelper.publishToController(armTrajectoryMessage);
                break;
             default:
@@ -212,7 +230,10 @@ public class RDXScriptedMotionMode
          if (!isTrajectoryMessageSent && streamToController.get())
          {
             sendScriptedTrajectories();
-            isTrajectoryMessageSent = true;
+            // TODO: this isn't supposed to be set to false here, it should be set to false in the callback when the trajectory is completed, but that doesn't
+            //  seem to be working
+            streamToController.set(false);
+            //            isTrajectoryMessageSent = true; // TODO: uncomment this when the callback is working
          }
       }
    }

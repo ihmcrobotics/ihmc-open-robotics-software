@@ -66,7 +66,7 @@ public class RDXVRModeManager
          kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot, controllerHelper, retargetingParameters, sceneGraph);
          kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
 
-         scriptedMotionMode = new RDXScriptedMotionMode(syncedRobot, controllerHelper, retargetingParameters, sceneGraph);
+         scriptedMotionMode = new RDXScriptedMotionMode(syncedRobot, controllerHelper, sceneGraph);
          scriptedMotionMode.create(baseUI.getVRManager().getContext());
       }
 
