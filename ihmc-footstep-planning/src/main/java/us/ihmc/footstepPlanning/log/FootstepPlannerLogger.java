@@ -170,6 +170,7 @@ public class FootstepPlannerLogger
 
    public boolean logSessionWithExactFolderName(String sessionDirectory)
    {
+      LogTools.info("Logging Session: " + sessionDirectory);
       latestLogDirectory = sessionDirectory;
 
       try
