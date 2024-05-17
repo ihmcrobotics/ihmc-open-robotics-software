@@ -35,6 +35,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
@@ -218,6 +219,8 @@ public class ContinuousPlannerSchedulingTask
             debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
             debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
          }
+
+         continuousPlanner.logFootStepPlan();
 
          if (continuousPlanner.isPlanAvailable())
          {

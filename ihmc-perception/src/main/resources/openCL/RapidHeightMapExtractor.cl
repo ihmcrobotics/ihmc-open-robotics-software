@@ -358,7 +358,7 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
    float finalHeight = previousHeight;
 
    // Filter the height value if it is within the registration height range and not colliding with the robot
-   if (!isColliding && (localHeight - sensorHeight) > params[MIN_HEIGHT_REGISTRATION] && (localHeight - sensorHeight) < params[MAX_HEIGHT_REGISTRATION])
+   if ((localHeight - sensorHeight) > params[MIN_HEIGHT_REGISTRATION] && (localHeight - sensorHeight) < params[MAX_HEIGHT_REGISTRATION])
    {
       // Apply a poor man's mahalanobis filter on the data
       float height_diff = fabs(localHeight - previousHeight);
@@ -372,6 +372,15 @@ void kernel heightMapRegistrationKernel(read_write image2d_t localMap,
          finalHeight = localHeight;
 
       }
+
+      if (isColliding)
+      {
+         if (height_diff > params[MAX_HEIGHT_DIFFERENCE])
+         {
+            return;
+         }
+      }
+
       finalHeight = get_spatial_filtered_height(xIndex, yIndex, finalHeight, globalMap, params);
    }
 

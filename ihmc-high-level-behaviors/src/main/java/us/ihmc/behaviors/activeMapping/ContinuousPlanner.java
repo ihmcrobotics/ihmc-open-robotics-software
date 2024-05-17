@@ -306,14 +306,16 @@ public class ContinuousPlanner
 
       assert plannerOutput != null;
       statistics.setTotalStepsPlanned(plannerOutput.getFootstepPlan().getNumberOfSteps());
+   }
 
+   public void logFootStepPlan()
+   {
       if (continuousWalkingParameters.getLogFootstepPlans())
       {
-         ThreadTools.startAThread(() ->
-                                  {
-                                     LogTools.info("Logging Session");
-                                     logger.logSession();
-                                  }, "FootstepPlanLogAndDeletion");
+          LogTools.info("Logging Session");
+          LogTools.error("------------------------------------------- Start Time");
+          logger.logSession();
+          LogTools.error("------------------------------------------- End Time");
       }
    }
 
