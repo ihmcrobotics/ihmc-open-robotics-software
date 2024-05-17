@@ -38,6 +38,7 @@ import us.ihmc.yoVariables.variable.YoVariableType;
 
 import java.io.*;
 import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
@@ -434,18 +435,26 @@ public class FootstepPlannerLogger
       }
    }
 
+   /**
+    * This method writes the contents of a file to the filePath specified.
+    * This method is intended to be optimized to run as fast as possible
+    */
    private void writeToFile(String file, byte[] fileContents) throws Exception
    {
-      FileTools.ensureFileExists(new File(file).toPath());
-      outputStream = new FileOutputStream(file);
-      printStream = new PrintStream(outputStream);
+      Path filePath = Paths.get(file);
+      FileTools.ensureFileExists(filePath);
 
-      FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket();
-      planner.getRequest().setPacket(requestPacket);
-      printStream.write(fileContents);
-      printStream.flush();
-      outputStream.close();
-      printStream.close();
+      // This uses a try-with-resources to make sure the BufferedOutputStream is closed properly
+      try (BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(new FileOutputStream(filePath.toFile())))
+      {
+         bufferedOutputStream.write(fileContents);
+         bufferedOutputStream.flush();
+      }
+      catch (IOException e)
+      {
+         System.err.println("Error writing to file: " + e.getMessage());
+         e.printStackTrace();
+      }
    }
 
    private void writeNode(int numTabs, String name, BodyPathLatticePoint node) throws IOException
