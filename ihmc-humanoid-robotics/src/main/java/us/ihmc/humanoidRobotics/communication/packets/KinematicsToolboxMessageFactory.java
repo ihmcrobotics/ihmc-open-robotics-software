@@ -1,10 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import toolbox_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
+import toolbox_msgs.msg.dds.*;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -257,6 +253,38 @@ public class KinematicsToolboxMessageFactory
                                                     privilegedRootJointOrientation,
                                                     jointHashCodes,
                                                     privilegedJointAngles);
+      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
+
+      return message;
+   }
+
+   /**
+    * Create a new configuration message holding a new initial robot configuration for the
+    * {@code KinematicsToolboxController} to use by extracting the joint angles out of the given
+    * {@code fullRobotModel}.
+    * <p>
+    *
+    * @param fullRobotModel        the robot that is currently at the desired privileged configuration.
+    *                              Not modified.
+    * @return the message containing the new privileged configuration ready to be sent to the
+    *         {@code KinematicsToolboxModule}.
+    */
+   public static KinematicsToolboxInitialConfigurationMessage initialConfigurationFromFullRobotModel(FullRobotModel fullRobotModel)
+   {
+      KinematicsToolboxInitialConfigurationMessage message = new KinematicsToolboxInitialConfigurationMessage();
+
+      OneDoFJointBasics[] oneDoFJoints = fullRobotModel.getOneDoFJoints();
+
+      int[] jointHashCodes = new int[oneDoFJoints.length];
+      float[] initialJointAngles = new float[oneDoFJoints.length];
+
+      for (int i = 0; i < oneDoFJoints.length; i++)
+      {
+         jointHashCodes[i] = oneDoFJoints[i].hashCode();
+         initialJointAngles[i] = (float) oneDoFJoints[i].getQ();
+      }
+
+      MessageTools.packInitialJointAngles(message, jointHashCodes, initialJointAngles);
       message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
 
       return message;

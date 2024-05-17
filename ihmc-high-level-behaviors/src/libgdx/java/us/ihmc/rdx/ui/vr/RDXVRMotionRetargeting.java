@@ -57,7 +57,7 @@ public class RDXVRMotionRetargeting
       desiredFrames.clear();
       retargetPelvis();
       retargetCoM();
-      alignDesiredFramesWithOtherReferences();
+      alignOtherDesiredFramesWithReferences();
    }
 
    /**
@@ -155,9 +155,9 @@ public class RDXVRMotionRetargeting
    }
 
    /**
-    * Set the desired value equal to the reference from the tracker
+    * For a specific set of trackers that do not require any particular retargeting, set the desired value equal to the reference from the tracker
     */
-   private void alignDesiredFramesWithOtherReferences()
+   private void alignOtherDesiredFramesWithReferences()
    {
       for (var tracker : UNCHANGED_TRACKER_REFERENCES)
       {

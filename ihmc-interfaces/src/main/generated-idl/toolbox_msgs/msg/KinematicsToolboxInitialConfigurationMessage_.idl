@@ -1,0 +1,36 @@
+#ifndef __toolbox_msgs__msg__KinematicsToolboxInitialConfigurationMessage__idl__
+#define __toolbox_msgs__msg__KinematicsToolboxInitialConfigurationMessage__idl__
+
+module toolbox_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body inverse kinematics module.
+       * It contains auxiliary information that allows to customize the initial configuration.
+       */
+      @TypeCode(type="toolbox_msgs::msg::dds_::KinematicsToolboxInitialConfigurationMessage_")
+      struct KinematicsToolboxInitialConfigurationMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * This array is used to identify to which joint each angle in initial_joint_angles belongs to.
+         * See Joint.hashCode() for the computation of a joint hash code.
+         */
+        sequence<long> initial_joint_hash_codes;
+        /**
+         * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
+         */
+        sequence<float> initial_joint_angles;
+      };
+    };
+  };
+};
+
+#endif

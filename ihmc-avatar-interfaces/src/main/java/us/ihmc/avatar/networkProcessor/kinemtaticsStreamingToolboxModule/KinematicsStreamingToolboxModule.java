@@ -16,6 +16,7 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInitialConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -149,6 +150,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       commands.add(KinematicsStreamingToolboxConfigurationCommand.class);
       commands.add(KinematicsToolboxConfigurationCommand.class);
       commands.add(KinematicsToolboxPrivilegedConfigurationCommand.class);
+      commands.add(KinematicsToolboxInitialConfigurationCommand.class);
       return commands;
    }
 
@@ -211,6 +213,11 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    public static ROS2Topic<KinematicsToolboxPrivilegedConfigurationMessage> getInputStreamingPrivilegedConfigurationTopic(String robotName)
    {
       return ControllerAPI.getTopic(getInputTopic(robotName), KinematicsToolboxPrivilegedConfigurationMessage.class);
+   }
+
+   public static ROS2Topic<KinematicsToolboxInitialConfigurationMessage> getInputStreamingInitialConfigurationTopic(String robotName)
+   {
+      return ControllerAPI.getTopic(getInputTopic(robotName), KinematicsToolboxInitialConfigurationMessage.class);
    }
 
    public static ROS2Topic<KinematicsToolboxOutputStatus> getOutputStatusTopic(String robotName)

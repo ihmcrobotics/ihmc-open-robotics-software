@@ -6,11 +6,12 @@ import java.util.Objects;
 
 import gnu.trove.list.array.TFloatArrayList;
 import gnu.trove.list.array.TIntArrayList;
+import toolbox_msgs.msg.dds.KinematicsToolboxInitialConfigurationMessage;
+import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.JointHashCodeResolver;
 
-public class KinematicsToolboxinitialConfigurationCommand
-      implements Command<KinematicsToolboxinitialConfigurationCommand, KinematicsToolboxInitialConfigurationMessage>
+public class KinematicsToolboxInitialConfigurationCommand implements Command<KinematicsToolboxInitialConfigurationCommand, KinematicsToolboxInitialConfigurationMessage>
 {
    private long sequenceId;
    private final List<OneDoFJointBasics> joints = new ArrayList<>();
@@ -25,7 +26,7 @@ public class KinematicsToolboxinitialConfigurationCommand
    }
 
    @Override
-   public void set(KinematicsToolboxinitialConfigurationCommand other)
+   public void set(KinematicsToolboxInitialConfigurationCommand other)
    {
       clear();
 
@@ -51,8 +52,8 @@ public class KinematicsToolboxinitialConfigurationCommand
 
       sequenceId = message.getSequenceId();
 
-      TIntArrayList messageHashCodes = message.getJointHashCodes();
-      TFloatArrayList messageJointAngles = message.getJointAngles();
+      TIntArrayList messageHashCodes = message.getInitialJointHashCodes();
+      TFloatArrayList messageJointAngles = message.getInitialJointAngles();
       for (int i = 0; i < messageHashCodes.size(); i++)
       {
          try

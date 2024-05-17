@@ -144,6 +144,7 @@ public class KinematicsToolboxModule extends ToolboxModule
       commands.add(KinematicsToolboxConfigurationCommand.class);
       commands.add(KinematicsToolboxSupportRegionCommand.class);
       commands.add(KinematicsToolboxPrivilegedConfigurationCommand.class);
+      commands.add(KinematicsToolboxInitialConfigurationCommand.class);
       commands.add(KinematicsToolboxInputCollectionCommand.class);
       commands.add(HumanoidKinematicsToolboxConfigurationCommand.class);
       return commands;

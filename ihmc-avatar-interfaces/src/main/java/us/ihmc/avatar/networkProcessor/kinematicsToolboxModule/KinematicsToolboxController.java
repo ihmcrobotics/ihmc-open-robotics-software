@@ -5,6 +5,7 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
@@ -56,6 +57,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
@@ -1021,6 +1023,21 @@ public class KinematicsToolboxController extends ToolboxController
 
          if (command.hasPrivilegedJointAngles())
             snapPrivilegedConfigurationToCurrent();
+      }
+
+      if (commandInputManager.isNewCommandAvailable(KinematicsToolboxInitialConfigurationCommand.class))
+      {
+         KinematicsToolboxInitialConfigurationCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxInitialConfigurationCommand.class);
+         Map<String, Double> initialConfigurationMap = new HashMap<>();
+         List<OneDoFJointBasics> joints = command.getJoints();
+         var initialJointAngles = command.getInitialJointAngles();
+         for (int i = 0; i < joints.size(); i++)
+         {
+            String jointName = joints.get(i).getName();
+            double q = initialJointAngles.get(i);
+            initialConfigurationMap.put(jointName, q);
+         }
+         setInitialRobotConfigurationNamedMap(initialConfigurationMap);
       }
    }
 

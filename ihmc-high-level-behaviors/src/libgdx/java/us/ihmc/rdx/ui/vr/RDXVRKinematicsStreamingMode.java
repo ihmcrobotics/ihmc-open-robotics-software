@@ -9,7 +9,6 @@ import org.lwjgl.openvr.InputDigitalActionData;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -103,6 +102,7 @@ public class RDXVRKinematicsStreamingMode
    private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
    private ReferenceFrame initialChestFrame;
    private final RigidBodyTransform initialChestTransformToWorld = new RigidBodyTransform();
+   private final SideDependentList<RigidBodyTransform> previousFootTransformToWorld = new SideDependentList<>();
    private RDXVRMotionRetargeting motionRetargeting;
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
@@ -161,33 +161,33 @@ public class RDXVRKinematicsStreamingMode
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled);
       motionRetargeting = new RDXVRMotionRetargeting(syncedRobot, trackerReferenceFrames, retargetingParameters);
 
-      KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
-      parameters.setDefault();
-      parameters.setPublishingPeriod(0.015); // Publishing period in seconds.
-      parameters.setDefaultChestMessageAngularWeight(1.0, 1.0, 0.5);
-      parameters.setDefaultPelvisMessageLinearWeight(10.0, 10.0, 15.0);
-      parameters.setDefaultLinearRateLimit(10.0);
-      parameters.setDefaultAngularRateLimit(100.0);
-      parameters.setDefaultLinearWeight(10.0);
-      parameters.setDefaultAngularWeight(0.1);
-      parameters.setInputPoseLPFBreakFrequency(15.0);
-      parameters.setInputPoseCorrectionDuration(0.05); // Need to send inputs at 30Hz.
-      parameters.setInputStateEstimatorType(KinematicsStreamingToolboxParameters.InputStateEstimatorType.FBC_STYLE);
-
-      parameters.setMinimizeAngularMomentum(true);
-      parameters.setMinimizeLinearMomentum(true);
-      parameters.setAngularMomentumWeight(0.25);
-      parameters.setLinearMomentumWeight(0.25);
-
-      parameters.getDefaultConfiguration().setEnableLeftHandTaskspace(false);
-      parameters.getDefaultConfiguration().setEnableRightHandTaskspace(false);
-      parameters.getDefaultConfiguration().setEnableNeckJointspace(false);
-      parameters.getDefaultSolverConfiguration().setJointVelocityWeight(0.05);
-      parameters.getDefaultSolverConfiguration().setEnableJointVelocityLimits(false);
-      parameters.setUseStreamingPublisher(true);
-
       if (createToolbox)
       {
+         KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
+         parameters.setDefault();
+         parameters.setPublishingPeriod(0.015); // Publishing period in seconds.
+         parameters.setDefaultChestMessageAngularWeight(1.0, 1.0, 0.5);
+         parameters.setDefaultPelvisMessageLinearWeight(10.0, 10.0, 15.0);
+         parameters.setDefaultLinearRateLimit(10.0);
+         parameters.setDefaultAngularRateLimit(100.0);
+         parameters.setDefaultLinearWeight(10.0);
+         parameters.setDefaultAngularWeight(0.1);
+         parameters.setInputPoseLPFBreakFrequency(15.0);
+         parameters.setInputPoseCorrectionDuration(0.05); // Need to send inputs at 30Hz.
+         parameters.setInputStateEstimatorType(KinematicsStreamingToolboxParameters.InputStateEstimatorType.FBC_STYLE);
+
+         parameters.setMinimizeAngularMomentum(true);
+         parameters.setMinimizeLinearMomentum(true);
+         parameters.setAngularMomentumWeight(0.25);
+         parameters.setLinearMomentumWeight(0.25);
+
+         parameters.getDefaultConfiguration().setEnableLeftHandTaskspace(false);
+         parameters.getDefaultConfiguration().setEnableRightHandTaskspace(false);
+         parameters.getDefaultConfiguration().setEnableNeckJointspace(false);
+         parameters.getDefaultSolverConfiguration().setJointVelocityWeight(0.05);
+         parameters.getDefaultSolverConfiguration().setEnableJointVelocityLimits(false);
+         parameters.setUseStreamingPublisher(true);
+
          boolean startYoVariableServer = true;
          toolbox = new KinematicsStreamingToolboxModule(robotModel, parameters, startYoVariableServer, DomainFactory.PubSubImplementation.FAST_RTPS);
       }
@@ -202,20 +202,6 @@ public class RDXVRKinematicsStreamingMode
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "Right A button");
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "Left A button");
       }
-   }
-
-   private Map<String, Double> createInitialConfiguration(DRCRobotModel robotModel)
-   {
-      Map<String, Double> initialConfigurationMap = new HashMap<>();
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
-      {
-         String jointName = joint.getName();
-         double q = syncedRobot.getFullRobotModel().getOneDoFJointByName(jointName).getQ();
-         initialConfigurationMap.put(jointName, q);
-      }
-
-      return initialConfigurationMap;
    }
 
    public void processVRInput()
@@ -381,7 +367,7 @@ public class RDXVRKinematicsStreamingMode
       }
    }
 
-   // TODO. there is a parameter in the KST to lock chest/pelvis, might use a message to set that. Might also need to tune the weight of that message
+   // There is a KTConfigurationMessage to lock chest/pelvis. Can use that message, but probably need to tune the weight of that message. This is equivalent
    private void lockChest(KinematicsStreamingToolboxInputMessage toolboxInputMessage)
    {
       if (initialChestFrame == null)
@@ -558,17 +544,24 @@ public class RDXVRKinematicsStreamingMode
          this.enabled.set(enabled);
       if (enabled)
       {
-         if (toolbox != null)
+         // Check if robot changed stance
+         boolean sameInitialStance = true;
+         for (RobotSide side : RobotSide.values())
          {
-            ((KinematicsStreamingToolboxController) toolbox.getToolboxController()).setInitialRobotConfigurationNamedMap(createInitialConfiguration(robotModel));
+            RigidBodyTransform footPoseTransformToWorld = syncedRobot.getFullRobotModel().getSoleFrame(side).getTransformToWorldFrame();
+            sameInitialStance &= footPoseTransformToWorld.getTranslation().geometricallyEquals(previousFootTransformToWorld.get(side).getTranslation(), 1.0e-2);
+            sameInitialStance &= footPoseTransformToWorld.getRotation().geometricallyEquals(previousFootTransformToWorld.get(side).getRotation(), 1.0e-2);
+            previousFootTransformToWorld.put(side, footPoseTransformToWorld);
+         }
+         if (!sameInitialStance)
+         {  // Update initial configuration of KST
+            KinematicsToolboxInitialConfigurationMessage initialConfigMessage = KinematicsToolboxMessageFactory.initialConfigurationFromFullRobotModel(
+                  syncedRobot.getFullRobotModel());
+            ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel()
+                                                                                                                                .getSimpleRobotName()), initialConfigMessage);
          }
          wakeUpToolbox();
          reinitializeToolbox();
-         KinematicsToolboxPrivilegedConfigurationMessage message = KinematicsToolboxMessageFactory.privilegedConfigurationFromFullRobotModel(syncedRobot.getFullRobotModel());
-         message.setUsePrivilegedRootJointPosition(true);
-         message.setUsePrivilegedRootJointOrientation(true);
-         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingPrivilegedConfigurationTopic(syncedRobot.getRobotModel()
-                                                                                                                                .getSimpleRobotName()), message);
          kinematicsRecorder.setReplay(false); // Check no concurrency replay and streaming
          initialPelvisFrame = null;
          initialChestFrame = null;

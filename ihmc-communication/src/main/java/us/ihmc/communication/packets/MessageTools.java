@@ -1076,6 +1076,17 @@ public class MessageTools
       message.getPrivilegedJointAngles().add(jointAngles);
    }
 
+   public static void packInitialJointAngles(KinematicsToolboxInitialConfigurationMessage message, int[] jointHashCodes, float[] jointAngles)
+   {
+      if (jointHashCodes.length != jointAngles.length)
+         throw new IllegalArgumentException("The two arrays jointAngles and jointHashCodes have to be of same length.");
+
+      message.getInitialJointHashCodes().reset();
+      message.getInitialJointHashCodes().add(jointHashCodes);
+      message.getInitialJointAngles().reset();
+      message.getInitialJointAngles().add(jointAngles);
+   }
+
    public static void packScan(LidarScanMessage lidarScanMessage, Point3DReadOnly[] scan)
    {
       lidarScanMessage.getScan().reset();

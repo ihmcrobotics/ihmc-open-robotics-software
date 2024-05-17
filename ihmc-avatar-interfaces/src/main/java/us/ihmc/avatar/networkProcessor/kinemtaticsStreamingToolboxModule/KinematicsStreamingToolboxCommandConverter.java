@@ -5,6 +5,7 @@ import us.ihmc.communication.controllerAPI.CommandConversionInterface;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxInitialConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxPrivilegedConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -33,6 +34,8 @@ public class KinematicsStreamingToolboxCommandConverter implements CommandConver
          return true;
       if (message instanceof KinematicsToolboxPrivilegedConfigurationMessage)
          return true;
+      if (message instanceof KinematicsToolboxInitialConfigurationMessage)
+         return true;
       return false;
    }
 
@@ -47,9 +50,15 @@ public class KinematicsStreamingToolboxCommandConverter implements CommandConver
       }
       else if (message instanceof KinematicsToolboxPrivilegedConfigurationMessage)
       {
-         KinematicsToolboxPrivilegedConfigurationMessage privConfMessage = (KinematicsToolboxPrivilegedConfigurationMessage) message;
-         KinematicsToolboxPrivilegedConfigurationCommand privConfCommand = (KinematicsToolboxPrivilegedConfigurationCommand) command;
-         privConfCommand.set(privConfMessage, jointHashCodeResolver);
+         KinematicsToolboxPrivilegedConfigurationMessage privilegedConfMessage = (KinematicsToolboxPrivilegedConfigurationMessage) message;
+         KinematicsToolboxPrivilegedConfigurationCommand privilegedConfCommand = (KinematicsToolboxPrivilegedConfigurationCommand) command;
+         privilegedConfCommand.set(privilegedConfMessage, jointHashCodeResolver);
+      }
+      else if (message instanceof KinematicsToolboxInitialConfigurationMessage)
+      {
+         KinematicsToolboxInitialConfigurationMessage initialConfMessage = (KinematicsToolboxInitialConfigurationMessage) message;
+         KinematicsToolboxInitialConfigurationCommand initialConfCommand = (KinematicsToolboxInitialConfigurationCommand) command;
+         initialConfCommand.set(initialConfMessage, jointHashCodeResolver);
       }
    }
 }

@@ -83,6 +83,7 @@ public final class ControllerAPI
       inputMessageClasses.add(KinematicsToolboxConfigurationMessage.class);
       inputMessageClasses.add(KinematicsToolboxSupportRegionMessage.class);
       inputMessageClasses.add(KinematicsToolboxPrivilegedConfigurationMessage.class);
+      inputMessageClasses.add(KinematicsToolboxInitialConfigurationMessage.class);
       inputMessageClasses.add(KinematicsToolboxInputCollectionMessage.class);
       inputMessageClasses.add(HumanoidKinematicsToolboxConfigurationMessage.class);
 
