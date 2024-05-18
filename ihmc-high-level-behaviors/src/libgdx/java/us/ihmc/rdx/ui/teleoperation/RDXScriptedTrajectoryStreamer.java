@@ -28,7 +28,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class RDXScriptedTrajectoryStreamer
 {
@@ -39,6 +41,7 @@ public class RDXScriptedTrajectoryStreamer
    private boolean initialize = false;
    private final SideDependentList<FramePose3DReadOnly> desiredHandPoses = new SideDependentList<>(side -> new FramePose3D());
    private final SideDependentList<OneDoFJointBasics[]> armJoints;
+   private Map<ScriptedTrajectoryType, SideDependentList<List<List<Double>>>> jointAngleWaypointsMap = new HashMap<>();
 
    public RDXScriptedTrajectoryStreamer(SideDependentList<OneDoFJointBasics[]> armJoints, double trajectoryTime)
    {
@@ -55,17 +58,34 @@ public class RDXScriptedTrajectoryStreamer
          multiWaypointJointTrajectories.put(side, new MultipleWaypointsTrajectoryGenerator(side.getLowerCaseName() + "_scriptedJointTrajectory", 17, registry));
          multiWaypointJointTrajectories.get(side).clear();
       }
+
+      for (ScriptedTrajectoryType trajectoryType : ScriptedTrajectoryType.values())
+      {
+         // TODO: find a better way to differentiate between taskspace and jointspace trajectories
+         if (trajectoryType == ScriptedTrajectoryType.JOINT_TRAJECTORY_TEST || trajectoryType == ScriptedTrajectoryType.HAND_CIRCLES
+             || trajectoryType == ScriptedTrajectoryType.STRETCH_OUT_ARMS)
+         {
+            continue;
+         }
+         jointAngleWaypointsMap.put(trajectoryType, getArmJointWaypoints(trajectoryType));
+      }
    }
 
    public enum ScriptedTrajectoryType
    {
       HAND_CIRCLES,
       STRETCH_OUT_ARMS,
-      JOINT_RANGE_OF_MOTION,
       WRIST_RANGE_OF_MOTION,
       BEACH_BALL_FLEX,
       BEACH_BALL_OVERHEAD,
-      JOINT_TRAJECTORY_TEST
+      JOINT_TRAJECTORY_TEST,
+      ROM_SHOULDER_PITCH,
+      ROM_SHOULDER_ROLL,
+      ROM_SHOULDER_YAW,
+      ROM_ELBOW,
+      ROM_WRIST_YAW,
+      ROM_WRIST_ROLL,
+      ROM_GRIPPER_YAW;
    }
 
    public boolean isDone()
@@ -105,7 +125,7 @@ public class RDXScriptedTrajectoryStreamer
 
    private SideDependentList<List<List<Double>>> getArmJointWaypoints(ScriptedTrajectoryType trajectoryType)
    {
-      SideDependentList<List<List<Double>>> armJointWaypoints = new SideDependentList<>();
+      SideDependentList<List<List<Double>>> waypoints = new SideDependentList<>();
 
       // It's easier to use the left arm's limits and then negate the roll and yaw actuators for the right arm.
       double[] upperLimits = new double[armJoints.get(RobotSide.LEFT).length];
@@ -120,100 +140,111 @@ public class RDXScriptedTrajectoryStreamer
 
       for (RobotSide side : RobotSide.values)
       {
-         List<Double> homeConfiguration = List.of(0.5, side.negateIfRightSide(0.13), 0.13, -1.0, 0.0, 0.0, 0.0);
+         List<Double> homeConfiguration = List.of(0.5, side.negateIfRightSide(0.13), side.negateIfRightSide(0.13), -1.6, 0.0, 0.0, 0.0);
          switch (trajectoryType)
          {
-            case JOINT_RANGE_OF_MOTION:
-               armJointWaypoints.put(side,
-                                     List.of(homeConfiguration,
-                                             // Shoulder Pitch ROM
-                                             List.of(upperLimits[0], 0.0, side.negateIfRightSide(-0.3), 0.0, 0.0, 0.0, 0.0),
-                                             List.of(lowerLimits[0], side.negateIfRightSide(1.243), 0.0, -2.3, 0.0, 0.0, 0.0),
-                                             // Shoulder Roll ROM
-                                             List.of(0.0, side.negateIfRightSide(upperLimits[1]), 0.0, -2.3, 0.0, 0.0, 0.0),
-                                             List.of(0.0, side.negateIfRightSide(lowerLimits[1]), 0.0, 0.0, 0.0, 0.0, 0.0),
-                                             // Shoulder Yaw ROM
-                                             List.of(-1.0, side.negateIfRightSide(1.4), side.negateIfRightSide(upperLimits[2]), -1.57, 0.0, 0.0, 0.0),
-                                             List.of(-1.0, side.negateIfRightSide(1.4), side.negateIfRightSide(lowerLimits[2]), -1.57, 0.0, 0.0, 0.0),
-                                             // Elbow ROM
-                                             List.of(-3.1, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.6), upperLimits[3], 0.0, 0.0, 0.0),
-                                             List.of(-3.1, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.6), lowerLimits[3], 0.0, 0.0, 0.0),
-                                             // Wrist Yaw ROM
-                                             List.of(-1.5, side.negateIfRightSide(0.75), 0.0, 0.0, side.negateIfRightSide(upperLimits[4]), side.negateIfRightSide(-1.6), 0.0),
-                                             List.of(-1.5, side.negateIfRightSide(0.75), 0.0, 0.0, side.negateIfRightSide(upperLimits[4]), side.negateIfRightSide(-1.6), 0.0),
-                                             // Wrist Roll ROM
-                                             List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), -1.6, 0.0, side.negateIfRightSide(upperLimits[5]), 0.0),
-                                             List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), -1.6, 0.0, side.negateIfRightSide(lowerLimits[5]), 0.0),
-                                             // Gripper Yaw ROM
-                                             List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), 0.0, 0.0, 0.0, side.negateIfRightSide(upperLimits[6])),
-                                             List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), 0.0, 0.0, 0.0, side.negateIfRightSide(lowerLimits[6])),
-                                             homeConfiguration));
+            case ROM_SHOULDER_PITCH:
+               waypoints.put(side, List.of(homeConfiguration,
+                                           // Shoulder Pitch ROM
+                                           List.of(upperLimits[0], 0.0, side.negateIfRightSide(-0.3), -2.3, 0.0, 0.0, 0.0),
+                                           List.of(lowerLimits[0], side.negateIfRightSide(1.243), side.negateIfRightSide(1.2), 0.0, 0.0, 0.0, 0.0),
+                                           List.of(upperLimits[0], 0.0, side.negateIfRightSide(-0.3), -2.3, 0.0, 0.0, 0.0),
+                                           homeConfiguration));
+               break;
+            case ROM_SHOULDER_ROLL:
+               waypoints.put(side, List.of(homeConfiguration,
+                                           // Shoulder Roll ROM
+                                           List.of(0.0, side.negateIfRightSide(upperLimits[1]), 0.0, -2.3, 0.0, 0.0, 0.0),
+                                           List.of(0.0, side.negateIfRightSide(lowerLimits[1]), 0.0, -2.3, 0.0, 0.0, 0.0),
+                                           List.of(0.0, side.negateIfRightSide(upperLimits[1]), 0.0, -2.3, 0.0, 0.0, 0.0),
+                                           homeConfiguration));
+               break;
+            case ROM_SHOULDER_YAW:
+               waypoints.put(side, List.of(homeConfiguration,
+                                           // Shoulder Yaw ROM
+                                           List.of(-1.0, side.negateIfRightSide(1.4), side.negateIfRightSide(0.13), -1.57, 0.0, 0.0, 0.0),
+                                           List.of(-1.0, side.negateIfRightSide(1.4), side.negateIfRightSide(upperLimits[2]), -1.57, 0.0, 0.0, 0.0),
+                                           List.of(-1.0, side.negateIfRightSide(1.4), side.negateIfRightSide(lowerLimits[2]), -1.57, 0.0, 0.0, 0.0),
+                                           List.of(-1.0, side.negateIfRightSide(1.4), side.negateIfRightSide(upperLimits[2]), -1.57, 0.0, 0.0, 0.0),
+                                           List.of(-1.0, side.negateIfRightSide(1.4), side.negateIfRightSide(0.13), -1.57, 0.0, 0.0, 0.0),
+                                           homeConfiguration));
+               break;
+            case ROM_ELBOW:
+               waypoints.put(side, List.of(homeConfiguration,
+                                           // Elbow ROM
+                                           List.of(-3.1, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.6), -0.5, 0.0, 0.0, 0.0),
+                                           List.of(-3.1, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.6), lowerLimits[3], 0.0, 0.0, 0.0),
+                                           List.of(-3.1, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.6), -0.5, 0.0, 0.0, 0.0),
+                                           List.of(-1.1, side.negateIfRightSide(2.7), 0.0, -1.6, 0.0, 0.0, 0.0),
+                                           homeConfiguration));
+               break;
+            case ROM_WRIST_YAW:
+               waypoints.put(side, List.of(homeConfiguration,
+                                           // Wrist Yaw ROM
+                                           List.of(-1.5, side.negateIfRightSide(0.75), 0.0, 0.0, 0.0, side.negateIfRightSide(-1.6), 0.0),
+                                           List.of(-1.5, side.negateIfRightSide(0.75), 0.0, 0.0, side.negateIfRightSide(upperLimits[4]), side.negateIfRightSide(-1.6), 0.0),
+                                           List.of(-1.5, side.negateIfRightSide(0.75), 0.0, 0.0, side.negateIfRightSide(lowerLimits[4]), side.negateIfRightSide(-1.6), 0.0),
+                                           List.of(-1.5, side.negateIfRightSide(0.75), 0.0, 0.0, side.negateIfRightSide(upperLimits[4]), side.negateIfRightSide(-1.6), 0.0),
+                                           List.of(-1.5, side.negateIfRightSide(0.75), 0.0, 0.0, side.negateIfRightSide(lowerLimits[4]), side.negateIfRightSide(-1.6), 0.0),
+                                           List.of(-1.5, side.negateIfRightSide(0.75), 0.0, 0.0, side.negateIfRightSide(upperLimits[4]), side.negateIfRightSide(-1.6), 0.0),
+                                           List.of(-1.5, side.negateIfRightSide(0.75), 0.0, 0.0, 0.0, side.negateIfRightSide(-1.6), 0.0),
+                                           homeConfiguration));
+               break;
+            case ROM_WRIST_ROLL:
+               waypoints.put(side, List.of(homeConfiguration,
+                                           // Wrist Roll ROM
+                                           List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), -1.6, 0.0, 0.0, 0.0),
+                                           List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), -1.6, 0.0, side.negateIfRightSide(upperLimits[5]), 0.0),
+                                           List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), -1.6, 0.0, side.negateIfRightSide(lowerLimits[5]), 0.0),
+                                           List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), -1.6, 0.0, side.negateIfRightSide(upperLimits[5]), 0.0),
+                                           List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), -1.6, 0.0, side.negateIfRightSide(lowerLimits[5]), 0.0),
+                                           List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), -1.6, 0.0, side.negateIfRightSide(upperLimits[5]), 0.0),
+                                           List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), -1.6, 0.0, 0.0, 0.0),
+                                           homeConfiguration));
+               break;
+            case ROM_GRIPPER_YAW:
+               waypoints.put(side, List.of(homeConfiguration,
+                                           // Gripper Yaw ROM
+                                           List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), 0.0, 0.0, 0.0, 0.0),
+                                           List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), 0.0, 0.0, 0.0, side.negateIfRightSide(upperLimits[6])),
+                                           List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), 0.0, 0.0, 0.0, side.negateIfRightSide(lowerLimits[6])),
+                                           List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), 0.0, 0.0, 0.0, side.negateIfRightSide(upperLimits[6])),
+                                           List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), 0.0, 0.0, 0.0, side.negateIfRightSide(lowerLimits[6])),
+                                           List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), 0.0, 0.0, 0.0, side.negateIfRightSide(upperLimits[6])),
+                                           List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), 0.0, 0.0, 0.0, 0.0),
+                                           homeConfiguration));
                break;
             case WRIST_RANGE_OF_MOTION:
-               armJointWaypoints.put(side,
+               waypoints.put(side,
                                      List.of(homeConfiguration,
-                                             List.of(0.5,
-                                                     side.negateIfRightSide(0.13),
-                                                     0.13,
-                                                     -1.9,
-                                                     side.negateIfRightSide(upperLimits[4]),
-                                                     side.negateIfRightSide(upperLimits[5]),
-                                                     side.negateIfRightSide(upperLimits[6])),
-                                             List.of(0.5,
-                                                     side.negateIfRightSide(0.13),
-                                                     0.13,
-                                                     -1.9,
-                                                     side.negateIfRightSide(lowerLimits[4]),
-                                                     side.negateIfRightSide(lowerLimits[5]),
-                                                     side.negateIfRightSide(lowerLimits[6])),
+                                             List.of(0.5, side.negateIfRightSide(0.13), 0.13, -1.9, side.negateIfRightSide(upperLimits[4]), side.negateIfRightSide(upperLimits[5]), side.negateIfRightSide(upperLimits[6])),
+                                             List.of(0.5, side.negateIfRightSide(0.13), 0.13, -1.9, side.negateIfRightSide(lowerLimits[4]), side.negateIfRightSide(lowerLimits[5]), side.negateIfRightSide(lowerLimits[6])),
                                              homeConfiguration));
                break;
             case BEACH_BALL_FLEX:
-               armJointWaypoints.put(side,
+               waypoints.put(side,
                                      List.of(homeConfiguration,
-                                             List.of(-0.147,
-                                                     side.negateIfRightSide(0.543),
-                                                     side.negateIfRightSide(-1.0),
-                                                     -1.431,
-                                                     side.negateIfRightSide(-1.50),
-                                                     side.negateIfRightSide(0.565),
-                                                     side.negateIfRightSide(0.0)),
-                                             List.of(-0.147,
-                                                     side.negateIfRightSide(0.543),
-                                                     side.negateIfRightSide(-1.0),
-                                                     -1.431,
-                                                     side.negateIfRightSide(-1.50),
-                                                     side.negateIfRightSide(0.565),
-                                                     side.negateIfRightSide(0.0)),
+                                             List.of(-0.147, side.negateIfRightSide(0.543), side.negateIfRightSide(-1.0), -1.431, side.negateIfRightSide(-1.50), side.negateIfRightSide(0.565), side.negateIfRightSide(0.0)),
+                                             List.of(-0.147, side.negateIfRightSide(0.543), side.negateIfRightSide(-1.0), -1.431, side.negateIfRightSide(-1.50), side.negateIfRightSide(0.565), side.negateIfRightSide(0.0)),
+                                             List.of(-0.147, side.negateIfRightSide(0.543), side.negateIfRightSide(-1.0), -1.431, side.negateIfRightSide(-1.50), side.negateIfRightSide(0.565), side.negateIfRightSide(0.0)),
+                                             List.of(-0.147, side.negateIfRightSide(0.543), side.negateIfRightSide(-1.0), -1.431, side.negateIfRightSide(-1.50), side.negateIfRightSide(0.565), side.negateIfRightSide(0.0)),
                                              homeConfiguration));
                break;
             case BEACH_BALL_OVERHEAD:
-               armJointWaypoints.put(side,
+               waypoints.put(side,
                                      List.of(homeConfiguration,
-                                             List.of(-2.623,
-                                                     side.negateIfRightSide(2.0),
-                                                     side.negateIfRightSide(-1.179),
-                                                     -1.586,
-                                                     side.negateIfRightSide(-1.50),
-                                                     side.negateIfRightSide(0.565),
-                                                     side.negateIfRightSide(0.0)),
-                                             List.of(-2.623,
-                                                     side.negateIfRightSide(2.0),
-                                                     side.negateIfRightSide(-1.179),
-                                                     -1.586,
-                                                     side.negateIfRightSide(-1.50),
-                                                     side.negateIfRightSide(0.565),
-                                                     side.negateIfRightSide(0.0)),
+                                             List.of(-2.623, side.negateIfRightSide(2.0), side.negateIfRightSide(-1.179), -1.586, side.negateIfRightSide(-1.50), side.negateIfRightSide(0.565), side.negateIfRightSide(0.0)),
+                                             List.of(-2.623, side.negateIfRightSide(2.0), side.negateIfRightSide(-1.179), -1.586, side.negateIfRightSide(-1.50), side.negateIfRightSide(0.565), side.negateIfRightSide(0.0)),
                                              homeConfiguration));
                break;
             case JOINT_TRAJECTORY_TEST:
-               armJointWaypoints.put(side, List.of(homeConfiguration, List.of(0.0, side.negateIfRightSide(0.0), 0.0, 0.0, 0.0, 0.0, 0.0), homeConfiguration));
+               waypoints.put(side, List.of(homeConfiguration, List.of(0.0, side.negateIfRightSide(0.0), 0.0, 0.0, 0.0, 0.0, 0.0), homeConfiguration));
                break;
             default:
                throw new RuntimeException("Unhandled trajectory type: " + trajectoryType);
          }
       }
-      return armJointWaypoints;
+      return waypoints;
    }
 
    private void createAndInitializePoseTrajectory(SideDependentList<List<FramePose3D>> poseWaypoints)
@@ -280,7 +311,7 @@ public class RDXScriptedTrajectoryStreamer
    public ArmTrajectoryMessage generateArmTrajectoryMessage(ScriptedTrajectoryType trajectoryType, double trajectoryTime, RobotSide robotSide)
    {
       OneDoFJointBasics[] sidedArmJoints = armJoints.get(robotSide);
-      List<List<Double>> jointAngleWaypoints = getArmJointWaypoints(trajectoryType).get(robotSide);
+      List<List<Double>> jointAngleWaypoints = jointAngleWaypointsMap.get(trajectoryType).get(robotSide);
       int numberOfTrajectoryPoints = jointAngleWaypoints.size();
       int numberOfJoints = sidedArmJoints.length;
 

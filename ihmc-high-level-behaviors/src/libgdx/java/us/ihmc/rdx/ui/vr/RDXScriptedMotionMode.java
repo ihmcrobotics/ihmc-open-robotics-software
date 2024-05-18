@@ -18,11 +18,9 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -40,8 +38,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class RDXScriptedMotionMode
 {
@@ -58,7 +54,7 @@ public class RDXScriptedMotionMode
    private final SceneGraph sceneGraph;
    private RDXScriptedTrajectoryStreamer scriptedTrajectory;
    private final SideDependentList<RigidBodyBasics> hands = new SideDependentList<>();
-   private final double scriptedTrajectoryDuration = 10.0;
+   private final double scriptedTrajectoryDuration = 5.0;
    private final SideDependentList<List<KinematicsToolboxOneDoFJointMessage>> armJointMessages = new SideDependentList<>();
 
    private ReferenceFrame chestFrame;
@@ -188,7 +184,13 @@ public class RDXScriptedMotionMode
                                                             scriptedTrajectoryDuration);
                ros2ControllerHelper.publishToController(handTrajectoryMessage);
                break;
-            case JOINT_RANGE_OF_MOTION:
+            case ROM_SHOULDER_PITCH:
+            case ROM_SHOULDER_ROLL:
+            case ROM_SHOULDER_YAW:
+            case ROM_ELBOW:
+            case ROM_WRIST_YAW:
+            case ROM_WRIST_ROLL:
+            case ROM_GRIPPER_YAW:
             case WRIST_RANGE_OF_MOTION:
             case BEACH_BALL_FLEX:
             case BEACH_BALL_OVERHEAD:
@@ -243,16 +245,13 @@ public class RDXScriptedMotionMode
 
    public void renderImGuiWidgets()
    {
-      ImGui.text("Trajectory Type Selection:");
-
+      ImGui.text("Taskspace Scripted Trajectories:");
       if (ImGui.radioButton(labels.get("Stretch out arms"), trajectoryType == ScriptedTrajectoryType.STRETCH_OUT_ARMS))
       {
          trajectoryType = ScriptedTrajectoryType.STRETCH_OUT_ARMS;
       }
-      if (ImGui.radioButton(labels.get("Joint ROM"), trajectoryType == ScriptedTrajectoryType.JOINT_RANGE_OF_MOTION))
-      {
-         trajectoryType = ScriptedTrajectoryType.JOINT_RANGE_OF_MOTION;
-      }
+
+      ImGui.text("Jointspace Scripted Trajectories:");
       if (ImGui.radioButton(labels.get("Wrist ROM"), trajectoryType == ScriptedTrajectoryType.WRIST_RANGE_OF_MOTION))
       {
          trajectoryType = ScriptedTrajectoryType.WRIST_RANGE_OF_MOTION;
@@ -265,6 +264,37 @@ public class RDXScriptedMotionMode
       {
          trajectoryType = ScriptedTrajectoryType.BEACH_BALL_OVERHEAD;
       }
+
+      ImGui.text("Joint ROM Scripted Trajectories:");
+      if (ImGui.radioButton(labels.get("Shoulder Pitch ROM"), trajectoryType == ScriptedTrajectoryType.ROM_SHOULDER_PITCH))
+      {
+         trajectoryType = ScriptedTrajectoryType.ROM_SHOULDER_PITCH;
+      }
+      if (ImGui.radioButton(labels.get("Shoulder Roll ROM"), trajectoryType == ScriptedTrajectoryType.ROM_SHOULDER_ROLL))
+      {
+         trajectoryType = ScriptedTrajectoryType.ROM_SHOULDER_ROLL;
+      }
+      if (ImGui.radioButton(labels.get("Shoulder Yaw ROM"), trajectoryType == ScriptedTrajectoryType.ROM_SHOULDER_YAW))
+      {
+         trajectoryType = ScriptedTrajectoryType.ROM_SHOULDER_YAW;
+      }
+      if (ImGui.radioButton(labels.get("Elbow ROM"), trajectoryType == ScriptedTrajectoryType.ROM_ELBOW))
+      {
+         trajectoryType = ScriptedTrajectoryType.ROM_ELBOW;
+      }
+      if (ImGui.radioButton(labels.get("Wrist Yaw ROM"), trajectoryType == ScriptedTrajectoryType.ROM_WRIST_YAW))
+      {
+         trajectoryType = ScriptedTrajectoryType.ROM_WRIST_YAW;
+      }
+      if (ImGui.radioButton(labels.get("Wrist Roll ROM"), trajectoryType == ScriptedTrajectoryType.ROM_WRIST_ROLL))
+      {
+         trajectoryType = ScriptedTrajectoryType.ROM_WRIST_ROLL;
+      }
+      if (ImGui.radioButton(labels.get("Gripper Yaw ROM"), trajectoryType == ScriptedTrajectoryType.ROM_GRIPPER_YAW))
+      {
+         trajectoryType = ScriptedTrajectoryType.ROM_GRIPPER_YAW;
+      }
+
 
       if (controllerModel == RDXVRControllerModel.FOCUS3)
          ImGui.text("X Button");
