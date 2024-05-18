@@ -184,12 +184,14 @@ public class RDXScriptedMotionMode
                HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
                scriptedTrajectory.packHandTrajectoryMessage(handTrajectoryMessage,
                                                             robotSide,
-                                                            ScriptedTrajectoryType.STRETCH_OUT_ARMS,
+                                                            trajectoryType,
                                                             scriptedTrajectoryDuration);
                ros2ControllerHelper.publishToController(handTrajectoryMessage);
                break;
             case JOINT_RANGE_OF_MOTION:
-               ArmTrajectoryMessage armTrajectoryMessage = scriptedTrajectory.generateArmTrajectoryMessage(ScriptedTrajectoryType.JOINT_RANGE_OF_MOTION,
+            case WRIST_RANGE_OF_MOTION:
+            case BEACH_BALL_FLEX:
+               ArmTrajectoryMessage armTrajectoryMessage = scriptedTrajectory.generateArmTrajectoryMessage(trajectoryType,
                                                                                                            scriptedTrajectoryDuration,
                                                                                                            robotSide);
                ros2ControllerHelper.publishToController(armTrajectoryMessage);
@@ -249,6 +251,14 @@ public class RDXScriptedMotionMode
       if (ImGui.radioButton(labels.get("Joint ROM"), trajectoryType == ScriptedTrajectoryType.JOINT_RANGE_OF_MOTION))
       {
          trajectoryType = ScriptedTrajectoryType.JOINT_RANGE_OF_MOTION;
+      }
+      if (ImGui.radioButton(labels.get("Wrist ROM"), trajectoryType == ScriptedTrajectoryType.WRIST_RANGE_OF_MOTION))
+      {
+         trajectoryType = ScriptedTrajectoryType.WRIST_RANGE_OF_MOTION;
+      }
+      if (ImGui.radioButton(labels.get("Beach Ball Flex"), trajectoryType == ScriptedTrajectoryType.BEACH_BALL_FLEX))
+      {
+         trajectoryType = ScriptedTrajectoryType.BEACH_BALL_FLEX;
       }
 
       if (controllerModel == RDXVRControllerModel.FOCUS3)

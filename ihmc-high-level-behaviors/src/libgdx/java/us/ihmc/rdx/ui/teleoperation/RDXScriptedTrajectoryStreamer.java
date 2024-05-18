@@ -59,7 +59,7 @@ public class RDXScriptedTrajectoryStreamer
 
    public enum ScriptedTrajectoryType
    {
-      HAND_CIRCLES, STRETCH_OUT_ARMS, JOINT_RANGE_OF_MOTION, JOINT_TRAJECTORY_TEST
+      HAND_CIRCLES, STRETCH_OUT_ARMS, JOINT_RANGE_OF_MOTION, WRIST_RANGE_OF_MOTION, BEACH_BALL_FLEX, JOINT_TRAJECTORY_TEST
    }
 
    public boolean isDone()
@@ -114,20 +114,70 @@ public class RDXScriptedTrajectoryStreamer
 
       for (RobotSide side : RobotSide.values)
       {
+         List<Double> homeConfiguration = List.of(0.5, side.negateIfRightSide(0.13), 0.13, -1.0, 0.0, 0.0, 0.0);
          switch (trajectoryType)
          {
             case JOINT_RANGE_OF_MOTION:
                armJointWaypoints.put(side,
-                                     List.of(List.of(0.5, side.negateIfRightSide(0.13), 0.13, -1.0, 0.0, 0.0, 0.0),
+                                     List.of(homeConfiguration,
                                              List.of(upperLimits[0], side.negateIfRightSide(-0.1), side.negateIfRightSide(-1.5), 0.0, 0.0, 0.0, 0.0),
                                              List.of(lowerLimits[0], side.negateIfRightSide(upperLimits[1]), 0.0, 0.0, 0.0, 0.0, 0.0),
-                                             List.of(0.5, side.negateIfRightSide(0.13), 0.13, -1.0, 0.0, 0.0, 0.0)));
+                                             homeConfiguration));
+               break;
+            case WRIST_RANGE_OF_MOTION:
+               armJointWaypoints.put(side,
+                                     List.of(homeConfiguration,
+                                             List.of(0.5,
+                                                     side.negateIfRightSide(0.13),
+                                                     0.13,
+                                                     -1.9,
+                                                     side.negateIfRightSide(upperLimits[4]),
+                                                     side.negateIfRightSide(upperLimits[5]),
+                                                     side.negateIfRightSide(upperLimits[6])),
+                                             List.of(0.5,
+                                                     side.negateIfRightSide(0.13),
+                                                     0.13,
+                                                     -1.9,
+                                                     side.negateIfRightSide(lowerLimits[4]),
+                                                     side.negateIfRightSide(lowerLimits[5]),
+                                                     side.negateIfRightSide(lowerLimits[6])),
+                                             homeConfiguration));
+               break;
+            case BEACH_BALL_FLEX:
+               armJointWaypoints.put(side,
+                                     List.of(homeConfiguration,
+                                             List.of(-0.147,
+                                                     side.negateIfRightSide(0.543),
+                                                     side.negateIfRightSide(-1.0),
+                                                     -1.431,
+                                                     side.negateIfRightSide(-1.50),
+                                                     side.negateIfRightSide(0.565),
+                                                     side.negateIfRightSide(0.0)),
+                                             List.of(-0.147,
+                                                     side.negateIfRightSide(0.543),
+                                                     side.negateIfRightSide(-1.0),
+                                                     -1.431,
+                                                     side.negateIfRightSide(-1.50),
+                                                     side.negateIfRightSide(0.565),
+                                                     side.negateIfRightSide(0.0)),
+                                             List.of(-2.623,
+                                                     side.negateIfRightSide(2.0),
+                                                     side.negateIfRightSide(-1.179),
+                                                     -1.586,
+                                                     side.negateIfRightSide(-1.50),
+                                                     side.negateIfRightSide(0.565),
+                                                     side.negateIfRightSide(0.0)),
+                                             List.of(-2.623,
+                                                     side.negateIfRightSide(2.0),
+                                                     side.negateIfRightSide(-1.179),
+                                                     -1.586,
+                                                     side.negateIfRightSide(-1.50),
+                                                     side.negateIfRightSide(0.565),
+                                                     side.negateIfRightSide(0.0)),
+                                             homeConfiguration));
                break;
             case JOINT_TRAJECTORY_TEST:
-               armJointWaypoints.put(side,
-                                     List.of(List.of(0.5, side.negateIfRightSide(0.13), 0.13, -1.0, 0.0, 0.0, 0.0),
-                                             List.of(0.0, side.negateIfRightSide(0.0), 0.0, 0.0, 0.0, 0.0, 0.0),
-                                             List.of(0.5, side.negateIfRightSide(0.13), 0.13, -1.0, 0.0, 0.0, 0.0)));
+               armJointWaypoints.put(side, List.of(homeConfiguration, List.of(0.0, side.negateIfRightSide(0.0), 0.0, 0.0, 0.0, 0.0, 0.0), homeConfiguration));
                break;
             default:
                throw new RuntimeException("Unhandled trajectory type: " + trajectoryType);
