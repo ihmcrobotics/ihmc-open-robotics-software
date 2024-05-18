@@ -59,7 +59,13 @@ public class RDXScriptedTrajectoryStreamer
 
    public enum ScriptedTrajectoryType
    {
-      HAND_CIRCLES, STRETCH_OUT_ARMS, JOINT_RANGE_OF_MOTION, WRIST_RANGE_OF_MOTION, BEACH_BALL_FLEX, JOINT_TRAJECTORY_TEST
+      HAND_CIRCLES,
+      STRETCH_OUT_ARMS,
+      JOINT_RANGE_OF_MOTION,
+      WRIST_RANGE_OF_MOTION,
+      BEACH_BALL_FLEX,
+      BEACH_BALL_OVERHEAD,
+      JOINT_TRAJECTORY_TEST
    }
 
    public boolean isDone()
@@ -120,8 +126,27 @@ public class RDXScriptedTrajectoryStreamer
             case JOINT_RANGE_OF_MOTION:
                armJointWaypoints.put(side,
                                      List.of(homeConfiguration,
-                                             List.of(upperLimits[0], side.negateIfRightSide(-0.1), side.negateIfRightSide(-1.5), 0.0, 0.0, 0.0, 0.0),
-                                             List.of(lowerLimits[0], side.negateIfRightSide(upperLimits[1]), 0.0, 0.0, 0.0, 0.0, 0.0),
+                                             // Shoulder Pitch ROM
+                                             List.of(upperLimits[0], 0.0, side.negateIfRightSide(-0.3), 0.0, 0.0, 0.0, 0.0),
+                                             List.of(lowerLimits[0], side.negateIfRightSide(1.243), 0.0, -2.3, 0.0, 0.0, 0.0),
+                                             // Shoulder Roll ROM
+                                             List.of(0.0, side.negateIfRightSide(upperLimits[1]), 0.0, -2.3, 0.0, 0.0, 0.0),
+                                             List.of(0.0, side.negateIfRightSide(lowerLimits[1]), 0.0, 0.0, 0.0, 0.0, 0.0),
+                                             // Shoulder Yaw ROM
+                                             List.of(-1.0, side.negateIfRightSide(1.4), side.negateIfRightSide(upperLimits[2]), -1.57, 0.0, 0.0, 0.0),
+                                             List.of(-1.0, side.negateIfRightSide(1.4), side.negateIfRightSide(lowerLimits[2]), -1.57, 0.0, 0.0, 0.0),
+                                             // Elbow ROM
+                                             List.of(-3.1, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.6), upperLimits[3], 0.0, 0.0, 0.0),
+                                             List.of(-3.1, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.6), lowerLimits[3], 0.0, 0.0, 0.0),
+                                             // Wrist Yaw ROM
+                                             List.of(-1.5, side.negateIfRightSide(0.75), 0.0, 0.0, side.negateIfRightSide(upperLimits[4]), side.negateIfRightSide(-1.6), 0.0),
+                                             List.of(-1.5, side.negateIfRightSide(0.75), 0.0, 0.0, side.negateIfRightSide(upperLimits[4]), side.negateIfRightSide(-1.6), 0.0),
+                                             // Wrist Roll ROM
+                                             List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), -1.6, 0.0, side.negateIfRightSide(upperLimits[5]), 0.0),
+                                             List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), -1.6, 0.0, side.negateIfRightSide(lowerLimits[5]), 0.0),
+                                             // Gripper Yaw ROM
+                                             List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), 0.0, 0.0, 0.0, side.negateIfRightSide(upperLimits[6])),
+                                             List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), 0.0, 0.0, 0.0, side.negateIfRightSide(lowerLimits[6])),
                                              homeConfiguration));
                break;
             case WRIST_RANGE_OF_MOTION:
@@ -160,6 +185,11 @@ public class RDXScriptedTrajectoryStreamer
                                                      side.negateIfRightSide(-1.50),
                                                      side.negateIfRightSide(0.565),
                                                      side.negateIfRightSide(0.0)),
+                                             homeConfiguration));
+               break;
+            case BEACH_BALL_OVERHEAD:
+               armJointWaypoints.put(side,
+                                     List.of(homeConfiguration,
                                              List.of(-2.623,
                                                      side.negateIfRightSide(2.0),
                                                      side.negateIfRightSide(-1.179),
@@ -287,7 +317,9 @@ public class RDXScriptedTrajectoryStreamer
       return armTrajectoryMessage;
    }
 
-   /** Gets the hand pose at one time instance from a trajectory that is generated on the first call of this method. Good for getting poses for IK streaming. */
+   /**
+    * Gets the hand pose at one time instance from a trajectory that is generated on the first call of this method. Good for getting poses for IK streaming.
+    */
    public FramePose3DReadOnly getHandPose(RobotSide robotSide, ScriptedTrajectoryType trajectoryType, double time)
    {
       if (!initialize)

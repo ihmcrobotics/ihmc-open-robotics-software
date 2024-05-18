@@ -58,7 +58,7 @@ public class RDXScriptedMotionMode
    private final SceneGraph sceneGraph;
    private RDXScriptedTrajectoryStreamer scriptedTrajectory;
    private final SideDependentList<RigidBodyBasics> hands = new SideDependentList<>();
-   private final double scriptedTrajectoryDuration = 5.0;
+   private final double scriptedTrajectoryDuration = 10.0;
    private final SideDependentList<List<KinematicsToolboxOneDoFJointMessage>> armJointMessages = new SideDependentList<>();
 
    private ReferenceFrame chestFrame;
@@ -191,6 +191,7 @@ public class RDXScriptedMotionMode
             case JOINT_RANGE_OF_MOTION:
             case WRIST_RANGE_OF_MOTION:
             case BEACH_BALL_FLEX:
+            case BEACH_BALL_OVERHEAD:
                ArmTrajectoryMessage armTrajectoryMessage = scriptedTrajectory.generateArmTrajectoryMessage(trajectoryType,
                                                                                                            scriptedTrajectoryDuration,
                                                                                                            robotSide);
@@ -259,6 +260,10 @@ public class RDXScriptedMotionMode
       if (ImGui.radioButton(labels.get("Beach Ball Flex"), trajectoryType == ScriptedTrajectoryType.BEACH_BALL_FLEX))
       {
          trajectoryType = ScriptedTrajectoryType.BEACH_BALL_FLEX;
+      }
+      if (ImGui.radioButton(labels.get("Beach Ball Overhead"), trajectoryType == ScriptedTrajectoryType.BEACH_BALL_OVERHEAD))
+      {
+         trajectoryType = ScriptedTrajectoryType.BEACH_BALL_OVERHEAD;
       }
 
       if (controllerModel == RDXVRControllerModel.FOCUS3)
