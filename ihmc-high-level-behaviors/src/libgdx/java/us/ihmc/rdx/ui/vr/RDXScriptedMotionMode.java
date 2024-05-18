@@ -194,6 +194,7 @@ public class RDXScriptedMotionMode
             case WRIST_RANGE_OF_MOTION:
             case BEACH_BALL_FLEX:
             case BEACH_BALL_OVERHEAD:
+            case DAB_ON_THEM_HATERS:
                ArmTrajectoryMessage armTrajectoryMessage = scriptedTrajectory.generateArmTrajectoryMessage(trajectoryType,
                                                                                                            scriptedTrajectoryDuration,
                                                                                                            robotSide);
@@ -294,7 +295,10 @@ public class RDXScriptedMotionMode
       {
          trajectoryType = ScriptedTrajectoryType.ROM_GRIPPER_YAW;
       }
-
+      if (ImGui.radioButton(labels.get("Dab on them haters"), trajectoryType == ScriptedTrajectoryType.DAB_ON_THEM_HATERS))
+      {
+         trajectoryType = ScriptedTrajectoryType.DAB_ON_THEM_HATERS;
+      }
 
       if (controllerModel == RDXVRControllerModel.FOCUS3)
          ImGui.text("X Button");

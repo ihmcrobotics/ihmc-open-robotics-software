@@ -85,7 +85,8 @@ public class RDXScriptedTrajectoryStreamer
       ROM_ELBOW,
       ROM_WRIST_YAW,
       ROM_WRIST_ROLL,
-      ROM_GRIPPER_YAW;
+      ROM_GRIPPER_YAW,
+      DAB_ON_THEM_HATERS;
    }
 
    public boolean isDone()
@@ -236,6 +237,26 @@ public class RDXScriptedTrajectoryStreamer
                                              List.of(-2.623, side.negateIfRightSide(2.0), side.negateIfRightSide(-1.179), -1.586, side.negateIfRightSide(-1.50), side.negateIfRightSide(0.565), side.negateIfRightSide(0.0)),
                                              List.of(-2.623, side.negateIfRightSide(2.0), side.negateIfRightSide(-1.179), -1.586, side.negateIfRightSide(-1.50), side.negateIfRightSide(0.565), side.negateIfRightSide(0.0)),
                                              homeConfiguration));
+               break;
+            case DAB_ON_THEM_HATERS:
+               if (side == RobotSide.LEFT)
+               {
+                  waypoints.put(side,
+                                List.of(homeConfiguration,
+                                        List.of(-2.06, side.negateIfRightSide(0.627), side.negateIfRightSide(-0.490), -1.813, 0.0, 0.0, 0.0),
+                                        List.of(-2.06, side.negateIfRightSide(0.627), side.negateIfRightSide(-0.490), -1.813, 0.0, 0.0, 0.0),
+                                        List.of(-2.06, side.negateIfRightSide(0.627), side.negateIfRightSide(-0.490), -1.813, 0.0, 0.0, 0.0),
+                                        homeConfiguration));
+               }
+               else
+               {
+                  waypoints.put(side,
+                                List.of(homeConfiguration,
+                                        List.of(0.128, side.negateIfRightSide(2.176), 0.0, 0.0, 0.0, 0.0, 0.0),
+                                        List.of(0.128, side.negateIfRightSide(2.176), 0.0, 0.0, 0.0, 0.0, 0.0),
+                                        List.of(0.128, side.negateIfRightSide(2.176), 0.0, 0.0, 0.0, 0.0, 0.0),
+                                        homeConfiguration));
+               }
                break;
             case JOINT_TRAJECTORY_TEST:
                waypoints.put(side, List.of(homeConfiguration, List.of(0.0, side.negateIfRightSide(0.0), 0.0, 0.0, 0.0, 0.0, 0.0), homeConfiguration));
