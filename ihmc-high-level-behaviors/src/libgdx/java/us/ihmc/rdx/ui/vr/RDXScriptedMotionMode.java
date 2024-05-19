@@ -195,9 +195,7 @@ public class RDXScriptedMotionMode
             case BEACH_BALL_FLEX:
             case BEACH_BALL_OVERHEAD:
             case DAB_ON_THEM_HATERS:
-               ArmTrajectoryMessage armTrajectoryMessage = scriptedTrajectory.generateArmTrajectoryMessage(trajectoryType,
-                                                                                                           scriptedTrajectoryDuration,
-                                                                                                           robotSide);
+               ArmTrajectoryMessage armTrajectoryMessage = scriptedTrajectory.getPreGeneratedArmTrajectoryMessage(trajectoryType, robotSide);
                ros2ControllerHelper.publishToController(armTrajectoryMessage);
                break;
             default:
@@ -265,6 +263,10 @@ public class RDXScriptedMotionMode
       {
          trajectoryType = ScriptedTrajectoryType.BEACH_BALL_OVERHEAD;
       }
+      if (ImGui.radioButton(labels.get("Dab on them haters"), trajectoryType == ScriptedTrajectoryType.DAB_ON_THEM_HATERS))
+      {
+         trajectoryType = ScriptedTrajectoryType.DAB_ON_THEM_HATERS;
+      }
 
       ImGui.text("Joint ROM Scripted Trajectories:");
       if (ImGui.radioButton(labels.get("Shoulder Pitch ROM"), trajectoryType == ScriptedTrajectoryType.ROM_SHOULDER_PITCH))
@@ -294,10 +296,6 @@ public class RDXScriptedMotionMode
       if (ImGui.radioButton(labels.get("Gripper Yaw ROM"), trajectoryType == ScriptedTrajectoryType.ROM_GRIPPER_YAW))
       {
          trajectoryType = ScriptedTrajectoryType.ROM_GRIPPER_YAW;
-      }
-      if (ImGui.radioButton(labels.get("Dab on them haters"), trajectoryType == ScriptedTrajectoryType.DAB_ON_THEM_HATERS))
-      {
-         trajectoryType = ScriptedTrajectoryType.DAB_ON_THEM_HATERS;
       }
 
       if (controllerModel == RDXVRControllerModel.FOCUS3)
