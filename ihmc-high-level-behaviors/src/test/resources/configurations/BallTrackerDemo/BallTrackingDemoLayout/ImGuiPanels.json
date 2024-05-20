@@ -1,7 +1,7 @@
 {
   "dockspacePanels" : { },
   "windows" : {
-    "3D View" : false,
+    "3D View" : true,
     "Perception Visualizers" : true,
     "/ihmc/zed2/left_color###us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer:/ihmc/zed2/left_color" : true,
     "Settings" : true

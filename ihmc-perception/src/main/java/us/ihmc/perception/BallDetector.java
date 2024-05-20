@@ -34,30 +34,35 @@ public class BallDetector
                                                                                new Point(-1, -1), // put anchor in center of kernel
                                                                                2);
 
-   public float detect(RawImage colorImage, Point2f centerPoint)
+   public double detect(RawImage colorImage, Point2f centerPoint)
+   {
+      return detect(colorImage, centerPoint, 1.0);
+   }
+
+   public double detect(RawImage colorImage, Point2f centerPoint, double scaleFactor)
    {
       centerPoint.x(-1.0f);
       centerPoint.y(-1.0f);
 
       if (!colorImage.isAvailable())
-         return -1.0f;
+         return -1.0;
 
       colorImage.get();
 
-      float radius;
+      double radius;
 
-      int halfWidth = colorImage.getImageWidth() / 2;
-      int halfHeight = colorImage.getImageHeight() / 2;
+      int scaledWidth = (int) Math.round(colorImage.getImageWidth() * scaleFactor);
+      int scaledHeight = (int) Math.round(colorImage.getImageHeight() * scaleFactor);
 
       GpuMat imageMat = colorImage.getGpuImageMat();
 
-      try (GpuMat detectionImage = new GpuMat(halfHeight, halfWidth, opencv_core.CV_8UC3);
-           Mat detectionMaskCPU = new Mat(halfHeight, halfWidth, opencv_core.CV_8UC1);
+      try (GpuMat detectionImage = new GpuMat(scaledHeight, scaledWidth, opencv_core.CV_8UC3);
+           Mat detectionMaskCPU = new Mat(scaledHeight, scaledWidth, opencv_core.CV_8UC1);
            MatVector contours = new MatVector())
       {
 
          // Get a smaller image for faster processing (quarter size of original)
-         opencv_cudawarping.resize(imageMat, detectionImage, new Size(halfWidth, halfHeight));
+         opencv_cudawarping.resize(imageMat, detectionImage, new Size(scaledWidth, scaledHeight));
          // Blur the image a bit to get a smoother detection
          gaussianFilter.apply(detectionImage, detectionImage);
          // Convert into HSV
@@ -76,7 +81,7 @@ public class BallDetector
          opencv_imgproc.findContours(detectionMaskCPU, contours, new Mat(), opencv_imgproc.RETR_EXTERNAL, opencv_imgproc.CHAIN_APPROX_SIMPLE);
          Optional<Mat> maxContourOptional = Arrays.stream(contours.get()).max(Comparator.comparingDouble(opencv_imgproc::contourArea));
          if (maxContourOptional.isEmpty())
-            return -1.0f;
+            return -1.0;
          Mat maxContour = maxContourOptional.get();
 
          // Get the circle of the contour
@@ -85,20 +90,20 @@ public class BallDetector
          {
             RotatedRect ellipse = opencv_imgproc.fitEllipse(maxContour);
 
-            // this is actually the diameter of the ellipse, but we need to double it to get the radius at the original size of the source image
-            // i.e. diameter in detection image = radius in source image
-            radius = Math.min(ellipse.size().height(), ellipse.size().width());
+            // Find the radius of the ball in the original image in pixels
+            // we take the shortest diameter of the ellipse, divide it by 2, and scale it using the scale factor
+            radius = (0.5 * Math.min(ellipse.size().height(), ellipse.size().width())) / scaleFactor;
          }
          catch (RuntimeException e) // if there aren't enough points to fit an ellipse, fit a circle instead.
          {
             float[] radiusResult = new float[1];
             opencv_imgproc.minEnclosingCircle(maxContour, new Point2f(), radiusResult);
-            radius = 2.0f * radiusResult[0];
+            radius = 2.0 * radiusResult[0];
          }
 
          Moments moments = opencv_imgproc.moments(maxContour);
-         centerPoint.x((float) (2.0 * moments.m10() / moments.m00()));
-         centerPoint.y((float) (2.0 * moments.m01() / moments.m00()));
+         centerPoint.x((float) ((moments.m10() / moments.m00()) / scaleFactor));
+         centerPoint.y((float) ((moments.m01() / moments.m00()) / scaleFactor));
 
          maxContour.close();
       }
