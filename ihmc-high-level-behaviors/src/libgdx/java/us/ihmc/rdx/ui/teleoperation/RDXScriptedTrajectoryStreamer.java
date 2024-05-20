@@ -257,8 +257,9 @@ public class RDXScriptedTrajectoryStreamer
             case BEACH_BALL_OVERHEAD:
                waypoints.put(side,
                              List.of(homeConfiguration,
-                                     List.of(-2.623, side.negateIfRightSide(2.0), side.negateIfRightSide(-1.179), -1.586, side.negateIfRightSide(-1.50), side.negateIfRightSide(0.565), side.negateIfRightSide(0.0)),
-                                     List.of(-2.623, side.negateIfRightSide(2.0), side.negateIfRightSide(-1.179), -1.586, side.negateIfRightSide(-1.50), side.negateIfRightSide(0.565), side.negateIfRightSide(0.0)),
+                                     List.of(-1.645, side.negateIfRightSide(2.05), side.negateIfRightSide(-0.683), -1.3, side.negateIfRightSide(-1.50), side.negateIfRightSide(0.565), 0.0),
+                                     List.of(-2.623, side.negateIfRightSide(2.0), side.negateIfRightSide(-1.179), -1.586, side.negateIfRightSide(-1.50), side.negateIfRightSide(0.565), 0.0),
+                                     List.of(-2.623, side.negateIfRightSide(2.0), side.negateIfRightSide(-1.179), -1.586, side.negateIfRightSide(-1.50), side.negateIfRightSide(0.565), 0.0),
                                      homeConfiguration));
                break;
             case DAB_ON_THEM_HATERS:
@@ -388,6 +389,7 @@ public class RDXScriptedTrajectoryStreamer
                                   .set(HumanoidMessageTools.createTrajectoryPoint1DMessage(trajectoryPoint.getTime(),
                                                                                            trajectoryPoint.getPosition(),
                                                                                            trajectoryPoint.getVelocity()));
+            jointTrajectoryMessage.setWeight(100.0);
          }
       }
       return armTrajectoryMessage;
