@@ -54,7 +54,7 @@ public class RDXScriptedMotionMode
    private final SceneGraph sceneGraph;
    private RDXScriptedTrajectoryStreamer scriptedTrajectory;
    private final SideDependentList<RigidBodyBasics> hands = new SideDependentList<>();
-   private final double scriptedTrajectoryDuration = 5.0;
+   private final double scriptedTrajectoryDuration = 10.0;
    private final SideDependentList<List<KinematicsToolboxOneDoFJointMessage>> armJointMessages = new SideDependentList<>();
 
    private ReferenceFrame chestFrame;

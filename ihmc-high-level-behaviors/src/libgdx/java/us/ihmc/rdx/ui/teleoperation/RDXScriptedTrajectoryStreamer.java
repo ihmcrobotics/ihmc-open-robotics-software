@@ -147,7 +147,7 @@ public class RDXScriptedTrajectoryStreamer
       // It's easier to use the left arm's limits and then negate the roll and yaw actuators for the right arm.
       double[] upperLimits = new double[armJoints.get(RobotSide.LEFT).length];
       double[] lowerLimits = new double[armJoints.get(RobotSide.LEFT).length];
-      double epsilon = 1e-3;
+      double epsilon = 0.18;
       for (int jointIndex = 0; jointIndex < armJoints.get(RobotSide.LEFT).length; jointIndex++)
       {
          // Epsilon is used to ensure the trajectory generator does not exceed the joint limits.
