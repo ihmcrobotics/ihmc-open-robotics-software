@@ -22,6 +22,7 @@ import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
+import us.ihmc.robotics.math.filters.AlphaFilteredTuple3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
@@ -44,9 +45,10 @@ public class RDXBallTrackingDemo
 
    private final BallDetector ballDetector = new BallDetector();
    private final Point2f ballCenter = new Point2f(-1.0f, -1.0f);
-   private final Point3D ballPoint = new Point3D();
+   private final AlphaFilteredTuple3D ballPoint = new AlphaFilteredTuple3D(0.5);
    private final ImFloat[] hsvLowerBound = {new ImFloat(0.0f), new ImFloat(0.0f), new ImFloat(0.0f)};
    private final ImFloat[] hsvUpperBound = {new ImFloat(255.0f), new ImFloat(255.0f), new ImFloat(255.0f)};
+   private final ImFloat positionAlpha = new ImFloat(0.1f);
 
    private boolean done = false;
 
@@ -95,8 +97,6 @@ public class RDXBallTrackingDemo
          y += 0.06; // offset due to ZED lens offset from center
          double z = -(ballCenter.y() - leftColorImage.getPrincipalPointY()) / leftColorImage.getFocalLengthY() * depth;
          ballPoint.set(depth, y, z);
-
-         System.out.printf("Distance = %.3f\n", depth);
       }
 
       imagePublisher.setNextColorImage(leftColorImage.get(), RobotSide.LEFT);
@@ -114,7 +114,7 @@ public class RDXBallTrackingDemo
          @Override
          public void create()
          {
-            ballFrameGraphic = new RDXReferenceFrameGraphic(0.3);
+            ballFrameGraphic = new RDXReferenceFrameGraphic(0.1);
 
             RDXROS2ImageMessageVisualizer colorImageVisualizer = new RDXROS2ImageMessageVisualizer("Color Image",
                                                                                                    PubSubImplementation.FAST_RTPS,
@@ -139,12 +139,17 @@ public class RDXBallTrackingDemo
          {
             perceptionVisualizerPanel.update();
             baseUI.renderBeforeOnScreenUI();
-            ballFrameGraphic.setPositionInWorldFrame(ballPoint);
+            ballFrameGraphic.setPositionInWorldFrame(new Point3D(ballPoint));
             baseUI.renderEnd();
          }
 
          private void renderSettings()
          {
+            if (ImGui.sliderFloat("Position Alpha Filter", positionAlpha.getData(), 0.0f, 1.0f))
+            {
+               ballPoint.setAlpha(positionAlpha.get());
+            }
+
             ImGui.text("HSV Lower Bound");
             ImGui.sliderFloat("Hl", hsvLowerBound[0].getData(), 0.0f, 255.0f);
             ImGui.sliderFloat("Sl", hsvLowerBound[1].getData(), 0.0f, 255.0f);
