@@ -75,7 +75,7 @@ public class BallDetector
          // Must use CPU Mat from this point. OpenCV doesn't support GpuMats for some functions
          detectionMask.download(detectionMaskCPU);
          PerceptionDebugTools.display("Mask", detectionMaskCPU, 5);
-         detectionMask.release();
+         detectionMask.close();
 
          // Find the biggest contour (probably our ball)
          opencv_imgproc.findContours(detectionMaskCPU, contours, new Mat(), opencv_imgproc.RETR_EXTERNAL, opencv_imgproc.CHAIN_APPROX_SIMPLE);

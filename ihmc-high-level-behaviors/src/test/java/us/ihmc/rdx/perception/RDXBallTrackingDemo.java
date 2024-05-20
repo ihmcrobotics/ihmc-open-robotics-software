@@ -46,9 +46,10 @@ public class RDXBallTrackingDemo
    private final BallDetector ballDetector = new BallDetector();
    private final Point2f ballCenter = new Point2f(-1.0f, -1.0f);
    private final AlphaFilteredTuple3D ballPoint = new AlphaFilteredTuple3D(0.5);
+
+   private final ImFloat positionAlpha = new ImFloat(0.1f);
    private final ImFloat[] hsvLowerBound = {new ImFloat(0.0f), new ImFloat(0.0f), new ImFloat(0.0f)};
    private final ImFloat[] hsvUpperBound = {new ImFloat(255.0f), new ImFloat(255.0f), new ImFloat(255.0f)};
-   private final ImFloat positionAlpha = new ImFloat(0.1f);
 
    private boolean done = false;
 
