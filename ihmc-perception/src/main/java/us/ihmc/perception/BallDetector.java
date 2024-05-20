@@ -15,6 +15,7 @@ import org.bytedeco.opencv.opencv_core.RotatedRect;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_cudafilters.Filter;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 
@@ -98,7 +99,7 @@ public class BallDetector
          {
             float[] radiusResult = new float[1];
             opencv_imgproc.minEnclosingCircle(maxContour, new Point2f(), radiusResult);
-            radius = 2.0 * radiusResult[0];
+            radius = radiusResult[0] / scaleFactor;
          }
 
          Moments moments = opencv_imgproc.moments(maxContour);
