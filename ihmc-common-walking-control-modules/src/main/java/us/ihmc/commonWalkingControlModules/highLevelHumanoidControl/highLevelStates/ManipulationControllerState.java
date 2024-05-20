@@ -96,6 +96,7 @@ public class ManipulationControllerState extends HighLevelControllerState
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
    private final WholeBodyControlCoreToolbox controlCoreToolbox;
+   private double controlDT;
 
    public ManipulationControllerState(CommandInputManager commandInputManager,
                                       StatusMessageOutputManager statusMessageOutputManager,
@@ -112,6 +113,7 @@ public class ManipulationControllerState extends HighLevelControllerState
 
       this.commandInputManager = commandInputManager;
       this.statusMessageOutputManager = statusMessageOutputManager;
+      this.controlDT = controlDT;
       this.fullHumanoidRobotModel = fullRobotModel;
 
       this.highLevelControllerParameters = highLevelControllerParameters;
@@ -282,7 +284,7 @@ public class ManipulationControllerState extends HighLevelControllerState
                                                                     defaultControlMode,
                                                                     enableFunctionGenerators,
                                                                     yoTime,
-                                                                    gravityZ,
+                                                                    controlDT,
                                                                     graphicsListRegistry,
                                                                     registry);
       manager.setGains(jointspaceGainMap);
@@ -330,6 +332,10 @@ public class ManipulationControllerState extends HighLevelControllerState
       consumeStopAllTrajectoryCommands();
       consumeManipulationCommands();
 
+      reportStatusMessages();
+
+      chestManager.compute();
+      headManager.compute();
       if (chestManager != null)
       {
          chestManager.compute();
@@ -591,6 +597,33 @@ public class ManipulationControllerState extends HighLevelControllerState
       }
 
    }
+
+   private void reportStatusMessages()
+   {
+      Object statusMessage;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         statusMessage = handManagers.get(robotSide).pollStatusToReport();
+         if (statusMessage != null)
+            statusMessageOutputManager.reportStatusMessage(statusMessage);
+      }
+
+      if (chestManager != null)
+      {
+         statusMessage = chestManager.pollStatusToReport();
+         if (statusMessage != null)
+            statusMessageOutputManager.reportStatusMessage(statusMessage);
+      }
+
+      if (headManager != null)
+      {
+         statusMessage = headManager.pollStatusToReport();
+         if (statusMessage != null)
+            statusMessageOutputManager.reportStatusMessage(statusMessage);
+      }
+  }
+
 
    @Override
    public void onExit(double timeInState)
