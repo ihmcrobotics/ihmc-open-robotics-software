@@ -285,6 +285,18 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
       }
    }
 
+   public void changeTopics(ROS2Topic<ImageMessage> colorTopic, ROS2Topic<ImageMessage> depthTopic)
+   {
+      boolean wasSubscribed = isSubscribed();
+      unsubscribe();
+
+      colorChannel.setTopic(colorTopic);
+      depthChannel.setTopic(depthTopic);
+
+      if (wasSubscribed)
+         subscribe();
+   }
+
    public boolean isSubscribed()
    {
       return subscribed;
