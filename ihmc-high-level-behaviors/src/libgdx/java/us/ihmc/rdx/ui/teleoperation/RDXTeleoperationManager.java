@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -42,6 +43,7 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.tools.gui.YoAppearanceTools;
 
@@ -198,9 +200,16 @@ public class RDXTeleoperationManager extends RDXPanel
          {
             RobotDefinition robotDefinition = robotModel.getRobotDefinition();
             FullHumanoidRobotModel fullRobotModel = syncedRobot.getFullRobotModel();
-            String modelFileName = RDXInteractableTools.getModelFileName(robotDefinition.getRigidBodyDefinition(robotCollidable.getRigidBodyName()));
+            String rigidBodyName = robotCollidable.getRigidBodyName();
+            RigidBodyDefinition rigidBodyDefinition = robotDefinition.getRigidBodyDefinition(rigidBodyName);
+            String modelFileName = RDXInteractableTools.getModelFileName(rigidBodyDefinition);
+            if (modelFileName == null)
+            {
+               LogTools.warn("No model file name found for rigid body: " + rigidBodyName);
+               continue;
+            }
 
-            if (robotCollidable.getRigidBodyName().equals(fullRobotModel.getChest().getName()))
+            if (rigidBodyName.equals(fullRobotModel.getChest().getName()))
             {
                if (interactableChest == null)
                {
@@ -228,7 +237,7 @@ public class RDXTeleoperationManager extends RDXPanel
                   interactableChest.addAdditionalRobotCollidable(robotCollidable);
                }
             }
-            if (robotCollidable.getRigidBodyName().equals(fullRobotModel.getPelvis().getName()))
+            if (rigidBodyName.equals(fullRobotModel.getPelvis().getName()))
             {
                if (interactablePelvis == null)
                {
