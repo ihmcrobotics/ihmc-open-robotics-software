@@ -302,6 +302,8 @@ public class ManipulationControllerState extends HighLevelControllerState
       consumeStopAllTrajectoryCommands();
       consumeManipulationCommands();
 
+      reportStatusMessages();
+
       chestManager.compute();
       headManager.compute();
 
@@ -533,6 +535,33 @@ public class ManipulationControllerState extends HighLevelControllerState
       }
 
    }
+
+   private void reportStatusMessages()
+   {
+      Object statusMessage;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         statusMessage = handManagers.get(robotSide).pollStatusToReport();
+         if (statusMessage != null)
+            statusMessageOutputManager.reportStatusMessage(statusMessage);
+      }
+
+      if (chestManager != null)
+      {
+         statusMessage = chestManager.pollStatusToReport();
+         if (statusMessage != null)
+            statusMessageOutputManager.reportStatusMessage(statusMessage);
+      }
+
+      if (headManager != null)
+      {
+         statusMessage = headManager.pollStatusToReport();
+         if (statusMessage != null)
+            statusMessageOutputManager.reportStatusMessage(statusMessage);
+      }
+  }
+
 
    @Override
    public void onExit(double timeInState)
