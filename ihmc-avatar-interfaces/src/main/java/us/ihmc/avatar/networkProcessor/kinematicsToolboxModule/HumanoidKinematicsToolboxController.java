@@ -399,8 +399,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       return true;
    }
 
-   private void
-   computeSupportZUpTransform(FullHumanoidRobotModel fullRobotModel, RigidBodyTransform transformToPack)
+   private void computeSupportZUpTransform(FullHumanoidRobotModel fullRobotModel, RigidBodyTransform transformToPack)
    {
 
       if (isFootInSupport.get(RobotSide.LEFT).getValue())

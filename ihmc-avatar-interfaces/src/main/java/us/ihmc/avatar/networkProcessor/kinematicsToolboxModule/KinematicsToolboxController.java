@@ -5,7 +5,6 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import toolbox_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
