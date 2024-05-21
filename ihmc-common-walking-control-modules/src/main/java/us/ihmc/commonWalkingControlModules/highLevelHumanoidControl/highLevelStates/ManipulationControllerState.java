@@ -146,6 +146,7 @@ public class ManipulationControllerState extends HighLevelControllerState
                                         momentumRegistry);
       ParameterTools.extract3DWeightMap("LinearWeight", momentumOptimizationSettings.getTaskspaceLinearWeights(), taskspaceLinearWeightMap, momentumRegistry);
 
+      String pelvisName = jointNameMap.getPelvisName();
       String chestName = jointNameMap.getChestName();
       String headName = jointNameMap.getHeadName();
 
@@ -153,10 +154,25 @@ public class ManipulationControllerState extends HighLevelControllerState
 
       RigidBodyBasics elevator = controllerSystem.getRootBody();
       RigidBodyBasics chest = controllerSystem.findRigidBody(chestName);
-      RigidBodyBasics head = controllerSystem.findRigidBody(headName);
 
-      chestManager = createRigidBodyManager(chest, elevator, chest.getBodyFixedFrame(), elevator.getBodyFixedFrame(), elevator, yoTime, graphicsListRegistry);
-      headManager = createRigidBodyManager(head, chest, head.getBodyFixedFrame(), chest.getBodyFixedFrame(), elevator, yoTime, graphicsListRegistry);
+      if (fullRobotModel.getChest() == null || fullRobotModel.getChest() == fullRobotModel.getPelvis())
+      {
+         chestManager = null;
+      }
+      else
+      {
+         chestManager = createRigidBodyManager(chest, elevator, chest.getBodyFixedFrame(), elevator.getBodyFixedFrame(), elevator, yoTime, graphicsListRegistry);
+      }
+
+      if (fullRobotModel.getHead() == null)
+      {
+         headManager = null;
+      }
+      else
+      {
+         RigidBodyBasics head = controllerSystem.findRigidBody(headName);
+         headManager = createRigidBodyManager(head, chest, head.getBodyFixedFrame(), chest.getBodyFixedFrame(), elevator, yoTime, graphicsListRegistry);
+      }
 
       privilegedConfigurationCommand.clear();
       for (RobotSide robotSide : RobotSide.values)
@@ -200,8 +216,16 @@ public class ManipulationControllerState extends HighLevelControllerState
                                                            registry);
 
       FeedbackControlCommandList feedbackControlCommandList = new FeedbackControlCommandList();
-      feedbackControlCommandList.addCommand(chestManager.createFeedbackControlTemplate());
-      feedbackControlCommandList.addCommand(headManager.createFeedbackControlTemplate());
+
+      if (chestManager != null)
+      {
+         feedbackControlCommandList.addCommand(chestManager.createFeedbackControlTemplate());
+      }
+      if (headManager != null)
+      {
+         feedbackControlCommandList.addCommand(headManager.createFeedbackControlTemplate());
+      }
+
       for (RobotSide robotSide : RobotSide.values)
       {
          feedbackControlCommandList.addCommand(handManagers.get(robotSide).createFeedbackControlTemplate());
@@ -274,8 +298,14 @@ public class ManipulationControllerState extends HighLevelControllerState
    {
       controllerCore.initialize();
 
-      chestManager.initialize();
-      headManager.initialize();
+      if (chestManager != null)
+      {
+         chestManager.initialize();
+      }
+      if (headManager != null)
+      {
+         headManager.initialize();
+      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -306,6 +336,14 @@ public class ManipulationControllerState extends HighLevelControllerState
 
       chestManager.compute();
       headManager.compute();
+      if (chestManager != null)
+      {
+         chestManager.compute();
+      }
+      if (headManager != null)
+      {
+         headManager.compute();
+      }
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -315,12 +353,18 @@ public class ManipulationControllerState extends HighLevelControllerState
       controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
 
       /* Head commands */
-      controllerCoreCommand.addFeedbackControlCommand(headManager.getFeedbackControlCommand());
-      controllerCoreCommand.addInverseDynamicsCommand(headManager.getInverseDynamicsCommand());
+      if (headManager != null)
+      {
+         controllerCoreCommand.addFeedbackControlCommand(headManager.getFeedbackControlCommand());
+         controllerCoreCommand.addInverseDynamicsCommand(headManager.getInverseDynamicsCommand());
+      }
 
       /* Chest commands */
-      controllerCoreCommand.addFeedbackControlCommand(chestManager.getFeedbackControlCommand());
-      controllerCoreCommand.addInverseDynamicsCommand(chestManager.getInverseDynamicsCommand());
+      if (chestManager != null)
+      {
+         controllerCoreCommand.addFeedbackControlCommand(chestManager.getFeedbackControlCommand());
+         controllerCoreCommand.addInverseDynamicsCommand(chestManager.getInverseDynamicsCommand());
+      }
 
       /* Arm commands */
       for (RobotSide robotSide : RobotSide.values)
@@ -339,6 +383,15 @@ public class ManipulationControllerState extends HighLevelControllerState
 
    private void consumeHeadCommands()
    {
+      if (headManager == null)
+      {
+         commandInputManager.clearCommands(HeadTrajectoryCommand.class);
+         commandInputManager.clearCommands(NeckTrajectoryCommand.class);
+         commandInputManager.clearCommands(NeckDesiredAccelerationsCommand.class);
+         commandInputManager.clearCommands(HeadHybridJointspaceTaskspaceTrajectoryCommand.class);
+         return;
+      }
+
       if (commandInputManager.isNewCommandAvailable(HeadTrajectoryCommand.class))
       {
          HeadTrajectoryCommand command = commandInputManager.pollNewestCommand(HeadTrajectoryCommand.class);
@@ -373,6 +426,15 @@ public class ManipulationControllerState extends HighLevelControllerState
 
    private void consumeChestCommands()
    {
+      if (chestManager == null)
+      {
+         commandInputManager.clearCommands(ChestTrajectoryCommand.class);
+         commandInputManager.clearCommands(SpineTrajectoryCommand.class);
+         commandInputManager.clearCommands(SpineDesiredAccelerationsCommand.class);
+         commandInputManager.clearCommands(ChestHybridJointspaceTaskspaceTrajectoryCommand.class);
+         return;
+      }
+
       if (commandInputManager.isNewCommandAvailable(ChestTrajectoryCommand.class))
       {
          ChestTrajectoryCommand command = commandInputManager.pollNewestCommand(ChestTrajectoryCommand.class);
@@ -434,7 +496,7 @@ public class ManipulationControllerState extends HighLevelControllerState
             }
          }
 
-         if (command.getRequest(HumanoidBodyPart.CHEST))
+         if (chestManager != null && command.getRequest(HumanoidBodyPart.CHEST))
          {
             chestManager.goHome(command.getTrajectoryTime());
          }

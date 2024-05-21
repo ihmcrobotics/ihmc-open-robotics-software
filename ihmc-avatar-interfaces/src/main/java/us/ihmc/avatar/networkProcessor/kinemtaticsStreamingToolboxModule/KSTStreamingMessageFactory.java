@@ -100,7 +100,16 @@ public class KSTStreamingMessageFactory
       }
 
       yoPelvisStreamingMessage = new YoSE3StreamingMessage(fullRobotModel.getPelvis(), registry);
-      yoChestStreamingMessage = new YoSO3StreamingMessage(chest, registry);
+      if (chest == fullRobotModel.getPelvis())
+      {
+         // This supports a hack where the chest was called the pelvis in the urdf with the fixed spine. Without this, we get a naming conflict. The other
+         // option would be to remove the pelvis message entirely.
+         yoChestStreamingMessage = null;
+      }
+      else
+      {
+         yoChestStreamingMessage = new YoSO3StreamingMessage(chest, registry);
+      }
 
       parentRegistry.addChild(registry);
    }

@@ -24,7 +24,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.idl.IDLSequence.Object;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -100,7 +99,6 @@ public class RDXWholeBodyIKManager
             rigidBodyCommand.getWeightMatrix().setAngularWeights(1.0, 1.0, 1.0);
             handRigidBodyCommands.put(side, rigidBodyCommand);
          }
-
       }
       chestRigidBodyCommand.setEndEffector(wholeBodyIKSolver.getDesiredFullRobotModel().getChest());
       chestRigidBodyCommand.getControlFramePose().setToZero(wholeBodyIKSolver.getDesiredFullRobotModel().getChest().getParentJoint().getFrameAfterJoint());
@@ -119,7 +117,8 @@ public class RDXWholeBodyIKManager
 
       for (RobotSide side : interactableHands.sides())
          desiredHandPoseChangedTrackers.put(side, new FramePose3DChangedTracker(interactableHands.get(side).getPose()));
-      desiredChestPoseChangedTracker = new FramePose3DChangedTracker(interactableChest.getPose());
+      if (interactableChest != null)
+         desiredChestPoseChangedTracker = new FramePose3DChangedTracker(interactableChest.getPose());
    }
 
    public void update()
@@ -284,6 +283,7 @@ public class RDXWholeBodyIKManager
    {
       for (RobotSide side : interactableHands.sides())
          desiredHandPoseChangedTrackers.get(side).markAsChanged();
-      desiredChestPoseChangedTracker.markAsChanged();
+      if (interactableChest != null)
+         desiredChestPoseChangedTracker.markAsChanged();
    }
 }
