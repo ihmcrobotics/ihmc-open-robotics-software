@@ -22,7 +22,7 @@ import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
 
 public class RDXVRMotionRetargeting
 {
-   private static final Set<VRTrackedSegmentType> UNCHANGED_TRACKER_REFERENCES = new HashSet<>()
+   private final Set<VRTrackedSegmentType> UNCHANGED_TRACKER_REFERENCES = new HashSet<>()
    {
       {
          add(CHEST);
@@ -38,8 +38,9 @@ public class RDXVRMotionRetargeting
    private final FramePose3D newPelvisFramePose = new FramePose3D();
    private final Map<VRTrackedSegmentType, ReferenceFrame> desiredFrames = new HashMap<>();
    private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
-   private final Point3D centerOfMassDesiredXYInWorld = new Point3D();
+   private Point3D centerOfMassDesiredXYInWorld;
    private ReferenceFrame initialPelvisFrame;
+   private boolean controlArmsOnly = false;
 
    public RDXVRMotionRetargeting(ROS2SyncedRobotModel syncedRobot, Map<String, MutableReferenceFrame> trackerReferenceFrames,
                                  RetargetingParameters retargetingParameters)
@@ -47,9 +48,6 @@ public class RDXVRMotionRetargeting
       this.syncedRobot = syncedRobot;
       this.retargetingParameters = retargetingParameters;
       this.trackerReferenceFrames = trackerReferenceFrames;
-
-      // Start CoM at midFeetZUp frame
-      centerOfMassDesiredXYInWorld.set(syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation());
    }
 
    public void computeDesiredValues()
@@ -57,7 +55,6 @@ public class RDXVRMotionRetargeting
       desiredFrames.clear();
       retargetPelvis();
       retargetCoM();
-      alignOtherDesiredFramesWithReferences();
    }
 
    /**
@@ -66,7 +63,7 @@ public class RDXVRMotionRetargeting
     */
    private void retargetPelvis()
    {
-      if (trackerReferenceFrames.containsKey(WAIST.getSegmentName()))
+      if (trackerReferenceFrames.containsKey(WAIST.getSegmentName()) && !controlArmsOnly)
       {
          if (initialPelvisFrame == null)
          {
@@ -109,8 +106,13 @@ public class RDXVRMotionRetargeting
    {
       if (trackerReferenceFrames.containsKey(WAIST.getSegmentName())
           && trackerReferenceFrames.containsKey(LEFT_ANKLE.getSegmentName())
-          && trackerReferenceFrames.containsKey(RIGHT_ANKLE.getSegmentName()))
+          && trackerReferenceFrames.containsKey(RIGHT_ANKLE.getSegmentName()) && !controlArmsOnly)
       {
+         if (centerOfMassDesiredXYInWorld == null)
+         {
+            centerOfMassDesiredXYInWorld = new Point3D();
+            centerOfMassDesiredXYInWorld.set(syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation());
+         }
          // Fetch the current frames for left and right ankle
          ReferenceFrame leftAnkleFrame = trackerReferenceFrames.get(LEFT_ANKLE.getSegmentName()).getReferenceFrame();
          ReferenceFrame rightAnkleFrame = trackerReferenceFrames.get(RIGHT_ANKLE.getSegmentName()).getReferenceFrame();
@@ -154,29 +156,19 @@ public class RDXVRMotionRetargeting
       }
    }
 
-   /**
-    * For a specific set of trackers that do not require any particular retargeting, set the desired value equal to the reference from the tracker
-    */
-   private void alignOtherDesiredFramesWithReferences()
+   public void setControlArmsOnly(boolean controlArmsOnly)
    {
-      for (var tracker : UNCHANGED_TRACKER_REFERENCES)
-      {
-         if (trackerReferenceFrames.containsKey(tracker.getSegmentName()))
-         {
-            desiredFrames.put(tracker, trackerReferenceFrames.get(tracker.getSegmentName()).getReferenceFrame());
-         }
-      }
+      this.controlArmsOnly = controlArmsOnly;
    }
 
    public void reset()
    {
       initialPelvisFrame = null;
       desiredFrames.clear();
-      // Reset CoM to midFeetZUp frame
-      centerOfMassDesiredXYInWorld.set(syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation());
+      centerOfMassDesiredXYInWorld = null;
    }
 
-   public Set<VRTrackedSegmentType> getControlledSegments()
+   public Set<VRTrackedSegmentType> getRetargetedSegments()
    {
       return desiredFrames.keySet();
    }
@@ -189,5 +181,15 @@ public class RDXVRMotionRetargeting
    public Point3D getDesiredCenterOfMassXYInWorld()
    {
       return centerOfMassDesiredXYInWorld;
+   }
+
+   public boolean isCenterOfMassAvailable()
+   {
+      return centerOfMassDesiredXYInWorld != null;
+   }
+
+   public boolean isRetargetingNotNeeded(VRTrackedSegmentType segment)
+   {
+      return UNCHANGED_TRACKER_REFERENCES.contains(segment);
    }
 }

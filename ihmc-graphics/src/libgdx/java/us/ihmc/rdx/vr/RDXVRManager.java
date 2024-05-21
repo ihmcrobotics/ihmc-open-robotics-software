@@ -174,7 +174,7 @@ public class RDXVRManager
                {
                   trackerRoleManagers.add(new RDXVRTrackerRoleManager(context, context.getTrackers().get(newSerialNumber)));
                }
-               if (context.isRolesResetPending())
+               if (context.getRolesResetNotification().poll())
                {
                   for (var trackerRoleManager : trackerRoleManagers)
                   {

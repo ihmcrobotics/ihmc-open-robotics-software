@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.vr;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -21,7 +22,7 @@ public class RDXVRStereoVision
    private final ImGuiFlashingText rightConnectedStatusCircle = new ImGuiFlashingText(ImGuiTools.DARK_GREEN);
    private final ImString leftConnectionAddress = new ImString();
    private final ImString rightConnectionAddress = new ImString();
-   private boolean justDisabled = false;
+   private final Notification disabledNotification = new Notification();
 
    public RDXVRStereoVision(HumanoidReferenceFrames currentRobotFrames)
    {
@@ -49,7 +50,11 @@ public class RDXVRStereoVision
          if (!enabled.get())
          {
             dualBlackflySphericalProjection.disable();
-            justDisabled = true;
+            disabledNotification.set();
+         }
+         else
+         {
+            disabledNotification.poll();
          }
       }
 
@@ -119,13 +124,8 @@ public class RDXVRStereoVision
       return dualBlackflySphericalProjection;
    }
 
-   public boolean justDisabled()
+   public Notification getDisabledNotification()
    {
-      if (justDisabled)
-      {
-         justDisabled = false;
-         return true;
-      }
-      return false;
+      return disabledNotification;
    }
 }

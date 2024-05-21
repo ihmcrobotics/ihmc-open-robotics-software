@@ -16,6 +16,7 @@ import org.lwjgl.openvr.VRCompositor;
 import org.lwjgl.openvr.VREvent;
 import org.lwjgl.openvr.VRInput;
 import org.lwjgl.openvr.VRSystem;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -134,7 +135,7 @@ public class RDXVRContext
    };
    private final List<String> newTrackerSerialNumber = new ArrayList<>();
    private final List<String> removedTrackerSerialNumber = new ArrayList<>();
-   private boolean rolesResetPending = false;
+   private final Notification rolesResetNotification = new Notification();
 
    public void initSystem()
    {
@@ -508,14 +509,12 @@ public class RDXVRContext
       availableTrackerRoles.add("Right Wrist");
       availableTrackerRoles.add("Left Ankle");
       availableTrackerRoles.add("Right Ankle");
-      rolesResetPending = true;
+      rolesResetNotification.set();
    }
 
-   public boolean isRolesResetPending()
+   public Notification getRolesResetNotification()
    {
-      boolean reset = rolesResetPending;
-      rolesResetPending = false;
-      return reset;
+      return rolesResetNotification;
    }
 
    public List<String> getNewTrackersSerialNumbers()

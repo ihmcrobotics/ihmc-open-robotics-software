@@ -6,8 +6,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
+import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.motionRetargeting.DefaultRetargetingParameters;
@@ -16,14 +18,17 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDX3DSituatedImGuiPanel;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXJoystickBasedStepping;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
+import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Set;
 
 public class RDXVRModeManager
@@ -41,6 +46,8 @@ public class RDXVRModeManager
    private RDX3DSituatedImGuiPanel vrModeControls3DPanel;
    private final FramePose3D vrModeControls3DPanelPose = new FramePose3D();
    private RDXROS2RobotVisualizer robotVisualizer;
+   private ImBoolean interactablesEnabled;
+   private ControllerStatusTracker controllerStatusTracker;
 
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
@@ -77,8 +84,19 @@ public class RDXVRModeManager
    {
       this.robotVisualizer = robotVisualizer;
 
-      handPlacedFootstepMode = new RDXVRHandPlacedFootstepMode();
-      handPlacedFootstepMode.create(syncedRobot.getRobotModel(), controllerHelper);
+      Collection<RDXPanel> baseUIPanels =  RDXBaseUI.getInstance().getImGuiPanelManager().getPanels();
+      for (RDXPanel panel : baseUIPanels)
+      {
+         if (panel instanceof RDXTeleoperationManager teleoperationPanel)
+         {
+            interactablesEnabled = teleoperationPanel.getInteractablesEnabled();
+            controllerStatusTracker = teleoperationPanel.getControllerStatusTracker();
+            break;
+         }
+      }
+
+      handPlacedFootstepMode = new RDXVRHandPlacedFootstepMode(baseUI.getVRManager().getContext());
+      handPlacedFootstepMode.create(syncedRobot, controllerHelper);
 
       if (syncedRobot.getRobotModel().getRobotVersion().hasArm(RobotSide.LEFT) || syncedRobot.getRobotModel().getRobotVersion().hasArm(RobotSide.RIGHT))
       {
@@ -86,7 +104,8 @@ public class RDXVRModeManager
                                                                     controllerHelper,
                                                                     baseUI.getVRManager().getContext(),
                                                                     retargetingParameters,
-                                                                    sceneGraph);
+                                                                    sceneGraph,
+                                                                    controllerStatusTracker);
          kinematicsStreamingMode.create(createKinematicsStreamingToolboxModule);
       }
 
@@ -124,7 +143,7 @@ public class RDXVRModeManager
 
       switch (mode)
       {
-         case FOOTSTEP_PLACEMENT -> handPlacedFootstepMode.processVRInput(vrContext);
+         case FOOTSTEP_PLACEMENT -> handPlacedFootstepMode.processVRInput();
          case WHOLE_BODY_IK_STREAMING ->
          {
             if (kinematicsStreamingMode != null)
@@ -142,13 +161,23 @@ public class RDXVRModeManager
       joystickBasedStepping.update(mode == RDXVRMode.JOYSTICK_WALKING);
       vrModeControls.update();
 
+      if (mode == RDXVRMode.FOOTSTEP_PLACEMENT)
+      { // Disable interactables because we do not want to collide with the walking control ring
+         interactablesEnabled.set(false);
+      }
+      else if (!interactablesEnabled.get())
+      {
+         interactablesEnabled.set(true);
+      }
+
       // Fade robot graphics
       if (kinematicsStreamingMode.isStreaming() && stereoVision.isEnabled())
       { // Fade graphics out if in stereo vision mode while streaming
          kinematicsStreamingMode.visualizeIKPreviewGraphic(false);
          robotVisualizer.fadeVisuals(0.0f, 0.01f);
       }
-      else if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING && (stereoVision.justDisabled() || kinematicsStreamingMode.streamingJustDisabled()
+      else if (mode == RDXVRMode.WHOLE_BODY_IK_STREAMING && (stereoVision.getDisabledNotification().poll()
+                                                             || kinematicsStreamingMode.getStreamingDisabledNotification().poll()
                                                              || robotVisualizer.isFading()))
       { // Fade graphics in if either stereo vision or streaming are exited
          robotVisualizer.fadeVisuals(1.0f, 0.05f);
