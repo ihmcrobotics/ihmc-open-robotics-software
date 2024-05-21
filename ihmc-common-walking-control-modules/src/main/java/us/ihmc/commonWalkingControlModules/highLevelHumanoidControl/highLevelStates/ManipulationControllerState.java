@@ -155,7 +155,7 @@ public class ManipulationControllerState extends HighLevelControllerState
       RigidBodyBasics elevator = controllerSystem.getRootBody();
       RigidBodyBasics chest = controllerSystem.findRigidBody(chestName);
 
-      if (chestName.equals(pelvisName))
+      if (fullRobotModel.getChest() == null || fullRobotModel.getChest() == fullRobotModel.getPelvis())
       {
          chestManager = null;
       }
@@ -164,7 +164,7 @@ public class ManipulationControllerState extends HighLevelControllerState
          chestManager = createRigidBodyManager(chest, elevator, chest.getBodyFixedFrame(), elevator.getBodyFixedFrame(), elevator, yoTime, graphicsListRegistry);
       }
 
-      if (headName == null)
+      if (fullRobotModel.getHead() == null)
       {
          headManager = null;
       }

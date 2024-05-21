@@ -15,8 +15,6 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
@@ -32,9 +30,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.*;
 import us.ihmc.rdx.ui.collidables.RDXRobotCollisionModel;
 import us.ihmc.rdx.ui.interactable.RDXChestOrientationSlider;
-import us.ihmc.rdx.ui.interactable.RDXPelvisHeightSlider;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionManager;
-import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.YawPitchRollAxis;
@@ -110,6 +106,7 @@ public class RDXTeleoperationManager extends RDXPanel
    private final RDXWholeBodyIKManager wholeBodyIKManager;
    private ImGuiStoredPropertySetDoubleWidget trajectoryTimeSlider;
    private RDXHumanoidDemoPoses demoPoses;
+   private final boolean hasMoveableChest;
 
    /** This tracker should be shared with the sub-managers to keep the state consistent. */
    private final ControllerStatusTracker controllerStatusTracker;
@@ -174,6 +171,10 @@ public class RDXTeleoperationManager extends RDXPanel
                                      wholeBodyIKManager::getEnabled);
 
       RDXBaseUI.getInstance().getKeyBindings().register("Delete all Interactables", "Shift + Escape");
+
+      // For the teststand, we set the chest to have the same name as the pelvis. This is a hack to ensure we don't make a chest or pelvis interactable when
+      // neither is moveable.
+      hasMoveableChest = !(syncedRobot.getFullRobotModel().getChest() == syncedRobot.getFullRobotModel().getPelvis());
    }
 
    public void create(RDXBaseUI baseUI)
@@ -209,7 +210,7 @@ public class RDXTeleoperationManager extends RDXPanel
                continue;
             }
 
-            if (rigidBodyName.equals(fullRobotModel.getChest().getName()))
+            if (rigidBodyName.equals(fullRobotModel.getChest().getName()) && hasMoveableChest)
             {
                if (interactableChest == null)
                {
@@ -237,7 +238,7 @@ public class RDXTeleoperationManager extends RDXPanel
                   interactableChest.addAdditionalRobotCollidable(robotCollidable);
                }
             }
-            if (rigidBodyName.equals(fullRobotModel.getPelvis().getName()))
+            if (rigidBodyName.equals(fullRobotModel.getPelvis().getName()) && hasMoveableChest)
             {
                if (interactablePelvis == null)
                {
