@@ -334,8 +334,6 @@ public class ManipulationControllerState extends HighLevelControllerState
 
       reportStatusMessages();
 
-      chestManager.compute();
-      headManager.compute();
       if (chestManager != null)
       {
          chestManager.compute();
