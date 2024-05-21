@@ -195,6 +195,7 @@ public class RDXScriptedMotionMode
             case BEACH_BALL_FLEX:
             case BEACH_BALL_OVERHEAD:
             case DAB_ON_THEM_HATERS:
+            case REACHABILITY:
                ArmTrajectoryMessage armTrajectoryMessage = scriptedTrajectory.getPreGeneratedArmTrajectoryMessage(trajectoryType, robotSide);
                ros2ControllerHelper.publishToController(armTrajectoryMessage);
                break;
@@ -266,6 +267,10 @@ public class RDXScriptedMotionMode
       if (ImGui.radioButton(labels.get("Dab on them haters"), trajectoryType == ScriptedTrajectoryType.DAB_ON_THEM_HATERS))
       {
          trajectoryType = ScriptedTrajectoryType.DAB_ON_THEM_HATERS;
+      }
+      if (ImGui.radioButton(labels.get("Reachability"), trajectoryType == ScriptedTrajectoryType.REACHABILITY))
+      {
+         trajectoryType = ScriptedTrajectoryType.REACHABILITY;
       }
 
       ImGui.text("Joint ROM Scripted Trajectories:");

@@ -95,6 +95,7 @@ public class RDXScriptedTrajectoryStreamer
       WRIST_RANGE_OF_MOTION,
       BEACH_BALL_FLEX,
       BEACH_BALL_OVERHEAD,
+      REACHABILITY,
       ROM_SHOULDER_PITCH,
       ROM_SHOULDER_ROLL,
       ROM_SHOULDER_YAW,
@@ -236,6 +237,15 @@ public class RDXScriptedTrajectoryStreamer
                                      List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), 0.0, 0.0, 0.0, side.negateIfRightSide(lowerLimits[6])),
                                      List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), 0.0, 0.0, 0.0, side.negateIfRightSide(upperLimits[6])),
                                      List.of(-1.5, side.negateIfRightSide(0.7), side.negateIfRightSide(0.8), 0.0, 0.0, 0.0, 0.0),
+                                     homeConfiguration));
+               break;
+            case REACHABILITY:
+               waypoints.put(side,
+                             List.of(homeConfiguration,
+                                     List.of(upperLimits[0], 0.0, side.negateIfRightSide(-0.3), -2.3, 0.0, 0.0, 0.0),
+                                     List.of(lowerLimits[0], side.negateIfRightSide(1.243), side.negateIfRightSide(1.2), 0.0, 0.0, 0.0, 0.0),
+                                     List.of(lowerLimits[0], side.negateIfRightSide(3.0), side.negateIfRightSide(1.2), 0.0, 0.0, 0.0, 0.0),
+                                     List.of(0.0, side.negateIfRightSide(1.57), side.negateIfRightSide(0.0), 0.0, 0.0, 0.0, 0.0),
                                      homeConfiguration));
                break;
             case WRIST_RANGE_OF_MOTION:
