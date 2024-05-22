@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
+import perception_msgs.msg.dds.BallDetectionParametersMessage;
 import perception_msgs.msg.dds.BigVideoPacket;
 import perception_msgs.msg.dds.DetectedObjectPacket;
 import perception_msgs.msg.dds.DoorLocationPacket;
@@ -167,6 +168,13 @@ public final class PerceptionAPI
    public static final ROS2Topic<DetectedObjectPacket> ICP_RESULT = IHMC_ROOT.withModule("iterative_closest_point")
                                                                              .withSuffix("result")
                                                                              .withType(DetectedObjectPacket.class);
+   public static final ROS2Topic<BallDetectionParametersMessage> BALL_DETECTION_PARAMETERS = IHMC_ROOT.withModule("ping_pong_ball")
+                                                                                                      .withSuffix("detection_parameters")
+                                                                                                      .withType(BallDetectionParametersMessage.class);
+   public static final ROS2Topic<Empty> REQUEST_BALL_TRACKING = IHMC_ROOT.withModule("ping_pong_ball").withSuffix("request_tracking").withType(Empty.class);
+   public static final ROS2Topic<ImageMessage> BALL_SEGMENTATION_IMAGE = IHMC_ROOT.withModule("ping_pong_ball")
+                                                                                  .withSuffix("segmentation_image")
+                                                                                  .withTypeName(ImageMessage.class);
    public static final ROS2Topic<RigidBodyTransformMessage> BALL_TRAJECTORY = IHMC_ROOT.withModule("ping_pong_ball")
                                                                                        .withSuffix("trajectory")
                                                                                        .withType(RigidBodyTransformMessage.class);

@@ -97,6 +97,16 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
             {
                switch (ImageMessageFormat.getFormat(imageMessage))
                {
+                  case PNG_8UC1 ->
+                  {
+                     LogTools.info("Creating Image Message Visualizer for {} with type PNG_8UC1", topic.getName());
+                     bytesIfUncompressed = numberOfPixels;
+                     incomingCompressedImageBuffer = NativeMemoryTools.allocate(bytesIfUncompressed);
+                     incomingCompressedImageBytePointer = new BytePointer(incomingCompressedImageBuffer);
+
+                     compressedBytesMat = new Mat(1, 1, opencv_core.CV_8UC1);
+                     decompressedImage = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC1);
+                  }
                   case DEPTH_PNG_16UC1 ->
                   {
                      LogTools.info("Creating Image Message Visualizer for {} with type DEPTH_PNG_16UC1", topic.getName());
@@ -154,6 +164,10 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
 
             switch (ImageMessageFormat.getFormat(imageMessage))
             {
+               case PNG_8UC1 ->
+               {
+                  OpenCVTools.convertGrayToRGBA(decompressedImage, getRGBA8Mat());
+               }
                case DEPTH_PNG_16UC1 ->
                {
                   OpenCVTools.clampTo8BitUnsignedChar(decompressedImage, normalizedScaledImage, 0.0, 255.0);

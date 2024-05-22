@@ -1,5 +1,6 @@
 package us.ihmc.perception;
 
+import org.bytedeco.javacpp.Pointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_cudafilters;
 import org.bytedeco.opencv.global.opencv_cudaimgproc;
@@ -16,7 +17,6 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.bytedeco.opencv.opencv_cudafilters.Filter;
 import us.ihmc.perception.opencv.OpenCVTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 
 import java.util.Arrays;
 import java.util.Comparator;
@@ -36,10 +36,10 @@ public class BallDetector
 
    public double detect(RawImage colorImage, Point2f centerPoint)
    {
-      return detect(colorImage, centerPoint, 1.0);
+      return detect(colorImage, 1.0, centerPoint, null);
    }
 
-   public double detect(RawImage colorImage, Point2f centerPoint, double scaleFactor)
+   public double detect(RawImage colorImage, double scaleFactor, Point2f centerPoint, Pointer maskMat)
    {
       centerPoint.x(-1.0f);
       centerPoint.y(-1.0f);
@@ -71,11 +71,14 @@ public class BallDetector
          // Get mask of the ball
          GpuMat detectionMask = OpenCVTools.cudaInRange(detectionImage, hsvLowerBound, hsvUpperBound);
          openFilter.apply(detectionMask, detectionMask);
+         if (maskMat instanceof GpuMat gpuMaskMat)
+            detectionMask.copyTo(gpuMaskMat);
 
          // Must use CPU Mat from this point. OpenCV doesn't support GpuMats for some functions
          detectionMask.download(detectionMaskCPU);
-         PerceptionDebugTools.display("Mask", detectionMaskCPU, 5);
          detectionMask.close();
+         if (maskMat instanceof Mat cpuMaskMat)
+            detectionMaskCPU.copyTo(cpuMaskMat);
 
          // Find the biggest contour (probably our ball)
          opencv_imgproc.findContours(detectionMaskCPU, contours, new Mat(), opencv_imgproc.RETR_EXTERNAL, opencv_imgproc.CHAIN_APPROX_SIMPLE);

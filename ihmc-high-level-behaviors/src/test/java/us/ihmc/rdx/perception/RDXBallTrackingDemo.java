@@ -22,9 +22,9 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2BallTrackingVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2TrajectoryVisualizer;
 import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -34,9 +34,8 @@ import us.ihmc.sensors.ZEDColorDepthImageRetriever;
 public class RDXBallTrackingDemo
 {
    private static final double BALL_DIAMETER_M = 0.0398;
-   private static final double ZED_PIXEL_SIZE = 2.0E-6;
 
-   private double zedFocalLengthM = -1.0;
+   private double zedFocalLength = -1.0;
 
    private final ROS2Node ros2Node;
    private final ROS2Helper ros2Helper;
@@ -85,8 +84,8 @@ public class RDXBallTrackingDemo
       RawImage leftColorImage = imageRetriever.getLatestRawColorImage(RobotSide.LEFT);
       RawImage rightColorImage = imageRetriever.getLatestRawColorImage(RobotSide.RIGHT);
 
-      if (zedFocalLengthM < 0)
-         zedFocalLengthM = ZED_PIXEL_SIZE * ((leftColorImage.getFocalLengthX() + leftColorImage.getFocalLengthY()) / 2.0);
+      if (zedFocalLength < 0)
+         zedFocalLength =  ((leftColorImage.getFocalLengthX() + leftColorImage.getFocalLengthY()) / 2.0);
 
       double radius = ballDetector.detect(leftColorImage, ballCenter);
       if (radius > 0.0f && ballCenter.x() > 0.0f && ballCenter.y() > 0.0f)
@@ -97,7 +96,7 @@ public class RDXBallTrackingDemo
                                new Scalar(0.0, 0.0, 255.0, 255.0));
          leftColorImage.getGpuImageMat().upload(leftColorImage.getCpuImageMat());
 
-         double depth = (BALL_DIAMETER_M * zedFocalLengthM) / (2.0 * radius * ZED_PIXEL_SIZE);
+         double depth = (BALL_DIAMETER_M * zedFocalLength) / (2.0 * radius);
          double y = -(ballCenter.x() - leftColorImage.getPrincipalPointX()) / leftColorImage.getFocalLengthX() * depth;
          y += 0.06; // offset due to ZED lens offset from center
          double z = -(ballCenter.y() - leftColorImage.getPrincipalPointY()) / leftColorImage.getFocalLengthY() * depth;
@@ -137,7 +136,7 @@ public class RDXBallTrackingDemo
                                                                                                              PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
             perceptionVisualizerPanel.addVisualizer(pointCloudVisualizer, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
 
-            RDXROS2TrajectoryVisualizer ballTrajectoryVisualizer = new RDXROS2TrajectoryVisualizer("Ball Trajectory", PerceptionAPI.BALL_TRAJECTORY);
+            RDXROS2BallTrackingVisualizer ballTrajectoryVisualizer = new RDXROS2BallTrackingVisualizer("Ball Trajectory", PerceptionAPI.BALL_TRAJECTORY, ros2Helper);
             perceptionVisualizerPanel.addVisualizer(ballTrajectoryVisualizer);
 
             baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
