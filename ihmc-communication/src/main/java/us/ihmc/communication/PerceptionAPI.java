@@ -160,6 +160,7 @@ public final class PerceptionAPI
                                                                                                                          .withType(ImageMessage.class)
                                                                                                                          .withSuffix("right_color"));
    public static final ROS2Topic<ImageMessage> ZED2_DEPTH = BEST_EFFORT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> ZED2_CUT_OUT_DEPTH = IHMC_ROOT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("cut_out_depth");
    public static final ROS2Topic<IterativeClosestPointRequest> ICP_REQUEST = IHMC_ROOT.withModule("iterative_closest_point")
                                                                                       .withSuffix("request")
                                                                                       .withType(IterativeClosestPointRequest.class);
@@ -246,6 +247,8 @@ public final class PerceptionAPI
 
    public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = PERCEPTION_MODULE.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
    public static final ROS2Topic<Empty> REQUEST_ARUCO = PERCEPTION_MODULE.withSuffix("request_aruco").withType(Empty.class);
+
+   public static final ROS2Topic<Empty> REQUEST_OVERLAP_REMOVAL = PERCEPTION_MODULE.withSuffix("remove_overlap").withType(Empty.class);
 
    private static final ROS2Topic<RigidBodyTransformMessage> TRANSFORM_TUNING_BASE_TOPIC = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
                                                                                                     .withModule("transform_tuning");
