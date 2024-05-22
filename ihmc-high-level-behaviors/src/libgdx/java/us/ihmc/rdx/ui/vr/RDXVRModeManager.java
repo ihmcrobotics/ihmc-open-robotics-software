@@ -88,6 +88,7 @@ public class RDXVRModeManager
          vrContext.getController(side).runIfConnected(controller ->
          {
             // During kinematic streaming, the only way to get out of it is the left hand panel.
+            // TODO (AM): Fix the VR panel not closing when in IK streaming mode
             controller.setExclusiveAccess(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING ? leftHandPanel : null);
 
             if (side == RobotSide.LEFT)

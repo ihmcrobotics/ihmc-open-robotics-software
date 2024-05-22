@@ -268,7 +268,10 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       listOfControllableRigidBodies.add(desiredFullRobotModel.getHead());
       listOfControllableRigidBodies.add(desiredFullRobotModel.getChest());
-      listOfControllableRigidBodies.add(desiredFullRobotModel.getPelvis());
+      if (desiredFullRobotModel.getChest().getName().contains(desiredFullRobotModel.getPelvis().getName()))
+         LogTools.error("The chest and pelvis have the same name, skipping the pelvis.");
+      else
+         listOfControllableRigidBodies.add(desiredFullRobotModel.getPelvis());
 
       for (RobotSide robotSide : RobotSide.values)
       {

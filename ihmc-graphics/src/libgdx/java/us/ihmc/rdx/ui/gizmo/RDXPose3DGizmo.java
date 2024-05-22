@@ -51,10 +51,11 @@ import us.ihmc.robotics.interaction.*;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
-import static us.ihmc.rdx.ui.gizmo.RDXGizmoTools.AXIS_COLORS;
-import static us.ihmc.rdx.ui.gizmo.RDXGizmoTools.AXIS_SELECTED_COLORS;
+import static us.ihmc.rdx.ui.gizmo.RDXGizmoTools.*;
 
 /**
  * A gizmo for manipulating a Pose3D in 3D space using
@@ -84,6 +85,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    private double arrowSpacing;
    private final Material[] normalMaterials = new Material[3];
    private final Material[] highlightedMaterials = new Material[3];
+   private final Material disabledMaterial = new Material();
    private final Axis3DRotations axisRotations = new Axis3DRotations();
    private final DynamicLibGDXModel centerSphereModel = new DynamicLibGDXModel();
    private final DynamicLibGDXModel[] arrowModels = new DynamicLibGDXModel[3];
@@ -121,6 +123,7 @@ public class RDXPose3DGizmo implements RenderableProvider
    private boolean queuePopupToOpen = false;
    private boolean proportionsNeedUpdate = false;
    private FrameBasedGizmoModification frameBasedGizmoModification;
+   private List<SixDoFSelection> disabledDoFs = new ArrayList<>();
 
    /** Maintains it's own frame in World. */
    public RDXPose3DGizmo()
@@ -247,7 +250,7 @@ public class RDXPose3DGizmo implements RenderableProvider
          highlightedMaterials[axis.ordinal()] = new Material();
          highlightedMaterials[axis.ordinal()].set(TextureAttribute.createDiffuse(RDXMultiColorMeshBuilder.loadPaletteTexture()));
          highlightedMaterials[axis.ordinal()].set(new BlendingAttribute(true, AXIS_SELECTED_COLORS[axis.ordinal()].a));
-
+         disabledMaterial.set(new BlendingAttribute(true, DISABLED_AXIS_COLOR.a));
          arrowModels[axis.ordinal()] = new DynamicLibGDXModel();
          arrowModels[axis.ordinal()].setMesh(meshBuilder ->
          {
@@ -369,59 +372,77 @@ public class RDXPose3DGizmo implements RenderableProvider
 
             if (altHeld && !ctrlHeld) // orientation
             {
-               if (upArrowHeld) // pitch +
+               if (!disabledDoFs.contains(SixDoFSelection.ANGULAR_Y))
                {
-                  orientationToAdjust.appendPitchRotation(amountRotation);
+                  if (upArrowHeld) // pitch +
+                  {
+                     orientationToAdjust.appendPitchRotation(amountRotation);
+                  }
+                  if (downArrowHeld) // pitch -
+                  {
+                     orientationToAdjust.appendPitchRotation(-amountRotation);
+                  }
                }
-               if (downArrowHeld) // pitch -
+               if (!disabledDoFs.contains(SixDoFSelection.ANGULAR_X))
                {
-                  orientationToAdjust.appendPitchRotation(-amountRotation);
-               }
-               if (rightArrowHeld) // roll +
-               {
-                  orientationToAdjust.appendRollRotation(amountRotation);
-               }
-               if (leftArrowHeld) // roll -
-               {
-                  orientationToAdjust.appendRollRotation(-amountRotation);
+                  if (rightArrowHeld) // roll +
+                  {
+                     orientationToAdjust.appendRollRotation(amountRotation);
+                  }
+                  if (leftArrowHeld) // roll -
+                  {
+                     orientationToAdjust.appendRollRotation(-amountRotation);
+                  }
                }
             }
             else if (!altHeld && ctrlHeld) // yaw the orientation, or z the translation
             {
-               if (leftArrowHeld) // yaw +
+               if (!disabledDoFs.contains(SixDoFSelection.ANGULAR_Z))
                {
-                  orientationToAdjust.appendYawRotation(amountRotation);
+                  if (leftArrowHeld) // yaw +
+                  {
+                     orientationToAdjust.appendYawRotation(amountRotation);
+                  }
+                  if (rightArrowHeld) // yaw -
+                  {
+                     orientationToAdjust.appendYawRotation(-amountRotation);
+                  }
                }
-               if (rightArrowHeld) // yaw -
+               if (!disabledDoFs.contains(SixDoFSelection.LINEAR_Z))
                {
-                  orientationToAdjust.appendYawRotation(-amountRotation);
-               }
-               if (upArrowHeld) // z +
-               {
-                  positionToAdjust.addZ(getTranslateSpeedFactor() * amountTranslation);
-               }
-               if (downArrowHeld) // z -
-               {
-                  positionToAdjust.subZ(getTranslateSpeedFactor() * amountTranslation);
+                  if (upArrowHeld) // z +
+                  {
+                     positionToAdjust.addZ(getTranslateSpeedFactor() * amountTranslation);
+                  }
+                  if (downArrowHeld) // z -
+                  {
+                     positionToAdjust.subZ(getTranslateSpeedFactor() * amountTranslation);
+                  }
                }
             }
             else // translation
             {
-               if (upArrowHeld && !ctrlHeld) // x +
+               if (!disabledDoFs.contains(SixDoFSelection.LINEAR_X))
                {
-                  positionToAdjust.addX(getTranslateSpeedFactor() * amountTranslation);
+                  if (upArrowHeld && !ctrlHeld) // x +
+                  {
+                     positionToAdjust.addX(getTranslateSpeedFactor() * amountTranslation);
+                  }
+                  if (downArrowHeld && !ctrlHeld) // x -
+                  {
+                     positionToAdjust.subX(getTranslateSpeedFactor() * amountTranslation);
+                  }
                }
-               if (downArrowHeld && !ctrlHeld) // x -
+               if (!disabledDoFs.contains(SixDoFSelection.LINEAR_Y))
                {
-                  positionToAdjust.subX(getTranslateSpeedFactor() * amountTranslation);
-               }
-               if (leftArrowHeld && !ctrlHeld) // y +
-               {
-                  positionToAdjust.addY(getTranslateSpeedFactor() * amountTranslation);
-               }
-               if (rightArrowHeld && !ctrlHeld) // y -
-               {
-                  positionToAdjust.subY(getTranslateSpeedFactor() * amountTranslation);
+                  if (leftArrowHeld && !ctrlHeld) // y +
+                  {
+                     positionToAdjust.addY(getTranslateSpeedFactor() * amountTranslation);
+                  }
+                  if (rightArrowHeld && !ctrlHeld) // y -
+                  {
+                     positionToAdjust.subY(getTranslateSpeedFactor() * amountTranslation);
+                  }
                }
             }
 
@@ -531,6 +552,10 @@ public class RDXPose3DGizmo implements RenderableProvider
          // collide tori
          for (Axis3D axis : Axis3D.values)
          {
+            // don't compute collision if this DoF is disabled for the gizmo
+            if (disabledDoFs.contains(SixDoFSelection.toAngularSelection(axis)))
+               continue;
+
             // TODO: Only update when shape changes?
             torusIntersection.update(torusRadius.get(), torusTubeRadiusRatio.get() * torusRadius.get(), axisTransformToWorlds[axis.ordinal()]);
             distance = torusIntersection.intersect(pickRay, 100);
@@ -545,6 +570,10 @@ public class RDXPose3DGizmo implements RenderableProvider
          // collide arrows
          for (Axis3D axis : Axis3D.values)
          {
+            // don't compute collision if this DoF is disabled for the gizmo
+            if (disabledDoFs.contains(SixDoFSelection.toLinearSelection(axis)))
+               continue;
+
             for (RobotSide side : RobotSide.values)
             {
                double zOffset = side.negateIfRightSide(0.5 * arrowSpacing + 0.5 * arrowBodyLength);
@@ -580,7 +609,11 @@ public class RDXPose3DGizmo implements RenderableProvider
 
       for (Axis3D axis : Axis3D.values)
       {
-         if (highlightingPrior && closestCollisionSelection.isAngular() && closestCollisionSelection.toAxis3D() == axis)
+         if (disabledDoFs.contains(SixDoFSelection.toAngularSelection(axis)))
+         {
+            torusModels[axis.ordinal()].setMaterial(disabledMaterial);
+         }
+         else if (highlightingPrior && closestCollisionSelection.isAngular() && closestCollisionSelection.toAxis3D() == axis)
          {
             torusModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }
@@ -589,7 +622,11 @@ public class RDXPose3DGizmo implements RenderableProvider
             torusModels[axis.ordinal()].setMaterial(normalMaterials[axis.ordinal()]);
          }
 
-         if (highlightingPrior && closestCollisionSelection.isLinear() && closestCollisionSelection.toAxis3D() == axis)
+         if (disabledDoFs.contains(SixDoFSelection.toLinearSelection(axis)))
+         {
+            arrowModels[axis.ordinal()].setMaterial(disabledMaterial);
+         }
+         else if (highlightingPrior && closestCollisionSelection.isLinear() && closestCollisionSelection.toAxis3D() == axis)
          {
             arrowModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }
@@ -758,5 +795,21 @@ public class RDXPose3DGizmo implements RenderableProvider
    public Notification getGizmoModifiedByUser()
    {
       return gizmoModifiedByUser;
+   }
+
+   public void disableDoF(SixDoFSelection dof)
+   {
+      if (!disabledDoFs.contains(dof))
+      {
+         disabledDoFs.add(dof);
+      }
+   }
+
+   public void enableDoF(SixDoFSelection dof)
+   {
+      if (disabledDoFs.contains(dof))
+      {
+         disabledDoFs.remove(dof);
+      }
    }
 }

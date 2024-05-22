@@ -6,17 +6,17 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.initialSetup.RobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.communication.DeprecatedAPIs;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -41,9 +41,6 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -53,7 +50,6 @@ import us.ihmc.ros2.ROS2Input;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
-import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
@@ -73,9 +69,12 @@ public class RDXVRKinematicsStreamingMode
    private OneDoFJointBasics[] ghostOneDoFJointsExcludingHands;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean enabled = new ImBoolean(false);
+
    private ROS2Input<KinematicsToolboxOutputStatus> status;
    private final double streamPeriod = UnitConversions.hertzToSeconds(120.0);
    private final Throttler toolboxInputStreamRateLimiter = new Throttler();
+   private final ImBoolean streamToController = new ImBoolean(false);
+
    private final FramePose3D tempFramePose = new FramePose3D();
    private final ImGuiFrequencyPlot statusFrequencyPlot = new ImGuiFrequencyPlot();
    private final ImGuiFrequencyPlot outputFrequencyPlot = new ImGuiFrequencyPlot();
@@ -86,11 +85,11 @@ public class RDXVRKinematicsStreamingMode
    private final Map<String, MutableReferenceFrame> trackedSegmentDesiredFrame = new HashMap<>();
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
-   private final ImBoolean streamToController = new ImBoolean(false);
+
    private final Throttler messageThrottler = new Throttler();
    private KinematicsRecordReplay kinematicsRecorder;
    private final SceneGraph sceneGraph;
-   //   private KinematicsStreamingToolboxModule toolbox;
+   private final KinematicsStreamingToolboxConfigurationMessage KSTConfigurationMessage = new KinematicsStreamingToolboxConfigurationMessage();
 
    private final ImBoolean controlArmsOnly = new ImBoolean(true);
    private ReferenceFrame pelvisFrame;
@@ -146,54 +145,16 @@ public class RDXVRKinematicsStreamingMode
 
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled);
 
-      KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
-      parameters.setDefault();
-      parameters.setPublishingPeriod(0.030); // Publishing period in seconds.
-      parameters.setDefaultChestMessageAngularWeight(0.15, 0.15, 0.02);
-      parameters.setDefaultLinearRateLimit(3.0);
-      parameters.setDefaultAngularRateLimit(30.0);
-      parameters.getDefaultConfiguration().setEnableLeftHandTaskspace(false);
-      parameters.getDefaultConfiguration().setEnableRightHandTaskspace(false);
-      parameters.getDefaultConfiguration().setEnableNeckJointspace(false);
-      parameters.getDefaultConfiguration().setLockPelvis(true);
-      parameters.getDefaultConfiguration().setLockChest(true);
-      parameters.setUseStreamingPublisher(true);
-
-      boolean startYoVariableServer = false;
-      //      toolbox = new KinematicsStreamingToolboxModule(robotModel, parameters, startYoVariableServer, PubSubImplementation.FAST_RTPS);
-      //      ((KinematicsStreamingToolboxController) toolbox.getToolboxController()).setInitialRobotConfigurationNamedMap(createInitialConfiguration(robotModel));
-   }
-
-   private Map<String, Double> createInitialConfiguration(DRCRobotModel robotModel)
-   {
-      Map<String, Double> initialConfigurationMap = new HashMap<>();
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      RobotInitialSetup<HumanoidFloatingRootJointRobot> defaultRobotInitialSetup = robotModel.getDefaultRobotInitialSetup(0.0, 0.0);
-      FullHumanoidRobotModel robot = robotModel.createFullRobotModel();
-      HumanoidJointNameMap jointMap = robotModel.getJointMap();
-      defaultRobotInitialSetup.initializeFullRobotModel(robot);
-
-      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
-      {
-         String jointName = joint.getName();
-         double q_priv = robot.getOneDoFJointByName(jointName).getQ();
-         initialConfigurationMap.put(jointName, q_priv);
-      }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         // TODO: Extract preset configuration to robot model
-         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_PITCH), 0.5);
-         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_ROLL), robotSide.negateIfRightSide(0.13));
-         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.SHOULDER_YAW), 0.13);
-         initialConfigurationMap.put(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), -1.0);
-
-         initialConfigurationMap.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH), -0.58);
-         initialConfigurationMap.put(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), 0.55 + 0.672);
-         initialConfigurationMap.put(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH), -0.64);
-      }
-
-      return initialConfigurationMap;
+      // Set the configuration parameters for the kinematics streaming toolbox
+      KSTConfigurationMessage.setLockPelvis(true);
+      KSTConfigurationMessage.setLockChest(true);
+      KSTConfigurationMessage.setEnablePelvisTaskspace(false);
+      KSTConfigurationMessage.setEnableChestTaskspace(false);
+      KSTConfigurationMessage.setEnableNeckJointspace(false);
+      KSTConfigurationMessage.setEnableLeftArmJointspace(true);
+      KSTConfigurationMessage.setEnableRightArmJointspace(true);
+      KSTConfigurationMessage.setEnableLeftHandTaskspace(false);
+      KSTConfigurationMessage.setEnableRightHandTaskspace(false);
    }
 
    public void processVRInput(RDXVRContext vrContext)
@@ -489,8 +450,8 @@ public class RDXVRKinematicsStreamingMode
       }
 
       // TODO (CD): Add this back in when we have a torso
-      //      if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
-      //      {
+      // if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
+      // {
       if (controlArmsOnly.get())
       {
          pelvisFrame = null;
@@ -521,6 +482,7 @@ public class RDXVRKinematicsStreamingMode
          this.enabled.set(enabled);
       if (enabled)
       {
+         configureIKStreamingToolbox();
          wakeUpToolbox();
          kinematicsRecorder.setReplay(false); //check no concurrency replay and streaming
       }
@@ -547,6 +509,12 @@ public class RDXVRKinematicsStreamingMode
       ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStateTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxStateMessage);
    }
 
+   private void configureIKStreamingToolbox()
+   {
+      ros2ControllerHelper.publish(ControllerAPI.getTopic(KinematicsStreamingToolboxModule.getInputStreamingConfigurationTopic(robotModel.getSimpleRobotName()),
+                                                          KinematicsStreamingToolboxConfigurationMessage.class), KSTConfigurationMessage);
+   }
+
    public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (status.hasReceivedFirstMessage())
@@ -567,7 +535,6 @@ public class RDXVRKinematicsStreamingMode
 
    public void destroy()
    {
-      //      toolbox.closeAndDispose();
       ghostRobotGraphic.destroy();
       for (RobotSide side : RobotSide.values)
       {
