@@ -1,5 +1,6 @@
 package us.ihmc.rdx.perception;
 
+import controller_msgs.msg.dds.RigidBodyTransformMessage;
 import imgui.ImGui;
 import imgui.type.ImFloat;
 import org.bytedeco.opencv.global.opencv_imgproc;
@@ -9,6 +10,7 @@ import org.bytedeco.opencv.opencv_core.Scalar;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,7 +24,8 @@ import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.robotics.math.filters.AlphaFilteredTuple3D;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2TrajectoryVisualizer;
+import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
@@ -36,6 +39,7 @@ public class RDXBallTrackingDemo
    private double zedFocalLengthM = -1.0;
 
    private final ROS2Node ros2Node;
+   private final ROS2Helper ros2Helper;
    private final ZEDColorDepthImageRetriever imageRetriever;
    private final ZEDColorDepthImagePublisher imagePublisher;
 
@@ -45,7 +49,7 @@ public class RDXBallTrackingDemo
 
    private final BallDetector ballDetector = new BallDetector();
    private final Point2f ballCenter = new Point2f(-1.0f, -1.0f);
-   private final AlphaFilteredTuple3D ballPoint = new AlphaFilteredTuple3D(0.5);
+   private final AlphaFilteredRigidBodyTransform ballPoint = new AlphaFilteredRigidBodyTransform();
 
    private final ImFloat positionAlpha = new ImFloat(0.1f);
    private final ImFloat[] hsvLowerBound = {new ImFloat(0.0f), new ImFloat(0.0f), new ImFloat(0.0f)};
@@ -56,7 +60,7 @@ public class RDXBallTrackingDemo
    public RDXBallTrackingDemo()
    {
       ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "ball_tracker_demo");
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
+      ros2Helper = new ROS2Helper(ros2Node);
 
       imageRetriever = new ZEDColorDepthImageRetriever(0,
                                                        ReferenceFrame::getWorldFrame,
@@ -97,7 +101,12 @@ public class RDXBallTrackingDemo
          double y = -(ballCenter.x() - leftColorImage.getPrincipalPointX()) / leftColorImage.getFocalLengthX() * depth;
          y += 0.06; // offset due to ZED lens offset from center
          double z = -(ballCenter.y() - leftColorImage.getPrincipalPointY()) / leftColorImage.getFocalLengthY() * depth;
-         ballPoint.set(depth, y, z);
+         ballPoint.getTranslation().set(depth, y, z);
+         ballPoint.setRotationToZero();
+
+         RigidBodyTransformMessage message = new RigidBodyTransformMessage();
+         MessageTools.toMessage(ballPoint, message);
+         ros2Helper.publish(PerceptionAPI.BALL_TRAJECTORY, message);
       }
 
       imagePublisher.setNextColorImage(leftColorImage.get(), RobotSide.LEFT);
@@ -128,6 +137,9 @@ public class RDXBallTrackingDemo
                                                                                                              PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
             perceptionVisualizerPanel.addVisualizer(pointCloudVisualizer, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
 
+            RDXROS2TrajectoryVisualizer ballTrajectoryVisualizer = new RDXROS2TrajectoryVisualizer("Ball Trajectory", PerceptionAPI.BALL_TRAJECTORY);
+            perceptionVisualizerPanel.addVisualizer(ballTrajectoryVisualizer);
+
             baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
             baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
             baseUI.getImGuiPanelManager().addPanel("Settings", this::renderSettings);
@@ -140,7 +152,7 @@ public class RDXBallTrackingDemo
          {
             perceptionVisualizerPanel.update();
             baseUI.renderBeforeOnScreenUI();
-            ballFrameGraphic.setPositionInWorldFrame(new Point3D(ballPoint));
+            ballFrameGraphic.setPositionInWorldFrame(new Point3D(ballPoint.getTranslation()));
             baseUI.renderEnd();
          }
 

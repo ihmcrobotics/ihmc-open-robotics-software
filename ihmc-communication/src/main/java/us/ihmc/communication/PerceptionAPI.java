@@ -166,6 +166,9 @@ public final class PerceptionAPI
    public static final ROS2Topic<DetectedObjectPacket> ICP_RESULT = IHMC_ROOT.withModule("iterative_closest_point")
                                                                              .withSuffix("result")
                                                                              .withType(DetectedObjectPacket.class);
+   public static final ROS2Topic<RigidBodyTransformMessage> BALL_TRAJECTORY = IHMC_ROOT.withModule("ping_pong_ball")
+                                                                                       .withSuffix("trajectory")
+                                                                                       .withType(RigidBodyTransformMessage.class);
    public static final ROS2Topic<Empty> REQUEST_PLANAR_REGIONS = IHMC_ROOT.withModule("planar_regions")
                                                                           .withSuffix("request")
                                                                           .withType(Empty.class);
