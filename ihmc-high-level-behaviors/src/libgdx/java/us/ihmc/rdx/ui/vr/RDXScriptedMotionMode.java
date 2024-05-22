@@ -59,8 +59,10 @@ public class RDXScriptedMotionMode
 
    private ReferenceFrame chestFrame;
    private final RigidBodyTransform chestTransformToWorld = new RigidBodyTransform();
-   private boolean isTrajectoryMessageSent = false;
    private ScriptedTrajectoryType trajectoryType = ScriptedTrajectoryType.STRETCH_OUT_ARMS;
+   private boolean isTrajectoryMessageSent = false;
+   private boolean isTrajectoryCompleted = false;
+   private int reachabilitySweepCounter = 0;
 
    private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
 
@@ -101,9 +103,10 @@ public class RDXScriptedMotionMode
                                                       if (message.getTrajectoryExecutionStatus()
                                                           == TaskspaceTrajectoryStatusMessage.TRAJECTORY_EXECUTION_STATUS_COMPLETED)
                                                       {
-                                                         streamToController.set(false);
+//                                                         streamToController.set(false);
                                                          // Reset this boolean for the next messages
                                                          isTrajectoryMessageSent = false;
+                                                         isTrajectoryCompleted = true;
                                                       }
                                                    }
                                                 });
@@ -121,9 +124,10 @@ public class RDXScriptedMotionMode
                                                       if (message.getTrajectoryExecutionStatus()
                                                           == JointspaceTrajectoryStatusMessage.TRAJECTORY_EXECUTION_STATUS_COMPLETED)
                                                       {
-                                                         streamToController.set(false);
+//                                                         streamToController.set(false);
                                                          // Reset this boolean for the next messages
                                                          isTrajectoryMessageSent = false;
+                                                         isTrajectoryCompleted = true;
                                                       }
                                                    }
                                                 });
@@ -174,6 +178,7 @@ public class RDXScriptedMotionMode
       // Send messages to the hands or arms based on the scripted trajectories
       for (RobotSide robotSide : RobotSide.values)
       {
+         ArmTrajectoryMessage armTrajectoryMessage;
          switch (trajectoryType)
          {
             case STRETCH_OUT_ARMS:
@@ -200,9 +205,62 @@ public class RDXScriptedMotionMode
             case REACHABILITY_ARMS_FORWARD:
             case REACHABILITY_ARMS_SIDEWAYS:
             case REACHABILITY_ARMS_BACK:
-               ArmTrajectoryMessage armTrajectoryMessage = scriptedTrajectory.getPreGeneratedArmTrajectoryMessage(trajectoryType, robotSide);
+               armTrajectoryMessage = scriptedTrajectory.getPreGeneratedArmTrajectoryMessage(trajectoryType, robotSide);
                ros2ControllerHelper.publishToController(armTrajectoryMessage);
                break;
+            case REACHABILITY_SWEEP:
+               if (reachabilitySweepCounter == 0)
+               {
+                  armTrajectoryMessage = scriptedTrajectory.getPreGeneratedArmTrajectoryMessage(ScriptedTrajectoryType.REACHABILITY_ARMS_BACK, robotSide);
+                  ros2ControllerHelper.publishToController(armTrajectoryMessage);
+                  if (robotSide == RobotSide.RIGHT)
+                     reachabilitySweepCounter++;
+               }
+               else if (reachabilitySweepCounter == 1)
+               {
+                  armTrajectoryMessage = scriptedTrajectory.getPreGeneratedArmTrajectoryMessage(ScriptedTrajectoryType.REACHABILITY_ARMS_FORWARD, robotSide);
+                  ros2ControllerHelper.publishToController(armTrajectoryMessage);
+                  if (robotSide == RobotSide.RIGHT)
+                     reachabilitySweepCounter++;
+               }
+               else if (reachabilitySweepCounter == 2)
+               {
+                  armTrajectoryMessage = scriptedTrajectory.getPreGeneratedArmTrajectoryMessage(ScriptedTrajectoryType.REACHABILITY_ARMS_SIDEWAYS, robotSide);
+                  ros2ControllerHelper.publishToController(armTrajectoryMessage);
+                  if (robotSide == RobotSide.RIGHT)
+                     reachabilitySweepCounter++;
+
+               }
+               else if (reachabilitySweepCounter == 3)
+               {
+                  armTrajectoryMessage = scriptedTrajectory.getPreGeneratedArmTrajectoryMessage(ScriptedTrajectoryType.REACHABILITY_ARMS_FORWARD, robotSide);
+                  ros2ControllerHelper.publishToController(armTrajectoryMessage);
+                  if (robotSide == RobotSide.RIGHT)
+                     reachabilitySweepCounter++;
+               }
+               else if (reachabilitySweepCounter == 4)
+               {
+                  armTrajectoryMessage = scriptedTrajectory.getPreGeneratedArmTrajectoryMessage(ScriptedTrajectoryType.ROM_WRIST_YAW, robotSide);
+                  ros2ControllerHelper.publishToController(armTrajectoryMessage);
+                  if (robotSide == RobotSide.RIGHT)
+                     reachabilitySweepCounter++;
+               }
+               else if (reachabilitySweepCounter == 5)
+               {
+                  armTrajectoryMessage = scriptedTrajectory.getPreGeneratedArmTrajectoryMessage(ScriptedTrajectoryType.ROM_GRIPPER_YAW, robotSide);
+                  ros2ControllerHelper.publishToController(armTrajectoryMessage);
+                  if (robotSide == RobotSide.RIGHT)
+                     reachabilitySweepCounter++;
+               }
+               else
+               {
+                  armTrajectoryMessage = scriptedTrajectory.getPreGeneratedArmTrajectoryMessage(ScriptedTrajectoryType.HOME_CONFIGURATION, robotSide);
+                  ros2ControllerHelper.publishToController(armTrajectoryMessage);
+                  if (robotSide == RobotSide.RIGHT)
+                     reachabilitySweepCounter = 0;
+               }
+               break;
+
             default:
                throw new RuntimeException("Unhandled trajectory type: " + trajectoryType);
          }
@@ -236,14 +294,39 @@ public class RDXScriptedMotionMode
       {
          statusFrequencyPlot.recordEvent();
 
-         if (!isTrajectoryMessageSent && streamToController.get())
+         if (trajectoryType == ScriptedTrajectoryType.REACHABILITY_SWEEP && !isTrajectoryMessageSent && streamToController.get())
          {
             sendScriptedTrajectories();
-            // TODO: this isn't supposed to be set to false here, it should be set to false in the callback when the trajectory is completed, but that doesn't
-            //  seem to be working
-            streamToController.set(false);
-            //            isTrajectoryMessageSent = true; // TODO: uncomment this when the callback is working
+            // If the reachability counter makes it back to zero, then the chain of trajectories is completed.
+            if (reachabilitySweepCounter == 0)
+            {
+               //reset
+               streamToController.set(false);
+//               isTrajectoryCompleted = false;
+//               isTrajectoryMessageSent = true;
+            }
+            else
+            {
+               streamToController.set(true);
+               isTrajectoryMessageSent = true;
+            }
+
          }
+         else if (!isTrajectoryMessageSent && streamToController.get())
+         {
+            if (isTrajectoryCompleted)
+            {
+               // reset
+               streamToController.set(false);
+               isTrajectoryCompleted = false;
+            }
+            else
+            {
+               sendScriptedTrajectories();
+               isTrajectoryMessageSent = true;
+            }
+         }
+         isTrajectoryCompleted = false;
       }
    }
 
@@ -278,6 +361,10 @@ public class RDXScriptedMotionMode
       }
 
       ImGui.text("Reachability Trajectories:");
+      if (ImGui.radioButton(labels.get("Reachability Sweep"), trajectoryType == ScriptedTrajectoryType.REACHABILITY_SWEEP))
+      {
+         trajectoryType = ScriptedTrajectoryType.REACHABILITY_SWEEP;
+      }
       if (ImGui.radioButton(labels.get("Reachability Arms Back"), trajectoryType == ScriptedTrajectoryType.REACHABILITY_ARMS_BACK))
       {
          trajectoryType = ScriptedTrajectoryType.REACHABILITY_ARMS_BACK;
