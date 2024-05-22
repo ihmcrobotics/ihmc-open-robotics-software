@@ -8,7 +8,7 @@ public enum ImageMessageFormat
    COLOR_JPEG_BGR8(3),
    COLOR_PNG_RGB8(3), // TODO: Implement receiver and visualizer
    DEPTH_PNG_16UC1(2),
-   PNG_8UC1(1)
+   GRAY_PNG_8UC1(1)
    ;
 
    public static final ImageMessageFormat[] values = values();

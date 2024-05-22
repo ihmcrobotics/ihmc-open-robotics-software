@@ -97,7 +97,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
             {
                switch (ImageMessageFormat.getFormat(imageMessage))
                {
-                  case PNG_8UC1 ->
+                  case GRAY_PNG_8UC1 ->
                   {
                      LogTools.info("Creating Image Message Visualizer for {} with type PNG_8UC1", topic.getName());
                      bytesIfUncompressed = numberOfPixels;
@@ -164,7 +164,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
 
             switch (ImageMessageFormat.getFormat(imageMessage))
             {
-               case PNG_8UC1 ->
+               case GRAY_PNG_8UC1 ->
                {
                   OpenCVTools.convertGrayToRGBA(decompressedImage, getRGBA8Mat());
                }
