@@ -26,6 +26,7 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.Throttler;
 
+import java.time.Instant;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -40,12 +41,13 @@ public class RDXROS2BallTrackingVisualizer extends RDXVisualizer
    private final ROS2PublishSubscribeAPI ros2;
 
    private final RDXTrajectoryGraphic trajectoryGraphic = new RDXTrajectoryGraphic();
-   private final ConcurrentLinkedQueue<RigidBodyTransform> trajectories;
+   private final ConcurrentLinkedQueue<RigidBodyTransform> trajectories = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<Instant> trajectoryAcquisitionTimes = new ConcurrentLinkedQueue<>();
 
    // Visualizer settings
    private final ImGuiExpandCollapseRenderer visualizerSettingsCollapser = new ImGuiExpandCollapseRenderer();
    private boolean showVisualizerSettings = false;
-   private final ImInt historyLength = new ImInt(25);
+   private final ImInt historySpan = new ImInt(2);
    private final ImFloat lineWidth = new ImFloat(0.015f);
 
    // Ball tracking settings
@@ -79,8 +81,6 @@ public class RDXROS2BallTrackingVisualizer extends RDXVisualizer
       this.pubSubImplementation = pubSubImplementation;
       this.ballPositionTopic = ballPositionTopic;
       this.ros2 = ros2PubSubAPI;
-
-      trajectories = new ConcurrentLinkedQueue<>();
 
       setActivenessChangeCallback(isActive ->
       {
@@ -118,11 +118,8 @@ public class RDXROS2BallTrackingVisualizer extends RDXVisualizer
       if (subscriber.isAvailable())
       {
          RigidBodyTransform newTransform = MessageTools.toEuclid(subscriber.takeNextData());
-
-         // Remove old trajectories over the history length and add new trajectory
-         while (trajectories.size() >= historyLength.get())
-            trajectories.poll();
          trajectories.offer(newTransform);
+         trajectoryAcquisitionTimes.offer(Instant.now());
       }
    }
 
@@ -130,6 +127,14 @@ public class RDXROS2BallTrackingVisualizer extends RDXVisualizer
    public void update()
    {
       super.update();
+
+      // Remove old trajectories over the history length and add new trajectory
+      Instant now = Instant.now();
+      while (trajectoryAcquisitionTimes.peek() != null && hasExpired(now, trajectoryAcquisitionTimes.peek(), historySpan.get()))
+      {
+         trajectories.poll();
+         trajectoryAcquisitionTimes.poll();
+      }
 
       trajectoryGraphic.update(lineWidth.get(), trajectories);
 
@@ -151,6 +156,11 @@ public class RDXROS2BallTrackingVisualizer extends RDXVisualizer
       }
    }
 
+   private boolean hasExpired(Instant now, Instant old, long lifespan)
+   {
+      return old.plusSeconds(lifespan).isBefore(now);
+   }
+
    @Override
    public void renderImGuiWidgets()
    {
@@ -162,7 +172,7 @@ public class RDXROS2BallTrackingVisualizer extends RDXVisualizer
       ImGui.text("Visualizer Settings");
       if (showVisualizerSettings)
       {
-         ImGuiTools.volatileInputInt("History Length", historyLength, 5);
+         ImGuiTools.volatileInputInt("History (seconds)", historySpan, 1);
          ImGuiTools.volatileInputFloat("Line Width", lineWidth);
       }
 
