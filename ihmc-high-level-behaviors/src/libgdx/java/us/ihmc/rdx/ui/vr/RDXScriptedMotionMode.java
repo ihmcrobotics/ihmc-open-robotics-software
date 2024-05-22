@@ -184,6 +184,7 @@ public class RDXScriptedMotionMode
                                                             scriptedTrajectoryDuration);
                ros2ControllerHelper.publishToController(handTrajectoryMessage);
                break;
+            case HOME_CONFIGURATION:
             case ROM_SHOULDER_PITCH:
             case ROM_SHOULDER_ROLL:
             case ROM_SHOULDER_YAW:
@@ -195,7 +196,10 @@ public class RDXScriptedMotionMode
             case BEACH_BALL_FLEX:
             case BEACH_BALL_OVERHEAD:
             case DAB_ON_THEM_HATERS:
-            case REACHABILITY:
+            case REACHABILITY_ARMS_UP:
+            case REACHABILITY_ARMS_FORWARD:
+            case REACHABILITY_ARMS_SIDEWAYS:
+            case REACHABILITY_ARMS_BACK:
                ArmTrajectoryMessage armTrajectoryMessage = scriptedTrajectory.getPreGeneratedArmTrajectoryMessage(trajectoryType, robotSide);
                ros2ControllerHelper.publishToController(armTrajectoryMessage);
                break;
@@ -252,6 +256,10 @@ public class RDXScriptedMotionMode
       }
 
       ImGui.text("Jointspace Scripted Trajectories:");
+      if (ImGui.radioButton(labels.get("Home Configuration"), trajectoryType == ScriptedTrajectoryType.HOME_CONFIGURATION))
+      {
+         trajectoryType = ScriptedTrajectoryType.HOME_CONFIGURATION;
+      }
       if (ImGui.radioButton(labels.get("Wrist ROM"), trajectoryType == ScriptedTrajectoryType.WRIST_RANGE_OF_MOTION))
       {
          trajectoryType = ScriptedTrajectoryType.WRIST_RANGE_OF_MOTION;
@@ -268,9 +276,23 @@ public class RDXScriptedMotionMode
       {
          trajectoryType = ScriptedTrajectoryType.DAB_ON_THEM_HATERS;
       }
-      if (ImGui.radioButton(labels.get("Reachability"), trajectoryType == ScriptedTrajectoryType.REACHABILITY))
+
+      ImGui.text("Reachability Trajectories:");
+      if (ImGui.radioButton(labels.get("Reachability Arms Back"), trajectoryType == ScriptedTrajectoryType.REACHABILITY_ARMS_BACK))
       {
-         trajectoryType = ScriptedTrajectoryType.REACHABILITY;
+         trajectoryType = ScriptedTrajectoryType.REACHABILITY_ARMS_BACK;
+      }
+      if (ImGui.radioButton(labels.get("Reachability Arms Forward"), trajectoryType == ScriptedTrajectoryType.REACHABILITY_ARMS_FORWARD))
+      {
+         trajectoryType = ScriptedTrajectoryType.REACHABILITY_ARMS_FORWARD;
+      }
+      if (ImGui.radioButton(labels.get("Reachability Arms Sideways"), trajectoryType == ScriptedTrajectoryType.REACHABILITY_ARMS_SIDEWAYS))
+      {
+         trajectoryType = ScriptedTrajectoryType.REACHABILITY_ARMS_SIDEWAYS;
+      }
+      if (ImGui.radioButton(labels.get("Reachability Arms Up"), trajectoryType == ScriptedTrajectoryType.REACHABILITY_ARMS_UP))
+      {
+         trajectoryType = ScriptedTrajectoryType.REACHABILITY_ARMS_UP;
       }
 
       ImGui.text("Joint ROM Scripted Trajectories:");
