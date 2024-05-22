@@ -366,4 +366,9 @@ public class RDXManualFootstepPlacement implements RenderableProvider
 
       return isReachable;
    }
+
+   public void walkFromSteps()
+   {
+      footstepPlan.walkFromSteps();
+   }
 }

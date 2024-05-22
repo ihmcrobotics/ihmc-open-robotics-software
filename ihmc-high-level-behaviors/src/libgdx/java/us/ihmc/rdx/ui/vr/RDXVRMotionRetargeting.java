@@ -20,8 +20,13 @@ import java.util.Set;
 
 import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
 
+/**
+ * Class responsible for motion retargeting from VR tracked segments to a robot model.
+ * It adjusts the robot's pelvis and center of mass based on the tracked segments.
+ */
 public class RDXVRMotionRetargeting
 {
+   // Set of trackers whose references are unchanged during retargeting
    private final Set<VRTrackedSegmentType> UNCHANGED_TRACKER_REFERENCES = new HashSet<>()
    {
       {
@@ -42,6 +47,13 @@ public class RDXVRMotionRetargeting
    private ReferenceFrame initialPelvisFrame;
    private boolean controlArmsOnly = false;
 
+   /**
+    * Constructor for the motion retargeting class.
+    *
+    * @param syncedRobot the synchronized robot model
+    * @param trackerReferenceFrames the reference frames of the trackers
+    * @param retargetingParameters the retargeting parameters
+    */
    public RDXVRMotionRetargeting(ROS2SyncedRobotModel syncedRobot, Map<String, MutableReferenceFrame> trackerReferenceFrames,
                                  RetargetingParameters retargetingParameters)
    {
@@ -50,6 +62,10 @@ public class RDXVRMotionRetargeting
       this.trackerReferenceFrames = trackerReferenceFrames;
    }
 
+   /**
+    * Computes the desired values for retargeting.
+    * Updates the pelvis and center of mass.
+    */
    public void computeDesiredValues()
    {
       desiredFrames.clear();

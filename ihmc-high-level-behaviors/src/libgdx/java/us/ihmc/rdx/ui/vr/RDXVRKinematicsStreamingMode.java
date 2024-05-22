@@ -37,6 +37,7 @@ import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.affordances.RDXManualFootstepPlacement;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.tools.KinematicsRecordReplay;
@@ -97,6 +98,7 @@ public class RDXVRKinematicsStreamingMode
    private final SceneGraph sceneGraph;
    private final RDXVRContext vrContext;
    private final ControllerStatusTracker controllerStatusTracker;
+   private final RDXManualFootstepPlacement footstepPlacer;
    private boolean pausedForWalking = false;
    @Nullable
    private KinematicsStreamingToolboxModule toolbox;
@@ -108,7 +110,7 @@ public class RDXVRKinematicsStreamingMode
    private final RigidBodyTransform initialChestTransformToWorld = new RigidBodyTransform();
    private final SideDependentList<RigidBodyTransform> previousFootTransformToWorld = new SideDependentList<>();
    private RDXVRMotionRetargeting motionRetargeting;
-   private final RDXVRPrescientFootstepStreaming prescientFootstepStreaming;
+   private RDXVRPrescientFootstepStreaming prescientFootstepStreaming;
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
    private int leftIndex = -1;
@@ -119,7 +121,8 @@ public class RDXVRKinematicsStreamingMode
                                        RDXVRContext vrContext,
                                        RetargetingParameters retargetingParameters,
                                        SceneGraph sceneGraph,
-                                       ControllerStatusTracker controllerStatusTracker)
+                                       ControllerStatusTracker controllerStatusTracker,
+                                       RDXManualFootstepPlacement footstepPlacer)
    {
       this.syncedRobot = syncedRobot;
       this.robotModel = syncedRobot.getRobotModel();
@@ -128,7 +131,7 @@ public class RDXVRKinematicsStreamingMode
       this.sceneGraph = sceneGraph;
       this.vrContext = vrContext;
       this.controllerStatusTracker = controllerStatusTracker;
-      prescientFootstepStreaming = new RDXVRPrescientFootstepStreaming(vrContext);
+      this.footstepPlacer = footstepPlacer;
    }
 
    public void create(boolean createToolbox)
@@ -168,7 +171,7 @@ public class RDXVRKinematicsStreamingMode
 
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled);
       motionRetargeting = new RDXVRMotionRetargeting(syncedRobot, trackerReferenceFrames, retargetingParameters);
-      prescientFootstepStreaming.create(syncedRobot, ros2ControllerHelper);
+      prescientFootstepStreaming = new RDXVRPrescientFootstepStreaming(syncedRobot, footstepPlacer);
 
       if (createToolbox)
       {
@@ -337,7 +340,7 @@ public class RDXVRKinematicsStreamingMode
             }
          }
 
-         prescientFootstepStreaming.processVRInput();
+         prescientFootstepStreaming.streamFootsteps();
          // Correct values from trackers using retargeting techniques
          motionRetargeting.setControlArmsOnly(controlArmsOnly.get());
          motionRetargeting.computeDesiredValues();
@@ -532,14 +535,19 @@ public class RDXVRKinematicsStreamingMode
          }
       }
 
-      if (enabled.get() && controllerStatusTracker.isWalking())
+      if (streamToController.get() && controllerStatusTracker.isWalking())
       {
-         setEnabled(false);
+         LogTools.info("Started walking. Paused Streaming");
+         streamToController.set(false);
          pausedForWalking = true;
       }
       if (pausedForWalking && controllerStatusTracker.getFinishedWalkingNotification().poll())
       {
+         LogTools.info("Finished walking. Resuming Streaming");
+         // Restart KST
+         setEnabled(false);
          setEnabled(true);
+         streamToController.set(true);
          pausedForWalking = false;
       }
    }
@@ -644,7 +652,7 @@ public class RDXVRKinematicsStreamingMode
       {
          ghostRobotGraphic.getRenderables(renderables, pool, sceneLevels);
       }
-      prescientFootstepStreaming.getRenderables(renderables, pool);
+
       if (showReferenceFrameGraphics.get())
       {
          for (RobotSide side : RobotSide.values)
