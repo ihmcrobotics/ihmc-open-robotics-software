@@ -34,11 +34,27 @@ public class BallDetector
                                                                                new Point(-1, -1), // put anchor in center of kernel
                                                                                2);
 
+   /**
+    * Detects the largest circle in the provided image, within the HSV color bounds.
+    *
+    * @param colorImage INPUT: Color image in BGR format. Unmodified.
+    * @param centerPoint OUTPUT: Center of the largest circle detected. (-1, -1) if unsuccessful. Modified.
+    * @return The radius of the largest circle detected. -1 if unsuccessful.
+    */
    public double detect(RawImage colorImage, Point2f centerPoint)
    {
       return detect(colorImage, 1.0, centerPoint, null);
    }
 
+   /**
+    * Detects the largest circle in the provided image, within the HSV color bounds.
+    *
+    * @param colorImage INPUT: Color image in BGR format. Unmodified.
+    * @param scaleFactor INPUT: Scale factor for downsizing the image before processing. Image is not scaled when using 1.0.
+    * @param centerPoint OUTPUT: Center of the largest circle detected. (-1, -1) if unsuccessful. Modified.
+    * @param maskMat OUTPUT: Mat or GpuMat of the image mask after segmentation. Will result in 8UC1 image.
+    * @return The radius of the largest circle detected. -1 if unsuccessful.
+    */
    public double detect(RawImage colorImage, double scaleFactor, Point2f centerPoint, Pointer maskMat)
    {
       centerPoint.x(-1.0f);

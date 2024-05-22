@@ -51,41 +51,53 @@ public class BallDetectionManager
       });
    }
 
+   // This method does not block
    public void run(RawImage colorImage)
    {
       detectionExecutor.execute(() ->
       {
+         // Ensure we have a color image
          if (!colorImage.isAvailable())
             return;
          colorImage.get();
 
+         // get the average focal length used for calculating position of the ball
          double averageFocalLength = 0.5 * (colorImage.getFocalLengthX() + colorImage.getFocalLengthY());
 
          Point2f ballCenter = new Point2f();
          Mat maskMat = new Mat();
+
+         // Try to detect a ball
          double radius = ballDetector.detect(colorImage, 1.0, ballCenter, maskMat);
          Instant maskAcquisitionTime = Instant.now();
 
+         // If a ball was found
          if (radius > 0.0f && ballCenter.x() > 0.0f && ballCenter.y() > 0.0f)
          {
+            // calculate its position (relative to sensor)
             double depth = (ballDiameter * averageFocalLength) / (2.0 * radius);
             double y = -(ballCenter.x() - colorImage.getPrincipalPointX()) / colorImage.getFocalLengthX() * depth;
             double z = -(ballCenter.y() - colorImage.getPrincipalPointY()) / colorImage.getFocalLengthY() * depth;
 
+            // get ball's position with respect to world
             RigidBodyTransform newBallPosition = new RigidBodyTransform(colorImage.getOrientation(), colorImage.getPosition());
             newBallPosition.appendTranslation(depth, y, z);
             ballPosition.update(newBallPosition);
 
+            // send out the ball's position
             RigidBodyTransformMessage message = new RigidBodyTransformMessage();
             MessageTools.toMessage(ballPosition, message);
             ros2Helper.publish(PerceptionAPI.BALL_TRAJECTORY, message);
          }
 
+         // If we got a segmentation image from the detector
          if (maskMat.rows() > 0 && maskMat.cols() > 0)
          {
+            // compress the image to PNG
             BytePointer compressedImage = new BytePointer();
             OpenCVTools.compressImagePNG(maskMat, compressedImage);
 
+            // send it out to UI
             ImageMessage imageMessage = new ImageMessage();
             ImageMessageDataPacker dataPacker = new ImageMessageDataPacker(compressedImage.limit());
             dataPacker.pack(imageMessage, compressedImage);
