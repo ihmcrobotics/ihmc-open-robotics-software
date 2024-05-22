@@ -94,13 +94,14 @@ public class RDXVRPrescientFootstepStreaming
                      translationXY.normalize();
                      // Scale the normalized direction to the fixed stride distance
                      translationXY.scale(STRIDE_LENGTH);
-
+                     // Apply the translation to the current robot foot position
                      FramePoint2D finalFootstep = new FramePoint2D(initialXY);
                      finalFootstep.add(translationXY);
 
                      currentRobotFootTransformInWorld.getTranslation().setX(finalFootstep.getX());
                      currentRobotFootTransformInWorld.getTranslation().setY(finalFootstep.getX());
 
+                     // Place and send footstep
                      footstepPlacer.createNewFootstep(side);
                      footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(), currentRobotFootTransformInWorld));
                      footstepPlacer.placeFootstep();
