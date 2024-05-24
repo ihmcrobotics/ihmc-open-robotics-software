@@ -9,6 +9,7 @@ import org.lwjgl.openvr.InputDigitalActionData;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
+import toolbox_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -41,6 +42,7 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -53,6 +55,7 @@ import us.ihmc.scs2.definition.visual.MaterialDefinition;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -90,6 +93,7 @@ public class RDXVRKinematicsStreamingMode
    private KinematicsRecordReplay kinematicsRecorder;
    private final SceneGraph sceneGraph;
    private final KinematicsStreamingToolboxConfigurationMessage KSTConfigurationMessage = new KinematicsStreamingToolboxConfigurationMessage();
+   private final KinematicsToolboxPrivilegedConfigurationMessage privilegedConfigurationMessage = new KinematicsToolboxPrivilegedConfigurationMessage();
 
    private final ImBoolean controlArmsOnly = new ImBoolean(true);
    private ReferenceFrame pelvisFrame;
@@ -144,6 +148,9 @@ public class RDXVRKinematicsStreamingMode
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
 
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled);
+
+      // Create the privileged configuration message
+      createPrivilegedConfigurationMessage();
 
       // Set the configuration parameters for the kinematics streaming toolbox
       KSTConfigurationMessage.setLockPelvis(true);
@@ -483,6 +490,7 @@ public class RDXVRKinematicsStreamingMode
       if (enabled)
       {
          configureIKStreamingToolbox();
+
          wakeUpToolbox();
          kinematicsRecorder.setReplay(false); //check no concurrency replay and streaming
       }
@@ -558,6 +566,33 @@ public class RDXVRKinematicsStreamingMode
       }
       rightIndex++;
       return handConfigurations[rightIndex % handConfigurations.length];
+   }
+
+   private void createPrivilegedConfigurationMessage()
+   {
+      // Create the privileged configuration message
+      privilegedConfigurationMessage.getPrivilegedJointHashCodes().clear();
+      privilegedConfigurationMessage.getPrivilegedJointAngles().clear();
+      for (RobotSide side : RobotSide.values)
+      {
+         ArmJointName[] armJointNames = robotModel.getJointMap().getArmJointNames(side);
+         float[] armJointAngles = {0.5f,
+                                   side.negateIfRightSide(0.13f),
+                                   side.negateIfRightSide(0.13f),
+                                   -1.6f,
+                                   side.negateIfRightSide(0.0f),
+                                   side.negateIfRightSide(0.0f),
+                                   side.negateIfRightSide(0.0f)};
+
+         for (int i = 0; i < armJointNames.length; i++)
+         {
+            privilegedConfigurationMessage.getPrivilegedJointHashCodes().add(syncedRobot.getFullRobotModel().getArmJoint(side, armJointNames[i]).hashCode());
+            privilegedConfigurationMessage.getPrivilegedJointAngles().add(armJointAngles[i]);
+         }
+      }
+
+      privilegedConfigurationMessage.setPrivilegedGain(40.0);
+      privilegedConfigurationMessage.setPrivilegedWeight(5.0);
    }
 
    /**
