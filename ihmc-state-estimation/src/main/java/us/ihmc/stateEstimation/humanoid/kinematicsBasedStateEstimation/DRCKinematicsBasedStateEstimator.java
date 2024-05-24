@@ -57,7 +57,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       NONE, SIMPLE, DISTRIBUTED_IMUS, WRENCH_BASED
    };
 
-   private static final MomentumEstimatorMode MOMENTUM_ESTIMATOR_MODE = MomentumEstimatorMode.NONE;
+   private static final MomentumEstimatorMode MOMENTUM_ESTIMATOR_MODE = MomentumEstimatorMode.DISTRIBUTED_IMUS;
 
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
