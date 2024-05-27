@@ -54,7 +54,7 @@ public class RDXScriptedMotionMode
    private final SceneGraph sceneGraph;
    private RDXScriptedTrajectoryStreamer scriptedTrajectory;
    private final SideDependentList<RigidBodyBasics> hands = new SideDependentList<>();
-   private final double scriptedTrajectoryDuration = 7.0;
+   private final double scriptedTrajectoryDuration = 5.0;
    private final SideDependentList<List<KinematicsToolboxOneDoFJointMessage>> armJointMessages = new SideDependentList<>();
 
    private ReferenceFrame chestFrame;
@@ -246,13 +246,6 @@ public class RDXScriptedMotionMode
                      reachabilitySweepCounter++;
                }
                else if (reachabilitySweepCounter == 5)
-               {
-                  armTrajectoryMessage = scriptedTrajectory.getPreGeneratedArmTrajectoryMessage(ScriptedTrajectoryType.WRIST_RANGE_OF_MOTION, robotSide);
-                  ros2ControllerHelper.publishToController(armTrajectoryMessage);
-                  if (robotSide == RobotSide.RIGHT)
-                     reachabilitySweepCounter++;
-               }
-               else if (reachabilitySweepCounter == 6)
                {
                   armTrajectoryMessage = scriptedTrajectory.getPreGeneratedArmTrajectoryMessage(ScriptedTrajectoryType.WRIST_RANGE_OF_MOTION, robotSide);
                   ros2ControllerHelper.publishToController(armTrajectoryMessage);

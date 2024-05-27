@@ -249,11 +249,12 @@ public class RDXScriptedTrajectoryStreamer
                break;
             case WRIST_RANGE_OF_MOTION:
                waypoints.put(side,
-                             List.of(                                     List.of(-0.5, side.negateIfRightSide(0.15), side.negateIfRightSide(0.3), -1.0, 0.0, side.negateIfRightSide(0.0), 0.0),
-                                     List.of(-0.5, side.negateIfRightSide(0.15), side.negateIfRightSide(0.3), -1.0, side.negateIfRightSide(upperLimits[4]), side.negateIfRightSide(-0.8), side.negateIfRightSide(upperLimits[6])),
-                                     List.of(-0.5, side.negateIfRightSide(0.15), side.negateIfRightSide(0.3), -1.0, side.negateIfRightSide(0.0), side.negateIfRightSide(-1.6), side.negateIfRightSide(lowerLimits[6])),
-                                     List.of(-0.5, side.negateIfRightSide(0.15), side.negateIfRightSide(0.3), -1.0, side.negateIfRightSide(lowerLimits[4]), side.negateIfRightSide(-0.8), side.negateIfRightSide(upperLimits[6])),
-                                     List.of(-0.5, side.negateIfRightSide(0.15), side.negateIfRightSide(0.3), -1.0, 0.0, side.negateIfRightSide(0.0), 0.0)
+                             List.of(
+                                   List.of(0.5, side.negateIfRightSide(0.13), side.negateIfRightSide(0.13), -1.6, 0.0, 0.0, 0.0),
+                                   List.of(0.5, side.negateIfRightSide(0.13), side.negateIfRightSide(0.13), -1.6, side.negateIfRightSide(upperLimits[4]), side.negateIfRightSide(-0.8), side.negateIfRightSide(upperLimits[6])),
+                                   List.of(0.5, side.negateIfRightSide(0.13), side.negateIfRightSide(0.13), -1.6, side.negateIfRightSide(0.0), side.negateIfRightSide(-1.6), side.negateIfRightSide(lowerLimits[6])),
+                                   List.of(0.5, side.negateIfRightSide(0.13), side.negateIfRightSide(0.13), -1.6, side.negateIfRightSide(lowerLimits[4]), side.negateIfRightSide(-0.8), side.negateIfRightSide(upperLimits[6])),
+                                   List.of(0.5, side.negateIfRightSide(0.13), side.negateIfRightSide(0.13), -1.6, 0.0, 0.0, 0.0)
                              ));
                break;
             case BEACH_BALL_FLEX:

@@ -96,8 +96,8 @@ public class KinematicsToolboxController extends ToolboxController
    private static final double GLOBAL_PROPORTIONAL_GAIN = 1200.0;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final double DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT = 0.025;
-   private static final double DEFAULT_PRIVILEGED_CONFIGURATION_GAIN = 50.0;
+   private static final double DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT = 0.1;
+   private static final double DEFAULT_PRIVILEGED_CONFIGURATION_GAIN = 100.0;
 
    /**
     * Indicates the duration of a control tick. It should match the thread period in
