@@ -16,7 +16,6 @@ import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.rdx.mesh.RDXIDMappedColorFunction;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.perception.gpuHeightMap.HeightMapTools;
@@ -89,21 +88,9 @@ public class RDXGridMapGraphic implements RenderableProvider
    {
       IntToDoubleFunction heightProvider = (d) -> (double) heightMapMessage.getHeights().get(d);
       IntFunction<Integer> keyProvider = (d) -> heightMapMessage.getKeys().get(d);
-      IntFunction<Vector3DReadOnly> normalsProvider;
-      IntToDoubleFunction variancesProvider;
-      if (heightMapMessage.getNormals().size() != heightMapMessage.getHeights().size())
-         normalsProvider = null;
-      else
-         normalsProvider = (d) -> heightMapMessage.getNormals().get(d);
-      if (heightMapMessage.getVariances().size() != heightMapMessage.getHeights().size())
-         variancesProvider = null;
-      else
-         variancesProvider = (d) -> heightMapMessage.getVariances().get(d);
 
       generateMeshes(heightProvider,
-                     variancesProvider,
                      keyProvider,
-                     normalsProvider,
                      heightMapMessage.getHeights().size(),
                      heightMapMessage.getXyResolution(),
                      heightMapMessage.getGridSizeXy(),
@@ -115,9 +102,7 @@ public class RDXGridMapGraphic implements RenderableProvider
    }
 
    private void generateMeshes(IntToDoubleFunction heightsProvider,
-                               IntToDoubleFunction variancesProvider,
                                IntFunction<Integer> keysProvider,
-                               IntFunction<Vector3DReadOnly> normalsProvider,
                                int numberOfOccupiedCells,
                                double gridResolutionXY,
                                double gridSizeXy,

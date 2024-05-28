@@ -35,7 +35,6 @@ public class RDXHeightMapRenderer implements RenderableProvider
    private Renderable renderable;
 
    public static final int FLOATS_PER_CELL = 8;
-   public static final int BYTES_PER_VERTEX = FLOATS_PER_CELL * Float.BYTES;
    private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(VertexAttributes.Usage.Position,
                                                                                               3,
                                                                                               ShaderProgram.POSITION_ATTRIBUTE),
@@ -47,13 +46,12 @@ public class RDXHeightMapRenderer implements RenderableProvider
                                                                                               GL41.GL_FLOAT,
                                                                                               false,
                                                                                               "a_size"));
-   private final RDXUniform screenWidthUniform = RDXUniform.createGlobalUniform("u_screenWidth", (shader, inputID, renderable, combinedAttributes) ->
-   {
-      shader.set(inputID, shader.camera.viewportWidth);
-   });
-   private int multiColor = 0;
+   private final RDXUniform screenWidthUniform = RDXUniform.createGlobalUniform("u_screenWidth",
+                                                                                (shader, inputID, renderable, combinedAttributes) -> shader.set(inputID,
+                                                                                                                                                shader.camera.viewportWidth));
    private final RDXUniform multiColorUniform = RDXUniform.createGlobalUniform("u_multiColor", (shader, inputID, renderable, combinedAttributes) ->
    {
+      int multiColor = 0;
       shader.set(inputID, multiColor);
    });
 
