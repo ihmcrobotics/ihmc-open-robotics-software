@@ -2,9 +2,6 @@ package us.ihmc.footstepPlanning.swing;
 
 import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.commons.InterpolationTools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -17,18 +14,14 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.javafx.IdMappedColorFunction;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.perception.gpuHeightMap.HeightMapTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 import java.awt.*;
-import java.util.Random;
 
 public class CollisionFreeSwingCalculatorLogViewer
 {

@@ -7,10 +7,9 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.gpuHeightMap.HeightMapTools;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 public class HeightMapManager
 {

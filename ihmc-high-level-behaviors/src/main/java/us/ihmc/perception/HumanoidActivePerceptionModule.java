@@ -17,7 +17,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.parameters.PerceptionConfigurationParameters;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.perception.gpuHeightMap.HeightMapTools;
 
 public class HumanoidActivePerceptionModule
 {

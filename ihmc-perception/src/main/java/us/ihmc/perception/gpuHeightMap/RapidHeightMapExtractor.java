@@ -23,9 +23,7 @@ import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersBa
 import us.ihmc.perception.steppableRegions.SteppableRegionsCalculator;
 import us.ihmc.perception.steppableRegions.data.SteppableCell;
 import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 /**
  * Extracts height map and some other cost metric maps on the GPU using OpenCL kernels

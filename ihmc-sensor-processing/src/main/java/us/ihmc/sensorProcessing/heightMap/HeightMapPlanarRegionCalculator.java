@@ -9,6 +9,7 @@ import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
+import us.ihmc.perception.gpuHeightMap.HeightMapTools;
 
 import java.util.ArrayList;
 import java.util.Arrays;

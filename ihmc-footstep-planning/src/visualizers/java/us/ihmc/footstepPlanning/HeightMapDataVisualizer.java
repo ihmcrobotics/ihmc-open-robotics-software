@@ -8,7 +8,6 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.footstepPlanning.bodyPath.HeightMapRANSACNormalCalculator;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
@@ -20,7 +19,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.pathPlanning.HeightMapDataSetName;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapPlanarRegionCalculator;
-import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
+import us.ihmc.perception.gpuHeightMap.HeightMapTools;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
