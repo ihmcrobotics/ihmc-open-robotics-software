@@ -3,11 +3,11 @@ package us.ihmc.rdx.ui.tools;
 import us.ihmc.pubsub.participant.Participant;
 import us.ihmc.pubsub.subscriber.Subscriber;
 
-public class ROS2SubscriberStats extends ROS2PubSubCommonStats
+public class PubSubSubscriberStats extends PubSubCommonStats
 {
    private final Subscriber<?> subscriber;
 
-   public ROS2SubscriberStats(Participant participant, Subscriber<?> subscriber)
+   public PubSubSubscriberStats(Participant participant, Subscriber<?> subscriber)
    {
       super(participant);
 

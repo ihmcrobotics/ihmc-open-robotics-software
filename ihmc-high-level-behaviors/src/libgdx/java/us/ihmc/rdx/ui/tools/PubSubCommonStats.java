@@ -2,7 +2,7 @@ package us.ihmc.rdx.ui.tools;
 
 import us.ihmc.pubsub.participant.Participant;
 
-public abstract class ROS2PubSubCommonStats
+public abstract class PubSubCommonStats
 {
    /**
     * We have observed issues when messages are larger than this.
@@ -17,7 +17,7 @@ public abstract class ROS2PubSubCommonStats
    private double publishFrequency = 0.0;
    private double bandwidth = 0.0;
 
-   public ROS2PubSubCommonStats(Participant participant)
+   public PubSubCommonStats(Participant participant)
    {
       this.participant = participant;
    }

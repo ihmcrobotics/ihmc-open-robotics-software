@@ -32,23 +32,23 @@ public class RDXROS2StatsPanel extends RDXPanel
    private final ImBoolean sortByLargestMessageSize = new ImBoolean(true);
    private final ImBoolean hideInactiveTopics = new ImBoolean(true);
 
-   private final HashMap<Publisher, ROS2PublisherStats> publisherStatsMap = new HashMap<>();
-   private final HashMap<Subscriber<?>, ROS2SubscriberStats> subscriberStatsMap = new HashMap<>();
+   private final HashMap<Publisher, PubSubPublisherStats> publisherStatsMap = new HashMap<>();
+   private final HashMap<Subscriber<?>, PubSubSubscriberStats> subscriberStatsMap = new HashMap<>();
    private final TreeSet<Participant> participantsSortedByName = new TreeSet<>(Comparator.<Participant, String>comparing(o -> o.getAttributes().getName())
                                                                                          .thenComparingInt(Object::hashCode));
-   private final TreeSet<ROS2PublisherStats> publishersSortedBySize
-         = new TreeSet<>(Comparator.<ROS2PublisherStats, Long>comparing(o -> o.getPublisher().getLargestMessageSize())
+   private final TreeSet<PubSubPublisherStats> publishersSortedBySize
+         = new TreeSet<>(Comparator.<PubSubPublisherStats, Long>comparing(o -> o.getPublisher().getLargestMessageSize())
                                    .reversed()
                                    .thenComparingInt(Object::hashCode));
-   private final TreeSet<ROS2SubscriberStats> subscribersSortedBySize
-         = new TreeSet<>(Comparator.<ROS2SubscriberStats, Long>comparing(o -> o.getSubscriber().getLargestMessageSize())
+   private final TreeSet<PubSubSubscriberStats> subscribersSortedBySize
+         = new TreeSet<>(Comparator.<PubSubSubscriberStats, Long>comparing(o -> o.getSubscriber().getLargestMessageSize())
                                    .reversed()
                                    .thenComparingInt(Object::hashCode));
-   private final TreeSet<ROS2PublisherStats> publishersSortedByName
-         = new TreeSet<>(Comparator.<ROS2PublisherStats, String>comparing(o -> o.getPublisher().getAttributes().getHumanReadableTopicName())
+   private final TreeSet<PubSubPublisherStats> publishersSortedByName
+         = new TreeSet<>(Comparator.<PubSubPublisherStats, String>comparing(o -> o.getPublisher().getAttributes().getHumanReadableTopicName())
                                    .thenComparingInt(Object::hashCode));
-   private final TreeSet<ROS2SubscriberStats> subscribersSortedByName
-         = new TreeSet<>(Comparator.<ROS2SubscriberStats, String>comparing(o -> o.getSubscriber().getAttributes().getHumanReadableTopicName())
+   private final TreeSet<PubSubSubscriberStats> subscribersSortedByName
+         = new TreeSet<>(Comparator.<PubSubSubscriberStats, String>comparing(o -> o.getSubscriber().getAttributes().getHumanReadableTopicName())
                                    .thenComparingInt(Object::hashCode));
 
    public RDXROS2StatsPanel()
@@ -85,11 +85,11 @@ public class RDXROS2StatsPanel extends RDXPanel
             {
                for (Publisher publisher : publishers)
                {
-                  ROS2PublisherStats publisherStats = publisherStatsMap.get(publisher);
+                  PubSubPublisherStats publisherStats = publisherStatsMap.get(publisher);
 
                   if (publisherStats == null)
                   {
-                     publisherStats = new ROS2PublisherStats(participant, publisher);
+                     publisherStats = new PubSubPublisherStats(participant, publisher);
                      publisherStatsMap.put(publisher, publisherStats);
                   }
 
@@ -105,11 +105,11 @@ public class RDXROS2StatsPanel extends RDXPanel
             {
                for (Subscriber<?> subscriber : subscribers)
                {
-                  ROS2SubscriberStats subscriberStats = subscriberStatsMap.get(subscriber);
+                  PubSubSubscriberStats subscriberStats = subscriberStatsMap.get(subscriber);
 
                   if (subscriberStats == null)
                   {
-                     subscriberStats = new ROS2SubscriberStats(participant, subscriber);
+                     subscriberStats = new PubSubSubscriberStats(participant, subscriber);
                      subscriberStatsMap.put(subscriber, subscriberStats);
                   }
 
@@ -122,7 +122,7 @@ public class RDXROS2StatsPanel extends RDXPanel
          }
       }
 
-      for (ROS2PublisherStats publisherStats : publisherStatsMap.values())
+      for (PubSubPublisherStats publisherStats : publisherStatsMap.values())
       {
          publisherStats.update();
 
@@ -133,7 +133,7 @@ public class RDXROS2StatsPanel extends RDXPanel
             largestMessageSize = publisherStats.getPublisher().getLargestMessageSize();
       }
 
-      for (ROS2SubscriberStats subscriberStats : subscriberStatsMap.values())
+      for (PubSubSubscriberStats subscriberStats : subscriberStatsMap.values())
       {
          subscriberStats.update();
 
@@ -267,10 +267,10 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.tableHeadersRow();
 
          if (sortByLargestMessageSize.get())
-            for (ROS2PublisherStats publisherStats : publishersSortedBySize)
+            for (PubSubPublisherStats publisherStats : publishersSortedBySize)
                renderPublisherRow(publisherStats);
          else
-            for (ROS2PublisherStats publisherStats : publishersSortedByName)
+            for (PubSubPublisherStats publisherStats : publishersSortedByName)
                renderPublisherRow(publisherStats);
 
          ImGui.endTable();
@@ -295,17 +295,17 @@ public class RDXROS2StatsPanel extends RDXPanel
          ImGui.tableHeadersRow();
 
          if (sortByLargestMessageSize.get())
-            for (ROS2SubscriberStats subscriberStats : subscribersSortedBySize)
+            for (PubSubSubscriberStats subscriberStats : subscribersSortedBySize)
                renderSubscriberRow(subscriberStats);
          else
-            for (ROS2SubscriberStats subscriberStats : subscribersSortedByName)
+            for (PubSubSubscriberStats subscriberStats : subscribersSortedByName)
                renderSubscriberRow(subscriberStats);
 
          ImGui.endTable();
       }
    }
 
-   private void renderPublisherRow(ROS2PublisherStats publisherStats)
+   private void renderPublisherRow(PubSubPublisherStats publisherStats)
    {
       if (publisherStats.getPublisher().getNumberOfPublications() > 0 || !hideInactiveTopics.get())
       {
@@ -334,7 +334,7 @@ public class RDXROS2StatsPanel extends RDXPanel
       }
    }
 
-   private void renderSubscriberRow(ROS2SubscriberStats subscriberStats)
+   private void renderSubscriberRow(PubSubSubscriberStats subscriberStats)
    {
       if (subscriberStats.getSubscriber().getNumberOfReceivedMessages() > 0 || !hideInactiveTopics.get())
       {
