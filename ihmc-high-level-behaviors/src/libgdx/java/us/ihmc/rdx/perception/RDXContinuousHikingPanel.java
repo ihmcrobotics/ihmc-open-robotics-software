@@ -106,8 +106,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()),
-                                      this::onControllerFootstepsReceived);
 
       commandPublisher = ros2Helper.getROS2NodeInterface().createPublisher(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND);
 
@@ -141,7 +139,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    public RDXContinuousHikingPanel(ROS2Helper ros2Helper, DRCRobotModel robotModel, MonteCarloFootstepPlannerParameters monteCarloPlannerParameters)
    {
-      super("Continuous Planning");
+      super("Continuous Hiking");
       setRenderMethod(this::renderImGuiWidgets);
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> groundContactPoints = robotModel.getContactPointParameters().getControllerFootGroundContactPoints();
@@ -168,8 +166,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName()),
-                                      this::onControllerFootstepsReceived);
       ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()), message ->
       {
          terrainPlanningDebugger.reset();
@@ -227,6 +223,10 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    public void renderImGuiWidgets()
    {
+      ImGui.text("The ContinuousHikingProcess must be running");
+      ImGui.text("And the enabled checkbox must be checked");
+      ImGui.text("By holding CTRL the robot will walk forward");
+      ImGui.separator();
       continuousPlanningParametersTuner.renderImGuiWidgets();
 
       ImGui.checkbox("Render", renderEnabled);
@@ -259,12 +259,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    {
       LogTools.debug("Received Monte-Carlo Plan: {}", message.getFootstepDataList().size());
       this.monteCarloPlanDataListMessage.set(message);
-   }
-
-   public void onControllerFootstepsReceived(FootstepDataListMessage message)
-   {
-      //LogTools.warn("Received footstep plan: {}", message.getFootstepDataList().size());
-      //this.footstepDataListMessage.set(message);
    }
 
    public void onStartAndGoalPosesReceived(PoseListMessage poseListMessage)
