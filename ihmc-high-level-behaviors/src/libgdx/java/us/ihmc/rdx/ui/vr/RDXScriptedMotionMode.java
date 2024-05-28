@@ -181,14 +181,15 @@ public class RDXScriptedMotionMode
          ArmTrajectoryMessage armTrajectoryMessage;
          switch (trajectoryType)
          {
-            case STRETCH_OUT_ARMS:
-               HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
-               scriptedTrajectory.packHandTrajectoryMessage(handTrajectoryMessage,
-                                                            robotSide,
-                                                            trajectoryType,
-                                                            scriptedTrajectoryDuration);
-               ros2ControllerHelper.publishToController(handTrajectoryMessage);
-               break;
+            //TODO: (CD) Don't use this until the taskspace gains are tuned.
+//            case STRETCH_OUT_ARMS:
+//               HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
+//               scriptedTrajectory.packHandTrajectoryMessage(handTrajectoryMessage,
+//                                                            robotSide,
+//                                                            trajectoryType,
+//                                                            scriptedTrajectoryDuration);
+//               ros2ControllerHelper.publishToController(handTrajectoryMessage);
+//               break;
             case HOME_CONFIGURATION:
             case ROM_SHOULDER_PITCH:
             case ROM_SHOULDER_ROLL:
@@ -332,11 +333,12 @@ public class RDXScriptedMotionMode
 
    public void renderImGuiWidgets()
    {
-      ImGui.text("Taskspace Scripted Trajectories:");
-      if (ImGui.radioButton(labels.get("Stretch out arms"), trajectoryType == ScriptedTrajectoryType.STRETCH_OUT_ARMS))
-      {
-         trajectoryType = ScriptedTrajectoryType.STRETCH_OUT_ARMS;
-      }
+      //TODO: (CD) Don't use this until the taskspace gains are tuned.
+//      ImGui.text("Taskspace Scripted Trajectories:");
+//      if (ImGui.radioButton(labels.get("Stretch out arms"), trajectoryType == ScriptedTrajectoryType.STRETCH_OUT_ARMS))
+//      {
+//         trajectoryType = ScriptedTrajectoryType.STRETCH_OUT_ARMS;
+//      }
 
       ImGui.text("Jointspace Scripted Trajectories:");
       if (ImGui.radioButton(labels.get("Home Configuration"), trajectoryType == ScriptedTrajectoryType.HOME_CONFIGURATION))
