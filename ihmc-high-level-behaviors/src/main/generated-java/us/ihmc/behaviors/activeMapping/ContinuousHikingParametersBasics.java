@@ -6,65 +6,65 @@ import us.ihmc.tools.property.StoredPropertySetBasics;
  * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
  * and run the main in super to regenerate.
  */
-public interface ContinuousWalkingParametersBasics extends ContinuousWalkingParametersReadOnly, StoredPropertySetBasics
+public interface ContinuousHikingParametersBasics extends ContinuousHikingParametersReadOnly, StoredPropertySetBasics
 {
    default void setEnableContinuousWalking(boolean enableContinuousWalking)
    {
-      set(ContinuousWalkingParameters.enableContinuousWalking, enableContinuousWalking);
+      set(ContinuousHikingParameters.enableContinuousWalking, enableContinuousWalking);
    }
 
    default void setShortcutIsPressed(boolean shortcutIsPressed)
    {
-      set(ContinuousWalkingParameters.shortcutIsPressed, shortcutIsPressed);
+      set(ContinuousHikingParameters.shortcutIsPressed, shortcutIsPressed);
    }
 
    default void setStepPublisherEnabled(boolean stepPublisherEnabled)
    {
-      set(ContinuousWalkingParameters.stepPublisherEnabled, stepPublisherEnabled);
+      set(ContinuousHikingParameters.stepPublisherEnabled, stepPublisherEnabled);
    }
 
    default void setOverrideEntireQueueEachStep(boolean overrideEntireQueueEachStep)
    {
-      set(ContinuousWalkingParameters.overrideEntireQueueEachStep, overrideEntireQueueEachStep);
+      set(ContinuousHikingParameters.overrideEntireQueueEachStep, overrideEntireQueueEachStep);
    }
 
    default void setNumberOfStepsToSend(int numberOfStepsToSend)
    {
-      set(ContinuousWalkingParameters.numberOfStepsToSend, numberOfStepsToSend);
+      set(ContinuousHikingParameters.numberOfStepsToSend, numberOfStepsToSend);
    }
 
    default void setGoalPoseForwardDistance(double goalPoseForwardDistance)
    {
-      set(ContinuousWalkingParameters.goalPoseForwardDistance, goalPoseForwardDistance);
+      set(ContinuousHikingParameters.goalPoseForwardDistance, goalPoseForwardDistance);
    }
 
    default void setGoalPoseUpDistance(double goalPoseUpDistance)
    {
-      set(ContinuousWalkingParameters.goalPoseUpDistance, goalPoseUpDistance);
+      set(ContinuousHikingParameters.goalPoseUpDistance, goalPoseUpDistance);
    }
 
    default void setSwingTime(double swingTime)
    {
-      set(ContinuousWalkingParameters.swingTime, swingTime);
+      set(ContinuousHikingParameters.swingTime, swingTime);
    }
 
    default void setTransferTime(double transferTime)
    {
-      set(ContinuousWalkingParameters.transferTime, transferTime);
+      set(ContinuousHikingParameters.transferTime, transferTime);
    }
 
    default void setPlannerTimeoutFraction(double plannerTimeoutFraction)
    {
-      set(ContinuousWalkingParameters.plannerTimeoutFraction, plannerTimeoutFraction);
+      set(ContinuousHikingParameters.plannerTimeoutFraction, plannerTimeoutFraction);
    }
 
    default void setPlanningWithoutReferenceTimeout(double planningWithoutReferenceTimeout)
    {
-      set(ContinuousWalkingParameters.planningWithoutReferenceTimeout, planningWithoutReferenceTimeout);
+      set(ContinuousHikingParameters.planningWithoutReferenceTimeout, planningWithoutReferenceTimeout);
    }
 
    default void setLogFootstepPlans(boolean logFootstepPlans)
    {
-      set(ContinuousWalkingParameters.logFootstepPlans, logFootstepPlans);
+      set(ContinuousHikingParameters.logFootstepPlans, logFootstepPlans);
    }
 }
