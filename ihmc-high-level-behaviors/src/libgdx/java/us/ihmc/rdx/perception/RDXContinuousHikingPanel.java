@@ -13,7 +13,6 @@ import ihmc_common_msgs.msg.dds.PoseListMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
@@ -73,7 +72,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator(numberOfKnotPoints,
                                                                                                                              maxIterationsOptimization);
 
-   private final ROS2Helper ros2Helper;
    private RDXTerrainPlanningDebugger terrainPlanningDebugger;
    private HumanoidActivePerceptionModule activePerceptionModule;
    private SwingPlannerParametersBasics swingPlannerParameters;
@@ -85,10 +83,9 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    private final RDXStoredPropertySetTuner continuousPlanningParametersTuner = new RDXStoredPropertySetTuner("Continuous Walking Parameters (Active Mapper)");
 
-
    public RDXContinuousHikingPanel(ROS2Helper ros2Helper,
                                    HumanoidActivePerceptionModule activePerceptionModule,
-                                   ROS2SyncedRobotModel syncedRobot,
+                                   DRCRobotModel robotModel,
                                    ContinuousHikingParameters continuousHikingParameters,
                                    SwingPlannerParametersBasics swingPlannerParameters,
                                    SwingTrajectoryParameters swingTrajectoryParameters,
@@ -97,7 +94,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       super("Continuous Hiking");
       setRenderMethod(this::renderImGuiWidgets);
 
-      this.ros2Helper = ros2Helper;
       this.activePerceptionModule = activePerceptionModule;
       this.swingPlannerParameters = swingPlannerParameters;
       this.swingTrajectoryParameters = swingTrajectoryParameters;
@@ -106,12 +102,12 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()),
+      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName()),
                                       this::onControllerFootstepsReceived);
 
       commandPublisher = ros2Helper.getROS2NodeInterface().createPublisher(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND);
 
-      SegmentDependentList<RobotSide, ArrayList<Point2D>> groundContactPoints = syncedRobot.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints();
+      SegmentDependentList<RobotSide, ArrayList<Point2D>> groundContactPoints = robotModel.getContactPointParameters().getControllerFootGroundContactPoints();
       SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -125,58 +121,12 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(stancePoseCalculator);
       terrainPlanningDebugger = new RDXTerrainPlanningDebugger(ros2Helper,
                                                                monteCarloPlannerParameters,
-                                                               syncedRobot.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
+                                                               robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
 
-
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class,
-                                                                       syncedRobot.getRobotModel().getSimpleRobotName()), message ->
-                                      {
-                                         terrainPlanningDebugger.reset();
-                                      });
-
+      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
+                                      message -> terrainPlanningDebugger.reset());
 
       LogTools.info("Continuous Walking Parameters Save File " + continuousHikingParameters.findSaveFileDirectory().toString());
-      continuousPlanningParametersTuner.create(continuousHikingParameters, false);
-   }
-
-   public RDXContinuousHikingPanel(ROS2Helper ros2Helper, DRCRobotModel robotModel, MonteCarloFootstepPlannerParameters monteCarloPlannerParameters)
-   {
-      super("Continuous Planning");
-      setRenderMethod(this::renderImGuiWidgets);
-
-      SegmentDependentList<RobotSide, ArrayList<Point2D>> groundContactPoints = robotModel.getContactPointParameters().getControllerFootGroundContactPoints();
-      SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
-         groundContactPoints.get(robotSide).forEach(defaultFoothold::addVertex);
-         defaultFoothold.update();
-         defaultContactPoints.put(robotSide, defaultFoothold);
-      }
-
-      stancePoseCalculator = new StancePoseCalculator(0.5f, 0.5f, 0.1f, defaultContactPoints);
-
-      this.ros2Helper = ros2Helper;
-      this.swingPlannerParameters = robotModel.getSwingPlannerParameters();
-      this.swingTrajectoryParameters = robotModel.getWalkingControllerParameters().getSwingTrajectoryParameters();
-      this.commandPublisher = ros2Helper.getROS2NodeInterface().createPublisher(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND);
-      this.stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(stancePoseCalculator);
-      this.terrainPlanningDebugger = new RDXTerrainPlanningDebugger(ros2Helper,
-                                                                    monteCarloPlannerParameters,
-                                                                    robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
-
-      ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
-      ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
-      ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName()),
-                                      this::onControllerFootstepsReceived);
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()), message ->
-      {
-         terrainPlanningDebugger.reset();
-      });
-
-
-      LogTools.info("Continuous Hiking Parameters Save File " + continuousHikingParameters.findSaveFileDirectory().toString());
       continuousPlanningParametersTuner.create(continuousHikingParameters, false);
    }
 
@@ -189,7 +139,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       terrainPlanningDebugger.generateStartAndGoalFootstepGraphics(startStancePose, goalStancePose);
       terrainPlanningDebugger.update(terrainMapData);
-//      stancePoseSelectionPanel.update(goalStancePose, terrainMapData, heightMapData);
+      stancePoseSelectionPanel.update(goalStancePose, terrainMapData, heightMapData);
    }
 
    public void updateFootstepGraphics()
