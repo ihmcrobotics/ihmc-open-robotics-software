@@ -12,6 +12,7 @@ import us.ihmc.motionRetargeting.VRTrackedSegmentType;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -36,6 +37,7 @@ public class RDXVRMotionRetargeting
       }
    };
    private final ROS2SyncedRobotModel syncedRobot;
+   private final SideDependentList<MutableReferenceFrame> controllerReferenceFrames;
    private final Map<String, MutableReferenceFrame> trackerReferenceFrames;
    private final RetargetingParameters retargetingParameters;
 
@@ -46,19 +48,24 @@ public class RDXVRMotionRetargeting
    private Point3D centerOfMassDesiredXYInWorld;
    private ReferenceFrame initialPelvisFrame;
    private boolean controlArmsOnly = false;
+   private boolean armScaling = false;
 
    /**
     * Constructor for the motion retargeting class.
     *
     * @param syncedRobot the synchronized robot model
+    * @param controllerReferenceFrames the reference frames of the controllers
     * @param trackerReferenceFrames the reference frames of the trackers
     * @param retargetingParameters the retargeting parameters
     */
-   public RDXVRMotionRetargeting(ROS2SyncedRobotModel syncedRobot, Map<String, MutableReferenceFrame> trackerReferenceFrames,
+   public RDXVRMotionRetargeting(ROS2SyncedRobotModel syncedRobot,
+                                 SideDependentList<MutableReferenceFrame> controllerReferenceFrames,
+                                 Map<String, MutableReferenceFrame> trackerReferenceFrames,
                                  RetargetingParameters retargetingParameters)
    {
       this.syncedRobot = syncedRobot;
       this.retargetingParameters = retargetingParameters;
+      this.controllerReferenceFrames = controllerReferenceFrames;
       this.trackerReferenceFrames = trackerReferenceFrames;
    }
 
@@ -71,6 +78,7 @@ public class RDXVRMotionRetargeting
       desiredFrames.clear();
       retargetPelvis();
       retargetCoM();
+      retargetHands();
    }
 
    /**
@@ -172,9 +180,82 @@ public class RDXVRMotionRetargeting
       }
    }
 
+   /**
+    * Compute desired pose of arms.
+    * Use the pose of the chest tracker (on the stern of the user) and the headset location to estimate the position of the shoulders.
+    * Then scale the controller referenceFrames by the ratio of robot arm length / initial controller frame.
+    */
+   private void retargetHands()
+   {
+      if (armScaling)
+      {
+         if (trackerReferenceFrames.containsKey(CHEST.getSegmentName()) && trackerReferenceFrames.containsKey(HEADSET.getSegmentName()))
+         {
+            ReferenceFrame chestTrackerFrame = trackerReferenceFrames.get(CHEST.getSegmentName()).getReferenceFrame();
+            ReferenceFrame headsetFrame = trackerReferenceFrames.get(HEADSET.getSegmentName()).getReferenceFrame();
+
+            // Estimate shoulder positions based on chest and headset positions
+            Point3D chestTrackerPosition = new Point3D(chestTrackerFrame.getTransformToWorldFrame().getTranslation());
+            Point3D headsetPosition = new Point3D(headsetFrame.getTransformToWorldFrame().getTranslation());
+
+            // Calculate Z offset as the midpoint between the chest tracker and headset positions
+            double shoulderOffsetZ = (headsetPosition.getZ() - chestTrackerPosition.getZ()) / 2.0;
+
+            // Calculate head length based on the sternum to headset distance
+            double distanceSternumToHeadset = chestTrackerPosition.distance(headsetPosition);
+            double headLength = distanceSternumToHeadset / 1.5;
+
+            // The Y offset for the shoulders is approximately equal to the head length
+            double shoulderOffsetY = headLength;
+
+            // Left shoulder position
+            Point3D leftShoulderPosition = new Point3D(chestTrackerPosition);
+            leftShoulderPosition.add(0.0, shoulderOffsetY, shoulderOffsetZ + chestTrackerPosition.getZ());
+            // Right shoulder position
+            Point3D rightShoulderPosition = new Point3D(chestTrackerPosition);
+            rightShoulderPosition.add(0.0, -shoulderOffsetY, shoulderOffsetZ + chestTrackerPosition.getZ());
+
+            // Scale the controller reference frames
+            for (RobotSide side : RobotSide.values())
+            {
+               String handSegmentName = side == RobotSide.LEFT ? LEFT_HAND.getSegmentName() : RIGHT_HAND.getSegmentName();
+               ReferenceFrame handFrame = trackerReferenceFrames.get(handSegmentName).getReferenceFrame();
+               Point3D initialHandPosition = new Point3D(handFrame.getTransformToWorldFrame().getTranslation());
+
+               // Calculate initial user arm length
+               Point3D shoulderPosition = side == RobotSide.LEFT ? leftShoulderPosition : rightShoulderPosition;
+               Vector3D initialArmVector = new Vector3D();
+               initialArmVector.sub(initialHandPosition, shoulderPosition);
+               double initialArmLength = initialArmVector.norm();
+
+               // Robot arm length
+               double robotArmLength = retargetingParameters.getArmLength(side);
+
+               // Scale factor for arm length
+               double armLengthScaleFactor = robotArmLength / initialArmLength;
+
+               // Compute scaled hand position
+               Vector3D scaledArmVector = new Vector3D(initialArmVector);
+               scaledArmVector.scale(armLengthScaleFactor);
+               Point3D scaledHandPosition = new Point3D(shoulderPosition);
+               scaledHandPosition.add(scaledArmVector);
+
+               // Set desired frame for hand
+               FramePose3D desiredHandPose = new FramePose3D(ReferenceFrame.getWorldFrame(), scaledHandPosition);
+               desiredFrames.put(side == RobotSide.LEFT ? LEFT_HAND : RIGHT_HAND, ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), desiredHandPose));
+            }
+         }
+      }
+   }
+
    public void setControlArmsOnly(boolean controlArmsOnly)
    {
       this.controlArmsOnly = controlArmsOnly;
+   }
+
+   public void setArmScaling(boolean armScaling)
+   {
+      this.armScaling = armScaling;
    }
 
    public void reset()

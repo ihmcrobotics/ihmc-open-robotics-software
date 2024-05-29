@@ -88,6 +88,7 @@ public class RDXVRKinematicsStreamingMode
    private final SideDependentList<RDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
    private final SideDependentList<Pose3D> ikControlFramePoses = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> handFrameGraphics = new SideDependentList<>();
+   private Set<String> additionalTrackedSegments;
    private final Map<String, MutableReferenceFrame> trackerReferenceFrames = new HashMap<>();
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(false);
@@ -104,6 +105,7 @@ public class RDXVRKinematicsStreamingMode
    private KinematicsStreamingToolboxModule toolbox;
 
    private final ImBoolean controlArmsOnly = new ImBoolean(false);
+   private final ImBoolean armScaling = new ImBoolean(false);
    private ReferenceFrame initialPelvisFrame;
    private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
    private ReferenceFrame initialChestFrame;
@@ -170,7 +172,7 @@ public class RDXVRKinematicsStreamingMode
       status = ros2ControllerHelper.subscribe(KinematicsStreamingToolboxModule.getOutputStatusTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
 
       kinematicsRecorder = new KinematicsRecordReplay(sceneGraph, enabled);
-      motionRetargeting = new RDXVRMotionRetargeting(syncedRobot, trackerReferenceFrames, retargetingParameters);
+      motionRetargeting = new RDXVRMotionRetargeting(syncedRobot, handDesiredControlFrames, trackerReferenceFrames, retargetingParameters);
       prescientFootstepStreaming = new RDXVRPrescientFootstepStreaming(syncedRobot, footstepPlacer);
 
       if (createToolbox)
@@ -263,7 +265,7 @@ public class RDXVRKinematicsStreamingMode
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
-         Set<String> additionalTrackedSegments = vrContext.getAssignedTrackerRoles();
+         additionalTrackedSegments = vrContext.getAssignedTrackerRoles();
          for (VRTrackedSegmentType segmentType : VRTrackedSegmentType.values())
          {
             // VR Controllers
@@ -342,7 +344,6 @@ public class RDXVRKinematicsStreamingMode
 
          prescientFootstepStreaming.streamFootsteps();
          // Correct values from trackers using retargeting techniques
-         motionRetargeting.setControlArmsOnly(controlArmsOnly.get());
          motionRetargeting.computeDesiredValues();
          for (VRTrackedSegmentType segmentType : motionRetargeting.getRetargetedSegments())
          {
@@ -568,6 +569,13 @@ public class RDXVRKinematicsStreamingMode
       {
          setEnabled(false);
       }
+      if (additionalTrackedSegments.contains(CHEST.getSegmentName()))
+      {
+         if (ImGui.checkbox(labels.get("Arm Scaling"), armScaling))
+         {
+            setEnabled(false);
+         }
+      }
 
       ghostRobotGraphic.renderImGuiWidgets();
       // add widgets for recording/replaying motion in VR
@@ -616,7 +624,10 @@ public class RDXVRKinematicsStreamingMode
          kinematicsRecorder.setReplay(false); // Check no concurrency replay and streaming
          initialPelvisFrame = null;
          initialChestFrame = null;
+         prescientFootstepStreaming.reset();
          motionRetargeting.reset();
+         motionRetargeting.setControlArmsOnly(controlArmsOnly.get());
+         motionRetargeting.setArmScaling(armScaling.get());
       }
       else
       {

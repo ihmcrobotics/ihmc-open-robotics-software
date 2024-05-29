@@ -160,4 +160,12 @@ public class RDXVRPrescientFootstepStreaming
    {
       ankleTrackerFrames.put(side, trackerReferenceFrame);
    }
+
+   public void reset()
+   {
+      for (RobotSide side : RobotSide.values())
+      {
+         ankleTrackerFrames.put(side, null);
+      }
+   }
 }
