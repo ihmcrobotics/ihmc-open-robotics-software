@@ -51,6 +51,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
    public RDXStancePoseSelectionPanel(StancePoseCalculator stancePoseCalculator)
    {
       super("Stance Pose Selection");
+      setRenderMethod(this::renderImGuiWidgets);
       this.stancePoseCalculator = stancePoseCalculator;
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = new SideDependentList<>();
@@ -84,7 +85,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
    private void updatePoses()
    {
-      if (environmentHandler.hasTerrainMapData())
+      if (environmentHandler.hasTerrainMapData() && environmentHandler.hasHeightMap())
       {
          TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
          double height = terrainMapData.getHeightInWorld(latestPose.getTranslation().getX32(), latestPose.getTranslation().getY32());

@@ -35,6 +35,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -119,6 +120,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       stancePoseCalculator = new StancePoseCalculator(0.5f, 0.5f, 0.1f, defaultContactPoints);
 
       stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(stancePoseCalculator);
+      addChild(stancePoseSelectionPanel);
+
       terrainPlanningDebugger = new RDXTerrainPlanningDebugger(ros2Helper,
                                                                monteCarloPlannerParameters,
                                                                robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
@@ -189,6 +192,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       publishInputCommandMessage();
    }
 
+   public void processImGui3DViewInput(ImGui3DViewInput input)
+   {
+      stancePoseSelectionPanel.processImGui3DViewInput(input);
+   }
+
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
@@ -196,6 +204,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       {
          stancePoseSelectionPanel.getRenderables(renderables, pool);
          terrainPlanningDebugger.getRenderables(renderables, pool);
+         stancePoseSelectionPanel.getRenderables(renderables, pool);
       }
    }
 
