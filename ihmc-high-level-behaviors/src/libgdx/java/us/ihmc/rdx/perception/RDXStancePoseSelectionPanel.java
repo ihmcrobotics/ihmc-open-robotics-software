@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
+import imgui.type.ImBoolean;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,6 +19,7 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.tools.LibGDXTools;
@@ -32,12 +34,14 @@ import java.util.ArrayList;
 
 public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableProvider
 {
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+
    private ModelInstance pickPointSphere;
 
    private ArrayList<ModelInstance> leftSpheres = new ArrayList<>();
    private ArrayList<ModelInstance> rightSpheres = new ArrayList<>();
 
-   private SideDependentList<FramePose3D> stancePoses = new SideDependentList<>();
+   public SideDependentList<FramePose3D> stancePoses = new SideDependentList<>();
    private final FramePose3D latestPose = new FramePose3D(ReferenceFrame.getWorldFrame());
    private final SideDependentList<RDXFootstepGraphic> footstepGraphics;
 
@@ -47,6 +51,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
    private boolean placed = false;
    private boolean selectionActive = false;
+   private ImBoolean calculateStancePose = new ImBoolean(false);
 
    public RDXStancePoseSelectionPanel(StancePoseCalculator stancePoseCalculator)
    {
@@ -72,7 +77,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       environmentHandler.setTerrainMapData(terrainMapData);
 
       boolean panel3DIsHovered = latestInput != null && latestInput.isWindowHovered();
-      if (panel3DIsHovered && ImGui.isKeyPressed('P'))
+      if (panel3DIsHovered && ImGui.isKeyPressed('P') && calculateStancePose.get())
       {
          selectionActive = true;
       }
@@ -152,7 +157,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
       if (input.isWindowHovered() & input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
       {
-         placeFootstep();
+         setGoalFootsteps();
          selectionActive = false;
       }
 
@@ -162,8 +167,9 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       }
    }
 
-   private void placeFootstep()
+   private void setGoalFootsteps()
    {
+
       placed = true;
    }
 
@@ -185,6 +191,8 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
          ImGui.text("Height: " + terrainMapData.getHeightInWorld(latestPose.getTranslation().getX32(), latestPose.getTranslation().getY32()));
          ImGui.text("Contact Score: " + terrainMapData.getContactScoreInWorld(latestPose.getTranslation().getX32(), latestPose.getTranslation().getY32()));
       }
+
+      ImGui.checkbox(labels.get("Calculate Stance Pose"), calculateStancePose);
    }
 
    @Override
