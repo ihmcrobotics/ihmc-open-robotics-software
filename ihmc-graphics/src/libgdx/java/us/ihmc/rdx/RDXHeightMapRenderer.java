@@ -16,7 +16,6 @@ import org.bytedeco.javacpp.BytePointer;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.perception.gpuHeightMap.HeightMapTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
@@ -30,6 +29,12 @@ import java.nio.FloatBuffer;
  * 0 is the metric -3.2768f height, and 65536 is the 3.2768f height.
  * The height is scaled up by 10,000 for storage as 16-bit value (short)
  */
+
+/**
+ * This has been updated to use {@link RDXHeightMapGraphicNew}, please use that going forward, this implementation has bugs with interacting with collisions
+ * from the mouse
+ */
+@Deprecated
 public class RDXHeightMapRenderer implements RenderableProvider
 {
    private Renderable renderable;
@@ -101,13 +106,10 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
       int cellsPerAxis = 2 * centerIndex + 1;
 
-      Point3D spritePoint = new Point3D();
       for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
       {
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
          {
-            spritePoint.setToZero();
-
             double xPosition = HeightMapTools.indexToCoordinate(xIndex, gridCenterX, cellSizeXYInMeters, centerIndex);
             double yPosition = HeightMapTools.indexToCoordinate(yIndex, gridCenterY, cellSizeXYInMeters, centerIndex);
 
@@ -118,18 +120,12 @@ public class RDXHeightMapRenderer implements RenderableProvider
             float zPosition = ((float) height / heightScalingFactor);
             zPosition -= heightOffset;
 
-            spritePoint.set(xPosition, yPosition, zPosition);
-            intermediateVertexBuffer[vertexIndex] = (float) spritePoint.getX();
-            intermediateVertexBuffer[vertexIndex + 1] = (float) spritePoint.getY();
-            intermediateVertexBuffer[vertexIndex + 2] = (float) spritePoint.getZ();
-
-            Color color = HeightMapTools.computeGDXColorFromHeight(zPosition);
-
-            /* For the brighter ones */
-            //float heightRatio = (zPosition / maxHeight);
-            //color.set(Math.abs(1.0f - heightRatio), Math.max(100.0f * heightRatio, 1.0f), Math.abs(1.0f - heightRatio), Math.abs(0.3f + 10.0f * heightRatio));
+            intermediateVertexBuffer[vertexIndex] = (float) xPosition;
+            intermediateVertexBuffer[vertexIndex + 1] = (float) yPosition;
+            intermediateVertexBuffer[vertexIndex + 2] = zPosition;
 
             // Color (0.0 to 1.0)
+            Color color = HeightMapTools.computeGDXColorFromHeight(zPosition);
             intermediateVertexBuffer[vertexIndex + 3] = color.r;
             intermediateVertexBuffer[vertexIndex + 4] = color.g;
             intermediateVertexBuffer[vertexIndex + 5] = color.b;
