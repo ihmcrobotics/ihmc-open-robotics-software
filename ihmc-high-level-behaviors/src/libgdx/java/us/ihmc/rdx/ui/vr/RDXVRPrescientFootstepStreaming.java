@@ -77,7 +77,7 @@ public class RDXVRPrescientFootstepStreaming
                translation.sub(currentTrackerPosition, initialTrackerPosition);
 
                // Check if the tracker has moved in any direction
-               if (translation.length() >= STEP_THRESHOLD)
+               if (translation.norm() >= STEP_THRESHOLD)
                {
                   // Check if the foot has been lifted
                   if (currentTrackerPosition.getZ() - initialTrackerPosition.getZ() >= LIFT_THRESHOLD)
@@ -123,7 +123,7 @@ public class RDXVRPrescientFootstepStreaming
                      Vector3D translation = new Vector3D();
                      translation.sub(currentTrackerPosition, previousTrackerPositions.get(side));
 
-                     if (translation.length() <= STABILITY_THRESHOLD)
+                     if (translation.norm() <= STABILITY_THRESHOLD)
                      {
                         int stableCount = stableIterationCounts.get(side);
                         stableCount++;

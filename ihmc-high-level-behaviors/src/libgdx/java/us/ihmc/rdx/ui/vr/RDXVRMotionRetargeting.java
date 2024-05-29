@@ -39,6 +39,7 @@ public class RDXVRMotionRetargeting
    private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<MutableReferenceFrame> controllerReferenceFrames;
    private final Map<String, MutableReferenceFrame> trackerReferenceFrames;
+   private final MutableReferenceFrame headsetReferenceFrame;
    private final RetargetingParameters retargetingParameters;
 
    private final RigidBodyTransform initialWaistTrackerTransformToWorld = new RigidBodyTransform();
@@ -47,8 +48,10 @@ public class RDXVRMotionRetargeting
    private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
    private Point3D centerOfMassDesiredXYInWorld;
    private ReferenceFrame initialPelvisFrame;
+   private final SideDependentList<Point3D> initialHandPositionsInWorld = new SideDependentList<>(null, null);
    private boolean controlArmsOnly = false;
    private boolean armScaling = false;
+   private double armLengthScaleFactor = 1.0;
 
    /**
     * Constructor for the motion retargeting class.
@@ -61,12 +64,14 @@ public class RDXVRMotionRetargeting
    public RDXVRMotionRetargeting(ROS2SyncedRobotModel syncedRobot,
                                  SideDependentList<MutableReferenceFrame> controllerReferenceFrames,
                                  Map<String, MutableReferenceFrame> trackerReferenceFrames,
+                                 MutableReferenceFrame headsetReferenceFrame,
                                  RetargetingParameters retargetingParameters)
    {
       this.syncedRobot = syncedRobot;
       this.retargetingParameters = retargetingParameters;
       this.controllerReferenceFrames = controllerReferenceFrames;
       this.trackerReferenceFrames = trackerReferenceFrames;
+      this.headsetReferenceFrame = headsetReferenceFrame;
    }
 
    /**
@@ -189,59 +194,67 @@ public class RDXVRMotionRetargeting
    {
       if (armScaling)
       {
-         if (trackerReferenceFrames.containsKey(CHEST.getSegmentName()) && trackerReferenceFrames.containsKey(HEADSET.getSegmentName()))
+         if (trackerReferenceFrames.containsKey(CHEST.getSegmentName()) && headsetReferenceFrame != null)
          {
             ReferenceFrame chestTrackerFrame = trackerReferenceFrames.get(CHEST.getSegmentName()).getReferenceFrame();
-            ReferenceFrame headsetFrame = trackerReferenceFrames.get(HEADSET.getSegmentName()).getReferenceFrame();
+            ReferenceFrame headsetFrame = headsetReferenceFrame.getReferenceFrame();
 
             // Estimate shoulder positions based on chest and headset positions
             Point3D chestTrackerPosition = new Point3D(chestTrackerFrame.getTransformToWorldFrame().getTranslation());
             Point3D headsetPosition = new Point3D(headsetFrame.getTransformToWorldFrame().getTranslation());
 
-            // Calculate Z offset as the midpoint between the chest tracker and headset positions
+            // Calculate Z offset as the midpoint between the chest and headset positions
             double shoulderOffsetZ = (headsetPosition.getZ() - chestTrackerPosition.getZ()) / 2.0;
-
             // Calculate head length based on the sternum to headset distance
-            double distanceSternumToHeadset = chestTrackerPosition.distance(headsetPosition);
-            double headLength = distanceSternumToHeadset / 1.5;
-
-            // The Y offset for the shoulders is approximately equal to the head length
+            double distanceChestToHeadset = chestTrackerPosition.distance(headsetPosition);
+            double headLength = distanceChestToHeadset / 1.5;
+            // The Y offset for the shoulders is equal to the head length
             double shoulderOffsetY = headLength;
 
-            // Left shoulder position
+            // Calculate the shoulder offsets in world frame
+            Point3D leftShoulderOffsetInChestFrame = new Point3D(0.0, shoulderOffsetY, shoulderOffsetZ);
+            Point3D rightShoulderOffsetInChestFrame = new Point3D(0.0, -shoulderOffsetY, shoulderOffsetZ);
+            RigidBodyTransform chestTransformToWorld = chestTrackerFrame.getTransformToWorldFrame();
+            Point3D leftShoulderOffsetInWorld = new Point3D();
+            chestTransformToWorld.transform(leftShoulderOffsetInChestFrame, leftShoulderOffsetInWorld);
+            Point3D rightShoulderOffsetInWorld = new Point3D();
+            chestTransformToWorld.transform(rightShoulderOffsetInChestFrame, rightShoulderOffsetInWorld);
+
+            // Calculate shoulder positions in world frame
             Point3D leftShoulderPosition = new Point3D(chestTrackerPosition);
-            leftShoulderPosition.add(0.0, shoulderOffsetY, shoulderOffsetZ + chestTrackerPosition.getZ());
-            // Right shoulder position
+            leftShoulderPosition.add(leftShoulderOffsetInWorld);
             Point3D rightShoulderPosition = new Point3D(chestTrackerPosition);
-            rightShoulderPosition.add(0.0, -shoulderOffsetY, shoulderOffsetZ + chestTrackerPosition.getZ());
+            rightShoulderPosition.add(rightShoulderOffsetInWorld);
 
             // Scale the controller reference frames
             for (RobotSide side : RobotSide.values())
             {
                String handSegmentName = side == RobotSide.LEFT ? LEFT_HAND.getSegmentName() : RIGHT_HAND.getSegmentName();
                ReferenceFrame handFrame = trackerReferenceFrames.get(handSegmentName).getReferenceFrame();
-               Point3D initialHandPosition = new Point3D(handFrame.getTransformToWorldFrame().getTranslation());
-
-               // Calculate initial user arm length
                Point3D shoulderPosition = side == RobotSide.LEFT ? leftShoulderPosition : rightShoulderPosition;
-               Vector3D initialArmVector = new Vector3D();
-               initialArmVector.sub(initialHandPosition, shoulderPosition);
-               double initialArmLength = initialArmVector.norm();
+               if (initialHandPositionsInWorld.get(side) == null)
+               {
+                  initialHandPositionsInWorld.put(side, new Point3D(handFrame.getTransformToWorldFrame().getTranslation()));
+                  // Calculate initial user arm length
+                  Vector3D initialArmVector = new Vector3D();
+                  initialArmVector.sub(initialHandPositionsInWorld.get(side), shoulderPosition);
+                  double initialArmLength = initialArmVector.norm();
 
-               // Robot arm length
-               double robotArmLength = retargetingParameters.getArmLength(side);
-
-               // Scale factor for arm length
-               double armLengthScaleFactor = robotArmLength / initialArmLength;
+                  // Scale factor for arm length
+                  double robotArmLength = retargetingParameters.getArmLength();
+                  armLengthScaleFactor = robotArmLength / initialArmLength;
+               }
 
                // Compute scaled hand position
-               Vector3D scaledArmVector = new Vector3D(initialArmVector);
+               Vector3D scaledArmVector = new Vector3D();
+               scaledArmVector.sub(handFrame.getTransformToWorldFrame().getTranslation(), shoulderPosition);
                scaledArmVector.scale(armLengthScaleFactor);
                Point3D scaledHandPosition = new Point3D(shoulderPosition);
                scaledHandPosition.add(scaledArmVector);
 
                // Set desired frame for hand
-               FramePose3D desiredHandPose = new FramePose3D(ReferenceFrame.getWorldFrame(), scaledHandPosition);
+               FramePose3D desiredHandPose = new FramePose3D(ReferenceFrame.getWorldFrame(), handFrame.getTransformToWorldFrame());
+               desiredHandPose.getTranslation().set(scaledHandPosition);
                desiredFrames.put(side == RobotSide.LEFT ? LEFT_HAND : RIGHT_HAND, ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), desiredHandPose));
             }
          }
@@ -261,6 +274,8 @@ public class RDXVRMotionRetargeting
    public void reset()
    {
       initialPelvisFrame = null;
+      for (RobotSide side : RobotSide.values)
+         initialHandPositionsInWorld.put(side, null);
       desiredFrames.clear();
       centerOfMassDesiredXYInWorld = null;
    }
