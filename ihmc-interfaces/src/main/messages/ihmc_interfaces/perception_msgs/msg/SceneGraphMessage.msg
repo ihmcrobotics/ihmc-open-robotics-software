@@ -10,6 +10,8 @@ byte ARUCO_MARKER_NODE_TYPE=3
 byte CENTERPOSE_NODE_TYPE=4
 byte STATIC_RELATIVE_NODE_TYPE=5
 byte PRIMITIVE_RIGID_BODY_NODE_TYPE=6
+byte YOLO_NODE_TYPE=7
+byte DOOR_NODE_TYPE=8
 
 # The ID to assign to the next instantiated node
 uint32 next_id
@@ -42,3 +44,9 @@ perception_msgs/StaticRelativeSceneNodeMessage[<=200] static_relative_scene_node
 
 # Reshapable rigid body scene nodes
 perception_msgs/PrimitiveRigidBodySceneNodeMessage[<=200] primitive_rigid_body_scene_nodes
+
+# YOLO scene nodes
+perception_msgs/YOLOv8NodeMessage[<=200] yolo_scene_nodes
+
+# Door scene nodes
+perception_msgs/DoorNodeMessage[<=200] door_scene_nodes

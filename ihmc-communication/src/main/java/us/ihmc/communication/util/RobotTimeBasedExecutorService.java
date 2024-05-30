@@ -10,7 +10,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.ros2.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.common.SampleInfo;
@@ -44,7 +44,7 @@ public class RobotTimeBasedExecutorService
    public static void schedulePackageBased(RealtimeROS2Node ros2Node, String robotName, long period, TimeUnit timeUnit, Runnable runnable)
    {
       NewMessageListener<RobotConfigurationData> robotConfigurationDataListener = createListener(period, timeUnit, runnable);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, createTopicName(robotName), robotConfigurationDataListener);
+      ros2Node.createSubscription(createTopicName(robotName).withTypeName(RobotConfigurationData.class), robotConfigurationDataListener);
    }
 
    /**
@@ -61,12 +61,12 @@ public class RobotTimeBasedExecutorService
    public static void schedulePackageBased(ROS2Node ros2Node, String robotName, long period, TimeUnit timeUnit, Runnable runnable)
    {
       NewMessageListener<RobotConfigurationData> robotConfigurationDataListener = createListener(period, timeUnit, runnable);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, createTopicName(robotName), robotConfigurationDataListener);
+      ros2Node.createSubscription(createTopicName(robotName).withTypeName(RobotConfigurationData.class), robotConfigurationDataListener);
    }
 
-   private static ROS2Topic createTopicName(String robotName)
+   private static ROS2Topic<?> createTopicName(String robotName)
    {
-      return ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
+      return HumanoidControllerAPI.HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
    }
 
    private static NewMessageListener<RobotConfigurationData> createListener(long period, TimeUnit timeUnit, Runnable runnable)
@@ -162,7 +162,7 @@ public class RobotTimeBasedExecutorService
 
       // Create a thread that estimates the current realtime rate.
       ROS2Topic topicName = createTopicName(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, topicName, new NewMessageListener<RobotConfigurationData>()
+      ros2Node.createSubscription(((ROS2Topic<?>) topicName).withTypeName(RobotConfigurationData.class), new NewMessageListener<RobotConfigurationData>()
       {
          private final SampleInfo sampleInfo = new SampleInfo();
          private final RobotConfigurationData robotConfigurationData = new RobotConfigurationData();

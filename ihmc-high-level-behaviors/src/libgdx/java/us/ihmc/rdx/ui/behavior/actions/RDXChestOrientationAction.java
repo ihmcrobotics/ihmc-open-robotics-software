@@ -53,7 +53,6 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
    private final ArrayList<MouseCollidable> mouseCollidables = new ArrayList<>();
    private final RDXInteractableHighlightModel highlightModel;
    private final RDX3DPanelTooltip tooltip;
-   private boolean wasConcurrent = false;
 
    public RDXChestOrientationAction(long id,
                                     CRDTInfo crdtInfo,
@@ -131,17 +130,6 @@ public class RDXChestOrientationAction extends RDXActionNode<ChestOrientationAct
          else
          {
             highlightModel.setTransparency(0.5);
-         }
-
-         // if the action is part of a group of concurrent actions that is currently executing or about to be executed
-         // send an update of the pose of the chest. Arms IK will be computed wrt this chest pose
-         if (state.getIsNextForExecution() && state.getIsToBeExecutedConcurrently())
-         {
-            wasConcurrent = true;
-         }
-         else if (wasConcurrent)
-         {
-            wasConcurrent = false;
          }
       }
    }

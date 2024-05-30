@@ -18,16 +18,21 @@ byte CURRENT_TOOLBOX_STATE_RUNNING = 3
 byte current_toolbox_state 0
 
 int32 joint_name_hash
+
+# Desired joint positions.
 float32[] desired_joint_angles
 
+# Desired root joint position in world frame.
 geometry_msgs/Point desired_root_position
+# Desired root joint orientation in world frame.
 geometry_msgs/Quaternion desired_root_orientation
 
-# Desired joint velocities might be empty.
+# Desired joint velocities.
 float32[] desired_joint_velocities
 
-# Desired twist of root might be empty.
+# Desired linear velocity of the root joint expressed in local frame.
 geometry_msgs/Vector3 desired_root_linear_velocity
+# Desired angular velocity of the root joint expressed in local frame.
 geometry_msgs/Vector3 desired_root_angular_velocity
 
 # Support region used by the toolbox

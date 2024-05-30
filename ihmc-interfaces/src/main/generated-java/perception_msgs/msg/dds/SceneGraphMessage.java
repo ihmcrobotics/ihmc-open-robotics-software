@@ -21,6 +21,8 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
    public static final byte CENTERPOSE_NODE_TYPE = (byte) 4;
    public static final byte STATIC_RELATIVE_NODE_TYPE = (byte) 5;
    public static final byte PRIMITIVE_RIGID_BODY_NODE_TYPE = (byte) 6;
+   public static final byte YOLO_NODE_TYPE = (byte) 7;
+   public static final byte DOOR_NODE_TYPE = (byte) 8;
    /**
             * The ID to assign to the next instantiated node
             */
@@ -63,6 +65,14 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
             * Reshapable rigid body scene nodes
             */
    public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage>  primitive_rigid_body_scene_nodes_;
+   /**
+            * YOLO scene nodes
+            */
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8NodeMessage>  yolo_scene_nodes_;
+   /**
+            * Door scene nodes
+            */
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.DoorNodeMessage>  door_scene_nodes_;
 
    public SceneGraphMessage()
    {
@@ -77,6 +87,8 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
       centerpose_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.CenterposeNodeMessage> (200, new perception_msgs.msg.dds.CenterposeNodeMessagePubSubType());
       static_relative_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.StaticRelativeSceneNodeMessage> (200, new perception_msgs.msg.dds.StaticRelativeSceneNodeMessagePubSubType());
       primitive_rigid_body_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage> (200, new perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessagePubSubType());
+      yolo_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8NodeMessage> (200, new perception_msgs.msg.dds.YOLOv8NodeMessagePubSubType());
+      door_scene_nodes_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.DoorNodeMessage> (200, new perception_msgs.msg.dds.DoorNodeMessagePubSubType());
 
    }
 
@@ -99,6 +111,8 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
       centerpose_scene_nodes_.set(other.centerpose_scene_nodes_);
       static_relative_scene_nodes_.set(other.static_relative_scene_nodes_);
       primitive_rigid_body_scene_nodes_.set(other.primitive_rigid_body_scene_nodes_);
+      yolo_scene_nodes_.set(other.yolo_scene_nodes_);
+      door_scene_nodes_.set(other.door_scene_nodes_);
    }
 
    /**
@@ -200,6 +214,24 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
    }
 
 
+   /**
+            * YOLO scene nodes
+            */
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.YOLOv8NodeMessage>  getYoloSceneNodes()
+   {
+      return yolo_scene_nodes_;
+   }
+
+
+   /**
+            * Door scene nodes
+            */
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.DoorNodeMessage>  getDoorSceneNodes()
+   {
+      return door_scene_nodes_;
+   }
+
+
    public static Supplier<SceneGraphMessagePubSubType> getPubSubType()
    {
       return SceneGraphMessagePubSubType::new;
@@ -272,6 +304,20 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
          {  if (!this.primitive_rigid_body_scene_nodes_.get(i).epsilonEquals(other.primitive_rigid_body_scene_nodes_.get(i), epsilon)) return false; }
       }
 
+      if (this.yolo_scene_nodes_.size() != other.yolo_scene_nodes_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.yolo_scene_nodes_.size(); i++)
+         {  if (!this.yolo_scene_nodes_.get(i).epsilonEquals(other.yolo_scene_nodes_.get(i), epsilon)) return false; }
+      }
+
+      if (this.door_scene_nodes_.size() != other.door_scene_nodes_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.door_scene_nodes_.size(); i++)
+         {  if (!this.door_scene_nodes_.get(i).epsilonEquals(other.door_scene_nodes_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -296,6 +342,8 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
       if (!this.centerpose_scene_nodes_.equals(otherMyClass.centerpose_scene_nodes_)) return false;
       if (!this.static_relative_scene_nodes_.equals(otherMyClass.static_relative_scene_nodes_)) return false;
       if (!this.primitive_rigid_body_scene_nodes_.equals(otherMyClass.primitive_rigid_body_scene_nodes_)) return false;
+      if (!this.yolo_scene_nodes_.equals(otherMyClass.yolo_scene_nodes_)) return false;
+      if (!this.door_scene_nodes_.equals(otherMyClass.door_scene_nodes_)) return false;
 
       return true;
    }
@@ -325,7 +373,11 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
       builder.append("static_relative_scene_nodes=");
       builder.append(this.static_relative_scene_nodes_);      builder.append(", ");
       builder.append("primitive_rigid_body_scene_nodes=");
-      builder.append(this.primitive_rigid_body_scene_nodes_);
+      builder.append(this.primitive_rigid_body_scene_nodes_);      builder.append(", ");
+      builder.append("yolo_scene_nodes=");
+      builder.append(this.yolo_scene_nodes_);      builder.append(", ");
+      builder.append("door_scene_nodes=");
+      builder.append(this.door_scene_nodes_);
       builder.append("}");
       return builder.toString();
    }

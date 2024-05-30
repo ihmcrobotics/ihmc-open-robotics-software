@@ -1,0 +1,29 @@
+#ifndef __behavior_msgs__msg__DoorTraversalDefinitionMessage__idl__
+#define __behavior_msgs__msg__DoorTraversalDefinitionMessage__idl__
+
+#include "behavior_msgs/msg/./BehaviorTreeNodeDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::DoorTraversalDefinitionMessage_")
+      struct DoorTraversalDefinitionMessage
+      {
+        /**
+         * Parent definition fields
+         */
+        behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
+        /**
+         * The hand open angle to assume we lost the grasp on the object
+         */
+        double lost_grasp_detection_hand_open_angle;
+        double opened_door_handle_distance_from_start;
+      };
+    };
+  };
+};
+
+#endif

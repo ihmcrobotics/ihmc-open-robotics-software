@@ -32,10 +32,18 @@ public class SakeHandParameters
    /** The max temperature before the hand resets. */
    public static final double TEMPERATURE_LIMIT_CELCIUS = 60.0;
    /** The temperature at which the Dynamixel will break. */
-   public static final double DYNAMIXEL_FAILURE_TEMPERATURE_CELCIUS = 80.0;
+   public static final int DYNAMIXEL_FAILURE_TEMPERATURE_CELCIUS = 80;
+   /** Sake encoder resolution is 4096. Convert that to rad */
+   public static final double RAW_SAKE_POSITION_TO_RAD = (2.0 * Math.PI) / 4096.0;
+   /**
+    * Robotis provide rotation speed conversion in RPM (0.11 rpm). Convert that to rad/s
+    * See: <a href="https://emanual.robotis.com/docs/en/dxl/mx/mx-64/#present-speed-38"> DYNAMIXEL Protocol 1.0: Present Speed </a>
+    */
+   public static final double RAW_SAKE_VELOCITY_TO_RAD_PER_SEC = 0.11 * ((2.0 * Math.PI) / 60);
+   public static final double RAW_SAKE_TORQUE_TO_GRIP_FORCE = FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT / 1023.0;
 
    /**
-    * @param normalizedHandOpenAngle 0.0 (closed) to 1.0 (open)
+    * @param normalizedHandOpenAngle 1.0 (open) to 0.0 (closed)
     * @return actual angle between fingers in radians
     */
    public static double denormalizeHandOpenAngle(double normalizedHandOpenAngle)
@@ -45,11 +53,21 @@ public class SakeHandParameters
 
    /**
     * @param handOpenAngle actual angle between fingers in radians
-    * @return 0.0 (closed) to 1.0 (open)
+    * @return 1.0 (open) to 0.0 (closed)
     */
    public static double normalizeHandOpenAngle(double handOpenAngle)
    {
       return handOpenAngle / Math.toRadians(MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES);
+   }
+
+   public static double denormalizeHandPosition(double normalizedPosition, double positionLowerLimit, double positionUpperLimit)
+   {
+      return normalizedPosition * (positionUpperLimit - positionLowerLimit) + positionLowerLimit;
+   }
+
+   public static double normalizeHandPosition(double handPosition, double positionLowerLimit, double positionUpperLimit)
+   {
+      return (handPosition - positionLowerLimit) / (positionUpperLimit - positionLowerLimit);
    }
 
    public static double denormalizeFingertipGripForceLimit(double normalizedFingertipGripForceLimit)
@@ -77,16 +95,51 @@ public class SakeHandParameters
       return denormalizeHandOpenAngle(knuckleJointAngle / Math.toRadians(OPEN_KNUCKLE_JOINT_ANGLE_DEGREES));
    }
 
+   public static double knuckleJointAnglesToHandOpenAngle(double knuckle1JointAngle, double knuckle2JointAngle)
+   {
+      return knuckleJointAngleToHandOpenAngle(knuckle1JointAngle + knuckle2JointAngle) / 2.0;
+   }
+
    public static double handOpenAngleToKnuckleJointAngle(double handOpenAngle)
    {
       return normalizeHandOpenAngle(handOpenAngle) * Math.toRadians(OPEN_KNUCKLE_JOINT_ANGLE_DEGREES);
    }
 
+   public static double handOpenAngleToPosition(double handOpenAngle, double positionLowerLimit, double positionUpperLimit)
+   {
+      return normalizeHandOpenAngle(handOpenAngle) * (positionUpperLimit - positionLowerLimit) + positionLowerLimit;
+   }
+
+   public static double handPositionToOpenAngle(double handPosition, double positionLowerLimit, double positionUpperLimit)
+   {
+      return normalizeHandPosition(handPosition, positionLowerLimit, positionUpperLimit) * Math.toRadians(MAX_DESIRED_HAND_OPEN_ANGLE_DEGREES);
+   }
+
+   public static double handPositionToKnuckleJointAngle(double handPosition, double positionLowerLimit, double positionUpperLimit)
+   {
+      return handOpenAngleToKnuckleJointAngle(handPositionToOpenAngle(handPosition, positionLowerLimit, positionUpperLimit));
+   }
+
+   public static int gripForceToRawTorque(double gripForce) {
+      return (int) (gripForce / RAW_SAKE_TORQUE_TO_GRIP_FORCE);
+   }
+
+   public static double knuckleTorqueToGripForce(double knuckleTorque)
+   {
+      return normalizeKnuckleTorque(knuckleTorque) * FINGERTIP_GRIP_FORCE_HARDWARE_LIMIT;
+   }
+
+   public static double gripForceToKnuckleTorque(double gripForce)
+   {
+      return normalizeFingertipGripForceLimit(gripForce) * KNUCKLE_TORQUE_AT_LIMIT;
+   }
+
    public static void resetDesiredCommandMessage(SakeHandDesiredCommandMessage sakeHandDesiredCommandMessage)
    {
-      sakeHandDesiredCommandMessage.setNormalizedGripperDesiredPosition(-1.0);
-      sakeHandDesiredCommandMessage.setNormalizedGripperTorqueLimit(-1.0);
+      sakeHandDesiredCommandMessage.setGripperDesiredPosition(Double.NaN);
+      sakeHandDesiredCommandMessage.setRawGripperTorqueLimit(-1);
       sakeHandDesiredCommandMessage.setRequestCalibration(false);
-      sakeHandDesiredCommandMessage.setRequestCalibration(false);
+      sakeHandDesiredCommandMessage.setRequestResetErrors(false);
+      sakeHandDesiredCommandMessage.setTorqueOn(true);
    }
 }

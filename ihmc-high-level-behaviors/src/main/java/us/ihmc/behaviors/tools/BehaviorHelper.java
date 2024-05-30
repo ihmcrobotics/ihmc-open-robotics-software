@@ -3,6 +3,7 @@ package us.ihmc.behaviors.tools;
 import org.apache.commons.lang.WordUtils;
 import perception_msgs.msg.dds.DoorLocationPacket;
 import toolbox_msgs.msg.dds.BehaviorControlModePacket;
+import toolbox_msgs.msg.dds.BehaviorStatusPacket;
 import toolbox_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -13,8 +14,8 @@ import us.ihmc.behaviors.tools.yo.YoBooleanClientHelper;
 import us.ihmc.behaviors.tools.yo.YoDoubleClientHelper;
 import us.ihmc.behaviors.tools.yo.YoVariableClientPublishSubscribeAPI;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
+import us.ihmc.communication.DeprecatedAPIs;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
@@ -59,6 +60,12 @@ import java.util.function.Function;
  */
 public class BehaviorHelper extends CommunicationHelper implements YoVariableClientPublishSubscribeAPI
 {
+   public static final ROS2Topic<?> BEHAVIOR_MODULE_INPUT = DeprecatedAPIs.BEHAVIOR_MODULE.withInput();
+   public static final ROS2Topic<?> BEHAVIOR_MODULE_OUTPUT = DeprecatedAPIs.BEHAVIOR_MODULE.withOutput();
+   public static final ROS2Topic<BehaviorControlModePacket> BEHAVIOR_CONTROL_MODE = BEHAVIOR_MODULE_INPUT.withTypeName(BehaviorControlModePacket.class);
+   public static final ROS2Topic<HumanoidBehaviorTypePacket> BEHAVIOR_TYPE = BEHAVIOR_MODULE_INPUT.withTypeName(HumanoidBehaviorTypePacket.class);
+   public static final ROS2Topic<BehaviorStatusPacket> BEHAVIOR_STATUS = BEHAVIOR_MODULE_OUTPUT.withTypeName(BehaviorStatusPacket.class);
+
    private final YoVariableClientHelper yoVariableClientHelper;
    private StatusLogger statusLogger;
    private ControllerStatusTracker controllerStatusTracker;
@@ -124,14 +131,16 @@ public class BehaviorHelper extends CommunicationHelper implements YoVariableCli
    {
       BehaviorControlModePacket behaviorControlModePacket = new BehaviorControlModePacket();
       behaviorControlModePacket.setBehaviorControlModeEnumRequest(controlMode.toByte());
-      publish(ROS2Tools.getBehaviorControlModeTopic(getRobotModel().getSimpleRobotName()), behaviorControlModePacket);
+      String robotName = getRobotModel().getSimpleRobotName();
+      publish(BEHAVIOR_CONTROL_MODE.withRobot(robotName), behaviorControlModePacket);
    }
 
    public void publishBehaviorType(HumanoidBehaviorType type)
    {
       HumanoidBehaviorTypePacket humanoidBehaviorTypePacket = new HumanoidBehaviorTypePacket();
       humanoidBehaviorTypePacket.setHumanoidBehaviorType(type.toByte());
-      publish(ROS2Tools.getBehaviorTypeTopic(getRobotModel().getSimpleRobotName()), humanoidBehaviorTypePacket);
+      String robotName = getRobotModel().getSimpleRobotName();
+      publish(BEHAVIOR_TYPE.withRobot(robotName), humanoidBehaviorTypePacket);
    }
 
    public void publishToolboxState(Function<String, ROS2Topic<?>> robotNameConsumer, ToolboxState state)
@@ -143,7 +152,8 @@ public class BehaviorHelper extends CommunicationHelper implements YoVariableCli
 
    public void subscribeToBehaviorStatusViaCallback(Consumer<CurrentBehaviorStatus> callback)
    {
-      subscribeViaCallback(ROS2Tools.getBehaviorStatusTopic(getRobotModel().getSimpleRobotName()), behaviorStatusPacket ->
+      String robotName = getRobotModel().getSimpleRobotName();
+      subscribeViaCallback(BEHAVIOR_STATUS.withRobot(robotName), behaviorStatusPacket ->
       {
          callback.accept(CurrentBehaviorStatus.fromByte(behaviorStatusPacket.getCurrentBehaviorStatus()));
       });

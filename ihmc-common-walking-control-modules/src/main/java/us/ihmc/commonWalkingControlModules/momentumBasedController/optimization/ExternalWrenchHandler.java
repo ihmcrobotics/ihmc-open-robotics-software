@@ -1,13 +1,7 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -15,12 +9,20 @@ import us.ihmc.mecano.spatial.SpatialForce;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author twan Date: 5/2/13
  */
 public class ExternalWrenchHandler
 {
+   private final double gravityZ;
+   private final DoubleProvider totalMassProvider;
    private final SpatialForce gravitationalWrench;
    private final DMatrixRMaj gravitationalWrenchMatrix = new DMatrixRMaj(Wrench.SIZE, 1);
    private final DMatrixRMaj wrenchEquationRightHandSide = new DMatrixRMaj(Wrench.SIZE, 1);
@@ -36,7 +38,9 @@ public class ExternalWrenchHandler
    private final SpatialForce tempWrench = new SpatialForce();
    private final ReferenceFrame centerOfMassFrame;
 
-   public ExternalWrenchHandler(double gravityZ, ReferenceFrame centerOfMassFrame, double robotTotalMass,
+   public ExternalWrenchHandler(double gravityZ,
+                                ReferenceFrame centerOfMassFrame,
+                                DoubleProvider totalMassProvider,
                                 List<? extends ContactablePlaneBody> contactablePlaneBodies)
    {
       this.centerOfMassFrame = centerOfMassFrame;
@@ -44,8 +48,10 @@ public class ExternalWrenchHandler
 
       this.contactablePlaneBodies = new ArrayList<>(contactablePlaneBodies);
 
+      this.gravityZ = gravityZ;
+      this.totalMassProvider = totalMassProvider;
       gravitationalWrench = new SpatialForce(centerOfMassFrame);
-      gravitationalWrench.setLinearPartZ(-gravityZ * robotTotalMass);
+      gravitationalWrench.setLinearPartZ(-gravityZ * totalMassProvider.getValue());
       totalWrenchAlreadyApplied = new SpatialForce(centerOfMassFrame);
 
       for (int i = 0; i < contactablePlaneBodies.size(); i++)
@@ -160,6 +166,7 @@ public class ExternalWrenchHandler
 
    public DMatrixRMaj getGravitationalWrench()
    {
+      gravitationalWrench.setLinearPartZ(-gravityZ * totalMassProvider.getValue());
       gravitationalWrench.get(gravitationalWrenchMatrix);
       return gravitationalWrenchMatrix;
    }

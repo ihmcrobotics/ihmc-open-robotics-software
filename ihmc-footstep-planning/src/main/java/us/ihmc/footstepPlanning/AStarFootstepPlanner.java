@@ -31,6 +31,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -100,7 +101,7 @@ public class AStarFootstepPlanner
       this.stopwatch = stopwatch;
       this.statusCallbacks = statusCallbacks;
 
-      this.checker = new HeightMapFootstepChecker(footstepPlannerParameters, footPolygons, snapper, stepReachabilityData, registry);
+      this.checker = new HeightMapFootstepChecker(footstepPlannerParameters, footPolygons, plannerEnvironmentHandler, snapper, stepReachabilityData, registry);
       this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder, plannerEnvironmentHandler, registry);
       this.referenceBasedIdealStepCalculator = new ReferenceBasedIdealStepCalculator(footstepPlannerParameters, idealStepCalculator, registry);
 
@@ -154,9 +155,11 @@ public class AStarFootstepPlanner
 
       // Update what we should use for planning
       boolean hasHeightMap = request.getHeightMapData() != null && !request.getHeightMapData().isEmpty();
-      boolean flatGroundMode = request.getAssumeFlatGround() || !hasHeightMap;
+      boolean hasTerrainMap = request.getTerrainMapData() != null;
+      boolean flatGroundMode = request.getAssumeFlatGround() || (!hasHeightMap && !hasTerrainMap);
 
       HeightMapData heightMapData = flatGroundMode ? null : request.getHeightMapData();
+      TerrainMapData terrainMapData = flatGroundMode ? null : request.getTerrainMapData();
 
       if (flatGroundMode)
       {
@@ -166,6 +169,7 @@ public class AStarFootstepPlanner
 
       snapper.clearSnapData();
       plannerEnvironmentHandler.setHeightMap(heightMapData);
+      plannerEnvironmentHandler.setTerrainMapData(terrainMapData);
 
       checker.setHeightMapData(heightMapData);
       stepCostCalculator.setHeightMapData(heightMapData);
@@ -426,8 +430,8 @@ public class AStarFootstepPlanner
       }
       else
       {
-         addSnapData(request.getGoalFootPoses().get(RobotSide.LEFT), RobotSide.LEFT);
-         addSnapData(request.getGoalFootPoses().get(RobotSide.RIGHT), RobotSide.RIGHT);
+         addSnapData(goalSteps.get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.LEFT), RobotSide.LEFT);
+         addSnapData(goalSteps.get(RobotSide.RIGHT), request.getGoalFootPoses().get(RobotSide.RIGHT), RobotSide.RIGHT);
          return true;
       }
 
@@ -455,6 +459,11 @@ public class AStarFootstepPlanner
    private void addSnapData(Pose3D footstepPose, RobotSide side)
    {
       DiscreteFootstep footstep = new DiscreteFootstep(footstepPose.getX(), footstepPose.getY(), footstepPose.getYaw(), side);
+      addSnapData(footstep, footstepPose, side);
+   }
+
+   private void addSnapData(DiscreteFootstep footstep, Pose3DReadOnly footstepPose, RobotSide side)
+   {
       FootstepSnapData snapData = new FootstepSnapData(FootstepSnappingTools.computeSnapTransform(footstep, footstepPose));
       snapData.getCroppedFoothold().set(footPolygons.get(side));
       snapData.getWiggleTransformInWorld().setIdentity();

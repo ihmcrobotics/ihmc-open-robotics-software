@@ -7,11 +7,7 @@ import org.bytedeco.javacpp.LongPointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.Mat;
-import perception_msgs.msg.dds.FramePlanarRegionsListMessage;
-import perception_msgs.msg.dds.ImageMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import perception_msgs.msg.dds.VideoPacket;
-import us.ihmc.commons.MathTools;
+import perception_msgs.msg.dds.*;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.VideoSource;
@@ -20,8 +16,10 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.idl.IDLSequence;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
@@ -32,7 +30,6 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;
-import java.util.stream.IntStream;
 
 public class PerceptionMessageTools
 {
@@ -252,5 +249,20 @@ public class PerceptionMessageTools
 
       // Decompress the height map image
       opencv_imgcodecs.imdecode(compressedBytesMat, opencv_imgcodecs.IMREAD_UNCHANGED, heightMapImageToPack);
+   }
+
+   public static void unpackMessage(HeightMapMessage heightMapMessage, TerrainMapData terrainMapData)
+   {
+      terrainMapData.getHeightMapCenter().set(heightMapMessage.getGridCenterX(), heightMapMessage.getGridCenterY());
+      int centerIndex = HeightMapTools.computeCenterIndex(heightMapMessage.getGridSizeXy(), heightMapMessage.getXyResolution());
+
+      for (int i = 0; i < heightMapMessage.getHeights().size(); i++)
+      {
+         int key = heightMapMessage.getKeys().get(i);
+         int xIndex = HeightMapTools.keyToXIndex(key, centerIndex);
+         int yIndex = HeightMapTools.keyToYIndex(key, centerIndex);
+         double height = heightMapMessage.getHeights().get(key);
+         terrainMapData.setHeightLocal((float) height, yIndex, xIndex);
+      }
    }
 }

@@ -4,11 +4,13 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTool
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePose3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -235,7 +237,8 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
 
       public void extrapolateInput(double integrationDT)
       {
-         KSTTools.integrateSpatialVelocity(integrationDT, rawExtrapolatedInputPose, decayingInputSpatialVelocity, rawExtrapolatedInputPose);
+         KSTTools.integrateLinearVelocity(integrationDT, rawExtrapolatedInputPose.getPosition(), decayingInputSpatialVelocity.getLinearPart(), rawExtrapolatedInputPose.getPosition());
+         KSTTools.integrateAngularVelocity(integrationDT, rawExtrapolatedInputPose.getOrientation(), decayingInputSpatialVelocity.getAngularPart(), false, rawExtrapolatedInputPose.getOrientation());
          filteredExtrapolatedInputPose.update();
       }
 

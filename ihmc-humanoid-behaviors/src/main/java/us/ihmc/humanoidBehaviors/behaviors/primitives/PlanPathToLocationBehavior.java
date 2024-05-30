@@ -8,7 +8,7 @@ import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
@@ -57,10 +57,10 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private boolean squareUpEndSteps = true;
 
    protected final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> footPlanStatusQueue = new ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus>(2);
-   private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
-   private final IHMCROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
-   private final IHMCROS2Publisher<FootstepPlannerParametersPacket> footstepPlannerParametersPublisher;
-   private final IHMCROS2Publisher<FootstepDataListMessage> goalFootstepToUIVisualization;
+   private final ROS2PublisherBasics<ToolboxStateMessage> toolboxStatePublisher;
+   private final ROS2PublisherBasics<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
+   private final ROS2PublisherBasics<FootstepPlannerParametersPacket> footstepPlannerParametersPublisher;
+   private final ROS2PublisherBasics<FootstepDataListMessage> goalFootstepToUIVisualization;
 
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
 

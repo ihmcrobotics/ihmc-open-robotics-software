@@ -1,0 +1,46 @@
+#ifndef __perception_msgs__msg__YOLOv8NodeMessage__idl__
+#define __perception_msgs__msg__YOLOv8NodeMessage__idl__
+
+#include "geometry_msgs/msg/./Point32_.idl"
+#include "geometry_msgs/msg/./Pose_.idl"
+#include "geometry_msgs/msg/./Transform_.idl"
+#include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Perception scene node for YOLOv8 detections
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::YOLOv8NodeMessage_")
+      struct YOLOv8NodeMessage
+      {
+        /**
+         * Detectable scene node information
+         */
+        perception_msgs::msg::dds::DetectableSceneNodeMessage detectable_scene_node;
+        /**
+         * YOLO parameters
+         */
+        long mask_erosion_kernel_radius;
+        double outlier_filter_threshold;
+        float detection_acceptance_threshold;
+        /**
+         * Detection information
+         */
+        string detection_class;
+        double confidence;
+        sequence<geometry_msgs::msg::dds::Point32, 5000> object_point_cloud;
+        geometry_msgs::msg::dds::Point32 object_centroid;
+        geometry_msgs::msg::dds::Transform centroid_to_object_transform;
+        geometry_msgs::msg::dds::Pose object_pose;
+        geometry_msgs::msg::dds::Pose filtered_object_pose;
+      };
+    };
+  };
+};
+
+#endif

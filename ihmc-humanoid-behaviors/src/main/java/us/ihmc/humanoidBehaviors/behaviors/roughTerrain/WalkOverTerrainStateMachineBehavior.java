@@ -13,7 +13,7 @@ import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
@@ -73,11 +73,11 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
    private final YoDouble swingTime = new YoDouble("swingTime", registry);
    private final YoDouble transferTime = new YoDouble("transferTime", registry);
    private final YoInteger planId = new YoInteger("planId", registry);
-   private final IHMCROS2Publisher<FootstepDataListMessage> footstepPublisher;
-   private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
-   private final IHMCROS2Publisher<FootstepPlanningRequestPacket> planningRequestPublisher;
-   private final IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
-   private final IHMCROS2Publisher<HeadTrajectoryMessage> headTrajectoryPublisher;
+   private final ROS2PublisherBasics<FootstepDataListMessage> footstepPublisher;
+   private final ROS2PublisherBasics<ToolboxStateMessage> toolboxStatePublisher;
+   private final ROS2PublisherBasics<FootstepPlanningRequestPacket> planningRequestPublisher;
+   private final ROS2PublisherBasics<REAStateRequestMessage> reaStateRequestPublisher;
+   private final ROS2PublisherBasics<HeadTrajectoryMessage> headTrajectoryPublisher;
    
    private final AtomicReference<WalkingStatusMessage> walkingStatus = new AtomicReference<>();
    private final double idealStanceWidth;

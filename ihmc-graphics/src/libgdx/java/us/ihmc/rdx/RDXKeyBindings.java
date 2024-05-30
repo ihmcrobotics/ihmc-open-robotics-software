@@ -1,6 +1,7 @@
 package us.ihmc.rdx;
 
 import imgui.ImVec2;
+import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiKey;
 import imgui.flag.ImGuiWindowFlags;
@@ -8,6 +9,7 @@ import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImString;
 import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.tools.string.StringTools;
 
 import java.util.Comparator;
@@ -83,7 +85,9 @@ public class RDXKeyBindings
             ImGui.text(keyBinding.function());
             ImGui.tableSetColumnIndex(1);
             ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
+            ImGui.pushStyleColor(ImGuiCol.Button, ImGuiTools.LIGHT_GRAY);
             ImGui.button(keyBinding.key(), keyButtonWidth, 0);
+            ImGui.popStyleColor();
             ImGui.popItemFlag();
          }
       }
@@ -192,6 +196,22 @@ public class RDXKeyBindings
          ImGui.end();
 
          forceActive = false;
+      }
+   }
+
+   public void renderKeybindingsSection(String sectionName)
+   {
+      KeyBindingsSection section = sections.get(sectionName);
+
+      if (section != null)
+      {
+         if (ImGui.beginTable("##keyBindingsTable_" + section.description, 2))
+         {
+            ImGui.tableSetupColumn(section.description);
+            ImGui.tableSetupColumn("Key");
+            section.renderSection(new ImString(section.description));
+            ImGui.endTable();
+         }
       }
    }
 

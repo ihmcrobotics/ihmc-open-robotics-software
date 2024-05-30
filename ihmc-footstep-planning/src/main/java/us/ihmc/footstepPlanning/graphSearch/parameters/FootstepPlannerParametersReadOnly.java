@@ -814,4 +814,23 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
       return get(minimumDistanceFromCliffTops);
    }
 
+   /**
+    * This uses the height map, this is a parameter to scale the size of the foot polygon.
+    * The scaledFootPolygonPercentage expands the foot so when conflicting with the height map we use a slightly larger foot.
+    */
+   default double getScaledFootPolygonPercentage()
+   {
+      return get(scaledFootPolygonPercentage);
+   }
+
+   /**
+    * This uses the height map, this is the threshold that determines whether the planner is detecting a cliff or not.
+    * This value will be in centimeters and if the height map values are greater than this value when being compared to
+    * the scaledFootPolygonPercentage then a cliff is detected.
+    */
+   default double getCliffHeightThreshold()
+   {
+      return get(cliffHeightThreshold);
+   }
+
 }

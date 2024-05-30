@@ -33,6 +33,7 @@ mainDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
 //   api("us.ihmc:ihmc-footstep-planning:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
+   api("us.ihmc:ihmc-parameter-estimation:source")
 }
 
 testDependencies {
@@ -47,7 +48,7 @@ testDependencies {
 visualizersDependencies {
    api(ihmc.sourceSetProject("main"))
    api("us.ihmc:simulation-construction-set:0.25.1")
-   api("us.ihmc:scs2-simulation-construction-set:17-0.23.1")
+   api("us.ihmc:scs2-simulation-construction-set:17-0.25.1")
 
    var javaFXVersion = "17.0.2"
    api(ihmc.javaFXModule("base", javaFXVersion))

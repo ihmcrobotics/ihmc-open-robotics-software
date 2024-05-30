@@ -9,7 +9,7 @@ import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.avatar.sakeGripper.SakeHandPreset;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.SakeHandAPI;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
@@ -46,6 +46,7 @@ public class RDXSakeHandWidgets
    private final ImGuiLabelledWidgetAligner widgetAligner = new ImGuiLabelledWidgetAligner();
    private final ImGuiFlashingText calibrateStatusText = new ImGuiFlashingText(ImGuiTools.RED);
    private final ImGuiFlashingText needResetStatusText = new ImGuiFlashingText(ImGuiTools.RED);
+   private final ImGuiFlashingText sakeErrorStatusText = new ImGuiFlashingText(ImGuiTools.RED);
 
    public RDXSakeHandWidgets(CommunicationHelper communicationHelper, ROS2SyncedRobotModel syncedRobot, RobotSide handSide)
    {
@@ -86,15 +87,16 @@ public class RDXSakeHandWidgets
          {
             LogTools.info("Commanding hand open angle %.1f%s".formatted(handOpenAngleDegreesSlider.getDoubleValue(),
                                                                         EuclidCoreMissingTools.DEGREE_SYMBOL));
-            sakeHandDesiredCommandMessage.setNormalizedGripperDesiredPosition(
-                  SakeHandParameters.normalizeHandOpenAngle(Math.toRadians(handOpenAngleDegreesSlider.getDoubleValue())));
+            sakeHandDesiredCommandMessage.setGripperDesiredPosition(
+                  SakeHandParameters.handOpenAngleToPosition(Math.toRadians(handOpenAngleDegreesSlider.getDoubleValue()),
+                                                             sakeHandStatus.getPositionLowerLimit(),
+                                                             sakeHandStatus.getPositionUpperLimit()));
          }
 
          if (sendForce)
          {
             LogTools.info("Commanding fingertip grip force limit %.1f N".formatted(fingertipGripForceSlider.getDoubleValue()));
-            sakeHandDesiredCommandMessage.setNormalizedGripperTorqueLimit(
-                  SakeHandParameters.normalizeFingertipGripForceLimit(fingertipGripForceSlider.getDoubleValue()));
+            sakeHandDesiredCommandMessage.setRawGripperTorqueLimit(SakeHandParameters.gripForceToRawTorque(fingertipGripForceSlider.getDoubleValue()));
          }
 
          if (sendCalibrate)
@@ -111,7 +113,7 @@ public class RDXSakeHandWidgets
 
          if (sendAngle || sendForce || sendCalibrate || sendResetErrors)
          {
-            communicationHelper.publish(robotName -> ROS2Tools.getHandSakeCommandTopic(robotName, handSide), sakeHandDesiredCommandMessage);
+            communicationHelper.publish(robotName -> SakeHandAPI.getHandSakeCommandTopic(robotName, handSide), sakeHandDesiredCommandMessage);
          }
       }
    }
@@ -152,6 +154,13 @@ public class RDXSakeHandWidgets
       calibrateStatusText.renderText("Is Calibrated: %b ".formatted(sakeHandStatus.getIsCalibrated()), !sakeHandStatus.getIsCalibrated());
       ImGui.sameLine();
       needResetStatusText.renderText("Needs Reset: %b ".formatted(sakeHandStatus.getNeedsReset()), sakeHandStatus.getNeedsReset());
+      String errorString = sakeHandStatus.getErrorString();
+
+      if (!errorString.isEmpty())
+      {
+         ImGui.sameLine();
+         sakeErrorStatusText.renderText("Error: %s".formatted(errorString), true);
+      }
 
       ImGui.beginDisabled(sakeHandStatus.getNeedsReset() || !sakeHandStatus.getIsCalibrated());
 

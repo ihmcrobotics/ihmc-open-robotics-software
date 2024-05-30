@@ -2,7 +2,6 @@ package us.ihmc.behaviors.sequence;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import java.util.ArrayList;
@@ -43,11 +42,22 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       // Update concurrency ranks
       for (int i = 0; i < state.getActionChildren().size(); i++)
       {
-         int j = i + 1;
-         for (; j < state.getActionChildren().size()
-              && state.getActionChildren().get(j).calculateExecuteAfterActionIndex(state.getActionChildren()) < i; j++);
+         state.getActionChildren().get(i).setConcurrencyRank(1);
 
-         state.getActionChildren().get(i).setConcurrencyRank(j - i);
+//         int j = i + 1;
+//         for (; j < state.getActionChildren().size()
+//              && state.getActionChildren().get(j).calculateExecuteAfterActionIndex(state.getActionChildren()) < i; j++);
+
+         int j = i - 1;
+         for (; j >= 0; j--)
+         {
+            int thisExecuteAfterActionIndex = state.getActionChildren().get(i).calculateExecuteAfterActionIndex(getState().getActionChildren());
+            int executeAfterActionIndexToCompare = state.getActionChildren().get(j).calculateExecuteAfterActionIndex(getState().getActionChildren());
+            if (thisExecuteAfterActionIndex == executeAfterActionIndexToCompare)
+            {
+               state.getActionChildren().get(i).setConcurrencyRank(2);
+            }
+         }
       }
 
       // Update is next for execution
@@ -75,19 +85,19 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       {
          if (isEndOfSequence())
          {
-            LogTools.info("End of sequence.");
+            state.getLogger().info("End of sequence.");
             state.setAutomaticExecution(false);
          }
          else if (anyActionExecutionFailed)
          {
-            LogTools.error("An action failed. Disabling automatic execution.");
+            state.getLogger().error("An action failed. Disabling automatic execution.");
             state.setAutomaticExecution(false);
          }
          else
          {
             while (shouldExecuteNextAction())
             {
-               LogTools.info("Automatically executing action: {}", executorChildren.get(state.getExecutionNextIndex()).getClass().getSimpleName());
+               state.getLogger().info("Automatically executing action: {}", executorChildren.get(state.getExecutionNextIndex()).getClass().getSimpleName());
                executeNextAction();
             }
          }
@@ -96,7 +106,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
       {
          while (shouldExecuteNextAction())
          {
-            LogTools.info("Manually executing action: {}", executorChildren.get(state.getExecutionNextIndex()).getClass().getSimpleName());
+            state.getLogger().info("Manually executing action: {}", executorChildren.get(state.getExecutionNextIndex()).getClass().getSimpleName());
             executeNextAction();
          }
       }
@@ -126,7 +136,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
    {
       ActionNodeExecutor<?, ?> actionToExecute = executorChildren.get(state.getExecutionNextIndex());
 
-      LogTools.info("Triggering action execution: %s".formatted(actionToExecute.getDefinition().getName()));
+      state.getLogger().info("Triggering action execution: %s".formatted(actionToExecute.getDefinition().getName()));
       actionToExecute.update();
       actionToExecute.triggerActionExecution();
       actionToExecute.updateCurrentlyExecuting();
@@ -145,7 +155,7 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
 
       if (!nextNodeToExecute.getCanExecute())
       {
-         LogTools.error("Cannot execute action: %s".formatted(nextNodeToExecute.getDefinition().getName()));
+         state.getLogger().error("Cannot execute action: %s".formatted(nextNodeToExecute.getDefinition().getName()));
          state.setAutomaticExecution(false);
          return false;
       }

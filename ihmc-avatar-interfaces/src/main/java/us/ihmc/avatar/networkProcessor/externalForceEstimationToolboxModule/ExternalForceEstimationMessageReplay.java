@@ -8,7 +8,8 @@ import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import toolbox_msgs.msg.dds.ExternalForceEstimationConfigurationMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
@@ -37,10 +38,10 @@ public class ExternalForceEstimationMessageReplay
    private final JSONSerializer<RobotConfigurationData> robotConfigurationDataSerializer = new JSONSerializer<>(new RobotConfigurationDataPubSubType());
    private final JSONSerializer<RobotDesiredConfigurationData> robotDesiredConfigurationDataSerializer = new JSONSerializer<>(new RobotDesiredConfigurationDataPubSubType());
 
-   private final IHMCRealtimeROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
-   private final IHMCRealtimeROS2Publisher<RobotDesiredConfigurationData> robotDesiredConfigurationDataPublisher;
-   private final IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
-   private final IHMCRealtimeROS2Publisher<ExternalForceEstimationConfigurationMessage> configMessagePublisher;
+   private final ROS2PublisherBasics<RobotConfigurationData> robotConfigurationDataPublisher;
+   private final ROS2PublisherBasics<RobotDesiredConfigurationData> robotDesiredConfigurationDataPublisher;
+   private final ROS2PublisherBasics<ToolboxStateMessage> toolboxStatePublisher;
+   private final ROS2PublisherBasics<ExternalForceEstimationConfigurationMessage> configMessagePublisher;
 
    public ExternalForceEstimationMessageReplay(String robotName, InputStream inputStream, PubSubImplementation pubSubImplementation) throws IOException
    {
@@ -50,13 +51,13 @@ public class ExternalForceEstimationMessageReplay
       String name = getClass().getSimpleName();
       ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_" + name);
 
-      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-      robotConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic);
-      robotDesiredConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, RobotDesiredConfigurationData.class, controllerOutputTopic);
+      ROS2Topic controllerOutputTopic = HumanoidControllerAPI.getOutputTopic(robotName);
+      robotConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(RobotConfigurationData.class));
+      robotDesiredConfigurationDataPublisher = ros2Node.createPublisher(controllerOutputTopic.withTypeName(RobotDesiredConfigurationData.class));
 
       ROS2Topic toolboxInputTopic = ExternalForceEstimationToolboxModule.getInputTopic(robotName);
-      configMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ExternalForceEstimationConfigurationMessage.class, toolboxInputTopic);
-      toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxInputTopic);
+      configMessagePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ExternalForceEstimationConfigurationMessage.class));
+      toolboxStatePublisher = ros2Node.createPublisher(toolboxInputTopic.withTypeName(ToolboxStateMessage.class));
 
       ros2Node.spin();
    }

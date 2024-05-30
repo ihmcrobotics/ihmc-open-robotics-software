@@ -119,9 +119,8 @@ public class RDXAssimpMeshLoader
       }
       else
       {
-         String message = "Combined primitive type not implemented!";
-         LogTools.error(message);
-         throw new RuntimeException(message);
+         gdxPrimitiveType = Assimp.aiTextureMapping_OTHER;
+         LogTools.warn("Undefined assimp primitive type");
       }
       return gdxPrimitiveType;
    }

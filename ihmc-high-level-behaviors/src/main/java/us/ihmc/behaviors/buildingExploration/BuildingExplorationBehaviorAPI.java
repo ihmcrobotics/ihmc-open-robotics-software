@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.buildingExploration;
 
 import std_msgs.msg.dds.UInt16;
+import us.ihmc.communication.DeprecatedAPIs;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
@@ -9,7 +10,7 @@ import us.ihmc.ros2.ROS2Topic;
 
 public class BuildingExplorationBehaviorAPI
 {
-   private static final String MODULE_NAME = ROS2Tools.BEHAVIOR_MODULE_NAME + "/building_exploration";
+   private static final String MODULE_NAME = DeprecatedAPIs.BEHAVIOR_MODULE_NAME + "/building_exploration";
    private static final ROS2Topic<?> BASE_TOPIC = ROS2Tools.IHMC_ROOT.withModule(MODULE_NAME);
 
    public static final ROS2Topic<UInt16> MODE = BASE_TOPIC.withType(UInt16.class).withSuffix("mode");

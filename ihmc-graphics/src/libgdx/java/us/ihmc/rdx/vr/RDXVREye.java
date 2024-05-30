@@ -8,7 +8,10 @@ import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import org.lwjgl.opengl.GL41;
-import org.lwjgl.openvr.*;
+import org.lwjgl.openvr.HmdMatrix34;
+import org.lwjgl.openvr.HmdMatrix44;
+import org.lwjgl.openvr.VR;
+import org.lwjgl.openvr.VRSystem;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,8 +21,8 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
+import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -35,14 +38,9 @@ public class RDXVREye extends Camera
 
    private final RigidBodyTransform openVREyeToHeadTransform = new RigidBodyTransform();
    private final ReferenceFrame eyeXRightZBackFrame;
-   private final RigidBodyTransformReadOnly xForwardZUpToXRightZBackTransform = new RigidBodyTransform(
-         new YawPitchRoll(
-            Math.toRadians(90.0),
-            Math.toRadians(90.0),
-            Math.toRadians(0.0)
-         ),
-         new Point3D()
-   );
+   private final RigidBodyTransformReadOnly xForwardZUpToXRightZBackTransform = new RigidBodyTransform(new YawPitchRoll(Math.toRadians(90.0),
+                                                                                                                        Math.toRadians(90.0),
+                                                                                                                        Math.toRadians(0.0)), new Point3D());
    private final ReferenceFrame eyeXForwardZUpFrame;
    private final FramePose3D eyeFramePose = new FramePose3D();
    private final Vector3D euclidDirection = new Vector3D();

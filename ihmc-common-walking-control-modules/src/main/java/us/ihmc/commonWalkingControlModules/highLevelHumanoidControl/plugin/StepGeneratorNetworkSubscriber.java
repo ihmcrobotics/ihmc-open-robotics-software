@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin;
 
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.euclid.interfaces.Settable;
@@ -82,19 +81,10 @@ public class StepGeneratorNetworkSubscriber
             unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, localInstance);
          };
 
-         if (qosProfile == null)
-         {
-            ROS2Tools.createCallbackSubscription(realtimeROS2Node, multipleMessageType, topicName, messageListener);
-         }
-         else
-         {
-            ROS2Tools.createCallbackSubscription(realtimeROS2Node,
-                                                 multipleMessageType,
-                                                 topicName.toString(),
-                                                 messageListener,
-                                                 qosProfile,
-                                                 ROS2Tools.RUNTIME_EXCEPTION);
-         }
+         if (qosProfile != null)
+            topicName = topicName.withQoS(qosProfile);
+
+         realtimeROS2Node.createSubscription(topicName, messageListener);
       }
       catch (InstantiationException | IllegalAccessException e)
       {
@@ -158,7 +148,7 @@ public class StepGeneratorNetworkSubscriber
          T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
          ROS2Topic<?> topicName = inputTopic.withTypeName(messageClass);
 
-         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, messageClass, topicName, s ->
+         realtimeROS2Node.createSubscription(topicName.withTypeName(messageClass), s ->
          {
             s.takeNextData(messageLocalInstance, null);
             receivedMessage(messageLocalInstance);

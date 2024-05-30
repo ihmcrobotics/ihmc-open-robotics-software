@@ -20,30 +20,28 @@ import static us.ihmc.humanoidRobotics.communication.packets.PacketValidityCheck
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import controller_msgs.msg.dds.*;
-import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.controllerAPI.ControllerAPI;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.humanoidRobotics.communication.fastWalkingAPI.FastWalkingGaitParametersCommand;
-import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.ros2.ROS2TopicNameTools;
 
+/**
+ * See {@link ControllerAPI} for the ROS 2 topics.
+ * Command classes must be registered both here and there.
+ */
 public class ControllerAPIDefinition
 {
    private static final List<Class<? extends Command<?, ?>>> controllerSupportedCommands;
    private static final List<Class<? extends Settable<?>>> controllerSupportedStatusMessages;
-   private static final HashSet<Class<?>> inputMessageClasses = new HashSet<>();
-   private static final HashSet<Class<?>> outputMessageClasses = new HashSet<>();
 
    static
    {
@@ -99,50 +97,13 @@ public class ControllerAPIDefinition
       commands.add(WholeBodyJointspaceTrajectoryCommand.class);
 
       controllerSupportedCommands = Collections.unmodifiableList(commands);
-      controllerSupportedCommands.forEach(command -> inputMessageClasses.add(ROS2TopicNameTools.newMessageInstance(command).getMessageClass()));
-      // Input messages that don't have a corresponding command
-      inputMessageClasses.add(WholeBodyTrajectoryMessage.class);
 
-      List<Class<? extends Settable<?>>> statusMessages = new ArrayList<>();
-
-      /** Statuses supported by bipedal walking controller {@link WalkingControllerState} */
-      statusMessages.add(CapturabilityBasedStatus.class);
-      statusMessages.add(FootstepStatusMessage.class);
-      statusMessages.add(PlanOffsetStatus.class);
-      statusMessages.add(WalkingStatusMessage.class);
-      statusMessages.add(WalkingControllerFailureStatusMessage.class);
-      statusMessages.add(ManipulationAbortedStatus.class);
-      statusMessages.add(HighLevelStateChangeStatusMessage.class);
-      statusMessages.add(TextToSpeechPacket.class);
-      statusMessages.add(ControllerCrashNotificationPacket.class);
-      statusMessages.add(JointspaceTrajectoryStatusMessage.class);
-      statusMessages.add(TaskspaceTrajectoryStatusMessage.class);
-      statusMessages.add(JointDesiredOutputMessage.class);
-      statusMessages.add(RobotDesiredConfigurationData.class);
-      statusMessages.add(FootstepQueueStatusMessage.class);
-      statusMessages.add(QueuedFootstepStatusMessage.class);
-
-      /** Statuses supported by multi-contact controller, not in this repo */
-      statusMessages.add(MultiContactBalanceStatus.class);
-      statusMessages.add(MultiContactTrajectoryStatus.class);
-
-      controllerSupportedStatusMessages = Collections.unmodifiableList(statusMessages);
-      outputMessageClasses.addAll(controllerSupportedStatusMessages);
+      controllerSupportedStatusMessages = ControllerAPI.outputMessageClasses.stream().toList();
    }
 
    public static List<Class<? extends Command<?, ?>>> getControllerSupportedCommands()
    {
       return controllerSupportedCommands;
-   }
-
-   public static HashSet<Class<?>> getROS2CommandMessageTypes()
-   {
-      return inputMessageClasses;
-   }
-
-   public static HashSet<Class<?>> getROS2StatusMessageTypes()
-   {
-      return outputMessageClasses;
    }
 
    public static List<Class<? extends Settable<?>>> getControllerSupportedStatusMessages()
@@ -225,29 +186,5 @@ public class ControllerAPIDefinition
             return extractor == null ? NO_ID : extractor.getMessageID(message);
          }
       };
-   }
-
-   public static ROS2Topic<?> getInputTopic(String robotName)
-   {
-      return ROS2Tools.getControllerInputTopic(robotName);
-   }
-
-   public static ROS2Topic<?> getOutputTopic(String robotName)
-   {
-      return ROS2Tools.getControllerOutputTopic(robotName);
-   }
-
-   public static <T> ROS2Topic<T> getTopic(Class<T> messageClass, String robotName)
-   {
-      if (inputMessageClasses.contains(messageClass))
-      {
-         return getInputTopic(robotName).withTypeName(messageClass);
-      }
-      if (outputMessageClasses.contains(messageClass))
-      {
-         return getOutputTopic(robotName).withTypeName(messageClass);
-      }
-
-      throw new RuntimeException("Topic does not exist: " + messageClass);
    }
 }

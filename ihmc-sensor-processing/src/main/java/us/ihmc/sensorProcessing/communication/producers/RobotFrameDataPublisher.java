@@ -1,8 +1,8 @@
 package us.ihmc.sensorProcessing.communication.producers;
 
 import ihmc_common_msgs.msg.dds.RobotFrameData;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.ros2.ROS2Topic;
@@ -17,7 +17,9 @@ import us.ihmc.ros2.RealtimeROS2Node;
  */
 public class RobotFrameDataPublisher
 {
-   private final IHMCRealtimeROS2Publisher<RobotFrameData> ros2Publisher;
+   public static final boolean ENABLE_ROBOT_FRAME_DATA_PUBLISHERS = false;
+
+   private final ROS2PublisherBasics<RobotFrameData> ros2Publisher;
    private final RobotFrameData robotFrameData = new RobotFrameData();
    private final ReferenceFrame myReferenceFrame;
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -27,16 +29,29 @@ public class RobotFrameDataPublisher
       myReferenceFrame = referenceFrame;
       robotFrameData.getFrameName().append(referenceFrame.getName());
 
-      ROS2Topic<?> ros2Topic = outputTopic.withSuffix(referenceFrame.getName());
-
-      ros2Publisher = ROS2Tools.createPublisher(realtimeROS2Node, RobotFrameData.class, ros2Topic);
+      if (ENABLE_ROBOT_FRAME_DATA_PUBLISHERS)
+      {
+         ROS2Topic<RobotFrameData> ros2Topic = outputTopic.withSuffix(referenceFrame.getName()).withType(RobotFrameData.class);
+         ros2Publisher = realtimeROS2Node.createPublisher(ros2Topic);
+      }
+      else
+      {
+         ros2Publisher = null;
+      }
    }
 
    public boolean publish()
    {
-      myReferenceFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
-      robotFrameData.getFramePoseInWorld().set(tempTransform);
-      return ros2Publisher.publish(robotFrameData);
+      if (ENABLE_ROBOT_FRAME_DATA_PUBLISHERS)
+      {
+         myReferenceFrame.getTransformToDesiredFrame(tempTransform, ReferenceFrame.getWorldFrame());
+         robotFrameData.getFramePoseInWorld().set(tempTransform);
+         return ros2Publisher.publish(robotFrameData);
+      }
+      else
+      {
+         return true;
+      }
    }
 
    public static ROS2Topic<RobotFrameData> getTopic(String robotName, ReferenceFrame referenceFrame)
@@ -46,6 +61,6 @@ public class RobotFrameDataPublisher
 
    public static ROS2Topic<RobotFrameData> getTopic(String robotName, String referenceFrameName)
    {
-      return ROS2Tools.getControllerOutputTopic(robotName).withType(RobotFrameData.class).withSuffix(referenceFrameName);
+      return HumanoidControllerAPI.getOutputTopic(robotName).withType(RobotFrameData.class).withSuffix(referenceFrameName);
    }
 }

@@ -4,7 +4,9 @@ import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -12,8 +14,11 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.OpeningMechanismType;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
+import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 
 public class ROS2SceneGraphTools
 {
@@ -71,6 +76,20 @@ public class ROS2SceneGraphTools
                                         subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices(),
                                         subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
       }
+      else if (nodeType == SceneGraphMessage.YOLO_NODE_TYPE)
+      {
+         sceneNode = new YOLOv8Node(nodeID,
+                                    nodeName,
+                                    subscriptionNode.getYOLONodeMessage().getMaskErosionKernelRadius(),
+                                    subscriptionNode.getYOLONodeMessage().getOutlierFilterThreshold(),
+                                    subscriptionNode.getYOLONodeMessage().getDetectionAcceptanceThreshold(),
+                                    YOLOv8DetectionClass.valueOf(subscriptionNode.getYOLONodeMessage().getDetectionClassAsString()),
+                                    subscriptionNode.getYOLONodeMessage().getConfidence(),
+                                    subscriptionNode.getYOLONodeMessage().getObjectPointCloud(),
+                                    subscriptionNode.getYOLONodeMessage().getObjectCentroid(),
+                                    subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform(),
+                                    subscriptionNode.getYOLONodeMessage().getObjectPose());
+      }
       else if (nodeType == SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE)
       {
          sceneNode = new DetectableSceneNode(nodeID, nodeName);
@@ -86,6 +105,16 @@ public class ROS2SceneGraphTools
                                                      primitiveRigidBodySceneNodeMessage.getInitialParentId(),
                                                      initialTransformToParent,
                                                      PrimitiveRigidBodyShape.fromString(primitiveRigidBodySceneNodeMessage.getShapeAsString()));
+      }
+      else if (nodeType == SceneGraphMessage.DOOR_NODE_TYPE)
+      {
+         DoorNode doorNode = new DoorNode(nodeID, nodeName);
+         doorNode.setOpeningMechanismType(OpeningMechanismType.fromByte(subscriptionNode.getDoorNodeMessage().getOpeningMechanismType()));
+         doorNode.getDoorPlanarRegion().set(PlanarRegionMessageConverter.convertToPlanarRegion(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegion()));
+         doorNode.setDoorPlanarRegionUpdateTime(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegionUpdateTimeMillis());
+         doorNode.setOpeningMechanismPoint3D(subscriptionNode.getDoorNodeMessage().getOpeningMechanismPoint());
+         doorNode.setOpeningMechanismPose3D(subscriptionNode.getDoorNodeMessage().getOpeningMechanismPose());
+         sceneNode = doorNode;
       }
       else
       {

@@ -88,14 +88,16 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         feet.put(robotSide, MultiBodySystemTools.findRigidBody(getElevator(), jointNameMap.getFootName(robotSide)));
-         hands.put(robotSide, MultiBodySystemTools.findRigidBody(chest, jointNameMap.getHandName(robotSide)));
-         forearms.put(robotSide, MultiBodySystemTools.findRigidBody(chest, jointNameMap.getForearmName(robotSide)));
+         RigidBodyBasics foot = MultiBodySystemTools.findRigidBody(getElevator(), jointNameMap.getFootName(robotSide));
+         RigidBodyBasics hand = MultiBodySystemTools.findRigidBody(chest, jointNameMap.getHandName(robotSide));
+         RigidBodyBasics forearm = MultiBodySystemTools.findRigidBody(chest, jointNameMap.getForearmName(robotSide));
+         feet.put(robotSide, foot);
+         hands.put(robotSide, hand);
+         forearms.put(robotSide, forearm);
 
          RigidBodyTransform soleFrameTransform = jointNameMap.getSoleToParentFrameTransform(robotSide);
          if (soleFrameTransform != null)
          {
-            RigidBodyBasics foot = feet.get(robotSide);
             if (foot == null)
                continue;
             soleFrames.put(robotSide,
@@ -104,17 +106,21 @@ public class FullHumanoidRobotModelWrapper extends FullRobotModelWrapper impleme
                                                          soleFrameTransform));
          }
 
-         RigidBodyTransform handControlFrameTransform = jointNameMap.getHandControlFrameToWristTransform(robotSide);
-         if (handControlFrameTransform != null)
+         if (hand != null)
          {
-            handControlFrames.put(robotSide,
-                                  new FixedMovingReferenceFrame(robotSide.getCamelCaseName() + "HandControlFrame",
-                                                                hands.get(robotSide).getParentJoint().getFrameAfterJoint(),
-                                                                handControlFrameTransform));
-         }
-         else if (hands.get(robotSide) != null)
-         {
-            handControlFrames.put(robotSide, hands.get(robotSide).getParentJoint().getFrameAfterJoint());
+            RigidBodyTransform handControlFrameTransform = jointNameMap.getHandControlFrameToWristTransform(robotSide);
+
+            if (handControlFrameTransform != null)
+            {
+               handControlFrames.put(robotSide,
+                                     new FixedMovingReferenceFrame(robotSide.getCamelCaseName() + "HandControlFrame",
+                                                                   hand.getParentJoint().getFrameAfterJoint(),
+                                                                   handControlFrameTransform));
+            }
+            else
+            {
+               handControlFrames.put(robotSide, hand.getParentJoint().getFrameAfterJoint());
+            }
          }
       }
 

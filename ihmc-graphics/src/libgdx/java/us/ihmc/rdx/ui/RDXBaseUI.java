@@ -22,10 +22,10 @@ import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.RDXKeyBindings;
 import us.ihmc.rdx.RDXSettings;
 import us.ihmc.rdx.imgui.ImGuiFrequencyDisplay;
-import us.ihmc.rdx.imgui.RDXPanelManager;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXImGuiWindowAndDockSystem;
+import us.ihmc.rdx.imgui.RDXPanelManager;
 import us.ihmc.rdx.input.RDXInputMode;
 import us.ihmc.rdx.sceneManager.RDX3DScene;
 import us.ihmc.rdx.sceneManager.RDX3DSceneTools;
@@ -116,7 +116,7 @@ public class RDXBaseUI
    private final ImBoolean modelSceneMouseCollisionEnabled = new ImBoolean(false);
    private final ImDouble view3DBackgroundShade = new ImDouble(RDX3DSceneTools.CLEAR_COLOR);
    private final ImInt libGDXLogLevel = new ImInt(LibGDXTools.toLibGDX(LogTools.getLevel()));
-   private final ImDouble imguiFontScale = new ImDouble(1.0);
+   private final ImInt imguiFontSize = new ImInt(ImGuiTools.DEFAULT_FONT_SIZE);
    private final RDXImGuiLayoutManager layoutManager;
    private final RDXKeyBindings keyBindings = new RDXKeyBindings();
    private long renderIndex = 0;
@@ -158,8 +158,6 @@ public class RDXBaseUI
       LogTools.info("Using class for loading resources: {}", classForLoading.getName());
 
       this.windowTitle = windowTitle = windowTitle == null ? classForLoading.getSimpleName() : windowTitle;
-
-      loadSettings();
 
       configurationExtraPath = "configurations/" + windowTitle.replaceAll(" ", "");
       configurationBaseDirectory = new HybridResourceDirectory(IHMCCommonPaths.DOT_IHMC_DIRECTORY, classForLoading, "/").resolve(configurationExtraPath);
@@ -217,13 +215,13 @@ public class RDXBaseUI
          LogTools.error("Unable to load RDXSettings.ini", e);
       }
       plotFrameRate.set(settings.plotFrameRateEnabled());
-      vsync.set(settings.vsyncEnabled());
-      foregroundFPSLimit.set(settings.getForegroundFPSLimit());
+      setVsync(settings.vsyncEnabled());
+      setForegroundFPSLimit(settings.getForegroundFPSLimit());
       libGDXLogLevel.set(settings.getLibGDXLogLevel());
-      imguiFontScale.set(settings.getImguiFontScale());
+      imguiFontSize.set(settings.getFontSize());
       try
       {
-         theme = Theme.valueOf(settings.getThemeName());
+         setTheme(Theme.valueOf(settings.getThemeName()));
       }
       catch (IllegalArgumentException e)
       {
@@ -245,7 +243,7 @@ public class RDXBaseUI
       Lwjgl3ApplicationConfiguration applicationConfiguration = LibGDXApplicationCreator.getDefaultConfiguration(windowTitle);
       // Hide the window at the beginning. If you don't do this, you get a window frame
       // with the contents behind the window displayed for a few seconds, which is really
-      // consifusing and error-prone.
+      // confusing and error-prone.
       applicationConfiguration.setInitialVisible(false);
       LibGDXApplicationCreator.launchGDXApplication(applicationConfiguration,
                                                     applicationAdapter);
@@ -276,8 +274,7 @@ public class RDXBaseUI
       primaryScene.addCoordinateFrame(0.3);
 
       imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
-      setTheme(theme); // TODO: move theme stuff to RDXImGuiWindowAndDockSystem?
-      ImGui.getIO().setFontGlobalScale((float) imguiFontScale.get());
+      ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
 
@@ -285,8 +282,8 @@ public class RDXBaseUI
       primaryScene.addRenderableProvider(vrManager::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
       primary3DPanel.addImGui3DViewPickCalculator(vrManager::calculate3DViewPick);
       primary3DPanel.addImGui3DViewInputProcessor(vrManager::process3DViewInput);
-      imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Thread Debugger", vrManager::renderImGuiDebugWidgets);
-      imGuiWindowAndDockSystem.getPanelManager().addPanel("VR Settings", vrManager::renderImGuiTunerWidgets);
+
+      loadSettings();
 
       keyBindings.register("Show key bindings", "Tab");
    }
@@ -331,8 +328,6 @@ public class RDXBaseUI
       }
       if (ImGui.beginMenu("Settings"))
       {
-         ImGui.pushItemWidth(80.0f);
-
          if (ImGui.beginTable("settingsTable", 2, ImGuiTableFlags.None))
          {
             // First row (libgdx log level)
@@ -395,7 +390,7 @@ public class RDXBaseUI
             }
 
             ImGui.sameLine();
-            if (ImGui.button("Reset"))
+            if (ImGui.button(labels.get("Reset##BackgroundShade")))
             {
                view3DBackgroundShade.set(RDX3DSceneTools.CLEAR_COLOR);
                settings.setView3DBackgroundShade((float) view3DBackgroundShade.get());
@@ -414,9 +409,16 @@ public class RDXBaseUI
                ImGui.pushStyleVar(ImGuiStyleVar.Alpha, ImGui.getStyle().getAlpha() * 0.5f);
             }
             ImGui.tableSetColumnIndex(1);
-            if (ImGuiTools.sliderInt(labels.get("##foregroundFPSLimitSlider"), foregroundFPSLimit, 15, 240)) {
+            if (foregroundFPSLimit.get() < 15) // Enforce it so you can't make it so laggy inputs don't work
+               foregroundFPSLimit.set(15);
+            if (ImGuiTools.sliderInt(labels.get("##foregroundFPSLimitSlider"), foregroundFPSLimit, 15, 240))
+            {
+               // Only update the FPS limit once the slider isn't active anymore
+            }
+            else if (!ImGui.isItemActive() && settings.getForegroundFPSLimit() != foregroundFPSLimit.get())
+            {
                settings.setForegroundFPSLimit(foregroundFPSLimit.get());
-               Gdx.graphics.setForegroundFPS(foregroundFPSLimit.get());
+               setForegroundFPSLimit(foregroundFPSLimit.get());
             }
             if (vsync.get())
             {
@@ -424,19 +426,28 @@ public class RDXBaseUI
                ImGui.popItemFlag();
             }
 
-            // Fifth row (font scale)
+            // Fifth row (font size)
             ImGui.tableNextRow();
             ImGui.tableSetColumnIndex(0);
             ImGui.alignTextToFramePadding();
-            ImGui.text("Font scale: ");
+            ImGui.text("Font size: ");
             ImGui.tableSetColumnIndex(1);
-            if (ImGuiTools.sliderDouble(labels.get("##imguiFontScaleSlider"), imguiFontScale, 1.0, 2.0, "%.1f")) {
-               settings.setImguiFontScale(imguiFontScale.get());
+            if (ImGui.sliderInt(labels.getHidden("fontSize"), imguiFontSize.getData(), ImGuiTools.SMALLEST_FONT_SIZE, ImGuiTools.LARGEST_FONT_SIZE, "%d"))
+            {
+//               ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
             }
             // Change the font scale after you've let go of the slider
             if (ImGui.isItemDeactivatedAfterEdit())
             {
-               ImGui.getIO().setFontGlobalScale((float) imguiFontScale.get());
+               settings.setFontSize(imguiFontSize.get());
+               ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
+            }
+            ImGui.sameLine();
+            if (ImGui.button(labels.get("Reset##FontSize")))
+            {
+               imguiFontSize.set(ImGuiTools.DEFAULT_FONT_SIZE);
+               settings.setFontSize(imguiFontSize.get());
+               ImGuiTools.CURRENT_FONT_SIZE = imguiFontSize.get();
             }
 
             ImGui.endTable();
@@ -498,27 +509,27 @@ public class RDXBaseUI
          ImGui.endMenu();
       }
 
+      vrManager.renderMenuBar();
+
       frameRateDisplay.ping();
 
       if (plotFrameRate.get())
       {
          // Currently we manually tune this value when we change the stuff in the status a
-         float menuBarStatusWidth = 320.0f;
+         float menuBarStatusWidth = 212.0f;
          ImGui.sameLine(ImGui.getWindowSizeX() - menuBarStatusWidth);
          frameRateDisplay.renderPlot();
       }
       else
       {
-         float menuBarStatusWidth = 212.0f;
+         float menuBarStatusWidth = 110.0f;
          ImGui.sameLine(ImGui.getWindowSizeX() - menuBarStatusWidth);
       }
 
       frameRateDisplay.renderHz();
 
       ImGui.text(FormattingTools.getFormattedDecimal2D(runTime.totalElapsed()) + " s");
-      float enoughWidthForVRButton = 100.0f; // Currently we manually tune this value
-      ImGui.sameLine(ImGui.getWindowSizeX() - enoughWidthForVRButton);
-      vrManager.renderImGuiEnableWidget();
+
       ImGui.endMainMenuBar();
    }
 
@@ -652,6 +663,11 @@ public class RDXBaseUI
          case CLASSIC -> ImGui.styleColorsClassic();
       }
       this.theme = theme;
+   }
+
+   public Theme getTheme()
+   {
+      return theme;
    }
 
    public static void pushNotification(String text)

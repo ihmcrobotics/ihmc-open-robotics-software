@@ -7,24 +7,18 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import perception_msgs.msg.dds.HeightMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import toolbox_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerAPI;
+import us.ihmc.communication.FootstepPlannerAPI;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
 public class RemotePlannerMessageConverter
 {
@@ -35,7 +29,7 @@ public class RemotePlannerMessageConverter
    private final Messager messager;
    private final String robotName;
 
-   private IHMCRealtimeROS2Publisher<FootstepPlanningToolboxOutputStatus> outputStatusPublisher;
+   private ROS2PublisherBasics<FootstepPlanningToolboxOutputStatus> outputStatusPublisher;
 
    private Optional<HeightMapMessage> heightMapData = Optional.empty();
 
@@ -87,17 +81,15 @@ public class RemotePlannerMessageConverter
    {
       /* subscribers */
       // we want to listen to the incoming request
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningRequestPacket.class,
-                                                    FootstepPlannerAPI.inputTopic(robotName),
-                                           s -> processFootstepPlanningRequestPacket(s.takeNextData()));
+      ros2Node.createSubscription(FootstepPlannerAPI.inputTopic(robotName).withTypeName(FootstepPlanningRequestPacket.class),
+                                  s -> processFootstepPlanningRequestPacket(s.takeNextData()));
       // we want to also listen to incoming REA planar region data.
       // TODO replace with height map
 //      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
 //                                           s -> processIncomingPlanarRegionMessage(s.takeNextData()));
 
       // publishers
-      outputStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepPlanningToolboxOutputStatus.class,
-                                                                 FootstepPlannerAPI.outputTopic(robotName));
+      outputStatusPublisher = ros2Node.createPublisher(FootstepPlannerAPI.outputTopic(robotName).withTypeName(FootstepPlanningToolboxOutputStatus.class));
 
       messager.addTopicListener(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, request -> checkAndPublishIfInvalidResult());
       messager.addTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponse, request -> publishResultingPlan());

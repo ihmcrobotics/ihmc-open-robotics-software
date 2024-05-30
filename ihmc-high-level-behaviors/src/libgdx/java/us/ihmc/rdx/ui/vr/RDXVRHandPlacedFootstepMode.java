@@ -7,15 +7,15 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import imgui.ImGui;
-import org.lwjgl.openvr.*;
+import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.tools.LibGDXTools;
+import us.ihmc.rdx.tools.RDXModelLoader;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
@@ -45,7 +45,6 @@ public class RDXVRHandPlacedFootstepMode
    private RDXLocomotionParameters locomotionParameters;
    private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
 
-
    public void create(DRCRobotModel robotModel, ROS2ControllerHelper controllerHelper)
    {
       this.robotModel = robotModel;
@@ -60,6 +59,16 @@ public class RDXVRHandPlacedFootstepMode
 
          footModels.put(side, RDXModelLoader.load(modelFileName));
 //         unplacedFadeInFootsteps.set(side, new ModelInstance(footModels.get(side)));
+      }
+
+      if (controllerModel == RDXVRControllerModel.FOCUS3)
+      {
+         RDXBaseUI.getInstance().getKeyBindings().register("Clear footsteps", "Y button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Walk", "A button");
+      }
+      else {
+         RDXBaseUI.getInstance().getKeyBindings().register("Clear footsteps", "Left B button");
+         RDXBaseUI.getInstance().getKeyBindings().register("Walk", "Right A button");
       }
    }
 
@@ -153,21 +162,6 @@ public class RDXVRHandPlacedFootstepMode
             });
          }
       }
-   }
-
-   public void renderImGuiWidgets()
-   {
-      ImGui.text("Footstep placement: Hold and release respective trigger");
-      if (controllerModel == RDXVRControllerModel.FOCUS3)
-      {
-         ImGui.text("Clear footsteps: Y button");
-         ImGui.text("Walk: A button");
-      }
-      else {
-         ImGui.text("Clear footsteps: Left B button");
-         ImGui.text("Walk: Right A button");
-      }
-
    }
 
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

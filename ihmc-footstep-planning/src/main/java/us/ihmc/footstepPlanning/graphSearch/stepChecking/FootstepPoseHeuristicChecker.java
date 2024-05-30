@@ -11,8 +11,6 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -33,7 +31,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class FootstepPoseHeuristicChecker
@@ -140,10 +137,10 @@ public class FootstepPoseHeuristicChecker
       {
          return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE;
       }
-      else if (stepLength.getValue() < parameters.getMinimumStepLength())
-      {
-         return BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH;
-      }
+//      else if (stepLength.getValue() < parameters.getMinimumStepLength())
+//      {
+//         return BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH;
+//      }
       else if (Math.abs(stepHeight.getValue()) > maximumStepZ)
       {
          return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW;

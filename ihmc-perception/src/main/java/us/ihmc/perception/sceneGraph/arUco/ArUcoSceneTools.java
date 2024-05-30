@@ -8,7 +8,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.filters.DetectionFilter;
 import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 
 /**
@@ -69,15 +69,14 @@ public class ArUcoSceneTools
          {
             if (child instanceof ArUcoMarkerNode arUcoMarkerNode)
             {
-               boolean isDetected = arUcoMarkerDetectionResults.isDetected(arUcoMarkerNode.getMarkerID());
+               boolean isDetected = arUcoMarkerDetectionResults.getPose(arUcoMarkerNode.getMarkerID(),
+                                                                        arUcoMarkerNode.getMarkerSize(),
+                                                                        sensorFrame,
+                                                                        arUcoMarkerNode.getNodeFrame().getParent(),
+                                                                        arUcoMarkerNode.getNodeToParentFrameTransform());
                arUcoMarkerNode.setCurrentlyDetected(isDetected);
                if (isDetected)
                {
-                  arUcoMarkerDetectionResults.getPose(arUcoMarkerNode.getMarkerID(),
-                                               arUcoMarkerNode.getMarkerSize(),
-                                               sensorFrame,
-                                               arUcoMarkerNode.getNodeFrame().getParent(),
-                                               arUcoMarkerNode.getNodeToParentFrameTransform());
                   arUcoMarkerNode.applyFilter();
                   arUcoMarkerNode.getNodeFrame().update();
                }

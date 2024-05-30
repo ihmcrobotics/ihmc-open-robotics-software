@@ -3,16 +3,15 @@ package us.ihmc.footstepPlanning.simplePlanners;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapSnapWiggler;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -21,6 +20,7 @@ public class PlanThenSnapPlanner
 {
    private final TurnWalkTurnPlanner turnWalkTurnPlanner;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
+   private final FootstepPlannerEnvironmentHandler internalEnvironmentHandler = new FootstepPlannerEnvironmentHandler();
    private HeightMapData heightMapData;
    private final HeightMapPolygonSnapper snapper;
    private final HeightMapSnapWiggler wiggler;
@@ -45,9 +45,9 @@ public class PlanThenSnapPlanner
       turnWalkTurnPlanner.setGoal(goal);
    }
 
-
    public void setHeightMapData(HeightMapData heightMapData)
    {
+      internalEnvironmentHandler.setHeightMap(heightMapData);
       this.heightMapData = heightMapData;
    }
 
@@ -58,7 +58,7 @@ public class PlanThenSnapPlanner
       FootstepPlanningResult result = turnWalkTurnPlanner.plan();
       footstepPlan = turnWalkTurnPlanner.getPlan();
 
-      if (heightMapData == null || heightMapData.isEmpty())
+      if (internalEnvironmentHandler.hasHeightMap())
          return result;
 
       int numberOfFootsteps = footstepPlan.getNumberOfSteps();
@@ -71,8 +71,8 @@ public class PlanThenSnapPlanner
          double minSurfaceIncline = Math.toRadians(45.0);
 
          DiscreteFootstep discreteFootstep = getAsDiscreteFootstep(footstep);
-         FootstepSnapData snapData = snapper.computeSnapData(discreteFootstep, footPolygon, heightMapData, snapHeightThreshold, minSurfaceIncline);
-         wiggler.computeWiggleTransform(discreteFootstep, heightMapData, snapData, snapHeightThreshold, minSurfaceIncline);
+         FootstepSnapData snapData = snapper.computeSnapData(discreteFootstep, footPolygon, internalEnvironmentHandler, snapHeightThreshold, minSurfaceIncline);
+         wiggler.computeWiggleTransform(discreteFootstep, internalEnvironmentHandler, snapData, snapHeightThreshold, minSurfaceIncline);
          ConvexPolygon2D footHold = snapData.getCroppedFoothold();
          solePose.set(snapData.getSnappedStepTransform(discreteFootstep));
 

@@ -14,6 +14,8 @@ public class ImGuiPlot
    private final float[] values;
    private int width;
    private int height;
+   private float yScaleMinValue = Float.MAX_VALUE;
+   private float yScaleMaxValue = Float.MAX_VALUE;
    private int index = 0;
 
    public ImGuiPlot(String name)
@@ -59,7 +61,7 @@ public class ImGuiPlot
 
    public void render()
    {
-      ImGui.plotLines(name, values, bufferSize, 0, "" + values[index], Float.MAX_VALUE, Float.MAX_VALUE, width, height);
+      ImGui.plotLines(name, values, bufferSize, 0, "" + values[index], yScaleMinValue, yScaleMaxValue, width, height);
 
       ++index;
       if (index >= bufferSize - 1)
@@ -77,5 +79,11 @@ public class ImGuiPlot
    public void setHeight(int height)
    {
       this.height = height;
+   }
+
+   public void setYScale(float minValue, float maxValue)
+   {
+      yScaleMinValue = minValue;
+      yScaleMaxValue = maxValue;
    }
 }

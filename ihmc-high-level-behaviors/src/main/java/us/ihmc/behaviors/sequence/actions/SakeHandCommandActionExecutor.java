@@ -3,13 +3,13 @@ package us.ihmc.behaviors.sequence.actions;
 import controller_msgs.msg.dds.SakeHandDesiredCommandMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.avatar.sakeGripper.ROS2SakeHandStatus;
 import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.JointspaceTrajectoryTrackingErrorCalculator;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.SakeHandAPI;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -24,14 +24,12 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
     *   desired finger velocities.
     */
    private static final double NOMINAL_TRAJECORY_DURATION = 1.0;
-   public static final double ANGLE_TOLERANCE = Math.toRadians(40.0); // We want to allow a bunch of compliance
-   /** If it's already within 5 degrees, we will just mark is as completed. */
-   public static final double INITIAL_SATISFACTION_TOLERANCE = Math.toRadians(5.0);
 
    private final SakeHandCommandActionState state;
    private final SakeHandCommandActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
+   private final SideDependentList<ROS2SakeHandStatus> sakeHandStatus = new SideDependentList<>();
    private final JointspaceTrajectoryTrackingErrorCalculator trackingCalculator = new JointspaceTrajectoryTrackingErrorCalculator();
    private final SideDependentList<RevoluteJoint> x1KnuckleJoints = new SideDependentList<>();
    private final SideDependentList<RevoluteJoint> x2KnuckleJoints = new SideDependentList<>();
@@ -57,6 +55,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
          {
             x1KnuckleJoints.put(side, (RevoluteJoint) syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(0));
             x2KnuckleJoints.put(side, (RevoluteJoint) syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(1));
+            sakeHandStatus.put(side, syncedRobot.getSakeHandStatus().get(side));
          }
       }
    }
@@ -86,9 +85,9 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       double goalKnuckleJointAngle = SakeHandParameters.handOpenAngleToKnuckleJointAngle(definition.getHandOpenAngle());
       trackingCalculator.addJointData(x1KnuckleJoints.get(definition.getSide()).getQ(), goalKnuckleJointAngle);
       trackingCalculator.addJointData(x2KnuckleJoints.get(definition.getSide()).getQ(), goalKnuckleJointAngle);
-      trackingCalculator.applyTolerance(INITIAL_SATISFACTION_TOLERANCE);
+      trackingCalculator.applyTolerance(definition.getInitialSatisfactionHandAngleTolerance());
 
-      LogTools.info("x1: %.2f%s  x2: %.2f%s  Goal open angle: %.2f%s Error: %.2f%s"
+      state.getLogger().info("x1: %.2f%s  x2: %.2f%s  Goal open angle: %.2f%s Error: %.2f%s"
                           .formatted(Math.toDegrees(x1KnuckleJoints.get(definition.getSide()).getQ()),
                                      EuclidCoreMissingTools.DEGREE_SYMBOL,
                                      Math.toDegrees(x2KnuckleJoints.get(definition.getSide()).getQ()),
@@ -100,21 +99,25 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
 
       if (trackingCalculator.isWithinPositionTolerance())
       {
-         LogTools.info("Gripper is already at the desired position. Proceeding to next action. (Error: %.2f)"
+         state.getLogger().info("Gripper is already at the desired position. Proceeding to next action. (Error: %.2f)"
                              .formatted(trackingCalculator.getTotalAbsolutePositionError()));
          state.setNominalExecutionDuration(0.0);
-         state.setPositionDistanceToGoalTolerance(INITIAL_SATISFACTION_TOLERANCE);
+         state.setPositionDistanceToGoalTolerance(definition.getInitialSatisfactionHandAngleTolerance());
       }
       else
       {
+         double handPositionLowerLimit = sakeHandStatus.get(definition.getSide()).getPositionLowerLimit();
+         double handPositionUpperLimit = sakeHandStatus.get(definition.getSide()).getPositionUpperLimit();
+
          sakeHandDesiredCommandMessage.setRobotSide(definition.getSide().toByte());
          SakeHandParameters.resetDesiredCommandMessage(sakeHandDesiredCommandMessage);
-         sakeHandDesiredCommandMessage.setNormalizedGripperDesiredPosition(SakeHandParameters.normalizeHandOpenAngle(definition.getHandOpenAngle()));
-         sakeHandDesiredCommandMessage.setNormalizedGripperTorqueLimit(
-                                                       SakeHandParameters.normalizeFingertipGripForceLimit(definition.getFingertipGripForceLimit()));
-         ros2ControllerHelper.publish(robotName -> ROS2Tools.getHandSakeCommandTopic(robotName, definition.getSide()), sakeHandDesiredCommandMessage);
+         sakeHandDesiredCommandMessage.setGripperDesiredPosition(SakeHandParameters.handOpenAngleToPosition(definition.getHandOpenAngle(),
+                                                                                                            handPositionLowerLimit,
+                                                                                                            handPositionUpperLimit));
+         sakeHandDesiredCommandMessage.setRawGripperTorqueLimit(SakeHandParameters.gripForceToRawTorque(definition.getFingertipGripForceLimit()));
+         ros2ControllerHelper.publish(robotName -> SakeHandAPI.getHandSakeCommandTopic(robotName, definition.getSide()), sakeHandDesiredCommandMessage);
 
-         LogTools.info("Commanding hand to open angle %.2f%s with torque limit %.2f N".formatted(Math.toDegrees(definition.getHandOpenAngle()),
+         state.getLogger().info("Commanding hand to open angle %.2f%s with torque limit %.2f N".formatted(Math.toDegrees(definition.getHandOpenAngle()),
                                                                                                  EuclidCoreMissingTools.DEGREE_SYMBOL,
                                                                                                  definition.getFingertipGripForceLimit()));
 
@@ -124,7 +127,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
          state.getCommandedJointTrajectories().addTrajectoryPoint(1, x2KnuckleJoints.get(definition.getSide()).getQ(), 0.0);
          state.getCommandedJointTrajectories().addTrajectoryPoint(1, goalKnuckleJointAngle, NOMINAL_TRAJECORY_DURATION);
          state.setNominalExecutionDuration(NOMINAL_TRAJECORY_DURATION);
-         state.setPositionDistanceToGoalTolerance(ANGLE_TOLERANCE);
+         state.setPositionDistanceToGoalTolerance(definition.getCompletionHandAngleTolerance());
       }
    }
 
@@ -141,7 +144,7 @@ public class SakeHandCommandActionExecutor extends ActionNodeExecutor<SakeHandCo
       {
          state.setFailed(true);
          state.setIsExecuting(false);
-         LogTools.error("Task execution timed out.");
+         state.getLogger().error("Task execution timed out.");
       }
       else if (!state.getCommandedJointTrajectories().isEmpty())
       {

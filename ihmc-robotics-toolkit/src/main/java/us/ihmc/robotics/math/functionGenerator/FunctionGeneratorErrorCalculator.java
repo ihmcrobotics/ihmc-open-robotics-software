@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class FunctionGeneratorErrorCalculator
 {
-   private static final int MAX_SAMPLES = 600;
+   private static final int MAX_SAMPLES = 1000;
    private final double controlDT;
    private final YoLong controllerCounter;
 
@@ -52,67 +52,71 @@ public class FunctionGeneratorErrorCalculator
       private final YoFunctionGeneratorNew functionGenerator;
       private final OneDoFJointBasics joint;
       private final YoDouble previousFrequency;
-      private final YoInteger controlTicksPerPeriod;
-      private final YoLong startCount;
       private final YoInteger counter;
       private final DoubleProvider baselineDesiredValue;
+
+      private long startCount;
+      private int controlTicksPerSample;
+      private int samplesPerPeriod;
+      private int controlTicksPerPeriod;
 
       private final YoDouble rmsPositionError;
       private final YoDouble rmsVelocityError;
 
       private final TDoubleArrayList positionErrorsSq = new TDoubleArrayList(new double[MAX_SAMPLES]);
       private final TDoubleArrayList velocityErrorsSq = new TDoubleArrayList(new double[MAX_SAMPLES]);
-      private boolean firstTick = true;
 
       TrajectorySignal(YoFunctionGeneratorNew functionGenerator, OneDoFJointBasics joint, DoubleProvider baselineDesiredValue, YoRegistry registry)
       {
          this.functionGenerator = functionGenerator;
          this.joint = joint;
          this.previousFrequency = new YoDouble("prevFreq" + joint.getName(), registry);
-         this.controlTicksPerPeriod = new YoInteger("controlTicksPerPeriod" + joint.getName(), registry);
          this.baselineDesiredValue = baselineDesiredValue;
 
          rmsPositionError = new YoDouble("q_err_rms_" + joint.getName(), registry);
          rmsVelocityError = new YoDouble("qd_err_rms_" + joint.getName(), registry);
-
-         startCount = new YoLong("startCount" + joint.getName(), registry);
          counter = new YoInteger("counter" + joint.getName(), registry);
+         previousFrequency.setToNaN();
       }
 
       void update()
       {
-         if (functionGenerator.getMode() == YoFunctionGeneratorMode.OFF)
+         if (functionGenerator.getMode() == YoFunctionGeneratorMode.OFF || functionGenerator.getFrequency() < 1e-3)
          {
             rmsPositionError.set(0.0);
             rmsVelocityError.set(0.0);
             return;
          }
 
-         if (firstTick || !EuclidCoreTools.epsilonEquals(functionGenerator.getFrequency(), previousFrequency.getValue(), 1e-5))
+         if (!EuclidCoreTools.epsilonEquals(functionGenerator.getFrequency(), previousFrequency.getValue(), 1e-5))
          {
-            firstTick = false;
             previousFrequency.set(functionGenerator.getFrequency());
 
             double periodDuration = 1.0 / functionGenerator.getFrequency();
-            controlTicksPerPeriod.set((int) Math.round(periodDuration / controlDT));
+            controlTicksPerPeriod = (int) (periodDuration / controlDT);
+            controlTicksPerSample = ((int) Math.ceil((double) controlTicksPerPeriod / MAX_SAMPLES));
+            samplesPerPeriod = controlTicksPerPeriod / controlTicksPerSample;
 
             positionErrorsSq.fill(0.0);
             velocityErrorsSq.fill(0.0);
-
-            startCount.set(controllerCounter.getValue());
+            startCount = controllerCounter.getValue();
             counter.set(0);
          }
 
-         if (controlTicksPerPeriod.getValue() > 0)
+         if (controlTicksPerSample <= 0)
          {
-            positionErrorsSq.set(counter.getValue(), EuclidCoreTools.square(baselineDesiredValue.getValue() + functionGenerator.getValue() - joint.getQ()));
-            velocityErrorsSq.set(counter.getValue(), EuclidCoreTools.square(functionGenerator.getValueDot() - joint.getQd()));
-
-            rmsPositionError.set(Math.sqrt(positionErrorsSq.sum() / controlTicksPerPeriod.getValue()));
-            rmsVelocityError.set(Math.sqrt(velocityErrorsSq.sum() / controlTicksPerPeriod.getValue()));
-
-            counter.set((counter.getValue() + 1) % controlTicksPerPeriod.getValue());
+            return;
          }
+
+         if (counter.getValue() % controlTicksPerSample == 0)
+         {
+            positionErrorsSq.set(counter.getValue() / controlTicksPerSample, EuclidCoreTools.square(baselineDesiredValue.getValue() - joint.getQ()));
+            velocityErrorsSq.set(counter.getValue() / controlTicksPerSample, EuclidCoreTools.square(functionGenerator.getValueDot() - joint.getQd()));
+            rmsPositionError.set(Math.sqrt(positionErrorsSq.sum() / samplesPerPeriod));
+            rmsVelocityError.set(Math.sqrt(velocityErrorsSq.sum() / samplesPerPeriod));
+         }
+
+         counter.set((1 + counter.getValue()) % controlTicksPerPeriod);
       }
    }
 }

@@ -49,11 +49,6 @@ public class RDXVisualizerWithHeartbeat
       visualizer.update();
    }
 
-   public RDXPanel getPanel()
-   {
-      return visualizer.getPanel();
-   }
-
    public boolean isActive()
    {
       return visualizer.isActive();

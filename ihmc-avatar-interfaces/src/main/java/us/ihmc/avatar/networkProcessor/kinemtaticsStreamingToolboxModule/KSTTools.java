@@ -5,29 +5,38 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
-import toolbox_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.RobotConfigurationDataBasedUpdater;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyStreamingMessagePublisher;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyTrajectoryMessagePublisher;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.input.KSTInputFilter;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output.KSTOutputDataBasics;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output.KSTOutputDataReadOnly;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.QuaternionTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialVectorBasics;
-import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -47,6 +56,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 
 public class KSTTools
 {
@@ -67,27 +77,20 @@ public class KSTTools
    private final HumanoidKinematicsToolboxController ikController;
    private final KSTStreamingMessageFactory streamingMessageFactory;
    private final KinematicsToolboxOutputConverter trajectoryMessageFactory;
-   private final WholeBodyStreamingMessage wholeBodyStreamingMessage = new WholeBodyStreamingMessage();
    private final WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
    private final YoDouble streamIntegrationDuration;
 
-   private final ConcurrentCopier<RobotConfigurationData> concurrentRobotConfigurationDataCopier = new ConcurrentCopier<>(RobotConfigurationData::new);
-   private boolean hasRobotDataConfiguration = false;
-   private final RobotConfigurationData robotConfigurationDataInternal = new RobotConfigurationData();
-   private final ConcurrentCopier<CapturabilityBasedStatus> concurrentCapturabilityBasedStatusCopier = new ConcurrentCopier<>(CapturabilityBasedStatus::new);
-   private boolean hasCapturabilityBasedStatus = false;
-   private final CapturabilityBasedStatus capturabilityBasedStatusInternal = new CapturabilityBasedStatus();
+   private IKRobotStateUpdater robotStateUpdater;
 
-   private final double walkingControllerPeriod;
    private final double toolboxControllerPeriod;
    private final YoDouble walkingControllerMonotonicTime, walkingControllerWallTime;
 
-   private long currentMessageId = 1L;
+   private final YoLong currentMessageId;
 
    private final YoBoolean hasNewInputCommand, hasPreviousInput;
    private final YoDouble latestInputReceivedTime, previousInputReceivedTime;
    private KinematicsStreamingToolboxInputCommand latestInput = null;
-   private KinematicsStreamingToolboxInputCommand previousInput = new KinematicsStreamingToolboxInputCommand();
+   private KinematicsStreamingToolboxInputCommand previousInput = null;
 
    private final KinematicsStreamingToolboxConfigurationCommand configurationCommand = new KinematicsStreamingToolboxConfigurationCommand();
    private final YoBoolean isNeckJointspaceOutputEnabled;
@@ -96,9 +99,11 @@ public class KSTTools
    private final SideDependentList<YoBoolean> areHandTaskspaceOutputsEnabled = new SideDependentList<>();
    private final SideDependentList<YoBoolean> areArmJointspaceOutputsEnabled = new SideDependentList<>();
 
-   private final YoLong latestInputTimestamp;
-
+   private final YoBoolean invalidUserInput;
+   private final YoLong latestInputTimestampSource;
+   private final YoDouble latestInputTimeSource;
    private final YoBoolean useStreamingPublisher;
+   private final KSTInputFilter inputFilter;
 
    private WholeBodyTrajectoryMessagePublisher trajectoryMessagePublisher = m ->
    {
@@ -110,8 +115,6 @@ public class KSTTools
                    KinematicsStreamingToolboxParameters parameters,
                    FullHumanoidRobotModel desiredFullRobotModel,
                    FullHumanoidRobotModelFactory fullRobotModelFactory,
-                   double walkingControllerPeriod,
-                   double toolboxControllerPeriod,
                    DoubleProvider time,
                    YoGraphicsListRegistry yoGraphicsListRegistry,
                    YoRegistry registry)
@@ -121,8 +124,7 @@ public class KSTTools
       this.parameters = parameters;
       this.desiredFullRobotModel = desiredFullRobotModel;
       this.fullRobotModelFactory = fullRobotModelFactory;
-      this.walkingControllerPeriod = walkingControllerPeriod;
-      this.toolboxControllerPeriod = toolboxControllerPeriod;
+      this.toolboxControllerPeriod = parameters.getToolboxUpdatePeriod();
       this.time = time;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       this.registry = registry;
@@ -134,20 +136,47 @@ public class KSTTools
       currentRootJoint = currentFullRobotModel.getRootJoint();
       currentOneDoFJoint = FullRobotModelUtils.getAllJointsExcludingHands(currentFullRobotModel);
 
+      if (parameters.getJointCustomPositionLowerLimits() != null)
+      {
+         for (Entry<String, Double> entry : parameters.getJointCustomPositionLowerLimits().entrySet())
+         {
+            OneDoFJointBasics joint = desiredFullRobotModel.getOneDoFJointByName(entry.getKey());
+            if (joint == null)
+            {
+               LogTools.warn("Couldn't find joint {}", entry.getKey());
+               continue;
+            }
+
+            joint.setJointLimitLower(entry.getValue());
+         }
+      }
+
+      if (parameters.getJointCustomPositionUpperLimits() != null)
+      {
+         for (Entry<String, Double> entry : parameters.getJointCustomPositionUpperLimits().entrySet())
+         {
+            OneDoFJointBasics joint = desiredFullRobotModel.getOneDoFJointByName(entry.getKey());
+            if (joint == null)
+            {
+               LogTools.warn("Couldn't find joint {}", entry.getKey());
+               continue;
+            }
+
+            joint.setJointLimitUpper(entry.getValue());
+         }
+      }
+
       ikCommandInputManager = new CommandInputManager(HumanoidKinematicsToolboxController.class.getSimpleName(),
                                                       KinematicsToolboxModule.supportedCommands(),
                                                       32); // Need at least 17: 2*7 (for each arm) + 3 (for the neck).
       ikController = new HumanoidKinematicsToolboxController(ikCommandInputManager,
                                                              statusOutputManager,
                                                              desiredFullRobotModel,
-                                                             fullRobotModelFactory,
                                                              toolboxControllerPeriod,
                                                              yoGraphicsListRegistry,
                                                              registry);
 
-      KinematicsStreamingToolboxCommandConverter commandConversionHelper = new KinematicsStreamingToolboxCommandConverter(ikController.getCurrentFullRobotModel(),
-                                                                                                                          ikController.getCurrentReferenceFrames(),
-                                                                                                                          desiredFullRobotModel,
+      KinematicsStreamingToolboxCommandConverter commandConversionHelper = new KinematicsStreamingToolboxCommandConverter(desiredFullRobotModel,
                                                                                                                           ikController.getDesiredReferenceFrames());
       commandInputManager.registerConversionHelper(commandConversionHelper);
       commandConversionHelper.process(configurationCommand,
@@ -157,11 +186,17 @@ public class KSTTools
 
       ikController.setPreserveUserCommandHistory(false);
 
-      streamingMessageFactory = new KSTStreamingMessageFactory(fullRobotModelFactory);
+      inputFilter = new KSTInputFilter(currentFullRobotModel, parameters, registry);
+
+      currentMessageId = new YoLong("currentMessageId", registry);
+      currentMessageId.set(1L);
+      streamingMessageFactory = new KSTStreamingMessageFactory(fullRobotModelFactory, registry);
+      streamingMessageFactory.setEnableVelocity(true);
+      streamingMessageFactory.setEnableAcceleration(true);
       trajectoryMessageFactory = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
       streamIntegrationDuration = new YoDouble("streamIntegrationDuration", registry);
-      streamIntegrationDuration.set(0.3);
+      streamIntegrationDuration.set(parameters.getStreamIntegrationDuration());
 
       hasNewInputCommand = new YoBoolean("hasNewInputCommand", registry);
       hasPreviousInput = new YoBoolean("hasPreviousInput", registry);
@@ -181,7 +216,9 @@ public class KSTTools
          areArmJointspaceOutputsEnabled.put(robotSide, isArmJointspaceOutputEnabled);
       }
 
-      latestInputTimestamp = new YoLong("latestInputTimestamp", registry);
+      invalidUserInput = new YoBoolean("invalidUserInput", registry);
+      latestInputTimestampSource = new YoLong("latestInputTimestampSource", registry);
+      latestInputTimeSource = new YoDouble("latestInputTimeSource", registry);
 
       useStreamingPublisher = new YoBoolean("useStreamingPublisher", registry);
       useStreamingPublisher.set(parameters.getUseStreamingPublisher());
@@ -189,6 +226,8 @@ public class KSTTools
 
    public void update()
    {
+      inputFilter.update();
+
       if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxConfigurationCommand.class))
       {
          configurationCommand.set(commandInputManager.pollNewestCommand(KinematicsStreamingToolboxConfigurationCommand.class));
@@ -204,34 +243,66 @@ public class KSTTools
          areArmJointspaceOutputsEnabled.get(robotSide).set(configurationCommand.isArmJointspaceEnabled(robotSide));
       }
 
-      RobotConfigurationData newRobotConfigurationData = concurrentRobotConfigurationDataCopier.getCopyForReading();
-      if (newRobotConfigurationData != null)
-      {
-         robotConfigurationDataInternal.set(newRobotConfigurationData);
-         hasRobotDataConfiguration = true;
-      }
+      boolean wasRobotUpdated = robotStateUpdater.updateRobotConfiguration(currentRootJoint, currentOneDoFJoint);
 
-      CapturabilityBasedStatus newCapturabilityBasedStatus = concurrentCapturabilityBasedStatusCopier.getCopyForReading();
-      if (newCapturabilityBasedStatus != null)
+      if (wasRobotUpdated)
       {
-         capturabilityBasedStatusInternal.set(newCapturabilityBasedStatus);
-         hasCapturabilityBasedStatus = true;
-      }
-
-      if (hasRobotDataConfiguration)
-      {
-         walkingControllerMonotonicTime.set(Conversions.nanosecondsToSeconds(robotConfigurationDataInternal.getMonotonicTime()));
-         walkingControllerWallTime.set(Conversions.nanosecondsToSeconds(robotConfigurationDataInternal.getWallTime()));
-
-         for (int jointIndex = 0; jointIndex < currentOneDoFJoint.length; jointIndex++)
+         if (robotStateUpdater instanceof RobotConfigurationDataBasedUpdater rcdBasedUpdater)
          {
-            currentOneDoFJoint[jointIndex].setQ(robotConfigurationDataInternal.getJointAngles().get(jointIndex));
+            RobotConfigurationData lastRobotConfigurationData = rcdBasedUpdater.getLastRobotConfigurationData();
+            walkingControllerMonotonicTime.set(Conversions.nanosecondsToSeconds(lastRobotConfigurationData.getMonotonicTime()));
+            walkingControllerWallTime.set(Conversions.nanosecondsToSeconds(lastRobotConfigurationData.getWallTime()));
          }
 
-         Pose3DBasics rootJointPose = currentRootJoint.getJointPose();
-         rootJointPose.set(robotConfigurationDataInternal.getRootPosition(), robotConfigurationDataInternal.getRootOrientation());
          currentFullRobotModel.updateFrames();
       }
+
+      if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxInputCommand.class))
+      {
+         if (latestInput != null)
+         {
+            if (previousInput == null)
+               previousInput = new KinematicsStreamingToolboxInputCommand();
+
+            previousInput.set(latestInput);
+            previousInputReceivedTime.set(latestInputReceivedTime.getValue());
+            hasPreviousInput.set(true);
+         }
+
+         if (latestInput == null)
+            latestInput = new KinematicsStreamingToolboxInputCommand();
+
+         latestInput.set(commandInputManager.pollNewestCommand(KinematicsStreamingToolboxInputCommand.class));
+
+         for (int i = latestInput.getNumberOfInputs() - 1; i >= 0; i--)
+         {
+            if (!inputFilter.isInputValid(latestInput.getInput(i), hasPreviousInput.getValue() ? previousInput.getInput(i) : null))
+               invalidUserInput.set(true);
+         }
+
+         latestInputTimestampSource.set(latestInput.getTimestamp());
+         latestInputTimeSource.set(latestInput.getTimestamp() * 1.0e-9);
+
+         if (latestInput.getTimestamp() <= 0)
+            latestInput.setTimestamp(Conversions.secondsToNanoseconds(time.getValue()));
+
+         latestInputReceivedTime.set(time.getValue());
+         hasNewInputCommand.set(true);
+      }
+      else
+      {
+         hasNewInputCommand.set(false);
+      }
+   }
+
+   public void resetUserInvalidInputFlag()
+   {
+      invalidUserInput.set(false);
+   }
+
+   public boolean hasUserSubmittedInvalidInput()
+   {
+      return invalidUserInput.getValue();
    }
 
    public KinematicsStreamingToolboxParameters getParameters()
@@ -249,43 +320,14 @@ public class KSTTools
       return configurationCommand;
    }
 
-   public void getCurrentState(KinematicsToolboxOutputStatus currentStateToPack)
+   public void getCurrentState(KSTOutputDataBasics currentStateToPack)
    {
-      MessageTools.packDesiredJointState(currentStateToPack, currentFullRobotModel.getRootJoint(), currentOneDoFJoint);
-   }
-
-   public void getCurrentState(YoKinematicsToolboxOutputStatus currentStateToPack)
-   {
-      KinematicsToolboxOutputStatus status = currentStateToPack.getStatus();
-      MessageTools.packDesiredJointState(status, currentFullRobotModel.getRootJoint(), currentOneDoFJoint);
-      currentStateToPack.set(status);
-   }
-
-   public void pollInputCommand()
-   {
-      hasNewInputCommand.set(commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxInputCommand.class));
-
-      if (hasNewInputCommand.getValue())
-      {
-         if (latestInput != null)
-         {
-            previousInput.set(latestInput);
-            previousInputReceivedTime.set(latestInputReceivedTime.getValue());
-            hasPreviousInput.set(true);
-         }
-         latestInput = commandInputManager.pollNewestCommand(KinematicsStreamingToolboxInputCommand.class);
-
-         if (latestInput.getTimestamp() <= 0)
-            latestInput.setTimestamp(Conversions.secondsToNanoseconds(time.getValue()));
-
-         latestInputTimestamp.set(latestInput.getTimestamp());
-         latestInputReceivedTime.set(time.getValue());
-      }
+      currentStateToPack.setFromRobot(currentRootJoint, currentOneDoFJoint);
    }
 
    public boolean hasNewInputCommand()
    {
-      return hasNewInputCommand.getValue();
+      return hasNewInputCommand.getValue() && !hasUserSubmittedInvalidInput();
    }
 
    public KinematicsStreamingToolboxInputCommand getLatestInput()
@@ -333,7 +375,7 @@ public class KSTTools
       this.streamingMessagePublisher = streamingMessagePublisher;
    }
 
-   public void streamToController(KinematicsToolboxOutputStatus outputToPublish, boolean finalizeTrajectory)
+   public void streamToController(KSTOutputDataReadOnly outputToPublish, boolean finalizeTrajectory)
    {
       if (finalizeTrajectory)
          trajectoryMessagePublisher.publish(setupFinalizeTrajectoryMessage(outputToPublish));
@@ -343,17 +385,17 @@ public class KSTTools
          streamingMessagePublisher.publish(setupStreamingMessage(outputToPublish));
    }
 
-   public WholeBodyStreamingMessage setupStreamingMessage(KinematicsToolboxOutputStatus solutionToConvert)
+   public WholeBodyStreamingMessage setupStreamingMessage(KSTOutputDataReadOnly solutionToConvert)
    {
-      HumanoidMessageTools.resetWholeBodyStreamingMessage(wholeBodyStreamingMessage);
-      streamingMessageFactory.updateFullRobotModel(solutionToConvert);
-      streamingMessageFactory.setMessageToCreate(wholeBodyStreamingMessage);
-      streamingMessageFactory.setEnableVelocity(true);
+      streamingMessageFactory.update(currentMessageId.getValue(),
+                                     Conversions.secondsToNanoseconds(time.getValue()),
+                                     streamIntegrationDuration.getValue(),
+                                     solutionToConvert::updateRobot);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
-            streamingMessageFactory.computeHandStreamingMessage(robotSide, configurationCommand.getHandTrajectoryFrame(robotSide));
+            streamingMessageFactory.computeHandStreamingMessage(robotSide, configurationCommand.getHandTrajectoryFrameId(robotSide));
 
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
             streamingMessageFactory.computeArmStreamingMessage(robotSide);
@@ -362,22 +404,18 @@ public class KSTTools
       if (isNeckJointspaceOutputEnabled.getValue())
          streamingMessageFactory.computeNeckStreamingMessage();
       if (isChestTaskspaceOutputEnabled.getValue())
-         streamingMessageFactory.computeChestStreamingMessage(configurationCommand.getChestTrajectoryFrame());
+         streamingMessageFactory.computeChestStreamingMessage(configurationCommand.getChestTrajectoryFrameId());
       if (isPelvisTaskspaceOutputEnabled.getValue())
-         streamingMessageFactory.computePelvisStreamingMessage(configurationCommand.getPelvisTrajectoryFrame());
+         streamingMessageFactory.computePelvisStreamingMessage(configurationCommand.getPelvisTrajectoryFrameId());
 
-      wholeBodyStreamingMessage.setEnableUserPelvisControl(true);
-      wholeBodyStreamingMessage.setStreamIntegrationDuration((float) streamIntegrationDuration.getValue());
-      wholeBodyStreamingMessage.setTimestamp(Conversions.secondsToNanoseconds(time.getValue()));
-      wholeBodyStreamingMessage.setSequenceId(currentMessageId++);
-      wholeBodyStreamingMessage.setUniqueId(currentMessageId++);
-      return wholeBodyStreamingMessage;
+      currentMessageId.increment();
+      return streamingMessageFactory.getOutput();
    }
 
-   public WholeBodyTrajectoryMessage setupTrajectoryMessage(KinematicsToolboxOutputStatus solutionToConvert)
+   public WholeBodyTrajectoryMessage setupTrajectoryMessage(KSTOutputDataReadOnly solutionToConvert)
    {
       HumanoidMessageTools.resetWholeBodyTrajectoryToolboxMessage(wholeBodyTrajectoryMessage);
-      trajectoryMessageFactory.updateFullRobotModel(solutionToConvert);
+      trajectoryMessageFactory.updateFullRobotModel(solutionToConvert::updateRobot);
       trajectoryMessageFactory.setMessageToCreate(wholeBodyTrajectoryMessage);
       trajectoryMessageFactory.setTrajectoryTime(0.0);
       trajectoryMessageFactory.setEnableVelocity(true);
@@ -385,7 +423,7 @@ public class KSTTools
       for (RobotSide robotSide : RobotSide.values)
       {
          if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
-            trajectoryMessageFactory.computeHandTrajectoryMessage(robotSide, configurationCommand.getHandTrajectoryFrame(robotSide));
+            trajectoryMessageFactory.computeHandTrajectoryMessage(robotSide, configurationCommand.getHandTrajectoryFrameId(robotSide));
 
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
             trajectoryMessageFactory.computeArmTrajectoryMessage(robotSide);
@@ -394,22 +432,23 @@ public class KSTTools
       if (isNeckJointspaceOutputEnabled.getValue())
          trajectoryMessageFactory.computeNeckTrajectoryMessage();
       if (isChestTaskspaceOutputEnabled.getValue())
-         trajectoryMessageFactory.computeChestTrajectoryMessage(configurationCommand.getChestTrajectoryFrame());
+         trajectoryMessageFactory.computeChestTrajectoryMessage(configurationCommand.getChestTrajectoryFrameId());
       if (isPelvisTaskspaceOutputEnabled.getValue())
-         trajectoryMessageFactory.computePelvisTrajectoryMessage(configurationCommand.getPelvisTrajectoryFrame());
+         trajectoryMessageFactory.computePelvisTrajectoryMessage(configurationCommand.getPelvisTrajectoryFrameId());
 
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(true);
       HumanoidMessageTools.configureForStreaming(wholeBodyTrajectoryMessage,
                                                  streamIntegrationDuration.getValue(),
                                                  Conversions.secondsToNanoseconds(time.getValue()));
-      setAllIDs(wholeBodyTrajectoryMessage, currentMessageId++);
+      setAllIDs(wholeBodyTrajectoryMessage, currentMessageId.getValue());
+      currentMessageId.increment();
       return wholeBodyTrajectoryMessage;
    }
 
-   public WholeBodyTrajectoryMessage setupFinalizeTrajectoryMessage(KinematicsToolboxOutputStatus solutionToConvert)
+   public WholeBodyTrajectoryMessage setupFinalizeTrajectoryMessage(KSTOutputDataReadOnly solutionToConvert)
    {
       HumanoidMessageTools.resetWholeBodyTrajectoryToolboxMessage(wholeBodyTrajectoryMessage);
-      trajectoryMessageFactory.updateFullRobotModel(solutionToConvert);
+      trajectoryMessageFactory.updateFullRobotModel(solutionToConvert::updateRobot);
       trajectoryMessageFactory.setMessageToCreate(wholeBodyTrajectoryMessage);
       trajectoryMessageFactory.setTrajectoryTime(0.5);
 
@@ -431,7 +470,8 @@ public class KSTTools
 
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(false);
       HumanoidMessageTools.configureForOverriding(wholeBodyTrajectoryMessage);
-      setAllIDs(wholeBodyTrajectoryMessage, currentMessageId++);
+      setAllIDs(wholeBodyTrajectoryMessage, currentMessageId.getValue());
+      currentMessageId.increment();
 
       return wholeBodyTrajectoryMessage;
    }
@@ -477,17 +517,14 @@ public class KSTTools
       message.getHeadTrajectoryMessage().getSo3Trajectory().getQueueingProperties().setMessageId(id);
    }
 
-   public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
+   public void setRobotStateUpdater(IKRobotStateUpdater robotStateUpdater)
    {
-      concurrentRobotConfigurationDataCopier.getCopyForWriting().set(newConfigurationData);
-      concurrentRobotConfigurationDataCopier.commit();
-      ikController.updateRobotConfigurationData(newConfigurationData);
+      this.robotStateUpdater = robotStateUpdater;
+      ikController.setDesiredRobotStateUpdater(robotStateUpdater);
    }
 
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
    {
-      concurrentCapturabilityBasedStatusCopier.getCopyForWriting().set(newStatus);
-      concurrentCapturabilityBasedStatusCopier.commit();
       ikController.updateCapturabilityBasedStatus(newStatus);
    }
 
@@ -539,21 +576,6 @@ public class KSTTools
    public HumanoidKinematicsToolboxController getIKController()
    {
       return ikController;
-   }
-
-   public RobotConfigurationData getRobotConfigurationData()
-   {
-      return hasRobotDataConfiguration ? robotConfigurationDataInternal : null;
-   }
-
-   public CapturabilityBasedStatus getCapturabilityBasedStatus()
-   {
-      return hasCapturabilityBasedStatus ? capturabilityBasedStatusInternal : null;
-   }
-
-   public double getWalkingControllerPeriod()
-   {
-      return walkingControllerPeriod;
    }
 
    public double getToolboxControllerPeriod()
@@ -652,15 +674,6 @@ public class KSTTools
       angularVelocityToPack.scale(2.0 / dt);
    }
 
-   public static void integrateSpatialVelocity(double dt,
-                                               FramePose3DReadOnly initialPose,
-                                               SpatialVectorReadOnly spatialVelocity,
-                                               FixedFramePose3DBasics finalPose)
-   {
-      integrateLinearVelocity(dt, initialPose.getPosition(), spatialVelocity.getLinearPart(), finalPose.getPosition());
-      integrateAngularVelocity(dt, initialPose.getOrientation(), spatialVelocity.getAngularPart(), finalPose.getOrientation());
-   }
-
    public static void integrateLinearVelocity(double dt,
                                               FramePoint3DReadOnly initialPosition,
                                               FrameVector3DReadOnly linearVelocity,
@@ -672,6 +685,7 @@ public class KSTTools
    public static void integrateAngularVelocity(double dt,
                                                FrameQuaternionReadOnly initialOrientation,
                                                FrameVector3DReadOnly angularVelocity,
+                                               boolean isAngularVelocityLocal,
                                                FixedFrameQuaternionBasics finalOrientation)
    {
       double qInit_x = initialOrientation.getX();
@@ -689,10 +703,93 @@ public class KSTTools
       double qInt_z = finalOrientation.getZ();
       double qInt_s = finalOrientation.getS();
 
-      double qFinal_x = qInit_s * qInt_x + qInit_x * qInt_s + qInit_y * qInt_z - qInit_z * qInt_y;
-      double qFinal_y = qInit_s * qInt_y - qInit_x * qInt_z + qInit_y * qInt_s + qInit_z * qInt_x;
-      double qFinal_z = qInit_s * qInt_z + qInit_x * qInt_y - qInit_y * qInt_x + qInit_z * qInt_s;
-      double qFinal_s = qInit_s * qInt_s - qInit_x * qInt_x - qInit_y * qInt_y - qInit_z * qInt_z;
-      finalOrientation.set(qFinal_x, qFinal_y, qFinal_z, qFinal_s);
+      if (isAngularVelocityLocal)
+         QuaternionTools.multiplyImpl(qInit_x, qInit_y, qInit_z, qInit_s, false, qInt_x, qInt_y, qInt_z, qInt_s, false, finalOrientation);
+      else
+         QuaternionTools.multiplyImpl(qInt_x, qInt_y, qInt_z, qInt_s, false, qInit_x, qInit_y, qInit_z, qInit_s, false, finalOrientation);
+   }
+
+   /**
+    * Computes the minimum velocity that can be applied to the joint to reach the minimum joint position limit.
+    *
+    * @param qMin the minimum joint position limit.
+    * @param q    the current joint position.
+    * @param dt   the time step.
+    * @return the minimum velocity that can be applied to the joint to reach the minimum joint position limit.
+    */
+   public static double computeJointMinVelocity(double qMin, double q, double dt)
+   {
+      if (!Double.isInfinite(qMin))
+      {
+         return (qMin - q) / dt;
+      }
+      else
+      {
+         return Double.NEGATIVE_INFINITY;
+      }
+   }
+
+   /**
+    * Computes the maximum velocity that can be applied to the joint to reach the maximum joint position limit.
+    *
+    * @param qMax the maximum joint position limit.
+    * @param q    the current joint position.
+    * @param dt   the time step.
+    * @return the maximum velocity that can be applied to the joint to reach the maximum joint position limit.
+    */
+   public static double computeJointMaxVelocity(double qMax, double q, double dt)
+   {
+      if (!Double.isInfinite(qMax))
+      {
+         return (qMax - q) / dt;
+      }
+      else
+      {
+         return Double.POSITIVE_INFINITY;
+      }
+   }
+
+   /**
+    * Computes the minimum acceleration that can be applied to the joint to reach the minimum joint position limit.
+    *
+    * @param qMin the minimum joint position limit.
+    * @param q    the current joint position.
+    * @param qDot the current joint velocity.
+    * @param dt   the time step.
+    * @return the minimum acceleration that can be applied to the joint to reach the minimum joint position limit.
+    */
+   public static double computeJointMinAcceleration(double qMin, double q, double qDot, double dt)
+   {
+      if (!Double.isInfinite(qMin))
+      {
+         double qDotMin = (qMin - q) / dt;
+         return 2.0 * (qDotMin - qDot) / dt;
+      }
+      else
+      {
+         return Double.NEGATIVE_INFINITY;
+      }
+   }
+
+   /**
+    * Computes the maximum acceleration that can be applied to the joint to reach the maximum joint position limit.
+    *
+    * @param qMax the maximum joint position limit.
+    * @param q    the current joint position.
+    * @param qDot the current joint velocity.
+    * @param dt   the time step.
+    * @return the maximum acceleration that can be applied to the joint to reach the maximum joint position limit.
+    */
+   public static double computeJointMaxAcceleration(double qMax, double q, double qDot, double dt)
+   {
+      if (!Double.isInfinite(qMax))
+      {
+         double qDotMax = (qMax - q) / dt;
+         return 2.0 * (qDotMax - qDot) / dt;
+      }
+      else
+      {
+         return Double.POSITIVE_INFINITY;
+      }
    }
 }

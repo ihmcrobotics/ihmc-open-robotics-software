@@ -35,7 +35,7 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
            robotConfigurationDataBuffer,
            scsSensorsCommunicator,
            ros2Node,
-           ROS2QosProfile.DEFAULT(),
+           ROS2QosProfile.RELIABLE(),
            robotMonotonicTimeCalculator);
    }
 

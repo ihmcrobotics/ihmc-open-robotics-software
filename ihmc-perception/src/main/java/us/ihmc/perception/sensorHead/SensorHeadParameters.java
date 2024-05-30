@@ -68,6 +68,16 @@ public class SensorHeadParameters
       EuclidCoreMissingTools.setYawPitchRollDegrees(FISHEYE_RIGHT_TO_OUSTER_TRANSFORM_ON_ROBOT.getRotation(), 0.000, -25.0, 0.000);
    }
 
+   public static final RigidBodyTransform FISHEYE_RIGHT_TO_FISHEYE_LEFT_TRANSFORM_ON_TESTBED = new RigidBodyTransform();
+   static
+   {
+      // This is the transform [x, y, z, qx, qy, qz, qw] as estimated by MSA calibration: [0.061508, 0.000184, 0.004143, -0.000360, 0.002948, -0.004588, 0.999985].
+      // The frame is z forward, x right, and y down.
+      // Need to transform it to our frame convention: x forward, y left, z up.
+      FISHEYE_RIGHT_TO_FISHEYE_LEFT_TRANSFORM_ON_TESTBED.getTranslation().set(0.004143, -0.063 - 0. * 0.061508, -0.000184);
+      FISHEYE_RIGHT_TO_FISHEYE_LEFT_TRANSFORM_ON_TESTBED.getRotation().setQuaternion(-0.004588, 0.000360, -0.002948, 0.999985);
+   }
+
    /**
     * These "for coloring" parameters are tuned by hand so the coloring on the
     * Ouster point cloud look better. It's probably not the correct model for doing

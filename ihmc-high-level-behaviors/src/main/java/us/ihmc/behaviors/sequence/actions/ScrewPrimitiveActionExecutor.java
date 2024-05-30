@@ -10,6 +10,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.TaskspaceTrajectoryTrackingErrorCalculator;
@@ -27,7 +28,6 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -61,8 +61,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
    private final RecyclingArrayList<FrameVector3D> linearVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final RecyclingArrayList<FrameVector3D> angularVelocities = new RecyclingArrayList<>(FrameVector3D::new);
    private final TDoubleArrayList trajectoryTimes = new TDoubleArrayList();
-   private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
-   private final int numberOfJoints = ArmJointAnglesActionDefinition.NUMBER_OF_JOINTS;
+   private final int numberOfJoints = HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS;
    private int numberOfPoints;
    private double rotationRadius;
    private double signedTotalRotation;
@@ -110,9 +109,10 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
       if (state.getScrewFrame().isChildOfWorld())
       {
-         if (getParent().getState() instanceof ActionSequenceState parent)
+         ActionSequenceState actionSequence = BehaviorTreeTools.findActionSequenceAncestor(state);
+         if (actionSequence != null)
          {
-            if (parent.getExecutionNextIndex() <= state.getActionIndex())
+            if (actionSequence.getExecutionNextIndex() <= state.getActionIndex())
             {
                ReferenceFrame initialHandFrame = null;
 
@@ -122,9 +122,9 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                }
                else
                {
-                  HandPoseActionState previousHandPose = parent.findNextPreviousAction(HandPoseActionState.class,
-                                                                                       state.getActionIndex(),
-                                                                                       definition.getSide());
+                  HandPoseActionState previousHandPose = actionSequence.findNextPreviousAction(HandPoseActionState.class,
+                                                                                               state.getActionIndex(),
+                                                                                               definition.getSide());
                   if (previousHandPose != null && previousHandPose.getPalmFrame().isChildOfWorld())
                   {
                      initialHandFrame = previousHandPose.getPalmFrame().getReferenceFrame();
@@ -307,7 +307,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
        || Double.isNaN(state.getPreviewTrajectoryAngularVelocity().getValue()))
       {
          state.setFailed(true);
-         LogTools.error("Cannot execute screw primitive with velocities:   Velocity %.2f m/s  %.2f %s/s"
+         state.getLogger().error("Cannot execute screw primitive with velocities:   Velocity %.2f m/s  %.2f %s/s"
                               .formatted(state.getPreviewTrajectoryLinearVelocity().getValue(),
                                          state.getPreviewTrajectoryAngularVelocity().getValue(),
                                          EuclidCoreMissingTools.DEGREE_SYMBOL));
@@ -373,7 +373,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
             armIKSolver.solve(angularVelocity, linearVelocity);
 
             if (armIKSolver.getQuality() > ArmIKSolver.GOOD_QUALITY_MAX)
-               LogTools.warn("Bad quality: {} (i == {})", armIKSolver.getQuality(), i);
+               state.getLogger().warn("Bad quality: {} (i == {})", armIKSolver.getQuality(), i);
 
             for (int j = 0; j < numberOfJoints; j++)
             {
@@ -385,7 +385,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                trajectoryPoint1DMessage.setVelocity(armIKSolver.getSolutionOneDoFJoints()[j].getQd());
             }
 
-            LogTools.info("Adding point time: %.2f  nextPose: %s %s  linearVel: %s  angularVel: %s"
+            state.getLogger().info("Adding point time: %.2f  nextPose: %s %s  linearVel: %s  angularVel: %s"
                     .formatted(waypointTime,
                                desiredPose.getPosition(),
                                new YawPitchRoll(desiredPose.getOrientation()),
@@ -412,13 +412,13 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
          if (definition.getJointspaceOnly())
          {
-            LogTools.info("Commanding %.3f s jointspace only trajectory with %d points".formatted(movementDuration, numberOfPoints));
+            state.getLogger().info("Commanding %.3f s jointspace only trajectory with %d points".formatted(movementDuration, numberOfPoints));
             jointspaceOnlyTrajectoryMessage.getJointspaceTrajectory().set(jointspaceTrajectoryMessage);
             ros2ControllerHelper.publishToController(jointspaceOnlyTrajectoryMessage);
          }
          else
          {
-            LogTools.info("Commanding %.3f s hybrid trajectory with %d points".formatted(movementDuration, numberOfPoints));
+            state.getLogger().info("Commanding %.3f s hybrid trajectory with %d points".formatted(movementDuration, numberOfPoints));
             ros2ControllerHelper.publishToController(handHybridTrajectoryMessage);
          }
 
@@ -428,7 +428,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
       }
       else
       {
-         LogTools.error("Cannot execute. Frame is not a child of World frame.");
+         state.getLogger().error("Cannot execute. Frame is not a child of World frame.");
       }
    }
 
@@ -442,13 +442,20 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
       {
          state.setIsExecuting(false);
          state.setFailed(true);
-         LogTools.error("Task execution timed out. Publishing stop all trajectories message.");
-         ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+         state.getLogger().error("Task execution timed out.");
          return;
       }
 
       if (state.getScrewFrame().isChildOfWorld())
       {
+         if (state.getCommandedTrajectory().isEmpty())
+         {
+            state.getLogger().error("Commanded trajectory is empty.");
+            state.setIsExecuting(false);
+            state.setFailed(true);
+            return;
+         }
+
          SE3TrajectoryPointReadOnly lastTrajectoryPose = state.getCommandedTrajectory().getLastValueReadOnly();
          desiredHandControlPose.set(lastTrajectoryPose.getPosition(), lastTrajectoryPose.getOrientation());
          syncedHandControlPose.setFromReferenceFrame(syncedRobot.getFullRobotModel().getHandControlFrame(definition.getSide()));

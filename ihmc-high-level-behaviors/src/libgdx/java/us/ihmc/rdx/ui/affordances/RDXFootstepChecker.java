@@ -87,6 +87,8 @@ public class RDXFootstepChecker
       FramePose3DReadOnly previousFootstepOnSameSide = getPreviousFootstepOnOppositeSide(stepList,
                                                                                          indexOfFootBeingChecked,
                                                                                          candidateStepSide.getOppositeSide());
+
+      snapper.initialize(); // The underlying parameters can get changed, we need to update them
       reason = stepChecker.checkValidity(candidateStepSide, candidateFootstepPose, previousFootstepOnOtherSide, previousFootstepOnSameSide);
 
       reasons.add(reason);

@@ -1,7 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.StopAllTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
@@ -14,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -28,7 +26,6 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
    private final FramePose3D desiredChestPose = new FramePose3D();
    private final FramePose3D syncedChestPose = new FramePose3D();
    private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
-   private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
 
    public ChestOrientationActionExecutor(long id,
                                          CRDTInfo crdtInfo,
@@ -86,7 +83,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
       }
       else
       {
-         LogTools.error("Cannot execute. Frame is not a child of World frame.");
+         state.getLogger().error("Cannot execute. Frame is not a child of World frame.");
       }
    }
 
@@ -100,8 +97,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
       {
          state.setIsExecuting(false);
          state.setFailed(true);
-         LogTools.error("Task execution timed out. Publishing stop all trajectories message.");
-         ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
+         state.getLogger().error("Task execution timed out.");
          return;
       }
 
@@ -145,7 +141,7 @@ public class ChestOrientationActionExecutor extends ActionNodeExecutor<ChestOrie
                                                                   syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame()));
       long frameId = MessageTools.toFrameId(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
-      LogTools.info("Publishing chest trajectory message to disengage holding hand in taskspace");
+      state.getLogger().info("Publishing chest trajectory message to disengage holding hand in taskspace");
       ros2ControllerHelper.publishToController(message);
    }
 }
