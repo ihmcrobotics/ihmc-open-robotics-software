@@ -1,18 +1,15 @@
-package us.ihmc.exampleSimulations.planarWalker;
+package us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting;
 
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.geometry.Ellipsoid3DDefinition;
 import us.ihmc.scs2.definition.geometry.GeometryDefinition;
 import us.ihmc.scs2.definition.robot.*;
 import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
-import us.ihmc.simulationconstructionset.util.LinearGroundContactModel;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.awt.*;
 

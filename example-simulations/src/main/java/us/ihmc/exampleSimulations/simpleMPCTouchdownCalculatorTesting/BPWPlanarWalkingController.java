@@ -1,12 +1,8 @@
-package us.ihmc.exampleSimulations.planarWalker;
+package us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting;
 
-import org.bytedeco.javacv.Frame;
-import org.lwjgl.system.linux.Stat;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
@@ -24,6 +20,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 import static us.ihmc.scs2.definition.visual.ColorDefinitions.Blue;
 import static us.ihmc.scs2.definition.visual.ColorDefinitions.Red;
@@ -87,11 +84,11 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
     private final YoDouble debug3 = new YoDouble("debug3", registry);
     private final YoDouble debug4 = new YoDouble("debug4", registry);
 
-    private final YoDouble WalkingGain = new YoDouble("WalkingGain", registry);
-    private final YoDouble SideWalkingGain = new YoDouble("SideWalkingGain", registry);
+    private final YoDouble walkingGain = new YoDouble("WalkingGain", registry);
+    private final YoDouble sideWalkingGain = new YoDouble("SideWalkingGain", registry);
 
-
-
+    public enum TouchdownCalculator {REGULAR, MPC}
+    private final YoEnum<TouchdownCalculator> yoTouchdownCalculator = new YoEnum<>("touchdownCalculator", registry, TouchdownCalculator.class, false);
 
     public BPWPlanarWalkingController( BPWPLanarWalkingRobot controllerRobot, RobotSide initialSwingSide)
     {
@@ -130,8 +127,8 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
         swingFootSideStepAdjustmentGain.set(1.0); // 0.65
         // Setting desired Walking Speed to zero for now
         desiredWalkingSpeed.set(0.0);
-        WalkingGain.set(0.06); //0.06
-        SideWalkingGain.set(0.06);
+        walkingGain.set(0.06); //0.06
+        sideWalkingGain.set(0.06);
 
 
         // Setting up the leg length controllers
@@ -168,9 +165,6 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
         }
 
         registry.addChild(controllerRobot.getYoRegistry());
-
-
-
     }
 
     @Override
@@ -225,6 +219,8 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
         private final YoDouble footTouchdownPositionY;
         private final YoDouble footDesiredPositionY;
 
+        private final RegularTouchdownCalculator regularTouchdownCalculator;
+        private final MPCTouchdownCalculator mpcTouchdownCalculator;
 
         public SwingFootState(RobotSide swingSide)
         {
@@ -249,10 +245,15 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
             footTouchdownPositionY = new YoDouble(swingSide.getLowerCaseName() + "footTouchdownPositionY", registry);
             footDesiredPositionY = new YoDouble(swingSide.getLowerCaseName() + "footDesiredPositionY", registry);
 
+            regularTouchdownCalculator = new RegularTouchdownCalculator(controllerRobot, swingSide,
+                                                                        desiredWalkingSpeed, desiredSideWalkingSpeed,
+                                                                        swingFootStepAdjustmentGain, swingFootSideStepAdjustmentGain,
+                                                                        walkingGain, sideWalkingGain, registry);
 
+            mpcTouchdownCalculator = new MPCTouchdownCalculator(controllerRobot, swingSide, desiredWalkingSpeed,
+                                                                desiredSideWalkingSpeed, registry);
 
         }
-
 
         @Override
         public void onEntry() {
@@ -277,8 +278,9 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
                     finalHeight,
                     finalVelocity);
 
-            swingFootXTraj.setCubic(0.0, swingDuration, footPositionAtStart.getX(), computeDesiredTouchdownPositionX());
-            swingFootYTraj.setCubic(0.0, swingDuration, footPositionAtStart.getY(), computeDesiredTouchdownPositionY(swingSide));
+            computeDesiredTouchdownPosition();
+            swingFootXTraj.setCubic(0.0, swingDuration, footPositionAtStart.getX(), footTouchdownPositionX.getDoubleValue());
+            swingFootYTraj.setCubic(0.0, swingDuration, footPositionAtStart.getY(), footTouchdownPositionY.getDoubleValue());
 
         }
 
@@ -303,7 +305,8 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
             // set the desired torque to the knee joint to achieve the desired swing foot height
             controllerRobot.getKneeJoint(swingSide).setTau(swingLegForce.getDoubleValue());
 
-            footTouchdownPositionX.set(computeDesiredTouchdownPositionX());
+            computeDesiredTouchdownPosition();
+
             swingFootXTraj.setCubic(0.0, desiredSwingDuration.getDoubleValue(), footPositionAtStart.getX(), footTouchdownPositionX.getDoubleValue());
             swingFootXTraj.compute(timeInState);
 
@@ -338,7 +341,6 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
 
 
             // Swing hip roll torque calculator
-            footTouchdownPositionY.set(computeDesiredTouchdownPositionY(swingSide));
             swingFootYTraj.setCubic(0.0, desiredSwingDuration.getDoubleValue(), footPositionAtStart.getY(), footTouchdownPositionY.getDoubleValue());
             swingFootYTraj.compute(timeInState);
 
@@ -368,34 +370,27 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
 
 
         }
-        private double computeDesiredTouchdownPositionX()
+
+        private void computeDesiredTouchdownPosition()
         {
-            double currentCoMVelocityX = -controllerRobot.getFootVelocityRelativeToCOM(swingSide.getOppositeSide()).getX();
+            switch (yoTouchdownCalculator.getEnumValue())
+            {
+                case REGULAR -> computeDesiredTouchdownPositionRegular();
 
-            // why not do this
-            double trial = controllerRobot.getCenterOfMassVelocity().getX();
-
-//            velocityDebugR.set(currentCoMVelocity);
-//            velocityDebugC.set(trial);
-            double omega = Math.sqrt(9.81 / controllerRobot.getCenterOfMassPoint().getZ());
-            double velocityError = currentCoMVelocityX - desiredWalkingSpeed.getDoubleValue() ;
-            return swingFootStepAdjustmentGain.getDoubleValue() / omega * currentCoMVelocityX + WalkingGain.getDoubleValue() * velocityError;
-//            return 1 / omega * currentCoMVelocity;
+                case MPC -> computeDesiredTouchdownPositionMPC();
+            }
         }
 
-        private double computeDesiredTouchdownPositionY(RobotSide robotSide)
+        private void computeDesiredTouchdownPositionRegular()
         {
-//            double currentCoMVelocityY = controllerRobot.getCenterOfMassVelocity().getY();
-            double currentCoMVelocityY = -controllerRobot.getFootVelocityRelativeToCOM(swingSide.getOppositeSide()).getY();
+            footTouchdownPositionX.set(regularTouchdownCalculator.computeAndReturnDesiredTouchdownPositionX());
+            footTouchdownPositionY.set(regularTouchdownCalculator.computeAndReturnDesiredTouchdownPositionY());
+        }
 
-            // why not do this
-            double trial = controllerRobot.getCenterOfMassVelocity().getY();
-
-            double omega = Math.sqrt(9.81 / controllerRobot.getCenterOfMassPoint().getZ());
-            double velocityError = currentCoMVelocityY - desiredSideWalkingSpeed.getDoubleValue() ;
-
-            return swingFootSideStepAdjustmentGain.getDoubleValue() / omega *  currentCoMVelocityY + robotSide.negateIfRightSide(0.05) +  SideWalkingGain.getDoubleValue() * velocityError;
-//          return swingFootSideStepAdjustmentGain.getDoubleValue() / omega *  currentCoMVelocityY + robotSide.negateIfRightSide(0.05);
+        private void computeDesiredTouchdownPositionMPC()
+        {
+            footTouchdownPositionX.set(mpcTouchdownCalculator.computeAndReturnDesiredTouchdownPositionX());
+            footTouchdownPositionY.set(mpcTouchdownCalculator.computeAndReturnDesiredTouchdownPositionY());
         }
 
         @Override

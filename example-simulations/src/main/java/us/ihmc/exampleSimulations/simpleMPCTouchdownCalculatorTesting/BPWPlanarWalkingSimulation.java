@@ -1,9 +1,8 @@
-package us.ihmc.exampleSimulations.planarWalker;
+package us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting;
 
+import us.ihmc.exampleSimulations.planarWalker.SlopeGroundDefinition;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.scs2.SimulationConstructionSet2;
-import us.ihmc.scs2.simulation.parameters.ContactPointBasedContactParameters;
-import us.ihmc.scs2.simulation.physicsEngine.contactPointBased.ContactPointBasedPhysicsEngine;
 import us.ihmc.scs2.simulation.robot.Robot;
 
 public class BPWPlanarWalkingSimulation {
@@ -48,7 +47,7 @@ public class BPWPlanarWalkingSimulation {
         robot.addThrottledController(controller, scs.getDT() * simTicksPerControlTick);
 
         scs.startSimulationThread();
-        scs.simulate();
+        //scs.simulate();
     }
 
 
