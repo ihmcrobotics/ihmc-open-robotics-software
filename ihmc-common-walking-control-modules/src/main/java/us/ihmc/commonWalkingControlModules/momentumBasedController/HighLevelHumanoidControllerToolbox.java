@@ -189,7 +189,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                              double omega0,
                                              SideDependentList<ContactableFoot> feet,
                                              double controlDT,
-                                             boolean kinematicsSimulation,
+                                             boolean kinematicsSimulation, // Whether to create for non-physical motion generation only
                                              List<Updatable> updatables,
                                              List<ContactablePlaneBody> contactableBodies,
                                              YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -819,6 +819,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       return controlDT;
    }
 
+   /** If the controller is created in a non-physics nominal motion previewing only mode. */
    public boolean isKinematicsSimulation()
    {
       return kinematicsSimulation;

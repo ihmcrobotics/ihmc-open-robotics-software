@@ -449,7 +449,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public HumanoidHighLevelControllerManager getController(FullHumanoidRobotModel fullRobotModel,
                                                            double controlDT,
                                                            double gravity,
-                                                           boolean kinematicsSimulation,
+                                                           boolean kinematicsSimulation, // For fast non-physics preview simulations
                                                            YoDouble yoTime,
                                                            YoGraphicsListRegistry yoGraphicsListRegistry,
                                                            HumanoidRobotSensorInformation sensorInformation,
@@ -600,7 +600,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<>();
 
-      if (kinematicsSimulation)
+      if (kinematicsSimulation)  // For fast non-physics preview simulations, deal with there being no forces
       {
          for (RobotSide robotSide : RobotSide.values)
          {
