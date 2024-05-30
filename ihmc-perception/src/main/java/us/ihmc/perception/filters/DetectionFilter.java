@@ -3,7 +3,7 @@ package us.ihmc.perception.filters;
 import gnu.trove.iterator.TFloatIterator;
 import gnu.trove.list.TFloatList;
 import gnu.trove.list.linked.TFloatLinkedList;
-import us.ihmc.commons.thread.Notification;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 
 /**
@@ -18,11 +18,11 @@ public class DetectionFilter
     * E.g. when used inside the scene graph update loop, historyLength = SceneGraph.UPDATE_FREQUENCY.
     * This will represent a history of 1 second.
     */
-   public int historyLength;
-   public float acceptanceThreshold;
+   private int historyLength;
+   private float acceptanceThreshold;
 
    private final TFloatList detections = new TFloatLinkedList();
-   private final Notification detected = new Notification();
+   private final TypedNotification<Float> detected = new TypedNotification<>();
    private boolean isStableDetectionResult = false;
 
    public DetectionFilter()
@@ -42,7 +42,12 @@ public class DetectionFilter
     */
    public void registerDetection()
    {
-      detected.set();
+      registerDetection(1.0f);
+   }
+
+   public void registerDetection(float confidence)
+   {
+      detected.set(confidence);
    }
 
    public boolean isStableDetectionResult()
@@ -67,7 +72,7 @@ public class DetectionFilter
 
    public void update()
    {
-      detections.add(detected.poll() ? 1.0f : 0.0f);
+      detections.add(detected.poll() ? detected.read() : 0.0f);
 
       while (detections.size() > historyLength)
          detections.removeAt(0);

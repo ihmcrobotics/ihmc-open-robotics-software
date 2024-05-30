@@ -25,7 +25,7 @@ mainDependencies {
 missionControlDependencies {
    api("us.ihmc:ihmc-commons:0.32.0")
    api("us.ihmc:log-tools:0.6.3")
-   api("us.ihmc:ihmc-ros2-library:0.24.0")
+   api("us.ihmc:ihmc-ros2-library:0.24.2")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-interfaces:source")
@@ -38,7 +38,7 @@ libgdxDependencies {
    api("org.abego.treelayout:org.abego.treelayout.core:1.0.3")
    api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:ihmc-graphics-libgdx:source")
-   api("us.ihmc:scs2-definition:17-0.25.0")
+   api("us.ihmc:scs2-definition:17-0.25.1")
    api("us.ihmc:mecano-graphviz:17-0.18.1")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-core:2.2.1")
    api("com.badlogicgames.gdx-controllers:gdx-controllers-desktop:2.2.1")
@@ -53,8 +53,8 @@ testDependencies {
    api("us.ihmc:ihmc-path-planning-test:source")
    api("org.cartesiantheatrics:bag-reader-java:0.0.1")
    api("com.github.stephengold:Libbulletjme:12.6.0")
-   api("us.ihmc:scs2-examples:17-0.25.0")
-   api("us.ihmc:scs2-bullet-simulation-test:17-0.25.0")
+   api("us.ihmc:scs2-examples:17-0.25.1")
+   api("us.ihmc:scs2-bullet-simulation-test:17-0.25.1")
    api("us.ihmc:example-simulations:source")
 
    api("us.ihmc:ihmc-avatar-interfaces:source") {

@@ -189,6 +189,8 @@ public class KSTStreamingState implements State
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics hand = desiredFullRobotModel.getHand(robotSide);
+         if (hand == null)
+            continue;
          OneDoFJointBasics[] joints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
          hands.put(robotSide, hand);
          armJoints.put(robotSide, joints);
@@ -312,6 +314,8 @@ public class KSTStreamingState implements State
 
       for (RobotSide robotSide : RobotSide.values)
       {
+         if (armJoints.get(robotSide) == null)
+            continue;
          for (OneDoFJointBasics armJoint : armJoints.get(robotSide))
             armJoint.setQ(controllerFullRobotModel.getOneDoFJointByName(armJoint.getName()).getQ());
       }
@@ -376,6 +380,8 @@ public class KSTStreamingState implements State
 
       for (RobotSide robotSide : RobotSide.values)
       {
+         if (armJoints.get(robotSide) == null)
+            continue;
          OneDoFJointBasics[] joints = armJoints.get(robotSide);
          List<KinematicsToolboxOneDoFJointMessage> defaultMessages = defaultArmJointMessages.get(robotSide);
 
@@ -538,6 +544,8 @@ public class KSTStreamingState implements State
 
          for (RobotSide robotSide : RobotSide.values)
          {
+            if (hands.get(robotSide) == null)
+               continue;
             if (!latestInput.hasInputFor(hands.get(robotSide)))
             {
                ikCommandInputManager.submitMessages(defaultArmJointMessages.get(robotSide));
@@ -595,6 +603,8 @@ public class KSTStreamingState implements State
 
          for (RobotSide robotSide : RobotSide.values)
          {
+            if (hands.get(robotSide) == null)
+               continue;
             if (latestInput.hasInputFor(hands.get(robotSide)))
                KSTTools.copyJointDesiredPositions(armJoints.get(robotSide), defaultArmJointMessages.get(robotSide));
          }

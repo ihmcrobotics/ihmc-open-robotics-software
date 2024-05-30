@@ -60,8 +60,8 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
    private final ImBoolean localRenderMode = new ImBoolean(false);
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
    private final ImBoolean useHybridPlanner = new ImBoolean(false);
-   private final ImBoolean useAStarFootstepPlanner = new ImBoolean(false);
-   private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(true);
+   private final ImBoolean useAStarFootstepPlanner = new ImBoolean(true);
+   private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
 
    private RDXStancePoseSelectionPanel stancePoseSelectionPanel;
    private final StancePoseCalculator stancePoseCalculator;

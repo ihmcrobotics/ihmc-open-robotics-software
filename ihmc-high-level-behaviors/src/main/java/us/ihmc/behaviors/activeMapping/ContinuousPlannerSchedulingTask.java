@@ -11,7 +11,6 @@ import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningMo
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -26,7 +25,6 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
@@ -39,9 +37,19 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * This class is responsible for scheduling the continuous planner state machine. It is responsible for handling the state transitions and the logic of the state machine.
+ */
 public class ContinuousPlannerSchedulingTask
 {
+   /**
+    * This limits the number of steps in a session, will cause the state machine to stop
+    * */
    private final static int MAX_STEPS_PER_SESSION = 50;
+
+   /**
+    * This is the delay between each tick of the state machine. Set based on perception update rate.
+    */
    private final static long CONTINUOUS_PLANNING_DELAY_MS = 16;
 
    private ContinuousWalkingState state = ContinuousWalkingState.NOT_STARTED;
@@ -94,8 +102,6 @@ public class ContinuousPlannerSchedulingTask
       publisherMap = new ROS2PublisherMap(ros2Node);
       publisherMap.getOrCreatePublisher(controllerFootstepDataTopic);
 
-      ROS2Topic<?> inputTopic = HumanoidControllerAPI.getInputTopic(robotModel.getSimpleRobotName());
-
       pauseWalkingPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(PauseWalkingMessage.class, robotModel.getSimpleRobotName()));
 
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
@@ -110,8 +116,7 @@ public class ContinuousPlannerSchedulingTask
       statistics = new ContinuousPlannerStatistics();
       continuousPlanner.setContinuousPlannerStatistics(statistics);
 
-      SideDependentList<ConvexPolygon2D> footPolygons = FootstepPlanningModuleLauncher.createFootPolygons(robotModel);
-
+      // FIXME this needs to get a copy of the height map or terrain map for the step checker to actually work as intended.
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       snapper = new FootstepSnapAndWiggler(FootstepPlanningModuleLauncher.createFootPolygons(robotModel),
                                            continuousPlanner.getFootstepPlannerParameters(),
@@ -128,8 +133,7 @@ public class ContinuousPlannerSchedulingTask
    {
       continuousPlanner.syncParametersCallback();
 
-      if (!parameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking()
-      )
+      if (!parameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
       {
          state = ContinuousWalkingState.NOT_STARTED;
 
@@ -171,8 +175,11 @@ public class ContinuousPlannerSchedulingTask
       continuousPlanner.initialize();
       continuousPlanner.setGoalWaypointPoses();
       continuousPlanner.planToGoal(commandMessage.get());
-      debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
-      debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
+      if (commandMessage.get().getUseMonteCarloFootstepPlanner() || commandMessage.get().getUseMonteCarloPlanAsReference() || commandMessage.get().getUseHybridPlanner())
+      {
+         debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
+         debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
+      }
 
       if (continuousPlanner.isPlanAvailable())
       {
@@ -188,8 +195,6 @@ public class ContinuousPlannerSchedulingTask
       }
    }
 
-   FramePose3D temp = new FramePose3D();
-
    public void handleStateMachine()
    {
       /*
@@ -204,16 +209,17 @@ public class ContinuousPlannerSchedulingTask
          {
             continuousPlanner.getImminentStanceFromLatestStatus(footstepStatusMessage, controllerQueue);
          }
-         else
-         {
-
-         }
 
          debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
          continuousPlanner.setGoalWaypointPoses();
          continuousPlanner.planToGoal(commandMessage.get());
-         debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
-         debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
+         continuousPlanner.logFootStePlan();
+
+         if (commandMessage.get().getUseHybridPlanner() || commandMessage.get().getUseMonteCarloFootstepPlanner() || commandMessage.get().getUseMonteCarloPlanAsReference())
+         {
+            debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
+            debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
+         }
 
          if (continuousPlanner.isPlanAvailable())
          {
@@ -237,8 +243,11 @@ public class ContinuousPlannerSchedulingTask
          FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(parameters, controllerQueue);
 
          debugger.publishPlannedFootsteps(footstepDataList);
-         debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
-         debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
+         if (commandMessage.get().getUseHybridPlanner() || commandMessage.get().getUseMonteCarloFootstepPlanner() || commandMessage.get().getUseMonteCarloPlanAsReference())
+         {
+            debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());
+            debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
+         }
 
          if (parameters.getStepPublisherEnabled())
          {

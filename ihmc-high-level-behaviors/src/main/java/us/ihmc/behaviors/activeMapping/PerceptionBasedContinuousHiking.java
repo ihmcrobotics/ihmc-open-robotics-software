@@ -18,7 +18,7 @@ import us.ihmc.tools.thread.ExecutorServiceTools;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class PerceptionBasedContinuousWalking
+public class PerceptionBasedContinuousHiking
 {
    private ContinuousPlanner.PlanningMode mode = ContinuousPlanner.PlanningMode.FAST_HIKING;
 
@@ -33,7 +33,7 @@ public class PerceptionBasedContinuousWalking
                                                                                                           getClass(),
                                                                                                           ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
-   public PerceptionBasedContinuousWalking(DRCRobotModel robotModel, String realsenseSerialNumber)
+   public PerceptionBasedContinuousHiking(DRCRobotModel robotModel, String realsenseSerialNumber)
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "nadia_terrain_perception_node");
       syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
@@ -53,8 +53,8 @@ public class PerceptionBasedContinuousWalking
                                                               syncedRobot.getReferenceFrames(),
                                                               syncedRobot::update);
 
-      activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters(), continuousPlanningParameters);
-      activePerceptionModule.initializeContinuousPlannerSchedulingTask(robotModel, ros2Node, syncedRobot.getReferenceFrames(), mode);
+      activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters());
+      activePerceptionModule.initializeContinuousPlannerSchedulingTask(robotModel, ros2Node, syncedRobot.getReferenceFrames(), continuousPlanningParameters, mode);
 
       ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.CONTINUOUS_WALKING_PARAMETERS, continuousPlanningParameters);
       ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.FOOTSTEP_PLANNING_PARAMETERS, activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getFootstepPlannerParameters());

@@ -27,7 +27,6 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.vr.RDXVRPanelPlacementMode;
-import us.ihmc.rdx.ui.vr.RDXVRModeManager;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRDragData;
 import us.ihmc.rdx.vr.RDXVRPickResult;
@@ -36,12 +35,10 @@ import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.badlogic.gdx.graphics.VertexAttributes.Usage.*;
-import static com.badlogic.gdx.graphics.VertexAttributes.Usage.TextureCoordinates;
-import static us.ihmc.rdx.ui.vr.RDXVRPanelPlacementMode.*;
+import static us.ihmc.rdx.ui.vr.RDXVRPanelPlacementMode.MANUAL_PLACEMENT;
 
 public class RDX3DSituatedImagePanel
 {
@@ -65,8 +62,7 @@ public class RDX3DSituatedImagePanel
    private final Vector2 bottomRightUV = new Vector2();
    private final Vector2 topRightUV = new Vector2();
 
-   @Nullable
-   private final RDXVRModeManager vrModeManager;
+   private RDXVRPanelPlacementMode placementMode = MANUAL_PLACEMENT;
    private final MutableReferenceFrame floatingPanelFrame = new MutableReferenceFrame(ReferenceFrame.getWorldFrame());
    private final FramePose3D floatingPanelFramePose = new FramePose3D();
    private double panelDistanceFromHeadset = 0.5;
@@ -77,21 +73,16 @@ public class RDX3DSituatedImagePanel
    /** If either VR controller is hovering the panel. */
    private boolean isVRHovering = false;
 
-   /**
-    * Create for a programmatically placed panel.
-    */
    public RDX3DSituatedImagePanel()
    {
-      vrModeManager = null;
+
    }
 
    /**
     * Create and enable VR interaction.
-    * @param vrModeManager TODO: Remove this and replace with context based manipulation
     */
-   public RDX3DSituatedImagePanel(RDXVRContext context, RDXVRModeManager vrModeManager)
+   public RDX3DSituatedImagePanel(RDXVRContext context)
    {
-      this.vrModeManager = vrModeManager;
       context.addVRPickCalculator(this::calculateVRPick);
       context.addVRInputProcessor(this::processVRInput);
    }
@@ -187,7 +178,7 @@ public class RDX3DSituatedImagePanel
 
       FramePoint3DBasics[] vertices = selectionCollisionBox.getVertices();
       hoverBoxMesh = new ModelInstance(RDXModelBuilder.buildModel(boxMeshBuilder ->
-                                               boxMeshBuilder.addMultiLineBox(vertices, 0.0005, new Color(Color.WHITE))));
+                                                                        boxMeshBuilder.addMultiLineBox(vertices, 0.0005, new Color(Color.WHITE))));
 
       for (RobotSide side : RobotSide.values)
          vrPickResult.get(side).setPickedObjectID(this, "3D Situated Image Panel");
@@ -203,14 +194,6 @@ public class RDX3DSituatedImagePanel
 
    public void update(Texture imageTexture)
    {
-      if (vrModeManager != null)
-      {
-         // Prevent ever having an invisible panel out there, which is very confusing
-         // to the VR user when the controllers are colliding with and invisible box.
-         boolean somethingToShow = imageTexture != null || texture != null;
-         isShowing = somethingToShow && vrModeManager.getShowFloatingVideoPanel().get();
-      }
-
       // Update the texture if necessary
       if (isShowing && imageTexture != null && imageTexture != texture)
       {
@@ -257,22 +240,6 @@ public class RDX3DSituatedImagePanel
    {
       if (isShowing)
       {
-         RDXVRPanelPlacementMode placementMode = vrModeManager.getVideoPanelPlacementMode();
-
-         context.getHeadset().runIfConnected(headset ->
-         {
-            if (placementMode == FOLLOW_HEADSET
-            || (placementMode == MANUAL_PLACEMENT && vrModeManager.getShowFloatVideoPanelNotification().poll()))
-            {
-               floatingPanelFramePose.setToZero(headset.getXForwardZUpHeadsetFrame());
-               floatingPanelFramePose.getPosition().set(panelDistanceFromHeadset, FOLLOW_HEADSET_OFFSET_Y, FOLLOW_HEADSET_OFFSET_Z);
-               floatingPanelFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-               floatingPanelFramePose.get(floatingPanelFrame.getTransformToParent());
-               floatingPanelFrame.getReferenceFrame().update();
-               updatePoses();
-            }
-         });
-
          for (RobotSide side : RobotSide.values)
          {
             context.getController(side).runIfConnected(controller ->
@@ -292,15 +259,11 @@ public class RDX3DSituatedImagePanel
 
                   if (gripDragData.isBeingDragged(this))
                   {
-                     gripDragData.getDragFrame().getTransformToDesiredFrame(floatingPanelFrame.getTransformToParent(),
-                                                                            floatingPanelFrame.getReferenceFrame().getParent());
+                     gripDragData.getDragFrame()
+                                 .getTransformToDesiredFrame(floatingPanelFrame.getTransformToParent(), floatingPanelFrame.getReferenceFrame().getParent());
                      floatingPanelFrame.getReferenceFrame().update();
                      updatePoses();
                   }
-               }
-               else if (controller.getGripActionData().x() > 0.9 && selectionCollisionBox.isPointInside(controller.getPickPointPose().getPosition()))
-               {
-                  vrModeManager.setVideoPanelPlacementMode(MANUAL_PLACEMENT);
                }
             });
          }
@@ -339,5 +302,15 @@ public class RDX3DSituatedImagePanel
    public Texture getTexture()
    {
       return texture;
+   }
+
+   public RDXVRPanelPlacementMode getPlacementMode()
+   {
+      return placementMode;
+   }
+
+   public void setPlacementMode(RDXVRPanelPlacementMode placementMode)
+   {
+      this.placementMode = placementMode;
    }
 }

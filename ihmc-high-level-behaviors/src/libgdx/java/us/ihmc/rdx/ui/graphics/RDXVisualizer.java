@@ -10,6 +10,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -44,6 +45,11 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       if (ImGui.checkbox(labels.get(title), active))
       {
          setActive(active.get());
+         if (this instanceof RDXROS2RobotVisualizer robotVisualizer)
+         {
+            robotVisualizer.visualizeSensors(active.get());
+         }
+
 
          if (getPanel() != null)
             getPanel().getIsShowing().set(active.get());

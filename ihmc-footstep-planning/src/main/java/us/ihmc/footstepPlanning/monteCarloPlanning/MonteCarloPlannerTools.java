@@ -20,6 +20,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D32;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
@@ -326,6 +327,9 @@ public class MonteCarloPlannerTools
       LogTools.info("Optimal Path Size: {}", path.size());
 
       HeightMapPolygonSnapper heightMapSnapper = new HeightMapPolygonSnapper();
+      FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
+      environmentHandler.setHeightMap(request.getHeightMapData());
+      environmentHandler.setTerrainMapData(request.getTerrainMapData());
 
       FootstepPlan footstepPlan = new FootstepPlan();
       for (MonteCarloTreeNode node : path)
@@ -341,7 +345,7 @@ public class MonteCarloPlannerTools
          FramePose3D footstepPose = getFramePose3D(nodeX, nodeY, nodeZ, nodeYaw);
          footPolygon.applyTransform(footstepPose);
 
-         MonteCarloPlannerTools.snapFootPoseToHeightMap(request.getHeightMapData(), footstepPose, heightMapSnapper, footPolygons.get(footstepNode.getRobotSide()));
+         MonteCarloPlannerTools.snapFootPoseToHeightMap(environmentHandler, footstepPose, heightMapSnapper, footPolygons.get(footstepNode.getRobotSide()));
          footstepPlan.addFootstep(footstepNode.getRobotSide(), footstepPose);
 
          LogTools.debug("Footstep Node -> Position: {}, Yaw: {}", footstepPose.getPosition(), footstepPose.getYaw());
@@ -349,21 +353,20 @@ public class MonteCarloPlannerTools
       return footstepPlan;
    }
 
-   public static void snapFootPoseToHeightMap(HeightMapData heightMapData, FramePose3D poseToSnap, HeightMapPolygonSnapper snapper, ConvexPolygon2D footPolygon)
+   public static void snapFootPoseToHeightMap(FootstepPlannerEnvironmentHandler environmentHandler, FramePose3D poseToSnap, HeightMapPolygonSnapper snapper, ConvexPolygon2D footPolygon)
    {
       ConvexPolygon2D footPolygonInWorld = new ConvexPolygon2D(footPolygon);
       footPolygonInWorld.applyTransform(poseToSnap);
-      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygonInWorld, heightMapData, 0.1, Math.toRadians(45));
-      double area = snapper.getArea();
-      double maxArea = footPolygon.getArea();
-      if (snapTransform != null && (area / maxArea > 0.75))
+      RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygonInWorld, environmentHandler, 0.1, Math.toRadians(45));
+
+      if (snapTransform != null && (snapper.getAreaFraction() > 0.75))
       {
          poseToSnap.getTranslation().setZ(0.0);
 //         snapTransform.getTranslation().setZ(0);
 //         snapTransform.getRotation().setYawPitchRoll(0, snapTransform.getRotation().getPitch(), snapTransform.getRotation().getRoll());
          poseToSnap.applyTransform(snapTransform);
       }
-      else if (snapTransform != null && area / maxArea < 0.75)
+      else if (snapTransform != null && snapper.getAreaFraction() < 0.75)
       {
          LogTools.warn("[SNAP] Snap area too low.");
       }

@@ -13,6 +13,34 @@ public enum BlackflyLensProperties
                                -0.0056699,
                                0.0007021),
    /**
+    * S/N = 17403057
+    * <p>
+    *    Calibration was done by Mainstream Autonomy.
+    * </p>
+    */
+   BFLY_U3_23S6C_FE185C086HA_1_17403057_MSA_CALIBRATED(459.58214914178149,
+                                                       459.47282333478574,
+                                                       978.21514340694534,
+                                                       601.73488527313305,
+                                                       0.0052447409101746747,
+                                                       0.0020334684662262435,
+                                                       -0.0030324697736473271,
+                                                       0.00054295260928293441),
+   /**
+    * S/N = 17372478
+    * <p>
+    *    Calibration was done by Mainstream Autonomy.
+    * </p>
+    */
+   BFLY_U3_23S6C_FE185C086HA_1_17372478_MSA_CALIBRATED(458.94767822937951,
+                                                       458.82725101993947,
+                                                       958.7941974006967,
+                                                       605.20380434415313,
+                                                       0.0042160252777120027,
+                                                       0.0028640034773069036,
+                                                       -0.0032855097232928651,
+                                                       0.00058034005897586937),
+   /**
     * These Blackfly S 27S5C parameters were calculated and tuned by @dcalvert, @danderson, and @tbialek on 6/23/2023
     * with a setup with 4 ArUco markers out in the main lab space, one occupying each quadrant of vision.
     */

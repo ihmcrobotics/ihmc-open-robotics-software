@@ -668,12 +668,15 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
          for (RobotSide robotSide : RobotSide.values)
          {
+            RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
+            if (hand == null)
+               continue;
             FramePoint3D position = circlePositionAt(time,
                                                      robotSide.negateIfRightSide(frequency),
                                                      circleRadius,
                                                      circleCenters.get(robotSide),
                                                      circleCenterVelocities.get(robotSide));
-            KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(fullRobotModel.getHand(robotSide), position);
+            KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(hand, position);
             input.getInputs().add().set(message);
          }
          return input;
@@ -829,10 +832,10 @@ public abstract class KinematicsStreamingToolboxControllerTest
       private final YoDouble handPositionMeanError = new YoDouble("HandsPositionMeanError", spyRegistry);
       private final YoDouble handOrientationMeanError = new YoDouble("HandsOrientationMeanError", spyRegistry);
 
-      private final SideDependentList<YoFramePose3D> handDesiredPoses;
-      private final SideDependentList<YoFramePose3D> handCurrentPoses;
-      private final SideDependentList<YoDouble> handPositionErrors;
-      private final SideDependentList<YoDouble> handOrientationErrors;
+      private final SideDependentList<YoFramePose3D> handDesiredPoses = new SideDependentList<>();
+      private final SideDependentList<YoFramePose3D> handCurrentPoses = new SideDependentList<>();
+      private final SideDependentList<YoDouble> handPositionErrors = new SideDependentList<>();
+      private final SideDependentList<YoDouble> handOrientationErrors = new SideDependentList<>();
       private YoDouble time;
       private YoBoolean isStreaming;
       private YoDouble streamingStartTime;
@@ -847,10 +850,17 @@ public abstract class KinematicsStreamingToolboxControllerTest
          this.toolboxRegistry = toolboxRegistry;
          this.desiredFullRobotModel = desiredFullRobotModel;
          this.currentFullRobotModel = currentFullRobotModel;
-         handDesiredPoses = new SideDependentList<>(side -> new YoFramePose3D(side.getCamelCaseName() + "HandDesired", worldFrame, spyRegistry));
-         handCurrentPoses = new SideDependentList<>(side -> new YoFramePose3D(side.getCamelCaseName() + "HandCurrent", worldFrame, spyRegistry));
-         handPositionErrors = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseName() + "HandPositionError", spyRegistry));
-         handOrientationErrors = new SideDependentList<>(side -> new YoDouble(side.getCamelCaseName() + "HandOrientationError", spyRegistry));
+
+         for (RobotSide side : RobotSide.values)
+         {
+            if (desiredFullRobotModel.getHand(side) == null)
+               continue;
+
+            handDesiredPoses      .put(side, new YoFramePose3D(side.getCamelCaseName() + "HandDesired", worldFrame, spyRegistry));
+            handCurrentPoses      .put(side, new YoFramePose3D(side.getCamelCaseName() + "HandCurrent", worldFrame, spyRegistry));
+            handPositionErrors    .put(side, new YoDouble(side.getCamelCaseName() + "HandPositionError", spyRegistry));
+            handOrientationErrors .put(side, new YoDouble(side.getCamelCaseName() + "HandOrientationError", spyRegistry));
+         }
          needsToInitialize = true;
          positionMean = new Mean();
          orientationMean = new Mean();
@@ -899,6 +909,9 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
          for (RobotSide robotSide : RobotSide.values)
          {
+            if (desiredFullRobotModel.getHand(robotSide) == null)
+               continue;
+
             YoFramePose3D handDesiredPose = handDesiredPoses.get(robotSide);
             YoFramePose3D handCurrentPose = handCurrentPoses.get(robotSide);
             YoDouble handPositionError = handPositionErrors.get(robotSide);

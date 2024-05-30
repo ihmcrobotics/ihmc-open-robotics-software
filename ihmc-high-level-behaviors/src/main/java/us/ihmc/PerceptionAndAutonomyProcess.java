@@ -87,6 +87,7 @@ public class PerceptionAndAutonomyProcess
    private static final int ZED_CAMERA_ID = 0;
    private static final SideDependentList<ROS2Topic<ImageMessage>> ZED_COLOR_TOPICS = PerceptionAPI.ZED2_COLOR_IMAGES;
    private static final ROS2Topic<ImageMessage> ZED_DEPTH_TOPIC = PerceptionAPI.ZED2_DEPTH;
+   private static final ROS2Topic<ImageMessage> ZED_CUT_OUT_DEPTH = PerceptionAPI.ZED2_CUT_OUT_DEPTH;
 
    private static final String REALSENSE_SERIAL_NUMBER = System.getProperty("d455.serial.number", "215122253249");
    private static final ROS2Topic<ImageMessage> REALSENSE_COLOR_TOPIC = PerceptionAPI.D455_COLOR_IMAGE;
@@ -94,7 +95,7 @@ public class PerceptionAndAutonomyProcess
 
    private static final ROS2Topic<ImageMessage> OUSTER_DEPTH_TOPIC = PerceptionAPI.OUSTER_DEPTH_IMAGE;
 
-   private static final String LEFT_BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "00000000");
+   private static final String LEFT_BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.left.serial.number", "17403057");
    private static final String RIGHT_BLACKFLY_SERIAL_NUMBER = System.getProperty("blackfly.right.serial.number", "00000000");
    private static final BlackflyLensProperties BLACKFLY_LENS = BlackflyLensProperties.BFS_U3_27S5C_FE185C086HA_1;
    private static final ROS2Topic<ImageMessage> BLACKFLY_IMAGE_TOPIC = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT);
@@ -104,6 +105,9 @@ public class PerceptionAndAutonomyProcess
    private final Supplier<ReferenceFrame> realsenseFrameSupplier;
    private final Supplier<ReferenceFrame> ousterFrameSupplier;
 
+   private final DepthImageOverlapRemover overlapRemover = new DepthImageOverlapRemover();
+
+   private ROS2DemandGraphNode depthOverlapRemovalDemandNode;
    private ROS2DemandGraphNode zedPointCloudDemandNode;
    private ROS2DemandGraphNode zedColorDemandNode;
    private ROS2DemandGraphNode zedDepthDemandNode;
@@ -180,8 +184,7 @@ public class PerceptionAndAutonomyProcess
                                        Supplier<ReferenceFrame> ousterFrameSupplier,
                                        Supplier<ReferenceFrame> leftBlackflyFrameSupplier,
                                        Supplier<ReferenceFrame> rightBlackflyFrameSupplier,
-                                       Supplier<ReferenceFrame> robotPelvisFrameSupplier,
-                                       ReferenceFrame zed2iLeftCameraFrame)
+                                       Supplier<ReferenceFrame> robotPelvisFrameSupplier)
    {
       this.ros2Helper = ros2Helper;
       this.zedFrameSupplier = zedFrameSupplier;
@@ -191,7 +194,7 @@ public class PerceptionAndAutonomyProcess
       initializeDependencyGraph(ros2Helper);
 
       zedImageRetriever = new ZEDColorDepthImageRetriever(ZED_CAMERA_ID, zedFrameSupplier, zedDepthDemandNode, zedColorDemandNode);
-      zedImagePublisher = new ZEDColorDepthImagePublisher(ZED_COLOR_TOPICS, ZED_DEPTH_TOPIC);
+      zedImagePublisher = new ZEDColorDepthImagePublisher(ZED_COLOR_TOPICS, ZED_DEPTH_TOPIC, ZED_CUT_OUT_DEPTH);
       zedProcessAndPublishThread = new RestartableThread("ZEDImageProcessAndPublish", this::processAndPublishZED);
       zedProcessAndPublishThread.start();
 
@@ -315,6 +318,7 @@ public class PerceptionAndAutonomyProcess
       // TODO: Why does this result in a native crash?
 //      openCLManager.destroy();
 
+      depthOverlapRemovalDemandNode.destroy();
       zedPointCloudDemandNode.destroy();
       zedColorDemandNode.destroy();
       zedDepthDemandNode.destroy();
@@ -359,6 +363,13 @@ public class PerceptionAndAutonomyProcess
          if (yoloZEDDemandNode.isDemanded())
             yolov8DetectionManager.setDetectionImages(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
 
+         if (depthOverlapRemovalDemandNode.isDemanded() && realsenseDemandNode.isDemanded() && realsenseDepthImage != null)
+         {
+            RawImage zedCutOutDepthImage = overlapRemover.removeOverlap(zedDepthImage.get(), 20);
+            zedImagePublisher.setNextCutOutDepthImage(zedCutOutDepthImage.get());
+            zedCutOutDepthImage.release();
+         }
+
          zedImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
          for (RobotSide side : RobotSide.values)
          {
@@ -379,9 +390,10 @@ public class PerceptionAndAutonomyProcess
          realsenseDepthImage = realsenseImageRetriever.getLatestRawDepthImage();
          realsenseColorImage = realsenseImageRetriever.getLatestRawColorImage();
 
-         // Do processing on image
          if (yoloRealsenseDemandNode.isDemanded())
             yolov8DetectionManager.setDetectionImages(realsenseColorImage, realsenseDepthImage);
+
+         overlapRemover.setHighQualityImage(realsenseDepthImage.get());
 
          realsenseImagePublisher.setNextDepthImage(realsenseDepthImage.get());
          realsenseImagePublisher.setNextColorImage(realsenseColorImage.get());
@@ -563,6 +575,7 @@ public class PerceptionAndAutonomyProcess
    private void initializeDependencyGraph(ROS2PublishSubscribeAPI ros2)
    {
       // Initialize all nodes
+      depthOverlapRemovalDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_OVERLAP_REMOVAL);
       zedPointCloudDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
       zedDepthDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_DEPTH);
       zedColorDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_COLOR);
@@ -622,8 +635,7 @@ public class PerceptionAndAutonomyProcess
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
-                                                                                                   ReferenceFrame::getWorldFrame,
-                                                                                                   ReferenceFrame.getWorldFrame());
+                                                                                                   ReferenceFrame::getWorldFrame);
       perceptionAndAutonomyProcess.startAutonomyThread();
 
       // To run a sensor without the UI, uncomment the below line.
