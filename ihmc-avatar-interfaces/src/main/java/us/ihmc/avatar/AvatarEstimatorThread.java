@@ -205,7 +205,8 @@ public class AvatarEstimatorThread extends ModularRobotController implements SCS
    public YoGraphicGroupDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-      group.addChild(mainStateEstimator.getSCS2YoGraphics());
+      if (mainStateEstimator != null)
+         group.addChild(mainStateEstimator.getSCS2YoGraphics());
       for (ImmutablePair<BooleanSupplier, StateEstimatorController> entry : secondaryStateEstimators)
       {
          group.addChild(entry.getRight().getSCS2YoGraphics());
