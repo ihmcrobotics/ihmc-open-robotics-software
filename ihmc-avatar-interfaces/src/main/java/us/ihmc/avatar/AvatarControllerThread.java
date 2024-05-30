@@ -97,7 +97,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                  DRCOutputProcessor outputProcessor,
                                  RealtimeROS2Node realtimeROS2Node,
                                  double gravity,
-                                 boolean kinematicsOnly)
+                                 boolean kinematicsSimulation)
    {
       controllerFullRobotModel = robotModel.createFullRobotModel();
       if (robotInitialSetup != null)
@@ -152,7 +152,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                   desiredJointDataHolder,
                                                   yoGraphicsListRegistry,
                                                   registry,
-                                                  kinematicsOnly,
+                                                  kinematicsSimulation,
                                                   arrayOfJointsToIgnore);
 
       createControllerRobotMotionStatusUpdater(controllerFactory, robotMotionStatusHolder);
@@ -227,7 +227,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
                                                             JointDesiredOutputListBasics lowLevelControllerOutput,
                                                             YoGraphicsListRegistry yoGraphicsListRegistry,
                                                             YoRegistry registry,
-                                                            boolean kinematicsOnly,
+                                                            boolean kinematicsSimulation,
                                                             JointBasics... jointsToIgnore)
    {
       if (CREATE_COM_CALIBRATION_TOOL)
@@ -249,7 +249,7 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       HumanoidHighLevelControllerManager robotController = controllerFactory.getController(controllerModel,
                                                                                            controlDT,
                                                                                            gravity,
-                                                                                           kinematicsOnly,
+                                                                                           kinematicsSimulation,
                                                                                            yoTime,
                                                                                            yoGraphicsListRegistry,
                                                                                            sensorInformation,

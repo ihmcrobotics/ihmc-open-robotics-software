@@ -22,9 +22,9 @@ import java.util.Map;
 
 /**
  * This class is used to pass desired accelerations through for
- * kinematics only simulations.
+ * kinematics simulations.
  */
-public class SCS2KinematicsOnlyOutputWriter implements JointDesiredOutputWriter
+public class SCS2KinematicsSimulationOutputWriter implements JointDesiredOutputWriter
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final ControllerInput controllerInput;
@@ -36,9 +36,9 @@ public class SCS2KinematicsOnlyOutputWriter implements JointDesiredOutputWriter
    private SimFloatingRootJoint simFloatingRootJoint;
    private RootJointDesiredConfigurationDataReadOnly outputForRootJoint;
 
-   public SCS2KinematicsOnlyOutputWriter(ControllerInput controllerInput,
-                                         ControllerOutput controllerOutput,
-                                         boolean writeBeforeEstimatorTick)
+   public SCS2KinematicsSimulationOutputWriter(ControllerInput controllerInput,
+                                               ControllerOutput controllerOutput,
+                                               boolean writeBeforeEstimatorTick)
    {
       this.controllerInput = controllerInput;
       this.controllerOutput = controllerOutput;

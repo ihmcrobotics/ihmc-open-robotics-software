@@ -12,29 +12,28 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 /**
  * Provides virtual ground reaction forces to keep the feet from flying away
- * when doing kinematics only simulations. It does this by feeding in controlled spatial
+ * when doing kinematics simulations. It does this by feeding in controlled spatial
  * acceleration commands for the feet into the controller to keep them in place
  * when they are nominally supposed to be in contact with the ground.
  */
-public class KinematicsOnlyVirtualGroundReactionManager
+public class KinematicsSimulationVirtualGroundReactionManager
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingHighLevelHumanoidController walkingController;
-   private final SideDependentList<KinematicsOnlyContactStateHolder> contactStateHolders = new SideDependentList<>();
+   private final SideDependentList<KinematicsSimulationContactStateHolder> contactStateHolders = new SideDependentList<>();
    private final FramePose3D desiredFootstep = new FramePose3D();
    private final InverseDynamicsCommandList inverseDynamicsContactHolderCommandList = new InverseDynamicsCommandList();
 
-   public KinematicsOnlyVirtualGroundReactionManager(HighLevelHumanoidControllerToolbox controllerToolbox,
-                                                     StatusMessageOutputManager statusOutputManager,
-                                                     WalkingHighLevelHumanoidController walkingController)
+   public KinematicsSimulationVirtualGroundReactionManager(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                                           StatusMessageOutputManager statusOutputManager,
+                                                           WalkingHighLevelHumanoidController walkingController)
    {
       this.controllerToolbox = controllerToolbox;
       this.walkingController = walkingController;
 
       statusOutputManager.attachStatusMessageListener(FootstepStatusMessage.class, this::processFootstepStatus);
-
    }
 
    /** Needs to be done after walking controller is initialized. */
@@ -43,7 +42,7 @@ public class KinematicsOnlyVirtualGroundReactionManager
       for (RobotSide robotSide : RobotSide.values)
       {
          contactStateHolders.put(robotSide,
-                                 KinematicsOnlyContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
+                                 KinematicsSimulationContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
       }
    }
 
@@ -61,7 +60,7 @@ public class KinematicsOnlyVirtualGroundReactionManager
          }
          case FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED ->
             contactStateHolders.put(side,
-                                    new KinematicsOnlyContactStateHolder(controllerToolbox.getFootContactStates().get(side), desiredFootstep));
+                                    new KinematicsSimulationContactStateHolder(controllerToolbox.getFootContactStates().get(side), desiredFootstep));
       }
    }
 

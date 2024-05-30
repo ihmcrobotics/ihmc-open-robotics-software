@@ -18,9 +18,9 @@ import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 /**
- * Used with {@link KinematicsOnlyVirtualGroundReactionManager}.
+ * Used with {@link KinematicsSimulationVirtualGroundReactionManager}.
  */
-public class KinematicsOnlyContactStateHolder
+public class KinematicsSimulationContactStateHolder
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -39,14 +39,14 @@ public class KinematicsOnlyContactStateHolder
    private final InverseDynamicsCommandList commandList = new InverseDynamicsCommandList();
    private final FramePoint3D desiredContactPoint;
 
-   public static KinematicsOnlyContactStateHolder holdAtCurrent(PlaneContactState contactStateToHold)
+   public static KinematicsSimulationContactStateHolder holdAtCurrent(PlaneContactState contactStateToHold)
    {
       FramePose3D desiredPose = new FramePose3D(contactStateToHold.getPlaneFrame());
       desiredPose.changeFrame(worldFrame);
-      return new KinematicsOnlyContactStateHolder(contactStateToHold, desiredPose);
+      return new KinematicsSimulationContactStateHolder(contactStateToHold, desiredPose);
    }
 
-   public KinematicsOnlyContactStateHolder(PlaneContactState contactStateToHold, FramePose3DReadOnly desiredPlaneFramePose)
+   public KinematicsSimulationContactStateHolder(PlaneContactState contactStateToHold, FramePose3DReadOnly desiredPlaneFramePose)
    {
       this.contactStateToHold = contactStateToHold;
       currentPlaneFrame = (MovingReferenceFrame) contactStateToHold.getPlaneFrame();

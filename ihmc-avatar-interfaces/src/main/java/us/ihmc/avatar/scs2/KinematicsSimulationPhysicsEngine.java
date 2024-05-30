@@ -16,13 +16,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Used for kinematics only simulation of robots.
+ * Used for kinematics simulation of robots.
  * The controller output is expected to be joint accelerations which
  * will be integrated to play out the motion.
  *
  * TODO: How do we handle terrain objects?
  */
-public class KinematicsOnlyPhysicsEngine implements PhysicsEngine
+public class KinematicsSimulationPhysicsEngine implements PhysicsEngine
 {
    private final ReferenceFrame inertialFrame;
    private final SingleRobotFirstOrderIntegrator integrator = new SingleRobotFirstOrderIntegrator();
@@ -33,7 +33,7 @@ public class KinematicsOnlyPhysicsEngine implements PhysicsEngine
 
    private boolean hasBeenInitialized = false;
 
-   public KinematicsOnlyPhysicsEngine(ReferenceFrame inertialFrame, YoRegistry rootRegistry)
+   public KinematicsSimulationPhysicsEngine(ReferenceFrame inertialFrame, YoRegistry rootRegistry)
    {
       this.rootRegistry = rootRegistry;
       this.inertialFrame = inertialFrame;

@@ -25,7 +25,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTraj
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.KinematicsOnlyContactStateHolder;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.KinematicsSimulationContactStateHolder;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -129,7 +129,7 @@ public class HumanoidKinematicsSimulation
    private final MultiBodySystemStateIntegrator integrator = new MultiBodySystemStateIntegrator();
 
    private AtomicReference<WalkingStatus> latestWalkingStatus = new AtomicReference<>();
-   private SideDependentList<KinematicsOnlyContactStateHolder> contactStateHolders = new SideDependentList<>();
+   private SideDependentList<KinematicsSimulationContactStateHolder> contactStateHolders = new SideDependentList<>();
    private InverseDynamicsCommandList inverseDynamicsContactHolderCommandList = new InverseDynamicsCommandList();
    private YoVariableServer yoVariableServer = null;
    private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
@@ -454,7 +454,7 @@ public class HumanoidKinematicsSimulation
       for (RobotSide robotSide : RobotSide.values)
       {
          contactStateHolders.put(robotSide,
-                                 KinematicsOnlyContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
+                                 KinematicsSimulationContactStateHolder.holdAtCurrent(controllerToolbox.getFootContactStates().get(robotSide)));
       }
 
       if (simulatedHandKinematicController != null)
@@ -576,7 +576,7 @@ public class HumanoidKinematicsSimulation
             break;
          case COMPLETED:
             contactStateHolders.put(side,
-                                    new KinematicsOnlyContactStateHolder(controllerToolbox.getFootContactStates().get(side), desiredFootstep));
+                                    new KinematicsSimulationContactStateHolder(controllerToolbox.getFootContactStates().get(side), desiredFootstep));
             break;
          default:
             throw new RuntimeException("Unexpected status: " + status);

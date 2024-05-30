@@ -47,7 +47,7 @@ public class WalkingControllerState extends HighLevelControllerState
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   private final KinematicsOnlyVirtualGroundReactionManager kinematicsOnlyVirtualGroundReactionManager;
+   private final KinematicsSimulationVirtualGroundReactionManager kinematicsSimulationVirtualGroundReactionManager;
 
    public WalkingControllerState(CommandInputManager commandInputManager,
                                  StatusMessageOutputManager statusOutputManager,
@@ -80,10 +80,10 @@ public class WalkingControllerState extends HighLevelControllerState
       //      linearMomentumRateControlModule = new LinearMomentumRateControlModule(controllerToolbox, walkingControllerParameters, registry);
       linearMomentumRateControlModule = controllerCoreFactory.getOrCreateLinearMomentumRateControlModule(registry);
 
-      if (controllerToolbox.isKinematicsOnly())
-         kinematicsOnlyVirtualGroundReactionManager = new KinematicsOnlyVirtualGroundReactionManager(controllerToolbox, statusOutputManager, walkingController);
+      if (controllerToolbox.isKinematicsSimulation())
+         kinematicsSimulationVirtualGroundReactionManager = new KinematicsSimulationVirtualGroundReactionManager(controllerToolbox, statusOutputManager, walkingController);
       else
-         kinematicsOnlyVirtualGroundReactionManager = null;
+         kinematicsSimulationVirtualGroundReactionManager = null;
 
       registry.addChild(walkingController.getYoVariableRegistry());
    }
@@ -98,16 +98,16 @@ public class WalkingControllerState extends HighLevelControllerState
       linearMomentumRateControlModule.reset();
       requestIntegratorReset = true;
 
-      if (kinematicsOnlyVirtualGroundReactionManager != null)
-         kinematicsOnlyVirtualGroundReactionManager.initialize();
+      if (kinematicsSimulationVirtualGroundReactionManager != null)
+         kinematicsSimulationVirtualGroundReactionManager.initialize();
    }
 
    @Override
    public void doAction(double timeInState)
    {
-      if (kinematicsOnlyVirtualGroundReactionManager != null)
+      if (kinematicsSimulationVirtualGroundReactionManager != null)
       {
-         kinematicsOnlyVirtualGroundReactionManager.update();
+         kinematicsSimulationVirtualGroundReactionManager.update();
       }
 
       walkingController.doAction();
@@ -125,9 +125,9 @@ public class WalkingControllerState extends HighLevelControllerState
       {
          controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getCenterOfPressureCommand());
       }
-      if (kinematicsOnlyVirtualGroundReactionManager != null)
+      if (kinematicsSimulationVirtualGroundReactionManager != null)
       {
-         controllerCoreCommand.addInverseDynamicsCommand(kinematicsOnlyVirtualGroundReactionManager.getInverseDynamicsContactHolderCommandList());
+         controllerCoreCommand.addInverseDynamicsCommand(kinematicsSimulationVirtualGroundReactionManager.getInverseDynamicsContactHolderCommandList());
       }
 
       JointDesiredOutputList stateSpecificJointSettings = getStateSpecificJointSettings();

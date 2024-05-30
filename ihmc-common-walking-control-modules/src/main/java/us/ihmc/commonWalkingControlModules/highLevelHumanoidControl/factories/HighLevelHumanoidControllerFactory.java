@@ -449,7 +449,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public HumanoidHighLevelControllerManager getController(FullHumanoidRobotModel fullRobotModel,
                                                            double controlDT,
                                                            double gravity,
-                                                           boolean kinematicsOnly,
+                                                           boolean kinematicsSimulation,
                                                            YoDouble yoTime,
                                                            YoGraphicsListRegistry yoGraphicsListRegistry,
                                                            HumanoidRobotSensorInformation sensorInformation,
@@ -463,7 +463,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       YoBoolean usingEstimatorCoMVelocity = new YoBoolean("usingEstimatorCoMVelocity", registry);
 
       CenterOfMassStateProvider centerOfMassStateProvider;
-      if (kinematicsOnly)
+      if (kinematicsSimulation)
       {
          centerOfMassStateProvider = CenterOfMassStateProvider.createJacobianBasedStateCalculator(fullRobotModel.getElevator(), worldFrame);
       }
@@ -522,7 +522,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                forceSensorDataHolder,
                                                                                fullRobotModel.getRootBody(),
                                                                                totalRobotWeight,
-                                                                               kinematicsOnly,
+                                                                               kinematicsSimulation,
                                                                                yoGraphicsListRegistry,
                                                                                registry);
       SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
@@ -540,7 +540,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                  omega0,
                                                                  feet,
                                                                  controlDT,
-                                                                 kinematicsOnly,
+                                                                 kinematicsSimulation,
                                                                  updatables,
                                                                  contactablePlaneBodies,
                                                                  yoGraphicsListRegistry,
@@ -602,13 +602,13 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                      ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                                                      RigidBodyBasics rootBody,
                                                                      double totalRobotWeight,
-                                                                     boolean kinematicsOnly,
+                                                                     boolean kinematicsSimulation,
                                                                      YoGraphicsListRegistry yoGraphicsListRegistry,
                                                                      YoRegistry registry)
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<>();
 
-      if (kinematicsOnly)
+      if (kinematicsSimulation)
       {
          for (RobotSide robotSide : RobotSide.values)
          {
