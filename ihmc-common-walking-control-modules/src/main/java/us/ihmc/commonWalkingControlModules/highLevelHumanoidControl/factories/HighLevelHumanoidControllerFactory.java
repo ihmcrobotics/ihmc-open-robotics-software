@@ -462,44 +462,36 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       YoBoolean usingEstimatorCoMPosition = new YoBoolean("usingEstimatorCoMPosition", registry);
       YoBoolean usingEstimatorCoMVelocity = new YoBoolean("usingEstimatorCoMVelocity", registry);
 
-      CenterOfMassStateProvider centerOfMassStateProvider;
-      if (kinematicsSimulation)
+      CenterOfMassStateProvider centerOfMassStateProvider = new CenterOfMassStateProvider()
       {
-         centerOfMassStateProvider = CenterOfMassStateProvider.createJacobianBasedStateCalculator(fullRobotModel.getElevator(), worldFrame);
-      }
-      else
-      {
-         centerOfMassStateProvider = new CenterOfMassStateProvider()
+         CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), worldFrame);
+
+         @Override
+         public void updateState()
          {
-            CenterOfMassJacobian centerOfMassJacobian = new CenterOfMassJacobian(fullRobotModel.getElevator(), worldFrame);
+            centerOfMassJacobian.reset();
+         }
 
-            @Override
-            public void updateState()
-            {
-               centerOfMassJacobian.reset();
-            }
+         @Override
+         public FramePoint3DReadOnly getCenterOfMassPosition()
+         {
+            usingEstimatorCoMPosition.set(centerOfMassDataHolderForController.hasCenterOfMassPosition());
+            if (centerOfMassDataHolderForController.hasCenterOfMassPosition())
+               return centerOfMassDataHolderForController.getCenterOfMassPosition();
+            else
+               return centerOfMassJacobian.getCenterOfMass();
+         }
 
-            @Override
-            public FramePoint3DReadOnly getCenterOfMassPosition()
-            {
-               usingEstimatorCoMPosition.set(centerOfMassDataHolderForController.hasCenterOfMassPosition());
-               if (centerOfMassDataHolderForController.hasCenterOfMassPosition())
-                  return centerOfMassDataHolderForController.getCenterOfMassPosition();
-               else
-                  return centerOfMassJacobian.getCenterOfMass();
-            }
-
-            @Override
-            public FrameVector3DReadOnly getCenterOfMassVelocity()
-            {
-               usingEstimatorCoMVelocity.set(centerOfMassDataHolderForController.hasCenterOfMassVelocity());
-               if (centerOfMassDataHolderForController.hasCenterOfMassVelocity())
-                  return centerOfMassDataHolderForController.getCenterOfMassVelocity();
-               else
-                  return centerOfMassJacobian.getCenterOfMassVelocity();
-            }
-         };
-      }
+         @Override
+         public FrameVector3DReadOnly getCenterOfMassVelocity()
+         {
+            usingEstimatorCoMVelocity.set(centerOfMassDataHolderForController.hasCenterOfMassVelocity());
+            if (centerOfMassDataHolderForController.hasCenterOfMassVelocity())
+               return centerOfMassDataHolderForController.getCenterOfMassVelocity();
+            else
+               return centerOfMassJacobian.getCenterOfMassVelocity();
+         }
+      };
 
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel, centerOfMassStateProvider, null);
 
