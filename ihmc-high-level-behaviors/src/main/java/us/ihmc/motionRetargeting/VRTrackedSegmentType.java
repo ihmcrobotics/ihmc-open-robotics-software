@@ -61,4 +61,36 @@ public enum VRTrackedSegmentType
    {
       return orientationWeight;
    }
+
+   public boolean isFootRelated()
+   {
+      return segmentName.contains("Ankle") || segmentName.contains("Foot");
+   }
+
+   public boolean isHandRelated()
+   {
+      return segmentName.contains("Hand");
+   }
+
+   public static VRTrackedSegmentType[] getTrackerTypes()
+   {
+      return new VRTrackedSegmentType[]
+            {
+                  LEFT_WRIST,
+                  RIGHT_WRIST,
+                  CHEST,
+                  WAIST,
+                  LEFT_ANKLE,
+                  RIGHT_ANKLE
+            };
+   }
+
+   public static VRTrackedSegmentType[] getControllerTypes()
+   {
+      return new VRTrackedSegmentType[]
+            {
+                  LEFT_HAND,
+                  RIGHT_HAND
+            };
+   }
 }

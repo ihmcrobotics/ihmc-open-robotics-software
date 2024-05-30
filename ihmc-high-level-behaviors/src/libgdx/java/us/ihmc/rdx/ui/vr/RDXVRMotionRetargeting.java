@@ -44,7 +44,7 @@ public class RDXVRMotionRetargeting
 
    private final RigidBodyTransform initialWaistTrackerTransformToWorld = new RigidBodyTransform();
    private final FramePose3D newPelvisFramePose = new FramePose3D();
-   private final Map<VRTrackedSegmentType, ReferenceFrame> desiredFrames = new HashMap<>();
+   private final Map<VRTrackedSegmentType, ReferenceFrame> retargetedFrames = new HashMap<>();
    private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
    private Point3D centerOfMassDesiredXYInWorld;
    private ReferenceFrame initialPelvisFrame;
@@ -80,7 +80,7 @@ public class RDXVRMotionRetargeting
     */
    public void computeDesiredValues()
    {
-      desiredFrames.clear();
+      retargetedFrames.clear();
       retargetPelvis();
       retargetCoM();
       retargetHands();
@@ -123,7 +123,7 @@ public class RDXVRMotionRetargeting
          newPelvisFramePose.getRotation().setYawPitchRoll(newPelvisFramePose.getRotation().getYaw(), newPelvisFramePose.getRotation().getPitch(),0.0);
          newPelvisFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-         desiredFrames.put(WAIST, ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), newPelvisFramePose));
+         retargetedFrames.put(WAIST, ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), newPelvisFramePose));
       }
    }
 
@@ -186,9 +186,9 @@ public class RDXVRMotionRetargeting
    }
 
    /**
-    * Compute desired pose of arms.
+    * Compute desired pose of hands.
     * Use the pose of the chest tracker (on the stern of the user) and the headset location to estimate the position of the shoulders.
-    * Then scale the controller referenceFrames by the ratio of robot arm length / initial controller frame.
+    * Then scale the relative position of the hand wrt to the shoulder based on the ratio of robot arm length / initial controller frame.
     */
    private void retargetHands()
    {
@@ -255,7 +255,7 @@ public class RDXVRMotionRetargeting
                // Set desired frame for hand
                FramePose3D desiredHandPose = new FramePose3D(ReferenceFrame.getWorldFrame(), handFrame.getTransformToWorldFrame());
                desiredHandPose.getTranslation().set(scaledHandPosition);
-               desiredFrames.put(side == RobotSide.LEFT ? LEFT_HAND : RIGHT_HAND, ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), desiredHandPose));
+               retargetedFrames.put(side == RobotSide.LEFT ? LEFT_HAND : RIGHT_HAND, ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), desiredHandPose));
             }
          }
       }
@@ -276,18 +276,18 @@ public class RDXVRMotionRetargeting
       initialPelvisFrame = null;
       for (RobotSide side : RobotSide.values)
          initialHandPositionsInWorld.put(side, null);
-      desiredFrames.clear();
+      retargetedFrames.clear();
       centerOfMassDesiredXYInWorld = null;
    }
 
    public Set<VRTrackedSegmentType> getRetargetedSegments()
    {
-      return desiredFrames.keySet();
+      return retargetedFrames.keySet();
    }
 
    public ReferenceFrame getDesiredFrame(VRTrackedSegmentType segment)
    {
-      return desiredFrames.get(segment);
+      return retargetedFrames.get(segment);
    }
 
    public Point3D getDesiredCenterOfMassXYInWorld()
