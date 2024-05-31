@@ -202,15 +202,20 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
          pelvisPoseHistoryGraphic.update(0.01, currentHistoryPelvisPose);
       }
 
-      boolean added = false;
-      while (!completedFootstepThreadBarrier.isEmpty())
+      // Avoid generating the meshes when we aren't showing them, just because the footstep plan graphic isn't super optimized
+      if (showHistory.get() && includeFootstepHistory.get())
       {
-         added = true;
-         footstepHistory.add(completedFootstepThreadBarrier.poll());
+         boolean added = false;
+         while (!completedFootstepThreadBarrier.isEmpty())
+         {
+            added = true;
+            footstepHistory.add(completedFootstepThreadBarrier.poll());
+         }
+
+         if (added)
+            footstepHistoryGraphic.generateMeshes(footstepHistory);
       }
 
-      if (added)
-         footstepHistoryGraphic.generateMeshes(footstepHistory);
       footstepHistoryGraphic.update();
    }
 
