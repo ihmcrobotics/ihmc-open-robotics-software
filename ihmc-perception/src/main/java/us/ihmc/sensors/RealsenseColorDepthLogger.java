@@ -9,13 +9,13 @@ import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.MutableBytePointer;
 import us.ihmc.perception.logging.PerceptionDataLogger;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
+import us.ihmc.perception.opencv.OpenCVTools;
+import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDevice;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
-import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.tools.IHMCCommonPaths;
@@ -30,7 +30,7 @@ import java.util.Date;
 /**
  * Logs color and depth from Realsense sensors into HDf5 log file locally
  */
-public class RealsenseColorAndDepthLogger
+public class RealsenseColorDepthLogger
 {
    private final FramePose3D cameraPose = new FramePose3D();
    private final String colorChannelName;
@@ -63,7 +63,7 @@ public class RealsenseColorAndDepthLogger
    private long depthSequenceNumber = 0;
    private long colorSequenceNumber = 0;
 
-   public RealsenseColorAndDepthLogger(String serialNumber, RealsenseConfiguration realsenseConfiguration, String depthChannelName, String colorChannelName)
+   public RealsenseColorDepthLogger(String serialNumber, RealsenseConfiguration realsenseConfiguration, String depthChannelName, String colorChannelName)
    {
       this.serialNumber = serialNumber;
       this.depthWidth = realsenseConfiguration.getDepthWidth();
@@ -158,9 +158,9 @@ public class RealsenseColorAndDepthLogger
 
       // L515: [F1121365, F0245563], D455: [215122254074]
       String serialNumber = System.getProperty("l515.serial.number", "F1121365");
-      new RealsenseColorAndDepthLogger(serialNumber,
-                                       RealsenseConfiguration.L515_COLOR_720P_DEPTH_768P_30HZ,
-                                       PerceptionLoggerConstants.L515_DEPTH_NAME,
-                                       PerceptionLoggerConstants.L515_DEPTH_NAME);
+      new RealsenseColorDepthLogger(serialNumber,
+                                    RealsenseConfiguration.L515_COLOR_720P_DEPTH_768P_30HZ,
+                                    PerceptionLoggerConstants.L515_DEPTH_NAME,
+                                    PerceptionLoggerConstants.L515_DEPTH_NAME);
    }
 }

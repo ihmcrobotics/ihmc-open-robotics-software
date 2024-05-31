@@ -19,7 +19,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.Date;
 
-public class ZEDColorAndDepthLogger
+public class ZEDColorDepthLogger
 {
    protected final ImageMessage imageMessage = new ImageMessage();
    private final SampleInfo sampleInfo = new SampleInfo();
@@ -30,10 +30,10 @@ public class ZEDColorAndDepthLogger
    private final Object colorBytePointerSyncObject = new Object();
    private BytePointer colorBytePointer;
 
-   public ZEDColorAndDepthLogger(String title,
-                                 DomainFactory.PubSubImplementation pubSubImplementation,
-                                 ROS2Topic<ImageMessage> depthTopic,
-                                 ROS2Topic<ImageMessage> colorTopic)
+   public ZEDColorDepthLogger(String title,
+                              DomainFactory.PubSubImplementation pubSubImplementation,
+                              ROS2Topic<ImageMessage> depthTopic,
+                              ROS2Topic<ImageMessage> colorTopic)
    {
       zedDepthDataLogger = new PerceptionDataLogger();
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
@@ -99,9 +99,9 @@ public class ZEDColorAndDepthLogger
 
    public static void main(String[] args)
    {
-      new ZEDColorAndDepthLogger("ZED 2 Depth",
-                                 DomainFactory.PubSubImplementation.FAST_RTPS,
-                                 PerceptionAPI.ZED2_DEPTH,
-                                 PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
+      new ZEDColorDepthLogger("ZED 2 Depth",
+                              DomainFactory.PubSubImplementation.FAST_RTPS,
+                              PerceptionAPI.ZED2_DEPTH,
+                              PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
    }
 }
