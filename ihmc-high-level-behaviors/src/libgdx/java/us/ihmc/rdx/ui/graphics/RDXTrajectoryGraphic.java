@@ -20,6 +20,7 @@ import java.util.Collection;
 public class RDXTrajectoryGraphic
 {
    public static final float OPACITY = 0.7f;
+   private final Color color;
    private final RecyclingArrayList<Point3D> positions = new RecyclingArrayList<>(Point3D::new);
    private final RDXMutableMultiLineModel positionTrajectoryGraphic = new RDXMutableMultiLineModel();
 
@@ -30,7 +31,17 @@ public class RDXTrajectoryGraphic
    private final RotationMatrix relativeRotation = new RotationMatrix();
    private final RotationMatrix endOrientation = new RotationMatrix();
 
-   /** Straight line trajectory. */
+   public RDXTrajectoryGraphic()
+   {
+      this(Color.WHITE);
+   }
+
+   public RDXTrajectoryGraphic(Color color)
+   {
+      this.color = color;
+   }
+
+   /** Set to be a single straight line trajectory. */
    public void update(double lineWidth, RigidBodyTransformReadOnly start, RigidBodyTransformReadOnly end)
    {
       positions.clear();
@@ -43,6 +54,7 @@ public class RDXTrajectoryGraphic
       updateInternal(lineWidth);
    }
 
+   /** Pass and override the entire list of poses. */
    public void update(double lineWidth, Collection<? extends RigidBodyTransformReadOnly> posesReadOnly)
    {
       positions.clear();
@@ -56,6 +68,15 @@ public class RDXTrajectoryGraphic
       updateInternal(lineWidth);
    }
 
+   /** Add a pose to the end of the list. */
+   public void update(double lineWidth, RigidBodyTransformReadOnly poseToAdd)
+   {
+      positions.add().set(poseToAdd.getTranslation());
+      poses.add().set(poseToAdd);
+
+      updateInternal(lineWidth);
+   }
+
    public void clear()
    {
       positionTrajectoryGraphic.clear();
@@ -65,7 +86,7 @@ public class RDXTrajectoryGraphic
 
    private void updateInternal(double lineWidth)
    {
-      positionTrajectoryGraphic.update(positions, lineWidth, Color.WHITE);
+      positionTrajectoryGraphic.update(positions, lineWidth, color);
       positionTrajectoryGraphic.accessModelIfExists(modelInstance -> modelInstance.setOpacity(OPACITY));
 
       if (referenceFrameGraphics == null)

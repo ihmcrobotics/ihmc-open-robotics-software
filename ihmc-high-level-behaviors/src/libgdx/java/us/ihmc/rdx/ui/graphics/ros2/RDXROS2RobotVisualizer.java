@@ -1,28 +1,38 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.rdx.RDXFocusBasedCamera;
+import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiSliderFloat;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
-import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
 import us.ihmc.rdx.ui.interactable.RDXInteractableBlackflyFujinon;
 import us.ihmc.rdx.ui.interactable.RDXInteractableOuster;
 import us.ihmc.rdx.ui.interactable.RDXInteractableRealsenseD455;
 import us.ihmc.rdx.ui.interactable.RDXInteractableZED2i;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.Set;
 import java.util.function.Supplier;
 
 public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
@@ -31,6 +41,7 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
    private final ROS2PublishSubscribeAPI ros2;
    private final ImBoolean trackRobot = new ImBoolean(false);
    private final ImBoolean hideChest = new ImBoolean(false);
+   private final ImBoolean showPoseHistory = new ImBoolean(false);
    private final Supplier<RDXFocusBasedCamera> cameraForTrackingSupplier;
    private RDXFocusBasedCamera cameraForTracking;
    private final Point3D previousRobotMidFeetUnderPelvis = new Point3D();
@@ -46,6 +57,9 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
    private RDXInteractableRealsenseD455 interactableRealsenseD455;
    private SideDependentList<RDXInteractableBlackflyFujinon> interactableBlackflyFujinons = new SideDependentList<>();
    private RDXInteractableZED2i interactableZED2i;
+   private final Pose3D lastHistoryPose = new Pose3D();
+   private final Pose3D currentHistoryPose = new Pose3D();
+   private final RDXTrajectoryGraphic poseHistoryGraphic = new RDXTrajectoryGraphic(Color.SKY);
 
    public RDXROS2RobotVisualizer(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, ROS2SyncedRobotModel syncedRobot)
    {
@@ -159,6 +173,13 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
          interactableBlackflyFujinons.forEach((side, blackflyFujinon) -> blackflyFujinon.getInteractableFrameModel().update());
          interactableZED2i.getInteractableFrameModel().update();
       }
+
+      syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToDesiredFrame(currentHistoryPose, ReferenceFrame.getWorldFrame());
+      if (!EuclidCoreMissingTools.epsilonEquals(lastHistoryPose, currentHistoryPose, Math.toRadians(2.0), 0.02))
+      {
+         lastHistoryPose.set(currentHistoryPose);
+         poseHistoryGraphic.update(0.01, currentHistoryPose);
+      }
    }
 
    public void processImGuiInput(ImGui3DViewInput input)
@@ -188,6 +209,8 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
             previousRobotMidFeetUnderPelvis.setToNaN();
       }
       ImGui.sameLine();
+      ImGui.checkbox(labels.get("Show history"), showPoseHistory);
+      ImGui.sameLine();
       ImGui.checkbox(labels.get("Hide chest"), hideChest);
       if (isRobotLoaded() && opacitySlider.render(0.0f, 1.0f))
       {
@@ -197,6 +220,15 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
          interactableBlackflyFujinons.forEach((side, blackflyFujinon) -> blackflyFujinon.getInteractableFrameModel().getModelInstance().setOpacity(opacitySlider.getFloatValue()));
          interactableZED2i.getInteractableFrameModel().getModelInstance().setOpacity(opacitySlider.getFloatValue());
       }
+   }
+
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
+   {
+      super.getRenderables(renderables, pool, sceneLevels);
+
+      if (showPoseHistory.get())
+         poseHistoryGraphic.getRenderables(renderables, pool);
    }
 
    public void destroy()
