@@ -45,6 +45,7 @@ import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
@@ -59,9 +60,7 @@ import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static us.ihmc.communication.packets.MessageTools.toFrameId;
 import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
@@ -89,7 +88,7 @@ public class RDXVRKinematicsStreamingMode
    private final SideDependentList<Pose3D> ikControlFramePoses = new SideDependentList<>();
    public long controllerLastPollTimeNanos;
    private final SideDependentList<RDXReferenceFrameGraphic> handFrameGraphics = new SideDependentList<>();
-   private Set<String> additionalTrackedSegments;
+   private Set<String> additionalTrackedSegments = new HashSet<>();
    private final Map<String, MutableReferenceFrame> trackerReferenceFrames = new HashMap<>();
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
    private MutableReferenceFrame headsetReferenceFrame;
@@ -103,6 +102,7 @@ public class RDXVRKinematicsStreamingMode
    private final ControllerStatusTracker controllerStatusTracker;
    private final RDXManualFootstepPlacement footstepPlacer;
    private boolean pausedForWalking = false;
+   private final SideDependentList<Float> gripButtonsValue = new SideDependentList<>();
    @Nullable
    private KinematicsStreamingToolboxModule toolbox;
 
@@ -182,28 +182,55 @@ public class RDXVRKinematicsStreamingMode
       {
          KinematicsStreamingToolboxParameters parameters = new KinematicsStreamingToolboxParameters();
          parameters.setDefault();
-         parameters.setPublishingPeriod(0.015); // Publishing period in seconds.
+         parameters.setToolboxUpdatePeriod(0.003);
+         parameters.setPublishingPeriod(0.006); // Publishing period in seconds.
+         boolean usingRealtimePlugin = false;
+         parameters.setStreamIntegrationDuration(usingRealtimePlugin ? 2.0 * parameters.getPublishingPeriod() : 0.1);
          parameters.setDefaultChestMessageAngularWeight(1.0, 1.0, 0.5);
-         parameters.setDefaultPelvisMessageLinearWeight(10.0, 10.0, 15.0);
+         parameters.setDefaultPelvisMessageLinearWeight(10.0, 10.0, 20.0);
          parameters.setDefaultLinearRateLimit(10.0);
          parameters.setDefaultAngularRateLimit(100.0);
          parameters.setDefaultLinearWeight(10.0);
-         parameters.setDefaultAngularWeight(0.1);
+         parameters.setDefaultAngularWeight(0.005); // TODO This is tuned for the 4-DoF arms. We want to relax the orientation tracking which we don't have good control over.
          parameters.setInputPoseLPFBreakFrequency(15.0);
          parameters.setInputPoseCorrectionDuration(0.05); // Need to send inputs at 30Hz.
+         parameters.setInputVelocityRawAlpha(0.65); // TODO This prob can be 1.0, afraid of overshoots.
          parameters.setInputStateEstimatorType(KinematicsStreamingToolboxParameters.InputStateEstimatorType.FBC_STYLE);
+         parameters.setUseBBXInputFilter(true);
+         parameters.setInputBBXFilterSize(2.0, 2.8, 2.6);
+         parameters.setInputBBXFilterCenter(0.4, 0.0, 1.25);
+         parameters.setOutputLPFBreakFrequency(10.0);
+         parameters.setOutputJointVelocityScale(0.65);
 
          parameters.setMinimizeAngularMomentum(true);
          parameters.setMinimizeLinearMomentum(true);
-         parameters.setAngularMomentumWeight(0.25);
-         parameters.setLinearMomentumWeight(0.25);
+         parameters.setAngularMomentumWeight(0.20);
+         // TODO should prob be something like 0.01, 0.25 makes it feels like it's moving through mud, the pelvis height mainly won't move fast up/down cuz it generates too much momentum.
+         parameters.setLinearMomentumWeight(0.01);
+
+         parameters.setMinimizeAngularMomentumRate(true);
+         parameters.setMinimizeLinearMomentumRate(true);
+         parameters.setAngularMomentumRateWeight(1.0);
+         parameters.setLinearMomentumRateWeight(1.0);
 
          parameters.getDefaultConfiguration().setEnableLeftHandTaskspace(false);
          parameters.getDefaultConfiguration().setEnableRightHandTaskspace(false);
          parameters.getDefaultConfiguration().setEnableNeckJointspace(false);
          parameters.getDefaultSolverConfiguration().setJointVelocityWeight(0.05);
+         parameters.getDefaultSolverConfiguration().setJointAccelerationWeight(0.0); // As soon as we increase this guy, we inject springy behavior.
+
          parameters.getDefaultSolverConfiguration().setEnableJointVelocityLimits(false);
-         parameters.setUseStreamingPublisher(true);
+
+         if (robotModel != null)
+         {
+            Map<String, Double> jointUpperLimits = new LinkedHashMap<>();
+            for (RobotSide robotSide : RobotSide.values)
+               jointUpperLimits.put(robotModel.getJointMap().getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), -0.10);
+            parameters.setJointCustomPositionUpperLimits(jointUpperLimits);
+            parameters.setInitialConfigurationMap(createInitialConfiguration(robotModel));
+         }
+
+         parameters.setUseStreamingPublisher(Boolean.parseBoolean(System.getProperty("use.streaming.publisher", "true")));
 
          boolean startYoVariableServer = true;
          toolbox = new KinematicsStreamingToolboxModule(robotModel, parameters, startYoVariableServer, DomainFactory.PubSubImplementation.FAST_RTPS);
@@ -219,6 +246,20 @@ public class RDXVRKinematicsStreamingMode
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Enable IK (toggle)", "Right A button");
          RDXBaseUI.getInstance().getKeyBindings().register("Streaming - Control robot (toggle)", "Left A button");
       }
+   }
+
+   private Map<String, Double> createInitialConfiguration(DRCRobotModel robotModel)
+   {
+      Map<String, Double> initialConfigurationMap = new HashMap<>();
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
+      {
+         String jointName = joint.getName();
+         double q = syncedRobot.getFullRobotModel().getOneDoFJointByName(jointName).getQ();
+         initialConfigurationMap.put(jointName, q);
+      }
+
+      return initialConfigurationMap;
    }
 
    public void processVRInput()
@@ -246,6 +287,8 @@ public class RDXVRKinematicsStreamingMode
          kinematicsRecorder.processRecordReplayInput(joystickButton);
          if (kinematicsRecorder.isReplayingEnabled().get())
             wakeUpToolbox();
+
+         gripButtonsValue.put(RobotSide.LEFT, controller.getGripActionData().x());
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
@@ -263,6 +306,8 @@ public class RDXVRKinematicsStreamingMode
            HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
            sendHandCommand(RobotSide.RIGHT, handConfiguration);
         }
+
+         gripButtonsValue.put(RobotSide.RIGHT, controller.getGripActionData().x());
       });
 
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
@@ -357,7 +402,16 @@ public class RDXVRKinematicsStreamingMode
          }
          // ---------- end VR Controllers ------------
 
-         prescientFootstepStreaming.streamFootsteps();
+         // Stepping with ankle trackers. Pauses Streaming until walking is done
+         if (gripButtonsValue.get(RobotSide.LEFT) > 0.5f && gripButtonsValue.get(RobotSide.RIGHT) > 0.5f)
+         {
+            prescientFootstepStreaming.streamFootsteps();
+         }
+         else
+         {
+            prescientFootstepStreaming.reset();
+         }
+
          if (armScaling.get())
          { // Update headset pose, used for retargeting to estimate shoulder position
             vrContext.getHeadset().runIfConnected(headset -> headset.getXForwardZUpHeadsetFrame().update());
@@ -569,6 +623,8 @@ public class RDXVRKinematicsStreamingMode
          LogTools.info("Started walking. Paused Streaming");
          streamToController.set(false);
          pausedForWalking = true;
+         visualizeIKPreviewGraphic(false);
+
       }
       if (pausedForWalking && controllerStatusTracker.getFinishedWalkingNotification().poll())
       {
@@ -576,6 +632,7 @@ public class RDXVRKinematicsStreamingMode
          // Restart KST
          setEnabled(false);
          setEnabled(true);
+         visualizeIKPreviewGraphic(true);
          streamToController.set(true);
          pausedForWalking = false;
       }
@@ -652,7 +709,8 @@ public class RDXVRKinematicsStreamingMode
          kinematicsRecorder.setReplay(false); // Check no concurrency replay and streaming
          initialPelvisFrame = null;
          initialChestFrame = null;
-         prescientFootstepStreaming.reset();
+         if (!pausedForWalking)
+            prescientFootstepStreaming.reset();
          motionRetargeting.reset();
          motionRetargeting.setControlArmsOnly(controlArmsOnly.get());
          motionRetargeting.setArmScaling(armScaling.get());

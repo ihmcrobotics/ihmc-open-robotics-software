@@ -168,7 +168,10 @@ public class RDXVRMotionRetargeting
 
          // Calculate normalized offset along the line connecting the feet
          double normalizedOffset = dotProduct / normSqFeetVector;
-
+         if (normalizedOffset > 1.0)
+            normalizedOffset = 1.0;
+         else if (normalizedOffset < 0.0)
+            normalizedOffset = 0.0;
          Point3D leftFootXYInWorld = new Point3D(syncedRobot.getFullRobotModel().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslation());
          Point3D rightFootXYInWorld = new Point3D(syncedRobot.getFullRobotModel().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame().getTranslation());
 
@@ -176,9 +179,6 @@ public class RDXVRMotionRetargeting
          Vector3D feetVector = new Vector3D();
          feetVector.sub(rightFootXYInWorld, leftFootXYInWorld);
 
-         LogTools.info("MidFeet: {}", syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation());
-         LogTools.info("COM: {}", centerOfMassDesiredXYInWorld);
-         LogTools.info("Offset: {}", normalizedOffset);
          centerOfMassDesiredXYInWorld.set(feetVector);
          centerOfMassDesiredXYInWorld.scale(normalizedOffset);
          centerOfMassDesiredXYInWorld.add(leftFootXYInWorld);

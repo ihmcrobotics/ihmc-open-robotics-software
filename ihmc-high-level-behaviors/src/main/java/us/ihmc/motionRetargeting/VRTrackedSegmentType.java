@@ -13,7 +13,7 @@ public enum VRTrackedSegmentType
    CHEST("Chest", null, 0.0, 10.0),
    WAIST("Waist", null, 0.0, 10.0, 50.0, 10.0, 10.0),
    LEFT_ANKLE("Left Ankle", RobotSide.LEFT, 0.0, 0.0),
-   RIGHT_ANKLE("right Ankle", RobotSide.RIGHT, 0.0, 0.0);
+   RIGHT_ANKLE("Right Ankle", RobotSide.RIGHT, 0.0, 0.0);
 
    private final String segmentName;
    private final RobotSide robotSide;

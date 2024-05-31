@@ -128,14 +128,18 @@ public class RDXVRTeleporter
      });
    }
 
-   private void snapToCameraView(RDXVRContext vrContext)
+   public void snapToCameraView(RDXVRContext vrContext)
    {
       RigidBodyTransform leftCameraFrameTransform = new RigidBodyTransform(robotCameraReferenceFrames.get(RobotSide.LEFT).getTransformToParent());
       RigidBodyTransform rightCameraFrameTransform = new RigidBodyTransform(robotCameraReferenceFrames.get(RobotSide.RIGHT).getTransformToParent());
+      // Compute transform from left camera to midpoint in between the 2 cameras
       RigidBodyTransform leftToMidCamerasFrameTransform = new RigidBodyTransform(leftCameraFrameTransform);
       rightCameraFrameTransform.getTranslation().sub(leftCameraFrameTransform.getTranslation());
       rightCameraFrameTransform.getTranslation().scale(0.5);
       leftToMidCamerasFrameTransform.getTranslation().add(rightCameraFrameTransform.getTranslation());
+      // Shift frame a bit forward to avoid having the camera model in sight
+      leftToMidCamerasFrameTransform.getTranslation().addX(0.1);
+      // Create robot camera frame as point in between cameras
       ReferenceFrame robotCameraReferenceFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(robotCameraReferenceFrames.get(RobotSide.LEFT).getParent(), leftToMidCamerasFrameTransform);
 
       vrContext.teleport(teleportIHMCZUpToIHMCZUpWorld ->
