@@ -9,6 +9,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeExecutor;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -169,6 +170,7 @@ public class PerceptionAndAutonomyProcess
    @Nullable
    private RapidPlanarRegionsExtractor planarRegionsExtractor;
    private final RestartableThrottledThread planarRegionsExtractorThread;
+   private final TypedNotification<PlanarRegionsList> newPlanarRegions = new TypedNotification<>();
    private ROS2DemandGraphNode planarRegionsDemandNode;
 
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
@@ -502,6 +504,11 @@ public class PerceptionAndAutonomyProcess
          yolov8DetectionManager.setRobotFrame(robotPelvisFrame);
       }
 
+      if (newPlanarRegions.poll())
+         for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
+            if (sceneNode instanceof DoorNode doorNode)
+               doorNode.filterAndSetDoorPlanarRegionFromPlanarRegionsList(newPlanarRegions.read());
+
       // Update general stuff
       sceneGraph.updateOnRobotOnly(robotPelvisFrame);
       sceneGraph.updatePublication();
@@ -552,12 +559,7 @@ public class PerceptionAndAutonomyProcess
          PlanarRegionsList planarRegionsInWorldFrame = framePlanarRegionsList.getPlanarRegionsList().copy();
          planarRegionsInWorldFrame.applyTransform(zedFrameSupplier.get().getTransformToWorldFrame());
 
-         sceneGraph.modifyTree(modificationQueue ->
-         {
-          for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
-             if (sceneNode instanceof DoorNode doorNode)
-                doorNode.filterAndSetDoorPlanarRegionFromPlanarRegionsList(planarRegionsInWorldFrame);
-         });
+         newPlanarRegions.set(planarRegionsInWorldFrame);
 
          PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
 
