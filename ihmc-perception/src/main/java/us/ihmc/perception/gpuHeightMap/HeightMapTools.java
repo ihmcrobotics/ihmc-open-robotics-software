@@ -87,7 +87,7 @@ public class HeightMapTools
       double yellowR = 1.0, yellowG = 1.0, yellowB = 0.0;
       double blueR = 0.0, blueG = 0.0, blueB = 1.0;
       double greenR = 0.0, greenG = 1.0, greenB = 0.0;
-      double gradientSize = 0.2;
+      double gradientSize = 0.20;
       double gradientLength = 1.0;
       double alpha = height % gradientLength;
       if (alpha < 0)
@@ -121,9 +121,9 @@ public class HeightMapTools
       }
       else if (alpha <= gradientSize * 5)
       {
-         r = InterpolationTools.linearInterpolate(orangeR, redR, (alpha - gradientSize * 4) / gradientSize);
-         g = InterpolationTools.linearInterpolate(orangeG, redG, (alpha - gradientSize * 4) / gradientSize);
-         b = InterpolationTools.linearInterpolate(orangeB, redB, (alpha - gradientSize * 4) / gradientSize);
+         r = InterpolationTools.linearInterpolate(orangeR, magentaR, (alpha - gradientSize * 4) / gradientSize);
+         g = InterpolationTools.linearInterpolate(orangeG, magentaG, (alpha - gradientSize * 4) / gradientSize);
+         b = InterpolationTools.linearInterpolate(orangeB, magentaB, (alpha - gradientSize * 4) / gradientSize);
       }
       else
       {
