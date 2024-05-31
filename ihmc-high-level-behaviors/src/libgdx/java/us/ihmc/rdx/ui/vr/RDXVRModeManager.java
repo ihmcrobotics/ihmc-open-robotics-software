@@ -34,7 +34,7 @@ public class RDXVRModeManager
    private RDXVRHandPlacedFootstepMode handPlacedFootstepMode;
    @Nullable
    private RDXVRKinematicsStreamingMode kinematicsStreamingMode;
-   private RDXJoystickBasedStepping joystickBasedStepping;
+//   private RDXJoystickBasedStepping joystickBasedStepping;
    private RDXVRStereoVision stereoVision;
    private RDXVRModeControls vrModeControls;
 
@@ -87,8 +87,8 @@ public class RDXVRModeManager
          kinematicsStreamingMode.create(baseUI.getVRManager().getContext(), createKinematicsStreamingToolboxModule);
       }
 
-      joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
-      joystickBasedStepping.create(baseUI, controllerHelper, syncedRobot);
+//      joystickBasedStepping = new RDXJoystickBasedStepping(syncedRobot.getRobotModel());
+//      joystickBasedStepping.create(baseUI, controllerHelper, syncedRobot);
 
       stereoVision = new RDXVRStereoVision(syncedRobot.getReferenceFrames());
       vrModeControls = new RDXVRModeControls(this);
@@ -136,7 +136,7 @@ public class RDXVRModeManager
          kinematicsStreamingMode.update(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING);
       if (vrModeControls.getRenderOnLeftHand().get())
          vrModeControls3DPanel.update();
-      joystickBasedStepping.update(mode == RDXVRMode.JOYSTICK_WALKING);
+//      joystickBasedStepping.update(mode == RDXVRMode.JOYSTICK_WALKING);
       vrModeControls.update();
 
       // fade robot graphics if in stereo vision mode
@@ -203,7 +203,7 @@ public class RDXVRModeManager
                if (kinematicsStreamingMode != null)
                   kinematicsStreamingMode.getVirtualRenderables(renderables, pool, sceneLevels);
             }
-            case JOYSTICK_WALKING -> joystickBasedStepping.getRenderables(renderables, pool);
+//            case JOYSTICK_WALKING -> joystickBasedStepping.getRenderables(renderables, pool);
          }
       }
 
@@ -219,7 +219,7 @@ public class RDXVRModeManager
       vrModeControls3DPanel.dispose();
       if (kinematicsStreamingMode != null)
          kinematicsStreamingMode.destroy();
-      joystickBasedStepping.destroy();
+//      joystickBasedStepping.destroy();
       stereoVision.getDualBlackflySphericalProjection().shutdown();
    }
 
@@ -241,7 +241,7 @@ public class RDXVRModeManager
 
    public RDXJoystickBasedStepping getJoystickBasedStepping()
    {
-      return joystickBasedStepping;
+      return null;
    }
 
    public RDXVRStereoVision getStereoVision()
