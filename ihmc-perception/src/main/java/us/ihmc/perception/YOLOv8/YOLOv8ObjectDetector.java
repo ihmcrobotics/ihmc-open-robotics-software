@@ -16,6 +16,7 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class YOLOv8ObjectDetector
 {
@@ -26,6 +27,8 @@ public class YOLOv8ObjectDetector
 
    private final Net yoloNet;
    private final StringVector outputNames;
+
+   private final AtomicBoolean isReady = new AtomicBoolean(true);
 
    public YOLOv8ObjectDetector()
    {
@@ -60,11 +63,13 @@ public class YOLOv8ObjectDetector
    public YOLOv8DetectionResults runOnImage(RawImage bgrImage, float confidenceThreshold, float nonMaximumSuppressionThreshold)
    {
       bgrImage.get();
+      isReady.set(false);
       Mat blob = opencv_dnn.blobFromImage(bgrImage.getCpuImageMat(), SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
       MatVector outputBlobs = new MatVector(outputNames.size());
 
       yoloNet.setInput(blob);
       yoloNet.forward(outputBlobs, outputNames);
+      isReady.set(true);
 
       Set<YOLOv8Detection> detections = processOutput(outputBlobs, confidenceThreshold, nonMaximumSuppressionThreshold, bgrImage.getImageWidth(), bgrImage.getImageHeight());
       YOLOv8DetectionResults results = new YOLOv8DetectionResults(detections, outputBlobs, bgrImage);
@@ -73,6 +78,11 @@ public class YOLOv8ObjectDetector
       bgrImage.release();
 
       return results;
+   }
+
+   public boolean isReady()
+   {
+      return isReady.get();
    }
 
    public void destroy()

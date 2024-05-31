@@ -372,7 +372,7 @@ public class PerceptionAndAutonomyProcess
             icpManager.setEnvironmentPointCloud(zedDepthImage);
 
          if (yoloZEDDemandNode.isDemanded())
-            yolov8DetectionManager.setDetectionImages(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
+            yolov8DetectionManager.runYOLODetection(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
 
          if (ballDetectionDemandNode.isDemanded())
             ballDetectionManager.run(zedColorImages.get(RobotSide.LEFT));
@@ -405,7 +405,7 @@ public class PerceptionAndAutonomyProcess
          realsenseColorImage = realsenseImageRetriever.getLatestRawColorImage();
 
          if (yoloRealsenseDemandNode.isDemanded())
-            yolov8DetectionManager.setDetectionImages(realsenseColorImage, realsenseDepthImage);
+            yolov8DetectionManager.runYOLODetection(realsenseColorImage, realsenseDepthImage);
 
          overlapRemover.setHighQualityImage(realsenseDepthImage.get());
 
