@@ -11,7 +11,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.mesh.RDXMutableMultiLineModel;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * A white line for the translation part and little coordinate frame graphics to show orientation change.
@@ -43,7 +43,7 @@ public class RDXTrajectoryGraphic
       updateInternal(lineWidth);
    }
 
-   public void update(double lineWidth, List<? extends RigidBodyTransformReadOnly> posesReadOnly)
+   public void update(double lineWidth, Collection<? extends RigidBodyTransformReadOnly> posesReadOnly)
    {
       positions.clear();
       poses.clear();
