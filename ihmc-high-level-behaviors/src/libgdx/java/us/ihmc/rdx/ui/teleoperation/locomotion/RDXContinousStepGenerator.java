@@ -9,7 +9,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import imgui.type.ImDouble;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -256,6 +256,7 @@ public class RDXContinousStepGenerator
 
    public void renderImGuiWidgets()
    {
+      ImGui.text("Walking mode active: " + walkingModeActive);
       ImGui.inputDouble(labels.get("Turning velocity"), turningVelocity);
       ImGui.inputDouble(labels.get("Forward velocity"), forwardVelocity);
       ImGui.inputDouble(labels.get("Lateral velocity"), lateralVelocity);

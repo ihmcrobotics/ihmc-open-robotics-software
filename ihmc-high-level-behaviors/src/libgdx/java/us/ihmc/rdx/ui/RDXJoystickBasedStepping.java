@@ -2,9 +2,6 @@ package us.ihmc.rdx.ui;
 
 import com.badlogic.gdx.controllers.Controller;
 import com.badlogic.gdx.controllers.Controllers;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -13,10 +10,8 @@ import us.ihmc.rdx.vr.RDXVRController;
 import us.ihmc.robotics.math.DeadbandTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class RDXJoystickBasedStepping
+public class RDXJoystickBasedStepping extends RDXContinousStepGenerator
 {
-   private final RDXContinousStepGenerator continousStepGenerator;
-
    private Controller currentController;
    private boolean currentControllerConnected;
    private RDXVRController leftVRController;
@@ -25,12 +20,12 @@ public class RDXJoystickBasedStepping
 
    public RDXJoystickBasedStepping(DRCRobotModel robotModel)
    {
-      continousStepGenerator = new RDXContinousStepGenerator(robotModel);
+      super(robotModel);
    }
 
    public void create(RDXBaseUI baseUI, ROS2ControllerHelper controllerHelper, ROS2SyncedRobotModel syncedRobot)
    {
-      continousStepGenerator.create(controllerHelper, syncedRobot);
+      super.create(controllerHelper, syncedRobot);
 
       leftVRController = baseUI.getVRManager().getContext().getController(RobotSide.LEFT);
       rightVRController = baseUI.getVRManager().getContext().getController(RobotSide.RIGHT);
@@ -40,6 +35,11 @@ public class RDXJoystickBasedStepping
          for (RobotSide side : RobotSide.values)
             userNotClickingAnImGuiPanel =  userNotClickingAnImGuiPanel && context.getController(side).getSelectedPick() == null;
       });
+   }
+
+   public void update()
+   {
+      update(true);
    }
 
    public void update(boolean enabled)
@@ -76,25 +76,10 @@ public class RDXJoystickBasedStepping
       }
 
       double deadband = 0.1;
-      continousStepGenerator.setWalkingModeActive(walkingModeEnabled);
-      continousStepGenerator.setNormalizedForwardVelocity(DeadbandTools.applyDeadband(deadband, forwardJoystickValue));
-      continousStepGenerator.setNormalizedLateralVelocity(DeadbandTools.applyDeadband(deadband, lateralJoystickValue));
-      continousStepGenerator.setNormalizedTurningVelocity(DeadbandTools.applyDeadband(deadband, turningJoystickValue));
-      continousStepGenerator.update();
-   }
-
-   public void renderImGuiWidgets()
-   {
-      continousStepGenerator.renderImGuiWidgets();
-   }
-
-   public void destroy()
-   {
-
-   }
-
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-
+      setWalkingModeActive(walkingModeEnabled);
+      setNormalizedForwardVelocity(DeadbandTools.applyDeadband(deadband, forwardJoystickValue));
+      setNormalizedLateralVelocity(DeadbandTools.applyDeadband(deadband, lateralJoystickValue));
+      setNormalizedTurningVelocity(DeadbandTools.applyDeadband(deadband, turningJoystickValue));
+      super.update();
    }
 }
