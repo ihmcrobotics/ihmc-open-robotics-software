@@ -11,5 +11,6 @@
   "Transfer time" : 0.3,
   "Planner timeout fraction" : 0.3,
   "Planning without reference timeout" : 1.3,
-  "Log footstep plans" : true
+  "Log footstep plans" : true,
+  "Next Waypoint Distance Margin" : 0.5
 }

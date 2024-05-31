@@ -119,7 +119,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       }
       stancePoseCalculator = new StancePoseCalculator(0.5f, 0.5f, 0.1f, defaultContactPoints);
 
-      stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(stancePoseCalculator);
+      stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(ros2Helper, stancePoseCalculator);
       addChild(stancePoseSelectionPanel);
 
       terrainPlanningDebugger = new RDXTerrainPlanningDebugger(ros2Helper,

@@ -10,6 +10,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -34,6 +35,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -42,7 +44,7 @@ public class ContinuousPlanner
 {
    public enum PlanningMode
    {
-      EXECUTE_AND_PAUSE, FRONTIER_EXPANSION, ACTIVE_SEARCH, FAST_HIKING
+      EXECUTE_AND_PAUSE, FRONTIER_EXPANSION, ACTIVE_SEARCH, FAST_HIKING, WALK_TO_GOAL
    }
 
    private ContinuousGoalGenerator goalGenerator = new ContinuousGoalGenerator(0.0, 5.0, 0.0, 5.0);
@@ -80,6 +82,8 @@ public class ContinuousPlanner
    private boolean resetMonteCarloFootstepPlanner = false;
    private boolean active;
    private double previousContinuousHikingSwingTime = 0.0;
+
+   private List<SideDependentList<Pose3D>> walkToGoalWayPointList = new ArrayList<>();
 
    float xRandomMargin = 0.2f;
    float nominalStanceWidth = 0.22f;
@@ -326,6 +330,21 @@ public class ContinuousPlanner
                                                                    (float) continuousHikingParameters.getGoalPoseForwardDistance(),
                                                                    xRandomMargin,
                                                                    (float) continuousHikingParameters.getGoalPoseUpDistance(), nominalStanceWidth);
+         case WALK_TO_GOAL:
+            if (!walkToGoalWayPointList.isEmpty())
+            {
+               goalStancePose.get(RobotSide.LEFT).set(walkToGoalWayPointList.get(0).get(RobotSide.LEFT));
+               goalStancePose.get(RobotSide.RIGHT).set(walkToGoalWayPointList.get(0).get(RobotSide.RIGHT));
+            }
+
+            Vector3DBasics robotLocation = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation();
+            double distanceToGoalPose = ContinuousPlanningTools.getDistanceFromRobotToGoalPoseOnXYPlane(robotLocation, goalStancePose);
+
+            if (distanceToGoalPose < continuousHikingParameters.getNextWaypointDistanceMargin())
+            {
+               walkToGoalWayPointList.remove(0);
+               continuousHikingParameters.setEnableContinuousWalking(false);
+            }
             break;
       }
    }
@@ -610,4 +629,20 @@ public class ContinuousPlanner
    {
       resetMonteCarloFootstepPlanner = true;
    }
+
+   public void addWayPointToList(Pose3D leftFootGoalPose, Pose3D rightFootGoalPose)
+   {
+      //TODO make sure we don't add the same values twice
+      SideDependentList<Pose3D> latestWayPoint = new SideDependentList<>();
+      latestWayPoint.put(RobotSide.LEFT, leftFootGoalPose);
+      latestWayPoint.put(RobotSide.RIGHT, rightFootGoalPose);
+
+      LogTools.info("Added waypoint for WALK_TO_GOAL");
+      walkToGoalWayPointList.add(latestWayPoint);
+
+      // Until the first waypoint is removed from this list, that is the current goal
+      goalStancePose.get(RobotSide.LEFT).set(walkToGoalWayPointList.get(0).get(RobotSide.LEFT));
+      goalStancePose.get(RobotSide.RIGHT).set(walkToGoalWayPointList.get(0).get(RobotSide.RIGHT));
+   }
 }
+

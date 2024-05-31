@@ -6,14 +6,19 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import ihmc_common_msgs.msg.dds.PoseListMessage;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImBoolean;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -28,9 +33,11 @@ import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableProvider
 {
@@ -53,11 +60,15 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
    private boolean selectionActive = false;
    private ImBoolean calculateStancePose = new ImBoolean(false);
 
-   public RDXStancePoseSelectionPanel(StancePoseCalculator stancePoseCalculator)
+   private ROS2Helper ros2Helper;
+
+   public RDXStancePoseSelectionPanel(ROS2Helper ros2Helper, StancePoseCalculator stancePoseCalculator)
    {
       super("Stance Pose Selection");
       setRenderMethod(this::renderImGuiWidgets);
       this.stancePoseCalculator = stancePoseCalculator;
+
+      this.ros2Helper = ros2Helper;
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> contactPoints = new SideDependentList<>();
       contactPoints.set(RobotSide.LEFT, PlannerTools.createFootContactPoints(0.2, 0.1, 0.08));
@@ -155,9 +166,10 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
          }
       }
 
-      if (input.isWindowHovered() & input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
+      if (input.isWindowHovered() & input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left) && calculateStancePose.get())
       {
-         setGoalFootsteps();
+         if (!placed)
+            setGoalFootsteps();
          selectionActive = false;
       }
 
@@ -169,7 +181,14 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
    private void setGoalFootsteps()
    {
+      List<Pose3D> poses = new ArrayList<>();
+      poses.add(new Pose3D(stancePoses.get(RobotSide.LEFT)));
+      poses.add(new Pose3D(stancePoses.get(RobotSide.RIGHT)));
 
+      PoseListMessage poseListMessage = new PoseListMessage();
+      MessageTools.packPoseListMessage(poses, poseListMessage);
+
+      ros2Helper.publish(ContinuousWalkingAPI.PLACED_GOAL_FOOTSTEPS, poseListMessage);
       placed = true;
    }
 
