@@ -18,6 +18,18 @@ import java.time.Instant;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+/**
+ * <p>
+ *    Manager for detecting balls using the {@link us.ihmc.perception.BallDetector},
+ *    which uses HSV color segmentation to detect the largest ball within a color image.
+ *    An Executor is used to make the call to {@link #run(RawImage)} non-blocking.
+ * </p>
+ * <p>
+ *    The HSV color boundaries are received from the {@link us.ihmc.communication.PerceptionAPI#BALL_DETECTION_PARAMETERS} topic,
+ *    and the detected ball's position is published on the {@link us.ihmc.communication.PerceptionAPI#BALL_TRAJECTORY} topic.
+ *    The segmented image is also published on the {@link us.ihmc.communication.PerceptionAPI#BALL_SEGMENTATION_IMAGE} topic.
+ * </p>
+ */
 public class BallDetectionManager
 {
    private final Executor detectionExecutor = Executors.newSingleThreadExecutor();

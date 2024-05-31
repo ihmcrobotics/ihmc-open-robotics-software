@@ -22,10 +22,16 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Optional;
 
+/**
+ * A ball detector which takes a BGR color image and uses HSV color bounds for segmentation.
+ * The largest blob within the segmented image will be considered to be the ball.
+ * Shape of the blob is not taken into account as motion blur and/or occlusion can cause the ball
+ * to not be circular in the image.
+ */
 public class BallDetector
 {
    private final Scalar hsvLowerBound = new Scalar(0.0, 0.0, 0.0, 0.0);
-   private final Scalar hsvUpperBound = new Scalar(255.0, 255.0, 255.0, 255.0);
+   private final Scalar hsvUpperBound = new Scalar(179.0, 255.0, 255.0, 255.0);
    private final Filter gaussianFilter = opencv_cudafilters.createGaussianFilter(opencv_core.CV_8UC3, opencv_core.CV_8UC3, new Size(9, 9), 0.0);
    private final Filter openFilter = opencv_cudafilters.createMorphologyFilter(opencv_imgproc.MORPH_OPEN,
                                                                                opencv_core.CV_8UC1,
@@ -104,7 +110,7 @@ public class BallDetector
          Mat maxContour = maxContourOptional.get();
 
          // Get the circle of the contour
-         // Try fitting an ellipse to counteract motion blur
+         // Try fitting an ellipse to handle motion blur
          try
          {
             RotatedRect ellipse = opencv_imgproc.fitEllipse(maxContour);
