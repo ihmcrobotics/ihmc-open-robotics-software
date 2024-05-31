@@ -37,6 +37,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Supplier;
@@ -69,7 +70,7 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
    private final Pose3D currentHistoryPelvisPose = new Pose3D();
    private final RDXTrajectoryGraphic pelvisPoseHistoryGraphic = new RDXTrajectoryGraphic(Color.SKY);
    private final ConcurrentLinkedQueue<MinimalFootstep> completedFootstepThreadBarrier = new ConcurrentLinkedQueue<>();
-   private final ArrayList<MinimalFootstep> footstepHistory = new ArrayList<>();
+   private final List<MinimalFootstep> footstepHistory = new ArrayList<>();
    private final RDXFootstepPlanGraphic footstepHistoryGraphic;
 
    public RDXROS2RobotVisualizer(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, ROS2SyncedRobotModel syncedRobot)
