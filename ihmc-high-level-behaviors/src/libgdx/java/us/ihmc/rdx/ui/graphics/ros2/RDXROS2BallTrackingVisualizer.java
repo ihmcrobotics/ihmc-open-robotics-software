@@ -188,7 +188,7 @@ public class RDXROS2BallTrackingVisualizer extends RDXVisualizer
             trackingParametersChanged.set();
 
          ImGui.text("HSV Lower Bound");
-         if (ImGui.sliderFloat("Hl", hLowerBound.getData(), 0.0f, 255.0f))
+         if (ImGui.sliderFloat("Hl", hLowerBound.getData(), 0.0f, 179.0f))
             trackingParametersChanged.set();
          if (ImGui.sliderFloat("Sl", sLowerBound.getData(), 0.0f, 255.0f))
             trackingParametersChanged.set();
@@ -196,7 +196,7 @@ public class RDXROS2BallTrackingVisualizer extends RDXVisualizer
             trackingParametersChanged.set();
 
          ImGui.text("HSV Upper Bound");
-         if (ImGui.sliderFloat("Hu", hUpperBound.getData(), 0.0f, 255.0f))
+         if (ImGui.sliderFloat("Hu", hUpperBound.getData(), 0.0f, 179.0f))
             trackingParametersChanged.set();
          if (ImGui.sliderFloat("Su", sUpperBound.getData(), 0.0f, 255.0f))
             trackingParametersChanged.set();
