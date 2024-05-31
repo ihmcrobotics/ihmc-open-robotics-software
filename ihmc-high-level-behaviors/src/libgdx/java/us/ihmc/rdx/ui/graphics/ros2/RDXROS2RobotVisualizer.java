@@ -49,8 +49,6 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
    private final ImBoolean trackRobot = new ImBoolean(false);
    private final ImBoolean hideChest = new ImBoolean(false);
    private final ImBoolean showHistory = new ImBoolean(false);
-   private final ImBoolean includePelvisPoseHistory = new ImBoolean(true);
-   private final ImBoolean includeFootstepHistory = new ImBoolean(true);
    private final Supplier<RDXFocusBasedCamera> cameraForTrackingSupplier;
    private RDXFocusBasedCamera cameraForTracking;
    private final Point3D previousRobotMidFeetUnderPelvis = new Point3D();
@@ -204,7 +202,7 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
       }
 
       // Avoid generating the meshes when we aren't showing them, just because the footstep plan graphic isn't super optimized
-      if (showHistory.get() && includeFootstepHistory.get())
+      if (showHistory.get())
       {
          boolean added = false;
          while (!completedFootstepThreadBarrier.isEmpty())
@@ -257,22 +255,14 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
          interactableZED2i.getInteractableFrameModel().getModelInstance().setOpacity(opacitySlider.getFloatValue());
       }
 
-      if (ImGui.collapsingHeader(labels.get("History")))
+      ImGui.checkbox(labels.get("Show History"), showHistory);
+      ImGuiTools.previousWidgetTooltip("(The history is always recording.)");
+      ImGui.sameLine();
+      if (ImGui.button("Clear"))
       {
-         ImGui.checkbox(labels.get("Show History"), showHistory);
-         ImGuiTools.previousWidgetTooltip("(The history is always recording.)");
-         ImGui.sameLine();
-         if (ImGui.button("Clear"))
-         {
-            pelvisPoseHistoryGraphic.clear();
-            footstepHistory.clear();
-            footstepHistoryGraphic.clear();
-         }
-         ImGui.text("Include:");
-         ImGui.sameLine();
-         ImGui.checkbox(labels.get("Pelvis Pose"), includePelvisPoseHistory);
-         ImGui.sameLine();
-         ImGui.checkbox(labels.get("Footsteps"), includeFootstepHistory);
+         pelvisPoseHistoryGraphic.clear();
+         footstepHistory.clear();
+         footstepHistoryGraphic.clear();
       }
    }
 
@@ -283,10 +273,8 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
 
       if (showHistory.get())
       {
-         if (includePelvisPoseHistory.get())
-            pelvisPoseHistoryGraphic.getRenderables(renderables, pool);
-         if (includeFootstepHistory.get())
-            footstepHistoryGraphic.getRenderables(renderables, pool);
+         pelvisPoseHistoryGraphic.getRenderables(renderables, pool);
+         footstepHistoryGraphic.getRenderables(renderables, pool);
       }
    }
 
