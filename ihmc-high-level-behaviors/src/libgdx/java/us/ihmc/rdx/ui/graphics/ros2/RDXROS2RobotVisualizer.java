@@ -4,10 +4,13 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.FootstepStatusMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.tools.MinimalFootstep;
+import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -22,6 +25,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.graphics.RDXMultiBodyGraphic;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
 import us.ihmc.rdx.ui.interactable.RDXInteractableBlackflyFujinon;
@@ -32,7 +36,9 @@ import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.ArrayList;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Supplier;
 
 public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
@@ -41,7 +47,9 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
    private final ROS2PublishSubscribeAPI ros2;
    private final ImBoolean trackRobot = new ImBoolean(false);
    private final ImBoolean hideChest = new ImBoolean(false);
-   private final ImBoolean showPoseHistory = new ImBoolean(false);
+   private final ImBoolean showHistory = new ImBoolean(false);
+   private final ImBoolean includePelvisPoseHistory = new ImBoolean(true);
+   private final ImBoolean includeFootstepHistory = new ImBoolean(true);
    private final Supplier<RDXFocusBasedCamera> cameraForTrackingSupplier;
    private RDXFocusBasedCamera cameraForTracking;
    private final Point3D previousRobotMidFeetUnderPelvis = new Point3D();
@@ -57,9 +65,12 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
    private RDXInteractableRealsenseD455 interactableRealsenseD455;
    private SideDependentList<RDXInteractableBlackflyFujinon> interactableBlackflyFujinons = new SideDependentList<>();
    private RDXInteractableZED2i interactableZED2i;
-   private final Pose3D lastHistoryPose = new Pose3D();
-   private final Pose3D currentHistoryPose = new Pose3D();
-   private final RDXTrajectoryGraphic poseHistoryGraphic = new RDXTrajectoryGraphic(Color.SKY);
+   private final Pose3D lastHistoryPelvisPose = new Pose3D();
+   private final Pose3D currentHistoryPelvisPose = new Pose3D();
+   private final RDXTrajectoryGraphic pelvisPoseHistoryGraphic = new RDXTrajectoryGraphic(Color.SKY);
+   private final ConcurrentLinkedQueue<MinimalFootstep> completedFootstepThreadBarrier = new ConcurrentLinkedQueue<>();
+   private final ArrayList<MinimalFootstep> footstepHistory = new ArrayList<>();
+   private final RDXFootstepPlanGraphic footstepHistoryGraphic;
 
    public RDXROS2RobotVisualizer(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, ROS2SyncedRobotModel syncedRobot)
    {
@@ -86,6 +97,10 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
       syncedRobot.addRobotConfigurationDataReceivedCallback(frequencyPlot::recordEvent);
       previousRobotMidFeetUnderPelvis.setToNaN();
       chestName = robotModel.getJointMap().getChestName();
+      footstepHistoryGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
+      footstepHistoryGraphic.setOpacity(0.7f);
+      footstepHistoryGraphic.setColor(RobotSide.LEFT, Color.SKY);
+      footstepHistoryGraphic.setColor(RobotSide.RIGHT, Color.SKY);
    }
 
    @Override
@@ -135,6 +150,12 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
       interactableZED2i.getInteractableFrameModel().addRemoteTuning(ros2,
                                                                     PerceptionAPI.EXPERIMENTAL_CAMERA_TO_PARENT_TUNING,
                                                                     robotModel.getSensorInformation().getExperimentalCameraTransform());
+
+      ros2.subscribeViaVolatileCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()), footstepStatusMessage ->
+      {
+         if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
+            completedFootstepThreadBarrier.add(new MinimalFootstep(footstepStatusMessage));
+      });
    }
 
    @Override
@@ -174,12 +195,23 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
          interactableZED2i.getInteractableFrameModel().update();
       }
 
-      syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToDesiredFrame(currentHistoryPose, ReferenceFrame.getWorldFrame());
-      if (!EuclidCoreMissingTools.epsilonEquals(lastHistoryPose, currentHistoryPose, Math.toRadians(2.0), 0.02))
+      syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToDesiredFrame(currentHistoryPelvisPose, ReferenceFrame.getWorldFrame());
+      if (!EuclidCoreMissingTools.epsilonEquals(lastHistoryPelvisPose, currentHistoryPelvisPose, Math.toRadians(2.0), 0.02))
       {
-         lastHistoryPose.set(currentHistoryPose);
-         poseHistoryGraphic.update(0.01, currentHistoryPose);
+         lastHistoryPelvisPose.set(currentHistoryPelvisPose);
+         pelvisPoseHistoryGraphic.update(0.01, currentHistoryPelvisPose);
       }
+
+      boolean added = false;
+      while (!completedFootstepThreadBarrier.isEmpty())
+      {
+         added = true;
+         footstepHistory.add(completedFootstepThreadBarrier.poll());
+      }
+
+      if (added)
+         footstepHistoryGraphic.generateMeshes(footstepHistory);
+      footstepHistoryGraphic.update();
    }
 
    public void processImGuiInput(ImGui3DViewInput input)
@@ -209,8 +241,6 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
             previousRobotMidFeetUnderPelvis.setToNaN();
       }
       ImGui.sameLine();
-      ImGui.checkbox(labels.get("Show history"), showPoseHistory);
-      ImGui.sameLine();
       ImGui.checkbox(labels.get("Hide chest"), hideChest);
       if (isRobotLoaded() && opacitySlider.render(0.0f, 1.0f))
       {
@@ -220,6 +250,24 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
          interactableBlackflyFujinons.forEach((side, blackflyFujinon) -> blackflyFujinon.getInteractableFrameModel().getModelInstance().setOpacity(opacitySlider.getFloatValue()));
          interactableZED2i.getInteractableFrameModel().getModelInstance().setOpacity(opacitySlider.getFloatValue());
       }
+
+      if (ImGui.collapsingHeader(labels.get("History")))
+      {
+         ImGui.checkbox(labels.get("Show History"), showHistory);
+         ImGuiTools.previousWidgetTooltip("(The history is always recording.)");
+         ImGui.sameLine();
+         if (ImGui.button("Clear"))
+         {
+            pelvisPoseHistoryGraphic.clear();
+            footstepHistory.clear();
+            footstepHistoryGraphic.clear();
+         }
+         ImGui.text("Include:");
+         ImGui.sameLine();
+         ImGui.checkbox(labels.get("Pelvis Pose"), includePelvisPoseHistory);
+         ImGui.sameLine();
+         ImGui.checkbox(labels.get("Footsteps"), includeFootstepHistory);
+      }
    }
 
    @Override
@@ -227,8 +275,13 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
    {
       super.getRenderables(renderables, pool, sceneLevels);
 
-      if (showPoseHistory.get())
-         poseHistoryGraphic.getRenderables(renderables, pool);
+      if (showHistory.get())
+      {
+         if (includePelvisPoseHistory.get())
+            pelvisPoseHistoryGraphic.getRenderables(renderables, pool);
+         if (includeFootstepHistory.get())
+            footstepHistoryGraphic.getRenderables(renderables, pool);
+      }
    }
 
    public void destroy()

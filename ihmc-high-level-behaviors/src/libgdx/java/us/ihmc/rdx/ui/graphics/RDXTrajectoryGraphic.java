@@ -79,6 +79,8 @@ public class RDXTrajectoryGraphic
 
    public void clear()
    {
+      positions.clear();
+      poses.clear();
       positionTrajectoryGraphic.clear();
       if (referenceFrameGraphics != null)
          referenceFrameGraphics.clear();
