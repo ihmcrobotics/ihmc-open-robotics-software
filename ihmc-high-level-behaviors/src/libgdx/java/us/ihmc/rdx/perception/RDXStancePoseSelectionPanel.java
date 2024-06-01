@@ -33,7 +33,6 @@ import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
@@ -45,22 +44,22 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
    private ModelInstance pickPointSphere;
 
-   private ArrayList<ModelInstance> leftSpheres = new ArrayList<>();
-   private ArrayList<ModelInstance> rightSpheres = new ArrayList<>();
+   private final ArrayList<ModelInstance> leftSpheres = new ArrayList<>();
+   private final ArrayList<ModelInstance> rightSpheres = new ArrayList<>();
 
    public SideDependentList<FramePose3D> stancePoses = new SideDependentList<>();
    private final FramePose3D latestPose = new FramePose3D(ReferenceFrame.getWorldFrame());
-   private final SideDependentList<RDXFootstepGraphic> footstepGraphics;
+   public final SideDependentList<RDXFootstepGraphic> footstepGraphics;
 
-   private StancePoseCalculator stancePoseCalculator;
+   private final StancePoseCalculator stancePoseCalculator;
    private final FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
    private ImGui3DViewInput latestInput;
 
    private boolean placed = false;
    private boolean selectionActive = false;
-   private ImBoolean calculateStancePose = new ImBoolean(false);
+   private final ImBoolean calculateStancePose = new ImBoolean(false);
 
-   private ROS2Helper ros2Helper;
+   private final ROS2Helper ros2Helper;
 
    public RDXStancePoseSelectionPanel(ROS2Helper ros2Helper, StancePoseCalculator stancePoseCalculator)
    {
@@ -82,13 +81,13 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       pickPointSphere = RDXModelBuilder.createSphere(0.04f, Color.CYAN);
    }
 
-   public void update(SideDependentList<FramePose3D> goalPoses, TerrainMapData terrainMapData, HeightMapData heightMapData)
+   public void update(TerrainMapData terrainMapData, HeightMapData heightMapData)
    {
       environmentHandler.setHeightMap(heightMapData);
       environmentHandler.setTerrainMapData(terrainMapData);
 
       boolean panel3DIsHovered = latestInput != null && latestInput.isWindowHovered();
-      if (panel3DIsHovered && ImGui.isKeyPressed('P') && calculateStancePose.get())
+      if (calculateStancePose.get() && panel3DIsHovered && ImGui.isKeyPressed('P'))
       {
          selectionActive = true;
       }
@@ -96,6 +95,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       {
          selectionActive = false;
       }
+      
       updatePoses();
    }
 
@@ -105,7 +105,6 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       {
          TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
          double height = terrainMapData.getHeightInWorld(latestPose.getTranslation().getX32(), latestPose.getTranslation().getY32());
-         double contactScore = terrainMapData.getContactScoreInWorld(latestPose.getTranslation().getX32(), latestPose.getTranslation().getY32());
 
          if (selectionActive)
          {

@@ -65,7 +65,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
 
    private RDXStancePoseSelectionPanel stancePoseSelectionPanel;
-   private final StancePoseCalculator stancePoseCalculator;
    private final ROS2PublisherBasics<ContinuousWalkingCommandMessage> commandPublisher;
 
    private static final int numberOfKnotPoints = 12;
@@ -103,8 +102,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName()),
-                                      this::onControllerFootstepsReceived);
 
       commandPublisher = ros2Helper.getROS2NodeInterface().createPublisher(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND);
 
@@ -117,8 +114,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
          defaultFoothold.update();
          defaultContactPoints.put(robotSide, defaultFoothold);
       }
-      stancePoseCalculator = new StancePoseCalculator(0.5f, 0.5f, 0.1f, defaultContactPoints);
-
+      StancePoseCalculator stancePoseCalculator = new StancePoseCalculator(defaultContactPoints);
       stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(ros2Helper, stancePoseCalculator);
       addChild(stancePoseSelectionPanel);
 
@@ -142,7 +138,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
       terrainPlanningDebugger.generateStartAndGoalFootstepGraphics(startStancePose, goalStancePose);
       terrainPlanningDebugger.update(terrainMapData);
-      stancePoseSelectionPanel.update(goalStancePose, terrainMapData, heightMapData);
+      stancePoseSelectionPanel.update(terrainMapData, heightMapData);
    }
 
    public void updateFootstepGraphics()
@@ -204,7 +200,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       {
          stancePoseSelectionPanel.getRenderables(renderables, pool);
          terrainPlanningDebugger.getRenderables(renderables, pool);
-         stancePoseSelectionPanel.getRenderables(renderables, pool);
       }
    }
 
@@ -218,12 +213,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    {
       LogTools.debug("Received Monte-Carlo Plan: {}", message.getFootstepDataList().size());
       this.monteCarloPlanDataListMessage.set(message);
-   }
-
-   public void onControllerFootstepsReceived(FootstepDataListMessage message)
-   {
-      //LogTools.warn("Received footstep plan: {}", message.getFootstepDataList().size());
-      //this.footstepDataListMessage.set(message);
    }
 
    public void onStartAndGoalPosesReceived(PoseListMessage poseListMessage)

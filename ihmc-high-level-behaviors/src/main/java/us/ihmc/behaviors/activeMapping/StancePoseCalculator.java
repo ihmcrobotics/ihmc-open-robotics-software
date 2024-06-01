@@ -5,7 +5,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
@@ -13,7 +12,6 @@ import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 
@@ -21,39 +19,33 @@ public class StancePoseCalculator
 {
    public static final float CONTACT_COST_WEIGHT = 10.0f;
    public static final float MAX_CONTACT_VALUE = 255.0f;
-   public static final float NOMINAL_STANCE_DISTANCE = 0.5f;
+   public static final float NOMINAL_STANCE_DISTANCE = 0.3f;
 
-   private int windowSize = 5;
-   private double resolution = 0.08f;
-   private double maxWidth = 0.5f;
-   private double maxLength = 0.5f;
-   private double maxYaw = 0.1f;
+   private final int windowSize = 5;
+   private final double resolution = 0.08f;
 
-   private HeightMapPolygonSnapper heightMapPolygonSnapper;
+   private final HeightMapPolygonSnapper heightMapPolygonSnapper;
 
-   private ArrayList<FramePose3D> leftPoses = new ArrayList<>();
-   private ArrayList<FramePose3D> rightPoses = new ArrayList<>();
+   private final ArrayList<FramePose3D> leftPoses = new ArrayList<>();
+   private final ArrayList<FramePose3D> rightPoses = new ArrayList<>();
 
-   private SideDependentList<Pose3D> bestPose3Ds = new SideDependentList<>(new Pose3D(), new Pose3D());
-   private SideDependentList<FramePose3D> bestFramePoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private final SideDependentList<Pose3D> bestPose3Ds = new SideDependentList<>(new Pose3D(), new Pose3D());
+   private final SideDependentList<FramePose3D> bestFramePoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
 
    private final SideDependentList<ConvexPolygon2D> footPolygons;
 
-   public StancePoseCalculator(double maxWidth, double maxLength, double maxYaw, SideDependentList<ConvexPolygon2D> footPolygons)
+   public StancePoseCalculator(SideDependentList<ConvexPolygon2D> footPolygons)
    {
-      this.maxWidth = maxWidth;
-      this.maxLength = maxLength;
-      this.maxYaw = maxYaw;
       this.footPolygons = footPolygons;
       this.heightMapPolygonSnapper = new HeightMapPolygonSnapper();
    }
 
-   public SideDependentList<FramePose3D> getStancePoses(FramePose3D goalPose, TerrainMapData terrainMap, FootstepPlannerEnvironmentHandler environmentHandler)
+   public SideDependentList<FramePose3D> getStancePoses(FramePose3D pickPoint, TerrainMapData terrainMap, FootstepPlannerEnvironmentHandler environmentHandler)
    {
       reset();
-      insertCandidatePoses(leftPoses, goalPose, RobotSide.LEFT);
-      insertCandidatePoses(rightPoses, goalPose, RobotSide.RIGHT);
-      searchForOptimalGoalStance(leftPoses, rightPoses, goalPose, terrainMap);
+      insertCandidatePoses(leftPoses, pickPoint, RobotSide.LEFT);
+      insertCandidatePoses(rightPoses, pickPoint, RobotSide.RIGHT);
+      searchForOptimalGoalStance(leftPoses, rightPoses, pickPoint, terrainMap);
       snapPosesToEnvironment(environmentHandler);
       return new SideDependentList<>(bestFramePoses.get(RobotSide.LEFT), bestFramePoses.get(RobotSide.RIGHT));
    }
@@ -71,10 +63,10 @@ public class StancePoseCalculator
       poses.clear();
       double multiplier = side == RobotSide.LEFT ? -1 : 1;
 
-      // sample left and right poses around the provided goal pose and check if they are valid in the height map
+      // Sample poses around the provided goal pose and check if they are valid in the height map
       for (int i = -windowSize; i < windowSize; i++)
       {
-         for (int j = 0; j < windowSize; j++)
+         for (int j = 1; j < windowSize; j++)
          {
             double x = i * resolution;
             double y = j * resolution * multiplier;
@@ -87,10 +79,10 @@ public class StancePoseCalculator
       }
    }
 
-   public void searchForOptimalGoalStance(ArrayList<FramePose3D> leftPoses, ArrayList<FramePose3D> rightPoses, FramePose3D goalPose, TerrainMapData terrainMap)
+   public void searchForOptimalGoalStance(ArrayList<FramePose3D> leftPoses, ArrayList<FramePose3D> rightPoses, FramePose3D pickPoint, TerrainMapData terrainMap)
    {
       double minCost = Double.POSITIVE_INFINITY;
-      double cost = 0.0f;
+      double cost;
 
       for (FramePose3D leftPose : leftPoses)
       {
@@ -103,6 +95,8 @@ public class StancePoseCalculator
             double contactCostRight = Math.abs(MAX_CONTACT_VALUE - terrainMap.getContactScoreInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32()));
 
             cost = Math.abs(NOMINAL_STANCE_DISTANCE - leftPose.getPositionDistance(rightPose));
+            cost += Math.abs((NOMINAL_STANCE_DISTANCE / 2) - leftPose.getPositionDistance(pickPoint));
+            cost += Math.abs((NOMINAL_STANCE_DISTANCE / 2) - rightPose.getPositionDistance(pickPoint));
             cost += CONTACT_COST_WEIGHT * (contactCostLeft + contactCostRight);
 
             leftPose.setZ(heightLeft);
