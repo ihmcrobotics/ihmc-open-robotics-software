@@ -1,0 +1,8 @@
+{
+  "title" : "Stance Pose Parameters",
+  "Contact cost weight" : 9.0,
+  "Max contact value" : 255.0,
+  "Nominal stance distance" : 0.3,
+  "Search window size" : 4,
+  "Search window resolution" : 0.08
+}

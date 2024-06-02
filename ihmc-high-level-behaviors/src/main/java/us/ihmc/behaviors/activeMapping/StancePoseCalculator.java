@@ -3,12 +3,11 @@ package us.ihmc.behaviors.activeMapping;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
+import us.ihmc.footstepPlanning.polygonSnapping.PolygonSnapperTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -17,12 +16,7 @@ import java.util.ArrayList;
 
 public class StancePoseCalculator
 {
-   public static final float CONTACT_COST_WEIGHT = 10.0f;
-   public static final float MAX_CONTACT_VALUE = 255.0f;
-   public static final float NOMINAL_STANCE_DISTANCE = 0.3f;
-
-   private final int windowSize = 5;
-   private final double resolution = 0.08f;
+   private final StancePoseParameters stancePoseParameters = new StancePoseParameters();
 
    private final HeightMapPolygonSnapper heightMapPolygonSnapper;
 
@@ -64,12 +58,13 @@ public class StancePoseCalculator
       double multiplier = side == RobotSide.LEFT ? -1 : 1;
 
       // Sample poses around the provided goal pose and check if they are valid in the height map
+      int windowSize = stancePoseParameters.getSearchWindowSize();
       for (int i = -windowSize; i < windowSize; i++)
       {
-         for (int j = 1; j < windowSize; j++)
+         for (int j = 1; j < windowSize + 1; j++)
          {
-            double x = i * resolution;
-            double y = j * resolution * multiplier;
+            double x = i * stancePoseParameters.getSearchWindowResolution();
+            double y = j * stancePoseParameters.getSearchWindowResolution() * multiplier;
 
             FramePose3D pose = new FramePose3D(goalPose);
             pose.appendTranslation(x, y, 0);
@@ -91,13 +86,13 @@ public class StancePoseCalculator
             double heightLeft = terrainMap.getHeightInWorld(leftPose.getPosition().getX32(), leftPose.getPosition().getY32());
             double heightRight = terrainMap.getHeightInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32());
 
-            double contactCostLeft = Math.abs(MAX_CONTACT_VALUE - terrainMap.getContactScoreInWorld(leftPose.getPosition().getX32(), leftPose.getPosition().getY32()));
-            double contactCostRight = Math.abs(MAX_CONTACT_VALUE - terrainMap.getContactScoreInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32()));
+            double contactCostLeft = Math.abs(stancePoseParameters.getMaxContactValue() - terrainMap.getContactScoreInWorld(leftPose.getPosition().getX32(), leftPose.getPosition().getY32()));
+            double contactCostRight = Math.abs(stancePoseParameters.getMaxContactValue() - terrainMap.getContactScoreInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32()));
 
-            cost = Math.abs(NOMINAL_STANCE_DISTANCE - leftPose.getPositionDistance(rightPose));
-            cost += Math.abs((NOMINAL_STANCE_DISTANCE / 2) - leftPose.getPositionDistance(pickPoint));
-            cost += Math.abs((NOMINAL_STANCE_DISTANCE / 2) - rightPose.getPositionDistance(pickPoint));
-            cost += CONTACT_COST_WEIGHT * (contactCostLeft + contactCostRight);
+            cost = Math.abs(stancePoseParameters.getNominalStanceDistance() - leftPose.getPositionDistance(rightPose));
+            cost += Math.abs((stancePoseParameters.getNominalStanceDistance() / 2) - leftPose.getPositionDistance(pickPoint));
+            cost += Math.abs((stancePoseParameters.getNominalStanceDistance() / 2) - rightPose.getPositionDistance(pickPoint));
+            cost += stancePoseParameters.getContactCostWeight() * (contactCostLeft + contactCostRight);
 
             leftPose.setZ(heightLeft);
             rightPose.setZ(heightRight);
@@ -134,34 +129,6 @@ public class StancePoseCalculator
       }
    }
 
-   static RigidBodyTransform createTransformToMatchSurfaceNormalPreserveX(Vector3DReadOnly surfaceNormal)
-   {
-      RigidBodyTransform transformToReturn = new RigidBodyTransform();
-      constructTransformToMatchSurfaceNormalPreserveX(surfaceNormal, transformToReturn);
-
-      return transformToReturn;
-   }
-
-   static void constructTransformToMatchSurfaceNormalPreserveX(Vector3DReadOnly surfaceNormal, RigidBodyTransform transformToPack)
-   {
-      // xAxis = yAxis cross SurfaceNormal
-      double xAxisX = surfaceNormal.getZ();
-      double xAxisY = 0.0;
-      double xAxisZ = -surfaceNormal.getX();
-
-      double xNorm = EuclidCoreTools.norm(xAxisX, xAxisZ);
-
-      xAxisX /= xNorm;
-      xAxisZ /= xNorm;
-
-      // yAxis = surfaceNormal cross xAxis
-      double yAxisX = surfaceNormal.getY() * xAxisZ;
-      double yAxisY = surfaceNormal.getZ() * xAxisX - surfaceNormal.getX() * xAxisZ;
-      double yAxisZ = -surfaceNormal.getY() * xAxisX;
-
-      transformToPack.getRotation().set(xAxisX, yAxisX, surfaceNormal.getX(), xAxisY, yAxisY, surfaceNormal.getY(), xAxisZ, yAxisZ, surfaceNormal.getZ());
-   }
-
    public void snapPosesToTerrainMapData(TerrainMapData terrainMapData)
    {
       for (RobotSide side : RobotSide.values)
@@ -173,7 +140,7 @@ public class StancePoseCalculator
    private void snapToTerrainMap(TerrainMapData terrainMapData, FramePose3D poseToSnap)
    {
       UnitVector3DReadOnly normal = terrainMapData.computeSurfaceNormalInWorld((float) poseToSnap.getX(), (float) poseToSnap.getY(), 1);
-      RigidBodyTransform snapTransform = createTransformToMatchSurfaceNormalPreserveX(normal);
+      RigidBodyTransform snapTransform = PolygonSnapperTools.createTransformToMatchSurfaceNormalPreserveX(normal);
       poseToSnap.applyTransform(snapTransform);
    }
 
@@ -196,8 +163,8 @@ public class StancePoseCalculator
       return bestPose3Ds;
    }
 
-   public SideDependentList<FramePose3D> getBestFramePoses()
+   public StancePoseParameters getStancePoseParameters()
    {
-      return bestFramePoses;
+      return stancePoseParameters;
    }
 }
