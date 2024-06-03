@@ -552,7 +552,7 @@ public class PerceptionAndAutonomyProcess
          FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
 
          // TODO: Get rid of BytedecoImage, RapidPlanarRegionsExtractor requires it
-         BytedecoImage bytedecoImage = new BytedecoImage(latestZEDDepthImage.getCpuImageMat());
+         BytedecoImage bytedecoImage = new BytedecoImage(latestZEDDepthImage.getCpuImageMat().clone());
          bytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
          planarRegionsExtractor.update(bytedecoImage, zedFrameSupplier.get(), framePlanarRegionsList);
          planarRegionsExtractor.setProcessing(false);
