@@ -2,6 +2,7 @@ package us.ihmc.perception.sceneGraph.ros2;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
@@ -33,11 +34,13 @@ public class ROS2SceneGraphTest
 
       SceneGraph subscriptionSceneGraph = new SceneGraph();
       ROS2SceneGraphSubscription subscription = new ROS2SceneGraphSubscription(subscriptionSceneGraph, ros2Helper, ROS2IOTopicQualifier.COMMAND);
+      Notification messageReceived = new Notification();
+      subscription.registerMessageReceivedCallback(messageReceived::set);
 
       ROS2SceneGraphPublisher publisher = new ROS2SceneGraphPublisher();
       publisher.publish(sceneGraph, ros2Helper, ROS2IOTopicQualifier.COMMAND);
 
-      subscription.getSceneGraphSubscription().getMessageNotification().blockingPeek();
+      messageReceived.blockingPeek();
 
       subscription.update();
       Assertions.assertEquals(1, subscription.getNumberOfMessagesReceived());

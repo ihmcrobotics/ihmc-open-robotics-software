@@ -6,7 +6,6 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
-import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.tuple3D.Vector3D32;
@@ -68,7 +67,7 @@ public class RDXSceneGraphUI
       RDXSceneNode rootNode = new RDXSceneNode(sceneGraph.getRootNode());
       addUISceneNode(rootNode);
 
-      sceneGraph.getSceneGraphSubscription().getSceneGraphSubscription().addCallback(message -> subscriptionFrequencyText.ping());
+      sceneGraph.getSceneGraphSubscription().registerMessageReceivedCallback(subscriptionFrequencyText::ping);
 
       predefinedRigidBodySceneNodeBuilder = new RDXPredefinedRigidBodySceneNodeBuilder(sceneGraph);
       primitiveRigidBodySceneNodeBuilder = new RDXPrimitiveRigidBodySceneNodeBuilder(sceneGraph);
@@ -330,9 +329,8 @@ public class RDXSceneGraphUI
          renderMenuBar(modificationQueue);
 
          int numberOfLocalNodes = sceneGraph.getIDToNodeMap().size();
-         SceneGraphMessage latestSceneGraphMessage = sceneGraph.getSceneGraphSubscription().getLatestSceneGraphMessage();
-         int numberOfOnRobotNodes = latestSceneGraphMessage == null ? 0 : latestSceneGraphMessage.getSceneTreeIndices().size();
-         ImGui.text("UI nodes: %d   On robot nodes: %d   State: ".formatted(numberOfLocalNodes, numberOfOnRobotNodes));
+         ImGui.text("UI nodes: %d   On robot nodes: %d   State: ".formatted(numberOfLocalNodes,
+                                                                            sceneGraph.getSceneGraphSubscription().getNumberOfOnRobotNodes()));
          ImGui.sameLine();
          if (sceneGraph.getSceneGraphSubscription().getLocalTreeFrozen())
             ImGui.textColored(ImGuiTools.LIGHT_BLUE, "Frozen");
