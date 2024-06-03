@@ -638,6 +638,7 @@ public class PerceptionAndAutonomyProcess
       zedColorDemandNode.addDependents(zedPointCloudDemandNode, centerposeDemandNode, ballDetectionDemandNode);
       planarRegionsDemandNode.addDependents(yoloZEDDemandNode); // Planar region used for door detection
       realsenseDemandNode.addDependents(yoloRealsenseDemandNode);
+      realsenseDemandNode.addDependents(heightMapDemandNode);
       blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(arUcoDetectionDemandNode); // ArUco set to use Blackfly images
    }
 
