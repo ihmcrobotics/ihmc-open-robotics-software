@@ -29,10 +29,12 @@ mainDependencies {
 
    api("us.ihmc:euclid-frame:0.21.0")
    api("us.ihmc:ihmc-communication:source")
-   api("us.ihmc:ihmc-perception:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-models:source")
+
+   api("com.badlogicgames.gdx:gdx-bullet:1.11.0")
+   api("us.ihmc:ihmc-javafx-toolkit:17-0.22.9")
 }
 
 testDependencies {

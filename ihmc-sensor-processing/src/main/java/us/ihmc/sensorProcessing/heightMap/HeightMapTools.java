@@ -1,10 +1,7 @@
-package us.ihmc.perception.gpuHeightMap;
+package us.ihmc.sensorProcessing.heightMap;
 
-import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.commons.InterpolationTools;
 import com.badlogic.gdx.graphics.Color;
-
-import java.util.List;
 
 /**
  * Height map indexing tools. The height map spans a square region and is parametrized by the following values:

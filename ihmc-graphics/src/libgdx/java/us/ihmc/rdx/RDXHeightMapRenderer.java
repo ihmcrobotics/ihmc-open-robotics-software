@@ -14,7 +14,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.bytedeco.javacpp.BytePointer;
 import org.lwjgl.opengl.GL41;
-import us.ihmc.perception.gpuHeightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.shader.RDXShader;
@@ -31,7 +31,7 @@ import java.nio.FloatBuffer;
  */
 
 /**
- * This has been updated to use {@link RDXHeightMapGraphicNew}, please use that going forward, this implementation has bugs with interacting with collisions
+ * This has been updated to use {@link us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew}, please use that going forward, this implementation has bugs with interacting with collisions
  * from the mouse
  */
 @Deprecated

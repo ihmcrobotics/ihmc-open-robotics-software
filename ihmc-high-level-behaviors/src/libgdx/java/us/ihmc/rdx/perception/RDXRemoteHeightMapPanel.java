@@ -6,7 +6,7 @@ import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.perception.gpuHeightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.perception.heightMap.HeightMapAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.rdx.imgui.RDXPanel;

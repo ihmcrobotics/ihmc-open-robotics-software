@@ -5,7 +5,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.perception.gpuHeightMap.HeightMapTools;
 
 import java.util.Arrays;
 
