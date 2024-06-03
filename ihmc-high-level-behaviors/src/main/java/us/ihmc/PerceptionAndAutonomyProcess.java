@@ -23,6 +23,7 @@ import us.ihmc.perception.BallDetectionManager;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.IterativeClosestPointManager;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
@@ -173,6 +174,10 @@ public class PerceptionAndAutonomyProcess
    private final TypedNotification<PlanarRegionsList> newPlanarRegions = new TypedNotification<>();
    private ROS2DemandGraphNode planarRegionsDemandNode;
 
+   private RapidHeightMapExtractor rapidHeightMapExtractor;
+   private final RestartableThrottledThread heightMapExtractorThread;
+   private ROS2DemandGraphNode heightMapDemandNode;
+
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
    private ReferenceFrameLibrary behaviorTreeReferenceFrameLibrary;
    private ROS2BehaviorTreeExecutor behaviorTreeExecutor;
@@ -246,6 +251,9 @@ public class PerceptionAndAutonomyProcess
 
       planarRegionsExtractorThread = new RestartableThrottledThread("PlanarRegionsExtractor", 10.0, this::updatePlanarRegions);
       planarRegionsExtractorThread.start();
+
+      heightMapExtractorThread = new RestartableThrottledThread("HeightMapExtractor", 10.0, this::updateHeightMap);
+      heightMapExtractorThread.start();
    }
 
    /** Needs to be a separate method to allow constructing test bench version. */
@@ -567,6 +575,21 @@ public class PerceptionAndAutonomyProcess
       }
    }
 
+   public void updateHeightMap()
+   {
+      if (realsenseDepthImage != null && realsenseDepthImage.isAvailable() && heightMapDemandNode.isDemanded())
+      {
+         RawImage latestRealsenseDepthImage = realsenseDepthImage.get();
+
+         if (rapidHeightMapExtractor == null)
+         {
+
+         }
+
+         latestRealsenseDepthImage.release();
+      }
+   }
+
    private void initializeBlackfly(RobotSide side)
    {
       String serialNumber = side == RobotSide.LEFT ? LEFT_BLACKFLY_SERIAL_NUMBER : RIGHT_BLACKFLY_SERIAL_NUMBER;
@@ -595,7 +618,7 @@ public class PerceptionAndAutonomyProcess
       zedColorDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_COLOR);
       realsenseDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
       ousterDepthDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_OUSTER_DEPTH);
-      ousterHeightMapDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
+      ousterHeightMapDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_OUSTER_HEIGHT_MAP);
       ousterLidarScanDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_LIDAR_SCAN);
       for (RobotSide side : RobotSide.values)
          blackflyImageDemandNodes.put(side, new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(side)));
@@ -606,6 +629,7 @@ public class PerceptionAndAutonomyProcess
       yoloRealsenseDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_YOLO_REALSENSE);
       ballDetectionDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_BALL_TRACKING);
       planarRegionsDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_PLANAR_REGIONS);
+      heightMapDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_REALSENSE_HEIGHT_MAP);
 
       // build the graph
       blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(ousterDepthDemandNode); // For point cloud coloring

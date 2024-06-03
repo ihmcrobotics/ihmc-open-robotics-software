@@ -10,6 +10,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -19,13 +20,13 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.NativeMemoryTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.RDXHeightMapRenderer;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXGridMapGraphic;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
@@ -68,21 +69,33 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
 
    public RDXHeightMapVisualizer()
    {
-      super("Height Map");
+      this("Height Map");
+   }
+
+   public RDXHeightMapVisualizer(String title)
+   {
+      super(title);
 
       executorService = Executors.newFixedThreadPool(4);
    }
 
+   /** @deprecated Use RDXPerceptionVisualizerPanel which supports demand heartbeats.*/
    public void setupForHeightMapMessage(ROS2PublishSubscribeAPI ros2)
    {
       ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, this::acceptHeightMapMessage);
-      activeHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
+      activeHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_OUSTER_HEIGHT_MAP);
    }
 
    public void setupForImageMessage(ROS2Helper ros2)
    {
       ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_CROPPED, this::acceptImageMessage);
-      activeHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
+   }
+
+   /** @deprecated Use RDXPerceptionVisualizerPanel which supports demand heartbeats.*/
+   public void setupForImageMessage(ROS2Helper ros2, ROS2Topic<Empty> visualizerHearbeatTopic)
+   {
+      ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_CROPPED, this::acceptImageMessage);
+      activeHeartbeat = new ROS2Heartbeat(ros2, visualizerHearbeatTopic);
    }
 
    @Override
