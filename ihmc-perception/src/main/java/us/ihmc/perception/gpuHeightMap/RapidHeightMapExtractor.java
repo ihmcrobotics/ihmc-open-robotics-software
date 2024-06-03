@@ -587,6 +587,11 @@ public class RapidHeightMapExtractor
       steppabilityConnectionsImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
    }
 
+   public void destroy()
+   {
+      // TODO What do we need to destroy in here?
+   }
+
    public boolean isProcessing()
    {
       return processing;

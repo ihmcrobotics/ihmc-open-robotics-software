@@ -1,6 +1,8 @@
 package us.ihmc;
 
+import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
+import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.colorVision.BlackflyImagePublisher;
 import us.ihmc.avatar.colorVision.BlackflyImageRetriever;
@@ -17,7 +19,9 @@ import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BallDetectionManager;
 import us.ihmc.perception.BytedecoImage;
@@ -26,6 +30,7 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
+import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
 import us.ihmc.perception.ouster.OusterDepthImageRetriever;
 import us.ihmc.perception.ouster.OusterNetServer;
@@ -58,6 +63,7 @@ import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.tools.thread.SwapReference;
 
 import javax.annotation.Nullable;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.function.Supplier;
 
@@ -106,6 +112,7 @@ public class PerceptionAndAutonomyProcess
    private final ROS2Helper ros2Helper;
    private final Supplier<ReferenceFrame> zedFrameSupplier;
    private final Supplier<ReferenceFrame> realsenseFrameSupplier;
+   private final Supplier<ReferenceFrame> realsenseZUpFrameSupplier;
    private final Supplier<ReferenceFrame> ousterFrameSupplier;
 
    private final DepthImageOverlapRemover overlapRemover = new DepthImageOverlapRemover();
@@ -176,7 +183,13 @@ public class PerceptionAndAutonomyProcess
 
    private RapidHeightMapExtractor rapidHeightMapExtractor;
    private final RestartableThrottledThread heightMapExtractorThread;
+   private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private ROS2DemandGraphNode heightMapDemandNode;
+   private final FramePose3D cameraPoseForHeightMap = new FramePose3D();
+   private final RigidBodyTransform sensorToWorldForHeightMap = new RigidBodyTransform();
+   private final RigidBodyTransform sensorToGroundForHeightMap = new RigidBodyTransform();
+   private final RigidBodyTransform groundToWorldForHeightMap = new RigidBodyTransform();
+   private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
 
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
    private ReferenceFrameLibrary behaviorTreeReferenceFrameLibrary;
@@ -192,6 +205,7 @@ public class PerceptionAndAutonomyProcess
    public PerceptionAndAutonomyProcess(ROS2Helper ros2Helper,
                                        Supplier<ReferenceFrame> zedFrameSupplier,
                                        Supplier<ReferenceFrame> realsenseFrameSupplier,
+                                       Supplier<ReferenceFrame> realsenseZUpFrameSupplier,
                                        Supplier<ReferenceFrame> ousterFrameSupplier,
                                        Supplier<ReferenceFrame> leftBlackflyFrameSupplier,
                                        Supplier<ReferenceFrame> rightBlackflyFrameSupplier,
@@ -200,6 +214,7 @@ public class PerceptionAndAutonomyProcess
       this.ros2Helper = ros2Helper;
       this.zedFrameSupplier = zedFrameSupplier;
       this.realsenseFrameSupplier = realsenseFrameSupplier;
+      this.realsenseZUpFrameSupplier = realsenseZUpFrameSupplier;
       this.ousterFrameSupplier = ousterFrameSupplier;
 
       initializeDependencyGraph(ros2Helper);
@@ -330,6 +345,10 @@ public class PerceptionAndAutonomyProcess
       planarRegionsExtractorThread.stop();
       if (planarRegionsExtractor != null)
          planarRegionsExtractor.destroy();
+
+      heightMapExtractorThread.stop();
+      if (rapidHeightMapExtractor != null)
+         rapidHeightMapExtractor.destroy();
 
       ballDetectionManager.destroy();
 
@@ -583,8 +602,38 @@ public class PerceptionAndAutonomyProcess
 
          if (rapidHeightMapExtractor == null)
          {
-
+            rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager, null); // TODO: Fix up for resetting to feet Z
+            rapidHeightMapExtractor.setDepthIntrinsics(latestRealsenseDepthImage.getIntrinsicsCopy());
+            rapidHeightMapExtractor.create(realsenseDepthImage, 1); // TODO: Can't use same image for whole run?
          }
+
+         ReferenceFrame d455SensorFrame = realsenseFrameSupplier.get(); // TODO: Can we do this in this thread?
+         ReferenceFrame d455ZUpSensorFrame = realsenseZUpFrameSupplier.get(); // TODO: Can we do this in this thread?
+
+         // TODO: These must have the wrong names, doesn't seem right
+         d455SensorFrame.getTransformToDesiredFrame(sensorToWorldForHeightMap, ReferenceFrame.getWorldFrame());
+         d455SensorFrame.getTransformToDesiredFrame(sensorToGroundForHeightMap, d455ZUpSensorFrame);
+         d455ZUpSensorFrame.getTransformToDesiredFrame(groundToWorldForHeightMap, ReferenceFrame.getWorldFrame());
+
+         cameraPoseForHeightMap.setToZero(d455SensorFrame);
+         cameraPoseForHeightMap.changeFrame(ReferenceFrame.getWorldFrame());
+
+         rapidHeightMapExtractor.update(sensorToWorldForHeightMap, sensorToGroundForHeightMap, groundToWorldForHeightMap);
+
+         Instant acquisitionTime = Instant.now();
+         Mat croppedHeightMapImage = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
+
+         OpenCVTools.compressImagePNG(croppedHeightMapImage, compressedCroppedHeightMapPointer);
+         PerceptionMessageTools.publishCompressedDepthImage(compressedCroppedHeightMapPointer,
+                                                            PerceptionAPI.HEIGHT_MAP_CROPPED,
+                                                            croppedHeightMapImageMessage,
+                                                            ros2Helper,
+                                                            cameraPoseForHeightMap,
+                                                            acquisitionTime,
+                                                            rapidHeightMapExtractor.getSequenceNumber(),
+                                                            croppedHeightMapImage.rows(),
+                                                            croppedHeightMapImage.cols(),
+                                                            (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
 
          latestRealsenseDepthImage.release();
       }
@@ -670,6 +719,7 @@ public class PerceptionAndAutonomyProcess
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       PerceptionAndAutonomyProcess perceptionAndAutonomyProcess = new PerceptionAndAutonomyProcess(ros2Helper,
+                                                                                                   ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
