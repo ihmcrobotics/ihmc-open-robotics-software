@@ -48,7 +48,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStateUpdater
 {
-   private static final boolean MORE_VARIABLES = true;
+   private static final boolean MORE_VARIABLES = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -105,6 +105,7 @@ public class DistributedIMUBasedCenterOfMassStateUpdater implements MomentumStat
       positionKi.set(0.005);
       orientationKp.set(0.05);
       orientationKi.set(0.005);
+      enableOutput.set(true); // Appears to help Nadia's oscillations due to the fused spine and shaky arms.
 
       gravityVector.setIncludingFrame(worldFrame, 0.0, 0.0, -Math.abs(gravitationalAcceleration));
 
