@@ -13,7 +13,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -33,8 +32,6 @@ public class IMUBasedJointVelocityEstimator
    private final JointBasics[] joints;
    private final FrameVector3D childAngularVelocity = new FrameVector3D();
    private final FrameVector3D parentAngularVelocity = new FrameVector3D();
-   private final YoFrameVector3D yoChildAngularVelocity;
-   private final YoFrameVector3D yoParentAngularVelocity;
 
    private final DMatrixRMaj jacobianAngularPart64F;
    private final DMatrixRMaj omega = new DMatrixRMaj(3, 1);
@@ -47,9 +44,6 @@ public class IMUBasedJointVelocityEstimator
    {
       this.parentIMU = parentIMU;
       this.childIMU = childIMU;
-
-      yoChildAngularVelocity = new YoFrameVector3D(childIMU.getSensorName() + "AngularVelocityInParentFrame", parentIMU.getMeasurementLink().getBodyFixedFrame(), registry);
-      yoParentAngularVelocity = new YoFrameVector3D(parentIMU.getSensorName() + "AngularVelocityInParentFrame", parentIMU.getMeasurementLink().getBodyFixedFrame(), registry);
 
       this.jacobian = new GeometricJacobianCalculator();
       jacobian.setKinematicChain(parentIMU.getMeasurementLink(), childIMU.getMeasurementLink());
@@ -117,10 +111,6 @@ public class IMUBasedJointVelocityEstimator
       parentAngularVelocity.setToZero(parentIMU.getMeasurementFrame());
       parentAngularVelocity.set(parentIMU.getAngularVelocityMeasurement());
       parentAngularVelocity.changeFrame(jacobian.getJacobianFrame());
-
-      yoChildAngularVelocity.setMatchingFrame(childAngularVelocity);
-      yoParentAngularVelocity.setMatchingFrame(parentAngularVelocity);
-
       childAngularVelocity.sub(parentAngularVelocity);
       childAngularVelocity.get(omega);
 
