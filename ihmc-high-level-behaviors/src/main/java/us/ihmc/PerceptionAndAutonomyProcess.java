@@ -328,6 +328,8 @@ public class PerceptionAndAutonomyProcess
       // TODO: Why does this result in a native crash?
 //      openCLManager.destroy();
 
+      overlapRemover.destroy();
+
       depthOverlapRemovalDemandNode.destroy();
       zedPointCloudDemandNode.destroy();
       zedColorDemandNode.destroy();
@@ -379,7 +381,7 @@ public class PerceptionAndAutonomyProcess
 
          if (depthOverlapRemovalDemandNode.isDemanded() && realsenseDemandNode.isDemanded() && realsenseDepthImage != null)
          {
-            RawImage zedCutOutDepthImage = overlapRemover.removeOverlap(zedDepthImage.get(), 20);
+            RawImage zedCutOutDepthImage = overlapRemover.removeOverlap(zedDepthImage, 20);
             zedImagePublisher.setNextCutOutDepthImage(zedCutOutDepthImage.get());
             zedCutOutDepthImage.release();
          }

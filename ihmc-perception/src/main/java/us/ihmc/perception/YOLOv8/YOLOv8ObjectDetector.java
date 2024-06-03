@@ -5,7 +5,13 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_dnn;
-import org.bytedeco.opencv.opencv_core.*;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
+import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_core.RectVector;
+import org.bytedeco.opencv.opencv_core.Scalar;
+import org.bytedeco.opencv.opencv_core.Size;
+import org.bytedeco.opencv.opencv_core.StringVector;
 import org.bytedeco.opencv.opencv_dnn.Net;
 import org.bytedeco.opencv.opencv_text.FloatVector;
 import org.bytedeco.opencv.opencv_text.IntVector;
@@ -87,8 +93,10 @@ public class YOLOv8ObjectDetector
 
    public void destroy()
    {
+      System.out.println("Destroying " + getClass().getSimpleName());
       DETECTION_SIZE.close();
       yoloNet.close();
+      System.out.println("Destroyed " + getClass().getSimpleName());
    }
 
    private Set<YOLOv8Detection> processOutput(MatVector outputBlobs, float confidenceThreshold, float nonMaximumSuppressionThreshold, int imageWidth, int imageHeight)

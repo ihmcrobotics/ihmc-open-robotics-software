@@ -18,28 +18,17 @@ import java.util.List;
 public class OpenCLPointCloudExtractor
 {
    private static final int FLOATS_PER_PIXEL = 4; // [0] = depth value, [1] = x, [2] = y, [3] = z (coordinates in world)
-   private final OpenCLManager openCLManager;
-   private final _cl_program openCLProgram;
-   private final _cl_kernel kernel;
+
+   private final OpenCLManager openCLManager = new OpenCLManager();
+   private final _cl_program openCLProgram = openCLManager.loadProgram("DepthImageToPointCloudConverter", "PerceptionCommon.cl");
+   private final _cl_kernel kernel = openCLManager.createKernel(openCLProgram, "convertDepthImageToPointCloud");
    private final OpenCLFloatParameters parametersBuffer = new OpenCLFloatParameters();
    private final OpenCLRigidBodyTransformParameter depthToWorldTransformParameter = new OpenCLRigidBodyTransformParameter();
    private OpenCLFloatBuffer pointCloudVertexOutput;
 
-   private RawImage depthImage;
-   private BytedecoImage bytedecoDepthImage;
-
-   public OpenCLPointCloudExtractor(OpenCLManager openCLManager)
-   {
-      this.openCLManager = openCLManager;
-      openCLProgram = openCLManager.loadProgram("DepthImageToPointCloudConverter", "PerceptionCommon.cl");
-      kernel = openCLManager.createKernel(openCLProgram, "convertDepthImageToPointCloud");
-   }
-
    public List<Point3D32> extractPointCloud(RawImage depthImage16UC1)
    {
-      if (depthImage != null)
-         depthImage.release();
-      depthImage = depthImage16UC1.get();
+      RawImage depthImage = depthImage16UC1.get();
 
       int numberOfPixels = depthImage.getImageWidth() * depthImage.getImageHeight();
       if (pointCloudVertexOutput == null)
@@ -60,9 +49,7 @@ public class OpenCLPointCloudExtractor
       parametersBuffer.setParameter(depthImage.getDepthDiscretization());
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
-      if (bytedecoDepthImage != null)
-         bytedecoDepthImage.destroy(openCLManager);
-      bytedecoDepthImage = new BytedecoImage(depthImage.getCpuImageMat());
+      BytedecoImage bytedecoDepthImage = new BytedecoImage(depthImage.getCpuImageMat());
       bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
       bytedecoDepthImage.writeOpenCLImage(openCLManager);
 
@@ -88,20 +75,20 @@ public class OpenCLPointCloudExtractor
          }
       }
 
+      depthImage.release();
+      bytedecoDepthImage.destroy(openCLManager);
+
       return pointCloud;
    }
 
    public void destroy()
    {
-      if (bytedecoDepthImage != null)
-         bytedecoDepthImage.destroy(openCLManager);
-      if (depthImage != null)
-         depthImage.release();
-
+      System.out.println("Destroying " + getClass().getSimpleName());
       if (pointCloudVertexOutput != null)
          pointCloudVertexOutput.destroy(openCLManager);
 
       openCLProgram.close();
       kernel.close();
+      System.out.println("Destroyed " + getClass().getSimpleName());
    }
 }

@@ -28,7 +28,6 @@ import us.ihmc.perception.YOLOv8.YOLOv8ObjectDetector;
 import us.ihmc.perception.comms.ImageMessageFormat;
 import us.ihmc.perception.filters.DetectionFilter;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
-import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
@@ -36,6 +35,7 @@ import us.ihmc.perception.tools.ImageMessageDataPacker;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.tools.thread.RestartableThread;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.util.HashSet;
@@ -44,9 +44,13 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class YOLOv8DetectionManager
 {
@@ -55,16 +59,23 @@ public class YOLOv8DetectionManager
    private static final int FONT_THICKNESS = 2;
    private static final int LINE_TYPE = opencv_imgproc.LINE_4;
    private static final Scalar BOUNDING_BOX_COLOR = new Scalar(0.0, 196.0, 0.0, 255.0);
+   private static final int MAX_QUEUE_SIZE = 3;
 
-   private final OpenCLManager openCLManager = new OpenCLManager();
-   private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor(openCLManager);
-   private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter(openCLManager);
+   private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor();
+   private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter();
 
    private final ROS2DemandGraphNode annotatedImageDemandNode;
    private final ROS2PublisherBasics<ImageMessage> annotatedImagePublisher;
 
    private final YOLOv8ObjectDetector yoloDetector = new YOLOv8ObjectDetector();
+   private final ConcurrentLinkedQueue<YOLOv8DetectionResults> yoloResultQueue = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<RawImage> yoloDetectionColorImageQueue = new ConcurrentLinkedQueue<>();
+   private final ConcurrentLinkedQueue<RawImage> yoloDetectionDepthImageQueue = new ConcurrentLinkedQueue<>();
    private final ExecutorService yoloExecutorService = Executors.newCachedThreadPool(ThreadTools.createNamedThreadFactory("YOLOExecutor"));
+   private final RestartableThread yoloProcessingThread;
+   private final Lock newResultsLock = new ReentrantLock();
+   private final Condition newResultsAvailable = newResultsLock.newCondition();
+
    private final FrequencyCalculator yoloFrequencyCalculator = new FrequencyCalculator();
 
    private final Map<YOLOv8DetectionClass, YOLOv8Node> detectedNodes = new ConcurrentHashMap<>();
@@ -101,25 +112,47 @@ public class YOLOv8DetectionManager
 
          targetDetections = newTargetDetections;
       });
+
+      yoloProcessingThread = new RestartableThread("YOLODetectionProcessor", this::processYoloResults);
+      yoloProcessingThread.start();
    }
 
+   /**
+    * Non-blocking call to run YOLO on the provided images
+    * @param colorImage BGR color image, used for YOLO detection
+    * @param depthImage 16UC1 depth image, used to get points of detected objects
+    */
    public void runYOLODetection(RawImage colorImage, RawImage depthImage)
    {
       if (yoloDetector.isReady() && !yoloExecutorService.isShutdown())
       {
          yoloExecutorService.submit(() ->
          {
+            // Acquire the images
             if (!colorImage.isAvailable() || !depthImage.isAvailable())
                return;
             colorImage.get();
             depthImage.get();
 
+            // Run YOLO to get results
             YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImage, yoloConfidenceThreshold, yoloNMSThreshold);
-            segmentAndMatchDetections(yoloResults, depthImage, robotFrame);
-            if (annotatedImageDemandNode.isDemanded())
-               annotateAndPublishImage(yoloResults, colorImage);
 
-            yoloResults.destroy();
+            // Put the results & images in queue to be processed further
+            yoloResultQueue.add(yoloResults);
+            yoloDetectionColorImageQueue.add(colorImage.get());
+            yoloDetectionDepthImageQueue.add(depthImage.get());
+
+            // Notify that new results came in
+            newResultsLock.lock();
+            try
+            {
+               newResultsAvailable.signal();
+            }
+            finally
+            {
+               newResultsLock.unlock();
+            }
+
             colorImage.release();
             depthImage.release();
          });
@@ -135,9 +168,9 @@ public class YOLOv8DetectionManager
    {
       System.out.println("Destroying " + getClass().getSimpleName());
       shutdownExecutor();
+      yoloProcessingThread.stop();
       segmenter.destroy();
       extractor.destroy();
-      openCLManager.destroy();
 
       yoloDetector.destroy();
       System.out.println("Destroyed " + getClass().getSimpleName());
@@ -159,6 +192,54 @@ public class YOLOv8DetectionManager
       {
          yoloExecutorService.shutdownNow();
          LogTools.error(e);
+      }
+   }
+
+   private void processYoloResults()
+   {
+      // Wait for new results if none are present
+      newResultsLock.lock();
+      try
+      {
+         while (yoloResultQueue.isEmpty() || yoloDetectionColorImageQueue.isEmpty() || yoloDetectionDepthImageQueue.isEmpty())
+            newResultsAvailable.await();
+      }
+      catch (InterruptedException interruptedException)
+      {
+         LogTools.error(interruptedException);
+      }
+      finally
+      {
+         newResultsLock.unlock();
+      }
+
+      // Process existing results
+      while (!yoloResultQueue.isEmpty() && !yoloDetectionDepthImageQueue.isEmpty() && !yoloDetectionColorImageQueue.isEmpty() && robotFrame != null)
+      {
+         // Discard old results if too many are present
+         while (yoloResultQueue.size() > MAX_QUEUE_SIZE && yoloDetectionColorImageQueue.size() > MAX_QUEUE_SIZE && yoloDetectionDepthImageQueue.size() > MAX_QUEUE_SIZE)
+         {
+            yoloResultQueue.poll().destroy();
+            yoloDetectionColorImageQueue.poll().release();
+            yoloDetectionDepthImageQueue.poll().release();
+         }
+
+         // get the images & yolo results
+         RawImage colorImage = yoloDetectionColorImageQueue.poll();
+         RawImage depthImage = yoloDetectionDepthImageQueue.poll();
+         YOLOv8DetectionResults yoloResults = yoloResultQueue.poll();
+
+         // process the detections for scene graph stuff
+         segmentAndMatchDetections(yoloResults, depthImage, robotFrame);
+
+         // if demanded, publish an annotated image
+         if (annotatedImageDemandNode.isDemanded())
+            annotateAndPublishImage(yoloResults, colorImage);
+
+         // release everything
+         yoloResults.destroy();
+         colorImage.release();
+         depthImage.release();
       }
    }
 
