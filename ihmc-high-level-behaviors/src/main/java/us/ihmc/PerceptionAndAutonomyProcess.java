@@ -267,6 +267,7 @@ public class PerceptionAndAutonomyProcess
       planarRegionsExtractorThread = new RestartableThrottledThread("PlanarRegionsExtractor", 10.0, this::updatePlanarRegions);
       planarRegionsExtractorThread.start();
 
+      // TODO: How should this be threaded?
       heightMapExtractorThread = new RestartableThrottledThread("HeightMapExtractor", 10.0, this::updateHeightMap);
       heightMapExtractorThread.start();
    }
@@ -610,7 +611,6 @@ public class PerceptionAndAutonomyProcess
          ReferenceFrame d455SensorFrame = realsenseFrameSupplier.get(); // TODO: Can we do this in this thread?
          ReferenceFrame d455ZUpSensorFrame = realsenseZUpFrameSupplier.get(); // TODO: Can we do this in this thread?
 
-         // TODO: These must have the wrong names, doesn't seem right
          d455SensorFrame.getTransformToDesiredFrame(sensorToWorldForHeightMap, ReferenceFrame.getWorldFrame());
          d455SensorFrame.getTransformToDesiredFrame(sensorToGroundForHeightMap, d455ZUpSensorFrame);
          d455ZUpSensorFrame.getTransformToDesiredFrame(groundToWorldForHeightMap, ReferenceFrame.getWorldFrame());
@@ -620,7 +620,6 @@ public class PerceptionAndAutonomyProcess
 
          rapidHeightMapExtractor.update(sensorToWorldForHeightMap, sensorToGroundForHeightMap, groundToWorldForHeightMap);
 
-         Instant acquisitionTime = Instant.now();
          Mat croppedHeightMapImage = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
 
          OpenCVTools.compressImagePNG(croppedHeightMapImage, compressedCroppedHeightMapPointer);
@@ -629,7 +628,7 @@ public class PerceptionAndAutonomyProcess
                                                             croppedHeightMapImageMessage,
                                                             ros2Helper,
                                                             cameraPoseForHeightMap,
-                                                            acquisitionTime,
+                                                            latestRealsenseDepthImage.getAcquisitionTime(),
                                                             rapidHeightMapExtractor.getSequenceNumber(),
                                                             croppedHeightMapImage.rows(),
                                                             croppedHeightMapImage.cols(),
