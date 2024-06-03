@@ -125,8 +125,9 @@ public abstract class KinematicsStreamingToolboxControllerTest
     */
    public abstract DRCRobotModel newRobotModel();
 
-   public void setupWithWalkingController(KinematicsStreamingToolboxParameters toolboxParameters)
+   public void setupWithWalkingController(IKStreamingTestRunParameters ikStreamingTestRunParameters)
    {
+      KinematicsStreamingToolboxParameters toolboxParameters = ikStreamingTestRunParameters.toolboxParameters();
       DRCRobotModel robotModel = newRobotModel();
       RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
 
@@ -199,6 +200,11 @@ public abstract class KinematicsStreamingToolboxControllerTest
             try
             {
                toolboxController.update();
+
+               if (ikStreamingTestRunParameters.getIKStreamingAssertion() != null)
+               {
+                  ikStreamingTestRunParameters.getIKStreamingAssertion().assertExecution(toolboxController);
+               }
 
                for (JointReadOnly joint : desiredJoints)
                {
@@ -342,9 +348,8 @@ public abstract class KinematicsStreamingToolboxControllerTest
       double circleRadius = 0.25;
       double circleFrequency = 0.25;
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(side -> new Point3D(0.2, side.negateIfRightSide(0.225), 1.0));
-      SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ?
-            new Vector3D(0.0, 0.0, 0.0) :
-            new Vector3D());
+      SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ? new Vector3D(0.0, 0.0, 0.0)
+                                                                                                                  : new Vector3D());
 
       double toolboxControllerPeriod = toolboxController.getTools().getToolboxControllerPeriod();
 
@@ -424,7 +429,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
    public void testStreamingToController(IKStreamingTestRunParameters ikStreamingTestRunParameters)
    {
-      setupWithWalkingController(ikStreamingTestRunParameters.toolboxParameters());
+      setupWithWalkingController(ikStreamingTestRunParameters);
       SpyTrackingController spyController = new SpyTrackingController(toolboxRegistry,
                                                                       toolboxController.getDesiredFullRobotModel(),
                                                                       simulationTestHelper.getControllerFullRobotModel());
@@ -474,11 +479,11 @@ public abstract class KinematicsStreamingToolboxControllerTest
       SimulationConstructionSet2 scs = simulationTestHelper.getSimulationConstructionSet();
       scs.waitUntilVisualizerFullyUp();
       Platform.runLater(() ->
-                        {
-                           Button restart = new Button("Restart");
-                           restart.setOnAction(event -> simRunner.reset());
-                           scs.addCustomGUIControl(restart);
-                        });
+      {
+         Button restart = new Button("Restart");
+         restart.setOnAction(event -> simRunner.reset());
+         scs.addCustomGUIControl(restart);
+      });
 
       assertTrue(simRunner.simulateNow(0.5));
       wakeupToolbox();
@@ -657,9 +662,8 @@ public abstract class KinematicsStreamingToolboxControllerTest
    {
       double circleRadius = 0.25;
       SideDependentList<Point3D> circleCenters = new SideDependentList<>(side -> new Point3D(0.3, side.negateIfRightSide(0.225), 1.0));
-      SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ?
-            new Vector3D(0.0, 0.0, 0.0) :
-            new Vector3D());
+      SideDependentList<Vector3D> circleCenterVelocities = new SideDependentList<>(side -> side == RobotSide.LEFT ? new Vector3D(0.0, 0.0, 0.0)
+                                                                                                                  : new Vector3D());
 
       return time ->
       {
@@ -722,6 +726,7 @@ public abstract class KinematicsStreamingToolboxControllerTest
       private double handOrientationMeanErrorThreshold = 0.25;
       private double messageGeneratorDT = 0.01;
       private IKStreamingMessageGenerator messageGenerator;
+      private IKStreamingAssertion ikStreamingAssertion;
       private double simulationDuration = 10.0;
 
       private YoRegistry registry;
@@ -781,6 +786,16 @@ public abstract class KinematicsStreamingToolboxControllerTest
          return messageGenerator;
       }
 
+      public void setIKStreamingAssertion(IKStreamingAssertion ikStreamingAssertion)
+      {
+         this.ikStreamingAssertion = ikStreamingAssertion;
+      }
+
+      public IKStreamingAssertion getIKStreamingAssertion()
+      {
+         return ikStreamingAssertion;
+      }
+
       public void setSimulationDuration(double simulationDuration)
       {
          this.simulationDuration = simulationDuration;
@@ -804,13 +819,12 @@ public abstract class KinematicsStreamingToolboxControllerTest
       @Override
       public String toString()
       {
-         return "[toolboxParameters=%s, handPositionMeanErrorThreshold=%s, handOrientationMeanErrorThreshold=%s, messageGeneratorDT=%s, messageGenerator=%s, simulationDuration=%s]".formatted(
-               toolboxParameters,
-               handPositionMeanErrorThreshold,
-               handOrientationMeanErrorThreshold,
-               messageGeneratorDT,
-               messageGenerator,
-               simulationDuration);
+         return "[toolboxParameters=%s, handPositionMeanErrorThreshold=%s, handOrientationMeanErrorThreshold=%s, messageGeneratorDT=%s, messageGenerator=%s, simulationDuration=%s]".formatted(toolboxParameters,
+                                                                                                                                                                                               handPositionMeanErrorThreshold,
+                                                                                                                                                                                               handOrientationMeanErrorThreshold,
+                                                                                                                                                                                               messageGeneratorDT,
+                                                                                                                                                                                               messageGenerator,
+                                                                                                                                                                                               simulationDuration);
       }
    }
 
@@ -821,6 +835,22 @@ public abstract class KinematicsStreamingToolboxControllerTest
       }
 
       KinematicsStreamingToolboxInputMessage update(double time);
+   }
+
+   public interface IKStreamingAssertion
+   {
+      void assertExecution(KinematicsStreamingToolboxController toolboxController);
+   }
+
+   public static IKStreamingMessageGenerator blop()
+   {
+      IKStreamingMessageGenerator generator = time ->
+      {
+         KinematicsStreamingToolboxInputMessage ret = new KinematicsStreamingToolboxInputMessage();
+         // des truc
+         return ret;
+      };
+      return generator;
    }
 
    public static class SpyTrackingController implements Controller
@@ -856,10 +886,10 @@ public abstract class KinematicsStreamingToolboxControllerTest
             if (desiredFullRobotModel.getHand(side) == null)
                continue;
 
-            handDesiredPoses      .put(side, new YoFramePose3D(side.getCamelCaseName() + "HandDesired", worldFrame, spyRegistry));
-            handCurrentPoses      .put(side, new YoFramePose3D(side.getCamelCaseName() + "HandCurrent", worldFrame, spyRegistry));
-            handPositionErrors    .put(side, new YoDouble(side.getCamelCaseName() + "HandPositionError", spyRegistry));
-            handOrientationErrors .put(side, new YoDouble(side.getCamelCaseName() + "HandOrientationError", spyRegistry));
+            handDesiredPoses.put(side, new YoFramePose3D(side.getCamelCaseName() + "HandDesired", worldFrame, spyRegistry));
+            handCurrentPoses.put(side, new YoFramePose3D(side.getCamelCaseName() + "HandCurrent", worldFrame, spyRegistry));
+            handPositionErrors.put(side, new YoDouble(side.getCamelCaseName() + "HandPositionError", spyRegistry));
+            handOrientationErrors.put(side, new YoDouble(side.getCamelCaseName() + "HandOrientationError", spyRegistry));
          }
          needsToInitialize = true;
          positionMean = new Mean();
