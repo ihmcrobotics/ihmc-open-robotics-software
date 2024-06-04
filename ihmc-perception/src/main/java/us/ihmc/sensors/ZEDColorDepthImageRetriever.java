@@ -5,9 +5,6 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
-import org.bytedeco.zed.SL_CalibrationParameters;
-import org.bytedeco.zed.SL_InitParameters;
-import org.bytedeco.zed.SL_RuntimeParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -17,6 +14,10 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.RestartableThread;
+import us.ihmc.zed.SL_CalibrationParameters;
+import us.ihmc.zed.SL_InitParameters;
+import us.ihmc.zed.SL_RuntimeParameters;
+import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
 import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
@@ -25,7 +26,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
-import static org.bytedeco.zed.global.zed.*;
+import static us.ihmc.zed.global.zed.*;
 
 /**
  * Encodes and publishes color and depth images from a ZED sensor.
@@ -33,6 +34,10 @@ import static org.bytedeco.zed.global.zed.*;
  */
 public class ZEDColorDepthImageRetriever
 {
+   static {
+      ZEDJavaAPINativeLibrary.load();
+   }
+
    private static final int CAMERA_FPS = 30;
    private static final float MILLIMETER_TO_METERS = 0.001f;
 
@@ -314,13 +319,15 @@ public class ZEDColorDepthImageRetriever
 
       SL_InitParameters zedInitializationParameters = new SL_InitParameters();
 
+      // TODO: We can't do this anymore since upgrading ZED SDK; it gives an invalid camera model
       // Open camera with default parameters to find model
       // Can't get the model number without opening the camera first
-      success = checkError("sl_open_camera", sl_open_camera(cameraID, zedInitializationParameters, 0, "", "", 0, "", "", ""));
-      if (!success)
-         return success;
-      setZEDConfiguration(cameraID);
-      sl_close_camera(cameraID);
+      // success = checkError("sl_open_camera", sl_open_camera(cameraID, zedInitializationParameters, 0, "", "", 0, "", "", ""));
+      // if (!success)
+      //    return success;
+      // setZEDConfiguration(cameraID);
+      // sl_close_camera(cameraID);
+      zedModelData = ZEDModelData.ZED_2I;
 
       // Set initialization parameters based on camera model
       zedInitializationParameters.camera_fps(CAMERA_FPS);
@@ -393,12 +400,12 @@ public class ZEDColorDepthImageRetriever
    {
       return switch (sl_get_camera_model(cameraID))
       {
-         case 0 -> "ZED";
-         case 1 -> "ZED Mini";
-         case 2 -> "ZED 2";
-         case 3 -> "ZED 2i";
-         case 4 -> "ZED X";
-         case 5 -> "ZED XM";
+         case SL_MODEL_ZED -> "ZED";
+         case SL_MODEL_ZED_M -> "ZED Mini";
+         case SL_MODEL_ZED2 -> "ZED 2";
+         case SL_MODEL_ZED2i -> "ZED 2i";
+         case SL_MODEL_ZED_X -> "ZED X";
+         case SL_MODEL_ZED_XM -> "ZED XM";
          default -> "Unknown model";
       };
    }
@@ -407,12 +414,12 @@ public class ZEDColorDepthImageRetriever
    {
       switch (sl_get_camera_model(cameraID))
       {
-         case 0 -> zedModelData = ZEDModelData.ZED;
-         case 1 -> zedModelData = ZEDModelData.ZED_MINI;
-         case 2 -> zedModelData = ZEDModelData.ZED_2;
-         case 3 -> zedModelData = ZEDModelData.ZED_2I;
-         case 4 -> zedModelData = ZEDModelData.ZED_X;
-         case 5 -> zedModelData = ZEDModelData.ZED_X_MINI;
+         case SL_MODEL_ZED -> zedModelData = ZEDModelData.ZED;
+         case SL_MODEL_ZED_M -> zedModelData = ZEDModelData.ZED_MINI;
+         case SL_MODEL_ZED2 -> zedModelData = ZEDModelData.ZED_2;
+         case SL_MODEL_ZED2i -> zedModelData = ZEDModelData.ZED_2I;
+         case SL_MODEL_ZED_X -> zedModelData = ZEDModelData.ZED_X;
+         case SL_MODEL_ZED_XM -> zedModelData = ZEDModelData.ZED_X_MINI;
          default ->
          {
             zedModelData = ZEDModelData.ZED;
