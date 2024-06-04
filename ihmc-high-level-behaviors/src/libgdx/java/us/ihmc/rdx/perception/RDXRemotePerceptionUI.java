@@ -1,7 +1,7 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.avatar.colorVision.BlackflyComms;
-import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
@@ -27,7 +27,7 @@ public class RDXRemotePerceptionUI
 
    private final SteppableRegionCalculatorParameters steppableRegionCalculatorParameters = new SteppableRegionCalculatorParameters();
    private final PerceptionConfigurationParameters perceptionConfigurationParameters = new PerceptionConfigurationParameters();
-   private final ContinuousWalkingParameters continuousWalkingParameters = new ContinuousWalkingParameters();
+   private final ContinuousHikingParameters continuousHikingParameters = new ContinuousHikingParameters();
    private final HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
 
    private SwingPlannerParametersBasics swingPlannerParameters;
@@ -59,7 +59,7 @@ public class RDXRemotePerceptionUI
       remotePropertySets = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
 
       remotePropertySets.registerRemotePropertySet(perceptionConfigurationParameters, PerceptionComms.PERCEPTION_CONFIGURATION_PARAMETERS);
-      remotePropertySets.registerRemotePropertySet(continuousWalkingParameters, ContinuousWalkingAPI.CONTINUOUS_WALKING_PARAMETERS);
+      remotePropertySets.registerRemotePropertySet(continuousHikingParameters, ContinuousWalkingAPI.CONTINUOUS_WALKING_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(heightMapParameters, PerceptionComms.HEIGHT_MAP_PARAMETERS);
       remotePropertySets.registerRemotePropertySet(monteCarloFootstepPlannerParameters, ContinuousWalkingAPI.MONTE_CARLO_PLANNER_PARAMETERS);
 
@@ -104,9 +104,9 @@ public class RDXRemotePerceptionUI
       return perceptionConfigurationParameters;
    }
 
-   public ContinuousWalkingParameters getContinuousPlanningParameters()
+   public ContinuousHikingParameters getContinuousPlanningParameters()
    {
-      return continuousWalkingParameters;
+      return continuousHikingParameters;
    }
 
    public SwingPlannerParametersBasics getSwingPlannerParameters()

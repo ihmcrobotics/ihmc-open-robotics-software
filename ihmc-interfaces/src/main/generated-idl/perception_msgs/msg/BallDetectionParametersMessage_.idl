@@ -1,0 +1,39 @@
+#ifndef __perception_msgs__msg__BallDetectionParametersMessage__idl__
+#define __perception_msgs__msg__BallDetectionParametersMessage__idl__
+
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::BallDetectionParametersMessage_")
+      struct BallDetectionParametersMessage
+      {
+        /**
+         * Diameter of ball being detected, in meters
+         */
+        double ball_diameter;
+        /**
+         * Position alpha filter value
+         */
+        double alpha;
+        /**
+         * HSV lower bounds
+         */
+        double h_low;
+        double s_low;
+        double v_low;
+        /**
+         * HSV upper bounds
+         */
+        double h_high;
+        double s_high;
+        double v_high;
+      };
+    };
+  };
+};
+
+#endif
