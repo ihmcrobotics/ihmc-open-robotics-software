@@ -184,12 +184,15 @@ public class HeightMapVisualizer extends AnimationTimer
       heightMapToRender.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
    }
 
-      @Override public void stop () {
+   @Override
+   public void stop()
+   {
       super.stop();
       meshComputation.shutdownNow();
    }
 
-      public Group getRoot () {
+   public Group getRoot()
+   {
       return rootNode;
    }
-   }
+}

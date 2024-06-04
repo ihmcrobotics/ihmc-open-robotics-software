@@ -89,11 +89,13 @@ public class HeightMapTools
       return new javafx.scene.paint.Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f);
    }
 
-   private static double[] getRedGreenBlue(double height)
+   /**
+    * Returns the red green and blue components of a color based on a given height.
+    */
+   public static double[] getRedGreenBlue(double height)
    {
       // Using interpolation between key color points
       double r = 0, g = 0, b = 0;
-      double redR = 1.0, redG = 0.0, redB = 0.0;
       double magentaR = 1.0, magentaG = 0.0, magentaB = 1.0;
       double orangeR = 1.0, orangeG = 200.0 / 255.0, orangeB = 0.0;
       double yellowR = 1.0, yellowG = 1.0, yellowB = 0.0;
