@@ -111,7 +111,6 @@ public class IMUBasedJointVelocityEstimator
       parentAngularVelocity.setToZero(parentIMU.getMeasurementFrame());
       parentAngularVelocity.set(parentIMU.getAngularVelocityMeasurement());
       parentAngularVelocity.changeFrame(jacobian.getJacobianFrame());
-
       childAngularVelocity.sub(parentAngularVelocity);
       childAngularVelocity.get(omega);
 
