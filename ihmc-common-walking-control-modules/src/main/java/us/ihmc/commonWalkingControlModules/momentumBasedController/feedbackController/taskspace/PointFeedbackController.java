@@ -10,9 +10,14 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBAlphaFilteredVector3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPoint3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings.FilterVector3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -49,6 +54,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final FBVector3D yoCurrentLinearVelocity;
    private final FBVector3D yoErrorLinearVelocity;
    private final FBAlphaFilteredVector3D yoFilteredErrorLinearVelocity;
+   private final FilterVector3D linearVelocityErrorFilter;
    private final FBVector3D yoFeedForwardLinearVelocity;
    private final FBVector3D yoFeedbackLinearVelocity;
    private final FBRateLimitedVector3D rateLimitedFeedbackLinearVelocity;
@@ -187,6 +193,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
             yoFilteredErrorLinearVelocity = null;
          }
 
+         linearVelocityErrorFilter = fbToolbox.getLinearVelocityErrorFilter(endEffector, controllerIndex);
+
          if (ccToolbox.isEnableInverseDynamicsModule())
          {
             yoDesiredLinearAcceleration = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, DESIRED, LINEAR_ACCELERATION, isEnabled, true);
@@ -248,6 +256,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
          yoCurrentLinearVelocity = null;
          yoErrorLinearVelocity = null;
          yoFilteredErrorLinearVelocity = null;
+         linearVelocityErrorFilter = null;
 
          yoDesiredLinearAcceleration = null;
          yoFeedForwardLinearAcceleration = null;
@@ -591,11 +600,17 @@ public class PointFeedbackController implements FeedbackControllerInterface
          yoErrorLinearVelocity.setIncludingFrame(feedbackTermToPack);
          yoFilteredErrorLinearVelocity.update();
          yoFilteredErrorLinearVelocity.setCommandId(currentCommandId);
-         feedbackTermToPack.set(yoFilteredErrorLinearVelocity);
+
+         if (linearVelocityErrorFilter != null)
+            linearVelocityErrorFilter.apply(yoFilteredErrorLinearVelocity, feedbackTermToPack);
+         else
+            feedbackTermToPack.set(yoFilteredErrorLinearVelocity);
       }
       else
       {
          yoErrorLinearVelocity.setIncludingFrame(feedbackTermToPack);
+         if (linearVelocityErrorFilter != null)
+            linearVelocityErrorFilter.apply(feedbackTermToPack, feedbackTermToPack);
       }
       yoErrorLinearVelocity.changeFrame(trajectoryFrame);
       yoErrorLinearVelocity.setCommandId(currentCommandId);

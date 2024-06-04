@@ -10,11 +10,21 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBAlphaFilteredVector6D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPose3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector6D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector3D;
+import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector6D;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings.FilterVector3D;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -55,6 +65,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final FBVector6D yoCurrentVelocity;
    protected final FBVector6D yoErrorVelocity;
    protected final FBAlphaFilteredVector6D yoFilteredErrorVelocity;
+   protected final FilterVector3D angularVelocityErrorFilter;
+   protected final FilterVector3D linearVelocityErrorFilter;
    protected final FBVector6D yoFeedForwardVelocity;
    protected final FBVector6D yoFeedbackVelocity;
    protected final FBRateLimitedVector6D rateLimitedFeedbackVelocity;
@@ -233,6 +245,9 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
             yoFilteredErrorVelocity = null;
          }
 
+         angularVelocityErrorFilter = fbToolbox.getAngularVelocityErrorFilter(endEffector, controllerIndex);
+         linearVelocityErrorFilter = fbToolbox.getLinearVelocityErrorFilter(endEffector, controllerIndex);
+
          if (ccToolbox.isEnableInverseDynamicsModule())
          {
             yoDesiredAcceleration = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, DESIRED, ACCELERATION, isEnabled, true);
@@ -294,6 +309,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          yoCurrentVelocity = null;
          yoErrorVelocity = null;
          yoFilteredErrorVelocity = null;
+         angularVelocityErrorFilter = null;
+         linearVelocityErrorFilter = null;
 
          yoDesiredAcceleration = null;
          yoFeedForwardAcceleration = null;
@@ -409,6 +426,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       {
          yoFilteredErrorVelocity.setToZero(worldFrame);
          yoFilteredErrorVelocity.reset();
+      }
+      if (angularVelocityErrorFilter != null)
+      {
+         angularVelocityErrorFilter.reset();
       }
       if (yoErrorPositionIntegrated != null)
       {
@@ -758,13 +779,28 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
          yoErrorVelocity.setIncludingFrame(angularFeedbackTermToPack, linearFeedbackTermToPack);
          yoFilteredErrorVelocity.update();
          yoFilteredErrorVelocity.setCommandId(currentCommandId);
-         linearFeedbackTermToPack.set(yoFilteredErrorVelocity.getLinearPart());
-         angularFeedbackTermToPack.set(yoFilteredErrorVelocity.getAngularPart());
+
+         if (linearVelocityErrorFilter != null)
+            linearVelocityErrorFilter.apply(yoFilteredErrorVelocity.getLinearPart(), linearFeedbackTermToPack);
+         else
+            linearFeedbackTermToPack.set(yoFilteredErrorVelocity.getLinearPart());
+
+         if (angularVelocityErrorFilter != null)
+            angularVelocityErrorFilter.apply(yoFilteredErrorVelocity.getAngularPart(), angularFeedbackTermToPack);
+         else
+            angularFeedbackTermToPack.set(yoFilteredErrorVelocity.getAngularPart());
       }
       else
       {
          yoErrorVelocity.setIncludingFrame(angularFeedbackTermToPack, linearFeedbackTermToPack);
+
+         if (linearVelocityErrorFilter != null)
+            linearVelocityErrorFilter.apply(linearFeedbackTermToPack, linearFeedbackTermToPack);
+
+         if (angularVelocityErrorFilter != null)
+            angularVelocityErrorFilter.apply(angularFeedbackTermToPack, angularFeedbackTermToPack);
       }
+
       yoErrorVelocity.changeFrame(trajectoryFrame);
       yoErrorVelocity.setCommandId(currentCommandId);
 
