@@ -844,6 +844,11 @@ public class RapidHeightMapExtractor
       return heightMapDataAvailable;
    }
 
+   public static void reloadHeightMapParameters(String versionSuffix)
+   {
+      heightMapParameters = new HeightMapParameters(versionSuffix);
+   }
+
    public static HeightMapParameters getHeightMapParameters()
    {
       return heightMapParameters;
