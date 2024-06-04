@@ -273,8 +273,7 @@ public class PerceptionAndAutonomyProcess
       planarRegionsExtractorThread = new RestartableThrottledThread("PlanarRegionsExtractor", 10.0, this::updatePlanarRegions);
       planarRegionsExtractorThread.start();
 
-      // TODO: How should this be threaded?
-      heightMapExtractorThread = new RestartableThrottledThread("HeightMapExtractor", 10.0, this::updateHeightMap);
+      heightMapExtractorThread = new RestartableThrottledThread("HeightMapExtractor", 30.0, this::updateHeightMap);
       heightMapExtractorThread.start();
    }
 

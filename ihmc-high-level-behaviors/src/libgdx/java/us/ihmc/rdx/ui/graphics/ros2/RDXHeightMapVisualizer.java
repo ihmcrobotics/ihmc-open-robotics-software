@@ -26,6 +26,8 @@ import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXGridMapGraphic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.nio.ByteBuffer;
 import java.util.Set;
@@ -36,7 +38,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
 {
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
    private final RDXGridMapGraphic gridMapGraphic = new RDXGridMapGraphic();
-   private final ExecutorService executorService;
+   private final ResettableExceptionHandlingExecutorService executorService;
 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
@@ -73,7 +75,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    {
       super(title);
 
-      executorService = Executors.newFixedThreadPool(4);
+      executorService = MissingThreadTools.newSingleThreadExecutor("Height Map Visualizer Subscription", true, 1);
    }
 
    public void setupForHeightMapMessage(ROS2PublishSubscribeAPI ros2)
@@ -105,9 +107,9 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       }
    }
 
-   public void updateGridMapGraphic(HeightMapMessage heightMapMessage)
+   private void updateGridMapGraphic(HeightMapMessage heightMapMessage)
    {
-      executorService.submit(() ->
+      executorService.clearQueueAndExecute(() ->
         {
            if (enableHeightMapVisualizer.get())
            {
@@ -124,7 +126,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       frequencyPlot.recordEvent();
       if (isActive())
       {
-         executorService.submit(() ->
+         executorService.clearQueueAndExecute(() ->
            {
               pixelScalingFactor = imageMessage.getDepthDiscretization();
               zUpToWorldTransform.set(imageMessage.getOrientation(), imageMessage.getPosition());
@@ -177,7 +179,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       super.setActive(active);
       if (!active)
       {
-         executorService.shutdown();
+         executorService.clearTaskQueue();
       }
    }
 
@@ -199,10 +201,6 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
          ImGui.checkbox(labels.get("Display Global Height Map Image"), displayGlobalHeightMapImage);
       }
 
-      if (!isActive())
-      {
-         executorService.shutdown();
-      }
       frequencyPlot.renderImGuiWidgets();
    }
 
@@ -255,7 +253,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
 
    public void destroy()
    {
-      executorService.shutdown();
+      executorService.destroy();
       gridMapGraphic.destroy();
    }
 
