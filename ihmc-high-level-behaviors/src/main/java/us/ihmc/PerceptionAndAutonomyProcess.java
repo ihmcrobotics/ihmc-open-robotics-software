@@ -1,9 +1,6 @@
 package us.ihmc;
 
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
-import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.colorVision.BlackflyImagePublisher;
 import us.ihmc.avatar.colorVision.BlackflyImageRetriever;
@@ -11,7 +8,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeExecutor;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.CommunicationMode;
@@ -21,18 +17,16 @@ import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BallDetectionManager;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.IterativeClosestPointManager;
+import us.ihmc.perception.RapidHeightMapManager;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
-import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
 import us.ihmc.perception.ouster.OusterDepthImageRetriever;
 import us.ihmc.perception.ouster.OusterNetServer;
@@ -183,17 +177,9 @@ public class PerceptionAndAutonomyProcess
    private final TypedNotification<PlanarRegionsList> newPlanarRegions = new TypedNotification<>();
    private ROS2DemandGraphNode planarRegionsDemandNode;
 
-   private RapidHeightMapExtractor heightMapExtractor;
+   private RapidHeightMapManager heightMapManager;
    private final RestartableThrottledThread heightMapExtractorThread;
-   private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private ROS2DemandGraphNode heightMapDemandNode;
-   private final FramePose3D cameraPoseForHeightMap = new FramePose3D();
-   private final RigidBodyTransform sensorToWorldForHeightMap = new RigidBodyTransform();
-   private final RigidBodyTransform sensorToGroundForHeightMap = new RigidBodyTransform();
-   private final RigidBodyTransform groundToWorldForHeightMap = new RigidBodyTransform();
-   private BytedecoImage heightMapBytedecoImage;
-   private final Notification resetHeightMapRequested = new Notification();
-   private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
 
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
    private ReferenceFrameLibrary behaviorTreeReferenceFrameLibrary;
@@ -353,8 +339,8 @@ public class PerceptionAndAutonomyProcess
          planarRegionsExtractor.destroy();
 
       heightMapExtractorThread.stop();
-      if (heightMapExtractor != null)
-         heightMapExtractor.destroy();
+      if (heightMapManager != null)
+         heightMapManager.destroy();
 
       ballDetectionManager.destroy();
 
@@ -606,50 +592,12 @@ public class PerceptionAndAutonomyProcess
       {
          RawImage latestRealsenseDepthImage = realsenseDepthImage.get();
 
-         if (heightMapExtractor == null)
+         if (heightMapManager == null)
          {
-            heightMapExtractor = new RapidHeightMapExtractor(openCLManager, midFeetUnderPelvisFrameSupplier.get()); // TODO: Fix up for resetting to feet Z
-            heightMapExtractor.setDepthIntrinsics(latestRealsenseDepthImage.getIntrinsicsCopy());
-
-            heightMapBytedecoImage = new BytedecoImage(latestRealsenseDepthImage.getImageWidth(), latestRealsenseDepthImage.getImageHeight(), opencv_core.CV_16UC1);
-            heightMapBytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
-            heightMapExtractor.create(heightMapBytedecoImage, 1);
-
-            ros2Helper.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
+            heightMapManager = new RapidHeightMapManager(openCLManager, midFeetUnderPelvisFrameSupplier.get(), latestRealsenseDepthImage, ros2Helper);
          }
 
-         latestRealsenseDepthImage.getCpuImageMat().copyTo(heightMapBytedecoImage.getBytedecoOpenCVMat());
-
-         if (resetHeightMapRequested.poll())
-         {
-            heightMapExtractor.reset();
-         }
-
-         ReferenceFrame d455SensorFrame = realsenseFrameSupplier.get(); // TODO: Can we do this in this thread?
-         ReferenceFrame d455ZUpSensorFrame = realsenseZUpFrameSupplier.get(); // TODO: Can we do this in this thread?
-
-         d455SensorFrame.getTransformToDesiredFrame(sensorToWorldForHeightMap, ReferenceFrame.getWorldFrame());
-         d455SensorFrame.getTransformToDesiredFrame(sensorToGroundForHeightMap, d455ZUpSensorFrame);
-         d455ZUpSensorFrame.getTransformToDesiredFrame(groundToWorldForHeightMap, ReferenceFrame.getWorldFrame());
-
-         cameraPoseForHeightMap.setToZero(d455SensorFrame);
-         cameraPoseForHeightMap.changeFrame(ReferenceFrame.getWorldFrame());
-
-         heightMapExtractor.update(sensorToWorldForHeightMap, sensorToGroundForHeightMap, groundToWorldForHeightMap);
-
-         Mat croppedHeightMapImage = heightMapExtractor.getTerrainMapData().getHeightMap();
-
-         OpenCVTools.compressImagePNG(croppedHeightMapImage, compressedCroppedHeightMapPointer);
-         PerceptionMessageTools.publishCompressedDepthImage(compressedCroppedHeightMapPointer,
-                                                            PerceptionAPI.HEIGHT_MAP_CROPPED,
-                                                            croppedHeightMapImageMessage,
-                                                            ros2Helper,
-                                                            cameraPoseForHeightMap,
-                                                            latestRealsenseDepthImage.getAcquisitionTime(),
-                                                            heightMapExtractor.getSequenceNumber(),
-                                                            croppedHeightMapImage.rows(),
-                                                            croppedHeightMapImage.cols(),
-                                                            (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
+         heightMapManager.update(latestRealsenseDepthImage, realsenseFrameSupplier.get(), realsenseZUpFrameSupplier.get(), ros2Helper);
 
          latestRealsenseDepthImage.release();
       }
