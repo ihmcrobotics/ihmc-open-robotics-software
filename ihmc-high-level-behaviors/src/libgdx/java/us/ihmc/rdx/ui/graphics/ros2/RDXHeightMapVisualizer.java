@@ -11,7 +11,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
@@ -20,6 +19,7 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.RDXHeightMapRenderer;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
@@ -37,8 +37,9 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
    private final RDXGridMapGraphic gridMapGraphic = new RDXGridMapGraphic();
    private final ExecutorService executorService;
-   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
 
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImBoolean inPaintHeight = new ImBoolean(false);
    private final ImBoolean renderGroundPlane = new ImBoolean(false);
    private final ImBoolean renderGroundCells = new ImBoolean(false);
@@ -50,6 +51,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    private final TerrainMapData terrainMapData = new TerrainMapData(RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
                                                                     RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize());
 
+   private ROS2PublishSubscribeAPI ros2;
    private HeightMapMessage latestHeightMapMessage = new HeightMapMessage();
    private HeightMapData latestHeightMapData;
    private Mat heightMapImage;
@@ -76,11 +78,13 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
 
    public void setupForHeightMapMessage(ROS2PublishSubscribeAPI ros2)
    {
+      this.ros2 = ros2;
       ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, this::acceptHeightMapMessage);
    }
 
-   public void setupForImageMessage(ROS2Helper ros2)
+   public void setupForImageMessage(ROS2PublishSubscribeAPI ros2)
    {
+      this.ros2 = ros2;
       ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_CROPPED, this::acceptImageMessage);
    }
 
@@ -182,12 +186,18 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    {
       super.renderImGuiWidgets();
 
-      ImGui.checkbox("Enable Height Map Visualizer", enableHeightMapVisualizer);
-      ImGui.checkbox("Enable Height Map Renderer", enableHeightMapRenderer);
-      ImGui.checkbox("In Paint Height", inPaintHeight);
-      ImGui.checkbox("Render Ground Plane", renderGroundPlane);
-      ImGui.checkbox("Render Ground Cells", renderGroundCells);
-      ImGui.checkbox("Display Global Height Map Image", displayGlobalHeightMapImage);
+      if (ros2 != null && ImGui.button(labels.get("Reset Ground to Feet")))
+         ros2.publish(PerceptionAPI.RESET_HEIGHT_MAP);
+
+      if (ImGui.collapsingHeader(labels.get("Visualization Options")))
+      {
+         ImGui.checkbox(labels.get("Enable Height Map Visualizer"), enableHeightMapVisualizer);
+         ImGui.checkbox(labels.get("Enable Height Map Renderer"), enableHeightMapRenderer);
+         ImGui.checkbox(labels.get("In Paint Height"), inPaintHeight);
+         ImGui.checkbox(labels.get("Render Ground Plane"), renderGroundPlane);
+         ImGui.checkbox(labels.get("Render Ground Cells"), renderGroundCells);
+         ImGui.checkbox(labels.get("Display Global Height Map Image"), displayGlobalHeightMapImage);
+      }
 
       if (!isActive())
       {

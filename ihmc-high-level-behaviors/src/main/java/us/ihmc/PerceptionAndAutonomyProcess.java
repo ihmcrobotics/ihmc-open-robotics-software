@@ -10,6 +10,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeExecutor;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.CommunicationMode;
@@ -190,6 +191,7 @@ public class PerceptionAndAutonomyProcess
    private final RigidBodyTransform sensorToGroundForHeightMap = new RigidBodyTransform();
    private final RigidBodyTransform groundToWorldForHeightMap = new RigidBodyTransform();
    private BytedecoImage heightMapBytedecoImage;
+   private final Notification resetHeightMapRequested = new Notification();
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
 
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
@@ -611,10 +613,17 @@ public class PerceptionAndAutonomyProcess
 
             heightMapBytedecoImage = new BytedecoImage(latestRealsenseDepthImage.getCpuImageMat());
             heightMapExtractor.create(heightMapBytedecoImage, 1);
+
+            ros2Helper.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
          }
          else
          {
             latestRealsenseDepthImage.getCpuImageMat().copyTo(heightMapBytedecoImage.getBytedecoOpenCVMat());
+         }
+
+         if (resetHeightMapRequested.poll())
+         {
+            heightMapExtractor.reset();
          }
 
          ReferenceFrame d455SensorFrame = realsenseFrameSupplier.get(); // TODO: Can we do this in this thread?
