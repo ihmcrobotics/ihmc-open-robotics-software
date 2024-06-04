@@ -245,8 +245,8 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
             yoFilteredErrorVelocity = null;
          }
 
-         angularVelocityErrorFilter = fbToolbox.getAngularVelocityErrorFilter(endEffector, controllerIndex);
-         linearVelocityErrorFilter = fbToolbox.getLinearVelocityErrorFilter(endEffector, controllerIndex);
+         angularVelocityErrorFilter = fbToolbox.getOrCreateAngularVelocityErrorFilter(endEffector, controllerIndex, dt);
+         linearVelocityErrorFilter = fbToolbox.getOrCreateLinearVelocityErrorFilter(endEffector, controllerIndex, dt);
 
          if (ccToolbox.isEnableInverseDynamicsModule())
          {
@@ -766,6 +766,10 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       linearFeedbackTermToPack.clipToMaxNorm(positionGains.getMaximumDerivativeError());
       angularFeedbackTermToPack.clipToMaxNorm(orientationGains.getMaximumDerivativeError());
 
+      linearFeedbackTermToPack.changeFrame(trajectoryFrame);
+      angularFeedbackTermToPack.changeFrame(trajectoryFrame);
+      yoErrorVelocity.setIncludingFrame(angularFeedbackTermToPack, linearFeedbackTermToPack);
+
       if (yoFilteredErrorVelocity != null)
       {
          // If the trajectory frame changed reset the filter.
@@ -774,45 +778,22 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
             yoFilteredErrorVelocity.setReferenceFrame(trajectoryFrame);
             yoFilteredErrorVelocity.reset();
          }
-         linearFeedbackTermToPack.changeFrame(trajectoryFrame);
-         angularFeedbackTermToPack.changeFrame(trajectoryFrame);
-         yoErrorVelocity.setIncludingFrame(angularFeedbackTermToPack, linearFeedbackTermToPack);
          yoFilteredErrorVelocity.update();
          yoFilteredErrorVelocity.setCommandId(currentCommandId);
-
-         if (linearVelocityErrorFilter != null)
-            linearVelocityErrorFilter.apply(yoFilteredErrorVelocity.getLinearPart(), linearFeedbackTermToPack);
-         else
-            linearFeedbackTermToPack.set(yoFilteredErrorVelocity.getLinearPart());
-
-         if (angularVelocityErrorFilter != null)
-            angularVelocityErrorFilter.apply(yoFilteredErrorVelocity.getAngularPart(), angularFeedbackTermToPack);
-         else
-            angularFeedbackTermToPack.set(yoFilteredErrorVelocity.getAngularPart());
-      }
-      else
-      {
-         yoErrorVelocity.setIncludingFrame(angularFeedbackTermToPack, linearFeedbackTermToPack);
-
-         if (linearVelocityErrorFilter != null)
-            linearVelocityErrorFilter.apply(linearFeedbackTermToPack, linearFeedbackTermToPack);
-
-         if (angularVelocityErrorFilter != null)
-            angularVelocityErrorFilter.apply(angularFeedbackTermToPack, angularFeedbackTermToPack);
+         linearFeedbackTermToPack.set(yoFilteredErrorVelocity.getLinearPart());
+         angularFeedbackTermToPack.set(yoFilteredErrorVelocity.getAngularPart());
       }
 
-      yoErrorVelocity.changeFrame(trajectoryFrame);
+      if (linearVelocityErrorFilter != null)
+         linearVelocityErrorFilter.apply(linearFeedbackTermToPack, linearFeedbackTermToPack);
+
+      if (angularVelocityErrorFilter != null)
+         angularVelocityErrorFilter.apply(angularFeedbackTermToPack, angularFeedbackTermToPack);
+
       yoErrorVelocity.setCommandId(currentCommandId);
 
-      if (linearGainsFrame != null)
-         linearFeedbackTermToPack.changeFrame(linearGainsFrame);
-      else
-         linearFeedbackTermToPack.changeFrame(controlFrame);
-
-      if (angularGainsFrame != null)
-         angularFeedbackTermToPack.changeFrame(angularGainsFrame);
-      else
-         angularFeedbackTermToPack.changeFrame(controlFrame);
+      linearFeedbackTermToPack.changeFrame(linearGainsFrame != null ? linearGainsFrame : controlFrame);
+      angularFeedbackTermToPack.changeFrame(angularGainsFrame != null ? angularGainsFrame : controlFrame);
 
       positionGains.getDerivativeGainMatrix(tempGainMatrix);
       tempGainMatrix.transform(linearFeedbackTermToPack);

@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
@@ -47,11 +46,12 @@ public interface FeedbackControllerSettings
    /**
     * Gets the filter to apply to the error velocity of a 1-DoF joint.
     *
-    * @param joint    the joint to which the filter is to be applied.
-    * @param registry the registry to which the filter variables are to be added.
+    * @param jointName the name of the 1-DoF joint to which the filter is to be applied.
+    * @param dt        the time step of the controller.
+    * @param registry  the registry to which the filter variables are to be added.
     * @return the filter to apply to the error velocity. If {@code null}, no filter will be applied.
     */
-   default FilterDouble1D getVelocity1DErrorFilter(OneDoFJointReadOnly joint, YoRegistry registry)
+   default FilterDouble1D getVelocity1DErrorFilter(String jointName, double dt, YoRegistry registry)
    {
       return null;
    }
@@ -62,10 +62,11 @@ public interface FeedbackControllerSettings
     * @param endEffectorName the name of the end-effector to which the filter is to be applied.
     *                        Note that for the center of mass feedback controller, use the following {@code String}:
     *                        {@link FeedbackControllerToolbox#centerOfMassName}.
+    * @param dt              the time step of the controller.
     * @param registry        the registry to which the filter variables are to be added.
     * @return the filter to apply to the error velocity. If {@code null}, no filter will be applied.
     */
-   default FilterVector3D getAngularVelocity3DErrorFilter(String endEffectorName, YoRegistry registry)
+   default FilterVector3D getAngularVelocity3DErrorFilter(String endEffectorName, double dt, YoRegistry registry)
    {
       return null;
    }
@@ -76,10 +77,11 @@ public interface FeedbackControllerSettings
     * @param endEffectorName the name of the end-effector to which the filter is to be applied.
     *                        Note that for the center of mass feedback controller, use the following {@code String}:
     *                        {@link FeedbackControllerToolbox#centerOfMassName}.
+    * @param dt              the time step of the controller.
     * @param registry        the registry to which the filter variables are to be added.
     * @return the filter to apply to the error velocity. If {@code null}, no filter will be applied.
     */
-   default FilterVector3D getLinearVelocity3DErrorFilter(String endEffectorName, YoRegistry registry)
+   default FilterVector3D getLinearVelocity3DErrorFilter(String endEffectorName, double dt, YoRegistry registry)
    {
       return null;
    }

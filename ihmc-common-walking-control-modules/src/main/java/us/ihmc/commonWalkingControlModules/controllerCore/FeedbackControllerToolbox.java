@@ -21,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings.FilterDouble1D;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings.FilterVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -66,6 +67,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    private final List<SingleFeedbackControllerDataPool> singleFeedbackControllerDataPoolList = new ArrayList<>();
 
    private final Map<String, DoubleProvider> errorVelocityFilterBreakFrequencies;
+   private final Map<String, FilterDouble1D> jointNameToVelocityErrorFilter = new HashMap<>();
 
    private final InverseDynamicsCommandList lastFeedbackControllerInverseDynamicsOutput = new InverseDynamicsCommandList();
    private final InverseKinematicsCommandList lastFeedbackControllerInverseKinematicsOutput = new InverseKinematicsCommandList();
@@ -262,6 +264,12 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       FBRateLimitedVector3D rateLimitedVectorData = dataPool.getOrCreateRateLimitedVectorData(rawDataType, space, maximumRate, dt, isRequiredVariable);
       rateLimitedVectorData.addActiveFlag(activeFlag);
       return rateLimitedVectorData;
+   }
+
+   public FilterVector3D getOrCreateCenterOfMassLinearVelocityErrorFilter(double dt)
+   {
+      SingleFeedbackControllerDataPool dataPool = getOrCreateCenterOfMassDataPool();
+      return dataPool.getOrCreateLinearVelocityErrorFilter(dt);
    }
 
    /**
@@ -513,16 +521,16 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       return alphaFilteredVectorData;
    }
 
-   public FilterVector3D getAngularVelocityErrorFilter(RigidBodyBasics endEffector, int controllerIndex)
+   public FilterVector3D getOrCreateAngularVelocityErrorFilter(RigidBodyBasics endEffector, int controllerIndex, double dt)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
-      return dataPool.angularVelocityErrorFilter;
+      return dataPool.getOrCreateAngularVelocityErrorFilter(dt);
    }
 
-   public FilterVector3D getLinearVelocityErrorFilter(RigidBodyBasics endEffector, int controllerIndex)
+   public FilterVector3D getOrCreateLinearVelocityErrorFilter(RigidBodyBasics endEffector, int controllerIndex, double dt)
    {
       SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
-      return dataPool.linearVelocityErrorFilter;
+      return dataPool.getOrCreateLinearVelocityErrorFilter(dt);
    }
 
    /**
@@ -820,6 +828,18 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       return errorVelocityFilterBreakFrequencies.get(endEffectorOrJointName);
    }
 
+   public FilterDouble1D getOrCreateVelocityErrorFilterDouble1D(String jointName, double dt)
+   {
+      FilterDouble1D filter = jointNameToVelocityErrorFilter.get(jointName);
+      if (filter == null)
+      {
+         filter = settings.getVelocity1DErrorFilter(jointName, dt, registry);
+         jointNameToVelocityErrorFilter.put(jointName, filter);
+      }
+
+      return filter;
+   }
+
    @Override
    public void getCenterOfMassPositionData(List<FBPoint3D> positionDataListToPack, Type type)
    {
@@ -952,9 +972,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       private final EnumMap<Type, EnumMap<SpaceData3D, FBVector3D>> vectorDataMap = new EnumMap<>(Type.class);
       private final EnumMap<Type, EnumMap<SpaceData3D, FBRateLimitedVector3D>> rateLimitedVectorDataMap = new EnumMap<>(Type.class);
       private final EnumMap<Type, EnumMap<SpaceData3D, FBAlphaFilteredVector3D>> filteredVectorDataMap = new EnumMap<>(Type.class);
+      private final String endEffectorName;
+      private final FeedbackControllerSettings settings;
 
-      private final FilterVector3D angularVelocityErrorFilter;
-      private final FilterVector3D linearVelocityErrorFilter;
+      private FilterVector3D angularVelocityErrorFilter;
+      private FilterVector3D linearVelocityErrorFilter;
 
       private YoPID3DGains orientationGains;
       private YoPID3DGains positionGains;
@@ -970,20 +992,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
 
       public SingleFeedbackControllerDataPool(String endEffectorName, int controllerIndex, FeedbackControllerSettings settings, YoRegistry registry)
       {
+         this.endEffectorName = endEffectorName;
+         this.settings = settings;
          this.namePrefix = appendIndex(endEffectorName, controllerIndex);
          this.registry = registry;
          debugRegistry = WholeBodyControllerCore.REDUCE_YOVARIABLES ? null : registry;
-
-         if (settings != null)
-         {
-            angularVelocityErrorFilter = settings.getAngularVelocity3DErrorFilter(endEffectorName, registry);
-            linearVelocityErrorFilter = settings.getLinearVelocity3DErrorFilter(endEffectorName, registry);
-         }
-         else
-         {
-            angularVelocityErrorFilter = null;
-            linearVelocityErrorFilter = null;
-         }
       }
 
       public void clearIfInactive()
@@ -1087,6 +1100,20 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          }
 
          return rateLimitedVectorData;
+      }
+
+      public FilterVector3D getOrCreateAngularVelocityErrorFilter(double dt)
+      {
+         if (angularVelocityErrorFilter == null)
+            angularVelocityErrorFilter = settings.getAngularVelocity3DErrorFilter(endEffectorName, dt, registry);
+         return angularVelocityErrorFilter;
+      }
+
+      public FilterVector3D getOrCreateLinearVelocityErrorFilter(double dt)
+      {
+         if (linearVelocityErrorFilter == null)
+            linearVelocityErrorFilter = settings.getLinearVelocity3DErrorFilter(endEffectorName, dt, registry);
+         return linearVelocityErrorFilter;
       }
 
       public YoPID3DGains getOrCreateOrientationGains(boolean useIntegrator, boolean isRequiredVariable)

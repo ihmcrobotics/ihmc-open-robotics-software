@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerInterface;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings.FilterDouble1D;
 import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
@@ -41,6 +42,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    private final YoDouble qError;
    private final YoDouble qDError;
    private final AlphaFilteredYoVariable qDFilteredError;
+   private final FilterDouble1D qDErrorFilter;
 
    private final YoDouble actionP;
    private final YoDouble actionD;
@@ -111,6 +113,8 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
             qDFilteredError = null;
          }
 
+         qDErrorFilter = feedbackControllerToolbox.getOrCreateVelocityErrorFilterDouble1D(jointName, dt);
+
          kd = new YoDouble("kd_" + jointName, registry);
 
          qDDFeedforward = new YoDouble("qdd_ff_" + jointName, debugVariableRegistry);
@@ -118,13 +122,13 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
          qDDFeedbackRateLimited = new RateLimitedYoVariable("qdd_fb_rl_" + jointName, debugVariableRegistry, maxFeedbackRate, qDDFeedback, dt);
          qDDDesired = new YoDouble("qdd_d_" + jointName, registry);
          qDDAchieved = new YoDouble("qdd_achieved_" + jointName, debugVariableRegistry);
-
       }
       else
       {
          qDCurrent = null;
          qDError = null;
          qDFilteredError = null;
+         qDErrorFilter = null;
 
          kd = null;
 
@@ -182,6 +186,8 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
          qDDFeedbackRateLimited.reset();
       if (qDFilteredError != null)
          qDFilteredError.reset();
+      if (qDErrorFilter != null)
+         qDErrorFilter.reset();
    }
 
    @Override
@@ -230,6 +236,8 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
          qDFilteredError.update();
          qDErrorToUse = qDFilteredError.getValue();
       }
+      if (qDErrorFilter != null)
+         qDErrorToUse = qDErrorFilter.apply(qDErrorToUse);
 
       actionP.set(kp.getDoubleValue() * qError.getDoubleValue());
       actionD.set(kd.getDoubleValue() * qDErrorToUse);

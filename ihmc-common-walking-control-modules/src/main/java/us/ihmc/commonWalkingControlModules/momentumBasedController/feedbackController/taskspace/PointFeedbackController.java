@@ -193,7 +193,7 @@ public class PointFeedbackController implements FeedbackControllerInterface
             yoFilteredErrorLinearVelocity = null;
          }
 
-         linearVelocityErrorFilter = fbToolbox.getLinearVelocityErrorFilter(endEffector, controllerIndex);
+         linearVelocityErrorFilter = fbToolbox.getOrCreateLinearVelocityErrorFilter(endEffector, controllerIndex, dt);
 
          if (ccToolbox.isEnableInverseDynamicsModule())
          {
@@ -351,6 +351,8 @@ public class PointFeedbackController implements FeedbackControllerInterface
          rateLimitedFeedbackLinearVelocity.reset();
       if (yoFilteredErrorLinearVelocity != null)
          yoFilteredErrorLinearVelocity.reset();
+      if (linearVelocityErrorFilter != null)
+         linearVelocityErrorFilter.reset();
       if (yoErrorPositionIntegrated != null)
          yoErrorPositionIntegrated.setToZero(worldFrame);
    }
@@ -588,6 +590,9 @@ public class PointFeedbackController implements FeedbackControllerInterface
       selectionMatrix.applyLinearSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxNorm(gains.getMaximumDerivativeError());
 
+      feedbackTermToPack.changeFrame(trajectoryFrame);
+      yoErrorLinearVelocity.setIncludingFrame(feedbackTermToPack);
+
       if (yoFilteredErrorLinearVelocity != null)
       {
          // If the trajectory frame changed reset the filter.
@@ -596,29 +601,18 @@ public class PointFeedbackController implements FeedbackControllerInterface
             yoFilteredErrorLinearVelocity.setReferenceFrame(trajectoryFrame);
             yoFilteredErrorLinearVelocity.reset();
          }
-         feedbackTermToPack.changeFrame(trajectoryFrame);
-         yoErrorLinearVelocity.setIncludingFrame(feedbackTermToPack);
          yoFilteredErrorLinearVelocity.update();
          yoFilteredErrorLinearVelocity.setCommandId(currentCommandId);
 
-         if (linearVelocityErrorFilter != null)
-            linearVelocityErrorFilter.apply(yoFilteredErrorLinearVelocity, feedbackTermToPack);
-         else
-            feedbackTermToPack.set(yoFilteredErrorLinearVelocity);
+         feedbackTermToPack.set(yoFilteredErrorLinearVelocity);
       }
-      else
-      {
-         yoErrorLinearVelocity.setIncludingFrame(feedbackTermToPack);
-         if (linearVelocityErrorFilter != null)
-            linearVelocityErrorFilter.apply(feedbackTermToPack, feedbackTermToPack);
-      }
-      yoErrorLinearVelocity.changeFrame(trajectoryFrame);
+
+      if (linearVelocityErrorFilter != null)
+         linearVelocityErrorFilter.apply(feedbackTermToPack, feedbackTermToPack);
+
       yoErrorLinearVelocity.setCommandId(currentCommandId);
 
-      if (linearGainsFrame != null)
-         feedbackTermToPack.changeFrame(linearGainsFrame);
-      else
-         feedbackTermToPack.changeFrame(controlFrame);
+      feedbackTermToPack.changeFrame(linearGainsFrame != null ? linearGainsFrame : controlFrame);
 
       gains.getDerivativeGainMatrix(tempGainMatrix);
       tempGainMatrix.transform(feedbackTermToPack);

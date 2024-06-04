@@ -202,7 +202,7 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          else
             yoFilteredErrorAngularVelocity = null;
 
-         angularVelocityErrorFilter = fbToolbox.getAngularVelocityErrorFilter(endEffector, controllerIndex);
+         angularVelocityErrorFilter = fbToolbox.getOrCreateAngularVelocityErrorFilter(endEffector, controllerIndex, dt);
 
          if (ccToolbox.isEnableInverseDynamicsModule())
          {
@@ -358,6 +358,8 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          rateLimitedFeedbackAngularVelocity.reset();
       if (yoFilteredErrorAngularVelocity != null)
          yoFilteredErrorAngularVelocity.reset();
+      if (angularVelocityErrorFilter != null)
+         angularVelocityErrorFilter.reset();
       if (yoErrorOrientationCumulated != null)
          yoErrorOrientationCumulated.setToZero(worldFrame);
       if (yoErrorRotationVectorIntegrated != null)
@@ -589,6 +591,9 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       selectionMatrix.applyAngularSelection(feedbackTermToPack);
       feedbackTermToPack.clipToMaxNorm(gains.getMaximumDerivativeError());
 
+      feedbackTermToPack.changeFrame(trajectoryFrame);
+      yoErrorAngularVelocity.setIncludingFrame(feedbackTermToPack);
+
       if (yoFilteredErrorAngularVelocity != null)
       {
          // If the trajectory frame changed reset the filter.
@@ -597,29 +602,18 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
             yoFilteredErrorAngularVelocity.setReferenceFrame(trajectoryFrame);
             yoFilteredErrorAngularVelocity.reset();
          }
-         feedbackTermToPack.changeFrame(trajectoryFrame);
-         yoErrorAngularVelocity.setIncludingFrame(feedbackTermToPack);
          yoFilteredErrorAngularVelocity.update();
          yoFilteredErrorAngularVelocity.setCommandId(currentCommandId);
+         feedbackTermToPack.set(yoFilteredErrorAngularVelocity);
+      }
 
-         if (angularVelocityErrorFilter != null)
-            angularVelocityErrorFilter.apply(yoFilteredErrorAngularVelocity, feedbackTermToPack);
-         else
-            feedbackTermToPack.set(yoFilteredErrorAngularVelocity);
-      }
-      else
-      {
-         yoErrorAngularVelocity.setIncludingFrame(feedbackTermToPack);
-         if (angularVelocityErrorFilter != null)
-            angularVelocityErrorFilter.apply(feedbackTermToPack, feedbackTermToPack);
-      }
+      if (angularVelocityErrorFilter != null)
+         angularVelocityErrorFilter.apply(feedbackTermToPack, feedbackTermToPack);
+
       yoErrorAngularVelocity.changeFrame(trajectoryFrame);
       yoErrorAngularVelocity.setCommandId(currentCommandId);
 
-      if (angularGainsFrame != null)
-         feedbackTermToPack.changeFrame(angularGainsFrame);
-      else
-         feedbackTermToPack.changeFrame(controlFrame);
+      feedbackTermToPack.changeFrame(angularGainsFrame != null ? angularGainsFrame : controlFrame);
 
       gains.getDerivativeGainMatrix(tempGainMatrix);
       tempGainMatrix.transform(feedbackTermToPack);
