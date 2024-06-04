@@ -83,4 +83,9 @@ public class RapidHeightMapManager
    {
       heightMapExtractor.destroy();
    }
+
+   public RapidHeightMapExtractor getHeightMapExtractor()
+   {
+      return heightMapExtractor;
+   }
 }
