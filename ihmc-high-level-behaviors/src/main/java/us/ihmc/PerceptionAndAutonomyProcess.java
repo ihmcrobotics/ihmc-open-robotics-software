@@ -2,6 +2,7 @@ package us.ihmc;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.avatar.colorVision.BlackflyImagePublisher;
@@ -611,15 +612,14 @@ public class PerceptionAndAutonomyProcess
             heightMapExtractor = new RapidHeightMapExtractor(openCLManager, midFeetUnderPelvisFrameSupplier.get()); // TODO: Fix up for resetting to feet Z
             heightMapExtractor.setDepthIntrinsics(latestRealsenseDepthImage.getIntrinsicsCopy());
 
-            heightMapBytedecoImage = new BytedecoImage(latestRealsenseDepthImage.getCpuImageMat());
+            heightMapBytedecoImage = new BytedecoImage(latestRealsenseDepthImage.getImageWidth(), latestRealsenseDepthImage.getImageHeight(), opencv_core.CV_16UC1);
+            heightMapBytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
             heightMapExtractor.create(heightMapBytedecoImage, 1);
 
             ros2Helper.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
          }
-         else
-         {
-            latestRealsenseDepthImage.getCpuImageMat().copyTo(heightMapBytedecoImage.getBytedecoOpenCVMat());
-         }
+
+         latestRealsenseDepthImage.getCpuImageMat().copyTo(heightMapBytedecoImage.getBytedecoOpenCVMat());
 
          if (resetHeightMapRequested.poll())
          {
