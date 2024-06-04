@@ -14,7 +14,7 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.behaviors.activeMapping.ContinuousWalkingParameters;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.StancePoseCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
@@ -36,6 +36,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
@@ -48,7 +49,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RDXContinuousWalkingPanel extends RDXPanel implements RenderableProvider
+public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProvider
 {
    private final ContinuousWalkingCommandMessage commandMessage = new ContinuousWalkingCommandMessage();
    private final AtomicReference<FootstepDataListMessage> footstepDataListMessage = new AtomicReference<>(null);
@@ -77,33 +78,34 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
    private HumanoidActivePerceptionModule activePerceptionModule;
    private SwingPlannerParametersBasics swingPlannerParameters;
    private SwingTrajectoryParameters swingTrajectoryParameters;
-   private ContinuousWalkingParameters continuousWalkingParameters;
+   private ContinuousHikingParameters continuousHikingParameters;
    private Controller currentController;
 
    private boolean currentControllerConnected;
 
-   public RDXContinuousWalkingPanel(ROS2Helper ros2Helper,
-                                    HumanoidActivePerceptionModule activePerceptionModule,
-                                    ROS2SyncedRobotModel syncedRobot,
-                                    ContinuousWalkingParameters continuousWalkingParameters,
-                                    SwingPlannerParametersBasics swingPlannerParameters,
-                                    SwingTrajectoryParameters swingTrajectoryParameters,
-                                    MonteCarloFootstepPlannerParameters monteCarloPlannerParameters)
+   private final RDXStoredPropertySetTuner continuousPlanningParametersTuner = new RDXStoredPropertySetTuner("Continuous Walking Parameters (Active Mapper)");
+
+
+   public RDXContinuousHikingPanel(ROS2Helper ros2Helper,
+                                   HumanoidActivePerceptionModule activePerceptionModule,
+                                   ROS2SyncedRobotModel syncedRobot,
+                                   ContinuousHikingParameters continuousHikingParameters,
+                                   SwingPlannerParametersBasics swingPlannerParameters,
+                                   SwingTrajectoryParameters swingTrajectoryParameters,
+                                   MonteCarloFootstepPlannerParameters monteCarloPlannerParameters)
    {
-      super("Continuous Planning");
+      super("Continuous Hiking");
       setRenderMethod(this::renderImGuiWidgets);
 
       this.ros2Helper = ros2Helper;
       this.activePerceptionModule = activePerceptionModule;
       this.swingPlannerParameters = swingPlannerParameters;
       this.swingTrajectoryParameters = swingTrajectoryParameters;
-      this.continuousWalkingParameters = continuousWalkingParameters;
+      this.continuousHikingParameters = continuousHikingParameters;
 
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()),
-                                      this::onControllerFootstepsReceived);
 
       commandPublisher = ros2Helper.getROS2NodeInterface().createPublisher(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND);
 
@@ -129,11 +131,15 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
                                       {
                                          terrainPlanningDebugger.reset();
                                       });
+
+
+      LogTools.info("Continuous Walking Parameters Save File " + continuousHikingParameters.findSaveFileDirectory().toString());
+      continuousPlanningParametersTuner.create(continuousHikingParameters, false);
    }
 
-   public RDXContinuousWalkingPanel(ROS2Helper ros2Helper, DRCRobotModel robotModel, MonteCarloFootstepPlannerParameters monteCarloPlannerParameters)
+   public RDXContinuousHikingPanel(ROS2Helper ros2Helper, DRCRobotModel robotModel, MonteCarloFootstepPlannerParameters monteCarloPlannerParameters)
    {
-      super("Continuous Planning");
+      super("Continuous Hiking");
       setRenderMethod(this::renderImGuiWidgets);
 
       SegmentDependentList<RobotSide, ArrayList<Point2D>> groundContactPoints = robotModel.getContactPointParameters().getControllerFootGroundContactPoints();
@@ -160,12 +166,14 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN, this::onMonteCarloPlanReceived);
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, robotModel.getSimpleRobotName()),
-                                      this::onControllerFootstepsReceived);
       ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()), message ->
       {
          terrainPlanningDebugger.reset();
       });
+
+
+      LogTools.info("Continuous Hiking Parameters Save File " + continuousHikingParameters.findSaveFileDirectory().toString());
+      continuousPlanningParametersTuner.create(continuousHikingParameters, false);
    }
 
    public void update(TerrainMapData terrainMapData, HeightMapData heightMapData)
@@ -215,6 +223,12 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
 
    public void renderImGuiWidgets()
    {
+      ImGui.text("The ContinuousHikingProcess must be running");
+      ImGui.text("And the enabled checkbox must be checked");
+      ImGui.text("By holding CTRL the robot will walk forward");
+      ImGui.separator();
+      continuousPlanningParametersTuner.renderImGuiWidgets();
+
       ImGui.checkbox("Render", renderEnabled);
       ImGui.checkbox("Local Render Mode", localRenderMode);
       ImGui.checkbox("Use A* Footstep Planner", useAStarFootstepPlanner);
@@ -247,12 +261,6 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
       this.monteCarloPlanDataListMessage.set(message);
    }
 
-   public void onControllerFootstepsReceived(FootstepDataListMessage message)
-   {
-      //LogTools.warn("Received footstep plan: {}", message.getFootstepDataList().size());
-      //this.footstepDataListMessage.set(message);
-   }
-
    public void onStartAndGoalPosesReceived(PoseListMessage poseListMessage)
    {
       List<Pose3D> poses = MessageTools.unpackPoseListMessage(poseListMessage);
@@ -281,7 +289,7 @@ public class RDXContinuousWalkingPanel extends RDXPanel implements RenderablePro
       }
 
       // Only allow Continuous Walking if the CTRL key is held and the check box is checked
-      if (continuousWalkingParameters != null && continuousWalkingParameters.getEnableContinuousWalking())
+      if (continuousHikingParameters != null && continuousHikingParameters.getEnableContinuousWalking())
       {
          commandMessage.setEnableContinuousWalking(walkingEnabled);
          commandMessage.setPublishToController(ImGui.getIO().getKeyAlt());

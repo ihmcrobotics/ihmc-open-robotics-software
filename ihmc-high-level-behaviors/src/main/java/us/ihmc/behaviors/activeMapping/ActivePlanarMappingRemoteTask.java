@@ -29,14 +29,14 @@ public class ActivePlanarMappingRemoteTask extends LocalizationAndMappingTask
    private final ROS2Topic controllerFootstepDataTopic;
 
    private ContinuousPlannerForPlanarRegions continuousPlanner;
-   private final ContinuousWalkingParameters continuousPlanningParameters;
+   private final ContinuousHikingParameters continuousPlanningParameters;
    private final SwingPlannerParametersBasics swingFootPlannerParameters;
    private TerrainPlanningDebugger terrainPlanningDebugger;
 
 
    public ActivePlanarMappingRemoteTask(String simpleRobotName,
                                         DRCRobotModel robotModel,
-                                        ContinuousWalkingParameters continuousPlanningParameters,
+                                        ContinuousHikingParameters continuousPlanningParameters,
                                         ROS2Topic<FramePlanarRegionsListMessage> terrainRegionsTopic,
                                         ROS2Topic<FramePlanarRegionsListMessage> structuralRegionsTopic,
                                         ROS2Node ros2Node,
