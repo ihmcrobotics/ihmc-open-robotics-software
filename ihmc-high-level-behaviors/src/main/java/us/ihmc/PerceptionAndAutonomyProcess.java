@@ -682,7 +682,7 @@ public class PerceptionAndAutonomyProcess
       ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "perception_autonomy_process");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-      RapidHeightMapExtractor.reloadHeightMapParameters("GPUBuildingExploration"); // FIXME: This should be redesigned.
+      RapidHeightMapExtractor.getHeightMapParameters().setCropWindowSize(501);
 
       PerceptionAndAutonomyProcess perceptionAndAutonomyProcess = new PerceptionAndAutonomyProcess(ros2Helper,
                                                                                                    ReferenceFrame::getWorldFrame,
