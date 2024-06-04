@@ -19,21 +19,25 @@ public class FeedbackControllerFilterFactory
 {
    public static FilterDouble1D createVelocity1DErrorHPRLFilter(String jointName, YoHPRLParameters parameters, double dt, YoRegistry registry)
    {
+      parameters.setRegistry(registry);
       return new YoHPRLFilterDouble1D(jointName + "VelocityErrorHPRL", parameters, dt, registry);
    }
 
    public static FilterDouble1D createVelocity1DErrorPIOFilter(String jointName, YoPIOParameters parameters, double dt, YoRegistry registry)
    {
+      parameters.setRegistry(registry);
       return new YoPIOFilterDouble1D(jointName + "VelocityErrorPIO", parameters, dt, registry);
    }
 
    public static FilterVector3D createAngularVelocityErrorPIOFilter(String endEffectorName, YoPIOParameters parameters, double dt, YoRegistry registry)
    {
+      parameters.setRegistry(registry);
       return new YoPIOFilterVector3D(endEffectorName + "AngularVelocityErrorPIO", parameters, dt, registry);
    }
 
    public static FilterVector3D createLinearVelocityErrorPIOFilter(String endEffectorName, YoPIOParameters parameters, double dt, YoRegistry registry)
    {
+      parameters.setRegistry(registry);
       return new YoPIOFilterVector3D(endEffectorName + "LinearVelocityErrorPIO", parameters, dt, registry);
    }
 
