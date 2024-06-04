@@ -6,7 +6,6 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -62,7 +61,7 @@ public class ContinuousPlanner
    private MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters;
    private MonteCarloFootstepPlannerRequest monteCarloFootstepPlannerRequest;
    private CollisionFreeSwingCalculator collisionFreeSwingCalculator;
-   private ContinuousWalkingParameters continuousWalkingParameters;
+   private ContinuousHikingParameters continuousHikingParameters;
    private MonteCarloFootstepPlanner monteCarloFootstepPlanner;
    private SwingPlannerParametersBasics swingPlannerParameters;
    private FootstepPlanningResult footstepPlanningResult;
@@ -88,11 +87,11 @@ public class ContinuousPlanner
    public ContinuousPlanner(DRCRobotModel robotModel,
                             HumanoidReferenceFrames humanoidReferenceFrames,
                             PlanningMode mode,
-                            ContinuousWalkingParameters continuousWalkingParameters,
+                            ContinuousHikingParameters continuousHikingParameters,
                             MonteCarloFootstepPlannerParameters monteCarloPlannerParameters,
                             TerrainPlanningDebugger debugger)
    {
-      this.continuousWalkingParameters = continuousWalkingParameters;
+      this.continuousHikingParameters = continuousHikingParameters;
       this.referenceFrames = humanoidReferenceFrames;
       this.debugger = debugger;
       this.active = true;
@@ -117,7 +116,7 @@ public class ContinuousPlanner
       footstepPlanner.clearCustomTerminationConditions();
       footstepPlanner.addCustomTerminationCondition((time, iterations, finalStep, secondToFinalStep, pathSize) ->
                                                     {
-                                                       return pathSize >= continuousWalkingParameters.getNumberOfStepsToSend();
+                                                       return pathSize >= continuousHikingParameters.getNumberOfStepsToSend();
                                                     });
 
       for (RobotSide side : RobotSide.values)
@@ -255,10 +254,10 @@ public class ContinuousPlanner
          statistics.appendString("Using Previous Plan As Reference: Total Steps: " + previousFootstepPlan.getNumberOfSteps());
 
          // Sets the previous footstep plan to be a reference for the current plan
-         if (latestFootstepPlan.getNumberOfSteps() >= continuousWalkingParameters.getNumberOfStepsToSend())
+         if (latestFootstepPlan.getNumberOfSteps() >= continuousHikingParameters.getNumberOfStepsToSend())
             previousFootstepPlan = new FootstepPlan(latestFootstepPlan);
 
-         if (previousFootstepPlan.getNumberOfSteps() < continuousWalkingParameters.getNumberOfStepsToSend())
+         if (previousFootstepPlan.getNumberOfSteps() < continuousHikingParameters.getNumberOfStepsToSend())
          {
             statistics.appendString("[ERROR]: Previous Plan for Reference: Not Enough Steps: " + previousFootstepPlan.getNumberOfSteps() + "!");
          }
@@ -267,13 +266,13 @@ public class ContinuousPlanner
             // These are steps that are considered to be at the start of the plan, don't want to use them as reference
             this.previousFootstepPlan.remove(0);
 
-            if (!continuousWalkingParameters.getOverrideEntireQueueEachStep())
+            if (!continuousHikingParameters.getOverrideEntireQueueEachStep())
                this.previousFootstepPlan.remove(1);
 
             request.setReferencePlan(this.previousFootstepPlan);
 
-            double stepDuration = continuousWalkingParameters.getSwingTime() + continuousWalkingParameters.getTransferTime();
-            double referencePlanTimeout = stepDuration * continuousWalkingParameters.getPlannerTimeoutFraction();
+            double stepDuration = continuousHikingParameters.getSwingTime() + continuousHikingParameters.getTransferTime();
+            double referencePlanTimeout = stepDuration * continuousHikingParameters.getPlannerTimeoutFraction();
 
             statistics.appendString("Using Reference Plan: " + this.previousFootstepPlan.getNumberOfSteps() + "Timeout: " + referencePlanTimeout);
             statistics.appendString("Previous Footstep Plan: " + previousFootstepPlan);
@@ -283,7 +282,7 @@ public class ContinuousPlanner
       else
       {
          statistics.appendString("[PLANNER] No Reference Plan");
-         request.setTimeout(continuousWalkingParameters.getPlanningWithoutReferenceTimeout());
+         request.setTimeout(continuousHikingParameters.getPlanningWithoutReferenceTimeout());
       }
 
       FootstepPlannerOutput plannerOutput = footstepPlanner.handleRequest(request);
@@ -310,7 +309,7 @@ public class ContinuousPlanner
 
    public void logFootStePlan()
    {
-      if (continuousWalkingParameters.getLogFootstepPlans())
+      if (continuousHikingParameters.getLogFootstepPlans())
       {
           logger.logSession();
       }
@@ -324,9 +323,9 @@ public class ContinuousPlanner
             ContinuousPlanningTools.setRandomizedStraightGoalPoses(walkingStartMidPose,
                                                                    startingStancePose,
                                                                    goalStancePose,
-                                                                   (float) continuousWalkingParameters.getGoalPoseForwardDistance(),
+                                                                   (float) continuousHikingParameters.getGoalPoseForwardDistance(),
                                                                    xRandomMargin,
-                                                                   (float) continuousWalkingParameters.getGoalPoseUpDistance(), nominalStanceWidth);
+                                                                   (float) continuousHikingParameters.getGoalPoseUpDistance(), nominalStanceWidth);
             break;
       }
    }
@@ -343,7 +342,7 @@ public class ContinuousPlanner
       return request;
    }
 
-   public FootstepDataListMessage getLimitedFootstepDataListMessage(ContinuousWalkingParameters parameters, List<QueuedFootstepStatusMessage> controllerQueue)
+   public FootstepDataListMessage getLimitedFootstepDataListMessage(ContinuousHikingParameters parameters, List<QueuedFootstepStatusMessage> controllerQueue)
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
       footstepDataListMessage.setDefaultSwingDuration(parameters.getSwingTime());
@@ -351,7 +350,7 @@ public class ContinuousPlanner
 
       // We expect the plannerOutput to contain this number of steps we ask for
       int index = 0;
-      if (!controllerQueue.isEmpty() && !continuousWalkingParameters.getOverrideEntireQueueEachStep())
+      if (!controllerQueue.isEmpty() && !continuousHikingParameters.getOverrideEntireQueueEachStep())
       {
          PlannedFootstep stepToNotOverride = new PlannedFootstep(RobotSide.fromByte(controllerQueue.get(1).getRobotSide()),
                                                                  new Pose3D(controllerQueue.get(1).getLocation(), controllerQueue.get(1).getOrientation()));
@@ -404,7 +403,7 @@ public class ContinuousPlanner
 
       FramePose3D nextRobotStepAfterCurrent;
 
-      if (continuousWalkingParameters.getOverrideEntireQueueEachStep())
+      if (continuousHikingParameters.getOverrideEntireQueueEachStep())
       {
          nextRobotStepAfterCurrent = new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                      referenceFrames.getSoleFrame(imminentFootSide.getOppositeSide()).getTransformToWorldFrame());
@@ -478,11 +477,11 @@ public class ContinuousPlanner
 
    public void syncParametersCallback()
    {
-      if (previousContinuousHikingSwingTime != continuousWalkingParameters.getSwingTime())
+      if (previousContinuousHikingSwingTime != continuousHikingParameters.getSwingTime())
       {
-         footstepPlanner.getSwingPlannerParameters().setMinimumSwingTime(continuousWalkingParameters.getSwingTime());
-         footstepPlanner.getSwingPlannerParameters().setMaximumSwingTime(continuousWalkingParameters.getSwingTime());
-         previousContinuousHikingSwingTime = continuousWalkingParameters.getSwingTime();
+         footstepPlanner.getSwingPlannerParameters().setMinimumSwingTime(continuousHikingParameters.getSwingTime());
+         footstepPlanner.getSwingPlannerParameters().setMaximumSwingTime(continuousHikingParameters.getSwingTime());
+         previousContinuousHikingSwingTime = continuousHikingParameters.getSwingTime();
          swingPlannerParameters.set(footstepPlanner.getSwingPlannerParameters());
       }
    }
