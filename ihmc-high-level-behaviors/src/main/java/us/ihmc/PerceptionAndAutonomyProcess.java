@@ -541,7 +541,7 @@ public class PerceptionAndAutonomyProcess
       }
    }
 
-   public void updatePlanarRegions()
+   private void updatePlanarRegions()
    {
       if (zedDepthImage != null && zedDepthImage.isAvailable() && planarRegionsDemandNode.isDemanded())
       {
@@ -586,7 +586,7 @@ public class PerceptionAndAutonomyProcess
       }
    }
 
-   public void updateHeightMap()
+   private void updateHeightMap()
    {
       if (realsenseDepthImage != null && realsenseDepthImage.isAvailable() && heightMapDemandNode.isDemanded())
       {
