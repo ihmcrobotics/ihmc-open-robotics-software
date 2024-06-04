@@ -7,11 +7,11 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -23,7 +23,6 @@ import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersBa
 import us.ihmc.perception.steppableRegions.SteppableRegionsCalculator;
 import us.ihmc.perception.steppableRegions.data.SteppableCell;
 import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
@@ -63,7 +62,7 @@ public class RapidHeightMapExtractor
    private final TerrainMapStatistics terrainMapStatistics = new TerrainMapStatistics();
 
 //   private HeightMapAutoencoder denoiser;
-   private HumanoidReferenceFrames referenceFrames;
+   private ReferenceFrame midFeetUnderPelvisFrame;
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
    private OpenCLFloatParameters snappingParametersBuffer;
@@ -123,10 +122,10 @@ public class RapidHeightMapExtractor
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
    }
 
-   public RapidHeightMapExtractor(OpenCLManager openCLManager, HumanoidReferenceFrames referenceFrames)
+   public RapidHeightMapExtractor(OpenCLManager openCLManager, ReferenceFrame midFeetUnderPelvisFrame)
    {
       this(openCLManager);
-      this.referenceFrames = referenceFrames;
+      this.midFeetUnderPelvisFrame = midFeetUnderPelvisFrame;
    }
 
    public void initialize()
@@ -499,9 +498,9 @@ public class RapidHeightMapExtractor
       double thicknessOfTheFoot = 0.02;
       double height = 0.0f;
 
-      if (referenceFrames != null)
+      if (midFeetUnderPelvisFrame != null)
       {
-         height = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslationZ() - thicknessOfTheFoot;
+         height = midFeetUnderPelvisFrame.getTransformToWorldFrame().getTranslationZ() - thicknessOfTheFoot;
       }
 
       int offset = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());

@@ -113,6 +113,7 @@ public class PerceptionAndAutonomyProcess
    private final Supplier<ReferenceFrame> realsenseFrameSupplier;
    private final Supplier<ReferenceFrame> realsenseZUpFrameSupplier;
    private final Supplier<ReferenceFrame> ousterFrameSupplier;
+   private final Supplier<ReferenceFrame> midFeetUnderPelvisFrameSupplier;
 
    private final DepthImageOverlapRemover overlapRemover = new DepthImageOverlapRemover();
 
@@ -209,13 +210,15 @@ public class PerceptionAndAutonomyProcess
                                        Supplier<ReferenceFrame> ousterFrameSupplier,
                                        Supplier<ReferenceFrame> leftBlackflyFrameSupplier,
                                        Supplier<ReferenceFrame> rightBlackflyFrameSupplier,
-                                       Supplier<ReferenceFrame> robotPelvisFrameSupplier)
+                                       Supplier<ReferenceFrame> robotPelvisFrameSupplier,
+                                       Supplier<ReferenceFrame> robotMidFeetUnderPelvisFrameSupplier)
    {
       this.ros2Helper = ros2Helper;
       this.zedFrameSupplier = zedFrameSupplier;
       this.realsenseFrameSupplier = realsenseFrameSupplier;
       this.realsenseZUpFrameSupplier = realsenseZUpFrameSupplier;
       this.ousterFrameSupplier = ousterFrameSupplier;
+      this.midFeetUnderPelvisFrameSupplier = robotMidFeetUnderPelvisFrameSupplier;
 
       initializeDependencyGraph(ros2Helper);
 
@@ -603,7 +606,7 @@ public class PerceptionAndAutonomyProcess
 
          if (heightMapExtractor == null)
          {
-            heightMapExtractor = new RapidHeightMapExtractor(openCLManager, null); // TODO: Fix up for resetting to feet Z
+            heightMapExtractor = new RapidHeightMapExtractor(openCLManager, midFeetUnderPelvisFrameSupplier.get()); // TODO: Fix up for resetting to feet Z
             heightMapExtractor.setDepthIntrinsics(latestRealsenseDepthImage.getIntrinsicsCopy());
 
             heightMapBytedecoImage = new BytedecoImage(latestRealsenseDepthImage.getCpuImageMat());
@@ -724,6 +727,7 @@ public class PerceptionAndAutonomyProcess
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       PerceptionAndAutonomyProcess perceptionAndAutonomyProcess = new PerceptionAndAutonomyProcess(ros2Helper,
+                                                                                                   ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
