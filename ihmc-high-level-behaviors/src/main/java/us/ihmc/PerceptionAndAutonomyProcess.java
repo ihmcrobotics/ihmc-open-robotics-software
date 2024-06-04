@@ -63,7 +63,6 @@ import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.tools.thread.SwapReference;
 
 import javax.annotation.Nullable;
-import java.time.Instant;
 import java.util.Collections;
 import java.util.function.Supplier;
 
@@ -181,7 +180,7 @@ public class PerceptionAndAutonomyProcess
    private final TypedNotification<PlanarRegionsList> newPlanarRegions = new TypedNotification<>();
    private ROS2DemandGraphNode planarRegionsDemandNode;
 
-   private RapidHeightMapExtractor rapidHeightMapExtractor;
+   private RapidHeightMapExtractor heightMapExtractor;
    private final RestartableThrottledThread heightMapExtractorThread;
    private final ImageMessage croppedHeightMapImageMessage = new ImageMessage();
    private ROS2DemandGraphNode heightMapDemandNode;
@@ -189,6 +188,7 @@ public class PerceptionAndAutonomyProcess
    private final RigidBodyTransform sensorToWorldForHeightMap = new RigidBodyTransform();
    private final RigidBodyTransform sensorToGroundForHeightMap = new RigidBodyTransform();
    private final RigidBodyTransform groundToWorldForHeightMap = new RigidBodyTransform();
+   private BytedecoImage heightMapBytedecoImage;
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
 
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
@@ -348,8 +348,8 @@ public class PerceptionAndAutonomyProcess
          planarRegionsExtractor.destroy();
 
       heightMapExtractorThread.stop();
-      if (rapidHeightMapExtractor != null)
-         rapidHeightMapExtractor.destroy();
+      if (heightMapExtractor != null)
+         heightMapExtractor.destroy();
 
       ballDetectionManager.destroy();
 
@@ -601,11 +601,17 @@ public class PerceptionAndAutonomyProcess
       {
          RawImage latestRealsenseDepthImage = realsenseDepthImage.get();
 
-         if (rapidHeightMapExtractor == null)
+         if (heightMapExtractor == null)
          {
-            rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager, null); // TODO: Fix up for resetting to feet Z
-            rapidHeightMapExtractor.setDepthIntrinsics(latestRealsenseDepthImage.getIntrinsicsCopy());
-            rapidHeightMapExtractor.create(realsenseDepthImage, 1); // TODO: Can't use same image for whole run?
+            heightMapExtractor = new RapidHeightMapExtractor(openCLManager, null); // TODO: Fix up for resetting to feet Z
+            heightMapExtractor.setDepthIntrinsics(latestRealsenseDepthImage.getIntrinsicsCopy());
+
+            heightMapBytedecoImage = new BytedecoImage(latestRealsenseDepthImage.getCpuImageMat());
+            heightMapExtractor.create(heightMapBytedecoImage, 1);
+         }
+         else
+         {
+            latestRealsenseDepthImage.getCpuImageMat().copyTo(heightMapBytedecoImage.getBytedecoOpenCVMat());
          }
 
          ReferenceFrame d455SensorFrame = realsenseFrameSupplier.get(); // TODO: Can we do this in this thread?
@@ -618,9 +624,9 @@ public class PerceptionAndAutonomyProcess
          cameraPoseForHeightMap.setToZero(d455SensorFrame);
          cameraPoseForHeightMap.changeFrame(ReferenceFrame.getWorldFrame());
 
-         rapidHeightMapExtractor.update(sensorToWorldForHeightMap, sensorToGroundForHeightMap, groundToWorldForHeightMap);
+         heightMapExtractor.update(sensorToWorldForHeightMap, sensorToGroundForHeightMap, groundToWorldForHeightMap);
 
-         Mat croppedHeightMapImage = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
+         Mat croppedHeightMapImage = heightMapExtractor.getTerrainMapData().getHeightMap();
 
          OpenCVTools.compressImagePNG(croppedHeightMapImage, compressedCroppedHeightMapPointer);
          PerceptionMessageTools.publishCompressedDepthImage(compressedCroppedHeightMapPointer,
@@ -629,7 +635,7 @@ public class PerceptionAndAutonomyProcess
                                                             ros2Helper,
                                                             cameraPoseForHeightMap,
                                                             latestRealsenseDepthImage.getAcquisitionTime(),
-                                                            rapidHeightMapExtractor.getSequenceNumber(),
+                                                            heightMapExtractor.getSequenceNumber(),
                                                             croppedHeightMapImage.rows(),
                                                             croppedHeightMapImage.cols(),
                                                             (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
@@ -666,7 +672,7 @@ public class PerceptionAndAutonomyProcess
       zedColorDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_ZED_COLOR);
       realsenseDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_REALSENSE_POINT_CLOUD);
       ousterDepthDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_OUSTER_DEPTH);
-      ousterHeightMapDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_OUSTER_HEIGHT_MAP);
+      ousterHeightMapDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
       ousterLidarScanDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_LIDAR_SCAN);
       for (RobotSide side : RobotSide.values)
          blackflyImageDemandNodes.put(side, new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_BLACKFLY_COLOR_IMAGE.get(side)));
@@ -677,7 +683,7 @@ public class PerceptionAndAutonomyProcess
       yoloRealsenseDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_YOLO_REALSENSE);
       ballDetectionDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_BALL_TRACKING);
       planarRegionsDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_PLANAR_REGIONS);
-      heightMapDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_REALSENSE_HEIGHT_MAP);
+      heightMapDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
 
       // build the graph
       blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(ousterDepthDemandNode); // For point cloud coloring

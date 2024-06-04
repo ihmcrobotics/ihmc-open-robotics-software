@@ -251,8 +251,7 @@ public final class PerceptionAPI
    public static final ROS2Topic<ImageMessage> HEIGHT_MAP_LOCAL = PERCEPTION_MODULE.withOutput().withTypeName(ImageMessage.class).withSuffix("height_map_local");
 
    public static final ROS2Topic<Empty> REQUEST_LIDAR_SCAN = PERCEPTION_MODULE.withSuffix("request_lidar_scan").withType(Empty.class);
-   public static final ROS2Topic<Empty> REQUEST_OUSTER_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("request_ouster_height_map").withType(Empty.class);
-   public static final ROS2Topic<Empty> REQUEST_REALSENSE_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("request_realsense_height_map").withType(Empty.class);
+   public static final ROS2Topic<Empty> REQUEST_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("request_height_map").withType(Empty.class);
 
    public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = PERCEPTION_MODULE.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
    public static final ROS2Topic<Empty> REQUEST_ARUCO = PERCEPTION_MODULE.withSuffix("request_aruco").withType(Empty.class);

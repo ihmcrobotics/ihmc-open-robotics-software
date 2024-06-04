@@ -29,7 +29,7 @@ public class RemoteFootstepPlannerUI extends ApplicationNoModule
       messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
       messageConverter = RemoteUIMessageConverter.createConverter(messager, "", PubSubImplementation.INTRAPROCESS);
 
-      heightMapHeartbeat = new ROS2Heartbeat(new ROS2Helper(PubSubImplementation.FAST_RTPS, "height_map_heartbeat"), PerceptionAPI.REQUEST_OUSTER_HEIGHT_MAP);
+      heightMapHeartbeat = new ROS2Heartbeat(new ROS2Helper(PubSubImplementation.FAST_RTPS, "height_map_heartbeat"), PerceptionAPI.REQUEST_HEIGHT_MAP);
       heightMapHeartbeat.setAlive(true);
 
       messager.startMessager();

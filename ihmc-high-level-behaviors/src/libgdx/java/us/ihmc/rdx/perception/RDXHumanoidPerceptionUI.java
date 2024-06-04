@@ -144,7 +144,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       if (ros2Helper != null)
       {
          heightMapVisualizer.setupForHeightMapMessage(ros2Helper);
-         heightMapVisualizer.setupForImageMessage(ros2Helper, PerceptionAPI.REQUEST_OUSTER_HEIGHT_MAP);
+         heightMapVisualizer.setupForImageMessage(ros2Helper);
       }
       heightMapVisualizer.create();
       visualizers.put("HeightMap", heightMapVisualizer);
