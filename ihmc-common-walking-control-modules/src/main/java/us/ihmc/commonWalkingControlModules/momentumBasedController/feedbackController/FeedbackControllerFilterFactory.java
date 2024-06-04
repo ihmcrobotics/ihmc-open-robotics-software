@@ -52,6 +52,7 @@ public class FeedbackControllerFilterFactory
          this.enableFilter = new YoBoolean(namePrefix + "EnableFilter", null);
          this.breakFrequency = new YoDouble(namePrefix + "BreakFrequency", null);
          this.maxOutputRate = new YoDouble(namePrefix + "MaxOutputRate", null);
+         this.enableFilter.set(enableFilter);
          this.breakFrequency.set(breakFrequency);
          this.maxOutputRate.set(maxOutputRate);
       }
@@ -121,6 +122,7 @@ public class FeedbackControllerFilterFactory
          this.updateStepBreakFrequency = new YoDouble(namePrefix + "UpdateStepBreakFrequency", null);
          this.maxOutputRate = new YoDouble(namePrefix + "MaxOutputRate", null);
 
+         this.enableFilter.set(enableFilter);
          this.maxInputRate.set(maxInputRate);
          this.maxInput.set(maxInput);
          this.leadFrequency.set(leadFrequency);
