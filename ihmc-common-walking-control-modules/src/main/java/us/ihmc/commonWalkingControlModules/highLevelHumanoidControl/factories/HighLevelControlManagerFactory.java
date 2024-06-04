@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation
 import us.ihmc.commonWalkingControlModules.configurations.InertialEstimationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.BimanualManipulationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.naturalPosture.NaturalPostureManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
@@ -81,6 +82,7 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
    private MomentumOptimizationSettings momentumOptimizationSettings;
    private final LoadBearingParameters loadBearingParameters = new LoadBearingParameters(registry);
    private InertialEstimationParameters inertialEstimationParameters;
+   private BimanualManipulationManager bimanualManipulationManager;
 
    private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
    private final Map<String, PID3DGainsReadOnly> taskspaceOrientationGainMap = new HashMap<>();
@@ -518,6 +520,8 @@ public class HighLevelControlManagerFactory implements SCS2YoGraphicHolder
          for (RigidBodyControlManager rigidBodyControlManager : rigidBodyManagerMapByBodyName.values())
             group.addChild(rigidBodyControlManager.getSCS2YoGraphics());
       }
+      if (bimanualManipulationManager != null)
+         group.addChild(bimanualManipulationManager.getSCS2YoGraphics());
       return group;
    }
 }

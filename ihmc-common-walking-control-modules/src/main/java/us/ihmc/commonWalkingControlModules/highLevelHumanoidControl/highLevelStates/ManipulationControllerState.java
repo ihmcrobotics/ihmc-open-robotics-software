@@ -9,6 +9,7 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.BimanualManipulationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
@@ -44,6 +45,9 @@ import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -97,6 +101,7 @@ public class ManipulationControllerState extends HighLevelControllerState
 
    private final WholeBodyControlCoreToolbox controlCoreToolbox;
    private double controlDT;
+   private final BimanualManipulationManager bimanualManipulationManager;
 
    public ManipulationControllerState(CommandInputManager commandInputManager,
                                       StatusMessageOutputManager statusMessageOutputManager,
@@ -118,6 +123,7 @@ public class ManipulationControllerState extends HighLevelControllerState
 
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
+      bimanualManipulationManager = new BimanualManipulationManager(fullRobotModel, controlDT, registry);
 
       ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver();
       referenceFrameHashCodeResolver.put(fullRobotModel.getRootBody().getBodyFixedFrame());
@@ -371,6 +377,13 @@ public class ManipulationControllerState extends HighLevelControllerState
          controllerCoreCommand.addInverseDynamicsCommand(handManagers.get(robotSide).getInverseDynamicsCommand());
       }
 
+      /* Bimanual module */
+      bimanualManipulationManager.update();
+      if (bimanualManipulationManager.isEnabled())
+      {
+         controllerCoreCommand.addInverseDynamicsCommand(bimanualManipulationManager.getCommand());
+      }
+
       JointDesiredOutputList stateSpecificJointSettings = getStateSpecificJointSettings();
       controllerCoreCommand.completeLowLevelJointData(stateSpecificJointSettings);
 
@@ -527,6 +540,7 @@ public class ManipulationControllerState extends HighLevelControllerState
       List<ArmDesiredAccelerationsCommand> armDesiredAccelerationCommands = commandInputManager.pollNewCommands(ArmDesiredAccelerationsCommand.class);
       List<HandHybridJointspaceTaskspaceTrajectoryCommand> handHybridCommands = commandInputManager.pollNewCommands(
             HandHybridJointspaceTaskspaceTrajectoryCommand.class);
+      List<BimanualManipulationCommand> bimanualManipulationCommands = commandInputManager.pollNewCommands(BimanualManipulationCommand.class);
 
       for (int i = 0; i < handTrajectoryCommands.size(); i++)
       {
@@ -594,6 +608,10 @@ public class ManipulationControllerState extends HighLevelControllerState
          }
       }
 
+      for (int i = 0; i < bimanualManipulationCommands.size(); i++)
+      {
+         bimanualManipulationManager.handleBimanualManipulationCommand(bimanualManipulationCommands.get(i));
+      }
    }
 
    private void reportStatusMessages()
@@ -633,5 +651,20 @@ public class ManipulationControllerState extends HighLevelControllerState
    public JointDesiredOutputListReadOnly getOutputForLowLevelController()
    {
       return controllerCore.getOutputForLowLevelController();
+   }
+
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+      group.addChild(bimanualManipulationManager.getSCS2YoGraphics());
+      group.addChild(chestManager.getSCS2YoGraphics());
+      group.addChild(headManager.getSCS2YoGraphics());
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         group.addChild(handManagers.get(robotSide).getSCS2YoGraphics());
+      }
+      return group;
    }
 }
