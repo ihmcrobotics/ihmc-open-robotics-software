@@ -217,7 +217,10 @@ public class RDXGridMapGraphic implements RenderableProvider
 
                Color color;
                if (colorFromHeight)
-                  color = HeightMapTools.computeGDXColorFromHeight(0.5 * (maxHeight + minHeight));
+               {
+                  double[] redGreenBlue = HeightMapTools.getRedGreenBlue(0.5 * (maxHeight - minHeight));
+                  color = new Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f);
+               }
                else
                   color = idColorFunction.getColor((int) id);
 
@@ -268,7 +271,10 @@ public class RDXGridMapGraphic implements RenderableProvider
 
             Color color;
             if (colorFromHeight)
-               color = HeightMapTools.computeGDXColorFromHeight(0.5 * (maxHeight + minHeight));
+            {
+               double[] redGreenBlue = HeightMapTools.getRedGreenBlue(0.5 * (maxHeight - minHeight));
+               color = new Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f);
+            }
             else
                color = idColorFunction.getColor((int) id);
 
@@ -293,11 +299,9 @@ public class RDXGridMapGraphic implements RenderableProvider
    {
       RDXMultiColorMeshBuilder groundMeshBuilder = new RDXMultiColorMeshBuilder();
       double renderedGroundPlaneHeight = 0.005;
-      groundMeshBuilder.addBox(gridSizeXy,
-                               gridSizeXy,
-                               renderedGroundPlaneHeight,
-                               new Point3D(gridCenterX, gridCenterY, groundHeight),
-                               HeightMapTools.computeGDXColorFromHeight(groundHeight));
+      double[] redGreenBlue = HeightMapTools.getRedGreenBlue(groundHeight);
+      Color color = new Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f);
+      groundMeshBuilder.addBox(gridSizeXy, gridSizeXy, renderedGroundPlaneHeight, new Point3D(gridCenterX, gridCenterY, groundHeight), color);
 
       return groundMeshBuilder;
    }

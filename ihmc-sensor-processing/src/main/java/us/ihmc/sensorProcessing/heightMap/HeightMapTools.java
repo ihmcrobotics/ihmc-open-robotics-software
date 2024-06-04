@@ -1,7 +1,6 @@
 package us.ihmc.sensorProcessing.heightMap;
 
 import us.ihmc.commons.InterpolationTools;
-import com.badlogic.gdx.graphics.Color;
 
 /**
  * Height map indexing tools. The height map spans a square region and is parametrized by the following values:
@@ -75,18 +74,6 @@ public class HeightMapTools
    public static double getCoordinateFromIndex(int index, double resolution, int offset)
    {
       return (index - offset) / resolution;
-   }
-
-   public static Color computeGDXColorFromHeight(double height)
-   {
-      double[] redGreenBlue = getRedGreenBlue(height);
-      return new Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f);
-   }
-
-   public static javafx.scene.paint.Color computeJavaFXColorFromHeight(double height)
-   {
-      double[] redGreenBlue = getRedGreenBlue(height);
-      return new javafx.scene.paint.Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f);
    }
 
    /**

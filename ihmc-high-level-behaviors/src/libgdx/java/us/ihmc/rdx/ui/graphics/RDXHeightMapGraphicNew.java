@@ -157,7 +157,8 @@ public class RDXHeightMapGraphicNew implements RenderableProvider
             bottomLeft.set(vertexCenter.getX() - halfWidth, vertexCenter.getY() - halfWidth, vertexCenter.getZ());
             bottomRight.set(vertexCenter.getX() + halfWidth, vertexCenter.getY() - halfWidth, vertexCenter.getZ());
 
-            Color color = HeightMapTools.computeGDXColorFromHeight((vertexCenter.getZ()));
+            double[] redGreenBlue = HeightMapTools.getRedGreenBlue(vertexCenter.getZ());
+            Color color = new Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f);
 
             meshBuilder.addPolygon(Arrays.asList(topLeft, topRight, bottomLeft, bottomRight), color);
             currentIndexForMeshBuilder++;

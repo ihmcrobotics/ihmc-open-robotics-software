@@ -118,12 +118,13 @@ public class HeightMapVisualizer extends AnimationTimer
          double y = HeightMapTools.indexToCoordinate(yIndex, heightMapMessage.getGridCenterY(), gridResolutionXY, centerIndex);
          double height = heights.get(i);
          double renderedHeight = height - heightMapMessage.getEstimatedGroundHeight();
+         double[] redGreenBlue = HeightMapTools.getRedGreenBlue(height);
 
          if (ONLY_VISUALIZE_TOP)
          {
             meshBuilder.addPolygon(new RigidBodyTransform(new Quaternion(), new Point3D(x, y, height)),
                                    heightMapCell,
-                                   HeightMapTools.computeJavaFXColorFromHeight(height));
+                                   new Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f));
          }
          else
          {
@@ -131,7 +132,7 @@ public class HeightMapVisualizer extends AnimationTimer
                                gridResolutionXY,
                                renderedHeight,
                                new Point3D(x, y, heightMapMessage.getEstimatedGroundHeight() + 0.5 * renderedHeight),
-                               HeightMapTools.computeJavaFXColorFromHeight(height));
+                               new Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f));
          }
 
          if (RENDER_BORDERS)
