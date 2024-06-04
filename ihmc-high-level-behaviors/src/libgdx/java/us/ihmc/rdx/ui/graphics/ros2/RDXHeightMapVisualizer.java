@@ -11,7 +11,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -59,8 +58,6 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    private BytePointer incomingCompressedImageBytePointer;
 
    private int compressedBufferDefaultSize = 100000;
-
-   private ROS2Heartbeat activeHeartbeat;
 
    private float pixelScalingFactor = 10000.0f;
    private boolean heightMapMessageGenerated = false;
@@ -210,11 +207,6 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
          updateGridMapGraphic(latestHeightMapMessage);
       }
 
-      if (activeHeartbeat != null)
-      {
-         activeHeartbeat.setAlive(isActive());
-      }
-
       boolean isActive = isActive();
       if (isActive && enableHeightMapVisualizer.get())
       {
@@ -254,10 +246,6 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    public void destroy()
    {
       executorService.shutdown();
-      if (activeHeartbeat != null)
-      {
-         activeHeartbeat.destroy();
-      }
       gridMapGraphic.destroy();
    }
 
