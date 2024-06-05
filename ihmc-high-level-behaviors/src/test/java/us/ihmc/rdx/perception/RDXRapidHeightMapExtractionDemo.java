@@ -122,7 +122,7 @@ public class RDXRapidHeightMapExtractionDemo
 
             cameraIntrinsics = new CameraIntrinsics();
             humanoidPerception.initializeRealsenseDepthImage(depthHeight, depthWidth);
-            humanoidPerception.initializeHeightMapExtractor(null, cameraIntrinsics);
+            humanoidPerception.initializeHeightMapExtractor(ros2Helper, null, cameraIntrinsics);
             humanoidPerception.getRapidHeightMapExtractor().setModeSpherical();
             humanoidPerception.getRapidHeightMapExtractor().getTerrainMapStatistics().setPrintToConsole(true);
 
@@ -146,7 +146,7 @@ public class RDXRapidHeightMapExtractionDemo
 
             cameraIntrinsics = new CameraIntrinsics(depthHeight, depthWidth, 654.29, 654.29, 651.14, 361.89);
             humanoidPerception.initializeRealsenseDepthImage(depthHeight, depthWidth);
-            humanoidPerception.initializeHeightMapExtractor(null, cameraIntrinsics);
+            humanoidPerception.initializeHeightMapExtractor(ros2Helper, null, cameraIntrinsics);
             humanoidPerception.getRapidHeightMapExtractor().setModePerspective();
             humanoidPerception.getRapidHeightMapExtractor().getTerrainMapStatistics().setPrintToConsole(true);
 

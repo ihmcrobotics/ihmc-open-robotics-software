@@ -6,6 +6,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -76,6 +77,7 @@ public class HumanoidPerceptionModule
    private BytedecoImage realsenseDepthImage;
 
    private final PerceptionStatistics perceptionStatistics = new PerceptionStatistics();
+   private final Notification resetHeightMapRequested = new Notification();
 
    private boolean rapidRegionsEnabled = false;
    private boolean sphericalRegionsEnabled = false;
@@ -231,6 +233,9 @@ public class HumanoidPerceptionModule
 
    private void updateRapidHeightMap(ROS2Helper ros2Helper, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
    {
+      if (resetHeightMapRequested.poll())
+         rapidHeightMapExtractor.reset();
+
       RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
       RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
       RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
@@ -278,7 +283,7 @@ public class HumanoidPerceptionModule
       this.rapidPlanarRegionsExtractor.getDebugger().setEnabled(false);
    }
 
-   public void initializeHeightMapExtractor(HumanoidReferenceFrames referenceFrames, CameraIntrinsics cameraIntrinsics)
+   public void initializeHeightMapExtractor(ROS2Helper ros2Helper, HumanoidReferenceFrames referenceFrames, CameraIntrinsics cameraIntrinsics)
    {
       LogTools.info("Rapid Height Map: {}", cameraIntrinsics);
       rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager,
@@ -286,6 +291,9 @@ public class HumanoidPerceptionModule
                                                             referenceFrames.getSoleFrame(RobotSide.RIGHT));
       rapidHeightMapExtractor.setDepthIntrinsics(cameraIntrinsics);
       rapidHeightMapExtractor.create(realsenseDepthImage, 1);
+
+      if (ros2Helper != null)
+         ros2Helper.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
    }
 
    public void initializeBodyCollisionFilter(FullHumanoidRobotModel fullRobotModel, CollisionBoxProvider collisionBoxProvider)
