@@ -24,7 +24,6 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.IterativeClosestPointManager;
 import us.ihmc.perception.RapidHeightMapManager;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
@@ -109,7 +108,8 @@ public class PerceptionAndAutonomyProcess
    private final Supplier<ReferenceFrame> realsenseFrameSupplier;
    private final Supplier<ReferenceFrame> realsenseZUpFrameSupplier;
    private final Supplier<ReferenceFrame> ousterFrameSupplier;
-   private final Supplier<ReferenceFrame> midFeetUnderPelvisFrameSupplier;
+   private final Supplier<ReferenceFrame> leftFootSoleFrameSupplier;
+   private final Supplier<ReferenceFrame> rightFootSoleFrameSupplier;
 
    private final DepthImageOverlapRemover overlapRemover = new DepthImageOverlapRemover();
 
@@ -200,14 +200,16 @@ public class PerceptionAndAutonomyProcess
                                        Supplier<ReferenceFrame> leftBlackflyFrameSupplier,
                                        Supplier<ReferenceFrame> rightBlackflyFrameSupplier,
                                        Supplier<ReferenceFrame> robotPelvisFrameSupplier,
-                                       Supplier<ReferenceFrame> robotMidFeetUnderPelvisFrameSupplier)
+                                       Supplier<ReferenceFrame> leftFootSoleFrameSupplier,
+                                       Supplier<ReferenceFrame> rightFootSoleFrameSupplier)
    {
       this.ros2Helper = ros2Helper;
       this.zedFrameSupplier = zedFrameSupplier;
       this.realsenseFrameSupplier = realsenseFrameSupplier;
       this.realsenseZUpFrameSupplier = realsenseZUpFrameSupplier;
       this.ousterFrameSupplier = ousterFrameSupplier;
-      this.midFeetUnderPelvisFrameSupplier = robotMidFeetUnderPelvisFrameSupplier;
+      this.leftFootSoleFrameSupplier = leftFootSoleFrameSupplier;
+      this.rightFootSoleFrameSupplier = rightFootSoleFrameSupplier;
 
       initializeDependencyGraph(ros2Helper);
 
@@ -596,7 +598,11 @@ public class PerceptionAndAutonomyProcess
 
          if (heightMapManager == null)
          {
-            heightMapManager = new RapidHeightMapManager(openCLManager, midFeetUnderPelvisFrameSupplier.get(), latestRealsenseDepthImage, ros2Helper);
+            heightMapManager = new RapidHeightMapManager(openCLManager,
+                                                         leftFootSoleFrameSupplier,
+                                                         rightFootSoleFrameSupplier,
+                                                         latestRealsenseDepthImage,
+                                                         ros2Helper);
          }
 
          heightMapManager.update(latestRealsenseDepthImage, realsenseFrameSupplier.get(), realsenseZUpFrameSupplier.get(), ros2Helper);
@@ -685,6 +691,7 @@ public class PerceptionAndAutonomyProcess
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       PerceptionAndAutonomyProcess perceptionAndAutonomyProcess = new PerceptionAndAutonomyProcess(ros2Helper,
+                                                                                                   ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,

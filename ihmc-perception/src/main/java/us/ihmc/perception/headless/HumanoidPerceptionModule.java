@@ -31,6 +31,7 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -280,7 +281,9 @@ public class HumanoidPerceptionModule
    public void initializeHeightMapExtractor(HumanoidReferenceFrames referenceFrames, CameraIntrinsics cameraIntrinsics)
    {
       LogTools.info("Rapid Height Map: {}", cameraIntrinsics);
-      rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager, referenceFrames.getMidFeetUnderPelvisFrame());
+      rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager,
+                                                            referenceFrames.getSoleFrame(RobotSide.LEFT),
+                                                            referenceFrames.getSoleFrame(RobotSide.RIGHT));
       rapidHeightMapExtractor.setDepthIntrinsics(cameraIntrinsics);
       rapidHeightMapExtractor.create(realsenseDepthImage, 1);
    }

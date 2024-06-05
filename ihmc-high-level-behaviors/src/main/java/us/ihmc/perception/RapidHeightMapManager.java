@@ -16,6 +16,8 @@ import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 
+import java.util.function.Supplier;
+
 /**
  * This class takes care of managing a {@link RapidHeightMapExtractor} in the {@link us.ihmc.PerceptionAndAutonomyProcess}.
  */
@@ -32,11 +34,12 @@ public class RapidHeightMapManager
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
 
    public RapidHeightMapManager(OpenCLManager openCLManager,
-                                ReferenceFrame midFeetUnderPelvisFrame,
+                                Supplier<ReferenceFrame> leftFootSoleFrameSupplier,
+                                Supplier<ReferenceFrame> rightFootSoleFrameSupplier,
                                 RawImage latestRealsenseDepthImage,
                                 ROS2PublishSubscribeAPI ros2)
    {
-      heightMapExtractor = new RapidHeightMapExtractor(openCLManager, midFeetUnderPelvisFrame);
+      heightMapExtractor = new RapidHeightMapExtractor(openCLManager, leftFootSoleFrameSupplier.get(), rightFootSoleFrameSupplier.get());
       heightMapExtractor.setDepthIntrinsics(latestRealsenseDepthImage.getIntrinsicsCopy());
 
       heightMapBytedecoImage = new BytedecoImage(latestRealsenseDepthImage.getImageWidth(), latestRealsenseDepthImage.getImageHeight(), opencv_core.CV_16UC1);

@@ -23,6 +23,8 @@ import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersBa
 import us.ihmc.perception.steppableRegions.SteppableRegionsCalculator;
 import us.ihmc.perception.steppableRegions.data.SteppableCell;
 import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
@@ -62,7 +64,7 @@ public class RapidHeightMapExtractor
    private final TerrainMapStatistics terrainMapStatistics = new TerrainMapStatistics();
 
 //   private HeightMapAutoencoder denoiser;
-   private ReferenceFrame midFeetUnderPelvisFrame;
+   private final SideDependentList<ReferenceFrame> footSoleFrames = new SideDependentList<>();
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
    private OpenCLFloatParameters snappingParametersBuffer;
@@ -122,10 +124,11 @@ public class RapidHeightMapExtractor
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
    }
 
-   public RapidHeightMapExtractor(OpenCLManager openCLManager, ReferenceFrame midFeetUnderPelvisFrame)
+   public RapidHeightMapExtractor(OpenCLManager openCLManager, ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame)
    {
       this(openCLManager);
-      this.midFeetUnderPelvisFrame = midFeetUnderPelvisFrame;
+      footSoleFrames.put(RobotSide.LEFT, leftFootSoleFrame);
+      footSoleFrames.put(RobotSide.RIGHT, rightFootSoleFrame);
    }
 
    public void initialize()
@@ -498,9 +501,10 @@ public class RapidHeightMapExtractor
       double thicknessOfTheFoot = 0.02;
       double height = 0.0f;
 
-      if (midFeetUnderPelvisFrame != null)
+      if (footSoleFrames.sides().length > 0)
       {
-         height = midFeetUnderPelvisFrame.getTransformToWorldFrame().getTranslationZ() - thicknessOfTheFoot;
+         height = Math.min(footSoleFrames.get(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ(),
+                           footSoleFrames.get(RobotSide.RIGHT).getTransformToWorldFrame().getTranslationZ()) - thicknessOfTheFoot;
       }
 
       int offset = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
