@@ -109,7 +109,8 @@ public class PerceptionAndAutonomyProcess
    private final Supplier<ReferenceFrame> realsenseFrameSupplier;
    private final Supplier<ReferenceFrame> realsenseZUpFrameSupplier;
    private final Supplier<ReferenceFrame> ousterFrameSupplier;
-   private final Supplier<ReferenceFrame> midFeetUnderPelvisFrameSupplier;
+   private final Supplier<ReferenceFrame> leftFootSoleFrameSupplier;
+   private final Supplier<ReferenceFrame> rightFootSoleFrameSupplier;
 
    private final DepthImageOverlapRemover overlapRemover = new DepthImageOverlapRemover();
 
@@ -202,14 +203,16 @@ public class PerceptionAndAutonomyProcess
                                        Supplier<ReferenceFrame> leftBlackflyFrameSupplier,
                                        Supplier<ReferenceFrame> rightBlackflyFrameSupplier,
                                        Supplier<ReferenceFrame> robotPelvisFrameSupplier,
-                                       Supplier<ReferenceFrame> robotMidFeetUnderPelvisFrameSupplier)
+                                       Supplier<ReferenceFrame> leftFootSoleFrameSupplier,
+                                       Supplier<ReferenceFrame> rightFootSoleFrameSupplier)
    {
       this.ros2Helper = ros2Helper;
       this.zedFrameSupplier = zedFrameSupplier;
       this.realsenseFrameSupplier = realsenseFrameSupplier;
       this.realsenseZUpFrameSupplier = realsenseZUpFrameSupplier;
       this.ousterFrameSupplier = ousterFrameSupplier;
-      this.midFeetUnderPelvisFrameSupplier = robotMidFeetUnderPelvisFrameSupplier;
+      this.leftFootSoleFrameSupplier = leftFootSoleFrameSupplier;
+      this.rightFootSoleFrameSupplier = rightFootSoleFrameSupplier;
 
       initializeDependencyGraph(ros2Helper);
 
@@ -358,6 +361,8 @@ public class PerceptionAndAutonomyProcess
       // TODO: Why does this result in a native crash?
 //      openCLManager.destroy();
 
+      overlapRemover.destroy();
+
       depthOverlapRemovalDemandNode.destroy();
       zedPointCloudDemandNode.destroy();
       zedColorDemandNode.destroy();
@@ -402,14 +407,14 @@ public class PerceptionAndAutonomyProcess
             icpManager.setEnvironmentPointCloud(zedDepthImage);
 
          if (yoloZEDDemandNode.isDemanded())
-            yolov8DetectionManager.setDetectionImages(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
+            yolov8DetectionManager.runYOLODetection(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
 
          if (ballDetectionDemandNode.isDemanded())
             ballDetectionManager.run(zedColorImages.get(RobotSide.LEFT));
 
          if (depthOverlapRemovalDemandNode.isDemanded() && realsenseDemandNode.isDemanded() && realsenseDepthImage != null)
          {
-            RawImage zedCutOutDepthImage = overlapRemover.removeOverlap(zedDepthImage.get(), 20);
+            RawImage zedCutOutDepthImage = overlapRemover.removeOverlap(zedDepthImage, 20);
             zedImagePublisher.setNextCutOutDepthImage(zedCutOutDepthImage.get());
             zedCutOutDepthImage.release();
          }
@@ -435,7 +440,7 @@ public class PerceptionAndAutonomyProcess
          realsenseColorImage = realsenseImageRetriever.getLatestRawColorImage();
 
          if (yoloRealsenseDemandNode.isDemanded())
-            yolov8DetectionManager.setDetectionImages(realsenseColorImage, realsenseDepthImage);
+            yolov8DetectionManager.runYOLODetection(realsenseColorImage, realsenseDepthImage);
 
          overlapRemover.setHighQualityImage(realsenseDepthImage.get());
 
@@ -580,7 +585,7 @@ public class PerceptionAndAutonomyProcess
          FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
 
          // TODO: Get rid of BytedecoImage, RapidPlanarRegionsExtractor requires it
-         BytedecoImage bytedecoImage = new BytedecoImage(latestZEDDepthImage.getCpuImageMat());
+         BytedecoImage bytedecoImage = new BytedecoImage(latestZEDDepthImage.getCpuImageMat().clone());
          bytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
          planarRegionsExtractor.update(bytedecoImage, zedFrameSupplier.get(), framePlanarRegionsList);
          planarRegionsExtractor.setProcessing(false);
@@ -605,7 +610,11 @@ public class PerceptionAndAutonomyProcess
 
          if (heightMapManager == null)
          {
-            heightMapManager = new RapidHeightMapManager(openCLManager, midFeetUnderPelvisFrameSupplier.get(), latestRealsenseDepthImage, ros2Helper);
+            heightMapManager = new RapidHeightMapManager(openCLManager,
+                                                         leftFootSoleFrameSupplier,
+                                                         rightFootSoleFrameSupplier,
+                                                         latestRealsenseDepthImage,
+                                                         ros2Helper);
          }
 
          heightMapManager.update(latestRealsenseDepthImage, realsenseFrameSupplier.get(), realsenseZUpFrameSupplier.get(), ros2Helper);
@@ -697,6 +706,7 @@ public class PerceptionAndAutonomyProcess
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       PerceptionAndAutonomyProcess perceptionAndAutonomyProcess = new PerceptionAndAutonomyProcess(ros2Helper,
+                                                                                                   ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,

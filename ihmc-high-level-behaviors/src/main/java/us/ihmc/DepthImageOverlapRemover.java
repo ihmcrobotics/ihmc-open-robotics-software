@@ -25,7 +25,6 @@ public class DepthImageOverlapRemover
    private final MutableReferenceFrame realsenseFrame = new MutableReferenceFrame();
    private final Object imageDataUsageSynchronizer = new Object();
 
-   private RawImage lowQualityImage;
    private BytedecoImage bytedecoLowQualityImage;
    private RawImage highQualityImage;
 
@@ -64,28 +63,26 @@ public class DepthImageOverlapRemover
     */
    public RawImage removeOverlap(RawImage lowQualityImage, int allowedOverlap)
    {
-      if (this.lowQualityImage != null)
-         this.lowQualityImage.release();
-      this.lowQualityImage = lowQualityImage;
+      lowQualityImage.get();
 
       synchronized (imageDataUsageSynchronizer)
       {
          if (highQualityImage == null || highQualityImage.isEmpty())
-            return this.lowQualityImage;
+            return lowQualityImage;
 
-         zedFrame.update(transformToWorld -> transformToWorld.set(this.lowQualityImage.getOrientation(), this.lowQualityImage.getPosition()));
+         zedFrame.update(transformToWorld -> transformToWorld.set(lowQualityImage.getOrientation(), lowQualityImage.getPosition()));
          realsenseFrame.update(transformToWorld -> transformToWorld.set(highQualityImage.getOrientation(), highQualityImage.getPosition()));
          zedFrame.getReferenceFrame().getTransformToDesiredFrame(zedToRealsenseTransform, realsenseFrame.getReferenceFrame());
          zedToRealsenseTransformParameter.setParameter(zedToRealsenseTransform);
          zedToRealsenseTransformParameter.writeOpenCLBufferObject(openCLManager);
 
-         parameters.setParameter(this.lowQualityImage.getFocalLengthX());
-         parameters.setParameter(this.lowQualityImage.getFocalLengthY());
-         parameters.setParameter(this.lowQualityImage.getPrincipalPointX());
-         parameters.setParameter(this.lowQualityImage.getPrincipalPointY());
-         parameters.setParameter(this.lowQualityImage.getDepthDiscretization());
-         parameters.setParameter(this.lowQualityImage.getImageWidth());
-         parameters.setParameter(this.lowQualityImage.getImageHeight());
+         parameters.setParameter(lowQualityImage.getFocalLengthX());
+         parameters.setParameter(lowQualityImage.getFocalLengthY());
+         parameters.setParameter(lowQualityImage.getPrincipalPointX());
+         parameters.setParameter(lowQualityImage.getPrincipalPointY());
+         parameters.setParameter(lowQualityImage.getDepthDiscretization());
+         parameters.setParameter(lowQualityImage.getImageWidth());
+         parameters.setParameter(lowQualityImage.getImageHeight());
          parameters.setParameter(highQualityImage.getFocalLengthX());
          parameters.setParameter(highQualityImage.getFocalLengthY());
          parameters.setParameter(highQualityImage.getPrincipalPointX());
@@ -99,13 +96,13 @@ public class DepthImageOverlapRemover
 
       if (bytedecoLowQualityImage != null)
          bytedecoLowQualityImage.destroy(openCLManager);
-      bytedecoLowQualityImage = new BytedecoImage(this.lowQualityImage.getCpuImageMat());
+      bytedecoLowQualityImage = new BytedecoImage(lowQualityImage.getCpuImageMat());
       bytedecoLowQualityImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
       bytedecoLowQualityImage.writeOpenCLImage(openCLManager);
 
       if (bytedecoZEDOutput != null)
          bytedecoZEDOutput.destroy(openCLManager);
-      bytedecoZEDOutput = new BytedecoImage(this.lowQualityImage.getImageWidth(), this.lowQualityImage.getImageHeight(), this.lowQualityImage.getOpenCVType());
+      bytedecoZEDOutput = new BytedecoImage(lowQualityImage.getImageWidth(), lowQualityImage.getImageHeight(), lowQualityImage.getOpenCVType());
       bytedecoZEDOutput.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
 
       openCLManager.setKernelArgument(kernel, 0, bytedecoLowQualityImage.getOpenCLImageObject());
@@ -113,7 +110,7 @@ public class DepthImageOverlapRemover
       openCLManager.setKernelArgument(kernel, 2, parameters.getOpenCLBufferObject());
       openCLManager.setKernelArgument(kernel, 3, zedToRealsenseTransformParameter.getOpenCLBufferObject());
 
-      openCLManager.execute2D(kernel, this.lowQualityImage.getImageWidth(), this.lowQualityImage.getImageHeight());
+      openCLManager.execute2D(kernel, lowQualityImage.getImageWidth(), lowQualityImage.getImageHeight());
 
       bytedecoZEDOutput.readOpenCLImage(openCLManager);
 
@@ -133,5 +130,14 @@ public class DepthImageOverlapRemover
                           lowQualityImage.getPrincipalPointY(),
                           lowQualityImage.getPosition(),
                           lowQualityImage.getOrientation());
+   }
+
+   public void destroy()
+   {
+      kernel.close();
+      openCLProgram.close();
+      openCLManager.destroy();
+      if (highQualityImage != null)
+         highQualityImage.release();
    }
 }

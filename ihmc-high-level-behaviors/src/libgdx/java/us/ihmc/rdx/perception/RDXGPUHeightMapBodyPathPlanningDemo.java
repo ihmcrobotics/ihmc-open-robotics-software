@@ -35,7 +35,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXSelectablePose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXBodyPathPlanGraphic;
-import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphic;
+import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -55,7 +55,7 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
    private RDXInteractableReferenceFrame robotInteractableReferenceFrame;
    private RDXSelectablePose3DGizmo ousterPoseGizmo;
    private RDXEnvironmentBuilder environmentBuilder;
-   private RDXHeightMapGraphic heightMapGraphic;
+   private RDXHeightMapGraphicNew heightMapGraphic;
    private SimpleGPUHeightMapParameters simpleGPUHeightMapParameters;
    private SimpleGPUHeightMapUpdater simpleGPUHeightMapUpdater;
    private RosMainNode ros1Node;
@@ -138,8 +138,7 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
                heightMapUpdater = new AlternateHeightMapUpdater();
             }
 
-            heightMapGraphic = new RDXHeightMapGraphic();
-            heightMapGraphic.getRenderGroundPlane().set(false);
+            heightMapGraphic = new RDXHeightMapGraphicNew();
             baseUI.getPrimaryScene().addRenderableProvider(heightMapGraphic, RDXSceneLevel.VIRTUAL);
             baseUI.getImGuiPanelManager().addPanel("Height Map", this::renderHeightMapImGuiWidgets);
 
@@ -275,7 +274,6 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
             ImGui.checkbox(labels.get("Height Map Gizmo"), heightMapPoseGizmo.getSelected());
             ImGui.checkbox(labels.get("Start Pose Gizmo"), startPoseGizmo.getSelected());
             ImGui.checkbox(labels.get("Goal Pose Gizmo"), goalPoseGizmo.getSelected());
-            ImGui.checkbox(labels.get("Render ground plane"), heightMapGraphic.getRenderGroundPlane());
             if (ImGui.button(labels.get("Plan body path")))
             {
                planBodyPath = true;

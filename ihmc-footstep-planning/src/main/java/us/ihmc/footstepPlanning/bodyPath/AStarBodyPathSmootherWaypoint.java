@@ -16,7 +16,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
-import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -39,9 +38,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
 
-import static us.ihmc.footstepPlanning.bodyPath.AStarBodyPathPlanner.*;
 import static us.ihmc.footstepPlanning.bodyPath.AStarBodyPathSmoother.*;
-import static us.ihmc.footstepPlanning.bodyPath.BodyPathRANSACTraversibilityCalculator.*;
 
 public class AStarBodyPathSmootherWaypoint
 {

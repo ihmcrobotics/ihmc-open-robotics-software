@@ -25,6 +25,8 @@ import us.ihmc.perception.steppableRegions.data.SteppableCell;
 import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
@@ -64,7 +66,7 @@ public class RapidHeightMapExtractor
    private final TerrainMapStatistics terrainMapStatistics = new TerrainMapStatistics();
 
 //   private HeightMapAutoencoder denoiser;
-   private ReferenceFrame midFeetUnderPelvisFrame;
+   private final SideDependentList<ReferenceFrame> footSoleFrames = new SideDependentList<>();
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
    private OpenCLFloatParameters snappingParametersBuffer;
@@ -124,10 +126,11 @@ public class RapidHeightMapExtractor
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
    }
 
-   public RapidHeightMapExtractor(OpenCLManager openCLManager, ReferenceFrame midFeetUnderPelvisFrame)
+   public RapidHeightMapExtractor(OpenCLManager openCLManager, ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame)
    {
       this(openCLManager);
-      this.midFeetUnderPelvisFrame = midFeetUnderPelvisFrame;
+      footSoleFrames.put(RobotSide.LEFT, leftFootSoleFrame);
+      footSoleFrames.put(RobotSide.RIGHT, rightFootSoleFrame);
    }
 
    public void initialize()
@@ -500,9 +503,10 @@ public class RapidHeightMapExtractor
       double thicknessOfTheFoot = 0.02;
       double height = 0.0f;
 
-      if (midFeetUnderPelvisFrame != null)
+      if (footSoleFrames.sides().length == 2)
       {
-         height = midFeetUnderPelvisFrame.getTransformToWorldFrame().getTranslationZ() - thicknessOfTheFoot;
+         height = Math.min(footSoleFrames.get(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ(),
+                           footSoleFrames.get(RobotSide.RIGHT).getTransformToWorldFrame().getTranslationZ()) - thicknessOfTheFoot;
       }
 
       int offset = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
@@ -588,9 +592,46 @@ public class RapidHeightMapExtractor
       steppabilityConnectionsImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
    }
 
+   /**
+    * Destroys all objects and releases allocated memory.
+    * Should be called after {@link #initialize()}
+    */
    public void destroy()
    {
-      // TODO What do we need to destroy in here?
+      yaw.destroy(openCLManager);
+
+      parametersBuffer.destroy(openCLManager);
+      if (computeSteppability)
+         snappingParametersBuffer.destroy(openCLManager);
+
+      worldToGroundTransformBuffer.destroy(openCLManager);
+      groundToWorldTransformBuffer.destroy(openCLManager);
+      groundToSensorTransformBuffer.destroy(openCLManager);
+      sensorToGroundTransformBuffer.destroy(openCLManager);
+      groundPlaneBuffer.destroy(openCLManager);
+
+      localHeightMapImage.destroy(openCLManager);
+      globalHeightMapImage.destroy(openCLManager);
+      globalHeightVarianceImage.destroy(openCLManager);
+      terrainCostImage.destroy(openCLManager);
+      contactMapImage.destroy(openCLManager);
+
+      sensorCroppedHeightMapImage.destroy(openCLManager);
+      sensorCroppedContactMapImage.destroy(openCLManager);
+      sensorCroppedTerrainCostImage.destroy(openCLManager);
+      steppableRegionAssignmentMat.close();
+      steppableRegionRingMat.close();
+
+      steppabilityImage.destroy(openCLManager);
+      snapHeightImage.destroy(openCLManager);
+      snapNormalXImage.destroy(openCLManager);
+      snapNormalYImage.destroy(openCLManager);
+      snapNormalZImage.destroy(openCLManager);
+      steppabilityConnectionsImage.destroy(openCLManager);
+      snappedAreaFractionImage.destroy(openCLManager);
+
+      denoisedHeightMapImage.close();
+      cropWindowRectangle.close();
    }
 
    public boolean isProcessing()
