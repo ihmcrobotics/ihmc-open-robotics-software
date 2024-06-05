@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting;
 
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -13,7 +14,7 @@ public class MPCTouchdownCalculator
 
    public MPCTouchdownCalculator(BPWPLanarWalkingRobot controllerRobot, RobotSide swingSide,
                                  YoDouble desiredWalkingSpeed, YoDouble desiredSideWalkingSpeed,
-                                 YoRegistry parentRegistry)
+                                 MPCParameters mpcParameters, YoRegistry parentRegistry)
    {
       registry = new YoRegistry(swingSide.getLowerCaseName() + getClass().getSimpleName());
 

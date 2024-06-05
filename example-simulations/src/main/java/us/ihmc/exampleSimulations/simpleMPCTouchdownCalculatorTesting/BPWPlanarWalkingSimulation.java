@@ -40,12 +40,15 @@ public class BPWPlanarWalkingSimulation {
         scs.addYoGraphic(controllerRobot.getSCS2YoGraphics());
 
         // controller
-        BPWPlanarWalkingController controller = new BPWPlanarWalkingController(controllerRobot, RobotSide.LEFT);
+        double controllerDt = scs.getDT() * simTicksPerControlTick;
+
+        BPWPlanarWalkingController controller = new BPWPlanarWalkingController(controllerRobot, controllerDt, RobotSide.LEFT);
         scs.addYoGraphic(controller.getSCS2YoGraphics());
 //         add the controller
 //        robot.addController(controller);
-        robot.addThrottledController(controller, scs.getDT() * simTicksPerControlTick);
+        robot.addThrottledController(controller, controllerDt);
 
+        scs.changeBufferSize(28000);
         scs.startSimulationThread();
         //scs.simulate();
     }
