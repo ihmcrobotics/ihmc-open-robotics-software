@@ -131,8 +131,11 @@ public class FeedbackControllerFilterFactory
          this.maxOutputRate.set(maxOutputRate);
       }
 
-      void setRegistry(YoRegistry registry)
+      public void setRegistry(YoRegistry registry)
       {
+         if (enableFilter.getRegistry() != null)
+            return;
+
          enableFilter.setRegistry(registry);
          maxInputRate.setRegistry(registry);
          maxInput.setRegistry(registry);
@@ -284,7 +287,7 @@ public class FeedbackControllerFilterFactory
    /**
     * Pilot-Induced Oscillation (PIO) filter for double values as implemented in the ISA spool controller.
     */
-   private static class YoPIOFilterDouble1D implements FilterDouble1D
+   public static class YoPIOFilterDouble1D implements FilterDouble1D
    {
       private final YoBoolean initialize;
       private final YoDouble rateLimitedInput;
@@ -451,6 +454,46 @@ public class FeedbackControllerFilterFactory
             return output.getValue();
          else
             return rawInput;
+      }
+
+      public YoBoolean getInitialize()
+      {
+         return initialize;
+      }
+
+      public YoDouble getRateLimitedInput()
+      {
+         return rateLimitedInput;
+      }
+
+      public YoDouble getUpdateStepLeadLag_q1()
+      {
+         return updateStepLeadLag_q1;
+      }
+
+      public YoDouble getUpdateStepLeadLag_q2()
+      {
+         return updateStepLeadLag_q2;
+      }
+
+      public YoDouble getUpdateStepLeadLagOutput()
+      {
+         return updateStepLeadLagOutput;
+      }
+
+      public YoDouble getUpdateStepLPF()
+      {
+         return updateStepLPF;
+      }
+
+      public YoDouble getOutputPreRateLimit()
+      {
+         return outputPreRateLimit;
+      }
+
+      public YoDouble getOutput()
+      {
+         return output;
       }
    }
 
