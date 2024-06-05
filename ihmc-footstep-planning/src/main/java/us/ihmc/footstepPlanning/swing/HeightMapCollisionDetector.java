@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.swing;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DReadOnly;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
