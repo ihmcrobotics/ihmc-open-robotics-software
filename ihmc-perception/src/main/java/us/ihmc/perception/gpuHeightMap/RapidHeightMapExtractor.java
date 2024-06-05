@@ -586,39 +586,46 @@ public class RapidHeightMapExtractor
       steppabilityConnectionsImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
    }
 
+   /**
+    * Destroys all objects and releases allocated memory.
+    * Should be called after {@link #initialize()}
+    */
    public void destroy()
    {
-      if (cropWindowRectangle != null) // this indicates everything was initialized, and should be destroyed
-      {
-         worldToGroundTransformBuffer.destroy(openCLManager);
-         groundToWorldTransformBuffer.destroy(openCLManager);
-         groundToSensorTransformBuffer.destroy(openCLManager);
-         sensorToGroundTransformBuffer.destroy(openCLManager);
-         groundPlaneBuffer.destroy(openCLManager);
+      yaw.destroy(openCLManager);
 
-         localHeightMapImage.destroy(openCLManager);
-         globalHeightMapImage.destroy(openCLManager);
-         globalHeightVarianceImage.destroy(openCLManager);
-         terrainCostImage.destroy(openCLManager);
-         contactMapImage.destroy(openCLManager);
+      parametersBuffer.destroy(openCLManager);
+      if (computeSteppability)
+         snappingParametersBuffer.destroy(openCLManager);
 
-         sensorCroppedHeightMapImage.destroy(openCLManager);
-         sensorCroppedContactMapImage.destroy(openCLManager);
-         sensorCroppedTerrainCostImage.destroy(openCLManager);
-         steppableRegionAssignmentMat.close();
-         steppableRegionRingMat.close();
+      worldToGroundTransformBuffer.destroy(openCLManager);
+      groundToWorldTransformBuffer.destroy(openCLManager);
+      groundToSensorTransformBuffer.destroy(openCLManager);
+      sensorToGroundTransformBuffer.destroy(openCLManager);
+      groundPlaneBuffer.destroy(openCLManager);
 
-         steppabilityImage.destroy(openCLManager);
-         snapHeightImage.destroy(openCLManager);
-         snapNormalXImage.destroy(openCLManager);
-         snapNormalYImage.destroy(openCLManager);
-         snapNormalZImage.destroy(openCLManager);
-         steppabilityConnectionsImage.destroy(openCLManager);
-         snappedAreaFractionImage.destroy(openCLManager);
+      localHeightMapImage.destroy(openCLManager);
+      globalHeightMapImage.destroy(openCLManager);
+      globalHeightVarianceImage.destroy(openCLManager);
+      terrainCostImage.destroy(openCLManager);
+      contactMapImage.destroy(openCLManager);
 
-         denoisedHeightMapImage.close();
-         cropWindowRectangle.close();
-      }
+      sensorCroppedHeightMapImage.destroy(openCLManager);
+      sensorCroppedContactMapImage.destroy(openCLManager);
+      sensorCroppedTerrainCostImage.destroy(openCLManager);
+      steppableRegionAssignmentMat.close();
+      steppableRegionRingMat.close();
+
+      steppabilityImage.destroy(openCLManager);
+      snapHeightImage.destroy(openCLManager);
+      snapNormalXImage.destroy(openCLManager);
+      snapNormalYImage.destroy(openCLManager);
+      snapNormalZImage.destroy(openCLManager);
+      steppabilityConnectionsImage.destroy(openCLManager);
+      snappedAreaFractionImage.destroy(openCLManager);
+
+      denoisedHeightMapImage.close();
+      cropWindowRectangle.close();
    }
 
    public boolean isProcessing()
