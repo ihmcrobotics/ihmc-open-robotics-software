@@ -501,7 +501,7 @@ public class RapidHeightMapExtractor
       double thicknessOfTheFoot = 0.02;
       double height = 0.0f;
 
-      if (footSoleFrames.sides().length > 0)
+      if (footSoleFrames.sides().length == 2)
       {
          height = Math.min(footSoleFrames.get(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ(),
                            footSoleFrames.get(RobotSide.RIGHT).getTransformToWorldFrame().getTranslationZ()) - thicknessOfTheFoot;
