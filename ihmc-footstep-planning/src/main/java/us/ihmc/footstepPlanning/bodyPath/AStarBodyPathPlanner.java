@@ -23,7 +23,7 @@ import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.perception.gpuHeightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;

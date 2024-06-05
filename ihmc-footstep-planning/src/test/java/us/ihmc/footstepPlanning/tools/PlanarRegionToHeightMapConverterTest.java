@@ -14,7 +14,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
-import us.ihmc.perception.gpuHeightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.util.ArrayList;
 import java.util.List;

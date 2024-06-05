@@ -11,6 +11,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.nio.ByteBuffer;
 

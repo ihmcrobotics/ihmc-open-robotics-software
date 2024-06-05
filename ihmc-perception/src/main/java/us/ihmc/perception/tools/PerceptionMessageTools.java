@@ -25,7 +25,7 @@ import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.perception.gpuHeightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.nio.ByteBuffer;
 import java.time.Instant;

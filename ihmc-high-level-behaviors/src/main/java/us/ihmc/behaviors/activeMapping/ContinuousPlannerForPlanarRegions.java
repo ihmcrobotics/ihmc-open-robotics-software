@@ -17,7 +17,7 @@ import us.ihmc.perception.mapping.PlanarRegionMap;
 import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.perception.gpuHeightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 public class ContinuousPlannerForPlanarRegions
 {

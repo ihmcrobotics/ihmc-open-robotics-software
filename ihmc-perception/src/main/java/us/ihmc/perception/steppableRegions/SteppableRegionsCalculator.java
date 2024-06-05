@@ -16,7 +16,7 @@ import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel
 import us.ihmc.robotEnvironmentAwareness.geometry.*;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.perception.gpuHeightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
 import java.util.ArrayList;
 import java.util.Comparator;
