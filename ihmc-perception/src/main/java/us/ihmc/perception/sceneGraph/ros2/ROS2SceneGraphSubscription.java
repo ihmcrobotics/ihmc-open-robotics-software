@@ -108,7 +108,7 @@ public class ROS2SceneGraphSubscription
             checkTreeModified(sceneGraph.getRootNode());
 
             if (!localTreeFrozen)
-               sceneGraph.getNextID().setValue(sceneGraphMessage.getNextId());
+               sceneGraph.getNextID().set(sceneGraphMessage.getNextId());
 
             sceneGraph.modifyTree(modificationQueue ->
             {
