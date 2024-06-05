@@ -29,8 +29,7 @@ public class IterativeClosestPointManager
    private final ROS2Helper ros2Helper;
    private final SceneGraph sceneGraph;
 
-   private final OpenCLManager openCLManager = new OpenCLManager();
-   private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor(openCLManager);
+   private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor();
 
    private final Random random = new Random(System.nanoTime());
    private final ConcurrentHashMap<Long, IterativeClosestPointWorker> nodeIDToWorkerMap = new ConcurrentHashMap<>();
@@ -127,8 +126,6 @@ public class IterativeClosestPointManager
    public void destroy()
    {
       workerThread.blockingStop();
-
-      openCLManager.destroy();
    }
 
    /**
