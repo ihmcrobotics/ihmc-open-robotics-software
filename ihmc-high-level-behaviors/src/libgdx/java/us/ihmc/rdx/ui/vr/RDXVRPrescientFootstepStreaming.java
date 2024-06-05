@@ -7,12 +7,9 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.log.LogTools;
 import us.ihmc.rdx.ui.affordances.RDXManualFootstepPlacement;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-
-import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.maxStepYaw;
 
 /**
  * Class responsible for streaming footstep placements based on VR tracker data.
@@ -20,12 +17,13 @@ import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerPar
  */
 public class RDXVRPrescientFootstepStreaming
 {
-   private static final double STEP_THRESHOLD = 0.05; // movement threshold
+   private static final double STEP_THRESHOLD = 0.08; // movement threshold
    private static final double LIFT_THRESHOLD = 0.02; // lift threshold
    private static final double STRIDE_LENGTH = 0.25; // fixed stride length in meters
    private static final double STABILITY_THRESHOLD = 0.005; // stability threshold
    private static final int STABILITY_ITERATIONS = 20; // Number of stable iterations
-   private static final int TURNING_THRESHOLD = 25; // Degrees variation for ankle tracker to trigger 45 deg turn on robot
+   private static final int TURNING_THRESHOLD = 20; // Degrees variation for ankle tracker to trigger 45 deg turn on robot
+   public static final int WAIT_TIME_AFTER_STEP = 500; // [ms] time to wait before restarting streaming
 
    private final ROS2SyncedRobotModel syncedRobot;
    private final RDXManualFootstepPlacement footstepPlacer;

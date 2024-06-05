@@ -1,14 +1,18 @@
 package us.ihmc.rdx.ui.vr;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.log.LogTools;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.motionRetargeting.VRTrackedSegmentType;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -20,6 +24,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
+import static us.ihmc.rdx.ui.vr.RDXVRKinematicsStreamingMode.FRAME_AXIS_GRAPHICS_LENGTH;
+import static us.ihmc.robotics.partNames.ArmJointName.SHOULDER_ROLL;
 
 /**
  * Class responsible for motion retargeting from VR tracked segments to a robot model.
@@ -51,7 +57,13 @@ public class RDXVRMotionRetargeting
    private final SideDependentList<Point3D> initialHandPositionsInWorld = new SideDependentList<>(null, null);
    private boolean controlArmsOnly = false;
    private boolean armScaling = false;
+   private boolean comTracking = false;
    private double armLengthScaleFactor = 1.0;
+   private final SideDependentList<RDXReferenceFrameGraphic> shoulderFrameGraphics = new SideDependentList<>();
+   private final SideDependentList<RDXReferenceFrameGraphic> scaledHandsFrameGraphics = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> shoulderFrames = new SideDependentList<>();
+   private final SideDependentList<ReferenceFrame> scaledHandFrames = new SideDependentList<>();
+   private final SideDependentList<RigidBodyTransform> shoulderToScaledHandTransforms = new SideDependentList<>();
 
    /**
     * Constructor for the motion retargeting class.
@@ -72,6 +84,13 @@ public class RDXVRMotionRetargeting
       this.controllerReferenceFrames = controllerReferenceFrames;
       this.trackerReferenceFrames = trackerReferenceFrames;
       this.headsetReferenceFrame = headsetReferenceFrame;
+
+      for (RobotSide side : RobotSide.values)
+      {
+         shoulderFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
+         scaledHandsFrameGraphics.put(side, new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH));
+         shoulderToScaledHandTransforms.put(side, new RigidBodyTransform());
+      }
    }
 
    /**
@@ -133,55 +152,66 @@ public class RDXVRMotionRetargeting
     */
    private void retargetCoM()
    {
-      if (trackerReferenceFrames.containsKey(WAIST.getSegmentName())
-          && trackerReferenceFrames.containsKey(LEFT_ANKLE.getSegmentName())
-          && trackerReferenceFrames.containsKey(RIGHT_ANKLE.getSegmentName()) && !controlArmsOnly)
+      if (comTracking)
       {
-         if (centerOfMassDesiredXYInWorld == null)
+         if (trackerReferenceFrames.containsKey(WAIST.getSegmentName()) && trackerReferenceFrames.containsKey(LEFT_ANKLE.getSegmentName())
+             && trackerReferenceFrames.containsKey(RIGHT_ANKLE.getSegmentName()) && !controlArmsOnly)
          {
-            centerOfMassDesiredXYInWorld = new Point3D();
-            centerOfMassDesiredXYInWorld.set(syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation());
+            if (centerOfMassDesiredXYInWorld == null)
+            {
+               centerOfMassDesiredXYInWorld = new Point3D();
+               centerOfMassDesiredXYInWorld.set(syncedRobot.getReferenceFrames().getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation());
+            }
+            // Fetch the current frames for left and right ankle
+            ReferenceFrame leftAnkleFrame = trackerReferenceFrames.get(LEFT_ANKLE.getSegmentName()).getReferenceFrame();
+            ReferenceFrame rightAnkleFrame = trackerReferenceFrames.get(RIGHT_ANKLE.getSegmentName()).getReferenceFrame();
+
+            // Get the waist tracker ground projection of the user (assuming this can approximate the ground projection of the center of mass)
+            Point3D waistTrackerXYInWorld = new Point3D(trackerReferenceFrames.get(WAIST.getSegmentName()).getReferenceFrame().getTransformToWorldFrame().getTranslation());
+            waistTrackerXYInWorld.setZ(0.0);
+
+            // Get the positions of the left and right foot on the ground
+            Point3D leftAnkleTrackerXYInWorld = new Point3D(leftAnkleFrame.getTransformToWorldFrame().getTranslation());
+            leftAnkleTrackerXYInWorld.setZ(0.0);
+            Point3D rightAnkleTrackerXYInWorld = new Point3D(rightAnkleFrame.getTransformToWorldFrame().getTranslation());
+            rightAnkleTrackerXYInWorld.setZ(0.0);
+
+            // Calculate the vector between the ankles (feet)
+            Vector3D virtualFeetVector = new Vector3D();
+            virtualFeetVector.sub(rightAnkleTrackerXYInWorld, leftAnkleTrackerXYInWorld);
+
+            // Project the waist tracker ground projection onto the line between the feet
+            Vector3D projectionVector = new Vector3D(waistTrackerXYInWorld);
+            projectionVector.sub(leftAnkleTrackerXYInWorld);
+            double dotProduct = projectionVector.dot(virtualFeetVector);
+            double normSqFeetVector = virtualFeetVector.lengthSquared();
+
+            // Calculate normalized offset along the line connecting the feet
+            double normalizedOffset = dotProduct / normSqFeetVector;
+            // Filter value
+            double filteredNormalizedOffset = normalizedOffset;
+            if (filteredNormalizedOffset >= 1.0)
+               filteredNormalizedOffset = 1.0;
+            else if (filteredNormalizedOffset <= 0.0)
+            {
+               filteredNormalizedOffset = 0.0;
+            }
+            //         else
+            //         { //logit function
+            //            filteredNormalizedOffset = 0.5- 0.1 * (Math.log10((1 - normalizedOffset) / normalizedOffset));
+            //         }
+
+            Point3D leftFootXYInWorld = new Point3D(syncedRobot.getFullRobotModel().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslation());
+            Point3D rightFootXYInWorld = new Point3D(syncedRobot.getFullRobotModel().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame().getTranslation());
+
+            // Reconstruct robot CoM based on the normalized offset and its feet position
+            Vector3D feetVector = new Vector3D();
+            feetVector.sub(rightFootXYInWorld, leftFootXYInWorld);
+
+            centerOfMassDesiredXYInWorld.set(feetVector);
+            centerOfMassDesiredXYInWorld.scale(filteredNormalizedOffset);
+            centerOfMassDesiredXYInWorld.add(leftFootXYInWorld);
          }
-         // Fetch the current frames for left and right ankle
-         ReferenceFrame leftAnkleFrame = trackerReferenceFrames.get(LEFT_ANKLE.getSegmentName()).getReferenceFrame();
-         ReferenceFrame rightAnkleFrame = trackerReferenceFrames.get(RIGHT_ANKLE.getSegmentName()).getReferenceFrame();
-
-         // Get the waist tracker ground projection of the user (assuming this can approximate the ground projection of the center of mass)
-         Point3D waistTrackerXYInWorld = new Point3D(trackerReferenceFrames.get(WAIST.getSegmentName()).getReferenceFrame().getTransformToWorldFrame().getTranslation());
-         waistTrackerXYInWorld.setZ(0.0);
-
-         // Get the positions of the left and right foot on the ground
-         Point3D leftAnkleTrackerXYInWorld = new Point3D(leftAnkleFrame.getTransformToWorldFrame().getTranslation());
-         leftAnkleTrackerXYInWorld.setZ(0.0);
-         Point3D rightAnkleTrackerXYInWorld = new Point3D(rightAnkleFrame.getTransformToWorldFrame().getTranslation());
-         rightAnkleTrackerXYInWorld.setZ(0.0);
-
-         // Calculate the vector between the ankles (feet)
-         Vector3D virtualFeetVector = new Vector3D();
-         virtualFeetVector.sub(rightAnkleTrackerXYInWorld, leftAnkleTrackerXYInWorld);
-
-         // Project the waist tracker ground projection onto the line between the feet
-         Vector3D projectionVector = new Vector3D(waistTrackerXYInWorld);
-         projectionVector.sub(leftAnkleTrackerXYInWorld);
-         double dotProduct = projectionVector.dot(virtualFeetVector);
-         double normSqFeetVector = virtualFeetVector.lengthSquared();
-
-         // Calculate normalized offset along the line connecting the feet
-         double normalizedOffset = dotProduct / normSqFeetVector;
-         if (normalizedOffset > 1.0)
-            normalizedOffset = 1.0;
-         else if (normalizedOffset < 0.0)
-            normalizedOffset = 0.0;
-         Point3D leftFootXYInWorld = new Point3D(syncedRobot.getFullRobotModel().getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslation());
-         Point3D rightFootXYInWorld = new Point3D(syncedRobot.getFullRobotModel().getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame().getTranslation());
-
-         // Reconstruct robot CoM based on the normalized offset and its feet position
-         Vector3D feetVector = new Vector3D();
-         feetVector.sub(rightFootXYInWorld, leftFootXYInWorld);
-
-         centerOfMassDesiredXYInWorld.set(feetVector);
-         centerOfMassDesiredXYInWorld.scale(normalizedOffset);
-         centerOfMassDesiredXYInWorld.add(leftFootXYInWorld);
       }
    }
 
@@ -203,59 +233,57 @@ public class RDXVRMotionRetargeting
             Point3D chestTrackerPosition = new Point3D(chestTrackerFrame.getTransformToWorldFrame().getTranslation());
             Point3D headsetPosition = new Point3D(headsetFrame.getTransformToWorldFrame().getTranslation());
 
-            // Calculate Z offset as the midpoint between the chest and headset positions
-            double shoulderOffsetZ = (headsetPosition.getZ() - chestTrackerPosition.getZ()) / 2.0;
-            // Calculate head length based on the sternum to headset distance
-            double distanceChestToHeadset = chestTrackerPosition.distance(headsetPosition);
-            double headLength = distanceChestToHeadset / 1.5;
-            // The Y offset for the shoulders is equal to the head length
-            double shoulderOffsetY = headLength;
-
-            // Calculate the shoulder offsets in world frame
-            Point3D leftShoulderOffsetInChestFrame = new Point3D(0.0, shoulderOffsetY, shoulderOffsetZ);
-            Point3D rightShoulderOffsetInChestFrame = new Point3D(0.0, -shoulderOffsetY, shoulderOffsetZ);
-            RigidBodyTransform chestTransformToWorld = chestTrackerFrame.getTransformToWorldFrame();
-            Point3D leftShoulderOffsetInWorld = new Point3D();
-            chestTransformToWorld.transform(leftShoulderOffsetInChestFrame, leftShoulderOffsetInWorld);
-            Point3D rightShoulderOffsetInWorld = new Point3D();
-            chestTransformToWorld.transform(rightShoulderOffsetInChestFrame, rightShoulderOffsetInWorld);
-
-            // Calculate shoulder positions in world frame
-            Point3D leftShoulderPosition = new Point3D(chestTrackerPosition);
-            leftShoulderPosition.add(leftShoulderOffsetInWorld);
-            Point3D rightShoulderPosition = new Point3D(chestTrackerPosition);
-            rightShoulderPosition.add(rightShoulderOffsetInWorld);
-
             // Scale the controller reference frames
             for (RobotSide side : RobotSide.values())
             {
-               String handSegmentName = side == RobotSide.LEFT ? LEFT_HAND.getSegmentName() : RIGHT_HAND.getSegmentName();
-               ReferenceFrame handFrame = trackerReferenceFrames.get(handSegmentName).getReferenceFrame();
-               Point3D shoulderPosition = side == RobotSide.LEFT ? leftShoulderPosition : rightShoulderPosition;
+               ReferenceFrame handFrame = controllerReferenceFrames.get(side).getReferenceFrame();
                if (initialHandPositionsInWorld.get(side) == null)
                {
+                  // Calculate Z offset as the midpoint between the chest and headset positions
+                  double shoulderOffsetZ = (headsetPosition.getZ() - chestTrackerPosition.getZ()) / 2.0;
+                  // Calculate head length based on the sternum to headset distance
+                  double distanceChestToHeadset = chestTrackerPosition.distance(headsetPosition);
+                  double headLength = distanceChestToHeadset / 1.5;
+                  // The Y offset for the shoulders is equal to the head length
+                  double shoulderOffsetY = headLength;
+
+                  // Create the shoulder frame
+                  RigidBodyTransform shoulderToChestTransform = new RigidBodyTransform(new YawPitchRoll(), new Point3D(0.0, side.negateIfRightSide(shoulderOffsetY), shoulderOffsetZ));
+                  shoulderFrames.put(side, ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(chestTrackerFrame, shoulderToChestTransform));
+                  shoulderFrameGraphics.get(side).setToReferenceFrame(shoulderFrames.get(side));
+                  scaledHandFrames.put(side,
+
+                                       ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(shoulderFrames.get(side),
+                                                                                                              shoulderToScaledHandTransforms.get(side)));
+
                   initialHandPositionsInWorld.put(side, new Point3D(handFrame.getTransformToWorldFrame().getTranslation()));
                   // Calculate initial user arm length
-                  Vector3D initialArmVector = new Vector3D();
-                  initialArmVector.sub(initialHandPositionsInWorld.get(side), shoulderPosition);
-                  double initialArmLength = initialArmVector.norm();
-
+                  double userArmLength = shoulderFrames.get(side).getTransformToWorldFrame().getTranslationZ() - initialHandPositionsInWorld.get(side).getZ();
                   // Scale factor for arm length
                   double robotArmLength = retargetingParameters.getArmLength();
-                  armLengthScaleFactor = robotArmLength / initialArmLength;
+                  armLengthScaleFactor = robotArmLength / userArmLength;
                }
 
+               Vector3DReadOnly shoulderPosition = shoulderFrames.get(side).getTransformToWorldFrame().getTranslation();
                // Compute scaled hand position
                Vector3D scaledArmVector = new Vector3D();
                scaledArmVector.sub(handFrame.getTransformToWorldFrame().getTranslation(), shoulderPosition);
                scaledArmVector.scale(armLengthScaleFactor);
-               Point3D scaledHandPosition = new Point3D(shoulderPosition);
-               scaledHandPosition.add(scaledArmVector);
+
+               shoulderToScaledHandTransforms.get(side).getTranslation().set(scaledArmVector);
+               RotationMatrixReadOnly controllerOrientation = controllerReferenceFrames.get(side)
+                                                                                       .getReferenceFrame()
+                                                                                       .getTransformToDesiredFrame(scaledHandFrames.get(side).getParent())
+                                                                                       .getRotation();
+               shoulderToScaledHandTransforms.get(side).getRotation().set(controllerOrientation);
+               scaledHandFrames.get(side).update();
+
+               // Update graphics
+               shoulderFrameGraphics.get(side).setToReferenceFrame(shoulderFrames.get(side));
+               scaledHandsFrameGraphics.get(side).setToReferenceFrame(scaledHandFrames.get(side));
 
                // Set desired frame for hand
-               FramePose3D desiredHandPose = new FramePose3D(ReferenceFrame.getWorldFrame(), handFrame.getTransformToWorldFrame());
-               desiredHandPose.getTranslation().set(scaledHandPosition);
-               retargetedFrames.put(side == RobotSide.LEFT ? LEFT_HAND : RIGHT_HAND, ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), desiredHandPose));
+               retargetedFrames.put(side == RobotSide.LEFT ? LEFT_HAND : RIGHT_HAND, scaledHandFrames.get(side));
             }
          }
       }
@@ -269,6 +297,11 @@ public class RDXVRMotionRetargeting
    public void setArmScaling(boolean armScaling)
    {
       this.armScaling = armScaling;
+   }
+
+   public void setCoMTracking(boolean comTracking)
+   {
+      this.comTracking = comTracking;
    }
 
    public void reset()
@@ -303,5 +336,15 @@ public class RDXVRMotionRetargeting
    public boolean isRetargetingNotNeeded(VRTrackedSegmentType segment)
    {
       return UNCHANGED_TRACKER_REFERENCES.contains(segment);
+   }
+
+   public RDXReferenceFrameGraphic getShoulderGraphic(RobotSide side)
+   {
+      return shoulderFrameGraphics.get(side);
+   }
+
+   public RDXReferenceFrameGraphic getScaledHandGraphic(RobotSide side)
+   {
+      return scaledHandsFrameGraphics.get(side);
    }
 }
