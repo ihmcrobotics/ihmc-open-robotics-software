@@ -41,6 +41,7 @@ public class RDXVRModeManager
    private RDX3DSituatedImGuiPanel vrModeControls3DPanel;
    private final FramePose3D vrModeControls3DPanelPose = new FramePose3D();
    private RDXROS2RobotVisualizer robotVisualizer;
+   private boolean wasStreamingWithStereo = false;
 
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
@@ -139,15 +140,21 @@ public class RDXVRModeManager
       vrModeControls.update();
 
       // fade robot graphics if in stereo vision mode
-      if (kinematicsStreamingMode.isStreaming() && stereoVision.isEnabled())
+      boolean streamingWithStereo = kinematicsStreamingMode.isStreaming() && stereoVision.isEnabled();
+      boolean changed = streamingWithStereo != wasStreamingWithStereo;
+      wasStreamingWithStereo = streamingWithStereo;
+      if (changed)
       {
-         kinematicsStreamingMode.visualizeIKPreviewGraphic(false);
-         robotVisualizer.fadeVisuals(0.0f, 0.01f);
-      }
-      else
-      {
-         kinematicsStreamingMode.visualizeIKPreviewGraphic(true);
-         robotVisualizer.fadeVisuals(1.0f, 0.01f);
+         if (streamingWithStereo)
+         {
+            kinematicsStreamingMode.visualizeIKPreviewGraphic(false);
+            robotVisualizer.fadeVisuals(0.0f, 0.01f);
+         }
+         else
+         {
+            kinematicsStreamingMode.visualizeIKPreviewGraphic(true);
+            robotVisualizer.fadeVisuals(1.0f, 0.01f);
+         }
       }
    }
 

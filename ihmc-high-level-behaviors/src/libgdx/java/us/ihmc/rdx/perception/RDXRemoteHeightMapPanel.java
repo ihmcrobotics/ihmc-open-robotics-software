@@ -6,7 +6,7 @@ import org.bytedeco.javacpp.BytePointer;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapStateRequestMessage;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.perception.gpuHeightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.perception.heightMap.HeightMapAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -77,7 +77,8 @@ public class RDXRemoteHeightMapPanel
          {
             int row = size - x - 1;
             int col = size - y - 1;
-            Color color = HeightMapTools.computeGDXColorFromHeight(heightMapData.getHeightAt(x, y));
+            double[] redGreenBlue = HeightMapTools.getRedGreenBlue(heightMapData.getHeightAt(x, y));
+            Color color = new Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f);
             BytePointer pixel = heightMapPanel.getImage().ptr(row, col);
             int r = (int) (color.r * 255);
             int g = (int) (color.g * 255);

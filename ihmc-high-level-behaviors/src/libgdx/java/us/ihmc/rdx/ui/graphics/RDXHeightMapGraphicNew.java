@@ -17,7 +17,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
-import us.ihmc.perception.gpuHeightMap.HeightMapTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -150,13 +150,15 @@ public class RDXHeightMapGraphicNew implements RenderableProvider
             Point3D bottomRight = new Point3D();
 
             // Take each vertex and create a 2cm polygon where the vertex is in the center
+            double halfWidth = gridResolutionXY / 2.0;
             Point3DReadOnly vertexCenter = vertices[xIndex][yIndex];
-            topLeft.set(vertexCenter.getX() + 0.01, vertexCenter.getY() + 0.01, vertexCenter.getZ());
-            topRight.set(vertexCenter.getX() - 0.01, vertexCenter.getY() + 0.01, vertexCenter.getZ());
-            bottomLeft.set(vertexCenter.getX() - 0.01, vertexCenter.getY() - 0.01, vertexCenter.getZ());
-            bottomRight.set(vertexCenter.getX() + 0.01, vertexCenter.getY() - 0.01, vertexCenter.getZ());
+            topLeft.set(vertexCenter.getX() + halfWidth, vertexCenter.getY() + halfWidth, vertexCenter.getZ());
+            topRight.set(vertexCenter.getX() - halfWidth, vertexCenter.getY() + halfWidth, vertexCenter.getZ());
+            bottomLeft.set(vertexCenter.getX() - halfWidth, vertexCenter.getY() - halfWidth, vertexCenter.getZ());
+            bottomRight.set(vertexCenter.getX() + halfWidth, vertexCenter.getY() - halfWidth, vertexCenter.getZ());
 
-            Color color = HeightMapTools.computeGDXColorFromHeight(0.5 * (vertexCenter.getZ()));
+            double[] redGreenBlue = HeightMapTools.getRedGreenBlue(vertexCenter.getZ());
+            Color color = new Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f);
 
             meshBuilder.addPolygon(Arrays.asList(topLeft, topRight, bottomLeft, bottomRight), color);
             currentIndexForMeshBuilder++;

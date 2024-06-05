@@ -3,10 +3,7 @@ package us.ihmc.perception.opencl;
 import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencl.global.OpenCL;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Point;
-import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.RawImage;
@@ -14,27 +11,16 @@ import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
 public class OpenCLDepthImageSegmenter
 {
-   private final OpenCLManager openCLManager;
-   private final _cl_program openCLProgram;
-   private final _cl_kernel kernel;
+   private final OpenCLManager openCLManager = new OpenCLManager();
+   private final _cl_program openCLProgram = openCLManager.loadProgram("SegmentDepthImage", "PerceptionCommon.cl");
+   private final _cl_kernel kernel = openCLManager.createKernel(openCLProgram, "segmentDepthImage");
    private final OpenCLFloatParameters parametersBuffer = new OpenCLFloatParameters();
    private final OpenCLRigidBodyTransformParameter depthToMaskTransformParameter = new OpenCLRigidBodyTransformParameter();
-   private BytedecoImage bytedecoDepthImage;
-   private BytedecoImage bytedecoMaskImage;
-   private BytedecoImage bytedecoSegmentedDepth;
 
    private final MutableReferenceFrame depthFrame = new MutableReferenceFrame();
    private final MutableReferenceFrame maskFrame = new MutableReferenceFrame();
    private final RigidBodyTransform depthToMaskTransform = new RigidBodyTransform();
 
-   public OpenCLDepthImageSegmenter(OpenCLManager openCLManager)
-   {
-      this.openCLManager = openCLManager;
-      openCLProgram = openCLManager.loadProgram("SegmentDepthImage", "PerceptionCommon.cl");
-      kernel = openCLManager.createKernel(openCLProgram, "segmentDepthImage");
-   }
-
-   // TODO: Add mask to depth transform so we can use YOLO with other cameras besides ZED
    public RawImage removeBackground(RawImage depthImage, RawImage imageMask)
    {
       depthImage.get();
@@ -57,21 +43,15 @@ public class OpenCLDepthImageSegmenter
       parametersBuffer.setParameter(imageMask.getFocalLengthY());
       parametersBuffer.writeOpenCLBufferObject(openCLManager);
 
-      if (bytedecoDepthImage != null)
-         bytedecoDepthImage.destroy(openCLManager);
-      bytedecoDepthImage = new BytedecoImage(depthImage.getCpuImageMat());
+      BytedecoImage bytedecoDepthImage = new BytedecoImage(depthImage.getCpuImageMat());
       bytedecoDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
       bytedecoDepthImage.writeOpenCLImage(openCLManager);
 
-      if (bytedecoMaskImage != null)
-         bytedecoMaskImage.destroy(openCLManager);
-      bytedecoMaskImage = new BytedecoImage(imageMask.getCpuImageMat());
+      BytedecoImage bytedecoMaskImage = new BytedecoImage(imageMask.getCpuImageMat());
       bytedecoMaskImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
       bytedecoMaskImage.writeOpenCLImage(openCLManager);
 
-      if (bytedecoSegmentedDepth != null)
-         bytedecoSegmentedDepth.destroy(openCLManager);
-      bytedecoSegmentedDepth = new BytedecoImage(depthImage.getImageWidth(), depthImage.getImageHeight(), depthImage.getOpenCVType());
+      BytedecoImage bytedecoSegmentedDepth = new BytedecoImage(depthImage.getImageWidth(), depthImage.getImageHeight(), depthImage.getOpenCVType());
       bytedecoSegmentedDepth.createOpenCLImage(openCLManager, OpenCL.CL_MEM_WRITE_ONLY);
 
       openCLManager.setKernelArgument(kernel, 0, bytedecoDepthImage.getOpenCLImageObject());
@@ -83,15 +63,20 @@ public class OpenCLDepthImageSegmenter
       openCLManager.execute2D(kernel, depthImage.getImageWidth(), depthImage.getImageHeight());
 
       bytedecoSegmentedDepth.readOpenCLImage(openCLManager);
+      Mat segmentedDepthImageMat = bytedecoSegmentedDepth.getBytedecoOpenCVMat().clone();
 
+      bytedecoDepthImage.destroy(openCLManager);
+      bytedecoMaskImage.destroy(openCLManager);
+      bytedecoSegmentedDepth.destroy(openCLManager);
       depthImage.release();
       imageMask.release();
+
       return new RawImage(depthImage.getSequenceNumber(),
                           depthImage.getAcquisitionTime(),
                           depthImage.getImageWidth(),
                           depthImage.getImageHeight(),
                           depthImage.getDepthDiscretization(),
-                          bytedecoSegmentedDepth.getBytedecoOpenCVMat(),
+                          segmentedDepthImageMat,
                           null,
                           depthImage.getOpenCVType(),
                           depthImage.getFocalLengthX(),
@@ -104,14 +89,9 @@ public class OpenCLDepthImageSegmenter
 
    public void destroy()
    {
-      if (bytedecoDepthImage != null)
-         bytedecoDepthImage.destroy(openCLManager);
-      if (bytedecoMaskImage != null)
-         bytedecoMaskImage.destroy(openCLManager);
-      if (bytedecoSegmentedDepth != null)
-         bytedecoSegmentedDepth.destroy(openCLManager);
-
-      openCLProgram.close();
+      System.out.println("Destroying " + getClass().getSimpleName());
       kernel.close();
+      openCLProgram.close();
+      System.out.println("Destroyed " + getClass().getSimpleName());
    }
 }

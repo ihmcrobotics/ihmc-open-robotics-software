@@ -125,7 +125,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(WalkingControllerFailureStatusMessage.class, robotModel.getSimpleRobotName()),
                                       message -> terrainPlanningDebugger.reset());
 
-      LogTools.info("Continuous Walking Parameters Save File " + continuousHikingParameters.findSaveFileDirectory().toString());
+      LogTools.info("Continuous Hiking Parameters Save File " + continuousHikingParameters.findSaveFileDirectory().toString());
       continuousPlanningParametersTuner.create(continuousHikingParameters, false);
    }
 
@@ -176,6 +176,10 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    public void renderImGuiWidgets()
    {
+      ImGui.text("The ContinuousHikingProcess must be running");
+      ImGui.text("And the enabled checkbox must be checked");
+      ImGui.text("By holding CTRL the robot will walk forward");
+      ImGui.separator();
       continuousPlanningParametersTuner.renderImGuiWidgets();
 
       ImGui.checkbox("Render", renderEnabled);

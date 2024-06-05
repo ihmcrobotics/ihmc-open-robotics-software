@@ -36,7 +36,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 /**
- * Following the paper titled: ""Humanoid Momentum Estimation Using Sensed Contact Wrenches".
+ * Following the paper titled: "Humanoid Momentum Estimation Using Sensed Contact Wrenches".
  */
 public class WrenchBasedMomentumStateUpdater implements MomentumStateUpdater
 {
