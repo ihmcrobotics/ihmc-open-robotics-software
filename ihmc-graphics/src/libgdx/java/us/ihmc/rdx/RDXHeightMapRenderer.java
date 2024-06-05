@@ -126,7 +126,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
             intermediateVertexBuffer[vertexIndex + 2] = zPosition;
 
             // Color (0.0 to 1.0)
-            double[] redGreenBlue = HeightMapTools.getRedGreenBlue(height);
+            double[] redGreenBlue = HeightMapTools.getRedGreenBlue(zPosition);
             Color color = new Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f);
             intermediateVertexBuffer[vertexIndex + 3] = color.r;
             intermediateVertexBuffer[vertexIndex + 4] = color.g;
