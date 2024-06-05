@@ -588,7 +588,37 @@ public class RapidHeightMapExtractor
 
    public void destroy()
    {
-      // TODO What do we need to destroy in here?
+      if (cropWindowRectangle != null) // this indicates everything was initialized, and should be destroyed
+      {
+         worldToGroundTransformBuffer.destroy(openCLManager);
+         groundToWorldTransformBuffer.destroy(openCLManager);
+         groundToSensorTransformBuffer.destroy(openCLManager);
+         sensorToGroundTransformBuffer.destroy(openCLManager);
+         groundPlaneBuffer.destroy(openCLManager);
+
+         localHeightMapImage.destroy(openCLManager);
+         globalHeightMapImage.destroy(openCLManager);
+         globalHeightVarianceImage.destroy(openCLManager);
+         terrainCostImage.destroy(openCLManager);
+         contactMapImage.destroy(openCLManager);
+
+         sensorCroppedHeightMapImage.destroy(openCLManager);
+         sensorCroppedContactMapImage.destroy(openCLManager);
+         sensorCroppedTerrainCostImage.destroy(openCLManager);
+         steppableRegionAssignmentMat.close();
+         steppableRegionRingMat.close();
+
+         steppabilityImage.destroy(openCLManager);
+         snapHeightImage.destroy(openCLManager);
+         snapNormalXImage.destroy(openCLManager);
+         snapNormalYImage.destroy(openCLManager);
+         snapNormalZImage.destroy(openCLManager);
+         steppabilityConnectionsImage.destroy(openCLManager);
+         snappedAreaFractionImage.destroy(openCLManager);
+
+         denoisedHeightMapImage.close();
+         cropWindowRectangle.close();
+      }
    }
 
    public boolean isProcessing()
