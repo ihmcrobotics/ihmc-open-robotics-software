@@ -54,12 +54,11 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
    private final StancePoseCalculator stancePoseCalculator;
    private final FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-   private ImGui3DViewInput latestInput;
 
-   private boolean placed = false;
+   private boolean clickedToPlaceStancePose = false;
    private boolean selectionActive = false;
    private final ImBoolean calculateStancePose = new ImBoolean(false);
-   private final RDXStoredPropertySetTuner stancePoseCalculaterParametersTuner = new RDXStoredPropertySetTuner("Stance Pose Parameters");
+   private final RDXStoredPropertySetTuner stancePoseCalculatorParametersTuner = new RDXStoredPropertySetTuner("Stance Pose Parameters");
 
    private final ROS2Helper ros2Helper;
 
@@ -69,7 +68,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       setRenderMethod(this::renderImGuiWidgets);
       this.stancePoseCalculator = stancePoseCalculator;
 
-      stancePoseCalculaterParametersTuner.create(stancePoseCalculator.getStancePoseParameters());
+      stancePoseCalculatorParametersTuner.create(stancePoseCalculator.getStancePoseParameters());
 
       this.ros2Helper = ros2Helper;
 
@@ -89,16 +88,6 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
    {
       environmentHandler.setHeightMap(heightMapData);
       environmentHandler.setTerrainMapData(terrainMapData);
-
-      boolean panel3DIsHovered = latestInput != null && latestInput.isWindowHovered();
-      if (calculateStancePose.get() && panel3DIsHovered && ImGui.isKeyPressed('P'))
-      {
-         selectionActive = true;
-      }
-      if (ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
-      {
-         selectionActive = false;
-      }
       
       updatePoses();
    }
@@ -126,8 +115,8 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
             {
                for (int i = 0; i < leftPoses.size(); i++)
                {
-                  leftSpheres.add(RDXModelBuilder.createSphere(0.015f, Color.WHITE));
-                  rightSpheres.add(RDXModelBuilder.createSphere(0.015f, Color.BLACK));
+                  leftSpheres.add(RDXModelBuilder.createSphere(0.01f, Color.WHITE));
+                  rightSpheres.add(RDXModelBuilder.createSphere(0.01f, Color.BLACK));
                }
             }
 
@@ -144,8 +133,6 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
    {
-      latestInput = input;
-
       Point3DReadOnly pickPointInWorld = input.getPickPointInWorld();
       latestPickPoint.getTranslation().set(pickPointInWorld);
 
@@ -171,7 +158,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
 
       if (input.isWindowHovered() & input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left) && calculateStancePose.get())
       {
-         if (!placed)
+         if (!clickedToPlaceStancePose)
             setGoalFootsteps();
          selectionActive = false;
       }
@@ -192,11 +179,22 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       MessageTools.packPoseListMessage(poses, poseListMessage);
 
       ros2Helper.publish(ContinuousWalkingAPI.PLACED_GOAL_FOOTSTEPS, poseListMessage);
-      placed = true;
+      clickedToPlaceStancePose = true;
    }
 
    public void renderImGuiWidgets()
    {
+
+      // Allow for visualizing the stance pose grid
+      if (calculateStancePose.get() && ImGui.isKeyPressed('P'))
+      {
+         selectionActive = true;
+      }
+      if (ImGui.isKeyPressed(ImGuiTools.getEscapeKey()))
+      {
+         selectionActive = false;
+      }
+
       TerrainMapData terrainMapData = environmentHandler.getTerrainMapData();
       if (ImGui.button("Print Contact Map"))
       {
@@ -215,7 +213,10 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       }
 
       ImGui.checkbox(labels.get("Calculate Stance Pose"), calculateStancePose);
-      stancePoseCalculaterParametersTuner.renderImGuiWidgets();
+      if (ImGui.collapsingHeader(labels.get("Stance Pose Parameters")))
+      {
+         stancePoseCalculatorParametersTuner.renderImGuiWidgets();
+      }
    }
 
    @Override
@@ -245,16 +246,8 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
       footstepGraphics.get(RobotSide.LEFT).destroy();
       footstepGraphics.get(RobotSide.RIGHT).destroy();
       pickPointSphere = null;
-
-      for (ModelInstance leftSphere : leftSpheres)
-      {
-         leftSphere = null;
-      }
-
-      for (ModelInstance rightSphere : rightSpheres)
-      {
-         rightSphere = null;
-      }
+      leftSpheres.clear();
+      rightSpheres.clear();
    }
 
    public boolean isSelectionActive()

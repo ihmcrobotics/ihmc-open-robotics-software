@@ -97,7 +97,10 @@ public class StancePoseCalculator
             leftPose.setZ(heightLeft);
             rightPose.setZ(heightRight);
 
-            if (cost < minCost)
+            // In order to not jump back and forth between two good poses, only accept a pose if its at least epsilon better for the cost
+            double epsilon = 0.02;
+            double difference = Math.abs(cost - minCost);
+            if (cost < minCost && difference > epsilon)
             {
                minCost = cost;
                bestFramePoses.get(RobotSide.LEFT).set(leftPose);
@@ -111,12 +114,14 @@ public class StancePoseCalculator
    {
       for (RobotSide side : RobotSide.values)
       {
-         snapToEnvironment(environmentHandler, bestFramePoses.get(side), footPolygons.get(side));
+         snapToEnvironment(environmentHandler, bestFramePoses.get(side), side);
       }
    }
 
-   private void snapToEnvironment(FootstepPlannerEnvironmentHandler environmentHandler, FramePose3D poseToSnap, ConvexPolygon2D footPolygon)
+   private void snapToEnvironment(FootstepPlannerEnvironmentHandler environmentHandler, FramePose3D poseToSnap, RobotSide side)
    {
+      // Transform the polygon to be surrounding the pose we want to step on
+      ConvexPolygon2D footPolygon = new ConvexPolygon2D(footPolygons.get(side));
       footPolygon.applyTransform(poseToSnap);
 
       RigidBodyTransform snapTransform = heightMapPolygonSnapper.snapPolygonToHeightMap(footPolygon, environmentHandler, 0.05, Math.toRadians(45.0));
