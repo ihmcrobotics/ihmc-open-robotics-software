@@ -108,8 +108,11 @@ public class ZEDColorDepthImagePublisher
             newCutOutDepthImageAvailable.await();
          }
 
-         ros2CutOutDepthImagePublisher.publish(createDepthImageMessage(nextCutOutDepthImage));
-         lastCutOutDepthSequenceNumber = nextCutOutDepthImage.getSequenceNumber();
+         if (nextCutOutDepthImage != null)
+         {
+            ros2CutOutDepthImagePublisher.publish(createDepthImageMessage(nextCutOutDepthImage));
+            lastCutOutDepthSequenceNumber = nextCutOutDepthImage.getSequenceNumber();
+         }
       }
       catch (InterruptedException interruptedException)
       {

@@ -7,14 +7,11 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.*;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.subscribers.FilteredNotification;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -35,6 +32,7 @@ import us.ihmc.rdx.ui.teleoperation.RDXLegControlMode;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.tools.Timer;
 
 /**
@@ -100,7 +98,6 @@ public class RDXLocomotionManager
    public RDXLocomotionManager(DRCRobotModel robotModel,
                                CommunicationHelper communicationHelper,
                                ROS2SyncedRobotModel syncedRobot,
-                               ROS2ControllerHelper ros2Helper,
                                ControllerStatusTracker controllerStatusTracker,
                                RDXPanel teleoperationPanel)
    {
@@ -133,14 +130,6 @@ public class RDXLocomotionManager
                                                  bodyPathPlannerParameters,
                                                  swingFootPlannerParameters);
       interactableFootstepPlan = new RDXInteractableFootstepPlan(controllerStatusTracker);
-
-      // TODO remove ros from this module, and have it call from the higher level.
-      ros2Helper.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, heightMap ->
-      {
-         footstepPlanning.setHeightMapData(heightMap);
-         interactableFootstepPlan.setHeightMapMessage(heightMap);
-      });
-
       controllerFootstepQueueGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
    }
 
@@ -520,7 +509,7 @@ public class RDXLocomotionManager
       }
    }
 
-   public void setHeightMapData(HeightMapMessage heightMapData)
+   public void setHeightMapData(HeightMapData heightMapData)
    {
       footstepPlanning.setHeightMapData(heightMapData);
       interactableFootstepPlan.setHeightMapMessage(heightMapData);
