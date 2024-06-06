@@ -21,6 +21,9 @@ public interface FeedbackControllerSettings
 
    /**
     * Gets the filter to apply to the error velocity of a 1-DoF joint.
+    * <p>
+    * Look at {@link FeedbackControllerFilterFactory} for default filter implementations.
+    * </p>
     *
     * @param jointName the name of the 1-DoF joint to which the filter is to be applied.
     * @param dt        the time step of the controller.
@@ -34,6 +37,9 @@ public interface FeedbackControllerSettings
 
    /**
     * Gets the filter to apply to the error in angular velocity for an end-effector.
+    * <p>
+    * Look at {@link FeedbackControllerFilterFactory} for default filter implementations.
+    * </p>
     *
     * @param endEffectorName the name of the end-effector to which the filter is to be applied.
     *                        Note that for the center of mass feedback controller, use the following {@code String}:
@@ -49,6 +55,9 @@ public interface FeedbackControllerSettings
 
    /**
     * Gets the filter to apply to the error in linear velocity for an end-effector.
+    * <p>
+    * Look at {@link FeedbackControllerFilterFactory} for default filter implementations.
+    * </p>
     *
     * @param endEffectorName the name of the end-effector to which the filter is to be applied.
     *                        Note that for the center of mass feedback controller, use the following {@code String}:

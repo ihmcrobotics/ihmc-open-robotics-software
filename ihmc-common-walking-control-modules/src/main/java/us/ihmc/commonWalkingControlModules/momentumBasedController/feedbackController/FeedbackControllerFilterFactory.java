@@ -19,57 +19,159 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FeedbackControllerFilterFactory
 {
+   /**
+    * Creates a low-pass filter for a 1-DoF joint velocity error.
+    *
+    * @param jointName      the name of the joint to which the filter is to be applied.
+    * @param breakFrequency the break frequency of the low-pass filter.
+    * @param dt             the time step of the controller.
+    * @param registry       the registry to which the filter variables are to be added.
+    * @return the low-pass filter to apply to the error velocity.
+    */
    public static FilterDouble1D createVelocity1DErrorLPFFilter(String jointName, DoubleProvider breakFrequency, double dt, YoRegistry registry)
    {
       return new YoLPFilterDouble1D(jointName + "VelocityErrorLPF", breakFrequency, dt, registry);
    }
 
+   /**
+    * Creates a low-pass filter for the error in angular velocity for an end-effector.
+    *
+    * @param endEffectorName the name of the end-effector to which the filter is to be applied.
+    * @param breakFrequency  the break frequency of the low-pass filter.
+    * @param dt              the time step of the controller.
+    * @param registry        the registry to which the filter variables are to be added.
+    * @return the low-pass filter to apply to the error velocity.
+    */
    public static FilterVector3D createAngularVelocityErrorLPFFilter(String endEffectorName, DoubleProvider breakFrequency, double dt, YoRegistry registry)
    {
       return new YoLPFilterVector3D(endEffectorName + "AngularVelocityErrorLPF", breakFrequency, dt, registry);
    }
 
+   /**
+    * Creates a low-pass filter for the error in linear velocity for an end-effector.
+    *
+    * @param endEffectorName the name of the end-effector to which the filter is to be applied.
+    * @param breakFrequency  the break frequency of the low-pass filter.
+    * @param dt              the time step of the controller.
+    * @param registry        the registry to which the filter variables are to be added.
+    * @return the low-pass filter to apply to the error velocity.
+    */
    public static FilterVector3D createLinearVelocityErrorLPFFilter(String endEffectorName, DoubleProvider breakFrequency, double dt, YoRegistry registry)
    {
       return new YoLPFilterVector3D(endEffectorName + "LinearVelocityErrorLPF", breakFrequency, dt, registry);
    }
 
+   /**
+    * Creates a High-Pass Rate-Limited (HPRL) filter for a 1-DoF joint velocity error.
+    * <p>
+    * The filter is based on the following paper: "Torque-Based Dynamic Walking - A Long Way from Simulation to Experiment" by Englsberger et al.
+    * </p>
+    *
+    * @param jointName  the name of the joint to which the filter is to be applied.
+    * @param parameters the parameters for the filter.
+    * @param dt         the time step of the controller.
+    * @param registry   the registry to which the filter variables are to be added.
+    * @return the HPRL filter to apply to the error velocity.
+    */
    public static FilterDouble1D createVelocity1DErrorHPRLFilter(String jointName, YoHPRLParameters parameters, double dt, YoRegistry registry)
    {
       parameters.setRegistryLazy(registry);
       return new YoHPRLFilterDouble1D(jointName + "VelocityErrorHPRL", parameters, dt, registry);
    }
 
+   /**
+    * Creates a High-Pass Rate-Limited (HPRL) filter for the error in angular velocity for an end-effector.
+    * <p>
+    * The filter is based on the following paper: "Torque-Based Dynamic Walking - A Long Way from Simulation to Experiment" by Englsberger et al.
+    * </p>
+    *
+    * @param endEffectorName the name of the end-effector to which the filter is to be applied.
+    * @param parameters      the parameters for the filter.
+    * @param dt              the time step of the controller.
+    * @param registry        the registry to which the filter variables are to be added.
+    * @return the HPRL filter to apply to the error velocity.
+    */
    public static FilterVector3D createAngularVelocityErrorHPRLFilter(String endEffectorName, YoHPRLParameters parameters, double dt, YoRegistry registry)
    {
       parameters.setRegistryLazy(registry);
       return new YoHPRLFilterVector3D(endEffectorName + "AngularVelocityErrorHPRL", parameters, dt, registry);
    }
 
+   /**
+    * Creates a High-Pass Rate-Limited (HPRL) filter for the error in linear velocity for an end-effector.
+    * <p>
+    * The filter is based on the following paper: "Torque-Based Dynamic Walking - A Long Way from Simulation to Experiment" by Englsberger et al.
+    * </p>
+    *
+    * @param endEffectorName the name of the end-effector to which the filter is to be applied.
+    * @param parameters      the parameters for the filter.
+    * @param dt              the time step of the controller.
+    * @param registry        the registry to which the filter variables are to be added.
+    * @return the HPRL filter to apply to the error velocity.
+    */
    public static FilterVector3D createLinearVelocityErrorHPRLFilter(String endEffectorName, YoHPRLParameters parameters, double dt, YoRegistry registry)
    {
       parameters.setRegistryLazy(registry);
       return new YoHPRLFilterVector3D(endEffectorName + "LinearVelocityErrorHPRL", parameters, dt, registry);
    }
 
+   /**
+    * Creates a Pilot-Induced Oscillation (PIO) filter for a 1-DoF joint velocity error.
+    * <p>
+    * The filter is based on the following paper: "Phase compensation design for prevention of PIO due to actuator rate saturation" by Alcala et al.
+    * </p>
+    *
+    * @param jointName  the name of the joint to which the filter is to be applied.
+    * @param parameters the parameters for the filter.
+    * @param dt         the time step of the controller.
+    * @param registry   the registry to which the filter variables are to be added.
+    * @return the PIO filter to apply to the error velocity.
+    */
    public static FilterDouble1D createVelocity1DErrorPIOFilter(String jointName, YoPIOParameters parameters, double dt, YoRegistry registry)
    {
       parameters.setRegistryLazy(registry);
       return new YoPIOFilterDouble1D(jointName + "VelocityErrorPIO", parameters, dt, registry);
    }
 
+   /**
+    * Creates a Pilot-Induced Oscillation (PIO) filter for the error in angular velocity for an end-effector.
+    * <p>
+    * The filter is based on the following paper: "Phase compensation design for prevention of PIO due to actuator rate saturation" by Alcala et al.
+    * </p>
+    *
+    * @param endEffectorName the name of the end-effector to which the filter is to be applied.
+    * @param parameters      the parameters for the filter.
+    * @param dt              the time step of the controller.
+    * @param registry        the registry to which the filter variables are to be added.
+    * @return the PIO filter to apply to the error velocity.
+    */
    public static FilterVector3D createAngularVelocityErrorPIOFilter(String endEffectorName, YoPIOParameters parameters, double dt, YoRegistry registry)
    {
       parameters.setRegistryLazy(registry);
       return new YoPIOFilterVector3D(endEffectorName + "AngularVelocityErrorPIO", parameters, dt, registry);
    }
 
+   /**
+    * Creates a Pilot-Induced Oscillation (PIO) filter for the error in linear velocity for an end-effector.
+    * <p>
+    * The filter is based on the following paper: "Phase compensation design for prevention of PIO due to actuator rate saturation" by Alcala et al.
+    * </p>
+    *
+    * @param endEffectorName the name of the end-effector to which the filter is to be applied.
+    * @param parameters      the parameters for the filter.
+    * @param dt              the time step of the controller.
+    * @param registry        the registry to which the filter variables are to be added.
+    * @return the PIO filter to apply to the error velocity.
+    */
    public static FilterVector3D createLinearVelocityErrorPIOFilter(String endEffectorName, YoPIOParameters parameters, double dt, YoRegistry registry)
    {
       parameters.setRegistryLazy(registry);
       return new YoPIOFilterVector3D(endEffectorName + "LinearVelocityErrorPIO", parameters, dt, registry);
    }
 
+   /**
+    * Parameters for the High-Pass Rate-Limited (HPRL) filter.
+    */
    public static class YoHPRLParameters
    {
       private final YoBoolean enableFilter;
@@ -77,6 +179,19 @@ public class FeedbackControllerFilterFactory
       private final YoDouble maxOutputRate;
       private final YoDouble updateReferenceRatio;
 
+      /**
+       * Creates a new set of parameters for the High-Pass Rate-Limited (HPRL) filter.
+       *
+       * @param namePrefix           the prefix to use for the names of the parameters.
+       * @param enableFilter         whether the filter is enabled or not.
+       * @param breakFrequency       the break frequency of the high-pass filter. The rate-limiter is applied after the high-pass filter.
+       * @param maxOutputRate        the maximum rate applied to apply on the high-pass filtered signal.
+       * @param updateReferenceRatio ratio in [0, 1] used to compute the reference for the rate limiter.
+       *                             A value of 0.0 means the reference is the previous high-pass filtered signal, while this reduces the phase lag, the
+       *                             resulting output may drift away when the maximum rate is reached.
+       *                             A value 1.0 means the last value of the rate limiter is used as the reference, while this reduces the drift, the resulting
+       *                             output may have a phase lag up to about 90 degrees which can affect the damping authority.
+       */
       public YoHPRLParameters(String namePrefix, boolean enableFilter, double breakFrequency, double maxOutputRate, double updateReferenceRatio)
       {
          this.enableFilter = new YoBoolean(namePrefix + "EnableFilter", null);
@@ -145,6 +260,9 @@ public class FeedbackControllerFilterFactory
       }
    }
 
+   /**
+    * Parameters for the Pilot-Induced Oscillation (PIO) filter.
+    */
    public static class YoPIOParameters
    {
       private final YoBoolean enableFilter;
@@ -155,6 +273,18 @@ public class FeedbackControllerFilterFactory
       private final YoDouble updateStepBreakFrequency;
       private final YoDouble maxOutputRate;
 
+      /**
+       * Creates a new set of parameters for the Pilot-Induced Oscillation (PIO) filter.
+       *
+       * @param namePrefix               the prefix to use for the names of the parameters.
+       * @param enableFilter             whether the filter is enabled or not.
+       * @param maxInputRate             the maximum rate of change of the input signal.
+       * @param maxInput                 the maximum value of the input signal.
+       * @param leadFrequency            the frequency of the lead filter.
+       * @param lagFrequency             the frequency of the lag filter.
+       * @param updateStepBreakFrequency the break frequency of the low-pass filter used to update the step in the PIO filter.
+       * @param maxOutputRate            the maximum rate of change of the output signal.
+       */
       public YoPIOParameters(String namePrefix,
                              boolean enableFilter,
                              double maxInputRate,
