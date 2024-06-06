@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBAlphaFilteredVector6D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPose3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector6D;
@@ -34,7 +33,6 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -64,7 +62,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
    protected final FBVector6D yoDesiredVelocity;
    protected final FBVector6D yoCurrentVelocity;
    protected final FBVector6D yoErrorVelocity;
-   protected final FBAlphaFilteredVector6D yoFilteredErrorVelocity;
    protected final FilterVector3D angularVelocityErrorFilter;
    protected final FilterVector3D linearVelocityErrorFilter;
    protected final FBVector6D yoFeedForwardVelocity;
@@ -226,25 +223,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
 
          yoCurrentVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, CURRENT, VELOCITY, isEnabled, true);
          yoErrorVelocity = fbToolbox.getOrCreateVectorData6D(endEffector, controllerIndex, ERROR, VELOCITY, isEnabled, false);
-
-         DoubleProvider breakFrequency = fbToolbox.getErrorVelocityFilterBreakFrequency(endEffectorName);
-         if (breakFrequency != null)
-         {
-            yoFilteredErrorVelocity = fbToolbox.getOrCreateAlphaFilteredVectorData6D(endEffector,
-                                                                                     controllerIndex,
-                                                                                     ERROR,
-                                                                                     VELOCITY,
-                                                                                     dt,
-                                                                                     breakFrequency,
-                                                                                     breakFrequency,
-                                                                                     isEnabled,
-                                                                                     false);
-         }
-         else
-         {
-            yoFilteredErrorVelocity = null;
-         }
-
          angularVelocityErrorFilter = fbToolbox.getOrCreateAngularVelocityErrorFilter(endEffector, controllerIndex, dt);
          linearVelocityErrorFilter = fbToolbox.getOrCreateLinearVelocityErrorFilter(endEffector, controllerIndex, dt);
 
@@ -308,7 +286,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       {
          yoCurrentVelocity = null;
          yoErrorVelocity = null;
-         yoFilteredErrorVelocity = null;
          angularVelocityErrorFilter = null;
          linearVelocityErrorFilter = null;
 
@@ -421,11 +398,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       {
          rateLimitedFeedbackVelocity.setToZero(worldFrame);
          rateLimitedFeedbackVelocity.reset();
-      }
-      if (yoFilteredErrorVelocity != null)
-      {
-         yoFilteredErrorVelocity.setToZero(worldFrame);
-         yoFilteredErrorVelocity.reset();
       }
       if (angularVelocityErrorFilter != null)
       {
@@ -769,20 +741,6 @@ public class SpatialFeedbackController implements FeedbackControllerInterface
       linearFeedbackTermToPack.changeFrame(trajectoryFrame);
       angularFeedbackTermToPack.changeFrame(trajectoryFrame);
       yoErrorVelocity.setIncludingFrame(angularFeedbackTermToPack, linearFeedbackTermToPack);
-
-      if (yoFilteredErrorVelocity != null)
-      {
-         // If the trajectory frame changed reset the filter.
-         if (yoFilteredErrorVelocity.getReferenceFrame() != trajectoryFrame)
-         {
-            yoFilteredErrorVelocity.setReferenceFrame(trajectoryFrame);
-            yoFilteredErrorVelocity.reset();
-         }
-         yoFilteredErrorVelocity.update();
-         yoFilteredErrorVelocity.setCommandId(currentCommandId);
-         linearFeedbackTermToPack.set(yoFilteredErrorVelocity.getLinearPart());
-         angularFeedbackTermToPack.set(yoFilteredErrorVelocity.getAngularPart());
-      }
 
       if (linearVelocityErrorFilter != null)
          linearVelocityErrorFilter.apply(linearFeedbackTermToPack, linearFeedbackTermToPack);

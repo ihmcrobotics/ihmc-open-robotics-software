@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBAlphaFilteredVector3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBPoint3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector3D;
@@ -29,7 +28,6 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -53,7 +51,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
    private final FBVector3D yoDesiredLinearVelocity;
    private final FBVector3D yoCurrentLinearVelocity;
    private final FBVector3D yoErrorLinearVelocity;
-   private final FBAlphaFilteredVector3D yoFilteredErrorLinearVelocity;
    private final FilterVector3D linearVelocityErrorFilter;
    private final FBVector3D yoFeedForwardLinearVelocity;
    private final FBVector3D yoFeedbackLinearVelocity;
@@ -176,23 +173,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
       {
          yoCurrentLinearVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, CURRENT, LINEAR_VELOCITY, isEnabled, true);
          yoErrorLinearVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR, LINEAR_VELOCITY, isEnabled, false);
-         DoubleProvider breakFrequency = fbToolbox.getErrorVelocityFilterBreakFrequency(endEffectorName);
-         if (breakFrequency != null)
-         {
-            yoFilteredErrorLinearVelocity = fbToolbox.getOrCreateAlphaFilteredVectorData3D(endEffector,
-                                                                                           controllerIndex,
-                                                                                           ERROR,
-                                                                                           LINEAR_VELOCITY,
-                                                                                           dt,
-                                                                                           breakFrequency,
-                                                                                           isEnabled,
-                                                                                           false);
-         }
-         else
-         {
-            yoFilteredErrorLinearVelocity = null;
-         }
-
          linearVelocityErrorFilter = fbToolbox.getOrCreateLinearVelocityErrorFilter(endEffector, controllerIndex, dt);
 
          if (ccToolbox.isEnableInverseDynamicsModule())
@@ -255,7 +235,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
       {
          yoCurrentLinearVelocity = null;
          yoErrorLinearVelocity = null;
-         yoFilteredErrorLinearVelocity = null;
          linearVelocityErrorFilter = null;
 
          yoDesiredLinearAcceleration = null;
@@ -349,8 +328,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
          rateLimitedFeedbackLinearAcceleration.reset();
       if (rateLimitedFeedbackLinearVelocity != null)
          rateLimitedFeedbackLinearVelocity.reset();
-      if (yoFilteredErrorLinearVelocity != null)
-         yoFilteredErrorLinearVelocity.reset();
       if (linearVelocityErrorFilter != null)
          linearVelocityErrorFilter.reset();
       if (yoErrorPositionIntegrated != null)
@@ -592,21 +569,6 @@ public class PointFeedbackController implements FeedbackControllerInterface
 
       feedbackTermToPack.changeFrame(trajectoryFrame);
       yoErrorLinearVelocity.setIncludingFrame(feedbackTermToPack);
-
-      if (yoFilteredErrorLinearVelocity != null)
-      {
-         // If the trajectory frame changed reset the filter.
-         if (yoFilteredErrorLinearVelocity.getReferenceFrame() != trajectoryFrame)
-         {
-            yoFilteredErrorLinearVelocity.setReferenceFrame(trajectoryFrame);
-            yoFilteredErrorLinearVelocity.reset();
-         }
-         yoFilteredErrorLinearVelocity.update();
-         yoFilteredErrorLinearVelocity.setCommandId(currentCommandId);
-
-         feedbackTermToPack.set(yoFilteredErrorLinearVelocity);
-      }
-
       if (linearVelocityErrorFilter != null)
          linearVelocityErrorFilter.apply(feedbackTermToPack, feedbackTermToPack);
 

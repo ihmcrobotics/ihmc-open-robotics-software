@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.controlModules.YoOrientationFrame;
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controlModules.YoTranslationFrame;
@@ -32,7 +31,6 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -66,7 +64,6 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    private final Map<RigidBodyBasics, List<SingleFeedbackControllerDataPool>> endEffectorDataPoolMap = new HashMap<>();
    private final List<SingleFeedbackControllerDataPool> singleFeedbackControllerDataPoolList = new ArrayList<>();
 
-   private final Map<String, DoubleProvider> errorVelocityFilterBreakFrequencies;
    private final Map<String, FilterDouble1D> jointNameToVelocityErrorFilter = new HashMap<>();
 
    private final InverseDynamicsCommandList lastFeedbackControllerInverseDynamicsOutput = new InverseDynamicsCommandList();
@@ -81,19 +78,6 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    public FeedbackControllerToolbox(FeedbackControllerSettings settings, YoRegistry parentRegistry)
    {
       this.settings = settings;
-      errorVelocityFilterBreakFrequencies = new HashMap<>();
-
-      List<GroupParameter<Double>> parameters = settings.getErrorVelocityFilterBreakFrequencies();
-      if (parameters != null)
-      {
-         for (GroupParameter<Double> groupParameter : parameters)
-         {
-            String parameterName = groupParameter.getGroupName() + "ErrorVelocityBreakFrequency";
-            DoubleParameter groupBreakFrequency = new DoubleParameter(parameterName, registry, groupParameter.getParameter());
-            groupParameter.getMemberNames().forEach(name -> errorVelocityFilterBreakFrequencies.put(name, groupBreakFrequency));
-         }
-      }
-
       parentRegistry.addChild(registry);
    }
 
@@ -821,11 +805,6 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       {
          singleFeedbackControllerDataPoolList.get(i).clearIfInactive();
       }
-   }
-
-   public DoubleProvider getErrorVelocityFilterBreakFrequency(String endEffectorOrJointName)
-   {
-      return errorVelocityFilterBreakFrequencies.get(endEffectorOrJointName);
    }
 
    public FilterDouble1D getOrCreateVelocityErrorFilterDouble1D(String jointName, double dt)

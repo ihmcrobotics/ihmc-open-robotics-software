@@ -3,10 +3,12 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings.FilterDouble1D;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings.FilterVector3D;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.robotics.math.filters.AlphaFilteredYoMutableFrameVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoMutableFrameVector3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -17,39 +19,54 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class FeedbackControllerFilterFactory
 {
+   public static FilterDouble1D createVelocity1DErrorLPFFilter(String jointName, DoubleProvider breakFrequency, double dt, YoRegistry registry)
+   {
+      return new YoLPFilterDouble1D(jointName + "VelocityErrorLPF", breakFrequency, dt, registry);
+   }
+
+   public static FilterVector3D createAngularVelocityErrorLPFFilter(String endEffectorName, DoubleProvider breakFrequency, double dt, YoRegistry registry)
+   {
+      return new YoLPFilterVector3D(endEffectorName + "AngularVelocityErrorLPF", breakFrequency, dt, registry);
+   }
+
+   public static FilterVector3D createLinearVelocityErrorLPFFilter(String endEffectorName, DoubleProvider breakFrequency, double dt, YoRegistry registry)
+   {
+      return new YoLPFilterVector3D(endEffectorName + "LinearVelocityErrorLPF", breakFrequency, dt, registry);
+   }
+
    public static FilterDouble1D createVelocity1DErrorHPRLFilter(String jointName, YoHPRLParameters parameters, double dt, YoRegistry registry)
    {
-      parameters.setRegistry(registry);
+      parameters.setRegistryLazy(registry);
       return new YoHPRLFilterDouble1D(jointName + "VelocityErrorHPRL", parameters, dt, registry);
    }
 
    public static FilterVector3D createAngularVelocityErrorHPRLFilter(String endEffectorName, YoHPRLParameters parameters, double dt, YoRegistry registry)
    {
-      parameters.setRegistry(registry);
+      parameters.setRegistryLazy(registry);
       return new YoHPRLFilterVector3D(endEffectorName + "AngularVelocityErrorHPRL", parameters, dt, registry);
    }
 
    public static FilterVector3D createLinearVelocityErrorHPRLFilter(String endEffectorName, YoHPRLParameters parameters, double dt, YoRegistry registry)
    {
-      parameters.setRegistry(registry);
+      parameters.setRegistryLazy(registry);
       return new YoHPRLFilterVector3D(endEffectorName + "LinearVelocityErrorHPRL", parameters, dt, registry);
    }
 
    public static FilterDouble1D createVelocity1DErrorPIOFilter(String jointName, YoPIOParameters parameters, double dt, YoRegistry registry)
    {
-      parameters.setRegistry(registry);
+      parameters.setRegistryLazy(registry);
       return new YoPIOFilterDouble1D(jointName + "VelocityErrorPIO", parameters, dt, registry);
    }
 
    public static FilterVector3D createAngularVelocityErrorPIOFilter(String endEffectorName, YoPIOParameters parameters, double dt, YoRegistry registry)
    {
-      parameters.setRegistry(registry);
+      parameters.setRegistryLazy(registry);
       return new YoPIOFilterVector3D(endEffectorName + "AngularVelocityErrorPIO", parameters, dt, registry);
    }
 
    public static FilterVector3D createLinearVelocityErrorPIOFilter(String endEffectorName, YoPIOParameters parameters, double dt, YoRegistry registry)
    {
-      parameters.setRegistry(registry);
+      parameters.setRegistryLazy(registry);
       return new YoPIOFilterVector3D(endEffectorName + "LinearVelocityErrorPIO", parameters, dt, registry);
    }
 
@@ -72,10 +89,15 @@ public class FeedbackControllerFilterFactory
          this.updateReferenceRatio.set(updateReferenceRatio);
       }
 
-      public void setRegistry(YoRegistry registry)
+      public void setRegistryLazy(YoRegistry registry)
       {
          if (enableFilter.getRegistry() != null)
             return;
+         setRegistry(registry);
+      }
+
+      private void setRegistry(YoRegistry registry)
+      {
          enableFilter.setRegistry(registry);
          breakFrequency.setRegistry(registry);
          maxOutputRate.setRegistry(registry);
@@ -159,11 +181,16 @@ public class FeedbackControllerFilterFactory
          this.maxOutputRate.set(maxOutputRate);
       }
 
-      public void setRegistry(YoRegistry registry)
+      public void setRegistryLazy(YoRegistry registry)
       {
          if (enableFilter.getRegistry() != null)
             return;
 
+         setRegistry(registry);
+      }
+
+      private void setRegistry(YoRegistry registry)
+      {
          enableFilter.setRegistry(registry);
          maxInputRate.setRegistry(registry);
          maxInput.setRegistry(registry);
@@ -171,6 +198,30 @@ public class FeedbackControllerFilterFactory
          lagFrequency.setRegistry(registry);
          updateStepBreakFrequency.setRegistry(registry);
          maxOutputRate.setRegistry(registry);
+      }
+   }
+
+   private static class YoLPFilterDouble1D implements FilterDouble1D
+   {
+      private final AlphaFilteredYoVariable output;
+
+      public YoLPFilterDouble1D(String namePrefix, DoubleProvider breakFrequency, double dt, YoRegistry registry)
+      {
+         DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt);
+         output = new AlphaFilteredYoVariable(namePrefix + "Output", registry, alpha);
+      }
+
+      @Override
+      public void reset()
+      {
+         output.reset();
+      }
+
+      @Override
+      public double apply(double rawInput)
+      {
+         output.update(rawInput);
+         return output.getDoubleValue();
       }
    }
 
@@ -423,6 +474,36 @@ public class FeedbackControllerFilterFactory
             return output.getValue();
          else
             return rawInput;
+      }
+   }
+
+   private static class YoLPFilterVector3D implements FilterVector3D
+   {
+      private final AlphaFilteredYoMutableFrameVector3D output;
+
+      public YoLPFilterVector3D(String namePrefix, DoubleProvider breakFrequency, double dt, YoRegistry registry)
+      {
+         DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt);
+         output = new AlphaFilteredYoMutableFrameVector3D(namePrefix + "Output", "", registry, alpha, ReferenceFrame.getWorldFrame());
+      }
+
+      @Override
+      public void reset()
+      {
+         output.reset();
+      }
+
+      @Override
+      public void apply(FrameVector3DReadOnly rawInput, FixedFrameVector3DBasics filteredOutput)
+      {
+         if (output.getReferenceFrame() != rawInput)
+         {
+            reset();
+            output.setReferenceFrame(rawInput.getReferenceFrame());
+         }
+
+         output.update(rawInput);
+         filteredOutput.setMatchingFrame(output);
       }
    }
 

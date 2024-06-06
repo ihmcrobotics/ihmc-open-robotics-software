@@ -12,9 +12,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.RateLimitedYoVariable;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -41,7 +39,6 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
    private final YoDouble qError;
    private final YoDouble qDError;
-   private final AlphaFilteredYoVariable qDFilteredError;
    private final FilterDouble1D qDErrorFilter;
 
    private final YoDouble actionP;
@@ -101,18 +98,6 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       {
          qDCurrent = new YoDouble("qd_" + jointName, debugVariableRegistry);
          qDError = new YoDouble("qd_err_" + jointName, debugVariableRegistry);
-
-         DoubleProvider breakFrequency = feedbackControllerToolbox.getErrorVelocityFilterBreakFrequency(jointName);
-         if (breakFrequency != null)
-         {
-            DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt);
-            qDFilteredError = new AlphaFilteredYoVariable(jointName, debugVariableRegistry, alpha, qDError);
-         }
-         else
-         {
-            qDFilteredError = null;
-         }
-
          qDErrorFilter = feedbackControllerToolbox.getOrCreateVelocityErrorFilterDouble1D(jointName, dt);
 
          kd = new YoDouble("kd_" + jointName, registry);
@@ -127,7 +112,6 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       {
          qDCurrent = null;
          qDError = null;
-         qDFilteredError = null;
          qDErrorFilter = null;
 
          kd = null;
@@ -184,8 +168,6 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
    {
       if (qDDFeedbackRateLimited != null)
          qDDFeedbackRateLimited.reset();
-      if (qDFilteredError != null)
-         qDFilteredError.reset();
       if (qDErrorFilter != null)
          qDErrorFilter.reset();
    }
@@ -228,28 +210,25 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       qCurrent.set(joint.getQ());
       qDCurrent.set(joint.getQd());
 
-      qError.set(qDesired.getDoubleValue() - qCurrent.getDoubleValue());
-      qDError.set(qDDesired.getDoubleValue() - qDCurrent.getDoubleValue());
-      double qDErrorToUse = qDError.getDoubleValue();
-      if (qDFilteredError != null)
-      {
-         qDFilteredError.update();
-         qDErrorToUse = qDFilteredError.getValue();
-      }
+      qError.set(qDesired.getValue() - qCurrent.getValue());
+      qDError.set(qDDesired.getValue() - qDCurrent.getValue());
+      double qDErrorToUse;
       if (qDErrorFilter != null)
-         qDErrorToUse = qDErrorFilter.apply(qDErrorToUse);
+         qDErrorToUse = qDErrorFilter.apply(qDError.getValue());
+      else
+         qDErrorToUse = qDError.getValue();
 
-      actionP.set(kp.getDoubleValue() * qError.getDoubleValue());
-      actionD.set(kd.getDoubleValue() * qDErrorToUse);
+      actionP.set(kp.getValue() * qError.getValue());
+      actionD.set(kd.getValue() * qDErrorToUse);
 
-      double qdd_fb = actionP.getDoubleValue() + actionD.getValue();
-      qdd_fb = MathTools.clamp(qdd_fb, maxFeedback.getDoubleValue());
+      double qdd_fb = actionP.getValue() + actionD.getValue();
+      qdd_fb = MathTools.clamp(qdd_fb, maxFeedback.getValue());
       qDDFeedback.set(qdd_fb);
       qDDFeedbackRateLimited.update();
 
-      qDDDesired.set(qDDFeedforward.getDoubleValue() + qDDFeedbackRateLimited.getDoubleValue());
-      inverseDynamicsOutput.setOneDoFJointDesiredAcceleration(0, qDDDesired.getDoubleValue());
-      inverseDynamicsOutput.setWeight(0, weightForSolver.getDoubleValue());
+      qDDDesired.set(qDDFeedforward.getValue() + qDDFeedbackRateLimited.getValue());
+      inverseDynamicsOutput.setOneDoFJointDesiredAcceleration(0, qDDDesired.getValue());
+      inverseDynamicsOutput.setWeight(0, weightForSolver.getValue());
    }
 
    @Override
@@ -260,10 +239,10 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
       qCurrent.set(joint.getQ());
 
-      qError.set(qDesired.getDoubleValue() - qCurrent.getDoubleValue());
+      qError.set(qDesired.getValue() - qCurrent.getValue());
 
-      double qd_fb = kp.getDoubleValue() * qError.getDoubleValue();
-      qd_fb = MathTools.clamp(qd_fb, maxFeedback.getDoubleValue());
+      double qd_fb = kp.getValue() * qError.getValue();
+      qd_fb = MathTools.clamp(qd_fb, maxFeedback.getValue());
 
       actionP.set(qd_fb);
       actionD.set(0.0);
@@ -271,9 +250,9 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       qDFeedback.set(qd_fb);
       qDFeedbackRateLimited.update();
 
-      qDDesired.set(qDFeedforward.getDoubleValue() + qDFeedbackRateLimited.getDoubleValue());
-      inverseKinematicsOutput.setOneDoFJointDesiredVelocity(0, qDDesired.getDoubleValue());
-      inverseKinematicsOutput.setWeight(0, weightForSolver.getDoubleValue());
+      qDDesired.set(qDFeedforward.getValue() + qDFeedbackRateLimited.getValue());
+      inverseKinematicsOutput.setOneDoFJointDesiredVelocity(0, qDDesired.getValue());
+      inverseKinematicsOutput.setWeight(0, weightForSolver.getValue());
    }
 
    @Override
@@ -285,26 +264,25 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
       qCurrent.set(joint.getQ());
       qDCurrent.set(joint.getQd());
 
-      qError.set(qDesired.getDoubleValue() - qCurrent.getDoubleValue());
-      qDError.set(qDDesired.getDoubleValue() - qDCurrent.getDoubleValue());
-      double qDErrorToUse = qDError.getDoubleValue();
-      if (qDFilteredError != null)
-      {
-         qDFilteredError.update();
-         qDErrorToUse = qDFilteredError.getValue();
-      }
+      qError.set(qDesired.getValue() - qCurrent.getValue());
+      qDError.set(qDDesired.getValue() - qDCurrent.getValue());
+      double qDErrorToUse;
+      if (qDErrorFilter != null)
+         qDErrorToUse = qDErrorFilter.apply(qDError.getValue());
+      else
+         qDErrorToUse = qDError.getValue();
 
-      actionP.set(kp.getDoubleValue() * qError.getDoubleValue());
-      actionD.set(kd.getDoubleValue() * qDErrorToUse);
-      double tau_fb = actionP.getDoubleValue() + actionD.getDoubleValue();
+      actionP.set(kp.getValue() * qError.getValue());
+      actionD.set(kd.getValue() * qDErrorToUse);
+      double tau_fb = actionP.getValue() + actionD.getValue();
 
-      tau_fb = MathTools.clamp(tau_fb, maxFeedback.getDoubleValue());
+      tau_fb = MathTools.clamp(tau_fb, maxFeedback.getValue());
       tauFeedback.set(tau_fb);
       tauFeedbackRateLimited.update();
 
-      tauDesired.set(tauFeedforward.getValue() + tauFeedbackRateLimited.getDoubleValue());
+      tauDesired.set(tauFeedforward.getValue() + tauFeedbackRateLimited.getValue());
 
-      virtualModelControlOutput.setOneDoFJointDesiredTorque(0, tauDesired.getDoubleValue());
+      virtualModelControlOutput.setOneDoFJointDesiredTorque(0, tauDesired.getValue());
    }
 
    @Override
@@ -320,7 +298,7 @@ public class OneDoFJointFeedbackController implements FeedbackControllerInterfac
 
    public double getJointDesiredAcceleration()
    {
-      return qDDDesired.getDoubleValue();
+      return qDDDesired.getValue();
    }
 
    @Override

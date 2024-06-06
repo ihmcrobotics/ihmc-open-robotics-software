@@ -17,7 +17,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
-import us.ihmc.robotics.math.filters.AlphaFilteredYoMutableFrameVector3D;
 import us.ihmc.robotics.math.filters.RateLimitedYoMutableFrameVector3D;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -45,7 +44,6 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
    private final FrameVector3DBasics yoDesiredLinearVelocity;
    private final FrameVector3DBasics yoCurrentLinearVelocity;
    private final FrameVector3DBasics yoErrorLinearVelocity;
-   private final AlphaFilteredYoMutableFrameVector3D yoFilteredErrorLinearVelocity;
    private final FilterVector3D linearVelocityErrorFilter;
    private final FrameVector3DBasics yoFeedForwardLinearVelocity;
    private final FrameVector3DBasics yoFeedbackLinearVelocity;
@@ -109,17 +107,6 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       {
          yoCurrentLinearVelocity = fbToolbox.getOrCreateCenterOfMassVectorData(CURRENT, LINEAR_VELOCITY, isEnabled, true);
          yoErrorLinearVelocity = fbToolbox.getOrCreateCenterOfMassVectorData(ERROR, LINEAR_VELOCITY, isEnabled, false);
-         DoubleProvider breakFrequency = fbToolbox.getErrorVelocityFilterBreakFrequency(FeedbackControllerToolbox.centerOfMassName);
-         if (breakFrequency != null)
-            yoFilteredErrorLinearVelocity = fbToolbox.getOrCreateCenterOfMassAlphaFilteredVectorData(ERROR,
-                                                                                                     LINEAR_VELOCITY,
-                                                                                                     dt,
-                                                                                                     breakFrequency,
-                                                                                                     isEnabled,
-                                                                                                     false);
-         else
-            yoFilteredErrorLinearVelocity = null;
-
          linearVelocityErrorFilter = fbToolbox.getOrCreateCenterOfMassLinearVelocityErrorFilter(dt);
 
          yoDesiredLinearAcceleration = fbToolbox.getOrCreateCenterOfMassVectorData(DESIRED, LINEAR_ACCELERATION, isEnabled, true);
@@ -137,7 +124,6 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       {
          yoCurrentLinearVelocity = null;
          yoErrorLinearVelocity = null;
-         yoFilteredErrorLinearVelocity = null;
          linearVelocityErrorFilter = null;
 
          yoDesiredLinearAcceleration = null;
@@ -201,8 +187,6 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
          rateLimitedFeedbackLinearAcceleration.reset();
       if (rateLimitedFeedbackLinearVelocity != null)
          rateLimitedFeedbackLinearVelocity.reset();
-      if (yoFilteredErrorLinearVelocity != null)
-         yoFilteredErrorLinearVelocity.reset();
       if (linearVelocityErrorFilter != null)
          linearVelocityErrorFilter.reset();
       if (yoErrorPositionIntegrated != null)
@@ -385,20 +369,6 @@ public class CenterOfMassFeedbackController implements FeedbackControllerInterfa
       // The point feedback controller sets this value after rate limiting.
       yoErrorLinearVelocity.setIncludingFrame(feedbackTermToPack);
       yoErrorLinearVelocity.changeFrame(trajectoryFrame);
-
-      if (yoFilteredErrorLinearVelocity != null)
-      {
-         // If the trajectory frame changed reset the filter.
-         if (yoFilteredErrorLinearVelocity.getReferenceFrame() != trajectoryFrame)
-         {
-            yoFilteredErrorLinearVelocity.setReferenceFrame(trajectoryFrame);
-            yoFilteredErrorLinearVelocity.reset();
-         }
-         feedbackTermToPack.changeFrame(trajectoryFrame);
-         yoFilteredErrorLinearVelocity.update();
-         feedbackTermToPack.set(yoFilteredErrorLinearVelocity);
-      }
-
       if (linearVelocityErrorFilter != null)
          linearVelocityErrorFilter.apply(feedbackTermToPack, feedbackTermToPack);
 

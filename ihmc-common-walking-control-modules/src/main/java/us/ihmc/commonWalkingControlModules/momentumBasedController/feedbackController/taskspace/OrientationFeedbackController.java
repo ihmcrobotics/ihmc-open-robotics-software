@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.data.FBAlphaFilteredVector3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBQuaternion3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBRateLimitedVector3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.FBVector3D;
@@ -27,7 +26,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.YoPID3DGains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -57,7 +55,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
    private final FBVector3D yoDesiredAngularVelocity;
    private final FBVector3D yoCurrentAngularVelocity;
    private final FBVector3D yoErrorAngularVelocity;
-   private final FBAlphaFilteredVector3D yoFilteredErrorAngularVelocity;
    private final FilterVector3D angularVelocityErrorFilter;
    private final FBVector3D yoFeedForwardAngularVelocity;
    private final FBVector3D yoFeedbackAngularVelocity;
@@ -189,19 +186,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       {
          yoCurrentAngularVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, CURRENT, ANGULAR_VELOCITY, isEnabled, true);
          yoErrorAngularVelocity = fbToolbox.getOrCreateVectorData3D(endEffector, controllerIndex, ERROR, ANGULAR_VELOCITY, isEnabled, false);
-         DoubleProvider breakFrequency = fbToolbox.getErrorVelocityFilterBreakFrequency(endEffectorName);
-         if (breakFrequency != null)
-            yoFilteredErrorAngularVelocity = fbToolbox.getOrCreateAlphaFilteredVectorData3D(endEffector,
-                                                                                            controllerIndex,
-                                                                                            ERROR,
-                                                                                            ANGULAR_VELOCITY,
-                                                                                            dt,
-                                                                                            breakFrequency,
-                                                                                            isEnabled,
-                                                                                            false);
-         else
-            yoFilteredErrorAngularVelocity = null;
-
          angularVelocityErrorFilter = fbToolbox.getOrCreateAngularVelocityErrorFilter(endEffector, controllerIndex, dt);
 
          if (ccToolbox.isEnableInverseDynamicsModule())
@@ -259,7 +243,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
       {
          yoCurrentAngularVelocity = null;
          yoErrorAngularVelocity = null;
-         yoFilteredErrorAngularVelocity = null;
          angularVelocityErrorFilter = null;
 
          yoDesiredAngularAcceleration = null;
@@ -356,8 +339,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
          rateLimitedFeedbackAngularAcceleration.reset();
       if (rateLimitedFeedbackAngularVelocity != null)
          rateLimitedFeedbackAngularVelocity.reset();
-      if (yoFilteredErrorAngularVelocity != null)
-         yoFilteredErrorAngularVelocity.reset();
       if (angularVelocityErrorFilter != null)
          angularVelocityErrorFilter.reset();
       if (yoErrorOrientationCumulated != null)
@@ -593,19 +574,6 @@ public class OrientationFeedbackController implements FeedbackControllerInterfac
 
       feedbackTermToPack.changeFrame(trajectoryFrame);
       yoErrorAngularVelocity.setIncludingFrame(feedbackTermToPack);
-
-      if (yoFilteredErrorAngularVelocity != null)
-      {
-         // If the trajectory frame changed reset the filter.
-         if (yoFilteredErrorAngularVelocity.getReferenceFrame() != trajectoryFrame)
-         {
-            yoFilteredErrorAngularVelocity.setReferenceFrame(trajectoryFrame);
-            yoFilteredErrorAngularVelocity.reset();
-         }
-         yoFilteredErrorAngularVelocity.update();
-         yoFilteredErrorAngularVelocity.setCommandId(currentCommandId);
-         feedbackTermToPack.set(yoFilteredErrorAngularVelocity);
-      }
 
       if (angularVelocityErrorFilter != null)
          angularVelocityErrorFilter.apply(feedbackTermToPack, feedbackTermToPack);
