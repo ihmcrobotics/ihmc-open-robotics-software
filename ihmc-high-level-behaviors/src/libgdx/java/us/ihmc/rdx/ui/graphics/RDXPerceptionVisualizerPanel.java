@@ -5,6 +5,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImString;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -63,13 +64,24 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
       {
       }
 
+      // Favorite visualizers
+      ImGuiTools.separatorText("Favorites");
+      for (RDXVisualizer visualizer : visualizers)
+         if (visualizer.isFavorite())
+            visualizer.renderMenuEntry();
+      ImGui.separator();
+
+      // All other visualizers in alphabetical order (filtered)
       for (RDXVisualizer visualizer : visualizers)
       {
-         if (filter.isNotEmpty())
-            if (!visualizer.getTitle().toLowerCase(Locale.ROOT).contains(filter.toString().toLowerCase(Locale.ROOT)))
-               continue;
+         if (!visualizer.isFavorite())
+         {
+            if (filter.isNotEmpty())
+               if (!visualizer.getTitle().toLowerCase(Locale.ROOT).contains(filter.toString().toLowerCase(Locale.ROOT)))
+                  continue;
 
-         visualizer.renderMenuEntry();
+            visualizer.renderMenuEntry();
+         }
       }
    }
 

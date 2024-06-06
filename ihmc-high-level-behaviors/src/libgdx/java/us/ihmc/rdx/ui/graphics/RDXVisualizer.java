@@ -35,6 +35,9 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
    @Nullable
    private ROS2Heartbeat heartbeat;
 
+   // If this visualizer should be at the top of the list in all visualizers
+   private boolean favorite;
+
    public RDXVisualizer(String title)
    {
       this.title = ImGuiTools.uniqueLabel(title);
@@ -191,5 +194,15 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
    public String getTitle()
    {
       return title;
+   }
+
+   public void setFavorite(boolean favorite)
+   {
+      this.favorite = favorite;
+   }
+
+   public boolean isFavorite()
+   {
+      return favorite;
    }
 }
