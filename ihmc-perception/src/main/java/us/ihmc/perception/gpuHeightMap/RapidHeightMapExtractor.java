@@ -7,11 +7,11 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Scalar;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -23,6 +23,8 @@ import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersBa
 import us.ihmc.perception.steppableRegions.SteppableRegionsCalculator;
 import us.ihmc.perception.steppableRegions.data.SteppableCell;
 import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
@@ -62,7 +64,7 @@ public class RapidHeightMapExtractor
    private final TerrainMapStatistics terrainMapStatistics = new TerrainMapStatistics();
 
 //   private HeightMapAutoencoder denoiser;
-   private HumanoidReferenceFrames referenceFrames;
+   private final SideDependentList<ReferenceFrame> footSoleFrames = new SideDependentList<>();
    private OpenCLManager openCLManager;
    private OpenCLFloatParameters parametersBuffer;
    private OpenCLFloatParameters snappingParametersBuffer;
@@ -122,10 +124,11 @@ public class RapidHeightMapExtractor
       rapidHeightMapUpdaterProgram = openCLManager.loadProgram("RapidHeightMapExtractor", "HeightMapUtils.cl");
    }
 
-   public RapidHeightMapExtractor(OpenCLManager openCLManager, HumanoidReferenceFrames referenceFrames)
+   public RapidHeightMapExtractor(OpenCLManager openCLManager, ReferenceFrame leftFootSoleFrame, ReferenceFrame rightFootSoleFrame)
    {
       this(openCLManager);
-      this.referenceFrames = referenceFrames;
+      footSoleFrames.put(RobotSide.LEFT, leftFootSoleFrame);
+      footSoleFrames.put(RobotSide.RIGHT, rightFootSoleFrame);
    }
 
    public void initialize()
@@ -498,9 +501,10 @@ public class RapidHeightMapExtractor
       double thicknessOfTheFoot = 0.02;
       double height = 0.0f;
 
-      if (referenceFrames != null)
+      if (footSoleFrames.sides().length == 2)
       {
-         height = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslationZ() - thicknessOfTheFoot;
+         height = Math.min(footSoleFrames.get(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ(),
+                           footSoleFrames.get(RobotSide.RIGHT).getTransformToWorldFrame().getTranslationZ()) - thicknessOfTheFoot;
       }
 
       int offset = (int) ((height + heightMapParameters.getHeightOffset()) * heightMapParameters.getHeightScaleFactor());
@@ -584,6 +588,48 @@ public class RapidHeightMapExtractor
       snapNormalZImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       snappedAreaFractionImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       steppabilityConnectionsImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
+   }
+
+   /**
+    * Destroys all objects and releases allocated memory.
+    * Should be called after {@link #initialize()}
+    */
+   public void destroy()
+   {
+      yaw.destroy(openCLManager);
+
+      parametersBuffer.destroy(openCLManager);
+      if (computeSteppability)
+         snappingParametersBuffer.destroy(openCLManager);
+
+      worldToGroundTransformBuffer.destroy(openCLManager);
+      groundToWorldTransformBuffer.destroy(openCLManager);
+      groundToSensorTransformBuffer.destroy(openCLManager);
+      sensorToGroundTransformBuffer.destroy(openCLManager);
+      groundPlaneBuffer.destroy(openCLManager);
+
+      localHeightMapImage.destroy(openCLManager);
+      globalHeightMapImage.destroy(openCLManager);
+      globalHeightVarianceImage.destroy(openCLManager);
+      terrainCostImage.destroy(openCLManager);
+      contactMapImage.destroy(openCLManager);
+
+      sensorCroppedHeightMapImage.destroy(openCLManager);
+      sensorCroppedContactMapImage.destroy(openCLManager);
+      sensorCroppedTerrainCostImage.destroy(openCLManager);
+      steppableRegionAssignmentMat.close();
+      steppableRegionRingMat.close();
+
+      steppabilityImage.destroy(openCLManager);
+      snapHeightImage.destroy(openCLManager);
+      snapNormalXImage.destroy(openCLManager);
+      snapNormalYImage.destroy(openCLManager);
+      snapNormalZImage.destroy(openCLManager);
+      steppabilityConnectionsImage.destroy(openCLManager);
+      snappedAreaFractionImage.destroy(openCLManager);
+
+      denoisedHeightMapImage.close();
+      cropWindowRectangle.close();
    }
 
    public boolean isProcessing()

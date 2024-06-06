@@ -80,4 +80,9 @@ public class OpenCLFloatParameters
    {
       return openCLFloatBuffer.getOpenCLBufferObject();
    }
+
+   public void destroy(OpenCLManager openClManager)
+   {
+      openCLFloatBuffer.destroy(openClManager);
+   }
 }

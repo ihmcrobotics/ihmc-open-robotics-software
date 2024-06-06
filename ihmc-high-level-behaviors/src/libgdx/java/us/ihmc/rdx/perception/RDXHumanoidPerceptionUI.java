@@ -8,11 +8,8 @@ import imgui.flag.ImGuiCond;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import org.bytedeco.opencv.opencv_core.Mat;
-import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.headless.HumanoidPerceptionModule;
@@ -23,7 +20,6 @@ import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXImagePanel;
-import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
@@ -115,7 +111,6 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       RDXROS2PlanarRegionsVisualizer mapRegionsVisualizer = new RDXROS2PlanarRegionsVisualizer("SLAM Rapid Regions",
                                                                                                ros2Node,
                                                                                                PerceptionAPI.SLAM_OUTPUT_RAPID_REGIONS);
-      mapRegionsVisualizer.setActive(true);
       mapRegionsVisualizer.create();
       visualizers.put("MapRegions", mapRegionsVisualizer);
    }
@@ -125,7 +120,6 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       RDXROS2FramePlanarRegionsVisualizer perspectiveRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Rapid Regions",
                                                                                                                  ros2Node,
                                                                                                                  PerceptionAPI.PERSPECTIVE_RAPID_REGIONS);
-      perspectiveRegionsVisualizer.setActive(true);
       perspectiveRegionsVisualizer.create();
       visualizers.put("PerspectiveRegions", perspectiveRegionsVisualizer);
    }
@@ -135,7 +129,6 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       RDXROS2FramePlanarRegionsVisualizer sphericalRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Structural Rapid Regions",
                                                                                                      ros2Node,
                                                                                                      PerceptionAPI.SPHERICAL_RAPID_REGIONS_WITH_POSE);
-      sphericalRegionsVisualizer.setActive(true);
       sphericalRegionsVisualizer.create();
       visualizers.put("SphericalRegions", sphericalRegionsVisualizer);
    }
@@ -144,7 +137,6 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    {
       terrainGridGraphic.create();
       RDXHeightMapVisualizer heightMapVisualizer = new RDXHeightMapVisualizer();
-      heightMapVisualizer.setActive(true);
       if (ros2Helper != null)
       {
          heightMapVisualizer.setupForHeightMapMessage(ros2Helper);
