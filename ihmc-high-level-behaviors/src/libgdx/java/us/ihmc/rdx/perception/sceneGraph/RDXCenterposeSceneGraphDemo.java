@@ -10,7 +10,7 @@ import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2DetectedObjectBoundingBoxVisualizer;
@@ -25,7 +25,7 @@ public class RDXCenterposeSceneGraphDemo
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
-   private RDXGlobalVisualizersPanel globalVisualizersPanel;
+   private RDXPerceptionVisualizerPanel perceptionVisualizerPanel;
    private CenterposeDetectionManager centerposeProcess;
    private ROS2SceneGraph onRobotSceneGraph;
    private ReferenceFrameLibrary referenceFrameLibrary;
@@ -45,16 +45,16 @@ public class RDXCenterposeSceneGraphDemo
             ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "centerpose_scene_graph_demo");
             ros2Helper = new ROS2Helper(ros2Node);
 
-            globalVisualizersPanel = new RDXGlobalVisualizersPanel();
-            baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
-            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersPanel);
+            perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
+            baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
+            baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
 
             RDXROS2ImageMessageVisualizer zed2LeftColorImageVisualizer
                   = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
                                                       DomainFactory.PubSubImplementation.FAST_RTPS,
                                                       PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
             zed2LeftColorImageVisualizer.setActive(true);
-            globalVisualizersPanel.addVisualizer(zed2LeftColorImageVisualizer);
+            perceptionVisualizerPanel.addVisualizer(zed2LeftColorImageVisualizer);
 
             RDXROS2DetectedObjectBoundingBoxVisualizer centerPoseBoundingBoxVisualizer
                   = new RDXROS2DetectedObjectBoundingBoxVisualizer("CenterPose Bounding Box",
@@ -70,7 +70,7 @@ public class RDXCenterposeSceneGraphDemo
                                                            PerceptionAPI.ZED2_DEPTH,
                                                            PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
             zed2ColoredPointCloudVisualizer.setActive(true);
-            globalVisualizersPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
+            perceptionVisualizerPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 
             sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI.getPrimary3DPanel());
             baseUI.getPrimaryScene().addRenderableProvider(sceneGraphUI::getRenderables);
@@ -85,7 +85,7 @@ public class RDXCenterposeSceneGraphDemo
             onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
             centerposeProcess = new CenterposeDetectionManager(ros2Helper);
 
-            globalVisualizersPanel.create();
+            perceptionVisualizerPanel.create();
          }
 
          @Override
@@ -104,7 +104,7 @@ public class RDXCenterposeSceneGraphDemo
 
             sceneGraphUI.update();
 
-            globalVisualizersPanel.update();
+            perceptionVisualizerPanel.update();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -113,7 +113,7 @@ public class RDXCenterposeSceneGraphDemo
          @Override
          public void dispose()
          {
-            globalVisualizersPanel.destroy();
+            perceptionVisualizerPanel.destroy();
             baseUI.dispose();
             ros2Node.destroy();
          }
