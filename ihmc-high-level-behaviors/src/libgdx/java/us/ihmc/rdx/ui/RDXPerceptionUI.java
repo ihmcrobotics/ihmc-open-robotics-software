@@ -14,15 +14,15 @@ import us.ihmc.rdx.perception.RDXRemotePerceptionUI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXBuildingConstructor;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
-import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
+import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2BigVideoVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2OusterPointCloudVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PlanarRegionsVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RigidBodyPoseVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PlanarRegionsVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2OusterPointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2PointCloudVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 
@@ -33,7 +33,7 @@ public class RDXPerceptionUI
    private final PerceptionDataLoader perceptionDataLoader = new PerceptionDataLoader();
 
    private RDXBaseUI baseUI;
-   private RDXPerceptionVisualizerPanel perceptionVisualizerPanel;
+   private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
 
    private RDXPerceptionDataLoaderPanel perceptionLogLoaderPanel;
    private RDXPerceptionDataLoggerPanel perceptionLoggingPanel;
@@ -50,7 +50,7 @@ public class RDXPerceptionUI
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "perception_ui_node");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-      perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
+      perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
       baseUI = new RDXBaseUI("Perception UI");
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()

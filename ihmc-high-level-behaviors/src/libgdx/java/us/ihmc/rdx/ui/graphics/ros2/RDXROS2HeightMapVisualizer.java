@@ -23,16 +23,17 @@ import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew;
-import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.nio.ByteBuffer;
+import java.util.List;
 import java.util.Set;
 
-public class RDXHeightMapVisualizer extends RDXVisualizer
+public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 {
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
    private final RDXHeightMapGraphicNew heightMapGraphicNew = new RDXHeightMapGraphicNew();
@@ -61,16 +62,17 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    private float pixelScalingFactor = 10000.0f;
    private boolean heightMapMessageGenerated = false;
 
-   public RDXHeightMapVisualizer()
-   {
-      this("Height Map");
-   }
-
-   public RDXHeightMapVisualizer(String title)
+   public RDXROS2HeightMapVisualizer(String title)
    {
       super(title);
 
       executorService = MissingThreadTools.newSingleThreadExecutor("Height Map Visualizer Subscription", true, 1);
+   }
+
+   @Override
+   public List<ROS2Topic<?>> getTopics()
+   {
+      return List.of(PerceptionAPI.HEIGHT_MAP_OUTPUT, PerceptionAPI.HEIGHT_MAP_CROPPED);
    }
 
    public void setupForHeightMapMessage(ROS2PublishSubscribeAPI ros2)
@@ -105,12 +107,14 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    private void updateGridMapGraphic(HeightMapMessage heightMapMessage)
    {
       executorService.clearQueueAndExecute(() ->
-        {
-           if (enableHeightMapVisualizer.get())
-           {
-              heightMapGraphicNew.generateMeshesAsync(heightMapMessage);
-           }
-        });
+      {
+         if (enableHeightMapVisualizer.get())
+         {
+            heightMapGraphicNew.generateMeshesAsync(heightMapMessage);
+         }
+      });
+
+      getFrequency(PerceptionAPI.HEIGHT_MAP_OUTPUT).ping();
    }
 
    public void acceptImageMessage(ImageMessage imageMessage)
@@ -163,6 +167,8 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
 //                 PerceptionDebugTools.clearAllWindows();
            });
       }
+
+      getFrequency(PerceptionAPI.HEIGHT_MAP_CROPPED).ping();
    }
 
    @Override

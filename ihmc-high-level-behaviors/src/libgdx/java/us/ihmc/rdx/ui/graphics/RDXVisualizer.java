@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
@@ -13,10 +12,9 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2MultiTopicVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.ROS2MultiTopicHolder;
-import us.ihmc.rdx.ui.graphics.ros2.ROS2TopicHolder;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2SingleTopicVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 
@@ -73,6 +71,32 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
 
    protected void renderMenuEntry()
    {
+      ImGui.tableNextRow();
+      ImGui.tableNextColumn();
+
+      StringBuilder tooltip = new StringBuilder();
+      if (this instanceof RDXROS2SingleTopicVisualizer<?> topicVisualizer)
+      {
+         tooltip = new StringBuilder("ROS\n" + topicVisualizer.getTopic().getName());
+         topicVisualizer.getFrequency().render();
+         ImGui.sameLine();
+      }
+      else if (this instanceof RDXROS2MultiTopicVisualizer multiTopicVisualizer)
+      {
+         tooltip = new StringBuilder("ROS\n");
+         for (ROS2Topic<?> topic : multiTopicVisualizer.getTopics())
+         {
+            tooltip.append(topic.getName()).append("\n");
+            multiTopicVisualizer.getFrequency(topic).render();
+            ImGui.sameLine();
+         }
+      }
+      if (tooltip.length() > 0)
+      {
+         ImGuiTools.previousWidgetTooltip(tooltip.toString());
+      }
+
+      ImGui.tableNextColumn();
       if (ImGui.checkbox(labels.get("##Active"), active))
       {
          setActive(active.get());
@@ -83,32 +107,14 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
 
          if (getPanel() != null)
             getPanel().getIsShowing().set(active.get());
+
+         System.out.println("set panel");
       }
       ImGui.sameLine();
 
       if (ImGui.collapsingHeader(labels.get(title)))
       {
          renderImGuiWidgets();
-      }
-
-      StringBuilder tooltip = new StringBuilder();
-
-      if (this instanceof ROS2TopicHolder<?> topicHolder)
-      {
-         tooltip = new StringBuilder("ROS\n" + topicHolder.getTopic().getName());
-      }
-      else if (this instanceof ROS2MultiTopicHolder<?> multiTopicHolder)
-      {
-         tooltip = new StringBuilder("ROS\n");
-         for (ROS2Topic<?> topic : multiTopicHolder.getTopics())
-         {
-            tooltip.append(topic.getName()).append("\n");
-         }
-      }
-
-      if (tooltip.length() > 0)
-      {
-         ImGuiTools.previousWidgetTooltip(tooltip.toString());
       }
 
       if (getPanel() != null)

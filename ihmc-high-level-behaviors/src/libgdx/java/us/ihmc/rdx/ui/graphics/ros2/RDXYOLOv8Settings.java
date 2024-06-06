@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class RDXROS2YOLOv8Settings extends RDXVisualizer
+public class RDXYOLOv8Settings extends RDXVisualizer
 {
    private static final String[] AVAILABLE_SENSORS = {"ZED", "D455"};
    private static final double MESSAGE_PUBLISH_PERIOD = 2; // publish messages every 2 seconds
@@ -38,7 +38,7 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
    private final Throttler messagePublishThrottler = new Throttler().setPeriod(MESSAGE_PUBLISH_PERIOD);
    private final Notification parametersChanged = new Notification();
 
-   public RDXROS2YOLOv8Settings(String title, ROS2PublishSubscribeAPI ros2)
+   public RDXYOLOv8Settings(String title, ROS2PublishSubscribeAPI ros2)
    {
       super(title);
 

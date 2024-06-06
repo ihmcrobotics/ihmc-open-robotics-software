@@ -11,8 +11,8 @@ import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2PointCloudVisualizer;
 import us.ihmc.ros2.ROS2Node;
 
 public class RDXROS2PointCloudSensorDemo
@@ -22,7 +22,7 @@ public class RDXROS2PointCloudSensorDemo
    private RDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator;
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();
    private RDXEnvironmentBuilder environmentBuilder;
-   private RDXPerceptionVisualizerPanel perceptionVisualizerPanel;
+   private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
    private ROS2Node ros2Node;
 
    public RDXROS2PointCloudSensorDemo()
@@ -47,7 +47,7 @@ public class RDXROS2PointCloudSensorDemo
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
-            perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
+            perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
 
             RDXROS2PointCloudVisualizer ousterPointCloudVisualizer = new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
                                                                                                      ros2Node,

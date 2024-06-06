@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.ros2;
+package us.ihmc.rdx.ui.graphics.ros2.pointCloud;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -23,16 +23,14 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.ImPlotDoublePlot;
-import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
-import us.ihmc.rdx.ui.graphics.RDXVisualizer;
-import us.ihmc.robotics.time.TimeTools;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2SingleTopicVisualizer;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
@@ -40,7 +38,7 @@ import us.ihmc.tools.string.StringTools;
 import java.nio.ByteBuffer;
 import java.util.Set;
 
-public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements ROS2TopicHolder<ImageMessage>
+public class RDXROS2OusterPointCloudVisualizer extends RDXROS2SingleTopicVisualizer<ImageMessage>
 {
    private final String titleBeforeAdditions;
    private final PubSubImplementation pubSubImplementation;
@@ -49,8 +47,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    private final ImageMessage imageMessage = new ImageMessage();
    private final SampleInfo sampleInfo = new SampleInfo();
    private final Object syncObject = new Object();
-   private final ImPlotFrequencyPlot frequencyPlot = new ImPlotFrequencyPlot("Hz", 30);
-   private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
+   //   private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private boolean subscribed = false;
@@ -100,14 +97,13 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
 
    private void queueRenderImageBasedPointCloud(Subscriber<ImageMessage> subscriber)
    {
-      frequencyPlot.ping();
-
       synchronized (syncObject)
       {
          imageMessage.getData().resetQuick();
          subscriber.takeNextData(imageMessage, sampleInfo);
-         delayPlot.addValue(TimeTools.calculateDelay(imageMessage.getAcquisitionTime().getSecondsSinceEpoch(),
-                                                     imageMessage.getAcquisitionTime().getAdditionalNanos()));
+         //         delayPlot.addValue(TimeTools.calculateDelay(imageMessage.getAcquisitionTime().getSecondsSinceEpoch(),
+         //                                                     imageMessage.getAcquisitionTime().getAdditionalNanos()));
+         getFrequency().ping();
       }
    }
 
@@ -124,7 +120,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
    {
       super.update();
 
-      if (subscribed && isActive() && frequencyPlot.anyPingsYet())
+      if (subscribed && isActive())
       {
          int numberOfBytes;
          long acquisitionTimeSecondsSinceEpoch;
@@ -176,45 +172,29 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
          decompressionInputMat.data(decompressionInputBytePointer);
 
          depth16UC1Image.getBackingDirectByteBuffer().rewind();
-         opencv_imgcodecs.imdecode(decompressionInputMat,
-                                   opencv_imgcodecs.IMREAD_UNCHANGED,
-                                   depth16UC1Image.getBytedecoOpenCVMat());
+         opencv_imgcodecs.imdecode(decompressionInputMat, opencv_imgcodecs.IMREAD_UNCHANGED, depth16UC1Image.getBytedecoOpenCVMat());
          depth16UC1Image.getBackingDirectByteBuffer().rewind();
-
 
          pointCloudRenderer.updateMeshFastestBeforeKernel();
          pointCloudVertexBuffer.syncWithBackingBuffer(); // TODO: Is this necessary?
 
          ousterFisheyeKernel.getOusterToWorldTransformToPack().set(imageMessage.getOrientation(), imageMessage.getPosition());
          ousterFisheyeKernel.setInstrinsicParameters(ousterBeamAltitudeAnglesBuffer, ousterBeamAzimuthAnglesBuffer);
-         ousterFisheyeKernel.runKernel(0.0f,
-                                       pointSize.get(),
-                                       false,
-                                       RDXColorGradientMode.WORLD_Z.ordinal(),
-                                       false,
-                                       depth16UC1Image,
-                                       pointCloudVertexBuffer);
+         ousterFisheyeKernel.runKernel(0.0f, pointSize.get(), false, RDXColorGradientMode.WORLD_Z.ordinal(), false, depth16UC1Image, pointCloudVertexBuffer);
 
          pointCloudRenderer.updateMeshFastestAfterKernel();
 
-         delayPlot.addValue(TimeTools.calculateDelay(acquisitionTimeSecondsSinceEpoch, acquisitionTimeAdditionalNanos));
+         //         delayPlot.addValue(TimeTools.calculateDelay(acquisitionTimeSecondsSinceEpoch, acquisitionTimeAdditionalNanos));
       }
    }
 
    @Override
    public void renderImGuiWidgets()
    {
-      if (frequencyPlot.anyPingsYet())
-      {
-         messageSizeReadout.renderImGuiWidgets();
-      }
+      messageSizeReadout.renderImGuiWidgets();
       ImGui.sliderFloat(labels.get("Point size"), pointSize.getData(), 0.0005f, 0.05f);
-      if (frequencyPlot.anyPingsYet())
-      {
-         frequencyPlot.renderImGuiWidgets();
-         delayPlot.renderImGuiWidgets();
-         sequenceDiscontinuityPlot.renderImGuiWidgets();
-      }
+      //      delayPlot.renderImGuiWidgets();
+      sequenceDiscontinuityPlot.renderImGuiWidgets();
    }
 
    @Override
@@ -241,14 +221,15 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements 
       }
    }
 
-   public boolean isSubscribed()
-   {
-      return subscribed;
-   }
-
    @Override
    public ROS2Topic<ImageMessage> getTopic()
    {
       return topic;
+   }
+
+   @Override
+   public ImGuiAveragedFrequencyText getFrequency()
+   {
+      return super.getFrequency();
    }
 }

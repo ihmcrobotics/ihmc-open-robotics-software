@@ -17,10 +17,10 @@ import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
-import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXSteppableRegionsVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2PointCloudVisualizer;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -37,7 +37,7 @@ public class RDXSteppableRegionCalculatorDemo
    private final RemoteSteppableRegionsUpdater steppableRegionsUpdater;
    private final RDXRemoteHeightMapPanel heightMapUI;
    private final RDXSteppableRegionsPanel steppableRegionsUI;
-   private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel;
+   private final RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
 
    public RDXSteppableRegionCalculatorDemo()
    {
@@ -60,9 +60,9 @@ public class RDXSteppableRegionCalculatorDemo
       baseUI.getImGuiPanelManager().addPanel(heightMapUI.getPanel());
 
       // Configure the height map visualizer
-      perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
+      perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
 
-      RDXHeightMapVisualizer heightMapVisualizer = new RDXHeightMapVisualizer();
+      RDXROS2HeightMapVisualizer heightMapVisualizer = new RDXROS2HeightMapVisualizer("Height Map");
       heightMapVisualizer.setActive(true);
       RDXSteppableRegionsVisualizer steppableRegionsVisualizer = new RDXSteppableRegionsVisualizer("Steppable Regions");
       steppableRegionsVisualizer.setActive(true);

@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
-import imgui.internal.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -10,15 +9,12 @@ import us.ihmc.idl.IDLSequence;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
-import us.ihmc.rdx.imgui.ImPlotDoublePlot;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
-import us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer;
-import us.ihmc.robotics.time.TimeTools;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
 
-public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer implements ROS2TopicHolder<BigVideoPacket>
+public class RDXROS2BigDepthVideoVisualizer extends RDXROS2OpenCVVideoVisualizer<BigVideoPacket>
 {
    private final String titleBeforeAdditions;
    private final PubSubImplementation pubSubImplementation;
@@ -31,7 +27,7 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer imp
    private BytePointer messageBytePointer;
    private Mat inputDepthMat;
    private Mat normalizedScaledImage;
-   private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
+//   private final ImPlotDoublePlot delayPlot = new ImPlotDoublePlot("Delay", 30);
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
 
    public RDXROS2BigDepthVideoVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<BigVideoPacket> topic)
@@ -64,9 +60,9 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer imp
          {
             videoPacket.getData().resetQuick();
             subscriber.takeNextData(videoPacket, sampleInfo);
-            delayPlot.addValue(TimeTools.calculateDelay(videoPacket.getAcquisitionTimeSecondsSinceEpoch(), videoPacket.getAcquisitionTimeAdditionalNanos()));
+//            delayPlot.addValue(TimeTools.calculateDelay(videoPacket.getAcquisitionTimeSecondsSinceEpoch(), videoPacket.getAcquisitionTimeAdditionalNanos()));
          }
-         doReceiveMessageOnThread(() ->
+         getOpenCVVideoVisualizer().doReceiveMessageOnThread(() ->
          {
             synchronized (syncObject)
             {
@@ -92,6 +88,8 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer imp
                inputDepthMat.data(messageBytePointer);
 
                messageSizeReadout.update(numberOfBytes);
+
+               getFrequency().ping();
             }
 
             if (normalizedScaledImage == null)
@@ -103,8 +101,8 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer imp
 
             synchronized (this) // synchronize with the update method
             {
-               updateImageDimensions(videoPacket.getImageWidth(), videoPacket.getImageHeight());
-               OpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage, getRGBA8Mat());
+               getOpenCVVideoVisualizer().updateImageDimensions(videoPacket.getImageWidth(), videoPacket.getImageHeight());
+               OpenCVTools.convert8BitGrayTo8BitRGBA(normalizedScaledImage, getOpenCVVideoVisualizer().getRGBA8Mat());
             }
          });
       });
@@ -115,11 +113,10 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer imp
    public void renderImGuiWidgets()
    {
       messageSizeReadout.renderImGuiWidgets();
-      if (getHasReceivedOne())
-      {
-         getFrequencyPlot().renderImGuiWidgets();
-         delayPlot.renderImGuiWidgets();
-      }
+//      if (getHasReceivedOne())
+//      {
+//         delayPlot.renderImGuiWidgets();
+//      }
    }
 
    @Override

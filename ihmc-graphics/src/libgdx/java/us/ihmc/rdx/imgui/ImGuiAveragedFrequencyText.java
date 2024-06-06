@@ -8,7 +8,7 @@ public class ImGuiAveragedFrequencyText
 {
    public static final int HISTORY = 100;
    private final FrequencyCalculator averagedFrequencyCalculator = new FrequencyCalculator(HISTORY);
-   private final Throttler throttler = new Throttler().setFrequency(1.0);
+   private final Throttler throttler = new Throttler().setFrequency(0.25);
    private String fpsString = "0 Hz";
 
    public void ping()
@@ -22,6 +22,11 @@ public class ImGuiAveragedFrequencyText
       {
          fpsString = "%3d Hz".formatted((int) averagedFrequencyCalculator.getFrequency());
       }
-      ImGui.text(fpsString);
+      ImGui.text(fpsString.trim());
+   }
+
+   public double getFrequency()
+   {
+      return averagedFrequencyCalculator.getFrequency();
    }
 }

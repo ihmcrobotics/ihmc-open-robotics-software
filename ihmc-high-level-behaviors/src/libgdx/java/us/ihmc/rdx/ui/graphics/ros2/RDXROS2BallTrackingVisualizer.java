@@ -16,11 +16,11 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
+import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXTrajectoryGraphic;
-import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
@@ -30,7 +30,7 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class RDXROS2BallTrackingVisualizer extends RDXVisualizer implements ROS2TopicHolder<RigidBodyTransformMessage>
+public class RDXROS2BallTrackingVisualizer extends RDXROS2SingleTopicVisualizer<RigidBodyTransformMessage>
 {
    private static final double MESSAGE_PUBLISH_PERIOD = 2; // publish messages every 2 seconds
 
@@ -120,6 +120,8 @@ public class RDXROS2BallTrackingVisualizer extends RDXVisualizer implements ROS2
          RigidBodyTransform newTransform = MessageTools.toEuclid(subscriber.takeNextData());
          trajectories.offer(newTransform);
          trajectoryAcquisitionTimes.offer(Instant.now());
+
+         getFrequency().ping();
       }
    }
 

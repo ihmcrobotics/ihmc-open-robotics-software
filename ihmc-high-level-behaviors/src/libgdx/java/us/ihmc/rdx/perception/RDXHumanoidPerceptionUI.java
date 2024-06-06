@@ -21,7 +21,7 @@ import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PlanarRegionsVisualizer;
 import us.ihmc.ros2.ROS2Node;
@@ -136,7 +136,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    public void initializeHeightMapVisualizer(ROS2Helper ros2Helper)
    {
       terrainGridGraphic.create();
-      RDXHeightMapVisualizer heightMapVisualizer = new RDXHeightMapVisualizer();
+      RDXROS2HeightMapVisualizer heightMapVisualizer = new RDXROS2HeightMapVisualizer("Height Map");
       if (ros2Helper != null)
       {
          heightMapVisualizer.setupForHeightMapMessage(ros2Helper);
@@ -263,7 +263,7 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
          ImGui.indent();
          ImGui.checkbox("Enable GPU Height Map", enableGPUHeightMap);
          terrainGridGraphic.renderImGuiWidgets();
-         RDXHeightMapVisualizer heightMapVisualizer = (RDXHeightMapVisualizer) visualizers.get("HeightMap");
+         RDXROS2HeightMapVisualizer heightMapVisualizer = (RDXROS2HeightMapVisualizer) visualizers.get("HeightMap");
          if (heightMapVisualizer != null)
          {
             heightMapVisualizer.renderImGuiWidgets();
@@ -439,9 +439,9 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
       return remotePerceptionUI;
    }
 
-   public RDXHeightMapVisualizer getHeightMapVisualizer()
+   public RDXROS2HeightMapVisualizer getHeightMapVisualizer()
    {
-      return (RDXHeightMapVisualizer) visualizers.get("HeightMap");
+      return (RDXROS2HeightMapVisualizer) visualizers.get("HeightMap");
    }
 
    public float getThresholdHeight()

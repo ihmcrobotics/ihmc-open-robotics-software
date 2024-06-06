@@ -9,10 +9,10 @@ import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2DetectedObjectBoundingBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ZEDModelData;
@@ -20,7 +20,7 @@ import us.ihmc.sensors.ZEDModelData;
 public class RDXCenterposeObjectDetectionDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("Centerpose Object Detection Demo");
-   private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
+   private final RDXPerceptionVisualizersPanel perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
    private final ROS2Helper ros2Helper;
 
    public RDXCenterposeObjectDetectionDemo()
@@ -56,7 +56,7 @@ public class RDXCenterposeObjectDetectionDemo
                                                                    baseUI.getPrimary3DPanel().getCamera3D());
             centerPoseBoundingBoxVisualizer.setActive(true);
             perceptionVisualizerPanel.addVisualizer(centerPoseBoundingBoxVisualizer);
-            zed2LeftColorImageVisualizer.addOverlay(centerPoseBoundingBoxVisualizer::drawVertexOverlay);
+            zed2LeftColorImageVisualizer.getOpenCVVideoVisualizer().addOverlay(centerPoseBoundingBoxVisualizer::drawVertexOverlay);
 
             RDXROS2ImageMessageVisualizer zed2RightColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Right",
                                                                                                             PubSubImplementation.FAST_RTPS,

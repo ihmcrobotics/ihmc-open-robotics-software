@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.ros2;
+package us.ihmc.rdx.ui.graphics.ros2.pointCloud;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -16,11 +16,12 @@ import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
 import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
-import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2MultiTopicVisualizer;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -37,7 +38,7 @@ import java.util.Set;
  * It provides our full set of analytics as plots, such as message size,
  * delay, sequence discontinuities, etc. and coloring options.
  */
-public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements ROS2MultiTopicHolder<ImageMessage>
+public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisualizer
 {
    private final String titleBeforeAdditions;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -234,23 +235,13 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
    public void renderStatistics()
    {
       if (colorChannel.getReceivedOne())
-      {
          colorChannel.getMessageSizeReadout().renderImGuiWidgets();
-      }
       if (depthChannel.getReceivedOne())
-      {
          depthChannel.getMessageSizeReadout().renderImGuiWidgets();
-      }
-      if (colorChannel.getReceivedOne())
-         colorChannel.getFrequencyPlot().renderImGuiWidgets();
-      if (depthChannel.getReceivedOne())
-         depthChannel.getFrequencyPlot().renderImGuiWidgets();
-
-      if (colorChannel.getReceivedOne())
-         colorChannel.getDelayPlot().renderImGuiWidgets();
-      if (depthChannel.getReceivedOne())
-         depthChannel.getDelayPlot().renderImGuiWidgets();
-
+//      if (colorChannel.getReceivedOne())
+//         colorChannel.getDelayPlot().renderImGuiWidgets();
+//      if (depthChannel.getReceivedOne())
+//         depthChannel.getDelayPlot().renderImGuiWidgets();
       if (colorChannel.getReceivedOne())
          colorChannel.getSequenceDiscontinuityPlot().renderImGuiWidgets();
       if (depthChannel.getReceivedOne())
@@ -350,8 +341,18 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements
    }
 
    @Override
-   public List<ROS2Topic<ImageMessage>> getTopics()
+   public List<ROS2Topic<?>> getTopics()
    {
       return List.of(colorChannel.getTopic(), depthChannel.getTopic());
+   }
+
+   @Override
+   public ImGuiAveragedFrequencyText getFrequency(ROS2Topic<?> topic)
+   {
+      if (topic == colorChannel.getTopic())
+         return colorChannel.getFrequencyText();
+      else if (topic == depthChannel.getTopic())
+         return depthChannel.getFrequencyText();
+      return null;
    }
 }

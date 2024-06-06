@@ -7,9 +7,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.string.StringTools;
@@ -22,22 +20,17 @@ import java.util.concurrent.atomic.AtomicReference;
  * Useful when any remote module is performing footstep planning to help the human operator understand the plan. It can function as a standalone visualizer
  * for any footstep plan based FootstepDataListMessage.
 * */
-public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer implements ROS2TopicHolder<FootstepDataListMessage>
+public class RDXROS2FootstepPlanVisualizer extends RDXROS2SingleTopicVisualizer<FootstepDataListMessage>
 {
    private final String titleBeforeAdditions;
-   private final DomainFactory.PubSubImplementation pubSubImplementation;
    private final ROS2Topic<FootstepDataListMessage> topic;
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private boolean subscribed = false;
    private ROS2Node ros2Node;
-   private final Object syncObject = new Object();
    private AtomicReference<FootstepDataListMessage> footstepDataListMessage = new AtomicReference<>(null);
 
-   public RDXROS2FootstepPlanVisualizer(String title, DomainFactory.PubSubImplementation pubSubImplementation, ROS2Topic<FootstepDataListMessage> topic)
+   public RDXROS2FootstepPlanVisualizer(String title, ROS2Topic<FootstepDataListMessage> topic)
    {
       super(title);
       titleBeforeAdditions = title;
-      this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
 
       setActivenessChangeCallback(isActive ->
@@ -55,7 +48,6 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer implements ROS2
 
    private void subscribe()
    {
-      subscribed = true;
       ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, StringTools.titleToSnakeCase(titleBeforeAdditions));
       ros2Node.createSubscription(this.topic, this::queueFootstepDataListMessage);
    }
@@ -63,6 +55,8 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer implements ROS2
    private void queueFootstepDataListMessage(Subscriber<FootstepDataListMessage> subscriber)
    {
       footstepDataListMessage.set(subscriber.takeNextData());
+
+      getFrequency().ping();
    }
 
    @Override
@@ -101,17 +95,11 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer implements ROS2
 
    private void unsubscribe()
    {
-      subscribed = false;
       if (ros2Node != null)
       {
          ros2Node.destroy();
          ros2Node = null;
       }
-   }
-
-   public boolean isSubscribed()
-   {
-      return subscribed;
    }
 
    @Override

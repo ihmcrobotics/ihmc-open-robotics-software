@@ -4,8 +4,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.flag.ImGuiTableColumnFlags;
 import imgui.type.ImString;
-import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -15,7 +15,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRenderableProvider
+public class RDXPerceptionVisualizersPanel extends RDXPanel implements RDXRenderableProvider
 {
    private static final String WINDOW_NAME = "Perception Visualizers";
 
@@ -24,7 +24,7 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
    private final ImString filter = new ImString();
    private boolean created = false;
 
-   public RDXPerceptionVisualizerPanel()
+   public RDXPerceptionVisualizersPanel()
    {
       super(WINDOW_NAME);
       setRenderMethod(this::renderImGuiWidgets);
@@ -60,28 +60,36 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.inputText("Search", filter))
+      if (ImGui.inputText("Search##perceptionVisualizers", filter))
       {
       }
 
-      // Pinned visualizers
-      ImGuiTools.separatorText("Pinned");
-      for (RDXVisualizer visualizer : visualizers)
-         if (visualizer.isPinned())
-            visualizer.renderMenuEntry();
-      ImGui.separator();
-
-      // All other visualizers in alphabetical order (filtered)
-      for (RDXVisualizer visualizer : visualizers)
+      if (ImGui.beginTable("##perceptionVisualizersTable", 2))
       {
-         if (!visualizer.isPinned())
-         {
-            if (filter.isNotEmpty())
-               if (!visualizer.getTitle().toLowerCase(Locale.ROOT).contains(filter.toString().toLowerCase(Locale.ROOT)))
-                  continue;
+         ImGui.tableSetupColumn("##leftTextContextCol", ImGuiTableColumnFlags.WidthFixed, 30.0f);
+         ImGui.tableSetupColumn("##rightCol", ImGuiTableColumnFlags.WidthStretch);
 
-            visualizer.renderMenuEntry();
+//          Pinned visualizers
+         ImGui.separator();
+         for (RDXVisualizer visualizer : visualizers)
+            if (visualizer.isPinned())
+               visualizer.renderMenuEntry();
+         ImGui.separator();
+
+         // All other visualizers in alphabetical order (filtered)
+         for (RDXVisualizer visualizer : visualizers)
+         {
+            if (!visualizer.isPinned())
+            {
+               if (filter.isNotEmpty())
+                  if (!visualizer.getTitle().toLowerCase(Locale.ROOT).contains(filter.toString().toLowerCase(Locale.ROOT)))
+                     continue;
+
+               visualizer.renderMenuEntry();
+            }
          }
+
+         ImGui.endTable();
       }
    }
 

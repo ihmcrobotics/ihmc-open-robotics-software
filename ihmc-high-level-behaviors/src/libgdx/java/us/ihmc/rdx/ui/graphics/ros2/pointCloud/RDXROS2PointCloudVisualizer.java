@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.ros2;
+package us.ihmc.rdx.ui.graphics.ros2.pointCloud;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
@@ -25,17 +25,14 @@ import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLIntBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.rdx.RDXPointCloudRenderer;
-import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.ImPlotIntegerPlot;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
-import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2SingleTopicVisualizer;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.thread.MissingThreadTools;
-import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -43,12 +40,11 @@ import java.nio.ByteOrder;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements ROS2TopicHolder
+public class RDXROS2PointCloudVisualizer extends RDXROS2SingleTopicVisualizer
 {
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> topic;
    private ROS2Callback<?> ros2Callback = null;
-   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImPlotIntegerPlot segmentIndexPlot = new ImPlotIntegerPlot("Segment", 30);
    private final ImFloat pointSize = new ImFloat(0.01f);
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -56,7 +52,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements ROS2To
    private int pointsPerSegment;
    private int numberOfSegments;
    private int totalNumberOfPoints;
-   private final ResettableExceptionHandlingExecutorService threadQueue;
    private final LZ4FastDecompressor lz4Decompressor = LZ4Factory.nativeInstance().fastDecompressor();
    private ByteBuffer decompressionInputDirectBuffer;
    private final AtomicReference<FusedSensorHeadPointCloudMessage> latestFusedSensorHeadPointCloudMessageReference = new AtomicReference<>(null);
@@ -78,7 +73,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements ROS2To
       super(title);
       this.ros2Node = ros2Node;
       this.topic = topic;
-      threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
       setActivenessChangeCallback(isActive ->
       {
@@ -119,7 +113,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements ROS2To
 
    private void queueRenderStereoVisionPointCloud(StereoVisionPointCloudMessage message)
    {
-      frequencyPlot.recordEvent();
       // TODO: Possibly decompress on a thread here
       // TODO: threadQueue.clearQueueAndExecute(() ->
       latestStereoVisionMessageReference.set(message);
@@ -127,13 +120,11 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements ROS2To
 
    private void queueRenderLidarScan(LidarScanMessage message)
    {
-      frequencyPlot.recordEvent();
       latestLidarScanMessageReference.set(message);
    }
 
    private void queueRenderFusedSensorHeadPointCloud(FusedSensorHeadPointCloudMessage message)
    {
-      frequencyPlot.recordEvent();
       latestFusedSensorHeadPointCloudMessageReference.set(message);
    }
 
@@ -299,7 +290,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements ROS2To
       ImGui.dragFloat(labels.get("Size"), pointSize.getData(), 0.001f, 0.0005f, 0.1f);
       ImGui.popItemWidth();
       messageSizeReadout.renderImGuiWidgets();
-      frequencyPlot.renderImGuiWidgets();
       segmentIndexPlot.renderImGuiWidgets();
    }
 
@@ -312,7 +302,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements ROS2To
 
    private void unsubscribe()
    {
-      subscribed = false;
       ros2Callback.destroy();
       ros2Callback = null;
    }
@@ -323,11 +312,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements ROS2To
       if (lidarActiveHeartbeat != null)
          lidarActiveHeartbeat.destroy();
       super.destroy();
-   }
-
-   public boolean isSubscribed()
-   {
-      return subscribed;
    }
 
    @Override
