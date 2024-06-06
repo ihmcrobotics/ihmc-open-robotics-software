@@ -198,7 +198,6 @@ public class SCS2KinematicsSimulationOutputWriter implements JointDesiredOutputW
       {
          updateFourBarJoint();
 
-//         if (jointDesiredOutput.hasDesiredTorque())
          double tau_actuated = localFourBarJoint.computeActuatedJointTau(jointDesiredOutput.getDesiredTorque());
          /*
           * Ideally we just want to set the torque of the actuated joint, but spreading the torque onto the
