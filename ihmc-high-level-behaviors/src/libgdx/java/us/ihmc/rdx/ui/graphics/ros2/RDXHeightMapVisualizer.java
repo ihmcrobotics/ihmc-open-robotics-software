@@ -19,13 +19,12 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.NativeMemoryTools;
-import us.ihmc.perception.tools.PerceptionDebugTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.RDXHeightMapRenderer;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
+import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
-import us.ihmc.rdx.ui.graphics.RDXGridMapGraphic;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 
@@ -37,15 +36,12 @@ import java.util.concurrent.Executors;
 public class RDXHeightMapVisualizer extends RDXVisualizer
 {
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
-   private final RDXGridMapGraphic gridMapGraphic = new RDXGridMapGraphic();
+   private final RDXHeightMapGraphicNew heightMapGraphicNew = new RDXHeightMapGraphicNew();
    private final ExecutorService executorService;
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
 
-   private final ImBoolean inPaintHeight = new ImBoolean(false);
-   private final ImBoolean renderGroundPlane = new ImBoolean(false);
-   private final ImBoolean renderGroundCells = new ImBoolean(false);
-   private final ImBoolean enableHeightMapVisualizer = new ImBoolean(false);
-   private final ImBoolean enableHeightMapRenderer = new ImBoolean(true);
+   private final ImBoolean enableHeightMapVisualizer = new ImBoolean(true);
+   private final ImBoolean enableHeightMapRenderer = new ImBoolean(false);
    private final ImBoolean displayGlobalHeightMapImage = new ImBoolean(false);
 
    private final RigidBodyTransform zUpToWorldTransform = new RigidBodyTransform();
@@ -89,7 +85,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    public void create()
    {
       super.create();
-      int cellsPerAxis = RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize() + 1;
+      int cellsPerAxis = RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize();
       heightMapRenderer.create(cellsPerAxis * cellsPerAxis);
    }
 
@@ -108,10 +104,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
         {
            if (enableHeightMapVisualizer.get())
            {
-              gridMapGraphic.setInPaintHeight(inPaintHeight.get());
-              gridMapGraphic.setRenderGroundPlane(renderGroundPlane.get());
-              gridMapGraphic.setRenderGroundCells(renderGroundCells.get());
-              gridMapGraphic.generateMeshesAsync(heightMapMessage);
+              heightMapGraphicNew.generateMeshesAsync(heightMapMessage);
            }
         });
    }
@@ -185,9 +178,6 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
 
       ImGui.checkbox("Enable Height Map Visualizer", enableHeightMapVisualizer);
       ImGui.checkbox("Enable Height Map Renderer", enableHeightMapRenderer);
-      ImGui.checkbox("In Paint Height", inPaintHeight);
-      ImGui.checkbox("Render Ground Plane", renderGroundPlane);
-      ImGui.checkbox("Render Ground Cells", renderGroundCells);
       ImGui.checkbox("Display Global Height Map Image", displayGlobalHeightMapImage);
 
       if (!isActive())
@@ -216,7 +206,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       boolean isActive = isActive();
       if (isActive && enableHeightMapVisualizer.get())
       {
-         gridMapGraphic.update();
+         heightMapGraphicNew.update();
       }
 
       if (isActive && enableHeightMapRenderer.get() && heightMapImage != null)
@@ -239,7 +229,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       {
          if (enableHeightMapVisualizer.get())
          {
-            gridMapGraphic.getRenderables(renderables, pool);
+            heightMapGraphicNew.getRenderables(renderables, pool);
          }
 
          if (enableHeightMapRenderer.get())
@@ -256,7 +246,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       {
          activeHeartbeat.destroy();
       }
-      gridMapGraphic.destroy();
+      heightMapGraphicNew.destroy();
    }
 
    public HeightMapMessage getLatestHeightMapMessage()
