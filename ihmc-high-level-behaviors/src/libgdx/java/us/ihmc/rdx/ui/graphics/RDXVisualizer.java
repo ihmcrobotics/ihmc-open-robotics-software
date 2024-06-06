@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.flag.ImGuiCol;
 import imgui.type.ImBoolean;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
@@ -12,6 +13,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2RobotVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.ROS2MultiTopicHolder;
 import us.ihmc.rdx.ui.graphics.ros2.ROS2TopicHolder;
@@ -36,7 +38,7 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
    private ROS2Heartbeat heartbeat;
 
    // If this visualizer should be at the top of the list in all visualizers
-   private boolean favorite;
+   private boolean pinned;
 
    public RDXVisualizer(String title)
    {
@@ -196,13 +198,13 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       return title;
    }
 
-   public void setFavorite(boolean favorite)
+   public void setPinned(boolean pinned)
    {
-      this.favorite = favorite;
+      this.pinned = pinned;
    }
 
-   public boolean isFavorite()
+   public boolean isPinned()
    {
-      return favorite;
+      return pinned;
    }
 }

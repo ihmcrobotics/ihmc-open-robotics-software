@@ -64,17 +64,17 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
       {
       }
 
-      // Favorite visualizers
-      ImGuiTools.separatorText("Favorites");
+      // Pinned visualizers
+      ImGuiTools.separatorText("Pinned");
       for (RDXVisualizer visualizer : visualizers)
-         if (visualizer.isFavorite())
+         if (visualizer.isPinned())
             visualizer.renderMenuEntry();
       ImGui.separator();
 
       // All other visualizers in alphabetical order (filtered)
       for (RDXVisualizer visualizer : visualizers)
       {
-         if (!visualizer.isFavorite())
+         if (!visualizer.isPinned())
          {
             if (filter.isNotEmpty())
                if (!visualizer.getTitle().toLowerCase(Locale.ROOT).contains(filter.toString().toLowerCase(Locale.ROOT)))
