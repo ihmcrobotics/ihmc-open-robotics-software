@@ -58,25 +58,17 @@ public class FeedbackControllerFilterFactory
       private final YoBoolean enableFilter;
       private final YoDouble breakFrequency;
       private final YoDouble maxOutputRate;
-      private final YoDouble updateScale;
       private final YoDouble updateReferenceRatio;
 
-      public YoHPRLParameters(String namePrefix,
-                              boolean enableFilter,
-                              double breakFrequency,
-                              double maxOutputRate,
-                              double updateScale,
-                              double updateReferenceRatio)
+      public YoHPRLParameters(String namePrefix, boolean enableFilter, double breakFrequency, double maxOutputRate, double updateReferenceRatio)
       {
          this.enableFilter = new YoBoolean(namePrefix + "EnableFilter", null);
          this.breakFrequency = new YoDouble(namePrefix + "BreakFrequency", null);
          this.maxOutputRate = new YoDouble(namePrefix + "MaxOutputRate", null);
-         this.updateScale = new YoDouble(namePrefix + "UpdateScale", null);
          this.updateReferenceRatio = new YoDouble(namePrefix + "UpdateReferenceRatio", null);
          this.enableFilter.set(enableFilter);
          this.breakFrequency.set(breakFrequency);
          this.maxOutputRate.set(maxOutputRate);
-         this.updateScale.set(updateScale);
          this.updateReferenceRatio.set(updateReferenceRatio);
       }
 
@@ -87,7 +79,6 @@ public class FeedbackControllerFilterFactory
          enableFilter.setRegistry(registry);
          breakFrequency.setRegistry(registry);
          maxOutputRate.setRegistry(registry);
-         updateScale.setRegistry(registry);
          updateReferenceRatio.setRegistry(registry);
       }
 
@@ -104,11 +95,6 @@ public class FeedbackControllerFilterFactory
       public void setMaxOutputRate(double maxOutputRate)
       {
          this.maxOutputRate.set(maxOutputRate);
-      }
-
-      public void setUpdateScale(double updateScale)
-      {
-         this.updateScale.set(updateScale);
       }
 
       public void setUpdateReferenceRatio(double updateReferenceRatio)
@@ -129,11 +115,6 @@ public class FeedbackControllerFilterFactory
       public double getMaxOutputRate()
       {
          return maxOutputRate.getValue();
-      }
-
-      public double getUpdateScale()
-      {
-         return updateScale.getValue();
       }
 
       public double getUpdateReferenceRatio()
@@ -191,76 +172,6 @@ public class FeedbackControllerFilterFactory
          updateStepBreakFrequency.setRegistry(registry);
          maxOutputRate.setRegistry(registry);
       }
-
-      public void setEnableFilter(boolean enableFilter)
-      {
-         this.enableFilter.set(enableFilter);
-      }
-
-      public void setMaxInputRate(double maxInputRate)
-      {
-         this.maxInputRate.set(maxInputRate);
-      }
-
-      public void setMaxInput(double maxInput)
-      {
-         this.maxInput.set(maxInput);
-      }
-
-      public void setLeadFrequency(double leadFrequency)
-      {
-         this.leadFrequency.set(leadFrequency);
-      }
-
-      public void setLagFrequency(double lagFrequency)
-      {
-         this.lagFrequency.set(lagFrequency);
-      }
-
-      public void setUpdateStepBreakFrequency(double updateStepBreakFrequency)
-      {
-         this.updateStepBreakFrequency.set(updateStepBreakFrequency);
-      }
-
-      public void setMaxOutputRate(double maxOutputRate)
-      {
-         this.maxOutputRate.set(maxOutputRate);
-      }
-
-      public boolean getEnableFilter()
-      {
-         return enableFilter.getValue();
-      }
-
-      public double getMaxInputRate()
-      {
-         return maxInputRate.getValue();
-      }
-
-      public double getMaxInput()
-      {
-         return maxInput.getValue();
-      }
-
-      public double getLeadFrequency()
-      {
-         return leadFrequency.getValue();
-      }
-
-      public double getLagFrequency()
-      {
-         return lagFrequency.getValue();
-      }
-
-      public double getUpdateStepFrequency()
-      {
-         return updateStepBreakFrequency.getValue();
-      }
-
-      public double getMaxOutputRate()
-      {
-         return maxOutputRate.getValue();
-      }
    }
 
    private static class YoHPRLFilterDouble1D implements FilterDouble1D
@@ -275,28 +186,19 @@ public class FeedbackControllerFilterFactory
       private final BooleanProvider enableFilter;
       private final DoubleProvider breakFrequency;
       private final DoubleProvider maxOutputRate;
-      private final DoubleProvider updateScale;
       private final DoubleProvider updateReferenceRatio;
 
       private final double dt;
 
       public YoHPRLFilterDouble1D(String namePrefix, YoHPRLParameters parameters, double dt, YoRegistry registry)
       {
-         this(namePrefix,
-              parameters.enableFilter,
-              parameters.breakFrequency,
-              parameters.maxOutputRate,
-              parameters.updateScale,
-              parameters.updateReferenceRatio,
-              dt,
-              registry);
+         this(namePrefix, parameters.enableFilter, parameters.breakFrequency, parameters.maxOutputRate, parameters.updateReferenceRatio, dt, registry);
       }
 
       public YoHPRLFilterDouble1D(String namePrefix,
                                   BooleanProvider enableFilter,
                                   DoubleProvider breakFrequency,
                                   DoubleProvider maxOutputRate,
-                                  DoubleProvider updateScale,
                                   DoubleProvider updateReferenceRatio,
                                   double dt,
                                   YoRegistry registry)
@@ -304,7 +206,6 @@ public class FeedbackControllerFilterFactory
          this.enableFilter = enableFilter;
          this.breakFrequency = breakFrequency;
          this.maxOutputRate = maxOutputRate;
-         this.updateScale = updateScale;
          this.updateReferenceRatio = updateReferenceRatio;
          this.dt = dt;
 
@@ -338,18 +239,11 @@ public class FeedbackControllerFilterFactory
          inputLPF2.set(EuclidCoreTools.interpolate(inputLPF.getValue(), inputLPF2.getValue(), alpha));
          double inputHPFPrevious = inputHPF.getValue();
          inputHPF.set(rawInput - inputLPF2.getValue());
-         if (updateScale.getValue() <= 0.0)
-         {
-            inputHPRL.set(0.0);
-            output.set(inputLPF2.getValue());
-         }
-         else
-         {
-            double reference = EuclidCoreTools.interpolate(inputHPFPrevious, inputHPRL.getValue(), updateReferenceRatio.getValue());
-            double update = updateScale.getValue() * (inputHPF.getValue() - reference);
-            inputHPRL.add(MathTools.clamp(update, maxOutputRate.getValue() * dt));
-            output.set(inputLPF2.getValue() + inputHPRL.getValue());
-         }
+
+         double reference = EuclidCoreTools.interpolate(inputHPFPrevious, inputHPRL.getValue(), MathTools.clamp(updateReferenceRatio.getValue(), 0.0, 1.0));
+         double update = inputHPF.getValue() - reference;
+         inputHPRL.add(MathTools.clamp(update, maxOutputRate.getValue() * dt));
+         output.set(inputLPF2.getValue() + inputHPRL.getValue());
 
          // Checking at the end allows to visualize the filter state when disabled.
          if (enableFilter.getValue())
@@ -530,46 +424,6 @@ public class FeedbackControllerFilterFactory
          else
             return rawInput;
       }
-
-      public YoBoolean getInitialize()
-      {
-         return initialize;
-      }
-
-      public YoDouble getRateLimitedInput()
-      {
-         return rateLimitedInput;
-      }
-
-      public YoDouble getUpdateStepLeadLag_q1()
-      {
-         return updateStepLeadLag_q1;
-      }
-
-      public YoDouble getUpdateStepLeadLag_q2()
-      {
-         return updateStepLeadLag_q2;
-      }
-
-      public YoDouble getUpdateStepLeadLagOutput()
-      {
-         return updateStepLeadLagOutput;
-      }
-
-      public YoDouble getUpdateStepLPF()
-      {
-         return updateStepLPF;
-      }
-
-      public YoDouble getOutputPreRateLimit()
-      {
-         return outputPreRateLimit;
-      }
-
-      public YoDouble getOutput()
-      {
-         return output;
-      }
    }
 
    private static class YoHPRLFilterVector3D implements FilterVector3D
@@ -584,28 +438,19 @@ public class FeedbackControllerFilterFactory
       private final BooleanProvider enableFilter;
       private final DoubleProvider breakFrequency;
       private final DoubleProvider maxOutputRate;
-      private final DoubleProvider updateScale;
       private final DoubleProvider updateReferenceRatio;
 
       private final double dt;
 
       public YoHPRLFilterVector3D(String namePrefix, YoHPRLParameters parameters, double dt, YoRegistry registry)
       {
-         this(namePrefix,
-              parameters.enableFilter,
-              parameters.breakFrequency,
-              parameters.maxOutputRate,
-              parameters.updateScale,
-              parameters.updateReferenceRatio,
-              dt,
-              registry);
+         this(namePrefix, parameters.enableFilter, parameters.breakFrequency, parameters.maxOutputRate, parameters.updateReferenceRatio, dt, registry);
       }
 
       public YoHPRLFilterVector3D(String namePrefix,
                                   BooleanProvider enableFilter,
                                   DoubleProvider breakFrequency,
                                   DoubleProvider maxOutputRate,
-                                  DoubleProvider updateScale,
                                   DoubleProvider updateReferenceRatio,
                                   double dt,
                                   YoRegistry registry)
@@ -613,7 +458,6 @@ public class FeedbackControllerFilterFactory
          this.enableFilter = enableFilter;
          this.breakFrequency = breakFrequency;
          this.maxOutputRate = maxOutputRate;
-         this.updateScale = updateScale;
          this.updateReferenceRatio = updateReferenceRatio;
          this.dt = dt;
 
@@ -646,27 +490,18 @@ public class FeedbackControllerFilterFactory
             initialize.set(false);
          }
 
-         double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt);
+         double alpha = MathTools.clamp(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt), 0.0, 1.0);
          inputLPF.interpolate(rawInput, inputLPF, alpha);
          inputLPF2.interpolate(inputLPF, inputLPF2, alpha);
          inputHPFPrevious.set(inputHPF);
          inputHPF.sub(rawInput, inputLPF2);
 
-         if (updateScale.getValue() <= 0.0)
-         {
-            reference.interpolate(inputHPFPrevious, inputHPRL, updateReferenceRatio.getValue());
-            update.sub(inputHPF, reference);
-            update.scale(updateScale.getValue());
-            update.clipToMaxNorm(maxOutputRate.getValue() * dt);
-            inputHPRL.add(update);
+         reference.interpolate(inputHPFPrevious, inputHPRL, MathTools.clamp(updateReferenceRatio.getValue(), 0.0, 1.0));
+         update.sub(inputHPF, reference);
+         update.clipToMaxNorm(maxOutputRate.getValue() * dt);
+         inputHPRL.add(update);
 
-            output.add(inputLPF2, inputHPRL);
-         }
-         else
-         {
-            inputHPRL.setToZero();
-            output.set(inputLPF2);
-         }
+         output.add(inputLPF2, inputHPRL);
 
          // Checking at the end allows to visualize the filter state when disabled.
          if (enableFilter.getValue())
