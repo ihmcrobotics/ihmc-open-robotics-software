@@ -4,7 +4,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
-import org.apache.commons.lang3.mutable.MutableLong;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
@@ -24,6 +23,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -42,7 +42,7 @@ public class SceneGraph
    public static long ROOT_NODE_ID = 0;
    public static String ROOT_NODE_NAME = "SceneGraphRoot";
 
-   private final MutableLong nextID = new MutableLong(1); // Starts at 1 because root node is passed in
+   private final AtomicLong nextID = new AtomicLong(1); // Starts at 1 because root node is passed in
    private final SceneNode rootNode;
    private final Queue<SceneGraphTreeModification> queuedModifications = new LinkedList<>();
    private final DetectionFilterCollection detectionFilterCollection = new DetectionFilterCollection();
@@ -164,7 +164,7 @@ public class SceneGraph
       return rootNode;
    }
 
-   public MutableLong getNextID()
+   public AtomicLong getNextID()
    {
       return nextID;
    }

@@ -9,6 +9,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeExecutor;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
@@ -18,6 +19,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.BallDetectionManager;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.IterativeClosestPointManager;
 import us.ihmc.perception.RawImage;
@@ -160,11 +162,15 @@ public class PerceptionAndAutonomyProcess
 
    private final IterativeClosestPointManager icpManager;
 
+   private final BallDetectionManager ballDetectionManager;
+   private ROS2DemandGraphNode ballDetectionDemandNode;
+
    private final OpenCLManager openCLManager = new OpenCLManager();
 
    @Nullable
    private RapidPlanarRegionsExtractor planarRegionsExtractor;
    private final RestartableThrottledThread planarRegionsExtractorThread;
+   private final TypedNotification<PlanarRegionsList> newPlanarRegions = new TypedNotification<>();
    private ROS2DemandGraphNode planarRegionsDemandNode;
 
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
@@ -235,6 +241,8 @@ public class PerceptionAndAutonomyProcess
 
       icpManager = new IterativeClosestPointManager(ros2Helper, sceneGraph);
       icpManager.startWorkers();
+
+      ballDetectionManager = new BallDetectionManager(ros2Helper);
 
       planarRegionsExtractorThread = new RestartableThrottledThread("PlanarRegionsExtractor", 10.0, this::updatePlanarRegions);
       planarRegionsExtractorThread.start();
@@ -315,8 +323,12 @@ public class PerceptionAndAutonomyProcess
       if (planarRegionsExtractor != null)
          planarRegionsExtractor.destroy();
 
+      ballDetectionManager.destroy();
+
       // TODO: Why does this result in a native crash?
 //      openCLManager.destroy();
+
+      overlapRemover.destroy();
 
       depthOverlapRemovalDemandNode.destroy();
       zedPointCloudDemandNode.destroy();
@@ -331,6 +343,7 @@ public class PerceptionAndAutonomyProcess
       yoloAnnotatedImageDemandNode.destroy();
       yoloZEDDemandNode.destroy();
       yoloRealsenseDemandNode.destroy();
+      ballDetectionDemandNode.destroy();
       planarRegionsDemandNode.destroy();
 
       if (zedHeartbeat != null)
@@ -361,11 +374,14 @@ public class PerceptionAndAutonomyProcess
             icpManager.setEnvironmentPointCloud(zedDepthImage);
 
          if (yoloZEDDemandNode.isDemanded())
-            yolov8DetectionManager.setDetectionImages(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
+            yolov8DetectionManager.runYOLODetection(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
+
+         if (ballDetectionDemandNode.isDemanded())
+            ballDetectionManager.run(zedColorImages.get(RobotSide.LEFT));
 
          if (depthOverlapRemovalDemandNode.isDemanded() && realsenseDemandNode.isDemanded() && realsenseDepthImage != null)
          {
-            RawImage zedCutOutDepthImage = overlapRemover.removeOverlap(zedDepthImage.get(), 20);
+            RawImage zedCutOutDepthImage = overlapRemover.removeOverlap(zedDepthImage, 20);
             zedImagePublisher.setNextCutOutDepthImage(zedCutOutDepthImage.get());
             zedCutOutDepthImage.release();
          }
@@ -391,7 +407,7 @@ public class PerceptionAndAutonomyProcess
          realsenseColorImage = realsenseImageRetriever.getLatestRawColorImage();
 
          if (yoloRealsenseDemandNode.isDemanded())
-            yolov8DetectionManager.setDetectionImages(realsenseColorImage, realsenseDepthImage);
+            yolov8DetectionManager.runYOLODetection(realsenseColorImage, realsenseDepthImage);
 
          overlapRemover.setHighQualityImage(realsenseDepthImage.get());
 
@@ -490,6 +506,11 @@ public class PerceptionAndAutonomyProcess
          yolov8DetectionManager.setRobotFrame(robotPelvisFrame);
       }
 
+      if (newPlanarRegions.poll())
+         for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
+            if (sceneNode instanceof DoorNode doorNode)
+               doorNode.filterAndSetDoorPlanarRegionFromPlanarRegionsList(newPlanarRegions.read());
+
       // Update general stuff
       sceneGraph.updateOnRobotOnly(robotPelvisFrame);
       sceneGraph.updatePublication();
@@ -531,7 +552,7 @@ public class PerceptionAndAutonomyProcess
          FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
 
          // TODO: Get rid of BytedecoImage, RapidPlanarRegionsExtractor requires it
-         BytedecoImage bytedecoImage = new BytedecoImage(latestZEDDepthImage.getCpuImageMat());
+         BytedecoImage bytedecoImage = new BytedecoImage(latestZEDDepthImage.getCpuImageMat().clone());
          bytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
          planarRegionsExtractor.update(bytedecoImage, zedFrameSupplier.get(), framePlanarRegionsList);
          planarRegionsExtractor.setProcessing(false);
@@ -540,12 +561,7 @@ public class PerceptionAndAutonomyProcess
          PlanarRegionsList planarRegionsInWorldFrame = framePlanarRegionsList.getPlanarRegionsList().copy();
          planarRegionsInWorldFrame.applyTransform(zedFrameSupplier.get().getTransformToWorldFrame());
 
-         sceneGraph.modifyTree(modificationQueue ->
-         {
-          for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
-             if (sceneNode instanceof DoorNode doorNode)
-                doorNode.filterAndSetDoorPlanarRegionFromPlanarRegionsList(planarRegionsInWorldFrame);
-         });
+         newPlanarRegions.set(planarRegionsInWorldFrame);
 
          PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
 
@@ -590,13 +606,14 @@ public class PerceptionAndAutonomyProcess
       yoloAnnotatedImageDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_YOLO_ANNOTATED_IMAGE);
       yoloZEDDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_YOLO_ZED);
       yoloRealsenseDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_YOLO_REALSENSE);
+      ballDetectionDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_BALL_TRACKING);
       planarRegionsDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_PLANAR_REGIONS);
 
       // build the graph
       blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(ousterDepthDemandNode); // For point cloud coloring
       zedDepthDemandNode.addDependents(planarRegionsDemandNode); // Using ZED for planar regions
       zedDepthDemandNode.addDependents(zedPointCloudDemandNode); // Used by global visualizer to demand color & depth
-      zedColorDemandNode.addDependents(zedPointCloudDemandNode, centerposeDemandNode);
+      zedColorDemandNode.addDependents(zedPointCloudDemandNode, centerposeDemandNode, ballDetectionDemandNode);
       planarRegionsDemandNode.addDependents(yoloZEDDemandNode); // Planar region used for door detection
       realsenseDemandNode.addDependents(yoloRealsenseDemandNode);
       blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(arUcoDetectionDemandNode); // ArUco set to use Blackfly images

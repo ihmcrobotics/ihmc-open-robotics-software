@@ -27,7 +27,7 @@ public class PerceptionBasedContinuousHiking
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private TerrainPerceptionProcessWithDriver perceptionTask;
    private HumanoidActivePerceptionModule activePerceptionModule;
-   private final ContinuousWalkingParameters continuousPlanningParameters = new ContinuousWalkingParameters();
+   private final ContinuousHikingParameters continuousPlanningParameters = new ContinuousHikingParameters();
 
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                           getClass(),

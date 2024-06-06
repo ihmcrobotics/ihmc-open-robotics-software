@@ -237,7 +237,6 @@ public class InverseDynamicsOptimizationControlModule implements SCS2YoGraphicHo
       qpSolver.reset();
       externalWrenchHandler.reset();
       motionQPInputCalculator.initialize();
-      inactiveJointIndices.reset();
    }
 
    public void resetCustomBounds()

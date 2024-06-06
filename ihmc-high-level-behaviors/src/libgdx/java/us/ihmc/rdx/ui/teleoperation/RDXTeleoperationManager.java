@@ -82,7 +82,8 @@ public class RDXTeleoperationManager extends RDXPanel
    private final ROS2ControllerHelper ros2Helper;
    private final YoVariableClientHelper yoVariableClientHelper;
    private final DRCRobotModel robotModel;
-   private final boolean robotHasArms;
+   private final SideDependentList<Boolean> hasArms = new SideDependentList<>();
+   private boolean hasEitherArm = false;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final RDXTeleoperationParameters teleoperationParameters;
@@ -138,7 +139,12 @@ public class RDXTeleoperationManager extends RDXPanel
       setRenderMethod(this::renderImGuiWidgets);
       addChild(teleoperationParametersTuner);
       robotModel = communicationHelper.getRobotModel();
-      robotHasArms = robotModel.getRobotVersion().hasBothArms();
+      for (RobotSide side : RobotSide.values)
+      {
+         boolean hasArm = robotModel.getRobotVersion().hasArm(side);
+         hasEitherArm |= hasArm;
+         hasArms.put(side, hasArm);
+      }
       ros2Helper = communicationHelper.getControllerHelper();
       this.yoVariableClientHelper = yoVariableClientHelper;
 
@@ -160,7 +166,7 @@ public class RDXTeleoperationManager extends RDXPanel
 
       controllerStatusTracker = new ControllerStatusTracker(logToolsLogger, ros2Helper.getROS2NodeInterface(), robotModel.getSimpleRobotName());
 
-      locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, ros2Helper, controllerStatusTracker, this);
+      locomotionManager = new RDXLocomotionManager(robotModel, communicationHelper, syncedRobot, controllerStatusTracker, this);
 
       interactablesAvailable = robotSelfCollisionModel != null;
       if (interactablesAvailable)
@@ -289,7 +295,7 @@ public class RDXTeleoperationManager extends RDXPanel
                      interactableFeet.get(side).addAdditionalRobotCollidable(robotCollidable);
                   }
                }
-               if (robotHasArms && RDXInteractableHand.robotCollidableIsHand(side, robotCollidable, fullRobotModel))
+               if (hasArms.get(side) && RDXInteractableHand.robotCollidableIsHand(side, robotCollidable, fullRobotModel))
                {
                   if (!interactableHands.containsKey(side))
                   {
@@ -305,7 +311,7 @@ public class RDXTeleoperationManager extends RDXPanel
             }
          }
 
-         if (robotHasArms)
+         if (hasEitherArm)
          {
             armManager.create(baseUI);
             for (RobotSide side : interactableHands.sides())
@@ -384,7 +390,7 @@ public class RDXTeleoperationManager extends RDXPanel
                for (RobotSide side : RobotSide.values)
                   armManager.getArmIKSolvers().get(side).reset();
             }
-            else if (robotHasArms)
+            else if (hasEitherArm)
             {
                // So the whole body IK will solve when selected
                wholeBodyIKManager.reset();
@@ -503,12 +509,9 @@ public class RDXTeleoperationManager extends RDXPanel
                }
             }
 
-            if (robotHasArms)
+            for (RobotSide side : interactableHands.sides())
             {
-               for (RobotSide side : interactableHands.sides())
-               {
-                  interactableHands.get(side).process3DViewInput(input);
-               }
+               interactableHands.get(side).process3DViewInput(input);
             }
          }
       }
@@ -552,14 +555,11 @@ public class RDXTeleoperationManager extends RDXPanel
             ImGui.sameLine();
             interactablePelvis.renderImGuiWidgets();
 
-            if (robotHasArms)
+            for (RobotSide side : interactableHands.sides())
             {
-               for (RobotSide side : interactableHands.sides())
-               {
-                  ImGui.text(side.getPascalCaseName() + " Hand:");
-                  ImGui.sameLine();
-                  interactableHands.get(side).renderImGuiWidgets();
-               }
+               ImGui.text(side.getPascalCaseName() + " Hand:");
+               ImGui.sameLine();
+               interactableHands.get(side).renderImGuiWidgets();
             }
 
             for (RobotSide side : interactableFeet.sides())
