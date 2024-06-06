@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeightMapBasedFootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
@@ -114,10 +115,7 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Boolean> kinematicsSimulation = new OptionalFactoryField<>("kinematicsSimulation", false);
    protected  final OptionalFactoryField<Boolean> createRigidBodyMutators = new OptionalFactoryField<>("createRigidBodyMutators", false);
    protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
-                                                                                                                              (in, out) -> new SCS2OutputWriter(
-                                                                                                                                    in,
-                                                                                                                                    out,
-                                                                                                                                    true));
+                                                                                                                              getDefaultOutputWriterFactory());
    protected final OptionalFactoryField<HighLevelControllerName> initialState = new OptionalFactoryField<>("initialControllerState", WALKING);
    protected final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", false);
    protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
@@ -184,6 +182,7 @@ public class SCS2AvatarSimulationFactory
       setupLidarController();
       initializeStateEstimatorToActual();
       setupSimulatedRobotTimeProvider();
+      setupKinematicsSimulationOutputWriter();
 
       SCS2AvatarSimulation avatarSimulation = new SCS2AvatarSimulation();
       avatarSimulation.setRobotModel(robotModel.get());
@@ -335,10 +334,35 @@ public class SCS2AvatarSimulationFactory
       }
    }
 
+   private SCS2JointDesiredOutputWriterFactory getDefaultOutputWriterFactory()
+   {
+      return (controllerInput, controllerOutput) ->
+      {
+         boolean writeBeforeEstimationTick = true;
+         if (kinematicsSimulation.get())
+            return new SCS2KinematicsSimulationOutputWriter(controllerInput, controllerOutput, writeBeforeEstimationTick);
+         else
+            return new SCS2OutputWriter(controllerInput, controllerOutput, writeBeforeEstimationTick);
+      };
+   }
+
    private void setupSimulationOutputWriter()
    {
       simulationOutputWriter = outputWriterFactory.get()
-                                                  .build(robot.getControllerManager().getControllerInput(), robot.getControllerManager().getControllerOutput());
+                                                  .build(robot.getControllerManager().getControllerInput(),
+                                                         robot.getControllerManager().getControllerOutput());
+   }
+
+   private void setupKinematicsSimulationOutputWriter()
+   {
+      if (kinematicsSimulation.get() && simulationOutputWriter instanceof SCS2KinematicsSimulationOutputWriter kinematicsSimulationOutputWriter)
+      {
+         RootJointDesiredConfigurationDataReadOnly outputForRootJoint = highLevelHumanoidControllerFactory.get()
+                                                                                                          .getWholeBodyControllerCoreFactory()
+                                                                                                          .getWholeBodyControllerCore()
+                                                                                                          .getOutputForRootJoint();
+         kinematicsSimulationOutputWriter.setOutputForRootJoint(outputForRootJoint);
+      }
    }
 
    private void setupStateEstimationThread()
