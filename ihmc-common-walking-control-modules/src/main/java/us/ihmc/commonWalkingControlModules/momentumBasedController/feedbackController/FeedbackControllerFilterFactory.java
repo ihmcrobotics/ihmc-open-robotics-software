@@ -23,6 +23,18 @@ public class FeedbackControllerFilterFactory
       return new YoHPRLFilterDouble1D(jointName + "VelocityErrorHPRL", parameters, dt, registry);
    }
 
+   public static FilterVector3D createAngularVelocityErrorHPRLFilter(String endEffectorName, YoHPRLParameters parameters, double dt, YoRegistry registry)
+   {
+      parameters.setRegistry(registry);
+      return new YoHPRLFilterVector3D(endEffectorName + "AngularVelocityErrorHPRL", parameters, dt, registry);
+   }
+
+   public static FilterVector3D createLinearVelocityErrorHPRLFilter(String endEffectorName, YoHPRLParameters parameters, double dt, YoRegistry registry)
+   {
+      parameters.setRegistry(registry);
+      return new YoHPRLFilterVector3D(endEffectorName + "LinearVelocityErrorHPRL", parameters, dt, registry);
+   }
+
    public static FilterDouble1D createVelocity1DErrorPIOFilter(String jointName, YoPIOParameters parameters, double dt, YoRegistry registry)
    {
       parameters.setRegistry(registry);
@@ -326,11 +338,18 @@ public class FeedbackControllerFilterFactory
          inputLPF2.set(EuclidCoreTools.interpolate(inputLPF.getValue(), inputLPF2.getValue(), alpha));
          double inputHPFPrevious = inputHPF.getValue();
          inputHPF.set(rawInput - inputLPF2.getValue());
-         double reference = EuclidCoreTools.interpolate(inputHPFPrevious, inputHPRL.getValue(), updateReferenceRatio.getValue());
-         double update = updateScale.getValue() * (inputHPF.getValue() - reference);
-         inputHPRL.add(MathTools.clamp(update, maxOutputRate.getValue() * dt));
-
-         output.set(inputLPF2.getValue() + inputHPRL.getValue());
+         if (updateScale.getValue() <= 0.0)
+         {
+            inputHPRL.set(0.0);
+            output.set(inputLPF2.getValue());
+         }
+         else
+         {
+            double reference = EuclidCoreTools.interpolate(inputHPFPrevious, inputHPRL.getValue(), updateReferenceRatio.getValue());
+            double update = updateScale.getValue() * (inputHPF.getValue() - reference);
+            inputHPRL.add(MathTools.clamp(update, maxOutputRate.getValue() * dt));
+            output.set(inputLPF2.getValue() + inputHPRL.getValue());
+         }
 
          // Checking at the end allows to visualize the filter state when disabled.
          if (enableFilter.getValue())
@@ -550,6 +569,110 @@ public class FeedbackControllerFilterFactory
       public YoDouble getOutput()
       {
          return output;
+      }
+   }
+
+   private static class YoHPRLFilterVector3D implements FilterVector3D
+   {
+      private final YoBoolean initialize;
+      private final YoMutableFrameVector3D inputLPF;
+      private final YoMutableFrameVector3D inputLPF2;
+      private final YoMutableFrameVector3D inputHPF;
+      private final YoMutableFrameVector3D inputHPRL;
+      private final YoMutableFrameVector3D output;
+
+      private final BooleanProvider enableFilter;
+      private final DoubleProvider breakFrequency;
+      private final DoubleProvider maxOutputRate;
+      private final DoubleProvider updateScale;
+      private final DoubleProvider updateReferenceRatio;
+
+      private final double dt;
+
+      public YoHPRLFilterVector3D(String namePrefix, YoHPRLParameters parameters, double dt, YoRegistry registry)
+      {
+         this(namePrefix,
+              parameters.enableFilter,
+              parameters.breakFrequency,
+              parameters.maxOutputRate,
+              parameters.updateScale,
+              parameters.updateReferenceRatio,
+              dt,
+              registry);
+      }
+
+      public YoHPRLFilterVector3D(String namePrefix,
+                                  BooleanProvider enableFilter,
+                                  DoubleProvider breakFrequency,
+                                  DoubleProvider maxOutputRate,
+                                  DoubleProvider updateScale,
+                                  DoubleProvider updateReferenceRatio,
+                                  double dt,
+                                  YoRegistry registry)
+      {
+         this.enableFilter = enableFilter;
+         this.breakFrequency = breakFrequency;
+         this.maxOutputRate = maxOutputRate;
+         this.updateScale = updateScale;
+         this.updateReferenceRatio = updateReferenceRatio;
+         this.dt = dt;
+
+         initialize = new YoBoolean(namePrefix + "Initialize", registry);
+         inputLPF = new YoMutableFrameVector3D(namePrefix + "InputLPF", "", registry);
+         inputLPF2 = new YoMutableFrameVector3D(namePrefix + "InputLPF2", "", registry);
+         inputHPF = new YoMutableFrameVector3D(namePrefix + "InputHPF", "", registry);
+         inputHPRL = new YoMutableFrameVector3D(namePrefix + "InputHPRL", "", registry);
+         output = new YoMutableFrameVector3D(namePrefix + "Output", "", registry);
+      }
+
+      @Override
+      public void reset()
+      {
+         initialize.set(true);
+      }
+
+      private final Vector3D inputHPFPrevious = new Vector3D();
+      private final Vector3D reference = new Vector3D();
+      private final Vector3D update = new Vector3D();
+
+      @Override
+      public void apply(FrameVector3DReadOnly rawInput, FixedFrameVector3DBasics filteredOutput)
+      {
+         if (initialize.getValue())
+         {
+            inputLPF.set(rawInput);
+            inputHPF.set(rawInput);
+            output.set(rawInput);
+            initialize.set(false);
+         }
+
+         double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(breakFrequency.getValue(), dt);
+         inputLPF.interpolate(rawInput, inputLPF, alpha);
+         inputLPF2.interpolate(inputLPF, inputLPF2, alpha);
+         inputHPFPrevious.set(inputHPF);
+         inputHPF.sub(rawInput, inputLPF2);
+
+         if (updateScale.getValue() <= 0.0)
+         {
+            reference.interpolate(inputHPFPrevious, inputHPRL, updateReferenceRatio.getValue());
+            update.sub(inputHPF, reference);
+            update.scale(updateScale.getValue());
+            update.clipToMaxNorm(maxOutputRate.getValue() * dt);
+            inputHPRL.add(update);
+
+            output.add(inputLPF2, inputHPRL);
+         }
+         else
+         {
+            inputHPRL.setToZero();
+            output.set(inputLPF2);
+         }
+
+         // Checking at the end allows to visualize the filter state when disabled.
+         if (enableFilter.getValue())
+            filteredOutput.set(output);
+         else
+            filteredOutput.set(rawInput);
       }
    }
 
