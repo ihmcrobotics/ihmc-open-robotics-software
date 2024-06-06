@@ -6,6 +6,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.FixedMovingReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -51,6 +53,7 @@ public class BPWPLanarWalkingRobot implements SCS2YoGraphicHolder
     private final SideDependentList<YoFrameVector3D> footVelocities = new SideDependentList<>();
     private final SimFloatingJointBasics floatingJoint;
 
+    private final RigidBodyBasics rootBody;
 
     public BPWPLanarWalkingRobot(Robot robot, DoubleProvider time)
     {
@@ -58,6 +61,7 @@ public class BPWPLanarWalkingRobot implements SCS2YoGraphicHolder
 
         floatingJoint = robot.getFloatingRootJoint();
         floatingJoint.setJointPosition(new Vector3D(0.0, 0.0, 0.75));
+        this.rootBody = robot.getRootBody();
         mass = TotalMassCalculator.computeSubTreeMass(robot.getRootBody());
 
         worldFrame = robot.getInertialFrame();
@@ -157,6 +161,11 @@ public class BPWPLanarWalkingRobot implements SCS2YoGraphicHolder
     public double getMass()
     {
         return mass;
+    }
+
+    public RigidBodyBasics getRootBody()
+    {
+        return rootBody;
     }
 
     public SimRevoluteJoint getHipJoint(RobotSide robotSide)

@@ -3,6 +3,8 @@ package us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.MPC.MPCParameters;
+import us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.MPC.MPCTouchdownCalculator;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;

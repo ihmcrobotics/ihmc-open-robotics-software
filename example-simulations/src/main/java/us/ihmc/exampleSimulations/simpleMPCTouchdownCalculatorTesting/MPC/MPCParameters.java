@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting;
+package us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.MPC;
 
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -9,6 +9,7 @@ public class MPCParameters
 
    private final static double NUMBER_OF_STEPS_IN_HORIZON = 2;
 
+   // MPC Specific
    private final YoDouble numberOfStepsInHorizon = new YoDouble("numberOfStepsInHorizon", registry);
    private final YoDouble timeDurationOfHorizon = new YoDouble("timeDurationOfHorizon", registry);
    private final YoDouble numberOfTicksInHorizon = new YoDouble("numberOfTicksInHorizon", registry);

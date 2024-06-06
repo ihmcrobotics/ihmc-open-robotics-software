@@ -1,6 +1,6 @@
-package us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting;
+package us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.MPC;
 
-import org.ejml.data.DMatrixRMaj;
+import us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.BPWPLanarWalkingRobot;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
