@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
-import imgui.internal.ImGui;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
@@ -27,7 +26,7 @@ import us.ihmc.tools.string.StringTools;
 
 import java.nio.ByteBuffer;
 
-public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
+public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer implements ROS2TopicHolder<ImageMessage>
 {
    private final String titleBeforeAdditions;
    private final PubSubImplementation pubSubImplementation;
@@ -53,7 +52,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
 
    public RDXROS2ImageMessageVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> topic)
    {
-      super(title + " (ROS 2)", topic.getName(), false);
+      super(title, topic.getName(), false);
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
@@ -189,9 +188,6 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-
-      ImGui.text(topic.getName());
       if (getHasReceivedOne())
       {
          renderStatistics();
@@ -226,5 +222,11 @@ public class RDXROS2ImageMessageVisualizer extends RDXOpenCVVideoVisualizer
       getFrequencyPlot().renderImGuiWidgets();
       delayPlot.renderImGuiWidgets();
       sequenceDiscontinuityPlot.renderImGuiWidgets();
+   }
+
+   @Override
+   public ROS2Topic<ImageMessage> getTopic()
+   {
+      return topic;
    }
 }

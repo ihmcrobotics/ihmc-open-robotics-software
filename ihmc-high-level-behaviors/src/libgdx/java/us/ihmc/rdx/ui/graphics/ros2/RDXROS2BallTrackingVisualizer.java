@@ -30,7 +30,7 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class RDXROS2BallTrackingVisualizer extends RDXVisualizer
+public class RDXROS2BallTrackingVisualizer extends RDXVisualizer implements ROS2TopicHolder<RigidBodyTransformMessage>
 {
    private static final double MESSAGE_PUBLISH_PERIOD = 2; // publish messages every 2 seconds
 
@@ -164,8 +164,6 @@ public class RDXROS2BallTrackingVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-
       if (visualizerSettingsCollapser.render(showVisualizerSettings))
          showVisualizerSettings = !showVisualizerSettings;
       ImGui.sameLine();
@@ -218,5 +216,11 @@ public class RDXROS2BallTrackingVisualizer extends RDXVisualizer
    {
       unsubscribe();
       super.destroy();
+   }
+
+   @Override
+   public ROS2Topic<RigidBodyTransformMessage> getTopic()
+   {
+      return ballPositionTopic;
    }
 }

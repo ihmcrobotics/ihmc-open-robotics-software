@@ -171,7 +171,8 @@ public class RDXOpenCVTrackerDemo
             RDXROS2ImageMessageVisualizer colorImageVisualizer = new RDXROS2ImageMessageVisualizer("Color Image",
                                                                                                    PubSubImplementation.FAST_RTPS,
                                                                                                    PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-            perceptionVisualizerPanel.addVisualizer(colorImageVisualizer, PerceptionAPI.REQUEST_ZED_COLOR);
+            colorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
+            perceptionVisualizerPanel.addVisualizer(colorImageVisualizer);
 
             perceptionVisualizerPanel.create();
             baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);

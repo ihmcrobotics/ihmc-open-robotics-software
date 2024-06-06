@@ -8,8 +8,8 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.rdx.imgui.ImGuiTools;
-import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
+import us.ihmc.rdx.ui.RDXImagePanel;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -70,6 +70,12 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
       frequencyPlot.ping();
       updateImageDimensions(mat.cols(), mat.rows());
       opencv_imgproc.cvtColor(mat, rgba8Mat, opencv_imgproc.COLOR_RGB2RGBA);
+   }
+
+   @Override
+   public void renderImGuiWidgets()
+   {
+
    }
 
    @Override

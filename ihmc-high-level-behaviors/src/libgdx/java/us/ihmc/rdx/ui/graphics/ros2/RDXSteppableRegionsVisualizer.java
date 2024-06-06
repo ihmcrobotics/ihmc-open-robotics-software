@@ -7,12 +7,12 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.perception.steppableRegions.SteppableRegionsAPI;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
-import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXSteppableRegionGraphic;
+import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -89,8 +89,6 @@ public class RDXSteppableRegionsVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-
       ImGui.checkbox("Render Height Map", renderHeightMap);
       ImGui.checkbox("Render Planes", renderPlanes);
       ImGui.checkbox("In Paint Height", inPaintHeight);

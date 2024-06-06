@@ -2,13 +2,13 @@ package us.ihmc.rdx.ui.graphics.ros2;
 
 import imgui.internal.ImGui;
 import perception_msgs.msg.dds.DetectedObjectPacket;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Topic;
 
-public class RDXROS2CenterposeVisualizer extends RDXVisualizer
+public class RDXROS2CenterposeVisualizer extends RDXVisualizer implements ROS2TopicHolder<DetectedObjectPacket>
 {
    private final ROS2Topic<DetectedObjectPacket> topic;
    private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
@@ -16,7 +16,7 @@ public class RDXROS2CenterposeVisualizer extends RDXVisualizer
 
    public RDXROS2CenterposeVisualizer(String title, ROS2PublishSubscribeAPI ros2, ROS2Topic<DetectedObjectPacket> topic)
    {
-      super(title + " (ROS 2)");
+      super(title);
       this.topic = topic;
 
       subscription = ros2.subscribe(topic);
@@ -36,13 +36,17 @@ public class RDXROS2CenterposeVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-      ImGui.text(topic.getName());
       frequencyPlot.renderImGuiWidgets();
    }
 
    public ImGuiFrequencyPlot getFrequencyPlot()
    {
       return frequencyPlot;
+   }
+
+   @Override
+   public ROS2Topic<DetectedObjectPacket> getTopic()
+   {
+      return topic;
    }
 }

@@ -19,9 +19,9 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.RDXHeightMapRenderer;
+import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -178,8 +178,6 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-
       if (ros2 != null && ImGui.button(labels.get("Reset Ground to Feet")))
          ros2.publish(PerceptionAPI.RESET_HEIGHT_MAP);
 

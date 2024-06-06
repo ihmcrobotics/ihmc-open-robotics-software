@@ -87,7 +87,7 @@ public class RDXROS2RobotVisualizer extends RDXMultiBodyGraphic
                                  ROS2SyncedRobotModel syncedRobot,
                                  Supplier<RDXFocusBasedCamera> cameraForTrackingSupplier)
    {
-      super(robotModel.getSimpleRobotName() + " Robot Visualizer (ROS 2)");
+      super(robotModel.getSimpleRobotName() + " Robot Visualizer");
       this.baseUI = baseUI;
       this.ros2 = ros2;
       this.robotModel = robotModel;

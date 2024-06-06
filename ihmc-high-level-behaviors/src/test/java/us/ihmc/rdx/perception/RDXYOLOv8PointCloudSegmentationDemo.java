@@ -118,12 +118,14 @@ public class RDXYOLOv8PointCloudSegmentationDemo
             RDXROS2ImageMessageVisualizer zedColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED2 Color Image",
                                                                                                       DomainFactory.PubSubImplementation.FAST_RTPS,
                                                                                                       PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-            perceptionVisualizerPanel.addVisualizer(zedColorImageVisualizer, PerceptionAPI.REQUEST_ZED_COLOR);
+            zedColorImageVisualizer.createRequestHeartbeat(node, PerceptionAPI.REQUEST_ZED_COLOR);
+            perceptionVisualizerPanel.addVisualizer(zedColorImageVisualizer);
             RDXROS2ColoredPointCloudVisualizer zedPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
                                                                                                                 DomainFactory.PubSubImplementation.FAST_RTPS,
                                                                                                                 PerceptionAPI.ZED2_DEPTH,
                                                                                                                 PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-            perceptionVisualizerPanel.addVisualizer(zedPointCloudVisualizer, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
+            zedPointCloudVisualizer.createRequestHeartbeat(node, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
+            perceptionVisualizerPanel.addVisualizer(zedPointCloudVisualizer);
 
             baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
             baseUI.create();

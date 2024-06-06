@@ -5,21 +5,21 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.Set;
 
-public class RDXROS2ArUcoMarkerPosesVisualizer extends RDXVisualizer
+public class RDXROS2ArUcoMarkerPosesVisualizer extends RDXVisualizer implements ROS2TopicHolder<ArUcoMarkerPoses>
 {
    private final ROS2Topic<ArUcoMarkerPoses> topic;
 
@@ -32,7 +32,7 @@ public class RDXROS2ArUcoMarkerPosesVisualizer extends RDXVisualizer
 
    public RDXROS2ArUcoMarkerPosesVisualizer(String title, ROS2PublishSubscribeAPI ros2, ROS2Topic<ArUcoMarkerPoses> topic)
    {
-      super(title + " (ROS 2)");
+      super(title);
       this.topic = topic;
 
       subscription = ros2.subscribe(topic);
@@ -72,8 +72,6 @@ public class RDXROS2ArUcoMarkerPosesVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-      ImGui.text(topic.getName());
       frequencyPlot.renderImGuiWidgets();
       numberOfMarkersPlot.render(numberOfArUcoMarkers);
    }
@@ -103,5 +101,11 @@ public class RDXROS2ArUcoMarkerPosesVisualizer extends RDXVisualizer
    public int getNumberOfArUcoMarkers()
    {
       return numberOfArUcoMarkers;
+   }
+
+   @Override
+   public ROS2Topic<ArUcoMarkerPoses> getTopic()
+   {
+      return topic;
    }
 }

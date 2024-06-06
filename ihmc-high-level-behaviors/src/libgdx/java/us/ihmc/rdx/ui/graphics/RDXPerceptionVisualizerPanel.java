@@ -4,46 +4,34 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import std_msgs.msg.dds.Empty;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.pubsub.DomainFactory;
+import imgui.type.ImString;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2Topic;
 
-import javax.annotation.Nullable;
-import java.util.LinkedHashMap;
+import java.util.Comparator;
+import java.util.Locale;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRenderableProvider
 {
    private static final String WINDOW_NAME = "Perception Visualizers";
 
-   private final LinkedHashMap<RDXVisualizer, RDXVisualizerWithHeartbeat> visualizers = new LinkedHashMap<>();
-   private final ROS2Node heartbeatNode;
-
+   private final TreeSet<RDXVisualizer> visualizers = new TreeSet<>(Comparator.comparing(RDXVisualizer::getTitle));
+   // Search filter
+   private final ImString filter = new ImString();
    private boolean created = false;
 
    public RDXPerceptionVisualizerPanel()
    {
       super(WINDOW_NAME);
-      heartbeatNode = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "visualizer_hearbeat_node");
       setRenderMethod(this::renderImGuiWidgets);
    }
 
    public void addVisualizer(RDXVisualizer visualizer)
    {
-      addVisualizer(visualizer, null);
-   }
-
-   public void addVisualizer(RDXVisualizer visualizer, @Nullable ROS2Topic<Empty> visualizerHearbeatTopic)
-   {
-      RDXVisualizerWithHeartbeat wrappedVisualizer = new RDXVisualizerWithHeartbeat(heartbeatNode,
-                                                                                    visualizerHearbeatTopic,
-                                                                                    visualizer);
-      visualizers.put(visualizer, wrappedVisualizer);
+      visualizers.add(visualizer);
       RDXPanel panel = visualizer.getPanel();
       if (panel != null)
          addChild(panel);
@@ -53,7 +41,7 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
 
    public void create()
    {
-      for (RDXVisualizerWithHeartbeat visualizer : visualizers.values())
+      for (RDXVisualizer visualizer : visualizers)
       {
          visualizer.create();
       }
@@ -62,7 +50,7 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
 
    public void update()
    {
-      for (RDXVisualizerWithHeartbeat visualizer : visualizers.values())
+      for (RDXVisualizer visualizer : visualizers)
       {
          if (visualizer.isActive())
             visualizer.update();
@@ -71,17 +59,24 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
 
    public void renderImGuiWidgets()
    {
-      for (RDXVisualizerWithHeartbeat visualizer : visualizers.values())
+      if (ImGui.inputText("Search", filter))
       {
-         visualizer.renderImGuiWidgets();
-         ImGui.separator();
+      }
+
+      for (RDXVisualizer visualizer : visualizers)
+      {
+         if (filter.isNotEmpty())
+            if (!visualizer.getTitle().toLowerCase(Locale.ROOT).contains(filter.toString().toLowerCase(Locale.ROOT)))
+               continue;
+
+         visualizer.renderMenuEntry();
       }
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      for (RDXVisualizerWithHeartbeat visualizer : visualizers.values())
+      for (RDXVisualizer visualizer : visualizers)
       {
          if (visualizer.isActive())
          {
@@ -92,9 +87,9 @@ public class RDXPerceptionVisualizerPanel extends RDXPanel implements RDXRendera
 
    public void destroy()
    {
-      for (RDXVisualizerWithHeartbeat visualizer : visualizers.values())
-      {
+      for (RDXVisualizer visualizer : visualizers)
          visualizer.destroy();
-      }
+
+      visualizers.clear();
    }
 }

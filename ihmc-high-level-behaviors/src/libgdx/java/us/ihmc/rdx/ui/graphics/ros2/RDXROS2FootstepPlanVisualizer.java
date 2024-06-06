@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import imgui.ImGui;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.subscriber.Subscriber;
@@ -23,7 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Useful when any remote module is performing footstep planning to help the human operator understand the plan. It can function as a standalone visualizer
  * for any footstep plan based FootstepDataListMessage.
 * */
-public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
+public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer implements ROS2TopicHolder<FootstepDataListMessage>
 {
    private final String titleBeforeAdditions;
    private final DomainFactory.PubSubImplementation pubSubImplementation;
@@ -36,7 +35,7 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
 
    public RDXROS2FootstepPlanVisualizer(String title, DomainFactory.PubSubImplementation pubSubImplementation, ROS2Topic<FootstepDataListMessage> topic)
    {
-      super(title + " (ROS 2)");
+      super(title);
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
@@ -73,16 +72,15 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
    }
 
    @Override
-   public void update()
+   public void renderImGuiWidgets()
    {
-      super.update();
+
    }
 
    @Override
-   public void renderImGuiWidgets()
+   public void update()
    {
-      super.renderImGuiWidgets();
-      ImGui.text(topic.getName());
+      super.update();
    }
 
    @Override
@@ -114,5 +112,11 @@ public class RDXROS2FootstepPlanVisualizer extends RDXVisualizer
    public boolean isSubscribed()
    {
       return subscribed;
+   }
+
+   @Override
+   public ROS2Topic<FootstepDataListMessage> getTopic()
+   {
+      return topic;
    }
 }

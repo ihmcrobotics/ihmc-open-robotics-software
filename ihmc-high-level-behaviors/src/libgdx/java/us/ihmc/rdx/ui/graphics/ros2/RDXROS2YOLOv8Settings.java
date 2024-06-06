@@ -54,8 +54,6 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-
       ImGui.combo("Sensor Selection", selectedSensor, AVAILABLE_SENSORS);
 
       demandYOLOv8ICPZed.setAlive(isActive() && selectedSensor.get() == 0);

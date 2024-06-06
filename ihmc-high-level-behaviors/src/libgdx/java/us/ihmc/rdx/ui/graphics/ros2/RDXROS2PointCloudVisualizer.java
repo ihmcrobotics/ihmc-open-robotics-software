@@ -13,7 +13,6 @@ import org.bytedeco.opencl._cl_kernel;
 import org.bytedeco.opencl._cl_program;
 import perception_msgs.msg.dds.FusedSensorHeadPointCloudMessage;
 import perception_msgs.msg.dds.LidarScanMessage;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
@@ -32,8 +31,8 @@ import us.ihmc.rdx.imgui.ImPlotIntegerPlot;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -44,7 +43,7 @@ import java.nio.ByteOrder;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RDXROS2PointCloudVisualizer extends RDXVisualizer
+public class RDXROS2PointCloudVisualizer extends RDXVisualizer implements ROS2TopicHolder
 {
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> topic;
@@ -76,7 +75,7 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
 
    public RDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic)
    {
-      super(title + " (ROS 2)");
+      super(title);
       this.ros2Node = ros2Node;
       this.topic = topic;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
@@ -295,8 +294,6 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-      ImGui.text(topic.getName());
       ImGui.sameLine();
       ImGui.pushItemWidth(30.0f);
       ImGui.dragFloat(labels.get("Size"), pointSize.getData(), 0.001f, 0.0005f, 0.1f);
@@ -331,5 +328,11 @@ public class RDXROS2PointCloudVisualizer extends RDXVisualizer
    public boolean isSubscribed()
    {
       return subscribed;
+   }
+
+   @Override
+   public ROS2Topic<?> getTopic()
+   {
+      return topic;
    }
 }

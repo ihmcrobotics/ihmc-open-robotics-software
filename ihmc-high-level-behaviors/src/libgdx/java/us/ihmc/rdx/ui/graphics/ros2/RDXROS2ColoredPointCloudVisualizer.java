@@ -27,6 +27,7 @@ import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.string.StringTools;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -36,7 +37,7 @@ import java.util.Set;
  * It provides our full set of analytics as plots, such as message size,
  * delay, sequence discontinuities, etc. and coloring options.
  */
-public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
+public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer implements ROS2MultiTopicHolder<ImageMessage>
 {
    private final String titleBeforeAdditions;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -72,7 +73,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
                                              ROS2Topic<ImageMessage> depthTopic,
                                              ROS2Topic<ImageMessage> colorTopic)
    {
-      super(title + " (ROS 2)");
+      super(title);
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       depthChannel = new RDXROS2ColoredPointCloudVisualizerDepthChannel(depthTopic);
@@ -212,9 +213,6 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-      ImGui.text(colorChannel.getTopic().getName());
-
       renderStatistics();
 
       ImGui.checkbox(labels.get("Use sensor color"), useSensorColor);
@@ -239,7 +237,6 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
       {
          colorChannel.getMessageSizeReadout().renderImGuiWidgets();
       }
-      ImGui.text(depthChannel.getTopic().getName());
       if (depthChannel.getReceivedOne())
       {
          depthChannel.getMessageSizeReadout().renderImGuiWidgets();
@@ -350,5 +347,11 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
    public ImInt getLevelOfColorDetail()
    {
       return levelOfColorDetail;
+   }
+
+   @Override
+   public List<ROS2Topic<ImageMessage>> getTopics()
+   {
+      return List.of(colorChannel.getTopic(), depthChannel.getTopic());
    }
 }

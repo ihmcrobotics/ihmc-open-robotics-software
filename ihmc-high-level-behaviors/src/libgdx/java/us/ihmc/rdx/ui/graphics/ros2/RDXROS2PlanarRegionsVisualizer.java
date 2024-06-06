@@ -1,17 +1,20 @@
 package us.ihmc.rdx.ui.graphics.ros2;
 
 import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 
-public class RDXROS2PlanarRegionsVisualizer extends RDXPlanarRegionsVisualizerBasics
+public class RDXROS2PlanarRegionsVisualizer extends RDXPlanarRegionsVisualizerBasics implements ROS2TopicHolder<PlanarRegionsListMessage>
 {
+   private final ROS2Topic<PlanarRegionsListMessage> topic;
+
    public RDXROS2PlanarRegionsVisualizer(String title, ROS2NodeInterface ros2Node, ROS2Topic<PlanarRegionsListMessage> topic)
    {
-      super(title + " (ROS 2)", topic.getName());
+      super(title);
+      this.topic = topic;
       new ROS2Callback<>(ros2Node, topic, this::acceptMessage);
    }
 
@@ -27,5 +30,11 @@ public class RDXROS2PlanarRegionsVisualizer extends RDXPlanarRegionsVisualizerBa
             getPlanarRegionsGraphic().generateMeshes(planarRegionsList);
          });
       }
+   }
+
+   @Override
+   public ROS2Topic<PlanarRegionsListMessage> getTopic()
+   {
+      return topic;
    }
 }

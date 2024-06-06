@@ -40,7 +40,7 @@ import us.ihmc.tools.string.StringTools;
 import java.nio.ByteBuffer;
 import java.util.Set;
 
-public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
+public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer implements ROS2TopicHolder<ImageMessage>
 {
    private final String titleBeforeAdditions;
    private final PubSubImplementation pubSubImplementation;
@@ -72,7 +72,7 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
 
    public RDXROS2OusterPointCloudVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<ImageMessage> topic)
    {
-      super(title + " (ROS 2)");
+      super(title);
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
@@ -204,8 +204,6 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-      ImGui.text(topic.getName());
       if (frequencyPlot.anyPingsYet())
       {
          messageSizeReadout.renderImGuiWidgets();
@@ -246,5 +244,11 @@ public class RDXROS2OusterPointCloudVisualizer extends RDXVisualizer
    public boolean isSubscribed()
    {
       return subscribed;
+   }
+
+   @Override
+   public ROS2Topic<ImageMessage> getTopic()
+   {
+      return topic;
    }
 }

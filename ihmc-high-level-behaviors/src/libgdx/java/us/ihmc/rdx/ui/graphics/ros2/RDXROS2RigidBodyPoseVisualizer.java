@@ -6,8 +6,6 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import geometry_msgs.PoseStamped;
-import imgui.internal.ImGui;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -21,13 +19,14 @@ import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.string.StringTools;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements RenderableProvider
+public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements RenderableProvider, ROS2TopicHolder<Pose3D>
 {
    private ModelInstance poseModel;
    private ReferenceFrame frame;
@@ -50,7 +49,7 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
 
    public RDXROS2RigidBodyPoseVisualizer(String title, DomainFactory.PubSubImplementation pubSubImplementation, ROS2Topic<Pose3D> topic)
    {
-      super(title + " (ROS 2)");
+      super(title);
       titleBeforeAdditions = title;
       this.topic = topic;
       this.pubSubImplementation = pubSubImplementation;
@@ -71,8 +70,6 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-      ImGui.text(topic.getName());
       frequencyPlot.renderImGuiWidgets();
       numberOfRegionsPlot.render(numberOfPlanarRegions);
    }
@@ -132,5 +129,11 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
    {
       unsubscribe();
       super.destroy();
+   }
+
+   @Override
+   public ROS2Topic<Pose3D> getTopic()
+   {
+      return topic;
    }
 }

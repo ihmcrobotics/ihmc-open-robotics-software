@@ -18,7 +18,7 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
 
-public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
+public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer implements ROS2TopicHolder<BigVideoPacket>
 {
    private final String titleBeforeAdditions;
    private final PubSubImplementation pubSubImplementation;
@@ -36,7 +36,7 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
 
    public RDXROS2BigDepthVideoVisualizer(String title, PubSubImplementation pubSubImplementation, ROS2Topic<BigVideoPacket> topic)
    {
-      super(title + " (ROS 2)", topic.getName(), false);
+      super(title, topic.getName(), false);
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       this.topic = topic;
@@ -114,8 +114,6 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-      ImGui.text(topic.getName());
       messageSizeReadout.renderImGuiWidgets();
       if (getHasReceivedOne())
       {
@@ -138,5 +136,11 @@ public class RDXROS2BigDepthVideoVisualizer extends RDXOpenCVVideoVisualizer
          realtimeROS2Node.destroy();
          realtimeROS2Node = null;
       }
+   }
+
+   @Override
+   public ROS2Topic<BigVideoPacket> getTopic()
+   {
+      return topic;
    }
 }
