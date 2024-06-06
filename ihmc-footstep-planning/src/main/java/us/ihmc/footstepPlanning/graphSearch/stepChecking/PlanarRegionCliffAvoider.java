@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -23,10 +23,10 @@ public class PlanarRegionCliffAvoider
 {
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepSnapperReadOnly snapper;
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DefaultFootstepPlannerParametersReadOnly parameters;
    private PlanarRegionsList planarRegionsList;
 
-   public PlanarRegionCliffAvoider(FootstepPlannerParametersReadOnly parameters, FootstepSnapperReadOnly snapper, SideDependentList<ConvexPolygon2D> footPolygons)
+   public PlanarRegionCliffAvoider(DefaultFootstepPlannerParametersReadOnly parameters, FootstepSnapperReadOnly snapper, SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.parameters = parameters;
       this.snapper = snapper;
@@ -40,11 +40,11 @@ public class PlanarRegionCliffAvoider
 
    public boolean isStepValid(DiscreteFootstep footstep)
    {
-      double cliffBottomHeightToAvoid = parameters.getCliffBaseHeightToAvoid();
-      double minimumDistanceFromCliffBottoms = parameters.getMinimumDistanceFromCliffBottoms();
+      double cliffBottomHeightToAvoid = parameters.getCliffBottomHeightToAvoid();
+      double minimumDistanceFromCliffBottoms = parameters.getMinDistanceFromCliffBottoms();
 
       double cliffTopHeightToAvoid = parameters.getCliffTopHeightToAvoid();
-      double minimumDistanceFromCliffTops = parameters.getMinimumDistanceFromCliffTops();
+      double minimumDistanceFromCliffTops = parameters.getMinDistanceFromCliffTops();
 
       RigidBodyTransformReadOnly soleTransform = snapper.snapFootstep(footstep).getSnappedStepTransform(footstep);
 

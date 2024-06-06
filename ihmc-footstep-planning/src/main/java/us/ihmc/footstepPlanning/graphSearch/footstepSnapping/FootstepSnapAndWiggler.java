@@ -7,11 +7,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapSnapWiggler;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -22,7 +21,7 @@ import java.util.HashSet;
 public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 {
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DefaultFootstepPlannerParametersReadOnly parameters;
 
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private double flatGroundHeight = 0.0;
@@ -37,7 +36,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    // Use this by default
    public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
-                                 FootstepPlannerParametersReadOnly parameters,
+                                 DefaultFootstepPlannerParametersReadOnly parameters,
                                  FootstepPlannerEnvironmentHandler environmentHandler)
    {
       this(footPolygonsInSoleFrame, parameters, null, environmentHandler,null, null);
@@ -45,7 +44,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
    // Call this constructor only for testing
    public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
-                                 FootstepPlannerParametersReadOnly parameters,
+                                 DefaultFootstepPlannerParametersReadOnly parameters,
                                  TickAndUpdatable tickAndUpdatable,
                                  FootstepPlannerEnvironmentHandler environmentHandler,
                                  YoGraphicsListRegistry graphicsListRegistry,
@@ -134,7 +133,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
                                               footPolygonsInSoleFrame.get(footstepToSnap.getRobotSide()),
                                               environmentHandler,
                                               parameters.getHeightMapSnapThreshold(),
-                                              parameters.getMinimumSurfaceInclineRadians());
+                                              parameters.getMinSurfaceIncline());
    }
 
    /**
@@ -153,7 +152,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
                                                   environmentHandler,
                                                   snapData,
                                                   parameters.getHeightMapSnapThreshold(),
-                                                  parameters.getMinimumSurfaceInclineRadians());
+                                                  parameters.getMinSurfaceIncline());
 
       if (stanceStep != null && stanceStep.hasSnapData())
       {
@@ -204,15 +203,15 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       return distance < parameters.getMinClearanceFromStance();
    }
 
-   private static void updateWiggleParameters(WiggleParameters wiggleParameters, FootstepPlannerParametersReadOnly parameters)
+   private static void updateWiggleParameters(WiggleParameters wiggleParameters, DefaultFootstepPlannerParametersReadOnly parameters)
    {
       wiggleParameters.deltaInside = parameters.getWiggleInsideDeltaTarget();
-      wiggleParameters.maxX = parameters.getMaximumXYWiggleDistance();
-      wiggleParameters.minX = -parameters.getMaximumXYWiggleDistance();
-      wiggleParameters.maxY = parameters.getMaximumXYWiggleDistance();
-      wiggleParameters.minY = -parameters.getMaximumXYWiggleDistance();
-      wiggleParameters.maxYaw = parameters.getMaximumYawWiggle();
-      wiggleParameters.minYaw = -parameters.getMaximumYawWiggle();
+      wiggleParameters.maxX = parameters.getMaxXYWiggleDistance();
+      wiggleParameters.minX = -parameters.getMaxXYWiggleDistance();
+      wiggleParameters.maxY = parameters.getMaxXYWiggleDistance();
+      wiggleParameters.minY = -parameters.getMaxXYWiggleDistance();
+      wiggleParameters.maxYaw = parameters.getMaxYawWiggle();
+      wiggleParameters.minYaw = -parameters.getMaxYawWiggle();
    }
 
    /**

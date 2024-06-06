@@ -5,7 +5,7 @@ import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.mapping.PlanarRegionMappingParameters;
@@ -31,7 +31,7 @@ public class RDXRemotePerceptionUI
    private final HeightMapParameters heightMapParameters = new HeightMapParameters("GPU");
 
    private SwingPlannerParametersBasics swingPlannerParameters;
-   private FootstepPlannerParametersBasics footstepPlannerParameters;
+   private DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
 
    private final MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters = new MonteCarloFootstepPlannerParameters();
    private final RapidRegionsExtractorParameters rapidRegionsExtractorParameters = new RapidRegionsExtractorParameters();
@@ -119,12 +119,12 @@ public class RDXRemotePerceptionUI
       return heightMapParameters;
    }
 
-   public FootstepPlannerParametersBasics getFootstepPlannerParameters()
+   public DefaultFootstepPlannerParametersBasics getFootstepPlannerParameters()
    {
       return footstepPlannerParameters;
    }
 
-   public void setFootstepPlannerParameters(FootstepPlannerParametersBasics parameters)
+   public void setFootstepPlannerParameters(DefaultFootstepPlannerParametersBasics parameters)
    {
       this.footstepPlannerParameters = parameters;
       remotePropertySets.registerRemotePropertySet(footstepPlannerParameters, ContinuousWalkingAPI.FOOTSTEP_PLANNING_PARAMETERS);

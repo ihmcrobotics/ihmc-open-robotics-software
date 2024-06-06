@@ -11,7 +11,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperRead
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.perception.steppableRegions.SnapResult;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -33,7 +33,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
    private static final double traversabilityThresholdCenter = 0.08;
    private static final double traversabilityThresholdPerimeter = 0.02;
 
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DefaultFootstepPlannerParametersReadOnly parameters;
    final FootstepSnapperReadOnly snapper;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final ConvexPolygon2D tmpFootPolygon = new ConvexPolygon2D();
@@ -56,7 +56,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
 
    private final List<CustomFootstepChecker> customFootstepCheckers = new ArrayList<>();
 
-   public HeightMapFootstepChecker(FootstepPlannerParametersReadOnly parameters,
+   public HeightMapFootstepChecker(DefaultFootstepPlannerParametersReadOnly parameters,
                                    SideDependentList<ConvexPolygon2D> footPolygons,
                                    FootstepPlannerEnvironmentHandler environmentHandler,
                                    FootstepSnapperReadOnly snapper,
@@ -160,7 +160,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       }
 
       // Check snapped footstep placement
-      if (parameters.getUseStepReachabilityMap())
+      if (parameters.getUseReachabilityMap())
       {
          poseRejectionReason = reachabilityChecker.checkStepValidity(candidateStep, stanceStep);
       }
@@ -222,7 +222,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
          footAreaPercentage.set(1.0);
 
       double epsilonAreaPercentage = 1e-4;
-      if (footAreaPercentage.getValue() < (parameters.getMinimumFootholdPercent() - epsilonAreaPercentage))
+      if (footAreaPercentage.getValue() < (parameters.getMinFootholdPercent() - epsilonAreaPercentage))
       {
          rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
          return false;
@@ -261,7 +261,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
 
       // Check incline
       RigidBodyTransform snappedSoleTransform = candidateStepSnapData.getSnappedStepTransform(candidateStep);
-      double minimumSurfaceNormalZ = Math.cos(parameters.getMinimumSurfaceInclineRadians());
+      double minimumSurfaceNormalZ = Math.cos(parameters.getMinSurfaceIncline());
       if (snappedSoleTransform.getM22() < minimumSurfaceNormalZ)
       {
          rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
@@ -280,7 +280,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
 
 
       // Check for obstacle collisions (vertically extruded line between steps)
-      if (parameters.checkForPathCollisions())
+      if (parameters.getCheckForPathCollisions())
       {
          try
          {
@@ -297,7 +297,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       }
 
       // Check for bounding box collisions
-      if (parameters.checkForBodyBoxCollisions())
+      if (parameters.getCheckForBodyBoxCollisions())
       {
          if (boundingBoxCollisionDetected(candidateStep, stanceStep))
          {
@@ -349,7 +349,7 @@ public class HeightMapFootstepChecker implements FootstepCheckerInterface
       obstacleBetweenStepsChecker.setHeightMapData(heightMapData);
    }
 
-   private static void checkWiggleParameters(FootstepPlannerParametersReadOnly parameters)
+   private static void checkWiggleParameters(DefaultFootstepPlannerParametersReadOnly parameters)
    {
       double epsilon = 1e-7;
       if (parameters.getWiggleInsideDeltaMinimum() > parameters.getWiggleInsideDeltaTarget() + epsilon)

@@ -1,19 +1,14 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
-import us.ihmc.footstepPlanning.graphSearch.stepChecking.ObstacleBetweenStepsChecker;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
-import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ParameterBasedStepExpansion;
 
-import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.*;
+import static us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters.*;
 
 /**
- * Parameters for {@link FootstepPlanningModule}.
- * Parameter sets are saved as .ini files, see atlasFootstepPlannerParameters.ini for an example.
- * For an example of instantiating a java parameters object from an ini file, see AtlasFootstepPlannerParameters(projectName, pathToResources, fileNameSuffix).
+ * This class was auto generated. Do not edit by hand. Edit the cooresponding JSON file
+ * and run the main in super to regenerate.
  */
-public interface FootstepPlannerParametersReadOnly extends StoredPropertySetReadOnly
+public interface DefaultFootstepPlannerParametersReadOnly extends StoredPropertySetReadOnly
 {
    ///////////////////////////////////////////////////////////////////////////////////////////////////
    /////////////////////////////         Algorithm parameters       //////////////////////////////////
@@ -23,24 +18,24 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * Heuristic inflation weight, used to speed up the planner at the expense of optimality
     * Should not be less than 1.0
     */
-   default DoubleProvider getAStarHeuristicsWeight()
+   default double getAStarHeuristicsWeight()
    {
-      return () -> get(aStarHeuristicsWeight);
+      return get(astarHeuristicsWeight);
    }
 
    /**
     * Maximum steps considered at each iteration. If more than this number of steps are available, the closest steps to the
     * ideal step are considered and the others are ignored. Set to non-positive number to disable
     */
-   default int getMaximumBranchFactor()
+   default int getMaxBranchFactor()
    {
-      return get(maximumBranchFactor);
+      return get(maxBranchFactor);
    }
 
    /**
     * If true, enables a mask that reduces the number of calculated steps away from the ideal step. See {@link ParameterBasedStepExpansion} for more information.
     */
-   default boolean getEnabledExpansionMask()
+   default boolean getEnableExpansionMask()
    {
       return get(enableExpansionMask);
    }
@@ -97,7 +92,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    /**
     * If true, uses IK-based step feasibility check instead of heuristic one
     */
-   default boolean getUseStepReachabilityMap()
+   default boolean getUseReachabilityMap()
    {
       return get(useReachabilityMap);
    }
@@ -115,7 +110,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * If this value is too low, for example below the foot's width, the planner could place consecutive footsteps
     * on top of each other. If too high, footsteps might not be kinematically feasible.
     */
-   default double getMinimumStepWidth()
+   default double getMinStepWidth()
    {
       return get(minStepWidth);
    }
@@ -125,7 +120,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * If this value is too low, for example below the foot's length, the planner could place consecutive footsteps
     * on top of each other. If too high, footsteps might not be kinematically feasible.
     */
-   default double getMinimumStepLength()
+   default double getMinStepLength()
    {
       return get(minStepLength);
    }
@@ -134,7 +129,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
     * then the value specified here. This value is in radians relative to vertical, so an incline of 0.0 means a flat surface.
     */
-   default double getMinimumSurfaceInclineRadians()
+   default double getMinSurfaceIncline()
    {
       return get(minSurfaceIncline);
    }
@@ -142,7 +137,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    /**
     * Minimum step yaw relative to previous step, where positive yaw is defined as rotating away from the other foot and zero yaw means the feet are parallel.
     */
-   default double getMinimumStepYaw()
+   default double getMinStepYaw()
    {
       return get(minStepYaw);
    }
@@ -152,7 +147,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * The maximum depth is determined by linearly interpolating between a step's maximum z value and this value, based on the fraction the foot is pitched by.
     * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
     */
-   default double getMinimumStepZWhenFullyPitched()
+   default double getMinStepZWhenFullyPitched()
    {
       return get(minStepZWhenFullyPitched);
    }
@@ -161,7 +156,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
     * If this parameter is set to 1.0 only full footsteps are allowed. A value less then 1.0 will allow partial footholds.
     */
-   default double getMinimumFootholdPercent()
+   default double getMinFootholdPercent()
    {
       return get(minFootholdPercent);
    }
@@ -215,16 +210,16 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * where the parent is the last footstep taken on the other foot.
     * If this value is too low, the planner will unnecessarily reject footsteps. If too high, footsteps might not be kinematically feasible.
     */
-   default double getMaximumStepWidth()
+   default double getMaxStepWidth()
    {
       return get(maxStepWidth);
    }
 
    /**
     * Maximum xy-distance the planner will consider for candidate steps relative to a squared-up step.
-    * A squared-up step is defined by offseting the parent step by the ideal step width.
+    * A squared-up step is defined by offsetting the parent step by the ideal step width.
     */
-   default double getMaximumStepReach()
+   default double getMaxStepReach()
    {
       return get(maxStepReach);
    }
@@ -232,7 +227,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    /**
     * Maximum step yaw relative to previous step, where positive yaw is defined as rotating away from the other foot and zero yaw means the feet are parallel.
     */
-   default double getMaximumStepYaw()
+   default double getMaxStepYaw()
    {
       return get(maxStepYaw);
    }
@@ -242,7 +237,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * The maximum distance is determined by linearly interpolating between a step's maximum z value and this value, based on the fraction the foot is pitched by.
     * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
     */
-   default double getMaximumStepXWhenFullyPitched()
+   default double getMaxStepXWhenFullyPitched()
    {
       return get(maxStepXWhenFullyPitched);
    }
@@ -265,9 +260,9 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
     * it's very close to hitting it's ankle pitch joint limit
     */
-   default double getMaximumStepXWhenForwardAndDown()
+   default double getMaxStepXWhenForwardAndDown()
    {
-      return get(maximumStepXWhenForwardAndDown);
+      return get(maxStepXWhenForwardAndDown);
    }
 
    /**
@@ -288,9 +283,9 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
     * it's very close to hitting it's ankle pitch joint limit
     */
-   default double getMaximumStepYWhenForwardAndDown()
+   default double getMaxStepYWhenForwardAndDown()
    {
-      return get(maximumStepYWhenForwardAndDown);
+      return get(maxStepYWhenForwardAndDown);
    }
 
    /**
@@ -299,11 +294,11 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * <p>
     * Large steps forward and down are rejected by the planner if one of two criteria are met:
     * <ul>
-    * <li> The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame </li>
+    * <li> The x-position of the value of the footstep exceeds {@link #getMaximumStepXWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
     * <li> - OR - </li>
-    * <li> The y-position of the value of the footstep exceeds maximumStepYWhenForwardAndDown, when expressed in its parent's z-up sole frame </li>
+    * <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepYWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
     * <li> - AND - </li>
-    * <li> The z-position of the value of the footstep is less than -maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame </li>
+    * <li> The z-position of the value of the footstep is less than -{@link #getMaximumStepZWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
     * </ul>
     * </p>
     *
@@ -311,9 +306,9 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
     * it's very close to hitting it's ankle pitch joint limit
     */
-   default double getMaximumStepZWhenForwardAndDown()
+   default double getMaxStepZWhenForwardAndDown()
    {
-      return get(maximumStepZWhenForwardAndDown);
+      return get(maxStepZWhenForwardAndDown);
    }
 
    /**
@@ -334,9 +329,9 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
     * it's very close to saturating its torque limits.
     */
-   default double getMaximumStepReachWhenSteppingUp()
+   default double getMaxStepReachWhenSteppingUp()
    {
-      return get(maximumStepReachWhenSteppingUp);
+      return get(maxStepReachWhenSteppingUp);
    }
 
    /**
@@ -357,9 +352,9 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
     * it's very close to saturating its torque limits.
     */
-   default double getMaximumStepWidthWhenSteppingUp()
+   default double getMaxStepWidthWhenSteppingUp()
    {
-      return get(maximumStepWidthWhenSteppingUp);
+      return get(maxStepWidthWhenSteppingUp);
    }
 
    /**
@@ -380,9 +375,9 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
     * it's very close to saturating its torque limits.
     */
-   default double getMaximumStepZWhenSteppingUp()
+   default double getMaxStepZWhenSteppingUp()
    {
-      return get(maximumStepZWhenSteppingUp);
+      return get(maxStepZWhenSteppingUp);
    }
 
    /**
@@ -425,10 +420,6 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
       return get(stepYawReductionFactorAtMaxReach);
    }
 
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   ///////////////////////////         Footstep cost parameters       ////////////////////////////////
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-
    /**
     * Scale factor for cost of deviating from the ideal footstep by rotating.
     * The cost is c*yaw, where c is this weight
@@ -439,7 +430,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Scale factor for cost of deviating from the ideal footstep by shifting along X, i.e. forwards/backwards
+    * Scale factor for cost of deviating from the ideal footstep by shifting along X, i.e. forwards/backwards.
     * The cost is c*stepLength, where c is this weight
     */
    default double getForwardWeight()
@@ -448,7 +439,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Scale factor for cost associated with deviating from the ideal footstep by shifting along Y, i.e. side to side
+    * Scale factor for cost associated with deviating from the ideal footstep by shifting along Y, i.e. side to side.
     * The cost is c*stepWidth, where c is this weight
     */
    default double getLateralWeight()
@@ -457,7 +448,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Constant cost per step to punish to avoid plans with extra steps.
+    * Constant cost per step to avoid plans with extra steps.
     */
    default double getCostPerStep()
    {
@@ -465,7 +456,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Scale factor for cost associated stepping up.
+    * Scale factor for cost associated with stepping up.
     * The cost is c*stepHeight, where c is this weight
     */
    default double getStepUpWeight()
@@ -474,7 +465,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Scale factor for cost associated stepping down.
+    * Scale factor for cost associated with stepping down.
     * The cost is c*abs(stepHeight), where c is this weight
     */
    default double getStepDownWeight()
@@ -514,10 +505,6 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
       return get(referencePlanAlpha);
    }
 
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   ////////////////////////         Footstep snapping and wiggling       /////////////////////////////
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-
    /**
     * The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
     * to the edge. A negative value means the footstep can overhang a region.
@@ -554,49 +541,45 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * When wiggling a candidate footstep into a planar region, this is the maximum distance xy-distance
-    * distance the planner will use
+    * When wiggling a candidate footstep into a planar region, this is the maximum xy-distance
+    * the planner will use.
     */
-   default double getMaximumXYWiggleDistance()
+   default double getMaxXYWiggleDistance()
    {
-      return get(maximumXYWiggleDistance);
+      return get(maxXYWiggleDistance);
    }
 
    /**
     * When wiggling a candidate footstep into a planar region, this is the maximum yaw
-    * distance the planner will use
+    * the planner will use.
     */
-   default double getMaximumYawWiggle()
+   default double getMaxYawWiggle()
    {
-      return get(maximumYawWiggle);
+      return get(maxYawWiggle);
    }
 
    /**
-    * When snapping a candidate footstep to a planar region, its possible that another planar region
+    * When snapping a candidate footstep to a planar region, it's possible that another planar region
     * intersects the footstep at a steep angle, i.e. a valley. If this intersecting planar region
     * is never more than maximumZPenetrationOnValleyRegions above the footstep, it won't be rejected,
     * otherwise it will.
     */
-   default double getMaximumZPenetrationOnValleyRegions()
+   default double getMaxZPenetrationOnValleyRegions()
    {
-      return get(maximumZPenetrationOnValleyRegions);
+      return get(maxZPenetrationOnValleyRegions);
    }
 
    /**
     * Maximum height above a stance step that a candidate step is snapped to. Regions above this height are ignored.
-    * Intended to avoid ceilings or obstacles that are above the top of the robot
+    * Intended to avoid ceilings or obstacles that are above the top of the robot.
     */
    default double getMaximumSnapHeight()
    {
       return get(maximumSnapHeight);
    }
 
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   /////////////////////////////         Body path parameters       //////////////////////////////////
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-
    /**
-    * Radius around the goal inside which the planner should start to turn to match the goal's orientation
+    * Radius around the goal inside which the planner should start to turn to match the goal's orientation.
     */
    default double getFinalTurnProximity()
    {
@@ -605,7 +588,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
 
    /**
     * If the robot's mid-foot pose is within this distance of the body path, it will match the body path heading.
-    * Otherwise, it will turn towards the body path
+    * Otherwise, it will turn towards the body path.
     */
    default double getDistanceFromPathTolerance()
    {
@@ -613,24 +596,28 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * If the robot's mid-foot pose oriented within this threshold of the body path's heading, it will match the body path heading.
-    * Otherwise, it will turn in plance towards the body path
+    * If the robot's mid-foot pose is oriented within this threshold of the body path's heading, it will match the body path heading.
+    * Otherwise, it will turn in place towards the body path.
     */
    default double getDeltaYawFromReferenceTolerance()
    {
       return get(deltaYawFromReferenceTolerance);
    }
 
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-   /////////////////////////         Bounding box collision check       //////////////////////////////
-   ///////////////////////////////////////////////////////////////////////////////////////////////////
-
    /**
     * Sets whether or not the search should check if a bounding box approximation of the robot collides with the world.
     */
-   default boolean checkForBodyBoxCollisions()
+   default boolean getCheckForBodyBoxCollisions()
    {
       return get(checkForBodyBoxCollisions);
+   }
+
+   /**
+    * Width (along Y) of body collision box
+    */
+   default double getBodyBoxWidth()
+   {
+      return get(bodyBoxWidth);
    }
 
    /**
@@ -647,14 +634,6 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default double getBodyBoxDepth()
    {
       return get(bodyBoxDepth);
-   }
-
-   /**
-    * Width (along Y) of body collision box
-    */
-   default double getBodyBoxWidth()
-   {
-      return get(bodyBoxWidth);
    }
 
    /**
@@ -705,6 +684,14 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * Length of the shin collidable cylinder
+    */
+   default double getShinLength()
+   {
+      return get(shinLength);
+   }
+
+   /**
     * How far the shin collision cylinder extends from the toe
     */
    default double getShinToeClearance()
@@ -721,19 +708,11 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Length of the shin collidable cylinder
-    */
-   default double getShinLength()
-   {
-      return get(shinLength);
-   }
-
-   /**
     * Height offset of shin collidable cylinder
     */
    default double getShinHeightOffset()
    {
-      return get(shinHeightOffet);
+      return get(shinHeightOffset);
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -744,7 +723,7 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
     * between consecutive steps and invalidates steps with collisions, see: {@link ObstacleBetweenStepsChecker}
     */
-   default boolean checkForPathCollisions()
+   default boolean getCheckForPathCollisions()
    {
       return get(checkForPathCollisions);
    }
@@ -761,9 +740,9 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * generator is capable of swinging over.
     * </p>
     */
-   default double getCliffBaseHeightToAvoid()
+   default double getCliffBottomHeightToAvoid()
    {
-      return get(cliffBaseHeightToAvoid);
+      return get(cliffBottomHeightToAvoid);
    }
 
    /**
@@ -777,9 +756,9 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * generator is capable of swinging over.
     * </p>
     */
-   default double getMinimumDistanceFromCliffBottoms()
+   default double getMinDistanceFromCliffBottoms()
    {
-      return get(minimumDistanceFromCliffBottoms);
+      return get(minDistanceFromCliffBottoms);
    }
 
    /**
@@ -809,9 +788,9 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * generator is capable of swinging over.
     * </p>
     */
-   default double getMinimumDistanceFromCliffTops()
+   default double getMinDistanceFromCliffTops()
    {
-      return get(minimumDistanceFromCliffTops);
+      return get(minDistanceFromCliffTops);
    }
 
    /**
@@ -832,5 +811,4 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    {
       return get(cliffHeightThreshold);
    }
-
 }

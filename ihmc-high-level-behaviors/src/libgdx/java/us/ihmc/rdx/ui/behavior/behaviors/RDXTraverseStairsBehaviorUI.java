@@ -15,7 +15,7 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiEnumPlot;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
@@ -99,7 +99,7 @@ public class RDXTraverseStairsBehaviorUI extends RDXBehaviorUIInterface
       goalAffordance.create(goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.SALMON);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGui3DViewInput);
 
-      FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("_Stairs");
+      DefaultFootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("_Stairs");
       footstepPlannerParameterTuner.create(footstepPlannerParameters,
                                            () ->
                                            {

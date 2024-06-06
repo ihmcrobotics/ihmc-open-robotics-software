@@ -8,7 +8,6 @@ import javafx.scene.paint.Color;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintInput;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintSolver;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;

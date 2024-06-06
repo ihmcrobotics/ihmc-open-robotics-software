@@ -12,7 +12,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -21,7 +21,7 @@ import java.util.*;
 public class ParameterBasedStepExpansion implements FootstepExpansion
 {
    private final List<FootstepGraphNode> fullExpansion = new ArrayList<>();
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DefaultFootstepPlannerParametersReadOnly parameters;
    private final IdealStepCalculatorInterface idealStepCalculator;
    private final IdealStepProximityComparator idealStepProximityComparator = new IdealStepProximityComparator();
    private final HashMap<FootstepGraphNode, PartialExpansionManager> expansionManagers = new HashMap<>();
@@ -38,7 +38,7 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
    private final TIntArrayList xyExpansionMask = new TIntArrayList();
    private final TIntArrayList yawExpansionMask = new TIntArrayList();
 
-   public ParameterBasedStepExpansion(FootstepPlannerParametersReadOnly parameters, IdealStepCalculatorInterface idealStepCalculator, SideDependentList<ConvexPolygon2D> footPolygons)
+   public ParameterBasedStepExpansion(DefaultFootstepPlannerParametersReadOnly parameters, IdealStepCalculatorInterface idealStepCalculator, SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.parameters = parameters;
       this.idealStepCalculator = idealStepCalculator;
@@ -65,23 +65,23 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
       yOffsets.clear();
       yawOffsets.clear();
 
-      double maxReachSquared = MathTools.square(parameters.getMaximumStepReach());
+      double maxReachSquared = MathTools.square(parameters.getMaxStepReach());
 
-      for (double x = parameters.getMinimumStepLength(); x <= parameters.getMaximumStepReach(); x += LatticePoint.gridSizeXY)
+      for (double x = parameters.getMinStepLength(); x <= parameters.getMaxStepReach(); x += LatticePoint.gridSizeXY)
       {
-         for (double y = parameters.getMinimumStepWidth(); y <= parameters.getMaximumStepWidth(); y += LatticePoint.gridSizeXY)
+         for (double y = parameters.getMinStepWidth(); y <= parameters.getMaxStepWidth(); y += LatticePoint.gridSizeXY)
          {
             double relativeYToIdeal = y - parameters.getIdealFootstepWidth();
             double reachSquared = EuclidCoreTools.normSquared(x, relativeYToIdeal);
             if (reachSquared > maxReachSquared)
                continue;
 
-            double reachFraction = EuclidCoreTools.fastSquareRoot(reachSquared) / parameters.getMaximumStepReach();
-            double minYawAtFullExtension = (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMinimumStepYaw();
-            double maxYawAtFullExtension = (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMaximumStepYaw();
+            double reachFraction = EuclidCoreTools.fastSquareRoot(reachSquared) / parameters.getMaxStepReach();
+            double minYawAtFullExtension = (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMinStepYaw();
+            double maxYawAtFullExtension = (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMaxStepYaw();
 
-            double minYaw = InterpolationTools.linearInterpolate(parameters.getMinimumStepYaw(), minYawAtFullExtension, reachFraction);
-            double maxYaw = InterpolationTools.linearInterpolate(parameters.getMaximumStepYaw(), maxYawAtFullExtension, reachFraction);
+            double minYaw = InterpolationTools.linearInterpolate(parameters.getMinStepYaw(), minYawAtFullExtension, reachFraction);
+            double maxYaw = InterpolationTools.linearInterpolate(parameters.getMaxStepYaw(), maxYawAtFullExtension, reachFraction);
 
             for (double yaw = minYaw; yaw <= maxYaw; yaw += LatticePoint.gridSizeYaw)
             {
@@ -99,7 +99,7 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
          }
       }
 
-      partialExpansionEnabled = parameters.getMaximumBranchFactor() > 0;
+      partialExpansionEnabled = parameters.getMaxBranchFactor() > 0;
       expansionManagers.clear();
    }
 
@@ -143,7 +143,7 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
             fullExpansionToPack.add(childNode);
       }
 
-      if (idealStepCalculator != null && parameters.getEnabledExpansionMask())
+      if (idealStepCalculator != null && parameters.getEnableExpansionMask())
       {
          applyMask(fullExpansionToPack, nodeToExpand);
       }

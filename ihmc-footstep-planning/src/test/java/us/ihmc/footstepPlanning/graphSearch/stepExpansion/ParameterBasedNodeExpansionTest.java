@@ -32,8 +32,8 @@ public class ParameterBasedNodeExpansionTest
       ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(parameters, null, PlannerTools.createDefaultFootPolygons());
       expansion.initialize();
 
-      double maxYaw = parameters.getMaximumStepYaw();
-      double minYaw = parameters.getMinimumStepYaw();
+      double maxYaw = parameters.getMaxStepYaw();
+      double minYaw = parameters.getMinStepYaw();
       double yawReduction = parameters.getStepYawReductionFactorAtMaxReach();
 
       double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
@@ -53,20 +53,20 @@ public class ParameterBasedNodeExpansionTest
       DiscreteFootstep mostOutwardYawed = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -snapToCircle(node.getYaw())));
       DiscreteFootstep mostInwardYawed = getExtremumNode(childNodes, Comparator.comparingDouble(node -> snapToCircle(node.getYaw())));
 
-      assertTrue(mostForward.getX() < parameters.getMaximumStepReach() + epsilon);
-      assertTrue(mostBackward.getX() > parameters.getMinimumStepLength() - epsilon);
-      assertTrue(mostInward.getY() < -parameters.getMinimumStepWidth() + epsilon);
-      assertTrue(mostOutward.getY() > -parameters.getMaximumStepWidth() - epsilon);
+      assertTrue(mostForward.getX() < parameters.getMaxStepReach() + epsilon);
+      assertTrue(mostBackward.getX() > parameters.getMinStepLength() - epsilon);
+      assertTrue(mostInward.getY() < -parameters.getMinStepWidth() + epsilon);
+      assertTrue(mostOutward.getY() > -parameters.getMaxStepWidth() - epsilon);
 
       double mostOutwardYawedReach = getReachAtNode(mostOutwardYawed, parameters.getIdealFootstepWidth());
       double mostInwardYawedReach = getReachAtNode(mostOutwardYawed, parameters.getIdealFootstepWidth());
-      double mostOutwardYawMax = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, mostOutwardYawedReach / parameters.getMaximumStepReach());
-      double mostInwardYawMin = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, mostInwardYawedReach / parameters.getMaximumStepReach());
+      double mostOutwardYawMax = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, mostOutwardYawedReach / parameters.getMaxStepReach());
+      double mostInwardYawMin = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, mostInwardYawedReach / parameters.getMaxStepReach());
       double minOutwardYaw = snapToYawGrid(-mostOutwardYawMax - epsilon);
       double maxInwardYaw = snapToYawGrid(-mostInwardYawMin + epsilon);
       assertTrue(mostOutwardYawed.getYaw() > minOutwardYaw - epsilon);
       assertTrue(mostInwardYawed.getYaw() < maxInwardYaw + epsilon);
-      assertTrue(getReachAtNode(furthestReach, parameters.getIdealFootstepWidth()) < parameters.getMaximumStepReach());
+      assertTrue(getReachAtNode(furthestReach, parameters.getIdealFootstepWidth()) < parameters.getMaxStepReach());
    }
 
    @Test
@@ -76,8 +76,8 @@ public class ParameterBasedNodeExpansionTest
       ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(parameters, null, PlannerTools.createDefaultFootPolygons());
       expansion.initialize();
 
-      double maxYaw = parameters.getMaximumStepYaw();
-      double minYaw = parameters.getMinimumStepYaw();
+      double maxYaw = parameters.getMaxStepYaw();
+      double minYaw = parameters.getMinStepYaw();
       double yawReduction = parameters.getStepYawReductionFactorAtMaxReach();
 
       double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
@@ -96,20 +96,20 @@ public class ParameterBasedNodeExpansionTest
       DiscreteFootstep mostOutwardYawed = getExtremumNode(childNodes, Comparator.comparingDouble(node -> snapToCircle(node.getYaw())));
       DiscreteFootstep mostInwardYawed = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -snapToCircle(node.getYaw())));
 
-      assertTrue(mostForward.getX() < parameters.getMaximumStepReach() + epsilon);
-      assertTrue(mostBackward.getX() > parameters.getMinimumStepLength() - epsilon);
-      assertTrue(mostInward.getY() > parameters.getMinimumStepWidth() - epsilon);
-      assertTrue(mostOutward.getY() < parameters.getMaximumStepWidth() + epsilon);
+      assertTrue(mostForward.getX() < parameters.getMaxStepReach() + epsilon);
+      assertTrue(mostBackward.getX() > parameters.getMinStepLength() - epsilon);
+      assertTrue(mostInward.getY() > parameters.getMinStepWidth() - epsilon);
+      assertTrue(mostOutward.getY() < parameters.getMaxStepWidth() + epsilon);
 
       double mostOutwardYawedReach = getReachAtNode(mostOutwardYawed, parameters.getIdealFootstepWidth());
       double mostInwardYawedReach = getReachAtNode(mostInwardYawed, parameters.getIdealFootstepWidth());
-      double mostOutwardYawMax = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, mostOutwardYawedReach / parameters.getMaximumStepReach());
-      double mostInwardYawMin = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, mostInwardYawedReach / parameters.getMaximumStepReach());
+      double mostOutwardYawMax = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, mostOutwardYawedReach / parameters.getMaxStepReach());
+      double mostInwardYawMin = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, mostInwardYawedReach / parameters.getMaxStepReach());
       double maxOutwardYaw = snapToYawGrid(mostOutwardYawMax + epsilon);
       double maxInwardYaw = snapToYawGrid(mostInwardYawMin + epsilon);
       assertTrue(mostOutwardYawed.getYaw() < maxOutwardYaw + epsilon);
       assertTrue(mostInwardYawed.getYaw() > maxInwardYaw - epsilon);
-      assertTrue(getReachAtNode(furthestReach, parameters.getIdealFootstepWidth()) < parameters.getMaximumStepReach());
+      assertTrue(getReachAtNode(furthestReach, parameters.getIdealFootstepWidth()) < parameters.getMaxStepReach());
    }
 
    @Test
@@ -122,8 +122,8 @@ public class ParameterBasedNodeExpansionTest
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
-      parameters.setMaximumStepYaw(maxYaw);
-      parameters.setMinimumStepYaw(minYaw);
+      parameters.setMaxStepYaw(maxYaw);
+      parameters.setMinStepYaw(minYaw);
       parameters.setStepYawReductionFactorAtMaxReach(yawReduction);
 
       double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
@@ -142,20 +142,20 @@ public class ParameterBasedNodeExpansionTest
       DiscreteFootstep mostOutwardYawed = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -snapToCircle(node.getYaw())));
       DiscreteFootstep mostInwardYawed = getExtremumNode(childNodes, Comparator.comparingDouble(node -> snapToCircle(node.getYaw())));
 
-      assertTrue(mostForward.getX() < parameters.getMaximumStepReach() + epsilon);
-      assertTrue(mostBackward.getX() > parameters.getMinimumStepLength() - epsilon);
-      assertTrue(mostInward.getY() < -parameters.getMinimumStepWidth() + epsilon);
-      assertTrue(mostOutward.getY() > -parameters.getMaximumStepWidth() - epsilon);
+      assertTrue(mostForward.getX() < parameters.getMaxStepReach() + epsilon);
+      assertTrue(mostBackward.getX() > parameters.getMinStepLength() - epsilon);
+      assertTrue(mostInward.getY() < -parameters.getMinStepWidth() + epsilon);
+      assertTrue(mostOutward.getY() > -parameters.getMaxStepWidth() - epsilon);
 
       double mostOutwardYawedReach = getReachAtNode(mostOutwardYawed, parameters.getIdealFootstepWidth());
       double mostInwardYawedReach = getReachAtNode(mostOutwardYawed, parameters.getIdealFootstepWidth());
-      double mostOutwardYawMax = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, mostOutwardYawedReach / parameters.getMaximumStepReach());
-      double mostInwardYawMin = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, mostInwardYawedReach / parameters.getMaximumStepReach());
+      double mostOutwardYawMax = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, mostOutwardYawedReach / parameters.getMaxStepReach());
+      double mostInwardYawMin = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, mostInwardYawedReach / parameters.getMaxStepReach());
       double minOutwardYaw = snapToYawGrid(-mostOutwardYawMax - epsilon);
       double maxInwardYaw = snapToYawGrid(-mostInwardYawMin + epsilon);
       assertTrue(mostOutwardYawed.getYaw() > minOutwardYaw);
       assertTrue(mostInwardYawed.getYaw() < maxInwardYaw + epsilon);
-      assertTrue(getReachAtNode(furthestReach, parameters.getIdealFootstepWidth()) < parameters.getMaximumStepReach());
+      assertTrue(getReachAtNode(furthestReach, parameters.getIdealFootstepWidth()) < parameters.getMaxStepReach());
    }
 
    private static double getReachAtNode(DiscreteFootstep node, double idealWidth)
@@ -196,7 +196,7 @@ public class ParameterBasedNodeExpansionTest
    {
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       int branchFactor = 100;
-      parameters.setMaximumBranchFactor(branchFactor);
+      parameters.setMaxBranchFactor(branchFactor);
 
       IdealStepCalculatorInterface idealStepCalculator = (stance, startOfSwing) -> new DiscreteFootstep(stance.getLatticePoint(), stance.getRobotSide().getOppositeSide());
       ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(parameters, idealStepCalculator, PlannerTools.createDefaultFootPolygons());
@@ -234,7 +234,7 @@ public class ParameterBasedNodeExpansionTest
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
 
       int branchFactor = 100;
-      parameters.setMaximumBranchFactor(branchFactor);
+      parameters.setMaxBranchFactor(branchFactor);
 
       for (int i = 0; i < numberOfGraphNodes; i++)
       {
@@ -274,7 +274,7 @@ public class ParameterBasedNodeExpansionTest
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
 
       int branchFactor = 100;
-      parameters.setMaximumBranchFactor(branchFactor);
+      parameters.setMaxBranchFactor(branchFactor);
 
       for (int i = 0; i < numberOfGraphNodes; i++)
       {
@@ -316,11 +316,11 @@ public class ParameterBasedNodeExpansionTest
       double clearance = 0.01;
 
       // set width so expansion will step on stance foot if not prevented
-      parameters.setMinimumStepWidth(0.0);
-      parameters.setMinimumStepLength(-0.2);
+      parameters.setMinStepWidth(0.0);
+      parameters.setMinStepLength(-0.2);
       parameters.setEnableExpansionMask(false);
       parameters.setMinClearanceFromStance(clearance);
-      parameters.setMaximumBranchFactor(Integer.MAX_VALUE);
+      parameters.setMaxBranchFactor(Integer.MAX_VALUE);
 
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       ParameterBasedStepExpansion expansion = new ParameterBasedStepExpansion(parameters, null, footPolygons);

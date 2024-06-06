@@ -4,13 +4,11 @@ import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityDa
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityLatticePoint;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -21,7 +19,7 @@ public class FootstepPoseReachabilityChecker
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DefaultFootstepPlannerParametersReadOnly parameters;
    private final FootstepSnapperReadOnly snapper;
    private final StepReachabilityData stepReachabilityData;
 
@@ -41,7 +39,7 @@ public class FootstepPoseReachabilityChecker
    private final YoFramePoseUsingYawPitchRoll yoStanceFootPose = new YoFramePoseUsingYawPitchRoll("stance", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoseUsingYawPitchRoll yoCandidateFootPose = new YoFramePoseUsingYawPitchRoll("candidate", stanceFootZUpFrame, registry);
 
-   public FootstepPoseReachabilityChecker(FootstepPlannerParametersReadOnly parameters,
+   public FootstepPoseReachabilityChecker(DefaultFootstepPlannerParametersReadOnly parameters,
                                           FootstepSnapperReadOnly snapper,
                                           StepReachabilityData stepReachabilityData,
                                           YoRegistry parentRegistry)

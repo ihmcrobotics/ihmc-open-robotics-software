@@ -16,7 +16,7 @@ public class FootstepPlannerParametersTest
    public void testSettingParameters()
    {
       Random random = new Random(1738L);
-      FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
 
       for (int iter = 0; iter < iters; iter++)
       {
@@ -24,15 +24,15 @@ public class FootstepPlannerParametersTest
       }
    }
 
-   private static void testSettingParameters(Random random, FootstepPlannerParametersBasics parameters)
+   private static void testSettingParameters(Random random, DefaultFootstepPlannerParametersBasics parameters)
    {
       boolean checkForBodyBoxCollisions = RandomNumbers.nextBoolean(random, 0.5);
       parameters.setCheckForBodyBoxCollisions(checkForBodyBoxCollisions);
-      assertEquals(checkForBodyBoxCollisions, parameters.checkForBodyBoxCollisions());
+      assertEquals(checkForBodyBoxCollisions, parameters.getCheckForBodyBoxCollisions());
 
       boolean checkForPathCollisions = RandomNumbers.nextBoolean(random, 0.5);
       parameters.setCheckForPathCollisions(checkForPathCollisions);
-      assertEquals(checkForPathCollisions, parameters.checkForPathCollisions());
+      assertEquals(checkForPathCollisions, parameters.getCheckForPathCollisions());
 
       double idealFootstepWidth = RandomNumbers.nextDouble(random, 10.0);
       parameters.setIdealFootstepWidth(idealFootstepWidth);
@@ -47,52 +47,52 @@ public class FootstepPlannerParametersTest
       assertEquals(idealStepLengthAtMaxStepZ, parameters.getIdealStepLengthAtMaxStepZ(), epsilon);
 
       double maxStepReach = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMaximumStepReach(maxStepReach);
-      assertEquals(maxStepReach, parameters.getMaximumStepReach(), epsilon);
+      parameters.setMaxStepReach(maxStepReach);
+      assertEquals(maxStepReach, parameters.getMaxStepReach(), epsilon);
 
       double minStepLength = RandomNumbers.nextDouble(random, 10.00);
-      parameters.setMinimumStepLength(minStepLength);
-      assertEquals(minStepLength, parameters.getMinimumStepLength(), epsilon);
+      parameters.setMinStepLength(minStepLength);
+      assertEquals(minStepLength, parameters.getMinStepLength(), epsilon);
 
       double minSTepYaw = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMinimumStepYaw(minSTepYaw);
-      assertEquals(minSTepYaw, parameters.getMinimumStepYaw(), epsilon);
+      parameters.setMinStepYaw(minSTepYaw);
+      assertEquals(minSTepYaw, parameters.getMinStepYaw(), epsilon);
 
       double minStepWidth = RandomNumbers.nextDouble(random, 10.00);
-      parameters.setMinimumStepWidth(minStepWidth);
-      assertEquals(minStepWidth, parameters.getMinimumStepWidth(), epsilon);
+      parameters.setMinStepWidth(minStepWidth);
+      assertEquals(minStepWidth, parameters.getMinStepWidth(), epsilon);
 
       boolean useReachabilityMap = random.nextBoolean();
       parameters.setUseReachabilityMap(useReachabilityMap);
-      assertEquals(useReachabilityMap, parameters.getUseStepReachabilityMap());
+      assertEquals(useReachabilityMap, parameters.getUseReachabilityMap());
 
       double solutionQualityThreshold = RandomNumbers.nextDouble(random, 10.00);
       parameters.setSolutionQualityThreshold(solutionQualityThreshold);
       assertEquals(solutionQualityThreshold, parameters.getSolutionQualityThreshold(), epsilon);
 
       double maxStepWidth = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMaximumStepWidth(maxStepWidth);
-      assertEquals(maxStepWidth, parameters.getMaximumStepWidth(), epsilon);
+      parameters.setMaxStepWidth(maxStepWidth);
+      assertEquals(maxStepWidth, parameters.getMaxStepWidth(), epsilon);
 
       double maxStepZ = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMaximumStepZ(maxStepZ);
+      parameters.setMaxStepZ(maxStepZ);
       assertEquals(maxStepZ, parameters.getMaxStepZ(), epsilon);
 
       double maxSwingZ = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMaximumSwingZ(maxSwingZ);
+      parameters.setMaxSwingZ(maxSwingZ);
       assertEquals(maxSwingZ, parameters.getMaxSwingZ(), epsilon);
 
       double maxSwingReach = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMaximumSwingReach(maxSwingReach);
+      parameters.setMaxSwingReach(maxSwingReach);
       assertEquals(maxSwingReach, parameters.getMaxSwingReach(), epsilon);
 
       double maxStepXWhenForwardAndDown = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMaximumStepXWhenForwardAndDown(maxStepXWhenForwardAndDown);
-      assertEquals(maxStepXWhenForwardAndDown, parameters.getMaximumStepXWhenForwardAndDown(), epsilon);
+      parameters.setMaxStepXWhenForwardAndDown(maxStepXWhenForwardAndDown);
+      assertEquals(maxStepXWhenForwardAndDown, parameters.getMaxStepXWhenForwardAndDown(), epsilon);
 
       double maxStepZWhenForwardAndDown = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMaximumStepZWhenForwardAndDown(maxStepZWhenForwardAndDown);
-      assertEquals(maxStepZWhenForwardAndDown, parameters.getMaximumStepZWhenForwardAndDown(), epsilon);
+      parameters.setMaxStepZWhenForwardAndDown(maxStepZWhenForwardAndDown);
+      assertEquals(maxStepZWhenForwardAndDown, parameters.getMaxStepZWhenForwardAndDown(), epsilon);
 
       double wiggleInsideDeltaTarget = RandomNumbers.nextDouble(random, 10.0);
       parameters.setWiggleInsideDeltaTarget(wiggleInsideDeltaTarget);
@@ -103,20 +103,20 @@ public class FootstepPlannerParametersTest
       assertEquals(wiggleInsideDeltaMinimum, parameters.getWiggleInsideDeltaMinimum(), epsilon);
 
       double maximumStepReachWhenSteppingUp = RandomNumbers.nextDouble(random, 10.00);
-      parameters.setMaximumStepReachWhenSteppingUp(maximumStepReachWhenSteppingUp);
-      assertEquals(maximumStepReachWhenSteppingUp, parameters.getMaximumStepReachWhenSteppingUp(), epsilon);
+      parameters.setMaxStepReachWhenSteppingUp(maximumStepReachWhenSteppingUp);
+      assertEquals(maximumStepReachWhenSteppingUp, parameters.getMaxStepReachWhenSteppingUp(), epsilon);
 
       double maximumStepZWhenSteppingUp = RandomNumbers.nextDouble(random, 10.00);
-      parameters.setMaximumStepZWhenSteppingUp(maximumStepZWhenSteppingUp);
-      assertEquals(maximumStepZWhenSteppingUp, parameters.getMaximumStepZWhenSteppingUp(), epsilon);
+      parameters.setMaxStepZWhenSteppingUp(maximumStepZWhenSteppingUp);
+      assertEquals(maximumStepZWhenSteppingUp, parameters.getMaxStepZWhenSteppingUp(), epsilon);
 
       double minFootholdPercent = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMinimumFootholdPercent(minFootholdPercent);
-      assertEquals(minFootholdPercent, parameters.getMinimumFootholdPercent(), epsilon);
+      parameters.setMinFootholdPercent(minFootholdPercent);
+      assertEquals(minFootholdPercent, parameters.getMinFootholdPercent(), epsilon);
 
       double minSurfaceIncline = RandomNumbers.nextDouble(random, 10.00);
-      parameters.setMinimumSurfaceInclineRadians(minSurfaceIncline);
-      assertEquals(minSurfaceIncline, parameters.getMinimumSurfaceInclineRadians(), epsilon);
+      parameters.setMinSurfaceInclineRadians(minSurfaceIncline);
+      assertEquals(minSurfaceIncline, parameters.getMinSurfaceIncline(), epsilon);
 
       boolean wiggleWhilePlanning = random.nextBoolean();
       parameters.setWiggleWhilePlanning(wiggleWhilePlanning);
@@ -127,24 +127,24 @@ public class FootstepPlannerParametersTest
       assertEquals(enableConcaveHullWiggler, parameters.getEnableConcaveHullWiggler());
 
       double maximumXYWiggleDistance = RandomNumbers.nextDouble(random, 10.00);
-      parameters.setMaximumXYWiggleDistance(maximumXYWiggleDistance);
-      assertEquals(maximumXYWiggleDistance, parameters.getMaximumXYWiggleDistance(), epsilon);
+      parameters.setMaxXYWiggleDistance(maximumXYWiggleDistance);
+      assertEquals(maximumXYWiggleDistance, parameters.getMaxXYWiggleDistance(), epsilon);
 
       double maximumYawWiggle = RandomNumbers.nextDouble(random, 10.00);
-      parameters.setMaximumYawWiggle(maximumYawWiggle);
-      assertEquals(maximumYawWiggle, parameters.getMaximumYawWiggle(), epsilon);
+      parameters.setMaxYawWiggle(maximumYawWiggle);
+      assertEquals(maximumYawWiggle, parameters.getMaxYawWiggle(), epsilon);
 
       double maxZpenetration = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMaximumZPenetrationOnValleyRegions(maxZpenetration);
-      assertEquals(maxZpenetration, parameters.getMaximumZPenetrationOnValleyRegions(), epsilon);
+      parameters.setMaxZPenetrationOnValleyRegions(maxZpenetration);
+      assertEquals(maxZpenetration, parameters.getMaxZPenetrationOnValleyRegions(), epsilon);
 
       double cliffHeightToAvoid = RandomNumbers.nextDouble(random, 10.00);
       parameters.setCliffBaseHeightToAvoid(cliffHeightToAvoid);
-      assertEquals(cliffHeightToAvoid, parameters.getCliffBaseHeightToAvoid());
+      assertEquals(cliffHeightToAvoid, parameters.getCliffBottomHeightToAvoid());
 
       double minimumDistanceFromCliff = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliff);
-      assertEquals(minimumDistanceFromCliff, parameters.getMinimumDistanceFromCliffBottoms(), epsilon);
+      parameters.setMinDistanceFromCliffBottoms(minimumDistanceFromCliff);
+      assertEquals(minimumDistanceFromCliff, parameters.getMinDistanceFromCliffBottoms(), epsilon);
 
       double minClearanceFromStance = RandomNumbers.nextDouble(random, 10.0);
       parameters.setMinClearanceFromStance(minClearanceFromStance);
@@ -188,7 +188,7 @@ public class FootstepPlannerParametersTest
 
       double aStarHeuristicWeight = RandomNumbers.nextDouble(random, 10.0);
       parameters.setAStarHeuristicsWeight(aStarHeuristicWeight);
-      assertEquals(aStarHeuristicWeight, parameters.getAStarHeuristicsWeight().getValue(), epsilon);
+      assertEquals(aStarHeuristicWeight, parameters.getAStarHeuristicsWeight(), epsilon);
 
       double yawWeight = RandomNumbers.nextDouble(random, 10.0);
       parameters.setYawWeight(yawWeight);

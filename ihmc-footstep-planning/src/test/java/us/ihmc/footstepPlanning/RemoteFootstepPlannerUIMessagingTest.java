@@ -40,8 +40,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
 import us.ihmc.footstepPlanning.ui.RemoteUIMessageConverter;
@@ -357,7 +357,7 @@ public class RemoteFootstepPlannerUIMessagingTest
                                    s -> processVisibilityGraphsParametersPacket(s.takeNextData()));
       localNode.spin();
 
-      FootstepPlannerParametersBasics randomParameters = FootstepPlanningTestTools.createRandomParameters(random);
+      DefaultFootstepPlannerParametersBasics randomParameters = FootstepPlanningTestTools.createRandomParameters(random);
       VisibilityGraphsParametersReadOnly randomVisibilityGraphParameters = createRandomVisibilityGraphsParameters(random);
 
       double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
@@ -610,10 +610,10 @@ public class RemoteFootstepPlannerUIMessagingTest
       footstepDataListMessageA.epsilonEquals(footstepDataListMessageB, epsilon);
    }
 
-   private static void checkFootstepPlannerParameters(FootstepPlannerParametersReadOnly parameters, FootstepPlannerParametersPacket packet)
+   private static void checkFootstepPlannerParameters(DefaultFootstepPlannerParametersReadOnly parameters, FootstepPlannerParametersPacket packet)
    {
-      assertEquals(parameters.checkForBodyBoxCollisions(), packet.getCheckForBodyBoxCollisions(), "Check for body box collisions flags aren't equal.");
-      assertEquals(parameters.checkForPathCollisions(), packet.getCheckForPathCollisions(), "Check for path collisions flags aren't equal.");
+      assertEquals(parameters.getCheckForBodyBoxCollisions(), packet.getCheckForBodyBoxCollisions(), "Check for body box collisions flags aren't equal.");
+      assertEquals(parameters.getCheckForPathCollisions(), packet.getCheckForPathCollisions(), "Check for path collisions flags aren't equal.");
       assertEquals(parameters.getIdealFootstepWidth(), packet.getIdealFootstepWidth(), epsilon, "Ideal footstep widths aren't equal.");
       assertEquals(parameters.getIdealFootstepLength(), packet.getIdealFootstepLength(), epsilon, "Ideal footstep lengths aren't equal.");
       assertEquals(parameters.getIdealSideStepWidth(), packet.getIdealSideStepWidth(), epsilon, "Ideal footstep lengths aren't equal.");
@@ -621,33 +621,33 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals(parameters.getIdealStepLengthAtMaxStepZ(), packet.getIdealStepLengthAtMaxStepZ(), epsilon, "Ideal footstep lengths aren't equal.");
       assertEquals(parameters.getWiggleInsideDeltaTarget(), packet.getWiggleInsideDeltaTarget(), epsilon, "Wiggle inside delta targets aren't equal.");
       assertEquals(parameters.getWiggleInsideDeltaMinimum(), packet.getWiggleInsideDeltaMinimum(), epsilon, "Wiggle inside delta minimums aren't equal.");
-      assertEquals(parameters.getMaximumStepReach(), parameters.getMaximumStepReach(), epsilon, "Maximum step reaches aren't equal.");
-      assertEquals(parameters.getMaximumStepYaw(), packet.getMaximumStepYaw(), epsilon, "Maximum step yaws aren't equal.");
-      assertEquals(parameters.getUseStepReachabilityMap(), packet.getUseReachabilityMap(), "Use reachability map isn't equal");
+      assertEquals(parameters.getMaxStepReach(), parameters.getMaxStepReach(), epsilon, "Maximum step reaches aren't equal.");
+      assertEquals(parameters.getMaxStepYaw(), packet.getMaximumStepYaw(), epsilon, "Maximum step yaws aren't equal.");
+      assertEquals(parameters.getUseReachabilityMap(), packet.getUseReachabilityMap(), "Use reachability map isn't equal");
       assertEquals(parameters.getSolutionQualityThreshold(), packet.getSolutionQualityThreshold(), epsilon, "Solution quality threshold isn't equal");
-      assertEquals(parameters.getMinimumStepWidth(), packet.getMinimumStepWidth(), epsilon, "Minimum step widths aren't equal.");
-      assertEquals(parameters.getMinimumStepLength(), packet.getMinimumStepLength(), epsilon, "Minimum step lengths aren't equal.");
-      assertEquals(parameters.getMinimumStepYaw(), packet.getMinimumStepYaw(), epsilon, "Minimum step yaws aren't equal.");
-      assertEquals(parameters.getMaximumStepReachWhenSteppingUp(), packet.getMaximumStepReachWhenSteppingUp(), epsilon);
-      assertEquals(parameters.getMaximumStepZWhenSteppingUp(), packet.getMaximumStepZWhenSteppingUp(), epsilon);
-      assertEquals(parameters.getMaximumStepXWhenForwardAndDown(), packet.getMaximumStepXWhenForwardAndDown(), epsilon, "Max X forward and down aren't equal");
-      assertEquals(parameters.getMaximumStepZWhenForwardAndDown(), packet.getMaximumStepZWhenForwardAndDown(), epsilon, "Max Z forward and down aren't equal");
+      assertEquals(parameters.getMinStepWidth(), packet.getMinimumStepWidth(), epsilon, "Minimum step widths aren't equal.");
+      assertEquals(parameters.getMinStepLength(), packet.getMinimumStepLength(), epsilon, "Minimum step lengths aren't equal.");
+      assertEquals(parameters.getMinStepYaw(), packet.getMinimumStepYaw(), epsilon, "Minimum step yaws aren't equal.");
+      assertEquals(parameters.getMaxStepReachWhenSteppingUp(), packet.getMaximumStepReachWhenSteppingUp(), epsilon);
+      assertEquals(parameters.getMaxStepZWhenSteppingUp(), packet.getMaximumStepZWhenSteppingUp(), epsilon);
+      assertEquals(parameters.getMaxStepXWhenForwardAndDown(), packet.getMaximumStepXWhenForwardAndDown(), epsilon, "Max X forward and down aren't equal");
+      assertEquals(parameters.getMaxStepZWhenForwardAndDown(), packet.getMaximumStepZWhenForwardAndDown(), epsilon, "Max Z forward and down aren't equal");
 
       assertEquals(parameters.getMaxStepZ(), packet.getMaximumStepZ(), epsilon, "Max step z isn't equal.");
       assertEquals(parameters.getMaxSwingZ(), packet.getMaximumSwingZ(), epsilon, "Max swing z isn't equal.");
       assertEquals(parameters.getMaxSwingReach(), packet.getMaximumSwingReach(), epsilon, "Max swing reach isn't equal.");
-      assertEquals(parameters.getMinimumFootholdPercent(), packet.getMinimumFootholdPercent(), epsilon, "Min foothold percent aren't equal.");
-      assertEquals(parameters.getMinimumSurfaceInclineRadians(), packet.getMinimumSurfaceInclineRadians(), epsilon, "Min surface incline aren't equal.");
+      assertEquals(parameters.getMinFootholdPercent(), packet.getMinimumFootholdPercent(), epsilon, "Min foothold percent aren't equal.");
+      assertEquals(parameters.getMinSurfaceIncline(), packet.getMinimumSurfaceInclineRadians(), epsilon, "Min surface incline aren't equal.");
       assertEquals(parameters.getWiggleWhilePlanning(), packet.getWiggleWhilePlanning());
       assertEquals(parameters.getEnableConcaveHullWiggler(), packet.getEnableConcaveHullWiggler(), "Wiggle while planning isn't equal.");
-      assertEquals(parameters.getMaximumXYWiggleDistance(), packet.getMaximumXyWiggleDistance(), epsilon, "Max XY wiggle distance isn't equal.");
-      assertEquals(parameters.getMaximumYawWiggle(), packet.getMaximumYawWiggle(), epsilon, "Max yaw wiggle isn't equal.");
-      assertEquals(parameters.getMaximumZPenetrationOnValleyRegions(), packet.getMaximumZPenetrationOnValleyRegions(), epsilon, "Max Z penetration isn't equal.");
-      assertEquals(parameters.getMaximumStepWidth(), packet.getMaximumStepWidth(), epsilon, "Max step width isn't equal.");
-      assertEquals(parameters.getCliffBaseHeightToAvoid(), packet.getCliffBaseHeightToAvoid(), epsilon, "Cliff base height to avoid isn't equal.");
-      assertEquals(parameters.getMinimumDistanceFromCliffBottoms(), packet.getMinimumDistanceFromCliffBottoms(), epsilon, "Minimum distance from cliff bottoms isn't equal.");
+      assertEquals(parameters.getMaxXYWiggleDistance(), packet.getMaximumXyWiggleDistance(), epsilon, "Max XY wiggle distance isn't equal.");
+      assertEquals(parameters.getMaxYawWiggle(), packet.getMaximumYawWiggle(), epsilon, "Max yaw wiggle isn't equal.");
+      assertEquals(parameters.getMaxZPenetrationOnValleyRegions(), packet.getMaximumZPenetrationOnValleyRegions(), epsilon, "Max Z penetration isn't equal.");
+      assertEquals(parameters.getMaxStepWidth(), packet.getMaximumStepWidth(), epsilon, "Max step width isn't equal.");
+      assertEquals(parameters.getCliffBottomHeightToAvoid(), packet.getCliffBaseHeightToAvoid(), epsilon, "Cliff base height to avoid isn't equal.");
+      assertEquals(parameters.getMinDistanceFromCliffBottoms(), packet.getMinimumDistanceFromCliffBottoms(), epsilon, "Minimum distance from cliff bottoms isn't equal.");
       assertEquals(parameters.getCliffTopHeightToAvoid(), packet.getCliffTopHeightToAvoid(), epsilon, "Cliff top height to avoid isn't equal.");
-      assertEquals(parameters.getMinimumDistanceFromCliffTops(), packet.getMinimumDistanceFromCliffTops(), epsilon, "Minimum distance from cliff tops isn't equal.");
+      assertEquals(parameters.getMinDistanceFromCliffTops(), packet.getMinimumDistanceFromCliffTops(), epsilon, "Minimum distance from cliff tops isn't equal.");
       assertEquals(parameters.getBodyBoxHeight(), packet.getBodyBoxHeight(), epsilon, "Body box heigth isn't equal.");
       assertEquals(parameters.getBodyBoxDepth(), packet.getBodyBoxDepth(), epsilon, "Body box depth isn't equal.");
       assertEquals(parameters.getBodyBoxWidth(), packet.getBodyBoxWidth(), epsilon, "Body box width isn't equal.");
@@ -657,7 +657,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals(parameters.getMaximumSnapHeight(), packet.getMaximumSnapHeight(), epsilon, "Maximum snap height isn't equal");
       assertEquals(parameters.getMinClearanceFromStance(), packet.getMinClearanceFromStance(), epsilon, "Min clearance from stance isn't equal.");
 
-      assertEquals(parameters.getAStarHeuristicsWeight().getValue(), packet.getAStarHeuristicsWeight(), epsilon, "A star heuristics weights aren't equal.");
+      assertEquals(parameters.getAStarHeuristicsWeight(), packet.getAStarHeuristicsWeight(), epsilon, "A star heuristics weights aren't equal.");
       assertEquals(parameters.getYawWeight(), packet.getYawWeight(), epsilon, "Yaw weights aren't equal.");
       assertEquals(parameters.getRollWeight(), packet.getRollWeight(), epsilon, "Roll weights aren't equal.");
       assertEquals(parameters.getPitchWeight(), packet.getPitchWeight(), epsilon, "Pitch weights aren't equal.");

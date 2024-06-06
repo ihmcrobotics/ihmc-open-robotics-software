@@ -8,7 +8,6 @@ import com.google.common.collect.Lists;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.behaviorTree.LocalOnlyBehaviorTreeNodeExecutor;
@@ -29,7 +28,6 @@ import us.ihmc.behaviors.waypoints.WaypointManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
@@ -262,7 +260,7 @@ public class PatrolBehavior extends LocalOnlyBehaviorTreeNodeExecutor
       DefaultFootstepPlannerParameters defaultFootstepPlannerParameters = new DefaultFootstepPlannerParameters();
       if (decidePlanType(start, goal) == PlanTravelDistance.CLOSE)
       {
-         defaultFootstepPlannerParameters.setMaximumStepYaw(1.1); // enable quick turn arounds
+         defaultFootstepPlannerParameters.setMaxStepYaw(1.1); // enable quick turn arounds
       }
 
       footstepPlanningModule.getFootstepPlannerParameters().set(defaultFootstepPlannerParameters);

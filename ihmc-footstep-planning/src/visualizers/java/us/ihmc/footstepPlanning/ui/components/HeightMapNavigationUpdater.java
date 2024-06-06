@@ -20,7 +20,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
@@ -32,7 +32,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -115,7 +114,7 @@ public class HeightMapNavigationUpdater extends AnimationTimer
    }
 
    public HeightMapNavigationUpdater(Messager messager,
-                                     FootstepPlannerParametersBasics footstepPlannerParameters,
+                                     DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                                      WalkingControllerParameters walkingControllerParameters,
                                      SideDependentList<List<Point2D>> defaultContactPoints,
                                      FullHumanoidRobotModel fullHumanoidRobotModel,

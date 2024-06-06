@@ -5,9 +5,8 @@ import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphParametersKeys;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
@@ -32,11 +31,11 @@ public class FootstepPlannerMessageToolsTest
       Random random = new Random(1738L);
 
       FootstepPlannerParametersPacket packet = new FootstepPlannerParametersPacket();
-      FootstepPlannerParametersBasics parametersToSet = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersBasics parametersToSet = new DefaultFootstepPlannerParameters();
 
       for (int iter = 0; iter < iters; iter++)
       {
-         FootstepPlannerParametersReadOnly randomParameters = getRandomParameters(random);
+         DefaultFootstepPlannerParametersReadOnly randomParameters = getRandomParameters(random);
          FootstepPlannerMessageTools.copyParametersToPacket(packet, randomParameters);
          parametersToSet.set(packet);
 
@@ -48,8 +47,8 @@ public class FootstepPlannerMessageToolsTest
    public void testNotSettingFromPacket()
    {
       FootstepPlannerParametersPacket packet = new FootstepPlannerParametersPacket();
-      FootstepPlannerParametersBasics parametersToSet = new DefaultFootstepPlannerParameters();
-      FootstepPlannerParametersBasics expectedParameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersBasics parametersToSet = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersBasics expectedParameters = new DefaultFootstepPlannerParameters();
 
       parametersToSet.set(packet);
 
@@ -84,9 +83,9 @@ public class FootstepPlannerMessageToolsTest
       assertDoubleParametersDontContainNoValue(expectedParameters, parametersToSet);
    }
 
-   private static void assertParametersEqual(FootstepPlannerParametersReadOnly parametersA, FootstepPlannerParametersReadOnly parametersB)
+   private static void assertParametersEqual(DefaultFootstepPlannerParametersReadOnly parametersA, DefaultFootstepPlannerParametersReadOnly parametersB)
    {
-      for (StoredPropertyKey<?> key : FootstepPlannerParameterKeys.keys.keys())
+      for (StoredPropertyKey<?> key : DefaultFootstepPlannerParameters.keys.keys())
       {
          String failureMessage = key.getTitleCasedName() + " has the wrong value.";
          if (key instanceof DoubleStoredPropertyKey)
@@ -132,9 +131,9 @@ public class FootstepPlannerMessageToolsTest
       }
    }
 
-   private static void assertDoubleParametersDontContainNoValue(FootstepPlannerParametersReadOnly parametersA, FootstepPlannerParametersReadOnly parametersB)
+   private static void assertDoubleParametersDontContainNoValue(DefaultFootstepPlannerParametersReadOnly parametersA, DefaultFootstepPlannerParametersReadOnly parametersB)
    {
-      for (StoredPropertyKey<?> key : FootstepPlannerParameterKeys.keys.keys())
+      for (StoredPropertyKey<?> key : DefaultFootstepPlannerParameters.keys.keys())
       {
          String failureMessage = key.getTitleCasedName() + " contains a no value.";
          if (key instanceof DoubleStoredPropertyKey)
@@ -161,11 +160,11 @@ public class FootstepPlannerMessageToolsTest
    }
 
 
-   private static FootstepPlannerParametersReadOnly getRandomParameters(Random random)
+   private static DefaultFootstepPlannerParametersReadOnly getRandomParameters(Random random)
    {
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
 
-      for (StoredPropertyKey<?> key : FootstepPlannerParameterKeys.keys.keys())
+      for (StoredPropertyKey<?> key : DefaultFootstepPlannerParameters.keys.keys())
       {
          if (key instanceof DoubleStoredPropertyKey)
          {
