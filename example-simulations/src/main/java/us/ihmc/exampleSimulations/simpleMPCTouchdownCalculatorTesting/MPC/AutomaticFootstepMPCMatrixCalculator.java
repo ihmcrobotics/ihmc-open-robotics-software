@@ -4,19 +4,20 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
-import us.ihmc.closedSourceControl.fastWalking.parameters.FastWalkingParameters;
-import us.ihmc.closedSourceControl.fastWalking.parameters.YoFastWalkingConstantParametersForStep;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.BPWPlanarWalkingRobotEstimates;
+import us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.MPC.FootstepMPCMatrixTools;
+import us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.MPC.MPCParameters;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
 import us.ihmc.robotics.math.frames.YoMatrix;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.euclid.YoVector2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
@@ -43,12 +44,15 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class AutomaticFootstepMPCMatrixCalculator
 {
    private static final double rateRegularizationWeight = 0.00001;
-   private static final double idealStepWeight = 2.0;
+   private static final double similarityOfStepsWeight = 2.0;
+   private static final double firstStepSteadyStateConvergenceWeight = 10.0;
+   private static final double finalSteadyStateConvergenceWeight = 25.0;
+   private static final double desiredStepWeight = 0.0;
 
    public static final int STATE_SIZE = 4;
    public static final int CONTROL_SIZE = 2;
    private static final int NUMBER_OF_STEPS = 2;
-   private static final int NUMBER_OF_VARIABLES = CONTROL_SIZE * NUMBER_OF_STEPS;
+   public static final int NUMBER_OF_VARIABLES = CONTROL_SIZE * NUMBER_OF_STEPS;
    private static final int SIZE_OF_FUTURE_STATES = STATE_SIZE * NUMBER_OF_STEPS;
 
    private final DMatrixRMaj currentTickStateVector;
@@ -64,11 +68,13 @@ public class AutomaticFootstepMPCMatrixCalculator
    private final DoubleProvider gravity;
    private final ReferenceFrame controlFrame;
 
+   private final FootstepMPCMatrixTools mpcMatrixTools = new FootstepMPCMatrixTools();
+
    //TODO should change below data type. this is temporally value
    //   private final FixedFramePoint2DBasics pendulumBaseInSoleFrame;
    private final FrameVector3D angularMomentum = new FrameVector3D();
    private final FrameVector3D angularMomentumAboutContactPoint = new FrameVector3D();
-   private final double nominalStanceWidth;
+   private final DoubleProvider nominalStanceWidth;
    //TODO should be changed into Vecot3DReadOnly, angularmomentum is read as the 3DReadOnly
    private final Vector2DReadOnly desiredXYVelocity;
    private final double comZUpFrameX;
@@ -107,28 +113,21 @@ public class AutomaticFootstepMPCMatrixCalculator
    private final YoMatrix yoPredictedStateAtEndOfCurrentPhase;
 
    private final DMatrixRMaj ARemaining = new DMatrixRMaj(STATE_SIZE, STATE_SIZE);
-   private final DMatrixRMaj A = new DMatrixRMaj(STATE_SIZE, STATE_SIZE); // This is the state transition matrix for the full step duration
-   private final DMatrixRMaj AJump = new DMatrixRMaj(STATE_SIZE,
-                                                     STATE_SIZE); // This is the state transition matrix from one terminal step to the next (A bar in the slides)
-   private final DMatrixRMaj BJump = new DMatrixRMaj(STATE_SIZE,
-                                                     CONTROL_SIZE); // This is the control transition matrix from one terminal step to the next (B bar in the slides)
-   private final DMatrixRMaj AHat = new DMatrixRMaj(STATE_SIZE, STATE_SIZE); // This is A * AJump
-   private final DMatrixRMaj BHat = new DMatrixRMaj(STATE_SIZE, CONTROL_SIZE); // This is A * BJump
-   private final DMatrixRMaj AHatAHat = new DMatrixRMaj(STATE_SIZE, STATE_SIZE);
-   private final DMatrixRMaj AHatBHat = new DMatrixRMaj(STATE_SIZE, CONTROL_SIZE);
 
    private final DMatrixRMaj stackedStateTransitionMatrix = new DMatrixRMaj(SIZE_OF_FUTURE_STATES, STATE_SIZE);
    private final DMatrixRMaj stackedControlInputMatrix = new DMatrixRMaj(SIZE_OF_FUTURE_STATES, NUMBER_OF_VARIABLES);
 
    private final DMatrixRMaj desiredTwoStepAheadStatesVector;
+   private final DMatrixRMaj steadyStateVector;
    private final YoMatrix desiredTwoStepStates;
    private final DMatrixRMaj desiredStateVector = new DMatrixRMaj(STATE_SIZE, 1);
    private final DMatrixRMaj idealStepVector = new DMatrixRMaj(SIZE_OF_FUTURE_STATES, 1);
    private final DMatrixRMaj costFunctionHessian = new DMatrixRMaj(NUMBER_OF_VARIABLES, NUMBER_OF_VARIABLES);
    private final DMatrixRMaj costFunctionGradient = new DMatrixRMaj(NUMBER_OF_VARIABLES, 1);
    private final DMatrixRMaj weightQMatrix;
+   private final DMatrixRMaj weightDesiredStep;
    private final DMatrixRMaj rateRegularizationWeightMatrix = new DMatrixRMaj(NUMBER_OF_VARIABLES, NUMBER_OF_VARIABLES);
-   private final DMatrixRMaj idealStepWeightMatrix = new DMatrixRMaj(SIZE_OF_FUTURE_STATES, SIZE_OF_FUTURE_STATES);
+   private final DMatrixRMaj similiarityOfStepsWeightMatrix = new DMatrixRMaj(CONTROL_SIZE, CONTROL_SIZE);
    private final DMatrixRMaj optimalTwoStepStates = new DMatrixRMaj(SIZE_OF_FUTURE_STATES, SIZE_OF_FUTURE_STATES);
    private final YoMatrix yoOptimalTwoStepStates;
    private final FramePoint2D capturePointInMPC = new FramePoint2D();
@@ -144,38 +143,51 @@ public class AutomaticFootstepMPCMatrixCalculator
    private final YoDouble angularMomentumOffsetLeftSupport;
    private final YoDouble angularMomentumOffsetRightSupport;
 
+   private final PoseReferenceFrame endOfCurrentStateFrame;
+   private final PoseReferenceFrame firstStepFrame;
+   private final PoseReferenceFrame endOfFirstStepFrame;
+   private final PoseReferenceFrame secondStepFrame;
+   private final PoseReferenceFrame endOfSecondStepFrame;
+
+   private final YoFramePoint2D solutionStepLocation0;
+   private final YoFramePoint2D solutionStepLocation1;
+
+   private final YoFramePoint2D solutionStepLocation0InWorld;
+   private final YoFramePoint2D solutionStepLocation1InWorld;
+
+   private final YoFramePoint2D endOfCurrentStep;
+   private final YoFramePoint2D endOfFirstStep;
+   private final YoFramePoint2D endOfSecondStep;
+
    private final YoMatrix aTransitionMatrix;
 
    //TODO Change this into final. for now, to escape the error, don't justify as final value.
-
    public AutomaticFootstepMPCMatrixCalculator(RobotSide supportSide,
                                                FrameVector3DReadOnly angularMomentum,
                                                BPWPlanarWalkingRobotEstimates estimates,
                                                Vector2DReadOnly desiredVelocityProvider,
-                                               YoFastWalkingConstantParametersForStep fastWalkingParametersForStep,
-                                               FastWalkingParameters fastWalkingParameters,
-                                               double deltaT,
-                                               YoRegistry parentRegistry)
+                                               MPCParameters parameters,
+                                               YoRegistry parentRegistry,
+                                               YoGraphicsListRegistry graphicsListRegistry)
    {
       this(supportSide,
            estimates::getTotalMass,
-           deltaT,
            desiredVelocityProvider,
-           fastWalkingParametersForStep.getSwingDuration(),
+           parameters.getSwingDuration(),
            angularMomentum,
            estimates.getCenterOfMassControlZUPFrame(),
-           fastWalkingParametersForStep.getOmegaX(),
-           fastWalkingParametersForStep.getOmegaY(),
+           parameters.getOmegaX(),
+           parameters.getOmegaY(),
            estimates::getGravity,
-           0.0,
-           0.2,
-           parentRegistry);
+           () -> 0.0,
+           parameters::getStanceWidth,
+           parentRegistry,
+           graphicsListRegistry);
    }
 
    //TODO swingDuration and doubleSupportFraction, omegaX,, omegaY should be changed in YoDouble
    public AutomaticFootstepMPCMatrixCalculator(RobotSide supportSide,
                                                DoubleProvider mass,
-                                               double deltaT,
                                                Vector2DReadOnly desiredXYVelocity,
                                                DoubleProvider swingDuration,
                                                FrameVector3DReadOnly angularMomentum,
@@ -183,9 +195,10 @@ public class AutomaticFootstepMPCMatrixCalculator
                                                DoubleProvider omegaX,
                                                DoubleProvider omegaY,
                                                DoubleProvider gravity,
-                                               double desiredTurningVelocity,
-                                               double stanceWidth,
-                                               YoRegistry parentRegistry)
+                                               DoubleProvider desiredTurningVelocity,
+                                               DoubleProvider stanceWidth,
+                                               YoRegistry parentRegistry,
+                                               YoGraphicsListRegistry graphicsListRegistry)
    {
       this.mass = mass;
       this.gravity = gravity;
@@ -216,8 +229,8 @@ public class AutomaticFootstepMPCMatrixCalculator
       //TODO find better way to get the turning speed
       nominalStanceWidth = stanceWidth;
 
-      firstFootAngle = swingDuration.getValue() * desiredTurningVelocity;
-      secondFootAngle = swingDuration.getValue() * desiredTurningVelocity + firstFootAngle;
+      firstFootAngle = swingDuration.getValue() * desiredTurningVelocity.getValue();
+      secondFootAngle = swingDuration.getValue() * desiredTurningVelocity.getValue() + firstFootAngle;
 
       optimizedSolution = new DMatrixRMaj(NUMBER_OF_VARIABLES, 1);
       previousOptimizedSolution = new DMatrixRMaj(NUMBER_OF_VARIABLES, 1);
@@ -234,8 +247,10 @@ public class AutomaticFootstepMPCMatrixCalculator
       ellipseLimitConstraintMatrix = new DMatrixRMaj(NUMBER_OF_VARIABLES, NUMBER_OF_VARIABLES);
 
       desiredTwoStepAheadStatesVector = new DMatrixRMaj(SIZE_OF_FUTURE_STATES, 1);
+      steadyStateVector = new DMatrixRMaj(SIZE_OF_FUTURE_STATES, 1);
 
       weightQMatrix = new DMatrixRMaj(SIZE_OF_FUTURE_STATES, SIZE_OF_FUTURE_STATES);
+      weightDesiredStep = new DMatrixRMaj(SIZE_OF_FUTURE_STATES, SIZE_OF_FUTURE_STATES);
 
       String prefix = supportSide.getLowerCaseName() + "MPCCalculator";
       YoRegistry registry = new YoRegistry(prefix);
@@ -261,10 +276,50 @@ public class AutomaticFootstepMPCMatrixCalculator
 
       comPositionRelativeToContact = new YoFrameVector2D(prefix + "CoMPositionRelativeToContact", controlFrame, registry);
 
+      solutionStepLocation0 = new YoFramePoint2D(prefix + "SolutionStepLocation0", controlFrame, registry);
+      solutionStepLocation1 = new YoFramePoint2D(prefix + "SolutionStepLocation1", controlFrame, registry);
+
       aTransitionMatrix = new YoMatrix(prefix + "ATransitionMatrix", 4, 4, registry);
 
+      endOfCurrentStateFrame = new PoseReferenceFrame(prefix + "EndOfCurrentStateFrame", controlFrame);
+      firstStepFrame = new PoseReferenceFrame(prefix + "FirstStepFrame", endOfCurrentStateFrame);
+      endOfFirstStepFrame = new PoseReferenceFrame(prefix + "EndOfFirstStepFrame", firstStepFrame);
+      secondStepFrame = new PoseReferenceFrame(prefix + "SecondStepFrame", endOfFirstStepFrame);
+      endOfSecondStepFrame = new PoseReferenceFrame(prefix + "EndOfSecondStepFrame", secondStepFrame);
+
+      solutionStepLocation0InWorld = new YoFramePoint2D(prefix + "SolutionStepLocation0InWorld", ReferenceFrame.getWorldFrame(), registry);
+      solutionStepLocation1InWorld = new YoFramePoint2D(prefix + "SolutionStepLocation1InWorld", ReferenceFrame.getWorldFrame(), registry);
+
+      endOfCurrentStep = new YoFramePoint2D(prefix + "EndOfCurrentStep", ReferenceFrame.getWorldFrame(), registry);
+      endOfFirstStep = new YoFramePoint2D(prefix + "EndOfFirstStep", ReferenceFrame.getWorldFrame(), registry);
+      endOfSecondStep = new YoFramePoint2D(prefix + "EndOfSecondStep", ReferenceFrame.getWorldFrame(), registry);
+
       if (parentRegistry != null)
+      {
          parentRegistry.addChild(registry);
+         if (graphicsListRegistry != null)
+         {
+            YoGraphicPosition firstStepGraphic = new YoGraphicPosition(prefix + "FirstStepViz", solutionStepLocation0InWorld, 0.01, YoAppearance.Red(), YoGraphicPosition.GraphicType.SOLID_BALL);
+            YoGraphicPosition secondStepGraphic = new YoGraphicPosition(prefix + "SecondStepViz", solutionStepLocation1InWorld, 0.005, YoAppearance.Red(), YoGraphicPosition.GraphicType.BALL);
+
+            YoGraphicPosition endOfCurrentStepViz = new YoGraphicPosition(prefix + "endOfCurrentStepViz", endOfCurrentStep, 0.01, YoAppearance.Blue(), YoGraphicPosition.GraphicType.SOLID_BALL);
+            YoGraphicPosition endOfFirstStepViz = new YoGraphicPosition(prefix + "endOfFirstStepViz", endOfFirstStep, 0.0075, YoAppearance.Blue(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+            YoGraphicPosition endOfSecondStepViz = new YoGraphicPosition(prefix + "endOfSecondStepViz", endOfSecondStep, 0.005, YoAppearance.Blue(), YoGraphicPosition.GraphicType.CROSS);
+
+            String name = prefix + "MPC";
+            graphicsListRegistry.registerYoGraphic(name, firstStepGraphic);
+            graphicsListRegistry.registerYoGraphic(name, secondStepGraphic);
+            graphicsListRegistry.registerYoGraphic(name, endOfCurrentStepViz);
+            graphicsListRegistry.registerYoGraphic(name, endOfFirstStepViz);
+            graphicsListRegistry.registerYoGraphic(name, endOfSecondStepViz);
+
+            graphicsListRegistry.registerArtifact(name, firstStepGraphic.createArtifact());
+            graphicsListRegistry.registerArtifact(name, secondStepGraphic.createArtifact());
+            graphicsListRegistry.registerArtifact(name, endOfCurrentStepViz.createArtifact());
+            graphicsListRegistry.registerArtifact(name, endOfFirstStepViz.createArtifact());
+            graphicsListRegistry.registerArtifact(name, endOfSecondStepViz.createArtifact());
+         }
+      }
    }
 
    private void computeAngularMomentumInContactPoint(FrameVector3DReadOnly angularMomentumInCoM,
@@ -279,57 +334,6 @@ public class AutomaticFootstepMPCMatrixCalculator
 
       yoAngularMomentumInContactPoint.set(angularMomentumInContactPoint);
    }
-
-   private final DMatrixRMaj steadyStateAX = new DMatrixRMaj(2, 2);
-   private final DMatrixRMaj steadyStateAY = new DMatrixRMaj(2, 2);
-   private final DMatrixRMaj steadyStateSelectionX = new DMatrixRMaj(2, 2);
-   private final DMatrixRMaj steadyStateSelectionY = new DMatrixRMaj(2, 2);
-   private final DMatrixRMaj steadyStateBX = new DMatrixRMaj(2, 1);
-   private final DMatrixRMaj steadyStateBY = new DMatrixRMaj(2, 1);
-   private final DMatrixRMaj steadStateInitialSolutionDecoupled = new DMatrixRMaj(2, 1);
-   private final DMatrixRMaj steadStateInitialSolution = new DMatrixRMaj(4, 1);
-
-   private void computeSteadyStateVector(RobotSide supportSide, DMatrixRMaj steadyState)
-   {
-      steadyStateSelectionX.set(0, 0, -1.0);
-      steadyStateSelectionX.set(1, 1, -1.0);
-
-      steadyStateAX.set(0, 0, A.get(0, 0));
-      steadyStateAX.set(0, 1, A.get(0, 3));
-      steadyStateAX.set(1, 0, A.get(3, 0));
-      steadyStateAX.set(1, 1, A.get(3, 3));
-
-      CommonOps_DDRM.addEquals(steadyStateAX, steadyStateSelectionX);
-
-      steadyStateBX.zero();
-      steadyStateBX.set(0, 0, desiredXYVelocity.getX() * swingDuration.getValue());
-
-      solver.setA(steadyStateAX);
-      solver.solve(steadyStateBX, steadStateInitialSolutionDecoupled);
-      steadStateInitialSolution.set(0, 0, steadStateInitialSolutionDecoupled.get(0, 0));
-      steadStateInitialSolution.set(3, 0, steadStateInitialSolutionDecoupled.get(1, 0));
-
-
-      steadyStateSelectionY.set(0, 0, -1.0);
-      steadyStateSelectionY.set(1, 1, 1.0);
-
-      // first goal is tha
-      steadyStateAY.set(0, 0, A.get(1, 1) - 1.0);// ftur
-      steadyStateAY.set(0, 1, A.get(1, 2)); // future of y state
-      steadyStateAY.set(1, 0, 1.0);
-
-      steadyStateBY.zero();
-      steadyStateBY.set(1, 0, desiredXYVelocity.getY() * swingDuration.getValue() + supportSide.negateIfLeftSide(0.5 * nominalStanceWidth));
-
-      solver.setA(steadyStateAY);
-      solver.solve(steadyStateBY, steadStateInitialSolutionDecoupled);
-      //f ixme
-      steadStateInitialSolution.set(1, 0, steadStateInitialSolutionDecoupled.get(0, 0));
-      steadStateInitialSolution.set(2, 0, steadStateInitialSolutionDecoupled.get(1, 0));
-
-      CommonOps_DDRM.mult(A, steadStateInitialSolution, steadyState);
-   }
-
 
    private void calculateInitialStateVectorRelatedCoM(FrameVector2DReadOnly comPositionRelativeToBase,
                                                       FrameVector3DReadOnly angularMomentumAboutContactPoint,
@@ -523,7 +527,7 @@ public class AutomaticFootstepMPCMatrixCalculator
 
          aTransitionMatrix.set(ARemaining);
 
-         computeStateTransitionMatrices(omegaX.getValue(), omegaY.getValue(), swingDuration.getValue());
+         mpcMatrixTools.computeEndOfStepStateTransitionMatrices(omegaX.getValue(), omegaY.getValue(), gravity.getValue(), mass.getValue(), swingDuration.getValue(), stackedStateTransitionMatrix, stackedControlInputMatrix);
 
          if (!firstTickAfterLeavingDoubleSupport)
          {
@@ -538,7 +542,7 @@ public class AutomaticFootstepMPCMatrixCalculator
                                           omegaY.getValue(),
                                           swingDuration.getValue(),
                                           tanhHalfYSwingT,
-                                          nominalStanceWidth,
+                                          nominalStanceWidth.getValue(),
                                           massComZUpXOmegaX,
                                           massComZUpYOmegaY,
                                           angularMomentumOffsetLeftSupport.getDoubleValue(),
@@ -549,49 +553,40 @@ public class AutomaticFootstepMPCMatrixCalculator
                                           // 3500
                                           supportSide,
                                           predictedStateAtEndOfCurrentPhase);
+         computeDesiredSteadyStates(omegaX.getValue(), omegaY.getValue(), supportSide);
 
-         double lowWeight = 5.0;
-         double highWeight = 20.0;
-         CommonOps_DDRM.setIdentity(weightQMatrix);
          // Set a to converge in X in one step, and Y in two
-         weightQMatrix.set(0, 0, highWeight);
-         weightQMatrix.set(1, 1, lowWeight);
-         weightQMatrix.set(2, 2, lowWeight / mass.getValue());
-         weightQMatrix.set(3, 3, highWeight / mass.getValue());
-         weightQMatrix.set(4, 4, lowWeight);
-         weightQMatrix.set(5, 5, highWeight);
-         weightQMatrix.set(6, 6, highWeight / mass.getValue());
-         weightQMatrix.set(7, 7, lowWeight / mass.getValue());
+         weightQMatrix.zero();
+         weightQMatrix.set(0, 0, firstStepSteadyStateConvergenceWeight);
+         weightQMatrix.set(1, 1, firstStepSteadyStateConvergenceWeight);
+         weightQMatrix.set(2, 2, firstStepSteadyStateConvergenceWeight / mass.getValue());
+         weightQMatrix.set(3, 3, firstStepSteadyStateConvergenceWeight / mass.getValue());
+         weightQMatrix.set(4, 4, finalSteadyStateConvergenceWeight);
+         weightQMatrix.set(5, 5, finalSteadyStateConvergenceWeight);
+         weightQMatrix.set(6, 6, finalSteadyStateConvergenceWeight / mass.getValue());
+         weightQMatrix.set(7, 7, finalSteadyStateConvergenceWeight / mass.getValue());
 
+         MatrixTools.setDiagonal(weightDesiredStep, desiredStepWeight);
          // TODO extract this value
          MatrixTools.setDiagonal(rateRegularizationWeightMatrix, rateRegularizationWeight);
 
-         idealStepWeightMatrix.zero();
-         idealStepWeightMatrix.set(0, 0, idealStepWeight);
-         idealStepWeightMatrix.set(1, 1, idealStepWeight);
-         idealStepWeightMatrix.set(4, 4, idealStepWeight);
-         idealStepWeightMatrix.set(5, 5, idealStepWeight);
+         similiarityOfStepsWeightMatrix.zero();
+         similiarityOfStepsWeightMatrix.set(0, 0, similarityOfStepsWeight);
+         similiarityOfStepsWeightMatrix.set(1, 1, similarityOfStepsWeight);
 
          costFunctionHessian.zero();
          costFunctionGradient.zero();
 
-         addTwoStepAheadTrackingCost(weightQMatrix);
+         addDesiredStepTrackingTask(weightDesiredStep);
+         addSteadyStateTrackingTask(weightQMatrix);
          //                  addIdealStepTrackingCost(idealStepWeightMatrix);
+         addSimilarityOfStepsTask(similiarityOfStepsWeightMatrix);
          addRateRegularizationTask(rateRegularizationWeightMatrix, previousOptimizedSolution);
 
-         CommonOps_DDRM.scale(-1.0, costFunctionGradient);
-         solver.setA(costFunctionHessian);
-         solver.solve(costFunctionGradient, optimizedSolution);
 
-         previousOptimizedSolution.set(optimizedSolution);
-         mpcSolution.set(optimizedSolution);
+         solveForOptimalFootsteps(desiredMPCTouchdownPosition);
 
-         CommonOps_DDRM.mult(stackedStateTransitionMatrix, predictedStateAtEndOfCurrentPhase, optimalTwoStepStates);
-         CommonOps_DDRM.multAdd(stackedControlInputMatrix, optimizedSolution, optimalTwoStepStates);
-         yoOptimalTwoStepStates.set(optimalTwoStepStates);
-
-         //         desiredMPCTouchdownPosition.set(optimizedSolution.get(0, 0) + pendulumBase.getX(), optimizedSolution.get(1, 0) + pendulumBase.getY());
-         desiredMPCTouchdownPosition.set(optimizedSolution);
+         reconstructSolution();
       }
       else
       {
@@ -639,25 +634,62 @@ public class AutomaticFootstepMPCMatrixCalculator
       }
    }
 
-   private void computeStateTransitionMatrices(double omegaX, double omegaY, double swingDuration)
+   private void solveForOptimalFootsteps(FixedFramePoint2DBasics desiredMPCTouchdownPosition)
    {
-      FootstepMPCMatrixTools.computeStateTransitionMatrix(omegaX, omegaY, swingDuration, massComZUpXOmegaX, massComZUpYOmegaY, A);
-      FootstepMPCMatrixTools.computeJumpMatrices(AJump, BJump);
-      CommonOps_DDRM.mult(A, AJump, AHat);
-      CommonOps_DDRM.mult(A, BJump, BHat);
+      CommonOps_DDRM.scale(-1.0, costFunctionGradient);
+      solver.setA(costFunctionHessian);
+      solver.solve(costFunctionGradient, optimizedSolution);
 
-      CommonOps_DDRM.mult(AHat, AHat, AHatAHat);
-      CommonOps_DDRM.mult(AHat, BHat, AHatBHat);
+      previousOptimizedSolution.set(optimizedSolution);
+      mpcSolution.set(optimizedSolution);
 
-      stackedStateTransitionMatrix.zero();
-      MatrixTools.setMatrixBlock(stackedStateTransitionMatrix, 0, 0, AHat, 0, 0, STATE_SIZE, STATE_SIZE, 1.0);
-      MatrixTools.setMatrixBlock(stackedStateTransitionMatrix, STATE_SIZE, 0, AHatAHat, 0, 0, STATE_SIZE, STATE_SIZE, 1.0);
-
-      stackedControlInputMatrix.zero();
-      MatrixTools.setMatrixBlock(stackedControlInputMatrix, 0, 0, BHat, 0, 0, STATE_SIZE, CONTROL_SIZE, 1.0);
-      MatrixTools.setMatrixBlock(stackedControlInputMatrix, STATE_SIZE, 0, AHatBHat, 0, 0, STATE_SIZE, CONTROL_SIZE, 1.0);
-      MatrixTools.setMatrixBlock(stackedControlInputMatrix, STATE_SIZE, CONTROL_SIZE, BHat, 0, 0, STATE_SIZE, CONTROL_SIZE, 1.0);
+      desiredMPCTouchdownPosition.set(optimizedSolution);
    }
+
+   private final FramePose3D poseOfEndOfCurrentStep = new FramePose3D();
+   private final FramePose3D poseOfFirstStep = new FramePose3D();
+   private final FramePose3D poseOfEndOfFirstStep = new FramePose3D();
+   private final FramePose3D poseOfSecondStep = new FramePose3D();
+   private final FramePose3D poseOfEndOfSecondStep = new FramePose3D();
+
+   private void reconstructSolution()
+   {
+      solutionStepLocation0.set(optimizedSolution);
+      solutionStepLocation1.set(2, optimizedSolution);
+
+      CommonOps_DDRM.mult(stackedStateTransitionMatrix, predictedStateAtEndOfCurrentPhase, optimalTwoStepStates);
+      CommonOps_DDRM.multAdd(stackedControlInputMatrix, optimizedSolution, optimalTwoStepStates);
+      yoOptimalTwoStepStates.set(optimalTwoStepStates);
+
+      // TODO set some heights
+      poseOfEndOfCurrentStep.setToZero(controlFrame);
+      poseOfEndOfCurrentStep.getPosition().set(predictedStateAtEndOfCurrentPhase.get(0), predictedStateAtEndOfCurrentPhase.get(1), 0.0);
+      poseOfEndOfCurrentStep.getPosition().sub(currentTickStateVector.get(0), currentTickStateVector.get(1), 0.0);
+      endOfCurrentStateFrame.setPoseAndUpdate(poseOfEndOfCurrentStep);
+
+      poseOfFirstStep.setToZero(endOfCurrentStateFrame);
+      poseOfFirstStep.getPosition().set(solutionStepLocation0.getX(), solutionStepLocation0.getY(), 0.0);
+      firstStepFrame.setPoseAndUpdate(poseOfFirstStep);
+
+      poseOfEndOfFirstStep.setToZero(firstStepFrame);
+      poseOfEndOfFirstStep.getPosition().set(optimalTwoStepStates.get(0), optimalTwoStepStates.get(1), 0.0);
+      endOfFirstStepFrame.setPoseAndUpdate(poseOfEndOfFirstStep);
+
+      poseOfSecondStep.setToZero(endOfFirstStepFrame);
+      poseOfSecondStep.getPosition().set(solutionStepLocation1.getX(), solutionStepLocation1.getY(), 0.0);
+      secondStepFrame.setPoseAndUpdate(poseOfSecondStep);
+
+      poseOfEndOfSecondStep.setToZero(secondStepFrame);
+      poseOfEndOfSecondStep.getPosition().set(optimalTwoStepStates.get(2), optimalTwoStepStates.get(3), 0.0);
+      endOfSecondStepFrame.setPoseAndUpdate(poseOfEndOfSecondStep);
+
+      solutionStepLocation0InWorld.setFromReferenceFrame(firstStepFrame);
+      solutionStepLocation1InWorld.setFromReferenceFrame(secondStepFrame);
+      endOfCurrentStep.setFromReferenceFrame(endOfCurrentStateFrame);
+      endOfFirstStep.setFromReferenceFrame(endOfFirstStepFrame);
+      endOfSecondStep.setFromReferenceFrame(endOfSecondStepFrame);
+   }
+
 
    private void computeIdealStepPosition(double stepDuration, double stepWidth, RobotSide supportSide)
    {
@@ -671,6 +703,11 @@ public class AutomaticFootstepMPCMatrixCalculator
       // position at the end of the step after that
       idealStepVector.set(4, 0, xDelta);
       idealStepVector.set(5, 0, yDelta + supportSide.negateIfLeftSide(halfWidth));
+   }
+
+   private void computeDesiredSteadyStates(double omegaX,double omegaY, RobotSide supportSide)
+   {
+      mpcMatrixTools.computeSteadyEndState(supportSide, omegaX, omegaY, gravity.getValue(), mass.getValue(), swingDuration.getValue(), nominalStanceWidth.getValue(), desiredXYVelocity, steadyStateVector);
    }
 
    private void computeDesiredTwoStepAheadStates(double omegaX,
@@ -734,35 +771,6 @@ public class AutomaticFootstepMPCMatrixCalculator
                                           + angularMomentumOffsetSecondStep * differenceOfDesiredMeasuredCoP.getY());
       desiredTwoStepAheadStatesVector.set(7, 0, initialStateVector.get(3, 0)); // Ly
 
-      // TODO override with teh steady state values
-      computeSteadyStateVector(supportSide.getOppositeSide(), desiredStateVector);
-      CommonOps_DDRM.insert(desiredStateVector, desiredTwoStepAheadStatesVector, 0, 0);
-      computeSteadyStateVector(supportSide, desiredStateVector);
-      CommonOps_DDRM.insert(desiredStateVector, desiredTwoStepAheadStatesVector, STATE_SIZE, 0);
-
-      //  use different manner of desired(reference) states.
-      //      desiredTwoStepAheadStatesVector.set(0, 0, 1 / massComZUpXOmegaX * Math.tanh(0.5 * omegaXTimeDuration) * initialStateVector.get(3, 0));
-      //      desiredTwoStepAheadStatesVector.set(1, 0, -0.5 * stepWidth * supportSide.negateIfRightSide(1.0));
-      //      desiredTwoStepAheadStatesVector.set(2,
-      //                                          0,
-      //                                          0.5 * supportSide.negateIfRightSide(1.0) * massComZUpYOmegaY * stepDuration * Math.tanh(0.5 * omegaYTimeDuration) - supportSide.negateIfLeftSide(150.0));
-      //      desiredTwoStepAheadStatesVector.set(3,0,initialStateVector.get(3, 0)) ;
-      //
-      //      desiredTwoStepAheadStatesVector.set(4,0, 2*1 / massComZUpXOmegaX * Math.tanh(0.5 * omegaXTimeDuration) * initialStateVector.get(3, 0));
-      //      desiredTwoStepAheadStatesVector.set(5, 0, 0.5 * stepWidth * supportSide.negateIfRightSide(1.0));
-      //      desiredTwoStepAheadStatesVector.set(6,
-      //                                          0,
-      //                                          -0.5 * supportSide.negateIfRightSide(1.0) * massComZUpYOmegaY * stepDuration * Math.tanh(0.5 * omegaYTimeDuration) - supportSide.negateIfRightSide(100.0));
-      //      desiredTwoStepAheadStatesVector.set(7,0,initialStateVector.get(3, 0)) ;
-
-      //      desiredTwoStepAheadStatesVector.set(0, 0, 0.0); // assumes zero x velocity for the first step position
-      //      desiredTwoStepAheadStatesVector.set(4, 0, 0.0); // assumes zero x velocity for the second step position
-      //
-      //      desiredTwoStepAheadStatesVector.set(1, 0, supportSide.negateIfLeftSide(stepWidth / 2.0)); // assumes zero velocity for the first step position
-      //      desiredTwoStepAheadStatesVector.set(5, 0, supportSide.negateIfRightSide(stepWidth / 2.0)); // assumes zero velocity for the first step position
-      //
-      //      desiredTwoStepAheadStatesVector.set(3, 0, 0.0); // assumes zero x velocity
-      //      desiredTwoStepAheadStatesVector.set(7, 0, 0.0); // assumes zero x velocity
 
       desiredTwoStepStates.set(desiredTwoStepAheadStatesVector);
    }
@@ -770,12 +778,23 @@ public class AutomaticFootstepMPCMatrixCalculator
    private final DMatrixRMaj objective = new DMatrixRMaj(8, 1);
    private final DMatrixRMaj jacobian = new DMatrixRMaj(8, 4);
 
-   private void addTwoStepAheadTrackingCost(DMatrixRMaj Q)
+   private void addDesiredStepTrackingTask(DMatrixRMaj Q)
    {
       // This cost is trying to achieve the desired tracking. That is, minimize (x - x_des). Since x = A x_0 + B u, this can be formulated as
       // min (A x_0 + B u - x_des)^T Q (A x_0 + B u - x_des). This is then equivalent to saying min (J u - b)^T Q (J u - b), where J = B and b = x_des - A x_0
       jacobian.set(stackedControlInputMatrix);
       objective.set(desiredTwoStepAheadStatesVector);
+      CommonOps_DDRM.multAdd(-1.0, stackedStateTransitionMatrix, predictedStateAtEndOfCurrentPhase, objective);
+
+      addObjectiveToCostFunction(jacobian, objective, Q);
+   }
+
+   private void addSteadyStateTrackingTask(DMatrixRMaj Q)
+   {
+      // This cost is trying to achieve the desired tracking. That is, minimize (x - x_des). Since x = A x_0 + B u, this can be formulated as
+      // min (A x_0 + B u - x_des)^T Q (A x_0 + B u - x_des). This is then equivalent to saying min (J u - b)^T Q (J u - b), where J = B and b = x_des - A x_0
+      jacobian.set(stackedControlInputMatrix);
+      objective.set(steadyStateVector);
       CommonOps_DDRM.multAdd(-1.0, stackedStateTransitionMatrix, predictedStateAtEndOfCurrentPhase, objective);
 
       addObjectiveToCostFunction(jacobian, objective, Q);
@@ -802,6 +821,26 @@ public class AutomaticFootstepMPCMatrixCalculator
    {
       CommonOps_DDRM.addEquals(costFunctionHessian, R);
       CommonOps_DDRM.multAdd(-1.0, R, previousOptimizedSolution, costFunctionGradient);
+   }
+
+   private void addSimilarityOfStepsTask(DMatrixRMaj weight)
+   {
+      jacobian.reshape(2, 4);
+      objective.reshape(2, 1);
+
+      // x adjustments should be the same
+      jacobian.zero();
+      jacobian.set(0, 0, 1.0);
+      jacobian.set(0, 2, -1.0);
+
+      jacobian.set(1, 1, 1.0);
+      jacobian.set(1, 3, -1.0);
+
+      objective.zero();
+      objective.set(0, 0, 0.0);
+      objective.set(1, 0, nominalStanceWidth.getValue());
+
+      addObjectiveToCostFunction(jacobian, objective, weight);
    }
 
    private final DMatrixRMaj weightTimesJacobian = new DMatrixRMaj(8, 8);
@@ -837,5 +876,4 @@ public class AutomaticFootstepMPCMatrixCalculator
       CommonOps_DDRM.multAddTransA(-weight, taskObjective, taskJacobian, costFunctionGradient);
    }
 }
-
 

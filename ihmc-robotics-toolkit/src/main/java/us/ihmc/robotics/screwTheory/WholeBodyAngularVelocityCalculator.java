@@ -25,6 +25,11 @@ public class WholeBodyAngularVelocityCalculator
       robotMomentum.setReferenceFrame(centerOfMassFrame);
    }
 
+   public WholeBodyAngularVelocityCalculator(ReferenceFrame centerOfMassFrame, RigidBodyBasics... rigidBodies)
+   {
+      this(centerOfMassFrame, null, rigidBodies);
+   }
+
    public WholeBodyAngularVelocityCalculator(ReferenceFrame centerOfMassFrame, YoGraphicsListRegistry graphicsListRegistry, RigidBodyBasics rootBody)
    {
       this(centerOfMassFrame, graphicsListRegistry, rootBody.subtreeArray());

@@ -4,7 +4,11 @@ import boofcv.visualize.SingleAxisRgb;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.MPC.MPCParameters;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
@@ -25,22 +29,50 @@ public class BPWPlanarWalkingRobotEstimates
    private final double mass;
    private final FramePoint3DReadOnly centerOfMassPosition;
    private final FrameVector3DReadOnly centerOfMassVelocity;
-   private final MovingZUpFrame centerOfMassControlZUpFrame;
    private final YoFrameVector3D currentCentroidalAngularMomentum = new YoFrameVector3D("currentCentroidalAngularMomentum", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D capturePoint = new YoFramePoint3D("capturePoint", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D acp = new YoFramePoint3D("ACP", ReferenceFrame.getWorldFrame(), registry);
    private final SideDependentList<YoFramePose3D> footPoses = new SideDependentList<>();
 
+
+   private final MovingReferenceFrame centerOfMassControlFrame;
+   private final MovingZUpFrame centerOfMassControlZUpFrame;
+
+
    private final WholeBodyAngularVelocityCalculator angularVelocityCalculator;
 
-   public BPWPlanarWalkingRobotEstimates(BPWPLanarWalkingRobot robot, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   private final MPCParameters parameters;
+
+   public BPWPlanarWalkingRobotEstimates(BPWPLanarWalkingRobot robot, MPCParameters parameters, YoRegistry parentRegistry)
    {
       this.robot = robot;
+      this.parameters = parameters;
 
       mass = robot.getMass();
       centerOfMassPosition = robot.getCenterOfMassPoint();
       centerOfMassVelocity = robot.getCenterOfMassVelocity();
-      centerOfMassControlZUpFrame = new MovingZUpFrame(robot.getCenterOfMassFrame(), "centerOfMassControlZUpFrame");
+
+      centerOfMassControlFrame = new MovingReferenceFrame("centerOfMassControlFrame", ReferenceFrame.getWorldFrame())
+      {
+         @Override
+         protected void updateTwistRelativeToParent(Twist twistRelativeToParentToPack)
+         {
+            //            pelvisFrame.getTwistRelativeToOther(ReferenceFrame.getWorldFrame(), pelvisTwist);
+            //            pelvisTwist.changeFrame(centerOfMassFrame); // FIXME we really want the rotation about the center of mass, relative to the world.
+
+            twistRelativeToParentToPack.getLinearPart().setMatchingFrame(getCenterOfMassVelocity());
+            //            twistRelativeToParentToPack.getAngularPart().setMatchingFrame(pelvisTwist.getAngularPart());
+         }
+
+         @Override
+         protected void updateTransformToParent(RigidBodyTransform transformToParent)
+         {
+            transformToParent.getTranslation().set(centerOfMassPosition);
+            //transformToParent.getRotation().set(desiredOrientation);
+         }
+      };
+
+      centerOfMassControlZUpFrame = new MovingZUpFrame(centerOfMassControlFrame, "centerOfMassControlZUpFrame");
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -49,25 +81,29 @@ public class BPWPlanarWalkingRobotEstimates
          footPoses.put(robotSide, footPosition);
       }
 
-      angularVelocityCalculator = new WholeBodyAngularVelocityCalculator(robot.getCenterOfMassFrame(), yoGraphicsListRegistry, robot.getRootBody().subtreeArray());
+      angularVelocityCalculator = new WholeBodyAngularVelocityCalculator(robot.getCenterOfMassFrame(), robot.getRootBody().subtreeArray());
 
       parentRegistry.addChild(registry);
    }
 
    public void update()
    {
+      //
+      centerOfMassControlFrame.update();
+      centerOfMassControlZUpFrame.update();
+
       // Update angular momentum
       angularVelocityCalculator.compute();
       currentCentroidalAngularMomentum.setMatchingFrame(angularVelocityCalculator.getAngularMomentum());
 
       // Update capture point and ACP
       capturePoint.setFromReferenceFrame(robot.getCenterOfMassFrame());
-      capturePoint.scaleAdd(1.0 / omega,
+      capturePoint.scaleAdd(1.0 / parameters.getOmegaX().getDoubleValue(),
                             centerOfMassVelocity,
                             centerOfMassPosition);
 
-      double mh = getTotalMass() * desiredHeight;
-      double wmh = omega * mh;
+      double mh = getTotalMass() * parameters.getDesiredWalkingHeight();
+      double wmh = parameters.getOmegaX().getDoubleValue()* mh;
 
       acp.set(capturePoint);
       acp.addX(1.0 / wmh * getCentroidalAngularMomentum().getY());

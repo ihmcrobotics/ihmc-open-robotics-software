@@ -1,8 +1,14 @@
 package us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.MPC;
 
 import org.ejml.data.DMatrixRMaj;
-
-import static us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.MPC.AutomaticFootstepMPCMatrixCalculator.STATE_SIZE;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.robotics.robotSide.RobotSide;
+import static us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.MPC.AutomaticFootstepMPCMatrixCalculator.*;
 
 public class FootstepMPCMatrixTools
 {
@@ -123,5 +129,86 @@ public class FootstepMPCMatrixTools
          rowStart += 2;
          colStart += STATE_SIZE;
       }
+   }
+
+   private final DMatrixRMaj AMatrix = new DMatrixRMaj(4, 4);
+   private final DMatrixRMaj ABar = new DMatrixRMaj(4, 4);
+   private final DMatrixRMaj BBar = new DMatrixRMaj(4, 2);
+   private final DMatrixRMaj AHat = new DMatrixRMaj(4, 4);
+   private final DMatrixRMaj BHat = new DMatrixRMaj(4, 2);
+
+   public void computeEndOfStepStateTransitionMatrices(double omegaX,
+                                                       double omegaY,
+                                                       double gravity,
+                                                       double mass,
+                                                       double swingDuration,
+                                                       DMatrixRMaj stackedStateTransitionMatrixToPack,
+                                                       DMatrixRMaj stackedControlInputMatrixToPack)
+   {
+      double zInX = gravity / MathTools.square(omegaX);
+      double zInY = gravity / MathTools.square(omegaY);
+
+      FootstepMPCMatrixTools.computeStateTransitionMatrix(omegaX, omegaY, swingDuration, mass * zInX * omegaX, mass * zInY * omegaY, AMatrix);
+      FootstepMPCMatrixTools.computeJumpMatrices(ABar, BBar);
+      CommonOps_DDRM.mult(AMatrix, ABar, AHat);
+      CommonOps_DDRM.mult(AMatrix, BBar, BHat);
+
+      stackedStateTransitionMatrixToPack.zero();
+      MatrixTools.setMatrixBlock(stackedStateTransitionMatrixToPack, 0, 0, AHat, 0, 0, STATE_SIZE, STATE_SIZE, 1.0);
+      MatrixTools.multAddBlock(AHat, AHat, stackedStateTransitionMatrixToPack, STATE_SIZE, 0);
+
+      stackedControlInputMatrixToPack.zero();
+      MatrixTools.setMatrixBlock(stackedControlInputMatrixToPack, 0, 0, BHat, 0, 0, STATE_SIZE, CONTROL_SIZE, 1.0);
+      MatrixTools.multAddBlock(AHat, BHat, stackedControlInputMatrixToPack, STATE_SIZE, 0);
+      MatrixTools.setMatrixBlock(stackedControlInputMatrixToPack , STATE_SIZE, CONTROL_SIZE, BHat, 0, 0, STATE_SIZE, CONTROL_SIZE, 1.0);
+   }
+
+
+   private final DMatrixRMaj stackedA = new DMatrixRMaj(8, 4);
+   private final DMatrixRMaj stackedB = new DMatrixRMaj(8, 4);
+   private final DMatrixRMaj finalA = new DMatrixRMaj(4, 4);
+   private final DMatrixRMaj finalB = new DMatrixRMaj(4, 4);
+   private final DMatrixRMaj expectedControlInput = new DMatrixRMaj(4, 1);
+   private final DMatrixRMaj identity = new DMatrixRMaj(4, 4);
+   private final DMatrixRMaj steadyStateA = new DMatrixRMaj(4, 4);
+   private final DMatrixRMaj steadyStateB = new DMatrixRMaj(4, 1);
+   private final DMatrixRMaj steadyStateFinal = new DMatrixRMaj(4, 1);
+
+   private final DMatrixRMaj positionSelection = new DMatrixRMaj(2, 4);
+   private final DMatrixRMaj pastStack = new DMatrixRMaj(2, 4);
+   private final LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.general(NUMBER_OF_VARIABLES, NUMBER_OF_VARIABLES);
+
+
+   public void computeSteadyEndState(RobotSide currentSupportSide,
+                                     double omegaX,
+                                     double omegaY,
+                                     double gravity,
+                                     double mass,
+                                     double swingDuration,
+                                     double nominalStanceWidth,
+                                     Vector2DReadOnly desiredWalkingSpeed,
+                                     DMatrixRMaj steadyStateToPack)
+   {
+      computeEndOfStepStateTransitionMatrices(omegaX, omegaY, gravity, mass, swingDuration, stackedA, stackedB);
+
+      CommonOps_DDRM.extract(stackedA, 4, 8, 0, 4, finalA, 0, 0);
+      CommonOps_DDRM.extract(stackedB, 4, 8, 0, 4, finalB, 0, 0);
+
+      expectedControlInput.set(0, 0, desiredWalkingSpeed.getX() * swingDuration);
+      expectedControlInput.set(1, 0, desiredWalkingSpeed.getY() * swingDuration + currentSupportSide.negateIfLeftSide(nominalStanceWidth));
+      expectedControlInput.set(2, 0, desiredWalkingSpeed.getX() * swingDuration);
+      expectedControlInput.set(3, 0, desiredWalkingSpeed.getY() * swingDuration - currentSupportSide.negateIfLeftSide(nominalStanceWidth));
+
+      CommonOps_DDRM.setIdentity(identity);
+      CommonOps_DDRM.setIdentity(positionSelection);
+
+      CommonOps_DDRM.subtract(identity, finalA, steadyStateA);
+      CommonOps_DDRM.mult(finalB, expectedControlInput, steadyStateB);
+
+      solver.setA(steadyStateA);
+      solver.solve(steadyStateB, steadyStateFinal);
+
+      CommonOps_DDRM.mult(stackedA, steadyStateFinal, steadyStateToPack);
+      CommonOps_DDRM.multAdd(stackedB, expectedControlInput, steadyStateToPack);
    }
 }

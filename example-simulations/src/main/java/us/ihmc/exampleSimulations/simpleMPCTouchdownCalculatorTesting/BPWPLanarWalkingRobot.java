@@ -3,8 +3,12 @@ package us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidRobotics.model.CenterOfMassStateProvider;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.FixedMovingReferenceFrame;
+import us.ihmc.mecano.frames.MovingCenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
@@ -32,12 +36,11 @@ import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYo
 
 public class BPWPLanarWalkingRobot implements SCS2YoGraphicHolder
 {
+    public static final double ROBOT_HEIGHT = 0.75;
+
     private final SideDependentList<SimPrismaticJoint> kneeJoints;
     private final SideDependentList<SimRevoluteJoint> hipJoints;
     private final SideDependentList<SimRevoluteJoint> hipRollJoints;
-
-
-//    private final SimRigidBody torso;
 
     private final SideDependentList<YoDouble> legLengths = new SideDependentList<YoDouble>();
     private final SideDependentList<MovingReferenceFrame> footFrames = new SideDependentList<>();
@@ -60,11 +63,11 @@ public class BPWPLanarWalkingRobot implements SCS2YoGraphicHolder
         this.time = time;
 
         floatingJoint = robot.getFloatingRootJoint();
-        floatingJoint.setJointPosition(new Vector3D(0.0, 0.0, 0.75));
+        floatingJoint.setJointPosition(new Vector3D(0.0, 0.0, ROBOT_HEIGHT));
         this.rootBody = robot.getRootBody();
         mass = TotalMassCalculator.computeSubTreeMass(robot.getRootBody());
 
-        worldFrame = robot.getInertialFrame();
+        worldFrame = ReferenceFrame.getWorldFrame();
         kneeJoints = new SideDependentList<>();
         hipJoints = new SideDependentList<>();
         hipRollJoints = new SideDependentList<>();
@@ -73,8 +76,11 @@ public class BPWPLanarWalkingRobot implements SCS2YoGraphicHolder
         centerOfMassVelocity = new YoFrameVector3D("centerOfMassVelocity", worldFrame, registry);
 
 
+        centerOfMassFrame = new MovingCenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), rootBody);
+
+        ///
         // FIXME use the center of mass jacobian calculator for this.
-        centerOfMassFrame = robot.getJoint(BPWPlanarWalkingRobotDefinition.baseJointName).getFrameAfterJoint();
+//        centerOfMassFrame = robot.getJoint(BPWPlanarWalkingRobotDefinition.baseJointName).getFrameBeforeJoint();
 
         for(RobotSide robotSide : RobotSide.values)
         {
@@ -97,9 +103,6 @@ public class BPWPLanarWalkingRobot implements SCS2YoGraphicHolder
 
         }
         kneeJoints.get(RobotSide.LEFT).setQ(0.25);
-//        torso = (SimRigidBody) robot.getJoint(BPWPlanarWalkingRobotDefinition.baseJointName);
-
-
     }
     
     public YoRegistry getYoRegistry()
@@ -129,6 +132,8 @@ public class BPWPLanarWalkingRobot implements SCS2YoGraphicHolder
 
     public void update()
     {
+        centerOfMassFrame.update();
+
         for(RobotSide robotSide : RobotSide.values)
         {
             // update current leg length

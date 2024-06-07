@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.MPC.MPCParameters;
 import us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.MPC.MPCTouchdownCalculator;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.controllers.PDController;
 import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
@@ -94,6 +95,7 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
     private enum TouchdownCalculator {REGULAR, MPC}
     private final YoEnum<TouchdownCalculator> yoTouchdownCalculator = new YoEnum<>("touchdownCalculator", registry, TouchdownCalculator.class, false);
     private final MPCParameters mpcParameters;
+    private final BPWPlanarWalkingRobotEstimates estimates;
 
     public BPWPlanarWalkingController(BPWPLanarWalkingRobot controllerRobot, double controllerDt, RobotSide initialSwingSide)
     {
@@ -127,13 +129,17 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
         swingHipRollKp.set(800.0);
         swingHipRollKd.set(120.0);
 
-        swingFootStepAdjustmentGain.set(0.55); // 0.65
+        swingFootStepAdjustmentGain.set(0.79); // 0.65
         swingFootSideStepAdjustmentGain.set(1.0); // 0.65
         // Setting desired Walking Speed to zero for now
         desiredWalkingSpeed.set(0.0);
         walkingGain.set(0.06); //0.06
         sideWalkingGain.set(0.06);
 
+        // NEW STUFF FOR MPC
+        this.controllerDt.set(controllerDt);
+        mpcParameters = new MPCParameters(desiredSwingDuration, BPWPLanarWalkingRobot.ROBOT_HEIGHT, this.controllerDt, registry);
+        estimates = new BPWPlanarWalkingRobotEstimates(controllerRobot, mpcParameters, registry);
 
         // Setting up the leg length controllers
         for( RobotSide robotSide : RobotSide.values)
@@ -168,10 +174,6 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
 
         }
 
-        // NEW STUFF FOR MPC
-        this.controllerDt.set(controllerDt);
-        mpcParameters = new MPCParameters(desiredSwingDuration, this.controllerDt, registry);
-
         registry.addChild(controllerRobot.getYoRegistry());
     }
 
@@ -179,6 +181,7 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
     public void doControl()
     {
         controllerRobot.update();
+        estimates.update();
 
         for( RobotSide robotSide : RobotSide.values)
         {
@@ -259,7 +262,7 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
                                                                         walkingGain, sideWalkingGain, registry);
 
             mpcTouchdownCalculator = new MPCTouchdownCalculator(controllerRobot, swingSide, desiredWalkingSpeed,
-                                                                desiredSideWalkingSpeed, mpcParameters, registry);
+                                                                desiredSideWalkingSpeed, estimates, mpcParameters, new YoGraphicsListRegistry(), registry);
 
         }
 
@@ -535,6 +538,7 @@ public class BPWPlanarWalkingController implements Controller, SCS2YoGraphicHold
     public YoGraphicDefinition getSCS2YoGraphics()
     {
         YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+
         for(RobotSide robotSide : RobotSide.values)
         {
             group.addChild(newYoGraphicPoint3D(robotSide.getLowerCaseName() + "TouchdownPosition", desiredTouchdownPositions.get(robotSide), 0.015, Red()));

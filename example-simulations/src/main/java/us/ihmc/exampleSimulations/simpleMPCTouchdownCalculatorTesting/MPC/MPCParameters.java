@@ -8,6 +8,8 @@ public class MPCParameters
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final static double NUMBER_OF_STEPS_IN_HORIZON = 2;
+   private final static double GRAVITY = 9.81;
+   private final static double DESIRED_STANCE_WIDTH = 0.3;
 
    // MPC Specific
    private final YoDouble numberOfStepsInHorizon = new YoDouble("numberOfStepsInHorizon", registry);
@@ -15,50 +17,70 @@ public class MPCParameters
    private final YoDouble numberOfTicksInHorizon = new YoDouble("numberOfTicksInHorizon", registry);
    private final YoDouble numberOfTicksPerStep = new YoDouble("numberOfTicksPerStep", registry);
 
-   private final YoDouble timeDurationOfStep;
+   // Other
+   private final YoDouble desiredWalkingHeight = new YoDouble("desiredWalkingHeight", registry);
+   private final YoDouble desiredStanceWidth = new YoDouble("desiredStanceWidth", registry);
+   private final YoDouble omegaX = new YoDouble("omegaX", registry);
+   private final YoDouble omegaY = new YoDouble("omegaY", registry);
+
+   private final YoDouble swingDuration;
    private final YoDouble controllerDt;
 
-   public MPCParameters(YoDouble swingDuration, YoDouble controllerDt, YoRegistry parentRegistry)
+   public MPCParameters(YoDouble swingDuration, double desiredWalkingHeight, YoDouble controllerDt, YoRegistry parentRegistry)
    {
-      this.timeDurationOfStep = swingDuration;
+      this.swingDuration = swingDuration;
       this.controllerDt = controllerDt;
 
       numberOfStepsInHorizon.set(NUMBER_OF_STEPS_IN_HORIZON);
+      desiredStanceWidth.set(DESIRED_STANCE_WIDTH);
+      this.desiredWalkingHeight.set(desiredWalkingHeight);
+      omegaX.set(Math.sqrt(getGravity() / this.desiredWalkingHeight.getDoubleValue()));
+      omegaY.set(Math.sqrt(getGravity() / this.desiredWalkingHeight.getDoubleValue()));
 
-      timeDurationOfStep.addListener(value -> updateMPCParametersFromNewSwingDuration());
+      //this.swingDuration.addListener(value -> updateMPCParametersFromNewSwingDuration());
 
       parentRegistry.addChild(registry);
    }
 
-   private void updateMPCParametersFromNewSwingDuration()
+//   private void updateMPCParametersFromNewSwingDuration()
+//   {
+//      numberOfTicksPerStep.set(swingDuration.getDoubleValue() / controllerDt.getDoubleValue());
+//      numberOfTicksInHorizon.set(numberOfTicksPerStep.getDoubleValue() * numberOfStepsInHorizon.getDoubleValue());
+//      timeDurationOfHorizon.set(swingDuration.getDoubleValue() * numberOfStepsInHorizon.getDoubleValue());
+//   }
+
+   public double getDesiredWalkingHeight()
    {
-      numberOfTicksPerStep.set(timeDurationOfStep.getDoubleValue() / controllerDt.getDoubleValue());
-      numberOfTicksInHorizon.set(numberOfTicksPerStep.getDoubleValue() * numberOfStepsInHorizon.getDoubleValue());
-      timeDurationOfHorizon.set(timeDurationOfStep.getDoubleValue() * numberOfStepsInHorizon.getDoubleValue());
+      return desiredWalkingHeight.getDoubleValue();
    }
 
-   public double getNumberOfStepsInHorizon()
+   public double getStanceWidth()
    {
-      return numberOfStepsInHorizon.getDoubleValue();
+      return desiredWalkingHeight.getDoubleValue();
    }
 
-   public double getTimeDurationOfHorizon()
+   public YoDouble getOmegaX()
    {
-      return timeDurationOfHorizon.getDoubleValue();
+      return omegaX;
    }
 
-   public double getNumberOfTicksInHorizon()
+   public YoDouble getOmegaY()
    {
-      return numberOfTicksInHorizon.getDoubleValue();
+      return omegaY;
    }
 
-   public double getNumberOfTicksPerStep()
+   public double getGravity()
    {
-      return numberOfTicksPerStep.getDoubleValue();
+      return GRAVITY;
    }
 
-   public double getTimeDurationOfStep()
+   public YoDouble getSwingDuration()
    {
-      return timeDurationOfStep.getDoubleValue();
+      return swingDuration;
+   }
+
+   public double getControllerDt()
+   {
+      return controllerDt.getDoubleValue();
    }
 }
