@@ -4,6 +4,7 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.perception.sceneGraph.yolo.YOLOv8SegmentedDetection;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
@@ -113,5 +114,10 @@ public class YOLOv8Tools
       centroid.scale(1.0 / numberOfPointsToUse);
 
       return centroid;
+   }
+
+   public static double detectionCentroidDistanceSquared(YOLOv8SegmentedDetection detectionA, YOLOv8SegmentedDetection detectionB)
+   {
+      return detectionA.getCentroid().distanceSquared(detectionB.getCentroid());
    }
 }

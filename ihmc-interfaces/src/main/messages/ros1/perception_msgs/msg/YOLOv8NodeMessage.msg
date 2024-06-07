@@ -13,7 +13,19 @@ float32 detection_acceptance_threshold
 # Detection information
 string detection_class
 
-float64 confidence
+float32 confidence
+
+# x coordinate of center of detection within image
+int32 x
+
+# y coordinate of center of detection within image
+int32 y
+
+# width of detection in pixels
+int32 width
+
+# height of detection in pixels
+int32 height
 
 geometry_msgs/Point32[] object_point_cloud
 

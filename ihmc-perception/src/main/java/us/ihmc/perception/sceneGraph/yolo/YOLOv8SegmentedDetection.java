@@ -18,12 +18,10 @@ import java.util.function.Function;
 public class YOLOv8SegmentedDetection
 {
    private final YOLOv8Detection detection;
-   private final DetectionFilter detectionFilter;
    private final List<Point3D32> objectPointCloud;
    private final Point3D32 centroid;
 
    public YOLOv8SegmentedDetection(YOLOv8Detection detection,
-                                   DetectionFilter detectionFilter,
                                    RawImage mask,
                                    RawImage depthImage,
                                    int erosionKernelRadius,
@@ -32,7 +30,6 @@ public class YOLOv8SegmentedDetection
                                    double zScoreThreshold)
    {
       this.detection = detection;
-      this.detectionFilter = detectionFilter;
 
       // Erode mask to get better segmentation
       Mat erodedMat = new Mat(mask.getImageHeight(), mask.getImageWidth(), mask.getOpenCVType());
@@ -57,11 +54,6 @@ public class YOLOv8SegmentedDetection
    public YOLOv8Detection getDetection()
    {
       return detection;
-   }
-
-   public DetectionFilter getDetectionFilter()
-   {
-      return detectionFilter;
    }
 
    public List<Point3D32> getObjectPointCloud()

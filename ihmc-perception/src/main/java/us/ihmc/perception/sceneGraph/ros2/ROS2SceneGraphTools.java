@@ -6,6 +6,7 @@ import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.YOLOv8.YOLOv8Detection;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -83,8 +84,13 @@ public class ROS2SceneGraphTools
                                     subscriptionNode.getYOLONodeMessage().getMaskErosionKernelRadius(),
                                     subscriptionNode.getYOLONodeMessage().getOutlierFilterThreshold(),
                                     subscriptionNode.getYOLONodeMessage().getDetectionAcceptanceThreshold(),
-                                    YOLOv8DetectionClass.valueOf(subscriptionNode.getYOLONodeMessage().getDetectionClassAsString()),
-                                    subscriptionNode.getYOLONodeMessage().getConfidence(),
+                                    new YOLOv8Detection(YOLOv8DetectionClass.valueOf(subscriptionNode.getYOLONodeMessage().getDetectionClassAsString()),
+                                                        subscriptionNode.getYOLONodeMessage().getConfidence(),
+                                                        subscriptionNode.getYOLONodeMessage().getX(),
+                                                        subscriptionNode.getYOLONodeMessage().getY(),
+                                                        subscriptionNode.getYOLONodeMessage().getWidth(),
+                                                        subscriptionNode.getYOLONodeMessage().getHeight(),
+                                                        null),
                                     subscriptionNode.getYOLONodeMessage().getObjectPointCloud(),
                                     subscriptionNode.getYOLONodeMessage().getObjectCentroid(),
                                     subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform(),

@@ -17,6 +17,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.YOLOv8.YOLOv8Detection;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -164,8 +165,13 @@ public class ROS2SceneGraphSubscription
             yoloNode.setMaskErosionKernelRadius(subscriptionNode.getYOLONodeMessage().getMaskErosionKernelRadius());
             yoloNode.setOutlierFilterThreshold(subscriptionNode.getYOLONodeMessage().getOutlierFilterThreshold());
             yoloNode.setDetectionAcceptanceThreshold(subscriptionNode.getYOLONodeMessage().getDetectionAcceptanceThreshold());
-            yoloNode.setDetectionClass(YOLOv8DetectionClass.valueOf(subscriptionNode.getYOLONodeMessage().getDetectionClassAsString()));
-            yoloNode.setConfidence(subscriptionNode.getYOLONodeMessage().getConfidence());
+            yoloNode.setDetection(new YOLOv8Detection(YOLOv8DetectionClass.valueOf(subscriptionNode.getYOLONodeMessage().getDetectionClassAsString()),
+                                                      subscriptionNode.getYOLONodeMessage().getConfidence(),
+                                                      subscriptionNode.getYOLONodeMessage().getX(),
+                                                      subscriptionNode.getYOLONodeMessage().getY(),
+                                                      subscriptionNode.getYOLONodeMessage().getWidth(),
+                                                      subscriptionNode.getYOLONodeMessage().getHeight(),
+                                                      null));
             yoloNode.setObjectPointCloud(subscriptionNode.getYOLONodeMessage().getObjectPointCloud());
             yoloNode.setCentroidToObjectTransform(subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform());
             yoloNode.setObjectPose(subscriptionNode.getYOLONodeMessage().getObjectPose());

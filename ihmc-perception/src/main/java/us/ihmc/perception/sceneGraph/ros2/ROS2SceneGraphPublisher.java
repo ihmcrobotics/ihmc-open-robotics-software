@@ -138,8 +138,13 @@ public class ROS2SceneGraphPublisher
             yoloNodeMessage.setMaskErosionKernelRadius(yoloNode.getMaskErosionKernelRadius());
             yoloNodeMessage.setOutlierFilterThreshold(yoloNode.getOutlierFilterThreshold());
             yoloNodeMessage.setDetectionAcceptanceThreshold(yoloNode.getDetectionAcceptanceThreshold());
-            yoloNodeMessage.setDetectionClass(yoloNode.getDetectionClass().name());
-            yoloNodeMessage.setConfidence(yoloNode.getConfidence());
+            yoloNodeMessage.setDetectionClass(yoloNode.getDetection().objectClass().name());
+            yoloNodeMessage.setConfidence(yoloNode.getDetection().confidence());
+            yoloNodeMessage.setX(yoloNode.getDetection().x());
+            yoloNodeMessage.setY(yoloNode.getDetection().y());
+            yoloNodeMessage.setWidth(yoloNode.getDetection().width());
+            yoloNodeMessage.setHeight(yoloNode.getDetection().height());
+
             // set point cloud
             yoloNodeMessage.getObjectPointCloud().clear();
             for (int i = 0; i < 5000 && i < yoloNode.getObjectPointCloud().size(); i++)

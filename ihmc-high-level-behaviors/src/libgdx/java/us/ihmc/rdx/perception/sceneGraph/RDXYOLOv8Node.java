@@ -73,8 +73,8 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
 
       confidencePlot.setWidth((int) (0.65 * ImGui.getWindowWidth()));
-      ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.greenRedGradientColor((float) yoloNode.getConfidence(), 1.0f, 0.0f));
-      confidencePlot.render(yoloNode.getConfidence());
+      ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.greenRedGradientColor((float) yoloNode.getDetection().confidence(), 1.0f, 0.0f));
+      confidencePlot.render(yoloNode.getDetection().confidence());
       ImGui.popStyleColor();
 
       if (ImGuiTools.volatileInputInt(labels.get("Mask Erosion Kernel Radius"), maskErosionKernelRadius))

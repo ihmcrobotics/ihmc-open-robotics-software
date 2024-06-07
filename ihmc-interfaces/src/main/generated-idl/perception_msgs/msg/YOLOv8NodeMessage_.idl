@@ -32,7 +32,23 @@ module perception_msgs
          * Detection information
          */
         string detection_class;
-        double confidence;
+        float confidence;
+        /**
+         * x coordinate of center of detection within image
+         */
+        long x;
+        /**
+         * y coordinate of center of detection within image
+         */
+        long y;
+        /**
+         * width of detection in pixels
+         */
+        long width;
+        /**
+         * height of detection in pixels
+         */
+        long height;
         sequence<geometry_msgs::msg::dds::Point32, 5000> object_point_cloud;
         geometry_msgs::msg::dds::Point32 object_centroid;
         geometry_msgs::msg::dds::Transform centroid_to_object_transform;

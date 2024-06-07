@@ -26,7 +26,7 @@ public final class DoorNodeTools
          {
             if (sceneNode instanceof YOLOv8Node yoloNode)
             {
-               boolean doorHardwareComponent = switch (yoloNode.getDetectionClass())
+               boolean doorHardwareComponent = switch (yoloNode.getDetection().objectClass())
                {
                   case DOOR_PULL_HANDLE, DOOR_KNOB, DOOR_PUSH_BAR, DOOR_LEVER -> true;
                   default -> false;
@@ -37,7 +37,7 @@ public final class DoorNodeTools
                   if (yoloNode.getChildren().isEmpty())
                   {
                      DoorNode doorNode = new DoorNode(sceneGraph.getNextID().getAndIncrement(), "Door");
-                     doorNode.setOpeningMechanismTypeFromYoloClass(yoloNode.getDetectionClass());
+                     doorNode.setOpeningMechanismTypeFromYoloClass(yoloNode.getDetection().objectClass());
                      modificationQueue.accept(new SceneGraphNodeAddition(doorNode, yoloNode));
 
                      SceneNode doorStaticNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),

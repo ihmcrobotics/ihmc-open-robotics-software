@@ -5,7 +5,9 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.perception.YOLOv8.YOLOv8Detection;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
+import us.ihmc.perception.filters.DetectionFilter;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 
 import java.util.List;
@@ -18,8 +20,8 @@ public class YOLOv8Node extends DetectableSceneNode
    private float detectionAcceptanceThreshold;
 
    // Read from YOLO manager, write to RDX
-   private YOLOv8DetectionClass detectionClass;
-   private double confidence;
+   private YOLOv8Detection detection;
+   private DetectionFilter detectionFilter;
    private List<Point3D32> objectPointCloud;
    private Point3D32 objectCentroid;
 
@@ -27,15 +29,14 @@ public class YOLOv8Node extends DetectableSceneNode
    private final RigidBodyTransform centroidToObjectTransform = new RigidBodyTransform();
    private Pose3D objectPose;
 
-   public YOLOv8Node(long id, String name, YOLOv8DetectionClass detectionClass, double confidence, List<Point3D32> objectPointCloud, Point3D32 objectCentroid)
+   public YOLOv8Node(long id, String name, YOLOv8Detection detection, List<Point3D32> objectPointCloud, Point3D32 objectCentroid)
    {
       this(id,
            name,
            2,
            2.0,
            0.2f,
-           detectionClass,
-           confidence,
+           detection,
            objectPointCloud,
            objectCentroid,
            new Pose3D(objectCentroid, new RotationMatrix()),
@@ -47,8 +48,7 @@ public class YOLOv8Node extends DetectableSceneNode
                      int maskErosionKernelRadius,
                      double outlierFilterThreshold,
                      float detectionAcceptanceThreshold,
-                     YOLOv8DetectionClass detectionClass,
-                     double confidence,
+                     YOLOv8Detection detection,
                      List<Point3D32> objectPointCloud,
                      Point3D32 objectCentroid,
                      RigidBodyTransformBasics centroidToObjectTransform,
@@ -59,8 +59,7 @@ public class YOLOv8Node extends DetectableSceneNode
       this.maskErosionKernelRadius = maskErosionKernelRadius;
       this.outlierFilterThreshold = outlierFilterThreshold;
       this.detectionAcceptanceThreshold = detectionAcceptanceThreshold;
-      this.detectionClass = detectionClass;
-      this.confidence = confidence;
+      this.detection = detection;
       this.objectPointCloud = objectPointCloud;
       this.objectCentroid = objectCentroid;
       this.centroidToObjectTransform.set(centroidToObjectTransform);
@@ -106,24 +105,14 @@ public class YOLOv8Node extends DetectableSceneNode
       this.detectionAcceptanceThreshold = detectionAcceptanceThreshold;
    }
 
-   public YOLOv8DetectionClass getDetectionClass()
+   public YOLOv8Detection getDetection()
    {
-      return detectionClass;
+      return detection;
    }
 
-   public void setDetectionClass(YOLOv8DetectionClass detectionClass)
+   public void setDetection(YOLOv8Detection detection)
    {
-      this.detectionClass = detectionClass;
-   }
-
-   public double getConfidence()
-   {
-      return confidence;
-   }
-
-   public void setConfidence(double confidence)
-   {
-      this.confidence = confidence;
+      this.detection = detection;
    }
 
    public List<Point3D32> getObjectPointCloud()

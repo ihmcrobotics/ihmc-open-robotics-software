@@ -452,8 +452,7 @@ public class YOLOv8DetectionManager
                   long nodeID = sceneGraph.getNextID().getAndIncrement();
                   YOLOv8Node newYoloNode = new YOLOv8Node(nodeID,
                                                           candidateDetection.getDetection().objectClass().getDefaultNodeName(),
-                                                          candidateDetection.getDetection().objectClass(),
-                                                          candidateDetection.getDetection().confidence(),
+                                                          candidateDetection.getDetection(),
                                                           candidateDetection.getObjectPointCloud(),
                                                           candidateDetection.getCentroid());
                   modificationQueue.accept(new SceneGraphNodeAddition(newYoloNode, sceneGraph.getRootNode()));
@@ -472,7 +471,7 @@ public class YOLOv8DetectionManager
       while (yoloNodeIterator.hasNext())
       {
          YOLOv8Node yoloNode = yoloNodeIterator.next().getValue();
-         YOLOv8SegmentedDetection detection = detectedObjects.get(yoloNode.getDetectionClass());
+         YOLOv8SegmentedDetection detection = detectedObjects.get(yoloNode.getDetection().objectClass());
 
          // Node may have been removed by user
          if (!sceneGraph.getIDToNodeMap().containsKey(yoloNode.getID()))
@@ -487,7 +486,7 @@ public class YOLOv8DetectionManager
 
             yoloNode.setObjectPointCloud(detection.getObjectPointCloud());
             yoloNode.setObjectCentroid(detection.getCentroid());
-            yoloNode.setConfidence(detection.getDetection().confidence());
+            yoloNode.setDetection(detection.getDetection());
             yoloNode.update();
          }
       }
