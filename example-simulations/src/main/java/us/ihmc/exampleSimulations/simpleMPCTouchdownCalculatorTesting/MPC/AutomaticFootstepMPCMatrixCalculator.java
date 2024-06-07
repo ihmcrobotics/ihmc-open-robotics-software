@@ -9,8 +9,6 @@ import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.BPWPlanarWalkingRobotEstimates;
-import us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.MPC.FootstepMPCMatrixTools;
-import us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.MPC.MPCParameters;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -166,7 +164,7 @@ public class AutomaticFootstepMPCMatrixCalculator
                                                FrameVector3DReadOnly angularMomentum,
                                                BPWPlanarWalkingRobotEstimates estimates,
                                                Vector2DReadOnly desiredVelocityProvider,
-                                               MPCParameters parameters,
+                                               BPWPlanarWalkerParameters parameters,
                                                YoRegistry parentRegistry,
                                                YoGraphicsListRegistry graphicsListRegistry)
    {

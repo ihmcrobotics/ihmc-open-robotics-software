@@ -3,13 +3,13 @@ package us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.MPC;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class MPCParameters
+public class BPWPlanarWalkerParameters
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final static double NUMBER_OF_STEPS_IN_HORIZON = 2;
    private final static double GRAVITY = 9.81;
-   private final static double DESIRED_STANCE_WIDTH = 0.3;
+   private final static double DESIRED_STANCE_WIDTH = 0.05;
 
    // MPC Specific
    private final YoDouble numberOfStepsInHorizon = new YoDouble("numberOfStepsInHorizon", registry);
@@ -26,7 +26,7 @@ public class MPCParameters
    private final YoDouble swingDuration;
    private final YoDouble controllerDt;
 
-   public MPCParameters(YoDouble swingDuration, double desiredWalkingHeight, YoDouble controllerDt, YoRegistry parentRegistry)
+   public BPWPlanarWalkerParameters(YoDouble swingDuration, double desiredWalkingHeight, YoDouble controllerDt, YoRegistry parentRegistry)
    {
       this.swingDuration = swingDuration;
       this.controllerDt = controllerDt;

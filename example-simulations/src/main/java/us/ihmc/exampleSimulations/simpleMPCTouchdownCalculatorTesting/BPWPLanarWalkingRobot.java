@@ -78,10 +78,6 @@ public class BPWPLanarWalkingRobot implements SCS2YoGraphicHolder
 
         centerOfMassFrame = new MovingCenterOfMassReferenceFrame("centerOfMass", ReferenceFrame.getWorldFrame(), rootBody);
 
-        ///
-        // FIXME use the center of mass jacobian calculator for this.
-//        centerOfMassFrame = robot.getJoint(BPWPlanarWalkingRobotDefinition.baseJointName).getFrameBeforeJoint();
-
         for(RobotSide robotSide : RobotSide.values)
         {
             SimPrismaticJoint kneeJoint = (SimPrismaticJoint) robot.getJoint(BPWPlanarWalkingRobotDefinition.kneeNames.get(robotSide));
@@ -102,6 +98,7 @@ public class BPWPLanarWalkingRobot implements SCS2YoGraphicHolder
             footFrames.put(robotSide, footFrame);
 
         }
+
         kneeJoints.get(RobotSide.LEFT).setQ(0.25);
     }
     

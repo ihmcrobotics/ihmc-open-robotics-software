@@ -1,12 +1,10 @@
 package us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting;
 
-import boofcv.visualize.SingleAxisRgb;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.MPC.MPCParameters;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.exampleSimulations.simpleMPCTouchdownCalculatorTesting.MPC.BPWPlanarWalkerParameters;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -16,9 +14,7 @@ import us.ihmc.robotics.screwTheory.WholeBodyAngularVelocityCalculator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BPWPlanarWalkingRobotEstimates
 {
@@ -41,9 +37,9 @@ public class BPWPlanarWalkingRobotEstimates
 
    private final WholeBodyAngularVelocityCalculator angularVelocityCalculator;
 
-   private final MPCParameters parameters;
+   private final BPWPlanarWalkerParameters parameters;
 
-   public BPWPlanarWalkingRobotEstimates(BPWPLanarWalkingRobot robot, MPCParameters parameters, YoRegistry parentRegistry)
+   public BPWPlanarWalkingRobotEstimates(BPWPLanarWalkingRobot robot, BPWPlanarWalkerParameters parameters, YoRegistry parentRegistry)
    {
       this.robot = robot;
       this.parameters = parameters;
@@ -67,7 +63,7 @@ public class BPWPlanarWalkingRobotEstimates
          @Override
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
-            transformToParent.getTranslation().set(centerOfMassPosition);
+            transformToParent.getTranslation().set(getCenterOfMass());
             //transformToParent.getRotation().set(desiredOrientation);
          }
       };
