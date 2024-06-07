@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 /**
  * These are preplaced objects used for behaviors, manipulation,
- * navigation simulations with {@link RDXSCS2SimulationSession}.
+ * navigation simulations.
  *
  * We return Function<ReferenceFrame, Robot> because we don't know the
  * inertial frame of the Session required to make the Robot.
@@ -29,32 +29,32 @@ public class SimulationSceneObjectRobotBuilders
    public static final double TABLE_Z = TableModelParameters.TABLE_LEG_LENGTH + SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE;
    public static final double TABLE_SURFACE_Z = TableModelParameters.TABLE_LEG_LENGTH + TableModelParameters.TABLE_THICKNESS;
 
-   public static Function<ReferenceFrame, Robot> getPushDoorBuilder()
+   public static Function<ReferenceFrame, Robot> getPushDoorBuilder(int id, Point3D position)
    {
       return inertialFrame ->
       {
-         DoorDefinition doorDefinition = getDoorWithArUcoMarkersDefinition();
+         DoorDefinition doorDefinition = getDoorWithArUcoMarkersDefinition(id);
          // Rotate the door so the push side is facing
-         doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(Math.PI, 0.0, 0.0), new Point3D(1.3, 0.5, 0.01));
+         doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(Math.PI, 0.0, 0.0), position);
          Robot robot = new Robot(doorDefinition, inertialFrame);
          return robot;
       };
    }
 
-   public static Function<ReferenceFrame, Robot> getPullDoorBuilder()
+   public static Function<ReferenceFrame, Robot> getPullDoorBuilder(int id, Point3D position)
    {
       return inertialFrame ->
       {
-         DoorDefinition doorDefinition = getDoorWithArUcoMarkersDefinition();
-         doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0), new Point3D(1.0, -0.5, 0.01));
+         DoorDefinition doorDefinition = getDoorWithArUcoMarkersDefinition(id);
+         doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0), position);
          Robot robot = new Robot(doorDefinition, inertialFrame);
          return robot;
       };
    }
 
-   private static DoorDefinition getDoorWithArUcoMarkersDefinition()
+   private static DoorDefinition getDoorWithArUcoMarkersDefinition(int id)
    {
-      DoorDefinition doorDefinition = new DoorDefinition();
+      DoorDefinition doorDefinition = new DoorDefinition(id);
       doorDefinition.getDoorPanelDefinition().setAddArUcoMarkers(true);
       doorDefinition.build();
       // doorDefinition.getInitialHingeState().setEffort(15.0);
