@@ -2,7 +2,6 @@ package us.ihmc.robotics.screwTheory;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
@@ -58,10 +57,10 @@ public class GeometricJacobian
     * Creates the Jacobian for the kinematic chain described by the given joints. These joints have
     * to be ordered and going downstream (the first joint has to be the closest joint to the root of
     * the system and the last the farthest).
-    * 
-    * @param joints the joints that this Jacobian considers.
+    *
+    * @param joints        the joints that this Jacobian considers.
     * @param jacobianFrame the frame in which the resulting twist of the end effector with respect
-    *           to the base frame will be expressed.
+    *                      to the base frame will be expressed.
     * @throws RuntimeException if the joint ordering is incorrect.
     */
    public GeometricJacobian(JointBasics[] joints, ReferenceFrame jacobianFrame)
@@ -73,12 +72,12 @@ public class GeometricJacobian
     * Creates the Jacobian for the kinematic chain described by the given joints. These joints have
     * to be ordered and going downstream (the first joint has to be the closest joint to the root of
     * the system and the last the farthest).
-    * 
-    * @param joints the joints that this Jacobian considers.
-    * @param jacobianFrame the frame in which the resulting twist of the end effector with respect
-    *           to the base frame will be expressed.
+    *
+    * @param joints           the joints that this Jacobian considers.
+    * @param jacobianFrame    the frame in which the resulting twist of the end effector with respect
+    *                         to the base frame will be expressed.
     * @param allowChangeFrame whether the feature {@link #changeFrame(ReferenceFrame)} will be
-    *           available or not.
+    *                         available or not.
     * @throws RuntimeException if the joint ordering is incorrect.
     */
    public GeometricJacobian(JointBasics[] joints, ReferenceFrame jacobianFrame, boolean allowChangeFrame)
@@ -99,13 +98,13 @@ public class GeometricJacobian
     * <p>
     * Creates a new Jacobian representing the motion subspace of the given joint.
     * </p>
-    * 
-    * @param joint the joint for which the motion subspace is to be created.
-    * @param unitTwists the list of unitary twists representing the degrees of freedom of
-    *           {@code joint}. For instance, the unit twist of a {@link RevoluteJoint} around the
-    *           y-axis is: T<sub>u</sub> = [0 1 0 0 0 0]<sup>T</sup>.
+    *
+    * @param joint         the joint for which the motion subspace is to be created.
+    * @param unitTwists    the list of unitary twists representing the degrees of freedom of
+    *                      {@code joint}. For instance, the unit twist of a {@link RevoluteJoint} around the
+    *                      y-axis is: T<sub>u</sub> = [0 1 0 0 0 0]<sup>T</sup>.
     * @param jacobianFrame the frame in which the resulting twist of the end effector with respect
-    *           to the base frame will be expressed.
+    *                      to the base frame will be expressed.
     * @throws RuntimeException if the joint ordering is incorrect.
     */
    public GeometricJacobian(JointBasics joint, ReferenceFrame jacobianFrame)
@@ -116,11 +115,11 @@ public class GeometricJacobian
    /**
     * Creates a new Jacobian for the kinematic starting from {@code ancestor} and ending at
     * {@code descendant}.
-    * 
-    * @param ancestor the predecessor of the first joint considered by this Jacobian.
-    * @param descendant the successor of the last joint considered by this Jacobian.
+    *
+    * @param ancestor      the predecessor of the first joint considered by this Jacobian.
+    * @param descendant    the successor of the last joint considered by this Jacobian.
     * @param jacobianFrame the frame in which the resulting twist of the end effector with respect
-    *           to the base frame will be expressed.
+    *                      to the base frame will be expressed.
     * @throws RuntimeException if the joint ordering is incorrect.
     */
    public GeometricJacobian(RigidBodyBasics ancestor, RigidBodyBasics descendant, ReferenceFrame jacobianFrame)
@@ -161,7 +160,7 @@ public class GeometricJacobian
     * WARNING: This method only changes the current frame without updating the Jacobian matrix. The
     * method {@link #compute()} after having changed the frame.
     * </p>
-    * 
+    *
     * @param jacobianFrame the new frame of this Jacobian.
     * @throws RuntimeException if this feature is not enabled.
     */
@@ -175,12 +174,12 @@ public class GeometricJacobian
 
    /**
     * Computes and packs the twist that corresponds to the given joint velocity vector.
-    * 
+    *
     * @param jointVelocities the joint velocity column vector. The vector should have the same
-    *           ordering as the unit twists of the ordered joint list of this Jacobian that were
-    *           passed in during construction.
+    *                        ordering as the unit twists of the ordered joint list of this Jacobian that were
+    *                        passed in during construction.
     * @return the twist of the end effector with respect to the base, expressed in the
-    *         jacobianFrame.
+    *       jacobianFrame.
     */
    public void getTwist(DMatrixRMaj jointVelocities, Twist twistToPack)
    {
@@ -190,14 +189,14 @@ public class GeometricJacobian
 
    /**
     * Computes and returns the joint torque vector that corresponds to the given wrench.
-    * 
+    *
     * @param wrench the resulting wrench at the end effector. The wrench should be expressed in
-    *           {@code jacobianFrame} and the wrench's {@code bodyFrame} should be the body fixed
-    *           frame of the end-effector.
+    *               {@code jacobianFrame} and the wrench's {@code bodyFrame} should be the body fixed
+    *               frame of the end-effector.
     * @return joint torques that result in the given wrench as a column vector.
     * @throws ReferenceFrameMismatchException if the given wrench
-    *            {@code wrench.getExpressedInFrame() != this.getJacobianFrame()} or
-    *            {@code wrench.getBodyFrame() != this.getEndEffectorFrame()}.
+    *       {@code wrench.getExpressedInFrame() != this.getJacobianFrame()} or
+    *       {@code wrench.getBodyFrame() != this.getEndEffectorFrame()}.
     */
    public DMatrixRMaj computeJointTorques(WrenchReadOnly wrench)
    {
@@ -208,13 +207,13 @@ public class GeometricJacobian
 
    /**
     * Computes and packs the joint torque vector that corresponds to the given wrench.
-    * 
+    *
     * @param wrench the resulting wrench at the end effector. The wrench should be expressed in
-    *           {@code jacobianFrame} and the wrench's {@code bodyFrame} should be the body fixed
-    *           frame of the end-effector.
+    *               {@code jacobianFrame} and the wrench's {@code bodyFrame} should be the body fixed
+    *               frame of the end-effector.
     * @throws ReferenceFrameMismatchException if the given wrench
-    *            {@code wrench.getExpressedInFrame() != this.getJacobianFrame()} or
-    *            {@code wrench.getBodyFrame() != this.getEndEffectorFrame()}.
+    *       {@code wrench.getExpressedInFrame() != this.getJacobianFrame()} or
+    *       {@code wrench.getBodyFrame() != this.getEndEffectorFrame()}.
     */
    public void computeJointTorques(WrenchReadOnly wrench, DMatrixRMaj jointTorquesToPack)
    {
@@ -224,14 +223,13 @@ public class GeometricJacobian
       //      wrench.getBodyFrame().checkReferenceFrameMatch(getEndEffectorFrame());
       wrench.get(tempMatrix);
       jointTorquesToPack.reshape(1, jacobian.getNumCols());
-      CommonOps_DDRM.multTransA(tempMatrix, jacobian, jointTorquesToPack);
-      CommonOps_DDRM.transpose(jointTorquesToPack);
+      CommonOps_DDRM.multTransA(jacobian, tempMatrix, jointTorquesToPack);
    }
 
    /**
     * Returns a reference to the underlying {@code DMatrixRMaj} object. Does not recompute the
     * Jacobian.
-    * 
+    *
     * @return a reference to the underlying {@code DMatrixRMaj} object
     */
    public DMatrixRMaj getJacobianMatrix()
@@ -249,8 +247,8 @@ public class GeometricJacobian
 
    /**
     * Returns one entry from the Jacobian matrix. Does not recompute the Jacobian.
-    * 
-    * @param row the desired row of the Jacobian
+    *
+    * @param row    the desired row of the Jacobian
     * @param column the desired column of the Jacobian
     * @return the entry at (row, column)
     */
@@ -283,7 +281,7 @@ public class GeometricJacobian
 
    /**
     * @return a {@code Array} of joints describing a continuous path from the base to the end
-    *         effector of this Jacobian.
+    *       effector of this Jacobian.
     */
    public JointBasics[] getJointPathFromBaseToEndEffector()
    {
@@ -293,7 +291,7 @@ public class GeometricJacobian
    /**
     * Returns the base {@code RigidBody} of this Jacobian. The base is the predecessor of the first
     * joint that this Jacobian considers.
-    * 
+    *
     * @return the base of this Jacobian.
     */
    public RigidBodyBasics getBase()
@@ -304,7 +302,7 @@ public class GeometricJacobian
    /**
     * Returns the end-effector {@code RigidBody} of this Jacobian. The end-effector is the successor
     * of the last joint this Jacobian considers.
-    * 
+    *
     * @return the end-effector of this jacobian.
     */
    public RigidBodyBasics getEndEffector()
@@ -315,7 +313,7 @@ public class GeometricJacobian
    /**
     * Returns the body fixed frame of the base {@code RigidBody} of this Jacobian. The base is the
     * predecessor of the first joint that this Jacobian considers.
-    * 
+    *
     * @return the body fixed frame of the base.
     */
    public ReferenceFrame getBaseFrame()
@@ -326,7 +324,7 @@ public class GeometricJacobian
    /**
     * Returns the body fixed frame of the end-effector {@code RigidBody} of this Jacobian. The
     * end-effector is the successor of the last joint this Jacobian considers.
-    * 
+    *
     * @return the body fixed frame of the end-effector.
     */
    public ReferenceFrame getEndEffectorFrame()
@@ -349,7 +347,7 @@ public class GeometricJacobian
     * Creates a descriptive {@code String} for this Jacobian containing information such as the
     * {@code jacobianFrame}, the list of the joint names, and the current value of the Jacobian
     * matrix.
-    * 
+    *
     * @return a descriptive {@code String} for this Jacobian.
     */
    @Override
