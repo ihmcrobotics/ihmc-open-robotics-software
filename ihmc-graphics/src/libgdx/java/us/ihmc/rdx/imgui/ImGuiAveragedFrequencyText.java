@@ -6,9 +6,9 @@ import us.ihmc.tools.time.FrequencyCalculator;
 
 public class ImGuiAveragedFrequencyText
 {
-   public static final int HISTORY = 100;
-   private final FrequencyCalculator averagedFrequencyCalculator = new FrequencyCalculator(HISTORY);
-   private final Throttler throttler = new Throttler().setFrequency(0.25);
+   public static final int HISTORY = 20;
+   private final Throttler throttler = new Throttler().setFrequency(0.1);
+   private FrequencyCalculator averagedFrequencyCalculator = new FrequencyCalculator(HISTORY);
    private String fpsString = "0 Hz";
 
    public void ping()
@@ -25,8 +25,8 @@ public class ImGuiAveragedFrequencyText
       ImGui.text(fpsString.trim());
    }
 
-   public double getFrequency()
+   public void reset()
    {
-      return averagedFrequencyCalculator.getFrequency();
+      averagedFrequencyCalculator = new FrequencyCalculator(HISTORY);
    }
 }

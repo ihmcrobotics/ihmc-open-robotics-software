@@ -69,7 +69,7 @@ public class RDXPerceptionVisualizersPanel extends RDXPanel implements RDXRender
          ImGui.tableSetupColumn("##leftTextContextCol", ImGuiTableColumnFlags.WidthFixed, 30.0f);
          ImGui.tableSetupColumn("##rightCol", ImGuiTableColumnFlags.WidthStretch);
 
-//          Pinned visualizers
+         // Pinned visualizers
          ImGui.separator();
          for (RDXVisualizer visualizer : visualizers)
             if (visualizer.isPinned())

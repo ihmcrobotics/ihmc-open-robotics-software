@@ -73,27 +73,20 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
    {
       ImGui.tableNextRow();
       ImGui.tableNextColumn();
-
-      StringBuilder tooltip = new StringBuilder();
       if (this instanceof RDXROS2SingleTopicVisualizer<?> topicVisualizer)
       {
-         tooltip = new StringBuilder("ROS\n" + topicVisualizer.getTopic().getName());
          topicVisualizer.getFrequency().render();
+         ImGuiTools.previousWidgetTooltip(topicVisualizer.getTopic().getName() + " (" + topicVisualizer.getTopic().getQoS().getReliabilityKind().name() + ")");
          ImGui.sameLine();
       }
       else if (this instanceof RDXROS2MultiTopicVisualizer multiTopicVisualizer)
       {
-         tooltip = new StringBuilder("ROS\n");
          for (ROS2Topic<?> topic : multiTopicVisualizer.getTopics())
          {
-            tooltip.append(topic.getName()).append("\n");
             multiTopicVisualizer.getFrequency(topic).render();
+            ImGuiTools.previousWidgetTooltip(topic.getName() + " (" + topic.getQoS().getReliabilityKind().name() + ")");
             ImGui.sameLine();
          }
-      }
-      if (tooltip.length() > 0)
-      {
-         ImGuiTools.previousWidgetTooltip(tooltip.toString());
       }
 
       ImGui.tableNextColumn();
@@ -107,8 +100,6 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
 
          if (getPanel() != null)
             getPanel().getIsShowing().set(active.get());
-
-         System.out.println("set panel");
       }
       ImGui.sameLine();
 

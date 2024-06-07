@@ -10,7 +10,7 @@ import java.util.Map;
 
 public abstract class RDXROS2MultiTopicVisualizer extends RDXVisualizer
 {
-   private final Map<ROS2Topic<?>, ImGuiAveragedFrequencyText> topicToFrequencies = new HashMap<>();
+   private final Map<String, ImGuiAveragedFrequencyText> topicToFrequencies = new HashMap<>();
 
    public RDXROS2MultiTopicVisualizer(String title)
    {
@@ -21,9 +21,9 @@ public abstract class RDXROS2MultiTopicVisualizer extends RDXVisualizer
 
    public ImGuiAveragedFrequencyText getFrequency(ROS2Topic<?> topic)
    {
-      if (!topicToFrequencies.containsKey(topic))
-         topicToFrequencies.put(topic, new ImGuiAveragedFrequencyText());
+      if (!topicToFrequencies.containsKey(topic.getName()))
+         topicToFrequencies.put(topic.getName(), new ImGuiAveragedFrequencyText());
 
-      return topicToFrequencies.get(topic);
+      return topicToFrequencies.get(topic.getName());
    }
 }
