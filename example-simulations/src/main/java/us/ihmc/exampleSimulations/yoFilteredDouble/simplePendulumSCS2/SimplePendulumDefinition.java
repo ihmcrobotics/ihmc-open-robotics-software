@@ -144,5 +144,4 @@ public class SimplePendulumDefinition extends RobotDefinition
 
       return pendulumLink;
    }
-
 }

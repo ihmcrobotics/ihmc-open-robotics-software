@@ -43,7 +43,6 @@ public class SimplePendulumSimulation
 
       // Launch the simulator
       scs.start(true, false, false);
-
    }
 
    public static void main(String[] args)
