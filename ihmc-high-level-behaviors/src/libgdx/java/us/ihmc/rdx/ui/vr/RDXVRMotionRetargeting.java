@@ -4,7 +4,6 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -25,7 +24,6 @@ import java.util.Set;
 
 import static us.ihmc.motionRetargeting.VRTrackedSegmentType.*;
 import static us.ihmc.rdx.ui.vr.RDXVRKinematicsStreamingMode.FRAME_AXIS_GRAPHICS_LENGTH;
-import static us.ihmc.robotics.partNames.ArmJointName.SHOULDER_ROLL;
 
 /**
  * Class responsible for motion retargeting from VR tracked segments to a robot model.
@@ -54,6 +52,7 @@ public class RDXVRMotionRetargeting
    private final RigidBodyTransform initialPelvisTransformToWorld = new RigidBodyTransform();
    private Point3D centerOfMassDesiredXYInWorld;
    private ReferenceFrame initialPelvisFrame;
+   private ReferenceFrame scaledPelvisFrame;
    private final SideDependentList<Point3D> initialHandPositionsInWorld = new SideDependentList<>(null, null);
    private boolean controlArmsOnly = false;
    private boolean armScaling = false;
@@ -119,6 +118,8 @@ public class RDXVRMotionRetargeting
             initialPelvisFrame = ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                           initialPelvisTransformToWorld);
             initialWaistTrackerTransformToWorld.set(trackerReferenceFrames.get(WAIST.getSegmentName()).getReferenceFrame().getTransformToWorldFrame());
+
+            scaledPelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(), newPelvisFramePose);
          }
          // Calculate the variation of the tracker's frame from its initial value
          RigidBodyTransform waistTrackerVariationFromInitialValue = new RigidBodyTransform(trackerReferenceFrames.get(WAIST.getSegmentName())
@@ -135,14 +136,14 @@ public class RDXVRMotionRetargeting
          RigidBodyTransform combinedTransformToWorld = new RigidBodyTransform(initialPelvisTransformToWorld);
          combinedTransformToWorld.multiply(waistTrackerVariationFromInitialValue);
 
-         newPelvisFramePose.changeFrame(ReferenceFrame.getWorldFrame());
          newPelvisFramePose.set(combinedTransformToWorld);
          // Zero roll orientation variation as it can lead to very unnatural motions (at least when in double support)
          newPelvisFramePose.changeFrame(initialPelvisFrame);
          newPelvisFramePose.getRotation().setYawPitchRoll(newPelvisFramePose.getRotation().getYaw(), newPelvisFramePose.getRotation().getPitch(),0.0);
          newPelvisFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+         scaledPelvisFrame.update();
 
-         retargetedFrames.put(WAIST, ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(ReferenceFrame.getWorldFrame(), newPelvisFramePose));
+         retargetedFrames.put(WAIST, scaledPelvisFrame);
       }
    }
 
@@ -251,10 +252,10 @@ public class RDXVRMotionRetargeting
                   RigidBodyTransform shoulderToChestTransform = new RigidBodyTransform(new YawPitchRoll(), new Point3D(0.0, side.negateIfRightSide(shoulderOffsetY), shoulderOffsetZ));
                   shoulderFrames.put(side, ReferenceFrameMissingTools.constructFrameWithUnchangingTransformToParent(chestTrackerFrame, shoulderToChestTransform));
                   shoulderFrameGraphics.get(side).setToReferenceFrame(shoulderFrames.get(side));
-                  scaledHandFrames.put(side,
-
-                                       ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(shoulderFrames.get(side),
-                                                                                                              shoulderToScaledHandTransforms.get(side)));
+                  // In theory, we should use robot shoulder frame as parent frame, but that creates a feedback loop that causes instability
+                  // Using the reconstructed user shoulder frame is close enough
+                  scaledHandFrames.put(side, ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(shoulderFrames.get(side),
+                                                                                                                    shoulderToScaledHandTransforms.get(side)));
 
                   initialHandPositionsInWorld.put(side, new Point3D(handFrame.getTransformToWorldFrame().getTranslation()));
                   // Calculate initial user arm length
