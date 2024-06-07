@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImInt;
 import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -19,6 +20,7 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDX3DSituatedImGuiPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.teleoperation.RDXScriptedTrajectoryStreamer.ScriptedTrajectoryType;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -31,14 +33,16 @@ public class RDXVRModeManager
 {
    private RDXVRKinematicsStreamingMode kinematicsStreamingMode;
    private RDXScriptedMotionMode scriptedMotionMode;
-   private RDX3DSituatedImGuiPanel leftHandPanel;
-   private final FramePose3D leftHandPanelPose = new FramePose3D();
+//   private RDX3DSituatedImGuiPanel leftHandPanel;
+//   private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RDXVRMode mode = RDXVRMode.WHOLE_BODY_IK_STREAMING;
    private RDXVRPanelPlacementMode panelPlacementMode = RDXVRPanelPlacementMode.MANUAL_PLACEMENT;
-   private boolean renderPanel;
+//   private boolean renderPanel;
    private final ImBoolean showFloatingVideoPanel = new ImBoolean(false);
    private final Notification showFloatVideoPanelNotification = new Notification();
+   private final ImInt selectedVRMode = new ImInt(RDXVRMode.WHOLE_BODY_IK_STREAMING.ordinal());
+   private final String[] vrModeNames = new String[RDXVRMode.values().length];
 
    public void create(RDXBaseUI baseUI,
                       ROS2SyncedRobotModel syncedRobot,
@@ -72,35 +76,40 @@ public class RDXVRModeManager
 
       baseUI.getImGuiPanelManager().addPanel("VR Mode Manager", this::renderImGuiWidgets);
 
-      leftHandPanel = new RDX3DSituatedImGuiPanel("VR Mode Manager", this::renderImGuiWidgets);
-      leftHandPanel.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5, 10);
-      leftHandPanel.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
-      baseUI.getVRManager().getContext().addVRPickCalculator(leftHandPanel::calculateVRPick);
-      baseUI.getVRManager().getContext().addVRInputProcessor(leftHandPanel::processVRInput);
+//      leftHandPanel = new RDX3DSituatedImGuiPanel("VR Mode Manager", this::renderImGuiWidgets);
+//      leftHandPanel.create(baseUI.getImGuiWindowAndDockSystem().getImGuiGl3(), 0.3, 0.5, 10);
+//      leftHandPanel.setBackgroundTransparency(new Color(0.3f, 0.3f, 0.3f, 0.75f));
+//      baseUI.getVRManager().getContext().addVRPickCalculator(leftHandPanel::calculateVRPick);
+//      baseUI.getVRManager().getContext().addVRInputProcessor(leftHandPanel::processVRInput);
+
+      for (RDXVRMode mode : RDXVRMode.values())
+      {
+         vrModeNames[mode.ordinal()] = mode.name();
+      }
    }
 
    public void processVRInput(RDXVRContext vrContext)
    {
-      renderPanel = vrContext.getHeadset().isConnected() && vrContext.getController(RobotSide.LEFT).isConnected();
+//      renderPanel = vrContext.getHeadset().isConnected() && vrContext.getController(RobotSide.LEFT).isConnected();
 
-      for (RobotSide side : RobotSide.values)
-      {
-         vrContext.getController(side).runIfConnected(controller ->
-         {
-            // During kinematic streaming, the only way to get out of it is the left hand panel.
-            // TODO (AM): Fix the VR panel not closing when in IK streaming mode
-            controller.setExclusiveAccess(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING ? leftHandPanel : null);
-
-            if (side == RobotSide.LEFT)
-            {
-               leftHandPanelPose.setToZero(controller.getXForwardZUpControllerFrame());
-               leftHandPanelPose.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 4.0);
-               leftHandPanelPose.getPosition().addY(-0.05);
-               leftHandPanelPose.changeFrame(ReferenceFrame.getWorldFrame());
-               leftHandPanel.updateDesiredPose(leftHandPanelPose::get);
-            }
-         });
-      }
+//      for (RobotSide side : RobotSide.values)
+//      {
+//         vrContext.getController(side).runIfConnected(controller ->
+//         {
+//            // During kinematic streaming, the only way to get out of it is the left hand panel.
+//            // TODO (AM): Fix the VR panel not closing when in IK streaming mode
+//            controller.setExclusiveAccess(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING ? leftHandPanel : null);
+//
+//            if (side == RobotSide.LEFT)
+//            {
+//               leftHandPanelPose.setToZero(controller.getXForwardZUpControllerFrame());
+//               leftHandPanelPose.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, Math.PI / 4.0);
+//               leftHandPanelPose.getPosition().addY(-0.05);
+//               leftHandPanelPose.changeFrame(ReferenceFrame.getWorldFrame());
+//               leftHandPanel.updateDesiredPose(leftHandPanelPose::get);
+//            }
+//         });
+//      }
 
       vrContext.getController(RobotSide.LEFT).runIfConnected(controller ->
                                                              {
@@ -140,14 +149,12 @@ public class RDXVRModeManager
          kinematicsStreamingMode.update(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING);
       if (scriptedMotionMode != null)
          scriptedMotionMode.update(mode == RDXVRMode.SCRIPTED_MOTION);
-      leftHandPanel.update();
+//      leftHandPanel.update();
    }
 
    private void renderImGuiWidgets()
    {
-      ImGui.text("Teleport: Right B button");
-      ImGui.text("Adjust user Z height: Right touchpad up/down");
-      ImGui.text("ImGui panels: Point and use right trigger to click and drag");
+      ImGui.text("Teleport: Right joystick click");
 
       if (ImGui.checkbox(labels.get("Floating video panel"), showFloatingVideoPanel))
       {
@@ -168,18 +175,12 @@ public class RDXVRModeManager
          }
       }
 
-      if (ImGui.radioButton(labels.get("Inputs disabled"), mode == RDXVRMode.INPUTS_DISABLED))
-      {
-         mode = RDXVRMode.INPUTS_DISABLED;
-      }
-      if (ImGui.radioButton(labels.get("Whole body IK streaming"), mode == RDXVRMode.WHOLE_BODY_IK_STREAMING))
-      {
-         mode = RDXVRMode.WHOLE_BODY_IK_STREAMING;
-      }
-      if (ImGui.radioButton(labels.get("Scripted motion"), mode == RDXVRMode.SCRIPTED_MOTION))
-      {
-         mode = RDXVRMode.SCRIPTED_MOTION;
-      }
+      ImGui.newLine();
+      ImGui.text("VR Mode:");
+      ImGui.pushItemWidth(200.0f);
+      ImGui.combo(labels.getHidden("VR Mode Combo"), selectedVRMode, vrModeNames);
+      // Set the current mode to the value that was selected in the combo box
+      mode = RDXVRMode.values()[selectedVRMode.get()];
 
       switch (mode)
       {
@@ -213,16 +214,16 @@ public class RDXVRModeManager
             }
          }
 
-         if (renderPanel)
-         {
-            leftHandPanel.getRenderables(renderables, pool);
-         }
+//         if (renderPanel)
+//         {
+//            leftHandPanel.getRenderables(renderables, pool);
+//         }
       }
    }
 
    public void destroy()
    {
-      leftHandPanel.dispose();
+//      leftHandPanel.dispose();
       if (kinematicsStreamingMode != null)
          kinematicsStreamingMode.destroy();
    }

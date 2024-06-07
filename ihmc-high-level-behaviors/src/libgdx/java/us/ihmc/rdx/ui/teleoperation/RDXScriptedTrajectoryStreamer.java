@@ -42,12 +42,18 @@ public class RDXScriptedTrajectoryStreamer
    private final SideDependentList<FramePose3DReadOnly> desiredHandPoses = new SideDependentList<>(side -> new FramePose3D());
    private final SideDependentList<OneDoFJointBasics[]> armJoints;
    private final Map<ScriptedTrajectoryType, SideDependentList<List<List<Double>>>> jointAngleWaypointsMap = new HashMap<>();
-   private final Map<ScriptedTrajectoryType, SideDependentList<ArmTrajectoryMessage>> preGeneratedArmTrajectories = new HashMap<>();
+   private final Map<ScriptedTrajectoryType, Double> trajectoryTimes = new HashMap<>();
+   private final double minimumAllowedDuration = 2.0;
 
    public RDXScriptedTrajectoryStreamer(SideDependentList<OneDoFJointBasics[]> armJoints, double trajectoryTime)
    {
       this.trajectoryTime = trajectoryTime;
       this.armJoints = armJoints;
+
+      for (ScriptedTrajectoryType trajectoryType : ScriptedTrajectoryType.values())
+      {
+         trajectoryTimes.put(trajectoryType, trajectoryTime);
+      }
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       for (RobotSide side : RobotSide.values)
@@ -69,22 +75,6 @@ public class RDXScriptedTrajectoryStreamer
             continue;
          }
          jointAngleWaypointsMap.put(trajectoryType, getArmJointWaypoints(trajectoryType));
-      }
-
-      for (ScriptedTrajectoryType trajectoryType : ScriptedTrajectoryType.values())
-      {
-         // TODO: find a better way to differentiate between taskspace and jointspace trajectories
-         if (trajectoryType == ScriptedTrajectoryType.HAND_CIRCLES || trajectoryType == ScriptedTrajectoryType.STRETCH_OUT_ARMS
-             || trajectoryType == ScriptedTrajectoryType.REACHABILITY_SWEEP)
-         {
-            continue;
-         }
-         SideDependentList<ArmTrajectoryMessage> armTrajectoryMessages = new SideDependentList<>();
-         for (RobotSide side : RobotSide.values)
-         {
-            armTrajectoryMessages.put(side, generateArmTrajectoryMessage(trajectoryType, trajectoryTime, side));
-         }
-         preGeneratedArmTrajectories.put(trajectoryType, armTrajectoryMessages);
       }
    }
 
@@ -358,8 +348,9 @@ public class RDXScriptedTrajectoryStreamer
       }
    }
 
-   private ArmTrajectoryMessage generateArmTrajectoryMessage(ScriptedTrajectoryType trajectoryType, double trajectoryTime, RobotSide robotSide)
+   public ArmTrajectoryMessage generateArmTrajectoryMessage(ScriptedTrajectoryType trajectoryType, RobotSide robotSide)
    {
+      double trajectoryDuration = trajectoryTimes.get(trajectoryType);
       OneDoFJointBasics[] sidedArmJoints = armJoints.get(robotSide);
       if (jointAngleWaypointsMap.get(trajectoryType) == null || jointAngleWaypointsMap.get(trajectoryType).get(robotSide) == null)
       {
@@ -380,7 +371,7 @@ public class RDXScriptedTrajectoryStreamer
 
             double[] desiredJointPositions = jointAngleWaypoints.get(0).stream().mapToDouble(Double::doubleValue).toArray();
 
-            armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryTime, desiredJointPositions);
+            armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryDuration, desiredJointPositions);
          }
       }
       else
@@ -399,9 +390,9 @@ public class RDXScriptedTrajectoryStreamer
                trajectoryPoint1DCalculator.appendTrajectoryPoint(desiredJointPosition);
             }
 
-            trajectoryPoint1DCalculator.compute(trajectoryTime);
+            trajectoryPoint1DCalculator.compute(trajectoryDuration);
             OneDoFTrajectoryPointList trajectoryData = trajectoryPoint1DCalculator.getTrajectoryData();
-            trajectoryData.addTimeOffset(trajectoryTime / (numberOfTrajectoryPoints - 1.0));
+            trajectoryData.addTimeOffset(trajectoryDuration / (numberOfTrajectoryPoints - 1.0));
 
             for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
             {
@@ -418,9 +409,19 @@ public class RDXScriptedTrajectoryStreamer
       return armTrajectoryMessage;
    }
 
-   public ArmTrajectoryMessage getPreGeneratedArmTrajectoryMessage(ScriptedTrajectoryType trajectoryType, RobotSide robotSide)
+   public double getTrajectoryDuration(ScriptedTrajectoryType trajectoryType)
    {
-      return preGeneratedArmTrajectories.get(trajectoryType).get(robotSide);
+      return trajectoryTimes.get(trajectoryType);
+   }
+
+   public void setTrajectoryDuration(ScriptedTrajectoryType trajectoryType, double duration)
+   {
+      duration = Math.max(duration, minimumAllowedDuration);
+      if (trajectoryTimes.containsKey(trajectoryType))
+      {
+         trajectoryTimes.replace(trajectoryType, duration);
+      }
+      trajectoryTimes.put(trajectoryType, duration);
    }
 
    /**
