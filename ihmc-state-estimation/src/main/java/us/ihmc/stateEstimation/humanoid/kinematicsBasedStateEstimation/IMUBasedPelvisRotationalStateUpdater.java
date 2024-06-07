@@ -1,7 +1,5 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import java.util.List;
-
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -9,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -23,10 +22,12 @@ import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.util.List;
+
 /**
  * PelvisRotationalStateUpdater reads and transforms the orientation and angular velocity obtained
  * from the IMU to update the pelvis orientation and angular velocity in world.
- * 
+ *
  * @author Sylvain
  */
 public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalStateUpdaterInterface
@@ -36,6 +37,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoFrameYawPitchRoll yoRootJointFrameOrientation;
    private final YoFrameQuaternion yoRootJointFrameQuaternion;
+   private final YoDouble rootJointUnclampedYaw = new YoDouble("rootJointEstimatedUnclampedYaw", registry);
 
    private final YoFrameVector3D yoRootJointAngularVelocityMeasFrame;
    private final YoFrameVector3D yoRootJointAngularVelocity;
@@ -115,7 +117,6 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
    @Override
    public void initialize()
    {
-
       if (zeroYawAtInitialization.getValue())
       {
          computeOrientationAtEstimateFrame(measurementFrame, imuProcessedOutput.getOrientationMeasurement(), rootJointFrame, rotationFromRootJointFrameToWorld);
@@ -168,7 +169,7 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
     * This method assumes that {@code estimateFrame} and {@code measurementFrame} are connected and
     * that the relative transform between the two frames is known.
     * </p>
-    * 
+    *
     * @param measurementFrame          reference frame in which the measurement was taken.
     * @param orientationMeasurement    the measurement of the {@code measurementFrame} orientation. Not
     *                                  modified.
@@ -240,7 +241,10 @@ public class IMUBasedPelvisRotationalStateUpdater implements PelvisRotationalSta
       yoRootJointAngularVelocityFromFD.update();
 
       yoRootJointFrameOrientation.checkReferenceFrameMatch(worldFrame);
+      double yawPrevious = yoRootJointFrameOrientation.getYaw();
       yoRootJointFrameOrientation.set(rotationFromRootJointFrameToWorld);
+      double yawCurrent = yoRootJointFrameOrientation.getYaw();
+      rootJointUnclampedYaw.add(EuclidCoreTools.angleDifferenceMinusPiToPi(yawCurrent, yawPrevious));
    }
 
    @Override
