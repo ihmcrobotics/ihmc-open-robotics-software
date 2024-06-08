@@ -25,6 +25,16 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
       set(DefaultFootstepPlannerParameters.enableExpansionMask, enableExpansionMask);
    }
 
+   default void setUseReachabilityMap(boolean useReachabilityMap)
+   {
+      set(DefaultFootstepPlannerParameters.useReachabilityMap, useReachabilityMap);
+   }
+
+   default void setSolutionQualityThreshold(double solutionQualityThreshold)
+   {
+      set(DefaultFootstepPlannerParameters.solutionQualityThreshold, solutionQualityThreshold);
+   }
+
    default void setIdealFootstepWidth(double idealFootstepWidth)
    {
       set(DefaultFootstepPlannerParameters.idealFootstepWidth, idealFootstepWidth);
@@ -48,16 +58,6 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
    default void setIdealStepLengthAtMaxStepZ(double idealStepLengthAtMaxStepZ)
    {
       set(DefaultFootstepPlannerParameters.idealStepLengthAtMaxStepZ, idealStepLengthAtMaxStepZ);
-   }
-
-   default void setUseReachabilityMap(boolean useReachabilityMap)
-   {
-      set(DefaultFootstepPlannerParameters.useReachabilityMap, useReachabilityMap);
-   }
-
-   default void setSolutionQualityThreshold(double solutionQualityThreshold)
-   {
-      set(DefaultFootstepPlannerParameters.solutionQualityThreshold, solutionQualityThreshold);
    }
 
    default void setMinStepWidth(double minimumStepWidth)
@@ -93,26 +93,6 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
    default void setMinClearanceFromStance(double clearance)
    {
       set(DefaultFootstepPlannerParameters.minClearanceFromStance, clearance);
-   }
-
-   default void setRMSErrorThreshold(double rmsErrorThreshold)
-   {
-      set(DefaultFootstepPlannerParameters.rmsErrorThreshold, rmsErrorThreshold);
-   }
-
-   default void setRMSErrorCost(double rmsErrorCost)
-   {
-      set(DefaultFootstepPlannerParameters.rmsErrorCost, rmsErrorCost);
-   }
-
-   default void setRMSMinErrorToPenalize(double rmsMinErrorToPenalize)
-   {
-      set(DefaultFootstepPlannerParameters.rmsMinErrorToPenalize, rmsMinErrorToPenalize);
-   }
-
-   default void setHeightMapSnapThreshold(double heightMapSnapThreshold)
-   {
-      set(DefaultFootstepPlannerParameters.heightMapSnapThreshold, heightMapSnapThreshold);
    }
 
    default void setMaxStepWidth(double width)
@@ -228,6 +208,26 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
    default void setFootholdAreaWeight(double footholdAreaWeight)
    {
       set(DefaultFootstepPlannerParameters.footholdAreaWeight, footholdAreaWeight);
+   }
+
+   default void setRMSErrorThreshold(double rmsErrorThreshold)
+   {
+      set(DefaultFootstepPlannerParameters.rmsErrorThreshold, rmsErrorThreshold);
+   }
+
+   default void setRMSErrorCost(double rmsErrorCost)
+   {
+      set(DefaultFootstepPlannerParameters.rmsErrorCost, rmsErrorCost);
+   }
+
+   default void setRMSMinErrorToPenalize(double rmsMinErrorToPenalize)
+   {
+      set(DefaultFootstepPlannerParameters.rmsMinErrorToPenalize, rmsMinErrorToPenalize);
+   }
+
+   default void setHeightMapSnapThreshold(double heightMapSnapThreshold)
+   {
+      set(DefaultFootstepPlannerParameters.heightMapSnapThreshold, heightMapSnapThreshold);
    }
 
    default void setReferencePlanAlpha(double referencePlanAlpha)

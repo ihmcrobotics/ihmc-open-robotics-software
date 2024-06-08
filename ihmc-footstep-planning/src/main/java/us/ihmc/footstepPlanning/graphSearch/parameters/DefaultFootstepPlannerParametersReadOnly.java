@@ -33,11 +33,27 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    }
 
    /**
-    * If true, enables a mask that reduces the number of calculated steps away from the ideal step. See {@link ParameterBasedStepExpansion} for more information.
+    * If true, enables a mask that reduces the number of calculated steps away from the ideal step. See {@link us.ihmc.footstepPlanning.graphSearch.stepExpansion.ParameterBasedStepExpansion} for more information.
     */
    default boolean getEnableExpansionMask()
    {
       return get(enableExpansionMask);
+   }
+
+   /**
+    * If true, uses IK-based step feasibility check instead of heuristic one
+    */
+   default boolean getUseReachabilityMap()
+   {
+      return get(useReachabilityMap);
+   }
+
+   /**
+    * Solution quality threshold when using IK-based feasibility check, only used when {@link #getUseReachabilityMap()} is true.
+    */
+   default double getSolutionQualityThreshold()
+   {
+      return get(solutionQualityThreshold);
    }
 
    ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -90,22 +106,6 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    ///////////////////////////////////////////////////////////////////////////////////////////////////
 
    /**
-    * If true, uses IK-based step feasibility check instead of heuristic one
-    */
-   default boolean getUseReachabilityMap()
-   {
-      return get(useReachabilityMap);
-   }
-
-   /**
-    * Solution quality threshold when using IK-based feasibility check, only used when {@link #getUseStepReachabilityMap} is true.
-    */
-   default double getSolutionQualityThreshold()
-   {
-      return get(solutionQualityThreshold);
-   }
-
-   /**
     * Minimum step width the planner will consider for candidate steps.
     * If this value is too low, for example below the foot's width, the planner could place consecutive footsteps
     * on top of each other. If too high, footsteps might not be kinematically feasible.
@@ -143,7 +143,7 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    }
 
    /**
-    * Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
+    * Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinSurfaceIncline()} .
     * The maximum depth is determined by linearly interpolating between a step's maximum z value and this value, based on the fraction the foot is pitched by.
     * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
     */
@@ -169,39 +169,6 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    default double getMinClearanceFromStance()
    {
       return get(minClearanceFromStance);
-   }
-
-   /**
-    * When using a height map, this returns the maximum accepted RMS error of the best-fit plane.
-    */
-   default double getRMSErrorThreshold()
-   {
-      return get(rmsErrorThreshold);
-   }
-
-   /**
-    * When using a height map, assigns a cost based on the RMS value, which maps (rmsMinErrorToPenalize, rmsErrorThreshold) to (0.0, rmsErrorCost)
-    */
-   default double getRMSErrorCost()
-   {
-      return get(rmsErrorCost);
-   }
-
-   /**
-    * See {@link #getRMSErrorCost()}
-    */
-   default double getRMSMinErrorToPenalize()
-   {
-      return get(rmsMinErrorToPenalize);
-   }
-
-   /**
-    * When using a height map, snapping is done by taking all the points inside the polygon, then removing points below
-    * z_max - dz, where z_max is the highest point and dz is this value.
-    */
-   default double getHeightMapSnapThreshold()
-   {
-      return get(heightMapSnapThreshold);
    }
 
    /**
@@ -233,7 +200,7 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    }
 
    /**
-    * Maximum forward distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
+    * Maximum forward distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinSurfaceIncline()} .
     * The maximum distance is determined by linearly interpolating between a step's maximum z value and this value, based on the fraction the foot is pitched by.
     * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
     */
@@ -248,11 +215,11 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
     * <p>
     * Large steps forward and down are rejected by the planner if one of two criteria are met:
     * <ul>
-    * <li> The x-position of the value of the footstep exceeds {@link #getMaximumStepXWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
+    * <li> The x-position of the value of the footstep exceeds {@link #getMaxStepXWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
     * <li> - OR - </li>
-    * <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepYWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
+    * <li> The y-position of the value of the footstep exceeds {@link #getMaxStepYWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
     * <li> - AND - </li>
-    * <li> The z-position of the value of the footstep is less than -{@link #getMaximumStepZWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
+    * <li> The z-position of the value of the footstep is less than -{@link #getMaxStepZWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
     * </ul>
     * </p>
     *
@@ -271,11 +238,11 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
     * <p>
     * Large steps forward and down are rejected by the planner if one of two criteria are met:
     * <ul>
-    * <li> The x-position of the value of the footstep exceeds {@link #getMaximumStepXWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
+    * <li> The x-position of the value of the footstep exceeds {@link #getMaxStepXWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
     * <li> - OR - </li>
-    * <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepYWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
+    * <li> The y-position of the value of the footstep exceeds {@link #getMaxStepYWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
     * <li> - AND - </li>
-    * <li> The z-position of the value of the footstep is less than -{@link #getMaximumStepZWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
+    * <li> The z-position of the value of the footstep is less than -{@link #getMaxStepZWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
     * </ul>
     * </p>
     *
@@ -294,11 +261,11 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
     * <p>
     * Large steps forward and down are rejected by the planner if one of two criteria are met:
     * <ul>
-    * <li> The x-position of the value of the footstep exceeds {@link #getMaximumStepXWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
+    * <li> The x-position of the value of the footstep exceeds {@link #getMaxStepXWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
     * <li> - OR - </li>
-    * <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepYWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
+    * <li> The y-position of the value of the footstep exceeds {@link #getMaxStepYWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
     * <li> - AND - </li>
-    * <li> The z-position of the value of the footstep is less than -{@link #getMaximumStepZWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
+    * <li> The z-position of the value of the footstep is less than -{@link #getMaxStepZWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
     * </ul>
     * </p>
     *
@@ -317,16 +284,16 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
     * <p>
     * Long steps forward are rejected by the planner if one of two criteria are met:
     * <ul>
-    *    <li> The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> The total length of the footstep exceeds {@link #getMaxStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
     *    <li> - OR - </li>
-    *    <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()} ()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> The y-position of the value of the footstep exceeds {@link #getMaxStepWidthWhenSteppingUp()} ()}, when expressed in its parent's z-up sole frame </li>
     *    <li> - AND - </li>
-    *    <li> The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
+    *    <li> The z-position of the value of the footstep is greater than {@link #getMaxStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
     * </ul>
     * </p>
     *
     * Large steps forward and up can cause the robot to surpass its torque limits.
-    * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+    * These parameters should be tuned so that when the robot takes a step of length {@link #getMaxStepReachWhenSteppingUp()} and {@link #getMaxStepZWhenSteppingUp()},
     * it's very close to saturating its torque limits.
     */
    default double getMaxStepReachWhenSteppingUp()
@@ -340,16 +307,16 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
     * <p>
     * Long steps forward are rejected by the planner if one of two criteria are met:
     * <ul>
-    *    <li> The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> The total length of the footstep exceeds {@link #getMaxStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
     *    <li> - OR - </li>
-    *    <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> The y-position of the value of the footstep exceeds {@link #getMaxStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
     *    <li> - AND - </li>
-    *    <li> The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
+    *    <li> The z-position of the value of the footstep is greater than {@link #getMaxStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
     * </ul>
     * </p>
     *
     * Large steps forward and up can cause the robot to surpass its torque limits.
-    * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+    * These parameters should be tuned so that when the robot takes a step of length {@link #getMaxStepReachWhenSteppingUp()} and {@link #getMaxStepZWhenSteppingUp()},
     * it's very close to saturating its torque limits.
     */
    default double getMaxStepWidthWhenSteppingUp()
@@ -363,16 +330,16 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
     * <p>
     * Long steps forward are rejected by the planner if one of two criteria are met:
     * <ul>
-    *    <li> The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> The total length of the footstep exceeds {@link #getMaxStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
     *    <li> - OR - </li>
-    *    <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> The y-position of the value of the footstep exceeds {@link #getMaxStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
     *    <li> - AND - </li>
-    *    <li> The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
+    *    <li> The z-position of the value of the footstep is greater than {@link #getMaxStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
     * </ul>
     * </p>
     *
     * Large steps forward and up can cause the robot to surpass its torque limits.
-    * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+    * These parameters should be tuned so that when the robot takes a step of length {@link #getMaxStepReachWhenSteppingUp()} and {@link #getMaxStepZWhenSteppingUp()},
     * it's very close to saturating its torque limits.
     */
    default double getMaxStepZWhenSteppingUp()
@@ -498,6 +465,39 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    default double getFootholdAreaWeight()
    {
       return get(footholdAreaWeight);
+   }
+
+   /**
+    * When using a height map, this returns the maximum accepted RMS error of the best-fit plane.
+    */
+   default double getRMSErrorThreshold()
+   {
+      return get(rmsErrorThreshold);
+   }
+
+   /**
+    * When using a height map, assigns a cost based on the RMS value, which maps (rmsMinErrorToPenalize, rmsErrorThreshold) to (0.0, rmsErrorCost)
+    */
+   default double getRMSErrorCost()
+   {
+      return get(rmsErrorCost);
+   }
+
+   /**
+    * See {@link #getRMSErrorCost()}
+    */
+   default double getRMSMinErrorToPenalize()
+   {
+      return get(rmsMinErrorToPenalize);
+   }
+
+   /**
+    * When using a height map, snapping is done by taking all the points inside the polygon, then removing points below
+    * z_max - dz, where z_max is the highest point and dz is this value.
+    */
+   default double getHeightMapSnapThreshold()
+   {
+      return get(heightMapSnapThreshold);
    }
 
    default double getReferencePlanAlpha()
@@ -661,7 +661,7 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    }
 
    /**
-    * When {@link #checkForBodyBoxCollisions()} is true, this sets how many bounding box checks to perform.
+    * When {@link #getCheckForBodyBoxCollisions()} is true, this sets how many bounding box checks to perform.
     * If this value is 1, only the final footstep is checked. Additional checks are done by interpolating
     * between the start and end steps.
     */
@@ -721,7 +721,7 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
 
    /**
     * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
-    * between consecutive steps and invalidates steps with collisions, see: {@link ObstacleBetweenStepsChecker}
+    * between consecutive steps and invalidates steps with collisions, see: {@link us.ihmc.footstepPlanning.graphSearch.stepChecking.ObstacleBetweenStepsChecker}
     */
    default boolean getCheckForPathCollisions()
    {
@@ -747,7 +747,7 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
 
    /**
     * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
-    * nearby that is {@link #getCliffBaseHeightToAvoid} higher than the candidate footstep, it will move away from it
+    * nearby that is {@link #getCliffBottomHeightToAvoid} higher than the candidate footstep, it will move away from it
     * until it is minimumDistanceFromCliffBottoms away from it.
     *
     * <p>
