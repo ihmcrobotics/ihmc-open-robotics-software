@@ -10,6 +10,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -338,7 +339,7 @@ public class ContinuousPlanner
             }
 
             Vector3DBasics robotLocation = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation();
-            double distanceToGoalPose = ContinuousPlanningTools.getDistanceFromRobotToGoalPoseOnXYPlane(robotLocation, goalStancePose);
+            double distanceToGoalPose = ContinuousPlanningTools.getDistanceFromRobotToGoalPoseOnXYPlane((Point3DReadOnly) robotLocation, goalStancePose);
 
             if (distanceToGoalPose < continuousHikingParameters.getNextWaypointDistanceMargin())
             {

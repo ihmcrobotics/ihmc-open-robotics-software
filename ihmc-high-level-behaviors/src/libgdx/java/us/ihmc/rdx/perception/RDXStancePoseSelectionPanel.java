@@ -16,6 +16,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
@@ -48,9 +49,9 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
    private final ArrayList<ModelInstance> leftSpheres = new ArrayList<>();
    private final ArrayList<ModelInstance> rightSpheres = new ArrayList<>();
 
-   public SideDependentList<FramePose3D> stancePoses = new SideDependentList<>();
+   private final SideDependentList<FramePose3D> stancePoses = new SideDependentList<>();
    private final FramePose3D latestPickPoint = new FramePose3D(ReferenceFrame.getWorldFrame());
-   public final SideDependentList<RDXFootstepGraphic> footstepGraphics;
+   private final SideDependentList<RDXFootstepGraphic> footstepGraphics;
 
    private final StancePoseCalculator stancePoseCalculator;
    private final FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
@@ -102,7 +103,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
          if (selectionActive)
          {
             latestPickPoint.getTranslation().setZ(height);
-            stancePoses.set(stancePoseCalculator.getStancePoses(latestPickPoint, terrainMapData, environmentHandler));
+            stancePoses.set(stancePoseCalculator.getStancePoses((FramePose3DReadOnly) pickPointSphere, terrainMapData, environmentHandler));
             for (RobotSide robotSide : RobotSide.values)
             {
                footstepGraphics.get(robotSide).setPose(stancePoses.get(robotSide));

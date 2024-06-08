@@ -3,6 +3,7 @@ package us.ihmc.behaviors.activeMapping;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
@@ -34,12 +35,14 @@ public class StancePoseCalculator
       this.heightMapPolygonSnapper = new HeightMapPolygonSnapper();
    }
 
-   public SideDependentList<FramePose3D> getStancePoses(FramePose3D pickPoint, TerrainMapData terrainMap, FootstepPlannerEnvironmentHandler environmentHandler)
+   public SideDependentList<FramePose3D> getStancePoses(FramePose3DReadOnly midStancePose,
+                                                        TerrainMapData terrainMap,
+                                                        FootstepPlannerEnvironmentHandler environmentHandler)
    {
       reset();
-      insertCandidatePoses(leftPoses, pickPoint, RobotSide.LEFT);
-      insertCandidatePoses(rightPoses, pickPoint, RobotSide.RIGHT);
-      searchForOptimalGoalStance(leftPoses, rightPoses, pickPoint, terrainMap);
+      populationCandidatePoses(leftPoses, midStancePose, RobotSide.LEFT);
+      populationCandidatePoses(rightPoses, midStancePose, RobotSide.RIGHT);
+      searchForOptimalGoalStance(leftPoses, rightPoses, midStancePose, terrainMap);
       snapPosesToEnvironment(environmentHandler);
       return new SideDependentList<>(bestFramePoses.get(RobotSide.LEFT), bestFramePoses.get(RobotSide.RIGHT));
    }
@@ -52,9 +55,9 @@ public class StancePoseCalculator
       bestFramePoses.get(RobotSide.RIGHT).setToZero();
    }
 
-   public void insertCandidatePoses(ArrayList<FramePose3D> poses, FramePose3D goalPose, RobotSide side)
+   public void populationCandidatePoses(ArrayList<FramePose3D> posesToPack, FramePose3DReadOnly goalPose, RobotSide side)
    {
-      poses.clear();
+      posesToPack.clear();
       double multiplier = side == RobotSide.LEFT ? -1 : 1;
 
       // Sample poses around the provided goal pose and check if they are valid in the height map
@@ -69,29 +72,35 @@ public class StancePoseCalculator
             FramePose3D pose = new FramePose3D(goalPose);
             pose.appendTranslation(x, y, 0);
 
-            poses.add(pose);
+            posesToPack.add(pose);
          }
       }
    }
 
-   public void searchForOptimalGoalStance(ArrayList<FramePose3D> leftPoses, ArrayList<FramePose3D> rightPoses, FramePose3D pickPoint, TerrainMapData terrainMap)
+   public void searchForOptimalGoalStance(ArrayList<FramePose3D> leftFootPoses,
+                                          ArrayList<FramePose3D> rightFootPoses,
+                                          FramePose3DReadOnly midStancePose,
+                                          TerrainMapData terrainMap)
    {
       double minCost = Double.POSITIVE_INFINITY;
       double cost;
 
-      for (FramePose3D leftPose : leftPoses)
+      for (FramePose3D leftPose : leftFootPoses)
       {
-         for (FramePose3D rightPose : rightPoses)
+         for (FramePose3D rightPose : rightFootPoses)
          {
             double heightLeft = terrainMap.getHeightInWorld(leftPose.getPosition().getX32(), leftPose.getPosition().getY32());
             double heightRight = terrainMap.getHeightInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32());
 
-            double contactCostLeft = Math.abs(stancePoseParameters.getMaxContactValue() - terrainMap.getContactScoreInWorld(leftPose.getPosition().getX32(), leftPose.getPosition().getY32()));
-            double contactCostRight = Math.abs(stancePoseParameters.getMaxContactValue() - terrainMap.getContactScoreInWorld(rightPose.getPosition().getX32(), rightPose.getPosition().getY32()));
+            double contactCostLeft = Math.abs(stancePoseParameters.getMaxContactValue() - terrainMap.getContactScoreInWorld(leftPose.getPosition().getX32(),
+                                                                                                                            leftPose.getPosition().getY32()));
+            double contactCostRight = Math.abs(stancePoseParameters.getMaxContactValue() - terrainMap.getContactScoreInWorld(rightPose.getPosition().getX32(),
+                                                                                                                             rightPose.getPosition().getY32()));
 
-            cost = Math.abs(stancePoseParameters.getNominalStanceDistance() - leftPose.getPositionDistance(rightPose));
-            cost += Math.abs((stancePoseParameters.getNominalStanceDistance() / 2) - leftPose.getPositionDistance(pickPoint));
-            cost += Math.abs((stancePoseParameters.getNominalStanceDistance() / 2) - rightPose.getPositionDistance(pickPoint));
+            cost = Math.abs(stancePoseParameters.getNominalStanceDistance() - leftPose.getPosition().distanceXY(rightPose.getPosition()));
+            cost += Math.abs((stancePoseParameters.getNominalStanceDistance() / 2) - leftPose.getPosition().distanceXY(midStancePose.getPosition()));
+            cost += Math.abs((stancePoseParameters.getNominalStanceDistance() / 2) - rightPose.getPosition().distanceXY(midStancePose.getPosition()));
+            cost += Math.abs(leftPose.getPosition().getZ() - rightPose.getPosition().getZ());
             cost += stancePoseParameters.getContactCostWeight() * (contactCostLeft + contactCostRight);
 
             leftPose.setZ(heightLeft);
@@ -99,8 +108,7 @@ public class StancePoseCalculator
 
             // In order to not jump back and forth between two good poses, only accept a pose if its at least epsilon better for the cost
             double epsilon = 0.02;
-            double difference = Math.abs(cost - minCost);
-            if (cost < minCost && difference > epsilon)
+            if (cost < minCost - epsilon)
             {
                minCost = cost;
                bestFramePoses.get(RobotSide.LEFT).set(leftPose);

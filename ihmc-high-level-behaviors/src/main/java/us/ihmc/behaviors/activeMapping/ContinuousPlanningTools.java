@@ -8,7 +8,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
@@ -21,20 +21,16 @@ import java.util.Random;
 
 public class ContinuousPlanningTools
 {
-   public static double getDistanceFromRobotToGoalPoseOnXYPlane(Vector3DBasics robotPositionInWorld, SideDependentList<FramePose3D> goalPoses)
+   public static double getDistanceFromRobotToGoalPoseOnXYPlane(Point3DReadOnly robotPositionInWorld, SideDependentList<FramePose3D> goalPoses)
    {
       FramePose3D leftGoalPose = goalPoses.get(RobotSide.LEFT);
       FramePose3D rightGoalPose = goalPoses.get(RobotSide.RIGHT);
 
       // Get point halfway between the left and right goal poses
-      leftGoalPose.interpolate(rightGoalPose, 0.5);
-      FramePose3D middleDistanceBetweenGoalPoses = leftGoalPose;
-      middleDistanceBetweenGoalPoses.getPosition().setZ(0.0);  // We want to check distance in XY Plane so zero the Z
+      Point3D middleDistanceBetweenGoalPoses = new Point3D();
+      middleDistanceBetweenGoalPoses.interpolate(leftGoalPose.getPosition(), rightGoalPose.getPosition(), 0.5);
 
-      FixedFramePoint3DBasics robotPoint = new FramePoint3D();
-      robotPoint.set(robotPositionInWorld.getX(), robotPositionInWorld.getY(), 0.0);
-
-      return middleDistanceBetweenGoalPoses.getPosition().distance(robotPoint);
+      return middleDistanceBetweenGoalPoses.distanceXY(robotPositionInWorld);
    }
 
    public static void setRandomizedStraightGoalPoses(FramePose3D walkingStartPose,
