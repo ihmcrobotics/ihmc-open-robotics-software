@@ -34,10 +34,6 @@ public class ParameterBasedNodeExpansionTest
 
       double maxYaw = parameters.getMaxStepYaw();
       double minYaw = parameters.getMinStepYaw();
-      double yawReduction = parameters.getStepYawReductionFactorAtMaxReach();
-
-      double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
-      double minYawAtFullLength = (1.0 - yawReduction) * minYaw;
 
       List<FootstepGraphNode> childNodes = new ArrayList<>();
 
@@ -58,14 +54,6 @@ public class ParameterBasedNodeExpansionTest
       assertTrue(mostInward.getY() < -parameters.getMinStepWidth() + epsilon);
       assertTrue(mostOutward.getY() > -parameters.getMaxStepWidth() - epsilon);
 
-      double mostOutwardYawedReach = getReachAtNode(mostOutwardYawed, parameters.getIdealFootstepWidth());
-      double mostInwardYawedReach = getReachAtNode(mostOutwardYawed, parameters.getIdealFootstepWidth());
-      double mostOutwardYawMax = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, mostOutwardYawedReach / parameters.getMaxStepReach());
-      double mostInwardYawMin = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, mostInwardYawedReach / parameters.getMaxStepReach());
-      double minOutwardYaw = snapToYawGrid(-mostOutwardYawMax - epsilon);
-      double maxInwardYaw = snapToYawGrid(-mostInwardYawMin + epsilon);
-      assertTrue(mostOutwardYawed.getYaw() > minOutwardYaw - epsilon);
-      assertTrue(mostInwardYawed.getYaw() < maxInwardYaw + epsilon);
       assertTrue(getReachAtNode(furthestReach, parameters.getIdealFootstepWidth()) < parameters.getMaxStepReach());
    }
 
@@ -78,10 +66,6 @@ public class ParameterBasedNodeExpansionTest
 
       double maxYaw = parameters.getMaxStepYaw();
       double minYaw = parameters.getMinStepYaw();
-      double yawReduction = parameters.getStepYawReductionFactorAtMaxReach();
-
-      double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
-      double minYawAtFullLength = (1.0 - yawReduction) * minYaw;
 
       DiscreteFootstep stanceStep = new DiscreteFootstep(0.0, 0.0, 0.0, RobotSide.RIGHT);
       DiscreteFootstep startOfSwingStep = new DiscreteFootstep(0.0, -0.3, 0.0, RobotSide.LEFT);
@@ -103,12 +87,6 @@ public class ParameterBasedNodeExpansionTest
 
       double mostOutwardYawedReach = getReachAtNode(mostOutwardYawed, parameters.getIdealFootstepWidth());
       double mostInwardYawedReach = getReachAtNode(mostInwardYawed, parameters.getIdealFootstepWidth());
-      double mostOutwardYawMax = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, mostOutwardYawedReach / parameters.getMaxStepReach());
-      double mostInwardYawMin = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, mostInwardYawedReach / parameters.getMaxStepReach());
-      double maxOutwardYaw = snapToYawGrid(mostOutwardYawMax + epsilon);
-      double maxInwardYaw = snapToYawGrid(mostInwardYawMin + epsilon);
-      assertTrue(mostOutwardYawed.getYaw() < maxOutwardYaw + epsilon);
-      assertTrue(mostInwardYawed.getYaw() > maxInwardYaw - epsilon);
       assertTrue(getReachAtNode(furthestReach, parameters.getIdealFootstepWidth()) < parameters.getMaxStepReach());
    }
 
@@ -124,7 +102,6 @@ public class ParameterBasedNodeExpansionTest
       double yawReduction = 0.5;
       parameters.setMaxStepYaw(maxYaw);
       parameters.setMinStepYaw(minYaw);
-      parameters.setStepYawReductionFactorAtMaxReach(yawReduction);
 
       double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
       double minYawAtFullLength = (1.0 - yawReduction) * minYaw;

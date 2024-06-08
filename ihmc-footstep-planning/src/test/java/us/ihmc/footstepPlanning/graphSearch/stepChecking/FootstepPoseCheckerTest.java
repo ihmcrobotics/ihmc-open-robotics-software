@@ -41,8 +41,6 @@ public class FootstepPoseCheckerTest
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       FootstepPoseHeuristicChecker checker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
-      parameters.setMaxStepXWhenFullyPitched(0.3);
-      parameters.setMinStepZWhenFullyPitched(0.05);
 
       PlanarRegionsListGenerator planarRegionGenerator = new PlanarRegionsListGenerator();
       planarRegionGenerator.rotate(new Quaternion(0.0, Math.toRadians(-30.0), 0.0));
@@ -90,7 +88,6 @@ public class FootstepPoseCheckerTest
       double yawReduction = 0.5;
       parameters.setMaxStepYaw(maxYaw);
       parameters.setMinStepYaw(minYaw);
-      parameters.setStepYawReductionFactorAtMaxReach(yawReduction);
 
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
@@ -126,7 +123,6 @@ public class FootstepPoseCheckerTest
       double yawReduction = 0.5;
       parameters.setMaxStepYaw(maxYaw);
       parameters.setMinStepYaw(minYaw);
-      parameters.setStepYawReductionFactorAtMaxReach(yawReduction);
 
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
@@ -162,7 +158,6 @@ public class FootstepPoseCheckerTest
       double yawReduction = 0.5;
       parameters.setMaxStepYaw(maxYaw);
       parameters.setMinStepYaw(minYaw);
-      parameters.setStepYawReductionFactorAtMaxReach(yawReduction);
 
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
@@ -214,7 +209,6 @@ public class FootstepPoseCheckerTest
       double yawReduction = 0.5;
       parameters.setMaxStepYaw(maxYaw);
       parameters.setMinStepYaw(minYaw);
-      parameters.setStepYawReductionFactorAtMaxReach(yawReduction);
 
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
@@ -266,7 +260,6 @@ public class FootstepPoseCheckerTest
       double yawReduction = 0.5;
       parameters.setMaxStepYaw(maxYaw);
       parameters.setMinStepYaw(minYaw);
-      parameters.setStepYawReductionFactorAtMaxReach(yawReduction);
 
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;

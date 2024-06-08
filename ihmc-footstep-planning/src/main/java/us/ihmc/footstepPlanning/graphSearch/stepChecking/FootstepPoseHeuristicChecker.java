@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
-import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -62,8 +61,6 @@ public class FootstepPoseHeuristicChecker
    private final YoBoolean stepIsPitchedBack = new YoBoolean("stepIsPitchedBack", registry);
    private final YoBoolean stepTooLow = new YoBoolean("stepTooLow", registry);
    private final YoBoolean stepTooForward = new YoBoolean("stepTooForward", registry);
-   private final YoDouble minZFromPitchContraint = new YoDouble("minZFromPitchContraint", registry);
-   private final YoDouble maxXFromPitchContraint = new YoDouble("maxXFromPitchContraint", registry);
 
    public FootstepPoseHeuristicChecker(DefaultFootstepPlannerParametersReadOnly parameters, YoRegistry parentRegistry)
    {
@@ -147,34 +144,14 @@ public class FootstepPoseHeuristicChecker
       }
 
       double alphaPitchedBack = Math.max(0.0, - stanceFootPose.getPitch() / parameters.getMinSurfaceIncline());
-      minZFromPitchContraint.set(InterpolationTools.linearInterpolate(Math.abs(maximumStepZ), Math.abs(parameters.getMinStepZWhenFullyPitched()), alphaPitchedBack));
-      maxXFromPitchContraint.set(InterpolationTools.linearInterpolate(Math.abs(parameters.getMaxStepReach()), parameters.getMaxStepXWhenFullyPitched(), alphaPitchedBack));
-      double stepDownFraction = - stepHeight.getValue() / minZFromPitchContraint.getValue();
-      double stepForwardFraction = stepLength.getValue() / maxXFromPitchContraint.getValue();
 
       stepIsPitchedBack.set(alphaPitchedBack > 0.0);
-      stepTooLow.set(stepLength.getValue() > 0.0 && stepDownFraction > 1.0);
-      stepTooForward.set(stepHeight.getValue() < 0.0 && stepForwardFraction > 1.0);
+      stepTooLow.set(stepLength.getValue() > 0.0 && stepHeight.getValue() > 1.0);
+      stepTooForward.set(stepHeight.getValue() < 0.0 && stepLength.getValue() > 1.0);
 
       if (stepIsPitchedBack.getBooleanValue() && (stepTooLow.getBooleanValue() || stepTooForward.getBooleanValue()))
       {
          return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED;
-      }
-
-      double maxReach = parameters.getMaxStepReach();
-      if (stepHeight.getValue() < -Math.abs(parameters.getMaxStepZWhenForwardAndDown()))
-      {
-         if (stepLength.getValue() > parameters.getMaxStepXWhenForwardAndDown())
-         {
-            return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN;
-         }
-
-         if (stepWidth.getValue() > parameters.getMaxStepYWhenForwardAndDown())
-         {
-            return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_DOWN;
-         }
-
-         maxReach = EuclidCoreTools.norm(parameters.getMaxStepXWhenForwardAndDown(), parameters.getMaxStepYWhenForwardAndDown() - parameters.getIdealFootstepWidth());
       }
 
       if (stepReachXY.getValue() > parameters.getMaxStepReach())
@@ -182,28 +159,8 @@ public class FootstepPoseHeuristicChecker
          return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR;
       }
 
-      if (stepHeight.getValue() > parameters.getMaxStepZWhenSteppingUp())
-      {
-         if (stepReachXY.getValue() > parameters.getMaxStepReachWhenSteppingUp())
-         {
-            return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH;
-         }
-         if (stepWidth.getValue() > parameters.getMaxStepWidthWhenSteppingUp())
-         {
-            return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_HIGH;
-         }
-
-         maxReach = parameters.getMaxStepReachWhenSteppingUp();
-      }
-
-      double stepReach3D = EuclidCoreTools.norm(stepReachXY.getValue(), stepHeight.getValue());
-      double maxInterpolationFactor = Math.max(stepReach3D / maxReach, Math.abs(stepHeight.getValue() / maximumStepZ));
-      maxInterpolationFactor = Math.min(maxInterpolationFactor, 1.0);
-
-      double maxYaw = InterpolationTools.linearInterpolate(parameters.getMaxStepYaw(), (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMaxStepYaw(),
-                                                           maxInterpolationFactor);
-      double minYaw = InterpolationTools.linearInterpolate(parameters.getMinStepYaw(), (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMinStepYaw(),
-                                                           maxInterpolationFactor);
+      double maxYaw = parameters.getMaxStepYaw();
+      double minYaw = parameters.getMinStepYaw();
       double yawDelta = AngleTools.computeAngleDifferenceMinusPiToPi(candidateStepTransform.getRotation().getYaw(), stanceFootPose.getRotation().getYaw());
       if (!MathTools.intervalContains(stepSide.negateIfRightSide(yawDelta), minYaw, maxYaw))
       {
@@ -268,8 +225,6 @@ public class FootstepPoseHeuristicChecker
       stepIsPitchedBack.set(false);
       stepTooLow.set(false);
       stepTooForward.set(false);
-      minZFromPitchContraint.setToNaN();
-      maxXFromPitchContraint.setToNaN();
    }
 
    public static void main(String[] args)

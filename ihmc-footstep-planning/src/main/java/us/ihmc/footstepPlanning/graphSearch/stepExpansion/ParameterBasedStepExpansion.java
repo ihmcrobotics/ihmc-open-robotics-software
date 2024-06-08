@@ -77,8 +77,8 @@ public class ParameterBasedStepExpansion implements FootstepExpansion
                continue;
 
             double reachFraction = EuclidCoreTools.fastSquareRoot(reachSquared) / parameters.getMaxStepReach();
-            double minYawAtFullExtension = (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMinStepYaw();
-            double maxYawAtFullExtension = (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMaxStepYaw();
+            double minYawAtFullExtension = parameters.getMinStepYaw();
+            double maxYawAtFullExtension = parameters.getMaxStepYaw();
 
             double minYaw = InterpolationTools.linearInterpolate(parameters.getMinStepYaw(), minYawAtFullExtension, reachFraction);
             double maxYaw = InterpolationTools.linearInterpolate(parameters.getMaxStepYaw(), maxYawAtFullExtension, reachFraction);

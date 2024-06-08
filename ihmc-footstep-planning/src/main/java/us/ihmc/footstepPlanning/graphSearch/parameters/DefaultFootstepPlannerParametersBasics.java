@@ -55,9 +55,19 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
       set(DefaultFootstepPlannerParameters.idealBackStepLength, idealBackStepLength);
    }
 
-   default void setIdealStepLengthAtMaxStepZ(double idealStepLengthAtMaxStepZ)
+   default void setMinFootholdPercent(double footholdPercent)
    {
-      set(DefaultFootstepPlannerParameters.idealStepLengthAtMaxStepZ, idealStepLengthAtMaxStepZ);
+      set(DefaultFootstepPlannerParameters.minFootholdPercent, footholdPercent);
+   }
+
+   default void setMinClearanceFromStance(double clearance)
+   {
+      set(DefaultFootstepPlannerParameters.minClearanceFromStance, clearance);
+   }
+
+   default void setMinSurfaceInclineRadians(double surfaceInclineRadians)
+   {
+      set(DefaultFootstepPlannerParameters.minSurfaceIncline, surfaceInclineRadians);
    }
 
    default void setMinStepWidth(double minimumStepWidth)
@@ -70,29 +80,9 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
       set(DefaultFootstepPlannerParameters.minStepLength, minimumStepLength);
    }
 
-   default void setMinSurfaceInclineRadians(double surfaceInclineRadians)
-   {
-      set(DefaultFootstepPlannerParameters.minSurfaceIncline, surfaceInclineRadians);
-   }
-
    default void setMinStepYaw(double yaw)
    {
       set(DefaultFootstepPlannerParameters.minStepYaw, yaw);
-   }
-
-   default void setMinStepZWhenFullyPitched(double stepZ)
-   {
-      set(DefaultFootstepPlannerParameters.minStepZWhenFullyPitched, stepZ);
-   }
-
-   default void setMinFootholdPercent(double footholdPercent)
-   {
-      set(DefaultFootstepPlannerParameters.minFootholdPercent, footholdPercent);
-   }
-
-   default void setMinClearanceFromStance(double clearance)
-   {
-      set(DefaultFootstepPlannerParameters.minClearanceFromStance, clearance);
    }
 
    default void setMaxStepWidth(double width)
@@ -110,41 +100,6 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
       set(DefaultFootstepPlannerParameters.maxStepYaw, yaw);
    }
 
-   default void setMaxStepXWhenFullyPitched(double stepX)
-   {
-      set(DefaultFootstepPlannerParameters.maxStepXWhenFullyPitched, stepX);
-   }
-
-   default void setMaxStepXWhenForwardAndDown(double maximumStepXWhenForwardAndDown)
-   {
-      set(DefaultFootstepPlannerParameters.maxStepXWhenForwardAndDown, maximumStepXWhenForwardAndDown);
-   }
-
-   default void setMaxStepYWhenForwardAndDown(double maximumStepYWhenForwardAndDown)
-   {
-      set(DefaultFootstepPlannerParameters.maxStepYWhenForwardAndDown, maximumStepYWhenForwardAndDown);
-   }
-
-   default void setMaxStepZWhenForwardAndDown(double maximumStepZWhenForwardAndDown)
-   {
-      set(DefaultFootstepPlannerParameters.maxStepZWhenForwardAndDown, maximumStepZWhenForwardAndDown);
-   }
-
-   default void setMaxStepReachWhenSteppingUp(double maximumStepReachWhenSteppingUp)
-   {
-      set(DefaultFootstepPlannerParameters.maxStepReachWhenSteppingUp, maximumStepReachWhenSteppingUp);
-   }
-
-   default void setMaxStepWidthWhenSteppingUp(double maximumStepWidthWhenSteppingUp)
-   {
-      set(DefaultFootstepPlannerParameters.maxStepWidthWhenSteppingUp, maximumStepWidthWhenSteppingUp);
-   }
-
-   default void setMaxStepZWhenSteppingUp(double maxStepZ)
-   {
-      set(DefaultFootstepPlannerParameters.maxStepZWhenSteppingUp, maxStepZ);
-   }
-
    default void setMaxStepZ(double maxStepZ)
    {
       set(DefaultFootstepPlannerParameters.maxStepZ, maxStepZ);
@@ -160,14 +115,9 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
       set(DefaultFootstepPlannerParameters.maxSwingReach, maxSwingReach);
    }
 
-   default void setStepYawReductionFactorAtMaxReach(double factor)
+   default void setCostPerStep(double costPerStep)
    {
-      set(DefaultFootstepPlannerParameters.stepYawReductionFactorAtMaxReach, factor);
-   }
-
-   default void setYawWeight(double yawWeight)
-   {
-      set(DefaultFootstepPlannerParameters.yawWeight, yawWeight);
+      set(DefaultFootstepPlannerParameters.costPerStep, costPerStep);
    }
 
    default void setForwardWeight(double forwardWeight)
@@ -180,11 +130,6 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
       set(DefaultFootstepPlannerParameters.lateralWeight, lateralWeight);
    }
 
-   default void setCostPerStep(double costPerStep)
-   {
-      set(DefaultFootstepPlannerParameters.costPerStep, costPerStep);
-   }
-
    default void setStepUpWeight(double stepUpWeight)
    {
       set(DefaultFootstepPlannerParameters.stepUpWeight, stepUpWeight);
@@ -193,6 +138,11 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
    default void setStepDownWeight(double stepDownWeight)
    {
       set(DefaultFootstepPlannerParameters.stepDownWeight, stepDownWeight);
+   }
+
+   default void setYawWeight(double yawWeight)
+   {
+      set(DefaultFootstepPlannerParameters.yawWeight, yawWeight);
    }
 
    default void setRollWeight(double rollWeight)
@@ -350,9 +300,9 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
       set(DefaultFootstepPlannerParameters.shinLength, shinLength);
    }
 
-   default void setShinHeightOffset(double shinHeightOffet)
+   default void setShinHeightOffset(double shinHeightOffset)
    {
-      set(DefaultFootstepPlannerParameters.shinHeightOffset, shinHeightOffet);
+      set(DefaultFootstepPlannerParameters.shinHeightOffset, shinHeightOffset);
    }
 
    default void setCheckForPathCollisions(boolean checkForPathCollisions)
@@ -406,8 +356,6 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
          setIdealSideStepWidth(parametersPacket.getIdealSideStepWidth());
       if (parametersPacket.getIdealBackStepLength() != noValue)
          setIdealBackStepLength(parametersPacket.getIdealBackStepLength());
-      if (parametersPacket.getIdealStepLengthAtMaxStepZ() != noValue)
-         setIdealStepLengthAtMaxStepZ(parametersPacket.getIdealStepLengthAtMaxStepZ());
       if (parametersPacket.getWiggleInsideDeltaTarget() != noValue)
          setWiggleInsideDeltaTarget(parametersPacket.getWiggleInsideDeltaTarget());
       if (parametersPacket.getWiggleInsideDeltaMinimum() != noValue)
@@ -425,30 +373,12 @@ public interface DefaultFootstepPlannerParametersBasics extends DefaultFootstepP
          setMinStepLength(parametersPacket.getMinimumStepLength());
       if (parametersPacket.getMinimumStepYaw() != noValue)
          setMinStepYaw(parametersPacket.getMinimumStepYaw());
-      if (parametersPacket.getMaximumStepReachWhenSteppingUp() != noValue)
-         setMaxStepReachWhenSteppingUp(parametersPacket.getMaximumStepReachWhenSteppingUp());
-      if (parametersPacket.getMaximumStepWidthWhenSteppingUp() != noValue)
-         setMaxStepWidthWhenSteppingUp(parametersPacket.getMaximumStepWidthWhenSteppingUp());
-      if (parametersPacket.getMaximumStepZWhenSteppingUp() != noValue)
-         setMaxStepZWhenSteppingUp(parametersPacket.getMaximumStepZWhenSteppingUp());
-      if (parametersPacket.getMaximumStepXWhenForwardAndDown() != noValue)
-         setMaxStepXWhenForwardAndDown(parametersPacket.getMaximumStepXWhenForwardAndDown());
-      if (parametersPacket.getMaximumStepYWhenForwardAndDown() != noValue)
-         setMaxStepYWhenForwardAndDown(parametersPacket.getMaximumStepYWhenForwardAndDown());
-      if (parametersPacket.getMaximumStepZWhenForwardAndDown() != noValue)
-         setMaxStepZWhenForwardAndDown(parametersPacket.getMaximumStepZWhenForwardAndDown());
       if (parametersPacket.getMaximumStepZ() != noValue)
          setMaxStepZ(parametersPacket.getMaximumStepZ());
       if (parametersPacket.getMaximumSwingZ() != noValue)
          setMaxSwingZ(parametersPacket.getMaximumSwingZ());
       if (parametersPacket.getMaximumSwingReach() != noValue)
          setMaxSwingReach(parametersPacket.getMaximumSwingReach());
-      if (parametersPacket.getMinimumStepZWhenFullyPitched() != noValue)
-         setMinStepZWhenFullyPitched(parametersPacket.getMinimumStepZWhenFullyPitched());
-      if (parametersPacket.getMaximumStepXWhenFullyPitched() != noValue)
-         setMaxStepXWhenFullyPitched(parametersPacket.getMaximumStepXWhenFullyPitched());
-      if (parametersPacket.getStepYawReductionFactorAtMaxReach() != noValue)
-         setStepYawReductionFactorAtMaxReach(parametersPacket.getStepYawReductionFactorAtMaxReach());
       if (parametersPacket.getMinimumFootholdPercent() != noValue)
          setMinFootholdPercent(parametersPacket.getMinimumFootholdPercent());
       if (parametersPacket.getMinimumSurfaceInclineRadians() != noValue)

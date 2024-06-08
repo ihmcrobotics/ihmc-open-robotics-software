@@ -42,10 +42,6 @@ public class FootstepPlannerParametersTest
       parameters.setIdealFootstepLength(idealFootstepLength);
       assertEquals(idealFootstepLength, parameters.getIdealFootstepLength(), epsilon);
 
-      double idealStepLengthAtMaxStepZ = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setIdealStepLengthAtMaxStepZ(idealStepLengthAtMaxStepZ);
-      assertEquals(idealStepLengthAtMaxStepZ, parameters.getIdealStepLengthAtMaxStepZ(), epsilon);
-
       double maxStepReach = RandomNumbers.nextDouble(random, 10.0);
       parameters.setMaxStepReach(maxStepReach);
       assertEquals(maxStepReach, parameters.getMaxStepReach(), epsilon);
@@ -86,14 +82,6 @@ public class FootstepPlannerParametersTest
       parameters.setMaxSwingReach(maxSwingReach);
       assertEquals(maxSwingReach, parameters.getMaxSwingReach(), epsilon);
 
-      double maxStepXWhenForwardAndDown = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMaxStepXWhenForwardAndDown(maxStepXWhenForwardAndDown);
-      assertEquals(maxStepXWhenForwardAndDown, parameters.getMaxStepXWhenForwardAndDown(), epsilon);
-
-      double maxStepZWhenForwardAndDown = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMaxStepZWhenForwardAndDown(maxStepZWhenForwardAndDown);
-      assertEquals(maxStepZWhenForwardAndDown, parameters.getMaxStepZWhenForwardAndDown(), epsilon);
-
       double wiggleInsideDeltaTarget = RandomNumbers.nextDouble(random, 10.0);
       parameters.setWiggleInsideDeltaTarget(wiggleInsideDeltaTarget);
       assertEquals(wiggleInsideDeltaTarget, parameters.getWiggleInsideDeltaTarget(), epsilon);
@@ -101,14 +89,6 @@ public class FootstepPlannerParametersTest
       double wiggleInsideDeltaMinimum = RandomNumbers.nextDouble(random, 10.0);
       parameters.setWiggleInsideDeltaMinimum(wiggleInsideDeltaMinimum);
       assertEquals(wiggleInsideDeltaMinimum, parameters.getWiggleInsideDeltaMinimum(), epsilon);
-
-      double maximumStepReachWhenSteppingUp = RandomNumbers.nextDouble(random, 10.00);
-      parameters.setMaxStepReachWhenSteppingUp(maximumStepReachWhenSteppingUp);
-      assertEquals(maximumStepReachWhenSteppingUp, parameters.getMaxStepReachWhenSteppingUp(), epsilon);
-
-      double maximumStepZWhenSteppingUp = RandomNumbers.nextDouble(random, 10.00);
-      parameters.setMaxStepZWhenSteppingUp(maximumStepZWhenSteppingUp);
-      assertEquals(maximumStepZWhenSteppingUp, parameters.getMaxStepZWhenSteppingUp(), epsilon);
 
       double minFootholdPercent = RandomNumbers.nextDouble(random, 10.0);
       parameters.setMinFootholdPercent(minFootholdPercent);

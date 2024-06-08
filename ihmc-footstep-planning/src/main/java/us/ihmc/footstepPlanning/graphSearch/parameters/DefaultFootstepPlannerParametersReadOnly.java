@@ -92,18 +92,37 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
       return get(idealBackStepLength);
    }
 
-   /**
-    * Returns ideal step length when the vertical height between the start-of-swing and stance feet are at maximum allowed height.
-    * Ideal step length is linearly interpolated between {@link #getIdealFootstepLength} on flat ground and this value at max stance height
-    */
-   default double getIdealStepLengthAtMaxStepZ()
-   {
-      return get(idealStepLengthAtMaxStepZ);
-   }
-
    ///////////////////////////////////////////////////////////////////////////////////////////////////
    ////////////////////////         Footstep restriction parameters       ////////////////////////////
    ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
+    * If this parameter is set to 1.0 only full footsteps are allowed. A value less then 1.0 will allow partial footholds.
+    */
+   default double getMinFootholdPercent()
+   {
+      return get(minFootholdPercent);
+   }
+
+   /**
+    * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
+    * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
+    * this parameter.
+    */
+   default double getMinClearanceFromStance()
+   {
+      return get(minClearanceFromStance);
+   }
+
+   /**
+    * The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
+    * then the value specified here. This value is in radians relative to vertical, so an incline of 0.0 means a flat surface.
+    */
+   default double getMinSurfaceIncline()
+   {
+      return get(minSurfaceIncline);
+   }
 
    /**
     * Minimum step width the planner will consider for candidate steps.
@@ -126,49 +145,11 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    }
 
    /**
-    * The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
-    * then the value specified here. This value is in radians relative to vertical, so an incline of 0.0 means a flat surface.
-    */
-   default double getMinSurfaceIncline()
-   {
-      return get(minSurfaceIncline);
-   }
-
-   /**
     * Minimum step yaw relative to previous step, where positive yaw is defined as rotating away from the other foot and zero yaw means the feet are parallel.
     */
    default double getMinStepYaw()
    {
       return get(minStepYaw);
-   }
-
-   /**
-    * Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinSurfaceIncline()} .
-    * The maximum depth is determined by linearly interpolating between a step's maximum z value and this value, based on the fraction the foot is pitched by.
-    * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
-    */
-   default double getMinStepZWhenFullyPitched()
-   {
-      return get(minStepZWhenFullyPitched);
-   }
-
-   /**
-    * Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
-    * If this parameter is set to 1.0 only full footsteps are allowed. A value less then 1.0 will allow partial footholds.
-    */
-   default double getMinFootholdPercent()
-   {
-      return get(minFootholdPercent);
-   }
-
-   /**
-    * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
-    * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
-    * this parameter.
-    */
-   default double getMinClearanceFromStance()
-   {
-      return get(minClearanceFromStance);
    }
 
    /**
@@ -200,154 +181,6 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    }
 
    /**
-    * Maximum forward distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinSurfaceIncline()} .
-    * The maximum distance is determined by linearly interpolating between a step's maximum z value and this value, based on the fraction the foot is pitched by.
-    * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
-    */
-   default double getMaxStepXWhenFullyPitched()
-   {
-      return get(maxStepXWhenFullyPitched);
-   }
-
-   /**
-    * Maximum step length when stepping forward and down.
-    *
-    * <p>
-    * Large steps forward and down are rejected by the planner if one of two criteria are met:
-    * <ul>
-    * <li> The x-position of the value of the footstep exceeds {@link #getMaxStepXWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
-    * <li> - OR - </li>
-    * <li> The y-position of the value of the footstep exceeds {@link #getMaxStepYWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
-    * <li> - AND - </li>
-    * <li> The z-position of the value of the footstep is less than -{@link #getMaxStepZWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
-    * </ul>
-    * </p>
-    *
-    * Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
-    * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
-    * it's very close to hitting it's ankle pitch joint limit
-    */
-   default double getMaxStepXWhenForwardAndDown()
-   {
-      return get(maxStepXWhenForwardAndDown);
-   }
-
-   /**
-    * Maximum step width when stepping forward and down.
-    *
-    * <p>
-    * Large steps forward and down are rejected by the planner if one of two criteria are met:
-    * <ul>
-    * <li> The x-position of the value of the footstep exceeds {@link #getMaxStepXWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
-    * <li> - OR - </li>
-    * <li> The y-position of the value of the footstep exceeds {@link #getMaxStepYWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
-    * <li> - AND - </li>
-    * <li> The z-position of the value of the footstep is less than -{@link #getMaxStepZWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
-    * </ul>
-    * </p>
-    *
-    * Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
-    * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
-    * it's very close to hitting it's ankle pitch joint limit
-    */
-   default double getMaxStepYWhenForwardAndDown()
-   {
-      return get(maxStepYWhenForwardAndDown);
-   }
-
-   /**
-    * Maximum step height when stepping forward and down.
-    *
-    * <p>
-    * Large steps forward and down are rejected by the planner if one of two criteria are met:
-    * <ul>
-    * <li> The x-position of the value of the footstep exceeds {@link #getMaxStepXWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
-    * <li> - OR - </li>
-    * <li> The y-position of the value of the footstep exceeds {@link #getMaxStepYWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
-    * <li> - AND - </li>
-    * <li> The z-position of the value of the footstep is less than -{@link #getMaxStepZWhenForwardAndDown()}, when expressed in its parent's z-up sole frame </li>
-    * </ul>
-    * </p>
-    *
-    * Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
-    * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
-    * it's very close to hitting it's ankle pitch joint limit
-    */
-   default double getMaxStepZWhenForwardAndDown()
-   {
-      return get(maxStepZWhenForwardAndDown);
-   }
-
-   /**
-    * Maximum step reach when stepping up.
-    *
-    * <p>
-    * Long steps forward are rejected by the planner if one of two criteria are met:
-    * <ul>
-    *    <li> The total length of the footstep exceeds {@link #getMaxStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
-    *    <li> - OR - </li>
-    *    <li> The y-position of the value of the footstep exceeds {@link #getMaxStepWidthWhenSteppingUp()} ()}, when expressed in its parent's z-up sole frame </li>
-    *    <li> - AND - </li>
-    *    <li> The z-position of the value of the footstep is greater than {@link #getMaxStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
-    * </ul>
-    * </p>
-    *
-    * Large steps forward and up can cause the robot to surpass its torque limits.
-    * These parameters should be tuned so that when the robot takes a step of length {@link #getMaxStepReachWhenSteppingUp()} and {@link #getMaxStepZWhenSteppingUp()},
-    * it's very close to saturating its torque limits.
-    */
-   default double getMaxStepReachWhenSteppingUp()
-   {
-      return get(maxStepReachWhenSteppingUp);
-   }
-
-   /**
-    * Maximum step width when stepping up.
-    *
-    * <p>
-    * Long steps forward are rejected by the planner if one of two criteria are met:
-    * <ul>
-    *    <li> The total length of the footstep exceeds {@link #getMaxStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
-    *    <li> - OR - </li>
-    *    <li> The y-position of the value of the footstep exceeds {@link #getMaxStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
-    *    <li> - AND - </li>
-    *    <li> The z-position of the value of the footstep is greater than {@link #getMaxStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
-    * </ul>
-    * </p>
-    *
-    * Large steps forward and up can cause the robot to surpass its torque limits.
-    * These parameters should be tuned so that when the robot takes a step of length {@link #getMaxStepReachWhenSteppingUp()} and {@link #getMaxStepZWhenSteppingUp()},
-    * it's very close to saturating its torque limits.
-    */
-   default double getMaxStepWidthWhenSteppingUp()
-   {
-      return get(maxStepWidthWhenSteppingUp);
-   }
-
-   /**
-    * Step height for considering stepping up.
-    *
-    * <p>
-    * Long steps forward are rejected by the planner if one of two criteria are met:
-    * <ul>
-    *    <li> The total length of the footstep exceeds {@link #getMaxStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
-    *    <li> - OR - </li>
-    *    <li> The y-position of the value of the footstep exceeds {@link #getMaxStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
-    *    <li> - AND - </li>
-    *    <li> The z-position of the value of the footstep is greater than {@link #getMaxStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
-    * </ul>
-    * </p>
-    *
-    * Large steps forward and up can cause the robot to surpass its torque limits.
-    * These parameters should be tuned so that when the robot takes a step of length {@link #getMaxStepReachWhenSteppingUp()} and {@link #getMaxStepZWhenSteppingUp()},
-    * it's very close to saturating its torque limits.
-    */
-   default double getMaxStepZWhenSteppingUp()
-   {
-      return get(maxStepZWhenSteppingUp);
-   }
-
-   /**
     * Maximum vertical distance between consecutive footsteps, applies for both stepping up and down.
     */
    default double getMaxStepZ()
@@ -372,28 +205,11 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    }
 
    /**
-    * This is the reduction factor for the max yaw when the step is at max reach.
-    * This means that, when the footstep is at its maximum distance, this is the fraction reduction of the max yaw.
-    * If this returns 0.0, the max yaw is not modified, even at full reach.
-    * If this returns 1.0, the max yaw is 0 at full reach.
-    *
-    * That is,
-    * modifiedMaxYaw = (1.0 - reach / maxReach) * maxYaw + reach / maxReach * (1.0 - alpha) * maxYaw
-    *
-    * @return alpha in the above equation
+    * Constant cost per step to avoid plans with extra steps.
     */
-   default double getStepYawReductionFactorAtMaxReach()
+   default double getCostPerStep()
    {
-      return get(stepYawReductionFactorAtMaxReach);
-   }
-
-   /**
-    * Scale factor for cost of deviating from the ideal footstep by rotating.
-    * The cost is c*yaw, where c is this weight
-    */
-   default double getYawWeight()
-   {
-      return get(yawWeight);
+      return get(costPerStep);
    }
 
    /**
@@ -415,14 +231,6 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    }
 
    /**
-    * Constant cost per step to avoid plans with extra steps.
-    */
-   default double getCostPerStep()
-   {
-      return get(costPerStep);
-   }
-
-   /**
     * Scale factor for cost associated with stepping up.
     * The cost is c*stepHeight, where c is this weight
     */
@@ -438,6 +246,15 @@ public interface DefaultFootstepPlannerParametersReadOnly extends StoredProperty
    default double getStepDownWeight()
    {
       return get(stepDownWeight);
+   }
+
+   /**
+    * Scale factor for cost of deviating from the ideal footstep by rotating.
+    * The cost is c*yaw, where c is this weight
+    */
+   default double getYawWeight()
+   {
+      return get(yawWeight);
    }
 
    /**

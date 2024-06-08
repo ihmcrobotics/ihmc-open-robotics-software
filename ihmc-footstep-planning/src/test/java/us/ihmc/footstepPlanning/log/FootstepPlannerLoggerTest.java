@@ -59,7 +59,6 @@ public class FootstepPlannerLoggerTest
 
       planningModule.getFootstepPlannerParameters().setMaxStepZ(0.294);
       planningModule.getFootstepPlannerParameters().setYawWeight(0.17);
-      planningModule.getFootstepPlannerParameters().setMaxStepZWhenSteppingUp(0.4);
       planningModule.getFootstepPlannerParameters().setMaxZPenetrationOnValleyRegions(1.0);
 
       planningModule.handleRequest(request);
@@ -99,7 +98,6 @@ public class FootstepPlannerLoggerTest
 
       planningModule.getFootstepPlannerParameters().setMaxStepZ(0.294);
       planningModule.getFootstepPlannerParameters().setYawWeight(0.17);
-      planningModule.getFootstepPlannerParameters().setMaxStepZWhenSteppingUp(0.4);
       planningModule.getFootstepPlannerParameters().setMaxZPenetrationOnValleyRegions(1.0);
 
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);

@@ -57,7 +57,6 @@ public class FootstepPlannerMessageTools
       packet.setIdealFootstepLength(parameters.getIdealFootstepLength());
       packet.setIdealSideStepWidth(parameters.getIdealSideStepWidth());
       packet.setIdealBackStepLength(parameters.getIdealBackStepLength());
-      packet.setIdealStepLengthAtMaxStepZ(parameters.getIdealStepLengthAtMaxStepZ());
       packet.setWiggleInsideDeltaTarget(parameters.getWiggleInsideDeltaTarget());
       packet.setWiggleInsideDeltaMinimum(parameters.getWiggleInsideDeltaMinimum());
       packet.setMaximumStepReach(parameters.getMaxStepReach());
@@ -67,18 +66,9 @@ public class FootstepPlannerMessageTools
       packet.setMinimumStepWidth(parameters.getMinStepWidth());
       packet.setMinimumStepLength(parameters.getMinStepLength());
       packet.setMinimumStepYaw(parameters.getMinStepYaw());
-      packet.setMaximumStepReachWhenSteppingUp(parameters.getMaxStepReachWhenSteppingUp());
-      packet.setMaximumStepWidthWhenSteppingUp(parameters.getMaxStepWidthWhenSteppingUp());
-      packet.setMaximumStepZWhenSteppingUp(parameters.getMaxStepZWhenSteppingUp());
-      packet.setMaximumStepXWhenForwardAndDown(parameters.getMaxStepXWhenForwardAndDown());
-      packet.setMaximumStepYWhenForwardAndDown(parameters.getMaxStepYWhenForwardAndDown());
-      packet.setMaximumStepZWhenForwardAndDown(parameters.getMaxStepZWhenForwardAndDown());
       packet.setMaximumStepZ(parameters.getMaxStepZ());
       packet.setMaximumSwingZ(parameters.getMaxSwingZ());
       packet.setMaximumSwingReach(parameters.getMaxSwingReach());
-      packet.setMinimumStepZWhenFullyPitched(parameters.getMinStepZWhenFullyPitched());
-      packet.setMaximumStepXWhenFullyPitched(parameters.getMaxStepXWhenFullyPitched());
-      packet.setStepYawReductionFactorAtMaxReach(parameters.getStepYawReductionFactorAtMaxReach());
       packet.setMinimumFootholdPercent(parameters.getMinFootholdPercent());
       packet.setMinimumSurfaceInclineRadians(parameters.getMinSurfaceIncline());
       packet.setWiggleWhilePlanning(parameters.getWiggleWhilePlanning());

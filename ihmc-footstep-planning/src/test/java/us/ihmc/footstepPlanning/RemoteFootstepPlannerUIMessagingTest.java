@@ -618,7 +618,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals(parameters.getIdealFootstepLength(), packet.getIdealFootstepLength(), epsilon, "Ideal footstep lengths aren't equal.");
       assertEquals(parameters.getIdealSideStepWidth(), packet.getIdealSideStepWidth(), epsilon, "Ideal footstep lengths aren't equal.");
       assertEquals(parameters.getIdealBackStepLength(), packet.getIdealBackStepLength(), epsilon, "Ideal footstep lengths aren't equal.");
-      assertEquals(parameters.getIdealStepLengthAtMaxStepZ(), packet.getIdealStepLengthAtMaxStepZ(), epsilon, "Ideal footstep lengths aren't equal.");
       assertEquals(parameters.getWiggleInsideDeltaTarget(), packet.getWiggleInsideDeltaTarget(), epsilon, "Wiggle inside delta targets aren't equal.");
       assertEquals(parameters.getWiggleInsideDeltaMinimum(), packet.getWiggleInsideDeltaMinimum(), epsilon, "Wiggle inside delta minimums aren't equal.");
       assertEquals(parameters.getMaxStepReach(), parameters.getMaxStepReach(), epsilon, "Maximum step reaches aren't equal.");
@@ -628,10 +627,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals(parameters.getMinStepWidth(), packet.getMinimumStepWidth(), epsilon, "Minimum step widths aren't equal.");
       assertEquals(parameters.getMinStepLength(), packet.getMinimumStepLength(), epsilon, "Minimum step lengths aren't equal.");
       assertEquals(parameters.getMinStepYaw(), packet.getMinimumStepYaw(), epsilon, "Minimum step yaws aren't equal.");
-      assertEquals(parameters.getMaxStepReachWhenSteppingUp(), packet.getMaximumStepReachWhenSteppingUp(), epsilon);
-      assertEquals(parameters.getMaxStepZWhenSteppingUp(), packet.getMaximumStepZWhenSteppingUp(), epsilon);
-      assertEquals(parameters.getMaxStepXWhenForwardAndDown(), packet.getMaximumStepXWhenForwardAndDown(), epsilon, "Max X forward and down aren't equal");
-      assertEquals(parameters.getMaxStepZWhenForwardAndDown(), packet.getMaximumStepZWhenForwardAndDown(), epsilon, "Max Z forward and down aren't equal");
 
       assertEquals(parameters.getMaxStepZ(), packet.getMaximumStepZ(), epsilon, "Max step z isn't equal.");
       assertEquals(parameters.getMaxSwingZ(), packet.getMaximumSwingZ(), epsilon, "Max swing z isn't equal.");
