@@ -11,8 +11,6 @@ import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2Heartbeat;
-import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
@@ -21,25 +19,27 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.RDXHeightMapRenderer;
+import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.nio.ByteBuffer;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class RDXHeightMapVisualizer extends RDXVisualizer
 {
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
    private final RDXHeightMapGraphicNew heightMapGraphicNew = new RDXHeightMapGraphicNew();
-   private final ExecutorService executorService;
-   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
+   private final ResettableExceptionHandlingExecutorService executorService;
 
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImBoolean enableHeightMapVisualizer = new ImBoolean(true);
    private final ImBoolean enableHeightMapRenderer = new ImBoolean(false);
    private final ImBoolean displayGlobalHeightMapImage = new ImBoolean(false);
@@ -48,6 +48,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    private final TerrainMapData terrainMapData = new TerrainMapData(RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize(),
                                                                     RapidHeightMapExtractor.getHeightMapParameters().getCropWindowSize());
 
+   private ROS2PublishSubscribeAPI ros2;
    private HeightMapMessage latestHeightMapMessage = new HeightMapMessage();
    private HeightMapData latestHeightMapData;
    private Mat heightMapImage;
@@ -57,28 +58,31 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
 
    private int compressedBufferDefaultSize = 100000;
 
-   private ROS2Heartbeat activeHeartbeat;
-
    private float pixelScalingFactor = 10000.0f;
    private boolean heightMapMessageGenerated = false;
 
    public RDXHeightMapVisualizer()
    {
-      super("Height Map");
+      this("Height Map");
+   }
 
-      executorService = Executors.newFixedThreadPool(4);
+   public RDXHeightMapVisualizer(String title)
+   {
+      super(title);
+
+      executorService = MissingThreadTools.newSingleThreadExecutor("Height Map Visualizer Subscription", true, 1);
    }
 
    public void setupForHeightMapMessage(ROS2PublishSubscribeAPI ros2)
    {
+      this.ros2 = ros2;
       ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_OUTPUT, this::acceptHeightMapMessage);
-      activeHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
    }
 
-   public void setupForImageMessage(ROS2Helper ros2)
+   public void setupForImageMessage(ROS2PublishSubscribeAPI ros2)
    {
+      this.ros2 = ros2;
       ros2.subscribeViaCallback(PerceptionAPI.HEIGHT_MAP_CROPPED, this::acceptImageMessage);
-      activeHeartbeat = new ROS2Heartbeat(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
    }
 
    @Override
@@ -98,9 +102,9 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       }
    }
 
-   public void updateGridMapGraphic(HeightMapMessage heightMapMessage)
+   private void updateGridMapGraphic(HeightMapMessage heightMapMessage)
    {
-      executorService.submit(() ->
+      executorService.clearQueueAndExecute(() ->
         {
            if (enableHeightMapVisualizer.get())
            {
@@ -114,7 +118,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       frequencyPlot.recordEvent();
       if (isActive())
       {
-         executorService.submit(() ->
+         executorService.clearQueueAndExecute(() ->
            {
               pixelScalingFactor = imageMessage.getDepthDiscretization();
               zUpToWorldTransform.set(imageMessage.getOrientation(), imageMessage.getPosition());
@@ -167,7 +171,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       super.setActive(active);
       if (!active)
       {
-         executorService.shutdown();
+         executorService.clearTaskQueue();
       }
    }
 
@@ -176,14 +180,16 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
    {
       super.renderImGuiWidgets();
 
-      ImGui.checkbox("Enable Height Map Visualizer", enableHeightMapVisualizer);
-      ImGui.checkbox("Enable Height Map Renderer", enableHeightMapRenderer);
-      ImGui.checkbox("Display Global Height Map Image", displayGlobalHeightMapImage);
+      if (ros2 != null && ImGui.button(labels.get("Reset Ground to Feet")))
+         ros2.publish(PerceptionAPI.RESET_HEIGHT_MAP);
 
-      if (!isActive())
+      if (ImGui.collapsingHeader(labels.get("Visualization Options")))
       {
-         executorService.shutdown();
+         ImGui.checkbox(labels.get("Enable Height Map Visualizer"), enableHeightMapVisualizer);
+         ImGui.checkbox(labels.get("Enable Height Map Renderer"), enableHeightMapRenderer);
+         ImGui.checkbox(labels.get("Display Global Height Map Image"), displayGlobalHeightMapImage);
       }
+
       frequencyPlot.renderImGuiWidgets();
    }
 
@@ -196,11 +202,6 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
       {
          heightMapMessageGenerated = false;
          updateGridMapGraphic(latestHeightMapMessage);
-      }
-
-      if (activeHeartbeat != null)
-      {
-         activeHeartbeat.setAlive(isActive());
       }
 
       boolean isActive = isActive();
@@ -241,11 +242,7 @@ public class RDXHeightMapVisualizer extends RDXVisualizer
 
    public void destroy()
    {
-      executorService.shutdown();
-      if (activeHeartbeat != null)
-      {
-         activeHeartbeat.destroy();
-      }
+      executorService.destroy();
       heightMapGraphicNew.destroy();
    }
 

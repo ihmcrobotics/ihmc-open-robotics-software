@@ -11,8 +11,8 @@ import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PointCloudVisualizer;
-import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
 import us.ihmc.ros2.ROS2Node;
 
 public class RDXROS2PointCloudSensorDemo
@@ -22,7 +22,7 @@ public class RDXROS2PointCloudSensorDemo
    private RDXHighLevelDepthSensorSimulator highLevelDepthSensorSimulator;
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo();
    private RDXEnvironmentBuilder environmentBuilder;
-   private RDXGlobalVisualizersPanel globalVisualizersPanel;
+   private RDXPerceptionVisualizerPanel perceptionVisualizerPanel;
    private ROS2Node ros2Node;
 
    public RDXROS2PointCloudSensorDemo()
@@ -47,16 +47,16 @@ public class RDXROS2PointCloudSensorDemo
             baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
-            globalVisualizersPanel = new RDXGlobalVisualizersPanel();
+            perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
 
             RDXROS2PointCloudVisualizer ousterPointCloudVisualizer = new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
                                                                                                      ros2Node,
                                                                                                      PerceptionAPI.OUSTER_POINT_CLOUD);
-            globalVisualizersPanel.addVisualizer(ousterPointCloudVisualizer);
+            perceptionVisualizerPanel.addVisualizer(ousterPointCloudVisualizer);
 
-            globalVisualizersPanel.create();
-            baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
-            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersPanel);
+            perceptionVisualizerPanel.create();
+            baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
+            baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
 
             highLevelDepthSensorSimulator = RDXSimulatedSensorFactory.createOusterLidar(sensorPoseGizmo.getGizmoFrame(), () -> 0L);
             highLevelDepthSensorSimulator.setupForROS2PointCloud(ros2Node, PerceptionAPI.OUSTER_POINT_CLOUD);
@@ -71,7 +71,7 @@ public class RDXROS2PointCloudSensorDemo
          public void render()
          {
             highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
-            globalVisualizersPanel.update();
+            perceptionVisualizerPanel.update();
 
             for (RDXEnvironmentObject allObject : environmentBuilder.getAllObjects())
             {
