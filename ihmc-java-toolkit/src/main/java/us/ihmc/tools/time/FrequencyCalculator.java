@@ -52,6 +52,14 @@ public class FrequencyCalculator
       return frequency;
    }
 
+   public double getFrequencyOrDefault(double defaultValue)
+   {
+      if (anyPingsYet())
+         return frequency;
+      else
+         return defaultValue;
+   }
+
    public boolean anyPingsYet()
    {
       return !deltas.isEmpty();

@@ -10,7 +10,7 @@ import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphSubscriptionNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraphTools;
-import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
+import us.ihmc.perception.YOLOv8.YOLOv8Node;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDX3DPanel;
 

@@ -4,7 +4,6 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.perception.sceneGraph.yolo.YOLOv8SegmentedDetection;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 

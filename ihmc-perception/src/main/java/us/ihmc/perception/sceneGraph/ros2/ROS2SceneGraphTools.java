@@ -19,7 +19,7 @@ import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.OpeningMechanismType;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
-import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
+import us.ihmc.perception.YOLOv8.YOLOv8Node;
 
 public class ROS2SceneGraphTools
 {

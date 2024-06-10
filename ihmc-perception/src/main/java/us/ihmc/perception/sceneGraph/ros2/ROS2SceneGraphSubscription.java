@@ -30,7 +30,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeReplacement;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.OpeningMechanismType;
-import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
+import us.ihmc.perception.YOLOv8.YOLOv8Node;
 import us.ihmc.tools.thread.SwapReference;
 
 import java.util.ArrayList;

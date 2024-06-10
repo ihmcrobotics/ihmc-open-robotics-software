@@ -1,4 +1,4 @@
-package us.ihmc.perception.sceneGraph.yolo;
+package us.ihmc.perception.YOLOv8;
 
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -6,9 +6,6 @@ import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Size;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.YOLOv8.YOLOv8Detection;
-import us.ihmc.perception.YOLOv8.YOLOv8Tools;
-import us.ihmc.perception.filters.DetectionFilter;
 
 import java.util.Collections;
 import java.util.List;

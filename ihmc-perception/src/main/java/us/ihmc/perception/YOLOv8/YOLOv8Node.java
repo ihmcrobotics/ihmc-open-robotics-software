@@ -1,13 +1,10 @@
-package us.ihmc.perception.sceneGraph.yolo;
+package us.ihmc.perception.YOLOv8;
 
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.perception.YOLOv8.YOLOv8Detection;
-import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
-import us.ihmc.perception.filters.DetectionFilter;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 
 import java.util.List;
@@ -21,7 +18,6 @@ public class YOLOv8Node extends DetectableSceneNode
 
    // Read from YOLO manager, write to RDX
    private YOLOv8Detection detection;
-   private DetectionFilter detectionFilter;
    private List<Point3D32> objectPointCloud;
    private Point3D32 objectCentroid;
 

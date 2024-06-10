@@ -6,7 +6,7 @@ import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
-import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
+import us.ihmc.perception.YOLOv8.YOLOv8Node;
 
 import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions.*;
 

@@ -28,7 +28,7 @@ import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
-import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
+import us.ihmc.perception.YOLOv8.YOLOv8Node;
 
 /**
  * Publishes the current state of the complete scene graph.
