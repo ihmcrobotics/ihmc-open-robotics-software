@@ -65,8 +65,8 @@ public class YOLOv8DetectionManager
    private float yoloConfidenceThreshold = 0.5f;
    private float yoloNMSThreshold = 0.1f;
    private float yoloSegmentationThreshold = 0.0f;
-   private int erosionKernelRadius = 2;
-   private float outlierRejectionThreshold = 0.2f;
+   private int makErosionKernelRadius = 2;
+   private float pointCloudOutlierRejectionThreshold = 0.2f;
    private float yoloMatchDistanceThreshold = 0.5f;
    private float candidateAcceptanceThreshold = 0.6f;
 
@@ -86,9 +86,9 @@ public class YOLOv8DetectionManager
          yoloConfidenceThreshold = parametersMessage.getConfidenceThreshold();
          yoloNMSThreshold = parametersMessage.getNonMaximumSuppressionThreshold();
          yoloSegmentationThreshold = parametersMessage.getSegmentationThreshold();
-         erosionKernelRadius = 2;
-         outlierRejectionThreshold = 0.2f;
-         yoloMatchDistanceThreshold = 0.5f;
+         makErosionKernelRadius = parametersMessage.getErosionKernelRadius();
+         pointCloudOutlierRejectionThreshold = parametersMessage.getOutlierRejectionThreshold();
+         yoloMatchDistanceThreshold = parametersMessage.getMatchDistanceThreshold();
          candidateAcceptanceThreshold = parametersMessage.getCandidateAcceptanceThreshold();
 
          // Create a new set of target detections to use
@@ -218,9 +218,7 @@ public class YOLOv8DetectionManager
          Map<YOLOv8Detection, RawImage> newDetections = yoloResults.getTargetSegmentationImages(yoloSegmentationThreshold, targetDetections);
          detectionMatcher.matchDetections(newDetections,
                                           depthImage,
-                                          yoloMatchDistanceThreshold,
-                                          erosionKernelRadius,
-                                          outlierRejectionThreshold,
+                                          yoloMatchDistanceThreshold, makErosionKernelRadius, pointCloudOutlierRejectionThreshold,
                                           candidateAcceptanceThreshold);
 
          // if demanded, publish an annotated image

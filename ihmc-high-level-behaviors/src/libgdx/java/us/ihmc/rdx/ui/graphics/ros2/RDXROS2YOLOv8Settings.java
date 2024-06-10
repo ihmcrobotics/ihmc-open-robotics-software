@@ -24,10 +24,19 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
 
    private final ROS2PublishSubscribeAPI ros2;
 
+   /**
+    * The mask erosion kernel radius determines how much the YOLO mask is eroded,
+    * i.e. how much it is shrunk.
+    * A larger radius will result is more shrinkage, and a radius of 0 will not shrink the mask.
+    * Erosion is useful when the YOLO mask is slightly larger than the object it detects.
+    */
+   private final ImInt maskErosionKernelRadius = new ImInt(2);
+   private final ImFloat pointCloudOutlierRejectionThreshold = new ImFloat(0.2f);
    private final ImFloat confidenceThreshold = new ImFloat(0.3f);
    private final ImFloat nmsThreshold = new ImFloat(0.1f);
    private final ImFloat maskThreshold = new ImFloat(0.0f);
    private final ImFloat candidateAcceptanceThreshold = new ImFloat(0.6f);
+   private final ImFloat matchDistanceThreshold = new ImFloat(0.2f);
    private final ImInt selectedSensor = new ImInt(0); // 0 = ZED, 1 = Realsense
 
    private final Set<YOLOv8DetectionClass> targetDetections = new HashSet<>();
@@ -61,6 +70,10 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
       demandYOLOv8ICPZed.setAlive(isActive() && selectedSensor.get() == 0);
       demandYOLOv8ICPRealsense.setAlive(isActive() && selectedSensor.get() == 1);
 
+      if (ImGui.sliderInt("maskErosionKernelRadius", maskErosionKernelRadius.getData(), 0, 10))
+         parametersChanged.set();
+      if (ImGui.sliderFloat("outlierPointRejectionThreshold", pointCloudOutlierRejectionThreshold.getData(), 0.0f, 5.0f))
+         parametersChanged.set();
       if (ImGui.sliderFloat("confidenceThreshold", confidenceThreshold.getData(), 0.0f, 1.0f))
          parametersChanged.set();
       if (ImGui.sliderFloat("nmsThreshold", nmsThreshold.getData(), 0.0f, 1.0f))
@@ -68,6 +81,8 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
       if (ImGui.sliderFloat("maskThreshold", maskThreshold.getData(), -1.0f, 1.0f))
          parametersChanged.set();
       if (ImGui.sliderFloat("candidateAcceptanceThreshold", candidateAcceptanceThreshold.getData(), 0.0f, 1.0f))
+         parametersChanged.set();
+      if (ImGui.sliderFloat("matchDistanceThreshold", matchDistanceThreshold.getData(), 0.0f, 5.0f))
          parametersChanged.set();
 
       if (ImGui.collapsingHeader("Target Detection Classes"))
@@ -108,10 +123,13 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
       if (parametersChanged.poll() || messagePublishThrottler.run())
       {
          YOLOv8ParametersMessage message = new YOLOv8ParametersMessage();
+         message.setErosionKernelRadius(maskErosionKernelRadius.get());
+         message.setOutlierRejectionThreshold(pointCloudOutlierRejectionThreshold.get());
          message.setConfidenceThreshold(confidenceThreshold.get());
          message.setNonMaximumSuppressionThreshold(nmsThreshold.get());
          message.setSegmentationThreshold(maskThreshold.get());
          message.setCandidateAcceptanceThreshold(candidateAcceptanceThreshold.get());
+         message.setMatchDistanceThreshold(matchDistanceThreshold.get());
 
          message.getTargetDetectionClasses().clear();
          for (YOLOv8DetectionClass targetDetection : targetDetections)

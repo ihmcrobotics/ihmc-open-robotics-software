@@ -15,15 +15,27 @@ module perception_msgs
       struct YOLOv8ParametersMessage
       {
         /**
-         * Confidence required to consider a mask a valid detection
+         * Confidence required to consider a detection valid
          */
         float confidence_threshold;
         float non_maximum_suppression_threshold;
         float segmentation_threshold;
         /**
-         * Percentage of updates a candidate must be detected in to be accepted
+         * DetectionFilter stability threshold
          */
         float candidate_acceptance_threshold;
+        /**
+         * How much to shrink the YOLO mask
+         */
+        long erosion_kernel_radius;
+        /**
+         * Rejection threshold for outlier points in segmented point cloud of the object
+         */
+        float outlier_rejection_threshold;
+        /**
+         * Maximum distance between new and old detections to be considered the same object
+         */
+        float match_distance_threshold;
         /**
          * List of YOLOv8DetectionClass values that YOLO should detect
          */

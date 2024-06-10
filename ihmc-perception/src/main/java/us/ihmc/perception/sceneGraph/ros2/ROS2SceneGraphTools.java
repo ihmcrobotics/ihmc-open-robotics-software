@@ -81,8 +81,6 @@ public class ROS2SceneGraphTools
       {
          sceneNode = new YOLOv8Node(nodeID,
                                     nodeName,
-                                    subscriptionNode.getYOLONodeMessage().getMaskErosionKernelRadius(),
-                                    subscriptionNode.getYOLONodeMessage().getOutlierFilterThreshold(),
                                     subscriptionNode.getYOLONodeMessage().getDetectionAcceptanceThreshold(),
                                     new YOLOv8Detection(YOLOv8DetectionClass.valueOf(subscriptionNode.getYOLONodeMessage().getDetectionClassAsString()),
                                                         subscriptionNode.getYOLONodeMessage().getConfidence(),

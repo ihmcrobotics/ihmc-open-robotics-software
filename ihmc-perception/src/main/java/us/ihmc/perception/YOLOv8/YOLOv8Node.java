@@ -12,8 +12,6 @@ import java.util.List;
 public class YOLOv8Node extends DetectableSceneNode
 {
    // Read from RDX node, write to YOLO Manager
-   private int maskErosionKernelRadius;
-   private double outlierFilterThreshold;
    private float detectionAcceptanceThreshold;
 
    // Read from YOLO manager, write to RDX
@@ -29,8 +27,6 @@ public class YOLOv8Node extends DetectableSceneNode
    {
       this(id,
            name,
-           2,
-           2.0,
            0.2f,
            detection,
            objectPointCloud,
@@ -41,8 +37,6 @@ public class YOLOv8Node extends DetectableSceneNode
 
    public YOLOv8Node(long id,
                      String name,
-                     int maskErosionKernelRadius,
-                     double outlierFilterThreshold,
                      float detectionAcceptanceThreshold,
                      YOLOv8Detection detection,
                      List<Point3D32> objectPointCloud,
@@ -52,8 +46,6 @@ public class YOLOv8Node extends DetectableSceneNode
    {
       super(id, name);
 
-      this.maskErosionKernelRadius = maskErosionKernelRadius;
-      this.outlierFilterThreshold = outlierFilterThreshold;
       this.detectionAcceptanceThreshold = detectionAcceptanceThreshold;
       this.detection = detection;
       this.objectPointCloud = objectPointCloud;
@@ -69,26 +61,6 @@ public class YOLOv8Node extends DetectableSceneNode
 
       getNodeToParentFrameTransform().set(objectPose);
       getNodeFrame().update();
-   }
-
-   public int getMaskErosionKernelRadius()
-   {
-      return maskErosionKernelRadius;
-   }
-
-   public void setMaskErosionKernelRadius(int maskErosionKernelRadius)
-   {
-      this.maskErosionKernelRadius = maskErosionKernelRadius;
-   }
-
-   public double getOutlierFilterThreshold()
-   {
-      return outlierFilterThreshold;
-   }
-
-   public void setOutlierFilterThreshold(double outlierFilterThreshold)
-   {
-      this.outlierFilterThreshold = outlierFilterThreshold;
    }
 
    public float getDetectionAcceptanceThreshold()

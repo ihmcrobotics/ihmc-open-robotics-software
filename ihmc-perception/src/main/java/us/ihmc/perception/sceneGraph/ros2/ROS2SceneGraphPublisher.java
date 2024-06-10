@@ -135,8 +135,6 @@ public class ROS2SceneGraphPublisher
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.YOLO_NODE_TYPE);
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getYoloSceneNodes().size());
             YOLOv8NodeMessage yoloNodeMessage = sceneGraphMessage.getYoloSceneNodes().add();
-            yoloNodeMessage.setMaskErosionKernelRadius(yoloNode.getMaskErosionKernelRadius());
-            yoloNodeMessage.setOutlierFilterThreshold(yoloNode.getOutlierFilterThreshold());
             yoloNodeMessage.setDetectionAcceptanceThreshold(yoloNode.getDetectionAcceptanceThreshold());
             yoloNodeMessage.setDetectionClass(yoloNode.getDetection().objectClass().name());
             yoloNodeMessage.setConfidence(yoloNode.getDetection().confidence());

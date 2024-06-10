@@ -15,7 +15,7 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9d53e97a873ba4528693b76954a92bb1bbb8f63ee11a6c1ae26c481edda59477";
+   		return "bb4cf9c215fb9b6f46836877987811189a2a4b4b6c0d13b56fee926975125a66";
    }
    
    @Override
@@ -53,10 +53,6 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       int initial_alignment = current_alignment;
 
       current_alignment += perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -100,12 +96,6 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getDetectionClass().length() + 1;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -143,10 +133,6 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    public static void write(perception_msgs.msg.dds.YOLOv8NodeMessage data, us.ihmc.idl.CDR cdr)
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.write(data.getDetectableSceneNode(), cdr);
-      cdr.write_type_2(data.getMaskErosionKernelRadius());
-
-      cdr.write_type_6(data.getOutlierFilterThreshold());
-
       cdr.write_type_5(data.getDetectionAcceptanceThreshold());
 
       if(data.getDetectionClass().length() <= 255)
@@ -176,10 +162,6 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    public static void read(perception_msgs.msg.dds.YOLOv8NodeMessage data, us.ihmc.idl.CDR cdr)
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.read(data.getDetectableSceneNode(), cdr);	
-      data.setMaskErosionKernelRadius(cdr.read_type_2());
-      	
-      data.setOutlierFilterThreshold(cdr.read_type_6());
-      	
       data.setDetectionAcceptanceThreshold(cdr.read_type_5());
       	
       cdr.read_type_d(data.getDetectionClass());	
@@ -206,8 +188,6 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       ser.write_type_a("detectable_scene_node", new perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType(), data.getDetectableSceneNode());
 
-      ser.write_type_2("mask_erosion_kernel_radius", data.getMaskErosionKernelRadius());
-      ser.write_type_6("outlier_filter_threshold", data.getOutlierFilterThreshold());
       ser.write_type_5("detection_acceptance_threshold", data.getDetectionAcceptanceThreshold());
       ser.write_type_d("detection_class", data.getDetectionClass());
       ser.write_type_5("confidence", data.getConfidence());
@@ -231,8 +211,6 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       ser.read_type_a("detectable_scene_node", new perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType(), data.getDetectableSceneNode());
 
-      data.setMaskErosionKernelRadius(ser.read_type_2("mask_erosion_kernel_radius"));
-      data.setOutlierFilterThreshold(ser.read_type_6("outlier_filter_threshold"));
       data.setDetectionAcceptanceThreshold(ser.read_type_5("detection_acceptance_threshold"));
       ser.read_type_d("detection_class", data.getDetectionClass());
       data.setConfidence(ser.read_type_5("confidence"));

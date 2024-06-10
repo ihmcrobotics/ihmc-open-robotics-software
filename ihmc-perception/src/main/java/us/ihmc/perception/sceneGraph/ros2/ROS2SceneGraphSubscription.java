@@ -162,8 +162,6 @@ public class ROS2SceneGraphSubscription
          }
          if (localNode instanceof YOLOv8Node yoloNode)
          {
-            yoloNode.setMaskErosionKernelRadius(subscriptionNode.getYOLONodeMessage().getMaskErosionKernelRadius());
-            yoloNode.setOutlierFilterThreshold(subscriptionNode.getYOLONodeMessage().getOutlierFilterThreshold());
             yoloNode.setDetectionAcceptanceThreshold(subscriptionNode.getYOLONodeMessage().getDetectionAcceptanceThreshold());
             yoloNode.setDetection(new YOLOv8Detection(YOLOv8DetectionClass.valueOf(subscriptionNode.getYOLONodeMessage().getDetectionClassAsString()),
                                                       subscriptionNode.getYOLONodeMessage().getConfidence(),

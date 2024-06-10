@@ -18,8 +18,6 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
    /**
             * YOLO parameters
             */
-   public int mask_erosion_kernel_radius_;
-   public double outlier_filter_threshold_;
    public float detection_acceptance_threshold_;
    /**
             * Detection information
@@ -69,10 +67,6 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
    public void set(YOLOv8NodeMessage other)
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.staticCopy(other.detectable_scene_node_, detectable_scene_node_);
-      mask_erosion_kernel_radius_ = other.mask_erosion_kernel_radius_;
-
-      outlier_filter_threshold_ = other.outlier_filter_threshold_;
-
       detection_acceptance_threshold_ = other.detection_acceptance_threshold_;
 
       detection_class_.setLength(0);
@@ -107,31 +101,13 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
    /**
             * YOLO parameters
             */
-   public void setMaskErosionKernelRadius(int mask_erosion_kernel_radius)
-   {
-      mask_erosion_kernel_radius_ = mask_erosion_kernel_radius;
-   }
-   /**
-            * YOLO parameters
-            */
-   public int getMaskErosionKernelRadius()
-   {
-      return mask_erosion_kernel_radius_;
-   }
-
-   public void setOutlierFilterThreshold(double outlier_filter_threshold)
-   {
-      outlier_filter_threshold_ = outlier_filter_threshold;
-   }
-   public double getOutlierFilterThreshold()
-   {
-      return outlier_filter_threshold_;
-   }
-
    public void setDetectionAcceptanceThreshold(float detection_acceptance_threshold)
    {
       detection_acceptance_threshold_ = detection_acceptance_threshold;
    }
+   /**
+            * YOLO parameters
+            */
    public float getDetectionAcceptanceThreshold()
    {
       return detection_acceptance_threshold_;
@@ -279,10 +255,6 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       if(other == this) return true;
 
       if (!this.detectable_scene_node_.epsilonEquals(other.detectable_scene_node_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.mask_erosion_kernel_radius_, other.mask_erosion_kernel_radius_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.outlier_filter_threshold_, other.outlier_filter_threshold_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.detection_acceptance_threshold_, other.detection_acceptance_threshold_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.detection_class_, other.detection_class_, epsilon)) return false;
@@ -322,10 +294,6 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       YOLOv8NodeMessage otherMyClass = (YOLOv8NodeMessage) other;
 
       if (!this.detectable_scene_node_.equals(otherMyClass.detectable_scene_node_)) return false;
-      if(this.mask_erosion_kernel_radius_ != otherMyClass.mask_erosion_kernel_radius_) return false;
-
-      if(this.outlier_filter_threshold_ != otherMyClass.outlier_filter_threshold_) return false;
-
       if(this.detection_acceptance_threshold_ != otherMyClass.detection_acceptance_threshold_) return false;
 
       if (!us.ihmc.idl.IDLTools.equals(this.detection_class_, otherMyClass.detection_class_)) return false;
@@ -357,10 +325,6 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       builder.append("YOLOv8NodeMessage {");
       builder.append("detectable_scene_node=");
       builder.append(this.detectable_scene_node_);      builder.append(", ");
-      builder.append("mask_erosion_kernel_radius=");
-      builder.append(this.mask_erosion_kernel_radius_);      builder.append(", ");
-      builder.append("outlier_filter_threshold=");
-      builder.append(this.outlier_filter_threshold_);      builder.append(", ");
       builder.append("detection_acceptance_threshold=");
       builder.append(this.detection_acceptance_threshold_);      builder.append(", ");
       builder.append("detection_class=");

@@ -4,10 +4,6 @@
 perception_msgs/DetectableSceneNodeMessage detectable_scene_node
 
 # YOLO parameters
-int32 mask_erosion_kernel_radius
-
-float64 outlier_filter_threshold
-
 float32 detection_acceptance_threshold
 
 # Detection information

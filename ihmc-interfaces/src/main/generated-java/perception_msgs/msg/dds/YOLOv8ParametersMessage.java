@@ -12,15 +12,27 @@ import us.ihmc.pubsub.TopicDataType;
 public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> implements Settable<YOLOv8ParametersMessage>, EpsilonComparable<YOLOv8ParametersMessage>
 {
    /**
-            * Confidence required to consider a mask a valid detection
+            * Confidence required to consider a detection valid
             */
    public float confidence_threshold_;
    public float non_maximum_suppression_threshold_;
    public float segmentation_threshold_;
    /**
-            * Percentage of updates a candidate must be detected in to be accepted
+            * DetectionFilter stability threshold
             */
    public float candidate_acceptance_threshold_;
+   /**
+            * How much to shrink the YOLO mask
+            */
+   public int erosion_kernel_radius_;
+   /**
+            * Rejection threshold for outlier points in segmented point cloud of the object
+            */
+   public float outlier_rejection_threshold_;
+   /**
+            * Maximum distance between new and old detections to be considered the same object
+            */
+   public float match_distance_threshold_;
    /**
             * List of YOLOv8DetectionClass values that YOLO should detect
             */
@@ -48,18 +60,24 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
 
       candidate_acceptance_threshold_ = other.candidate_acceptance_threshold_;
 
+      erosion_kernel_radius_ = other.erosion_kernel_radius_;
+
+      outlier_rejection_threshold_ = other.outlier_rejection_threshold_;
+
+      match_distance_threshold_ = other.match_distance_threshold_;
+
       target_detection_classes_.set(other.target_detection_classes_);
    }
 
    /**
-            * Confidence required to consider a mask a valid detection
+            * Confidence required to consider a detection valid
             */
    public void setConfidenceThreshold(float confidence_threshold)
    {
       confidence_threshold_ = confidence_threshold;
    }
    /**
-            * Confidence required to consider a mask a valid detection
+            * Confidence required to consider a detection valid
             */
    public float getConfidenceThreshold()
    {
@@ -85,18 +103,63 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
    }
 
    /**
-            * Percentage of updates a candidate must be detected in to be accepted
+            * DetectionFilter stability threshold
             */
    public void setCandidateAcceptanceThreshold(float candidate_acceptance_threshold)
    {
       candidate_acceptance_threshold_ = candidate_acceptance_threshold;
    }
    /**
-            * Percentage of updates a candidate must be detected in to be accepted
+            * DetectionFilter stability threshold
             */
    public float getCandidateAcceptanceThreshold()
    {
       return candidate_acceptance_threshold_;
+   }
+
+   /**
+            * How much to shrink the YOLO mask
+            */
+   public void setErosionKernelRadius(int erosion_kernel_radius)
+   {
+      erosion_kernel_radius_ = erosion_kernel_radius;
+   }
+   /**
+            * How much to shrink the YOLO mask
+            */
+   public int getErosionKernelRadius()
+   {
+      return erosion_kernel_radius_;
+   }
+
+   /**
+            * Rejection threshold for outlier points in segmented point cloud of the object
+            */
+   public void setOutlierRejectionThreshold(float outlier_rejection_threshold)
+   {
+      outlier_rejection_threshold_ = outlier_rejection_threshold;
+   }
+   /**
+            * Rejection threshold for outlier points in segmented point cloud of the object
+            */
+   public float getOutlierRejectionThreshold()
+   {
+      return outlier_rejection_threshold_;
+   }
+
+   /**
+            * Maximum distance between new and old detections to be considered the same object
+            */
+   public void setMatchDistanceThreshold(float match_distance_threshold)
+   {
+      match_distance_threshold_ = match_distance_threshold;
+   }
+   /**
+            * Maximum distance between new and old detections to be considered the same object
+            */
+   public float getMatchDistanceThreshold()
+   {
+      return match_distance_threshold_;
    }
 
 
@@ -134,6 +197,12 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.candidate_acceptance_threshold_, other.candidate_acceptance_threshold_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.erosion_kernel_radius_, other.erosion_kernel_radius_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.outlier_rejection_threshold_, other.outlier_rejection_threshold_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.match_distance_threshold_, other.match_distance_threshold_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.target_detection_classes_, other.target_detection_classes_, epsilon)) return false;
 
 
@@ -157,6 +226,12 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
 
       if(this.candidate_acceptance_threshold_ != otherMyClass.candidate_acceptance_threshold_) return false;
 
+      if(this.erosion_kernel_radius_ != otherMyClass.erosion_kernel_radius_) return false;
+
+      if(this.outlier_rejection_threshold_ != otherMyClass.outlier_rejection_threshold_) return false;
+
+      if(this.match_distance_threshold_ != otherMyClass.match_distance_threshold_) return false;
+
       if (!this.target_detection_classes_.equals(otherMyClass.target_detection_classes_)) return false;
 
       return true;
@@ -176,6 +251,12 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
       builder.append(this.segmentation_threshold_);      builder.append(", ");
       builder.append("candidate_acceptance_threshold=");
       builder.append(this.candidate_acceptance_threshold_);      builder.append(", ");
+      builder.append("erosion_kernel_radius=");
+      builder.append(this.erosion_kernel_radius_);      builder.append(", ");
+      builder.append("outlier_rejection_threshold=");
+      builder.append(this.outlier_rejection_threshold_);      builder.append(", ");
+      builder.append("match_distance_threshold=");
+      builder.append(this.match_distance_threshold_);      builder.append(", ");
       builder.append("target_detection_classes=");
       builder.append(this.target_detection_classes_);
       builder.append("}");
