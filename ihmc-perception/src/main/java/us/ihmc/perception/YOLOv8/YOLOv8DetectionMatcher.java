@@ -27,11 +27,14 @@ public class YOLOv8DetectionMatcher
    private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor();
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter();
 
-   private final Map<YOLOv8SegmentedDetection, DetectionFilter> existingDetections = new ConcurrentHashMap<>();
-   private final Map<YOLOv8SegmentedDetection, YOLOv8Node> detectionToNodeMap = new ConcurrentHashMap<>();
-   private final Map<YOLOv8SegmentedDetection, DetectionFilter> candidateDetections = new ConcurrentHashMap<>();
+   private final Map<YOLOv8SegmentedDetection, DetectionFilter> existingDetections = new HashMap<>();
+   private final Map<YOLOv8SegmentedDetection, YOLOv8Node> detectionToNodeMap = new HashMap<>();
+   private final Map<YOLOv8SegmentedDetection, DetectionFilter> candidateDetections = new HashMap<>();
 
    private final FrequencyCalculator updateFrequencyCalculator = new FrequencyCalculator();
+
+   private final Object existingDetectionsSyncObject = new Object();
+   private final Object candidateDetectionsSyncObject = new Object();
 
    public void matchDetections(Map<YOLOv8Detection, RawImage> newDetections,
                                RawImage depthImage,
@@ -53,50 +56,57 @@ public class YOLOv8DetectionMatcher
                                                                  zScoreThreshold));
       }
 
-      // Match existing and new detections
-      Map<YOLOv8SegmentedDetection, YOLOv8SegmentedDetection> detectionMatches = matchDetections(existingDetections.keySet(),
-                                                                                                 newSegmentedDetections,
-                                                                                                 distanceThreshold);
-      // Remove the new detections that matched to existing detections
-      newSegmentedDetections.removeIf(detectionMatches::containsValue);
-
-      // Replace the existing detections with the new one, and register the detection
-      detectionMatches.forEach((existingDetection, newDetection) ->
+      synchronized (existingDetectionsSyncObject)
       {
-         DetectionFilter filter = existingDetections.remove(existingDetection);
-         if (filter != null)
+         // Match existing and new detections
+         Map<YOLOv8SegmentedDetection, YOLOv8SegmentedDetection> detectionMatches = matchDetections(existingDetections.keySet(),
+                                                                                                    newSegmentedDetections,
+                                                                                                    distanceThreshold);
+         // Remove the new detections that matched to existing detections
+         newSegmentedDetections.removeIf(detectionMatches::containsValue);
+
+         // Replace the existing detections with the new one, and register the detection
+         detectionMatches.forEach((existingDetection, newDetection) ->
          {
-            filter.registerDetection(newDetection.getDetection().confidence());
-            existingDetections.put(newDetection, filter);
-         }
-      });
+            DetectionFilter filter = existingDetections.remove(existingDetection);
+            if (filter != null)
+            {
+               filter.registerDetection(newDetection.getDetection().confidence());
+               existingDetections.put(newDetection, filter);
+               detectionToNodeMap.put(newDetection, detectionToNodeMap.remove(existingDetection));
+            }
+         });
+      }
 
-      // Match remaining new detections & candidate detections
-      Map<YOLOv8SegmentedDetection, YOLOv8SegmentedDetection> candidateMatches = matchDetections(candidateDetections.keySet(),
-                                                                                                 newSegmentedDetections,
-                                                                                                 distanceThreshold);
-      // Remove the new detections that matched to candidates
-      newSegmentedDetections.removeIf(candidateMatches::containsValue);
-
-      // Replace the old candidate detections with new ones, and register the detection
-      candidateMatches.forEach((oldDetection, newDetection) ->
+      synchronized (candidateDetectionsSyncObject)
       {
-         DetectionFilter filter = candidateDetections.remove(oldDetection);
-         if (filter != null)
+         // Match remaining new detections & candidate detections
+         Map<YOLOv8SegmentedDetection, YOLOv8SegmentedDetection> candidateMatches = matchDetections(candidateDetections.keySet(),
+                                                                                                    newSegmentedDetections,
+                                                                                                    distanceThreshold);
+         // Remove the new detections that matched to candidates
+         newSegmentedDetections.removeIf(candidateMatches::containsValue);
+
+         // Replace the old candidate detections with new ones, and register the detection
+         candidateMatches.forEach((oldDetection, newDetection) ->
          {
-            filter.registerDetection(newDetection.getDetection().confidence());
-            candidateDetections.put(newDetection, filter);
-         }
-      });
+            DetectionFilter filter = candidateDetections.remove(oldDetection);
+            if (filter != null)
+            {
+               filter.registerDetection(newDetection.getDetection().confidence());
+               candidateDetections.put(newDetection, filter);
+            }
+         });
 
-      // Only unmatched new detection remain; add as new candidate detections
-      newSegmentedDetections.forEach(newDetection ->
-      {
-         DetectionFilter newFilter = new DetectionFilter((int) updateFrequencyCalculator.getFrequencyOrDefault(DEFAULT_FILTER_HISTORY),
-                                                         candidateAcceptanceThreshold);
-         newFilter.registerDetection(newDetection.getDetection().confidence());
-         candidateDetections.put(newDetection, newFilter);
-      });
+         // Only unmatched new detection remain; add as new candidate detections
+         newSegmentedDetections.forEach(newDetection ->
+         {
+            DetectionFilter newFilter = new DetectionFilter((int) updateFrequencyCalculator.getFrequencyOrDefault(DEFAULT_FILTER_HISTORY),
+                                                            candidateAcceptanceThreshold);
+            newFilter.registerDetection(newDetection.getDetection().confidence());
+            candidateDetections.put(newDetection, newFilter);
+         });
+      }
    }
 
    public void updateSceneGraph(SceneGraph sceneGraph)
@@ -106,68 +116,75 @@ public class YOLOv8DetectionMatcher
       // Handle candidate detections
       sceneGraph.modifyTree(modificationQueue ->
       {
-         // accept or reject candidate detections
-         Iterator<Entry<YOLOv8SegmentedDetection, DetectionFilter>> candidateIterator = candidateDetections.entrySet().iterator();
-         while (candidateIterator.hasNext())
+         synchronized (candidateDetectionsSyncObject)
          {
-            Entry<YOLOv8SegmentedDetection, DetectionFilter> candidateEntry = candidateIterator.next();
-            YOLOv8SegmentedDetection candidate = candidateEntry.getKey();
-            DetectionFilter filter = candidateEntry.getValue();
-            filter.setHistoryLength((int) updateFrequencyCalculator.getFrequencyOrDefault(DEFAULT_FILTER_HISTORY));
-            filter.update();
-
-            // Check if detection has been candidate long enough
-            if (filter.hasEnoughSamples())
+            // accept or reject candidate detections
+            Iterator<Entry<YOLOv8SegmentedDetection, DetectionFilter>> candidateIterator = candidateDetections.entrySet().iterator();
+            while (candidateIterator.hasNext())
             {
-               // if the candidate has stable detection, add it to existing detections
-               if (filter.isStableDetectionResult())
+               Entry<YOLOv8SegmentedDetection, DetectionFilter> candidateEntry = candidateIterator.next();
+               YOLOv8SegmentedDetection candidate = candidateEntry.getKey();
+               DetectionFilter filter = candidateEntry.getValue();
+               filter.setHistoryLength((int) updateFrequencyCalculator.getFrequencyOrDefault(DEFAULT_FILTER_HISTORY));
+               filter.update();
+
+               // Check if detection has been candidate long enough
+               if (filter.hasEnoughSamples())
                {
-                  existingDetections.put(candidate, filter);
+                  // if the candidate has stable detection, add it to existing detections
+                  if (filter.isStableDetectionResult())
+                  {
 
-                  long newNodeID = sceneGraph.getNextID().getAndIncrement();
-                  String newNodeName = candidate.getDetection().objectClass().getDefaultNodeName() + newNodeID;
-                  YOLOv8Node newYoloNode = new YOLOv8Node(newNodeID,
-                                                          newNodeName,
-                                                          candidate.getDetection(),
-                                                          candidate.getObjectPointCloud(),
-                                                          candidate.getCentroid());
-                  modificationQueue.accept(new SceneGraphNodeAddition(newYoloNode, sceneGraph.getRootNode()));
+                     long newNodeID = sceneGraph.getNextID().getAndIncrement();
+                     String newNodeName = candidate.getDetection().objectClass().getDefaultNodeName() + newNodeID;
+                     YOLOv8Node newYoloNode = new YOLOv8Node(newNodeID,
+                                                             newNodeName,
+                                                             candidate.getDetection(),
+                                                             candidate.getObjectPointCloud(),
+                                                             candidate.getCentroid());
+                     modificationQueue.accept(new SceneGraphNodeAddition(newYoloNode, sceneGraph.getRootNode()));
 
-                  detectionToNodeMap.put(candidate, newYoloNode);
-                  filter.setAcceptanceThreshold(DEFAULT_ACCEPTANCE_THRESHOLD);
+                     existingDetections.put(candidate, filter);
+                     detectionToNodeMap.put(candidate, newYoloNode);
+
+                     filter.setAcceptanceThreshold(DEFAULT_ACCEPTANCE_THRESHOLD);
+                  }
+
+                  // remove the candidate
+                  candidateIterator.remove();
                }
-
-               // remove the candidate
-               candidateIterator.remove();
             }
          }
       });
 
-      // Handle existing detections
-      Iterator<Entry<YOLOv8SegmentedDetection, YOLOv8Node>> detectionToNodeMapIterator = detectionToNodeMap.entrySet().iterator();
-      while (detectionToNodeMapIterator.hasNext())
+      synchronized (existingDetectionsSyncObject)
       {
-         Entry<YOLOv8SegmentedDetection, YOLOv8Node> entry = detectionToNodeMapIterator.next();
-         YOLOv8SegmentedDetection detection = entry.getKey();
-         YOLOv8Node yoloNode = entry.getValue();
-
-         // Node may have been removed by user
-         if (!sceneGraph.getIDToNodeMap().containsKey(yoloNode.getID()))
+         // Handle existing detections
+         Iterator<Entry<YOLOv8SegmentedDetection, YOLOv8Node>> detectionToNodeMapIterator = detectionToNodeMap.entrySet().iterator();
+         while (detectionToNodeMapIterator.hasNext())
          {
-            detectionToNodeMapIterator.remove();
-            existingDetections.remove(detection);
-         }
-         else // Node still exists; update
-         {
-            DetectionFilter filter = existingDetections.get(detection);
-            filter.setAcceptanceThreshold(yoloNode.getDetectionAcceptanceThreshold());
-            filter.update();
+            Entry<YOLOv8SegmentedDetection, YOLOv8Node> entry = detectionToNodeMapIterator.next();
+            YOLOv8SegmentedDetection detection = entry.getKey();
+            YOLOv8Node yoloNode = entry.getValue();
 
-            yoloNode.setDetection(detection.getDetection());
-            yoloNode.setObjectPointCloud(detection.getObjectPointCloud());
-            yoloNode.setObjectCentroid(detection.getCentroid());
-            yoloNode.setCurrentlyDetected(filter.isStableDetectionResult());
-            yoloNode.update();
+            // Node may have been removed by user
+            if (!sceneGraph.getIDToNodeMap().containsKey(yoloNode.getID()))
+            {
+               detectionToNodeMapIterator.remove();
+               existingDetections.remove(detection);
+            }
+            else // Node still exists; update
+            {
+               DetectionFilter filter = existingDetections.get(detection);
+               filter.setAcceptanceThreshold(yoloNode.getDetectionAcceptanceThreshold());
+               filter.update();
+
+               yoloNode.setDetection(detection.getDetection());
+               yoloNode.setObjectPointCloud(detection.getObjectPointCloud());
+               yoloNode.setObjectCentroid(detection.getCentroid());
+               yoloNode.setCurrentlyDetected(filter.isStableDetectionResult());
+               yoloNode.update();
+            }
          }
       }
    }
