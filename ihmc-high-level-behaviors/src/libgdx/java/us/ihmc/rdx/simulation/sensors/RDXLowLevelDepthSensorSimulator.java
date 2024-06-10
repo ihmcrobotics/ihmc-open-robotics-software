@@ -98,7 +98,7 @@ public class RDXLowLevelDepthSensorSimulator
    /** This contains a float buffer that has the point cloud in world coordinates **/
    private OpenCLFloatBuffer pointCloudRenderingBuffer;
    private OpenCLFloatBuffer parametersBuffer;
-   private boolean firstRender = true;
+   private long sequenceNumber = 0;
 
    public RDXLowLevelDepthSensorSimulator(String sensorName,
                                           double fieldOfViewY,
@@ -277,9 +277,8 @@ public class RDXLowLevelDepthSensorSimulator
       parametersBuffer.getBytedecoFloatBufferPointer().put(26, noiseAmplitudeAtMinRange);
       parametersBuffer.getBytedecoFloatBufferPointer().put(27, noiseAmplitudeAtMaxRange);
       parametersBuffer.getBytedecoFloatBufferPointer().put(28, simulateL515Noise);
-      if (firstRender)
+      if (sequenceNumber++ == 0)
       {
-         firstRender = false;
          normalizedDeviceCoordinateDepthImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
          noiseImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
          rgba8888ColorImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
@@ -438,6 +437,11 @@ public class RDXLowLevelDepthSensorSimulator
    public Texture getFrameBufferColorTexture()
    {
       return frameBuffer.getColorTexture();
+   }
+
+   public long getSequenceNumber()
+   {
+      return sequenceNumber;
    }
 
    public CameraIntrinsics getCameraIntrinsics()

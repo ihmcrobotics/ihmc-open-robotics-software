@@ -251,7 +251,7 @@ public class PerceptionAndAutonomyProcess
 
       centerposeDetectionManager = new CenterposeDetectionManager(ros2Helper);
 
-      yolov8DetectionManager = new YOLOv8DetectionManager(ros2Helper, yoloAnnotatedImageDemandNode);
+      yolov8DetectionManager = new YOLOv8DetectionManager(ros2Helper, yoloAnnotatedImageDemandNode::isDemanded);
 
       icpManager = new IterativeClosestPointManager(ros2Helper, sceneGraph);
       icpManager.startWorkers();
