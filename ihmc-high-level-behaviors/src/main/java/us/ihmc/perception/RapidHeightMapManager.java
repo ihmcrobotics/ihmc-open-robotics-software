@@ -57,7 +57,10 @@ public class RapidHeightMapManager
                       ReferenceFrame d455ZUpSensorFrame,
                       ROS2PublishSubscribeAPI ros2)
    {
-      latestDepthImage.copyTo(heightMapBytedecoImage.getBytedecoOpenCVMat());
+      if (latestDepthImage.type() == opencv_core.CV_32FC1) // Support our simulated sensors
+         OpenCVTools.convertFloatToShort(latestDepthImage, heightMapBytedecoImage.getBytedecoOpenCVMat(), 1000.0, 0.0);
+      else
+         latestDepthImage.copyTo(heightMapBytedecoImage.getBytedecoOpenCVMat());
 
       if (resetHeightMapRequested.poll())
       {
