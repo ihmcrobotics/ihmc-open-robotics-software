@@ -6,6 +6,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory.UnclampedEstimatedRootYawProvider;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSensorCalibrationModule;
 
@@ -49,6 +50,11 @@ public interface StateEstimatorController extends RobotController, StateEstimato
    }
 
    default ForceSensorDataHolderReadOnly getForceSensorOutputWithGravityCancelled()
+   {
+      return null;
+   }
+
+   default UnclampedEstimatedRootYawProvider getUnclampedEstimatedRootYawProvider()
    {
       return null;
    }

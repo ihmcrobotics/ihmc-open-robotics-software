@@ -1,12 +1,5 @@
 package us.ihmc.avatar;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.BooleanSupplier;
-
 import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.RequestWristForceSensorCalibrationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
@@ -20,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.ControllerAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -39,10 +31,12 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory.UnclampedEstimatedRootYawProvider;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
@@ -71,13 +65,21 @@ import us.ihmc.yoVariables.exceptions.IllegalOperationException;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.BooleanSupplier;
+
 public class AvatarEstimatorThreadFactory
 {
    private final YoRegistry estimatorRegistry = new YoRegistry("DRCEstimatorThread");
 
    // Required fields -----------------------------------------------
    private final RequiredFactoryField<Double> gravityField = new RequiredFactoryField<>("gravity");
-   private final RequiredFactoryField<HumanoidRobotContextDataFactory> humanoidRobotContextDataFactoryField = new RequiredFactoryField<>("humanoidRobotContextDataFactory");
+   private final RequiredFactoryField<HumanoidRobotContextDataFactory> humanoidRobotContextDataFactoryField = new RequiredFactoryField<>(
+         "humanoidRobotContextDataFactory");
    private final RequiredFactoryField<FullHumanoidRobotModel> estimatorFullRobotModelField = new RequiredFactoryField<>("estimatorFullRobotModel");
    private final RequiredFactoryField<StateEstimatorParameters> stateEstimatorParametersField = new RequiredFactoryField<>("stateEstimatorParameters");
    private final RequiredFactoryField<SensorReaderFactory> sensorReaderFactoryField = new RequiredFactoryField<>("sensorReaderFactory");
@@ -88,12 +90,16 @@ public class AvatarEstimatorThreadFactory
    // Optional fields -----------------------------------------------
    private final OptionalFactoryField<YoGraphicsListRegistry> yoGraphicsListRegistryField = new OptionalFactoryField<>("yoGraphicsListRegistry");
    private final OptionalFactoryField<StateEstimatorController> mainStateEstimatorField = new OptionalFactoryField<>("mainEstimatorController");
-   private final OptionalFactoryField<PairList<BooleanSupplier, StateEstimatorController>> secondaryStateEstimatorsField = new OptionalFactoryField<>("secondaryEstimatorControllers");
-   private final OptionalFactoryField<List<StateEstimatorControllerFactory>> secondaryStateEstimatorFactoriesField = new OptionalFactoryField<>("secondaryEstimatorControllerFactories");
+   private final OptionalFactoryField<PairList<BooleanSupplier, StateEstimatorController>> secondaryStateEstimatorsField = new OptionalFactoryField<>(
+         "secondaryEstimatorControllers");
+   private final OptionalFactoryField<List<StateEstimatorControllerFactory>> secondaryStateEstimatorFactoriesField = new OptionalFactoryField<>(
+         "secondaryEstimatorControllerFactories");
 
-   private final OptionalFactoryField<RobotConfigurationDataPublisher> robotConfigurationDataPublisherField = new OptionalFactoryField<>("robotConfigurationDataPublisher");
+   private final OptionalFactoryField<RobotConfigurationDataPublisher> robotConfigurationDataPublisherField = new OptionalFactoryField<>(
+         "robotConfigurationDataPublisher");
 
-   private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisPoseSubscriberField = new OptionalFactoryField<>("externalPelvisPoseSubscriberField");
+   private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisPoseSubscriberField = new OptionalFactoryField<>(
+         "externalPelvisPoseSubscriberField");
 
    private final OptionalFactoryField<RealtimeROS2Node> realtimeROS2NodeField = new OptionalFactoryField<>("realtimeROS2Node");
    private final OptionalFactoryField<ROS2Topic<?>> outputTopicField = new OptionalFactoryField<>("outputTopic");
@@ -101,15 +107,18 @@ public class AvatarEstimatorThreadFactory
 
    private final OptionalFactoryField<SensorDataContext> sensorDataContextField = new OptionalFactoryField<>("sensorDataContext");
    private final OptionalFactoryField<HumanoidRobotContextData> humanoidRobotContextDataField = new OptionalFactoryField<>("humanoidRobotContextData");
-   private final OptionalFactoryField<HumanoidRobotContextJointData> humanoidRobotContextJointDataField = new OptionalFactoryField<>("humanoidRobotContextJointData");
+   private final OptionalFactoryField<HumanoidRobotContextJointData> humanoidRobotContextJointDataField = new OptionalFactoryField<>(
+         "humanoidRobotContextJointData");
    private final OptionalFactoryField<LowLevelOneDoFJointDesiredDataHolder> desiredJointDataHolderField = new OptionalFactoryField<>("desiredJointDataHolder");
 
    private final OptionalFactoryField<FloatingJointBasics> rootJointField = new OptionalFactoryField<>("rootJoint");
    private final OptionalFactoryField<OneDoFJointBasics[]> oneDoFJointsField = new OptionalFactoryField<>("oneDoFJoints");
    private final OptionalFactoryField<OneDoFJointBasics[]> controllableOneDoFJointsField = new OptionalFactoryField<>("controllableOneDoFJoints");
 
-   private final OptionalFactoryField<RobotMotionStatusHolder> robotMotionStatusFromControllerField = new OptionalFactoryField<>("robotMotionStatusFromController");
-   private final OptionalFactoryField<CenterOfPressureDataHolder> centerOfPressureDataHolderFromControllerField = new OptionalFactoryField<>("centerOfPressureDataHolderFromController");
+   private final OptionalFactoryField<RobotMotionStatusHolder> robotMotionStatusFromControllerField = new OptionalFactoryField<>(
+         "robotMotionStatusFromController");
+   private final OptionalFactoryField<CenterOfPressureDataHolder> centerOfPressureDataHolderFromControllerField = new OptionalFactoryField<>(
+         "centerOfPressureDataHolderFromController");
    private final OptionalFactoryField<ForceSensorDataHolder> forceSensorDataHolderField = new OptionalFactoryField<>("forceSensorDataHolder");
    private final OptionalFactoryField<CenterOfMassDataHolder> centerOfMassDataHolderField = new OptionalFactoryField<>("centerOfMassDataHolder");
    private final OptionalFactoryField<ForceSensorDefinition[]> forceSensorDefinitionsField = new OptionalFactoryField<>("forceSensorDefinitionsField");
@@ -377,7 +386,6 @@ public class AvatarEstimatorThreadFactory
       addSecondaryStateEstimators(() -> false, secondaryStateEstimator);
    }
 
-
    /**
     * Optional: adds a secondary state estimator factory to run in parallel to the main state estimator.
     *
@@ -484,8 +492,9 @@ public class AvatarEstimatorThreadFactory
       if (realtimeROS2NodeField.hasValue())
       {
          ForceSensorStateUpdater forceSensorStateUpdater = stateEstimator.getForceSensorStateUpdater();
-         realtimeROS2NodeField.get().createSubscription(inputTopicField.get().withTypeName(RequestWristForceSensorCalibrationPacket.class),
-                                     subscriber -> forceSensorStateUpdater.requestWristForceSensorCalibrationAtomic());
+         realtimeROS2NodeField.get()
+                              .createSubscription(inputTopicField.get().withTypeName(RequestWristForceSensorCalibrationPacket.class),
+                                                  subscriber -> forceSensorStateUpdater.requestWristForceSensorCalibrationAtomic());
       }
 
       return stateEstimator;
@@ -789,13 +798,23 @@ public class AvatarEstimatorThreadFactory
       if (!robotConfigurationDataPublisherField.hasValue())
       {
          ForceSensorDataHolderReadOnly forceSensorDataHolderToSend = getForceSensorDataHolder();
-         if (getMainStateEstimator() != null && getMainStateEstimator().getForceSensorOutputWithGravityCancelled() != null)
-            forceSensorDataHolderToSend = getMainStateEstimator().getForceSensorOutputWithGravityCancelled();
+         UnclampedEstimatedRootYawProvider unclampedEstimatedRootYawProvider = null;
+         StateEstimatorController mainStateEstimator = getMainStateEstimator();
+
+         if (mainStateEstimator != null)
+         {
+            if (mainStateEstimator.getForceSensorOutputWithGravityCancelled() != null)
+               forceSensorDataHolderToSend = mainStateEstimator.getForceSensorOutputWithGravityCancelled();
+
+            unclampedEstimatedRootYawProvider = mainStateEstimator.getUnclampedEstimatedRootYawProvider();
+         }
 
          RobotConfigurationDataPublisherFactory factory = new RobotConfigurationDataPublisherFactory();
          factory.setDefinitionsToPublish(getEstimatorFullRobotModel());
          factory.setSensorSource(getEstimatorFullRobotModel(), forceSensorDataHolderToSend, getRawSensorOutputMap());
          factory.setRobotMotionStatusHolder(getRobotMotionStatusFromController());
+         if (unclampedEstimatedRootYawProvider != null)
+            factory.setUnclampedEstimatedRootYawProvider(unclampedEstimatedRootYawProvider);
          factory.setROS2Info(realtimeROS2NodeField.get(), outputTopicField.get());
          factory.setPublishPeriod(Conversions.secondsToNanoseconds(StateEstimatorParameters.ROBOT_CONFIGURATION_DATA_PUBLISH_DT));
          robotConfigurationDataPublisherField.set(factory.createRobotConfigurationDataPublisher());

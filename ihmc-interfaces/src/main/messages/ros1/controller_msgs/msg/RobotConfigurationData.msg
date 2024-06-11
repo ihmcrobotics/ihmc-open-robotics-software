@@ -34,6 +34,9 @@ float32[] joint_torques
 
 geometry_msgs/Point root_position
 
+# The estimated yaw of the root joint in the world frame. This angle is not clamped to [-pi, pi].
+float32 unclamped_root_yaw
+
 geometry_msgs/Quaternion root_orientation
 
 geometry_msgs/Vector3 pelvis_linear_velocity

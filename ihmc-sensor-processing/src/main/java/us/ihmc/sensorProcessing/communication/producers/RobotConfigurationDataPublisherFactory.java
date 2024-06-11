@@ -1,12 +1,5 @@
 package us.ihmc.sensorProcessing.communication.producers;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -33,6 +26,13 @@ import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 public class RobotConfigurationDataPublisherFactory
 {
    private final RequiredFactoryField<List<? extends OneDoFJointStateReadOnly>> oneDoFJointSensorData = new RequiredFactoryField<>("oneDoFJointSensorData");
@@ -46,6 +46,8 @@ public class RobotConfigurationDataPublisherFactory
    private final OptionalFactoryField<IMUDefinition[]> imuDefinitionsField = new OptionalFactoryField<>("imuDefinitions");
    private final OptionalFactoryField<ForceSensorDefinition[]> forceSensorDefinitionsField = new OptionalFactoryField<>("forceSensorDefinitions");
 
+   private final OptionalFactoryField<UnclampedEstimatedRootYawProvider> unclampedEstimatedRootYawProviderField = new OptionalFactoryField<>(
+         "unclampedEstimatedRootYawProvider");
    private final OptionalFactoryField<RobotMotionStatusHolder> robotMotionStatusHolderField = new OptionalFactoryField<>("robotMotionStatusHolder");
 
    private final RequiredFactoryField<RealtimeROS2Node> realtimeROS2NodeField = new RequiredFactoryField<>("realtimeROS2Node");
@@ -59,6 +61,7 @@ public class RobotConfigurationDataPublisherFactory
       forceSensorDefinitionsField.setDefaultValue(new ForceSensorDefinition[0]);
 
       robotMotionStatusHolderField.setDefaultValue(new RobotMotionStatusHolder(RobotMotionStatus.UNKNOWN));
+      unclampedEstimatedRootYawProviderField.setDefaultValue(() -> rootJointSensorData.get().getPose().getYaw());
       publishPeriod.setDefaultValue(0L);
    }
 
@@ -68,7 +71,7 @@ public class RobotConfigurationDataPublisherFactory
     * <li>joint states are obtained from the {@code fullRobotModel}.
     * <li>timestamps, force sensor data, and IMU data are obtained from {@code sensorOutput}.
     * </ul>
-    * 
+    *
     * @param fullRobotModel to get joint state.
     * @param sensorOutput   to get timestamps, force sensor data, and IMU data.
     */
@@ -84,7 +87,7 @@ public class RobotConfigurationDataPublisherFactory
     * <li>force sensor data from the given {@code forceSensorDataHolderToSend}.
     * <li>timestamps and IMU data are obtained from {@code sensorOutput}.
     * </ul>
-    * 
+    *
     * @param fullRobotModel              to get joint state.
     * @param forceSensorDataHolderToSend to get force sensor data.
     * @param sensorOutput                to get timestamps and IMU data.
@@ -107,7 +110,7 @@ public class RobotConfigurationDataPublisherFactory
 
    /**
     * Sets the sensor source to use to get the data to publish.
-    * 
+    *
     * @param sensorTimestampHolder to get timestamps.
     * @param rootJointStateOutput  to get root joint state.
     * @param jointSensorOutputs    to get the 1-DoF joint states.
@@ -132,7 +135,7 @@ public class RobotConfigurationDataPublisherFactory
     * <p>
     * Note that the finger joints are excluded by default.
     * </p>
-    * 
+    *
     * @param fullHumanoidRobotModel the instance to get the definitions from.
     * @see #setDefinitionsToPublish(OneDoFJointBasics[], ForceSensorDefinition[], IMUDefinition[])
     */
@@ -145,7 +148,7 @@ public class RobotConfigurationDataPublisherFactory
 
    /**
     * Extracts and sets the sensor definitions from the given {@code fullRobotModel}.
-    * 
+    *
     * @param fullRobotModel the instance to get the definitions from.
     * @see #setDefinitionsToPublish(OneDoFJointBasics[], ForceSensorDefinition[], IMUDefinition[])
     */
@@ -156,7 +159,7 @@ public class RobotConfigurationDataPublisherFactory
 
    /**
     * Specifies for which sensors the data should be sent.
-    * 
+    *
     * @param joints                 only the data for the given joints will be published.
     * @param forceSensorDefinitions only the data for the given force sensors will be published.
     * @param imuDefinitions         only the data for the given IMUs will be published.
@@ -171,7 +174,7 @@ public class RobotConfigurationDataPublisherFactory
    /**
     * Sets the robot motion status holder that will be used to update the corresponding field in
     * {@link RobotConfigurationData#robot_motion_status_}.
-    * 
+    *
     * @param robotMotionStatusHolder the status holder to use for publishing data.
     */
    public void setRobotMotionStatusHolder(RobotMotionStatusHolder robotMotionStatusHolder)
@@ -179,9 +182,14 @@ public class RobotConfigurationDataPublisherFactory
       robotMotionStatusHolderField.set(robotMotionStatusHolder);
    }
 
+   public void setUnclampedEstimatedRootYawProvider(UnclampedEstimatedRootYawProvider unclampedEstimatedRootYawProvider)
+   {
+      unclampedEstimatedRootYawProviderField.set(unclampedEstimatedRootYawProvider);
+   }
+
    /**
     * ROS 2 necessary information to create the real-time publisher.
-    * 
+    *
     * @param ros2Node    the real-time node to create the publisher with.
     * @param outputTopic the generator to use for creating the topic name.
     */
@@ -203,17 +211,16 @@ public class RobotConfigurationDataPublisherFactory
 
    /**
     * Instantiates a new publisher and disposes of this factory.
-    * 
+    *
     * @return the new publisher ready to use.
     */
    public RobotConfigurationDataPublisher createRobotConfigurationDataPublisher()
    {
       FactoryTools.checkAllFactoryFieldsAreSet(this);
-      
+
       List<OneDoFJointStateReadOnly> jointSensorDataToPublish = filterJointSensorDataToPublish();
       List<IMUSensorReadOnly> imuSensorDataToPublish = filterIMUSensorDataToPublish();
       List<ForceSensorDataReadOnly> forceSensorDataToPublish = filterForceSensorDataToPublish();
-      
 
       RobotConfigurationDataPublisher publisher = new RobotConfigurationDataPublisher(realtimeROS2NodeField.get(),
                                                                                       outputTopicField.get(),
@@ -224,6 +231,7 @@ public class RobotConfigurationDataPublisherFactory
                                                                                       frameDataToPublish,
                                                                                       timestampHolder.get(),
                                                                                       robotMotionStatusHolderField.get(),
+                                                                                      unclampedEstimatedRootYawProviderField.get(),
                                                                                       publishPeriod.get());
 
       FactoryTools.disposeFactory(this);
@@ -341,5 +349,10 @@ public class RobotConfigurationDataPublisherFactory
       ForceSensorData dummySensor = new ForceSensorData();
       dummySensor.setDefinition(forceSensor);
       return dummySensor;
+   }
+
+   public interface UnclampedEstimatedRootYawProvider
+   {
+      double getUnclampedEstimatedRootYaw();
    }
 }

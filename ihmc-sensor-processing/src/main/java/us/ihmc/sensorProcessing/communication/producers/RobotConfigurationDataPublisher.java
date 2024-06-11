@@ -1,26 +1,27 @@
 package us.ihmc.sensorProcessing.communication.producers;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import controller_msgs.msg.dds.IMUPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.communication.StateEstimatorAPI;
-import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory.UnclampedEstimatedRootYawProvider;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.sensorProcessors.FloatingJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class RobotConfigurationDataPublisher implements RawOutputWriter
 {
@@ -36,6 +37,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    private final RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
    private final ROS2PublisherBasics<RobotConfigurationData> robotConfigurationDataPublisher;
 
+   private final UnclampedEstimatedRootYawProvider unclampedEstimatedRootYawProvider;
    private final long publishPeriod;
    private long lastPublishTime = -1;
 
@@ -44,16 +46,17 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
 
    /**
     * Intended to be instantiated only using {@link RobotConfigurationDataPublisherFactory}.
-    * 
-    * @param realtimeROS2Node        the ROS 2 node to create the publisher with.
-    * @param outputTopic             the generator to use to create the name of the topic.
-    * @param rootJointSensorData     the data provider for the root joint.
-    * @param jointSensorData         the data providers for the 1-DoF joints.
-    * @param imuSensorData           the data providers for the IMUs.
-    * @param forceSensorData         the data providers for the force sensors.
-    * @param timestampHolder         the data provider for the timestamps.
-    * @param robotMotionStatusHolder the data provider for the robot motion status.
-    * @param publishPeriod           period in nanoseconds to publish.
+    *
+    * @param realtimeROS2Node                  the ROS 2 node to create the publisher with.
+    * @param outputTopic                       the generator to use to create the name of the topic.
+    * @param rootJointSensorData               the data provider for the root joint.
+    * @param jointSensorData                   the data providers for the 1-DoF joints.
+    * @param imuSensorData                     the data providers for the IMUs.
+    * @param forceSensorData                   the data providers for the force sensors.
+    * @param timestampHolder                   the data provider for the timestamps.
+    * @param robotMotionStatusHolder           the data provider for the robot motion status.
+    * @param unclampedEstimatedRootYawProvider the data provider for the unclamped estimated root yaw.
+    * @param publishPeriod                     period in nanoseconds to publish.
     */
    public RobotConfigurationDataPublisher(RealtimeROS2Node realtimeROS2Node,
                                           ROS2Topic<?> outputTopic,
@@ -64,6 +67,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
                                           List<? extends ReferenceFrame> frameData,
                                           SensorTimestampHolder timestampHolder,
                                           RobotMotionStatusHolder robotMotionStatusHolder,
+                                          UnclampedEstimatedRootYawProvider unclampedEstimatedRootYawProvider,
                                           long publishPeriod)
    {
       this.rootJointSensorData = rootJointSensorData;
@@ -72,6 +76,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       this.forceSensorData = forceSensorData;
       this.timestampHolder = timestampHolder;
       this.robotMotionStatusHolder = robotMotionStatusHolder;
+      this.unclampedEstimatedRootYawProvider = unclampedEstimatedRootYawProvider;
       this.publishPeriod = publishPeriod;
 
       robotConfigurationData.setJointNameHash(RobotConfigurationDataFactory.calculateJointNameHash(jointSensorData, forceSensorData, imuSensorData));
@@ -103,6 +108,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       robotConfigurationData.setSyncTimestamp(timestampHolder.getSyncTimestamp());
 
       // Write root joint data
+      robotConfigurationData.setUnclampedRootYaw((float) unclampedEstimatedRootYawProvider.getUnclampedEstimatedRootYaw());
       robotConfigurationData.getRootOrientation().set(rootJointSensorData.getPose().getOrientation());
       robotConfigurationData.getRootPosition().set(rootJointSensorData.getPose().getPosition());
       robotConfigurationData.getPelvisAngularVelocity().set(rootJointSensorData.getTwist().getAngularPart());

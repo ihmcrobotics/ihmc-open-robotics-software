@@ -55,6 +55,10 @@ module controller_msgs
         sequence<float, 50> joint_velocities;
         sequence<float, 50> joint_torques;
         geometry_msgs::msg::dds::Point root_position;
+        /**
+         * The estimated yaw of the root joint in the world frame. This angle is not clamped to [-pi, pi].
+         */
+        float unclamped_root_yaw;
         geometry_msgs::msg::dds::Quaternion root_orientation;
         geometry_msgs::msg::dds::Vector3 pelvis_linear_velocity;
         geometry_msgs::msg::dds::Vector3 pelvis_angular_velocity;

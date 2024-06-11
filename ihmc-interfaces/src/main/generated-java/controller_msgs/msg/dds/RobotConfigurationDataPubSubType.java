@@ -15,7 +15,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "06d7040905e6dccb1fbc39f344d9b71096e35cc8faa6f66edce02b780c376aaa";
+   		return "1bfba03f0cd4b448d7538caee2d22bba2b02a659c9446151b6a37814be3da176";
    }
    
    @Override
@@ -69,6 +69,8 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (50 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -134,6 +136,9 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRootPosition(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getRootOrientation(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getPelvisLinearVelocity(), current_alignment);
@@ -193,6 +198,8 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
           throw new RuntimeException("joint_torques field exceeds the maximum length");
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getRootPosition(), cdr);
+      cdr.write_type_5(data.getUnclampedRootYaw());
+
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getRootOrientation(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getPelvisLinearVelocity(), cdr);
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getPelvisAngularVelocity(), cdr);
@@ -231,6 +238,8 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
       cdr.read_type_e(data.getJointVelocities());	
       cdr.read_type_e(data.getJointTorques());	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getRootPosition(), cdr);	
+      data.setUnclampedRootYaw(cdr.read_type_5());
+      	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getRootOrientation(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getPelvisLinearVelocity(), cdr);	
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getPelvisAngularVelocity(), cdr);	
@@ -261,6 +270,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
       ser.write_type_e("joint_torques", data.getJointTorques());
       ser.write_type_a("root_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getRootPosition());
 
+      ser.write_type_5("unclamped_root_yaw", data.getUnclampedRootYaw());
       ser.write_type_a("root_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRootOrientation());
 
       ser.write_type_a("pelvis_linear_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getPelvisLinearVelocity());
@@ -290,6 +300,7 @@ public class RobotConfigurationDataPubSubType implements us.ihmc.pubsub.TopicDat
       ser.read_type_e("joint_torques", data.getJointTorques());
       ser.read_type_a("root_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getRootPosition());
 
+      data.setUnclampedRootYaw(ser.read_type_5("unclamped_root_yaw"));
       ser.read_type_a("root_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRootOrientation());
 
       ser.read_type_a("pelvis_linear_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getPelvisLinearVelocity());

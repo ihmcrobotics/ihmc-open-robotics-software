@@ -41,6 +41,10 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
    public us.ihmc.idl.IDLSequence.Float  joint_velocities_;
    public us.ihmc.idl.IDLSequence.Float  joint_torques_;
    public us.ihmc.euclid.tuple3D.Point3D root_position_;
+   /**
+            * The estimated yaw of the root joint in the world frame. This angle is not clamped to [-pi, pi].
+            */
+   public float unclamped_root_yaw_;
    public us.ihmc.euclid.tuple4D.Quaternion root_orientation_;
    public us.ihmc.euclid.tuple3D.Vector3D pelvis_linear_velocity_;
    public us.ihmc.euclid.tuple3D.Vector3D pelvis_angular_velocity_;
@@ -92,6 +96,8 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
       joint_velocities_.set(other.joint_velocities_);
       joint_torques_.set(other.joint_torques_);
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.root_position_, root_position_);
+      unclamped_root_yaw_ = other.unclamped_root_yaw_;
+
       geometry_msgs.msg.dds.QuaternionPubSubType.staticCopy(other.root_orientation_, root_orientation_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.pelvis_linear_velocity_, pelvis_linear_velocity_);
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.pelvis_angular_velocity_, pelvis_angular_velocity_);
@@ -211,6 +217,21 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
       return root_position_;
    }
 
+   /**
+            * The estimated yaw of the root joint in the world frame. This angle is not clamped to [-pi, pi].
+            */
+   public void setUnclampedRootYaw(float unclamped_root_yaw)
+   {
+      unclamped_root_yaw_ = unclamped_root_yaw;
+   }
+   /**
+            * The estimated yaw of the root joint in the world frame. This angle is not clamped to [-pi, pi].
+            */
+   public float getUnclampedRootYaw()
+   {
+      return unclamped_root_yaw_;
+   }
+
 
    public us.ihmc.euclid.tuple4D.Quaternion getRootOrientation()
    {
@@ -318,6 +339,8 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.joint_torques_, other.joint_torques_, epsilon)) return false;
 
       if (!this.root_position_.epsilonEquals(other.root_position_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.unclamped_root_yaw_, other.unclamped_root_yaw_, epsilon)) return false;
+
       if (!this.root_orientation_.epsilonEquals(other.root_orientation_, epsilon)) return false;
       if (!this.pelvis_linear_velocity_.epsilonEquals(other.pelvis_linear_velocity_, epsilon)) return false;
       if (!this.pelvis_angular_velocity_.epsilonEquals(other.pelvis_angular_velocity_, epsilon)) return false;
@@ -371,6 +394,8 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
       if (!this.joint_velocities_.equals(otherMyClass.joint_velocities_)) return false;
       if (!this.joint_torques_.equals(otherMyClass.joint_torques_)) return false;
       if (!this.root_position_.equals(otherMyClass.root_position_)) return false;
+      if(this.unclamped_root_yaw_ != otherMyClass.unclamped_root_yaw_) return false;
+
       if (!this.root_orientation_.equals(otherMyClass.root_orientation_)) return false;
       if (!this.pelvis_linear_velocity_.equals(otherMyClass.pelvis_linear_velocity_)) return false;
       if (!this.pelvis_angular_velocity_.equals(otherMyClass.pelvis_angular_velocity_)) return false;
@@ -413,6 +438,8 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
       builder.append(this.joint_torques_);      builder.append(", ");
       builder.append("root_position=");
       builder.append(this.root_position_);      builder.append(", ");
+      builder.append("unclamped_root_yaw=");
+      builder.append(this.unclamped_root_yaw_);      builder.append(", ");
       builder.append("root_orientation=");
       builder.append(this.root_orientation_);      builder.append(", ");
       builder.append("pelvis_linear_velocity=");
