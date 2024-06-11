@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiTableColumnFlags;
 import imgui.flag.ImGuiTableFlags;
 import imgui.type.ImBoolean;
+import imgui.type.ImString;
 import us.ihmc.pubsub.impl.fastRTPS.FastRTPSDomain;
 import us.ihmc.pubsub.participant.Participant;
 import us.ihmc.pubsub.publisher.Publisher;
@@ -11,6 +12,7 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.scs2.sessionVisualizer.jfx.controllers.RegularExpression;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -31,6 +33,7 @@ public class RDXROS2StatsPanel extends RDXPanel
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImBoolean sortByLargestMessageSize = new ImBoolean(true);
    private final ImBoolean hideInactiveTopics = new ImBoolean(true);
+   private final ImString filter = new ImString();
 
    private final HashMap<Publisher, PubSubPublisherStats> publisherStatsMap = new HashMap<>();
    private final HashMap<Subscriber<?>, PubSubSubscriberStats> subscriberStatsMap = new HashMap<>();
@@ -60,6 +63,8 @@ public class RDXROS2StatsPanel extends RDXPanel
 
    private void renderImGuiWidgets()
    {
+      ImGui.inputText(labels.get("Search"), filter);
+
       numberOfMatchedSubscriptions = 0;
       numberOfPublications = 0;
       numberOfReceivedMessages = 0;
@@ -236,14 +241,17 @@ public class RDXROS2StatsPanel extends RDXPanel
 
          for (Participant participant : participantsSortedByName)
          {
-            ImGui.tableNextColumn();
-            ImGui.text(participant.getAttributes().getName());
-            ImGui.tableNextColumn();
-            ImGui.text("%d".formatted(participant.getAllPublishersForStatistics().size()));
-            ImGui.tableNextColumn();
-            ImGui.text("%d".formatted(participant.getAllSubscribersForStatistics().size()));
-            ImGui.tableNextColumn();
-            ImGui.text("%b".formatted(participant.isRemoved()));
+            if (RegularExpression.check(participant.getAttributes().getName(), filter.get()))
+            {
+               ImGui.tableNextColumn();
+               ImGui.text(participant.getAttributes().getName());
+               ImGui.tableNextColumn();
+               ImGui.text("%d".formatted(participant.getAllPublishersForStatistics().size()));
+               ImGui.tableNextColumn();
+               ImGui.text("%d".formatted(participant.getAllSubscribersForStatistics().size()));
+               ImGui.tableNextColumn();
+               ImGui.text("%b".formatted(participant.isRemoved()));
+            }
          }
 
          ImGui.endTable();
@@ -307,18 +315,34 @@ public class RDXROS2StatsPanel extends RDXPanel
 
    private void renderPublisherRow(PubSubPublisherStats publisherStats)
    {
-      if (publisherStats.getPublisher().getNumberOfPublications() > 0 || !hideInactiveTopics.get())
+      String nodeName = publisherStats.getParticipant().getAttributes().getName();
+      String topicName = publisherStats.getPublisher().getAttributes().getHumanReadableTopicName();
+      String typeName = publisherStats.getPublisher().getAttributes().getHumanReadableTopicDataTypeName();
+      String reliabilityKindName = publisherStats.getPublisher().getAttributes().getReliabilityKind().name();
+
+      boolean show = publisherStats.getPublisher().getNumberOfPublications() > 0 || !hideInactiveTopics.get();
+      if (!filter.isEmpty())
+      {
+         boolean matchesAny = false;
+         matchesAny |= RegularExpression.check(nodeName, filter.get());
+         matchesAny |= RegularExpression.check(topicName, filter.get());
+         matchesAny |= RegularExpression.check(typeName, filter.get());
+         matchesAny |= RegularExpression.check(reliabilityKindName, filter.get());
+         show &= matchesAny;
+      }
+
+      if (show)
       {
          ImGui.tableNextRow();
 
          ImGui.tableNextColumn();
-         ImGui.text(publisherStats.getParticipant().getAttributes().getName());
+         ImGui.text(nodeName);
          ImGui.tableNextColumn();
-         ImGui.text(publisherStats.getPublisher().getAttributes().getHumanReadableTopicName());
+         ImGui.text(topicName);
          ImGui.tableNextColumn();
-         ImGui.text(publisherStats.getPublisher().getAttributes().getHumanReadableTopicDataTypeName());
+         ImGui.text(typeName);
          ImGui.tableNextColumn();
-         ImGui.text(publisherStats.getPublisher().getAttributes().getReliabilityKind().name());
+         ImGui.text(reliabilityKindName);
          ImGui.tableNextColumn();
          ImGui.text("%d".formatted(publisherStats.getPublisher().getNumberOfPublications()));
          ImGui.tableNextColumn();
@@ -336,18 +360,34 @@ public class RDXROS2StatsPanel extends RDXPanel
 
    private void renderSubscriberRow(PubSubSubscriberStats subscriberStats)
    {
-      if (subscriberStats.getSubscriber().getNumberOfReceivedMessages() > 0 || !hideInactiveTopics.get())
+      String nodeName = subscriberStats.getParticipant().getAttributes().getName();
+      String topicName = subscriberStats.getSubscriber().getAttributes().getHumanReadableTopicName();
+      String typeName = subscriberStats.getSubscriber().getAttributes().getHumanReadableTopicDataTypeName();
+      String reliabilityKindName = subscriberStats.getSubscriber().getAttributes().getReliabilityKind().name();
+
+      boolean show = subscriberStats.getSubscriber().getNumberOfReceivedMessages() > 0 || !hideInactiveTopics.get();
+      if (!filter.isEmpty())
+      {
+         boolean matchesAny = false;
+         matchesAny |= RegularExpression.check(nodeName, filter.get());
+         matchesAny |= RegularExpression.check(topicName, filter.get());
+         matchesAny |= RegularExpression.check(typeName, filter.get());
+         matchesAny |= RegularExpression.check(reliabilityKindName, filter.get());
+         show &= matchesAny;
+      }
+
+      if (show)
       {
          ImGui.tableNextRow();
 
          ImGui.tableNextColumn();
-         ImGui.text(subscriberStats.getParticipant().getAttributes().getName());
+         ImGui.text(nodeName);
          ImGui.tableNextColumn();
-         ImGui.text(subscriberStats.getSubscriber().getAttributes().getHumanReadableTopicName());
+         ImGui.text(topicName);
          ImGui.tableNextColumn();
-         ImGui.text(subscriberStats.getSubscriber().getAttributes().getHumanReadableTopicDataTypeName());
+         ImGui.text(typeName);
          ImGui.tableNextColumn();
-         ImGui.text(subscriberStats.getSubscriber().getAttributes().getReliabilityKind().name());
+         ImGui.text(reliabilityKindName);
          ImGui.tableNextColumn();
          ImGui.text("%d".formatted(subscriberStats.getSubscriber().getNumberOfReceivedMessages()));
          ImGui.tableNextColumn();
