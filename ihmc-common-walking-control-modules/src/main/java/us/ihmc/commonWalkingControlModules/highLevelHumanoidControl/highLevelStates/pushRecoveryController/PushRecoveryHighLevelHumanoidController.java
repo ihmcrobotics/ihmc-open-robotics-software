@@ -431,16 +431,12 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
       feetManager.compute();
 
-      boolean bodyManagerIsLoadBearing = false;
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
          RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
          if (bodyManager != null)
          {
             bodyManager.compute();
-
-            if (bodyManager.isLoadBearing())
-               bodyManagerIsLoadBearing = true;
          }
       }
 
@@ -455,8 +451,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
       // the comHeightManager can control the pelvis with a feedback controller and doesn't always need the z component of the momentum command. It would be better to remove the coupling between these two modules
       boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum() && enableHeightFeedbackControl.getValue();
-      boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
-      balanceManager.compute(heightControlCommand, keepCMPInsideSupportPolygon, controlHeightWithMomentum);
+      balanceManager.compute(heightControlCommand, null, controlHeightWithMomentum);
    }
 
    private void reportStatusMessages()

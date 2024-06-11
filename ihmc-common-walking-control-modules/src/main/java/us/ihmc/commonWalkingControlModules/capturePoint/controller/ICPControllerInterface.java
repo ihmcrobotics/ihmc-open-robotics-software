@@ -9,7 +9,7 @@ public interface ICPControllerInterface extends SCS2YoGraphicHolder
 {
    void initialize();
 
-   void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon);
+   void setMultiContactStabilityRegion(FrameConvexPolygon2DReadOnly multiContactStabilityRegion);
 
    default void compute(FrameConvexPolygon2DReadOnly supportPolygonInWorld,
                         FramePoint2DReadOnly desiredICP,

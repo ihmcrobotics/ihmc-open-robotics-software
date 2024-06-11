@@ -13,7 +13,7 @@ public class ICPCoPConstraintHandler
 
    private final boolean hasICPControlPolygons;
    private final BooleanProvider useICPControlPolygons;
-   private final YoBoolean keepCoPInsideSupportPolygon;
+   private FrameConvexPolygon2DReadOnly multiContactStabilityRegion;
 
    private final FrameConvexPolygon2D copConstraint = new FrameConvexPolygon2D();
 
@@ -28,9 +28,6 @@ public class ICPCoPConstraintHandler
       this.icpControlPolygons = icpControlPolygons;
       this.useICPControlPolygons = useICPControlPolygons;
       this.hasICPControlPolygons = hasICPControlPolygons;
-
-      keepCoPInsideSupportPolygon = new YoBoolean("keepCoPInsideSupportPolygon", parentRegistry);
-      keepCoPInsideSupportPolygon.set(true);
    }
 
    /**
@@ -48,7 +45,7 @@ public class ICPCoPConstraintHandler
     */
    public FrameConvexPolygon2DReadOnly updateCoPConstraint(FrameConvexPolygon2DReadOnly supportPolygonInWorld)
    {
-      if (keepCoPInsideSupportPolygon.getBooleanValue())
+      if (multiContactStabilityRegion == null)
       {
          FrameConvexPolygon2DReadOnly supportPolygon;
          if (useICPControlPolygons.getValue() && icpControlPolygons != null && hasICPControlPolygons)
@@ -70,16 +67,22 @@ public class ICPCoPConstraintHandler
          copConstraint.setIncludingFrame(supportPolygon);
          return supportPolygon;
       }
-
-      return null;
+      else
+      {
+         return multiContactStabilityRegion;
+      }
    }
 
    public FrameConvexPolygon2DReadOnly getCoPConstraint()
    {
-      if (keepCoPInsideSupportPolygon.getBooleanValue())
+      if (multiContactStabilityRegion == null)
+      {
          return copConstraint;
+      }
       else
-         return null;
+      {
+         return multiContactStabilityRegion;
+      }
    }
 
    /**
@@ -91,8 +94,8 @@ public class ICPCoPConstraintHandler
       return hasSupportPolygonChanged;
    }
 
-   public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
+   public void setMultiContactStabilityRegion(FrameConvexPolygon2DReadOnly multiContactStabilityRegion)
    {
-      this.keepCoPInsideSupportPolygon.set(keepCoPInsideSupportPolygon);
+      this.multiContactStabilityRegion = multiContactStabilityRegion;
    }
 }

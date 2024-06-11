@@ -281,7 +281,7 @@ public class HeuristicICPController implements ICPControllerInterface
    }
 
    @Override
-   public void setKeepCoPInsideSupportPolygon(boolean keepCoPInsideSupportPolygon)
+   public void setMultiContactStabilityRegion(FrameConvexPolygon2DReadOnly multiContactStabilityRegion)
    {
    }
 

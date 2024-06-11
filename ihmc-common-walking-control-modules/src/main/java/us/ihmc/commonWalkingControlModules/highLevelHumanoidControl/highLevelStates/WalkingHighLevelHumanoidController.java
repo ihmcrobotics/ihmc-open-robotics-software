@@ -50,6 +50,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
@@ -94,6 +95,7 @@ import java.util.stream.Stream;
 public class WalkingHighLevelHumanoidController implements JointLoadStatusProvider, SCS2YoGraphicHolder
 {
    private static final boolean ENABLE_LEG_ELASTICITY_DEBUGGATOR = false;
+   private static final boolean ENABLE_MULTI_CONTACT_STABILITY_REGION = true;
 
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -774,6 +776,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       feetManager.compute();
 
       boolean isUpperBodyLoadBearing = false;
+      FrameConvexPolygon2DReadOnly multiContactStabilityRegion = null;
+
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
          RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
@@ -791,6 +795,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       {
          updateWholeBodyContactState();
          controllerToolbox.updateMultiContactCoMRegion();
+         if (ENABLE_MULTI_CONTACT_STABILITY_REGION && controllerToolbox.getMultiContactRegionCalculator().hasSolvedWholeRegion())
+            multiContactStabilityRegion = controllerToolbox.getMultiContactRegionCalculator().getFeasibleCoMRegion();
       }
 
       pelvisOrientationManager.compute();
@@ -808,10 +814,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
        * two modules.
        */
       boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum() && enableHeightFeedbackControl.getValue();
-      if (currentState.isDoubleSupportState())
-         balanceManager.compute(currentState.getTransferToSide(), heightControlCommand, isUpperBodyLoadBearing, controlHeightWithMomentum);
-      else
-         balanceManager.compute(currentState.getSupportSide(), heightControlCommand, isUpperBodyLoadBearing, controlHeightWithMomentum);
+      RobotSide supportLeg = currentState.isDoubleSupportState() ? currentState.getTransferToSide() : currentState.getSupportSide();
+      balanceManager.compute(supportLeg, heightControlCommand, multiContactStabilityRegion, controlHeightWithMomentum);
    }
 
    private void updateWholeBodyContactState()
