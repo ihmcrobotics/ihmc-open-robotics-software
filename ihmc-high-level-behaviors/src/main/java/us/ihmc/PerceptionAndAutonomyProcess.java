@@ -613,11 +613,15 @@ public class PerceptionAndAutonomyProcess
             heightMapManager = new RapidHeightMapManager(openCLManager,
                                                          leftFootSoleFrameSupplier,
                                                          rightFootSoleFrameSupplier,
-                                                         latestRealsenseDepthImage,
+                                                         latestRealsenseDepthImage.getIntrinsicsCopy(),
                                                          ros2Helper);
          }
 
-         heightMapManager.update(latestRealsenseDepthImage, realsenseFrameSupplier.get(), realsenseZUpFrameSupplier.get(), ros2Helper);
+         heightMapManager.update(latestRealsenseDepthImage.getCpuImageMat(),
+                                 latestRealsenseDepthImage.getAcquisitionTime(),
+                                 realsenseFrameSupplier.get(),
+                                 realsenseZUpFrameSupplier.get(),
+                                 ros2Helper);
 
          if (continuousHikingManager != null)
             continuousHikingManager.setHeightMapDataAsync(heightMapManager.getHeightMapExtractor());

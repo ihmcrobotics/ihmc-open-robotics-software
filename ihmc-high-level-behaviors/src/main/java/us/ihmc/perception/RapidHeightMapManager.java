@@ -11,11 +11,13 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.gpuHeightMap.RapidHeightMapExtractor;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 
+import java.time.Instant;
 import java.util.function.Supplier;
 
 /**
@@ -36,22 +38,26 @@ public class RapidHeightMapManager
    public RapidHeightMapManager(OpenCLManager openCLManager,
                                 Supplier<ReferenceFrame> leftFootSoleFrameSupplier,
                                 Supplier<ReferenceFrame> rightFootSoleFrameSupplier,
-                                RawImage latestRealsenseDepthImage,
+                                CameraIntrinsics depthImageIntrinsics,
                                 ROS2PublishSubscribeAPI ros2)
    {
       heightMapExtractor = new RapidHeightMapExtractor(openCLManager, leftFootSoleFrameSupplier.get(), rightFootSoleFrameSupplier.get());
-      heightMapExtractor.setDepthIntrinsics(latestRealsenseDepthImage.getIntrinsicsCopy());
+      heightMapExtractor.setDepthIntrinsics(depthImageIntrinsics);
 
-      heightMapBytedecoImage = new BytedecoImage(latestRealsenseDepthImage.getImageWidth(), latestRealsenseDepthImage.getImageHeight(), opencv_core.CV_16UC1);
+      heightMapBytedecoImage = new BytedecoImage(depthImageIntrinsics.getWidth(), depthImageIntrinsics.getHeight(), opencv_core.CV_16UC1);
       heightMapBytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
       heightMapExtractor.create(heightMapBytedecoImage, 1);
 
       ros2.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
    }
 
-   public void update(RawImage latestRealsenseDepthImage, ReferenceFrame d455SensorFrame, ReferenceFrame d455ZUpSensorFrame, ROS2PublishSubscribeAPI ros2)
+   public void update(Mat latestDepthImage,
+                      Instant imageAquisitionTime,
+                      ReferenceFrame d455SensorFrame,
+                      ReferenceFrame d455ZUpSensorFrame,
+                      ROS2PublishSubscribeAPI ros2)
    {
-      latestRealsenseDepthImage.getCpuImageMat().copyTo(heightMapBytedecoImage.getBytedecoOpenCVMat());
+      latestDepthImage.copyTo(heightMapBytedecoImage.getBytedecoOpenCVMat());
 
       if (resetHeightMapRequested.poll())
       {
@@ -75,7 +81,7 @@ public class RapidHeightMapManager
                                                          croppedHeightMapImageMessage,
                                                          ros2,
                                                          cameraPoseForHeightMap,
-                                                         latestRealsenseDepthImage.getAcquisitionTime(),
+                                                         imageAquisitionTime,
                                                          heightMapExtractor.getSequenceNumber(),
                                                          croppedHeightMapImage.rows(),
                                                          croppedHeightMapImage.cols(),
