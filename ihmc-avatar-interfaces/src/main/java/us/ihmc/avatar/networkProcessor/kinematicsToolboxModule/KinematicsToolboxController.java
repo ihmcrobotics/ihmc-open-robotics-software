@@ -702,7 +702,8 @@ public class KinematicsToolboxController extends ToolboxController
                                                                             optimizationSettings,
                                                                             null,
                                                                             registry);
-      toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
+      toolbox.setJointPrivilegedConfigurationParameters(new KinematicsToolboxPrivilegedConfigurationParameters());
+      //toolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
       jointTorqueMinimizationWeightCalculator = new JointTorqueSoftLimitWeightCalculator(toolbox.getJointIndexHandler());
       jointTorqueMinimizationWeightCalculator.setParameters(0.0, 0.001, 0.10);
       toolbox.setupForInverseKinematicsSolver(jointTorqueMinimizationWeightCalculator);
