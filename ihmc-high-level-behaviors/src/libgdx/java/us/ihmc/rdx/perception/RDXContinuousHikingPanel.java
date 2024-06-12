@@ -36,6 +36,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.imgui.RDXPanel;
+import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySetGroup;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -83,13 +84,13 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    private boolean currentControllerConnected;
 
-   private final RDXStoredPropertySetTuner continuousPlanningParametersTuner = new RDXStoredPropertySetTuner("Continuous Walking Parameters (Active Mapper)");
-
+   private ImGuiRemoteROS2StoredPropertySetGroup remoteROS2StoredPropertySetGroup;
+   private RDXStoredPropertySetTuner continuousPlanningParametersTuner;
 
    public RDXContinuousHikingPanel(ROS2Helper ros2Helper,
                                    HumanoidActivePerceptionModule activePerceptionModule,
                                    ROS2SyncedRobotModel syncedRobot,
-                                   ContinuousHikingParameters continuousHikingParameters,
+                                   ContinuousHikingParameters continuousHikingParameters, // null if not used with perception UI
                                    SwingPlannerParametersBasics swingPlannerParameters,
                                    SwingTrajectoryParameters swingTrajectoryParameters,
                                    MonteCarloFootstepPlannerParameters monteCarloPlannerParameters)
@@ -101,7 +102,23 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       this.activePerceptionModule = activePerceptionModule;
       this.swingPlannerParameters = swingPlannerParameters;
       this.swingTrajectoryParameters = swingTrajectoryParameters;
-      this.continuousHikingParameters = continuousHikingParameters;
+
+      if (continuousHikingParameters == null)
+      {
+         this.continuousHikingParameters = new ContinuousHikingParameters();
+         remoteROS2StoredPropertySetGroup = new ImGuiRemoteROS2StoredPropertySetGroup(ros2Helper);
+         remoteROS2StoredPropertySetGroup.registerRemotePropertySet(this.continuousHikingParameters, ContinuousWalkingAPI.CONTINUOUS_WALKING_PARAMETERS);
+         remoteROS2StoredPropertySetGroup.registerRemotePropertySet(swingPlannerParameters, ContinuousWalkingAPI.SWING_PLANNING_PARAMETERS);
+         continuousPlanningParametersTuner = null;
+      }
+      else
+      {
+         this.continuousHikingParameters = continuousHikingParameters;
+         LogTools.info("Continuous Walking Parameters Save File " + continuousHikingParameters.findSaveFileDirectory().toString());
+         continuousPlanningParametersTuner = new RDXStoredPropertySetTuner("Continuous Walking Parameters (Active Mapper)");
+         continuousPlanningParametersTuner.create(continuousHikingParameters, false);
+         remoteROS2StoredPropertySetGroup = null;
+      }
 
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS, this::onStartAndGoalPosesReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLANNED_FOOTSTEPS, this::onPlannedFootstepsReceived);
@@ -131,10 +148,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                                       {
                                          terrainPlanningDebugger.reset();
                                       });
-
-
-      LogTools.info("Continuous Walking Parameters Save File " + continuousHikingParameters.findSaveFileDirectory().toString());
-      continuousPlanningParametersTuner.create(continuousHikingParameters, false);
    }
 
    public RDXContinuousHikingPanel(ROS2Helper ros2Helper, DRCRobotModel robotModel, MonteCarloFootstepPlannerParameters monteCarloPlannerParameters)
@@ -173,6 +186,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
 
       LogTools.info("Continuous Hiking Parameters Save File " + continuousHikingParameters.findSaveFileDirectory().toString());
+      continuousPlanningParametersTuner = new RDXStoredPropertySetTuner("Continuous Walking Parameters (Active Mapper)");
       continuousPlanningParametersTuner.create(continuousHikingParameters, false);
    }
 
@@ -227,7 +241,10 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ImGui.text("And the enabled checkbox must be checked");
       ImGui.text("By holding CTRL the robot will walk forward");
       ImGui.separator();
-      continuousPlanningParametersTuner.renderImGuiWidgets();
+      if (remoteROS2StoredPropertySetGroup != null)
+         remoteROS2StoredPropertySetGroup.renderImGuiWidgets();
+      if (continuousPlanningParametersTuner != null)
+         continuousPlanningParametersTuner.renderImGuiWidgets();
 
       ImGui.checkbox("Render", renderEnabled);
       ImGui.checkbox("Local Render Mode", localRenderMode);
