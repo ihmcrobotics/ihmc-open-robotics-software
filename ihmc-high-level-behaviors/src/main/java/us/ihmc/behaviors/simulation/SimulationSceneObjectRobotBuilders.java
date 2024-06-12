@@ -1,9 +1,9 @@
 package us.ihmc.behaviors.simulation;
 
+import us.ihmc.behaviors.simulation.door.DoorDefinition;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.behaviors.simulation.door.DoorDefinition;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.TableModelParameters;
 import us.ihmc.scs2.simulation.robot.Robot;
@@ -29,11 +29,11 @@ public class SimulationSceneObjectRobotBuilders
    public static final double TABLE_Z = TableModelParameters.TABLE_LEG_LENGTH + SPACE_TO_ALLOW_IT_TO_FALL_ONTO_SURFACE;
    public static final double TABLE_SURFACE_Z = TableModelParameters.TABLE_LEG_LENGTH + TableModelParameters.TABLE_THICKNESS;
 
-   public static Function<ReferenceFrame, Robot> getPushDoorBuilder()
+   public static Function<ReferenceFrame, Robot> getPushDoorBuilder(String name)
    {
       return inertialFrame ->
       {
-         DoorDefinition doorDefinition = getDoorWithArUcoMarkersDefinition();
+         DoorDefinition doorDefinition = getDoorWithArUcoMarkersDefinition(name);
          // Rotate the door so the push side is facing
          doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(Math.PI, 0.0, 0.0), new Point3D(1.3, 0.5, 0.01));
          Robot robot = new Robot(doorDefinition, inertialFrame);
@@ -41,31 +41,31 @@ public class SimulationSceneObjectRobotBuilders
       };
    }
 
-   public static Function<ReferenceFrame, Robot> getPullDoorBuilder()
+   public static Function<ReferenceFrame, Robot> getPullDoorBuilder(String name)
    {
       return inertialFrame ->
       {
-         DoorDefinition doorDefinition = getDoorWithArUcoMarkersDefinition();
+         DoorDefinition doorDefinition = getDoorWithArUcoMarkersDefinition(name);
          doorDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0), new Point3D(1.0, -0.5, 0.01));
          Robot robot = new Robot(doorDefinition, inertialFrame);
          return robot;
       };
    }
 
-   private static DoorDefinition getDoorWithArUcoMarkersDefinition()
+   private static DoorDefinition getDoorWithArUcoMarkersDefinition(String name)
    {
-      DoorDefinition doorDefinition = new DoorDefinition();
+      DoorDefinition doorDefinition = new DoorDefinition(name);
       doorDefinition.getDoorPanelDefinition().setAddArUcoMarkers(true);
       doorDefinition.build();
       // doorDefinition.getInitialHingeState().setEffort(15.0);
       return doorDefinition;
    }
 
-   public static Function<ReferenceFrame, Robot> getTableBuilder()
+   public static Function<ReferenceFrame, Robot> getTableBuilder(String name)
    {
       return inertialFrame ->
       {
-         TableDefinition tableDefinition = new TableDefinition();
+         TableDefinition tableDefinition = new TableDefinition(name);
          tableDefinition.setAddArUcoMarkers(true);
          tableDefinition.build();
          tableDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0), new Point3D(TABLE_X, TABLE_Y, TABLE_Z));
@@ -74,11 +74,11 @@ public class SimulationSceneObjectRobotBuilders
       };
    }
 
-   public static Function<ReferenceFrame, Robot> getCanOfSoupOnTableBuilder()
+   public static Function<ReferenceFrame, Robot> getCanOfSoupOnTableBuilder(String name)
    {
       return inertialFrame ->
       {
-         CanOfSoupDefinition canOfSoupDefinition = new CanOfSoupDefinition();
+         CanOfSoupDefinition canOfSoupDefinition = new CanOfSoupDefinition(name);
          canOfSoupDefinition.build();
          canOfSoupDefinition.getInitialSixDoFState().setConfiguration(new YawPitchRoll(0.0, 0.0, 0.0),
             new Point3D(TABLE_X + TableModelParameters.TABLE_ARUCO_MARKER_FROM_LEFT_EDGE + RigidBodySceneObjectDefinitions.MARKER_TO_CAN_OF_SOUP_X_WORLD,
