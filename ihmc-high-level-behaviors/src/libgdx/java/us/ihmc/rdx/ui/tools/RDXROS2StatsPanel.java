@@ -320,15 +320,18 @@ public class RDXROS2StatsPanel extends RDXPanel
       String typeName = publisherStats.getPublisher().getAttributes().getHumanReadableTopicDataTypeName();
       String reliabilityKindName = publisherStats.getPublisher().getAttributes().getReliabilityKind().name();
 
-      boolean show = publisherStats.getPublisher().getNumberOfPublications() > 0 || !hideInactiveTopics.get();
+      boolean show;
       if (!filter.isEmpty())
       {
-         boolean matchesAny = false;
-         matchesAny |= RegularExpression.check(nodeName, filter.get());
-         matchesAny |= RegularExpression.check(topicName, filter.get());
-         matchesAny |= RegularExpression.check(typeName, filter.get());
-         matchesAny |= RegularExpression.check(reliabilityKindName, filter.get());
-         show &= matchesAny;
+         show = false;
+         show |= RegularExpression.check(nodeName, filter.get());
+         show |= RegularExpression.check(topicName, filter.get());
+         show |= RegularExpression.check(typeName, filter.get());
+         show |= RegularExpression.check(reliabilityKindName, filter.get());
+      }
+      else
+      {
+         show = publisherStats.getPublisher().getNumberOfPublications() > 0 || !hideInactiveTopics.get();
       }
 
       if (show)
@@ -365,15 +368,18 @@ public class RDXROS2StatsPanel extends RDXPanel
       String typeName = subscriberStats.getSubscriber().getAttributes().getHumanReadableTopicDataTypeName();
       String reliabilityKindName = subscriberStats.getSubscriber().getAttributes().getReliabilityKind().name();
 
-      boolean show = subscriberStats.getSubscriber().getNumberOfReceivedMessages() > 0 || !hideInactiveTopics.get();
+      boolean show;
       if (!filter.isEmpty())
       {
-         boolean matchesAny = false;
-         matchesAny |= RegularExpression.check(nodeName, filter.get());
-         matchesAny |= RegularExpression.check(topicName, filter.get());
-         matchesAny |= RegularExpression.check(typeName, filter.get());
-         matchesAny |= RegularExpression.check(reliabilityKindName, filter.get());
-         show &= matchesAny;
+         show = false;
+         show |= RegularExpression.check(nodeName, filter.get());
+         show |= RegularExpression.check(topicName, filter.get());
+         show |= RegularExpression.check(typeName, filter.get());
+         show |= RegularExpression.check(reliabilityKindName, filter.get());
+      }
+      else
+      {
+         show = subscriberStats.getSubscriber().getNumberOfReceivedMessages() > 0 || !hideInactiveTopics.get();
       }
 
       if (show)
