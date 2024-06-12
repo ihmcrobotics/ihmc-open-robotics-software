@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -197,13 +198,6 @@ public class ManipulationControllerState extends HighLevelControllerState
          RigidBodyControlManager handManager = createRigidBodyManager(hand, chest, handControlFrames.get(robotSide), chest.getBodyFixedFrame(), elevator, yoTime, graphicsListRegistry);
          handManager.setDoPrepareForLocomotion(false);
          handManagers.put(robotSide, handManager);
-
-         List<String> armJointNames = jointNameMap.getArmJointNamesAsStrings(robotSide);
-         for (int i = 0; i < armJointNames.size(); i++)
-         {
-            privilegedConfigurationCommand.addJoint((OneDoFJointBasics) controllerSystem.findJoint(armJointNames.get(i)),
-                                                    PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_MID_RANGE);
-         }
       }
 
       registry.addChild(jointGainRegistry);
@@ -317,9 +311,6 @@ public class ManipulationControllerState extends HighLevelControllerState
       {
          handManagers.get(robotSide).initialize();
       }
-
-      privilegedConfigurationCommand.clear();
-      privilegedConfigurationCommand.setPrivilegedConfigurationOption(PrivilegedConfigurationCommand.PrivilegedConfigurationOption.AT_ZERO);
    }
 
    @Override
@@ -354,7 +345,10 @@ public class ManipulationControllerState extends HighLevelControllerState
          handManagers.get(robotSide).compute();
       }
 
-      controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
+      if (handManagers.get(RobotSide.LEFT).getActiveControlMode() == RigidBodyControlMode.TASKSPACE && handManagers.get(RobotSide.RIGHT).getActiveControlMode() == RigidBodyControlMode.TASKSPACE)
+      {
+         controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
+      }
 
       /* Head commands */
       if (headManager != null)
@@ -653,14 +647,18 @@ public class ManipulationControllerState extends HighLevelControllerState
       return controllerCore.getOutputForLowLevelController();
    }
 
+   public PrivilegedConfigurationCommand getPrivilegedConfigurationCommand()
+   {
+      return privilegedConfigurationCommand;
+   }
 
    @Override
    public YoGraphicDefinition getSCS2YoGraphics()
    {
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
       group.addChild(bimanualManipulationManager.getSCS2YoGraphics());
-      group.addChild(chestManager.getSCS2YoGraphics());
-      group.addChild(headManager.getSCS2YoGraphics());
+//      group.addChild(chestManager.getSCS2YoGraphics());
+//      group.addChild(headManager.getSCS2YoGraphics());
       for (RobotSide robotSide : RobotSide.values)
       {
          group.addChild(handManagers.get(robotSide).getSCS2YoGraphics());
