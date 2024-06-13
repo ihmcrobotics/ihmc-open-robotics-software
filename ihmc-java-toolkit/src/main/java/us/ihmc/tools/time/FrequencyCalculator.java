@@ -2,6 +2,7 @@ package us.ihmc.tools.time;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.UnitConversions;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -55,7 +56,7 @@ public class FrequencyCalculator
          long elapsedNanos = pingTimes.getLast() - pingTimes.getFirst();
          long elapsedNanosAverage = elapsedNanos / (pingTimes.size() - 1);
          double elapsedSecondsAverage = elapsedNanosAverage / NANOS_IN_A_SECOND;
-         return 1 / elapsedSecondsAverage;
+         return UnitConversions.secondsToHertz(elapsedSecondsAverage);
       }
 
       return 0.0;
