@@ -41,7 +41,7 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
 
    public RDXVisualizer(String title)
    {
-      this.title = ImGuiTools.uniqueLabel(title);
+      this.title = title;
    }
 
    public void createRequestHeartbeat(ROS2Node node, ROS2Topic<Empty> heartbeatTopic)
