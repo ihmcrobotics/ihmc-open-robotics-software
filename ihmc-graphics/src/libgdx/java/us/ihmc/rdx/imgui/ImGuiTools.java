@@ -463,8 +463,10 @@ public class ImGuiTools
    {
       float windowWidth = ImGui.getWindowContentRegionMaxX();
       float textWidth = calcTextSizeX(text);
-      ImGui.sameLine(windowWidth - textWidth);
+      float cursorPosX = ImGui.getCursorPosX();
+      ImGui.setCursorPosX(windowWidth - textWidth);
       ImGui.text(text);
+      ImGui.setCursorPosY(cursorPosX);
    }
 
    public static float calcTextSizeX(String text)

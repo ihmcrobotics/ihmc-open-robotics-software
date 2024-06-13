@@ -111,14 +111,17 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
 
       if (collapse)
          ImGui.setNextItemOpen(false, ImGuiCond.Always);
+      float preHeaderCursorY = ImGui.getCursorPosY();
       if (ImGui.collapsingHeader(labels.get(title)))
       {
          renderImGuiWidgets();
       }
+      float postHeaderCursorY = ImGui.getCursorPosY();
       if (renderRightContext)
       {
-         ImGui.sameLine();
+         ImGui.setCursorPosY(preHeaderCursorY + (ImGui.getTextLineHeight() / 2) - 2);
          ImGuiTools.rightAlignText(rightAlignedContextText.toString());
+         ImGui.setCursorPosY(postHeaderCursorY);
          ImGuiTools.previousWidgetTooltip(rightAlignedContextTextTooltip.toString());
       }
 
