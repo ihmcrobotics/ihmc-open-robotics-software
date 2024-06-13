@@ -77,7 +77,7 @@ public class RDXPerceptionVisualizersPanel extends RDXPanel implements RDXRender
          if (visualizerNameLength > longestVisualizerNameLength)
             longestVisualizerNameLength = visualizerNameLength;
       }
-      boolean renderRightContext = (ImGui.getWindowSizeX() + 220) > longestVisualizerNameLength;
+      boolean renderRightContext = (ImGui.getWindowSizeX() - 120) > longestVisualizerNameLength;
 
       // Pinned visualizers
       ImGui.separator();
