@@ -104,7 +104,7 @@ public class RDXRemotePerceptionUI
       return perceptionConfigurationParameters;
    }
 
-   public ContinuousHikingParameters getContinuousPlanningParameters()
+   public ContinuousHikingParameters getContinuousHikingParameters()
    {
       return continuousHikingParameters;
    }

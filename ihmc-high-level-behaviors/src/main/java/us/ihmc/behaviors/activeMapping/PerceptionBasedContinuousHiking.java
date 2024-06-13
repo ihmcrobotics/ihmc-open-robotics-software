@@ -20,14 +20,11 @@ import java.util.concurrent.TimeUnit;
 
 public class PerceptionBasedContinuousHiking
 {
-   private ContinuousPlanner.PlanningMode mode = ContinuousPlanner.PlanningMode.FAST_HIKING;
+   private final static ContinuousPlanner.PlanningMode MODE = ContinuousPlanner.PlanningMode.FAST_HIKING;
 
-   private final ROS2SyncedRobotModel syncedRobot;
-   private final ROS2Helper ros2Helper;
-   private ROS2StoredPropertySetGroup ros2PropertySetGroup;
-   private TerrainPerceptionProcessWithDriver perceptionTask;
-   private HumanoidActivePerceptionModule activePerceptionModule;
-   private final ContinuousHikingParameters continuousPlanningParameters = new ContinuousHikingParameters();
+   private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
+   private final TerrainPerceptionProcessWithDriver perceptionTask;
+   private final HumanoidActivePerceptionModule activePerceptionModule;
 
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                           getClass(),
@@ -36,8 +33,8 @@ public class PerceptionBasedContinuousHiking
    public PerceptionBasedContinuousHiking(DRCRobotModel robotModel, String realsenseSerialNumber)
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "nadia_terrain_perception_node");
-      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
-      ros2Helper = new ROS2Helper(ros2Node);
+      ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
+      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
       syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
       perceptionTask = new TerrainPerceptionProcessWithDriver(realsenseSerialNumber,
@@ -54,12 +51,25 @@ public class PerceptionBasedContinuousHiking
                                                               syncedRobot::update);
 
       activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters());
-      activePerceptionModule.initializeContinuousPlannerSchedulingTask(robotModel, ros2Node, syncedRobot.getReferenceFrames(), continuousPlanningParameters, mode);
+      ContinuousHikingParameters continuousHikingParameters = new ContinuousHikingParameters();
+      activePerceptionModule.initializeContinuousPlannerSchedulingTask(robotModel,
+                                                                       ros2Node,
+                                                                       syncedRobot.getReferenceFrames(),
+                                                                       continuousHikingParameters, MODE);
 
-      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.CONTINUOUS_WALKING_PARAMETERS, continuousPlanningParameters);
-      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.FOOTSTEP_PLANNING_PARAMETERS, activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getFootstepPlannerParameters());
-      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.SWING_PLANNING_PARAMETERS, activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getSwingPlannerParameters());
-      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.MONTE_CARLO_PLANNER_PARAMETERS, activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getMonteCarloFootstepPlannerParameters());
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.CONTINUOUS_WALKING_PARAMETERS, continuousHikingParameters);
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.FOOTSTEP_PLANNING_PARAMETERS,
+                                                     activePerceptionModule.getContinuousPlannerSchedulingTask()
+                                                                           .getContinuousPlanner()
+                                                                           .getFootstepPlannerParameters());
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.SWING_PLANNING_PARAMETERS,
+                                                     activePerceptionModule.getContinuousPlannerSchedulingTask()
+                                                                           .getContinuousPlanner()
+                                                                           .getSwingPlannerParameters());
+      ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.MONTE_CARLO_PLANNER_PARAMETERS,
+                                                     activePerceptionModule.getContinuousPlannerSchedulingTask()
+                                                                           .getContinuousPlanner()
+                                                                           .getMonteCarloFootstepPlannerParameters());
 
       perceptionTask.run();
 
@@ -79,9 +89,10 @@ public class PerceptionBasedContinuousHiking
       if (perceptionTask.getHumanoidPerceptionModule().getLatestHeightMapData() != null)
       {
          perceptionTask.getHumanoidPerceptionModule().setIsHeightMapDataBeingProcessed(true);
-         activePerceptionModule.getContinuousPlannerSchedulingTask().setLatestHeightMapData(perceptionTask.getHumanoidPerceptionModule().getLatestHeightMapData());
-         activePerceptionModule.getContinuousPlannerSchedulingTask().setTerrainMapData(perceptionTask.getHumanoidPerceptionModule().getRapidHeightMapExtractor()
-                                                                                                     .getTerrainMapData());
+         activePerceptionModule.getContinuousPlannerSchedulingTask()
+                               .setLatestHeightMapData(perceptionTask.getHumanoidPerceptionModule().getLatestHeightMapData());
+         activePerceptionModule.getContinuousPlannerSchedulingTask()
+                               .setTerrainMapData(perceptionTask.getHumanoidPerceptionModule().getRapidHeightMapExtractor().getTerrainMapData());
          perceptionTask.getHumanoidPerceptionModule().setIsHeightMapDataBeingProcessed(false);
       }
    }
