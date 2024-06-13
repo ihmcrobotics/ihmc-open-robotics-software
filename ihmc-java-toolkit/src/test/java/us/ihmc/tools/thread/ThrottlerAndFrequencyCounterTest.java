@@ -9,7 +9,7 @@ import us.ihmc.tools.time.FrequencyCalculator;
 
 public class ThrottlerAndFrequencyCounterTest
 {
-   private static void testFrequencyCounter(int targetFrequency, double epsilon)
+   private static void testFrequencyCounter(double targetFrequency, double epsilon)
    {
       LogTools.info("testFrequencyCounter targetFrequency=" + targetFrequency + " epsilon=" + epsilon);
 
@@ -32,7 +32,7 @@ public class ThrottlerAndFrequencyCounterTest
       TestTools.assertEpsilonEquals(targetFrequency, frequencyCalculator.getFrequency(), epsilon, "Frequency not correct");
    }
 
-   private static void testThrottlerAndFrequencyCounter(int targetFrequency, double epsilon)
+   private static void testThrottlerAndFrequencyCounter(double targetFrequency, double epsilon)
    {
       LogTools.info("testThrottlerAndFrequencyCounter (using us.ihmc.tools.thread.Throttler) targetFrequency=" + targetFrequency + " epsilon=" + epsilon);
 
@@ -89,5 +89,17 @@ public class ThrottlerAndFrequencyCounterTest
    public void testThrottlerAndFrequencyCounter1Hz()
    {
       testThrottlerAndFrequencyCounter(1, 0.5);
+   }
+
+   @Test
+   public void testFrequencyCounter0_5Hz()
+   {
+      testFrequencyCounter(0.5, 0.01);
+   }
+
+   @Test
+   public void testThrottlerAndFrequencyCounter0_5Hz()
+   {
+      testThrottlerAndFrequencyCounter(0.5, 0.01);
    }
 }

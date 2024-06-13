@@ -3,12 +3,13 @@ package us.ihmc.tools.time;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 
-import javax.annotation.Nullable;
+import java.util.Deque;
+import java.util.LinkedList;
 import java.util.UUID;
 
 /**
- * A rolling frequency calculator with an optional logging thread to print the frequency once per second.
- * The frequency is updated on each query to the frequency rather than each new event.
+ * A rolling average frequency calculator with an optional logging thread to print the frequency once per second.
+ * The frequency is calculated on each query to the frequency rather than each new event.
  * Call {@link #ping()} on each new event.
  * Call {@link #getFrequency()} to get the current frequency.
  */
@@ -16,13 +17,8 @@ public class FrequencyCalculator
 {
    private static final double NANOS_IN_A_SECOND = 1_000_000_000.0;
 
-   private long lastPingTimeNanos;
-   private int pingCount;
-   private double frequency;
-   private long elapsedNanos;
+   private final Deque<Long> pingTimes = new LinkedList<>();
 
-   @Nullable
-   private Thread loggingThread;
    private volatile boolean loggingThreadRunning;
 
    public FrequencyCalculator(boolean enableLoggingThread)
@@ -31,7 +27,7 @@ public class FrequencyCalculator
       {
          String threadID = UUID.randomUUID().toString().substring(0, 5);
 
-         loggingThread = new Thread(() ->
+         Thread loggingThread = new Thread(() ->
          {
             loggingThreadRunning = true;
 
@@ -52,23 +48,32 @@ public class FrequencyCalculator
       this(false);
    }
 
-   public void ping() {
-      long currentTime = System.nanoTime();
+   private double calculateFrequency()
+   {
+      if (pingTimes.size() > 1)
+      {
+         long elapsedNanos = pingTimes.getLast() - pingTimes.getFirst();
+         long elapsedNanosAverage = elapsedNanos / (pingTimes.size() - 1);
+         double elapsedSecondsAverage = elapsedNanosAverage / NANOS_IN_A_SECOND;
+         return 1 / elapsedSecondsAverage;
+      }
 
-      pingCount++;
-      elapsedNanos += currentTime - lastPingTimeNanos;
-      lastPingTimeNanos = currentTime;
+      return 0.0;
+   }
+
+   public void ping() {
+      pingTimes.add(System.nanoTime());
+
+      double frequency = calculateFrequency();
+      while (frequency > 0.0 && pingTimes.size() > (frequency * 10))
+      {
+         pingTimes.remove();
+      }
    }
 
    public double getFrequency()
    {
-      if (elapsedNanos >= (NANOS_IN_A_SECOND / 2)) {
-         frequency = pingCount / (elapsedNanos / (NANOS_IN_A_SECOND));
-         pingCount = 0;
-         elapsedNanos = 0;
-      }
-
-      return frequency;
+      return calculateFrequency();
    }
 
    public void destroy()
