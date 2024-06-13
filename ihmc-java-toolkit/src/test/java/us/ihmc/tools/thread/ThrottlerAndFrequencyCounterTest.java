@@ -58,48 +58,48 @@ public class ThrottlerAndFrequencyCounterTest
    @Test
    public void testFrequencyCounter100Hz()
    {
-      testFrequencyCounter(100, 5);
+      testFrequencyCounter(100, 1);
    }
 
    @Test
    public void testThrottlerAndFrequencyCounter100Hz()
    {
-      testThrottlerAndFrequencyCounter(100, 5);
+      testThrottlerAndFrequencyCounter(100, 1);
    }
 
    @Test
    public void testFrequencyCounter10Hz()
    {
-      testFrequencyCounter(10, 0.5);
+      testFrequencyCounter(10, 0.1);
    }
 
    @Test
    public void testThrottlerAndFrequencyCounter10Hz()
    {
-      testThrottlerAndFrequencyCounter(10, 0.5);
+      testThrottlerAndFrequencyCounter(10, 0.1);
    }
 
    @Test
    public void testFrequencyCounter1Hz()
    {
-      testFrequencyCounter(1, 0.5);
+      testFrequencyCounter(1, 0.01);
    }
 
    @Test
    public void testThrottlerAndFrequencyCounter1Hz()
    {
-      testThrottlerAndFrequencyCounter(1, 0.5);
+      testThrottlerAndFrequencyCounter(1, 0.01);
    }
 
    @Test
    public void testFrequencyCounter0_5Hz()
    {
-      testFrequencyCounter(0.5, 0.01);
+      testFrequencyCounter(0.5, 0.005);
    }
 
    @Test
    public void testThrottlerAndFrequencyCounter0_5Hz()
    {
-      testThrottlerAndFrequencyCounter(0.5, 0.01);
+      testThrottlerAndFrequencyCounter(0.5, 0.005);
    }
 }
