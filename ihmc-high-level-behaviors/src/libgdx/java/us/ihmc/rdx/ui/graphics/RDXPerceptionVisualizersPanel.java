@@ -4,8 +4,8 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import imgui.flag.ImGuiTableColumnFlags;
 import imgui.type.ImString;
+import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.sceneManager.RDXRenderableProvider;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -63,33 +63,40 @@ public class RDXPerceptionVisualizersPanel extends RDXPanel implements RDXRender
       if (ImGui.inputText("Search##perceptionVisualizers", filter))
       {
       }
-
-      if (ImGui.beginTable("##perceptionVisualizersTable", 2))
+      ImGui.sameLine();
+      boolean collapse = false;
+      if (ImGui.button("Collapse##perceptionVisualizers"))
       {
-         ImGui.tableSetupColumn("##leftTextContextCol", ImGuiTableColumnFlags.WidthFixed, 30.0f);
-         ImGui.tableSetupColumn("##rightCol", ImGuiTableColumnFlags.WidthStretch);
+         collapse = true;
+      }
 
-         // Pinned visualizers
-         ImGui.separator();
-         for (RDXVisualizer visualizer : visualizers)
-            if (visualizer.isPinned())
-               visualizer.renderMenuEntry();
-         ImGui.separator();
+      double longestVisualizerNameLength = 0.0;
+      for (RDXVisualizer visualizer : visualizers)
+      {
+         double visualizerNameLength = ImGuiTools.calcTextSizeX(visualizer.getTitle());
+         if (visualizerNameLength > longestVisualizerNameLength)
+            longestVisualizerNameLength = visualizerNameLength;
+      }
+      boolean renderRightContext = (ImGui.getWindowSizeX() + 220) > longestVisualizerNameLength;
 
-         // All other visualizers in alphabetical order (filtered)
-         for (RDXVisualizer visualizer : visualizers)
+      // Pinned visualizers
+      ImGui.separator();
+      for (RDXVisualizer visualizer : visualizers)
+         if (visualizer.isPinned())
+            visualizer.renderMenuEntry(collapse, renderRightContext);
+      ImGui.separator();
+
+      // All other visualizers in alphabetical order (filtered)
+      for (RDXVisualizer visualizer : visualizers)
+      {
+         if (!visualizer.isPinned())
          {
-            if (!visualizer.isPinned())
-            {
-               if (filter.isNotEmpty())
-                  if (!visualizer.getTitle().toLowerCase(Locale.ROOT).contains(filter.toString().toLowerCase(Locale.ROOT)))
-                     continue;
+            if (filter.isNotEmpty())
+               if (!visualizer.getTitle().toLowerCase(Locale.ROOT).contains(filter.toString().toLowerCase(Locale.ROOT)))
+                  continue;
 
-               visualizer.renderMenuEntry();
-            }
+            visualizer.renderMenuEntry(collapse, renderRightContext);
          }
-
-         ImGui.endTable();
       }
    }
 

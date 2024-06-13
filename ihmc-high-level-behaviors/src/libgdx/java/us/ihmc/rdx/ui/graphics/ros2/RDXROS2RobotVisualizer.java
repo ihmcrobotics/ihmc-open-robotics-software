@@ -104,6 +104,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
    public void create()
    {
       super.create();
+      getMultiBodyGraphic().create();
       if (baseUI != null)
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
       cameraForTracking = cameraForTrackingSupplier.get();
@@ -161,6 +162,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
       if (getMultiBodyGraphic().isRobotLoaded())
       {
          super.update();
+         getMultiBodyGraphic().update();
 
          if (cameraForTracking != null && trackRobot.get())
          {
@@ -228,6 +230,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
    public void renderImGuiWidgets()
    {
       super.renderImGuiWidgets();
+      getMultiBodyGraphic().renderImGuiWidgets();
 
       if (ImGui.button(labels.get("Snap to Robot")))
       {
@@ -266,7 +269,10 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
+      getMultiBodyGraphic().setActive(isActive());
+
       super.getRenderables(renderables, pool, sceneLevels);
+      getMultiBodyGraphic().getRenderables(renderables, pool, sceneLevels);
 
       if (showHistory.get())
       {
@@ -278,6 +284,7 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
    public void destroy()
    {
       super.destroy();
+      getMultiBodyGraphic().destroy();
    }
 
    public ImBoolean getTrackRobot()

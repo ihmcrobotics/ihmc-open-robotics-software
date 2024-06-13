@@ -18,11 +18,16 @@ public class ImGuiAveragedFrequencyText
 
    public void render()
    {
+      ImGui.text(getText());
+   }
+
+   public String getText()
+   {
       if (throttler.run())
       {
          fpsString = "%3d Hz".formatted((int) averagedFrequencyCalculator.getFrequency());
       }
-      ImGui.text(fpsString.trim());
+      return fpsString;
    }
 
    public void reset()

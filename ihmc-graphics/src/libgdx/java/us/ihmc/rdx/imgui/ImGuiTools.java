@@ -4,10 +4,25 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import imgui.*;
-import imgui.flag.*;
+import imgui.ImFont;
+import imgui.ImFontAtlas;
+import imgui.ImFontConfig;
+import imgui.ImFontGlyphRangesBuilder;
+import imgui.ImGui;
+import imgui.ImGuiIO;
+import imgui.ImVec2;
+import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiDataType;
+import imgui.flag.ImGuiFreeTypeBuilderFlags;
+import imgui.flag.ImGuiInputTextFlags;
+import imgui.flag.ImGuiKey;
 import imgui.internal.ImGuiContext;
-import imgui.type.*;
+import imgui.type.ImBoolean;
+import imgui.type.ImDouble;
+import imgui.type.ImFloat;
+import imgui.type.ImInt;
+import imgui.type.ImLong;
+import imgui.type.ImString;
 import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL41;
@@ -442,6 +457,14 @@ public class ImGuiTools
                                         separatorColor, lineThickness);
       ImGui.setCursorPosX(ImGui.getCursorPosX() + secondLineWidth);
       ImGui.newLine();
+   }
+
+   public static void rightAlignText(String text)
+   {
+      float windowWidth = ImGui.getWindowContentRegionMaxX();
+      float textWidth = calcTextSizeX(text);
+      ImGui.sameLine(windowWidth - textWidth);
+      ImGui.text(text);
    }
 
    public static float calcTextSizeX(String text)

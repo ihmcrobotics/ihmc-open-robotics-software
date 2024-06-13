@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
+import imgui.flag.ImGuiCond;
 import imgui.type.ImBoolean;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
@@ -69,27 +70,32 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       }
    }
 
-   protected void renderMenuEntry()
+   protected void renderMenuEntry(boolean collapse, boolean renderRightContext)
    {
-      ImGui.tableNextRow();
-      ImGui.tableNextColumn();
+      StringBuilder rightAlignedContextText = new StringBuilder();
+      StringBuilder rightAlignedContextTextTooltip = new StringBuilder();
+
       if (this instanceof RDXROS2SingleTopicVisualizer<?> topicVisualizer)
       {
-         topicVisualizer.getFrequency().render();
-         ImGuiTools.previousWidgetTooltip(topicVisualizer.getTopic().getName() + " (" + topicVisualizer.getTopic().getQoS().getReliabilityKind().name() + ")");
-         ImGui.sameLine();
+         rightAlignedContextText.append(topicVisualizer.getFrequency().getText());
+         rightAlignedContextTextTooltip.append(topicVisualizer.getTopic().getName())
+                                       .append(" (")
+                                       .append(topicVisualizer.getTopic().getQoS().getReliabilityKind().name())
+                                       .append(")");
       }
       else if (this instanceof RDXROS2MultiTopicVisualizer multiTopicVisualizer)
       {
          for (ROS2Topic<?> topic : multiTopicVisualizer.getTopics())
          {
-            multiTopicVisualizer.getFrequency(topic).render();
-            ImGuiTools.previousWidgetTooltip(topic.getName() + " (" + topic.getQoS().getReliabilityKind().name() + ")");
-            ImGui.sameLine();
+            //            rightAlignedContextText.append(topic.getName()).append(" (").append(topic.getQoS().getReliabilityKind().name()).append(")\n");
+            rightAlignedContextText.append(multiTopicVisualizer.getFrequency(topic).getText());
+            rightAlignedContextTextTooltip.append(topic.getName())
+                                          .append(" (")
+                                          .append(topic.getQoS().getReliabilityKind().name())
+                                          .append(")\n");
          }
       }
 
-      ImGui.tableNextColumn();
       if (ImGui.checkbox(labels.get("##Active"), active))
       {
          setActive(active.get());
@@ -103,9 +109,17 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       }
       ImGui.sameLine();
 
+      if (collapse)
+         ImGui.setNextItemOpen(false, ImGuiCond.Always);
       if (ImGui.collapsingHeader(labels.get(title)))
       {
          renderImGuiWidgets();
+      }
+      if (renderRightContext)
+      {
+         ImGui.sameLine();
+         ImGuiTools.rightAlignText(rightAlignedContextText.toString());
+         ImGuiTools.previousWidgetTooltip(rightAlignedContextTextTooltip.toString());
       }
 
       if (getPanel() != null)
