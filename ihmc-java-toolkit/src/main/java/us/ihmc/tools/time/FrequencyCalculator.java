@@ -72,20 +72,13 @@ public class FrequencyCalculator
       double frequency = calculateFrequency();
       while (frequency > 0.0 && pingTimes.size() > (frequency * 10))
       {
-         pingTimes.remove();
+         pingTimes.removeFirst();
       }
    }
 
    public double getFrequency()
    {
-      double frequency = calculateFrequency();
-
-      while (frequency > 0.0 && pingTimes.size() > (frequency * 10))
-      {
-         pingTimes.remove();
-      }
-
-      return frequency;
+      return calculateFrequency();
    }
 
    public void destroy()
