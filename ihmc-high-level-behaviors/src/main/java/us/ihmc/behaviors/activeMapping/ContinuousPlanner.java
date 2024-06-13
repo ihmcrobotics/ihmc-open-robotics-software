@@ -333,12 +333,16 @@ public class ContinuousPlanner
                                                                    (float) continuousHikingParameters.getGoalPoseForwardDistance(),
                                                                    xRandomMargin,
                                                                    (float) continuousHikingParameters.getGoalPoseUpDistance(), nominalStanceWidth);
+            break;
          case WALK_TO_GOAL:
-            if (!walkToGoalWayPointList.isEmpty())
+            if (walkToGoalWayPointList.isEmpty())
             {
-               goalStancePose.get(RobotSide.LEFT).set(walkToGoalWayPointList.get(0).get(RobotSide.LEFT));
-               goalStancePose.get(RobotSide.RIGHT).set(walkToGoalWayPointList.get(0).get(RobotSide.RIGHT));
+               mode = PlanningMode.FAST_HIKING;
+               return;
             }
+
+            goalStancePose.get(RobotSide.LEFT).set(walkToGoalWayPointList.get(0).get(RobotSide.LEFT));
+            goalStancePose.get(RobotSide.RIGHT).set(walkToGoalWayPointList.get(0).get(RobotSide.RIGHT));
 
             Vector3DBasics robotLocationVector = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation();
             robotLocation.set(robotLocationVector);
@@ -346,8 +350,16 @@ public class ContinuousPlanner
 
             if (distanceToGoalPose < continuousHikingParameters.getNextWaypointDistanceMargin())
             {
+               LogTools.info("Removed goal from list... ready to go to the next one");
                walkToGoalWayPointList.remove(0);
                continuousHikingParameters.setEnableContinuousWalking(false);
+
+               if (!walkToGoalWayPointList.isEmpty())
+               {
+                  goalStancePose.get(RobotSide.LEFT).set(walkToGoalWayPointList.get(0).get(RobotSide.LEFT));
+                  goalStancePose.get(RobotSide.RIGHT).set(walkToGoalWayPointList.get(0).get(RobotSide.RIGHT));
+                  debugger.publishStartAndGoalForVisualization(getStartingStancePose(), getGoalStancePose());
+               }
             }
             break;
       }
@@ -636,6 +648,7 @@ public class ContinuousPlanner
 
    public void addWayPointToList(Pose3D leftFootGoalPose, Pose3D rightFootGoalPose)
    {
+      mode = PlanningMode.WALK_TO_GOAL;
       //TODO make sure we don't add the same values twice
       SideDependentList<Pose3D> latestWayPoint = new SideDependentList<>();
       latestWayPoint.put(RobotSide.LEFT, leftFootGoalPose);
