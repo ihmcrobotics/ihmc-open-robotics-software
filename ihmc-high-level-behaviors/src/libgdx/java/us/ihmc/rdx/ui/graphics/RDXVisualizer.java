@@ -87,7 +87,6 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       {
          for (ROS2Topic<?> topic : multiTopicVisualizer.getTopics())
          {
-            //            rightAlignedContextText.append(topic.getName()).append(" (").append(topic.getQoS().getReliabilityKind().name()).append(")\n");
             rightAlignedContextText.append(multiTopicVisualizer.getFrequency(topic).getText());
             rightAlignedContextTextTooltip.append(topic.getName())
                                           .append(" (")
