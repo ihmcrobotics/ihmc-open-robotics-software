@@ -51,10 +51,14 @@ public class FrequencyCalculator
 
    private double calculateFrequency()
    {
-      if (pingTimes.size() > 1)
+      Long first = pingTimes.peekFirst();
+      int pings = pingTimes.size();
+
+      if (first != null && pings > 1)
       {
-         long elapsedNanos = pingTimes.getLast() - pingTimes.getFirst();
-         long elapsedNanosAverage = elapsedNanos / (pingTimes.size() - 1);
+         long now = System.nanoTime();
+         long elapsedNanos = now - first;
+         long elapsedNanosAverage = elapsedNanos / (pings - 1);
          double elapsedSecondsAverage = elapsedNanosAverage / NANOS_IN_A_SECOND;
          return UnitConversions.secondsToHertz(elapsedSecondsAverage);
       }
@@ -74,7 +78,14 @@ public class FrequencyCalculator
 
    public double getFrequency()
    {
-      return calculateFrequency();
+      double frequency = calculateFrequency();
+
+      while (frequency > 0.0 && pingTimes.size() > (frequency * 10))
+      {
+         pingTimes.remove();
+      }
+
+      return frequency;
    }
 
    public void destroy()
