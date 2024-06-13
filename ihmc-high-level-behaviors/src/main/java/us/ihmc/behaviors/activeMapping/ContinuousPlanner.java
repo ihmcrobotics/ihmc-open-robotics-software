@@ -10,6 +10,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -85,6 +86,7 @@ public class ContinuousPlanner
    private double previousContinuousHikingSwingTime = 0.0;
 
    private List<SideDependentList<Pose3D>> walkToGoalWayPointList = new ArrayList<>();
+   private final Point3D robotLocation = new Point3D();
 
    float xRandomMargin = 0.2f;
    float nominalStanceWidth = 0.22f;
@@ -338,8 +340,9 @@ public class ContinuousPlanner
                goalStancePose.get(RobotSide.RIGHT).set(walkToGoalWayPointList.get(0).get(RobotSide.RIGHT));
             }
 
-            Vector3DBasics robotLocation = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation();
-            double distanceToGoalPose = ContinuousPlanningTools.getDistanceFromRobotToGoalPoseOnXYPlane((Point3DReadOnly) robotLocation, goalStancePose);
+            Vector3DBasics robotLocationVector = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation();
+            robotLocation.set(robotLocationVector);
+            double distanceToGoalPose = ContinuousPlanningTools.getDistanceFromRobotToGoalPoseOnXYPlane(robotLocation, goalStancePose);
 
             if (distanceToGoalPose < continuousHikingParameters.getNextWaypointDistanceMargin())
             {

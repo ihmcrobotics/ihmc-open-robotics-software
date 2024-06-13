@@ -103,7 +103,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
          if (selectionActive)
          {
             latestPickPoint.getTranslation().setZ(height);
-            stancePoses.set(stancePoseCalculator.getStancePoses((FramePose3DReadOnly) pickPointSphere, terrainMapData, environmentHandler));
+            stancePoses.set(stancePoseCalculator.getStancePoses(latestPickPoint, terrainMapData, environmentHandler));
             for (RobotSide robotSide : RobotSide.values)
             {
                footstepGraphics.get(robotSide).setPose(stancePoses.get(robotSide));
