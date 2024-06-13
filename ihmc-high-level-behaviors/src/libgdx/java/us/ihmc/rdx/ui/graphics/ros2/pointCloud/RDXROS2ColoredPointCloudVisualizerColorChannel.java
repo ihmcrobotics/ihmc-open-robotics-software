@@ -41,6 +41,7 @@ public class RDXROS2ColoredPointCloudVisualizerColorChannel extends RDXROS2Color
       {
          BytedecoImage color8UC4Image = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_8UC4);
          color8UC4Image.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+         getFrequencyText().ping();
          return color8UC4Image;
       });
    }

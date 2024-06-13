@@ -131,8 +131,6 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
          cameraModel = CameraModel.getCameraModel(imageMessage);
          MessageTools.extractIDLSequence(imageMessage.getOusterBeamAltitudeAngles(), ousterBeamAltitudeAnglesBuffer);
          MessageTools.extractIDLSequence(imageMessage.getOusterBeamAzimuthAngles(), ousterBeamAzimuthAnglesBuffer);
-
-         getFrequencyText().ping();
       }
    }
 
