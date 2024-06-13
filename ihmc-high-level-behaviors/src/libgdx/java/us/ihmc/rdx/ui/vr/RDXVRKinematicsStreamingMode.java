@@ -102,6 +102,8 @@ public class RDXVRKinematicsStreamingMode
    private int rightIndex = -1;
    private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
 
+   private RDXBiManualManipulationManager rdxBiManipulationManager;
+
    public RDXVRKinematicsStreamingMode(ROS2SyncedRobotModel syncedRobot,
                                        ROS2ControllerHelper ros2ControllerHelper,
                                        RetargetingParameters retargetingParameters,
@@ -155,6 +157,9 @@ public class RDXVRKinematicsStreamingMode
       KSTConfigurationMessage.setEnableRightArmJointspace(true);
       KSTConfigurationMessage.setEnableLeftHandTaskspace(false);
       KSTConfigurationMessage.setEnableRightHandTaskspace(false);
+
+      // Initialize the bi-manipulation manager
+      rdxBiManipulationManager = new RDXBiManualManipulationManager();
    }
 
    public void processVRInput(RDXVRContext vrContext)
@@ -198,6 +203,12 @@ public class RDXVRKinematicsStreamingMode
                                                                  { // do not want to close grippers while interacting with the panel
                                                                     HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
                                                                     sendHandCommand(RobotSide.RIGHT, handConfiguration);
+                                                                 }
+
+                                                                 InputDigitalActionData bimaniuplationButton = controller.getBButtonActionData();
+                                                                 if (bimaniuplationButton.bChanged() && !bimaniuplationButton.bState())
+                                                                 {
+                                                                    rdxBiManipulationManager.toggleBiManualManipulationMode();
                                                                  }
                                                               });
 
@@ -253,6 +264,7 @@ public class RDXVRKinematicsStreamingMode
          toolboxInputMessage.setTimestamp(System.nanoTime());
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()),
                                       toolboxInputMessage);
+         ros2ControllerHelper.publishToController(rdxBiManipulationManager.getBiManualManipulationMessage());
          outputFrequencyPlot.recordEvent();
       }
    }

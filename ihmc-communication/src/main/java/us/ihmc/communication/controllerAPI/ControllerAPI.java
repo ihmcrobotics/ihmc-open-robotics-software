@@ -86,6 +86,10 @@ public final class ControllerAPI
       inputMessageClasses.add(KinematicsToolboxInputCollectionMessage.class);
       inputMessageClasses.add(HumanoidKinematicsToolboxConfigurationMessage.class);
 
+      
+      // Commands supported by the BiManual Manipulation ControlS State
+      inputMessageClasses.add(BimanualManipulationMessage.class);
+
       // Commands supported by the kinematics streaming toolbox
       inputMessageClasses.add(KinematicsStreamingToolboxInputMessage.class);
       inputMessageClasses.add(KinematicsStreamingToolboxConfigurationMessage.class);
