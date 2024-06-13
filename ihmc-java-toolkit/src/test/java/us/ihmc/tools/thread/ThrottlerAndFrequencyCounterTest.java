@@ -32,6 +32,33 @@ public class ThrottlerAndFrequencyCounterTest
       TestTools.assertEpsilonEquals(targetFrequency, frequencyCalculator.getFrequency(), epsilon, "Frequency not correct");
    }
 
+   private static void testFrequencyCounterDecaying(double targetFrequency, double decayTimeSeconds, double epsilon)
+   {
+      LogTools.info("testFrequencyCounter (decaying) targetFrequency=" + targetFrequency + " decayTimeSeconds=" + decayTimeSeconds + " epsilon=" + epsilon);
+
+      long start = System.currentTimeMillis();
+      FrequencyCalculator frequencyCalculator = new FrequencyCalculator(true);
+
+      // Run for 5 seconds
+      while (System.currentTimeMillis() - start < 5000)
+      {
+         frequencyCalculator.ping();
+
+         double sleepTimeSeconds = UnitConversions.hertzToSeconds(targetFrequency);
+         long sleepTimeMillis = (long) (sleepTimeSeconds * 1000);
+
+         ThreadTools.sleep(sleepTimeMillis);
+      }
+
+      frequencyCalculator.destroy();
+
+      // Decaying sleep
+      ThreadTools.sleep((long) (decayTimeSeconds * 1000));
+
+      double targetDecayFrequency = frequencyCalculator.getFrequency() / Math.sqrt(decayTimeSeconds);
+      TestTools.assertEpsilonEquals(frequencyCalculator.getFrequencyDecaying(), targetDecayFrequency, epsilon);
+   }
+
    private static void testThrottlerAndFrequencyCounter(double targetFrequency, double epsilon)
    {
       LogTools.info("testThrottlerAndFrequencyCounter (using us.ihmc.tools.thread.Throttler) targetFrequency=" + targetFrequency + " epsilon=" + epsilon);
@@ -101,5 +128,11 @@ public class ThrottlerAndFrequencyCounterTest
    public void testThrottlerAndFrequencyCounter0_5Hz()
    {
       testThrottlerAndFrequencyCounter(0.5, 0.005);
+   }
+
+   @Test
+   public void testThrottlerAndFrequencyCounter100HzDecaying()
+   {
+      testFrequencyCounterDecaying(100, 5, 10);
    }
 }

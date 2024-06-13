@@ -18,6 +18,7 @@ public class FrequencyCalculator
 {
    private static final double NANOS_IN_A_SECOND = 1_000_000_000.0;
 
+   private double frequency;
    private final Deque<Long> pingTimes = new LinkedList<>();
 
    private volatile boolean loggingThreadRunning;
@@ -49,15 +50,15 @@ public class FrequencyCalculator
       this(false);
    }
 
-   private double calculateFrequency()
+   private double calculateFrequency(boolean decay)
    {
       Long first = pingTimes.peekFirst();
+      Long last = decay ? Long.valueOf(System.nanoTime()) : pingTimes.peekLast();
       int pings = pingTimes.size();
 
-      if (first != null && pings > 1)
+      if (first != null && last != null && pings > 1)
       {
-         long now = System.nanoTime();
-         long elapsedNanos = now - first;
+         long elapsedNanos = last - first;
          long elapsedNanosAverage = elapsedNanos / (pings - 1);
          double elapsedSecondsAverage = elapsedNanosAverage / NANOS_IN_A_SECOND;
          return UnitConversions.secondsToHertz(elapsedSecondsAverage);
@@ -69,16 +70,23 @@ public class FrequencyCalculator
    public void ping() {
       pingTimes.add(System.nanoTime());
 
-      double frequency = calculateFrequency();
+      double frequency = calculateFrequency(false);
       while (frequency > 0.0 && pingTimes.size() > (frequency * 10))
       {
          pingTimes.removeFirst();
       }
+
+      this.frequency = frequency;
    }
 
    public double getFrequency()
    {
-      return calculateFrequency();
+      return frequency;
+   }
+
+   public double getFrequencyDecaying()
+   {
+      return calculateFrequency(true);
    }
 
    public void destroy()
