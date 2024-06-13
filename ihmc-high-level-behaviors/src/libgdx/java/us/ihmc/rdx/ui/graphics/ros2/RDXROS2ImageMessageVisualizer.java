@@ -5,6 +5,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
+import org.jetbrains.annotations.Nullable;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
@@ -14,6 +15,7 @@ import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
+import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
 import us.ihmc.ros2.ROS2Topic;
@@ -65,6 +67,21 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
       this.realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
       realtimeROS2Node.createSubscription(topic, this::queueRenderImage);
       realtimeROS2Node.spin();
+   }
+
+   @Override
+   public void update()
+   {
+      super.update();
+      getOpenCVVideoVisualizer().setActive(isActive());
+      getOpenCVVideoVisualizer().update();
+   }
+
+   @Nullable
+   @Override
+   public RDXPanel getPanel()
+   {
+      return getOpenCVVideoVisualizer().getPanel();
    }
 
    private void queueRenderImage(Subscriber<ImageMessage> subscriber)
@@ -186,6 +203,8 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
       {
          renderStatistics();
       }
+
+      getOpenCVVideoVisualizer().renderImGuiWidgets();
    }
 
    private void unsubscribe()
@@ -202,6 +221,7 @@ public class RDXROS2ImageMessageVisualizer extends RDXROS2OpenCVVideoVisualizer<
    {
       unsubscribe();
       super.destroy();
+      getOpenCVVideoVisualizer().destroy();
    }
 
    public void renderStatistics()
