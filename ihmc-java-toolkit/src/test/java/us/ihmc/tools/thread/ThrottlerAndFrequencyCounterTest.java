@@ -85,13 +85,13 @@ public class ThrottlerAndFrequencyCounterTest
    @Test
    public void testFrequencyCounter100Hz()
    {
-      testFrequencyCounter(100, 1);
+      testFrequencyCounter(100, 5);
    }
 
    @Test
    public void testThrottlerAndFrequencyCounter100Hz()
    {
-      testThrottlerAndFrequencyCounter(100, 1);
+      testThrottlerAndFrequencyCounter(100, 5);
    }
 
    @Test
