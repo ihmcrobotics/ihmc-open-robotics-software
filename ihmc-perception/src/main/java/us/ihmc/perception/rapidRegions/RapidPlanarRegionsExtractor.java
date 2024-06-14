@@ -23,8 +23,8 @@ import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 
 import java.util.Comparator;
@@ -717,10 +717,10 @@ public class RapidPlanarRegionsExtractor
 
    public void destroy()
    {
-      currentFeatureGrid.destroy();
-      patchGraph.destroy(openCLManager);
-      openCLManager.destroy();
-      // TODO: Destroy the rest
+      // TODO: calling these destroy methods cause a native crash
+//      currentFeatureGrid.destroy();
+//      patchGraph.destroy(openCLManager);
+//      openCLManager.destroy();
    }
 
    public RapidPlanarRegionsCustomizer getRapidPlanarRegionsCustomizer()

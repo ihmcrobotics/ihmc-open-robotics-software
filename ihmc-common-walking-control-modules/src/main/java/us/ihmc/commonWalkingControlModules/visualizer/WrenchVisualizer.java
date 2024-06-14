@@ -1,14 +1,5 @@
 package us.ihmc.commonWalkingControlModules.visualizer;
 
-import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicArrow3D;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -29,6 +20,15 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicListDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Consumer;
+
+import static us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.newYoGraphicArrow3D;
 
 /**
  * @author twan Date: 6/2/13
@@ -115,8 +115,9 @@ public class WrenchVisualizer
 
    public void visualize(Map<RigidBodyBasics, ? extends WrenchReadOnly> wrenches)
    {
-      for (RigidBodyBasics rigidBody : rigidBodies)
+      for (int i = 0; i < rigidBodies.size(); i++)
       {
+         RigidBodyBasics rigidBody = rigidBodies.get(i);
          WrenchReadOnly wrench = wrenches.get(rigidBody);
          visualizerMap.get(rigidBody).accept(wrench);
       }
@@ -154,7 +155,6 @@ public class WrenchVisualizer
                                                         true);
 
          yoGraphicsListRegistry.registerYoGraphic(name, forceViz);
-
       }
 
       @Override

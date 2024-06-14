@@ -4,6 +4,7 @@ import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
+import us.ihmc.perception.camera.CameraIntrinsics;
 
 import javax.annotation.Nullable;
 import java.time.Instant;
@@ -175,6 +176,11 @@ public class RawImage
       }
 
       return gpuImageMat;
+   }
+
+   public CameraIntrinsics getIntrinsicsCopy()
+   {
+      return new CameraIntrinsics(imageHeight, imageWidth, focalLengthX, focalLengthY, principalPointX, principalPointY);
    }
 
    public int getOpenCVType()

@@ -17,7 +17,7 @@ public class SceneGraphTest
 
       Assertions.assertEquals(0, sceneGraph.getRootNode().getChildren().size());
 
-      Assertions.assertEquals(1, sceneGraph.getNextID().getValue());
+      Assertions.assertEquals(1, sceneGraph.getNextID().get());
       Assertions.assertEquals(1, sceneGraph.getIDToNodeMap().size());
       Assertions.assertEquals(1, sceneGraph.getNodeNameList().size());
       Assertions.assertEquals(1, sceneGraph.getNamesToNodesMap().size());
@@ -31,7 +31,7 @@ public class SceneGraphTest
 
       Assertions.assertEquals(1, sceneGraph.getRootNode().getChildren().size());
 
-      Assertions.assertEquals(2, sceneGraph.getNextID().getValue());
+      Assertions.assertEquals(2, sceneGraph.getNextID().get());
       Assertions.assertEquals(2, sceneGraph.getIDToNodeMap().size());
       Assertions.assertEquals(2, sceneGraph.getNodeNameList().size());
       Assertions.assertEquals(2, sceneGraph.getNamesToNodesMap().size());
@@ -48,7 +48,7 @@ public class SceneGraphTest
       Assertions.assertEquals(2, sceneGraph.getRootNode().getChildren().size());
       Assertions.assertEquals(1, child1.getChildren().size());
 
-      Assertions.assertEquals(4, sceneGraph.getNextID().getValue());
+      Assertions.assertEquals(4, sceneGraph.getNextID().get());
       Assertions.assertEquals(4, sceneGraph.getIDToNodeMap().size());
       Assertions.assertEquals(4, sceneGraph.getNodeNameList().size());
       Assertions.assertEquals(4, sceneGraph.getNamesToNodesMap().size());

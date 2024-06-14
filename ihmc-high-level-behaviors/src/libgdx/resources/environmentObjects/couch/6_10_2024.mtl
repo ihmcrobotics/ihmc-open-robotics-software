@@ -1,0 +1,13 @@
+# Created by Polycam
+# object name: 6_10_2024
+newmtl 6_10_2024_0
+Ka 0.000 0.000 0.000
+Kd 1.000 1.000 1.000
+Ks 0.000 0.000 0.000
+Tr 0.000000
+illum 1
+Ns 1.000000
+map_Kd 6_10_2024_2_pdGgmP5e.jpg
+normal 6_10_2024_0_pdGgmP5e.jpg
+map_ao 6_10_2024_1_pdGgmP5e.jpg
+map_Pr 6_10_2024_3_pdGgmP5e.jpg
