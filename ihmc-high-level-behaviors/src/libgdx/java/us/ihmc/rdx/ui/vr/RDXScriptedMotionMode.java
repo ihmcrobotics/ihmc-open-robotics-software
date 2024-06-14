@@ -355,25 +355,25 @@ public class RDXScriptedMotionMode
       //         trajectoryType = ScriptedTrajectoryType.STRETCH_OUT_ARMS;
       //      }
 
+      // Home Configuration
+      if (ImGui.radioButton(labels.get("Home Configuration"), trajectoryType == ScriptedTrajectoryType.HOME_CONFIGURATION))
+      {
+         trajectoryType = ScriptedTrajectoryType.HOME_CONFIGURATION;
+      }
+      ImGui.sameLine();
+      ImGui.pushItemWidth(70.0f);
+      homeDuration.set(trajectoryStreamer.getTrajectoryDuration(ScriptedTrajectoryType.HOME_CONFIGURATION));
+      if (ImGui.inputDouble("##homeConfigurationDuration", homeDuration))
+      {
+         trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.HOME_CONFIGURATION, homeDuration.get());
+      }
+
       // Ensure the collapsing headers are open on the first frame.
       if (isFirstFrame)
          ImGui.setNextItemOpen(true);
 
       if (ImGui.collapsingHeader(labels.get("Jointspace Scripted Trajectories:")))
       {
-         // Home Configuration
-         if (ImGui.radioButton(labels.get("Home Configuration"), trajectoryType == ScriptedTrajectoryType.HOME_CONFIGURATION))
-         {
-            trajectoryType = ScriptedTrajectoryType.HOME_CONFIGURATION;
-         }
-         ImGui.sameLine();
-         ImGui.pushItemWidth(70.0f);
-         homeDuration.set(trajectoryStreamer.getTrajectoryDuration(ScriptedTrajectoryType.HOME_CONFIGURATION));
-         if (ImGui.inputDouble("##homeConfigurationDuration", homeDuration))
-         {
-            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.HOME_CONFIGURATION, homeDuration.get());
-         }
-
          // Wrist ROM
          if (ImGui.radioButton(labels.get("Wrist ROM"), trajectoryType == ScriptedTrajectoryType.WRIST_RANGE_OF_MOTION))
          {
