@@ -1,5 +1,6 @@
 package us.ihmc.tools.time;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.UnitConversions;
@@ -59,8 +60,8 @@ public class FrequencyCalculator
       if (first != null && last != null && pings > 1)
       {
          long elapsedNanos = last - first;
-         long elapsedNanosAverage = elapsedNanos / (pings - 1);
-         double elapsedSecondsAverage = elapsedNanosAverage / NANOS_IN_A_SECOND;
+         double elapsedSeconds = Conversions.nanosecondsToSeconds(elapsedNanos);
+         double elapsedSecondsAverage = elapsedSeconds / (pings - 1);
          return UnitConversions.secondsToHertz(elapsedSecondsAverage);
       }
 
