@@ -22,21 +22,20 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class YoFilteredDouble
 {
 
-   private TransferFunctionDiscretizer filter;
+   private final TransferFunctionDiscretizer filter;
 
-   private DMatrixRMaj inputCoefficients;
-   private DMatrixRMaj outputCoefficients;
+   private final DMatrixRMaj inputCoefficients;
+   private final DMatrixRMaj outputCoefficients;
 
-   private DMatrixRMaj inputHistory;
-   private DMatrixRMaj outputHistory;
+   private final DMatrixRMaj inputHistory;
+   private final DMatrixRMaj outputHistory;
 
    private final YoDouble filteredYoDouble;
    private final YoDouble rawYoDouble;
    private boolean firstTick = true;
-   private double[] inTemp;
-   private double[] outTemp;
-   private double newFilteredValue;
-   private boolean safeStartup;
+   private final double[] inTemp;
+   private final double[] outTemp;
+   private final boolean safeStartup;
 
    public YoFilteredDouble(YoRegistry registry, TransferFunctionDiscretizer filter)
    {
@@ -49,11 +48,11 @@ public class YoFilteredDouble
    }
 
    /**
-    * @param name        - class name
-    * @param registry    - YoRegistry to add YoVariables to.
-    * @param filter      - Filter object from trec-simulation-tools.YoVariables.
-    * @param safeStartup -	Recommended to set true. Boolean refers to whether you would like to set the
-    *                    to avoid input/output histories of zero. Without this enabled, you will start the first ticks with high outputs.
+    * @param name        class name
+    * @param registry    YoRegistry to add YoVariables to.
+    * @param filter      Filter object from trec-simulation-tools.YoVariables.
+    * @param safeStartup Recommended to set true. Boolean refers to whether you would like to set the to avoid input/output histories of zero.
+    *                    Without this enabled, you will start the first ticks with high outputs.
     */
    public YoFilteredDouble(String name, YoRegistry registry, TransferFunctionDiscretizer filter, boolean safeStartup)
    {
@@ -127,7 +126,7 @@ public class YoFilteredDouble
       inputHistory.set(1, inTemp.length, false, inTemp);
 
       // Solve for new filtered value.
-      newFilteredValue = CommonOps_DDRM.dot(inputCoefficients, inputHistory) + CommonOps_DDRM.dot(outputCoefficients, outputHistory);
+      double newFilteredValue = CommonOps_DDRM.dot(inputCoefficients, inputHistory) + CommonOps_DDRM.dot(outputCoefficients, outputHistory);
 
       // Set new filtered value.
       filteredYoDouble.set(newFilteredValue);

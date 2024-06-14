@@ -34,12 +34,12 @@ public class ContinuousTransferFunction
     * @param numerator   - numerator coefficients in power order (see above).
     * @param denominator - denominator coefficients in power order (see above).
     */
-   public ContinuousTransferFunction(double k, double numerator[], double denominator[])
+   public ContinuousTransferFunction(double k, double[] numerator, double[] denominator)
    {
       this("", k, numerator, denominator);
    }
 
-   public ContinuousTransferFunction(String name, double k, double numerator[], double denominator[])
+   public ContinuousTransferFunction(String name, double k, double[] numerator, double[] denominator)
    {
       this.name = name;
       this.k = k;
@@ -56,13 +56,13 @@ public class ContinuousTransferFunction
    {
       this.name = name;
 
-      int numOfTranferFunctionsToCascade = severalContinuousTransferFunctions.length;
+      int numOfTransferFunctionsToCascade = severalContinuousTransferFunctions.length;
       ContinuousTransferFunction tf_total;
 
       // Initialize total transfer function with first transfer function.
       tf_total = severalContinuousTransferFunctions[0];
 
-      for (int i = 1; i < numOfTranferFunctionsToCascade; i++)
+      for (int i = 1; i < numOfTransferFunctionsToCascade; i++)
       {
          tf_total = CascadeTwoTransferFunctions(tf_total, severalContinuousTransferFunctions[i]);
       }
@@ -75,10 +75,11 @@ public class ContinuousTransferFunction
 
    /**
     * Method cascades two transfer functions, H1(s) and H2(s) and returns a new transfer function H3(s).
-    *
-    * N1(s)      N2(s)        N3(s)
+    * <pre>
+    *                            N1(s)      N2(s)        N3(s)
     * H3(s) = H1(s)*H2(s) = k1 * ----- k2 * ----- = k3 * -----
-    * D1(s)      D2(s)        D3(s)
+    *                            D1(s)      D2(s)        D3(s)
+    * </pre>
     *
     * @param H1 - Transfer Function 1
     * @param H2 - Transfer Function 2
@@ -89,8 +90,8 @@ public class ContinuousTransferFunction
       ContinuousTransferFunction H3 = new ContinuousTransferFunction();
 
       H3.setGain(H1.getGain() * H2.getGain());
-      H3.setNumerator(CascadePolynomials(H1.getNumerator(), H2.getNumerator()));
-      H3.setDenominator(CascadePolynomials(H1.getDenominator(), H2.getDenominator()));
+      H3.setNumerator(cascadePolynomials(H1.getNumerator(), H2.getNumerator()));
+      H3.setDenominator(cascadePolynomials(H1.getDenominator(), H2.getDenominator()));
 
       return H3;
    }
@@ -102,7 +103,7 @@ public class ContinuousTransferFunction
     * @param poly2
     * @return poly3 = poly1*poly2
     */
-   private double[] CascadePolynomials(double[] poly1, double[] poly2)
+   private static double[] cascadePolynomials(double[] poly1, double[] poly2)
    {
       // Initialize new polynomial to new size.
       double[] poly3 = new double[poly1.length + poly2.length - 1];
