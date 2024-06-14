@@ -81,6 +81,7 @@ public class RDXVRKinematicsStreamingMode
    private final SideDependentList<MutableReferenceFrame> handDesiredControlFrames = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
    private final SideDependentList<Pose3D> ikControlFramePoses = new SideDependentList<>();
+   private final Pose3D ikMidControlFramePose = new Pose3D();
    private final SideDependentList<RDXReferenceFrameGraphic> handFrameGraphics = new SideDependentList<>();
    private final Map<String, MutableReferenceFrame> trackedSegmentDesiredFrame = new HashMap<>();
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
@@ -102,7 +103,7 @@ public class RDXVRKinematicsStreamingMode
    private int rightIndex = -1;
    private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
 
-   private RDXBiManualManipulationManager rdxBiManipulationManager;
+   private RDXBiManualManipulationManager rdxBiManipulationManager = new RDXBiManualManipulationManager();;
 
    public RDXVRKinematicsStreamingMode(ROS2SyncedRobotModel syncedRobot,
                                        ROS2ControllerHelper ros2ControllerHelper,
@@ -157,9 +158,6 @@ public class RDXVRKinematicsStreamingMode
       KSTConfigurationMessage.setEnableRightArmJointspace(true);
       KSTConfigurationMessage.setEnableLeftHandTaskspace(false);
       KSTConfigurationMessage.setEnableRightHandTaskspace(false);
-
-      // Initialize the bi-manipulation manager
-      rdxBiManipulationManager = new RDXBiManualManipulationManager();
    }
 
    public void processVRInput(RDXVRContext vrContext)
@@ -216,6 +214,14 @@ public class RDXVRKinematicsStreamingMode
       {
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          Set<String> additionalTrackedSegments = vrContext.getBodySegmentsWithTrackers();
+
+         // If bi-manipulation mode is enabled, we back out more feasible IK control frame poses that keep the hands flush with the box.
+         if (rdxBiManipulationManager.getEnableBiManualManipulationMode())
+         {
+            //ikMidControlFramePose.interpolate(ikControlFramePoses.get(RobotSide.LEFT),ikControlFramePoses.get(RobotSide.RIGHT), 0.5);
+            rdxBiManipulationManager.adjustHandControlFramesForHoldingBox(handDesiredControlFrames);
+         }
+
          for (VRTrackedSegmentType segmentType : VRTrackedSegmentType.values())
             handleTrackedSegment(vrContext, toolboxInputMessage, segmentType, additionalTrackedSegments);
 
