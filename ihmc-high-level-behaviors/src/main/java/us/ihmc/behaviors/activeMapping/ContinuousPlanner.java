@@ -352,13 +352,16 @@ public class ContinuousPlanner
             {
                LogTools.info("Removed goal from list... ready to go to the next one");
                walkToGoalWayPointList.remove(0);
-               continuousHikingParameters.setEnableContinuousWalking(false);
 
                if (!walkToGoalWayPointList.isEmpty())
                {
                   goalStancePose.get(RobotSide.LEFT).set(walkToGoalWayPointList.get(0).get(RobotSide.LEFT));
                   goalStancePose.get(RobotSide.RIGHT).set(walkToGoalWayPointList.get(0).get(RobotSide.RIGHT));
                   debugger.publishStartAndGoalForVisualization(getStartingStancePose(), getGoalStancePose());
+               }
+               else
+               {
+                  continuousHikingParameters.setEnableContinuousWalking(false);
                }
             }
             break;

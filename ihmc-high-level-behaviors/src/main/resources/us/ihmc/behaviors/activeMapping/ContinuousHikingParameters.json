@@ -12,5 +12,5 @@
   "Planner timeout fraction" : 0.3,
   "Planning without reference timeout" : 1.3,
   "Log footstep plans" : true,
-  "Next Waypoint Distance Margin" : 0.5
+  "Next Waypoint Distance Margin" : 0.92
 }
