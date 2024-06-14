@@ -70,6 +70,7 @@ public class RDXScriptedMotionMode
    private final ImDouble beachBallFlexDuration = new ImDouble();
    private final ImDouble beachBallOverheadDuration = new ImDouble();
    private final ImDouble dabOnThemHatersDuration = new ImDouble();
+   private final ImDouble bicepCurlSimpleDuration = new ImDouble();
    private final ImDouble reachabilityArmsBackDuration = new ImDouble();
    private final ImDouble reachabilityArmsForwardDuration = new ImDouble();
    private final ImDouble reachabilityArmsSidewaysDuration = new ImDouble();
@@ -214,11 +215,18 @@ public class RDXScriptedMotionMode
             case BEACH_BALL_FLEX:
             case BEACH_BALL_OVERHEAD:
             case DAB_ON_THEM_HATERS:
+            case BICEP_CURL_SIMPLE:
+            case BICEP_CURL:
             case REACHABILITY_ARMS_UP:
             case REACHABILITY_ARMS_FORWARD:
             case REACHABILITY_ARMS_SIDEWAYS:
             case REACHABILITY_ARMS_BACK:
                armTrajectoryMessage = trajectoryStreamer.generateArmTrajectoryMessage(trajectoryType, robotSide);
+               if (armTrajectoryMessage == null)
+               {
+                  // If there's no message, don't publish it.
+                  break;
+               }
                ros2ControllerHelper.publishToController(armTrajectoryMessage);
                break;
             case REACHABILITY_SWEEP:
@@ -565,9 +573,38 @@ public class RDXScriptedMotionMode
          {
             trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.ROM_GRIPPER_YAW, gripperYawRomDuration.get());
          }
-
-         isFirstFrame = false;
       }
+
+      if (isFirstFrame)
+         ImGui.setNextItemOpen(true);
+
+      if (ImGui.collapsingHeader(labels.get("Weight Lifting Trajectories:")))
+      {
+         // Bicep Curl Simple
+         if (ImGui.radioButton(labels.get("Bicep Curl Simple"), trajectoryType == ScriptedTrajectoryType.BICEP_CURL_SIMPLE))
+         {
+            trajectoryType = ScriptedTrajectoryType.BICEP_CURL_SIMPLE;
+         }
+         ImGui.sameLine();
+         bicepCurlSimpleDuration.set(trajectoryStreamer.getTrajectoryDuration(ScriptedTrajectoryType.BICEP_CURL_SIMPLE));
+         if (ImGui.inputDouble("##bicepCurlSimpleDuration", bicepCurlSimpleDuration))
+         {
+            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.BICEP_CURL_SIMPLE, bicepCurlSimpleDuration.get());
+         }
+
+         // Bicep Curl
+         if (ImGui.radioButton(labels.get("Bicep Curl"), trajectoryType == ScriptedTrajectoryType.BICEP_CURL))
+         {
+            trajectoryType = ScriptedTrajectoryType.BICEP_CURL;
+         }
+         ImGui.sameLine();
+         bicepCurlSimpleDuration.set(trajectoryStreamer.getTrajectoryDuration(ScriptedTrajectoryType.BICEP_CURL));
+         if (ImGui.inputDouble("##bicepCurlDuration", bicepCurlSimpleDuration))
+         {
+            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.BICEP_CURL, bicepCurlSimpleDuration.get());
+         }
+      }
+      isFirstFrame = false;
 
       if (ImGui.button(labels.get("Execute Trajectory")))
       {
