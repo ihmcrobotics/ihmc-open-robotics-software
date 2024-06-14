@@ -60,15 +60,9 @@ public class RDXPerceptionVisualizersPanel extends RDXPanel implements RDXRender
 
    public void renderImGuiWidgets()
    {
-      if (ImGui.inputText("Search##perceptionVisualizers", filter))
-      {
-      }
+      ImGui.inputText("Search##perceptionVisualizers", filter);
       ImGui.sameLine();
-      boolean collapse = false;
-      if (ImGui.button("Collapse##perceptionVisualizers"))
-      {
-         collapse = true;
-      }
+      boolean collapse = ImGui.button("Collapse##perceptionVisualizers");
 
       double longestVisualizerNameLength = 0.0;
       for (RDXVisualizer visualizer : visualizers)
