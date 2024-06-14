@@ -19,7 +19,6 @@ import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.rdx.RDXHeightMapRenderer;
-import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew;
@@ -35,12 +34,12 @@ import java.util.Set;
 
 public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 {
+   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
+
    private final RDXHeightMapRenderer heightMapRenderer = new RDXHeightMapRenderer();
    private final RDXHeightMapGraphicNew heightMapGraphicNew = new RDXHeightMapGraphicNew();
    private final ResettableExceptionHandlingExecutorService executorService;
 
-   private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
-   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImBoolean enableHeightMapVisualizer = new ImBoolean(true);
    private final ImBoolean enableHeightMapRenderer = new ImBoolean(false);
    private final ImBoolean displayGlobalHeightMapImage = new ImBoolean(false);
@@ -97,7 +96,6 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
    public void acceptHeightMapMessage(HeightMapMessage heightMapMessage)
    {
-      frequencyPlot.recordEvent();
       if (isActive())
       {
          updateGridMapGraphic(heightMapMessage);
@@ -119,7 +117,6 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
 
    public void acceptImageMessage(ImageMessage imageMessage)
    {
-      frequencyPlot.recordEvent();
       if (isActive())
       {
          executorService.clearQueueAndExecute(() ->
@@ -193,8 +190,6 @@ public class RDXROS2HeightMapVisualizer extends RDXROS2MultiTopicVisualizer
          ImGui.checkbox(labels.get("Enable Height Map Renderer"), enableHeightMapRenderer);
          ImGui.checkbox(labels.get("Display Global Height Map Image"), displayGlobalHeightMapImage);
       }
-
-      frequencyPlot.renderImGuiWidgets();
    }
 
    @Override

@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.communication.HumanoidControllerAPI;
@@ -53,7 +52,6 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
    private final Point3D previousRobotMidFeetUnderPelvis = new Point3D();
    private final Point3D latestRobotMidFeetUnderPelvis = new Point3D();
    private final Point3D robotTranslationDifference = new Point3D();
-   private final DRCRobotModel robotModel;
    private final String chestName;
    private final ROS2SyncedRobotModel syncedRobot;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -69,32 +67,25 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
    private final List<MinimalFootstep> footstepHistory = new ArrayList<>();
    private final RDXFootstepPlanGraphic footstepHistoryGraphic;
 
-   public RDXROS2RobotVisualizer(DRCRobotModel robotModel, ROS2PublishSubscribeAPI ros2, ROS2SyncedRobotModel syncedRobot)
+   public RDXROS2RobotVisualizer(RDXBaseUI baseUI, ROS2PublishSubscribeAPI ros2, ROS2SyncedRobotModel syncedRobot)
    {
-      this(null, ros2, robotModel, syncedRobot, () -> null);
-   }
-
-   public RDXROS2RobotVisualizer(RDXBaseUI baseUI, ROS2PublishSubscribeAPI ros2, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
-   {
-      this(baseUI, ros2, robotModel, syncedRobot, () -> null);
+      this(baseUI, ros2, syncedRobot, () -> null);
    }
 
    public RDXROS2RobotVisualizer(RDXBaseUI baseUI,
                                  ROS2PublishSubscribeAPI ros2,
-                                 DRCRobotModel robotModel,
                                  ROS2SyncedRobotModel syncedRobot,
                                  Supplier<RDXFocusBasedCamera> cameraForTrackingSupplier)
    {
-      super(robotModel.getSimpleRobotName() + " Robot Visualizer", StateEstimatorAPI.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()));
+      super(syncedRobot.getRobotModel().getSimpleRobotName() + " Robot Visualizer", StateEstimatorAPI.getRobotConfigurationDataTopic(syncedRobot.getRobotModel().getSimpleRobotName()));
       this.baseUI = baseUI;
       this.ros2 = ros2;
-      this.robotModel = robotModel;
       this.syncedRobot = syncedRobot;
       this.cameraForTrackingSupplier = cameraForTrackingSupplier;
       syncedRobot.addRobotConfigurationDataReceivedCallback(getFrequency()::ping);
       previousRobotMidFeetUnderPelvis.setToNaN();
-      chestName = robotModel.getJointMap().getChestName();
-      footstepHistoryGraphic = new RDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
+      chestName = syncedRobot.getRobotModel().getJointMap().getChestName();
+      footstepHistoryGraphic = new RDXFootstepPlanGraphic(syncedRobot.getRobotModel().getContactPointParameters().getControllerFootGroundContactPoints());
       footstepHistoryGraphic.setOpacity(0.7f);
       footstepHistoryGraphic.setColor(RobotSide.LEFT, Color.SKY);
       footstepHistoryGraphic.setColor(RobotSide.RIGHT, Color.SKY);
@@ -108,48 +99,48 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
       if (baseUI != null)
          baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(this::processImGuiInput);
       cameraForTracking = cameraForTrackingSupplier.get();
-      getMultiBodyGraphic().loadRobotModelAndGraphics(robotModel.getRobotDefinition(), syncedRobot.getFullRobotModel().getElevator());
+      getMultiBodyGraphic().loadRobotModelAndGraphics(syncedRobot.getRobotModel().getRobotDefinition(), syncedRobot.getFullRobotModel().getElevator());
 
       interactableOuster = new RDXInteractableOuster(baseUI.getPrimary3DPanel(),
                                                      syncedRobot.getReferenceFrames().getOusterLidarFrame(),
-                                                     robotModel.getSensorInformation().getOusterLidarTransform());
+                                                     syncedRobot.getRobotModel().getSensorInformation().getOusterLidarTransform());
       interactableOuster.getInteractableFrameModel()
                         .addRemoteTuning(ros2,
                                          PerceptionAPI.OUSTER_TO_CHEST_TUNING,
-                                         robotModel.getSensorInformation().getOusterLidarTransform());
+                                         syncedRobot.getRobotModel().getSensorInformation().getOusterLidarTransform());
       interactableRealsenseD455 = new RDXInteractableRealsenseD455(baseUI.getPrimary3DPanel(),
                                                                    syncedRobot.getReferenceFrames().getSteppingCameraFrame(),
-                                                                   robotModel.getSensorInformation().getSteppingCameraTransform());
+                                                                   syncedRobot.getRobotModel().getSensorInformation().getSteppingCameraTransform());
       interactableRealsenseD455.getInteractableFrameModel()
                                .addRemoteTuning(ros2,
                                                 PerceptionAPI.STEPPING_CAMERA_TO_PARENT_TUNING,
-                                                robotModel.getSensorInformation().getSteppingCameraTransform());
+                                                syncedRobot.getRobotModel().getSensorInformation().getSteppingCameraTransform());
       RDXInteractableBlackflyFujinon interactableBlackflyLeftFujinon = new RDXInteractableBlackflyFujinon(baseUI.getPrimary3DPanel(),
                                                                                                           syncedRobot.getReferenceFrames().getSituationalAwarenessCameraFrame(RobotSide.LEFT),
-                                                                                                          robotModel.getSensorInformation().getSituationalAwarenessCameraTransform(RobotSide.LEFT));
+                                                                                                          syncedRobot.getRobotModel().getSensorInformation().getSituationalAwarenessCameraTransform(RobotSide.LEFT));
       interactableBlackflyLeftFujinon.getInteractableFrameModel()
                                      .addRemoteTuning(ros2,
                                                       PerceptionAPI.SITUATIONAL_AWARENESS_CAMERA_TO_PARENT_TUNING.get(RobotSide.LEFT),
-                                                      robotModel.getSensorInformation().getSituationalAwarenessCameraTransform(RobotSide.LEFT));
+                                                      syncedRobot.getRobotModel().getSensorInformation().getSituationalAwarenessCameraTransform(RobotSide.LEFT));
       interactableBlackflyFujinons.set(RobotSide.LEFT, interactableBlackflyLeftFujinon);
 
       RDXInteractableBlackflyFujinon interactableBlackflyRightFujinon = new RDXInteractableBlackflyFujinon(baseUI.getPrimary3DPanel(),
                                                                                                            syncedRobot.getReferenceFrames().getSituationalAwarenessCameraFrame(RobotSide.RIGHT),
-                                                                                                           robotModel.getSensorInformation().getSituationalAwarenessCameraTransform(RobotSide.RIGHT));
+                                                                                                           syncedRobot.getRobotModel().getSensorInformation().getSituationalAwarenessCameraTransform(RobotSide.RIGHT));
       interactableBlackflyRightFujinon.getInteractableFrameModel()
                                       .addRemoteTuning(ros2,
                                                        PerceptionAPI.SITUATIONAL_AWARENESS_CAMERA_TO_PARENT_TUNING.get(RobotSide.RIGHT),
-                                                       robotModel.getSensorInformation().getSituationalAwarenessCameraTransform(RobotSide.RIGHT));
+                                                       syncedRobot.getRobotModel().getSensorInformation().getSituationalAwarenessCameraTransform(RobotSide.RIGHT));
       interactableBlackflyFujinons.set(RobotSide.RIGHT, interactableBlackflyRightFujinon);
 
       interactableZED2i = new RDXInteractableZED2i(baseUI.getPrimary3DPanel(),
                                                    syncedRobot.getReferenceFrames().getExperimentalCameraFrame(),
-                                                   robotModel.getSensorInformation().getExperimentalCameraTransform());
+                                                   syncedRobot.getRobotModel().getSensorInformation().getExperimentalCameraTransform());
       interactableZED2i.getInteractableFrameModel().addRemoteTuning(ros2,
                                                                     PerceptionAPI.EXPERIMENTAL_CAMERA_TO_PARENT_TUNING,
-                                                                    robotModel.getSensorInformation().getExperimentalCameraTransform());
+                                                                    syncedRobot.getRobotModel().getSensorInformation().getExperimentalCameraTransform());
 
-      ros2.subscribeViaVolatileCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, robotModel.getSimpleRobotName()), footstepStatusMessage ->
+      ros2.subscribeViaVolatileCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, syncedRobot.getRobotModel().getSimpleRobotName()), footstepStatusMessage ->
       {
          if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
             completedFootstepThreadBarrier.add(new MinimalFootstep(footstepStatusMessage));
