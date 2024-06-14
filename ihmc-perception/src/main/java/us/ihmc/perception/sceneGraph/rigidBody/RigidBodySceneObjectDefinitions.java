@@ -144,6 +144,14 @@ public class RigidBodySceneObjectDefinitions
       DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM.getTranslation().addY(-0.05);
    }
 
+   public static final String COUCH_NAME = "Couch";
+   public static final String COUCH_VISUAL_MODEL_FILE_PATH = "environmentObjects/couch/Couch.g3dj";
+   public static final RigidBodyTransform COUCH_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+
+   public static final String TRASHCAN_NAME = "TrashCan";
+   public static final String TRASHCAN_VISUAL_MODEL_FILE_PATH = "environmentObjects/trashCan/TrashCan.g3dj";
+   public static final RigidBodyTransform TRASHCAN_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM = new RigidBodyTransform();
+
    public static void ensureNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
       ArUcoMarkerNode boxArUcoMarker = sceneGraph.getArUcoMarkerIDToNodeMap().get(BOX_MARKER_ID);
@@ -297,5 +305,29 @@ public class RigidBodySceneObjectDefinitions
                                                         DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
       LogTools.info("Adding Drill to scene graph.");
       modificationQueue.accept(new SceneGraphNodeAddition(drill, parentNode));
+   }
+
+   public static void ensureCouchNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
+   {
+      SceneNode couch = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                         COUCH_NAME,
+                                                         sceneGraph.getIDToNodeMap(),
+                                                         parentNode.getID(),
+                                                         new RigidBodyTransform(), COUCH_VISUAL_MODEL_FILE_PATH,
+                                                         COUCH_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      LogTools.info("Adding Couch to scene graph.");
+      modificationQueue.accept(new SceneGraphNodeAddition(couch, parentNode));
+   }
+
+   public static void ensureTrashCanNodeAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue, SceneNode parentNode)
+   {
+      SceneNode trashCan = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                         TRASHCAN_NAME,
+                                                         sceneGraph.getIDToNodeMap(),
+                                                         parentNode.getID(),
+                                                         new RigidBodyTransform(), TRASHCAN_VISUAL_MODEL_FILE_PATH,
+                                                         TRASHCAN_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+      LogTools.info("Adding TrashCan to scene graph.");
+      modificationQueue.accept(new SceneGraphNodeAddition(trashCan, parentNode));
    }
 }
