@@ -333,16 +333,41 @@ public class MatrixMissingToolsTest
          DMatrixRMaj matrixCompareTemporary = new DMatrixRMaj(matrixSize, matrixSize);
          DMatrixRMaj matrixCompareResult = new DMatrixRMaj(matrix);
 
-
-         if(powerNumber >1) {
-            for (int j=0; j<powerNumber-1; j++){
+         if (powerNumber > 1)
+         {
+            for (int j = 0; j < powerNumber - 1; j++)
+            {
                CommonOps_DDRM.mult(matrix, matrixCompareResult, matrixCompareTemporary);
                matrixCompareResult.set(matrixCompareTemporary);
             }
          }
          MatrixTestTools.assertMatrixEquals(matrixPowerTest, matrixCompareResult, EPSILON);
+      }
+   }
 
+   @Test
+   public void testElementWiseLessThan()
+   {
+      Random random = new Random(41584L);
 
+      int iters = 100;
+
+      for (int i = 0; i < iters; i++)
+      {
+         int rowSize = random.nextInt(5, 10);
+         int columnSize = random.nextInt(5, 10);
+
+         DMatrixRMaj matrixLess = RandomMatrices_DDRM.rectangle(rowSize, columnSize, random);
+         DMatrixRMaj matrixMore = new DMatrixRMaj(rowSize, columnSize);
+         for (int j = 0; j < rowSize; j++)
+         {
+            for (int k = 0; k < columnSize; k++)
+            {
+               matrixMore.set(j, k, matrixLess.get(j, k) + random.nextDouble(0.01, 0.05));
+            }
+         }
+
+         assertTrue(MatrixMissingTools.elementWiseLessThan(matrixLess, matrixMore));
       }
    }
 }
