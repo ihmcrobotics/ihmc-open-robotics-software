@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.room;
+package us.ihmc.behaviors.roomExploration;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;

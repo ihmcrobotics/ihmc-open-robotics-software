@@ -50,6 +50,8 @@ behavior_msgs/ActionSequenceStateMessage[] action_sequences
 
 behavior_msgs/DoorTraversalStateMessage[] door_traversals
 
+behavior_msgs/RoomExplorationStateMessage[] room_explorations
+
 behavior_msgs/ChestOrientationActionStateMessage[] chest_orientation_actions
 
 behavior_msgs/FootstepPlanActionStateMessage[] footstep_plan_actions

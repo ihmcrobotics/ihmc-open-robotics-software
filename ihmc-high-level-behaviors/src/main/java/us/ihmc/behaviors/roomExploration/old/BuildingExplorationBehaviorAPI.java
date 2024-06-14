@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.buildingExploration;
+package us.ihmc.behaviors.roomExploration.old;
 
 import std_msgs.msg.dds.UInt16;
 import us.ihmc.communication.DeprecatedAPIs;

@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
-import us.ihmc.behaviors.room.RoomExplorationDefinition;
+import us.ihmc.behaviors.roomExploration.RoomExplorationDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;

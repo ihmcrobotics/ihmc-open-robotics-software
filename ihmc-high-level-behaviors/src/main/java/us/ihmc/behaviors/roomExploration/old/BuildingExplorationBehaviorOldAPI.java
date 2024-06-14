@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.buildingExploration;
+package us.ihmc.behaviors.roomExploration.old;
 
 public class BuildingExplorationBehaviorOldAPI
 {

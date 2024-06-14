@@ -7,8 +7,8 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import org.apache.commons.lang3.StringUtils;
 import std_msgs.msg.dds.UInt16;
-import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorMode;
-import us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorParameters;
+import us.ihmc.behaviors.roomExploration.old.BuildingExplorationBehaviorMode;
+import us.ihmc.behaviors.roomExploration.old.BuildingExplorationBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.property.StoredPropertySetMessageTools;
@@ -22,7 +22,7 @@ import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 
 import java.util.Set;
 
-import static us.ihmc.behaviors.buildingExploration.BuildingExplorationBehaviorAPI.*;
+import static us.ihmc.behaviors.roomExploration.old.BuildingExplorationBehaviorAPI.*;
 
 public class RDXBuildingExplorationBehaviorUI extends RDXBehaviorUIInterface
 {
