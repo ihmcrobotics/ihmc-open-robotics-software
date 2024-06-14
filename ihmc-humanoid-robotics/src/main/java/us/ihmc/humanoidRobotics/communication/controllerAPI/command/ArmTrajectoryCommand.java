@@ -145,4 +145,9 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    {
       return sequenceId;
    }
+
+   public void setSequenceId(int sequenceId)
+   {
+      this.sequenceId = sequenceId;
+   }
 }
