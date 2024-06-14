@@ -1,12 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.controlModules.YoOrientationFrame;
 import us.ihmc.commonWalkingControlModules.controlModules.YoSE3OffsetFrame;
 import us.ihmc.commonWalkingControlModules.controlModules.YoTranslationFrame;
@@ -27,6 +20,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData3D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.SpaceData6D;
 import us.ihmc.commonWalkingControlModules.controllerCore.data.Type;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings.FilterDouble1D;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings.FilterVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.GainCoupling;
@@ -36,11 +31,16 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * {@code FeedbackControllerToolbox} is meant to be used only in the
@@ -58,12 +58,13 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    public static final String centerOfMassName = "centerOfMass";
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final FeedbackControllerSettings settings;
 
    private SingleFeedbackControllerDataPool centerOfMassDataPool;
    private final Map<RigidBodyBasics, List<SingleFeedbackControllerDataPool>> endEffectorDataPoolMap = new HashMap<>();
    private final List<SingleFeedbackControllerDataPool> singleFeedbackControllerDataPoolList = new ArrayList<>();
 
-   private final Map<String, DoubleProvider> errorVelocityFilterBreakFrequencies;
+   private final Map<String, FilterDouble1D> jointNameToVelocityErrorFilter = new HashMap<>();
 
    private final InverseDynamicsCommandList lastFeedbackControllerInverseDynamicsOutput = new InverseDynamicsCommandList();
    private final InverseKinematicsCommandList lastFeedbackControllerInverseKinematicsOutput = new InverseKinematicsCommandList();
@@ -76,19 +77,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
 
    public FeedbackControllerToolbox(FeedbackControllerSettings settings, YoRegistry parentRegistry)
    {
-      errorVelocityFilterBreakFrequencies = new HashMap<>();
-
-      List<GroupParameter<Double>> parameters = settings.getErrorVelocityFilterBreakFrequencies();
-      if (parameters != null)
-      {
-         for (GroupParameter<Double> groupParameter : parameters)
-         {
-            String parameterName = groupParameter.getGroupName() + "ErrorVelocityBreakFrequency";
-            DoubleParameter groupBreakFrequency = new DoubleParameter(parameterName, registry, groupParameter.getParameter());
-            groupParameter.getMemberNames().forEach(name -> errorVelocityFilterBreakFrequencies.put(name, groupBreakFrequency));
-         }
-      }
-
+      this.settings = settings;
       parentRegistry.addChild(registry);
    }
 
@@ -99,7 +88,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
 
    /**
     * Stores the feedback controllers' output for later access to the user.
-    * 
+    *
     * @param output the output of the controller.
     */
    public void registerFeedbackControllerOutput(InverseDynamicsCommandList output)
@@ -111,7 +100,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
 
    /**
     * Stores the feedback controllers' output for later access to the user.
-    * 
+    *
     * @param output the output of the controller.
     */
    public void registerFeedbackControllerOutput(InverseKinematicsCommandList output)
@@ -123,7 +112,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
 
    /**
     * Stores the feedback controllers' output for later access to the user.
-    * 
+    *
     * @param output the output of the controller.
     */
    public void registerFeedbackControllerOutput(VirtualModelControlCommandList output)
@@ -137,7 +126,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
    {
       if (centerOfMassDataPool == null)
       {
-         centerOfMassDataPool = new SingleFeedbackControllerDataPool(centerOfMassName, 0, registry);
+         centerOfMassDataPool = new SingleFeedbackControllerDataPool(centerOfMassName, 0, settings, registry);
          singleFeedbackControllerDataPoolList.add(centerOfMassDataPool);
       }
       return centerOfMassDataPool;
@@ -261,6 +250,12 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       return rateLimitedVectorData;
    }
 
+   public FilterVector3D getOrCreateCenterOfMassLinearVelocityErrorFilter(double dt)
+   {
+      SingleFeedbackControllerDataPool dataPool = getOrCreateCenterOfMassDataPool();
+      return dataPool.getOrCreateLinearVelocityErrorFilter(dt);
+   }
+
    /**
     * Retrieves and returns the set of gains {@code YoPID3DGains} for the center of mass, if it does
     * not exist it is created.
@@ -289,7 +284,7 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
 
       while (endEffectorDataPoolList.size() <= controllerIndex)
       {
-         SingleFeedbackControllerDataPool newPool = new SingleFeedbackControllerDataPool(endEffector.getName(), controllerIndex, registry);
+         SingleFeedbackControllerDataPool newPool = new SingleFeedbackControllerDataPool(endEffector.getName(), controllerIndex, settings, registry);
          endEffectorDataPoolList.add(newPool);
          singleFeedbackControllerDataPoolList.add(newPool);
       }
@@ -302,11 +297,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * {@code type}, if it does not exist it is created.
     * <p>
     * The name prefix of the created variable is created as follows:
-    * 
+    *
     * <pre>
     * namePrefix = endEffector.getName() + type.getName() + SpaceData3D.POSITION.getName()
     * </pre>
-    * 
+    *
     * Such that the desired position for the rigid-body 'rightHand' will have the prefix:
     * "rightHandDesiredPosition".
     * </p>
@@ -336,11 +331,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * {@code type}, if it does not exist it is created.
     * <p>
     * The name prefix of the created variable is created as follows:
-    * 
+    *
     * <pre>
     * namePrefix = endEffector.getName() + type.getName() + SpaceData3D.ORIENTATION.getName()
     * </pre>
-    * 
+    *
     * Such that the current orientation for the rigid-body 'rightHand' will have the prefix:
     * "rightHandCurrentOrientation".
     * </p>
@@ -374,11 +369,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * {@code type}, and {@code space}, if it does not exist it is created.
     * <p>
     * The name prefix of the created variable is created as follows:
-    * 
+    *
     * <pre>
     * namePrefix = endEffector.getName() + type.getName() + space.getName()
     * </pre>
-    * 
+    *
     * Such that the desired linear velocity for the rigid-body 'rightHand' will have the prefix:
     * "rightHandDesiredLinearVelocity".
     * </p>
@@ -418,11 +413,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * </p>
     * <p>
     * The name prefix of the created variable is created as follows:
-    * 
+    *
     * <pre>
     * namePrefix = endEffector.getName() + "RateLimited" + type.getName() + space.getName()
     * </pre>
-    * 
+    *
     * Such that the rate-limited vector of the desired linear acceleration for the rigid-body
     * 'rightHand' will have the prefix: "rightHandRateLimitedDesiredLinearAcceleration".
     * </p>
@@ -466,11 +461,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     * </p>
     * <p>
     * The name prefix of the created variable is created as follows:
-    * 
+    *
     * <pre>
     * namePrefix = endEffector.getName() + "Filtered" + type.getName() + space.getName()
     * </pre>
-    * 
+    *
     * Such that the filtered vector of the linear velocity error for the rigid-body 'rightHand' will
     * have the prefix: "rightHandFilteredErrorLinearVelocity".
     * </p>
@@ -508,6 +503,18 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
                                                                                                     isRequiredVariable);
       alphaFilteredVectorData.addActiveFlag(activeFlag);
       return alphaFilteredVectorData;
+   }
+
+   public FilterVector3D getOrCreateAngularVelocityErrorFilter(RigidBodyBasics endEffector, int controllerIndex, double dt)
+   {
+      SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
+      return dataPool.getOrCreateAngularVelocityErrorFilter(dt);
+   }
+
+   public FilterVector3D getOrCreateLinearVelocityErrorFilter(RigidBodyBasics endEffector, int controllerIndex, double dt)
+   {
+      SingleFeedbackControllerDataPool dataPool = getOrCreateEndEffectorDataPool(endEffector, controllerIndex);
+      return dataPool.getOrCreateLinearVelocityErrorFilter(dt);
    }
 
    /**
@@ -744,7 +751,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     */
    public YoSE3OffsetFrame getOrCreateSpatialFeedbackControlFrame(RigidBodyBasics endEffector, int controllerIndex, boolean isRequiredVariable)
    {
-      return getOrCreateEndEffectorDataPool(endEffector, controllerIndex).getOrCreateSpatialFeedbackControlFrame(endEffector.getBodyFixedFrame(), isRequiredVariable);
+      return getOrCreateEndEffectorDataPool(endEffector, controllerIndex).getOrCreateSpatialFeedbackControlFrame(endEffector.getBodyFixedFrame(),
+                                                                                                                 isRequiredVariable);
    }
 
    /**
@@ -761,7 +769,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     */
    public YoTranslationFrame getOrCreatePointFeedbackControlFrame(RigidBodyBasics endEffector, int controllerIndex, boolean isRequiredVariable)
    {
-      return getOrCreateEndEffectorDataPool(endEffector, controllerIndex).getOrCreatePointFeedbackControlFrame(endEffector.getBodyFixedFrame(), isRequiredVariable);
+      return getOrCreateEndEffectorDataPool(endEffector, controllerIndex).getOrCreatePointFeedbackControlFrame(endEffector.getBodyFixedFrame(),
+                                                                                                               isRequiredVariable);
    }
 
    /**
@@ -778,7 +787,8 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
     */
    public YoOrientationFrame getOrCreateOrientationFeedbackControlFrame(RigidBodyBasics endEffector, int controllerIndex, boolean isRequiredVariable)
    {
-      return getOrCreateEndEffectorDataPool(endEffector, controllerIndex).getOrCreateOrientationFeedbackControlFrame(endEffector.getBodyFixedFrame(), isRequiredVariable);
+      return getOrCreateEndEffectorDataPool(endEffector, controllerIndex).getOrCreateOrientationFeedbackControlFrame(endEffector.getBodyFixedFrame(),
+                                                                                                                     isRequiredVariable);
    }
 
    /**
@@ -797,9 +807,16 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       }
    }
 
-   public DoubleProvider getErrorVelocityFilterBreakFrequency(String endEffectorOrJointName)
+   public FilterDouble1D getOrCreateVelocityErrorFilterDouble1D(String jointName, double dt)
    {
-      return errorVelocityFilterBreakFrequencies.get(endEffectorOrJointName);
+      FilterDouble1D filter = jointNameToVelocityErrorFilter.get(jointName);
+      if (filter == null)
+      {
+         filter = settings.getVelocity1DErrorFilter(jointName, dt, registry);
+         jointNameToVelocityErrorFilter.put(jointName, filter);
+      }
+
+      return filter;
    }
 
    @Override
@@ -934,6 +951,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       private final EnumMap<Type, EnumMap<SpaceData3D, FBVector3D>> vectorDataMap = new EnumMap<>(Type.class);
       private final EnumMap<Type, EnumMap<SpaceData3D, FBRateLimitedVector3D>> rateLimitedVectorDataMap = new EnumMap<>(Type.class);
       private final EnumMap<Type, EnumMap<SpaceData3D, FBAlphaFilteredVector3D>> filteredVectorDataMap = new EnumMap<>(Type.class);
+      private final String endEffectorName;
+      private final FeedbackControllerSettings settings;
+
+      private FilterVector3D angularVelocityErrorFilter;
+      private FilterVector3D linearVelocityErrorFilter;
 
       private YoPID3DGains orientationGains;
       private YoPID3DGains positionGains;
@@ -947,9 +969,11 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
 
       private final List<FeedbackControllerData> clearableData = new ArrayList<>();
 
-      public SingleFeedbackControllerDataPool(String namePrefix, int controllerIndex, YoRegistry registry)
+      public SingleFeedbackControllerDataPool(String endEffectorName, int controllerIndex, FeedbackControllerSettings settings, YoRegistry registry)
       {
-         this.namePrefix = appendIndex(namePrefix, controllerIndex);
+         this.endEffectorName = endEffectorName;
+         this.settings = settings;
+         this.namePrefix = appendIndex(endEffectorName, controllerIndex);
          this.registry = registry;
          debugRegistry = WholeBodyControllerCore.REDUCE_YOVARIABLES ? null : registry;
       }
@@ -1057,6 +1081,20 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
          return rateLimitedVectorData;
       }
 
+      public FilterVector3D getOrCreateAngularVelocityErrorFilter(double dt)
+      {
+         if (angularVelocityErrorFilter == null)
+            angularVelocityErrorFilter = settings.getAngularVelocity3DErrorFilter(endEffectorName, dt, registry);
+         return angularVelocityErrorFilter;
+      }
+
+      public FilterVector3D getOrCreateLinearVelocityErrorFilter(double dt)
+      {
+         if (linearVelocityErrorFilter == null)
+            linearVelocityErrorFilter = settings.getLinearVelocity3DErrorFilter(endEffectorName, dt, registry);
+         return linearVelocityErrorFilter;
+      }
+
       public YoPID3DGains getOrCreateOrientationGains(boolean useIntegrator, boolean isRequiredVariable)
       {
          if (orientationGains == null)
@@ -1105,14 +1143,18 @@ public class FeedbackControllerToolbox implements FeedbackControllerDataHolderRe
       private YoFrameVector3D getOrCreateControlFrameTranslationOffset(ReferenceFrame parentFrame, boolean isRequiredVariable)
       {
          if (controlFrameTranslationToParent == null)
-            controlFrameTranslationToParent = new YoFrameVector3D(namePrefix + controlFrameNameSuffix, parentFrame, isRequiredVariable ? registry : debugRegistry);
+            controlFrameTranslationToParent = new YoFrameVector3D(namePrefix + controlFrameNameSuffix,
+                                                                  parentFrame,
+                                                                  isRequiredVariable ? registry : debugRegistry);
          return controlFrameTranslationToParent;
       }
 
       private YoFrameQuaternion getOrCreateControlFrameOrientationOffset(ReferenceFrame parentFrame, boolean isRequiredVariable)
       {
          if (controlFrameRotationToParent == null)
-            controlFrameRotationToParent = new YoFrameQuaternion(namePrefix + controlFrameNameSuffix, parentFrame, isRequiredVariable ? registry : debugRegistry);
+            controlFrameRotationToParent = new YoFrameQuaternion(namePrefix + controlFrameNameSuffix,
+                                                                 parentFrame,
+                                                                 isRequiredVariable ? registry : debugRegistry);
          return controlFrameRotationToParent;
       }
 

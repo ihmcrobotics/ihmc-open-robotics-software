@@ -198,6 +198,18 @@ public class RDXSceneGraphUI
                      modificationQueue.accept(new SceneGraphNodeAddition(drill.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(drill);
                   }
+                  if (ImGui.button(labels.get("Add Couch")))
+                  {
+                     RDXPredefinedRigidBodySceneNode couch = predefinedRigidBodySceneNodeBuilder.build("Couch");
+                     modificationQueue.accept(new SceneGraphNodeAddition(couch.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(couch);
+                  }
+                  if (ImGui.button(labels.get("Add TrashCan")))
+                  {
+                     RDXPredefinedRigidBodySceneNode trashCan = predefinedRigidBodySceneNodeBuilder.build("TrashCan");
+                     modificationQueue.accept(new SceneGraphNodeAddition(trashCan.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(trashCan);
+                  }
                   ImGui.endTable();
                }
                ImGui.endDisabled();
