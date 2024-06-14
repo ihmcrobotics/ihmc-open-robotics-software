@@ -2,20 +2,20 @@ package behavior_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "PelvisHeightPitchActionDefinitionMessage" defined in "PelvisHeightPitchActionDefinitionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "PelvisHeightOrientationActionDefinitionMessage" defined in "PelvisHeightOrientationActionDefinitionMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from PelvisHeightPitchActionDefinitionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit PelvisHeightPitchActionDefinitionMessage_.idl instead.
+* This file was automatically generated from PelvisHeightOrientationActionDefinitionMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit PelvisHeightOrientationActionDefinitionMessage_.idl instead.
 *
 */
-public class PelvisHeightPitchActionDefinitionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage>
+public class PelvisHeightOrientationActionDefinitionMessagePubSubType implements us.ihmc.pubsub.TopicDataType<behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage>
 {
-   public static final java.lang.String name = "behavior_msgs::msg::dds_::PelvisHeightPitchActionDefinitionMessage_";
+   public static final java.lang.String name = "behavior_msgs::msg::dds_::PelvisHeightOrientationActionDefinitionMessage_";
    
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "98a9ae84a6b6a45780ba11655374c02f8bc72e789087cf9b91ef13531795950a";
+   		return "6e210ac0e6b8e7694de1641f104ac8d7c1239ca4036c43293f39e68e756a1f7a";
    }
    
    @Override
@@ -28,7 +28,7 @@ public class PelvisHeightPitchActionDefinitionMessagePubSubType implements us.ih
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -36,7 +36,7 @@ public class PelvisHeightPitchActionDefinitionMessagePubSubType implements us.ih
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -63,12 +63,12 @@ public class PelvisHeightPitchActionDefinitionMessagePubSubType implements us.ih
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage data)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -85,7 +85,7 @@ public class PelvisHeightPitchActionDefinitionMessagePubSubType implements us.ih
       return current_alignment - initial_alignment;
    }
 
-   public static void write(behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.write(data.getDefinition(), cdr);
       if(data.getParentFrameName().length() <= 255)
@@ -97,7 +97,7 @@ public class PelvisHeightPitchActionDefinitionMessagePubSubType implements us.ih
 
    }
 
-   public static void read(behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.read(data.getDefinition(), cdr);	
       cdr.read_type_d(data.getParentFrameName());	
@@ -108,7 +108,7 @@ public class PelvisHeightPitchActionDefinitionMessagePubSubType implements us.ih
    }
 
    @Override
-   public final void serialize(behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
@@ -119,7 +119,7 @@ public class PelvisHeightPitchActionDefinitionMessagePubSubType implements us.ih
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage data)
    {
       ser.read_type_a("definition", new behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType(), data.getDefinition());
 
@@ -129,15 +129,15 @@ public class PelvisHeightPitchActionDefinitionMessagePubSubType implements us.ih
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
    }
 
-   public static void staticCopy(behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage src, behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage dest)
+   public static void staticCopy(behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage src, behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage createData()
+   public behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage createData()
    {
-      return new behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage();
+      return new behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage();
    }
    @Override
    public int getTypeSize()
@@ -151,24 +151,24 @@ public class PelvisHeightPitchActionDefinitionMessagePubSubType implements us.ih
       return name;
    }
    
-   public void serialize(behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage src, behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage dest)
+   public void copy(behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage src, behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public PelvisHeightPitchActionDefinitionMessagePubSubType newInstance()
+   public PelvisHeightOrientationActionDefinitionMessagePubSubType newInstance()
    {
-      return new PelvisHeightPitchActionDefinitionMessagePubSubType();
+      return new PelvisHeightOrientationActionDefinitionMessagePubSubType();
    }
 }

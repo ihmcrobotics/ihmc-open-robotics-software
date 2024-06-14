@@ -52,7 +52,7 @@ behavior_msgs/HandWrenchActionStateMessage[<=200] hand_wrench_actions
 
 behavior_msgs/ScrewPrimitiveActionStateMessage[<=200] screw_primitive_actions
 
-behavior_msgs/PelvisHeightPitchActionStateMessage[<=200] pelvis_height_actions
+behavior_msgs/PelvisHeightOrientationActionStateMessage[<=200] pelvis_height_actions
 
 behavior_msgs/WaitDurationActionStateMessage[<=200] wait_duration_actions
 

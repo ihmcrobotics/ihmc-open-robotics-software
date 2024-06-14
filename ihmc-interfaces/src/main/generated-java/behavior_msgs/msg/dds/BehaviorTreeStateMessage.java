@@ -25,6 +25,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public static final byte SCREW_PRIMITIVE_ACTION = (byte) 15;
    public static final byte PELVIS_HEIGHT_PITCH_ACTION = (byte) 16;
    public static final byte WAIT_DURATION_ACTION = (byte) 17;
+   public static final byte FOOT_POSE_ACTION = (byte) 17;
    /**
             * Monotonically increasing message ID that matches the CRDTInfo update number
             */
@@ -56,8 +57,9 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandPoseActionStateMessage>  hand_pose_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionStateMessage>  hand_wrench_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage>  screw_primitive_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessage>  pelvis_height_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessage>  pelvis_height_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionStateMessage>  wait_duration_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootPoseActionStateMessage>  foot_pose_actions_;
 
    public BehaviorTreeStateMessage()
    {
@@ -75,8 +77,9 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       hand_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandPoseActionStateMessage> (200, new behavior_msgs.msg.dds.HandPoseActionStateMessagePubSubType());
       hand_wrench_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionStateMessage> (200, new behavior_msgs.msg.dds.HandWrenchActionStateMessagePubSubType());
       screw_primitive_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage> (200, new behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessagePubSubType());
-      pelvis_height_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessage> (200, new behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessagePubSubType());
+      pelvis_height_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessage> (200, new behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessagePubSubType());
       wait_duration_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionStateMessage> (200, new behavior_msgs.msg.dds.WaitDurationActionStateMessagePubSubType());
+      foot_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootPoseActionStateMessage> (200, new behavior_msgs.msg.dds.FootPoseActionStateMessagePubSubType());
 
    }
 
@@ -106,6 +109,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       screw_primitive_actions_.set(other.screw_primitive_actions_);
       pelvis_height_actions_.set(other.pelvis_height_actions_);
       wait_duration_actions_.set(other.wait_duration_actions_);
+      foot_pose_actions_.set(other.foot_pose_actions_);
    }
 
    /**
@@ -222,7 +226,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessage>  getPelvisHeightActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessage>  getPelvisHeightActions()
    {
       return pelvis_height_actions_;
    }
@@ -231,6 +235,12 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionStateMessage>  getWaitDurationActions()
    {
       return wait_duration_actions_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootPoseActionStateMessage>  getFootPoseActions()
+   {
+      return foot_pose_actions_;
    }
 
 
@@ -337,6 +347,13 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
          {  if (!this.wait_duration_actions_.get(i).epsilonEquals(other.wait_duration_actions_.get(i), epsilon)) return false; }
       }
 
+      if (this.foot_pose_actions_.size() != other.foot_pose_actions_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.foot_pose_actions_.size(); i++)
+         {  if (!this.foot_pose_actions_.get(i).epsilonEquals(other.foot_pose_actions_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -368,6 +385,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       if (!this.screw_primitive_actions_.equals(otherMyClass.screw_primitive_actions_)) return false;
       if (!this.pelvis_height_actions_.equals(otherMyClass.pelvis_height_actions_)) return false;
       if (!this.wait_duration_actions_.equals(otherMyClass.wait_duration_actions_)) return false;
+      if (!this.foot_pose_actions_.equals(otherMyClass.foot_pose_actions_)) return false;
 
       return true;
    }
@@ -409,7 +427,9 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       builder.append("pelvis_height_actions=");
       builder.append(this.pelvis_height_actions_);      builder.append(", ");
       builder.append("wait_duration_actions=");
-      builder.append(this.wait_duration_actions_);
+      builder.append(this.wait_duration_actions_);      builder.append(", ");
+      builder.append("foot_pose_actions=");
+      builder.append(this.foot_pose_actions_);
       builder.append("}");
       return builder.toString();
    }
