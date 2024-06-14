@@ -6,22 +6,22 @@ import java.time.Instant;
 
 public abstract class InstantDetection
 {
-   private final String detectionClass;
+   private final String detectedObjectClass;
    private final double confidence;
    private final Pose3DBasics pose;
    private final Instant detectionTime;
 
    public InstantDetection(String detectionClass, double confidence, Pose3DBasics pose, Instant detectionTime)
    {
-      this.detectionClass = detectionClass;
+      this.detectedObjectClass = detectionClass;
       this.confidence = confidence;
       this.pose = pose;
       this.detectionTime = detectionTime;
    }
 
-   public String getDetectionClass()
+   public String getDetectedObjectClass()
    {
-      return detectionClass;
+      return detectedObjectClass;
    }
 
    public double getConfidence()
@@ -38,4 +38,6 @@ public abstract class InstantDetection
    {
       return detectionTime;
    }
+
+   abstract void destroy();
 }

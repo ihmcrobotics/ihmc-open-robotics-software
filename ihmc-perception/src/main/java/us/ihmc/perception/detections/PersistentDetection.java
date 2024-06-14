@@ -13,64 +13,79 @@ public class PersistentDetection<T extends InstantDetection>
    private final TreeSet<T> detectionHistory = new TreeSet<>(Comparator.comparing(InstantDetection::getDetectionTime));
    private Duration historyDuration;
 
-   private String detectionClass = null;
+   private final Class<?> instantDetectionClass;
+   private final String detectedObjectClass;
 
    // If the total confidence per second is greater than this value, the detections will be considered stable.
    private double stabilityThreshold;
 
-   public PersistentDetection(double stabilityThreshold)
+   public PersistentDetection(T firstDetection)
    {
-      this(stabilityThreshold, Duration.ofSeconds(1L));
+      this(firstDetection, 0.5);
    }
 
-   public PersistentDetection(double stabilityThreshold, double historyDurationSeconds)
+   public PersistentDetection(T firstDetection, double stabilityThreshold)
    {
-      this(stabilityThreshold, TimeTools.durationOfSeconds(historyDurationSeconds));
+      this(firstDetection, stabilityThreshold, Duration.ofSeconds(1L));
    }
 
-   public PersistentDetection(double stabilityThreshold, Duration historyDuration)
+   public PersistentDetection(T firstDetection, double stabilityThreshold, double historyDurationSeconds)
    {
+      this(firstDetection, stabilityThreshold, TimeTools.durationOfSeconds(historyDurationSeconds));
+   }
+
+   public PersistentDetection(T firstDetection, double stabilityThreshold, Duration historyDuration)
+   {
+      instantDetectionClass = firstDetection.getClass();
+      detectedObjectClass = firstDetection.getDetectedObjectClass();
+
+      addDetection(firstDetection);
       setStabilityThreshold(stabilityThreshold);
       setHistoryLength(historyDuration);
    }
 
    /**
     * Add a new instant detection to the history of detections
-    * @param newDetection A new {@link us.ihmc.perception.detections.InstantDetection} of the same class as the first detection
-    *                     added to this {@link us.ihmc.perception.detections.PersistentDetection}
+    * @param newDetection A new {@link InstantDetection} of the same class as the first detection
+    *                     added to this {@link PersistentDetection}
     */
    public void addDetection(T newDetection)
    {
-      // Record the detection class of the first detection added
-      if (detectionClass == null)
-         detectionClass = newDetection.getDetectionClass();
-
       // ensure only detection of the same class are added to the history
-      if (!newDetection.getDetectionClass().equals(detectionClass))
+      if (!newDetection.getDetectedObjectClass().equals(detectedObjectClass))
          throw new IllegalArgumentException(String.format("New detection's class (%s) does not match original detection's class (%s)",
-                                                          newDetection.getDetectionClass(),
-                                                          detectionClass));
+                                                          newDetection.getDetectedObjectClass(), detectedObjectClass));
 
       detectionHistory.add(newDetection);
    }
 
    /**
-    * @return The most recent {@link us.ihmc.perception.detections.InstantDetection} added to the history,
+    * @return The most recent {@link InstantDetection} added to the history,
     * based on the detection's {@link java.time.Instant}.
-    * Null if there are no detection in the history, or if the most recent detection is older than the history duration.
     */
-   public InstantDetection getMostRecentDetection()
+   public T getMostRecentDetection()
    {
-      updateHistory();
-      if (detectionHistory.isEmpty())
-         return null;
-
       return detectionHistory.last();
+   }
+
+   public Class<?> getInstantDetectionClass()
+   {
+      return instantDetectionClass;
+   }
+
+   public String getDetectedObjectClass()
+   {
+      return detectedObjectClass;
+   }
+
+   public int getHistorySize()
+   {
+      return detectionHistory.size();
    }
 
    /**
     * Set the duration of detection history stored by this object.
-    * {@link us.ihmc.perception.detections.InstantDetection} objects older than this duration will be removed from the history.
+    * {@link InstantDetection} objects older than this duration will be removed from the history.
     * @param historyDurationSeconds Number of seconds of history to store. Must be positive.
     */
    public void setHistoryLength(double historyDurationSeconds)
@@ -80,7 +95,7 @@ public class PersistentDetection<T extends InstantDetection>
 
    /**
     * Set the duration of detection history stored by this object.
-    * {@link us.ihmc.perception.detections.InstantDetection} objects older than this duration will be removed from the history.
+    * {@link InstantDetection} objects older than this duration will be removed from the history when {@link #updateHistory()} is called.
     * @param historyDuration Duration of history to store. Must be positive.
     */
    public void setHistoryLength(Duration historyDuration)
@@ -93,43 +108,57 @@ public class PersistentDetection<T extends InstantDetection>
 
    public void setStabilityThreshold(double stabilityThreshold)
    {
-      this.stabilityThreshold = Math.abs(stabilityThreshold);
+      if (stabilityThreshold < 0.0 || stabilityThreshold > 1.0)
+         throw new IllegalArgumentException("Stability threshold must be between 0.0 and 1.0 (inclusive)");
+
+      this.stabilityThreshold = stabilityThreshold;
    }
 
    public boolean isStable()
    {
-      return getConfidencePerSecond() > stabilityThreshold;
+      return isStable(Instant.now());
    }
 
-   public double getConfidencePerSecond()
+   public boolean isStable(Instant now)
    {
-      return getConfidencePerSecond(Instant.now());
+      return !detectionExpired(getMostRecentDetection(), now) && getAverageConfidence() > stabilityThreshold;
    }
 
-   public double getConfidencePerSecond(Instant now)
+   /**
+    * Calculates the average confidence of the {@link InstantDetection}s in the stored history.
+    * {@link #updateHistory()} should be called before this method to get the up-to-date value!
+    * @return Average confidence of {@link InstantDetection}s in history
+    */
+   public double getAverageConfidence()
    {
-      updateHistory(now);
-
       double confidenceSum = 0.0;
-      for (InstantDetection detection : detectionHistory) {
+      for (T detection : detectionHistory) {
          confidenceSum += detection.getConfidence();
       }
 
-      double historyDurationSeconds = TimeTools.toDoubleSeconds(historyDuration);
-      return confidenceSum / historyDurationSeconds;
+      return confidenceSum / detectionHistory.size();
    }
 
-   // This method should be called before accessing history...
-   private void updateHistory()
+   /**
+    * Clears history items older than {@code historyDuration}, except for the most recent detection.
+    */
+   public void updateHistory()
    {
       updateHistory(Instant.now());
    }
 
-   // Or this method works too!
-   private void updateHistory(Instant now)
+   /**
+    * Clears history items older than {@code now - historyDuration}, except for the most recent detection.
+    * @param now Present time instant.
+    */
+   public void updateHistory(Instant now)
    {
       // Remove detections that are too old
-      Instant beginningOfHistory = now.minus(historyDuration);
-      detectionHistory.removeIf(detection -> detection.getDetectionTime().isBefore(beginningOfHistory));
+      detectionHistory.removeIf(detection -> detectionExpired(detection, now) && !detection.equals(getMostRecentDetection()));
+   }
+
+   private boolean detectionExpired(InstantDetection detection, Instant now)
+   {
+      return detection.getDetectionTime().isBefore(now.minus(historyDuration));
    }
 }
