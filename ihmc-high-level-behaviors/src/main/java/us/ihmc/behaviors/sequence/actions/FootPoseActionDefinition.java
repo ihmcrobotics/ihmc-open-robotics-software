@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
+import behavior_msgs.msg.dds.FootPoseActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
@@ -98,7 +99,7 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
 
       message.setRobotSide(side.toMessage().toByte());
       message.setParentFrameName(parentFrameName.toMessage());
-      footToParentTransform.toMessage(message.getFootTransformToParent());
+      footToParentTransform.toMessage(message.getTransformToParent());
       message.setTrajectoryDuration(trajectoryDuration.toMessage());
    }
 
@@ -108,7 +109,7 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
 
       side.fromMessage(RobotSide.fromByte(message.getRobotSide()));
       parentFrameName.fromMessage(message.getParentFrameNameAsString());
-      footToParentTransform.fromMessage(message.getFootTransformToParent());
+      footToParentTransform.fromMessage(message.getTransformToParent());
       trajectoryDuration.fromMessage(message.getTrajectoryDuration());
    }
 

@@ -7,7 +7,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.actions.PelvisHeightOrientationActionDefinition;
-import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionState;
+import us.ihmc.behaviors.sequence.actions.PelvisHeightOrientationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -34,9 +34,9 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeightPitchActionState, PelvisHeightOrientationActionDefinition>
+public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeightOrientationActionState, PelvisHeightOrientationActionDefinition>
 {
-   private final PelvisHeightPitchActionState state;
+   private final PelvisHeightOrientationActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper heightWidget;
    private final ImDoubleWrapper yawWidget;
@@ -64,7 +64,7 @@ public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeight
                                            RobotCollisionModel selectionCollisionModel,
                                            ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(new PelvisHeightPitchActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+      super(new PelvisHeightOrientationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
       state = getState();
 

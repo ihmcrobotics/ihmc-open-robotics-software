@@ -1,14 +1,10 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.ChestOrientationActionStateMessage;
+import behavior_msgs.msg.dds.FootPoseActionStateMessage;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.communication.crdt.CRDTDetachableReferenceFrame;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalRigidBodyTransform;
-import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class FootPoseActionState extends ActionNodeState<FootPoseActionDefinition>

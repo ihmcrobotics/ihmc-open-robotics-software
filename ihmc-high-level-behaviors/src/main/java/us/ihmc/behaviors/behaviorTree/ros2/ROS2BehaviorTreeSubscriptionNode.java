@@ -19,7 +19,7 @@ public class ROS2BehaviorTreeSubscriptionNode
    private HandPoseActionStateMessage handPoseActionStateMessage;
    private HandWrenchActionStateMessage handWrenchActionStateMessage;
    private ScrewPrimitiveActionStateMessage screwPrimitiveActionStateMessage;
-   private PelvisHeightPitchActionStateMessage pelvisHeightPitchActionStateMessage;
+   private PelvisHeightOrientationActionStateMessage pelvisHeightOrientationActionStateMessage;
    private WaitDurationActionStateMessage waitDurationActionStateMessage;
    private final List<ROS2BehaviorTreeSubscriptionNode> children = new ArrayList<>();
 
@@ -37,7 +37,7 @@ public class ROS2BehaviorTreeSubscriptionNode
       handPoseActionStateMessage = null;
       handWrenchActionStateMessage = null;
       screwPrimitiveActionStateMessage = null;
-      pelvisHeightPitchActionStateMessage = null;
+      pelvisHeightOrientationActionStateMessage = null;
       waitDurationActionStateMessage = null;
       children.clear();
    }
@@ -162,14 +162,14 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.screwPrimitiveActionStateMessage = screwPrimitiveActionStateMessage;
    }
 
-   public PelvisHeightPitchActionStateMessage getPelvisHeightPitchActionStateMessage()
+   public PelvisHeightOrientationActionStateMessage getPelvisHeightOrientationActionStateMessage()
    {
-      return pelvisHeightPitchActionStateMessage;
+      return pelvisHeightOrientationActionStateMessage;
    }
 
-   public void setPelvisHeightPitchActionStateMessage(PelvisHeightPitchActionStateMessage pelvisHeightPitchActionStateMessage)
+   public void setPelvisHeightOrientationActionStateMessage(PelvisHeightOrientationActionStateMessage pelvisHeightOrientationActionStateMessage)
    {
-      this.pelvisHeightPitchActionStateMessage = pelvisHeightPitchActionStateMessage;
+      this.pelvisHeightOrientationActionStateMessage = pelvisHeightOrientationActionStateMessage;
    }
 
    public WaitDurationActionStateMessage getWaitDurationActionStateMessage()

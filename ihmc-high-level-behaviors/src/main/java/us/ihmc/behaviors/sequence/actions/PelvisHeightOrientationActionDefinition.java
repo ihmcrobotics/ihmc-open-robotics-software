@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage;
+import behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
@@ -87,7 +87,7 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
       return !unchanged;
    }
 
-   public void toMessage(PelvisHeightPitchActionDefinitionMessage message)
+   public void toMessage(PelvisHeightOrientationActionDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
 
@@ -96,7 +96,7 @@ public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinitio
       pelvisToParentTransform.toMessage(message.getPelvisTransformToParent());
    }
 
-   public void fromMessage(PelvisHeightPitchActionDefinitionMessage message)
+   public void fromMessage(PelvisHeightOrientationActionDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 

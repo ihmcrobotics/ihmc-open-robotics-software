@@ -14,26 +14,26 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHeightPitchActionState, PelvisHeightOrientationActionDefinition>
+public class PelvisHeightOrientationActionExecutor extends ActionNodeExecutor<PelvisHeightOrientationActionState, PelvisHeightOrientationActionDefinition>
 {
    public static final double POSITION_TOLERANCE = 0.15;
 
    private final PelvisHeightOrientationActionDefinition definition;
-   private final PelvisHeightPitchActionState state;
+   private final PelvisHeightOrientationActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
    private final FramePose3D desiredPelvisPose = new FramePose3D();
    private final FramePose3D syncedPelvisPose = new FramePose3D();
    private final TaskspaceTrajectoryTrackingErrorCalculator trackingCalculator = new TaskspaceTrajectoryTrackingErrorCalculator();
 
-   public PelvisHeightPitchActionExecutor(long id,
-                                          CRDTInfo crdtInfo,
-                                          WorkspaceResourceDirectory saveFileDirectory,
-                                          ROS2ControllerHelper ros2ControllerHelper,
-                                          ReferenceFrameLibrary referenceFrameLibrary,
-                                          ROS2SyncedRobotModel syncedRobot)
+   public PelvisHeightOrientationActionExecutor(long id,
+                                                CRDTInfo crdtInfo,
+                                                WorkspaceResourceDirectory saveFileDirectory,
+                                                ROS2ControllerHelper ros2ControllerHelper,
+                                                ReferenceFrameLibrary referenceFrameLibrary,
+                                                ROS2SyncedRobotModel syncedRobot)
    {
-      super(new PelvisHeightPitchActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+      super(new PelvisHeightOrientationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
       state = getState();
 

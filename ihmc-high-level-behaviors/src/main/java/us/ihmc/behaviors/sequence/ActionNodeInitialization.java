@@ -101,9 +101,9 @@ public class ActionNodeInitialization
          }
          chestOrientationAction.update();
       }
-      else if (newAction instanceof PelvisHeightPitchActionState pelvisHeightPitchAction)
+      else if (newAction instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
       {
-         PelvisHeightPitchActionState nextPreviousAction = findNextPreviousAction(actionSequence, PelvisHeightPitchActionState.class, indexOfInsertion, null);
+         PelvisHeightOrientationActionState nextPreviousAction = findNextPreviousAction(actionSequence, PelvisHeightOrientationActionState.class, indexOfInsertion, null);
          if (nextPreviousAction != null && nextPreviousAction.getPelvisFrame().isChildOfWorld())
          {
             pelvisHeightPitchAction.getDefinition().setParentFrameName(nextPreviousAction.getDefinition().getParentFrameName());
