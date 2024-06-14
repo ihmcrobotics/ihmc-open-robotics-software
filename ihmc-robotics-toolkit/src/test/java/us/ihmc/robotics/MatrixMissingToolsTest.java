@@ -394,7 +394,18 @@ public class MatrixMissingToolsTest
             }
          }
 
-         assertTrue(MatrixMissingTools.elementWiseLessThan(matrixLess, matrixMore));
+         boolean matrixASmallThanMatrixB = true;
+
+         for (int j = 0; j < rowSize; j++)
+         {
+            for (int k = 0; k < columnSize; k++)
+            {
+               if (matrixLess.get(j, k) >= matrixMore.get(j, k))
+                  matrixASmallThanMatrixB = false;
+            }
+         }
+
+         assertEquals(matrixASmallThanMatrixB, MatrixMissingTools.elementWiseLessThan(matrixLess, matrixMore));
       }
    }
 }
