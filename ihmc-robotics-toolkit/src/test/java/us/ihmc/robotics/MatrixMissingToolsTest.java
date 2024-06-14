@@ -319,6 +319,7 @@ public class MatrixMissingToolsTest
    {
       Random random = new Random(1738L);
 
+      double error = 1e-5;
       int iters = 100;
 
       for (int i = 0; i < iters; i++)
@@ -326,23 +327,49 @@ public class MatrixMissingToolsTest
          int matrixSize = random.nextInt(10);
          DMatrixRMaj matrix = RandomMatrices_DDRM.rectangle(matrixSize, matrixSize, random);
          DMatrixRMaj matrixPowerTest = new DMatrixRMaj(matrixSize, matrixSize);
-         int powerNumber = random.nextInt(15);
+         int powerNumber = random.nextInt(1, 15);
 
          MatrixMissingTools.power(matrix, powerNumber, matrixPowerTest);
 
-         DMatrixRMaj matrixCompareTemporary = new DMatrixRMaj(matrixSize, matrixSize);
-         DMatrixRMaj matrixCompareResult = new DMatrixRMaj(matrix);
+         DMatrixRMaj matrixCompareResult = new DMatrixRMaj(matrixSize, matrixSize);
+         DMatrixRMaj matrixCompareTemporary = new DMatrixRMaj(matrix);
 
-         if (powerNumber > 1)
+         CommonOps_DDRM.setIdentity(matrixCompareResult);
+
+         while (powerNumber > 0)
          {
-            for (int j = 0; j < powerNumber - 1; j++)
+            if (powerNumber % 2 == 1)
             {
-               CommonOps_DDRM.mult(matrix, matrixCompareResult, matrixCompareTemporary);
-               matrixCompareResult.set(matrixCompareTemporary);
+               multiplyMatrices(matrixCompareResult, matrixCompareTemporary, matrixCompareResult);
+            }
+            multiplyMatrices(matrixCompareTemporary, matrixCompareTemporary, matrixCompareTemporary);
+            powerNumber /= 2;
+         }
+         MatrixTestTools.assertMatrixEquals(matrixPowerTest, matrixCompareResult, error);
+      }
+   }
+
+   private void multiplyMatrices(DMatrixRMaj aMatrix, DMatrixRMaj bMatrix, DMatrixRMaj resultMatrix)
+   {
+      int size = aMatrix.getNumCols();
+
+      DMatrixRMaj result = new DMatrixRMaj(size, size);
+
+      double tempValue = 0.0;
+      for (int i = 0; i < size; i++)
+      {
+         for (int j = 0; j < size; j++)
+         {
+            for (int k = 0; k < size; k++)
+            {
+               tempValue = result.get(i, j);
+               tempValue += aMatrix.get(i, k) * bMatrix.get(k, j);
+               result.set(i, j, tempValue);
             }
          }
-         MatrixTestTools.assertMatrixEquals(matrixPowerTest, matrixCompareResult, EPSILON);
       }
+
+      resultMatrix.set(result);
    }
 
    @Test
