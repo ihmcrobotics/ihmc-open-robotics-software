@@ -25,7 +25,7 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getHandPoseActions().clear();
       treeStateMessage.getHandWrenchActions().clear();
       treeStateMessage.getScrewPrimitiveActions().clear();
-      treeStateMessage.getPelvisHeightOrientationActions().clear();
+      treeStateMessage.getPelvisHeightActions().clear();
       treeStateMessage.getSakeHandCommandActions().clear();
       treeStateMessage.getWaitDurationActions().clear();
    }
@@ -82,9 +82,9 @@ public class ROS2BehaviorTreeMessageTools
       }
       else if (nodeState instanceof PelvisHeightOrientationActionState pelvisHeightActionState)
       {
-         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.PELVIS_HEIGHT_PITCH_ACTION);
-         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getPelvisHeightOrientationActions().size());
-         pelvisHeightActionState.toMessage(treeStateMessage.getPelvisHeightOrientationActions().add());
+         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.PELVIS_HEIGHT_ORIENTATION_ACTION);
+         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getPelvisHeightActions().size());
+         pelvisHeightActionState.toMessage(treeStateMessage.getPelvisHeightActions().add());
       }
       else if (nodeState instanceof WaitDurationActionState waitDurationActionState)
       {
@@ -214,7 +214,7 @@ public class ROS2BehaviorTreeMessageTools
          }
          case BehaviorTreeStateMessage.PELVIS_HEIGHT_ORIENTATION_ACTION ->
          {
-            PelvisHeightOrientationActionStateMessage pelvisHeightOrientationActionStateMessage = treeStateMessage.getPelvisHeightOrientationActions().get(indexInTypesList);
+            PelvisHeightOrientationActionStateMessage pelvisHeightOrientationActionStateMessage = treeStateMessage.getPelvisHeightActions().get(indexInTypesList);
             subscriptionNode.setPelvisHeightOrientationActionStateMessage(pelvisHeightOrientationActionStateMessage);
             subscriptionNode.setBehaviorTreeNodeStateMessage(pelvisHeightOrientationActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(pelvisHeightOrientationActionStateMessage.getDefinition().getDefinition().getDefinition());
@@ -232,6 +232,13 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setWaitDurationActionStateMessage(waitDurationActionStateMessage);
             subscriptionNode.setBehaviorTreeNodeStateMessage(waitDurationActionStateMessage.getState().getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(waitDurationActionStateMessage.getDefinition().getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.FOOT_POSE_ACTION ->
+         {
+            FootPoseActionStateMessage footPoseActionStateMessage = treeStateMessage.getFootPoseActions().get(indexInTypesList);
+            subscriptionNode.setFootPoseActionStateMessage(footPoseActionStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(footPoseActionStateMessage.getState().getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(footPoseActionStateMessage.getDefinition().getDefinition().getDefinition());
          }
       }
    }

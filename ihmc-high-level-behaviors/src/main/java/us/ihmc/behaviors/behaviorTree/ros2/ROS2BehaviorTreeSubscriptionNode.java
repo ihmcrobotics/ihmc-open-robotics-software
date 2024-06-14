@@ -21,6 +21,7 @@ public class ROS2BehaviorTreeSubscriptionNode
    private ScrewPrimitiveActionStateMessage screwPrimitiveActionStateMessage;
    private PelvisHeightOrientationActionStateMessage pelvisHeightOrientationActionStateMessage;
    private WaitDurationActionStateMessage waitDurationActionStateMessage;
+   private FootPoseActionStateMessage footPoseActionStateMessage;
    private final List<ROS2BehaviorTreeSubscriptionNode> children = new ArrayList<>();
 
    public void clear()
@@ -39,6 +40,7 @@ public class ROS2BehaviorTreeSubscriptionNode
       screwPrimitiveActionStateMessage = null;
       pelvisHeightOrientationActionStateMessage = null;
       waitDurationActionStateMessage = null;
+      footPoseActionStateMessage = null;
       children.clear();
    }
 
@@ -180,6 +182,11 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setWaitDurationActionStateMessage(WaitDurationActionStateMessage waitDurationActionStateMessage)
    {
       this.waitDurationActionStateMessage = waitDurationActionStateMessage;
+   }
+
+   public void setFootPoseActionStateMessage(FootPoseActionStateMessage footPoseActionStateMessage)
+   {
+      this.footPoseActionStateMessage = footPoseActionStateMessage;
    }
 
    public List<ROS2BehaviorTreeSubscriptionNode> getChildren()
