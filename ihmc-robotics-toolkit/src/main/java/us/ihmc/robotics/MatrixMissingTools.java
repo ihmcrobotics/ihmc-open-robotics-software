@@ -480,14 +480,15 @@ public class MatrixMissingTools
     *
     * @param input        the matrix that will be raised to {@code power}. Not modified.
     * @param power        power to raise {@code matrix} to.
-    * @param temporary    matrix to use for intermediate operations. Modified.
     * @param resultToPack matrix to store result in. Modified.
     */
-   public static void power(DMatrixRMaj input, int power, DMatrixRMaj temporary, DMatrixRMaj resultToPack)
+   public static void power(DMatrixRMaj input, int power, DMatrixRMaj resultToPack)
    {
-      if (input.numCols != resultToPack.numCols && input.numCols != temporary.numCols)
+      DMatrixRMaj temporaryMatrix = new DMatrixRMaj(input.numRows, input.numCols);
+
+      if (input.numCols != resultToPack.numCols && input.numCols != temporaryMatrix.numCols)
          throw new IllegalArgumentException("The matrices have incompatible column sizes.");
-      if (input.numRows != resultToPack.numRows && input.numRows != temporary.numRows)
+      if (input.numRows != resultToPack.numRows && input.numRows != temporaryMatrix.numRows)
          throw new IllegalArgumentException("The matrices have incompatible row sizes.");
 
       resultToPack.set(input);
@@ -496,8 +497,8 @@ public class MatrixMissingTools
       {
          for (int k = 0; k < power - 1; k++)
          {
-            CommonOps_DDRM.mult(input, resultToPack, temporary);
-            resultToPack.set(temporary);
+            CommonOps_DDRM.mult(input, resultToPack, temporaryMatrix);
+            resultToPack.set(temporaryMatrix);
          }
       }
    }

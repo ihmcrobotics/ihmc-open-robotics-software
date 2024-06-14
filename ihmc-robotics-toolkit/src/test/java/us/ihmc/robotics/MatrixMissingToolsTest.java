@@ -313,4 +313,36 @@ public class MatrixMissingToolsTest
          }
       }
    }
+
+   @Test
+   public void testPowerCalculation()
+   {
+      Random random = new Random(1738L);
+
+      int iters = 100;
+
+      for (int i = 0; i < iters; i++)
+      {
+         int matrixSize = random.nextInt(10);
+         DMatrixRMaj matrix = RandomMatrices_DDRM.rectangle(matrixSize, matrixSize, random);
+         DMatrixRMaj matrixPowerTest = new DMatrixRMaj(matrixSize, matrixSize);
+         int powerNumber = random.nextInt(15);
+
+         MatrixMissingTools.power(matrix, powerNumber, matrixPowerTest);
+
+         DMatrixRMaj matrixCompareTemporary = new DMatrixRMaj(matrixSize, matrixSize);
+         DMatrixRMaj matrixCompareResult = new DMatrixRMaj(matrix);
+
+
+         if(powerNumber >1) {
+            for (int j=0; j<powerNumber-1; j++){
+               CommonOps_DDRM.mult(matrix, matrixCompareResult, matrixCompareTemporary);
+               matrixCompareResult.set(matrixCompareTemporary);
+            }
+         }
+         MatrixTestTools.assertMatrixEquals(matrixPowerTest, matrixCompareResult, EPSILON);
+
+
+      }
+   }
 }
