@@ -331,45 +331,70 @@ public class MatrixMissingToolsTest
 
          MatrixMissingTools.power(matrix, powerNumber, matrixPowerTest);
 
-         DMatrixRMaj matrixCompareResult = new DMatrixRMaj(matrixSize, matrixSize);
-         DMatrixRMaj matrixCompareTemporary = new DMatrixRMaj(matrix);
+         DMatrixRMaj matrixResult = new DMatrixRMaj(matrixSize, matrixSize);
+         DMatrixRMaj matrixIdentity = new DMatrixRMaj(matrixSize, matrixSize);
 
-         CommonOps_DDRM.setIdentity(matrixCompareResult);
+         ///Testing for the identity Matrix
+         CommonOps_DDRM.setIdentity(matrixResult);
+         CommonOps_DDRM.setIdentity(matrixIdentity);
 
-         while (powerNumber > 0)
+         MatrixMissingTools.power(matrixIdentity, powerNumber, matrixResult);
+         MatrixTestTools.assertMatrixEquals(matrixIdentity, matrixResult, error);
+
+         //Testing for the Diagonal Matrix
+         DMatrixRMaj matrixDiagonal = new DMatrixRMaj(matrixSize, matrixSize);
+         DMatrixRMaj matrixDiagonalHand = new DMatrixRMaj(matrixSize, matrixSize);
+         DMatrixRMaj matrixDiagonalResult = new DMatrixRMaj(matrixSize, matrixSize);
+         CommonOps_DDRM.setIdentity(matrixDiagonal);
+         double diagonalTemp = 0;
+         for (int j = 0; j < matrixSize; j++)
          {
-            if (powerNumber % 2 == 1)
+            matrixDiagonal.set(j, j, random.nextDouble(50));
+            diagonalTemp = matrixDiagonal.get(j, j);
+            for (int k = 1; k < powerNumber; k++)
             {
-               multiplyMatrices(matrixCompareResult, matrixCompareTemporary, matrixCompareResult);
+               diagonalTemp *= matrixDiagonal.get(j, j);
             }
-            multiplyMatrices(matrixCompareTemporary, matrixCompareTemporary, matrixCompareTemporary);
-            powerNumber /= 2;
+            matrixDiagonalHand.set(j, j, diagonalTemp);
          }
-         MatrixTestTools.assertMatrixEquals(matrixPowerTest, matrixCompareResult, error);
+         MatrixMissingTools.power(matrixDiagonal, powerNumber, matrixDiagonalResult);
+         MatrixTestTools.assertMatrixEquals(matrixDiagonalHand, matrixDiagonalResult, error);
+
+         // Test for skew matrix, simple 2x2 size of skew matrix
+         DMatrixRMaj skewMatrix = new DMatrixRMaj(2,2);
+         double skewTempValue = random.nextDouble();
+         skewMatrix.zero();
+         skewMatrix.set(0,1, skewTempValue);
+         skewMatrix.set(1,0,-skewTempValue);
+
+         DMatrixRMaj skewMatrixHand = new DMatrixRMaj(2,2);
+         DMatrixRMaj skewMatrixResult = new DMatrixRMaj(2,2);
+
+         //check square times
+         skewMatrixHand.zero();
+         skewMatrixHand.set(0,0, -skewTempValue*skewTempValue);
+         skewMatrixHand.set(1,1, -skewTempValue*skewTempValue);
+         MatrixMissingTools.power(skewMatrix,2,skewMatrixResult);
+         MatrixTestTools.assertMatrixEquals(skewMatrixHand, skewMatrixResult, error);
+
+         //check triple times
+         skewMatrixHand.zero();
+         skewMatrixHand.set(0,1, -skewTempValue*skewTempValue*skewTempValue);
+         skewMatrixHand.set(1,0, skewTempValue*skewTempValue*skewTempValue);
+         MatrixMissingTools.power(skewMatrix,3,skewMatrixResult);
+         MatrixTestTools.assertMatrixEquals(skewMatrixHand, skewMatrixResult, error);
+
+         //Check quadruple time
+         skewMatrixHand.zero();
+         skewMatrixHand.set(0,0, skewTempValue*skewTempValue*skewTempValue*skewTempValue);
+         skewMatrixHand.set(1,1, skewTempValue*skewTempValue*skewTempValue*skewTempValue);
+         MatrixMissingTools.power(skewMatrix,4,skewMatrixResult);
+         MatrixTestTools.assertMatrixEquals(skewMatrixHand, skewMatrixResult, error);
+
+
+
+         //         MatrixTestTools.assertMatrixEquals(matrixPowerTest, matrixCompareResult, error);
       }
-   }
-
-   private void multiplyMatrices(DMatrixRMaj aMatrix, DMatrixRMaj bMatrix, DMatrixRMaj resultMatrix)
-   {
-      int size = aMatrix.getNumCols();
-
-      DMatrixRMaj result = new DMatrixRMaj(size, size);
-
-      double tempValue = 0.0;
-      for (int i = 0; i < size; i++)
-      {
-         for (int j = 0; j < size; j++)
-         {
-            for (int k = 0; k < size; k++)
-            {
-               tempValue = result.get(i, j);
-               tempValue += aMatrix.get(i, k) * bMatrix.get(k, j);
-               result.set(i, j, tempValue);
-            }
-         }
-      }
-
-      resultMatrix.set(result);
    }
 
    @Test
@@ -394,18 +419,17 @@ public class MatrixMissingToolsTest
             }
          }
 
-         boolean matrixASmallThanMatrixB = true;
+         assertTrue(MatrixMissingTools.elementWiseLessThan(matrixLess, matrixMore));
+         assertFalse(MatrixMissingTools.elementWiseLessThan(matrixMore, matrixLess));
 
-         for (int j = 0; j < rowSize; j++)
+         for (int j = 0; j < matrixLess.getNumElements(); j++)
          {
-            for (int k = 0; k < columnSize; k++)
-            {
-               if (matrixLess.get(j, k) >= matrixMore.get(j, k))
-                  matrixASmallThanMatrixB = false;
-            }
+            DMatrixRMaj matrixLessNotAll = new DMatrixRMaj(matrixLess);
+            matrixLessNotAll.set(j, matrixMore.get(j) + 0.001);
+            assertFalse(MatrixMissingTools.elementWiseLessThan(matrixLess, matrixMore));
          }
-
-         assertEquals(matrixASmallThanMatrixB, MatrixMissingTools.elementWiseLessThan(matrixLess, matrixMore));
       }
+
+      assertThrows(IllegalArgumentException.class, () -> MatrixMissingTools.elementWiseLessThan(new DMatrixRMaj(1, 2), new DMatrixRMaj(2, 2)));
    }
 }
