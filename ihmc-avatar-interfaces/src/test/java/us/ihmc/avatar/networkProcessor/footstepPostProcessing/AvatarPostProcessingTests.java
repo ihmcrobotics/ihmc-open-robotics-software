@@ -142,8 +142,6 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       simulationTestHelper.start();
 
       footstepPlannerParameters.setMaxStepZ(height + 0.05);
-      footstepPlannerParameters.setMaxStepZWhenForwardAndDown(height - 0.05);
-      footstepPlannerParameters.setMaxStepXWhenForwardAndDown(0.22);
       footstepPlannerParameters.setIdealFootstepLength(0.28);
 
       ThreadTools.sleep(1000);
