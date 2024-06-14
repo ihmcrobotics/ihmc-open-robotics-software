@@ -14,11 +14,11 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHeightPitchActionState, PelvisHeightPitchActionDefinition>
+public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHeightPitchActionState, PelvisHeightOrientationActionDefinition>
 {
    public static final double POSITION_TOLERANCE = 0.15;
 
-   private final PelvisHeightPitchActionDefinition definition;
+   private final PelvisHeightOrientationActionDefinition definition;
    private final PelvisHeightPitchActionState state;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
@@ -61,10 +61,7 @@ public class PelvisHeightPitchActionExecutor extends ActionNodeExecutor<PelvisHe
       if (state.getPelvisFrame().isChildOfWorld())
       {
          FramePose3D framePose = new FramePose3D(state.getPelvisFrame().getReferenceFrame());
-         FramePose3D syncedPose = new FramePose3D(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
-         framePose.getRotation().setYawPitchRoll(syncedPose.getYaw(), framePose.getPitch(), syncedPose.getRoll());
          framePose.changeFrame(ReferenceFrame.getWorldFrame());
-         syncedPose.changeFrame(ReferenceFrame.getWorldFrame());
 
          PelvisTrajectoryMessage message = new PelvisTrajectoryMessage();
          message.getSe3Trajectory()

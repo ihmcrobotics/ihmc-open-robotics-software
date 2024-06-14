@@ -7,13 +7,13 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class PelvisHeightPitchActionState extends ActionNodeState<PelvisHeightPitchActionDefinition>
+public class PelvisHeightPitchActionState extends ActionNodeState<PelvisHeightOrientationActionDefinition>
 {
    private final CRDTDetachableReferenceFrame pelvisFrame;
 
    public PelvisHeightPitchActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(id, new PelvisHeightPitchActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
+      super(id, new PelvisHeightOrientationActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
       pelvisFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
                                                      getDefinition().getCRDTParentFrameName(),

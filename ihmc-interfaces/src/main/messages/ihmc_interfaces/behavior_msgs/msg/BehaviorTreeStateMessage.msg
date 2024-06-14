@@ -15,6 +15,7 @@ byte HAND_WRENCH_ACTION = 14
 byte SCREW_PRIMITIVE_ACTION = 15
 byte PELVIS_HEIGHT_PITCH_ACTION = 16
 byte WAIT_DURATION_ACTION = 17
+byte FOOT_POSE_ACTION = 17
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
 uint32 sequence_id
@@ -54,3 +55,5 @@ behavior_msgs/ScrewPrimitiveActionStateMessage[<=200] screw_primitive_actions
 behavior_msgs/PelvisHeightPitchActionStateMessage[<=200] pelvis_height_actions
 
 behavior_msgs/WaitDurationActionStateMessage[<=200] wait_duration_actions
+
+behavior_msgs/FootPoseActionStateMessage[<=200] foot_pose_actions

@@ -2,14 +2,7 @@ package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
-import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
-import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
-import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
-import us.ihmc.behaviors.sequence.actions.HandWrenchActionDefinition;
-import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionDefinition;
-import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
-import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionDefinition;
-import us.ihmc.behaviors.sequence.actions.WaitDurationActionDefinition;
+import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -45,9 +38,13 @@ public class BehaviorTreeDefinitionBuilder
       {
          return new HandWrenchActionDefinition(crdtInfo, saveFileDirectory);
       }
-      if (definitionType == PelvisHeightPitchActionDefinition.class)
+      if (definitionType == PelvisHeightOrientationActionDefinition.class)
       {
-         return new PelvisHeightPitchActionDefinition(crdtInfo, saveFileDirectory);
+         return new PelvisHeightOrientationActionDefinition(crdtInfo, saveFileDirectory);
+      }
+      if (definitionType == FootPoseActionDefinition.class)
+      {
+         return new FootPoseActionDefinition(crdtInfo, saveFileDirectory);
       }
       if (definitionType == SakeHandCommandActionDefinition.class)
       {
