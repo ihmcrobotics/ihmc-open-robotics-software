@@ -184,6 +184,11 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.waitDurationActionStateMessage = waitDurationActionStateMessage;
    }
 
+   public FootPoseActionStateMessage getFootPoseActionStateMessage()
+   {
+      return footPoseActionStateMessage;
+   }
+
    public void setFootPoseActionStateMessage(FootPoseActionStateMessage footPoseActionStateMessage)
    {
       this.footPoseActionStateMessage = footPoseActionStateMessage;

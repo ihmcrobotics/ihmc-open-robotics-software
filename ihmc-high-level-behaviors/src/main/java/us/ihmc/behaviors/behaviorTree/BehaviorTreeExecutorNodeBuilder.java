@@ -88,10 +88,6 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       {
          return new HandPoseActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot);
       }
-      if (nodeType == FootPoseActionDefinition.class)
-      {
-         return new FootPoseActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
-      }
       if (nodeType == HandWrenchActionDefinition.class)
       {
          return new HandWrenchActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper);
@@ -111,6 +107,10 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       if (nodeType == WaitDurationActionDefinition.class)
       {
          return new WaitDurationActionExecutor(id, crdtInfo, saveFileDirectory, syncedRobot);
+      }
+      if (nodeType == FootPoseActionDefinition.class)
+      {
+         return new FootPoseActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
       }
 
       return null;

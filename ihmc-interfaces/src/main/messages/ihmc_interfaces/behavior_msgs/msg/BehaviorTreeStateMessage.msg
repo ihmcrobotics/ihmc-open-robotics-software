@@ -15,7 +15,7 @@ byte HAND_WRENCH_ACTION = 14
 byte SCREW_PRIMITIVE_ACTION = 15
 byte PELVIS_HEIGHT_ORIENTATION_ACTION = 16
 byte WAIT_DURATION_ACTION = 17
-byte FOOT_POSE_ACTION = 17
+byte FOOT_POSE_ACTION = 18
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
 uint32 sequence_id

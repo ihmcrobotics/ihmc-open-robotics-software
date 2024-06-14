@@ -23,9 +23,9 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public static final byte HAND_POSE_ACTION = (byte) 13;
    public static final byte HAND_WRENCH_ACTION = (byte) 14;
    public static final byte SCREW_PRIMITIVE_ACTION = (byte) 15;
-   public static final byte PELVIS_HEIGHT_PITCH_ACTION = (byte) 16;
+   public static final byte PELVIS_HEIGHT_ORIENTATION_ACTION = (byte) 16;
    public static final byte WAIT_DURATION_ACTION = (byte) 17;
-   public static final byte FOOT_POSE_ACTION = (byte) 17;
+   public static final byte FOOT_POSE_ACTION = (byte) 18;
    /**
             * Monotonically increasing message ID that matches the CRDTInfo update number
             */
@@ -226,7 +226,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessage> getPelvisHeightOrientationActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessage>  getPelvisHeightActions()
    {
       return pelvis_height_actions_;
    }

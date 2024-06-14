@@ -42,10 +42,6 @@ public class BehaviorTreeDefinitionBuilder
       {
          return new PelvisHeightOrientationActionDefinition(crdtInfo, saveFileDirectory);
       }
-      if (definitionType == FootPoseActionDefinition.class)
-      {
-         return new FootPoseActionDefinition(crdtInfo, saveFileDirectory);
-      }
       if (definitionType == SakeHandCommandActionDefinition.class)
       {
          return new SakeHandCommandActionDefinition(crdtInfo, saveFileDirectory);
@@ -57,6 +53,10 @@ public class BehaviorTreeDefinitionBuilder
       if (definitionType == WaitDurationActionDefinition.class)
       {
          return new WaitDurationActionDefinition(crdtInfo, saveFileDirectory);
+      }
+      if (definitionType == FootPoseActionDefinition.class)
+      {
+         return new FootPoseActionDefinition(crdtInfo, saveFileDirectory);
       }
 
       throw new RuntimeException("Node definition type not found: " + definitionType.getSimpleName());

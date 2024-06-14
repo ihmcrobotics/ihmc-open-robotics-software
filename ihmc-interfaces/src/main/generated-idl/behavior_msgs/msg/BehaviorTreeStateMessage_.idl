@@ -47,14 +47,14 @@ module behavior_msgs
       const octet SCREW_PRIMITIVE_ACTION =
       15;
 
-      const octet PELVIS_HEIGHT_PITCH_ACTION =
+      const octet PELVIS_HEIGHT_ORIENTATION_ACTION =
       16;
 
       const octet WAIT_DURATION_ACTION =
       17;
 
       const octet FOOT_POSE_ACTION =
-      17;
+      18;
 
 
       /**

@@ -28,6 +28,7 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getPelvisHeightActions().clear();
       treeStateMessage.getSakeHandCommandActions().clear();
       treeStateMessage.getWaitDurationActions().clear();
+      treeStateMessage.getFootPoseActions().clear();
    }
 
    public static void packMessage(BehaviorTreeNodeState nodeState, BehaviorTreeStateMessage treeStateMessage)
@@ -92,6 +93,12 @@ public class ROS2BehaviorTreeMessageTools
          treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getWaitDurationActions().size());
          waitDurationActionState.toMessage(treeStateMessage.getWaitDurationActions().add());
       }
+      else if (nodeState instanceof FootPoseActionState footPoseActionState)
+      {
+         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.FOOT_POSE_ACTION);
+         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getFootPoseActions().size());
+         footPoseActionState.toMessage(treeStateMessage.getFootPoseActions().add());
+      }
       else
       {
          treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.BASIC_NODE);
@@ -143,6 +150,10 @@ public class ROS2BehaviorTreeMessageTools
       else if (nodeState instanceof WaitDurationActionState waitDurationActionState)
       {
          waitDurationActionState.fromMessage(subscriptionNode.getWaitDurationActionStateMessage());
+      }
+      else if (nodeState instanceof FootPoseActionState footPoseActionState)
+      {
+         footPoseActionState.fromMessage(subscriptionNode.getFootPoseActionStateMessage());
       }
       else
       {

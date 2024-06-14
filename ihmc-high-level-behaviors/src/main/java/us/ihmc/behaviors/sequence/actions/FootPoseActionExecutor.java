@@ -61,6 +61,7 @@ public class FootPoseActionExecutor extends ActionNodeExecutor<FootPoseActionSta
          desiredControlFramePose.changeFrame(ReferenceFrame.getWorldFrame());
 
          FootTrajectoryMessage message = new FootTrajectoryMessage();
+         message.setRobotSide(getDefinition().getSide().toByte());
          message.getSe3Trajectory()
                 .set(HumanoidMessageTools.createSE3TrajectoryMessage(getDefinition().getTrajectoryDuration(),
                                                                      desiredControlFramePose,

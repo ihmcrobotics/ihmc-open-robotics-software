@@ -128,6 +128,17 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       {
          return new RDXWaitDurationAction(id, crdtInfo, saveFileDirectory);
       }
+      if (nodeType == FootPoseActionDefinition.class)
+      {
+         return new RDXFootPoseAction(id,
+                                      crdtInfo,
+                                      saveFileDirectory,
+                                      panel3D,
+                                      robotModel,
+                                      syncedRobot.getFullRobotModel(),
+                                      selectionCollisionModel,
+                                      referenceFrameLibrary);
+      }
       else
       {
          return null;
