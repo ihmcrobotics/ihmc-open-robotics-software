@@ -28,6 +28,9 @@ module behavior_msgs
       const octet DOOR_TRAVERSAL =
       2;
 
+      const octet ROOM_EXPLORATION =
+      3;
+
       const octet CHEST_ORIENTATION_ACTION =
       10;
 

@@ -1,0 +1,24 @@
+#ifndef __behavior_msgs__msg__RoomExplorationDefinitionMessage__idl__
+#define __behavior_msgs__msg__RoomExplorationDefinitionMessage__idl__
+
+#include "behavior_msgs/msg/./BehaviorTreeNodeDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::RoomExplorationDefinitionMessage_")
+      struct RoomExplorationDefinitionMessage
+      {
+        /**
+         * Parent definition fields
+         */
+        behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
+      };
+    };
+  };
+};
+
+#endif
