@@ -70,10 +70,6 @@ public class FootstepPoseCheckerTest
       assertNull(rejectionReason);
 
       snapper.setPlanarRegionsList(angledGround);
-
-      rejectionReason = checker.snapAndCheckValidity(childNode, stanceNode, null);
-      assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED, rejectionReason);
-
       // TODO check that this doesn't cause the other rejection reasons to fail if the pitch is flat.
    }
 

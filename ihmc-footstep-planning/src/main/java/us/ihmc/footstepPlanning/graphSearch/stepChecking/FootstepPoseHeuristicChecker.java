@@ -59,8 +59,6 @@ public class FootstepPoseHeuristicChecker
    private final YoDouble swingReach = new YoDouble("swingReach", registry);
 
    private final YoBoolean stepIsPitchedBack = new YoBoolean("stepIsPitchedBack", registry);
-   private final YoBoolean stepTooLow = new YoBoolean("stepTooLow", registry);
-   private final YoBoolean stepTooForward = new YoBoolean("stepTooForward", registry);
 
    public FootstepPoseHeuristicChecker(DefaultFootstepPlannerParametersReadOnly parameters, YoRegistry parentRegistry)
    {
@@ -146,13 +144,6 @@ public class FootstepPoseHeuristicChecker
       double alphaPitchedBack = Math.max(0.0, - stanceFootPose.getPitch() / parameters.getMinSurfaceIncline());
 
       stepIsPitchedBack.set(alphaPitchedBack > 0.0);
-      stepTooLow.set(stepLength.getValue() > 0.0 && stepHeight.getValue() > 1.0);
-      stepTooForward.set(stepHeight.getValue() < 0.0 && stepLength.getValue() > 1.0);
-
-      if (stepIsPitchedBack.getBooleanValue() && (stepTooLow.getBooleanValue() || stepTooForward.getBooleanValue()))
-      {
-         return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED;
-      }
 
       if (stepReachXY.getValue() > parameters.getMaxStepReach())
       {
@@ -223,8 +214,6 @@ public class FootstepPoseHeuristicChecker
       yoCandidateFootPose.setToNaN();
 
       stepIsPitchedBack.set(false);
-      stepTooLow.set(false);
-      stepTooForward.set(false);
    }
 
    public static void main(String[] args)
