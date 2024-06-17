@@ -33,6 +33,6 @@ public class ImPlotFrequencyPlot
 
    public boolean anyPingsYet()
    {
-      return frequencyCalculator.anyPingsYet();
+      return frequencyCalculator.getFrequency() != 0.0;
    }
 }
