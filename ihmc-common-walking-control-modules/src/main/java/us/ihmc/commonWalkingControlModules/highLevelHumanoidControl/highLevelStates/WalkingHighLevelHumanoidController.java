@@ -1065,4 +1065,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    {
       return null;
    }
+
+   public BalanceManager getBalanceManager()
+   {
+      return balanceManager;
+   }
 }

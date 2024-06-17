@@ -29,6 +29,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.Compo
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HighLevelHumanoidControllerPluginFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
@@ -448,6 +449,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    public HumanoidHighLevelControllerManager getController(FullHumanoidRobotModel fullRobotModel,
                                                            double controlDT,
                                                            double gravity,
+                                                           boolean kinematicsSimulation, // For fast non-physics preview simulations
                                                            YoDouble yoTime,
                                                            YoGraphicsListRegistry yoGraphicsListRegistry,
                                                            HumanoidRobotSensorInformation sensorInformation,
@@ -508,7 +510,13 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       double totalMass = TotalMassCalculator.computeSubTreeMass(fullRobotModel.getElevator());
       double totalRobotWeight = totalMass * gravityZ;
 
-      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet, forceSensorDataHolder, fullRobotModel.getRootBody(), totalRobotWeight, yoGraphicsListRegistry, registry);
+      SideDependentList<FootSwitchInterface> footSwitches = createFootSwitches(feet,
+                                                                               forceSensorDataHolder,
+                                                                               fullRobotModel.getRootBody(),
+                                                                               totalRobotWeight,
+                                                                               kinematicsSimulation,
+                                                                               yoGraphicsListRegistry,
+                                                                               registry);
       SideDependentList<ForceSensorDataReadOnly> wristForceSensors = createWristForceSensors(forceSensorDataHolder);
 
       /////////////////////////////////////////////////////////////////////////////////////////////
@@ -524,6 +532,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                  omega0,
                                                                  feet,
                                                                  controlDT,
+                                                                 kinematicsSimulation,
                                                                  updatables,
                                                                  contactablePlaneBodies,
                                                                  yoGraphicsListRegistry,
@@ -585,29 +594,41 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                      ForceSensorDataHolderReadOnly forceSensorDataHolder,
                                                                      RigidBodyBasics rootBody,
                                                                      double totalRobotWeight,
+                                                                     boolean kinematicsSimulation,
                                                                      YoGraphicsListRegistry yoGraphicsListRegistry,
                                                                      YoRegistry registry)
    {
-      SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
+      SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<>();
 
-      SideDependentList<FootSwitchFactory> footSwitchFactories = walkingControllerParameters.getFootSwitchFactories();
-
-      for (RobotSide robotSide : RobotSide.values)
+      if (kinematicsSimulation)  // For fast non-physics preview simulations, deal with there being no forces
       {
-         String footName = bipedFeet.get(robotSide).getName();
-         ForceSensorDataReadOnly footForceSensor = forceSensorDataHolder.getData(footSensorNames.get(robotSide));
-         FootSwitchFactory footSwitchFactory = footSwitchFactories.get(robotSide);
-         FootSwitchInterface footSwitch = footSwitchFactory.newFootSwitch(footName,
-                                                                          bipedFeet.get(robotSide),
-                                                                          Collections.singleton(bipedFeet.get(robotSide.getOppositeSide())),
-                                                                          rootBody,
-                                                                          footForceSensor,
-                                                                          totalRobotWeight,
-                                                                          yoGraphicsListRegistry,
-                                                                          registry);
-         footSwitches.put(robotSide, footSwitch);
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            SettableFootSwitch footSwitch = new SettableFootSwitch(bipedFeet.get(robotSide), totalRobotWeight, 2, registry);
+            footSwitch.setFootContactState(true);
+            footSwitches.put(robotSide, footSwitch);
+         }
       }
+      else
+      {
+         SideDependentList<FootSwitchFactory> footSwitchFactories = walkingControllerParameters.getFootSwitchFactories();
 
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            String footName = bipedFeet.get(robotSide).getName();
+            ForceSensorDataReadOnly footForceSensor = forceSensorDataHolder.getData(footSensorNames.get(robotSide));
+            FootSwitchFactory footSwitchFactory = footSwitchFactories.get(robotSide);
+            FootSwitchInterface footSwitch = footSwitchFactory.newFootSwitch(footName,
+                                                                             bipedFeet.get(robotSide),
+                                                                             Collections.singleton(bipedFeet.get(robotSide.getOppositeSide())),
+                                                                             rootBody,
+                                                                             footForceSensor,
+                                                                             totalRobotWeight,
+                                                                             yoGraphicsListRegistry,
+                                                                             registry);
+            footSwitches.put(robotSide, footSwitch);
+         }
+      }
 
       return footSwitches;
    }

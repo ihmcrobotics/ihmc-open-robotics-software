@@ -61,7 +61,7 @@ public class GarbageFreePlanarRegionPolygonSnapper
       if (noIntersection)
          return false;
 
-      PlanarRegionPolygonSnapper.constructTransformToMatchSurfaceNormalPreserveX(planarRegionToSnapTo.getNormal(), snapTransformToPack);
+      PolygonSnapperTools.constructTransformToMatchSurfaceNormalPreserveX(planarRegionToSnapTo.getNormal(), snapTransformToPack);
       PlanarRegionPolygonSnapper.setTranslationSettingZAndPreservingXAndY(highestVertexInWorld, snapTransformToPack);
 
       return true;

@@ -39,9 +39,9 @@ public class DoorDefinition extends RobotDefinition
 
    private final DoorPanelDefinition doorPanelDefinition = new DoorPanelDefinition();
 
-   public DoorDefinition()
+   public DoorDefinition(int id)
    {
-      super(DOOR_ROBOT_NAME);
+      super(DOOR_ROBOT_NAME + id);
    }
 
    public DoorPanelDefinition getDoorPanelDefinition()

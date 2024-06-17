@@ -17,7 +17,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-public class RDXROS2YOLOv8Settings extends RDXVisualizer
+public class RDXYOLOv8Settings extends RDXVisualizer
 {
    private static final String[] AVAILABLE_SENSORS = {"ZED", "D455"};
    private static final double MESSAGE_PUBLISH_PERIOD = 2; // publish messages every 2 seconds
@@ -38,7 +38,7 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
    private final Throttler messagePublishThrottler = new Throttler().setPeriod(MESSAGE_PUBLISH_PERIOD);
    private final Notification parametersChanged = new Notification();
 
-   public RDXROS2YOLOv8Settings(String title, ROS2PublishSubscribeAPI ros2)
+   public RDXYOLOv8Settings(String title, ROS2PublishSubscribeAPI ros2)
    {
       super(title);
 
@@ -54,12 +54,7 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-
       ImGui.combo("Sensor Selection", selectedSensor, AVAILABLE_SENSORS);
-
-      demandYOLOv8ICPZed.setAlive(isActive() && selectedSensor.get() == 0);
-      demandYOLOv8ICPRealsense.setAlive(isActive() && selectedSensor.get() == 1);
 
       if (ImGui.sliderFloat("confidenceThreshold", confidenceThreshold.getData(), 0.0f, 1.0f))
          parametersChanged.set();
@@ -103,6 +98,9 @@ public class RDXROS2YOLOv8Settings extends RDXVisualizer
    public void update()
    {
       super.update();
+
+      demandYOLOv8ICPZed.setAlive(isActive() && selectedSensor.get() == 0);
+      demandYOLOv8ICPRealsense.setAlive(isActive() && selectedSensor.get() == 1);
 
       // Publish a settings message if user changed a setting or enough time has passed since last publication
       if (parametersChanged.poll() || messagePublishThrottler.run())

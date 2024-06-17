@@ -432,19 +432,7 @@ public class HumanoidPerceptionModule
 
    public HeightMapData getLatestHeightMapData()
    {
-      Mat heightMapMat = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
-      if (latestHeightMapData == null)
-      {
-         latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
-                                                 (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
-                                                 rapidHeightMapExtractor.getSensorOrigin().getX(),
-                                                 rapidHeightMapExtractor.getSensorOrigin().getY());
-      }
-      PerceptionMessageTools.convertToHeightMapData(heightMapMat,
-                                                    latestHeightMapData,
-                                                    rapidHeightMapExtractor.getSensorOrigin(),
-                                                    (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
-                                                    (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters());
+      latestHeightMapData = RapidHeightMapExtractor.packHeightMapData(rapidHeightMapExtractor, latestHeightMapData);
       return latestHeightMapData;
    }
 

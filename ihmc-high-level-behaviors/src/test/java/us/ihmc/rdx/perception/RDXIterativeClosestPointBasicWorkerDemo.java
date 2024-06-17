@@ -33,7 +33,7 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
+import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.RestartableThread;
@@ -57,7 +57,7 @@ public class RDXIterativeClosestPointBasicWorkerDemo
    private IterativeClosestPointWorker icpWorker = new IterativeClosestPointWorker(SHAPE_SAMPLE_POINTS, CORRESPONDENCE_POINTS, random);
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
+   private final RDXPerceptionVisualizersPanel perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
    private RDXReferenceFrameGraphic referenceFrameGraphic;
 
    private ModelInstance mousePickSphere;

@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.ros2;
+package us.ihmc.rdx.ui.graphics.ros2.pointCloud;
 
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
@@ -6,16 +6,15 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.perception.CameraModel;
-import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.comms.ImageMessageFormat;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.tools.ImageMessageDecompressionInput;
 import us.ihmc.perception.tools.NativeMemoryTools;
 import us.ihmc.pubsub.common.SampleInfo;
+import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.ui.graphics.RDXMessageSizeReadout;
 import us.ihmc.rdx.ui.graphics.RDXSequenceDiscontinuityPlot;
-import us.ihmc.rdx.imgui.ImPlotDoublePlot;
-import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -34,8 +33,7 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    protected final ImageMessage imageMessage = new ImageMessage();
    private final SampleInfo sampleInfo = new SampleInfo();
    private ROS2Topic<ImageMessage> topic;
-   private final ImPlotFrequencyPlot frequencyPlot;
-   private final ImPlotDoublePlot delayPlot;
+//   private final ImPlotDoublePlot delayPlot;
    private final RDXMessageSizeReadout messageSizeReadout = new RDXMessageSizeReadout();
    private final RDXSequenceDiscontinuityPlot sequenceDiscontinuityPlot = new RDXSequenceDiscontinuityPlot();
    protected final SwapReference<ImageMessageDecompressionInput> decompressionInputSwapReference = new SwapReference<>(ImageMessageDecompressionInput::new);
@@ -59,12 +57,13 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    private final ByteBuffer ousterBeamAltitudeAnglesBuffer = NativeMemoryTools.allocate(Float.BYTES * OusterNetServer.MAX_POINTS_PER_COLUMN);
    private final ByteBuffer ousterBeamAzimuthAnglesBuffer = NativeMemoryTools.allocate(Float.BYTES * OusterNetServer.MAX_POINTS_PER_COLUMN);
 
+   private ImGuiAveragedFrequencyText frequencyText = new ImGuiAveragedFrequencyText();
+
    public RDXROS2ColoredPointCloudVisualizerChannel(String name, ROS2Topic<ImageMessage> topic)
    {
       this.topic = topic;
 
-      frequencyPlot = new ImPlotFrequencyPlot(name + " Hz", 30);
-      delayPlot = new ImPlotDoublePlot(name + " Delay", 30);
+//      delayPlot = new ImPlotDoublePlot(name + " Delay", 30);
 
       boolean daemon = true;
       int queueSize = 1;
@@ -77,11 +76,11 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
       {
          synchronized (imageMessagesSyncObject)
          {
-            frequencyPlot.ping();
             imageMessage.getData().resetQuick();
             subscriber.takeNextData(imageMessage, sampleInfo);
             subscribedImageAvailable.set();
             receivedOne = true;
+            frequencyText.ping();
          }
       });
    }
@@ -127,7 +126,7 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
 
          messageSizeReadout.update(imageMessage.getData().size());
          sequenceDiscontinuityPlot.update(imageMessage.getSequenceNumber());
-         delayPlot.addValue(MessageTools.calculateDelay(imageMessage));
+//         delayPlot.addValue(MessageTools.calculateDelay(imageMessage));
 
          cameraModel = CameraModel.getCameraModel(imageMessage);
          MessageTools.extractIDLSequence(imageMessage.getOusterBeamAltitudeAngles(), ousterBeamAltitudeAnglesBuffer);
@@ -217,16 +216,6 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
       return messageSizeReadout;
    }
 
-   public ImPlotFrequencyPlot getFrequencyPlot()
-   {
-      return frequencyPlot;
-   }
-
-   public ImPlotDoublePlot getDelayPlot()
-   {
-      return delayPlot;
-   }
-
    public RDXSequenceDiscontinuityPlot getSequenceDiscontinuityPlot()
    {
       return sequenceDiscontinuityPlot;
@@ -255,5 +244,10 @@ public abstract class RDXROS2ColoredPointCloudVisualizerChannel
    public void setTopic(ROS2Topic<ImageMessage> topic)
    {
       this.topic = topic;
+   }
+
+   public ImGuiAveragedFrequencyText getFrequencyText()
+   {
+      return frequencyText;
    }
 }

@@ -10,6 +10,8 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -34,6 +36,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -42,7 +45,7 @@ public class ContinuousPlanner
 {
    public enum PlanningMode
    {
-      EXECUTE_AND_PAUSE, FRONTIER_EXPANSION, ACTIVE_SEARCH, FAST_HIKING
+      EXECUTE_AND_PAUSE, FRONTIER_EXPANSION, ACTIVE_SEARCH, FAST_HIKING, WALK_TO_GOAL
    }
 
    private ContinuousGoalGenerator goalGenerator = new ContinuousGoalGenerator(0.0, 5.0, 0.0, 5.0);
@@ -50,36 +53,39 @@ public class ContinuousPlanner
    private final SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final HumanoidReferenceFrames referenceFrames;
 
-   private AtomicReference<FootstepPlan> monteCarloFootstepPlan = new AtomicReference<>(null);
-   private FramePose3D walkingStartMidPose = new FramePose3D();
-   private FramePose3D imminentFootstepPose = new FramePose3D();
+   private final AtomicReference<FootstepPlan> monteCarloFootstepPlan = new AtomicReference<>(null);
+   private final FramePose3D walkingStartMidPose = new FramePose3D();
+   private final FramePose3D imminentFootstepPose = new FramePose3D();
    private RobotSide imminentFootstepSide = RobotSide.LEFT;
    private ContinuousWalkingCommandMessage command;
    private PlanningMode mode;
 
    private List<EnumMap<Axis3D, List<PolynomialReadOnly>>> latestSwingTrajectories;
-   private MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters;
+   private final MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters;
    private MonteCarloFootstepPlannerRequest monteCarloFootstepPlannerRequest;
-   private CollisionFreeSwingCalculator collisionFreeSwingCalculator;
-   private ContinuousHikingParameters continuousHikingParameters;
-   private MonteCarloFootstepPlanner monteCarloFootstepPlanner;
-   private SwingPlannerParametersBasics swingPlannerParameters;
+   private final CollisionFreeSwingCalculator collisionFreeSwingCalculator;
+   private final ContinuousHikingParameters continuousHikingParameters;
+   private final MonteCarloFootstepPlanner monteCarloFootstepPlanner;
+   private final SwingPlannerParametersBasics swingPlannerParameters;
    private FootstepPlanningResult footstepPlanningResult;
    private ContinuousPlannerStatistics statistics;
-   private FootstepPlanningModule footstepPlanner;
+   private final FootstepPlanningModule footstepPlanner;
    private FootstepPlan monteCarloReferencePlan;
    private TerrainMapData latestTerrainMapData;
    private FootstepPlan previousFootstepPlan;
    private HeightMapData latestHeightMapData;
-   private TerrainPlanningDebugger debugger;
+   private final TerrainPlanningDebugger debugger;
    private FootstepPlan latestFootstepPlan;
-   private FootstepPlannerLogger logger;
+   private final FootstepPlannerLogger logger;
 
    private boolean initialized = false;
    private boolean planAvailable = false;
    private boolean resetMonteCarloFootstepPlanner = false;
    private boolean active;
    private double previousContinuousHikingSwingTime = 0.0;
+
+   private final List<SideDependentList<Pose3D>> walkToGoalWayPointList = new ArrayList<>();
+   private final Point3D robotLocation = new Point3D();
 
    float xRandomMargin = 0.2f;
    float nominalStanceWidth = 0.22f;
@@ -327,6 +333,37 @@ public class ContinuousPlanner
                                                                    xRandomMargin,
                                                                    (float) continuousHikingParameters.getGoalPoseUpDistance(), nominalStanceWidth);
             break;
+         case WALK_TO_GOAL:
+            if (walkToGoalWayPointList.isEmpty())
+            {
+               mode = PlanningMode.FAST_HIKING;
+               return;
+            }
+
+            goalStancePose.get(RobotSide.LEFT).set(walkToGoalWayPointList.get(0).get(RobotSide.LEFT));
+            goalStancePose.get(RobotSide.RIGHT).set(walkToGoalWayPointList.get(0).get(RobotSide.RIGHT));
+
+            Vector3DBasics robotLocationVector = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation();
+            robotLocation.set(robotLocationVector);
+            double distanceToGoalPose = ContinuousPlanningTools.getDistanceFromRobotToGoalPoseOnXYPlane(robotLocation, goalStancePose);
+
+            if (distanceToGoalPose < continuousHikingParameters.getNextWaypointDistanceMargin())
+            {
+               LogTools.info("Removed goal from list... ready to go to the next one");
+               walkToGoalWayPointList.remove(0);
+
+               if (!walkToGoalWayPointList.isEmpty())
+               {
+                  goalStancePose.get(RobotSide.LEFT).set(walkToGoalWayPointList.get(0).get(RobotSide.LEFT));
+                  goalStancePose.get(RobotSide.RIGHT).set(walkToGoalWayPointList.get(0).get(RobotSide.RIGHT));
+                  debugger.publishStartAndGoalForVisualization(getStartingStancePose(), getGoalStancePose());
+               }
+               else
+               {
+                  continuousHikingParameters.setEnableContinuousWalking(false);
+               }
+            }
+            break;
       }
    }
 
@@ -496,8 +533,7 @@ public class ContinuousPlanner
       // this also packs the footstep plan with optimized waypoints
       collisionFreeSwingCalculator.computeSwingTrajectories(startingStancePose, footstepPlan);
 
-      List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = collisionFreeSwingCalculator.getSwingTrajectories();
-      return swingTrajectories;
+      return collisionFreeSwingCalculator.getSwingTrajectories();
    }
 
    public MonteCarloFootstepPlanner getMonteCarloFootstepPlanner()
@@ -610,4 +646,21 @@ public class ContinuousPlanner
    {
       resetMonteCarloFootstepPlanner = true;
    }
+
+   public void addWayPointToList(Pose3D leftFootGoalPose, Pose3D rightFootGoalPose)
+   {
+      mode = PlanningMode.WALK_TO_GOAL;
+      //TODO make sure we don't add the same values twice
+      SideDependentList<Pose3D> latestWayPoint = new SideDependentList<>();
+      latestWayPoint.put(RobotSide.LEFT, leftFootGoalPose);
+      latestWayPoint.put(RobotSide.RIGHT, rightFootGoalPose);
+
+      LogTools.info("Added waypoint for WALK_TO_GOAL");
+      walkToGoalWayPointList.add(latestWayPoint);
+
+      // Until the first waypoint is removed from this list, that is the current goal
+      goalStancePose.get(RobotSide.LEFT).set(walkToGoalWayPointList.get(0).get(RobotSide.LEFT));
+      goalStancePose.get(RobotSide.RIGHT).set(walkToGoalWayPointList.get(0).get(RobotSide.RIGHT));
+   }
 }
+

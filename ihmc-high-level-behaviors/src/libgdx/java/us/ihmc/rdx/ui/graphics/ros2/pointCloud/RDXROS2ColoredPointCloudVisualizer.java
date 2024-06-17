@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.ros2;
+package us.ihmc.rdx.ui.graphics.ros2.pointCloud;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
@@ -16,17 +16,19 @@ import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.RDXPointCloudRenderer;
+import us.ihmc.rdx.imgui.ImGuiAveragedFrequencyText;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.graphics.RDXColorGradientMode;
 import us.ihmc.rdx.ui.graphics.RDXOusterFisheyeColoredPointCloudKernel;
-import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2MultiTopicVisualizer;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.string.StringTools;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -36,7 +38,7 @@ import java.util.Set;
  * It provides our full set of analytics as plots, such as message size,
  * delay, sequence discontinuities, etc. and coloring options.
  */
-public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
+public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisualizer
 {
    private final String titleBeforeAdditions;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -72,7 +74,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
                                              ROS2Topic<ImageMessage> depthTopic,
                                              ROS2Topic<ImageMessage> colorTopic)
    {
-      super(title + " (ROS 2)");
+      super(title);
       titleBeforeAdditions = title;
       this.pubSubImplementation = pubSubImplementation;
       depthChannel = new RDXROS2ColoredPointCloudVisualizerDepthChannel(depthTopic);
@@ -212,9 +214,6 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-      ImGui.text(colorChannel.getTopic().getName());
-
       renderStatistics();
 
       ImGui.checkbox(labels.get("Use sensor color"), useSensorColor);
@@ -236,24 +235,13 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
    public void renderStatistics()
    {
       if (colorChannel.getReceivedOne())
-      {
          colorChannel.getMessageSizeReadout().renderImGuiWidgets();
-      }
-      ImGui.text(depthChannel.getTopic().getName());
       if (depthChannel.getReceivedOne())
-      {
          depthChannel.getMessageSizeReadout().renderImGuiWidgets();
-      }
-      if (colorChannel.getReceivedOne())
-         colorChannel.getFrequencyPlot().renderImGuiWidgets();
-      if (depthChannel.getReceivedOne())
-         depthChannel.getFrequencyPlot().renderImGuiWidgets();
-
-      if (colorChannel.getReceivedOne())
-         colorChannel.getDelayPlot().renderImGuiWidgets();
-      if (depthChannel.getReceivedOne())
-         depthChannel.getDelayPlot().renderImGuiWidgets();
-
+//      if (colorChannel.getReceivedOne())
+//         colorChannel.getDelayPlot().renderImGuiWidgets();
+//      if (depthChannel.getReceivedOne())
+//         depthChannel.getDelayPlot().renderImGuiWidgets();
       if (colorChannel.getReceivedOne())
          colorChannel.getSequenceDiscontinuityPlot().renderImGuiWidgets();
       if (depthChannel.getReceivedOne())
@@ -350,5 +338,21 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXVisualizer
    public ImInt getLevelOfColorDetail()
    {
       return levelOfColorDetail;
+   }
+
+   @Override
+   public List<ROS2Topic<?>> getTopics()
+   {
+      return List.of(colorChannel.getTopic(), depthChannel.getTopic());
+   }
+
+   @Override
+   public ImGuiAveragedFrequencyText getFrequency(ROS2Topic<?> topic)
+   {
+      if (topic == colorChannel.getTopic())
+         return colorChannel.getFrequencyText();
+      else if (topic == depthChannel.getTopic())
+         return depthChannel.getFrequencyText();
+      return null;
    }
 }
