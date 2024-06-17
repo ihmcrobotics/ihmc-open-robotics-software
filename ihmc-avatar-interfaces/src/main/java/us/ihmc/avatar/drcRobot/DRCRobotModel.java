@@ -27,7 +27,7 @@ import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityDa
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -210,12 +210,12 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
-   public default FootstepPlannerParametersBasics getFootstepPlannerParameters()
+   public default DefaultFootstepPlannerParametersBasics getFootstepPlannerParameters()
    {
       return null;
    }
 
-   default FootstepPlannerParametersBasics getFootstepPlannerParameters(String fileNameSuffix)
+   default DefaultFootstepPlannerParametersBasics getFootstepPlannerParameters(String fileNameSuffix)
    {
       return null;
    }

@@ -9,7 +9,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnappingTools;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionFootstepSnapAndWiggler;
@@ -74,7 +73,7 @@ public class FootstepCostCalculatorTest
          // test partial area cost for ideal step
          ConvexPolygon2D foothold = PlannerTools.createDefaultFootPolygon();
          double percentAreaCost = random.nextDouble();
-         double percentFoothold = EuclidCoreTools.interpolate(1.0, footstepPlannerParameters.getMinimumFootholdPercent(), percentAreaCost);
+         double percentFoothold = EuclidCoreTools.interpolate(1.0, footstepPlannerParameters.getMinFootholdPercent(), percentAreaCost);
          foothold.scale(Math.sqrt(percentFoothold));
 
          snapper.reset();

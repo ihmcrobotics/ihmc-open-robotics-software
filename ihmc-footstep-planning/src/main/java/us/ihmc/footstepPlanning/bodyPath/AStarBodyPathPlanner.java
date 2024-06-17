@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.AStarBodyPathEdgeData;
 import us.ihmc.footstepPlanning.log.AStarBodyPathIterationData;
 import us.ihmc.log.LogTools;
@@ -44,7 +44,7 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DefaultFootstepPlannerParametersReadOnly parameters;
    private final AStarBodyPathPlannerParametersReadOnly plannerParameters;
    private final AStarBodyPathEdgeData edgeData;
    private HeightMapData heightMapData;
@@ -103,14 +103,14 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
 
    private final AStarBodyPathSmoother smoother;
 
-   public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters,
+   public AStarBodyPathPlanner(DefaultFootstepPlannerParametersReadOnly parameters,
                                AStarBodyPathPlannerParametersReadOnly plannerParameters,
                                SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this(parameters, plannerParameters, footPolygons, new Stopwatch());
    }
 
-   public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters,
+   public AStarBodyPathPlanner(DefaultFootstepPlannerParametersReadOnly parameters,
                                AStarBodyPathPlannerParametersReadOnly plannerParameters,
                                SideDependentList<ConvexPolygon2D> footPolygons,
                                Stopwatch stopwatch)
@@ -118,7 +118,7 @@ public class AStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       this(parameters, plannerParameters, footPolygons, new ArrayList<>(), stopwatch);
    }
 
-   public AStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters,
+   public AStarBodyPathPlanner(DefaultFootstepPlannerParametersReadOnly parameters,
                                AStarBodyPathPlannerParametersReadOnly plannerParameters,
                                SideDependentList<ConvexPolygon2D> footPolygons,
                                List<Consumer<FootstepPlannerOutput>> statusCallbacks,

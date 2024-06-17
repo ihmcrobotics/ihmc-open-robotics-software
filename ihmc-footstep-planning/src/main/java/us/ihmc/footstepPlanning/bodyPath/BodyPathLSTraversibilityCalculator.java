@@ -5,7 +5,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -23,7 +23,7 @@ public class BodyPathLSTraversibilityCalculator
    private static final double alphaNode1 = 0.05;
    private static final double alphaEdge = 0.5;
 
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DefaultFootstepPlannerParametersReadOnly parameters;
    private final Pose2D bodyPose = new Pose2D();
    private final Pose2D stepPose = new Pose2D();
 
@@ -53,7 +53,7 @@ public class BodyPathLSTraversibilityCalculator
    private final TDoubleArrayList traversibilityCosts = new TDoubleArrayList();
    private HeightMapData heightMapData;
 
-   public BodyPathLSTraversibilityCalculator(FootstepPlannerParametersReadOnly parameters,
+   public BodyPathLSTraversibilityCalculator(DefaultFootstepPlannerParametersReadOnly parameters,
                                              SideDependentList<ConvexPolygon2D> footPolygons,
                                              Map<BodyPathLatticePoint, Double> gridHeightMap,
                                              YoRegistry registry)
@@ -195,7 +195,7 @@ public class BodyPathLSTraversibilityCalculator
                RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon,
                                                                                  internalEnvironmentHandler,
                                                                                  parameters.getHeightMapSnapThreshold(),
-                                                                                 parameters.getMinimumSurfaceInclineRadians(),
+                                                                                 parameters.getMinSurfaceIncline(),
                                                                                  parentHeight - heightWindow);
                if (snapTransform == null)
                {

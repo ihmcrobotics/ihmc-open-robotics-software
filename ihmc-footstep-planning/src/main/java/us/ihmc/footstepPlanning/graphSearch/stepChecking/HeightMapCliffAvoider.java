@@ -12,7 +12,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataRea
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -21,7 +21,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class HeightMapCliffAvoider
 {
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DefaultFootstepPlannerParametersReadOnly parameters;
    private final FootstepSnapperReadOnly snapper;
 
    private HeightMapData heightMapData;
@@ -35,7 +35,7 @@ public class HeightMapCliffAvoider
 
    private double previousScaledFootPolygonPercentage = Double.NaN;
 
-   public HeightMapCliffAvoider(FootstepPlannerParametersReadOnly parameters,
+   public HeightMapCliffAvoider(DefaultFootstepPlannerParametersReadOnly parameters,
                                 FootstepSnapperReadOnly snapper,
                                 SideDependentList<ConvexPolygon2D> defaultFootPolygons,
                                 YoRegistry registry)

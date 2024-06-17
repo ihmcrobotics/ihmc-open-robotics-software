@@ -1,28 +1,4 @@
 # This message is part of the IHMC footstep planning module.
-# Maximum step reach when stepping up.
-# 
-# Long steps forward are rejected by the planner if one of two criteria are met:
-# The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
-# - OR -
-# The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
-# - AND -
-# The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
-# Maximum step width when stepping up.
-# 
-# Long steps forward are rejected by the planner if one of two criteria are met:
-# The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
-# - OR -
-# The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
-# - AND -
-# The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
-# Step height for considering stepping up.
-# 
-# Long steps forward are rejected by the planner if one of two criteria are met:
-# The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
-# - OR -
-# The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
-# - AND -
-# The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame.
 
 float64 DEFAULT_NO_VALUE=-11.1
 
@@ -56,10 +32,6 @@ float64 ideal_side_step_width
 # Returns the ideal length when walking backwards. This value is positive.
 # Field default value -11.1
 float64 ideal_back_step_length
-
-# Returns ideal step length when the vertical height between the start-of-swing and stance feet are at maximum allowed height.
-# Field default value -11.1
-float64 ideal_step_length_at_max_step_z
 
 # The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
 # to the edge. A negative value means the footstep can overhang a region.
@@ -120,69 +92,6 @@ float64 minimum_step_length
 # Field default value -11.1
 float64 minimum_step_yaw
 
-# Large steps forward and up can cause the robot to surpass its torque limits.
-# These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
-# it's very close to saturating its torque limits.
-# Field default value -11.1
-float64 maximum_step_reach_when_stepping_up
-
-# Large steps forward and up can cause the robot to surpass its torque limits.
-# These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
-# it's very close to saturating its torque limits.
-# Field default value -11.1
-float64 maximum_step_width_when_stepping_up
-
-# Large steps forward and up can cause the robot to surpass its torque limits.
-# These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
-# it's very close to saturating its torque limits.
-# Field default value -11.1
-float64 maximum_step_z_when_stepping_up
-
-# Maximum step length when stepping forward and down.
-# 
-# Large steps forward and down are rejected by the planner if one of two criteria are met:
-# The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame
-# - OR -
-# The y-position of the value of the footstep exceeds maximumStepYWhenForwardAndDown, when expressed in its parent's z-up sole frame
-# - AND -
-# The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
-# 
-# Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
-# These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
-# it's very close to hitting it's ankle pitch joint limit.
-# Field default value -11.1
-float64 maximum_step_x_when_forward_and_down
-
-# Maximum step width when stepping forward and down.
-# 
-# Large steps forward and down are rejected by the planner if one of two criteria are met:
-# The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame
-# - OR -
-# The y-position of the value of the footstep exceeds maximumStepYWhenForwardAndDown, when expressed in its parent's z-up sole frame
-# - AND -
-# The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
-# 
-# Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
-# These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
-# it's very close to hitting it's ankle pitch joint limit.
-# Field default value -11.1
-float64 maximum_step_y_when_forward_and_down
-
-# Maximum step height when stepping forward and down.
-# 
-# Large steps forward and down are rejected by the planner if one of two criteria are met:
-# The x-position of the value of the footstep exceeds maximumStepXWhenForwardAndDown, when expressed in its parent's z-up sole frame
-# - OR -
-# The y-position of the value of the footstep exceeds maximumStepYWhenForwardAndDown, when expressed in its parent's z-up sole frame
-# - AND -
-# The z-position of the value of the footstep is less than maximumStepZWhenForwardAndDown, when expressed in its parent's z-up sole frame
-# 
-# Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
-# These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
-# it's very close to hitting it's ankle pitch joint limit.
-# Field default value -11.1
-float64 maximum_step_z_when_forward_and_down
-
 # Maximum vertical distance between consecutive footsteps
 # 
 # A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
@@ -197,30 +106,6 @@ float64 maximum_swing_z
 # Maximum xy distance between start-of-swing and touchdown
 # Field default value -11.1
 float64 maximum_swing_reach
-
-# Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
-# 
-# The maximum depth is determined by linearly interpolating between {@link #getMaximumStepZ()} and this value, based on the fraction the foot is pitched by.
-# A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
-# Field default value -11.1
-float64 minimum_step_z_when_fully_pitched
-
-# Maximum forward distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
-# 
-# The maximum distance is determined by linearly interpolating between {@link #getMaximumStepZ()} and this value, based on the fraction the foot is pitched by.
-# A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
-# Field default value -11.1
-float64 maximum_step_x_when_fully_pitched
-
-# This is the reduction factor for the max yaw when the step is at max reach.
-# This means that, when the footstep is at its maximum distance, this is the fraction reduction of the max yaw.
-# If this returns 0.0, the max yaw is not modified, even at full reach.
-# If this returns 1.0, the max yaw is 0 at full reach.
-# 
-# That is,
-# modifiedMaxYaw = (1.0 - reach / maxReach) * maxYaw + reach / maxReach * (1.0 - alpha) * maxYaw
-# Field default value -11.1
-float64 step_yaw_reduction_factor_at_max_reach
 
 # Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
 # 

@@ -5,7 +5,6 @@ import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPosition
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalOpaqueMaterial;
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalTransparentMaterial;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -22,16 +21,14 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 public class GoalOrientationViewer extends AnimationTimer
 {
@@ -46,7 +43,7 @@ public class GoalOrientationViewer extends AnimationTimer
    private SideDependentList<Material> transparentFootMaterial = new SideDependentList<>();
    private SideDependentList<Material> opaqueFootMaterial = new SideDependentList<>();
 
-   private FootstepPlannerParametersReadOnly parameters;
+   private DefaultFootstepPlannerParametersReadOnly parameters;
    private final AtomicReference<Boolean> goalRotationEditModeEnabled;
    private final AtomicReference<Boolean> goalPositionEditModeEnabled;
 
@@ -80,7 +77,7 @@ public class GoalOrientationViewer extends AnimationTimer
       messager.addTopicListener(ShowGoal, root::setVisible);
    }
 
-   public void setPlannerParameters(FootstepPlannerParametersBasics parameters)
+   public void setPlannerParameters(DefaultFootstepPlannerParametersBasics parameters)
    {
       this.parameters = parameters;
    }

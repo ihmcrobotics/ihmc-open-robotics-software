@@ -17,7 +17,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -66,7 +66,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
                       CommunicationHelper communicationHelper,
                       ROS2SyncedRobotModel syncedRobot,
                       RDXLocomotionParameters locomotionParameters,
-                      FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                      DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters,
                       SwingPlannerParametersBasics swingFootPlannerParameters)
    {
       this.baseUI = baseUI;

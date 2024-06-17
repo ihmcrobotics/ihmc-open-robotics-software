@@ -2,16 +2,13 @@ package us.ihmc.footstepPlanning;
 
 import perception_msgs.msg.dds.HeightMapMessage;
 import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
-import perception_msgs.msg.dds.PlanarRegionsListMessage;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.perception.heightMap.TerrainMapData;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -104,7 +101,7 @@ public class FootstepPlannerRequest
 
    /**
     * If true, will ignore planar regions and plan on flat ground.
-    * Note that collision checks will still be performed if enabled, such as {@link FootstepPlannerParametersReadOnly#checkForBodyBoxCollisions}
+    * Note that collision checks will still be performed if enabled, such as {@link DefaultFootstepPlannerParametersReadOnly#getCheckForBodyBoxCollisions}
     */
    private boolean assumeFlatGround;
 

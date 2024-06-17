@@ -21,7 +21,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.communication.FootstepPlannerAPI;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
@@ -62,7 +62,7 @@ public class RemoteUIMessageConverter
    private final String robotName;
 
    private final AtomicReference<VisibilityGraphsParametersReadOnly> visibilityGraphParametersReference;
-   private final AtomicReference<FootstepPlannerParametersReadOnly> plannerParametersReference;
+   private final AtomicReference<DefaultFootstepPlannerParametersReadOnly> plannerParametersReference;
    private final AtomicReference<SwingPlannerParametersReadOnly> swingPlannerParametersReference;
    private final AtomicReference<Pose3DReadOnly> leftFootPose;
    private final AtomicReference<Pose3DReadOnly> rightFootPose;
@@ -395,7 +395,7 @@ public class RemoteUIMessageConverter
          visibilityGraphsParametersPublisher.publish(visibilityGraphsParametersPacket);
       }
 
-      FootstepPlannerParametersReadOnly footstepPlannerParameters = plannerParametersReference.get();
+      DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters = plannerParametersReference.get();
       if(footstepPlannerParameters != null)
       {
          FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();

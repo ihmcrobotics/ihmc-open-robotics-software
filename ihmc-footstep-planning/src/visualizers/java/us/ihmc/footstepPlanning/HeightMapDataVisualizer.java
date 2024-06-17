@@ -229,7 +229,7 @@ public class HeightMapDataVisualizer
          RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(polygonToSnap,
                                                                            environmentHandler,
                                                                            parameters.getHeightMapSnapThreshold(),
-                                                                           parameters.getMinimumSurfaceInclineRadians());
+                                                                           parameters.getMinSurfaceIncline());
          snapTransform.transform(stepTransform);
 
          graphics3DObject.identity();

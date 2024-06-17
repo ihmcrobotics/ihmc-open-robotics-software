@@ -18,7 +18,7 @@ import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.bodyPath.AStarBodyPathPlanner;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.SimpleGPUHeightMap;
@@ -142,7 +142,7 @@ public class RDXGPUHeightMapBodyPathPlanningDemo
             baseUI.getPrimaryScene().addRenderableProvider(heightMapGraphic, RDXSceneLevel.VIRTUAL);
             baseUI.getImGuiPanelManager().addPanel("Height Map", this::renderHeightMapImGuiWidgets);
 
-            FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+            DefaultFootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
             SideDependentList<ConvexPolygon2D> footPolygons = FootstepPlanningModuleLauncher.createFootPolygons(robotModel);
             bodyPathPlanner = new AStarBodyPathPlanner(footstepPlannerParameters, new AStarBodyPathPlannerParameters(), footPolygons, bodyPathPlannerStopwatch);
 
