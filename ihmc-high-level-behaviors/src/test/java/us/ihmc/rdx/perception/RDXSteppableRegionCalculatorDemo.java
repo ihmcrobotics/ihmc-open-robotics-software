@@ -1,7 +1,6 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.communication.CommunicationMode;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -18,10 +17,11 @@ import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableReferenceFrame;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXSteppableRegionsVisualizer;
-import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.RealtimeROS2Node;
 
@@ -37,7 +37,7 @@ public class RDXSteppableRegionCalculatorDemo
    private final RemoteSteppableRegionsUpdater steppableRegionsUpdater;
    private final RDXRemoteHeightMapPanel heightMapUI;
    private final RDXSteppableRegionsPanel steppableRegionsUI;
-   private final RDXGlobalVisualizersPanel globalVisualizersUI;
+   private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel;
 
    public RDXSteppableRegionCalculatorDemo()
    {
@@ -60,15 +60,15 @@ public class RDXSteppableRegionCalculatorDemo
       baseUI.getImGuiPanelManager().addPanel(heightMapUI.getPanel());
 
       // Configure the height map visualizer
-      globalVisualizersUI = new RDXGlobalVisualizersPanel();
+      perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
 
       RDXHeightMapVisualizer heightMapVisualizer = new RDXHeightMapVisualizer();
       heightMapVisualizer.setActive(true);
       RDXSteppableRegionsVisualizer steppableRegionsVisualizer = new RDXSteppableRegionsVisualizer("Steppable Regions");
       steppableRegionsVisualizer.setActive(true);
 
-      baseUI.getImGuiPanelManager().addPanel(globalVisualizersUI);
-      baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI);
+      baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
+      baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -77,7 +77,7 @@ public class RDXSteppableRegionCalculatorDemo
          {
             heightMapUI.create();
             steppableRegionsUI.create();
-            globalVisualizersUI.create();
+            perceptionVisualizerPanel.create();
             baseUI.create();
 
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
@@ -88,8 +88,8 @@ public class RDXSteppableRegionCalculatorDemo
             heightMapVisualizer.create();
             steppableRegionsVisualizer.create();
             //            baseUI.getImGuiPanelManager().addPanel(heightMapVisualizer.getPanel());
-            globalVisualizersUI.addVisualizer(heightMapVisualizer);
-            globalVisualizersUI.addVisualizer(steppableRegionsVisualizer);
+            perceptionVisualizerPanel.addVisualizer(heightMapVisualizer);
+            perceptionVisualizerPanel.addVisualizer(steppableRegionsVisualizer);
 
             steppableRegionsUI.getEnabled().set(true);
 
@@ -127,7 +127,7 @@ public class RDXSteppableRegionCalculatorDemo
             RDXROS2PointCloudVisualizer ousterPointCloudVisualizer = new RDXROS2PointCloudVisualizer("Ouster Point Cloud",
                                                                                                      ros2Node,
                                                                                                      PerceptionAPI.OUSTER_LIDAR_SCAN);
-            globalVisualizersUI.addVisualizer(ousterPointCloudVisualizer);
+            perceptionVisualizerPanel.addVisualizer(ousterPointCloudVisualizer);
 
             baseUI.getImGuiPanelManager().addPanel(ousterLidarSimulator);
             baseUI.getPrimaryScene().addRenderableProvider(ousterLidarSimulator::getRenderables);
@@ -147,7 +147,7 @@ public class RDXSteppableRegionCalculatorDemo
             heightMapVisualizer.update();
             steppableRegionsVisualizer.update();
 
-            globalVisualizersUI.update();
+            perceptionVisualizerPanel.update();
             heightMapUI.update();
             steppableRegionsUI.update();
 
@@ -162,7 +162,7 @@ public class RDXSteppableRegionCalculatorDemo
             environmentBuilder.destroy();
             realtimeRos2Node.destroy();
             ros2Node.destroy();
-            globalVisualizersUI.destroy();
+            perceptionVisualizerPanel.destroy();
             heightMapVisualizer.destroy();
             heightMapUI.destroy();
             steppableRegionsUpdater.destroy();

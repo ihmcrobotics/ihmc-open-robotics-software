@@ -203,7 +203,7 @@ public class RDXStancePoseSelectionPanel extends RDXPanel implements RenderableP
          PerceptionDebugTools.printMat("Height Map", terrainMapData.getHeightMap(), 4);
       }
       ImGui.text("World Point: " + latestPickPoint.getTranslation().toString("%.3f"));
-      if (terrainMapData != null)
+      if (terrainMapData != null && terrainMapData.getHeightMap() != null)
       {
          ImGui.text("Height: " + terrainMapData.getHeightInWorld(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));
          ImGui.text("Contact Score: " + terrainMapData.getContactScoreInWorld(latestPickPoint.getTranslation().getX32(), latestPickPoint.getTranslation().getY32()));

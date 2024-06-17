@@ -14,8 +14,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionFootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
@@ -43,8 +41,6 @@ public class FootstepPoseCheckerTest
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
       FootstepPoseHeuristicChecker checker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
-      parameters.setMaximumStepXWhenFullyPitched(0.3);
-      parameters.setMinimumStepZWhenFullyPitched(0.05);
 
       PlanarRegionsListGenerator planarRegionGenerator = new PlanarRegionsListGenerator();
       planarRegionGenerator.rotate(new Quaternion(0.0, Math.toRadians(-30.0), 0.0));
@@ -74,10 +70,6 @@ public class FootstepPoseCheckerTest
       assertNull(rejectionReason);
 
       snapper.setPlanarRegionsList(angledGround);
-
-      rejectionReason = checker.snapAndCheckValidity(childNode, stanceNode, null);
-      assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED, rejectionReason);
-
       // TODO check that this doesn't cause the other rejection reasons to fail if the pitch is flat.
    }
 
@@ -90,9 +82,8 @@ public class FootstepPoseCheckerTest
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
-      parameters.setMaximumStepYaw(maxYaw);
-      parameters.setMinimumStepYaw(minYaw);
-      parameters.setStepYawReductionFactorAtMaxReach(yawReduction);
+      parameters.setMaxStepYaw(maxYaw);
+      parameters.setMinStepYaw(minYaw);
 
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
@@ -102,8 +93,8 @@ public class FootstepPoseCheckerTest
       double snappedPosition = snapToGrid(parameters.getIdealFootstepWidth());
       double reachAtChild = Math.abs(snappedPosition - parameters.getIdealFootstepWidth());
 
-      double maxValue = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, reachAtChild / parameters.getMaximumStepReach());
-      double minValue = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, reachAtChild / parameters.getMaximumStepReach());
+      double maxValue = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, reachAtChild / parameters.getMaxStepReach());
+      double minValue = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, reachAtChild / parameters.getMaxStepReach());
       DiscreteFootstep parentNode = new DiscreteFootstep(0.0, 0.0, 0.0, RobotSide.RIGHT);
       DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(0.0, parameters.getIdealFootstepWidth(), snapDownToYaw(maxValue), RobotSide.LEFT);
       DiscreteFootstep childNodeAtMinYaw = new DiscreteFootstep(0.0, parameters.getIdealFootstepWidth(), snapUpToYaw(minValue), RobotSide.LEFT);
@@ -126,9 +117,8 @@ public class FootstepPoseCheckerTest
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
-      parameters.setMaximumStepYaw(maxYaw);
-      parameters.setMinimumStepYaw(minYaw);
-      parameters.setStepYawReductionFactorAtMaxReach(yawReduction);
+      parameters.setMaxStepYaw(maxYaw);
+      parameters.setMinStepYaw(minYaw);
 
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
@@ -138,8 +128,8 @@ public class FootstepPoseCheckerTest
       double snappedPosition = snapToGrid(parameters.getIdealFootstepWidth());
       double reachAtChild = Math.abs(snappedPosition - parameters.getIdealFootstepWidth());
 
-      double maxValue = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, reachAtChild / parameters.getMaximumStepReach());
-      double minValue = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, reachAtChild / parameters.getMaximumStepReach());
+      double maxValue = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, reachAtChild / parameters.getMaxStepReach());
+      double minValue = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, reachAtChild / parameters.getMaxStepReach());
       DiscreteFootstep parentNode = new DiscreteFootstep(0.0, 0.0, 0.0, RobotSide.LEFT);
       DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(0.0, -parameters.getIdealFootstepWidth(), -snapDownToYaw(maxValue), RobotSide.RIGHT);
       DiscreteFootstep childNodeAtMinYaw = new DiscreteFootstep(0.0, -parameters.getIdealFootstepWidth(), -snapUpToYaw(minValue), RobotSide.RIGHT);
@@ -162,9 +152,8 @@ public class FootstepPoseCheckerTest
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
-      parameters.setMaximumStepYaw(maxYaw);
-      parameters.setMinimumStepYaw(minYaw);
-      parameters.setStepYawReductionFactorAtMaxReach(yawReduction);
+      parameters.setMaxStepYaw(maxYaw);
+      parameters.setMinStepYaw(minYaw);
 
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
@@ -182,8 +171,8 @@ public class FootstepPoseCheckerTest
       FramePoint3D childPosition = new FramePoint3D(parentFrame, 0.0, parameters.getIdealFootstepWidth(), 0.0);
       childPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-      double maxValue = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, reachAtChild / parameters.getMaximumStepReach());
-      double minValue = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, reachAtChild / parameters.getMaximumStepReach());
+      double maxValue = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, reachAtChild / parameters.getMaxStepReach());
+      double minValue = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, reachAtChild / parameters.getMaxStepReach());
       DiscreteFootstep parentNode = new DiscreteFootstep(0.0, 0.0, parentYaw, RobotSide.RIGHT);
 
       DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(childPosition.getX(),
@@ -214,9 +203,8 @@ public class FootstepPoseCheckerTest
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
-      parameters.setMaximumStepYaw(maxYaw);
-      parameters.setMinimumStepYaw(minYaw);
-      parameters.setStepYawReductionFactorAtMaxReach(yawReduction);
+      parameters.setMaxStepYaw(maxYaw);
+      parameters.setMinStepYaw(minYaw);
 
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
@@ -234,8 +222,8 @@ public class FootstepPoseCheckerTest
       FramePoint3D childPosition = new FramePoint3D(parentFrame, 0.0, -parameters.getIdealFootstepWidth(), 0.0);
       childPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
-      double maxValue = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, reachAtChild / parameters.getMaximumStepReach());
-      double minValue = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, reachAtChild / parameters.getMaximumStepReach());
+      double maxValue = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, reachAtChild / parameters.getMaxStepReach());
+      double minValue = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, reachAtChild / parameters.getMaxStepReach());
       DiscreteFootstep parentNode = new DiscreteFootstep(0.0, 0.0, parentYaw, RobotSide.LEFT);
 
       DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(childPosition.getX(),
@@ -266,9 +254,8 @@ public class FootstepPoseCheckerTest
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
-      parameters.setMaximumStepYaw(maxYaw);
-      parameters.setMinimumStepYaw(minYaw);
-      parameters.setStepYawReductionFactorAtMaxReach(yawReduction);
+      parameters.setMaxStepYaw(maxYaw);
+      parameters.setMinStepYaw(minYaw);
 
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
@@ -276,10 +263,10 @@ public class FootstepPoseCheckerTest
       FootstepPoseHeuristicChecker nodeChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
 
       double snappedYPosition = snapToGrid(parameters.getIdealFootstepWidth());
-      double snappedXPosition = snapDownToGrid(0.8 * parameters.getMaximumStepReach());
+      double snappedXPosition = snapDownToGrid(0.8 * parameters.getMaxStepReach());
       double reachAtChild = EuclidCoreTools.norm(snappedXPosition, snappedYPosition - parameters.getIdealFootstepWidth());
 
-      double maxValue = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, reachAtChild / parameters.getMaximumStepReach());
+      double maxValue = InterpolationTools.linearInterpolate(maxYaw, maxYawAtFullLength, reachAtChild / parameters.getMaxStepReach());
       DiscreteFootstep parentNode = new DiscreteFootstep(0.0, 0.0, 0.0, RobotSide.RIGHT);
       DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(snappedXPosition, parameters.getIdealFootstepWidth(), snapDownToYaw(maxValue), RobotSide.LEFT);
 

@@ -15,6 +15,16 @@ public interface StancePoseParametersReadOnly extends StoredPropertySetReadOnly
       return get(contactCostWeight);
    }
 
+   default double getHeightChangeCostWeight()
+   {
+      return get(heightChangeCostWeight);
+   }
+
+   default double getCostImprovementForSwitch()
+   {
+      return get(costImprovementForSwitch);
+   }
+
    default double getMaxContactValue()
    {
       return get(maxContactValue);

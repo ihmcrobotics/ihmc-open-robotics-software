@@ -7,12 +7,9 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
-import us.ihmc.footstepPlanning.polygonSnapping.HeightMapSnapWiggler;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
@@ -29,7 +26,7 @@ import java.util.function.ToDoubleFunction;
 public class PlanarRegionFootstepSnapAndWiggler implements FootstepSnapperReadOnly
 {
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DefaultFootstepPlannerParametersReadOnly parameters;
 
    private final GradientDescentStepConstraintSolver gradientDescentStepConstraintSolver;
    private final WiggleParameters wiggleParameters = new WiggleParameters();
@@ -48,14 +45,14 @@ public class PlanarRegionFootstepSnapAndWiggler implements FootstepSnapperReadOn
    private PlanarRegionsList planarRegionsList;
 
    // Use this by default
-   public PlanarRegionFootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters)
+   public PlanarRegionFootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, DefaultFootstepPlannerParametersReadOnly parameters)
    {
       this(footPolygonsInSoleFrame, parameters, null, null, null);
    }
 
    // Call this constructor only for testing
    public PlanarRegionFootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
-                                             FootstepPlannerParametersReadOnly parameters,
+                                             DefaultFootstepPlannerParametersReadOnly parameters,
                                              TickAndUpdatable tickAndUpdatable,
                                              YoGraphicsListRegistry graphicsListRegistry,
                                              YoRegistry parentRegistry)
@@ -385,15 +382,15 @@ public class PlanarRegionFootstepSnapAndWiggler implements FootstepSnapperReadOn
       }
    }
 
-   private static void updateWiggleParameters(WiggleParameters wiggleParameters, FootstepPlannerParametersReadOnly parameters)
+   private static void updateWiggleParameters(WiggleParameters wiggleParameters, DefaultFootstepPlannerParametersReadOnly parameters)
    {
       wiggleParameters.deltaInside = parameters.getWiggleInsideDeltaTarget();
-      wiggleParameters.maxX = parameters.getMaximumXYWiggleDistance();
-      wiggleParameters.minX = -parameters.getMaximumXYWiggleDistance();
-      wiggleParameters.maxY = parameters.getMaximumXYWiggleDistance();
-      wiggleParameters.minY = -parameters.getMaximumXYWiggleDistance();
-      wiggleParameters.maxYaw = parameters.getMaximumYawWiggle();
-      wiggleParameters.minYaw = -parameters.getMaximumYawWiggle();
+      wiggleParameters.maxX = parameters.getMaxXYWiggleDistance();
+      wiggleParameters.minX = -parameters.getMaxXYWiggleDistance();
+      wiggleParameters.maxY = parameters.getMaxXYWiggleDistance();
+      wiggleParameters.minY = -parameters.getMaxXYWiggleDistance();
+      wiggleParameters.maxYaw = parameters.getMaxYawWiggle();
+      wiggleParameters.minYaw = -parameters.getMaxYawWiggle();
    }
 
    /**

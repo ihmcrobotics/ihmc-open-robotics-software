@@ -13,6 +13,16 @@ public interface StancePoseParametersBasics extends StancePoseParametersReadOnly
       set(StancePoseParameters.contactCostWeight, contactCostWeight);
    }
 
+   default void setHeightChangeCostWeight(double heightChangeCostWeight)
+   {
+      set(StancePoseParameters.heightChangeCostWeight, heightChangeCostWeight);
+   }
+
+   default void setCostImprovementForSwitch(double costImprovementForSwitch)
+   {
+      set(StancePoseParameters.costImprovementForSwitch, costImprovementForSwitch);
+   }
+
    default void setMaxContactValue(double maxContactValue)
    {
       set(StancePoseParameters.maxContactValue, maxContactValue);

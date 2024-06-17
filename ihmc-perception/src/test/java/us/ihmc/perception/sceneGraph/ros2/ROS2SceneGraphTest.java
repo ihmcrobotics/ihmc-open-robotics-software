@@ -58,7 +58,7 @@ public class ROS2SceneGraphTest
       Assertions.assertEquals("Child1Child0", subscriptionChild1Child0.getName());
       Assertions.assertEquals(0, subscriptionChild1Child0.getChildren().size());
 
-      Assertions.assertEquals(4, subscriptionSceneGraph.getNextID().getValue());
+      Assertions.assertEquals(4, subscriptionSceneGraph.getNextID().get());
       Assertions.assertEquals(4, subscriptionSceneGraph.getIDToNodeMap().size());
       Assertions.assertEquals(4, subscriptionSceneGraph.getNodeNameList().size());
       Assertions.assertEquals(4, subscriptionSceneGraph.getNamesToNodesMap().size());

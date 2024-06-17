@@ -390,6 +390,5 @@ public class ContinuousPlannerSchedulingTask
       List<Pose3D> poses = MessageTools.unpackPoseListMessage(poseListMessage);
       continuousPlanner.addWayPointToList(poses.get(0), poses.get(1));
       debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
-      //      Are the start and goal foosteps not white and black? What happened to the color? Need to look into that????
    }
 }

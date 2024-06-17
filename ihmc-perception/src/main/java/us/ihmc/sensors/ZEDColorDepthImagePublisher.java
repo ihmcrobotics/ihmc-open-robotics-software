@@ -126,7 +126,9 @@ public class ZEDColorDepthImagePublisher
 
    private ImageMessage createDepthImageMessage(RawImage depthImageToPublish)
    {
-      depthImageToPublish.get();
+      if (depthImageToPublish != null && depthImageToPublish.isAvailable())
+         depthImageToPublish.get();
+
       ImageMessage depthImageMessage = new ImageMessage();
 
       // Encode depth image to png

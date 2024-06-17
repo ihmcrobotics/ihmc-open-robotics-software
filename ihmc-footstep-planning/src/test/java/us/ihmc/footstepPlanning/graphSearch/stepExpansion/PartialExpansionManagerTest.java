@@ -19,7 +19,7 @@ public class PartialExpansionManagerTest
 
       int maxBranchFactor = 5;
       int numberOfPartialExpansions = 3;
-      footstepPlannerParameters.setMaximumBranchFactor(maxBranchFactor);
+      footstepPlannerParameters.setMaxBranchFactor(maxBranchFactor);
 
       PartialExpansionManager partialExpansionManager = new PartialExpansionManager(footstepPlannerParameters);
 
@@ -52,7 +52,7 @@ public class PartialExpansionManagerTest
 
       int maxBranchFactor = 1;
       int numberOfNodes = 4;
-      footstepPlannerParameters.setMaximumBranchFactor(maxBranchFactor);
+      footstepPlannerParameters.setMaxBranchFactor(maxBranchFactor);
 
       PartialExpansionManager partialExpansionManager = new PartialExpansionManager(footstepPlannerParameters);
 

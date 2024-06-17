@@ -5,7 +5,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -21,10 +21,10 @@ public class ReferenceBasedIdealStepCalculator implements IdealStepCalculatorInt
    private final YoBoolean stepSideIncorrect;
 
    // This will be used to query what reference alpha to use.
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
    private final YoBoolean usingReferenceStep;
 
-   public ReferenceBasedIdealStepCalculator(FootstepPlannerParametersBasics footstepPlannerParameters, IdealStepCalculator nominalIdealStepCalculator, YoRegistry registry)
+   public ReferenceBasedIdealStepCalculator(DefaultFootstepPlannerParametersBasics footstepPlannerParameters, IdealStepCalculator nominalIdealStepCalculator, YoRegistry registry)
    {
       this.nominalIdealStepCalculator = nominalIdealStepCalculator;
       stepSideIncorrect = new YoBoolean("stepSideIncorrect", registry);

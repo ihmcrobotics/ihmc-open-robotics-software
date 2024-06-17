@@ -10,7 +10,7 @@ public class ImGuiFrequencyDisplay
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImGuiAveragedFrequencyText averagedFrequencyText = new ImGuiAveragedFrequencyText();
-   private final FrequencyCalculator plotFrequencyCalculator = new FrequencyCalculator(1);
+   private final FrequencyCalculator plotFrequencyCalculator = new FrequencyCalculator();
    private final ImGuiMovingPlot plot;
 
    public ImGuiFrequencyDisplay(String hiddenLabel)

@@ -20,7 +20,7 @@ import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.PlannedFootstep;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlanner;
 import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlannerRequest;
@@ -352,13 +352,16 @@ public class ContinuousPlanner
             {
                LogTools.info("Removed goal from list... ready to go to the next one");
                walkToGoalWayPointList.remove(0);
-               continuousHikingParameters.setEnableContinuousWalking(false);
 
                if (!walkToGoalWayPointList.isEmpty())
                {
                   goalStancePose.get(RobotSide.LEFT).set(walkToGoalWayPointList.get(0).get(RobotSide.LEFT));
                   goalStancePose.get(RobotSide.RIGHT).set(walkToGoalWayPointList.get(0).get(RobotSide.RIGHT));
                   debugger.publishStartAndGoalForVisualization(getStartingStancePose(), getGoalStancePose());
+               }
+               else
+               {
+                  continuousHikingParameters.setEnableContinuousWalking(false);
                }
             }
             break;
@@ -585,7 +588,7 @@ public class ContinuousPlanner
       return initialized;
    }
 
-   public FootstepPlannerParametersBasics getFootstepPlannerParameters()
+   public DefaultFootstepPlannerParametersBasics getFootstepPlannerParameters()
    {
       return footstepPlanner.getFootstepPlannerParameters();
    }

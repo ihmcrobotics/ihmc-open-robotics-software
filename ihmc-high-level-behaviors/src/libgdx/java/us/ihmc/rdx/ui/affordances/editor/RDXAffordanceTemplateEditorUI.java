@@ -85,6 +85,8 @@ public class RDXAffordanceTemplateEditorUI
                                RigidBodySceneObjectDefinitions.ensureMugNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
                                RigidBodySceneObjectDefinitions.ensureBikeNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
                                RigidBodySceneObjectDefinitions.ensureDrillNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureCouchNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
+                               RigidBodySceneObjectDefinitions.ensureTrashCanNodeAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
                             });
 
       objectBuilder = new RDXInteractableObjectBuilder(baseUI, sceneGraph);

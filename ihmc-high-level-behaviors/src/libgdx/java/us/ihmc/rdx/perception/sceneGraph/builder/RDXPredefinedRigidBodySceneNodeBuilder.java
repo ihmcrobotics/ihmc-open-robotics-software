@@ -164,6 +164,28 @@ public class RDXPredefinedRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<
                                                                                  DRILL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
             yield new RDXPredefinedRigidBodySceneNode(drill, RDXBaseUI.getInstance().getPrimary3DPanel());
          }
+         case "Couch" ->
+         {
+            PredefinedRigidBodySceneNode couch = new PredefinedRigidBodySceneNode(nextID,
+                                                                                  name,
+                                                                                  sceneGraph.getIDToNodeMap(),
+                                                                                  parent.getID(),
+                                                                                  new RigidBodyTransform(),
+                                                                                  COUCH_VISUAL_MODEL_FILE_PATH,
+                                                                                  COUCH_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            yield new RDXPredefinedRigidBodySceneNode(couch, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
+         case "TrashCan" ->
+         {
+            PredefinedRigidBodySceneNode trashCan = new PredefinedRigidBodySceneNode(nextID,
+                                                                                     name,
+                                                                                     sceneGraph.getIDToNodeMap(),
+                                                                                     parent.getID(),
+                                                                                     new RigidBodyTransform(),
+                                                                                     TRASHCAN_VISUAL_MODEL_FILE_PATH,
+                                                                                     TRASHCAN_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            yield new RDXPredefinedRigidBodySceneNode(trashCan, RDXBaseUI.getInstance().getPrimary3DPanel());
+         }
          default -> throw new IllegalStateException("Unexpected value: " + name);
       };
    }

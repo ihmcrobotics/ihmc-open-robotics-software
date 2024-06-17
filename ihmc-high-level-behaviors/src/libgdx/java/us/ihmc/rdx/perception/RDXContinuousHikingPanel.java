@@ -64,7 +64,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ImBoolean useAStarFootstepPlanner = new ImBoolean(true);
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
 
-   private final RDXStancePoseSelectionPanel stancePoseSelectionPanel;
+   private RDXStancePoseSelectionPanel stancePoseSelectionPanel;
    private final ROS2PublisherBasics<ContinuousWalkingCommandMessage> commandPublisher;
 
    private static final int numberOfKnotPoints = 12;
@@ -72,11 +72,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator(numberOfKnotPoints,
                                                                                                                              maxIterationsOptimization);
 
-   private final RDXTerrainPlanningDebugger terrainPlanningDebugger;
-   private final HumanoidActivePerceptionModule activePerceptionModule;
+   private RDXTerrainPlanningDebugger terrainPlanningDebugger;
+   private HumanoidActivePerceptionModule activePerceptionModule;
    private SwingPlannerParametersBasics swingPlannerParameters;
-   private final SwingTrajectoryParameters swingTrajectoryParameters;
-   private final ContinuousHikingParameters continuousHikingParameters;
+   private SwingTrajectoryParameters swingTrajectoryParameters;
+   private ContinuousHikingParameters continuousHikingParameters;
    private Controller currentController;
 
    private boolean currentControllerConnected;

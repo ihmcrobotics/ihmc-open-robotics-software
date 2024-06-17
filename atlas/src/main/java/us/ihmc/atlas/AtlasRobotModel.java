@@ -51,7 +51,7 @@ import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
@@ -645,13 +645,13 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public FootstepPlannerParametersBasics getFootstepPlannerParameters()
+   public DefaultFootstepPlannerParametersBasics getFootstepPlannerParameters()
    {
       return new AtlasFootstepPlannerParameters();
    }
 
    @Override
-   public FootstepPlannerParametersBasics getFootstepPlannerParameters(String fileNameSuffix)
+   public DefaultFootstepPlannerParametersBasics getFootstepPlannerParameters(String fileNameSuffix)
    {
       return new AtlasFootstepPlannerParameters(fileNameSuffix);
    }

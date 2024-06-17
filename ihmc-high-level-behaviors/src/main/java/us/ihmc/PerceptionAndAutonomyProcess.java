@@ -22,6 +22,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.BallDetectionManager;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.IterativeClosestPointManager;
+import us.ihmc.perception.RapidHeightMapManager;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
@@ -105,7 +106,10 @@ public class PerceptionAndAutonomyProcess
    private final ROS2Helper ros2Helper;
    private final Supplier<ReferenceFrame> zedFrameSupplier;
    private final Supplier<ReferenceFrame> realsenseFrameSupplier;
+   private final Supplier<ReferenceFrame> realsenseZUpFrameSupplier;
    private final Supplier<ReferenceFrame> ousterFrameSupplier;
+   private final Supplier<ReferenceFrame> leftFootSoleFrameSupplier;
+   private final Supplier<ReferenceFrame> rightFootSoleFrameSupplier;
 
    private final DepthImageOverlapRemover overlapRemover = new DepthImageOverlapRemover();
 
@@ -173,6 +177,10 @@ public class PerceptionAndAutonomyProcess
    private final TypedNotification<PlanarRegionsList> newPlanarRegions = new TypedNotification<>();
    private ROS2DemandGraphNode planarRegionsDemandNode;
 
+   private RapidHeightMapManager heightMapManager;
+   private final RestartableThrottledThread heightMapExtractorThread;
+   private ROS2DemandGraphNode heightMapDemandNode;
+
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
    private ReferenceFrameLibrary behaviorTreeReferenceFrameLibrary;
    private ROS2BehaviorTreeExecutor behaviorTreeExecutor;
@@ -187,15 +195,21 @@ public class PerceptionAndAutonomyProcess
    public PerceptionAndAutonomyProcess(ROS2Helper ros2Helper,
                                        Supplier<ReferenceFrame> zedFrameSupplier,
                                        Supplier<ReferenceFrame> realsenseFrameSupplier,
+                                       Supplier<ReferenceFrame> realsenseZUpFrameSupplier,
                                        Supplier<ReferenceFrame> ousterFrameSupplier,
                                        Supplier<ReferenceFrame> leftBlackflyFrameSupplier,
                                        Supplier<ReferenceFrame> rightBlackflyFrameSupplier,
-                                       Supplier<ReferenceFrame> robotPelvisFrameSupplier)
+                                       Supplier<ReferenceFrame> robotPelvisFrameSupplier,
+                                       Supplier<ReferenceFrame> leftFootSoleFrameSupplier,
+                                       Supplier<ReferenceFrame> rightFootSoleFrameSupplier)
    {
       this.ros2Helper = ros2Helper;
       this.zedFrameSupplier = zedFrameSupplier;
       this.realsenseFrameSupplier = realsenseFrameSupplier;
+      this.realsenseZUpFrameSupplier = realsenseZUpFrameSupplier;
       this.ousterFrameSupplier = ousterFrameSupplier;
+      this.leftFootSoleFrameSupplier = leftFootSoleFrameSupplier;
+      this.rightFootSoleFrameSupplier = rightFootSoleFrameSupplier;
 
       initializeDependencyGraph(ros2Helper);
 
@@ -246,6 +260,9 @@ public class PerceptionAndAutonomyProcess
 
       planarRegionsExtractorThread = new RestartableThrottledThread("PlanarRegionsExtractor", 10.0, this::updatePlanarRegions);
       planarRegionsExtractorThread.start();
+
+      heightMapExtractorThread = new RestartableThrottledThread("HeightMapExtractor", 30.0, this::updateHeightMap);
+      heightMapExtractorThread.start();
    }
 
    /** Needs to be a separate method to allow constructing test bench version. */
@@ -322,6 +339,10 @@ public class PerceptionAndAutonomyProcess
       planarRegionsExtractorThread.stop();
       if (planarRegionsExtractor != null)
          planarRegionsExtractor.destroy();
+
+      heightMapExtractorThread.stop();
+      if (heightMapManager != null)
+         heightMapManager.destroy();
 
       ballDetectionManager.destroy();
 
@@ -524,7 +545,7 @@ public class PerceptionAndAutonomyProcess
       }
    }
 
-   public void updatePlanarRegions()
+   private void updatePlanarRegions()
    {
       if (zedDepthImage != null && zedDepthImage.isAvailable() && planarRegionsDemandNode.isDemanded())
       {
@@ -552,7 +573,7 @@ public class PerceptionAndAutonomyProcess
          FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
 
          // TODO: Get rid of BytedecoImage, RapidPlanarRegionsExtractor requires it
-         BytedecoImage bytedecoImage = new BytedecoImage(latestZEDDepthImage.getCpuImageMat());
+         BytedecoImage bytedecoImage = new BytedecoImage(latestZEDDepthImage.getCpuImageMat().clone());
          bytedecoImage.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_WRITE);
          planarRegionsExtractor.update(bytedecoImage, zedFrameSupplier.get(), framePlanarRegionsList);
          planarRegionsExtractor.setProcessing(false);
@@ -566,6 +587,27 @@ public class PerceptionAndAutonomyProcess
          PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
 
          latestZEDDepthImage.release();
+      }
+   }
+
+   private void updateHeightMap()
+   {
+      if (realsenseDepthImage != null && realsenseDepthImage.isAvailable() && heightMapDemandNode.isDemanded())
+      {
+         RawImage latestRealsenseDepthImage = realsenseDepthImage.get();
+
+         if (heightMapManager == null)
+         {
+            heightMapManager = new RapidHeightMapManager(openCLManager,
+                                                         leftFootSoleFrameSupplier,
+                                                         rightFootSoleFrameSupplier,
+                                                         latestRealsenseDepthImage,
+                                                         ros2Helper);
+         }
+
+         heightMapManager.update(latestRealsenseDepthImage, realsenseFrameSupplier.get(), realsenseZUpFrameSupplier.get(), ros2Helper);
+
+         latestRealsenseDepthImage.release();
       }
    }
 
@@ -608,6 +650,7 @@ public class PerceptionAndAutonomyProcess
       yoloRealsenseDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_YOLO_REALSENSE);
       ballDetectionDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_BALL_TRACKING);
       planarRegionsDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_PLANAR_REGIONS);
+      heightMapDemandNode = new ROS2DemandGraphNode(ros2, PerceptionAPI.REQUEST_HEIGHT_MAP);
 
       // build the graph
       blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(ousterDepthDemandNode); // For point cloud coloring
@@ -616,6 +659,7 @@ public class PerceptionAndAutonomyProcess
       zedColorDemandNode.addDependents(zedPointCloudDemandNode, centerposeDemandNode, ballDetectionDemandNode);
       planarRegionsDemandNode.addDependents(yoloZEDDemandNode); // Planar region used for door detection
       realsenseDemandNode.addDependents(yoloRealsenseDemandNode);
+      realsenseDemandNode.addDependents(heightMapDemandNode);
       blackflyImageDemandNodes.get(RobotSide.RIGHT).addDependents(arUcoDetectionDemandNode); // ArUco set to use Blackfly images
    }
 
@@ -647,6 +691,9 @@ public class PerceptionAndAutonomyProcess
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       PerceptionAndAutonomyProcess perceptionAndAutonomyProcess = new PerceptionAndAutonomyProcess(ros2Helper,
+                                                                                                   ReferenceFrame::getWorldFrame,
+                                                                                                   ReferenceFrame::getWorldFrame,
+                                                                                                   ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,
                                                                                                    ReferenceFrame::getWorldFrame,

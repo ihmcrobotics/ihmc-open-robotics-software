@@ -6,7 +6,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.messager.Messager;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -23,7 +23,7 @@ public class FootPoseFromMidFootUpdater extends AnimationTimer
    private final AtomicReference<Point3D> goalMidFootPosition;
    private final AtomicReference<Quaternion> goalMidFootOrientation;
 
-   private final AtomicReference<FootstepPlannerParametersReadOnly> parameters;
+   private final AtomicReference<DefaultFootstepPlannerParametersReadOnly> parameters;
 
    private final Pose3D leftFootPose = new Pose3D();
    private final Pose3D rightFootPose = new Pose3D();

@@ -14,11 +14,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -52,7 +51,7 @@ public class PlanarRegionFootstepSnapAndWigglerTest
    private YoGraphicsListRegistry graphicsListRegistry;
    private YoRegistry registry;
    private PlanarRegionFootstepSnapAndWiggler snapAndWiggler;
-   private final FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
+   private final DefaultFootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
    private YoDouble achievedDeltaInside;
 
    @BeforeEach
@@ -88,8 +87,8 @@ public class PlanarRegionFootstepSnapAndWigglerTest
    public void testQPNotSolvedIfFootSufficientlyInside()
    {
       DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
-      footstepPlannerParameters.setMaximumXYWiggleDistance(0.1);
-      footstepPlannerParameters.setMaximumYawWiggle(0.1);
+      footstepPlannerParameters.setMaxXYWiggleDistance(0.1);
+      footstepPlannerParameters.setMaxYawWiggle(0.1);
       footstepPlannerParameters.setWiggleInsideDeltaTarget(0.05);
 
       double epsilon = 1e-5;
@@ -132,7 +131,7 @@ public class PlanarRegionFootstepSnapAndWigglerTest
       boolean dirtyBit = false;
 
       public FootstepSnapAndWiggleTester(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
-                                         FootstepPlannerParametersReadOnly parameters)
+                                         DefaultFootstepPlannerParametersReadOnly parameters)
       {
          super(footPolygonsInSoleFrame, parameters);
       }
@@ -434,7 +433,7 @@ public class PlanarRegionFootstepSnapAndWigglerTest
       parameters.setEnableConcaveHullWiggler(true);
       parameters.setWiggleInsideDeltaTarget(0.07);
       parameters.setWiggleInsideDeltaMinimum(0.02);
-      parameters.setMaximumXYWiggleDistance(0.2);
+      parameters.setMaxXYWiggleDistance(0.2);
       parameters.setMinClearanceFromStance(0.03);
 
       snapAndWiggler.initialize();
