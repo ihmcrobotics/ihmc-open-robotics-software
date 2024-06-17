@@ -224,6 +224,8 @@ public class RDXScriptedMotionMode
             case FRONT_RAISE:
             case LATERAL_RAISE:
             case SHOULDER_PRESS:
+            case SHOULDER_PRESS_INITIAL:
+            case SHOULDER_PRESS_RETURN:
             case REACHABILITY_ARMS_UP:
             case REACHABILITY_ARMS_FORWARD:
             case REACHABILITY_ARMS_SIDEWAYS:
@@ -645,6 +647,18 @@ public class RDXScriptedMotionMode
          if (ImGui.inputDouble("##shoulderPressDuration", shoulderPressDuration))
          {
             trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.SHOULDER_PRESS, shoulderPressDuration.get());
+            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.SHOULDER_PRESS_INITIAL, shoulderPressDuration.get());
+            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.SHOULDER_PRESS_RETURN, shoulderPressDuration.get());
+         }
+         ImGui.sameLine();
+         if (ImGui.radioButton(labels.get("Initialize"), trajectoryType == ScriptedTrajectoryType.SHOULDER_PRESS_INITIAL))
+         {
+            trajectoryType = ScriptedTrajectoryType.SHOULDER_PRESS_INITIAL;
+         }
+         ImGui.sameLine();
+         if (ImGui.radioButton(labels.get("Return"), trajectoryType == ScriptedTrajectoryType.SHOULDER_PRESS_RETURN))
+         {
+            trajectoryType = ScriptedTrajectoryType.SHOULDER_PRESS_RETURN;
          }
       }
       isFirstFrame = false;

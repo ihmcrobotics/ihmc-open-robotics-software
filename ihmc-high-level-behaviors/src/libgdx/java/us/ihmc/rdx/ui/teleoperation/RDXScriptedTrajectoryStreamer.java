@@ -104,7 +104,9 @@ public class RDXScriptedTrajectoryStreamer
       BICEP_CURL,
       FRONT_RAISE,
       LATERAL_RAISE,
-      SHOULDER_PRESS
+      SHOULDER_PRESS,
+      SHOULDER_PRESS_INITIAL,
+      SHOULDER_PRESS_RETURN,
    }
 
    public boolean isDone()
@@ -329,9 +331,25 @@ public class RDXScriptedTrajectoryStreamer
                if (side == RobotSide.RIGHT)
                {
                   waypoints.put(side,
-                                List.of(List.of(-3.14, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.5), -1.57, 0.0, 0.0, 0.0),
+                                List.of(List.of(-3.14, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.5), -1.3, 0.0, 0.0, 0.0),
                                         List.of(-3.14, side.negateIfRightSide(1.4), side.negateIfRightSide(-1.5), 0.0, 0.0, 0.0, 0.0),
-                                        List.of(-3.14, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.5), -1.57, 0.0, 0.0, 0.0)));
+                                        List.of(-3.14, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.5), -1.3, 0.0, 0.0, 0.0)));
+               }
+               break;
+            case SHOULDER_PRESS_INITIAL:
+               if (side == RobotSide.RIGHT)
+               {
+                  waypoints.put(side,
+                                List.of(List.of(-1.5, side.negateIfRightSide(0.6), side.negateIfRightSide(0.0), 0.0, 0.0, 0.0, 0.0),
+                                        List.of(-3.14, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.5), -1.3, 0.0, 0.0, 0.0)));
+               }
+               break;
+            case SHOULDER_PRESS_RETURN:
+               if (side == RobotSide.RIGHT)
+               {
+                  waypoints.put(side,
+                                List.of(List.of(-1.5, side.negateIfRightSide(0.6), side.negateIfRightSide(0.0), 0.0, 0.0, 0.0, 0.0),
+                                        homeConfiguration));
                }
                break;
             default:
