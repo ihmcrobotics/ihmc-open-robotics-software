@@ -267,7 +267,7 @@ public class DetectionManagerTest
       DetectionManager detectionManager = new DetectionManager();
       detectionManager.setMatchDistanceThreshold(0.5);
       detectionManager.setDefaultStabilityThreshold(0.5);
-      detectionManager.setDefaultStabilityMinHistorySize(3);
+      detectionManager.setDefaultStabilityFrequency(0.9);
       detectionManager.setDefaultHistorySeconds(2.5);
 
       Instant startTime = Instant.now();

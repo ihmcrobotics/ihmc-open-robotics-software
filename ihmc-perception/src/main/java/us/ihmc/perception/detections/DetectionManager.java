@@ -16,19 +16,19 @@ public class DetectionManager
 
    private double matchDistanceSquared;
    private double defaultStabilityThreshold;
-   private int defaultStabilityMinHistorySize;
+   private double defaultStabilityFrequency;
    private double defaultHistorySeconds;
 
    public DetectionManager()
    {
-      this(1.0, 0.5, 3, 1.0);
+      this(1.0, 0.5, 5.0, 1.0);
    }
 
-   public DetectionManager(double matchDistanceThreshold, double defaultStabilityThreshold, int defaultStabilityMinHistorySize, double defaultHistorySeconds)
+   public DetectionManager(double matchDistanceThreshold, double defaultStabilityThreshold, double defaultStabilityFrequency, double defaultHistorySeconds)
    {
       setMatchDistanceThreshold(matchDistanceThreshold);
       setDefaultStabilityThreshold(defaultStabilityThreshold);
-      setDefaultStabilityMinHistorySize(defaultStabilityMinHistorySize);
+      setDefaultStabilityFrequency(defaultStabilityFrequency);
       setDefaultHistorySeconds(defaultHistorySeconds);
    }
 
@@ -86,7 +86,7 @@ public class DetectionManager
          for (T unmatchedNewDetection : unmatchedNewDetections)
             persistentDetections.add(new PersistentDetection<>(unmatchedNewDetection,
                                                                defaultStabilityThreshold,
-                                                               defaultStabilityMinHistorySize,
+                                                               defaultStabilityFrequency,
                                                                defaultHistorySeconds));
       }
    }
@@ -116,7 +116,10 @@ public class DetectionManager
 
    public Set<PersistentDetection<? extends InstantDetection>> getDetections()
    {
-      return persistentDetections;
+      synchronized(persistentDetectionsLock)
+      {
+         return new HashSet<>(persistentDetections);
+      }
    }
 
    public void updateDetections()
@@ -132,7 +135,7 @@ public class DetectionManager
       }
    }
 
-   public boolean removePersistentDetection(PersistentDetection<? extends InstantDetection> detectionToRemove)
+   public boolean removeDetection(PersistentDetection<? extends InstantDetection> detectionToRemove)
    {
       return persistentDetections.remove(detectionToRemove);
    }
@@ -147,9 +150,9 @@ public class DetectionManager
       this.defaultStabilityThreshold = defaultStabilityThreshold;
    }
 
-   public void setDefaultStabilityMinHistorySize(int minHistorySize)
+   public void setDefaultStabilityFrequency(double defaultStabilityFrequency)
    {
-      defaultStabilityMinHistorySize = minHistorySize;
+      this.defaultStabilityFrequency = defaultStabilityFrequency;
    }
 
    public void setDefaultHistorySeconds(double historyLengthSeconds)

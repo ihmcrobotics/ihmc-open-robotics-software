@@ -523,14 +523,14 @@ public class PerceptionAndAutonomyProcess
          ArUcoSceneTools.updateSceneGraph(sharedArUcoDetectionResults.getForThreadTwo(), blackflyFrameSuppliers.get(RobotSide.RIGHT).get(), sceneGraph);
       }
 
-      // Update detections
-      sceneGraph.updateDetections(detectionManager);
-
       // Update CenterPose stuff
       if (centerposeDemandNode.isDemanded())
          centerposeDetectionManager.updateSceneGraph(sceneGraph);
 
       ReferenceFrame robotPelvisFrame = robotPelvisFrameSupplier.get();
+
+      // Update detections
+      sceneGraph.updateDetections(detectionManager);
 
       if (newPlanarRegions.poll())
          for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())

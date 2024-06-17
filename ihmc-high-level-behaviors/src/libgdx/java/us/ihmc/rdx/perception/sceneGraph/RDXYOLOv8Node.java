@@ -29,7 +29,7 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
 
    private final ImGuiUniqueLabelMap labels;
 
-   private final ImGuiPlot confidencePlot = new ImGuiPlot("Confidence", 1000, 230, 22);
+   private final ImGuiPlot confidencePlot;
 
    private final RDXPointCloudRenderer objectPointCloudRenderer = new RDXPointCloudRenderer();
 
@@ -39,6 +39,7 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
       this.yoloNode = yoloNode;
       this.labels = labels;
 
+      confidencePlot = new ImGuiPlot(labels.get("Confidence"), 1000, 230, 22);
       confidencePlot.setYScale(0.0f, 1.0f);
 
       objectPointCloudRenderer.create(5000);

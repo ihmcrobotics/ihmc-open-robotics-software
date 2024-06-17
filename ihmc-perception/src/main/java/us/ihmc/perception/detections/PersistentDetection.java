@@ -1,9 +1,11 @@
 package us.ihmc.perception.detections;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.robotics.time.TimeTools;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.TreeSet;
 
@@ -16,35 +18,32 @@ public class PersistentDetection<T extends InstantDetection>
    private final Class<?> instantDetectionClass;
    private final String detectedObjectClass;
    private final String detectedObjectName;
+   private final Instant firstDetectionTime;
 
    // If the total confidence per second is greater than this value, the detections will be considered stable.
    private double stabilityConfidenceThreshold;
-   private int stabilityMinHistorySize;
+   private double stabilityDetectionFrequency;
 
    public PersistentDetection(T firstDetection)
    {
-      this(firstDetection, 0.5, 3);
+      this(firstDetection, 0.5, 5.0, 1.0);
    }
 
-   public PersistentDetection(T firstDetection, double stabilityThreshold, int stabilityMinHistorySize)
+   public PersistentDetection(T firstDetection, double stabilityConfidenceThreshold, double stabilityDetectionFrequency, double historyDurationSeconds)
    {
-      this(firstDetection, stabilityThreshold, stabilityMinHistorySize, Duration.ofSeconds(1L));
+      this(firstDetection, stabilityConfidenceThreshold, stabilityDetectionFrequency, TimeTools.durationOfSeconds(historyDurationSeconds));
    }
 
-   public PersistentDetection(T firstDetection, double stabilityConfidenceThreshold, int stabilityMinHistorySize, double historyDurationSeconds)
-   {
-      this(firstDetection, stabilityConfidenceThreshold, stabilityMinHistorySize, TimeTools.durationOfSeconds(historyDurationSeconds));
-   }
-
-   public PersistentDetection(T firstDetection, double stabilityConfidenceThreshold, int stabilityMinHistorySize, Duration historyDuration)
+   public PersistentDetection(T firstDetection, double stabilityConfidenceThreshold, double stabilityDetectionFrequency, Duration historyDuration)
    {
       instantDetectionClass = firstDetection.getClass();
       detectedObjectClass = firstDetection.getDetectedObjectClass();
       detectedObjectName = firstDetection.getDetectedObjectName();
+      firstDetectionTime = firstDetection.getDetectionTime();
 
       addDetection(firstDetection);
       setStabilityConfidenceThreshold(stabilityConfidenceThreshold);
-      setStabilityMinHistorySize(stabilityMinHistorySize);
+      setStabilityDetectionFrequency(stabilityDetectionFrequency);
       setHistoryDuration(historyDuration);
    }
 
@@ -117,20 +116,32 @@ public class PersistentDetection<T extends InstantDetection>
 
    public void setStabilityConfidenceThreshold(double stabilityConfidenceThreshold)
    {
-      if (stabilityConfidenceThreshold < 0.0 || stabilityConfidenceThreshold > 1.0)
-         throw new IllegalArgumentException("Stability threshold must be between 0.0 and 1.0 (inclusive)");
-
       this.stabilityConfidenceThreshold = stabilityConfidenceThreshold;
    }
 
-   public void setStabilityMinHistorySize(int minHistoryLength)
+   public void setStabilityDetectionFrequency(double stabilityDetectionFrequency)
    {
-      this.stabilityMinHistorySize = minHistoryLength;
+      this.stabilityDetectionFrequency = stabilityDetectionFrequency;
+   }
+
+   public boolean isOldEnough()
+   {
+      return isOldEnough(Instant.now());
+   }
+
+   public boolean isOldEnough(Instant now)
+   {
+      return firstDetectionTime.isBefore(now.minus(historyDuration));
    }
 
    public boolean isStable()
    {
-      return getHistorySize() >= stabilityMinHistorySize && getAverageConfidence() > stabilityConfidenceThreshold;
+      return isStable(Instant.now());
+   }
+
+   public boolean isStable(Instant now)
+   {
+      return getDetectionFrequencyDecaying(now) > stabilityDetectionFrequency && getAverageConfidence() > stabilityConfidenceThreshold;
    }
 
    /**
@@ -146,6 +157,31 @@ public class PersistentDetection<T extends InstantDetection>
       }
 
       return confidenceSum / detectionHistory.size();
+   }
+
+   public double getDetectionFrequency()
+   {
+      if (detectionHistory.size() <= 1)
+         return 0.0;
+
+      Instant oldestDetectionTime = detectionHistory.first().getDetectionTime();
+      Instant newestDetectionTime = detectionHistory.last().getDetectionTime();
+
+      long periodNanos = oldestDetectionTime.until(newestDetectionTime, ChronoUnit.NANOS);
+      return (getHistorySize() - 1.0) / Conversions.nanosecondsToSeconds(periodNanos);
+   }
+
+   public double getDetectionFrequencyDecaying()
+   {
+      return getDetectionFrequencyDecaying(Instant.now());
+   }
+
+   public double getDetectionFrequencyDecaying(Instant now)
+   {
+      Instant oldestDetectionTime = detectionHistory.first().getDetectionTime();
+
+      long periodNanos = oldestDetectionTime.until(now, ChronoUnit.NANOS);
+      return getHistorySize() / Conversions.nanosecondsToSeconds(periodNanos);
    }
 
    /**

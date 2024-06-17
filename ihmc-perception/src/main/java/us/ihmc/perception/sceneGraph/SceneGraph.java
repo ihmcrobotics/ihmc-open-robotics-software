@@ -23,9 +23,11 @@ import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.Set;
 import java.util.SortedSet;
@@ -169,30 +171,54 @@ public class SceneGraph
 
    public void updateDetections(DetectionManager detectionManager)
    {
+      // Remove detections associated to non-existent nodes
+      Iterator<Entry<PersistentDetection<? extends InstantDetection>, DetectableSceneNode>> entryIterator = detectionToNodeMap.entrySet().iterator();
+      while(entryIterator.hasNext())
+      {
+         Map.Entry<PersistentDetection<? extends InstantDetection>, DetectableSceneNode> entry = entryIterator.next();
+         PersistentDetection<? extends InstantDetection> detection = entry.getKey();
+         DetectableSceneNode node = entry.getValue();
+
+         if (!sceneNodesByID.contains(node))
+         {
+            detectionManager.removeDetection(detection);
+            entryIterator.remove();
+         }
+      }
+
+      // Update detections to get up-to-date data
       detectionManager.updateDetections();
+
+      // Check all existing detections
       Set<PersistentDetection<? extends InstantDetection>> detections = detectionManager.getDetections();
       for (PersistentDetection<? extends InstantDetection> detection : detections)
       {
-         if (detectionToNodeMap.containsKey(detection))
+         if (detectionToNodeMap.containsKey(detection)) // Scene graph has a node for this detection
          {
             // Update the node
             DetectableSceneNode detectionNode = detectionToNodeMap.get(detection);
             detectionNode.updateDetection(detection.getMostRecentDetection());
+            detectionNode.setCurrentlyDetected(detection.isStable());
          }
-         else if (detection.isStable())
+         else if (detection.isOldEnough()) // Scene graph does not have node for this detection. Add/remove based on stability
          {
-            long newNodeID = getNextID().getAndIncrement();
-            String newNodeName = detection.getDetectedObjectName() + newNodeID;
-            Class<?> detectionClass = detection.getInstantDetectionClass();
-
-            if (detectionClass.equals(YOLOv8InstantDetection.class))
+            if (detection.isStable())
             {
-               YOLOv8Node newYoloNode = new YOLOv8Node(newNodeID, newNodeName, (YOLOv8InstantDetection) detection.getMostRecentDetection());
-               modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(newYoloNode, rootNode)));
+               // Detection is stable -> add a new node
+               long newNodeID = getNextID().getAndIncrement();
+               String newNodeName = detection.getDetectedObjectName() + newNodeID;
+               Class<?> detectionClass = detection.getInstantDetectionClass();
+
+               if (detectionClass.equals(YOLOv8InstantDetection.class))
+               {
+                  YOLOv8Node newYoloNode = new YOLOv8Node(newNodeID, newNodeName, (YOLOv8InstantDetection) detection.getMostRecentDetection());
+                  modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(newYoloNode, rootNode)));
+                  detectionToNodeMap.put(detection, newYoloNode);
+               }
             }
+            else // Detection is unstable -> forget about it
+               detectionManager.removeDetection(detection);
          }
-         else
-            detectionManager.removePersistentDetection(detection);
       }
    }
 

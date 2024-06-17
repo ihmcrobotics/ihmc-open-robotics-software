@@ -45,13 +45,33 @@ public class PersistentDetectionTest
       {
          TestDetection testDetection = new TestDetection("TestDetection", i / 10.0, startInstant.minusSeconds(i));
          if (persistentDetection == null)
-            persistentDetection = new PersistentDetection<>(testDetection, 0.5, 3, 10.0);
+            persistentDetection = new PersistentDetection<>(testDetection, 0.5, 0.0, 10.0);
          else
             persistentDetection.addDetection(testDetection);
       }
 
       persistentDetection.updateHistory(startInstant);
       assertEquals(0.45, persistentDetection.getAverageConfidence());
+   }
+
+   @Test
+   public void testDetectionFrequency()
+   {
+      PersistentDetection<TestDetection> persistentDetection = null;
+
+      Instant startInstant = Instant.now();
+      for (int i = 0; i < 10; ++i)
+      {
+         TestDetection testDetection = new TestDetection("TestDetection", 1.0, startInstant.plusSeconds(i));
+         if (persistentDetection == null)
+            persistentDetection = new PersistentDetection<>(testDetection);
+         else
+            persistentDetection.addDetection(testDetection);
+      }
+
+      assertEquals(1.0, persistentDetection.getDetectionFrequency(), 1E-7);
+      assertEquals(1.0, persistentDetection.getDetectionFrequencyDecaying(startInstant.plusSeconds(10)), 1E-7);
+      assertEquals(0.5, persistentDetection.getDetectionFrequencyDecaying(startInstant.plusSeconds(20)), 1E-7);
    }
 
    @Test
@@ -62,20 +82,22 @@ public class PersistentDetectionTest
       Instant startInstant = Instant.now();
       for (int i = 0; i < 10; ++i)
       {
-         TestDetection testDetection = new TestDetection("TestDetection", i / 10.0, startInstant.minusSeconds(i));
+         TestDetection testDetection = new TestDetection("TestDetection", (10.0 - i) / 10.0, startInstant.plusSeconds(i));
          if (persistentDetection == null)
-            persistentDetection = new PersistentDetection<>(testDetection, 0.4, 3, 10.0);
+            persistentDetection = new PersistentDetection<>(testDetection, 0.4, 0.5, 10.0);
          else
             persistentDetection.addDetection(testDetection);
       }
-      assertTrue(persistentDetection.isStable());
+
+      Instant future = startInstant.plusSeconds(11);
+      assertTrue(persistentDetection.isStable(future));
 
       persistentDetection.setHistoryDuration(5.0);
-      persistentDetection.updateHistory();
-      assertFalse(persistentDetection.isStable());
+      persistentDetection.updateHistory(future);
+      assertFalse(persistentDetection.isStable(future));
 
       persistentDetection.setStabilityConfidenceThreshold(0.19);
-      assertTrue(persistentDetection.isStable());
+      assertTrue(persistentDetection.isStable(future));
    }
 
    @Test
@@ -93,6 +115,6 @@ public class PersistentDetectionTest
       assertThrows(IllegalArgumentException.class, () -> persistentDetection.setHistoryDuration(-1.0));
 
       // Don't allow bad arguments in construction
-      assertThrows(IllegalArgumentException.class, () -> new PersistentDetection<>(detectionClassA, 1.0, 3, -0.5));
+      assertThrows(IllegalArgumentException.class, () -> new PersistentDetection<>(detectionClassA, 1.0, 0.0, -0.5));
    }
 }

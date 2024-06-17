@@ -145,6 +145,8 @@ public class YOLOv8DetectionExecutor
                pointCloud = YOLOv8Tools.filterOutliers(pointCloud, outlierThreshold, 128);
                // Get the centroid of the point cloud
                Point3D32 centroid = YOLOv8Tools.computeCentroidOfPointCloud(pointCloud, 128);
+               if (centroid.containsNaN())
+                  return;
 
                // Create an instant detection from data
                YOLOv8InstantDetection instantDetection = new YOLOv8InstantDetection(simpleDetection.objectClass().getDefaultNodeName(),
