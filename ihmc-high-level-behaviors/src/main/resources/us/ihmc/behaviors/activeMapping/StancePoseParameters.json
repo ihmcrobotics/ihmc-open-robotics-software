@@ -1,8 +1,8 @@
 {
   "title" : "Stance Pose Parameters",
-  "Contact cost weight" : 0.05,
-  "Height change cost weight" : 0.5,
-  "Cost improvement for switch" : 0.0,
+  "Contact cost weight" : 0.001,
+  "Height change cost weight" : 0.01,
+  "Cost improvement for switch" : 0.001,
   "Max contact value" : 255.0,
   "Nominal stance distance" : 0.3,
   "Search window size" : 4,
