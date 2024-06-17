@@ -60,7 +60,7 @@ public class LookAndStepAPITest
       reason1.setReason(BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP.ordinal());
       reason1.setRejectionPercentage(0.6f);
       FootstepPlannerRejectionReasonMessage reason2 = footstepPlannerRejectionReasonsMessage.getRejectionReasons().add();
-      reason2.setReason(BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN.ordinal());
+      reason2.setReason(BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR.ordinal());
       reason2.setRejectionPercentage(0.1f);
    }
 }

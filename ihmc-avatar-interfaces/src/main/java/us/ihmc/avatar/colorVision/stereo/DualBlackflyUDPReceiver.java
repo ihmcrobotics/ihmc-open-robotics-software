@@ -31,8 +31,8 @@ public class DualBlackflyUDPReceiver
    public DualBlackflyUDPReceiver()
    {
       frequencyCalculators = new SideDependentList<>();
-      frequencyCalculators.put(RobotSide.LEFT, new FrequencyCalculator(10));
-      frequencyCalculators.put(RobotSide.RIGHT, new FrequencyCalculator(10));
+      frequencyCalculators.put(RobotSide.LEFT, new FrequencyCalculator());
+      frequencyCalculators.put(RobotSide.RIGHT, new FrequencyCalculator());
 
       addresses.put(RobotSide.LEFT, "172.16.66.230");
       addresses.put(RobotSide.RIGHT, "172.16.66.230");

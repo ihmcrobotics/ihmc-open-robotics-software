@@ -17,7 +17,7 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
@@ -45,7 +45,7 @@ public class LookAndStepBehavior extends ResettingNode implements Destroyable
    final LookAndStepReset reset = new LookAndStepReset();
    final BehaviorStateReference<State> behaviorStateReference;
    final ROS2StoredPropertySet<LookAndStepBehaviorParametersBasics> ros2LookAndStepParameters;
-   final ROS2StoredPropertySet<FootstepPlannerParametersBasics> ros2FootstepPlannerParameters;
+   final ROS2StoredPropertySet<DefaultFootstepPlannerParametersBasics> ros2FootstepPlannerParameters;
    final ROS2StoredPropertySet<SwingPlannerParametersBasics> ros2SwingPlannerParameters;
    final PausablePeriodicThread propertyStatusThread;
    final VisibilityGraphsParametersBasics visibilityGraphParameters;

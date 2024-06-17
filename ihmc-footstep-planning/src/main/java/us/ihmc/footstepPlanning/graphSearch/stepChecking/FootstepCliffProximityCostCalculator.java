@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -22,10 +22,10 @@ public class FootstepCliffProximityCostCalculator
 {
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepSnapperReadOnly snapper;
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DefaultFootstepPlannerParametersReadOnly parameters;
    private PlanarRegionsList planarRegionsList;
 
-   public FootstepCliffProximityCostCalculator(FootstepPlannerParametersReadOnly parameters, FootstepSnapperReadOnly snapper, SideDependentList<ConvexPolygon2D> footPolygons)
+   public FootstepCliffProximityCostCalculator(DefaultFootstepPlannerParametersReadOnly parameters, FootstepSnapperReadOnly snapper, SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.parameters = parameters;
       this.footPolygons = footPolygons;
@@ -39,8 +39,8 @@ public class FootstepCliffProximityCostCalculator
 
    public boolean isStepValid(DiscreteFootstep footstep)
    {
-      double cliffHeightToAvoid = parameters.getCliffBaseHeightToAvoid();
-      double minimumDistanceFromCliffBottoms = parameters.getMinimumDistanceFromCliffBottoms();
+      double cliffHeightToAvoid = parameters.getCliffBottomHeightToAvoid();
+      double minimumDistanceFromCliffBottoms = parameters.getMinDistanceFromCliffBottoms();
 
       if(minimumDistanceFromCliffBottoms <= 0.0 || Double.isInfinite(cliffHeightToAvoid) || (cliffHeightToAvoid <= 0.0))
          return true;

@@ -4,9 +4,8 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -15,13 +14,13 @@ public class FootstepPlannerHeuristicCalculator
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DefaultFootstepPlannerParametersReadOnly parameters;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
 
    private final Pose3D projectionPose = new Pose3D();
    private final Pose3D goalPose = new Pose3D();
 
-   public FootstepPlannerHeuristicCalculator(FootstepPlannerParametersReadOnly parameters,
+   public FootstepPlannerHeuristicCalculator(DefaultFootstepPlannerParametersReadOnly parameters,
                                              WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
                                              YoRegistry parentRegistry)
    {
@@ -62,6 +61,6 @@ public class FootstepPlannerHeuristicCalculator
          finalTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(finalRobotPostureHeading, goalPose.getYaw())) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
      }
 
-      return parameters.getAStarHeuristicsWeight().getValue() * (initialTurnDistance + walkDistance + finalTurnDistance);
+      return parameters.getAStarHeuristicsWeight() * (initialTurnDistance + walkDistance + finalTurnDistance);
    }
 }

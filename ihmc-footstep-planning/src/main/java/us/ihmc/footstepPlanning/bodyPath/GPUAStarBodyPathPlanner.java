@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DReadOnly;
 import us.ihmc.footstepPlanning.*;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.AStarBodyPathEdgeData;
 import us.ihmc.footstepPlanning.log.AStarBodyPathIterationData;
 import us.ihmc.log.LogTools;
@@ -52,7 +52,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
 
 
    // Inputs to the planner
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DefaultFootstepPlannerParametersReadOnly parameters;
    private final AStarBodyPathPlannerParametersReadOnly plannerParameters;
    private HeightMapData heightMapData;
 
@@ -149,14 +149,14 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
 
    private boolean firstTick = true;
 
-   public GPUAStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters,
+   public GPUAStarBodyPathPlanner(DefaultFootstepPlannerParametersReadOnly parameters,
                                   AStarBodyPathPlannerParametersReadOnly plannerParameters,
                                   SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this(parameters, plannerParameters, footPolygons, new Stopwatch());
    }
 
-   public GPUAStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters,
+   public GPUAStarBodyPathPlanner(DefaultFootstepPlannerParametersReadOnly parameters,
                                   AStarBodyPathPlannerParametersReadOnly plannerParameters,
                                   SideDependentList<ConvexPolygon2D> footPolygons,
                                   Stopwatch stopwatch)
@@ -164,7 +164,7 @@ public class GPUAStarBodyPathPlanner implements AStarBodyPathPlannerInterface
       this(parameters, plannerParameters, footPolygons, new ArrayList<>(), stopwatch);
    }
 
-   public GPUAStarBodyPathPlanner(FootstepPlannerParametersReadOnly parameters,
+   public GPUAStarBodyPathPlanner(DefaultFootstepPlannerParametersReadOnly parameters,
                                   AStarBodyPathPlannerParametersReadOnly plannerParameters,
                                   SideDependentList<ConvexPolygon2D> footPolygons,
                                   List<Consumer<FootstepPlannerOutput>> statusCallbacks,

@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.footstepPlanning.swing.CollisionFreeSwingCalculator;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
@@ -32,7 +32,7 @@ public class SwingPlanningModule
 
    private final List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = new ArrayList<>();
 
-   public SwingPlanningModule(FootstepPlannerParametersReadOnly footstepPlannerParameters,
+   public SwingPlanningModule(DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters,
                               SwingPlannerParametersBasics swingPlannerParameters,
                               WalkingControllerParameters walkingControllerParameters,
                               SideDependentList<ConvexPolygon2D> footPolygons)
