@@ -17,8 +17,6 @@ import java.util.UUID;
  */
 public class FrequencyCalculator
 {
-   private static final double NANOS_IN_A_SECOND = 1_000_000_000.0;
-
    private double frequency;
    private final Deque<Long> pingTimes = new LinkedList<>();
 
