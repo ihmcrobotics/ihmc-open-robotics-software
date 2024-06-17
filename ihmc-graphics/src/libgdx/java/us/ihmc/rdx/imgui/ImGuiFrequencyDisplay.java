@@ -15,7 +15,7 @@ public class ImGuiFrequencyDisplay
 
    public ImGuiFrequencyDisplay(String hiddenLabel)
    {
-      plot = new ImGuiMovingPlot(labels.getHidden(hiddenLabel), ImGuiAveragedFrequencyText.HISTORY, 100, (int) ImGuiTools.TAB_BAR_HEIGHT);
+      plot = new ImGuiMovingPlot(labels.getHidden(hiddenLabel), 50, 100, (int) ImGuiTools.TAB_BAR_HEIGHT);
    }
 
    public void ping()

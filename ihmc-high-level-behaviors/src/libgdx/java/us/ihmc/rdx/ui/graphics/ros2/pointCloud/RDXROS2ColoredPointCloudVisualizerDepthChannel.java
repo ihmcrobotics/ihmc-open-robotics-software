@@ -1,4 +1,4 @@
-package us.ihmc.rdx.ui.graphics.ros2;
+package us.ihmc.rdx.ui.graphics.ros2.pointCloud;
 
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
@@ -28,6 +28,7 @@ public class RDXROS2ColoredPointCloudVisualizerDepthChannel extends RDXROS2Color
       {
          BytedecoImage depth16UC1Image = new BytedecoImage(imageWidth, imageHeight, opencv_core.CV_16UC1);
          depth16UC1Image.createOpenCLImage(openCLManager, OpenCL.CL_MEM_READ_ONLY);
+         getFrequencyText().ping();
          return depth16UC1Image;
       });
    }

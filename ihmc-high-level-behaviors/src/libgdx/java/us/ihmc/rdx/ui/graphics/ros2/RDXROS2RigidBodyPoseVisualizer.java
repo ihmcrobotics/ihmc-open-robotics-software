@@ -2,12 +2,9 @@ package us.ihmc.rdx.ui.graphics.ros2;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import geometry_msgs.PoseStamped;
-import imgui.internal.ImGui;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -18,16 +15,18 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiPlot;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
-import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.string.StringTools;
 
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements RenderableProvider
+public class RDXROS2RigidBodyPoseVisualizer extends RDXROS2SingleTopicVisualizer<Pose3D>
 {
    private ModelInstance poseModel;
    private ReferenceFrame frame;
@@ -50,29 +49,27 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
 
    public RDXROS2RigidBodyPoseVisualizer(String title, DomainFactory.PubSubImplementation pubSubImplementation, ROS2Topic<Pose3D> topic)
    {
-      super(title + " (ROS 2)");
+      super(title);
       titleBeforeAdditions = title;
       this.topic = topic;
       this.pubSubImplementation = pubSubImplementation;
 
       setActivenessChangeCallback(isActive ->
-      {
-         if (isActive && ros2Node == null)
-         {
-            subscribe();
-         }
-         else if (!isActive && ros2Node != null)
-         {
-            unsubscribe();
-         }
-      });
+                                  {
+                                     if (isActive && ros2Node == null)
+                                     {
+                                        subscribe();
+                                     }
+                                     else if (!isActive && ros2Node != null)
+                                     {
+                                        unsubscribe();
+                                     }
+                                  });
    }
 
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-      ImGui.text(topic.getName());
       frequencyPlot.renderImGuiWidgets();
       numberOfRegionsPlot.render(numberOfPlanarRegions);
    }
@@ -84,29 +81,28 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
 
       Pose3D transformMessage = transformMessageReference.getAndSet(null);
 
-      if(transformMessage != null)
+      if (transformMessage != null)
       {
          RigidBodyTransform transform = new RigidBodyTransform();
-//         MessageTools.toEuclid(message, transform);
+         // MessageTools.toEuclid(message, transform);
          this.framePose.changeFrame(ReferenceFrame.getWorldFrame());
          poseModel = RDXModelBuilder.createCoordinateFrameInstance(0.1);
          LibGDXTools.toLibGDX(this.framePose, this.tempTransform, poseModel.transform);
+
+         getFrequency().ping();
       }
    }
 
    public void queueRenderRigidBodyPose(Pose3D message)
    {
-         transformMessageReference.set(message);
+      transformMessageReference.set(message);
    }
 
    private void subscribe()
    {
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, StringTools.titleToSnakeCase(titleBeforeAdditions));
 
-      new ROS2Callback<>(ros2Node, PerceptionAPI.MOCAP_RIGID_BODY, (message) ->
-      {
-         queueRenderRigidBodyPose(message);
-      });
+      new ROS2Callback<>(ros2Node, PerceptionAPI.MOCAP_RIGID_BODY, this::queueRenderRigidBodyPose);
    }
 
    private void unsubscribe()
@@ -119,7 +115,7 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
    }
 
    @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
       if (poseModel != null)
       {
@@ -132,5 +128,11 @@ public class RDXROS2RigidBodyPoseVisualizer extends RDXVisualizer implements Ren
    {
       unsubscribe();
       super.destroy();
+   }
+
+   @Override
+   public ROS2Topic<Pose3D> getTopic()
+   {
+      return topic;
    }
 }
