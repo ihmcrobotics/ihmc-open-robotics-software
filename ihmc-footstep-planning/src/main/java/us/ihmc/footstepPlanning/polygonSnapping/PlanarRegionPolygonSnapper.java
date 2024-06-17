@@ -75,7 +75,7 @@ public class PlanarRegionPolygonSnapper
       if (noIntersection)
          return false;
 
-      constructTransformToMatchSurfaceNormalPreserveX(planarRegionToSnapTo.getNormal(), snapTransformToPack);
+      PolygonSnapperTools.constructTransformToMatchSurfaceNormalPreserveX(planarRegionToSnapTo.getNormal(), snapTransformToPack);
       setTranslationSettingZAndPreservingXAndY(highestVertexInWorld, snapTransformToPack);
 
       return true;
@@ -86,35 +86,5 @@ public class PlanarRegionPolygonSnapper
       EuclidCoreMissingTools.transform(transformToReturn.getRotation(), highestVertex.getX(), highestVertex.getY(), 0.0, transformToReturn.getTranslation());
       transformToReturn.getTranslation().scale(-1.0);
       transformToReturn.getTranslation().add(highestVertex);
-   }
-
-   static RigidBodyTransform createTransformToMatchSurfaceNormalPreserveX(Vector3DReadOnly surfaceNormal)
-   {
-      RigidBodyTransform transformToReturn = new RigidBodyTransform();
-      constructTransformToMatchSurfaceNormalPreserveX(surfaceNormal, transformToReturn);
-
-      return transformToReturn;
-   }
-
-   static void constructTransformToMatchSurfaceNormalPreserveX(Vector3DReadOnly surfaceNormal, RigidBodyTransform transformToPack)
-   {
-      // xAxis = yAxis cross SurfaceNormal
-      double xAxisX = surfaceNormal.getZ();
-      double xAxisY = 0.0;
-      double xAxisZ = -surfaceNormal.getX();
-
-      double xNorm = EuclidCoreTools.norm(xAxisX, xAxisZ);
-
-      xAxisX /= xNorm;
-      xAxisZ /= xNorm;
-
-      // yAxis = surfaceNormal cross xAxis
-      double yAxisX = surfaceNormal.getY() * xAxisZ;
-      double yAxisY = surfaceNormal.getZ() * xAxisX - surfaceNormal.getX() * xAxisZ;
-      double yAxisZ = -surfaceNormal.getY() * xAxisX;
-
-      transformToPack.getRotation().set(xAxisX, yAxisX, surfaceNormal.getX(),
-                                        xAxisY, yAxisY, surfaceNormal.getY(),
-                                        xAxisZ, yAxisZ, surfaceNormal.getZ());
    }
 }
