@@ -1,6 +1,6 @@
 {
   "title" : "Continuous Hiking parameters",
-  "Enable continuous walking" : true,
+  "Enable continuous walking" : false,
   "Shortcut is pressed" : false,
   "Step publisher enabled" : false,
   "Override entire queue each step" : true,
