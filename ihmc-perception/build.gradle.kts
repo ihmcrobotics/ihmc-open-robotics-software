@@ -107,6 +107,8 @@ mainDependencies {
 
    api("com.microsoft.onnxruntime:onnxruntime:1.11.0")
    api("com.microsoft.onnxruntime:onnxruntime_gpu:1.11.0")
+
+   api("com.badlogicgames.gdx:gdx-bullet:1.11.0")
 }
 
 testDependencies {

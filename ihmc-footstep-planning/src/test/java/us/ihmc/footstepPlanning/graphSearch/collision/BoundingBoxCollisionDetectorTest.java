@@ -1,11 +1,10 @@
 package us.ihmc.footstepPlanning.graphSearch.collision;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
@@ -19,7 +18,7 @@ public class BoundingBoxCollisionDetectorTest
    @Test
    public void testBodyCollisionWithZeroYaw()
    {
-      FootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters();
       ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxDepth(1.0);
       ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxWidth(0.5);
       ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxHeight(1.0);
@@ -88,7 +87,7 @@ public class BoundingBoxCollisionDetectorTest
    @Test
    public void testCollisionWithRotatedBody()
    {
-      FootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters();
       ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxDepth(0.5);
       ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxWidth(1.0);
       ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxHeight(1.0);
@@ -122,7 +121,7 @@ public class BoundingBoxCollisionDetectorTest
    @Test
    public void testHeightDetection()
    {
-      FootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters();
       ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxDepth(0.5);
       ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxWidth(1.0);
       ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxHeight(1.0);
@@ -156,7 +155,7 @@ public class BoundingBoxCollisionDetectorTest
    @Test
    public void testCollidingWithACube()
    {
-      FootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters();
       ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxDepth(0.5);
       ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxWidth(1.0);
       ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxHeight(1.0);

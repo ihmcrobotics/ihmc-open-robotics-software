@@ -11,13 +11,11 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -53,7 +51,7 @@ public class FootstepPathCalculatorModule
    private final AtomicReference<Boolean> snapGoalSteps;
    private final AtomicReference<Boolean> abortIfGoalStepSnapFails;
 
-   private final AtomicReference<FootstepPlannerParametersReadOnly> parameters;
+   private final AtomicReference<DefaultFootstepPlannerParametersReadOnly> parameters;
    private final AtomicReference<AStarBodyPathPlannerParametersReadOnly> pathPlannerParameters;
 
    private final Messager messager;

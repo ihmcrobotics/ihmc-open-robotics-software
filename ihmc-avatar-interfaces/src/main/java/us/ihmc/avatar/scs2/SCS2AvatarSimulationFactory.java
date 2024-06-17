@@ -17,6 +17,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeightMapBasedFootstepAdjustment;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
@@ -25,7 +26,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.ComponentBasedFootstepDataMessageGeneratorFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.HumanoidSteppingPluginFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.plugin.JoystickBasedSteppingPluginFactory;
-import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.StateEstimatorAPI;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -45,7 +45,6 @@ import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.scs2.SimulationConstructionSet2;
 import us.ihmc.scs2.definition.controller.ControllerInput;
@@ -113,12 +112,10 @@ public class SCS2AvatarSimulationFactory
    protected final OptionalFactoryField<Integer> simulationDataBufferSize = new OptionalFactoryField<>("simulationDataBufferSize", 8192);
    protected final OptionalFactoryField<Integer> simulationDataRecordTickPeriod = new OptionalFactoryField<>("simulationDataRecordTickPeriod");
    protected final OptionalFactoryField<Boolean> usePerfectSensors = new OptionalFactoryField<>("usePerfectSensors", false);
+   protected final OptionalFactoryField<Boolean> kinematicsSimulation = new OptionalFactoryField<>("kinematicsSimulation", false);
    protected  final OptionalFactoryField<Boolean> createRigidBodyMutators = new OptionalFactoryField<>("createRigidBodyMutators", false);
    protected final OptionalFactoryField<SCS2JointDesiredOutputWriterFactory> outputWriterFactory = new OptionalFactoryField<>("outputWriterFactory",
-                                                                                                                              (in, out) -> new SCS2OutputWriter(
-                                                                                                                                    in,
-                                                                                                                                    out,
-                                                                                                                                    true));
+                                                                                                                              getDefaultOutputWriterFactory());
    protected final OptionalFactoryField<HighLevelControllerName> initialState = new OptionalFactoryField<>("initialControllerState", WALKING);
    protected final OptionalFactoryField<Boolean> runMultiThreaded = new OptionalFactoryField<>("runMultiThreaded", false);
    protected final OptionalFactoryField<Boolean> initializeEstimatorToActual = new OptionalFactoryField<>("initializeEstimatorToActual", true);
@@ -185,6 +182,7 @@ public class SCS2AvatarSimulationFactory
       setupLidarController();
       initializeStateEstimatorToActual();
       setupSimulatedRobotTimeProvider();
+      setupKinematicsSimulationOutputWriter();
 
       SCS2AvatarSimulation avatarSimulation = new SCS2AvatarSimulation();
       avatarSimulation.setRobotModel(robotModel.get());
@@ -258,7 +256,11 @@ public class SCS2AvatarSimulationFactory
 
       PhysicsEngineFactory physicsEngineFactory;
 
-      if (useImpulseBasedPhysicsEngine.hasValue() && useImpulseBasedPhysicsEngine.get())
+      if (kinematicsSimulation.get())
+      {
+         physicsEngineFactory = KinematicsSimulationPhysicsEngine::new;
+      }
+      else if (useImpulseBasedPhysicsEngine.hasValue() && useImpulseBasedPhysicsEngine.get())
       {
          physicsEngineFactory = (inertialFrame, rootRegistry) ->
          {
@@ -332,10 +334,35 @@ public class SCS2AvatarSimulationFactory
       }
    }
 
+   private SCS2JointDesiredOutputWriterFactory getDefaultOutputWriterFactory()
+   {
+      return (controllerInput, controllerOutput) ->
+      {
+         boolean writeBeforeEstimationTick = true;
+         if (kinematicsSimulation.get())
+            return new SCS2KinematicsSimulationOutputWriter(controllerInput, controllerOutput, writeBeforeEstimationTick);
+         else
+            return new SCS2OutputWriter(controllerInput, controllerOutput, writeBeforeEstimationTick);
+      };
+   }
+
    private void setupSimulationOutputWriter()
    {
       simulationOutputWriter = outputWriterFactory.get()
-                                                  .build(robot.getControllerManager().getControllerInput(), robot.getControllerManager().getControllerOutput());
+                                                  .build(robot.getControllerManager().getControllerInput(),
+                                                         robot.getControllerManager().getControllerOutput());
+   }
+
+   private void setupKinematicsSimulationOutputWriter()
+   {
+      if (kinematicsSimulation.get() && simulationOutputWriter instanceof SCS2KinematicsSimulationOutputWriter kinematicsSimulationOutputWriter)
+      {
+         RootJointDesiredConfigurationDataReadOnly outputForRootJoint = highLevelHumanoidControllerFactory.get()
+                                                                                                          .getWholeBodyControllerCoreFactory()
+                                                                                                          .getWholeBodyControllerCore()
+                                                                                                          .getOutputForRootJoint();
+         kinematicsSimulationOutputWriter.setOutputForRootJoint(outputForRootJoint);
+      }
    }
 
    private void setupStateEstimationThread()
@@ -401,7 +428,8 @@ public class SCS2AvatarSimulationFactory
                                                     contextDataFactory,
                                                     null,
                                                     ros2Node,
-                                                    gravity.get());
+                                                    gravity.get(),
+                                                    kinematicsSimulation.get());
       if (enableSCS1YoGraphics.get())
          simulationConstructionSet.addYoGraphics(YoGraphicConversionTools.toYoGraphicDefinitions(controllerThread.getSCS1YoGraphicsListRegistry()));
       if (enableSCS2YoGraphics.get())
@@ -516,7 +544,7 @@ public class SCS2AvatarSimulationFactory
 
       if (realtimeROS2Node.hasBeenSet())
       {
-         handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get());
+         handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get(), kinematicsSimulation.get());
 
          if (handControlThread != null)
          {
@@ -910,6 +938,12 @@ public class SCS2AvatarSimulationFactory
    public void setUsePerfectSensors(boolean usePerfectSensors)
    {
       this.usePerfectSensors.set(usePerfectSensors);
+   }
+
+   /** Must be used with perfect sensors. */
+   public void setKinematicsSimulation(boolean kinematicsSimulation)
+   {
+      this.kinematicsSimulation.set(kinematicsSimulation);
    }
 
    public void setCreateRigidBodyMutators(boolean createRigidBodyMutators)

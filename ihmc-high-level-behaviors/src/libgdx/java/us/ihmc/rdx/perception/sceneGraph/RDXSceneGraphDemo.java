@@ -18,7 +18,7 @@ import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
+import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ArUcoMarkerPosesVisualizer;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.ros2.ROS2Node;
@@ -35,7 +35,7 @@ public class RDXSceneGraphDemo
    private RDXEnvironmentBuilder environmentBuilder;
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo("SimulatedSensor");
    private RDXHighLevelDepthSensorSimulator simulatedCamera;
-   private RDXPerceptionVisualizerPanel perceptionVisualizerPanel;
+   private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
    private OpenCVArUcoMarkerDetector arUcoMarkerDetector;
    private OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults;
    private ROS2SceneGraph onRobotSceneGraph;
@@ -58,7 +58,7 @@ public class RDXSceneGraphDemo
             ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_scene_graph_demo");
             ros2Helper = new ROS2Helper(ros2Node);
 
-            perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
+            perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
             baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
             baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
 

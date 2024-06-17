@@ -22,7 +22,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -32,8 +32,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
@@ -89,7 +87,7 @@ public class SimpleOcclusionTests
       runTest(testInfo, startPose, goalPose, regions, getParameters(), maxAllowedSolveTime);
    }
 
-   private void runTest(TestInfo testInfo, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, FootstepPlannerParametersReadOnly parameters,
+   private void runTest(TestInfo testInfo, FramePose3D startPose, FramePose3D goalPose, PlanarRegionsList regions, DefaultFootstepPlannerParametersReadOnly parameters,
                         double maxAllowedSolveTime)
    {
       YoRegistry registry = new YoRegistry(testInfo.getTestMethod().get().getName());
@@ -405,7 +403,7 @@ public class SimpleOcclusionTests
       return goal;
    }
 
-   private RobotSide computeStanceFootPose(FramePose3D startPose, FootstepPlannerParametersReadOnly parameters, FramePose3D stancePoseToPack)
+   private RobotSide computeStanceFootPose(FramePose3D startPose, DefaultFootstepPlannerParametersReadOnly parameters, FramePose3D stancePoseToPack)
    {
       RobotSide side = RobotSide.LEFT;
 
@@ -422,7 +420,7 @@ public class SimpleOcclusionTests
       return side;
    }
 
-   private Point3D computeBodyPoint(FramePose3D solePose, RobotSide side, FootstepPlannerParametersReadOnly parameters, double bodyHeight)
+   private Point3D computeBodyPoint(FramePose3D solePose, RobotSide side, DefaultFootstepPlannerParametersReadOnly parameters, double bodyHeight)
    {
       double stanceWidth = parameters.getIdealFootstepWidth();
       ReferenceFrame soleFrame = new PoseReferenceFrame("stanceFrame", solePose);
@@ -550,7 +548,7 @@ public class SimpleOcclusionTests
       return ret;
    }
 
-   private FootstepPlannerParametersReadOnly getParameters()
+   private DefaultFootstepPlannerParametersReadOnly getParameters()
    {
       return new DefaultFootstepPlannerParameters();
    }

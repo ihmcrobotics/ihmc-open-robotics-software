@@ -69,4 +69,9 @@ public interface ContinuousHikingParametersReadOnly extends StoredPropertySetRea
    {
       return get(logFootstepPlans);
    }
+
+   default double getNextWaypointDistanceMargin()
+   {
+      return get(nextWaypointDistanceMargin);
+   }
 }

@@ -24,12 +24,11 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -68,7 +67,7 @@ public class CollisionFreeSwingCalculator
    private final YoDouble maxCollisionDistance = new YoDouble("maxCollisionDistance", registry);
    private final boolean visualize;
 
-   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
+   private final DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final SwingPlannerParametersReadOnly swingPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final List<TickAndUpdatable> tickAndUpdatables = new ArrayList<>();
@@ -112,7 +111,7 @@ public class CollisionFreeSwingCalculator
       PLAN_NOMINAL_TRAJECTORY, PERFORM_COLLISION_CHECK, RECOMPUTE_FULL_TRAJECTORY, COMPUTE_DOWN_SAMPLED_TRAJECTORY
    }
 
-   public CollisionFreeSwingCalculator(FootstepPlannerParametersReadOnly footstepPlannerParameters,
+   public CollisionFreeSwingCalculator(DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters,
                                        SwingPlannerParametersReadOnly swingPlannerParameters,
                                        WalkingControllerParameters walkingControllerParameters,
                                        SideDependentList<ConvexPolygon2D> footPolygons)
@@ -120,7 +119,7 @@ public class CollisionFreeSwingCalculator
       this(footstepPlannerParameters, swingPlannerParameters, walkingControllerParameters, footPolygons, null, null, null);
    }
 
-   public CollisionFreeSwingCalculator(FootstepPlannerParametersReadOnly footstepPlannerParameters,
+   public CollisionFreeSwingCalculator(DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters,
                                        SwingPlannerParametersReadOnly swingPlannerParameters,
                                        WalkingControllerParameters walkingControllerParameters,
                                        SideDependentList<ConvexPolygon2D> footPolygons,

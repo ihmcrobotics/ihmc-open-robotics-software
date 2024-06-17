@@ -22,7 +22,7 @@ import us.ihmc.footstepPlanning.bodyPath.BodyPathLatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.*;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
@@ -91,7 +91,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<UIStepAdjustmentFrame> FootstepAdjustmentFrame = topic("FootstepAdjustmentFrame"); // ManualFootstepAdjustmentListener >>> table
 
    // Parameters
-   public static final Topic<FootstepPlannerParametersReadOnly> PlannerParameters = topic("PlannerParameters");
+   public static final Topic<DefaultFootstepPlannerParametersReadOnly> PlannerParameters = topic("PlannerParameters");
    public static final Topic<AStarBodyPathPlannerParametersReadOnly> AStarBodyPathPlannerParameters = topic("AStarBodyPathPlannerParameters");
    public static final Topic<VisibilityGraphsParametersReadOnly> VisibilityGraphsParameters = topic("VisibilityGraphsParameters");
    public static final Topic<SwingPlannerParametersReadOnly> SwingPlannerParameters = topic("SwingPlannerParameters");

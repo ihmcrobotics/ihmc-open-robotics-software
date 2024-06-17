@@ -7,7 +7,7 @@ import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2PointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2PointCloudVisualizer;
 import us.ihmc.rdx.vr.RDXVRApplication;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
