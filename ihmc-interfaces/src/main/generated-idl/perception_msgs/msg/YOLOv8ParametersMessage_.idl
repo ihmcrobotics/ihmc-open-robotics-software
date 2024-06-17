@@ -21,9 +21,10 @@ module perception_msgs
         float non_maximum_suppression_threshold;
         float segmentation_threshold;
         /**
-         * Percentage of updates a candidate must be detected in to be accepted
+         * How much to shrink the object mask. Higher value = more shrinkage
          */
-        float candidate_acceptance_threshold;
+        long erosion_kernel_radius;
+        float outlier_threshold;
         /**
          * List of YOLOv8DetectionClass values that YOLO should detect
          */

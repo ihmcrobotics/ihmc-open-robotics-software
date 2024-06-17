@@ -20,7 +20,7 @@ public class CenterposeNode extends DetectableSceneNode
 
    public CenterposeNode(long id, String name, int markerID, Point3D[] vertices3D, Point3D[] vertices2D, boolean enableTracking)
    {
-      super(id, name);
+      super(id, name, null); // TODO: FIXME TOMASZ PLEASE
       this.objectID = markerID;
       this.vertices3D = vertices3D;
       this.vertices2D = vertices2D;

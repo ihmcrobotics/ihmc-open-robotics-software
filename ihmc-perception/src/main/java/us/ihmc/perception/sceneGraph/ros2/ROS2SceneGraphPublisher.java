@@ -4,6 +4,7 @@ import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
 import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
+import perception_msgs.msg.dds.InstantDetectionMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
@@ -105,6 +106,7 @@ public class ROS2SceneGraphPublisher
       else if (sceneNode instanceof DetectableSceneNode detectableSceneNode)
       {
          DetectableSceneNodeMessage detectableSceneNodeMessage;
+         InstantDetectionMessage instantDetectionMessage;
          if (sceneNode instanceof ArUcoMarkerNode arUcoMarkerNode)
          {
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.ARUCO_MARKER_NODE_TYPE);
@@ -135,20 +137,15 @@ public class ROS2SceneGraphPublisher
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.YOLO_NODE_TYPE);
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getYoloSceneNodes().size());
             YOLOv8NodeMessage yoloNodeMessage = sceneGraphMessage.getYoloSceneNodes().add();
-            yoloNodeMessage.setMaskErosionKernelRadius(yoloNode.getMaskErosionKernelRadius());
-            yoloNodeMessage.setOutlierFilterThreshold(yoloNode.getOutlierFilterThreshold());
-            yoloNodeMessage.setDetectionAcceptanceThreshold(yoloNode.getDetectionAcceptanceThreshold());
-            yoloNodeMessage.setDetectionClass(yoloNode.getDetectionClass().name());
-            yoloNodeMessage.setConfidence(yoloNode.getConfidence());
+
             // set point cloud
             yoloNodeMessage.getObjectPointCloud().clear();
-            for (int i = 0; i < 5000 && i < yoloNode.getObjectPointCloud().size(); i++)
+            for (int i = 0; i < 5000 && i < yoloNode.getYoloDetection().getObjectPointCloud().size(); i++)
             {
                Point3D32 point = yoloNodeMessage.getObjectPointCloud().add();
-               point.set(yoloNode.getObjectPointCloud().get(i));
+               point.set(yoloNode.getYoloDetection().getObjectPointCloud().get(i));
             }
 
-            yoloNodeMessage.getObjectCentroid().set(yoloNode.getObjectCentroid());
             yoloNodeMessage.getCentroidToObjectTransform().set(yoloNode.getCentroidToObjectTransform());
             yoloNodeMessage.getObjectPose().set(yoloNode.getObjectPose());
 
@@ -160,8 +157,15 @@ public class ROS2SceneGraphPublisher
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getDetectableSceneNodes().size());
             detectableSceneNodeMessage = sceneGraphMessage.getDetectableSceneNodes().add();
          }
-
          detectableSceneNodeMessage.setCurrentlyDetected(detectableSceneNode.getCurrentlyDetected());
+
+         instantDetectionMessage = detectableSceneNodeMessage.getInstantDetection();
+         instantDetectionMessage.setDetectedObjectClass(detectableSceneNode.getDetection().getDetectedObjectClass());
+         instantDetectionMessage.setDetectedObjectName(detectableSceneNode.getDetection().getDetectedObjectName());
+         instantDetectionMessage.setConfidence(detectableSceneNode.getDetection().getConfidence());
+         instantDetectionMessage.getObjectPose().set(detectableSceneNode.getDetection().getPose());
+         MessageTools.toMessage(detectableSceneNode.getDetection().getDetectionTime(), instantDetectionMessage.getDetectionTime());
+
          sceneNodeMessage = detectableSceneNodeMessage.getSceneNode();
       }
       else if (sceneNode instanceof PrimitiveRigidBodySceneNode reshapableRigidBodySceneNode)

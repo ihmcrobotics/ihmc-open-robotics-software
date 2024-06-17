@@ -26,12 +26,6 @@ public class DetectionManagerTest
       {
          super(detectionClass, 0.0, new Pose3D(), detectionTime);
       }
-
-      @Override
-      void destroy()
-      {
-
-      }
    }
 
    private static class TestDetectionB extends InstantDetection
@@ -39,12 +33,6 @@ public class DetectionManagerTest
       public TestDetectionB(String detectionClass, Instant detectionTime)
       {
          super(detectionClass, 1.0, new Pose3D(), detectionTime);
-      }
-
-      @Override
-      void destroy()
-      {
-
       }
    }
 
@@ -279,6 +267,7 @@ public class DetectionManagerTest
       DetectionManager detectionManager = new DetectionManager();
       detectionManager.setMatchDistanceThreshold(0.5);
       detectionManager.setDefaultStabilityThreshold(0.5);
+      detectionManager.setDefaultStabilityMinHistorySize(3);
       detectionManager.setDefaultHistorySeconds(2.5);
 
       Instant startTime = Instant.now();
@@ -313,13 +302,13 @@ public class DetectionManagerTest
 
       for (PersistentDetection<TestDetectionA> persistentDetection : persistentDetectionsA)
       {
-         assertFalse(persistentDetection.isStable(future));
+         assertFalse(persistentDetection.isStable());
          assertEquals(1, persistentDetection.getHistorySize());
       }
 
       for (PersistentDetection<TestDetectionB> persistentDetection : persistentDetectionsB)
       {
-         assertFalse(persistentDetection.isStable(future));
+         assertFalse(persistentDetection.isStable());
          assertEquals(1, persistentDetection.getHistorySize());
       }
    }

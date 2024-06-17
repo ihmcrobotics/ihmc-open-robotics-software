@@ -15,7 +15,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "8c702564f775d339bccbf5460258522a2f70c99ec8df756cf18b2785fa74748c";
+   		return "ddf5b82e37355deecca85eddca8e86bd20850ddf17b01efac85dc67ed59973e2";
    }
    
    @Override
@@ -54,6 +54,8 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += perception_msgs.msg.dds.SceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += perception_msgs.msg.dds.InstantDetectionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -71,6 +73,8 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += perception_msgs.msg.dds.SceneNodeMessagePubSubType.getCdrSerializedSize(data.getSceneNode(), current_alignment);
 
+      current_alignment += perception_msgs.msg.dds.InstantDetectionMessagePubSubType.getCdrSerializedSize(data.getInstantDetection(), current_alignment);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -81,6 +85,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    public static void write(perception_msgs.msg.dds.DetectableSceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.write(data.getSceneNode(), cdr);
+      perception_msgs.msg.dds.InstantDetectionMessagePubSubType.write(data.getInstantDetection(), cdr);
       cdr.write_type_7(data.getCurrentlyDetected());
 
    }
@@ -88,6 +93,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    public static void read(perception_msgs.msg.dds.DetectableSceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.read(data.getSceneNode(), cdr);	
+      perception_msgs.msg.dds.InstantDetectionMessagePubSubType.read(data.getInstantDetection(), cdr);	
       data.setCurrentlyDetected(cdr.read_type_7());
       	
 
@@ -98,6 +104,8 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       ser.write_type_a("scene_node", new perception_msgs.msg.dds.SceneNodeMessagePubSubType(), data.getSceneNode());
 
+      ser.write_type_a("instant_detection", new perception_msgs.msg.dds.InstantDetectionMessagePubSubType(), data.getInstantDetection());
+
       ser.write_type_7("currently_detected", data.getCurrentlyDetected());
    }
 
@@ -105,6 +113,8 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.DetectableSceneNodeMessage data)
    {
       ser.read_type_a("scene_node", new perception_msgs.msg.dds.SceneNodeMessagePubSubType(), data.getSceneNode());
+
+      ser.read_type_a("instant_detection", new perception_msgs.msg.dds.InstantDetectionMessagePubSubType(), data.getInstantDetection());
 
       data.setCurrentlyDetected(ser.read_type_7("currently_detected"));
    }

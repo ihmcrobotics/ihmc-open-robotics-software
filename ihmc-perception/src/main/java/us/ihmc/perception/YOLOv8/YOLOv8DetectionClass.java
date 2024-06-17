@@ -79,6 +79,17 @@ public enum YOLOv8DetectionClass
       return null;
    }
 
+   public static YOLOv8DetectionClass fromName(String name)
+   {
+      for (YOLOv8DetectionClass detectionClass : values())
+      {
+         if (detectionClass.getDefaultNodeName().equalsIgnoreCase(name))
+            return detectionClass;
+      }
+
+      return null;
+   }
+
    @Override
    public String toString()
    {

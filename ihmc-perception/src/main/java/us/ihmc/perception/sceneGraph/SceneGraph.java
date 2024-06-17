@@ -5,13 +5,19 @@ import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.perception.YOLOv8.YOLOv8InstantDetection;
+import us.ihmc.perception.detections.DetectionManager;
+import us.ihmc.perception.detections.InstantDetection;
+import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
+import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
 
 import java.util.ArrayList;
@@ -21,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
@@ -57,6 +64,7 @@ public class SceneGraph
    private transient final TIntObjectMap<ArUcoMarkerNode> arUcoMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final TIntObjectMap<CenterposeNode> centerposeDetectedMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
+   private transient final Map<PersistentDetection<? extends InstantDetection>, DetectableSceneNode> detectionToNodeMap = new HashMap<>();
 
    public SceneGraph()
    {
@@ -156,6 +164,35 @@ public class SceneGraph
       for (SceneNode child : node.getChildren())
       {
          updateCaches(child);
+      }
+   }
+
+   public void updateDetections(DetectionManager detectionManager)
+   {
+      detectionManager.updateDetections();
+      Set<PersistentDetection<? extends InstantDetection>> detections = detectionManager.getDetections();
+      for (PersistentDetection<? extends InstantDetection> detection : detections)
+      {
+         if (detectionToNodeMap.containsKey(detection))
+         {
+            // Update the node
+            DetectableSceneNode detectionNode = detectionToNodeMap.get(detection);
+            detectionNode.updateDetection(detection.getMostRecentDetection());
+         }
+         else if (detection.isStable())
+         {
+            long newNodeID = getNextID().getAndIncrement();
+            String newNodeName = detection.getDetectedObjectName() + newNodeID;
+            Class<?> detectionClass = detection.getInstantDetectionClass();
+
+            if (detectionClass.equals(YOLOv8InstantDetection.class))
+            {
+               YOLOv8Node newYoloNode = new YOLOv8Node(newNodeID, newNodeName, (YOLOv8InstantDetection) detection.getMostRecentDetection());
+               modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(newYoloNode, rootNode)));
+            }
+         }
+         else
+            detectionManager.removePersistentDetection(detection);
       }
    }
 

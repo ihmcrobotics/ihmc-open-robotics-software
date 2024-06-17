@@ -24,6 +24,7 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.IterativeClosestPointManager;
 import us.ihmc.perception.RapidHeightMapManager;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
@@ -39,7 +40,7 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
-import us.ihmc.perception.sceneGraph.yolo.YOLOv8DetectionManager;
+import us.ihmc.perception.YOLOv8.YOLOv8DetectionExecutor;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
@@ -83,7 +84,7 @@ import java.util.function.Supplier;
  *    {@code forceEnableAllSensors} method.
  * </p>
  *
- * TODO: Add HumanoidPerceptionModule, add depth image overlap removal.
+ * TODO: Add HumanoidPerceptionModule
  */
 public class PerceptionAndAutonomyProcess
 {
@@ -113,6 +114,7 @@ public class PerceptionAndAutonomyProcess
 
    private final DepthImageOverlapRemover overlapRemover = new DepthImageOverlapRemover();
 
+   // Sensor Data
    private ROS2DemandGraphNode depthOverlapRemovalDemandNode;
    private ROS2DemandGraphNode zedPointCloudDemandNode;
    private ROS2DemandGraphNode zedColorDemandNode;
@@ -146,30 +148,24 @@ public class PerceptionAndAutonomyProcess
    private final SideDependentList<BlackflyImagePublisher> blackflyImagePublishers = new SideDependentList<>();
    private final RestartableThread blackflyProcessAndPublishThread;
 
+   // Detections
+   private final DetectionManager detectionManager;
+
    private final RestartableThread arUcoMarkerDetectionThread;
    private final ArUcoDetectionUpdater arUcoUpdater;
    private final SwapReference<OpenCVArUcoMarkerDetectionResults> sharedArUcoDetectionResults = new SwapReference<>(OpenCVArUcoMarkerDetectionResults::new);
-
-   private final Supplier<ReferenceFrame> robotPelvisFrameSupplier;
-   private final ROS2SceneGraph sceneGraph;
-   private final RestartableThrottledThread sceneGraphUpdateThread;
    private ROS2DemandGraphNode arUcoDetectionDemandNode;
-   private long sceneGraphUpdateIndex = 0;
 
    private final CenterposeDetectionManager centerposeDetectionManager;
    private ROS2DemandGraphNode centerposeDemandNode;
 
-   private final YOLOv8DetectionManager yolov8DetectionManager;
+   private final YOLOv8DetectionExecutor yolov8DetectionExecutor;
    private ROS2DemandGraphNode yoloAnnotatedImageDemandNode;
    private ROS2DemandGraphNode yoloZEDDemandNode;
    private ROS2DemandGraphNode yoloRealsenseDemandNode;
 
-   private final IterativeClosestPointManager icpManager;
-
    private final BallDetectionManager ballDetectionManager;
    private ROS2DemandGraphNode ballDetectionDemandNode;
-
-   private final OpenCLManager openCLManager = new OpenCLManager();
 
    @Nullable
    private RapidPlanarRegionsExtractor planarRegionsExtractor;
@@ -180,6 +176,15 @@ public class PerceptionAndAutonomyProcess
    private RapidHeightMapManager heightMapManager;
    private final RestartableThrottledThread heightMapExtractorThread;
    private ROS2DemandGraphNode heightMapDemandNode;
+
+   private final IterativeClosestPointManager icpManager;
+
+   private final OpenCLManager openCLManager = new OpenCLManager();
+
+   private final Supplier<ReferenceFrame> robotPelvisFrameSupplier;
+   private final ROS2SceneGraph sceneGraph;
+   private final RestartableThrottledThread sceneGraphUpdateThread;
+   private long sceneGraphUpdateIndex = 0;
 
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
    private ReferenceFrameLibrary behaviorTreeReferenceFrameLibrary;
@@ -212,6 +217,8 @@ public class PerceptionAndAutonomyProcess
       this.rightFootSoleFrameSupplier = rightFootSoleFrameSupplier;
 
       initializeDependencyGraph(ros2Helper);
+
+      detectionManager = new DetectionManager();
 
       zedImageRetriever = new ZEDColorDepthImageRetriever(ZED_CAMERA_ID, zedFrameSupplier, zedDepthDemandNode, zedColorDemandNode);
       zedImagePublisher = new ZEDColorDepthImagePublisher(ZED_COLOR_TOPICS, ZED_DEPTH_TOPIC, ZED_CUT_OUT_DEPTH);
@@ -251,7 +258,8 @@ public class PerceptionAndAutonomyProcess
 
       centerposeDetectionManager = new CenterposeDetectionManager(ros2Helper);
 
-      yolov8DetectionManager = new YOLOv8DetectionManager(ros2Helper, yoloAnnotatedImageDemandNode);
+      yolov8DetectionExecutor = new YOLOv8DetectionExecutor(ros2Helper, yoloAnnotatedImageDemandNode);
+      yolov8DetectionExecutor.addDetectionConsumerCallback(detectionManager::addDetections);
 
       icpManager = new IterativeClosestPointManager(ros2Helper, sceneGraph);
       icpManager.startWorkers();
@@ -292,7 +300,7 @@ public class PerceptionAndAutonomyProcess
    {
       LogTools.info("Destroying {}", getClass().getSimpleName());
       icpManager.destroy();
-      yolov8DetectionManager.destroy();
+      yolov8DetectionExecutor.destroy();
 
       if (zedImageRetriever != null)
       {
@@ -395,7 +403,7 @@ public class PerceptionAndAutonomyProcess
             icpManager.setEnvironmentPointCloud(zedDepthImage);
 
          if (yoloZEDDemandNode.isDemanded())
-            yolov8DetectionManager.runYOLODetection(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
+            yolov8DetectionExecutor.runYOLODetection(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
 
          if (ballDetectionDemandNode.isDemanded())
             ballDetectionManager.run(zedColorImages.get(RobotSide.LEFT));
@@ -428,7 +436,7 @@ public class PerceptionAndAutonomyProcess
          realsenseColorImage = realsenseImageRetriever.getLatestRawColorImage();
 
          if (yoloRealsenseDemandNode.isDemanded())
-            yolov8DetectionManager.runYOLODetection(realsenseColorImage, realsenseDepthImage);
+            yolov8DetectionExecutor.runYOLODetection(realsenseColorImage, realsenseDepthImage);
 
          overlapRemover.setHighQualityImage(realsenseDepthImage.get());
 
@@ -515,17 +523,14 @@ public class PerceptionAndAutonomyProcess
          ArUcoSceneTools.updateSceneGraph(sharedArUcoDetectionResults.getForThreadTwo(), blackflyFrameSuppliers.get(RobotSide.RIGHT).get(), sceneGraph);
       }
 
+      // Update detections
+      sceneGraph.updateDetections(detectionManager);
+
       // Update CenterPose stuff
       if (centerposeDemandNode.isDemanded())
          centerposeDetectionManager.updateSceneGraph(sceneGraph);
 
       ReferenceFrame robotPelvisFrame = robotPelvisFrameSupplier.get();
-
-      if (yoloZEDDemandNode.isDemanded() || yoloRealsenseDemandNode.isDemanded())
-      {
-         yolov8DetectionManager.updateSceneGraph(sceneGraph);
-         yolov8DetectionManager.setRobotFrame(robotPelvisFrame);
-      }
 
       if (newPlanarRegions.poll())
          for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())

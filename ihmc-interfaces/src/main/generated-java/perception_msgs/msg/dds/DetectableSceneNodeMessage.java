@@ -17,6 +17,10 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
             */
    public perception_msgs.msg.dds.SceneNodeMessage scene_node_;
    /**
+            * Instant detection information
+            */
+   public perception_msgs.msg.dds.InstantDetectionMessage instant_detection_;
+   /**
             * Whether or not the node is currently detected
             */
    public boolean currently_detected_;
@@ -24,6 +28,7 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
    public DetectableSceneNodeMessage()
    {
       scene_node_ = new perception_msgs.msg.dds.SceneNodeMessage();
+      instant_detection_ = new perception_msgs.msg.dds.InstantDetectionMessage();
    }
 
    public DetectableSceneNodeMessage(DetectableSceneNodeMessage other)
@@ -35,6 +40,7 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
    public void set(DetectableSceneNodeMessage other)
    {
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.staticCopy(other.scene_node_, scene_node_);
+      perception_msgs.msg.dds.InstantDetectionMessagePubSubType.staticCopy(other.instant_detection_, instant_detection_);
       currently_detected_ = other.currently_detected_;
 
    }
@@ -46,6 +52,15 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
    public perception_msgs.msg.dds.SceneNodeMessage getSceneNode()
    {
       return scene_node_;
+   }
+
+
+   /**
+            * Instant detection information
+            */
+   public perception_msgs.msg.dds.InstantDetectionMessage getInstantDetection()
+   {
+      return instant_detection_;
    }
 
    /**
@@ -82,6 +97,7 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       if(other == this) return true;
 
       if (!this.scene_node_.epsilonEquals(other.scene_node_, epsilon)) return false;
+      if (!this.instant_detection_.epsilonEquals(other.instant_detection_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.currently_detected_, other.currently_detected_, epsilon)) return false;
 
 
@@ -98,6 +114,7 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       DetectableSceneNodeMessage otherMyClass = (DetectableSceneNodeMessage) other;
 
       if (!this.scene_node_.equals(otherMyClass.scene_node_)) return false;
+      if (!this.instant_detection_.equals(otherMyClass.instant_detection_)) return false;
       if(this.currently_detected_ != otherMyClass.currently_detected_) return false;
 
 
@@ -112,6 +129,8 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
       builder.append("DetectableSceneNodeMessage {");
       builder.append("scene_node=");
       builder.append(this.scene_node_);      builder.append(", ");
+      builder.append("instant_detection=");
+      builder.append(this.instant_detection_);      builder.append(", ");
       builder.append("currently_detected=");
       builder.append(this.currently_detected_);
       builder.append("}");

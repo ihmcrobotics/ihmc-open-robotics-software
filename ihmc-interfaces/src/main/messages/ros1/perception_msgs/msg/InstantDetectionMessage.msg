@@ -1,0 +1,13 @@
+
+# Message representing an InstantDetection
+string detected_object_class
+
+string detected_object_name
+
+float64 confidence
+
+geometry_msgs/Pose object_pose
+
+ihmc_common_msgs/InstantMessage detection_time
+
+

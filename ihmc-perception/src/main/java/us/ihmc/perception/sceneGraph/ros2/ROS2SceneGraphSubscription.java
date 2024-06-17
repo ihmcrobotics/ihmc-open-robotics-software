@@ -18,6 +18,8 @@ import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
+import us.ihmc.perception.YOLOv8.YOLOv8InstantDetection;
+import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -149,6 +151,7 @@ public class ROS2SceneGraphSubscription
             arUcoMarkerNode.setMarkerID(subscriptionNode.getArUcoMarkerNodeMessage().getMarkerId());
             arUcoMarkerNode.setMarkerSize(subscriptionNode.getArUcoMarkerNodeMessage().getMarkerSize());
             arUcoMarkerNode.setBreakFrequency(subscriptionNode.getArUcoMarkerNodeMessage().getBreakFrequency());
+            // TODO: FIXME TOMASZ PLEASE ADD INSTANT DETECTION UPDATE
          }
          if (localNode instanceof CenterposeNode centerposeNode)
          {
@@ -158,15 +161,11 @@ public class ROS2SceneGraphSubscription
             centerposeNode.setVertices3D(subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices());
             centerposeNode.setVertices2D(subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices());
             centerposeNode.setEnableTracking(subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
+            // TODO: FIXME TOMASZ PLEASE ADD INSTANT DETECTION UPDATE
          }
          if (localNode instanceof YOLOv8Node yoloNode)
          {
-            yoloNode.setMaskErosionKernelRadius(subscriptionNode.getYOLONodeMessage().getMaskErosionKernelRadius());
-            yoloNode.setOutlierFilterThreshold(subscriptionNode.getYOLONodeMessage().getOutlierFilterThreshold());
-            yoloNode.setDetectionAcceptanceThreshold(subscriptionNode.getYOLONodeMessage().getDetectionAcceptanceThreshold());
-            yoloNode.setDetectionClass(YOLOv8DetectionClass.valueOf(subscriptionNode.getYOLONodeMessage().getDetectionClassAsString()));
-            yoloNode.setConfidence(subscriptionNode.getYOLONodeMessage().getConfidence());
-            yoloNode.setObjectPointCloud(subscriptionNode.getYOLONodeMessage().getObjectPointCloud());
+            yoloNode.updateDetection(YOLOv8InstantDetection.fromMessage(subscriptionNode.getYOLONodeMessage()));
             yoloNode.setCentroidToObjectTransform(subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform());
             yoloNode.setObjectPose(subscriptionNode.getYOLONodeMessage().getObjectPose());
          }

@@ -7,6 +7,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
+import us.ihmc.perception.YOLOv8.YOLOv8InstantDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -80,19 +81,13 @@ public class ROS2SceneGraphTools
       {
          sceneNode = new YOLOv8Node(nodeID,
                                     nodeName,
-                                    subscriptionNode.getYOLONodeMessage().getMaskErosionKernelRadius(),
-                                    subscriptionNode.getYOLONodeMessage().getOutlierFilterThreshold(),
-                                    subscriptionNode.getYOLONodeMessage().getDetectionAcceptanceThreshold(),
-                                    YOLOv8DetectionClass.valueOf(subscriptionNode.getYOLONodeMessage().getDetectionClassAsString()),
-                                    subscriptionNode.getYOLONodeMessage().getConfidence(),
-                                    subscriptionNode.getYOLONodeMessage().getObjectPointCloud(),
-                                    subscriptionNode.getYOLONodeMessage().getObjectCentroid(),
+                                    YOLOv8InstantDetection.fromMessage(subscriptionNode.getYOLONodeMessage()),
                                     subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform(),
                                     subscriptionNode.getYOLONodeMessage().getObjectPose());
       }
       else if (nodeType == SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE)
       {
-         sceneNode = new DetectableSceneNode(nodeID, nodeName);
+         sceneNode = new DetectableSceneNode(nodeID, nodeName, null); // TODO: FIXME TOMASZ PLEASE
       }
       else if (nodeType == SceneGraphMessage.PRIMITIVE_RIGID_BODY_NODE_TYPE)
       {

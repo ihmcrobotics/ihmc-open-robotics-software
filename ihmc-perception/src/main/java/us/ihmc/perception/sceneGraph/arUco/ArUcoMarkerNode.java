@@ -23,7 +23,7 @@ public class ArUcoMarkerNode extends DetectableSceneNode
     */
    public ArUcoMarkerNode(long id, String name, int markerID, double markerSize)
    {
-      super(id, name);
+      super(id, name, null); // TODO: FIXME TOMASZ PLEASE
 
       this.markerID = markerID;
       this.markerSize = markerSize;

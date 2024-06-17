@@ -16,17 +16,19 @@ public class DetectionManager
 
    private double matchDistanceSquared;
    private double defaultStabilityThreshold;
+   private int defaultStabilityMinHistorySize;
    private double defaultHistorySeconds;
 
    public DetectionManager()
    {
-      this(1.0, 0.5, 1.0);
+      this(1.0, 0.5, 3, 1.0);
    }
 
-   public DetectionManager(double matchDistanceThreshold, double defaultStabilityThreshold, double defaultHistorySeconds)
+   public DetectionManager(double matchDistanceThreshold, double defaultStabilityThreshold, int defaultStabilityMinHistorySize, double defaultHistorySeconds)
    {
       setMatchDistanceThreshold(matchDistanceThreshold);
       setDefaultStabilityThreshold(defaultStabilityThreshold);
+      setDefaultStabilityMinHistorySize(defaultStabilityMinHistorySize);
       setDefaultHistorySeconds(defaultHistorySeconds);
    }
 
@@ -82,7 +84,10 @@ public class DetectionManager
 
          // create new persistent detections from unmatched new detections
          for (T unmatchedNewDetection : unmatchedNewDetections)
-            persistentDetections.add(new PersistentDetection<>(unmatchedNewDetection, defaultStabilityThreshold, defaultHistorySeconds));
+            persistentDetections.add(new PersistentDetection<>(unmatchedNewDetection,
+                                                               defaultStabilityThreshold,
+                                                               defaultStabilityMinHistorySize,
+                                                               defaultHistorySeconds));
       }
    }
 
@@ -107,6 +112,11 @@ public class DetectionManager
       }
 
       return typeDetections;
+   }
+
+   public Set<PersistentDetection<? extends InstantDetection>> getDetections()
+   {
+      return persistentDetections;
    }
 
    public void updateDetections()
@@ -135,6 +145,11 @@ public class DetectionManager
    public void setDefaultStabilityThreshold(double defaultStabilityThreshold)
    {
       this.defaultStabilityThreshold = defaultStabilityThreshold;
+   }
+
+   public void setDefaultStabilityMinHistorySize(int minHistorySize)
+   {
+      defaultStabilityMinHistorySize = minHistorySize;
    }
 
    public void setDefaultHistorySeconds(double historyLengthSeconds)

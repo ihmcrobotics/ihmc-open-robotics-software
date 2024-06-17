@@ -25,7 +25,7 @@ public class YOLOv8DetectionResults
    private final static Stopwatch booleanWatch = new Stopwatch();
    private double booleanTime = 0.0;
 
-   private final Set<YOLOv8Detection> detections;
+   private final Set<YOLOv8SimpleDetection> detections;
    private final MatVector outputBlobs;
    private final RawImage detectionImage;
    private final FloatIndexer outputMasksIndexer;
@@ -40,7 +40,7 @@ public class YOLOv8DetectionResults
    private final float maskPrincipalPointX;
    private final float maskPrincipalPointY;
 
-   public YOLOv8DetectionResults(Set<YOLOv8Detection> detections, MatVector outputBlobs, RawImage detectionImage)
+   public YOLOv8DetectionResults(Set<YOLOv8SimpleDetection> detections, MatVector outputBlobs, RawImage detectionImage)
    {
       this.detections = detections;
       this.outputBlobs = outputBlobs;
@@ -60,11 +60,11 @@ public class YOLOv8DetectionResults
       maskPrincipalPointY = yScaleFactor * detectionImage.getPrincipalPointY();
    }
 
-   public Map<YOLOv8Detection, RawImage> getSegmentationImages(float maskThreshold)
+   public Map<YOLOv8SimpleDetection, RawImage> getSegmentationImages(float maskThreshold)
    {
-      Map<YOLOv8Detection, RawImage> segmentationImages = new HashMap<>();
+      Map<YOLOv8SimpleDetection, RawImage> segmentationImages = new HashMap<>();
 
-      for (YOLOv8Detection detection : detections)
+      for (YOLOv8SimpleDetection detection : detections)
       {
          Mat floatMaskMat = getFloatMaskMat(detection);
          Mat booleanMaskMat = getBooleanMaskMat(detection, floatMaskMat, maskThreshold);
@@ -75,11 +75,11 @@ public class YOLOv8DetectionResults
       return segmentationImages;
    }
 
-   public Map<YOLOv8Detection, RawImage> getTargetSegmentationImages(float maskThreshold, Set<YOLOv8DetectionClass> targetClasses)
+   public Map<YOLOv8SimpleDetection, RawImage> getTargetSegmentationImages(float maskThreshold, Set<YOLOv8DetectionClass> targetClasses)
    {
-      Map<YOLOv8Detection, RawImage> segmentationImages = new HashMap<>();
+      Map<YOLOv8SimpleDetection, RawImage> segmentationImages = new HashMap<>();
 
-      for (YOLOv8Detection detection : detections)
+      for (YOLOv8SimpleDetection detection : detections)
       {
          if (targetClasses.contains(detection.objectClass()))
          {
@@ -93,11 +93,11 @@ public class YOLOv8DetectionResults
       return segmentationImages;
    }
 
-   public Map<YOLOv8Detection, RawImage> getICPSegmentationImages(float maskThreshold)
+   public Map<YOLOv8SimpleDetection, RawImage> getICPSegmentationImages(float maskThreshold)
    {
-      Map<YOLOv8Detection, RawImage> segmentationImages = new HashMap<>();
+      Map<YOLOv8SimpleDetection, RawImage> segmentationImages = new HashMap<>();
 
-      for (YOLOv8Detection detection : detections)
+      for (YOLOv8SimpleDetection detection : detections)
       {
          if (detection.objectClass().getPointCloudFileName() != null)
          {
@@ -121,7 +121,7 @@ public class YOLOv8DetectionResults
 
       totalWatch.start();
       Mat maskBooleanMat = null;
-      for (YOLOv8Detection detection : detections)
+      for (YOLOv8SimpleDetection detection : detections)
       {
          // Find the detection that matches the query object type
          if (detection.objectClass() == objectType)
@@ -148,15 +148,15 @@ public class YOLOv8DetectionResults
       return null;
    }
 
-   public Set<YOLOv8Detection> getDetections()
+   public Set<YOLOv8SimpleDetection> getDetections()
    {
       return detections;
    }
 
-   public Set<YOLOv8Detection> getICPDetections()
+   public Set<YOLOv8SimpleDetection> getICPDetections()
    {
-      Set<YOLOv8Detection> icpDetections = new HashSet<>();
-      for (YOLOv8Detection detection : detections)
+      Set<YOLOv8SimpleDetection> icpDetections = new HashSet<>();
+      for (YOLOv8SimpleDetection detection : detections)
       {
          if (detection.objectClass().getPointCloudFileName() != null)
             icpDetections.add(detection);
@@ -165,7 +165,7 @@ public class YOLOv8DetectionResults
       return icpDetections;
    }
 
-   private Mat getFloatMaskMat(YOLOv8Detection detection)
+   private Mat getFloatMaskMat(YOLOv8SimpleDetection detection)
    {
       floatWatch.start();
       Mat floatMaskMat = new Mat(maskHeight, maskWidth, maskOpenCVType, new Scalar(0.0));
@@ -184,7 +184,7 @@ public class YOLOv8DetectionResults
       return floatMaskMat;
    }
 
-   private Mat getBooleanMaskMat(YOLOv8Detection detection, Mat maskFloatMat, double maskThreshold)
+   private Mat getBooleanMaskMat(YOLOv8SimpleDetection detection, Mat maskFloatMat, double maskThreshold)
    {
       booleanWatch.start();
       // Use the float mat to threshold

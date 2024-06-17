@@ -1,0 +1,29 @@
+#ifndef __perception_msgs__msg__InstantDetectionMessage__idl__
+#define __perception_msgs__msg__InstantDetectionMessage__idl__
+
+#include "geometry_msgs/msg/./Pose_.idl"
+#include "ihmc_common_msgs/msg/./InstantMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::InstantDetectionMessage_")
+      struct InstantDetectionMessage
+      {
+        /**
+         * Message representing an InstantDetection
+         */
+        string detected_object_class;
+        string detected_object_name;
+        double confidence;
+        geometry_msgs::msg::dds::Pose object_pose;
+        ihmc_common_msgs::msg::dds::InstantMessage detection_time;
+      };
+    };
+  };
+};
+
+#endif

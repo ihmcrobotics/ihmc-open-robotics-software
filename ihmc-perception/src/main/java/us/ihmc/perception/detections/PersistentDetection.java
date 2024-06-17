@@ -15,33 +15,37 @@ public class PersistentDetection<T extends InstantDetection>
 
    private final Class<?> instantDetectionClass;
    private final String detectedObjectClass;
+   private final String detectedObjectName;
 
    // If the total confidence per second is greater than this value, the detections will be considered stable.
-   private double stabilityThreshold;
+   private double stabilityConfidenceThreshold;
+   private int stabilityMinHistorySize;
 
    public PersistentDetection(T firstDetection)
    {
-      this(firstDetection, 0.5);
+      this(firstDetection, 0.5, 3);
    }
 
-   public PersistentDetection(T firstDetection, double stabilityThreshold)
+   public PersistentDetection(T firstDetection, double stabilityThreshold, int stabilityMinHistorySize)
    {
-      this(firstDetection, stabilityThreshold, Duration.ofSeconds(1L));
+      this(firstDetection, stabilityThreshold, stabilityMinHistorySize, Duration.ofSeconds(1L));
    }
 
-   public PersistentDetection(T firstDetection, double stabilityThreshold, double historyDurationSeconds)
+   public PersistentDetection(T firstDetection, double stabilityConfidenceThreshold, int stabilityMinHistorySize, double historyDurationSeconds)
    {
-      this(firstDetection, stabilityThreshold, TimeTools.durationOfSeconds(historyDurationSeconds));
+      this(firstDetection, stabilityConfidenceThreshold, stabilityMinHistorySize, TimeTools.durationOfSeconds(historyDurationSeconds));
    }
 
-   public PersistentDetection(T firstDetection, double stabilityThreshold, Duration historyDuration)
+   public PersistentDetection(T firstDetection, double stabilityConfidenceThreshold, int stabilityMinHistorySize, Duration historyDuration)
    {
       instantDetectionClass = firstDetection.getClass();
       detectedObjectClass = firstDetection.getDetectedObjectClass();
+      detectedObjectName = firstDetection.getDetectedObjectName();
 
       addDetection(firstDetection);
-      setStabilityThreshold(stabilityThreshold);
-      setHistoryLength(historyDuration);
+      setStabilityConfidenceThreshold(stabilityConfidenceThreshold);
+      setStabilityMinHistorySize(stabilityMinHistorySize);
+      setHistoryDuration(historyDuration);
    }
 
    /**
@@ -78,6 +82,11 @@ public class PersistentDetection<T extends InstantDetection>
       return detectedObjectClass;
    }
 
+   public String getDetectedObjectName()
+   {
+      return detectedObjectName;
+   }
+
    public int getHistorySize()
    {
       return detectionHistory.size();
@@ -88,9 +97,9 @@ public class PersistentDetection<T extends InstantDetection>
     * {@link InstantDetection} objects older than this duration will be removed from the history.
     * @param historyDurationSeconds Number of seconds of history to store. Must be positive.
     */
-   public void setHistoryLength(double historyDurationSeconds)
+   public void setHistoryDuration(double historyDurationSeconds)
    {
-      setHistoryLength(TimeTools.durationOfSeconds(historyDurationSeconds));
+      setHistoryDuration(TimeTools.durationOfSeconds(historyDurationSeconds));
    }
 
    /**
@@ -98,7 +107,7 @@ public class PersistentDetection<T extends InstantDetection>
     * {@link InstantDetection} objects older than this duration will be removed from the history when {@link #updateHistory()} is called.
     * @param historyDuration Duration of history to store. Must be positive.
     */
-   public void setHistoryLength(Duration historyDuration)
+   public void setHistoryDuration(Duration historyDuration)
    {
       if (historyDuration.isNegative())
          throw new IllegalArgumentException("History duration must be a positive duration");
@@ -106,22 +115,22 @@ public class PersistentDetection<T extends InstantDetection>
       this.historyDuration = historyDuration;
    }
 
-   public void setStabilityThreshold(double stabilityThreshold)
+   public void setStabilityConfidenceThreshold(double stabilityConfidenceThreshold)
    {
-      if (stabilityThreshold < 0.0 || stabilityThreshold > 1.0)
+      if (stabilityConfidenceThreshold < 0.0 || stabilityConfidenceThreshold > 1.0)
          throw new IllegalArgumentException("Stability threshold must be between 0.0 and 1.0 (inclusive)");
 
-      this.stabilityThreshold = stabilityThreshold;
+      this.stabilityConfidenceThreshold = stabilityConfidenceThreshold;
+   }
+
+   public void setStabilityMinHistorySize(int minHistoryLength)
+   {
+      this.stabilityMinHistorySize = minHistoryLength;
    }
 
    public boolean isStable()
    {
-      return isStable(Instant.now());
-   }
-
-   public boolean isStable(Instant now)
-   {
-      return !detectionExpired(getMostRecentDetection(), now) && getAverageConfidence() > stabilityThreshold;
+      return getHistorySize() >= stabilityMinHistorySize && getAverageConfidence() > stabilityConfidenceThreshold;
    }
 
    /**
