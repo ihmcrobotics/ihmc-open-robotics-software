@@ -234,6 +234,7 @@ public class WalkingControllerPreviewToolboxController extends ToolboxController
                                                     omega0,
                                                     feet,
                                                     integrationDT,
+                                                    false,
                                                     Collections.emptyList(),
                                                     allContactableBodies,
                                                     yoGraphicsListRegistry,

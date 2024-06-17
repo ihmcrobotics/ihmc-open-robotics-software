@@ -47,6 +47,8 @@ public class WalkingControllerState extends HighLevelControllerState
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
+   private final KinematicsSimulationVirtualGroundReactionManager kinematicsSimulationVirtualGroundReactionManager;
+
    public WalkingControllerState(CommandInputManager commandInputManager,
                                  StatusMessageOutputManager statusOutputManager,
                                  HighLevelControlManagerFactory managerFactory,
@@ -78,6 +80,12 @@ public class WalkingControllerState extends HighLevelControllerState
       //      linearMomentumRateControlModule = new LinearMomentumRateControlModule(controllerToolbox, walkingControllerParameters, registry);
       linearMomentumRateControlModule = controllerCoreFactory.getOrCreateLinearMomentumRateControlModule(registry);
 
+      // support non-physics simulation for motion previewing by holding the feet in contact virtually
+      if (controllerToolbox.isKinematicsSimulation())
+         kinematicsSimulationVirtualGroundReactionManager = new KinematicsSimulationVirtualGroundReactionManager(controllerToolbox, statusOutputManager, walkingController);
+      else
+         kinematicsSimulationVirtualGroundReactionManager = null;
+
       registry.addChild(walkingController.getYoVariableRegistry());
    }
 
@@ -90,11 +98,19 @@ public class WalkingControllerState extends HighLevelControllerState
       walkingController.initialize();
       linearMomentumRateControlModule.reset();
       requestIntegratorReset = true;
+
+      if (kinematicsSimulationVirtualGroundReactionManager != null)
+         kinematicsSimulationVirtualGroundReactionManager.initialize();
    }
 
    @Override
    public void doAction(double timeInState)
    {
+      if (kinematicsSimulationVirtualGroundReactionManager != null)
+      {
+         kinematicsSimulationVirtualGroundReactionManager.update();
+      }
+
       walkingController.doAction();
 
       linearMomentumRateControlModule.setInputFromWalkingStateMachine(walkingController.getLinearMomentumRateControlModuleInput());
@@ -109,6 +125,10 @@ public class WalkingControllerState extends HighLevelControllerState
       if (useCoPObjective.getValue())
       {
          controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getCenterOfPressureCommand());
+      }
+      if (kinematicsSimulationVirtualGroundReactionManager != null) // only for non-physical preview simulations, holding the feet virtually
+      {
+         controllerCoreCommand.addInverseDynamicsCommand(kinematicsSimulationVirtualGroundReactionManager.getInverseDynamicsContactHolderCommandList());
       }
 
       JointDesiredOutputList stateSpecificJointSettings = getStateSpecificJointSettings();
