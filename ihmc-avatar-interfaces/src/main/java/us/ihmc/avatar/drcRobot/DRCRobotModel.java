@@ -130,11 +130,12 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
 
    public abstract DRCSensorSuiteManager getSensorSuiteManager(ROS2NodeInterface ros2Node);
 
-   public default AvatarSimulatedHandControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node)
+   public default AvatarSimulatedHandControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node, boolean kinematicsSimulation)
    {
       return null;
    }
 
+   @Deprecated
    public default SimulatedHandKinematicController createSimulatedHandKinematicController(FullHumanoidRobotModel fullHumanoidRobotModel,
                                                                                           RealtimeROS2Node realtimeROS2Node,
                                                                                           DoubleProvider controllerTime)
