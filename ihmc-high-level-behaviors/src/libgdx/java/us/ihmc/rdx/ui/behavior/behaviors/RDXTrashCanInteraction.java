@@ -62,9 +62,12 @@ public class RDXTrashCanInteraction extends RDXBehaviorTreeNode<TrashCanInteract
       ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
 
       renderNodePresenceStatus(TrashCanInteractionState.COMPUTE_STANCE, state.getComputeStanceAction());
-      renderNodePresenceStatus(TrashCanInteractionState.APPROACH_FRONT, state.getApproachingFrontAction());
-      renderNodePresenceStatus(TrashCanInteractionState.APPROACH_LEFT, state.getApproachingLeftAction());
-      renderNodePresenceStatus(TrashCanInteractionState.APPROACH_RIGHT, state.getApproachingRightAction());
+      renderNodePresenceStatus(TrashCanInteractionState.APPROACHING_FRONT, state.getApproachingFrontAction());
+      renderNodePresenceStatus(TrashCanInteractionState.APPROACHING_LEFT, state.getApproachingLeftAction());
+      renderNodePresenceStatus(TrashCanInteractionState.APPROACHING_RIGHT, state.getApproachingRightAction());
+      renderNodePresenceStatus(TrashCanInteractionState.APPROACH_FRONT, state.getApproachFrontAction());
+      renderNodePresenceStatus(TrashCanInteractionState.APPROACH_LEFT, state.getApproachLeftAction());
+      renderNodePresenceStatus(TrashCanInteractionState.APPROACH_RIGHT, state.getApproachRightAction());
 
       ImGui.text("Trash can interaction: ");
       ImGui.sameLine();

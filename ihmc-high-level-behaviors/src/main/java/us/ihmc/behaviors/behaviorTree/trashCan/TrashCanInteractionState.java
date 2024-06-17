@@ -131,6 +131,9 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
       isValid &= approachingLeftAction != null;
       isValid &= approachingRightAction != null;
       isValid &= approachingFrontAction != null;
+      isValid &= approachLeftAction != null;
+      isValid &= approachRightAction != null;
+      isValid &= approachFrontAction != null;
       return isValid;
    }
 
