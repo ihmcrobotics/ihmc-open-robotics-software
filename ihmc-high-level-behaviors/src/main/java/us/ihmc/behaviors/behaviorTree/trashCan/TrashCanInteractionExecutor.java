@@ -6,6 +6,9 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class TrashCanInteractionExecutor extends BehaviorTreeNodeExecutor<TrashCanInteractionState, TrashCanInteractionDefinition>
@@ -56,15 +59,15 @@ public class TrashCanInteractionExecutor extends BehaviorTreeNodeExecutor<TrashC
             String obstructedNodeName = definition.getObstructedNode().getValue();
             if (!obstructedNodeName.isEmpty())
             {
-               if (obstructedNodeName.contains("RightDoorPanel"))
+               if (obstructedNodeName.contains(DoorSceneNodeDefinitions.RIGHT_DOOR_PANEL_NAME))
                {
                   state.getStance().setValue(InteractionStance.RIGHT);
                }
-               else if (obstructedNodeName.contains("LeftDoorPanel"))
+               else if (obstructedNodeName.contains(DoorSceneNodeDefinitions.LEFT_DOOR_PANEL_NAME))
                {
                   state.getStance().setValue(InteractionStance.LEFT);
                }
-               else if (obstructedNodeName.contains("Couch"))
+               else if (obstructedNodeName.contains(RigidBodySceneObjectDefinitions.COUCH_NAME))
                {
                   state.getStance().setValue(InteractionStance.FRONT);
                }

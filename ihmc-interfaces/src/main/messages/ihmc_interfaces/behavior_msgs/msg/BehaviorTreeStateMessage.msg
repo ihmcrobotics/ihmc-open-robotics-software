@@ -40,6 +40,8 @@ behavior_msgs/ActionSequenceStateMessage[<=200] action_sequences
 
 behavior_msgs/DoorTraversalStateMessage[<=200] door_traversals
 
+behavior_msgs/TrashCanInteractionStateMessage[<=200] trash_can_interactions
+
 behavior_msgs/ChestOrientationActionStateMessage[<=200] chest_orientation_actions
 
 behavior_msgs/FootstepPlanActionStateMessage[<=200] footstep_plan_actions

@@ -5,6 +5,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalEnumField;
@@ -14,6 +15,9 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInteractionDefinition>
 {
    public static final String COMPUTE_STANCE = "Compute Stance";
+   public static final String APPROACHING_LEFT = "Approaching Left";
+   public static final String APPROACHING_FRONT = "Approaching Front";
+   public static final String APPROACHING_RIGHT = "Approaching Right";
    public static final String APPROACH_LEFT = "Approach Left";
    public static final String APPROACH_FRONT = "Approach Front";
    public static final String APPROACH_RIGHT = "Approach Right";
@@ -23,6 +27,9 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
    private WaitDurationActionState approachingLeftAction;
    private WaitDurationActionState approachingRightAction;
    private WaitDurationActionState approachingFrontAction;
+   private FootstepPlanActionState approachLeftAction;
+   private FootstepPlanActionState approachRightAction;
+   private FootstepPlanActionState approachFrontAction;
    private final CRDTUnidirectionalEnumField<InteractionStance> stance;
 
    public TrashCanInteractionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
@@ -48,6 +55,9 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
       approachingLeftAction = null;
       approachingRightAction = null;
       approachingFrontAction = null;
+      approachLeftAction = null;
+      approachRightAction = null;
+      approachFrontAction = null;
 
       for (BehaviorTreeNodeState<?> child : node.getChildren())
       {
@@ -59,19 +69,34 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
                computeStanceAction = waitDurationAction;
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
-                && waitDurationAction.getDefinition().getName().equals(APPROACH_LEFT))
+                && waitDurationAction.getDefinition().getName().equals(APPROACHING_LEFT))
             {
                approachingLeftAction = waitDurationAction;
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
-                && waitDurationAction.getDefinition().getName().equals(APPROACH_RIGHT))
+                && waitDurationAction.getDefinition().getName().equals(APPROACHING_RIGHT))
             {
                approachingRightAction = waitDurationAction;
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
-                && waitDurationAction.getDefinition().getName().equals(APPROACH_FRONT))
+                && waitDurationAction.getDefinition().getName().equals(APPROACHING_FRONT))
             {
                approachingFrontAction = waitDurationAction;
+            }
+            if (actionNode instanceof FootstepPlanActionState footstepPlanAction
+                && footstepPlanAction.getDefinition().getName().equals(APPROACH_LEFT))
+            {
+               approachLeftAction = footstepPlanAction;
+            }
+            if (actionNode instanceof FootstepPlanActionState footstepPlanAction
+                && footstepPlanAction.getDefinition().getName().equals(APPROACH_FRONT))
+            {
+               approachFrontAction = footstepPlanAction;
+            }
+            if (actionNode instanceof FootstepPlanActionState footstepPlanAction
+                && footstepPlanAction.getDefinition().getName().equals(APPROACH_RIGHT))
+            {
+               approachRightAction = footstepPlanAction;
             }
          }
          else
@@ -132,6 +157,21 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
    public WaitDurationActionState getApproachingRightAction()
    {
       return approachingRightAction;
+   }
+
+   public FootstepPlanActionState getApproachLeftAction()
+   {
+      return approachLeftAction;
+   }
+
+   public FootstepPlanActionState getApproachFrontAction()
+   {
+      return approachFrontAction;
+   }
+
+   public FootstepPlanActionState getApproachRightAction()
+   {
+      return approachRightAction;
    }
 
    public CRDTUnidirectionalEnumField getStance()

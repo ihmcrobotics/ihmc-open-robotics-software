@@ -12,6 +12,7 @@ public class ROS2BehaviorTreeSubscriptionNode
    private BehaviorTreeNodeStateMessage behaviorTreeNodeStateMessage;
    private ActionSequenceStateMessage actionSequenceStateMessage;
    private DoorTraversalStateMessage doorTraversalStateMessage;
+   private TrashCanInteractionStateMessage trashCanInteractionStateMessage;
    private ActionNodeStateMessage actionNodeStateMessage;
    private ChestOrientationActionStateMessage chestOrientationActionStateMessage;
    private FootstepPlanActionStateMessage footstepPlanActionStateMessage;
@@ -31,6 +32,7 @@ public class ROS2BehaviorTreeSubscriptionNode
       behaviorTreeNodeStateMessage = null;
       actionSequenceStateMessage = null;
       doorTraversalStateMessage = null;
+      trashCanInteractionStateMessage = null;
       actionNodeStateMessage = null;
       chestOrientationActionStateMessage = null;
       footstepPlanActionStateMessage = null;
@@ -102,6 +104,16 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setDoorTraversalStateMessage(DoorTraversalStateMessage doorTraversalStateMessage)
    {
       this.doorTraversalStateMessage = doorTraversalStateMessage;
+   }
+
+   public TrashCanInteractionStateMessage getTrashCanInteractionStateMessage()
+   {
+      return trashCanInteractionStateMessage;
+   }
+
+   public void setTrashCanInteractionStateMessage(TrashCanInteractionStateMessage trashCanInteractionStateMessage)
+   {
+      this.trashCanInteractionStateMessage = trashCanInteractionStateMessage;
    }
 
    public ChestOrientationActionStateMessage getChestOrientationActionStateMessage()

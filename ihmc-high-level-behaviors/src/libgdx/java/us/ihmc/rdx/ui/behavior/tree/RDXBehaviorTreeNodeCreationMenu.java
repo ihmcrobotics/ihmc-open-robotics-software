@@ -7,6 +7,7 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
+import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
@@ -154,6 +155,7 @@ public class RDXBehaviorTreeNodeCreationMenu
       {
          renderNodeCreationClickable(relativeNode, insertionType, "Basic Node", BehaviorTreeNodeDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Door Traversal", DoorTraversalDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Trash Can Interaction", TrashCanInteractionDefinition.class, null);
       }
       if (insertionType == BehaviorTreeNodeInsertionType.INSERT_ROOT)
          renderNodeCreationClickable(relativeNode, insertionType, "Action Sequence", ActionSequenceDefinition.class, null);

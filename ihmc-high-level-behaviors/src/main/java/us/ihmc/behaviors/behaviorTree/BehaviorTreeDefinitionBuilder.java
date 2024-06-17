@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
@@ -21,6 +22,10 @@ public class BehaviorTreeDefinitionBuilder
       if (definitionType == DoorTraversalDefinition.class)
       {
          return new DoorTraversalDefinition(crdtInfo, saveFileDirectory);
+      }
+      if (definitionType == TrashCanInteractionDefinition.class)
+      {
+         return new TrashCanInteractionDefinition(crdtInfo, saveFileDirectory);
       }
       if (definitionType == ChestOrientationActionDefinition.class)
       {

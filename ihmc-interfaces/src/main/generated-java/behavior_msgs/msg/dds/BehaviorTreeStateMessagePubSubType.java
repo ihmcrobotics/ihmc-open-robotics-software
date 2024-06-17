@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "a689795795d5272604e0b9e473e5a0d26fb1b3b5710f77c2f67946cf559a849d";
+   		return "2ea2d8fe741288e2650beacd2eb10650f6b95124701d385e1acc7f2e6d82fb4f";
    }
    
    @Override
@@ -71,6 +71,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.TrashCanInteractionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.ChestOrientationActionStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -141,6 +144,11 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       for(int i0 = 0; i0 < data.getDoorTraversals().size(); ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType.getCdrSerializedSize(data.getDoorTraversals().get(i0), current_alignment);}
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getTrashCanInteractions().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.TrashCanInteractionStateMessagePubSubType.getCdrSerializedSize(data.getTrashCanInteractions().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getChestOrientationActions().size(); ++i0)
@@ -218,6 +226,10 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_e(data.getDoorTraversals());else
           throw new RuntimeException("door_traversals field exceeds the maximum length");
 
+      if(data.getTrashCanInteractions().size() <= 200)
+      cdr.write_type_e(data.getTrashCanInteractions());else
+          throw new RuntimeException("trash_can_interactions field exceeds the maximum length");
+
       if(data.getChestOrientationActions().size() <= 200)
       cdr.write_type_e(data.getChestOrientationActions());else
           throw new RuntimeException("chest_orientation_actions field exceeds the maximum length");
@@ -268,6 +280,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.read_type_e(data.getBasicNodes());	
       cdr.read_type_e(data.getActionSequences());	
       cdr.read_type_e(data.getDoorTraversals());	
+      cdr.read_type_e(data.getTrashCanInteractions());	
       cdr.read_type_e(data.getChestOrientationActions());	
       cdr.read_type_e(data.getFootstepPlanActions());	
       cdr.read_type_e(data.getSakeHandCommandActions());	
@@ -292,6 +305,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.write_type_e("basic_nodes", data.getBasicNodes());
       ser.write_type_e("action_sequences", data.getActionSequences());
       ser.write_type_e("door_traversals", data.getDoorTraversals());
+      ser.write_type_e("trash_can_interactions", data.getTrashCanInteractions());
       ser.write_type_e("chest_orientation_actions", data.getChestOrientationActions());
       ser.write_type_e("footstep_plan_actions", data.getFootstepPlanActions());
       ser.write_type_e("sake_hand_command_actions", data.getSakeHandCommandActions());
@@ -315,6 +329,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ser.read_type_e("basic_nodes", data.getBasicNodes());
       ser.read_type_e("action_sequences", data.getActionSequences());
       ser.read_type_e("door_traversals", data.getDoorTraversals());
+      ser.read_type_e("trash_can_interactions", data.getTrashCanInteractions());
       ser.read_type_e("chest_orientation_actions", data.getChestOrientationActions());
       ser.read_type_e("footstep_plan_actions", data.getFootstepPlanActions());
       ser.read_type_e("sake_hand_command_actions", data.getSakeHandCommandActions());

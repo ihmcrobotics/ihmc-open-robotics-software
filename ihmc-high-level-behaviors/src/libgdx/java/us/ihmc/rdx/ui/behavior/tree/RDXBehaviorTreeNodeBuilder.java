@@ -4,6 +4,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateBuilder;
+import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeInitialization;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
@@ -14,6 +15,7 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.actions.*;
 import us.ihmc.rdx.ui.behavior.behaviors.RDXDoorTraversal;
+import us.ihmc.rdx.ui.behavior.behaviors.RDXTrashCanInteraction;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -65,6 +67,10 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       if (nodeType == DoorTraversalDefinition.class)
       {
          return new RDXDoorTraversal(id, crdtInfo, saveFileDirectory, syncedRobot);
+      }
+      if (nodeType == TrashCanInteractionDefinition.class)
+      {
+         return new RDXTrashCanInteraction(id, crdtInfo, saveFileDirectory, syncedRobot);
       }
 
       // Actions:

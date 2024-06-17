@@ -12,6 +12,7 @@
 #include "behavior_msgs/msg/./PelvisHeightOrientationActionStateMessage_.idl"
 #include "behavior_msgs/msg/./SakeHandCommandActionStateMessage_.idl"
 #include "behavior_msgs/msg/./ScrewPrimitiveActionStateMessage_.idl"
+#include "behavior_msgs/msg/./TrashCanInteractionStateMessage_.idl"
 #include "behavior_msgs/msg/./WaitDurationActionStateMessage_.idl"
 #include "ihmc_common_msgs/msg/./ConfirmableRequestMessage_.idl"
 module behavior_msgs
@@ -91,6 +92,7 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::BasicNodeStateMessage, 200> basic_nodes;
         sequence<behavior_msgs::msg::dds::ActionSequenceStateMessage, 200> action_sequences;
         sequence<behavior_msgs::msg::dds::DoorTraversalStateMessage, 200> door_traversals;
+        sequence<behavior_msgs::msg::dds::TrashCanInteractionStateMessage, 200> trash_can_interactions;
         sequence<behavior_msgs::msg::dds::ChestOrientationActionStateMessage, 200> chest_orientation_actions;
         sequence<behavior_msgs::msg::dds::FootstepPlanActionStateMessage, 200> footstep_plan_actions;
         sequence<behavior_msgs::msg::dds::SakeHandCommandActionStateMessage, 200> sake_hand_command_actions;
