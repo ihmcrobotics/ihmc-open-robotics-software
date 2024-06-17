@@ -103,7 +103,6 @@ public class RDXVRKinematicsStreamingMode
    private final ControllerStatusTracker controllerStatusTracker;
    private final RDXManualFootstepPlacement footstepPlacer;
    private boolean pausedForWalking = false;
-   private final Notification readyToStep = new Notification();
    private final SideDependentList<Float> gripButtonsValue = new SideDependentList<>();
    private boolean streamingFootstepEnabled = false;
    @Nullable
@@ -119,6 +118,7 @@ public class RDXVRKinematicsStreamingMode
    private RDXVRMotionRetargeting motionRetargeting;
    private RDXVRPrescientFootstepStreaming prescientFootstepStreaming;
    private long lastStepCompletionTime;
+   private boolean reintializingToolbox = false;
    private long pausedStreamingTime;
 
    private final HandConfiguration[] handConfigurations = {HandConfiguration.HALF_CLOSE, HandConfiguration.CRUSH, HandConfiguration.CLOSE};
@@ -670,8 +670,10 @@ public class RDXVRKinematicsStreamingMode
                LogTools.info("Finished walking. Resuming streaming");
                // Restart KST
                sleepToolbox();
+               lastStepCompletionTime = System.currentTimeMillis();
+               reintializingToolbox = true;
             }
-            else if (pausedForWalking && !enabled.get())
+            else if (pausedForWalking && reintializingToolbox)
             {
                // Wait a bit for robot to stabilize on last footsteps
                if (System.currentTimeMillis() - lastStepCompletionTime > RDXVRPrescientFootstepStreaming.WAIT_TIME_AFTER_STEP)
@@ -773,6 +775,7 @@ public class RDXVRKinematicsStreamingMode
          motionRetargeting.setControlArmsOnly(controlArmsOnly.get());
          motionRetargeting.setArmScaling(armScaling.get());
          motionRetargeting.setCoMTracking(comTracking.get());
+         reintializingToolbox = false;
       }
       else
       {
