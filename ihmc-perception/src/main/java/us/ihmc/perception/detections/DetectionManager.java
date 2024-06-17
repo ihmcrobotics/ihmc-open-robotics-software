@@ -32,6 +32,38 @@ public class DetectionManager
       setDefaultHistorySeconds(defaultHistorySeconds);
    }
 
+   public <T extends InstantDetection> void addDetection(T newInstantDetection, Class<T> classType)
+   {
+      DetectionPair<T> bestMatch = null;
+
+      Set<PersistentDetection<T>> sameTypePersistentDetections = getDetectionsOfType(classType);
+      for (PersistentDetection<T> persistentDetection : sameTypePersistentDetections)
+      {
+         // matches must be of the same class
+         if (persistentDetection.getDetectedObjectClass().equals(newInstantDetection.getDetectedObjectClass()))
+         {
+            double distanceSquared = persistentDetection.getMostRecentDetection()
+                                                        .getPose()
+                                                        .getPosition()
+                                                        .distanceSquared(newInstantDetection.getPose().getPosition());
+            // matches must be close enough
+            if (distanceSquared < matchDistanceSquared)
+            {
+               if (bestMatch == null || bestMatch.getDistanceSquared() > distanceSquared)
+                  bestMatch = new DetectionPair<>(persistentDetection, newInstantDetection);
+            }
+         }
+      }
+
+      if (bestMatch != null)
+         bestMatch.confirmDetectionMatch();
+      else
+         persistentDetections.add(new PersistentDetection<>(newInstantDetection,
+                                                            defaultStabilityThreshold,
+                                                            defaultStabilityFrequency,
+                                                            defaultHistorySeconds));
+   }
+
    public <T extends InstantDetection> void addDetections(Set<T> newInstantDetections, Class<T> classType)
    {
       PriorityQueue<DetectionPair<T>> possibleMatches = new PriorityQueue<>();
@@ -112,6 +144,12 @@ public class DetectionManager
       }
 
       return typeDetections;
+   }
+
+   public Set<PersistentDetection<? extends InstantDetection>> updateAndGetDetections()
+   {
+      updateDetections();
+      return getDetections();
    }
 
    public Set<PersistentDetection<? extends InstantDetection>> getDetections()

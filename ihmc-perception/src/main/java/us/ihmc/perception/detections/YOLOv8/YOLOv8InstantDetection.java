@@ -1,4 +1,4 @@
-package us.ihmc.perception.YOLOv8;
+package us.ihmc.perception.detections.YOLOv8;
 
 import perception_msgs.msg.dds.InstantDetectionMessage;
 import perception_msgs.msg.dds.YOLOv8NodeMessage;
@@ -38,8 +38,7 @@ public class YOLOv8InstantDetection extends InstantDetection
 
    public static YOLOv8InstantDetection fromMessage(YOLOv8NodeMessage message)
    {
-      List<Point3D32> objectPointCloud = new ArrayList<>();
-      objectPointCloud.addAll(message.getObjectPointCloud());
+      List<Point3D32> objectPointCloud = new ArrayList<>(message.getObjectPointCloud());
 
       InstantDetectionMessage instantDetectionMessage = message.getDetectableSceneNode().getInstantDetection();
       return new YOLOv8InstantDetection(instantDetectionMessage.getDetectedObjectClass().toString(),

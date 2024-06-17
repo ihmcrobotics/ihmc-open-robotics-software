@@ -40,7 +40,7 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
-import us.ihmc.perception.YOLOv8.YOLOv8DetectionExecutor;
+import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionExecutor;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;

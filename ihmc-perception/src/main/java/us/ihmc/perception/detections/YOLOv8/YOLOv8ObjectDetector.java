@@ -1,4 +1,4 @@
-package us.ihmc.perception.YOLOv8;
+package us.ihmc.perception.detections.YOLOv8;
 
 import org.bytedeco.javacpp.FloatPointer;
 import org.bytedeco.javacpp.IntPointer;
@@ -77,7 +77,7 @@ public class YOLOv8ObjectDetector
       yoloNet.forward(outputBlobs, outputNames);
       isReady.set(true);
 
-      Set<YOLOv8SimpleDetection> detections = processOutput(outputBlobs, confidenceThreshold, nonMaximumSuppressionThreshold, bgrImage.getImageWidth(), bgrImage.getImageHeight());
+      Set<YOLOv8DetectionOutput> detections = processOutput(outputBlobs, confidenceThreshold, nonMaximumSuppressionThreshold, bgrImage.getImageWidth(), bgrImage.getImageHeight());
       YOLOv8DetectionResults results = new YOLOv8DetectionResults(detections, outputBlobs, bgrImage);
 
       blob.release();
@@ -99,13 +99,13 @@ public class YOLOv8ObjectDetector
       System.out.println("Destroyed " + getClass().getSimpleName());
    }
 
-   private Set<YOLOv8SimpleDetection> processOutput(MatVector outputBlobs, float confidenceThreshold, float nonMaximumSuppressionThreshold, int imageWidth, int imageHeight)
+   private Set<YOLOv8DetectionOutput> processOutput(MatVector outputBlobs, float confidenceThreshold, float nonMaximumSuppressionThreshold, int imageWidth, int imageHeight)
    {
       int shiftWidth = (imageWidth - DETECTION_SIZE.width()) / 2;
       int shiftHeight = (imageHeight - DETECTION_SIZE.height()) / 2;
       int numberOfMasks = outputBlobs.get(1).size(1);
 
-      Set<YOLOv8SimpleDetection> detections = new HashSet<>();
+      Set<YOLOv8DetectionOutput> detections = new HashSet<>();
 
       try (FloatIndexer output0Indexer = outputBlobs.get(0).createIndexer();
            IntVector detectedClassIds = new IntVector();
@@ -164,7 +164,7 @@ public class YOLOv8ObjectDetector
             {
                maskWeights[j] = detectedMaskWeights.get(((long) numberOfMasks * index) + j);
             }
-            detections.add(new YOLOv8SimpleDetection(YOLOv8DetectionClass.fromClassID(detectedClassIds.get(index)),
+            detections.add(new YOLOv8DetectionOutput(YOLOv8DetectionClass.fromClassID(detectedClassIds.get(index)),
                                                      detectedConfidences.get(index),
                                                detectedBoxes.get(index).x() + shiftWidth,
                                                detectedBoxes.get(index).y() + shiftHeight,

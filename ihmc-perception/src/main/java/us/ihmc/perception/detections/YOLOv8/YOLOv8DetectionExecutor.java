@@ -1,4 +1,4 @@
-package us.ihmc.perception.YOLOv8;
+package us.ihmc.perception.detections.YOLOv8;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
@@ -23,7 +23,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.ImageMessageFormat;
-import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
@@ -118,13 +117,13 @@ public class YOLOv8DetectionExecutor
             YOLOv8DetectionResults yoloResults = yoloDetector.runOnImage(colorImage, yoloConfidenceThreshold, yoloNMSThreshold);
 
             // Get the object masks from the results
-            Map<YOLOv8SimpleDetection, RawImage> simpleDetectionMap = yoloResults.getTargetSegmentationImages(yoloSegmentationThreshold, targetDetections);
+            Map<YOLOv8DetectionOutput, RawImage> simpleDetectionMap = yoloResults.getTargetSegmentationImages(yoloSegmentationThreshold, targetDetections);
 
             // Create set of instant detections from results
             Set<YOLOv8InstantDetection> yoloInstantDetections = new HashSet<>();
-            for (Map.Entry<YOLOv8SimpleDetection, RawImage> simpleDetectionEntry : simpleDetectionMap.entrySet())
+            for (Map.Entry<YOLOv8DetectionOutput, RawImage> simpleDetectionEntry : simpleDetectionMap.entrySet())
             {
-               YOLOv8SimpleDetection simpleDetection = simpleDetectionEntry.getKey();
+               YOLOv8DetectionOutput simpleDetection = simpleDetectionEntry.getKey();
                RawImage objectMask = simpleDetectionEntry.getValue();
 
                // Erode mask to get better segmentation
@@ -206,7 +205,7 @@ public class YOLOv8DetectionExecutor
    {
       Mat resultMat = colorImage.get().getCpuImageMat().clone();
 
-      Set<YOLOv8SimpleDetection> detections = yoloResults.getDetections();
+      Set<YOLOv8DetectionOutput> detections = yoloResults.getDetections();
       detections.stream().filter(detection -> detection.confidence() >= yoloConfidenceThreshold).forEach(detection ->
       {
          String text = String.format("%s: %.2f", detection.objectClass().toString(), detection.confidence());

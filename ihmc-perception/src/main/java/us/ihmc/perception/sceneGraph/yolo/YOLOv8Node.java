@@ -1,18 +1,12 @@
 package us.ihmc.perception.sceneGraph.yolo;
 
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
-import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
-import us.ihmc.perception.YOLOv8.YOLOv8InstantDetection;
+import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
+import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.InstantDetection;
-import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
-
-import java.util.List;
 
 public class YOLOv8Node extends DetectableSceneNode
 {

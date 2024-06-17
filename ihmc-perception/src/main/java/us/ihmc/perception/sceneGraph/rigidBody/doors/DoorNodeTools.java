@@ -2,7 +2,6 @@ package us.ihmc.perception.sceneGraph.rigidBody.doors;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
-import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;

@@ -5,7 +5,8 @@ import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.perception.YOLOv8.YOLOv8InstantDetection;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
@@ -186,11 +187,8 @@ public class SceneGraph
          }
       }
 
-      // Update detections to get up-to-date data
-      detectionManager.updateDetections();
-
       // Check all existing detections
-      Set<PersistentDetection<? extends InstantDetection>> detections = detectionManager.getDetections();
+      Set<PersistentDetection<? extends InstantDetection>> detections = detectionManager.updateAndGetDetections();
       for (PersistentDetection<? extends InstantDetection> detection : detections)
       {
          if (detectionToNodeMap.containsKey(detection)) // Scene graph has a node for this detection
@@ -205,16 +203,7 @@ public class SceneGraph
             if (detection.isStable())
             {
                // Detection is stable -> add a new node
-               long newNodeID = getNextID().getAndIncrement();
-               String newNodeName = detection.getDetectedObjectName() + newNodeID;
-               Class<?> detectionClass = detection.getInstantDetectionClass();
-
-               if (detectionClass.equals(YOLOv8InstantDetection.class))
-               {
-                  YOLOv8Node newYoloNode = new YOLOv8Node(newNodeID, newNodeName, (YOLOv8InstantDetection) detection.getMostRecentDetection());
-                  modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(newYoloNode, rootNode)));
-                  detectionToNodeMap.put(detection, newYoloNode);
-               }
+               addNodeFromDetection(detection);
             }
             else // Detection is unstable -> forget about it
                detectionManager.removeDetection(detection);
@@ -275,5 +264,27 @@ public class SceneGraph
          return sceneNode == null ? null : sceneNode.getNodeFrame();
       };
       return new ReferenceFrameDynamicCollection(nodeNameList, frameLookup);
+   }
+
+   private void addNodeFromDetection(PersistentDetection<? extends InstantDetection> detection)
+   {
+      DetectableSceneNode detectableNode;
+      long newNodeID = getNextID().getAndIncrement();
+      String newNodeName = detection.getDetectedObjectName() + newNodeID;
+
+      Class<?> detectionClass = detection.getInstantDetectionClass();
+      if (detectionClass.equals(YOLOv8InstantDetection.class))
+         detectableNode = new YOLOv8Node(newNodeID, newNodeName, (YOLOv8InstantDetection) detection.getMostRecentDetection());
+      else
+      {
+         LogTools.error("Logic to handle detections of class {} has not been implemented", detectionClass);
+         detectableNode = null;
+      }
+
+      if (detectableNode != null)
+      {
+         modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(detectableNode, rootNode)));
+         detectionToNodeMap.put(detection, detectableNode);
+      }
    }
 }

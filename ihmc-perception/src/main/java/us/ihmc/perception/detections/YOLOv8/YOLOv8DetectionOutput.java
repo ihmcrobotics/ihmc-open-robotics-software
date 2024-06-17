@@ -1,6 +1,6 @@
-package us.ihmc.perception.YOLOv8;
+package us.ihmc.perception.detections.YOLOv8;
 
-public record YOLOv8SimpleDetection(YOLOv8DetectionClass objectClass,
+public record YOLOv8DetectionOutput(YOLOv8DetectionClass objectClass,
                                     float confidence,
                                     int x, int y,
                                     int width, int height,

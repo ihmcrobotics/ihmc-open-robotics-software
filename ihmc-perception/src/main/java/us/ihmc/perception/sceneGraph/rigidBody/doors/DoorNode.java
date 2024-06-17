@@ -7,7 +7,7 @@ import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
+import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;

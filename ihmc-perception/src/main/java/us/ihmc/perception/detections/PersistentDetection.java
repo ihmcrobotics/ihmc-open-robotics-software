@@ -20,7 +20,6 @@ public class PersistentDetection<T extends InstantDetection>
    private final String detectedObjectName;
    private final Instant firstDetectionTime;
 
-   // If the total confidence per second is greater than this value, the detections will be considered stable.
    private double stabilityConfidenceThreshold;
    private double stabilityDetectionFrequency;
 
