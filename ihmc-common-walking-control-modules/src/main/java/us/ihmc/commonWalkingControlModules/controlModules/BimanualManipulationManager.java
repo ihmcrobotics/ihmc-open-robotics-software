@@ -159,7 +159,7 @@ public class BimanualManipulationManager implements SCS2YoGraphicHolder
             hand.getInertia().setIncludingFrame(combinedInertia);
          }
 
-         // Update sqeeze force
+         // Update squeeze force
          double effectiveSqueezeForce = alphaEnabled.getValue() * requestedSqueezeForce.getValue();
          for (RobotSide robotSide : RobotSide.values)
          {
