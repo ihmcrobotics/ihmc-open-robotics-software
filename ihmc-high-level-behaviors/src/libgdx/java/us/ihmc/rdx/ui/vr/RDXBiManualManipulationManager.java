@@ -54,7 +54,7 @@ public class RDXBiManualManipulationManager
    public BimanualManipulationMessage getBiManualManipulationMessage()
    {
       BimanualManipulationMessage message = new BimanualManipulationMessage();
-      message.setDisable(enableBiManualManipulation);
+      message.setDisable(!enableBiManualManipulation);
       return message;
    }
 
