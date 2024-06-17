@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.behaviorTree.trashCan;
 
-import behavior_msgs.msg.dds.DoorTraversalDefinitionMessage;
+import behavior_msgs.msg.dds.TrashCanInteractionDefinitionMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalString;
@@ -18,18 +18,18 @@ public class TrashCanInteractionDefinition extends BehaviorTreeNodeDefinition
       obstructedNode = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, "");
    }
 
-   public void toMessage(DoorTraversalDefinitionMessage message)
+   public void toMessage(TrashCanInteractionDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
 
-      message.setObstructedNode(obstructedNode.toMessage());
+      message.setObstructedNodeName(obstructedNode.toMessage());
    }
 
-   public void fromMessage(DoorTraversalDefinitionMessage message)
+   public void fromMessage(TrashCanInteractionDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 
-      obstructedNode.fromMessage(message.getObstructedNode());
+      obstructedNode.fromMessage(message.getObstructedNodeNameAsString());
    }
 
    public CRDTUnidirectionalString getObstructedNode()
