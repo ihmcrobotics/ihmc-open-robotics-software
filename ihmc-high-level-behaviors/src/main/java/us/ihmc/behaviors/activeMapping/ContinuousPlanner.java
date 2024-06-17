@@ -11,7 +11,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
@@ -54,30 +53,30 @@ public class ContinuousPlanner
    private final SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final HumanoidReferenceFrames referenceFrames;
 
-   private AtomicReference<FootstepPlan> monteCarloFootstepPlan = new AtomicReference<>(null);
-   private FramePose3D walkingStartMidPose = new FramePose3D();
-   private FramePose3D imminentFootstepPose = new FramePose3D();
+   private final AtomicReference<FootstepPlan> monteCarloFootstepPlan = new AtomicReference<>(null);
+   private final FramePose3D walkingStartMidPose = new FramePose3D();
+   private final FramePose3D imminentFootstepPose = new FramePose3D();
    private RobotSide imminentFootstepSide = RobotSide.LEFT;
    private ContinuousWalkingCommandMessage command;
    private PlanningMode mode;
 
    private List<EnumMap<Axis3D, List<PolynomialReadOnly>>> latestSwingTrajectories;
-   private MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters;
+   private final MonteCarloFootstepPlannerParameters monteCarloFootstepPlannerParameters;
    private MonteCarloFootstepPlannerRequest monteCarloFootstepPlannerRequest;
-   private CollisionFreeSwingCalculator collisionFreeSwingCalculator;
-   private ContinuousHikingParameters continuousHikingParameters;
-   private MonteCarloFootstepPlanner monteCarloFootstepPlanner;
-   private SwingPlannerParametersBasics swingPlannerParameters;
+   private final CollisionFreeSwingCalculator collisionFreeSwingCalculator;
+   private final ContinuousHikingParameters continuousHikingParameters;
+   private final MonteCarloFootstepPlanner monteCarloFootstepPlanner;
+   private final SwingPlannerParametersBasics swingPlannerParameters;
    private FootstepPlanningResult footstepPlanningResult;
    private ContinuousPlannerStatistics statistics;
-   private FootstepPlanningModule footstepPlanner;
+   private final FootstepPlanningModule footstepPlanner;
    private FootstepPlan monteCarloReferencePlan;
    private TerrainMapData latestTerrainMapData;
    private FootstepPlan previousFootstepPlan;
    private HeightMapData latestHeightMapData;
-   private TerrainPlanningDebugger debugger;
+   private final TerrainPlanningDebugger debugger;
    private FootstepPlan latestFootstepPlan;
-   private FootstepPlannerLogger logger;
+   private final FootstepPlannerLogger logger;
 
    private boolean initialized = false;
    private boolean planAvailable = false;
@@ -85,7 +84,7 @@ public class ContinuousPlanner
    private boolean active;
    private double previousContinuousHikingSwingTime = 0.0;
 
-   private List<SideDependentList<Pose3D>> walkToGoalWayPointList = new ArrayList<>();
+   private final List<SideDependentList<Pose3D>> walkToGoalWayPointList = new ArrayList<>();
    private final Point3D robotLocation = new Point3D();
 
    float xRandomMargin = 0.2f;
@@ -534,8 +533,7 @@ public class ContinuousPlanner
       // this also packs the footstep plan with optimized waypoints
       collisionFreeSwingCalculator.computeSwingTrajectories(startingStancePose, footstepPlan);
 
-      List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = collisionFreeSwingCalculator.getSwingTrajectories();
-      return swingTrajectories;
+      return collisionFreeSwingCalculator.getSwingTrajectories();
    }
 
    public MonteCarloFootstepPlanner getMonteCarloFootstepPlanner()

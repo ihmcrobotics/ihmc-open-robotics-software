@@ -70,10 +70,11 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
 
    private final ImBoolean enableRapidRegions = new ImBoolean(false);
    private final ImBoolean enableSphericalRapidRegions = new ImBoolean(false);
-   private final ImBoolean enableGPUHeightMap = new ImBoolean(false);
    private final ImBoolean enableMapRegions = new ImBoolean(false);
 
    private final ImFloat thresholdHeight = new ImFloat(1.0f);
+
+   public final ImBoolean enableGPUHeightMap = new ImBoolean(false);
 
    public RDXHumanoidPerceptionUI(HumanoidPerceptionModule humanoidPerception, ROS2Helper ros2Helper)
    {
@@ -294,6 +295,11 @@ public class RDXHumanoidPerceptionUI extends RDXPanel implements RDXRenderablePr
    public RDXRapidRegionsUI getRapidRegionsUI()
    {
       return rapidRegionsUI;
+   }
+
+   public void setEnableGPUHeightMap(boolean enableHeightMap)
+   {
+      enableGPUHeightMap.set(enableHeightMap);
    }
 
    public RDXRemotePerceptionUI getRemotePerceptionUI()
