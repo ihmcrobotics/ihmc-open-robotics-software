@@ -6,11 +6,14 @@ import controller_msgs.msg.dds.FootstepQueueStatusMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
 import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
+import ihmc_common_msgs.msg.dds.PoseListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -110,6 +113,7 @@ public class ContinuousPlannerSchedulingTask
       ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, robotModel.getSimpleRobotName()),
                                       this::footstepQueueStatusReceived);
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND, commandMessage::set);
+      ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLACED_GOAL_FOOTSTEPS, this::addWayPointCheckPointToList);
 
       this.continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, mode, parameters, monteCarloPlannerParameters, debugger);
 
@@ -132,6 +136,7 @@ public class ContinuousPlannerSchedulingTask
    private void tickStateMachine()
    {
       continuousPlanner.syncParametersCallback();
+//      continuousPlanner.updatePlanningMode();
 
       if (!parameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
       {
@@ -383,4 +388,12 @@ public class ContinuousPlannerSchedulingTask
    {
       executorService.shutdown();
    }
+
+   public void addWayPointCheckPointToList(PoseListMessage poseListMessage)
+   {
+      List<Pose3D> poses = MessageTools.unpackPoseListMessage(poseListMessage);
+      continuousPlanner.addWayPointToList(poses.get(0), poses.get(1));
+      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
+//      Are the start and goal foosteps not white and black? What happened to the color? Need to look into that????
+    }
 }

@@ -22,7 +22,6 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionPolygonSnapper.createTransformToMatchSurfaceNormalPreserveX;
 import static us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionPolygonSnapper.setTranslationSettingZAndPreservingXAndY;
 
 public class HeightMapPolygonSnapper
@@ -170,7 +169,7 @@ public class HeightMapPolygonSnapper
          double height = terrainMapData.getSnappedHeightInWorld(centroid.getX(), centroid.getY());
          UnitVector3DReadOnly normal = terrainMapData.getNormalInWorld(centroid.getX(), centroid.getY());
 
-         transformToReturn = createTransformToMatchSurfaceNormalPreserveX(normal);
+         transformToReturn = PolygonSnapperTools.createTransformToMatchSurfaceNormalPreserveX(normal);
          setTranslationSettingZAndPreservingXAndY(new Point3D(centroid.getX(), centroid.getY(), height), transformToReturn);
 
          // TODO need to compute the snapped polygon
@@ -269,7 +268,7 @@ public class HeightMapPolygonSnapper
          double height = bestFitPlane.getZOnPlane(centroid.getX(), centroid.getY());
 
          // compute the actual snap transform.
-         transformToReturn = createTransformToMatchSurfaceNormalPreserveX(bestFitPlane.getNormal());
+         transformToReturn = PolygonSnapperTools.createTransformToMatchSurfaceNormalPreserveX(bestFitPlane.getNormal());
          setTranslationSettingZAndPreservingXAndY(new Point3D(centroid.getX(), centroid.getY(), height), transformToReturn);
       }
 

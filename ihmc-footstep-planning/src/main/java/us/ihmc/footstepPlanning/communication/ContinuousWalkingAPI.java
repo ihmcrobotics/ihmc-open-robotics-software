@@ -28,6 +28,7 @@ public class ContinuousWalkingAPI
    public static final ROS2Topic<ContinuousWalkingCommandMessage> CONTINUOUS_WALKING_COMMAND = IHMC_ROOT.withModule("continuous_walking").withType(ContinuousWalkingCommandMessage.class).withSuffix("command");
    public static final ROS2Topic<ContinuousWalkingStatusMessage> CONTINUOUS_WALKING_STATUS = IHMC_ROOT.withModule("continuous_walking").withType(ContinuousWalkingStatusMessage.class).withSuffix("status");
 
+   public static final ROS2Topic<PoseListMessage> PLACED_GOAL_FOOTSTEPS = IHMC_ROOT.withModule("continuous_walking").withType(PoseListMessage.class).withSuffix("placed_goal_footsteps");
    public static final ROS2Topic<FootstepDataListMessage> PLANNED_FOOTSTEPS = IHMC_ROOT.withModule("continuous_walking").withType(FootstepDataListMessage.class).withSuffix("planned_footsteps");
    public static final ROS2Topic<PoseListMessage> START_AND_GOAL_FOOTSTEPS = IHMC_ROOT.withModule("continuous_walking").withType(PoseListMessage.class).withSuffix("start_and_goal");
    public static final ROS2Topic<PoseListMessage> MONTE_CARLO_TREE_NODES = IHMC_ROOT.withModule("continuous_walking").withType(PoseListMessage.class).withSuffix("monte_carlo_tree_nodes");
