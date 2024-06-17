@@ -104,12 +104,16 @@ public class PerceptionAndAutonomyProcess
    private static final ROS2Topic<ImageMessage> BLACKFLY_IMAGE_TOPIC = PerceptionAPI.BLACKFLY_FISHEYE_COLOR_IMAGE.get(RobotSide.RIGHT);
 
    private final ROS2Helper ros2Helper;
-   private final Supplier<ReferenceFrame> zedFrameSupplier;
-   private final Supplier<ReferenceFrame> realsenseFrameSupplier;
-   private final Supplier<ReferenceFrame> realsenseZUpFrameSupplier;
-   private final Supplier<ReferenceFrame> ousterFrameSupplier;
-   private final Supplier<ReferenceFrame> leftFootSoleFrameSupplier;
-   private final Supplier<ReferenceFrame> rightFootSoleFrameSupplier;
+   private final @Nullable ROS2SyncedRobotModel syncedRobot;
+   private Supplier<ReferenceFrame> zedFrameSupplier = ReferenceFrame::getWorldFrame;
+   private Supplier<ReferenceFrame> realsenseFrameSupplier = ReferenceFrame::getWorldFrame;
+   private Supplier<ReferenceFrame> realsenseZUpFrameSupplier = ReferenceFrame::getWorldFrame;
+   private Supplier<ReferenceFrame> ousterFrameSupplier = ReferenceFrame::getWorldFrame;
+   private final SideDependentList<Supplier<ReferenceFrame>> blackflyFrameSuppliers = new SideDependentList<>(ReferenceFrame::getWorldFrame,
+                                                                                                              ReferenceFrame::getWorldFrame);
+   private Supplier<ReferenceFrame> robotPelvisFrameSupplier = ReferenceFrame::getWorldFrame;
+   private final SideDependentList<Supplier<ReferenceFrame>> soleFrameSuppliers = new SideDependentList<>(ReferenceFrame::getWorldFrame,
+                                                                                                          ReferenceFrame::getWorldFrame);
 
    private final DepthImageOverlapRemover overlapRemover = new DepthImageOverlapRemover();
 
@@ -139,7 +143,6 @@ public class PerceptionAndAutonomyProcess
    private final OusterDepthImagePublisher ousterDepthImagePublisher;
    private final RestartableThread ousterProcessAndPublishThread;
 
-   private final SideDependentList<Supplier<ReferenceFrame>> blackflyFrameSuppliers = new SideDependentList<>();
    private final SideDependentList<ROS2DemandGraphNode> blackflyImageDemandNodes = new SideDependentList<>();
    private final SideDependentList<RawImage> blackflyImages = new SideDependentList<>();
    private final SideDependentList<BlackflyImageRetriever> blackflyImageRetrievers = new SideDependentList<>();
@@ -150,7 +153,6 @@ public class PerceptionAndAutonomyProcess
    private final ArUcoDetectionUpdater arUcoUpdater;
    private final SwapReference<OpenCVArUcoMarkerDetectionResults> sharedArUcoDetectionResults = new SwapReference<>(OpenCVArUcoMarkerDetectionResults::new);
 
-   private final Supplier<ReferenceFrame> robotPelvisFrameSupplier;
    private final ROS2SceneGraph sceneGraph;
    private final RestartableThrottledThread sceneGraphUpdateThread;
    private ROS2DemandGraphNode arUcoDetectionDemandNode;
@@ -192,24 +194,23 @@ public class PerceptionAndAutonomyProcess
    private ROS2Heartbeat leftBlackflyHeartbeat;
    private ROS2Heartbeat rightBlackflyHeartbeat;
 
-   public PerceptionAndAutonomyProcess(ROS2Helper ros2Helper,
-                                       Supplier<ReferenceFrame> zedFrameSupplier,
-                                       Supplier<ReferenceFrame> realsenseFrameSupplier,
-                                       Supplier<ReferenceFrame> realsenseZUpFrameSupplier,
-                                       Supplier<ReferenceFrame> ousterFrameSupplier,
-                                       Supplier<ReferenceFrame> leftBlackflyFrameSupplier,
-                                       Supplier<ReferenceFrame> rightBlackflyFrameSupplier,
-                                       Supplier<ReferenceFrame> robotPelvisFrameSupplier,
-                                       Supplier<ReferenceFrame> leftFootSoleFrameSupplier,
-                                       Supplier<ReferenceFrame> rightFootSoleFrameSupplier)
+   public PerceptionAndAutonomyProcess(ROS2Helper ros2Helper, ROS2SyncedRobotModel syncedRobot)
    {
       this.ros2Helper = ros2Helper;
-      this.zedFrameSupplier = zedFrameSupplier;
-      this.realsenseFrameSupplier = realsenseFrameSupplier;
-      this.realsenseZUpFrameSupplier = realsenseZUpFrameSupplier;
-      this.ousterFrameSupplier = ousterFrameSupplier;
-      this.leftFootSoleFrameSupplier = leftFootSoleFrameSupplier;
-      this.rightFootSoleFrameSupplier = rightFootSoleFrameSupplier;
+      this.syncedRobot = syncedRobot;
+      if (syncedRobot != null)
+      {
+         zedFrameSupplier = syncedRobot.getReferenceFrames()::getExperimentalCameraFrame;
+         realsenseFrameSupplier = syncedRobot.getReferenceFrames()::getSteppingCameraFrame;
+         realsenseZUpFrameSupplier = syncedRobot.getReferenceFrames()::getSteppingCameraZUpFrame;
+         ousterFrameSupplier = syncedRobot.getReferenceFrames()::getOusterLidarFrame;
+         robotPelvisFrameSupplier = syncedRobot.getReferenceFrames()::getPelvisZUpFrame;
+         for (RobotSide side : RobotSide.values)
+         {
+            blackflyFrameSuppliers.put(side, () -> syncedRobot.getReferenceFrames().getSituationalAwarenessCameraFrame(side));
+            soleFrameSuppliers.put(side, () -> syncedRobot.getReferenceFrames().getSoleFrame(side));
+         }
+      }
 
       initializeDependencyGraph(ros2Helper);
 
@@ -236,8 +237,6 @@ public class PerceptionAndAutonomyProcess
       ousterProcessAndPublishThread = new RestartableThread("OusterProcessAndPublish", this::processAndPublishOuster);
       ousterProcessAndPublishThread.start();
 
-      blackflyFrameSuppliers.put(RobotSide.LEFT, leftBlackflyFrameSupplier);
-      blackflyFrameSuppliers.put(RobotSide.RIGHT, rightBlackflyFrameSupplier);
       blackflyProcessAndPublishThread = new RestartableThread("BlackflyProcessAndPublish", this::processAndPublishBlackfly);
       blackflyProcessAndPublishThread.start();
 
@@ -245,7 +244,6 @@ public class PerceptionAndAutonomyProcess
       arUcoMarkerDetectionThread = new RestartableThread("ArUcoMarkerDetection", this::detectAndPublishArUcoMarkers);
       arUcoMarkerDetectionThread.start();
 
-      this.robotPelvisFrameSupplier = robotPelvisFrameSupplier;
       sceneGraph = new ROS2SceneGraph(ros2Helper);
       sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", SceneGraph.UPDATE_FREQUENCY, this::updateSceneGraph);
 
@@ -599,13 +597,18 @@ public class PerceptionAndAutonomyProcess
          if (heightMapManager == null)
          {
             heightMapManager = new RapidHeightMapManager(openCLManager,
-                                                         leftFootSoleFrameSupplier,
-                                                         rightFootSoleFrameSupplier,
-                                                         latestRealsenseDepthImage,
+                                                         syncedRobot == null ? null : syncedRobot.getRobotModel(),
+                                                         soleFrameSuppliers.get(RobotSide.LEFT).get(),
+                                                         soleFrameSuppliers.get(RobotSide.RIGHT).get(),
+                                                         latestRealsenseDepthImage.getIntrinsicsCopy(),
                                                          ros2Helper);
          }
 
-         heightMapManager.update(latestRealsenseDepthImage, realsenseFrameSupplier.get(), realsenseZUpFrameSupplier.get(), ros2Helper);
+         heightMapManager.update(latestRealsenseDepthImage.getCpuImageMat(),
+                                 latestRealsenseDepthImage.getAcquisitionTime(),
+                                 realsenseFrameSupplier.get(),
+                                 realsenseZUpFrameSupplier.get(),
+                                 ros2Helper);
 
          latestRealsenseDepthImage.release();
       }
@@ -690,16 +693,7 @@ public class PerceptionAndAutonomyProcess
       ROS2Node ros2Node = ROS2Tools.createROS2Node(CommunicationMode.INTERPROCESS.getPubSubImplementation(), "perception_autonomy_process");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-      PerceptionAndAutonomyProcess perceptionAndAutonomyProcess = new PerceptionAndAutonomyProcess(ros2Helper,
-                                                                                                   ReferenceFrame::getWorldFrame,
-                                                                                                   ReferenceFrame::getWorldFrame,
-                                                                                                   ReferenceFrame::getWorldFrame,
-                                                                                                   ReferenceFrame::getWorldFrame,
-                                                                                                   ReferenceFrame::getWorldFrame,
-                                                                                                   ReferenceFrame::getWorldFrame,
-                                                                                                   ReferenceFrame::getWorldFrame,
-                                                                                                   ReferenceFrame::getWorldFrame,
-                                                                                                   ReferenceFrame::getWorldFrame);
+      PerceptionAndAutonomyProcess perceptionAndAutonomyProcess = new PerceptionAndAutonomyProcess(ros2Helper, null);
       perceptionAndAutonomyProcess.startAutonomyThread();
 
       // To run a sensor without the UI, uncomment the below line.
