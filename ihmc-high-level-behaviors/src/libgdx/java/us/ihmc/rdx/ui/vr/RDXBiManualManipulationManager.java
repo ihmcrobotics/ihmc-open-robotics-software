@@ -45,10 +45,16 @@ public class RDXBiManualManipulationManager
    private final FrameVector3D midHandFrameY = new FrameVector3D();
    private final FrameVector3D midHandFrameZ = new FrameVector3D();
    private final FrameVector3D worldFrameX = new FrameVector3D(ReferenceFrame.getWorldFrame(), Axis3D.X);
+   private double nominalHandDistance;
+   private boolean saveHandDistanceOnFirstTick;
 
    public void toggleBiManualManipulationMode()
    {
       enableBiManualManipulation = !enableBiManualManipulation;
+      if (enableBiManualManipulation)
+      {
+         saveHandDistanceOnFirstTick = true;
+      }
    }
 
    public BimanualManipulationMessage getBiManualManipulationMessage()
@@ -79,13 +85,10 @@ public class RDXBiManualManipulationManager
 
    private void updateFrames(SideDependentList<MutableReferenceFrame> handDesiredControlFrames)
    {
-      for (RobotSide robotSide : RobotSide.values)
+      if(saveHandDistanceOnFirstTick)
       {
-         handPoints.get(robotSide).setMatchingFrame(handDesiredControlFrames.get(robotSide).getReferenceFrame(), 0.0, 0.0, 0.0);
+         saveNominalHandDistanceAtFirstTick(handDesiredControlFrames);
       }
-
-      double currentHandDistance = handPoints.get(RobotSide.LEFT).distance(handPoints.get(RobotSide.RIGHT));
-
       midHandFramePose.setToZero(ReferenceFrame.getWorldFrame());
       midHandFramePose.getPosition().interpolate(handPoints.get(RobotSide.LEFT), handPoints.get(RobotSide.RIGHT), 0.5);
 
@@ -110,5 +113,16 @@ public class RDXBiManualManipulationManager
       {
          handDesiredControlFrames.get(robotSide).getTransformToParent().getRotation().set(midHandFramePose.getOrientation());
       }
+   }
+
+   private void saveNominalHandDistanceAtFirstTick(SideDependentList<MutableReferenceFrame> handDesiredControlFrames)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         handPoints.get(robotSide).setMatchingFrame(handDesiredControlFrames.get(robotSide).getReferenceFrame(), 0.0, 0.0, 0.0);
+      }
+
+      nominalHandDistance = handPoints.get(RobotSide.LEFT).distance(handPoints.get(RobotSide.RIGHT));
+      saveHandDistanceOnFirstTick = false;
    }
 }
