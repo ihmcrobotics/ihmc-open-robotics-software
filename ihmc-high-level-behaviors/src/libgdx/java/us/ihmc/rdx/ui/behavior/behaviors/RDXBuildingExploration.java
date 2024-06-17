@@ -17,6 +17,8 @@ public class RDXBuildingExploration extends RDXBehaviorTreeNode<BuildingExplorat
       super(new BuildingExplorationState(id, crdtInfo, saveFileDirectory));
 
       this.syncedRobot = syncedRobot;
+
+      getDefinition().setName("Building Exploration");
    }
 
    @Override
