@@ -1,6 +1,19 @@
 package us.ihmc.behaviors.behaviorTree.ros2;
 
-import behavior_msgs.msg.dds.*;
+import behavior_msgs.msg.dds.ActionNodeStateMessage;
+import behavior_msgs.msg.dds.ActionSequenceStateMessage;
+import behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage;
+import behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage;
+import behavior_msgs.msg.dds.BuildingExplorationStateMessage;
+import behavior_msgs.msg.dds.ChestOrientationActionStateMessage;
+import behavior_msgs.msg.dds.DoorTraversalStateMessage;
+import behavior_msgs.msg.dds.FootstepPlanActionStateMessage;
+import behavior_msgs.msg.dds.HandPoseActionStateMessage;
+import behavior_msgs.msg.dds.HandWrenchActionStateMessage;
+import behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessage;
+import behavior_msgs.msg.dds.SakeHandCommandActionStateMessage;
+import behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage;
+import behavior_msgs.msg.dds.WaitDurationActionStateMessage;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +25,7 @@ public class ROS2BehaviorTreeSubscriptionNode
    private BehaviorTreeNodeStateMessage behaviorTreeNodeStateMessage;
    private ActionSequenceStateMessage actionSequenceStateMessage;
    private DoorTraversalStateMessage doorTraversalStateMessage;
-   private RoomExplorationStateMessage roomExplorationStateMessage;
+   private BuildingExplorationStateMessage buildingExplorationStateMessage;
    private ActionNodeStateMessage actionNodeStateMessage;
    private ChestOrientationActionStateMessage chestOrientationActionStateMessage;
    private FootstepPlanActionStateMessage footstepPlanActionStateMessage;
@@ -31,7 +44,7 @@ public class ROS2BehaviorTreeSubscriptionNode
       behaviorTreeNodeStateMessage = null;
       actionSequenceStateMessage = null;
       doorTraversalStateMessage = null;
-      roomExplorationStateMessage = null;
+      buildingExplorationStateMessage = null;
       actionNodeStateMessage = null;
       chestOrientationActionStateMessage = null;
       footstepPlanActionStateMessage = null;
@@ -104,14 +117,14 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.doorTraversalStateMessage = doorTraversalStateMessage;
    }
 
-   public RoomExplorationStateMessage getRoomExplorationStateMessage()
+   public BuildingExplorationStateMessage getBuildingExplorationStateMessage()
    {
-      return roomExplorationStateMessage;
+      return buildingExplorationStateMessage;
    }
 
-   public void setRoomExplorationStateMessage(RoomExplorationStateMessage roomExplorationStateMessage)
+   public void setBuildingExplorationStateMessage(BuildingExplorationStateMessage buildingExplorationStateMessage)
    {
-      this.roomExplorationStateMessage = roomExplorationStateMessage;
+      this.buildingExplorationStateMessage = buildingExplorationStateMessage;
    }
 
    public ChestOrientationActionStateMessage getChestOrientationActionStateMessage()

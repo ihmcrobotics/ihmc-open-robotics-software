@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class RoomExplorationStateMessage extends Packet<RoomExplorationStateMessage> implements Settable<RoomExplorationStateMessage>, EpsilonComparable<RoomExplorationStateMessage>
+public class BuildingExplorationStateMessage extends Packet<BuildingExplorationStateMessage> implements Settable<BuildingExplorationStateMessage>, EpsilonComparable<BuildingExplorationStateMessage>
 {
    /**
             * Parent state fields
@@ -15,24 +15,24 @@ public class RoomExplorationStateMessage extends Packet<RoomExplorationStateMess
    /**
             * Definition
             */
-   public behavior_msgs.msg.dds.RoomExplorationDefinitionMessage definition_;
+   public behavior_msgs.msg.dds.BuildingExplorationDefinitionMessage definition_;
 
-   public RoomExplorationStateMessage()
+   public BuildingExplorationStateMessage()
    {
       state_ = new behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage();
-      definition_ = new behavior_msgs.msg.dds.RoomExplorationDefinitionMessage();
+      definition_ = new behavior_msgs.msg.dds.BuildingExplorationDefinitionMessage();
    }
 
-   public RoomExplorationStateMessage(RoomExplorationStateMessage other)
+   public BuildingExplorationStateMessage(BuildingExplorationStateMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(RoomExplorationStateMessage other)
+   public void set(BuildingExplorationStateMessage other)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeStateMessagePubSubType.staticCopy(other.state_, state_);
-      behavior_msgs.msg.dds.RoomExplorationDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      behavior_msgs.msg.dds.BuildingExplorationDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
    }
 
 
@@ -48,25 +48,25 @@ public class RoomExplorationStateMessage extends Packet<RoomExplorationStateMess
    /**
             * Definition
             */
-   public behavior_msgs.msg.dds.RoomExplorationDefinitionMessage getDefinition()
+   public behavior_msgs.msg.dds.BuildingExplorationDefinitionMessage getDefinition()
    {
       return definition_;
    }
 
 
-   public static Supplier<RoomExplorationStateMessagePubSubType> getPubSubType()
+   public static Supplier<BuildingExplorationStateMessagePubSubType> getPubSubType()
    {
-      return RoomExplorationStateMessagePubSubType::new;
+      return BuildingExplorationStateMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return RoomExplorationStateMessagePubSubType::new;
+      return BuildingExplorationStateMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(RoomExplorationStateMessage other, double epsilon)
+   public boolean epsilonEquals(BuildingExplorationStateMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -82,9 +82,9 @@ public class RoomExplorationStateMessage extends Packet<RoomExplorationStateMess
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof RoomExplorationStateMessage)) return false;
+      if(!(other instanceof BuildingExplorationStateMessage)) return false;
 
-      RoomExplorationStateMessage otherMyClass = (RoomExplorationStateMessage) other;
+      BuildingExplorationStateMessage otherMyClass = (BuildingExplorationStateMessage) other;
 
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
@@ -97,7 +97,7 @@ public class RoomExplorationStateMessage extends Packet<RoomExplorationStateMess
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("RoomExplorationStateMessage {");
+      builder.append("BuildingExplorationStateMessage {");
       builder.append("state=");
       builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");

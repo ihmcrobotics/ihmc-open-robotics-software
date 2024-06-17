@@ -1,8 +1,8 @@
-package us.ihmc.behaviors.roomExploration.old;
+package us.ihmc.behaviors.buildingExploration.old;
 
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-import static us.ihmc.behaviors.roomExploration.old.BuildingExplorationBehaviorParameters.*;
+import static us.ihmc.behaviors.buildingExploration.old.BuildingExplorationBehaviorParameters.*;
 
 public interface BuildingExplorationBehaviorParametersReadOnly extends StoredPropertySetReadOnly
 {

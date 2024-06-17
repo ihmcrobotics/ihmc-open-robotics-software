@@ -9,7 +9,7 @@ int8 ACTION_SEQUENCE=1
 
 int8 DOOR_TRAVERSAL=2
 
-int8 ROOM_EXPLORATION=3
+int8 BUILDING_EXPLORATION=3
 
 int8 CHEST_ORIENTATION_ACTION=10
 
@@ -50,7 +50,7 @@ behavior_msgs/ActionSequenceStateMessage[] action_sequences
 
 behavior_msgs/DoorTraversalStateMessage[] door_traversals
 
-behavior_msgs/RoomExplorationStateMessage[] room_explorations
+behavior_msgs/BuildingExplorationStateMessage[] building_explorations
 
 behavior_msgs/ChestOrientationActionStateMessage[] chest_orientation_actions
 

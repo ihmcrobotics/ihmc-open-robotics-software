@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.roomExploration.old;
+package us.ihmc.behaviors.buildingExploration.old;
 
 import std_msgs.msg.dds.UInt16;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -18,8 +18,8 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.roomExploration.old.BuildingExplorationBehaviorAPI.*;
-import static us.ihmc.behaviors.roomExploration.old.BuildingExplorationBehaviorMode.*;
+import static us.ihmc.behaviors.buildingExploration.old.BuildingExplorationBehaviorAPI.*;
+import static us.ihmc.behaviors.buildingExploration.old.BuildingExplorationBehaviorMode.*;
 
 /**
  * This was intended to be an upgrade for the 2019 Atlas building exploration demo but never got used.

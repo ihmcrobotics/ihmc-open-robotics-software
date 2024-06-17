@@ -6,25 +6,25 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class RoomExplorationDefinitionMessage extends Packet<RoomExplorationDefinitionMessage> implements Settable<RoomExplorationDefinitionMessage>, EpsilonComparable<RoomExplorationDefinitionMessage>
+public class BuildingExplorationDefinitionMessage extends Packet<BuildingExplorationDefinitionMessage> implements Settable<BuildingExplorationDefinitionMessage>, EpsilonComparable<BuildingExplorationDefinitionMessage>
 {
    /**
             * Parent definition fields
             */
    public behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage definition_;
 
-   public RoomExplorationDefinitionMessage()
+   public BuildingExplorationDefinitionMessage()
    {
       definition_ = new behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage();
    }
 
-   public RoomExplorationDefinitionMessage(RoomExplorationDefinitionMessage other)
+   public BuildingExplorationDefinitionMessage(BuildingExplorationDefinitionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(RoomExplorationDefinitionMessage other)
+   public void set(BuildingExplorationDefinitionMessage other)
    {
       behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);   }
 
@@ -38,19 +38,19 @@ public class RoomExplorationDefinitionMessage extends Packet<RoomExplorationDefi
    }
 
 
-   public static Supplier<RoomExplorationDefinitionMessagePubSubType> getPubSubType()
+   public static Supplier<BuildingExplorationDefinitionMessagePubSubType> getPubSubType()
    {
-      return RoomExplorationDefinitionMessagePubSubType::new;
+      return BuildingExplorationDefinitionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return RoomExplorationDefinitionMessagePubSubType::new;
+      return BuildingExplorationDefinitionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(RoomExplorationDefinitionMessage other, double epsilon)
+   public boolean epsilonEquals(BuildingExplorationDefinitionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -65,9 +65,9 @@ public class RoomExplorationDefinitionMessage extends Packet<RoomExplorationDefi
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof RoomExplorationDefinitionMessage)) return false;
+      if(!(other instanceof BuildingExplorationDefinitionMessage)) return false;
 
-      RoomExplorationDefinitionMessage otherMyClass = (RoomExplorationDefinitionMessage) other;
+      BuildingExplorationDefinitionMessage otherMyClass = (BuildingExplorationDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
 
@@ -79,7 +79,7 @@ public class RoomExplorationDefinitionMessage extends Packet<RoomExplorationDefi
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("RoomExplorationDefinitionMessage {");
+      builder.append("BuildingExplorationDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);
       builder.append("}");

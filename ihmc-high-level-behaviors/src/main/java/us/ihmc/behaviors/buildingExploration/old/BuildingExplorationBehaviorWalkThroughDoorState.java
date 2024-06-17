@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.roomExploration.old;
+package us.ihmc.behaviors.buildingExploration.old;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.BehaviorHelper;

@@ -1,5 +1,5 @@
-#ifndef __behavior_msgs__msg__RoomExplorationDefinitionMessage__idl__
-#define __behavior_msgs__msg__RoomExplorationDefinitionMessage__idl__
+#ifndef __behavior_msgs__msg__BuildingExplorationDefinitionMessage__idl__
+#define __behavior_msgs__msg__BuildingExplorationDefinitionMessage__idl__
 
 #include "behavior_msgs/msg/./BehaviorTreeNodeDefinitionMessage_.idl"
 module behavior_msgs
@@ -9,8 +9,8 @@ module behavior_msgs
     module dds
     {
 
-      @TypeCode(type="behavior_msgs::msg::dds_::RoomExplorationDefinitionMessage_")
-      struct RoomExplorationDefinitionMessage
+      @TypeCode(type="behavior_msgs::msg::dds_::BuildingExplorationDefinitionMessage_")
+      struct BuildingExplorationDefinitionMessage
       {
         /**
          * Parent definition fields

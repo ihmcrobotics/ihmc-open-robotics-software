@@ -7,8 +7,8 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
-import us.ihmc.behaviors.roomExploration.RoomExplorationDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
@@ -162,12 +162,12 @@ public class RDXBehaviorTreeNodeCreationMenu
       {
          renderNodeCreationClickable(relativeNode, insertionType, "Basic Node", BehaviorTreeNodeDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Door Traversal", DoorTraversalDefinition.class, null);
-         renderNodeCreationClickable(relativeNode, insertionType, "Room Exploration", RoomExplorationDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Building Exploration", BuildingExplorationDefinition.class, null);
       }
       if (insertionType == BehaviorTreeNodeInsertionType.INSERT_ROOT)
       {
          renderNodeCreationClickable(relativeNode, insertionType, "Action Sequence", ActionSequenceDefinition.class, null);
-         renderNodeCreationClickable(relativeNode, insertionType, "Room Exploration", RoomExplorationDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Building Exploration", BuildingExplorationDefinition.class, null);
       }
 
       ImGui.unindent();

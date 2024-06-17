@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
-import us.ihmc.behaviors.roomExploration.RoomExplorationDefinition;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
@@ -30,9 +30,9 @@ public class BehaviorTreeDefinitionBuilder
       {
          return new DoorTraversalDefinition(crdtInfo, saveFileDirectory);
       }
-      if (definitionType == RoomExplorationDefinition.class)
+      if (definitionType == BuildingExplorationDefinition.class)
       {
-         return new RoomExplorationDefinition(crdtInfo, saveFileDirectory);
+         return new BuildingExplorationDefinition(crdtInfo, saveFileDirectory);
       }
       if (definitionType == ChestOrientationActionDefinition.class)
       {

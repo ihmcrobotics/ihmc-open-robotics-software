@@ -1,14 +1,14 @@
-package us.ihmc.behaviors.roomExploration;
+package us.ihmc.behaviors.buildingExploration;
 
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class RoomExplorationExecutor extends BehaviorTreeNodeExecutor<RoomExplorationState, RoomExplorationDefinition>
+public class BuildingExplorationExecutor extends BehaviorTreeNodeExecutor<BuildingExplorationState, BuildingExplorationDefinition>
 {
-   public RoomExplorationExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public BuildingExplorationExecutor(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
-      super(new RoomExplorationState(id, crdtInfo, saveFileDirectory));
+      super(new BuildingExplorationState(id, crdtInfo, saveFileDirectory));
    }
 
    @Override

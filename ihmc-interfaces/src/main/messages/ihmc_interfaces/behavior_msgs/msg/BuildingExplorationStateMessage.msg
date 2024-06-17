@@ -2,5 +2,5 @@
 behavior_msgs/BehaviorTreeNodeStateMessage state
 
 # Definition
-behavior_msgs/RoomExplorationDefinitionMessage definition
+behavior_msgs/BuildingExplorationDefinitionMessage definition
 
