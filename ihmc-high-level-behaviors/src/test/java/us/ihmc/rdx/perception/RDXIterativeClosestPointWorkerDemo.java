@@ -21,9 +21,8 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.IterativeClosestPointWorker;
-import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -52,8 +51,7 @@ public class RDXIterativeClosestPointWorkerDemo
    private static final int MAX_ENVIRONMENT_SIZE = 1000;
    private static final int CORRESPONDENCES = 1000;
 
-   private final OpenCLManager openCLManager = new OpenCLManager();
-   private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor(openCLManager);
+   private final OpenCLPointCloudExtractor pointCloudExtractor = new OpenCLPointCloudExtractor();
    private final Random random = new Random(System.nanoTime());
 
    private final ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "icp_worker_demo");
@@ -106,7 +104,7 @@ public class RDXIterativeClosestPointWorkerDemo
                                                           ReferenceFrame::getWorldFrame,
                                                           new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_DEPTH),
                                                           new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_COLOR));
-      zedImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH);
+      zedImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH, PerceptionAPI.ZED2_CUT_OUT_DEPTH);
 
       PrimitiveRigidBodyShape[] shapeArray = new PrimitiveRigidBodyShape[PrimitiveRigidBodyShape.values().length];
       Arrays.stream(PrimitiveRigidBodyShape.values()).toList().toArray(shapeArray);

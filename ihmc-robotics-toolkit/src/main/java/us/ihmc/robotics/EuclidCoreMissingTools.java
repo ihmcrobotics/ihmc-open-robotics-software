@@ -30,6 +30,7 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.TupleTools;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -528,6 +529,12 @@ public class EuclidCoreMissingTools
       double dx = projectionX - pointX;
       double dy = projectionY - pointY;
       return dx * dx + dy * dy;
+   }
+
+   public static boolean epsilonEquals(RigidBodyTransformReadOnly a, RigidBodyTransformReadOnly b, double rotationEpsilon, double translationEpsilon)
+   {
+      return a.getRotation().geometricallyEquals(b.getRotation(), rotationEpsilon)
+          && a.getTranslation().geometricallyEquals(b.getTranslation(), translationEpsilon);
    }
 
    /**

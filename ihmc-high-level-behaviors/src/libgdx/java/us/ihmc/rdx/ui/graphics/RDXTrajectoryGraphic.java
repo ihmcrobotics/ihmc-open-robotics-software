@@ -11,7 +11,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.rdx.mesh.RDXMutableMultiLineModel;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * A white line for the translation part and little coordinate frame graphics to show orientation change.
@@ -20,6 +20,7 @@ import java.util.List;
 public class RDXTrajectoryGraphic
 {
    public static final float OPACITY = 0.7f;
+   private final Color color;
    private final RecyclingArrayList<Point3D> positions = new RecyclingArrayList<>(Point3D::new);
    private final RDXMutableMultiLineModel positionTrajectoryGraphic = new RDXMutableMultiLineModel();
 
@@ -30,7 +31,17 @@ public class RDXTrajectoryGraphic
    private final RotationMatrix relativeRotation = new RotationMatrix();
    private final RotationMatrix endOrientation = new RotationMatrix();
 
-   /** Straight line trajectory. */
+   public RDXTrajectoryGraphic()
+   {
+      this(Color.WHITE);
+   }
+
+   public RDXTrajectoryGraphic(Color color)
+   {
+      this.color = color;
+   }
+
+   /** Set to be a single straight line trajectory. */
    public void update(double lineWidth, RigidBodyTransformReadOnly start, RigidBodyTransformReadOnly end)
    {
       positions.clear();
@@ -43,7 +54,8 @@ public class RDXTrajectoryGraphic
       updateInternal(lineWidth);
    }
 
-   public void update(double lineWidth, List<? extends RigidBodyTransformReadOnly> posesReadOnly)
+   /** Pass and override the entire list of poses. */
+   public void update(double lineWidth, Collection<? extends RigidBodyTransformReadOnly> posesReadOnly)
    {
       positions.clear();
       poses.clear();
@@ -56,8 +68,19 @@ public class RDXTrajectoryGraphic
       updateInternal(lineWidth);
    }
 
+   /** Add a pose to the end of the list. */
+   public void update(double lineWidth, RigidBodyTransformReadOnly poseToAdd)
+   {
+      positions.add().set(poseToAdd.getTranslation());
+      poses.add().set(poseToAdd);
+
+      updateInternal(lineWidth);
+   }
+
    public void clear()
    {
+      positions.clear();
+      poses.clear();
       positionTrajectoryGraphic.clear();
       if (referenceFrameGraphics != null)
          referenceFrameGraphics.clear();
@@ -65,7 +88,7 @@ public class RDXTrajectoryGraphic
 
    private void updateInternal(double lineWidth)
    {
-      positionTrajectoryGraphic.update(positions, lineWidth, Color.WHITE);
+      positionTrajectoryGraphic.update(positions, lineWidth, color);
       positionTrajectoryGraphic.accessModelIfExists(modelInstance -> modelInstance.setOpacity(OPACITY));
 
       if (referenceFrameGraphics == null)

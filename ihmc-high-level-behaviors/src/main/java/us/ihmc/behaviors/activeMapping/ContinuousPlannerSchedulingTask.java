@@ -75,7 +75,7 @@ public class ContinuousPlannerSchedulingTask
    private ContinuousPlannerStatistics statistics;
    private MonteCarloFootstepPlannerParameters monteCarloPlannerParameters;
    private final FootstepSnapAndWiggler snapper;
-   private final ContinuousWalkingParameters parameters;
+   private final ContinuousHikingParameters parameters;
    private final FootstepPoseHeuristicChecker stepChecker;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -90,7 +90,7 @@ public class ContinuousPlannerSchedulingTask
    public ContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
                                           ROS2Node ros2Node,
                                           HumanoidReferenceFrames referenceFrames,
-                                          ContinuousWalkingParameters parameters,
+                                          ContinuousHikingParameters parameters,
                                           ContinuousPlanner.PlanningMode mode)
    {
       this.referenceFrames = referenceFrames;
@@ -213,6 +213,8 @@ public class ContinuousPlannerSchedulingTask
          debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
          continuousPlanner.setGoalWaypointPoses();
          continuousPlanner.planToGoal(commandMessage.get());
+         continuousPlanner.logFootStePlan();
+
          if (commandMessage.get().getUseHybridPlanner() || commandMessage.get().getUseMonteCarloFootstepPlanner() || commandMessage.get().getUseMonteCarloPlanAsReference())
          {
             debugger.publishMonteCarloPlan(continuousPlanner.getMonteCarloFootstepDataListMessage());

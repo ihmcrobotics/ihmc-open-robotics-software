@@ -8,6 +8,7 @@ import behavior_msgs.msg.dds.MinimalFootstepMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepQueueStatusMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import ihmc_common_msgs.msg.dds.Point2DMessage;
 import org.apache.commons.lang3.tuple.Pair;
@@ -54,6 +55,14 @@ public class MinimalFootstep
    public MinimalFootstep(RobotSide side, Pose3DBasics solePoseInWorld, ConvexPolygon2DReadOnly foothold)
    {
       this(side, solePoseInWorld, foothold, null);
+   }
+
+   public MinimalFootstep(FootstepStatusMessage footstepStatusMessageToCopy)
+   {
+      this(RobotSide.fromByte(footstepStatusMessageToCopy.getRobotSide()),
+           new Pose3D(footstepStatusMessageToCopy.getActualFootPositionInWorld(), footstepStatusMessageToCopy.getActualFootOrientationInWorld()),
+           null,
+           null);
    }
 
    public MinimalFootstep(RobotSide side, Pose3DBasics solePoseInWorld, ConvexPolygon2DReadOnly foothold, String description)

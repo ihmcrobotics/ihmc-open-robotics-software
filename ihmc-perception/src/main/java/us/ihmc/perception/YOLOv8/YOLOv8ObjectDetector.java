@@ -5,7 +5,13 @@ import org.bytedeco.javacpp.IntPointer;
 import org.bytedeco.javacpp.indexer.FloatIndexer;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_dnn;
-import org.bytedeco.opencv.opencv_core.*;
+import org.bytedeco.opencv.opencv_core.Mat;
+import org.bytedeco.opencv.opencv_core.MatVector;
+import org.bytedeco.opencv.opencv_core.Rect;
+import org.bytedeco.opencv.opencv_core.RectVector;
+import org.bytedeco.opencv.opencv_core.Scalar;
+import org.bytedeco.opencv.opencv_core.Size;
+import org.bytedeco.opencv.opencv_core.StringVector;
 import org.bytedeco.opencv.opencv_dnn.Net;
 import org.bytedeco.opencv.opencv_text.FloatVector;
 import org.bytedeco.opencv.opencv_text.IntVector;
@@ -16,6 +22,7 @@ import us.ihmc.tools.io.WorkspaceResourceFile;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class YOLOv8ObjectDetector
 {
@@ -26,6 +33,8 @@ public class YOLOv8ObjectDetector
 
    private final Net yoloNet;
    private final StringVector outputNames;
+
+   private final AtomicBoolean isReady = new AtomicBoolean(true);
 
    public YOLOv8ObjectDetector()
    {
@@ -60,11 +69,13 @@ public class YOLOv8ObjectDetector
    public YOLOv8DetectionResults runOnImage(RawImage bgrImage, float confidenceThreshold, float nonMaximumSuppressionThreshold)
    {
       bgrImage.get();
+      isReady.set(false);
       Mat blob = opencv_dnn.blobFromImage(bgrImage.getCpuImageMat(), SCALE_FACTOR, DETECTION_SIZE, new Scalar(), true, true, opencv_core.CV_32F);
       MatVector outputBlobs = new MatVector(outputNames.size());
 
       yoloNet.setInput(blob);
       yoloNet.forward(outputBlobs, outputNames);
+      isReady.set(true);
 
       Set<YOLOv8Detection> detections = processOutput(outputBlobs, confidenceThreshold, nonMaximumSuppressionThreshold, bgrImage.getImageWidth(), bgrImage.getImageHeight());
       YOLOv8DetectionResults results = new YOLOv8DetectionResults(detections, outputBlobs, bgrImage);
@@ -75,10 +86,17 @@ public class YOLOv8ObjectDetector
       return results;
    }
 
+   public boolean isReady()
+   {
+      return isReady.get();
+   }
+
    public void destroy()
    {
+      System.out.println("Destroying " + getClass().getSimpleName());
       DETECTION_SIZE.close();
       yoloNet.close();
+      System.out.println("Destroyed " + getClass().getSimpleName());
    }
 
    private Set<YOLOv8Detection> processOutput(MatVector outputBlobs, float confidenceThreshold, float nonMaximumSuppressionThreshold, int imageWidth, int imageHeight)

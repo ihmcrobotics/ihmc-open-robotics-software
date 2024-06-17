@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -28,6 +27,7 @@ import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -52,7 +52,7 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private RDXLocomotionParameters locomotionParameters;
    private SwingPlannerParametersBasics swingPlannerParameters;
 
-   private final AtomicReference<HeightMapMessage> heightMapDataReference = new AtomicReference<>();
+   private final AtomicReference<HeightMapData> heightMapDataReference = new AtomicReference<>();
 
    private int previousPlanLength;
    private boolean wasPlanUpdated = false;
@@ -85,11 +85,11 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       clear();
    }
 
-   public void setHeightMapMessage(HeightMapMessage heightMapMessage)
+   public void setHeightMapMessage(HeightMapData heightMapData)
    {
-      heightMapDataReference.set(heightMapMessage);
+      heightMapDataReference.set(heightMapData);
       if (swingPlanningModule != null)
-         swingPlanningModule.setHeightMapData(heightMapMessage);
+         swingPlanningModule.setHeightMapData(heightMapData);
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -218,9 +218,9 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
       if (wasPlanUpdated && locomotionParameters.getReplanSwingTrajectoryOnChange() && !swingPlanningModule.getIsCurrentlyPlanning())
       {
-         HeightMapMessage heightMapMessage = heightMapDataReference.getAndSet(null);
-         if (heightMapMessage != null)
-            swingPlanningModule.setHeightMapData(heightMapMessage);
+         HeightMapData heightMapData = heightMapDataReference.getAndSet(null);
+         if (heightMapData != null)
+            swingPlanningModule.setHeightMapData(heightMapData);
 
          swingPlanningModule.setSwingPlannerParameters(swingPlannerParameters);
          swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);

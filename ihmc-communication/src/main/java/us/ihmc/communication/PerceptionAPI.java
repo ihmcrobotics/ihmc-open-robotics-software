@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import ihmc_common_msgs.msg.dds.StampedPosePacket;
 import ihmc_common_msgs.msg.dds.TextToSpeechPacket;
 import perception_msgs.msg.dds.ArUcoMarkerPoses;
+import perception_msgs.msg.dds.BallDetectionParametersMessage;
 import perception_msgs.msg.dds.BigVideoPacket;
 import perception_msgs.msg.dds.DetectedObjectPacket;
 import perception_msgs.msg.dds.DoorLocationPacket;
@@ -160,12 +161,23 @@ public final class PerceptionAPI
                                                                                                                          .withType(ImageMessage.class)
                                                                                                                          .withSuffix("right_color"));
    public static final ROS2Topic<ImageMessage> ZED2_DEPTH = BEST_EFFORT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("depth");
+   public static final ROS2Topic<ImageMessage> ZED2_CUT_OUT_DEPTH = IHMC_ROOT.withModule(ZED2_NAME).withType(ImageMessage.class).withSuffix("cut_out_depth");
    public static final ROS2Topic<IterativeClosestPointRequest> ICP_REQUEST = IHMC_ROOT.withModule("iterative_closest_point")
                                                                                       .withSuffix("request")
                                                                                       .withType(IterativeClosestPointRequest.class);
    public static final ROS2Topic<DetectedObjectPacket> ICP_RESULT = IHMC_ROOT.withModule("iterative_closest_point")
                                                                              .withSuffix("result")
                                                                              .withType(DetectedObjectPacket.class);
+   public static final ROS2Topic<BallDetectionParametersMessage> BALL_DETECTION_PARAMETERS = IHMC_ROOT.withModule("ping_pong_ball")
+                                                                                                      .withSuffix("detection_parameters")
+                                                                                                      .withType(BallDetectionParametersMessage.class);
+   public static final ROS2Topic<Empty> REQUEST_BALL_TRACKING = IHMC_ROOT.withModule("ping_pong_ball").withSuffix("request_tracking").withType(Empty.class);
+   public static final ROS2Topic<ImageMessage> BALL_SEGMENTATION_IMAGE = IHMC_ROOT.withModule("ping_pong_ball")
+                                                                                  .withSuffix("segmentation_image")
+                                                                                  .withTypeName(ImageMessage.class);
+   public static final ROS2Topic<RigidBodyTransformMessage> BALL_TRAJECTORY = IHMC_ROOT.withModule("ping_pong_ball")
+                                                                                       .withSuffix("trajectory")
+                                                                                       .withType(RigidBodyTransformMessage.class);
    public static final ROS2Topic<Empty> REQUEST_PLANAR_REGIONS = IHMC_ROOT.withModule("planar_regions")
                                                                           .withSuffix("request")
                                                                           .withType(Empty.class);
@@ -240,9 +252,12 @@ public final class PerceptionAPI
 
    public static final ROS2Topic<Empty> REQUEST_LIDAR_SCAN = PERCEPTION_MODULE.withSuffix("request_lidar_scan").withType(Empty.class);
    public static final ROS2Topic<Empty> REQUEST_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("request_height_map").withType(Empty.class);
+   public static final ROS2Topic<Empty> RESET_HEIGHT_MAP = PERCEPTION_MODULE.withSuffix("reset_height_map").withType(Empty.class);
 
    public static final ROS2Topic<ArUcoMarkerPoses> ARUCO_MARKER_POSES = PERCEPTION_MODULE.withType(ArUcoMarkerPoses.class).withSuffix("aruco_marker_poses");
    public static final ROS2Topic<Empty> REQUEST_ARUCO = PERCEPTION_MODULE.withSuffix("request_aruco").withType(Empty.class);
+
+   public static final ROS2Topic<Empty> REQUEST_OVERLAP_REMOVAL = PERCEPTION_MODULE.withSuffix("remove_overlap").withType(Empty.class);
 
    private static final ROS2Topic<RigidBodyTransformMessage> TRANSFORM_TUNING_BASE_TOPIC = IHMC_ROOT.withTypeName(RigidBodyTransformMessage.class)
                                                                                                     .withModule("transform_tuning");

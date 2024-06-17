@@ -13,11 +13,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL41;
 import perception_msgs.msg.dds.HeightMapMessage;
-import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.rdx.mesh.RDXIDMappedColorFunction;
 import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
@@ -31,8 +29,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.IntFunction;
 import java.util.function.IntToDoubleFunction;
 
+/**
+ * This class has been replaced with a newer implementation called {@link RDXHeightMapGraphicNew}, please use that going forward and use this one only for
+ * reference
+ */
+@Deprecated
 public class RDXGridMapGraphic implements RenderableProvider
 {
+   private static final int MAX_INDEX_MESH_BUILDER = MeshBuilder.MAX_INDEX / 4; // To prevent over flowing, stay far away from MAX_INDEX
+
    private final ModelBuilder modelBuilder = new ModelBuilder();
 
    private Model lastModel;
@@ -40,8 +45,8 @@ public class RDXGridMapGraphic implements RenderableProvider
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
-   private boolean colorFromHeight = true;
-   private boolean inPaintHeight = true;
+   private static boolean colorFromHeight = true;
+   private static boolean inPaintHeight = true;
    private boolean renderGroundCells = false;
    private boolean renderGroundPlane = false;
 
@@ -61,7 +66,7 @@ public class RDXGridMapGraphic implements RenderableProvider
       createModelFromMeshBuilders();
    }
 
-   public void colorFromHeight(boolean colorFromHeight)
+   public void setColorFromHeight(boolean colorFromHeight)
    {
       this.colorFromHeight = colorFromHeight;
    }
@@ -90,43 +95,27 @@ public class RDXGridMapGraphic implements RenderableProvider
    {
       IntToDoubleFunction heightProvider = (d) -> (double) heightMapMessage.getHeights().get(d);
       IntFunction<Integer> keyProvider = (d) -> heightMapMessage.getKeys().get(d);
-      IntFunction<Vector3DReadOnly> normalsProvider;
-      IntToDoubleFunction variancesProvider;
-      if (heightMapMessage.getNormals().size() != heightMapMessage.getHeights().size())
-         normalsProvider = null;
-      else
-         normalsProvider = (d) -> heightMapMessage.getNormals().get(d);
-      if (heightMapMessage.getVariances().size() != heightMapMessage.getHeights().size())
-         variancesProvider = null;
-      else
-         variancesProvider = (d) -> heightMapMessage.getVariances().get(d);
 
       generateMeshes(heightProvider,
-                     variancesProvider,
                      keyProvider,
-                     normalsProvider,
                      heightMapMessage.getHeights().size(),
                      heightMapMessage.getXyResolution(),
                      heightMapMessage.getGridSizeXy(),
                      heightMapMessage.getGridCenterX(),
                      heightMapMessage.getGridCenterY(),
                      heightMapMessage.getEstimatedGroundHeight(),
-                     heightMapMessage.getSequenceId(),
-                     inPaintHeight);
+                     heightMapMessage.getSequenceId());
    }
 
    private void generateMeshes(IntToDoubleFunction heightsProvider,
-                               IntToDoubleFunction variancesProvider,
                                IntFunction<Integer> keysProvider,
-                               IntFunction<Vector3DReadOnly> normalsProvider,
                                int numberOfOccupiedCells,
                                double gridResolutionXY,
                                double gridSizeXy,
                                double gridCenterX,
                                double gridCenterY,
                                double groundHeight,
-                               long id,
-                               boolean inPaintHeight)
+                               long id)
    {
       List<RDXMultiColorMeshBuilder> meshBuilders = generateHeightCells(heightsProvider,
                                                                         keysProvider,
@@ -137,9 +126,7 @@ public class RDXGridMapGraphic implements RenderableProvider
                                                                         gridCenterY,
                                                                         groundHeight,
                                                                         id,
-                                                                        inPaintHeight,
-                                                                        renderGroundCells,
-                                                                        colorFromHeight);
+                                                                        renderGroundCells);
 
       if (renderGroundPlane)
          meshBuilders.add(generateGroundPlaneMesh(gridSizeXy, gridCenterX, gridCenterY, groundHeight));
@@ -156,9 +143,7 @@ public class RDXGridMapGraphic implements RenderableProvider
                                                                      double gridCenterY,
                                                                      double groundHeight,
                                                                      long id,
-                                                                     boolean inPaintHeight,
-                                                                     boolean renderGroundCells,
-                                                                     boolean computeColorFromHeight)
+                                                                     boolean renderGroundCells)
    {
       List<RDXMultiColorMeshBuilder> meshBuilders = new ArrayList<>();
 
@@ -184,7 +169,7 @@ public class RDXGridMapGraphic implements RenderableProvider
          vertices[xIndex][yIndex] = new Point3D(x, y, height);
       }
 
-      // fill in all the vertices for the mesh texture
+      // Fill in all the vertices for the mesh texture
       for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
       {
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
@@ -198,9 +183,8 @@ public class RDXGridMapGraphic implements RenderableProvider
          }
       }
 
-      int maxCellsPerBuilder = MeshBuilder.MAX_INDEX / 6;
-      int cellsPerBuilder = 0;
       RDXMultiColorMeshBuilder meshBuilder = new RDXMultiColorMeshBuilder();
+      int currentIndexForMeshBuilder = 0; // This is used to prevent us from over filling a MeshBuilder
 
       if (renderGroundCells)
       {
@@ -232,19 +216,23 @@ public class RDXGridMapGraphic implements RenderableProvider
                }
 
                Color color;
-               if (computeColorFromHeight)
-                  color = computeColorFromHeight(0.5 * (maxHeight + minHeight));
+               if (colorFromHeight)
+               {
+                  double[] redGreenBlue = HeightMapTools.getRedGreenBlue(0.5 * (maxHeight - minHeight));
+                  color = new Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f);
+               }
                else
                   color = idColorFunction.getColor((int) id);
 
                meshBuilder.addPolygon(Arrays.asList(topLeft, topRight, bottomRight, bottomLeft), color);
-               cellsPerBuilder++;
+               currentIndexForMeshBuilder++;
 
-               if (cellsPerBuilder >= maxCellsPerBuilder)
+               // Create a new MeshBuilder if this one gets filled up
+               if (currentIndexForMeshBuilder >= MAX_INDEX_MESH_BUILDER)
                {
                   meshBuilders.add(meshBuilder);
                   meshBuilder = new RDXMultiColorMeshBuilder();
-                  cellsPerBuilder = 0;
+                  currentIndexForMeshBuilder = 0;
                }
             }
          }
@@ -282,19 +270,23 @@ public class RDXGridMapGraphic implements RenderableProvider
             }
 
             Color color;
-            if (computeColorFromHeight)
-               color = computeColorFromHeight(0.5 * (maxHeight + minHeight));
+            if (colorFromHeight)
+            {
+               double[] redGreenBlue = HeightMapTools.getRedGreenBlue(0.5 * (maxHeight - minHeight));
+               color = new Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f);
+            }
             else
                color = idColorFunction.getColor((int) id);
 
             meshBuilder.addPolygon(Arrays.asList(topLeft, topRight, bottomRight, bottomLeft), color);
-            cellsPerBuilder++;
+            currentIndexForMeshBuilder++;
 
-            if (cellsPerBuilder >= maxCellsPerBuilder)
+            // Create a new MeshBuilder if this one gets filled up
+            if (currentIndexForMeshBuilder >= MAX_INDEX_MESH_BUILDER)
             {
                meshBuilders.add(meshBuilder);
                meshBuilder = new RDXMultiColorMeshBuilder();
-               cellsPerBuilder = 0;
+               currentIndexForMeshBuilder = 0;
             }
          }
          meshBuilders.add(meshBuilder);
@@ -307,7 +299,9 @@ public class RDXGridMapGraphic implements RenderableProvider
    {
       RDXMultiColorMeshBuilder groundMeshBuilder = new RDXMultiColorMeshBuilder();
       double renderedGroundPlaneHeight = 0.005;
-      groundMeshBuilder.addBox(gridSizeXy, gridSizeXy, renderedGroundPlaneHeight, new Point3D(gridCenterX, gridCenterY, groundHeight), computeColorFromHeight(groundHeight));
+      double[] redGreenBlue = HeightMapTools.getRedGreenBlue(groundHeight);
+      Color color = new Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f);
+      groundMeshBuilder.addBox(gridSizeXy, gridSizeXy, renderedGroundPlaneHeight, new Point3D(gridCenterX, gridCenterY, groundHeight), color);
 
       return groundMeshBuilder;
    }
@@ -366,69 +360,11 @@ public class RDXGridMapGraphic implements RenderableProvider
       return height;
    }
 
-   public static Color computeColorFromHeight(double height)
-   {
-      // Using interpolation between key color points
-      double r = 0, g = 0, b = 0;
-      double redR = 1.0, redG = 0.0, redB = 0.0;
-      double magentaR = 1.0, magentaG = 0.0, magentaB = 1.0;
-      double orangeR = 1.0, orangeG = 200.0 / 255.0, orangeB = 0.0;
-      double yellowR = 1.0, yellowG = 1.0, yellowB = 0.0;
-      double blueR = 0.0, blueG = 0.0, blueB = 1.0;
-      double greenR = 0.0, greenG = 1.0, greenB = 0.0;
-      double gradientSize = 0.2;
-      double gradientLength = 1.0;
-      double alpha = height % gradientLength;
-      if (alpha < 0)
-         alpha = 1 + alpha;
-      while (alpha > 5 * gradientSize)
-         alpha -=  5 * gradientSize;
-
-      if (alpha <= gradientSize * 1)
-      {
-         r = InterpolationTools.linearInterpolate(magentaR, blueR, (alpha) / gradientSize);
-         g = InterpolationTools.linearInterpolate(magentaG, blueG, (alpha) / gradientSize);
-         b = InterpolationTools.linearInterpolate(magentaB, blueB, (alpha) / gradientSize);
-      }
-      else if (alpha <= gradientSize * 2)
-      {
-         r = InterpolationTools.linearInterpolate(blueR, greenR, (alpha - gradientSize * 1) / gradientSize);
-         g = InterpolationTools.linearInterpolate(blueG, greenG, (alpha - gradientSize * 1) / gradientSize);
-         b = InterpolationTools.linearInterpolate(blueB, greenB, (alpha - gradientSize * 1) / gradientSize);
-      }
-      else if (alpha <= gradientSize * 3)
-      {
-         r = InterpolationTools.linearInterpolate(greenR, yellowR, (alpha - gradientSize * 2) / gradientSize);
-         g = InterpolationTools.linearInterpolate(greenG, yellowG, (alpha - gradientSize * 2) / gradientSize);
-         b = InterpolationTools.linearInterpolate(greenB, yellowB, (alpha - gradientSize * 2) / gradientSize);
-      }
-      else if (alpha <= gradientSize * 4)
-      {
-         r = InterpolationTools.linearInterpolate(yellowR, orangeR, (alpha - gradientSize * 3) / gradientSize);
-         g = InterpolationTools.linearInterpolate(yellowG, orangeG, (alpha - gradientSize * 3) / gradientSize);
-         b = InterpolationTools.linearInterpolate(yellowB, orangeB, (alpha - gradientSize * 3) / gradientSize);
-      }
-      else if (alpha <= gradientSize * 5)
-      {
-         r = InterpolationTools.linearInterpolate(orangeR, redR, (alpha - gradientSize * 4) / gradientSize);
-         g = InterpolationTools.linearInterpolate(orangeG, redG, (alpha - gradientSize * 4) / gradientSize);
-         b = InterpolationTools.linearInterpolate(orangeB, redB, (alpha - gradientSize * 4) / gradientSize);
-      }
-      else
-      {
-         throw new RuntimeException("no valid color");
-      }
-
-      if (r == 0.0 && g == 0.0 && b == 0.0)
-         throw new RuntimeException("Shouldn't return black.)");
-      return new Color((float) r, (float) g, (float) b, 1.0f);
-   }
-
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       ModelInstance modelInstance = latestModel.get();
-      // sync over current and add
+      // Sync over current and add
       if (modelInstance != null)
       {
          modelInstance.getRenderables(renderables, pool);

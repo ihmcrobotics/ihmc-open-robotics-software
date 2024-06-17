@@ -14,7 +14,6 @@ import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionResults;
 import us.ihmc.perception.YOLOv8.YOLOv8ObjectDetector;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
-import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -40,9 +39,8 @@ public class RDXYOLOv8PointCloudSegmentationDemo
    private static final YOLOv8DetectionClass OBJECT_TYPE = YOLOv8DetectionClass.DOOR_LEVER;
    private static final Random random = new Random();
 
-   private final OpenCLManager openCLManager = new OpenCLManager();
-   private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor(openCLManager);
-   private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter(openCLManager);
+   private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor();
+   private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter();
 
    private final ROS2Node node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "yolo_demo");
    private final ROS2Helper ros2Helper = new ROS2Helper(node);
@@ -62,7 +60,7 @@ public class RDXYOLOv8PointCloudSegmentationDemo
                                                           ReferenceFrame::getWorldFrame,
                                                           new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_DEPTH),
                                                           new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_COLOR));
-      zedImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH);
+      zedImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH, PerceptionAPI.ZED2_CUT_OUT_DEPTH);
 
       zedImageRetriever.start();
 
