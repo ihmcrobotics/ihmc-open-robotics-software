@@ -9,7 +9,6 @@ import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.RDXImagePanel;
-import us.ihmc.rdx.imgui.ImPlotFrequencyPlot;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -22,8 +21,7 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
    private Mat rgba8Mat;
    private boolean needNewTexture = false;
    private BytePointer rgba8888BytePointer;
-   private final ImPlotFrequencyPlot frequencyPlot = new ImPlotFrequencyPlot("Hz", 30);
-   private boolean hasReceivedOne = false;
+   private boolean hasRenderedOne = false;
 
    private final ResettableExceptionHandlingExecutorService threadQueue;
    private Pixmap pixmap;
@@ -38,17 +36,16 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
       imagePanel = new RDXImagePanel(ImGuiTools.uniqueLabel(this, panelName), flipY);
    }
 
-   protected void doReceiveMessageOnThread(Runnable receiveMessageOnThread)
+   public void doReceiveMessageOnThread(Runnable receiveMessageOnThread)
    {
-      hasReceivedOne = true;
-      frequencyPlot.ping();
+      hasRenderedOne = true;
       if (isActive())
       {
          getThreadQueue().clearQueueAndExecute(receiveMessageOnThread);
       }
    }
 
-   protected void updateImageDimensions(int imageWidth, int imageHeight)
+   public void updateImageDimensions(int imageWidth, int imageHeight)
    {
       if (rgba8Mat == null || pixmap.getWidth() != imageWidth || pixmap.getHeight() != imageHeight)
       {
@@ -66,10 +63,15 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
 
    public void setImage(Mat mat)
    {
-      hasReceivedOne = true;
-      frequencyPlot.ping();
+      hasRenderedOne = true;
       updateImageDimensions(mat.cols(), mat.rows());
       opencv_imgproc.cvtColor(mat, rgba8Mat, opencv_imgproc.COLOR_RGB2RGBA);
+   }
+
+   @Override
+   public void renderImGuiWidgets()
+   {
+
    }
 
    @Override
@@ -117,7 +119,7 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
       overlays.add(overlay);
    }
 
-   protected Mat getRGBA8Mat()
+   public Mat getRGBA8Mat()
    {
       return rgba8Mat;
    }
@@ -132,14 +134,9 @@ public class RDXOpenCVVideoVisualizer extends RDXVisualizer
       return threadQueue;
    }
 
-   protected ImPlotFrequencyPlot getFrequencyPlot()
+   public boolean getHasRenderedOne()
    {
-      return frequencyPlot;
-   }
-
-   public boolean getHasReceivedOne()
-   {
-      return hasReceivedOne;
+      return hasRenderedOne;
    }
 
    public Texture getTexture()

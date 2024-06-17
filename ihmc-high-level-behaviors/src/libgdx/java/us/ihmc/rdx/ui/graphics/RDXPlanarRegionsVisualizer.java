@@ -1,39 +1,33 @@
-package us.ihmc.rdx.ui.graphics.ros2;
+package us.ihmc.rdx.ui.graphics;
 
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.internal.ImGui;
 import imgui.type.ImDouble;
-import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
 import us.ihmc.rdx.imgui.ImGuiPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.Set;
 
-public class RDXPlanarRegionsVisualizerBasics extends RDXVisualizer
+public class RDXPlanarRegionsVisualizer extends RDXVisualizer
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
 
    private final RDXPlanarRegionsGraphic planarRegionsGraphic = new RDXPlanarRegionsGraphic();
    private final ResettableExceptionHandlingExecutorService executorService;
-   private final String topicName;
 
-   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImGuiPlot numberOfRegionsPlot = new ImGuiPlot("# Regions", 1000, 230, 20);
    private int numberOfPlanarRegions = 0;
    private final ImDouble opacity = new ImDouble(0.7);
 
-   RDXPlanarRegionsVisualizerBasics(String title, String topicName)
+   public RDXPlanarRegionsVisualizer(String title)
    {
-      super(title + " (ROS 2)");
-      this.topicName = topicName;
+      super(title);
 
       boolean daemon = true;
       int queueSize = 1;
@@ -53,13 +47,10 @@ public class RDXPlanarRegionsVisualizerBasics extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
       if (!isActive())
       {
          executorService.interruptAndReset();
       }
-      ImGui.text(topicName);
-      frequencyPlot.renderImGuiWidgets();
       numberOfRegionsPlot.render(numberOfPlanarRegions);
       ImGuiTools.sliderDouble(labels.get("Opacity"), opacity, 0.1, 1.0);
       planarRegionsGraphic.setBlendOpacity((float) opacity.get());
@@ -89,22 +80,17 @@ public class RDXPlanarRegionsVisualizerBasics extends RDXVisualizer
       planarRegionsGraphic.destroy();
    }
 
-   protected void setNumberOfPlanarRegions(int numberOfPlanarRegions)
+   public void setNumberOfPlanarRegions(int numberOfPlanarRegions)
    {
       this.numberOfPlanarRegions = numberOfPlanarRegions;
    }
 
-   protected ImGuiFrequencyPlot getFrequencyPlot()
-   {
-      return frequencyPlot;
-   }
-
-   protected ResettableExceptionHandlingExecutorService getExecutorService()
+   public ResettableExceptionHandlingExecutorService getExecutorService()
    {
       return executorService;
    }
 
-   protected RDXPlanarRegionsGraphic getPlanarRegionsGraphic()
+   public RDXPlanarRegionsGraphic getPlanarRegionsGraphic()
    {
       return planarRegionsGraphic;
    }

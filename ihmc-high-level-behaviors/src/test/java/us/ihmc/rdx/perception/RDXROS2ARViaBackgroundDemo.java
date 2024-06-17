@@ -15,7 +15,7 @@ import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
-import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
+import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2BigVideoVisualizer;
 
 import java.nio.ByteBuffer;
@@ -32,7 +32,7 @@ public class RDXROS2ARViaBackgroundDemo
    private RDXEnvironmentBuilder environmentBuilder;
    private Pixmap pixmap;
    private RDX3DPanel arPanel;
-   private RDXPerceptionVisualizerPanel perceptionVisualizerPanel;
+   private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
 
    public RDXROS2ARViaBackgroundDemo()
    {
@@ -56,7 +56,7 @@ public class RDXROS2ARViaBackgroundDemo
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
             PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
-            perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
+            perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
 
             RDXROS2BigVideoVisualizer videoVisualizer = new RDXROS2BigVideoVisualizer("Video",
                                                                                       pubSubImplementation,

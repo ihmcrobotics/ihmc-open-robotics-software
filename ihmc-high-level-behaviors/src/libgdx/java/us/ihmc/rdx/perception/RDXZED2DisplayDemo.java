@@ -5,8 +5,8 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -14,7 +14,7 @@ import us.ihmc.ros2.ROS2Node;
 public class RDXZED2DisplayDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("ZED 2 Display Demo");
-   private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
+   private final RDXPerceptionVisualizersPanel perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
 
    public RDXZED2DisplayDemo()
    {
