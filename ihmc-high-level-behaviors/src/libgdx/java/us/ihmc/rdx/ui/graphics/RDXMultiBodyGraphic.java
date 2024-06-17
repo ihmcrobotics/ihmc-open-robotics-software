@@ -5,12 +5,16 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.simulation.scs2.*;
 import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.simulation.scs2.RDXFrameGraphicsNode;
+import us.ihmc.rdx.simulation.scs2.RDXFrameNodePart;
+import us.ihmc.rdx.simulation.scs2.RDXMultiBodySystemFactories;
+import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
+import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
 import us.ihmc.scs2.definition.robot.CrossFourBarJointDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.tools.thread.Activator;
@@ -100,7 +104,6 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
    }
 
    @Override

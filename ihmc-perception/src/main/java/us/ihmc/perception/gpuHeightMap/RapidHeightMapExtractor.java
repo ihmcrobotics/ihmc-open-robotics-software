@@ -23,8 +23,10 @@ import us.ihmc.perception.steppableRegions.SteppableRegionCalculatorParametersBa
 import us.ihmc.perception.steppableRegions.SteppableRegionsCalculator;
 import us.ihmc.perception.steppableRegions.data.SteppableCell;
 import us.ihmc.perception.steppableRegions.data.SteppableRegionsEnvironmentModel;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapParameters;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 
@@ -792,6 +794,26 @@ public class RapidHeightMapExtractor
                                      heightMapParameters.getCropWindowSize(),
                                      heightMapParameters.getCropWindowSize());
       return imageToCrop.apply(cropWindowRectangle);
+   }
+
+   public static HeightMapData packHeightMapData(RapidHeightMapExtractor heightMapExtractor, HeightMapData heightMapDataToPack)
+   {
+      Mat heightMapMat = heightMapExtractor.getTerrainMapData().getHeightMap();
+      HeightMapData latestHeightMapData = heightMapDataToPack;
+      if (latestHeightMapData == null)
+      {
+         latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
+                                                 (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
+                                                 heightMapExtractor.getSensorOrigin().getX(),
+                                                 heightMapExtractor.getSensorOrigin().getY());
+      }
+      PerceptionMessageTools.convertToHeightMapData(heightMapMat,
+                                                    latestHeightMapData,
+                                                    heightMapExtractor.getSensorOrigin(),
+                                                    (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
+                                                    (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters());
+
+      return latestHeightMapData;
    }
 
    public int getLocalCellsPerAxis()

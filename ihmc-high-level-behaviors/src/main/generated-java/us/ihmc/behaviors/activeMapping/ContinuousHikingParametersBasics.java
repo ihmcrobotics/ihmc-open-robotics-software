@@ -67,4 +67,9 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
    {
       set(ContinuousHikingParameters.logFootstepPlans, logFootstepPlans);
    }
+
+   default void setNextWaypointDistanceMargin(double nextWaypointDistanceMargin)
+   {
+      set(ContinuousHikingParameters.nextWaypointDistanceMargin, nextWaypointDistanceMargin);
+   }
 }

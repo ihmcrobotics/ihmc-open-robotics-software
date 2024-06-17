@@ -17,7 +17,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -101,7 +101,7 @@ public class ControllerBasedBodyPathTest
       private final List<Point3D> waypoints = new ArrayList<>();
       private final WaypointDefinedBodyPathPlanHolder bodyPath = new WaypointDefinedBodyPathPlanHolder();
 
-      private final FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
+      private final DefaultFootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       private final FootstepPlanningModule footstepPlanningModule = new FootstepPlanningModule("controllerBasedBodyPathTest");
       private final FootstepPlannerRequest request = new FootstepPlannerRequest();
 

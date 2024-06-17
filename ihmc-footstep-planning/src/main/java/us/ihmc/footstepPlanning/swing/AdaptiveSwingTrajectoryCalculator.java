@@ -11,7 +11,7 @@ import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
@@ -41,7 +41,7 @@ public class AdaptiveSwingTrajectoryCalculator
    private final TickAndUpdatable tickAndUpdatable;
 
    private final SwingPlannerParametersReadOnly swingPlannerParameters;
-   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
+   private final DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private HeightMapData heightMapData;
 
@@ -52,14 +52,14 @@ public class AdaptiveSwingTrajectoryCalculator
    private final Box3D endOfSwingHeelCollisionBox = new Box3D();
 
    public AdaptiveSwingTrajectoryCalculator(SwingPlannerParametersReadOnly swingPlannerParameters,
-                                            FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                                            DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters,
                                             WalkingControllerParameters walkingControllerParameters)
    {
       this(swingPlannerParameters, footstepPlannerParameters, walkingControllerParameters, null, null, null);
    }
 
    public AdaptiveSwingTrajectoryCalculator(SwingPlannerParametersReadOnly swingPlannerParameters,
-                                            FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                                            DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters,
                                             WalkingControllerParameters walkingControllerParameters,
                                             TickAndUpdatable tickAndUpdatable,
                                             YoGraphicsListRegistry graphicsListRegistry,

@@ -1,12 +1,11 @@
 package us.ihmc.footstepPlanning.swing;
 
 import perception_msgs.msg.dds.HeightMapMessage;
-import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -40,7 +39,7 @@ public class CollisionFreeSwingCalculatorLogViewer
       SwingPlannerParametersBasics swingPlannerParameters = new DefaultSwingPlannerParameters();
       swingPlannerParameters.set(log.getSwingPlannerParametersPacket());
 
-      FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       footstepPlannerParameters.set(log.getFootstepParametersPacket());
 
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));

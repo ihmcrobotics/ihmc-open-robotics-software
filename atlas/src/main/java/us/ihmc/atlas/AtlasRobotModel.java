@@ -51,7 +51,7 @@ import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
@@ -549,7 +549,7 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public SimulatedRobotiqHandsControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node)
+   public SimulatedRobotiqHandsControlThread createSimulatedHandController(RealtimeROS2Node realtimeROS2Node, boolean kinematicsSimulation)
    {
       if (selectedVersion == AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ)
       {
@@ -645,13 +645,13 @@ public class AtlasRobotModel implements DRCRobotModel
    }
 
    @Override
-   public FootstepPlannerParametersBasics getFootstepPlannerParameters()
+   public DefaultFootstepPlannerParametersBasics getFootstepPlannerParameters()
    {
       return new AtlasFootstepPlannerParameters();
    }
 
    @Override
-   public FootstepPlannerParametersBasics getFootstepPlannerParameters(String fileNameSuffix)
+   public DefaultFootstepPlannerParametersBasics getFootstepPlannerParameters(String fileNameSuffix)
    {
       return new AtlasFootstepPlannerParameters(fileNameSuffix);
    }

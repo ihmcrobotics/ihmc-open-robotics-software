@@ -11,10 +11,9 @@ import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepCheckerInterface;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -38,7 +37,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
    private static final double maxYawAdjustmentTowardsPath = Math.toRadians(20.0);
 
    private final HashMap<DiscreteFootstep, DiscreteFootstep> idealStepMap = new HashMap<>();
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DefaultFootstepPlannerParametersReadOnly parameters;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
    private final FootstepPlannerEnvironmentHandler environmentHandler;
    private final FootstepCheckerInterface nodeChecker;
@@ -63,7 +62,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
    private final Pose2D idealMidFootPose = new Pose2D();
    private double pathLength;
 
-   public IdealStepCalculator(FootstepPlannerParametersReadOnly parameters,
+   public IdealStepCalculator(DefaultFootstepPlannerParametersReadOnly parameters,
                               FootstepCheckerInterface nodeChecker,
                               WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
                               FootstepPlannerEnvironmentHandler environmentHandler,
@@ -148,7 +147,7 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       }
    }
 
-   private static double getIdealStepLength(FootstepPlannerParametersReadOnly parameters, FootstepPlanHeading heading)
+   private static double getIdealStepLength(DefaultFootstepPlannerParametersReadOnly parameters, FootstepPlanHeading heading)
    {
       switch (heading)
       {
@@ -163,14 +162,14 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       }
    }
 
-   private static double getIdealStepWidth(FootstepPlannerParametersReadOnly parameters, FootstepPlanHeading heading, RobotSide stanceSide)
+   private static double getIdealStepWidth(DefaultFootstepPlannerParametersReadOnly parameters, FootstepPlanHeading heading, RobotSide stanceSide)
    {
       switch (heading)
       {
          case LEFT:
-            return stanceSide == RobotSide.LEFT ? - parameters.getMaximumStepWidth() : parameters.getMinimumStepWidth();
+            return stanceSide == RobotSide.LEFT ? - parameters.getMaxStepWidth() : parameters.getMinStepWidth();
          case RIGHT:
-            return stanceSide == RobotSide.LEFT ? - parameters.getMinimumStepWidth() : parameters.getMaximumStepWidth();
+            return stanceSide == RobotSide.LEFT ? - parameters.getMinStepWidth() : parameters.getMaxStepWidth();
          case BACKWARD:
          case FORWARD:
          default:
@@ -238,8 +237,8 @@ public class IdealStepCalculator implements IdealStepCalculatorInterface
       idealStepYaw.set(desiredYaw);
       double deltaYaw = AngleTools.computeAngleDifferenceMinusPiToPi(desiredYaw, stanceStep.getYaw());
       RobotSide stepSide = stanceSide.getOppositeSide();
-      double yawLowerLimit = stepSide == RobotSide.LEFT ? parameters.getMinimumStepYaw() : - parameters.getMaximumStepYaw();
-      double yawUpperLimit = stepSide == RobotSide.LEFT ? parameters.getMaximumStepYaw() : - parameters.getMinimumStepYaw();
+      double yawLowerLimit = stepSide == RobotSide.LEFT ? parameters.getMinStepYaw() : - parameters.getMaxStepYaw();
+      double yawUpperLimit = stepSide == RobotSide.LEFT ? parameters.getMaxStepYaw() : - parameters.getMinStepYaw();
       double achievableStepYaw = MathTools.clamp(deltaYaw, yawLowerLimit, yawUpperLimit);
 
       // Calculate step positions:

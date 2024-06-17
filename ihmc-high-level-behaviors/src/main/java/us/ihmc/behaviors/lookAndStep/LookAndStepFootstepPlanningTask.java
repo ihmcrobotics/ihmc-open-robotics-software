@@ -38,8 +38,8 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.CustomFootstepChecker;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
@@ -78,7 +78,7 @@ public class LookAndStepFootstepPlanningTask
    protected BehaviorHelper helper;
    protected StatusLogger statusLogger;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
-   protected FootstepPlannerParametersReadOnly footstepPlannerParameters;
+   protected DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters;
    protected SwingPlannerParametersReadOnly swingPlannerParameters;
    protected UIPublisher uiPublisher;
    protected FootstepPlanningModule footstepPlanningModule;
@@ -103,7 +103,7 @@ public class LookAndStepFootstepPlanningTask
       protected ControllerStatusTracker controllerStatusTracker;
       private Supplier<LookAndStepBehavior.State> behaviorStateReference;
       private ROS2StoredPropertySet<LookAndStepBehaviorParametersBasics> ros2LookAndStepParameters;
-      private ROS2StoredPropertySet<FootstepPlannerParametersBasics> ros2FootstepPlannerParameters;
+      private ROS2StoredPropertySet<DefaultFootstepPlannerParametersBasics> ros2FootstepPlannerParameters;
       private ROS2StoredPropertySet<SwingPlannerParametersBasics> ros2SwingPlannerParameters;
 
       private final TypedInput<LookAndStepBodyPathLocalizationResult> localizationResultInput = new TypedInput<>();
@@ -363,7 +363,7 @@ public class LookAndStepFootstepPlanningTask
       // move point along body path plan by plan horizon
       Pose3D subGoalPoseBetweenFeet = new Pose3D();
       double planHorizonDistance = lookAndStepParameters.getPlanHorizon()
-                                   + (lookAndStepParameters.getNumberOfStepsToTryToPlan() - 1) * footstepPlannerParameters.getMaximumStepReach();
+                                   + (lookAndStepParameters.getNumberOfStepsToTryToPlan() - 1) * footstepPlannerParameters.getMaxStepReach();
       BodyPathPlannerTools.movePointAlongBodyPath(bodyPathPlan, closestPointAlongPath, subGoalPoseBetweenFeet, closestSegmentIndex, planHorizonDistance);
 
       statusLogger.info("Found next sub goal: {}", subGoalPoseBetweenFeet);
@@ -629,7 +629,7 @@ public class LookAndStepFootstepPlanningTask
       MinimalFootstep stanceFoot = startFootPoses.get(firstStep.getRobotSide().getOppositeSide());
       Pose3DReadOnly stancePose = stanceFoot.getSolePoseInWorld();
 
-      if (stepPose.getPosition().distanceXY(stancePose.getPosition()) > footstepPlannerParameters.getMaximumStepReach())
+      if (stepPose.getPosition().distanceXY(stancePose.getPosition()) > footstepPlannerParameters.getMaxStepReach())
          return false;
 
       return Math.abs(stepPose.getPosition().getZ() - stancePose.getZ()) < footstepPlannerParameters.getMaxStepZ();

@@ -10,9 +10,9 @@ import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
+import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2DetectedObjectBoundingBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -25,7 +25,7 @@ public class RDXCenterposeSceneGraphDemo
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
-   private RDXPerceptionVisualizerPanel perceptionVisualizerPanel;
+   private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
    private CenterposeDetectionManager centerposeProcess;
    private ROS2SceneGraph onRobotSceneGraph;
    private ReferenceFrameLibrary referenceFrameLibrary;
@@ -45,7 +45,7 @@ public class RDXCenterposeSceneGraphDemo
             ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "centerpose_scene_graph_demo");
             ros2Helper = new ROS2Helper(ros2Node);
 
-            perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
+            perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
             baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
             baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
 
@@ -62,7 +62,7 @@ public class RDXCenterposeSceneGraphDemo
                                                                    ReferenceFrame.getWorldFrame(),
                                                                    PerceptionAPI.CENTERPOSE_DETECTED_OBJECT,
                                                                    baseUI.getPrimary3DPanel().getCamera3D());
-            zed2LeftColorImageVisualizer.addOverlay(centerPoseBoundingBoxVisualizer::drawVertexOverlay);
+            zed2LeftColorImageVisualizer.getOpenCVVideoVisualizer().addOverlay(centerPoseBoundingBoxVisualizer::drawVertexOverlay);
 
             RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer
                   = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",

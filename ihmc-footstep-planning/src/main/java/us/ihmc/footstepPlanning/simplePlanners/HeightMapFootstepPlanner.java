@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -77,7 +77,7 @@ public class HeightMapFootstepPlanner
 
    public static FootstepPlan plan(Pose3DReadOnly start,
                                    Pose3DReadOnly goal,
-                                   FootstepPlannerParametersReadOnly parameters,
+                                   DefaultFootstepPlannerParametersReadOnly parameters,
                                    SideDependentList<ConvexPolygon2D> footPolygons,
                                    HeightMapData heightMap)
    {
@@ -106,7 +106,7 @@ public class HeightMapFootstepPlanner
                                                              footPolygons.get(RobotSide.LEFT),
                                                              environmentHandler,
                                                              parameters.getHeightMapSnapThreshold(),
-                                                             parameters.getMinimumSurfaceInclineRadians());
+                                                             parameters.getMinSurfaceIncline());
 
          FramePose3D step = new FramePose3D(ReferenceFrame.getWorldFrame(), footstepTransform);
          if (snapData.getSnapTransform() != null)
@@ -122,12 +122,12 @@ public class HeightMapFootstepPlanner
       return footstepPlan;
    }
 
-   private static List<Pose2D> generateTurnWalkTurnPoses(Pose3DReadOnly start, Pose3DReadOnly goal, FootstepPlannerParametersReadOnly parameters)
+   private static List<Pose2D> generateTurnWalkTurnPoses(Pose3DReadOnly start, Pose3DReadOnly goal, DefaultFootstepPlannerParametersReadOnly parameters)
    {
       List<Pose2D> poses = new ArrayList<>();
 
       double walkHeading = Math.atan2(goal.getY() - start.getY(), goal.getX() - start.getX());
-      double yawPerStep = Math.abs(parameters.getMinimumStepYaw());
+      double yawPerStep = Math.abs(parameters.getMinStepYaw());
 
       // initial turn
       double deltaTurn = EuclidCoreTools.angleDifferenceMinusPiToPi(walkHeading, start.getYaw());
