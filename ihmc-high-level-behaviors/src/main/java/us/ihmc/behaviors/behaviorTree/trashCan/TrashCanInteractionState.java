@@ -1,44 +1,35 @@
 package us.ihmc.behaviors.behaviorTree.trashCan;
 
-import behavior_msgs.msg.dds.DoorTraversalStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
-import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
-import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
+import us.ihmc.communication.crdt.CRDTUnidirectionalEnumField;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInteractionDefinition>
 {
-   public static final String STABILIZE_DETECTION = "Stabilize Detection";
-   public static final String WAIT_TO_OPEN_RIGHT_HAND = "Wait to open right hand";
-   public static final String PULL_SCREW_PRIMITIVE = "Pull Screw primitive";
-   public static final String POST_PULL_DOOR = "Post pull door evaluation";
-   public static final String POST_GRASP_HANDLE = "Evaluate grasp";
+   public static final String COMPUTE_STANCE = "Compute Stance";
+   public static final String APPROACH_LEFT = "Approach Left";
+   public static final String APPROACH_FRONT = "Approach Front";
+   public static final String APPROACH_RIGHT = "Approach Right";
 
    private ActionSequenceState actionSequence;
-   private WaitDurationActionState stabilizeDetectionAction;
-   private WaitDurationActionState waitToOpenRightHandAction;
-   private ScrewPrimitiveActionState pullScrewPrimitiveAction;
-   private WaitDurationActionState postGraspEvaluationAction;
-   private WaitDurationActionState postPullDoorEvaluationAction;
-
-   private final CRDTUnidirectionalBoolean isBlockingPathToDoor;
-   private final CRDTUnidirectionalDouble distanceFromDoor;
-   private final CRDTUnidirectionalDouble distanceFromCouch;
+   private WaitDurationActionState computeStanceAction;
+   private WaitDurationActionState approachingLeftAction;
+   private WaitDurationActionState approachingRightAction;
+   private WaitDurationActionState approachingFrontAction;
+   private final CRDTUnidirectionalEnumField<InteractionStance> stance;
 
    public TrashCanInteractionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new TrashCanInteractionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
-      isBlockingPathToDoor = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
-      distanceFromDoor = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
-      distanceFromCouch = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      stance = new CRDTUnidirectionalEnumField(ROS2ActorDesignation.ROBOT, crdtInfo, InteractionStance.FRONT);
    }
 
    @Override
@@ -53,40 +44,34 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
 
    public void updateActionSubtree(BehaviorTreeNodeState<?> node)
    {
-      stabilizeDetectionAction = null;
-      waitToOpenRightHandAction = null;
-      pullScrewPrimitiveAction = null;
-      postGraspEvaluationAction = null;
-      postPullDoorEvaluationAction = null;
+      computeStanceAction = null;
+      approachingLeftAction = null;
+      approachingRightAction = null;
+      approachingFrontAction = null;
 
       for (BehaviorTreeNodeState<?> child : node.getChildren())
       {
          if (child instanceof ActionNodeState<?> actionNode)
          {
             if (actionNode instanceof WaitDurationActionState waitDurationAction
-                && waitDurationAction.getDefinition().getName().equals(STABILIZE_DETECTION))
+                && waitDurationAction.getDefinition().getName().equals(COMPUTE_STANCE))
             {
-               stabilizeDetectionAction = waitDurationAction;
+               computeStanceAction = waitDurationAction;
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
-                && waitDurationAction.getDefinition().getName().equals(WAIT_TO_OPEN_RIGHT_HAND))
+                && waitDurationAction.getDefinition().getName().equals(APPROACH_LEFT))
             {
-               waitToOpenRightHandAction = waitDurationAction;
-            }
-            if (actionNode instanceof ScrewPrimitiveActionState screwPrimitiveAction
-                && screwPrimitiveAction.getDefinition().getName().equals(PULL_SCREW_PRIMITIVE))
-            {
-               pullScrewPrimitiveAction = screwPrimitiveAction;
+               approachingLeftAction = waitDurationAction;
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
-                && waitDurationAction.getDefinition().getName().equals(POST_GRASP_HANDLE))
+                && waitDurationAction.getDefinition().getName().equals(APPROACH_RIGHT))
             {
-               postGraspEvaluationAction = waitDurationAction;
+               approachingRightAction = waitDurationAction;
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
-                && waitDurationAction.getDefinition().getName().equals(POST_PULL_DOOR))
+                && waitDurationAction.getDefinition().getName().equals(APPROACH_FRONT))
             {
-               postPullDoorEvaluationAction = waitDurationAction;
+               approachingFrontAction = waitDurationAction;
             }
          }
          else
@@ -102,8 +87,7 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
 
       super.toMessage(message.getState());
 
-      message.setDistanceFromDoor(distanceFromDoor.toMessage());
-      message.setDistanceFromCouch(distanceFromCouch.toMessage());
+      message.setStance(stance.toMessageOrdinal());
    }
 
    public void fromMessage(TrashCanInteractionStateMessage message)
@@ -112,17 +96,16 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
 
       getDefinition().fromMessage(message.getDefinition());
 
-      distanceFromDoor.fromMessage(message.getDistanceFromDoor());
-      distanceFromCouch.fromMessage(message.getDistanceFromCouch());
+      stance.fromMessageOrdinal(message.getStance(), InteractionStance.values);
    }
 
-   public boolean arePullRetryNodesPresent()
+   public boolean areLogicNodesPresent()
    {
       boolean isValid = actionSequence != null;
-      isValid &= waitToOpenRightHandAction != null;
-      isValid &= pullScrewPrimitiveAction != null;
-      isValid &= postGraspEvaluationAction != null;
-      isValid &= postPullDoorEvaluationAction != null;
+      isValid &= computeStanceAction != null;
+      isValid &= approachingLeftAction != null;
+      isValid &= approachingRightAction != null;
+      isValid &= approachingFrontAction != null;
       return isValid;
    }
 
@@ -131,43 +114,33 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
       return actionSequence;
    }
 
-   public WaitDurationActionState getStabilizeDetectionAction()
+   public WaitDurationActionState getComputeStanceAction()
    {
-      return stabilizeDetectionAction;
+      return computeStanceAction;
    }
 
-   public WaitDurationActionState getWaitToOpenRightHandAction()
+   public WaitDurationActionState getApproachingLeftAction()
    {
-      return waitToOpenRightHandAction;
+      return approachingLeftAction;
    }
 
-   public ScrewPrimitiveActionState getPullScrewPrimitiveAction()
+   public WaitDurationActionState getApproachingFrontAction()
    {
-      return pullScrewPrimitiveAction;
+      return approachingFrontAction;
    }
 
-   public WaitDurationActionState getPostGraspEvaluationAction()
+   public WaitDurationActionState getApproachingRightAction()
    {
-      return postGraspEvaluationAction;
+      return approachingRightAction;
    }
 
-   public WaitDurationActionState getPostPullDoorEvaluationAction()
+   public CRDTUnidirectionalEnumField getStance()
    {
-      return postPullDoorEvaluationAction;
+      return stance;
    }
 
-   public CRDTUnidirectionalBoolean getIsBlockingPathToDoor()
+   public void setStance(InteractionStance stance)
    {
-      return isBlockingPathToDoor;
-   }
-
-   public CRDTUnidirectionalDouble getDistanceFromDoor()
-   {
-      return distanceFromDoor;
-   }
-
-   public CRDTUnidirectionalDouble getDistanceFromCouch()
-   {
-      return distanceFromCouch;
+      this.stance.setValue(stance);
    }
 }
