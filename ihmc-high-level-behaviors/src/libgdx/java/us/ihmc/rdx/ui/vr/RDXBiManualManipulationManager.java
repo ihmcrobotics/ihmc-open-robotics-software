@@ -104,14 +104,15 @@ public class RDXBiManualManipulationManager
 
       midHandFrame.setPoseAndUpdate(midHandFramePose);
 
-      //TODO: Calculate the desired Hand Control frame based on the midFramePose. The desired hand control frame should Box Width/2.0 away along the midFramePose Y axis and have the same orientation as the midHandFramePose.
-      //needs implementation
-
-
-      // Currently the distance from the midFrame pose is not enforced.
       for (RobotSide robotSide : RobotSide.values)
       {
          handDesiredControlFrames.get(robotSide).getTransformToParent().getRotation().set(midHandFramePose.getOrientation());
+
+         handDesiredControlFrames.get(robotSide).getTransformToParent().getRotation().set(midHandFramePose.getOrientation());
+         handDesiredControlFrames.get(robotSide).setParentFrame(midHandFrame);
+         handDesiredControlFrames.get(robotSide).getTransformToParent().setTranslationToZero();
+         handDesiredControlFrames.get(robotSide).getTransformToParent().appendTranslation(0.0, robotSide.negateIfRightSide(nominalHandDistance/2), 0.0);
+         handDesiredControlFrames.get(robotSide).changeFrame(ReferenceFrame.getWorldFrame());
       }
    }
 
@@ -121,7 +122,6 @@ public class RDXBiManualManipulationManager
       {
          handPoints.get(robotSide).setMatchingFrame(handDesiredControlFrames.get(robotSide).getReferenceFrame(), 0.0, 0.0, 0.0);
       }
-
       nominalHandDistance = handPoints.get(RobotSide.LEFT).distance(handPoints.get(RobotSide.RIGHT));
       saveHandDistanceOnFirstTick = false;
    }
