@@ -16,14 +16,13 @@ import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.PlannerInput;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -40,7 +39,7 @@ public class NarrowPassageBodyPathOptimizerTest
    private final double idealStanceWidth = new DefaultFootstepPlannerParameters().getIdealFootstepWidth();
    private final ExpandingPolytopeAlgorithm collisionDetector = new ExpandingPolytopeAlgorithm();
    private FootstepPlanningModule module;
-   private FootstepPlannerParametersBasics footstepPlanningParameters;
+   private DefaultFootstepPlannerParametersBasics footstepPlanningParameters;
    private PlanarRegionsList planarRegionsList;
 
    @BeforeEach

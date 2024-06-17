@@ -9,7 +9,7 @@ import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -18,7 +18,7 @@ import java.util.Comparator;
 
 public class FootstepPlannerCompletionChecker
 {
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
    private final AStarFootstepPlannerIterationConductor iterationConductor;
    private final FootstepPlannerHeuristicCalculator heuristics;
 
@@ -35,7 +35,7 @@ public class FootstepPlannerCompletionChecker
 
    private final SquaredUpStepComparator squaredUpStepComparator = new SquaredUpStepComparator();
 
-   public FootstepPlannerCompletionChecker(FootstepPlannerParametersBasics footstepPlannerParameters,
+   public FootstepPlannerCompletionChecker(DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                                            AStarFootstepPlannerIterationConductor iterationConductor,
                                            FootstepPlannerHeuristicCalculator heuristics,
                                            FootstepSnapperReadOnly snapper)

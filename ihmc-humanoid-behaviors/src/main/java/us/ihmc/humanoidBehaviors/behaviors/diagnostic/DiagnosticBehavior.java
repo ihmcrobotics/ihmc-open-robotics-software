@@ -20,7 +20,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.*;
@@ -216,7 +216,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    private final ROS2PublisherBasics<StampedPosePacket> stampedPosePublisher;
 
    public DiagnosticBehavior(String robotName, FullHumanoidRobotModel fullRobotModel, YoEnum<RobotSide> supportLeg, HumanoidReferenceFrames referenceFrames,
-                             YoDouble yoTime, YoBoolean yoDoubleSupport, ROS2Node ros2Node, WholeBodyControllerParameters wholeBodyControllerParameters, FootstepPlannerParametersBasics footstepPlannerParameters,
+                             YoDouble yoTime, YoBoolean yoDoubleSupport, ROS2Node ros2Node, WholeBodyControllerParameters wholeBodyControllerParameters, DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                              YoFrameConvexPolygon2D yoSupportPolygon, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, ros2Node);

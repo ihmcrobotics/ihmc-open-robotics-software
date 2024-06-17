@@ -17,7 +17,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -45,7 +45,7 @@ class BuildingExplorationBehaviorLookAndStepState implements State
 
    private final Pose3DReadOnly bombPose;
 
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
 
    private final ROS2Input<PoseListMessage> bodyPathSubscription;
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();

@@ -6,7 +6,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -14,7 +13,7 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.communication.FootstepPlannerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
@@ -77,7 +76,7 @@ public class FootstepPlanningModuleLauncher
    {
       String moduleName = robotModel.getSimpleRobotName();
 
-      FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();
 
@@ -100,7 +99,7 @@ public class FootstepPlanningModuleLauncher
    {
       String moduleName = robotModel.getSimpleRobotName();
 
-      FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters(suffix);
+      DefaultFootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters(suffix);
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();
 

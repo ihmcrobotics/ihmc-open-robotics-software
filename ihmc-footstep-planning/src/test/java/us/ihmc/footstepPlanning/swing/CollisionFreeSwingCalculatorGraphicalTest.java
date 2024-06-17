@@ -12,7 +12,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -32,7 +32,7 @@ public class CollisionFreeSwingCalculatorGraphicalTest
 {
    private static final boolean runSCS = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
-   private final FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+   private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
    private final SwingPlannerParametersBasics swingParameters = new DefaultSwingPlannerParameters();
    private final WalkingControllerParameters walkingControllerParameters = new ProxyAtlasWalkingControllerParameters();
    private final SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(ProxyAtlasWalkingControllerParameters::getProxyAtlasFootPolygon);

@@ -47,7 +47,7 @@ public class PlanarRegionPolygonSnapperTest
          RigidBodyTransform transformExpected = new RigidBodyTransform();
          transformExpected.getRotation().set(rotationMatrix);
 
-         EuclidCoreTestTools.assertEquals(transformExpected, PlanarRegionPolygonSnapper.createTransformToMatchSurfaceNormalPreserveX(surfaceNormal), 1e-5);
+         EuclidCoreTestTools.assertEquals(transformExpected, PolygonSnapperTools.createTransformToMatchSurfaceNormalPreserveX(surfaceNormal), 1e-5);
       }
    }
 
