@@ -32,7 +32,7 @@ public class TrashCanInteractionExecutor extends BehaviorTreeNodeExecutor<TrashC
    private boolean waitForPullScrewToFinish = false;
    private boolean waitForGraspToFinish = false;
 
-   private transient final FramePose3D pushDoorPanelPose = new FramePose3D();
+   private transient final FramePose3D doorPanelPose = new FramePose3D();
 
    public TrashCanInteractionExecutor(long id,
                                       CRDTInfo crdtInfo,
@@ -75,11 +75,23 @@ public class TrashCanInteractionExecutor extends BehaviorTreeNodeExecutor<TrashC
 
       updateActionSubtree(this);
 
-      state.getDoorHingeJointAngle().setValue(Double.NaN);
+      SceneNode rightDoorPanelNode = sceneGraph.getNamesToNodesMap().get(DoorSceneNodeDefinitions.RIGHT_DOOR_PANEL_NAME);
+      SceneNode leftDoorPanelNode = sceneGraph.getNamesToNodesMap().get(DoorSceneNodeDefinitions.LEFT_DOOR_PANEL_NAME);
+      SceneNode trashCanNode = sceneGraph.getNamesToNodesMap().get(DoorSceneNodeDefinitions.LEFT_DOOR_PANEL_NAME);
+      if (rightDoorPanelNode != null)
+      {
+         rightDoorPanelNode.getNodeFrame();
+         // set the distance from door
+         state.getDistanceFromDoor().setValue(rightDoorPanelNode.getNodeFrame().getTransformToDesiredFrame());
+         setSide()
+      }
 
-      // TODO: PUSH_DOOR_FRAME_NAME renamed to RIGHT_DOOR_FRAME?
-      SceneNode pushDoorFrameNode = sceneGraph.getNamesToNodesMap().get(DoorSceneNodeDefinitions.PUSH_DOOR_FRAME_NAME);
-      SceneNode pushDoorPanelNode = sceneGraph.getNamesToNodesMap().get(DoorSceneNodeDefinitions.RIGHT_DOOR_PANEL_NAME);
+      if ()
+         state.getIsBlockingPathToDoor().setValue(true);
+
+      // same here but distance from couch
+      // if blocking path to couch then walk in front of couch and knee forward
+
 
       DetectableSceneNode yoloDoorHandleNode = (DetectableSceneNode) sceneGraph.getNamesToNodesMap().get("YOLO door lever");
       StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get("doorStaticHandle");

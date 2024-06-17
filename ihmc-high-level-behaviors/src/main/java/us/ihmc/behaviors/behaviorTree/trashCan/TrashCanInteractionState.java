@@ -8,6 +8,7 @@ import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -27,15 +28,17 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
    private WaitDurationActionState postGraspEvaluationAction;
    private WaitDurationActionState postPullDoorEvaluationAction;
 
-   private final CRDTUnidirectionalDouble doorHingeJointAngle;
-   private final CRDTUnidirectionalDouble doorHandleDistanceFromStart;
+   private final CRDTUnidirectionalBoolean isBlockingPathToDoor;
+   private final CRDTUnidirectionalDouble distanceFromDoor;
+   private final CRDTUnidirectionalDouble distanceFromCouch;
 
    public TrashCanInteractionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(id, new TrashCanInteractionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
-      doorHingeJointAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
-      doorHandleDistanceFromStart = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, 0.0);
+      isBlockingPathToDoor = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
+      distanceFromDoor = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      distanceFromCouch = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
    }
 
    @Override
@@ -93,24 +96,24 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
       }
    }
 
-   public void toMessage(DoorTraversalStateMessage message)
+   public void toMessage(TrashCanInteractionStateMessage message)
    {
       getDefinition().toMessage(message.getDefinition());
 
       super.toMessage(message.getState());
 
-      message.setDoorHingeJointAngle(doorHingeJointAngle.toMessage());
-      message.setDoorHandleDistanceFromStart(doorHandleDistanceFromStart.toMessage());
+      message.setDistanceFromDoor(distanceFromDoor.toMessage());
+      message.setDistanceFromCouch(distanceFromCouch.toMessage());
    }
 
-   public void fromMessage(DoorTraversalStateMessage message)
+   public void fromMessage(TrashCanInteractionStateMessage message)
    {
       super.fromMessage(message.getState());
 
       getDefinition().fromMessage(message.getDefinition());
 
-      doorHingeJointAngle.fromMessage(message.getDoorHingeJointAngle());
-      doorHandleDistanceFromStart.fromMessage(message.getDoorHandleDistanceFromStart());
+      distanceFromDoor.fromMessage(message.getDistanceFromDoor());
+      distanceFromCouch.fromMessage(message.getDistanceFromCouch());
    }
 
    public boolean arePullRetryNodesPresent()
@@ -153,13 +156,18 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
       return postPullDoorEvaluationAction;
    }
 
-   public CRDTUnidirectionalDouble getDoorHingeJointAngle()
+   public CRDTUnidirectionalBoolean getIsBlockingPathToDoor()
    {
-      return doorHingeJointAngle;
+      return isBlockingPathToDoor;
    }
 
-   public CRDTUnidirectionalDouble getDoorHandleDistanceFromStart()
+   public CRDTUnidirectionalDouble getDistanceFromDoor()
    {
-      return doorHandleDistanceFromStart;
+      return distanceFromDoor;
+   }
+
+   public CRDTUnidirectionalDouble getDistanceFromCouch()
+   {
+      return distanceFromCouch;
    }
 }
