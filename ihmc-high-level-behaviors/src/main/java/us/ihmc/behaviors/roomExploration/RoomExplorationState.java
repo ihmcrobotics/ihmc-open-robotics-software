@@ -20,8 +20,17 @@ public class RoomExplorationState extends BehaviorTreeNodeState<RoomExplorationD
       return super.getChildren();
    }
 
-   public void toMessage(RoomExplorationStateMessage stateMessage)
+   public void toMessage(RoomExplorationStateMessage message)
    {
+      getDefinition().toMessage(message.getDefinition());
 
+      super.toMessage(message.getState());
+   }
+
+   public void fromMessage(RoomExplorationStateMessage message)
+   {
+      super.fromMessage(message.getState());
+
+      getDefinition().fromMessage(message.getDefinition());
    }
 }

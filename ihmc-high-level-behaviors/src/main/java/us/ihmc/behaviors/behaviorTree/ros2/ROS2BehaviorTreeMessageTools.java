@@ -139,6 +139,10 @@ public class ROS2BehaviorTreeMessageTools
       {
          doorTraversalState.fromMessage(subscriptionNode.getDoorTraversalStateMessage());
       }
+      else if (nodeState instanceof RoomExplorationState roomExplorationState)
+      {
+         roomExplorationState.fromMessage(subscriptionNode.getRoomExplorationStateMessage());
+      }
       else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
       {
          chestOrientationActionState.fromMessage(subscriptionNode.getChestOrientationActionStateMessage());
