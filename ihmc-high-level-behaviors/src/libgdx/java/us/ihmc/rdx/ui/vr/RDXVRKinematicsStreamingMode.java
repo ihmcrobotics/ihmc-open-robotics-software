@@ -669,7 +669,7 @@ public class RDXVRKinematicsStreamingMode
             {
                LogTools.info("Finished walking. Resuming streaming");
                // Restart KST
-               setEnabled(false);
+               sleepToolbox();
             }
             else if (pausedForWalking && !enabled.get())
             {
@@ -759,7 +759,10 @@ public class RDXVRKinematicsStreamingMode
          if (!this.enabled.get())
             wakeUpToolbox();
          else
+         {
+            wakeUpToolbox();
             reinitializeToolbox();
+         }
          kinematicsRecorder.setReplay(false); // Check no concurrency replay and streaming
          initialPelvisFrame = null;
          initialChestFrame = null;
