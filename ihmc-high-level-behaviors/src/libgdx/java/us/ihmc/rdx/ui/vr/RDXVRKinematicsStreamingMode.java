@@ -756,8 +756,10 @@ public class RDXVRKinematicsStreamingMode
                syncedRobot.getFullRobotModel());
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel()
                                                                                                                              .getSimpleRobotName()), initialConfigMessage);
-         wakeUpToolbox();
-         reinitializeToolbox();
+         if (!this.enabled.get())
+            wakeUpToolbox();
+         else
+            reinitializeToolbox();
          kinematicsRecorder.setReplay(false); // Check no concurrency replay and streaming
          initialPelvisFrame = null;
          initialChestFrame = null;
