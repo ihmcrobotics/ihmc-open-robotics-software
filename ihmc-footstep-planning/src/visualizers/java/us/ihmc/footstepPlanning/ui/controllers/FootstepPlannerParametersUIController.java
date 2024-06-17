@@ -8,7 +8,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.shape.Rectangle;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
 import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper;
 import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper.ParametersTableRow;
@@ -18,7 +18,7 @@ import us.ihmc.messager.javafx.JavaFXMessager;
 public class FootstepPlannerParametersUIController
 {
    private JavaFXMessager messager;
-   private FootstepPlannerParametersBasics planningParameters;
+   private DefaultFootstepPlannerParametersBasics planningParameters;
    private JavaFXStoredPropertyMap javaFXStoredPropertyMap;
    private final StepShapeManager stepShapeManager = new StepShapeManager();
    private StoredPropertyTableViewWrapper tableViewWrapper;
@@ -47,7 +47,7 @@ public class FootstepPlannerParametersUIController
       this.messager = messager;
    }
 
-   public void setPlannerParameters(FootstepPlannerParametersBasics parameters)
+   public void setPlannerParameters(DefaultFootstepPlannerParametersBasics parameters)
    {
       this.planningParameters = parameters;
       javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
@@ -114,12 +114,12 @@ public class FootstepPlannerParametersUIController
 
       void update()
       {
-         double minStepYaw = planningParameters.getMinimumStepYaw();
-         double maxStepYaw = planningParameters.getMaximumStepYaw();
-         double minStepWidth = planningParameters.getMinimumStepWidth();
-         double maxStepWidth = planningParameters.getMaximumStepWidth();
-         double minStepLength = planningParameters.getMinimumStepLength();
-         double maxStepLength = planningParameters.getMaximumStepReach();
+         double minStepYaw = planningParameters.getMinStepYaw();
+         double maxStepYaw = planningParameters.getMaxStepYaw();
+         double minStepWidth = planningParameters.getMinStepWidth();
+         double maxStepWidth = planningParameters.getMaxStepWidth();
+         double minStepLength = planningParameters.getMinStepLength();
+         double maxStepLength = planningParameters.getMaxStepReach();
          double worstYaw = maxStepYaw > Math.abs(minStepYaw) ? maxStepYaw : minStepYaw;
 
          if (EuclidCoreTools.epsilonEquals(minStepYaw, this.minStepYaw, 1e-3) &&

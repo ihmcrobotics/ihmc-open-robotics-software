@@ -35,14 +35,13 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
@@ -543,7 +542,7 @@ public class SwingOverPlanarRegionsTest
                                              SideDependentList<? extends Pose3DReadOnly> startFootPoses,
                                              SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander,
                                              WalkingControllerParameters walkingControllerParameters,
-                                             FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                                             DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters,
                                              SwingPlannerParametersReadOnly swingPlannerParameters)
    {
       swingOverPlanarRegionsTrajectoryExpander.setDoInitialFastApproximation(swingPlannerParameters.getDoInitialFastApproximation());
@@ -607,7 +606,7 @@ public class SwingOverPlanarRegionsTest
    }
 
    private static double computeNominalSwingTrajectoryLength(WalkingControllerParameters walkingControllerParameters,
-                                                      FootstepPlannerParametersReadOnly footstepPlannerParameters)
+                                                      DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       double nominalSwingHeight = walkingControllerParameters.getSwingTrajectoryParameters().getDefaultSwingHeight();
       double nominalSwingProportion = TwoWaypointSwingGenerator.getDefaultWaypointProportions()[0];

@@ -19,7 +19,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
@@ -41,7 +41,7 @@ public class RDXFootstepPlanning
    private final ROS2SyncedRobotModel syncedRobot;
    private final ControllerStatusTracker controllerStatusTracker;
    private final FootstepPlanningModule footstepPlanner;
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
    private final AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters;
    private final SwingPlannerParametersBasics swingFootPlannerParameters;
    private final RDXLocomotionParameters locomotionParameters;
@@ -66,7 +66,7 @@ public class RDXFootstepPlanning
                               ROS2SyncedRobotModel syncedRobot,
                               ControllerStatusTracker controllerStatusTracker,
                               RDXLocomotionParameters locomotionParameters,
-                              FootstepPlannerParametersBasics footstepPlannerParameters,
+                              DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                               AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters,
                               SwingPlannerParametersBasics swingFootPlannerParameters)
    {

@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.DeprecatedAPIs;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.*;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
@@ -58,11 +58,11 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
    private final YoDouble yoTime = new YoDouble("yoTime", registry);
 
    private YoVariableServer yoVariableServer = null;
-   private FootstepPlannerParametersBasics footstepPlannerParameters;
+   private DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
 
    private final BehaviorDispatcher<HumanoidBehaviorType> dispatcher;
 
-   public IHMCHumanoidBehaviorManager(String robotName, FootstepPlannerParametersBasics footstepPlannerParameters,
+   public IHMCHumanoidBehaviorManager(String robotName, DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                                       WholeBodyControllerParameters<?> wholeBodyControllerParameters, FullHumanoidRobotModelFactory robotModelFactory,
                                       LogModelProvider modelProvider, boolean startYoVariableServer, HumanoidRobotSensorInformation sensorInfo)
          throws IOException
@@ -79,7 +79,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
    }
 
    public IHMCHumanoidBehaviorManager(String robotName,
-                                      FootstepPlannerParametersBasics footstepPlannerParameters,
+                                      DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                                       WholeBodyControllerParameters<?> wholeBodyControllerParameters,
                                       FullHumanoidRobotModelFactory robotModelFactory,
                                       LogModelProvider modelProvider,
@@ -105,7 +105,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
    }
 
    private IHMCHumanoidBehaviorManager(String robotName,
-                                       FootstepPlannerParametersBasics footstepPlannerParameters,
+                                       DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                                        WholeBodyControllerParameters<?> wholeBodyControllerParameters,
                                        FullHumanoidRobotModelFactory robotModelFactory,
                                        LogModelProvider modelProvider,
@@ -251,7 +251,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                            SideDependentList<WristForceSensorFilteredUpdatable> wristSensors, HumanoidReferenceFrames referenceFrames,
                                            YoDouble yoTime, ROS2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry,
                                            CapturePointUpdatable capturePointUpdatable, WholeBodyControllerParameters<?> wholeBodyControllerParameters,
-                                           FootstepPlannerParametersBasics footstepPlannerParameters)
+                                           DefaultFootstepPlannerParametersBasics footstepPlannerParameters)
    {
 
       WalkingControllerParameters walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
@@ -481,7 +481,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                                      FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, YoDouble yoTime,
                                                      ROS2Node ros2Node, CapturePointUpdatable capturePointUpdatable,
                                                      WholeBodyControllerParameters wholeBodyControllerParameters,
-                                                     FootstepPlannerParametersBasics footstepPlannerParameters, double timeToWait,
+                                                     DefaultFootstepPlannerParametersBasics footstepPlannerParameters, double timeToWait,
                                                      YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       YoBoolean yoDoubleSupport = capturePointUpdatable.getYoDoubleSupport();
@@ -505,7 +505,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
    }
 
    public static IHMCHumanoidBehaviorManager createBehaviorModuleForAutomaticDiagnostic(String robotName,
-                                                                                        FootstepPlannerParametersBasics footstepPlannerParameters,
+                                                                                        DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                                                                                         WholeBodyControllerParameters wholeBodyControllerParameters,
                                                                                         FullHumanoidRobotModelFactory robotModelFactory,
                                                                                         LogModelProvider modelProvider,

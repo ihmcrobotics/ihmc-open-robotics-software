@@ -18,7 +18,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -195,7 +195,7 @@ public class PlannerTools
    public static boolean doesPathContainBodyCollisions(Pose3DReadOnly robotPose,
                                                        List<? extends Pose3DReadOnly> bodyPathWaypoints,
                                                        PlanarRegionsList planarRegionsList,
-                                                       FootstepPlannerParametersReadOnly parameters,
+                                                       DefaultFootstepPlannerParametersReadOnly parameters,
                                                        double horizonDistanceToCheck)
    {
       BodyCollisionData collisionData = detectCollisionsAlongBodyPath(robotPose,
@@ -209,7 +209,7 @@ public class PlannerTools
    public static BodyCollisionData detectCollisionsAlongBodyPath(Pose3DReadOnly robotPose,
                                                                  List<? extends Pose3DReadOnly> bodyPathWaypoints,
                                                                  PlanarRegionsList planarRegionsList,
-                                                                 FootstepPlannerParametersReadOnly parameters,
+                                                                 DefaultFootstepPlannerParametersReadOnly parameters,
                                                                  double horizonDistanceToCheck)
    {
       WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
@@ -271,7 +271,7 @@ public class PlannerTools
 
    /**
     * Calculates the total expected duration of a footstep plan, which depends
-    * on parameters outside of {@link FootstepPlannerParametersReadOnly}.
+    * on parameters outside of {@link DefaultFootstepPlannerParametersReadOnly}.
     */
    public static double calculateNominalTotalPlanExecutionDuration(FootstepPlan footstepPlan,
                                                                    double defaultSwingDuration,

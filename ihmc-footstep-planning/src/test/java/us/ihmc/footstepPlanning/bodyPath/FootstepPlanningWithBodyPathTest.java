@@ -13,7 +13,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.testTools.PlanningTestTools;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
@@ -48,7 +48,7 @@ public class FootstepPlanningWithBodyPathTest
    public void testWaypointPathOnFlat(TestInfo testInfo)
    {
       YoRegistry registry = new YoRegistry(testInfo.getTestMethod().get().getName());
-      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       double defaultStepWidth = parameters.getIdealFootstepWidth();
 
       double goalDistance = 5.0;
@@ -111,7 +111,7 @@ public class FootstepPlanningWithBodyPathTest
       Pose3D finalPose = new Pose3D();
       bodyPath.getPointAlongPath(1.0, finalPose);
 
-      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       double defaultStepWidth = parameters.getIdealFootstepWidth();
 
       FramePose3D initialMidFootPose = new FramePose3D();
