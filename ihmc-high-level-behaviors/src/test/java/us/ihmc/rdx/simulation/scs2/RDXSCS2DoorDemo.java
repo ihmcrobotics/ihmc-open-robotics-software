@@ -76,7 +76,7 @@ public class RDXSCS2DoorDemo extends Lwjgl3ApplicationAdapter
 
       bulletPhysicsEngine.getGlobalBulletMultiBodyJointParameters().setJointDisableParentCollision(false);
 
-      DoorDefinition doorDefinition = new DoorDefinition();
+      DoorDefinition doorDefinition = new DoorDefinition(0);
       doorDefinition.getDoorPanelDefinition().setAddArUcoMarkers(true);
       doorDefinition.build();
 
