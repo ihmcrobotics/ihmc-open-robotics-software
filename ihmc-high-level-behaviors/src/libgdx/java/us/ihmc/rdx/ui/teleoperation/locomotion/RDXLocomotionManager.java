@@ -50,13 +50,12 @@ public class RDXLocomotionManager
    private final CommunicationHelper communicationHelper;
    private final RDXLocomotionParameters locomotionParameters;
    private final DefaultFootstepPlannerParametersBasics aStarFootstepPlannerParameters;
-   private final DefaultFootstepPlannerParametersBasics turnWalkTurnFootstepPlannerParameters;
-   private final FootstepPlannerParametersDelegate footstepPlannerParametersDelegate = new FootstepPlannerParametersDelegate();
+   private final DefaultFootstepPlannerParametersBasics footstepPlannerParametersDelegate = new DefaultFootstepPlannerParameters();
    private final AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters;
    private final SwingPlannerParametersBasics swingFootPlannerParameters;
    private final Notification locomotionParametersChanged = new Notification();
    private final Notification footstepPlanningParametersChanged = new Notification();
-   private final Notification turnWalkTurnFootstepPlanningParametersChanged = new Notification();
+   private final Notification delegatdFootstepPlanningParametersChanged = new Notification();
    private final RDXStoredPropertySetTuner locomotionParametersTuner = new RDXStoredPropertySetTuner("Locomotion Parameters");
    private final RDXStoredPropertySetTuner aStartFootstepPlanningParametersTuner
          = new RDXStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation A*)");
@@ -113,10 +112,6 @@ public class RDXLocomotionManager
       locomotionParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
       locomotionParameters.load();
       aStarFootstepPlannerParameters = robotModel.getFootstepPlannerParameters();
-      turnWalkTurnFootstepPlannerParameters = robotModel.getFootstepPlannerParameters("TurnWalkTurn");
-      footstepPlannerParametersDelegate.setParametersToDelegate(locomotionParameters.getPerformAStarSearch() ?
-                                                                      aStarFootstepPlannerParameters :
-                                                                      turnWalkTurnFootstepPlannerParameters);
       bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
 
@@ -145,11 +140,10 @@ public class RDXLocomotionManager
       controllerStatusTracker.getFootstepTracker().registerFootstepQueuedMessageListener(footstepQueueNotification);
       locomotionParameters.addAnyPropertyChangedListener(locomotionParametersChanged);
       aStarFootstepPlannerParameters.addAnyPropertyChangedListener(footstepPlanningParametersChanged);
-      turnWalkTurnFootstepPlannerParameters.addAnyPropertyChangedListener(turnWalkTurnFootstepPlanningParametersChanged);
+      footstepPlannerParametersDelegate.addAnyPropertyChangedListener(delegatdFootstepPlanningParametersChanged);
 
       locomotionParametersTuner.create(locomotionParameters);
       aStartFootstepPlanningParametersTuner.create(aStarFootstepPlannerParameters, false);
-      turnWalkTurnFootstepPlanningParametersTuner.create(turnWalkTurnFootstepPlannerParameters, false);
       bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false);
       swingFootPlanningParametersTuner.create(swingFootPlannerParameters, false);
 
@@ -159,7 +153,7 @@ public class RDXLocomotionManager
       replanSwingTrajectoriesOnChangeCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.replanSwingTrajectoriesOnChange);
       swingTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.swingTime, 0.3, 1.5);
       transferTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.transferTime, 0.1, 1.5);
-      stepAggressivenessSlider = new ImGuiSliderDouble("Step Aggressiveness", "", 0.5);
+      stepAggressivenessSlider = new ImGuiSliderDouble("Step Aggressiveness", "", aStarFootstepPlannerParameters.getIdealFootstepLength() / aStarFootstepPlannerParameters.getMaxStepReach());
       turnAggressivenessSlider = new ImGuiSliderDouble("Turn Aggressiveness", "", 0.5);
       initialStanceSideRadioButtons = locomotionParametersTuner.createEnumRadioButtons(RDXLocomotionParameters.initialStanceSide, InitialStanceSide.values());
 
@@ -201,15 +195,23 @@ public class RDXLocomotionManager
          deleteAll();
       }
 
-      footstepPlannerParametersDelegate.setParametersToDelegate(locomotionParameters.getPerformAStarSearch() ?
-                                                                      aStarFootstepPlannerParameters :
-                                                                      turnWalkTurnFootstepPlannerParameters);
+      footstepPlannerParametersDelegate.set(aStarFootstepPlannerParameters);
+
+      footstepPlannerParametersDelegate.setIdealFootstepLength(stepAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMaxStepReach());
+      footstepPlannerParametersDelegate.setIdealBackStepLength(stepAggressivenessSlider.getDoubleValue() * -aStarFootstepPlannerParameters.getMinStepLength());
+      footstepPlannerParametersDelegate.setIdealSideStepWidth(stepAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMaxStepWidth());
+
+      if (!locomotionParameters.getPerformAStarSearch())
+      {
+         footstepPlannerParametersDelegate.setMaxStepYaw(turnAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMaxStepYaw());
+         footstepPlannerParametersDelegate.setMinStepYaw(turnAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMinStepYaw());
+      }
 
       swingFootPlannerParameters.setMinimumSwingTime(locomotionParameters.getSwingTime());
 
       boolean parametersChanged = locomotionParametersChanged.poll();
       parametersChanged |= footstepPlanningParametersChanged.poll();
-      parametersChanged |= turnWalkTurnFootstepPlanningParametersChanged.poll();
+      parametersChanged |= delegatdFootstepPlanningParametersChanged.poll();
 
       if (parametersChanged)
       {
@@ -301,14 +303,8 @@ public class RDXLocomotionManager
 
       swingTimeSlider.renderImGuiWidget();
       transferTimeSlider.renderImGuiWidget();
-      stepAggressivenessSlider.render(0.0, 1.0);
+      stepAggressivenessSlider.render(0.0, 1.5);
       turnAggressivenessSlider.render(0.0, 2.0);
-
-      turnWalkTurnFootstepPlannerParameters.setIdealFootstepLength(stepAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMaxStepReach());
-      turnWalkTurnFootstepPlannerParameters.setIdealBackStepLength(stepAggressivenessSlider.getDoubleValue() * -aStarFootstepPlannerParameters.getMinStepLength());
-      turnWalkTurnFootstepPlannerParameters.setIdealSideStepWidth(stepAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMaxStepWidth());
-      turnWalkTurnFootstepPlannerParameters.setMaxStepYaw(turnAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMaxStepYaw());
-      turnWalkTurnFootstepPlannerParameters.setMinStepYaw(turnAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMinStepYaw());
 
       ImGui.separator();
       ImGui.text("Walking Options:");
