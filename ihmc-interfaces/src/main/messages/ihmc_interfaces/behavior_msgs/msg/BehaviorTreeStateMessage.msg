@@ -6,6 +6,8 @@
 byte BASIC_NODE = 0
 byte ACTION_SEQUENCE = 1
 byte DOOR_TRAVERSAL = 2
+byte TRASH_CAN_INTERACTION = 3
+byte BUILDING_EXPLORATION = 4
 
 byte CHEST_ORIENTATION_ACTION = 10
 byte FOOTSTEP_PLAN_ACTION = 11
@@ -41,6 +43,8 @@ behavior_msgs/ActionSequenceStateMessage[<=200] action_sequences
 behavior_msgs/DoorTraversalStateMessage[<=200] door_traversals
 
 behavior_msgs/TrashCanInteractionStateMessage[<=200] trash_can_interactions
+
+behavior_msgs/BuildingExplorationStateMessage[<=200] building_explorations
 
 behavior_msgs/ChestOrientationActionStateMessage[<=200] chest_orientation_actions
 

@@ -3,6 +3,7 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 import behavior_msgs.msg.dds.*;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionState;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationState;
 import us.ihmc.behaviors.door.DoorTraversalState;
 import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.*;
@@ -22,6 +23,7 @@ public class ROS2BehaviorTreeMessageTools
       treeStateMessage.getActionSequences().clear();
       treeStateMessage.getDoorTraversals().clear();
       treeStateMessage.getTrashCanInteractions().clear();
+      treeStateMessage.getBuildingExplorations().clear();
       treeStateMessage.getChestOrientationActions().clear();
       treeStateMessage.getFootstepPlanActions().clear();
       treeStateMessage.getHandPoseActions().clear();
@@ -52,6 +54,12 @@ public class ROS2BehaviorTreeMessageTools
          treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.TRASH_CAN_INTERACTION);
          treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getTrashCanInteractions().size());
          trashCanInteractionState.toMessage(treeStateMessage.getTrashCanInteractions().add());
+      }
+      else if (nodeState instanceof BuildingExplorationState buildingExplorationState)
+      {
+         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.BUILDING_EXPLORATION);
+         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getDoorTraversals().size());
+         buildingExplorationState.toMessage(treeStateMessage.getBuildingExplorations().add());
       }
       else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
       {
@@ -131,6 +139,10 @@ public class ROS2BehaviorTreeMessageTools
       {
          trashCanInteractionState.fromMessage(subscriptionNode.getTrashCanInteractionStateMessage());
       }
+      else if (nodeState instanceof BuildingExplorationState buildingExplorationState)
+      {
+         buildingExplorationState.fromMessage(subscriptionNode.getBuildingExplorationStateMessage());
+      }
       else if (nodeState instanceof ChestOrientationActionState chestOrientationActionState)
       {
          chestOrientationActionState.fromMessage(subscriptionNode.getChestOrientationActionStateMessage());
@@ -206,6 +218,13 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setTrashCanInteractionStateMessage(trashCanInteractionStateMessage);
             subscriptionNode.setBehaviorTreeNodeStateMessage(trashCanInteractionStateMessage.getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(trashCanInteractionStateMessage.getDefinition().getDefinition());
+         }
+         case BehaviorTreeStateMessage.BUILDING_EXPLORATION ->
+         {
+            BuildingExplorationStateMessage buildingExplorationStateMessage = treeStateMessage.getBuildingExplorations().get(indexInTypesList);
+            subscriptionNode.setBuildingExplorationStateMessage(buildingExplorationStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(buildingExplorationStateMessage.getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(buildingExplorationStateMessage.getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION ->
          {

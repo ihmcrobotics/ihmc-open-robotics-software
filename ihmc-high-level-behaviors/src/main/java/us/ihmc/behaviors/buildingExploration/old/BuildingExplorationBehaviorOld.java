@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.buildingExploration;
+package us.ihmc.behaviors.buildingExploration.old;
 
 import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;

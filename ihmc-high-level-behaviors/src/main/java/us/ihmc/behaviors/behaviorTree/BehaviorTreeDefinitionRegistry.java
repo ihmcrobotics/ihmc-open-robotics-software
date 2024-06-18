@@ -2,6 +2,7 @@ package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
 import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
@@ -16,6 +17,7 @@ public class BehaviorTreeDefinitionRegistry
       new RegistryRecord(ActionSequenceDefinition.class, BehaviorTreeStateMessage.ACTION_SEQUENCE),
       new RegistryRecord(DoorTraversalDefinition.class, BehaviorTreeStateMessage.DOOR_TRAVERSAL),
       new RegistryRecord(TrashCanInteractionDefinition.class, BehaviorTreeStateMessage.TRASH_CAN_INTERACTION),
+      new RegistryRecord(BuildingExplorationDefinition.class, BehaviorTreeStateMessage.BUILDING_EXPLORATION),
 
       new RegistryRecord(ChestOrientationActionDefinition.class, BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION),
       new RegistryRecord(FootstepPlanActionDefinition.class, BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION),
