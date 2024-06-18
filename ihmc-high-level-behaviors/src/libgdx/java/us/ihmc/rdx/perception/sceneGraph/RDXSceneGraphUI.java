@@ -210,6 +210,12 @@ public class RDXSceneGraphUI
                      modificationQueue.accept(new SceneGraphNodeAddition(trashCan.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
                      addUISceneNode(trashCan);
                   }
+                  if (ImGui.button(labels.get("Add RightDoorPanel")))
+                  {
+                     RDXPredefinedRigidBodySceneNode rightDoorPanel = predefinedRigidBodySceneNodeBuilder.build("RightDoorPanel");
+                     modificationQueue.accept(new SceneGraphNodeAddition(rightDoorPanel.getSceneNode(), predefinedRigidBodySceneNodeBuilder.getParent()));
+                     addUISceneNode(rightDoorPanel);
+                  }
                   ImGui.endTable();
                }
                ImGui.endDisabled();

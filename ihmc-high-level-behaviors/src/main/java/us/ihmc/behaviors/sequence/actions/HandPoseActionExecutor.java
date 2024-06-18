@@ -78,7 +78,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       if (state.getIsNextForExecution())
       {
          ChestOrientationActionState concurrentChestOrientationAction = null;
-         PelvisHeightPitchActionState concurrentPelvisHeightPitchAction = null;
+         PelvisHeightOrientationActionState concurrentPelvisHeightPitchAction = null;
 
          ActionSequenceExecutor actionSequenceExecutor = BehaviorTreeTools.findActionSequenceAncestor(this);
          if (actionSequenceExecutor != null)
@@ -93,7 +93,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                   {
                      concurrentChestOrientationAction = chestOrientationAction;
                   }
-                  if (actionChildren.get(i) instanceof PelvisHeightPitchActionState pelvisHeightPitchAction)
+                  if (actionChildren.get(i) instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
                   {
                      concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
                   }
@@ -106,7 +106,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                {
                   concurrentChestOrientationAction = chestOrientationAction;
                }
-               if (currentlyExecutingAction.getState() instanceof PelvisHeightPitchActionState pelvisHeightPitchAction)
+               if (currentlyExecutingAction.getState() instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
                {
                   concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
                }

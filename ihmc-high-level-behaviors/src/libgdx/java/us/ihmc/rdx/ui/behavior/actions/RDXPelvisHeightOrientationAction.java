@@ -6,8 +6,8 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionDefinition;
-import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionState;
+import us.ihmc.behaviors.sequence.actions.PelvisHeightOrientationActionDefinition;
+import us.ihmc.behaviors.sequence.actions.PelvisHeightOrientationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -34,12 +34,14 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchActionState, PelvisHeightPitchActionDefinition>
+public class RDXPelvisHeightOrientationAction extends RDXActionNode<PelvisHeightOrientationActionState, PelvisHeightOrientationActionDefinition>
 {
-   private final PelvisHeightPitchActionState state;
+   private final PelvisHeightOrientationActionState state;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ImDoubleWrapper heightWidget;
+   private final ImDoubleWrapper yawWidget;
    private final ImDoubleWrapper pitchWidget;
+   private final ImDoubleWrapper rollWidget;
    private final ImDoubleWrapper trajectoryDurationWidget;
    /** Gizmo is control frame */
    private final RDXSelectablePose3DGizmo poseGizmo;
@@ -53,22 +55,22 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
    private final RDX3DPanelTooltip tooltip;
    private final FullHumanoidRobotModel syncedFullRobotModel;
 
-   public RDXPelvisHeightPitchAction(long id,
-                                     CRDTInfo crdtInfo,
-                                     WorkspaceResourceDirectory saveFileDirectory,
-                                     RDX3DPanel panel3D,
-                                     DRCRobotModel robotModel,
-                                     FullHumanoidRobotModel syncedFullRobotModel,
-                                     RobotCollisionModel selectionCollisionModel,
-                                     ReferenceFrameLibrary referenceFrameLibrary)
+   public RDXPelvisHeightOrientationAction(long id,
+                                           CRDTInfo crdtInfo,
+                                           WorkspaceResourceDirectory saveFileDirectory,
+                                           RDX3DPanel panel3D,
+                                           DRCRobotModel robotModel,
+                                           FullHumanoidRobotModel syncedFullRobotModel,
+                                           RobotCollisionModel selectionCollisionModel,
+                                           ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(new PelvisHeightPitchActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+      super(new PelvisHeightOrientationActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
       state = getState();
 
       this.syncedFullRobotModel = syncedFullRobotModel;
 
-      getDefinition().setName("Pelvis height and pitch");
+      getDefinition().setName("Pelvis height and orientation");
 
       poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getPelvisToParentTransform().getValue());
       poseGizmo.create(panel3D);
@@ -80,9 +82,13 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
       heightWidget = new ImDoubleWrapper(getDefinition()::getHeight,
                                          getDefinition()::setHeight,
                                          imDouble -> ImGuiTools.volatileInputDouble(labels.get("Height"), imDouble));
+      yawWidget = new ImDoubleWrapper(getDefinition().getRotation()::getYaw, getDefinition()::setYaw,
+                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Yaw"), imDouble));
       pitchWidget = new ImDoubleWrapper(getDefinition()::getPitch,
                                         getDefinition()::setPitch,
                                         imDouble -> ImGuiTools.volatileInputDouble(labels.get("Pitch"), imDouble));
+      rollWidget = new ImDoubleWrapper(getDefinition().getRotation()::getRoll, getDefinition()::setRoll,
+                                       imDouble -> ImGuiTools.volatileInputDouble(labels.get("Roll"), imDouble));
       trajectoryDurationWidget = new ImDoubleWrapper(getDefinition()::getTrajectoryDuration,
                                                      getDefinition()::setTrajectoryDuration,
                                                      imDouble -> ImGuiTools.volatileInputDouble(labels.get("Trajectory duration"), imDouble));
@@ -146,7 +152,11 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
       parentFrameComboBox.render();
       ImGui.pushItemWidth(80.0f);
       heightWidget.renderImGuiWidget();
+      yawWidget.renderImGuiWidget();
+      ImGui.sameLine();
       pitchWidget.renderImGuiWidget();
+      ImGui.sameLine();
+      rollWidget.renderImGuiWidget();
       trajectoryDurationWidget.renderImGuiWidget();
       ImGui.popItemWidth();
    }
@@ -215,6 +225,6 @@ public class RDXPelvisHeightPitchAction extends RDXActionNode<PelvisHeightPitchA
    @Override
    public String getActionTypeTitle()
    {
-      return "Pelvis Height and Pitch";
+      return "Pelvis Height and Orientation";
    }
 }

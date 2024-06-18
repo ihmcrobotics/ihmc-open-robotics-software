@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class PelvisHeightPitchActionDefinitionMessage extends Packet<PelvisHeightPitchActionDefinitionMessage> implements Settable<PelvisHeightPitchActionDefinitionMessage>, EpsilonComparable<PelvisHeightPitchActionDefinitionMessage>
+public class PelvisHeightOrientationActionDefinitionMessage extends Packet<PelvisHeightOrientationActionDefinitionMessage> implements Settable<PelvisHeightOrientationActionDefinitionMessage>, EpsilonComparable<PelvisHeightOrientationActionDefinitionMessage>
 {
    /**
             * Parent definition fields
@@ -25,20 +25,20 @@ public class PelvisHeightPitchActionDefinitionMessage extends Packet<PelvisHeigh
             */
    public double trajectory_duration_;
 
-   public PelvisHeightPitchActionDefinitionMessage()
+   public PelvisHeightOrientationActionDefinitionMessage()
    {
       definition_ = new behavior_msgs.msg.dds.ActionNodeDefinitionMessage();
       parent_frame_name_ = new java.lang.StringBuilder(255);
       pelvis_transform_to_parent_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
-   public PelvisHeightPitchActionDefinitionMessage(PelvisHeightPitchActionDefinitionMessage other)
+   public PelvisHeightOrientationActionDefinitionMessage(PelvisHeightOrientationActionDefinitionMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(PelvisHeightPitchActionDefinitionMessage other)
+   public void set(PelvisHeightOrientationActionDefinitionMessage other)
    {
       behavior_msgs.msg.dds.ActionNodeDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
       parent_frame_name_.setLength(0);
@@ -107,19 +107,19 @@ public class PelvisHeightPitchActionDefinitionMessage extends Packet<PelvisHeigh
    }
 
 
-   public static Supplier<PelvisHeightPitchActionDefinitionMessagePubSubType> getPubSubType()
+   public static Supplier<PelvisHeightOrientationActionDefinitionMessagePubSubType> getPubSubType()
    {
-      return PelvisHeightPitchActionDefinitionMessagePubSubType::new;
+      return PelvisHeightOrientationActionDefinitionMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return PelvisHeightPitchActionDefinitionMessagePubSubType::new;
+      return PelvisHeightOrientationActionDefinitionMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(PelvisHeightPitchActionDefinitionMessage other, double epsilon)
+   public boolean epsilonEquals(PelvisHeightOrientationActionDefinitionMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -139,9 +139,9 @@ public class PelvisHeightPitchActionDefinitionMessage extends Packet<PelvisHeigh
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof PelvisHeightPitchActionDefinitionMessage)) return false;
+      if(!(other instanceof PelvisHeightOrientationActionDefinitionMessage)) return false;
 
-      PelvisHeightPitchActionDefinitionMessage otherMyClass = (PelvisHeightPitchActionDefinitionMessage) other;
+      PelvisHeightOrientationActionDefinitionMessage otherMyClass = (PelvisHeightOrientationActionDefinitionMessage) other;
 
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
       if (!us.ihmc.idl.IDLTools.equals(this.parent_frame_name_, otherMyClass.parent_frame_name_)) return false;
@@ -158,7 +158,7 @@ public class PelvisHeightPitchActionDefinitionMessage extends Packet<PelvisHeigh
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("PelvisHeightPitchActionDefinitionMessage {");
+      builder.append("PelvisHeightOrientationActionDefinitionMessage {");
       builder.append("definition=");
       builder.append(this.definition_);      builder.append(", ");
       builder.append("parent_frame_name=");

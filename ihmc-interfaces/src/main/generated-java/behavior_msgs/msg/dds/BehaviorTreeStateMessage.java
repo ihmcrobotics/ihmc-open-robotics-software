@@ -17,15 +17,17 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public static final byte BASIC_NODE = (byte) 0;
    public static final byte ACTION_SEQUENCE = (byte) 1;
    public static final byte DOOR_TRAVERSAL = (byte) 2;
-   public static final byte BUILDING_EXPLORATION = (byte) 3;
+   public static final byte TRASH_CAN_INTERACTION = (byte) 3;
+   public static final byte BUILDING_EXPLORATION = (byte) 4;
    public static final byte CHEST_ORIENTATION_ACTION = (byte) 10;
    public static final byte FOOTSTEP_PLAN_ACTION = (byte) 11;
    public static final byte SAKE_HAND_COMMAND_ACTION = (byte) 12;
    public static final byte HAND_POSE_ACTION = (byte) 13;
    public static final byte HAND_WRENCH_ACTION = (byte) 14;
    public static final byte SCREW_PRIMITIVE_ACTION = (byte) 15;
-   public static final byte PELVIS_HEIGHT_PITCH_ACTION = (byte) 16;
+   public static final byte PELVIS_HEIGHT_ORIENTATION_ACTION = (byte) 16;
    public static final byte WAIT_DURATION_ACTION = (byte) 17;
+   public static final byte FOOT_POSE_ACTION = (byte) 18;
    /**
             * Monotonically increasing message ID that matches the CRDTInfo update number
             */
@@ -51,6 +53,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BasicNodeStateMessage>  basic_nodes_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ActionSequenceStateMessage>  action_sequences_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.DoorTraversalStateMessage>  door_traversals_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.TrashCanInteractionStateMessage>  trash_can_interactions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BuildingExplorationStateMessage>  building_explorations_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ChestOrientationActionStateMessage>  chest_orientation_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionStateMessage>  footstep_plan_actions_;
@@ -58,8 +61,9 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandPoseActionStateMessage>  hand_pose_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionStateMessage>  hand_wrench_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage>  screw_primitive_actions_;
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessage>  pelvis_height_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessage>  pelvis_height_actions_;
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionStateMessage>  wait_duration_actions_;
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootPoseActionStateMessage>  foot_pose_actions_;
 
    public BehaviorTreeStateMessage()
    {
@@ -71,6 +75,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       basic_nodes_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BasicNodeStateMessage> (200, new behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType());
       action_sequences_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ActionSequenceStateMessage> (200, new behavior_msgs.msg.dds.ActionSequenceStateMessagePubSubType());
       door_traversals_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.DoorTraversalStateMessage> (200, new behavior_msgs.msg.dds.DoorTraversalStateMessagePubSubType());
+      trash_can_interactions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.TrashCanInteractionStateMessage> (200, new behavior_msgs.msg.dds.TrashCanInteractionStateMessagePubSubType());
       building_explorations_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BuildingExplorationStateMessage> (200, new behavior_msgs.msg.dds.BuildingExplorationStateMessagePubSubType());
       chest_orientation_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ChestOrientationActionStateMessage> (200, new behavior_msgs.msg.dds.ChestOrientationActionStateMessagePubSubType());
       footstep_plan_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootstepPlanActionStateMessage> (200, new behavior_msgs.msg.dds.FootstepPlanActionStateMessagePubSubType());
@@ -78,8 +83,9 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       hand_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandPoseActionStateMessage> (200, new behavior_msgs.msg.dds.HandPoseActionStateMessagePubSubType());
       hand_wrench_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.HandWrenchActionStateMessage> (200, new behavior_msgs.msg.dds.HandWrenchActionStateMessagePubSubType());
       screw_primitive_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessage> (200, new behavior_msgs.msg.dds.ScrewPrimitiveActionStateMessagePubSubType());
-      pelvis_height_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessage> (200, new behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessagePubSubType());
+      pelvis_height_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessage> (200, new behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessagePubSubType());
       wait_duration_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionStateMessage> (200, new behavior_msgs.msg.dds.WaitDurationActionStateMessagePubSubType());
+      foot_pose_actions_ = new us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootPoseActionStateMessage> (200, new behavior_msgs.msg.dds.FootPoseActionStateMessagePubSubType());
 
    }
 
@@ -101,6 +107,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       basic_nodes_.set(other.basic_nodes_);
       action_sequences_.set(other.action_sequences_);
       door_traversals_.set(other.door_traversals_);
+      trash_can_interactions_.set(other.trash_can_interactions_);
       building_explorations_.set(other.building_explorations_);
       chest_orientation_actions_.set(other.chest_orientation_actions_);
       footstep_plan_actions_.set(other.footstep_plan_actions_);
@@ -110,6 +117,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       screw_primitive_actions_.set(other.screw_primitive_actions_);
       pelvis_height_actions_.set(other.pelvis_height_actions_);
       wait_duration_actions_.set(other.wait_duration_actions_);
+      foot_pose_actions_.set(other.foot_pose_actions_);
    }
 
    /**
@@ -190,6 +198,12 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    }
 
 
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.TrashCanInteractionStateMessage>  getTrashCanInteractions()
+   {
+      return trash_can_interactions_;
+   }
+
+
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.BuildingExplorationStateMessage>  getBuildingExplorations()
    {
       return building_explorations_;
@@ -232,7 +246,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightPitchActionStateMessage>  getPelvisHeightActions()
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.PelvisHeightOrientationActionStateMessage>  getPelvisHeightActions()
    {
       return pelvis_height_actions_;
    }
@@ -241,6 +255,12 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.WaitDurationActionStateMessage>  getWaitDurationActions()
    {
       return wait_duration_actions_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<behavior_msgs.msg.dds.FootPoseActionStateMessage>  getFootPoseActions()
+   {
+      return foot_pose_actions_;
    }
 
 
@@ -289,6 +309,13 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       {
          for (int i = 0; i < this.door_traversals_.size(); i++)
          {  if (!this.door_traversals_.get(i).epsilonEquals(other.door_traversals_.get(i), epsilon)) return false; }
+      }
+
+      if (this.trash_can_interactions_.size() != other.trash_can_interactions_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.trash_can_interactions_.size(); i++)
+         {  if (!this.trash_can_interactions_.get(i).epsilonEquals(other.trash_can_interactions_.get(i), epsilon)) return false; }
       }
 
       if (this.building_explorations_.size() != other.building_explorations_.size()) { return false; }
@@ -354,6 +381,13 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
          {  if (!this.wait_duration_actions_.get(i).epsilonEquals(other.wait_duration_actions_.get(i), epsilon)) return false; }
       }
 
+      if (this.foot_pose_actions_.size() != other.foot_pose_actions_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.foot_pose_actions_.size(); i++)
+         {  if (!this.foot_pose_actions_.get(i).epsilonEquals(other.foot_pose_actions_.get(i), epsilon)) return false; }
+      }
+
 
       return true;
    }
@@ -377,6 +411,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       if (!this.basic_nodes_.equals(otherMyClass.basic_nodes_)) return false;
       if (!this.action_sequences_.equals(otherMyClass.action_sequences_)) return false;
       if (!this.door_traversals_.equals(otherMyClass.door_traversals_)) return false;
+      if (!this.trash_can_interactions_.equals(otherMyClass.trash_can_interactions_)) return false;
       if (!this.building_explorations_.equals(otherMyClass.building_explorations_)) return false;
       if (!this.chest_orientation_actions_.equals(otherMyClass.chest_orientation_actions_)) return false;
       if (!this.footstep_plan_actions_.equals(otherMyClass.footstep_plan_actions_)) return false;
@@ -386,6 +421,7 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       if (!this.screw_primitive_actions_.equals(otherMyClass.screw_primitive_actions_)) return false;
       if (!this.pelvis_height_actions_.equals(otherMyClass.pelvis_height_actions_)) return false;
       if (!this.wait_duration_actions_.equals(otherMyClass.wait_duration_actions_)) return false;
+      if (!this.foot_pose_actions_.equals(otherMyClass.foot_pose_actions_)) return false;
 
       return true;
    }
@@ -412,6 +448,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       builder.append(this.action_sequences_);      builder.append(", ");
       builder.append("door_traversals=");
       builder.append(this.door_traversals_);      builder.append(", ");
+      builder.append("trash_can_interactions=");
+      builder.append(this.trash_can_interactions_);      builder.append(", ");
       builder.append("building_explorations=");
       builder.append(this.building_explorations_);      builder.append(", ");
       builder.append("chest_orientation_actions=");
@@ -429,7 +467,9 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       builder.append("pelvis_height_actions=");
       builder.append(this.pelvis_height_actions_);      builder.append(", ");
       builder.append("wait_duration_actions=");
-      builder.append(this.wait_duration_actions_);
+      builder.append(this.wait_duration_actions_);      builder.append(", ");
+      builder.append("foot_pose_actions=");
+      builder.append(this.foot_pose_actions_);
       builder.append("}");
       return builder.toString();
    }
