@@ -5,10 +5,11 @@ import java.util.List;
 
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 
 public class FlatGroundPlanningUtils
 {
-   public static FramePose3D poseFormPose2d(FramePose2D pose2d)
+   public static FramePose3D poseFormPose2d(FramePose2DReadOnly pose2d)
    {
       FramePose3D pose = new FramePose3D(pose2d.getReferenceFrame());
       pose.getOrientation().setYawPitchRoll(pose2d.getYaw(), 0.0, 0.0);
@@ -17,7 +18,7 @@ public class FlatGroundPlanningUtils
       return pose;
    }
 
-   public static FramePose3D poseFormPose2d(FramePose2D pose2d, double z)
+   public static FramePose3D poseFormPose2d(FramePose2DReadOnly pose2d, double z)
    {
       FramePose3D pose = poseFormPose2d(pose2d);
       pose.setZ(z);
