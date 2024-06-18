@@ -74,6 +74,8 @@ public class PelvisHeightOrientationActionExecutor extends ActionNodeExecutor<Pe
          message.getSe3Trajectory().getLinearSelectionMatrix().setXSelected(false);
          message.getSe3Trajectory().getLinearSelectionMatrix().setYSelected(false);
          message.getSe3Trajectory().getLinearSelectionMatrix().setZSelected(true);
+
+         state.getLogger().info("Publishing pelvis trajectory message");
          ros2ControllerHelper.publishToController(message);
 
          trackingCalculator.reset();
