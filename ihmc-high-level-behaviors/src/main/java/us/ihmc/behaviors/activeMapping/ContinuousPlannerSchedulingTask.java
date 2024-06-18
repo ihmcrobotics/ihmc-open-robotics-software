@@ -56,12 +56,7 @@ public class ContinuousPlannerSchedulingTask
     */
    private final static long CONTINUOUS_PLANNING_DELAY_MS = 16;
 
-   private ContinuousWalkingState state = ContinuousWalkingState.NOT_STARTED;
-
-   private enum ContinuousWalkingState
-   {
-      NOT_STARTED, READY_TO_PLAN, NEED_TO_REPLAN, PLAN_AVAILABLE, WAITING_TO_LAND, PAUSED
-   }
+   private ContinuousHikingState state = ContinuousHikingState.NOT_STARTED;
 
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                           getClass(),
@@ -127,7 +122,7 @@ public class ContinuousPlannerSchedulingTask
    }
 
    /**
-    * Runs the continuous planner state machine every ACTIVE_MAPPING_UPDATE_TICK_MS milliseconds. The state is stored in the ContinuousWalkingState
+    * Runs the continuous planner state machine every ACTIVE_MAPPING_UPDATE_TICK_MS milliseconds. The state is stored in the ContinuousHikingState
     */
    private void tickStateMachine()
    {
@@ -135,7 +130,7 @@ public class ContinuousPlannerSchedulingTask
 
       if (!parameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
       {
-         state = ContinuousWalkingState.NOT_STARTED;
+         state = ContinuousHikingState.NOT_STARTED;
 
          stepCounter = 0;
          sendPauseWalkingMessage();
@@ -184,11 +179,11 @@ public class ContinuousPlannerSchedulingTask
 
       if (continuousPlanner.isPlanAvailable())
       {
-         state = ContinuousWalkingState.PLAN_AVAILABLE;
+         state = ContinuousHikingState.PLAN_AVAILABLE;
       }
       else
       {
-         state = ContinuousWalkingState.NOT_STARTED;
+         state = ContinuousHikingState.NOT_STARTED;
          continuousPlanner.setInitialized(false);
 
          LogTools.error(message = String.format("State: [%s]: Initialization failed... will retry initializing next tick", state));
@@ -201,7 +196,7 @@ public class ContinuousPlannerSchedulingTask
       /*
        * Ready to plan means that the current step is completed and the planner is ready to plan the next step
        */
-      if (state == ContinuousWalkingState.READY_TO_PLAN)
+      if (state == ContinuousHikingState.READY_TO_PLAN)
       {
          LogTools.info("State: " + state);
          statistics.setLastAndTotalWaitingTimes();
@@ -225,12 +220,12 @@ public class ContinuousPlannerSchedulingTask
 
          if (continuousPlanner.isPlanAvailable())
          {
-            state = ContinuousWalkingState.PLAN_AVAILABLE;
+            state = ContinuousHikingState.PLAN_AVAILABLE;
          }
          else
          {
             // TODO: Add replanning. Replanned plan valid only until the foot lands.
-            state = ContinuousWalkingState.WAITING_TO_LAND;
+            state = ContinuousHikingState.WAITING_TO_LAND;
             LogTools.error(message = String.format("State: [%s]: Planning failed... will try again when current step is completed", state));
             statistics.appendString(message);
          }
@@ -239,7 +234,7 @@ public class ContinuousPlannerSchedulingTask
       /*
        * Plan available means that the planner has a plan ready to send to the controller
        */
-      if (state == ContinuousWalkingState.PLAN_AVAILABLE)
+      if (state == ContinuousHikingState.PLAN_AVAILABLE)
       {
          LogTools.info("State: " + state);
          FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(parameters, controllerQueue);
@@ -274,7 +269,7 @@ public class ContinuousPlannerSchedulingTask
             {
                publisherMap.publish(controllerFootstepDataTopic, footstepDataList);
 
-               state = ContinuousWalkingState.WAITING_TO_LAND;
+               state = ContinuousHikingState.WAITING_TO_LAND;
                continuousPlanner.setPlanAvailable(false);
                continuousPlanner.transitionCallback();
                statistics.setStartWaitingTime();
@@ -292,12 +287,12 @@ public class ContinuousPlannerSchedulingTask
                LogTools.info("Candidate:" + candidateStepPose);
 
                continuousPlanner.setInitialized(false);
-               state = ContinuousWalkingState.NOT_STARTED;
+               state = ContinuousHikingState.NOT_STARTED;
             }
          }
          else
          {
-            state = ContinuousWalkingState.READY_TO_PLAN;
+            state = ContinuousHikingState.READY_TO_PLAN;
          }
       }
    }
@@ -313,7 +308,7 @@ public class ContinuousPlannerSchedulingTask
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
       {
          stepCounter++;
-         state = ContinuousWalkingState.READY_TO_PLAN;
+         state = ContinuousHikingState.READY_TO_PLAN;
          statistics.endStepTime();
          statistics.startStepTime();
       }
