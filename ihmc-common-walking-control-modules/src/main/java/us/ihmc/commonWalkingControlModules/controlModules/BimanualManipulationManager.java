@@ -130,6 +130,8 @@ public class BimanualManipulationManager implements SCS2YoGraphicHolder
 
    public void update()
    {
+      commandList.clear();
+
       // Safety check to switch off the applied force when there's too much tracking error.
       isEnabled.set(isEnabled.getValue() && isTracking());
 
@@ -177,6 +179,7 @@ public class BimanualManipulationManager implements SCS2YoGraphicHolder
             externalWrenchCommand.getExternalWrench().getLinearPart().negate(); // this is an external wrench to compensate for
             externalWrenchCommand.getExternalWrench().getAngularPart().setToZero();
             externalWrenchCommand.getExternalWrench().changeFrame(hand.getBodyFixedFrame());
+            commandList.addCommand(externalWrenchCommand);
 
             yoDesiredSqueezingForces.get(robotSide).setMatchingFrame(desiredSqueezingForce);
          }
@@ -194,6 +197,17 @@ public class BimanualManipulationManager implements SCS2YoGraphicHolder
             hand.getInertia().setIncludingFrame(combinedInertia);
 
             yoDesiredSqueezingForces.get(robotSide).setToZero();
+         }
+
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            ExternalWrenchCommand externalWrenchCommand = externalWrenchCommands.get(robotSide);
+            RigidBodyBasics hand = hands.get(robotSide);
+            externalWrenchCommand.getExternalWrench().setBodyFrame(hand.getBodyFixedFrame());
+            externalWrenchCommand.getExternalWrench().setReferenceFrame(hand.getBodyFixedFrame());
+
+            externalWrenchCommand.getExternalWrench().setToZero();
+            commandList.addCommand(externalWrenchCommand);
          }
       }
    }

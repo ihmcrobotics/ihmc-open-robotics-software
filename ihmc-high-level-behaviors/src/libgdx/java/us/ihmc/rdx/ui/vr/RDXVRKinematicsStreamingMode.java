@@ -279,8 +279,8 @@ public class RDXVRKinematicsStreamingMode
          toolboxInputMessage.setTimestamp(System.nanoTime());
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()),
                                       toolboxInputMessage);
-         if (enabled.get() && streamToController.get())
-         {
+//         if (enabled.get() && streamToController.get())
+//         {
             if (!hasSentSqueezeMessage && rdxBiManipulationManager.getEnableBiManualManipulationMode())
             {
                BimanualManipulationMessage message = rdxBiManipulationManager.getBiManualManipulationMessage();
@@ -290,13 +290,13 @@ public class RDXVRKinematicsStreamingMode
                ros2ControllerHelper.publishToController(message);
                hasSentSqueezeMessage = true;
             }
-         }
-         else
-         {
-            BimanualManipulationMessage message = rdxBiManipulationManager.getBiManualManipulationMessage();
-            message.setDisable(true);
-            ros2ControllerHelper.publishToController(message);
-         }
+
+//            if (!rdxBiManipulationManager.getEnableBiManualManipulationMode())
+//            {
+//               BimanualManipulationMessage message = rdxBiManipulationManager.getBiManualManipulationMessage();
+//               message.setDisable(true);
+//               ros2ControllerHelper.publishToController(message);
+//            }
          outputFrequencyPlot.recordEvent();
       }
    }
