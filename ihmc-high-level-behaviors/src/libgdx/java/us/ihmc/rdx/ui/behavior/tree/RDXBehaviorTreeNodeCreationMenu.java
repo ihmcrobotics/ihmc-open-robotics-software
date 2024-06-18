@@ -252,6 +252,9 @@ public class RDXBehaviorTreeNodeCreationMenu
       topologyOperationQueue.queueInsertNode(insertionDefinition);
       ImGui.closeCurrentPopup();
 
+      if (insertionDefinition.getParent() != null)
+         insertionDefinition.getParent().setTreeWidgetExpanded(true);
+
       insertionDefinition.getNodeToInsert().setTreeWidgetExpanded(true);
    }
 
