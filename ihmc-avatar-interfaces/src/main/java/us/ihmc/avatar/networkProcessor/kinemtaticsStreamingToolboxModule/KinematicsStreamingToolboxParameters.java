@@ -293,7 +293,7 @@ public class KinematicsStreamingToolboxParameters
       useStreamingPublisher = true;
       publishingPeriod = 5.0 * 0.006;
 
-      inputStateEstimatorType = InputStateEstimatorType.FIRST_ORDER_LPF;
+      inputStateEstimatorType = InputStateEstimatorType.FBC_STYLE;
 
       defaultConfiguration.setLockPelvis(false);
       defaultConfiguration.setLockChest(false);
@@ -310,6 +310,7 @@ public class KinematicsStreamingToolboxParameters
       defaultConfiguration.setPelvisTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
 
       defaultSolverConfiguration.setJointVelocityWeight(1.0);
+      //defaultSolverConfiguration.setDisableJointVelocityLimits(true);
       defaultSolverConfiguration.setEnableJointVelocityLimits(true);
 
       inputFilterMaxLinearDelta = 0.5;
