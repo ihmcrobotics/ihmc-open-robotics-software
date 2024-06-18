@@ -69,6 +69,7 @@ public class FootPoseActionExecutor extends ActionNodeExecutor<FootPoseActionSta
          long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
          message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
 
+         state.getLogger().info("Publishing foot trajectory message");
          ros2ControllerHelper.publishToController(message);
 
          trackingCalculator.reset();
