@@ -20,6 +20,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.rdx.imgui.ImGuiSliderDouble;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
@@ -69,8 +70,8 @@ public class RDXLocomotionManager
    private ImGuiStoredPropertySetBooleanWidget replanSwingTrajectoriesOnChangeCheckbox;
    private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
-   private ImGuiStoredPropertySetDoubleWidget stepLengthSlider;
-   private ImGuiStoredPropertySetDoubleWidget turnAggressivenessSlider;
+   private ImGuiSliderDouble stepAggressivenessSlider;
+   private ImGuiSliderDouble turnAggressivenessSlider;
    private ImGuiStoredPropertySetEnumWidget initialStanceSideRadioButtons;
 
    private final RDXFootstepPlanGraphic controllerFootstepQueueGraphic;
@@ -158,8 +159,8 @@ public class RDXLocomotionManager
       replanSwingTrajectoriesOnChangeCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.replanSwingTrajectoriesOnChange);
       swingTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.swingTime, 0.3, 1.5);
       transferTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.transferTime, 0.1, 1.5);
-//      stepLengthSlider = turnWalkTurnFootstepPlanningParametersTuner.createDoubleSlider(DefaultFootstepPlannerParameters.maxStepReach, 0.2, 0.5);
-//      turnAggressivenessSlider = turnWalkTurnFootstepPlanningParametersTuner.createDoubleSlider(DefaultFootstepPlannerParameters.maxStepYaw, 0.0, 1.0);
+      stepAggressivenessSlider = new ImGuiSliderDouble("Step Aggressiveness", "", 0.5);
+      turnAggressivenessSlider = new ImGuiSliderDouble("Turn Aggressiveness", "", 0.5);
       initialStanceSideRadioButtons = locomotionParametersTuner.createEnumRadioButtons(RDXLocomotionParameters.initialStanceSide, InitialStanceSide.values());
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW, syncedRobot);
@@ -300,8 +301,14 @@ public class RDXLocomotionManager
 
       swingTimeSlider.renderImGuiWidget();
       transferTimeSlider.renderImGuiWidget();
-//      stepLengthSlider.renderImGuiWidget();
-//      turnAggressivenessSlider.renderImGuiWidget();
+      stepAggressivenessSlider.render(0.0, 1.0);
+      turnAggressivenessSlider.render(0.0, 2.0);
+
+      turnWalkTurnFootstepPlannerParameters.setIdealFootstepLength(stepAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMaxStepReach());
+      turnWalkTurnFootstepPlannerParameters.setIdealBackStepLength(stepAggressivenessSlider.getDoubleValue() * -aStarFootstepPlannerParameters.getMinStepLength());
+      turnWalkTurnFootstepPlannerParameters.setIdealSideStepWidth(stepAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMaxStepWidth());
+      turnWalkTurnFootstepPlannerParameters.setMaxStepYaw(turnAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMaxStepYaw());
+      turnWalkTurnFootstepPlannerParameters.setMinStepYaw(turnAggressivenessSlider.getDoubleValue() * aStarFootstepPlannerParameters.getMinStepYaw());
 
       ImGui.separator();
       ImGui.text("Walking Options:");
