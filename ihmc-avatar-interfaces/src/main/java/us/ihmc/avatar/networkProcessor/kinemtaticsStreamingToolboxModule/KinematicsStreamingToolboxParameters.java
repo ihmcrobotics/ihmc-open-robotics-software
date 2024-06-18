@@ -293,7 +293,7 @@ public class KinematicsStreamingToolboxParameters
       useStreamingPublisher = true;
       publishingPeriod = 5.0 * 0.006;
 
-      inputStateEstimatorType = InputStateEstimatorType.FBC_STYLE;
+      inputStateEstimatorType = InputStateEstimatorType.FIRST_ORDER_LPF;
 
       defaultConfiguration.setLockPelvis(false);
       defaultConfiguration.setLockChest(false);
