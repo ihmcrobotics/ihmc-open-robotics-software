@@ -4,12 +4,20 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
-import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
+import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
+import us.ihmc.behaviors.sequence.actions.HandWrenchActionDefinition;
+import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionDefinition;
+import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
+import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionDefinition;
+import us.ihmc.behaviors.sequence.actions.WaitDurationActionDefinition;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -154,9 +162,12 @@ public class RDXBehaviorTreeNodeCreationMenu
       {
          renderNodeCreationClickable(relativeNode, insertionType, "Basic Node", BehaviorTreeNodeDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Door Traversal", DoorTraversalDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Building Exploration", BuildingExplorationDefinition.class, null);
       }
       if (insertionType == BehaviorTreeNodeInsertionType.INSERT_ROOT)
+      {
          renderNodeCreationClickable(relativeNode, insertionType, "Action Sequence", ActionSequenceDefinition.class, null);
+      }
 
       ImGui.unindent();
 

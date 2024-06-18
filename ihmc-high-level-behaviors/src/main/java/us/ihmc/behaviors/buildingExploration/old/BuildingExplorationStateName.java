@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.buildingExploration;
+package us.ihmc.behaviors.buildingExploration.old;
 
 public enum BuildingExplorationStateName
 {

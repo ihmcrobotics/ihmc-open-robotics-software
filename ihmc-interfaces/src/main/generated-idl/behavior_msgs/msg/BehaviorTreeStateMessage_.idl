@@ -3,6 +3,7 @@
 
 #include "behavior_msgs/msg/./ActionSequenceStateMessage_.idl"
 #include "behavior_msgs/msg/./BasicNodeStateMessage_.idl"
+#include "behavior_msgs/msg/./BuildingExplorationStateMessage_.idl"
 #include "behavior_msgs/msg/./ChestOrientationActionStateMessage_.idl"
 #include "behavior_msgs/msg/./DoorTraversalStateMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionStateMessage_.idl"
@@ -27,6 +28,9 @@ module behavior_msgs
 
       const octet DOOR_TRAVERSAL =
       2;
+
+      const octet BUILDING_EXPLORATION =
+      3;
 
       const octet CHEST_ORIENTATION_ACTION =
       10;
@@ -87,6 +91,7 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::BasicNodeStateMessage, 200> basic_nodes;
         sequence<behavior_msgs::msg::dds::ActionSequenceStateMessage, 200> action_sequences;
         sequence<behavior_msgs::msg::dds::DoorTraversalStateMessage, 200> door_traversals;
+        sequence<behavior_msgs::msg::dds::BuildingExplorationStateMessage, 200> building_explorations;
         sequence<behavior_msgs::msg::dds::ChestOrientationActionStateMessage, 200> chest_orientation_actions;
         sequence<behavior_msgs::msg::dds::FootstepPlanActionStateMessage, 200> footstep_plan_actions;
         sequence<behavior_msgs::msg::dds::SakeHandCommandActionStateMessage, 200> sake_hand_command_actions;
