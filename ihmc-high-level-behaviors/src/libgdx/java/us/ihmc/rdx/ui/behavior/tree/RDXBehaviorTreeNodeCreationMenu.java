@@ -166,49 +166,53 @@ public class RDXBehaviorTreeNodeCreationMenu
       }
 
       ImGui.unindent();
-      ImGui.separator();
 
-      ImGui.pushFont(ImGuiTools.getSmallBoldFont());
-      ImGui.text("Actions:");
-      ImGui.popFont();
-      ImGui.indent();
+      if (ancestorIsActionSequenceNode)
+      {
+         ImGui.separator();
 
-      renderNodeCreationClickable(relativeNode, insertionType, "Footstep Plan", FootstepPlanActionDefinition.class, null);
-      ImGui.text("Foot Pose: ");
-      for (RobotSide side : RobotSide.values)
-      {
-         ImGui.sameLine();
-         renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), FootPoseActionDefinition.class, side);
-      }
-      ImGui.text("Hand Pose: ");
-      for (RobotSide side : RobotSide.values)
-      {
-         ImGui.sameLine();
-         renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandPoseActionDefinition.class, side);
-      }
-      ImGui.text("Sake Hand Command: ");
-      for (RobotSide side : RobotSide.values)
-      {
-         ImGui.sameLine();
-         renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), SakeHandCommandActionDefinition.class, side);
-      }
-      renderNodeCreationClickable(relativeNode, insertionType, "Chest Orientation", ChestOrientationActionDefinition.class, null);
-      renderNodeCreationClickable(relativeNode, insertionType, "Pelvis Height", PelvisHeightOrientationActionDefinition.class, null);
-      renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitDurationActionDefinition.class, null);
-      ImGui.text("Screw Primitive: ");
-      for (RobotSide side : RobotSide.values)
-      {
-         ImGui.sameLine();
-         renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), ScrewPrimitiveActionDefinition.class, side);
-      }
-      ImGui.textDisabled("Hand Wrench: ");
-      for (RobotSide side : RobotSide.values)
-      {
-         ImGui.sameLine();
-         renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandWrenchActionDefinition.class, side);
-      }
+         ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+         ImGui.text("Actions:");
+         ImGui.popFont();
+         ImGui.indent();
 
-      ImGui.unindent();
+         renderNodeCreationClickable(relativeNode, insertionType, "Footstep Plan", FootstepPlanActionDefinition.class, null);
+         ImGui.text("Foot Pose: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), FootPoseActionDefinition.class, side);
+         }
+         ImGui.text("Hand Pose: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandPoseActionDefinition.class, side);
+         }
+         ImGui.text("Sake Hand Command: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), SakeHandCommandActionDefinition.class, side);
+         }
+         renderNodeCreationClickable(relativeNode, insertionType, "Chest Orientation", ChestOrientationActionDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Pelvis Height", PelvisHeightOrientationActionDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitDurationActionDefinition.class, null);
+         ImGui.text("Screw Primitive: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), ScrewPrimitiveActionDefinition.class, side);
+         }
+         ImGui.textDisabled("Hand Wrench: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandWrenchActionDefinition.class, side);
+         }
+
+         ImGui.unindent();
+      }
    }
 
    private void renderNodeCreationClickable(RDXBehaviorTreeNode<?, ?> relativeNode,
