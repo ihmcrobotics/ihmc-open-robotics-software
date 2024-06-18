@@ -97,12 +97,14 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
       openedDoorHandleDistanceFromStartSlider.setWidgetText("%.2f".formatted(getDefinition().getOpenedDoorHandleDistanceFromStart().getValue()));
       openedDoorHandleDistanceFromStartSlider.renderImGuiWidget();
 
-      boolean pullScrewPrimitiveIsExecuting = false;
-      if (state.arePullRetryNodesPresent())
-         pullScrewPrimitiveIsExecuting = state.getPullScrewPrimitiveAction().getIsExecuting();
-      ImGui.beginDisabled(state.arePullRetryNodesPresent());
-      ImGui.text("Pull screw primitive node: Executing: %b".formatted(state.getPullScrewPrimitiveAction().getIsExecuting()));
-      ImGui.endDisabled();
+         boolean pullScrewPrimitiveIsExecuting = false;
+         if (state.arePullRetryNodesPresent())
+         {
+            pullScrewPrimitiveIsExecuting = state.getPullScrewPrimitiveAction().getIsExecuting();
+         }
+         ImGui.beginDisabled(state.arePullRetryNodesPresent());
+         ImGui.text("Pull screw primitive node: Executing: %b".formatted(pullScrewPrimitiveIsExecuting));
+         ImGui.endDisabled();
 
       ImGui.text("Door hinge joint angle: %.2f%s".formatted(Math.toDegrees(state.getDoorHingeJointAngle().getValue()), EuclidCoreMissingTools.DEGREE_SYMBOL));
 
