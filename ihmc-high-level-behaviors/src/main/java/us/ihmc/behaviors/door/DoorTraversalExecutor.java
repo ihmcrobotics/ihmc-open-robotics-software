@@ -29,8 +29,6 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
    private boolean waitForPullScrewToFinish = false;
    private boolean waitForGraspToFinish = false;
 
-   private transient final FramePose3D pushDoorPanelPose = new FramePose3D();
-
    public DoorTraversalExecutor(long id,
                                 CRDTInfo crdtInfo,
                                 WorkspaceResourceDirectory saveFileDirectory,
@@ -63,21 +61,8 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
       updateActionSubtree(this);
 
-      state.getDoorHingeJointAngle().setValue(Double.NaN);
-
-      // TODO: PUSH_DOOR_FRAME_NAME renamed to RIGHT_DOOR_FRAME?
-      SceneNode pushDoorFrameNode = sceneGraph.getNamesToNodesMap().get(DoorSceneNodeDefinitions.PUSH_DOOR_FRAME_NAME);
-      SceneNode pushDoorPanelNode = sceneGraph.getNamesToNodesMap().get(DoorSceneNodeDefinitions.RIGHT_DOOR_PANEL_NAME);
-
       DetectableSceneNode yoloDoorHandleNode = (DetectableSceneNode) sceneGraph.getNamesToNodesMap().get("YOLO door lever");
       StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get("doorStaticHandle");
-
-      if (pushDoorFrameNode != null && pushDoorPanelNode != null)
-      {
-         pushDoorPanelPose.setFromReferenceFrame(pushDoorPanelNode.getNodeFrame());
-         pushDoorPanelPose.changeFrame(pushDoorFrameNode.getNodeFrame());
-         state.getDoorHingeJointAngle().setValue(pushDoorPanelPose.getOrientation().getYaw());
-      }
 
       if (state.getStabilizeDetectionAction() != null && state.getStabilizeDetectionAction().getIsExecuting())
       {
