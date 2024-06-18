@@ -4,6 +4,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerGoal;
@@ -16,6 +18,7 @@ import us.ihmc.robotics.referenceFrames.Pose2dReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class TurnWalkTurnPlanner
 {
@@ -27,7 +30,7 @@ public class TurnWalkTurnPlanner
    private final FramePose2D goalPose = new FramePose2D();
    private RobotSide initialStanceSide;
    private RobotSide lastStepSide;
-   private final Pose2dReferenceFrame stanceFootFrame = new Pose2dReferenceFrame("StanceFootFrame", ReferenceFrame.getWorldFrame());
+   private final Pose2dReferenceFrame planStanceFootFrame = new Pose2dReferenceFrame("StanceFootFrame", ReferenceFrame.getWorldFrame());
    private final Pose2dReferenceFrame turningFrame = new Pose2dReferenceFrame("TurningFrame", ReferenceFrame.getWorldFrame());
    private double groundHeight = 0.0;
 
@@ -67,46 +70,40 @@ public class TurnWalkTurnPlanner
       this.goalPose.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
-   private FootstepPlan footstepPlan = new FootstepPlan();
+   private final FootstepPlan footstepPlan = new FootstepPlan();
 
    public FootstepPlanningResult plan()
    {
-      stanceFootFrame.setPoseAndUpdate(initialStanceFootPose);
+      planStanceFootFrame.setPoseAndUpdate(initialStanceFootPose);
 
       FramePoint2D goalPoint = new FramePoint2D(goalPose.getPosition());
 
-      ArrayList<FramePose2D> footstepList = new ArrayList<>();
+      List<FramePose2DReadOnly> footstepList = new ArrayList<>();
 
       // turn
       Point2D robotOffsetFromStanceFoot = new Point2D(0.0, lastStepSide.negateIfLeftSide(parameters.getIdealFootstepWidth() / 2.0));
-      FramePose2D robotPose = new FramePose2D(stanceFootFrame, robotOffsetFromStanceFoot, 0.0);
-      FramePose2D robotPoseInWorld = new FramePose2D(robotPose);
-      robotPoseInWorld.changeFrame(ReferenceFrame.getWorldFrame());
+      FramePose2D robotPose = new FramePose2D(planStanceFootFrame, robotOffsetFromStanceFoot, 0.0);
+      robotPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      double turningAngle = AngleTools.calculateHeading(robotPoseInWorld, goalPoint, -robotPoseInWorld.getYaw(), 0.0);
-      boolean reverse = false;
+      double turningAngle = AngleTools.calculateHeading(robotPose, goalPoint, -robotPose.getYaw(), 0.0);
       double minTurn = AngleTools.computeAngleDifferenceMinusPiToPi(initialStanceFootPose.getYaw(), goalPose.getYaw());
-      if (Math.abs(turningAngle) > Math.PI / 2.0 && Math.abs(minTurn) < Math.PI / 2.0)
-      {
+      boolean reverse = Math.abs(turningAngle) > Math.PI / 2.0 && Math.abs(minTurn) < Math.PI / 2.0;
+      if (reverse)
          turningAngle = turningAngle > 0.0 ? turningAngle - Math.PI : turningAngle + Math.PI;
-         reverse = true;
-      }
 
-      FramePoint2D pointToTurnAbout = new FramePoint2D(robotPoseInWorld.getPosition());
-      addTurnInPlace(footstepList, turningAngle, pointToTurnAbout);
+      addTurnInPlace(footstepList, turningAngle, robotPose.getPosition());
 
       // walk
-      FramePoint2D robotPosition = new FramePoint2D(robotPoseInWorld.getPosition());
-      double distanceToTravel = reverse ? -robotPosition.distance(goalPoint) : robotPosition.distance(goalPoint);
-      double stepLength = reverse ? parameters.getMinStepLength() : parameters.getMaxStepReach();
-      addStraightWalk(footstepList, robotPosition, distanceToTravel, stepLength);
+      double distanceToTravel = reverse ? -robotPose.getPositionDistance(goalPoint) : robotPose.getPositionDistance(goalPoint);
+      double stepLength = reverse ? parameters.getIdealBackStepLength() : parameters.getIdealFootstepLength();
+      addStraightWalk(footstepList, robotPose.getPosition(), distanceToTravel, stepLength);
 
       // turn
-      FramePose2D stanceFootPose = new FramePose2D(stanceFootFrame);
+      FramePose2D stanceFootPose = new FramePose2D(planStanceFootFrame);
       stanceFootPose.changeFrame(goalPose.getReferenceFrame());
       turningAngle = AngleTools.trimAngleMinusPiToPi(goalPose.getYaw() - stanceFootPose.getYaw());
-      pointToTurnAbout = new FramePoint2D(stanceFootFrame,
-                                                       new Point2D(0.0, lastStepSide.negateIfLeftSide(parameters.getIdealFootstepWidth() / 2.0)));
+      FramePoint2D pointToTurnAbout = new FramePoint2D(planStanceFootFrame, 0.0, lastStepSide.negateIfLeftSide(parameters.getIdealFootstepWidth() / 2.0));
+      pointToTurnAbout.changeFrame(ReferenceFrame.getWorldFrame());
       addTurnInPlace(footstepList, turningAngle, pointToTurnAbout);
 
       // square up
@@ -114,7 +111,7 @@ public class TurnWalkTurnPlanner
 
       footstepPlan.clear();
       RobotSide robotSide = initialStanceSide;
-      for (FramePose2D footstepPose2d : footstepList)
+      for (FramePose2DReadOnly footstepPose2d : footstepList)
       {
          robotSide = robotSide.getOppositeSide();
          footstepPlan.addFootstep(robotSide, FlatGroundPlanningUtils.poseFormPose2d(footstepPose2d, groundHeight));
@@ -122,14 +119,14 @@ public class TurnWalkTurnPlanner
       return FootstepPlanningResult.FOUND_SOLUTION;
    }
 
-   private void addSquareUp(ArrayList<FramePose2D> footstepList, FramePoint2D robotPosition)
+   private void addSquareUp(List<FramePose2DReadOnly> footstepList, FramePoint2D robotPosition)
    {
-      robotPosition.changeFrame(stanceFootFrame);
+      robotPosition.changeFrame(planStanceFootFrame);
       if (Math.abs(robotPosition.getX()) > 0.001)
          throw new RuntimeException("Can not square up for given position.");
 
-      robotPosition.changeFrame(stanceFootFrame);
-      FramePose2D footstepPose = new FramePose2D(stanceFootFrame);
+      robotPosition.changeFrame(planStanceFootFrame);
+      FramePose2D footstepPose = new FramePose2D(planStanceFootFrame);
       footstepPose.setY(2.0 * robotPosition.getY());
 
       if (lastStepSide.equals(RobotSide.LEFT) && footstepPose.getY() > 0)
@@ -141,28 +138,27 @@ public class TurnWalkTurnPlanner
       footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       footstepList.add(footstepPose);
-      stanceFootFrame.setPoseAndUpdate(footstepPose);
+      planStanceFootFrame.setPoseAndUpdate(footstepPose);
       lastStepSide = lastStepSide.getOppositeSide();
    }
 
-   private void addStraightWalk(ArrayList<FramePose2D> footstepList, FramePoint2D startingPoint, double distanceToTravel, double maxStepLength)
+   private void addStraightWalk(List<FramePose2DReadOnly> footstepList, FramePoint2DReadOnly startingPoint, double distanceToTravel, double nominalStepLength)
    {
       if (Math.abs(distanceToTravel) < epsilon)
          return;
 
-      double straightSteps = Math.ceil(distanceToTravel / maxStepLength);
+      double straightSteps = Math.ceil(distanceToTravel / nominalStepLength);
       double stepLength = distanceToTravel / straightSteps;
-      FramePoint2D startingPointInWorld = new FramePoint2D(startingPoint);
-      startingPointInWorld.changeFrame(ReferenceFrame.getWorldFrame());
+      FramePoint2D planStart = new FramePoint2D();
 
       for (int i = 0; i < straightSteps; i++)
       {
-         startingPoint.setIncludingFrame(startingPointInWorld);
-         startingPoint.changeFrame(stanceFootFrame);
+         planStart.setIncludingFrame(startingPoint);
+         planStart.changeFrame(planStanceFootFrame);
 
-         FramePose2D nextFootStep = new FramePose2D(stanceFootFrame);
+         FramePose2D nextFootStep = new FramePose2D(planStanceFootFrame);
          nextFootStep.setX(stepLength);
-         nextFootStep.setY(startingPoint.getY() + lastStepSide.negateIfLeftSide(parameters.getIdealFootstepWidth() / 2.0));
+         nextFootStep.setY(planStart.getY() + lastStepSide.negateIfLeftSide(parameters.getIdealFootstepWidth() / 2.0));
 
          if (lastStepSide.equals(RobotSide.LEFT) && nextFootStep.getY() > 0)
             throw new RuntimeException("Left foot can not be placed on right side of right foot");
@@ -172,21 +168,20 @@ public class TurnWalkTurnPlanner
 
          nextFootStep.changeFrame(ReferenceFrame.getWorldFrame());
          footstepList.add(nextFootStep);
-         stanceFootFrame.setPoseAndUpdate(nextFootStep);
+         planStanceFootFrame.setPoseAndUpdate(nextFootStep);
          lastStepSide = lastStepSide.getOppositeSide();
       }
    }
 
-   private void addTurnInPlace(ArrayList<FramePose2D> footstepList, double turningAngle, FramePoint2D pointToTurnAbout)
+   private void addTurnInPlace(List<FramePose2DReadOnly> footstepListToPack, double turningAngle, FramePoint2DReadOnly pointToTurnAbout)
    {
       if (Math.abs(turningAngle) < epsilon)
          return;
 
-      FramePoint2D pointToTurnAboutInWorld = new FramePoint2D(pointToTurnAbout);
-      pointToTurnAboutInWorld.changeFrame(ReferenceFrame.getWorldFrame());
+      FramePoint2D pointToPlanFrom = new FramePoint2D(pointToTurnAbout);
 
-      pointToTurnAbout.changeFrame(stanceFootFrame);
-      if (Math.abs(pointToTurnAbout.getX()) > 0.001)
+      pointToPlanFrom.changeFrame(planStanceFootFrame);
+      if (Math.abs(pointToPlanFrom.getX()) > 0.001)
          throw new RuntimeException("Can not turn in place around given point.");
 
       RobotSide sideToTurnTo = turningAngle >= 0.0 ? RobotSide.LEFT : RobotSide.RIGHT;
@@ -217,10 +212,10 @@ public class TurnWalkTurnPlanner
 
       for (int i = 0; i < turningSteps; i++)
       {
-         FramePose2D turningFramePose = new FramePose2D(stanceFootFrame);
-         pointToTurnAbout.setIncludingFrame(pointToTurnAboutInWorld);
-         pointToTurnAbout.changeFrame(stanceFootFrame);
-         turningFramePose.setY(pointToTurnAbout.getY());
+         FramePose2D turningFramePose = new FramePose2D(planStanceFootFrame);
+         pointToPlanFrom.setIncludingFrame(pointToTurnAbout);
+         pointToPlanFrom.changeFrame(planStanceFootFrame);
+         turningFramePose.setY(pointToPlanFrom.getY());
 
          if (sideToTurnTo.equals(lastStepSide))
          {
@@ -244,13 +239,11 @@ public class TurnWalkTurnPlanner
 
          nextFootstep.changeFrame(ReferenceFrame.getWorldFrame());
 
-         footstepList.add(nextFootstep);
-         stanceFootFrame.setPoseAndUpdate(nextFootstep);
+         footstepListToPack.add(nextFootstep);
+         planStanceFootFrame.setPoseAndUpdate(nextFootstep);
          lastStepSide = lastStepSide.getOppositeSide();
 
       }
-      pointToTurnAbout.setIncludingFrame(pointToTurnAboutInWorld);
-      pointToTurnAbout.changeFrame(stanceFootFrame);
    }
 
    public FootstepPlan getPlan()
