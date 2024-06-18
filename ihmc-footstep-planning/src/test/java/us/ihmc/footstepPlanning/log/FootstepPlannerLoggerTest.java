@@ -76,7 +76,7 @@ public class FootstepPlannerLoggerTest
       // This number is arbitrary, just want to make sure things aren't slow when logging, important if re-planning in a loop
       long timeExpected = 150;
 
-      // Logging the footstep plans should not take to long, the timeExpected is arbitrary but it ensures that the logging doesn't take too long
+      // Logging the footstep plans should not take to long, the timeExpected is arbitrary, but it ensures that the logging doesn't take too long
       assertTrue(timeInMilliseconds < timeExpected, "Time taken was: " + timeInMilliseconds + ", and the time expected was " + timeExpected);
    }
 
