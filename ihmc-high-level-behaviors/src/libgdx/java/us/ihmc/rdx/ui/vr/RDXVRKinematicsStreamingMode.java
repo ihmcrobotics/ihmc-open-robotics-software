@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.BimanualManipulationMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import imgui.type.ImDouble;
 import org.lwjgl.openvr.InputDigitalActionData;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
@@ -107,6 +108,8 @@ public class RDXVRKinematicsStreamingMode
 
    private RDXBiManualManipulationManager rdxBiManipulationManager = new RDXBiManualManipulationManager();
    private boolean hasSentSqueezeMessage = false;
+   private ImDouble objectMass = new ImDouble(0.0);
+   private ImDouble squeezeForce = new ImDouble(0.0);
 
    public RDXVRKinematicsStreamingMode(ROS2SyncedRobotModel syncedRobot,
                                        ROS2ControllerHelper ros2ControllerHelper,
@@ -282,7 +285,9 @@ public class RDXVRKinematicsStreamingMode
             {
                BimanualManipulationMessage message = rdxBiManipulationManager.getBiManualManipulationMessage();
                message.setDisable(false);
-               ros2ControllerHelper.publishToController(rdxBiManipulationManager.getBiManualManipulationMessage());
+               message.setObjectMass(objectMass.get());
+               message.setSqueezeForce(squeezeForce.get());
+               ros2ControllerHelper.publishToController(message);
                hasSentSqueezeMessage = true;
             }
          }
@@ -519,7 +524,8 @@ public class RDXVRKinematicsStreamingMode
 
       ImGui.checkbox("enableBimanipulation", rdxBiManipulationManager.getEnableBiManualManipulationMode());
       ImGui.checkbox("hasSentSqueezeMessage", hasSentSqueezeMessage);
-
+      ImGui.inputDouble("objectMass", objectMass);
+      ImGui.inputDouble("squeezeForce",squeezeForce);
    }
 
    public void setEnabled(boolean enabled)
