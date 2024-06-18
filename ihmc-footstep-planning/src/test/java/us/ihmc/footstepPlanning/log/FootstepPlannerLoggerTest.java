@@ -121,6 +121,8 @@ public class FootstepPlannerLoggerTest
       FootstepPlannerMessageTools.copyParametersToPacket(expectedFootstepParameters, planningModule.getFootstepPlannerParameters());
       plannerOutput.setPacket(expectedOutputStatusPacket);
 
+      //TODO this test is broken because the outputStatus never sets the goal pose, but thats part of the message so it needs to be set in order for this test to pass
+      // or the goal pose needs to be changed, maybe removed because there should be a goal pose for each foot
       assertTrue(expectedRequestPacket.epsilonEquals(log.getRequestPacket(), 1e-5));
       assertTrue(expectedFootstepParameters.epsilonEquals(log.getFootstepParametersPacket(), 1e-5));
       assertTrue(expectedOutputStatusPacket.epsilonEquals(log.getStatusPacket(), 1e-5));
