@@ -141,15 +141,15 @@ public class TurnWalkTurnPlanner
       return FootstepPlanningResult.FOUND_SOLUTION;
    }
 
-   private void addSquareUp(List<FramePose2DReadOnly> footstepListToPack, FramePoint2D robotPosition)
+   private void addSquareUp(List<FramePose2DReadOnly> footstepListToPack, FramePoint2DReadOnly robotPosition)
    {
-      robotPosition.changeFrame(planStanceFootFrame);
-      if (Math.abs(robotPosition.getX()) > 0.001)
+      FramePoint2D positionInStance = new FramePoint2D(robotPosition);
+      positionInStance.changeFrame(planStanceFootFrame);
+      if (Math.abs(positionInStance.getX()) > 0.001)
          throw new RuntimeException("Can not square up for given position.");
 
-      robotPosition.changeFrame(planStanceFootFrame);
       FramePose2D footstepPose = new FramePose2D(planStanceFootFrame);
-      footstepPose.setY(2.0 * robotPosition.getY());
+      footstepPose.setY(2.0 * positionInStance.getY());
 
       if (lastStepSide.equals(RobotSide.LEFT) && footstepPose.getY() > 0)
          throw new RuntimeException("Left foot can not be placed on right side of right foot");
