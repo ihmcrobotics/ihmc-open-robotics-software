@@ -167,7 +167,6 @@ public class RDXBehaviorTreeNodeCreationMenu
       if (insertionType == BehaviorTreeNodeInsertionType.INSERT_ROOT)
       {
          renderNodeCreationClickable(relativeNode, insertionType, "Action Sequence", ActionSequenceDefinition.class, null);
-         renderNodeCreationClickable(relativeNode, insertionType, "Building Exploration", BuildingExplorationDefinition.class, null);
       }
 
       ImGui.unindent();
