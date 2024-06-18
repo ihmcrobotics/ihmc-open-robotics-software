@@ -132,14 +132,14 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 //            if (handOpenAngle < lostGraspDetectionHandOpenAngle)
 //            {
 //               state.getLogger().info("""
-//                                            Retrying pull door. Hand open angle %.2f%s / %.2f%s degrees.
-//                                            Stopping all trajectories.
-//                                            Going back to %s.
-//                                            """.formatted(Math.toDegrees(knuckle1Q),
-//                                                          EuclidCoreMissingTools.DEGREE_SYMBOL,
-//                                                          Math.toDegrees(lostGraspDetectionHandOpenAngle),
-//                                                          EuclidCoreMissingTools.DEGREE_SYMBOL,
-//                                                          state.getWaitToOpenRightHandAction().getDefinition().getName()));
+//                                      Retrying pull door. Hand open angle %.2f%s / %.2f%s degrees.
+//                                      Stopping all trajectories.
+//                                      Going back to %s.
+//                                      """.formatted(Math.toDegrees(knuckle1Q),
+//                                                    EuclidCoreMissingTools.DEGREE_SYMBOL,
+//                                                    Math.toDegrees(lostGraspDetectionHandOpenAngle),
+//                                                    EuclidCoreMissingTools.DEGREE_SYMBOL,
+//                                                    state.getWaitToOpenRightHandAction().getDefinition().getName()));
 //               ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
 //               waitForPullScrewToFinish = true;
 //               state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
