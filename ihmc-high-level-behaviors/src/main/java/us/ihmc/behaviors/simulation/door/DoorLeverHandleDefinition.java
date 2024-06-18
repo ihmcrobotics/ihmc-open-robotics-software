@@ -20,9 +20,9 @@ import us.ihmc.scs2.definition.visual.VisualDefinition;
  */
 public class DoorLeverHandleDefinition extends RigidBodyDefinition
 {
-   public DoorLeverHandleDefinition()
+   public DoorLeverHandleDefinition(String name)
    {
-      super("doorLeverHandle");
+      super(name);
 
       double sizeX = 0.065;
       double sizeY = 0.14;

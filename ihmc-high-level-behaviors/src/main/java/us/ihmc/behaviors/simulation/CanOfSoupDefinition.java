@@ -21,16 +21,16 @@ public class CanOfSoupDefinition extends RobotDefinition
 {
    private SixDoFJointState initialSixDoFState;
 
-   public CanOfSoupDefinition()
+   public CanOfSoupDefinition(String name)
    {
-      super("canOfSoup");
+      super(name);
    }
 
    public void build()
    {
-      RigidBodyDefinition rootBodyDefinition = new RigidBodyDefinition("canOfSoupRootBody");
+      RigidBodyDefinition rootBodyDefinition = new RigidBodyDefinition(getName() + "_canOfSoupRootBody");
 
-      SixDoFJointDefinition rootJointDefinition = new SixDoFJointDefinition("canOfSoupRootJoint");
+      SixDoFJointDefinition rootJointDefinition = new SixDoFJointDefinition(getName() + "_canOfSoupRootJoint");
       rootBodyDefinition.addChildJoint(rootJointDefinition);
       initialSixDoFState = new SixDoFJointState(new YawPitchRoll(), new Point3D());
       initialSixDoFState.setVelocity(new Vector3D(), new Vector3D());
@@ -38,7 +38,7 @@ public class CanOfSoupDefinition extends RobotDefinition
 
       double length = RigidBodySceneObjectDefinitions.CAN_OF_SOUP_HEIGHT;
       double radius = RigidBodySceneObjectDefinitions.CAN_OF_SOUP_RADIUS;
-      RigidBodyDefinition canOfSoupBody = new RigidBodyDefinition("canOfSoupBody");
+      RigidBodyDefinition canOfSoupBody = new RigidBodyDefinition(getName() + "_canOfSoupBody");
       VisualDefinition modelVisualDefinition = new VisualDefinition();
       ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition("environmentObjects/canOfSoup/CanOfSoup.g3dj");
       modelVisualDefinition.setGeometryDefinition(geometryDefinition);

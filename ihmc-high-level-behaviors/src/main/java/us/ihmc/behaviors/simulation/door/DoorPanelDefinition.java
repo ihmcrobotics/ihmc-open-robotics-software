@@ -20,9 +20,9 @@ public class DoorPanelDefinition extends RigidBodyDefinition
 {
    private boolean addArUcoMarkers = false;
 
-   public DoorPanelDefinition()
+   public DoorPanelDefinition(String name)
    {
-      super("panelBody");
+      super(name);
    }
 
    public void setAddArUcoMarkers(boolean addFiducials)
