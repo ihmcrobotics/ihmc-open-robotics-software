@@ -15,6 +15,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.subscribers.FilteredNotification;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersDelegate;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
@@ -68,6 +69,8 @@ public class RDXLocomotionManager
    private ImGuiStoredPropertySetBooleanWidget replanSwingTrajectoriesOnChangeCheckbox;
    private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
    private ImGuiStoredPropertySetDoubleWidget transferTimeSlider;
+   private ImGuiStoredPropertySetDoubleWidget stepLengthSlider;
+   private ImGuiStoredPropertySetDoubleWidget turnAggressivenessSlider;
    private ImGuiStoredPropertySetEnumWidget initialStanceSideRadioButtons;
 
    private final RDXFootstepPlanGraphic controllerFootstepQueueGraphic;
@@ -155,6 +158,8 @@ public class RDXLocomotionManager
       replanSwingTrajectoriesOnChangeCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.replanSwingTrajectoriesOnChange);
       swingTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.swingTime, 0.3, 1.5);
       transferTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.transferTime, 0.1, 1.5);
+      stepLengthSlider = turnWalkTurnFootstepPlanningParametersTuner.createDoubleSlider(FootstepPlannerParameterKeys.maxStepReach, 0.2, 0.5);
+      turnAggressivenessSlider = turnWalkTurnFootstepPlanningParametersTuner.createDoubleSlider(FootstepPlannerParameterKeys.maxStepYaw, 0.0, 1.0);
       initialStanceSideRadioButtons = locomotionParametersTuner.createEnumRadioButtons(RDXLocomotionParameters.initialStanceSide, InitialStanceSide.values());
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW, syncedRobot);
@@ -295,6 +300,8 @@ public class RDXLocomotionManager
 
       swingTimeSlider.renderImGuiWidget();
       transferTimeSlider.renderImGuiWidget();
+      stepLengthSlider.renderImGuiWidget();
+      turnAggressivenessSlider.renderImGuiWidget();
 
       ImGui.separator();
       ImGui.text("Walking Options:");
