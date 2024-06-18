@@ -42,7 +42,7 @@ public class BimanualManipulationManager implements SCS2YoGraphicHolder
    private final FullHumanoidRobotModel fullRobotModel;
    private final YoBoolean isEnabled = new YoBoolean("isEnabled", registry);
    private final YoDouble maxEnableRate = new YoDouble("maxEnableRate", registry);
-   private final RateLimitedYoVariable alphaEnabled;
+   private final RateLimitedYoVariable squeezeForceScalingFactor;
 
    private final YoDouble objectMass = new YoDouble("objectMass", registry);
    private final YoDouble requestedSqueezeForce = new YoDouble("requestedSqueezeForce", registry);
@@ -77,8 +77,8 @@ public class BimanualManipulationManager implements SCS2YoGraphicHolder
       this.fullRobotModel = fullRobotModel;
 
       maxEnableRate.set(1.0 / DEFAULT_INITIALIZE_DURATION);
-      alphaEnabled = new RateLimitedYoVariable("alphaEnabled", registry, maxEnableRate, controlDT);
-      alphaEnabled.update(0.0);
+      squeezeForceScalingFactor = new RateLimitedYoVariable("squeezeForceScalingFactor", registry, maxEnableRate, controlDT);
+      squeezeForceScalingFactor.update(0.0);
 
       midHandFrame = new PoseReferenceFrame("midHandFrame", ReferenceFrame.getWorldFrame());
       yoMidHandFramePose = new YoFramePose3D("midHandFramePose", ReferenceFrame.getWorldFrame(), registry);
@@ -111,7 +111,7 @@ public class BimanualManipulationManager implements SCS2YoGraphicHolder
       if (command.isDisableRequested())
       {
          isEnabled.set(false);
-         alphaEnabled.set(0.0);
+         squeezeForceScalingFactor.set(0.0);
       }
       else
       {
@@ -130,16 +130,17 @@ public class BimanualManipulationManager implements SCS2YoGraphicHolder
 
    public void update()
    {
+      // Safety check to switch off the applied force when there's too much tracking error.
       isEnabled.set(isEnabled.getValue() && isTracking());
 
       if (isEnabled.getValue())
       {
          updateFrames();
 
-         alphaEnabled.update(1.0);
+         squeezeForceScalingFactor.update(1.0);
 
          // Update inertia properties
-         double effectiveObjectMass = alphaEnabled.getValue() * objectMass.getValue();
+         double effectiveObjectMass = squeezeForceScalingFactor.getValue() * objectMass.getValue();
          for (RobotSide robotSide : RobotSide.values)
          {
             RigidBodyBasics hand = hands.get(robotSide);
@@ -160,7 +161,7 @@ public class BimanualManipulationManager implements SCS2YoGraphicHolder
          }
 
          // Update squeeze force
-         double effectiveSqueezeForce = alphaEnabled.getValue() * requestedSqueezeForce.getValue();
+         double effectiveSqueezeForce = squeezeForceScalingFactor.getValue() * requestedSqueezeForce.getValue();
          for (RobotSide robotSide : RobotSide.values)
          {
             ExternalWrenchCommand externalWrenchCommand = externalWrenchCommands.get(robotSide);
@@ -182,7 +183,7 @@ public class BimanualManipulationManager implements SCS2YoGraphicHolder
       }
       else
       {
-         alphaEnabled.set(0.0);
+         squeezeForceScalingFactor.set(0.0);
 
          // Set to nominal inertial parameters
          for (RobotSide robotSide : RobotSide.values)

@@ -18,7 +18,7 @@ public class RDXBiManualManipulationManager
 
    // TO DO : FIELDS NEED TO BE SET FROM THE UI
 
-   private boolean enableBiManualManipulation = true;
+   private boolean enableBiManualManipulation = false;
    /**
     * Mass of the object being manipulated
     */
@@ -47,6 +47,7 @@ public class RDXBiManualManipulationManager
    private final FrameVector3D worldFrameX = new FrameVector3D(ReferenceFrame.getWorldFrame(), Axis3D.X);
    private double nominalHandDistance;
    private boolean saveHandDistanceOnFirstTick;
+   private final BimanualManipulationMessage message = new BimanualManipulationMessage();
 
    public void toggleBiManualManipulationMode()
    {
@@ -59,7 +60,8 @@ public class RDXBiManualManipulationManager
 
    public BimanualManipulationMessage getBiManualManipulationMessage()
    {
-      BimanualManipulationMessage message = new BimanualManipulationMessage();
+      message.setSqueezeForce(10.0);
+      message.setObjectMass(0.0);
       message.setDisable(!enableBiManualManipulation);
       return message;
    }
@@ -102,6 +104,10 @@ public class RDXBiManualManipulationManager
       midHandFrameOrientation.setColumns(midHandFrameX, midHandFrameY, midHandFrameZ);
       midHandFramePose.getOrientation().set(midHandFrameOrientation);
 
+      // Necessary for the usual orientation of the hands when picking upa box. This isn't necessary if we correctly interpolate between the two hand frames.
+      if (saveHandDistanceOnFirstTick)
+         midHandFramePose.appendPitchRotation(Math.PI/2);
+
       midHandFrame.setPoseAndUpdate(midHandFramePose);
 
       for (RobotSide robotSide : RobotSide.values)
@@ -124,5 +130,10 @@ public class RDXBiManualManipulationManager
       }
       nominalHandDistance = handPoints.get(RobotSide.LEFT).distance(handPoints.get(RobotSide.RIGHT));
       saveHandDistanceOnFirstTick = false;
+   }
+
+   public ReferenceFrame getMidHandFrame()
+   {
+      return midHandFrame;
    }
 }
