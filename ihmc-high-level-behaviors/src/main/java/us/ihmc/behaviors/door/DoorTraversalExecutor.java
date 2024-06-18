@@ -9,8 +9,10 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -21,6 +23,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
    private final DoorTraversalDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
+   private final SceneGraph sceneGraph;
 
    private final SideDependentList<RevoluteJoint> x1KnuckleJoints = new SideDependentList<>();
    private final SideDependentList<RevoluteJoint> x2KnuckleJoints = new SideDependentList<>();
@@ -35,7 +38,8 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
                                 CRDTInfo crdtInfo,
                                 WorkspaceResourceDirectory saveFileDirectory,
                                 ROS2ControllerHelper ros2ControllerHelper,
-                                ROS2SyncedRobotModel syncedRobot)
+                                ROS2SyncedRobotModel syncedRobot,
+                                SceneGraph sceneGraph)
    {
       super(new DoorTraversalState(id, crdtInfo, saveFileDirectory));
 
@@ -44,6 +48,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
+      this.sceneGraph = sceneGraph;
 
       for (RobotSide side : RobotSide.values)
       {
@@ -72,13 +77,12 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
       state.getDoorHingeJointAngle().setValue(Double.NaN);
 
-      // TODO:
-      SceneNode pushDoorFrameNode = null;
-      SceneNode pushDoorPanelNode = null;
+      // TODO: PUSH_DOOR_FRAME_NAME renamed to RIGHT_DOOR_FRAME?
+      SceneNode pushDoorFrameNode = sceneGraph.getNamesToNodesMap().get(DoorSceneNodeDefinitions.PUSH_DOOR_FRAME_NAME);
+      SceneNode pushDoorPanelNode = sceneGraph.getNamesToNodesMap().get(DoorSceneNodeDefinitions.RIGHT_DOOR_PANEL_NAME);
 
-      // TODO:
-      DetectableSceneNode yoloDoorHandleNode = null;
-      StaticRelativeSceneNode staticHandleClosedDoor = null;
+      DetectableSceneNode yoloDoorHandleNode = (DetectableSceneNode) sceneGraph.getNamesToNodesMap().get("YOLO door lever");
+      StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get("doorStaticHandle");
 
       if (pushDoorFrameNode != null && pushDoorPanelNode != null)
       {
@@ -123,7 +127,6 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
                   state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
                }
             }
-            // TODO?
 //            double knuckle1Q = x1KnuckleJoints.get(RobotSide.RIGHT).getQ();
 //            double knuckle2Q = x2KnuckleJoints.get(RobotSide.RIGHT).getQ();
 //            double handOpenAngle = SakeHandParameters.knuckleJointAnglesToHandOpenAngle(knuckle1Q, knuckle2Q);
