@@ -23,7 +23,7 @@ import us.ihmc.perception.RawImage;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizerPanel;
+import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -45,7 +45,7 @@ public class RDXOpenCVTrackerDemo
    private final ZEDColorDepthImagePublisher imagePublisher;
 
    private final RDXBaseUI baseUI = new RDXBaseUI("OpenCV Tracker Demo");
-   private final RDXPerceptionVisualizerPanel perceptionVisualizerPanel = new RDXPerceptionVisualizerPanel();
+   private final RDXPerceptionVisualizersPanel perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
 
    private final ImInt currentTracker = new ImInt(0);
    private final String[] availableTrackers = {"CSRT", "KCF", "Nano"};
@@ -171,7 +171,8 @@ public class RDXOpenCVTrackerDemo
             RDXROS2ImageMessageVisualizer colorImageVisualizer = new RDXROS2ImageMessageVisualizer("Color Image",
                                                                                                    PubSubImplementation.FAST_RTPS,
                                                                                                    PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
-            perceptionVisualizerPanel.addVisualizer(colorImageVisualizer, PerceptionAPI.REQUEST_ZED_COLOR);
+            colorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
+            perceptionVisualizerPanel.addVisualizer(colorImageVisualizer);
 
             perceptionVisualizerPanel.create();
             baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);

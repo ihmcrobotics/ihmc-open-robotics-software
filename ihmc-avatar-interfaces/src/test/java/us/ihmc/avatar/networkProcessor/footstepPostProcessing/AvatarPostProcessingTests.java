@@ -30,7 +30,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
@@ -53,7 +52,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.PlannedFootstep;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -90,7 +89,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
    protected SCS2AvatarTestingSimulation simulationTestHelper;
 
    private FootstepPlanningModule footstepPlanningModule;
-   private FootstepPlannerParametersBasics footstepPlannerParameters;
+   private DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -142,9 +141,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       simulationTestHelper = simulationTestHelperFactory.createAvatarTestingSimulation();
       simulationTestHelper.start();
 
-      footstepPlannerParameters.setMaximumStepZ(height + 0.05);
-      footstepPlannerParameters.setMaximumStepZWhenForwardAndDown(height - 0.05);
-      footstepPlannerParameters.setMaximumStepXWhenForwardAndDown(0.22);
+      footstepPlannerParameters.setMaxStepZ(height + 0.05);
       footstepPlannerParameters.setIdealFootstepLength(0.28);
 
       ThreadTools.sleep(1000);
@@ -177,16 +174,16 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       simulationTestHelper = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulation(getRobotModel(), environment, simulationTestingParameters);
       simulationTestHelper.start();
 
-      footstepPlannerParameters.setMaximumStepReach(0.6);
-      footstepPlannerParameters.setMinimumStepWidth(0.05);
-      footstepPlannerParameters.setMaximumStepWidth(0.35);
+      footstepPlannerParameters.setMaxStepReach(0.6);
+      footstepPlannerParameters.setMinStepWidth(0.05);
+      footstepPlannerParameters.setMaxStepWidth(0.35);
       footstepPlannerParameters.setBodyBoxBaseZ(0.4);
       footstepPlannerParameters.setCheckForBodyBoxCollisions(false);
       footstepPlannerParameters.setCheckForPathCollisions(false);
-      footstepPlannerParameters.setMinimumFootholdPercent(0.99);
-      footstepPlannerParameters.setMaximumStepZ(0.32);
-      footstepPlannerParameters.setMinimumDistanceFromCliffBottoms(-1.0);
-      footstepPlannerParameters.setMinimumDistanceFromCliffTops(-1.0);
+      footstepPlannerParameters.setMinFootholdPercent(0.99);
+      footstepPlannerParameters.setMaxStepZ(0.32);
+      footstepPlannerParameters.setMinDistanceFromCliffBottoms(-1.0);
+      footstepPlannerParameters.setMinDistanceFromCliffTops(-1.0);
 
       ThreadTools.sleep(1000);
       simulationTestHelper.simulateNow(1.0);
@@ -389,7 +386,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
    private static FootstepPlanningRequestPacket getRequest(FullHumanoidRobotModel fullRobotModel,
                                                            PlanarRegionsList planarRegionsList,
                                                            FramePose3D goalPose,
-                                                           FootstepPlannerParametersBasics footstepPlannerParameters)
+                                                           DefaultFootstepPlannerParametersBasics footstepPlannerParameters)
    {
       FramePose3D leftFoot = new FramePose3D(fullRobotModel.getSoleFrame(RobotSide.LEFT));
       FramePose3D rightFoot = new FramePose3D(fullRobotModel.getSoleFrame(RobotSide.RIGHT));

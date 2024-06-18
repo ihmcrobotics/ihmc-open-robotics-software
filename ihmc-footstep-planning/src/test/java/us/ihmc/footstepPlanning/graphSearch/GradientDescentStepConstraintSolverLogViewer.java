@@ -1,17 +1,11 @@
 package us.ihmc.footstepPlanning.graphSearch;
 
 import javafx.scene.paint.Color;
-import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintSolver;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.PlannedFootstep;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionFootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
@@ -48,7 +42,7 @@ public class GradientDescentStepConstraintSolverLogViewer
       FootstepPlannerLog log = logLoader.getLog();
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(ProxyAtlasWalkingControllerParameters::getProxyAtlasFootPolygon);
 
-      FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       footstepPlannerParameters.set(log.getFootstepParametersPacket());
       footstepPlannerParameters.setMinClearanceFromStance(0.1);
 

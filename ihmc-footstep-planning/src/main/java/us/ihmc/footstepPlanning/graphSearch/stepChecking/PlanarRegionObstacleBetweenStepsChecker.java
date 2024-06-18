@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -30,9 +30,9 @@ public class PlanarRegionObstacleBetweenStepsChecker
    private final DoubleSupplier heightOffset;
    private final DoubleSupplier heightExtrusion;
 
-   public PlanarRegionObstacleBetweenStepsChecker(FootstepPlannerParametersReadOnly parameters, FootstepSnapperReadOnly snapper)
+   public PlanarRegionObstacleBetweenStepsChecker(DefaultFootstepPlannerParametersReadOnly parameters, FootstepSnapperReadOnly snapper)
    {
-      this(snapper, parameters::checkForPathCollisions, parameters::getIdealFootstepWidth, parameters::getBodyBoxBaseZ, parameters::getBodyBoxHeight);
+      this(snapper, parameters::getCheckForPathCollisions, parameters::getIdealFootstepWidth, parameters::getBodyBoxBaseZ, parameters::getBodyBoxHeight);
    }
 
    public PlanarRegionObstacleBetweenStepsChecker(FootstepSnapperReadOnly snapper,

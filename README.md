@@ -1,45 +1,31 @@
 # IHMC Open Robotics Software
 
-**Compile:** ![Compile](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-IHMCOPENROBOTICSSOFTWARE)
-**Test (3000+ tests):** ![Test](https://bamboo.ihmc.us/plugins/servlet/wittified/build-status/LIBS-IHMCOPENROBOTICSSOFTWAREFAST)
+## Robots
 
-### Tested Platforms
-
-#### Robots
-
-- DRC-Atlas
-- Valkyrie
 - [Nadia](https://boardwalkrobotics.com/Nadia.html)
+- [Alex](https://boardwalkrobotics.com/Alex.html)
 
-#### Developers
+## Licensing
+
+All of the software in *IHMC Open Robotics Software* is licensed under the Apache 2.0 license.
+
+## Developing with *IHMC Open Robotics Software* from source
+
+*IHMC Open Robotics Software* uses the [Gradle](https://gradle.org) build system, and requires JDK 17. 
+We recommend working in IntelliJ.
 
 Our developers are a mix of Windows and Linux users. We officially support:
 - Windows 10/11
 - Ubuntu 20.04+
 
-Other GNU/Linux distros will likely work, however largely untested. macOS is partially supported, but incomplete at this time.
+Arch Linux will work fine for development.
+Other GNU/Linux distros will likely work, however largely untested.
+macOS is partially supported, but incomplete at this time.
 
-### Branches
-This repository uses the git-flow branching model. 
-You can find more about git-flow [here](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow).
+To get set up, use our public Confluence pages:
+https://ihmcrobotics.atlassian.net/wiki/spaces/PUBLIC/overview
 
-### Licensing
-All of the software in *IHMC Open Robotics Software* is licensed under the Apache 2.0 license.
-
-## Getting Started
-
-### Developing with *IHMC Open Robotics Software* from source
-
-#### Requirements
-*IHMC Open Robotics Software* uses the [Gradle](https://gradle.org) build system, and requires JDK 17. 
-We also strongly suggest an IDE, either Eclipse
-or IntelliJ (Ultimate or Community is fine). Currently, we require **Gradle 7.5.1+**.
-
-Installing Gradle: https://gradle.org/install/
-
-### Companion Software
-
-#### Other IHMC Libraries
+## Other IHMC Libraries
 IHMC Open Robotics Software both depends on and is depended on by many other IHMC Robotics Libraries. 
 A small sampling of our other software includes:
 
@@ -59,22 +45,15 @@ EtherCAT Slave defintions: https://github.com/ihmcrobotics/ihmc-ethercat-master
 
 You can find all of our other repositories as well as the ones above at https://github.com/ihmcrobotics
 
-#### ROS API's
-We provide a native ROS 2 API for many of the core components in our software stack. 
+## ROS APIs
+We provide a ROS 2 API for many of the core components in our software stack. 
 You can find the .msg definitions for use in your own projects in this project's ihmc-interfaces folder.
 
 We have ROS 1 support via the ROS 2 `ros1_bridge` package. 
 You can find the ROS 1 message definitions and instructions on using the 
 ROS 1 Bridge here: https://github.com/ihmcrobotics/ihmc_msgs
 
-#### IDE Support
-Our Gradle models are tested in IntelliJ IDEA (both Community and Ultimate) with the Gradle plugin.
-Eclipse 2021 or higher with the Buildship plugin. The Buildship plugin is bundled with the 
-Eclipse IDE for Java Developers (but *not* Java EE Developers). 
-It can always be manually installed to any version of Eclipse using the 
-[installation instructions](https://github.com/eclipse/buildship/blob/master/docs/user/Installation.md).
-
-#### Building .jars
+## Building .jars
 *IHMC Open Robotics Software* is pre-configured for generating Maven publications. 
 You can publish directly from the source code right in to your local Maven
 repository, e.g. the `$HOME/.m2` directory. These builds will be tagged with a 
@@ -111,7 +90,7 @@ dependencies {
 }
 ```  
 
-#### Creating a project
+## Creating a project
 To create a project that uses *IHMC Open Robotics Software*, your
 project hierarchy needs to take a particular form.
 
@@ -177,7 +156,6 @@ testDependencies {
 * Duncan Calvert (dcalvert@ihmc.org)
 * Stephen McCrory (smcrory@ihmc.org)
 * Robert Griffin (rgriffin@ihmc.org)
-* Bhavyansh Mishra (bmishra@ihmc.org)
 * James Foster (jfoster@ihmc.org)
 * Dexton Anderson (danderson@ihmc.org)
 * Luigi Penco (lpenco@ihmc.org)

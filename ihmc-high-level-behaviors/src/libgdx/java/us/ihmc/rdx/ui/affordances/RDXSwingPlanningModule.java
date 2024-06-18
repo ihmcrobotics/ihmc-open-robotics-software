@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.SwingPlanningModule;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
@@ -33,7 +33,7 @@ public class RDXSwingPlanningModule
    private boolean isCurrentlyPlanning = false;
 
    public RDXSwingPlanningModule(ROS2SyncedRobotModel syncedRobot,
-                                 FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                                 DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters,
                                  SwingPlannerParametersBasics swingPlannerParameters,
                                  WalkingControllerParameters walkingControllerParameters,
                                  SideDependentList<ConvexPolygon2D> footPolygons)

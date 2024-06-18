@@ -1,11 +1,14 @@
 package us.ihmc.behaviors.activeMapping;
 
 import us.ihmc.euclid.geometry.Pose2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
@@ -18,6 +21,18 @@ import java.util.Random;
 
 public class ContinuousPlanningTools
 {
+   public static double getDistanceFromRobotToGoalPoseOnXYPlane(Point3DReadOnly robotPositionInWorld, SideDependentList<FramePose3D> goalPoses)
+   {
+      FramePose3D leftGoalPose = goalPoses.get(RobotSide.LEFT);
+      FramePose3D rightGoalPose = goalPoses.get(RobotSide.RIGHT);
+
+      // Get point halfway between the left and right goal poses
+      Point3D middleDistanceBetweenGoalPoses = new Point3D();
+      middleDistanceBetweenGoalPoses.interpolate(leftGoalPose.getPosition(), rightGoalPose.getPosition(), 0.5);
+
+      return middleDistanceBetweenGoalPoses.distanceXY(robotPositionInWorld);
+   }
+
    public static void setRandomizedStraightGoalPoses(FramePose3D walkingStartPose,
                                                      SideDependentList<FramePose3D> stancePose,
                                                      SideDependentList<FramePose3D> goalPose,

@@ -27,7 +27,6 @@ public class RDXMessageSizeReadout
    {
       if (messageSizeString != null)
       {
-         ImGui.sameLine();
          ImGui.text(messageSizeString);
       }
    }
