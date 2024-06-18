@@ -10,21 +10,15 @@ import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
-
-import javax.annotation.Nullable;
 
 public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefinition>
 {
-   public static final String STABILIZE_DETECTION = "Stabilize detection";
+   public static final String STABILIZE_DETECTION = "Stabilize Detection";
    public static final String WAIT_TO_OPEN_RIGHT_HAND = "Wait to open right hand";
-   public static final String PULL_SCREW_PRIMITIVE = "Pull screw primitive";
+   public static final String PULL_SCREW_PRIMITIVE = "Pull Screw primitive";
    public static final String POST_PULL_DOOR = "Post pull door evaluation";
    public static final String POST_GRASP_HANDLE = "Evaluate grasp";
-
-   @Nullable
-   private DoorNode doorNode;
 
    private ActionSequenceState actionSequence;
    private WaitDurationActionState stabilizeDetectionAction;
@@ -66,27 +60,28 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       {
          if (child instanceof ActionNodeState<?> actionNode)
          {
-            if (actionNode instanceof WaitDurationActionState waitDurationAction && waitDurationAction.getDefinition().getName().equals(STABILIZE_DETECTION))
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(STABILIZE_DETECTION))
             {
                stabilizeDetectionAction = waitDurationAction;
             }
-            if (actionNode instanceof WaitDurationActionState waitDurationAction && waitDurationAction.getDefinition()
-                                                                                                      .getName()
-                                                                                                      .equals(WAIT_TO_OPEN_RIGHT_HAND))
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(WAIT_TO_OPEN_RIGHT_HAND))
             {
                waitToOpenRightHandAction = waitDurationAction;
             }
-            if (actionNode instanceof ScrewPrimitiveActionState screwPrimitiveAction && screwPrimitiveAction.getDefinition()
-                                                                                                            .getName()
-                                                                                                            .equals(PULL_SCREW_PRIMITIVE))
+            if (actionNode instanceof ScrewPrimitiveActionState screwPrimitiveAction
+                && screwPrimitiveAction.getDefinition().getName().equals(PULL_SCREW_PRIMITIVE))
             {
                pullScrewPrimitiveAction = screwPrimitiveAction;
             }
-            if (actionNode instanceof WaitDurationActionState waitDurationAction && waitDurationAction.getDefinition().getName().equals(POST_GRASP_HANDLE))
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(POST_GRASP_HANDLE))
             {
                postGraspEvaluationAction = waitDurationAction;
             }
-            if (actionNode instanceof WaitDurationActionState waitDurationAction && waitDurationAction.getDefinition().getName().equals(POST_PULL_DOOR))
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(POST_PULL_DOOR))
             {
                postPullDoorEvaluationAction = waitDurationAction;
             }
@@ -126,17 +121,6 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       isValid &= postGraspEvaluationAction != null;
       isValid &= postPullDoorEvaluationAction != null;
       return isValid;
-   }
-
-   @Nullable
-   public DoorNode getDoorNode()
-   {
-      return doorNode;
-   }
-
-   public void setDoorNode(@Nullable DoorNode doorNode)
-   {
-      this.doorNode = doorNode;
    }
 
    public ActionSequenceState getActionSequence()

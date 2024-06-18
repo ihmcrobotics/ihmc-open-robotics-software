@@ -3,28 +3,13 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
-import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
-import us.ihmc.behaviors.buildingExploration.BuildingExplorationExecutor;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.door.DoorTraversalExecutor;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationExecutor;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceExecutor;
-import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
-import us.ihmc.behaviors.sequence.actions.ChestOrientationActionExecutor;
-import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
-import us.ihmc.behaviors.sequence.actions.FootstepPlanActionExecutor;
-import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
-import us.ihmc.behaviors.sequence.actions.HandPoseActionExecutor;
-import us.ihmc.behaviors.sequence.actions.HandWrenchActionDefinition;
-import us.ihmc.behaviors.sequence.actions.HandWrenchActionExecutor;
-import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionDefinition;
-import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionExecutor;
-import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
-import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionExecutor;
-import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionDefinition;
-import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionExecutor;
-import us.ihmc.behaviors.sequence.actions.WaitDurationActionDefinition;
-import us.ihmc.behaviors.sequence.actions.WaitDurationActionExecutor;
+import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.behaviors.tools.interfaces.LogToolsLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.walkingController.WalkingFootstepTracker;
@@ -82,11 +67,11 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       }
       if (nodeType == DoorTraversalDefinition.class)
       {
-         return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot);
+         return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
       }
       if (nodeType == BuildingExplorationDefinition.class)
       {
-         return new BuildingExplorationExecutor(id, crdtInfo, saveFileDirectory, sceneGraph);
+         return new BuildingExplorationExecutor(id, crdtInfo, saveFileDirectory);
       }
       if (nodeType == ChestOrientationActionDefinition.class)
       {
