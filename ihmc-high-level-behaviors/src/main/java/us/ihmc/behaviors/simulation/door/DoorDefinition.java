@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.simulation.door;
 
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
@@ -25,6 +26,7 @@ import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters.
  * SCS 2 definition of the door we have in the lab.
  *
  * It is a push and pull door depending on the side you're on.
+ * The hinge is on the right on the pull side.
  *
  * TODO: It's decently accurate, but still missing some features like:
  *   - Accurate hinge axis
