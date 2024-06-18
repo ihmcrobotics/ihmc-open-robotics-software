@@ -222,12 +222,12 @@ public class RDXVRKinematicsStreamingMode
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          Set<String> additionalTrackedSegments = vrContext.getBodySegmentsWithTrackers();
 
-//         // If bi-manipulation mode is enabled, we back out more feasible IK control frame poses that keep the hands flush with the box.
-//         if (rdxBiManipulationManager.getEnableBiManualManipulationMode())
-//         {
-//            //ikMidControlFramePose.interpolate(ikControlFramePoses.get(RobotSide.LEFT),ikControlFramePoses.get(RobotSide.RIGHT), 0.5);
-//            rdxBiManipulationManager.adjustHandControlFramesForHoldingBox(handDesiredControlFrames);
-//         }
+         //         // If bi-manipulation mode is enabled, we back out more feasible IK control frame poses that keep the hands flush with the box.
+         //         if (rdxBiManipulationManager.getEnableBiManualManipulationMode())
+         //         {
+         //            //ikMidControlFramePose.interpolate(ikControlFramePoses.get(RobotSide.LEFT),ikControlFramePoses.get(RobotSide.RIGHT), 0.5);
+         //            rdxBiManipulationManager.adjustHandControlFramesForHoldingBox(handDesiredControlFrames);
+         //         }
 
          for (VRTrackedSegmentType segmentType : VRTrackedSegmentType.values())
             handleTrackedSegment(vrContext, toolboxInputMessage, segmentType, additionalTrackedSegments);
@@ -496,6 +496,15 @@ public class RDXVRKinematicsStreamingMode
          setEnabled(enabled.get());
       }
 
+      ImGui.text("Right Trigger");
+      ImGui.sameLine();
+      if (ImGui.checkbox(labels.get("enableBimanipulation"), rdxBiManipulationManager.getEnableBiManualManipulationMode()))
+      {
+         rdxBiManipulationManager.toggleBiManualManipulationMode();
+         hasSentSqueezeMessage = false;
+      }
+      ImGui.checkbox(labels.get("hasSentSqueezeMessage"), hasSentSqueezeMessage);
+
       // TODO (CD): Add this back in when we have a torso
       // if (ImGui.checkbox(labels.get("Control only arms"), controlArmsOnly))
       // {
@@ -522,10 +531,8 @@ public class RDXVRKinematicsStreamingMode
 
       ImGui.checkbox(labels.get("Show reference frames"), showReferenceFrameGraphics);
 
-      ImGui.checkbox("enableBimanipulation", rdxBiManipulationManager.getEnableBiManualManipulationMode());
-      ImGui.checkbox("hasSentSqueezeMessage", hasSentSqueezeMessage);
       ImGui.inputDouble("objectMass", objectMass);
-      ImGui.inputDouble("squeezeForce",squeezeForce);
+      ImGui.inputDouble("squeezeForce", squeezeForce);
    }
 
    public void setEnabled(boolean enabled)
