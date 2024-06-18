@@ -1,9 +1,17 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
-import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.behaviors.sequence.actions.ChestOrientationActionDefinition;
+import us.ihmc.behaviors.sequence.actions.FootstepPlanActionDefinition;
+import us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition;
+import us.ihmc.behaviors.sequence.actions.HandWrenchActionDefinition;
+import us.ihmc.behaviors.sequence.actions.PelvisHeightPitchActionDefinition;
+import us.ihmc.behaviors.sequence.actions.SakeHandCommandActionDefinition;
+import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionDefinition;
+import us.ihmc.behaviors.sequence.actions.WaitDurationActionDefinition;
 
 public class BehaviorTreeDefinitionRegistry
 {
@@ -14,6 +22,7 @@ public class BehaviorTreeDefinitionRegistry
       new RegistryRecord(BehaviorTreeNodeDefinition.class, BehaviorTreeStateMessage.BASIC_NODE),
       new RegistryRecord(ActionSequenceDefinition.class, BehaviorTreeStateMessage.ACTION_SEQUENCE),
       new RegistryRecord(DoorTraversalDefinition.class, BehaviorTreeStateMessage.DOOR_TRAVERSAL),
+      new RegistryRecord(BuildingExplorationDefinition.class, BehaviorTreeStateMessage.BUILDING_EXPLORATION),
 
       new RegistryRecord(ChestOrientationActionDefinition.class, BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION),
       new RegistryRecord(FootstepPlanActionDefinition.class, BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION),

@@ -10,12 +10,12 @@ import us.ihmc.avatar.scs2.SCS2AvatarSimulationFactory;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.bullet.physicsEngine.BulletPhysicsEngine;
@@ -24,8 +24,8 @@ import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulationSession
 {
@@ -34,8 +34,8 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
    private final boolean useVelocityAndHeadingScript;
    private final DRCRobotModel robotModel;
    private final CommunicationMode ros2CommunicationMode;
-   private final ArrayList<Function<ReferenceFrame, Robot>> secondaryRobots = new ArrayList<>();
-   private final ArrayList<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
+   private final List<RobotDefinition> secondaryRobotDefinitions = new ArrayList<>();
+   private final List<TerrainObjectDefinition> terrainObjectDefinitions = new ArrayList<>();
    private SCS2AvatarSimulation avatarSimulation;
    private Consumer<SCS2AvatarSimulationFactory> externalFactorySetup = null;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -86,10 +86,10 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
       {
          avatarSimulationFactory.addTerrainObjectDefinition(terrainObjectDefinition);
       }
-      for (Function<ReferenceFrame, Robot> secondaryRobot : secondaryRobots)
+      for (RobotDefinition secondaryRobotDefinition : secondaryRobotDefinitions)
       {
          // FIXME Technically the inertial frame could be different here
-         avatarSimulationFactory.addSecondaryRobot(secondaryRobot.apply(SimulationSession.DEFAULT_INERTIAL_FRAME));
+         avatarSimulationFactory.addSecondaryRobot(new Robot(secondaryRobotDefinition, SimulationSession.DEFAULT_INERTIAL_FRAME));
       }
       avatarSimulationFactory.setRobotInitialSetup(robotInitialSetup);
       avatarSimulationFactory.setCreateYoVariableServer(true);
@@ -126,12 +126,12 @@ public class RDXSCS2HumanoidSimulationManager extends RDXSCS2RestartableSimulati
       return avatarSimulation.getSimulationConstructionSet().getSimulationSession();
    }
 
-   public ArrayList<Function<ReferenceFrame, Robot>> getSecondaryRobots()
+   public List<RobotDefinition> getSecondaryRobotDefinitions()
    {
-      return secondaryRobots;
+      return secondaryRobotDefinitions;
    }
 
-   public ArrayList<TerrainObjectDefinition> getTerrainObjectDefinitions()
+   public List<TerrainObjectDefinition> getTerrainObjectDefinitions()
    {
       return terrainObjectDefinitions;
    }

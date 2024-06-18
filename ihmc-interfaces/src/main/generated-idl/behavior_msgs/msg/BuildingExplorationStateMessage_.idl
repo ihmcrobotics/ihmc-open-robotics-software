@@ -1,0 +1,29 @@
+#ifndef __behavior_msgs__msg__BuildingExplorationStateMessage__idl__
+#define __behavior_msgs__msg__BuildingExplorationStateMessage__idl__
+
+#include "behavior_msgs/msg/./BehaviorTreeNodeStateMessage_.idl"
+#include "behavior_msgs/msg/./BuildingExplorationDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::BuildingExplorationStateMessage_")
+      struct BuildingExplorationStateMessage
+      {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::BehaviorTreeNodeStateMessage state;
+        /**
+         * Definition
+         */
+        behavior_msgs::msg::dds::BuildingExplorationDefinitionMessage definition;
+      };
+    };
+  };
+};
+
+#endif
