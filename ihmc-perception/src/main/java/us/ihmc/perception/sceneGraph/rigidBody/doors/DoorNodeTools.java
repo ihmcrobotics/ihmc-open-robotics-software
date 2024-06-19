@@ -73,7 +73,7 @@ public final class DoorNodeTools
                                                                             doorNode.getID(),
                                                                             new RigidBodyTransform(),
                                                                             visualModelPath,
-                                                                            DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM,
+                                                                            yoloVisualModelTransform,
                                                                             DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN);
                      LogTools.info("Adding doorStaticHandle to scene graph.");
                      modificationQueue.accept(new SceneGraphNodeAddition(doorStaticNode, doorNode));
