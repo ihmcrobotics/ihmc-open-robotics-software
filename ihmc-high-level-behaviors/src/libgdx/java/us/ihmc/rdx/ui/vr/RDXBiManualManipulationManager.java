@@ -60,7 +60,8 @@ public class RDXBiManualManipulationManager
 
    public BimanualManipulationMessage getBiManualManipulationMessage()
    {
-      message.setSqueezeForce(10.0);
+      // Set force and mass to zero by default. The user should set these values from the operator UI.
+      message.setSqueezeForce(0.0);
       message.setObjectMass(0.0);
       message.setDisable(!enableBiManualManipulation);
       return message;
@@ -78,10 +79,6 @@ public class RDXBiManualManipulationManager
 
    public void adjustHandControlFramesForHoldingBox(SideDependentList<MutableReferenceFrame> handDesiredControlFrames)
    {
-//      for (RobotSide robotSide : RobotSide.values)
-//      {
-//         handPoints.get(robotSide).set(ikControlFramePoses.get(robotSide).getPosition());
-//      }
       updateFrames(handDesiredControlFrames);
    }
 
@@ -104,16 +101,11 @@ public class RDXBiManualManipulationManager
       midHandFrameOrientation.setColumns(midHandFrameX, midHandFrameY, midHandFrameZ);
       midHandFramePose.getOrientation().set(midHandFrameOrientation);
 
-      // Necessary for the usual orientation of the hands when picking upa box. This isn't necessary if we correctly interpolate between the two hand frames.
-      if (saveHandDistanceOnFirstTick)
-         midHandFramePose.appendPitchRotation(Math.PI/2);
-
+      //TODO: (CD) Make sure midHandFramePose is correct.
       midHandFrame.setPoseAndUpdate(midHandFramePose);
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         handDesiredControlFrames.get(robotSide).getTransformToParent().getRotation().set(midHandFramePose.getOrientation());
-
          handDesiredControlFrames.get(robotSide).getTransformToParent().getRotation().set(midHandFramePose.getOrientation());
          handDesiredControlFrames.get(robotSide).setParentFrame(midHandFrame);
          handDesiredControlFrames.get(robotSide).getTransformToParent().setTranslationToZero();

@@ -222,16 +222,10 @@ public class RDXVRKinematicsStreamingMode
          KinematicsStreamingToolboxInputMessage toolboxInputMessage = new KinematicsStreamingToolboxInputMessage();
          Set<String> additionalTrackedSegments = vrContext.getBodySegmentsWithTrackers();
 
-         //         // If bi-manipulation mode is enabled, we back out more feasible IK control frame poses that keep the hands flush with the box.
-         //         if (rdxBiManipulationManager.getEnableBiManualManipulationMode())
-         //         {
-         //            //ikMidControlFramePose.interpolate(ikControlFramePoses.get(RobotSide.LEFT),ikControlFramePoses.get(RobotSide.RIGHT), 0.5);
-         //            rdxBiManipulationManager.adjustHandControlFramesForHoldingBox(handDesiredControlFrames);
-         //         }
-
          for (VRTrackedSegmentType segmentType : VRTrackedSegmentType.values())
             handleTrackedSegment(vrContext, toolboxInputMessage, segmentType, additionalTrackedSegments);
 
+         //TODO: (CD) This is not yet used. Use to back out orientation-adjusted hand frames or remove
          midHandFrameGraphic.setToReferenceFrame(rdxBiManipulationManager.getMidHandFrame());
 
          if (controlArmsOnly.get())
@@ -279,24 +273,16 @@ public class RDXVRKinematicsStreamingMode
          toolboxInputMessage.setTimestamp(System.nanoTime());
          ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()),
                                       toolboxInputMessage);
-//         if (enabled.get() && streamToController.get())
-//         {
-            if (!hasSentSqueezeMessage && rdxBiManipulationManager.getEnableBiManualManipulationMode())
-            {
-               BimanualManipulationMessage message = rdxBiManipulationManager.getBiManualManipulationMessage();
-               message.setDisable(false);
-               message.setObjectMass(objectMass.get());
-               message.setSqueezeForce(squeezeForce.get());
-               ros2ControllerHelper.publishToController(message);
-               hasSentSqueezeMessage = true;
-            }
 
-//            if (!rdxBiManipulationManager.getEnableBiManualManipulationMode())
-//            {
-//               BimanualManipulationMessage message = rdxBiManipulationManager.getBiManualManipulationMessage();
-//               message.setDisable(true);
-//               ros2ControllerHelper.publishToController(message);
-//            }
+         if (!hasSentSqueezeMessage && rdxBiManipulationManager.getEnableBiManualManipulationMode())
+         {
+            BimanualManipulationMessage message = rdxBiManipulationManager.getBiManualManipulationMessage();
+            message.setDisable(false);
+            message.setObjectMass(objectMass.get());
+            message.setSqueezeForce(squeezeForce.get());
+            ros2ControllerHelper.publishToController(message);
+            hasSentSqueezeMessage = true;
+         }
          outputFrequencyPlot.recordEvent();
       }
    }

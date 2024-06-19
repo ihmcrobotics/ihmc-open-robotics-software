@@ -186,8 +186,6 @@ public class BimanualManipulationManager implements SCS2YoGraphicHolder
       }
       else
       {
-         squeezeForceScalingFactor.set(0.0);
-
          // Set to nominal inertial parameters
          for (RobotSide robotSide : RobotSide.values)
          {
@@ -195,19 +193,20 @@ public class BimanualManipulationManager implements SCS2YoGraphicHolder
             combinedInertia.setIncludingFrame(baselineHandInertias.get(robotSide));
             combinedInertia.changeFrame(hand.getBodyFixedFrame());
             hand.getInertia().setIncludingFrame(combinedInertia);
-
-            yoDesiredSqueezingForces.get(robotSide).setToZero();
          }
 
+         // Set squeeze force to zero
+         squeezeForceScalingFactor.set(0.0);
          for (RobotSide robotSide : RobotSide.values)
          {
             ExternalWrenchCommand externalWrenchCommand = externalWrenchCommands.get(robotSide);
             RigidBodyBasics hand = hands.get(robotSide);
             externalWrenchCommand.getExternalWrench().setBodyFrame(hand.getBodyFixedFrame());
             externalWrenchCommand.getExternalWrench().setReferenceFrame(hand.getBodyFixedFrame());
-
             externalWrenchCommand.getExternalWrench().setToZero();
             commandList.addCommand(externalWrenchCommand);
+
+            yoDesiredSqueezingForces.get(robotSide).setToZero();
          }
       }
    }
