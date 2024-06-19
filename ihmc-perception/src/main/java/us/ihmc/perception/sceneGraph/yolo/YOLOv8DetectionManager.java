@@ -52,6 +52,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BooleanSupplier;
 
 public class YOLOv8DetectionManager
 {
@@ -66,7 +67,7 @@ public class YOLOv8DetectionManager
    private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor();
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter();
 
-   private final ROS2DemandGraphNode annotatedImageDemandNode;
+   private final BooleanSupplier isAnnotatedImageDemanded;
    private final ROS2PublisherBasics<ImageMessage> annotatedImagePublisher;
 
    private final YOLOv8ObjectDetector yoloDetector = new YOLOv8ObjectDetector();
@@ -93,9 +94,9 @@ public class YOLOv8DetectionManager
 
    private ReferenceFrame robotFrame = null;
 
-   public YOLOv8DetectionManager(ROS2Helper ros2Helper, ROS2DemandGraphNode annotatedImageDemandNode)
+   public YOLOv8DetectionManager(ROS2Helper ros2Helper, BooleanSupplier isAnnotatedImageDemanded)
    {
-      this.annotatedImageDemandNode = annotatedImageDemandNode;
+      this.isAnnotatedImageDemanded = isAnnotatedImageDemanded;
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "yolo_detection_manager");
       annotatedImagePublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_ANNOTATED_IMAGE);
@@ -237,7 +238,7 @@ public class YOLOv8DetectionManager
          segmentAndMatchDetections(yoloResults, depthImage, robotFrame);
 
          // if demanded, publish an annotated image
-         if (annotatedImageDemandNode.isDemanded())
+         if (isAnnotatedImageDemanded.getAsBoolean())
             annotateAndPublishImage(yoloResults, colorImage);
 
          // release everything
