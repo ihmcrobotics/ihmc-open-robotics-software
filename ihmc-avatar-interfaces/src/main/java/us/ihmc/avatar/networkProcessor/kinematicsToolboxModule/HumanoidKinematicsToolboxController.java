@@ -492,6 +492,7 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
       desiredReferenceFrames.updateFrames();
    }
 
+   private final FramePoint3D tempMidFeet = new FramePoint3D();
    /**
     * Sets the {@link #initialCenterOfMassPosition} and {@link #initialFootPoses} to match the current
     * state of {@link #desiredFullRobotModel}.
@@ -502,11 +503,18 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       initialCenterOfMassPosition.setFromReferenceFrame(centerOfMassFrame);
 
+      tempMidFeet.setToZero(worldFrame);
+
       for (RobotSide robotSide : RobotSide.values)
       {
+         tempMidFeet.scaleAdd(0.5, desiredFullRobotModel.getSoleFrame(robotSide).getTransformToRoot().getTranslation(), tempMidFeet);
+
          RigidBodyBasics foot = desiredFullRobotModel.getFoot(robotSide);
          initialFootPoses.get(robotSide).setFromReferenceFrame(foot.getBodyFixedFrame());
       }
+
+      initialCenterOfMassPosition.setX(tempMidFeet.getX());
+      initialCenterOfMassPosition.setY(tempMidFeet.getY());
    }
 
    /**
