@@ -54,7 +54,8 @@ public class RDXLocomotionManager
    private final SwingPlannerParametersBasics swingFootPlannerParameters;
    private final Notification locomotionParametersChanged = new Notification();
    private final Notification footstepPlanningParametersChanged = new Notification();
-   private final Notification usedFootstepParametersChanged = new Notification();
+   private final Notification turnAggressivenessChanged = new Notification();
+   private final Notification stepAggressivenessChanged = new Notification();
    private final RDXStoredPropertySetTuner locomotionParametersTuner = new RDXStoredPropertySetTuner("Locomotion Parameters");
    private final RDXStoredPropertySetTuner aStartFootstepPlanningParametersTuner
          = new RDXStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation A*)");
@@ -140,7 +141,6 @@ public class RDXLocomotionManager
       controllerStatusTracker.getFootstepTracker().registerFootstepQueuedMessageListener(footstepQueueNotification);
       locomotionParameters.addAnyPropertyChangedListener(locomotionParametersChanged);
       aStarFootstepPlannerParameters.addAnyPropertyChangedListener(footstepPlanningParametersChanged);
-      footstepPlannerParametersToUse.addAnyPropertyChangedListener(usedFootstepParametersChanged);
 
       locomotionParametersTuner.create(locomotionParameters);
       aStartFootstepPlanningParametersTuner.create(aStarFootstepPlannerParameters, false);
@@ -212,7 +212,8 @@ public class RDXLocomotionManager
 
       boolean parametersChanged = locomotionParametersChanged.poll();
       parametersChanged |= footstepPlanningParametersChanged.poll();
-      parametersChanged |= usedFootstepParametersChanged.poll();
+      parametersChanged |= turnAggressivenessChanged.poll();
+      parametersChanged |= stepAggressivenessChanged.poll();
 
       if (parametersChanged)
       {
@@ -304,8 +305,10 @@ public class RDXLocomotionManager
 
       swingTimeSlider.renderImGuiWidget();
       transferTimeSlider.renderImGuiWidget();
-      stepAggressivenessSlider.render(0.0, 1.5);
-      turnAggressivenessSlider.render(0.0, 2.0);
+      if (stepAggressivenessSlider.render(0.0, 1.5))
+         stepAggressivenessChanged.set();
+      if (turnAggressivenessSlider.render(0.0, 2.0))
+         turnAggressivenessChanged.set();
 
       ImGui.separator();
       ImGui.text("Walking Options:");
