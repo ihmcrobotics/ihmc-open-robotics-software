@@ -384,7 +384,7 @@ public class YOLOv8DetectionManager
       depthImage.release();
    }
 
-   public void annotateAndPublishImage(YOLOv8DetectionResults yoloResults, RawImage colorImage)
+   private void annotateAndPublishImage(YOLOv8DetectionResults yoloResults, RawImage colorImage)
    {
       Mat resultMat = colorImage.get().getCpuImageMat().clone();
 
