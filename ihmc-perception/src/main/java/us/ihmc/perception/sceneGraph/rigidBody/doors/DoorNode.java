@@ -7,6 +7,7 @@ import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -94,6 +95,7 @@ public class DoorNode extends SceneNode
       // Check if the current door planar region is old
       if (System.currentTimeMillis() - doorPlanarRegionUpdateTimeMillis > 2000)
       {
+         LogTools.info("Setting planar region door panel");
          setDoorPlanarRegion(new PlanarRegion());
       }
 

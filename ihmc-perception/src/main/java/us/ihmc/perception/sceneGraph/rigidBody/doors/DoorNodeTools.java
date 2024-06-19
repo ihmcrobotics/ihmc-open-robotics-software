@@ -58,7 +58,7 @@ public final class DoorNodeTools
                         case PUSH_BAR ->
                         {
                            visualModelPath = DOOR_EMERGENCY_BAR_VISUAL_MODEL_FILE_PATH;
-                           yoloVisualModelTransform.set(DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM);
+                           yoloVisualModelTransform.set(DOOR_PUSH_BAR_TO_YOLO_VISUAL_MODEL_TRANSFORM);
                         }
                         case PULL_HANDLE ->
                         {
