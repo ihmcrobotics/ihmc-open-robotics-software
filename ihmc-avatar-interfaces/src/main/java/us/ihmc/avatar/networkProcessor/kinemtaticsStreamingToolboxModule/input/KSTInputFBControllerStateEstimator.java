@@ -204,11 +204,15 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
       {
          estimatedPose.setToZero();
          estimatedVelocity.setToZero();
+         estimatedDecayingVelocity.setToZero();
          correctiveVelocity.setToZero();
+         debugInputVelocity.setToZero();
          lastUpdateTime.set(Double.NaN);
          lastInputTimestamp.set(Long.MIN_VALUE);
          rawInputPose.setToZero();
          rawInputVelocity.setToZero();
+         nextTimeTriggerForDecay.set(0.0);
+         inputVelocityDecayFactor.set(0.0);
       }
 
       private final Quaternion tempError = new Quaternion();
@@ -343,11 +347,15 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
       {
          estimatedPosition.setToZero();
          estimatedVelocity.setToZero();
+         estimatedDecayingVelocity.setToZero();
          correctiveVelocity.setToZero();
+         debugInputVelocity.setToZero();
          lastUpdateTime.set(Double.NaN);
          lastInputTimestamp.set(Long.MIN_VALUE);
          rawInputPosition.setToZero();
          rawInputVelocity.setToZero();
+         nextTimeTriggerForDecay.set(0.0);
+         inputVelocityDecayFactor.set(0.0);
       }
 
       public void update(double time, long inputTimestamp, KinematicsToolboxCenterOfMassCommand input)

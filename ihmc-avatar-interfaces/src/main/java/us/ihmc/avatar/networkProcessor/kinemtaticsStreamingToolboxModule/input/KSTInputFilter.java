@@ -83,8 +83,19 @@ public class KSTInputFilter
          }
       }
 
+      if (input.getDesiredPosition().containsNaN())
+      {
+         LogTools.warn("NaN position for CoM command");
+         return false;
+      }
+
       if (input.getHasDesiredVelocity())
       {
+         if (input.getDesiredVelocity().containsNaN())
+         {
+            LogTools.warn("NaN velocity for CoM command");
+            return false;
+         }
          double linearVelocity = input.getDesiredVelocity().norm();
          if (linearVelocity > maxLinearVelocity.getValue())
             return false;
@@ -117,8 +128,19 @@ public class KSTInputFilter
          }
       }
 
+      if (input.getDesiredPose().containsNaN())
+      {
+         LogTools.warn("NaN pose for end-effector: {}", input.getEndEffector().getName());
+         return false;
+      }
+
       if (input.getHasDesiredVelocity())
       {
+         if (input.getDesiredVelocity().containsNaN())
+         {
+            LogTools.warn("NaN velocity for end-effector: {}", input.getEndEffector().getName());
+            return false;
+         }
          double linearVelocity = input.getDesiredVelocity().getLinearPart().norm();
          if (linearVelocity > maxLinearVelocity.getValue())
             return false;
