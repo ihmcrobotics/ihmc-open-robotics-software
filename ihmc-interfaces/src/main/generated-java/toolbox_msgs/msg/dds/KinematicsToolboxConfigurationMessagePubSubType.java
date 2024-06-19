@@ -15,7 +15,7 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7e0e4d33021b2ceb874deee72ab87c9ca8349b1379585469e0604f2c369b49f8";
+   		return "74ab1f6139100d691f76c8881ac312eff593b8d3fd26d24ee0987324e97a6264";
    }
    
    @Override
@@ -74,6 +74,10 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (10 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (10 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       return current_alignment - initial_alignment;
    }
@@ -120,6 +124,14 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getJointsToDeactivate().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getJointsToActivate().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -148,6 +160,14 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
 
       cdr.write_type_7(data.getDisableSupportPolygonConstraint());
 
+      if(data.getJointsToDeactivate().size() <= 10)
+      cdr.write_type_e(data.getJointsToDeactivate());else
+          throw new RuntimeException("joints_to_deactivate field exceeds the maximum length");
+
+      if(data.getJointsToActivate().size() <= 10)
+      cdr.write_type_e(data.getJointsToActivate());else
+          throw new RuntimeException("joints_to_activate field exceeds the maximum length");
+
    }
 
    public static void read(toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
@@ -174,6 +194,8 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       	
       data.setDisableSupportPolygonConstraint(cdr.read_type_7());
       	
+      cdr.read_type_e(data.getJointsToDeactivate());	
+      cdr.read_type_e(data.getJointsToActivate());	
 
    }
 
@@ -191,6 +213,8 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       ser.write_type_7("enable_input_persistence", data.getEnableInputPersistence());
       ser.write_type_7("enable_support_polygon_constraint", data.getEnableSupportPolygonConstraint());
       ser.write_type_7("disable_support_polygon_constraint", data.getDisableSupportPolygonConstraint());
+      ser.write_type_e("joints_to_deactivate", data.getJointsToDeactivate());
+      ser.write_type_e("joints_to_activate", data.getJointsToActivate());
    }
 
    @Override
@@ -207,6 +231,8 @@ public class KinematicsToolboxConfigurationMessagePubSubType implements us.ihmc.
       data.setEnableInputPersistence(ser.read_type_7("enable_input_persistence"));
       data.setEnableSupportPolygonConstraint(ser.read_type_7("enable_support_polygon_constraint"));
       data.setDisableSupportPolygonConstraint(ser.read_type_7("disable_support_polygon_constraint"));
+      ser.read_type_e("joints_to_deactivate", data.getJointsToDeactivate());
+      ser.read_type_e("joints_to_activate", data.getJointsToActivate());
    }
 
    public static void staticCopy(toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage src, toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage dest)

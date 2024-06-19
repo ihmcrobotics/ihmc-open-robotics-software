@@ -1,7 +1,14 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import toolbox_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.robotModels.JointHashCodeResolver;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class KinematicsToolboxConfigurationCommand implements Command<KinematicsToolboxConfigurationCommand, KinematicsToolboxConfigurationMessage>
 {
@@ -22,6 +29,9 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    private boolean enableSupportPolygonConstraint = false;
    private boolean disableSupportPolygonConstraint = false;
 
+   private final List<OneDoFJointBasics> jointsToDeactivate = new ArrayList<>();
+   private final List<OneDoFJointBasics> jointsToActivate = new ArrayList<>();
+
    @Override
    public void clear()
    {
@@ -36,6 +46,8 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
       enableInputPersistence = false;
       enableSupportPolygonConstraint = false;
       disableSupportPolygonConstraint = false;
+      jointsToDeactivate.clear();
+      jointsToActivate.clear();
    }
 
    @Override
@@ -54,11 +66,23 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
       enableInputPersistence = other.enableInputPersistence;
       enableSupportPolygonConstraint = other.enableSupportPolygonConstraint;
       disableSupportPolygonConstraint = other.disableSupportPolygonConstraint;
+
+      for (int i = 0; i < other.jointsToDeactivate.size(); i++)
+         jointsToDeactivate.add(other.jointsToDeactivate.get(i));
+      for (int i = 0; i < other.jointsToActivate.size(); i++)
+         jointsToActivate.add(other.jointsToActivate.get(i));
    }
 
    @Override
    public void setFromMessage(KinematicsToolboxConfigurationMessage message)
    {
+      set(message, null);
+   }
+
+   public void set(KinematicsToolboxConfigurationMessage message, JointHashCodeResolver jointHashCodeResolver)
+   {
+      Objects.requireNonNull(jointHashCodeResolver);
+
       sequenceId = message.getSequenceId();
 
       jointVelocityWeight = message.getJointVelocityWeight();
@@ -72,6 +96,13 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
       enableInputPersistence = message.getEnableInputPersistence();
       enableSupportPolygonConstraint = message.getEnableSupportPolygonConstraint();
       disableSupportPolygonConstraint = message.getDisableSupportPolygonConstraint();
+
+      jointsToDeactivate.clear();
+      for (int i = 0; i < message.getJointsToDeactivate().size(); i++)
+         jointsToDeactivate.add((OneDoFJointBasics) jointHashCodeResolver.castAndGetJoint(message.getJointsToDeactivate().get(i)));
+      jointsToActivate.clear();
+      for (int i = 0; i < message.getJointsToActivate().size(); i++)
+         jointsToActivate.add((OneDoFJointBasics) jointHashCodeResolver.castAndGetJoint(message.getJointsToActivate().get(i)));
    }
 
    public double getJointVelocityWeight()
@@ -122,6 +153,16 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
    public boolean getDisableSupportPolygonConstraint()
    {
       return disableSupportPolygonConstraint;
+   }
+
+   public List<OneDoFJointBasics> getJointsToDeactivate()
+   {
+      return jointsToDeactivate;
+   }
+
+   public List<OneDoFJointBasics> getJointsToActivate()
+   {
+      return jointsToActivate;
    }
 
    @Override

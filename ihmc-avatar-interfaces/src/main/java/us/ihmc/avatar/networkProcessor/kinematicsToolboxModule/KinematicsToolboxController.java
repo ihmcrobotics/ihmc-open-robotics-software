@@ -975,6 +975,18 @@ public class KinematicsToolboxController extends ToolboxController
             activeOptimizationSettings.setJointVelocityLimitMode(ActivationState.DISABLED);
          if (command.getEnableJointVelocityLimits())
             activeOptimizationSettings.setJointVelocityLimitMode(ActivationState.ENABLED);
+         if (!command.getJointsToDeactivate().isEmpty())
+         {
+            activeOptimizationSettings.getJointsToDeactivate().clear();
+            for (int i = 0; i < command.getJointsToDeactivate().size(); i++)
+               activeOptimizationSettings.getJointsToDeactivate().add(command.getJointsToDeactivate().get(i));
+         }
+         if (!command.getJointsToActivate().isEmpty())
+         {
+            activeOptimizationSettings.getJointsToActivate().clear();
+            for (int i = 0; i < command.getJointsToActivate().size(); i++)
+               activeOptimizationSettings.getJointsToActivate().add(command.getJointsToActivate().get(i));
+         }
          if (command.getDisableInputPersistence())
             setPreserveUserCommandHistory(false);
          else if (command.getEnableInputPersistence())
