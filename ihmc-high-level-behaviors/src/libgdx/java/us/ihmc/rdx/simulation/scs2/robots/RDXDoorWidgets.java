@@ -16,8 +16,8 @@ public class RDXDoorWidgets
 
    public void initialize(Robot doorRobot)
    {
-      doorHingeJoint = (SimRevoluteJoint) doorRobot.getJoint("doorHingeJoint");
-      doorLeverJoint = (SimRevoluteJoint) doorRobot.getJoint("doorLeverJoint");
+      doorHingeJoint = (SimRevoluteJoint) doorRobot.getJoint(doorRobot.getName() + "_doorHingeJoint");
+      doorLeverJoint = (SimRevoluteJoint) doorRobot.getJoint(doorRobot.getName() + "_doorLeverJoint");
 
       doorRobot.addController(() ->
       {

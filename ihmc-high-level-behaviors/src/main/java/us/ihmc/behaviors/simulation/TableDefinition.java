@@ -24,9 +24,9 @@ public class TableDefinition  extends RobotDefinition
    private SixDoFJointState initialSixDoFState;
    private boolean addArUcoMarkers = false;
 
-   public TableDefinition()
+   public TableDefinition(String name)
    {
-      super("table");
+      super(name);
    }
 
    public void setAddArUcoMarkers(boolean addFiducials)
@@ -36,9 +36,9 @@ public class TableDefinition  extends RobotDefinition
 
    public void build()
    {
-      RigidBodyDefinition rootBodyDefinition = new RigidBodyDefinition("tableRootBody");
+      RigidBodyDefinition rootBodyDefinition = new RigidBodyDefinition(getName() + "_tableRootBody");
 
-      SixDoFJointDefinition rootJointDefinition = new SixDoFJointDefinition("tableRootJoint");
+      SixDoFJointDefinition rootJointDefinition = new SixDoFJointDefinition(getName() + "_tableRootJoint");
       rootBodyDefinition.addChildJoint(rootJointDefinition);
       initialSixDoFState = new SixDoFJointState(new YawPitchRoll(), new Point3D());
       initialSixDoFState.setVelocity(new Vector3D(), new Vector3D());
@@ -47,7 +47,7 @@ public class TableDefinition  extends RobotDefinition
       double sizeX = 2.0;
       double sizeY = 0.75;
       double sizeZ = TableModelParameters.TABLE_THICKNESS;
-      RigidBodyDefinition tableSurface = new RigidBodyDefinition("tableSurface");
+      RigidBodyDefinition tableSurface = new RigidBodyDefinition(getName() + "_tableSurface");
       VisualDefinition modelVisualDefinition = new VisualDefinition();
       ModelFileGeometryDefinition geometryDefinition = new ModelFileGeometryDefinition("environmentObjects/table/Table.g3dj");
       MaterialDefinition materialDefinition = new MaterialDefinition(ColorDefinitions.Brown());

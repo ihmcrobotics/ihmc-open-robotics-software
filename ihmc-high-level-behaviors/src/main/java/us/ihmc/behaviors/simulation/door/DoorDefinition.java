@@ -1,10 +1,15 @@
 package us.ihmc.behaviors.simulation.door;
 
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.scs2.definition.robot.*;
+import us.ihmc.scs2.definition.robot.PrismaticJointDefinition;
+import us.ihmc.scs2.definition.robot.RevoluteJointDefinition;
+import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
+import us.ihmc.scs2.definition.robot.RobotDefinition;
+import us.ihmc.scs2.definition.robot.SixDoFJointDefinition;
 import us.ihmc.scs2.definition.state.OneDoFJointState;
 import us.ihmc.scs2.definition.state.SixDoFJointState;
 import us.ihmc.scs2.simulation.SimulationSession;
@@ -21,6 +26,7 @@ import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters.
  * SCS 2 definition of the door we have in the lab.
  *
  * It is a push and pull door depending on the side you're on.
+ * The hinge is on the right on the pull side.
  *
  * TODO: It's decently accurate, but still missing some features like:
  *   - Accurate hinge axis
@@ -30,18 +36,29 @@ import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters.
  */
 public class DoorDefinition extends RobotDefinition
 {
-   public static final String DOOR_ROBOT_NAME = "door";
-
    private SixDoFJointState initialSixDoFState;
    private OneDoFJointState initialHingeState;
    private OneDoFJointState initialLeverState;
    private OneDoFJointState initialBoltState;
 
-   private final DoorPanelDefinition doorPanelDefinition = new DoorPanelDefinition();
+   private final DoorFrameDefinition doorFrameDefinition;
+   private final DoorPanelDefinition doorPanelDefinition;
+   private final DoorBoltDefinition doorBoltDefinition;
+   private final DoorLeverHandleDefinition doorLeverHandleDefinition;
 
-   public DoorDefinition()
+   public DoorDefinition(String name)
    {
-      super(DOOR_ROBOT_NAME);
+      super(name);
+
+      doorFrameDefinition = new DoorFrameDefinition(getName() + "_doorFrame");
+      doorPanelDefinition = new DoorPanelDefinition(getName() + "_doorPanel");
+      doorBoltDefinition = new DoorBoltDefinition(getName() + "_doorBolt");
+      doorLeverHandleDefinition = new DoorLeverHandleDefinition(getName() + "_doorLever");
+   }
+
+   public DoorFrameDefinition getDoorFrameDefinition()
+   {
+      return doorFrameDefinition;
    }
 
    public DoorPanelDefinition getDoorPanelDefinition()
@@ -49,20 +66,29 @@ public class DoorDefinition extends RobotDefinition
       return doorPanelDefinition;
    }
 
+   public DoorBoltDefinition getDoorBoltDefinition()
+   {
+      return doorBoltDefinition;
+   }
+
+   public DoorLeverHandleDefinition getDoorLeverHandleDefinition()
+   {
+      return doorLeverHandleDefinition;
+   }
+
    public void build()
    {
-      RigidBodyDefinition rootBodyDefinition = new RigidBodyDefinition("doorRootBody");
+      RigidBodyDefinition rootBodyDefinition = new RigidBodyDefinition(getName() + "_doorRootBody");
 
-      SixDoFJointDefinition rootJointDefinition = new SixDoFJointDefinition("doorRootJoint");
+      SixDoFJointDefinition rootJointDefinition = new SixDoFJointDefinition(getName() + "_doorRootJoint");
       rootBodyDefinition.addChildJoint(rootJointDefinition);
       initialSixDoFState = new SixDoFJointState(new YawPitchRoll(), new Point3D());
       initialSixDoFState.setVelocity(new Vector3D(), new Vector3D());
       rootJointDefinition.setInitialJointState(initialSixDoFState);
 
-      DoorFrameDefinition doorFrameDefinition = new DoorFrameDefinition();
       rootJointDefinition.setSuccessor(doorFrameDefinition);
 
-      RevoluteJointDefinition doorHingeJoint = new RevoluteJointDefinition("doorHingeJoint");
+      RevoluteJointDefinition doorHingeJoint = new RevoluteJointDefinition(getName() + "_doorHingeJoint");
       doorHingeJoint.setAxis(Axis3D.Z);
       doorFrameDefinition.addChildJoint(doorHingeJoint);
       doorHingeJoint.getTransformToParent()
@@ -77,7 +103,7 @@ public class DoorDefinition extends RobotDefinition
       doorPanelDefinition.build();
       doorHingeJoint.setSuccessor(doorPanelDefinition);
 
-      RevoluteJointDefinition doorLeverJoint = new RevoluteJointDefinition("doorLeverJoint");
+      RevoluteJointDefinition doorLeverJoint = new RevoluteJointDefinition(getName() + "_doorLeverJoint");
       doorLeverJoint.setAxis(Axis3D.X);
       doorPanelDefinition.addChildJoint(doorLeverJoint);
       doorLeverJoint.getTransformToParent().getTranslation().add(0.0,
@@ -85,11 +111,9 @@ public class DoorDefinition extends RobotDefinition
                                                                  DOOR_OPENER_FROM_BOTTOM_OF_PANEL);
       initialLeverState = new OneDoFJointState();
       doorLeverJoint.setInitialJointState(initialLeverState);
-
-      DoorLeverHandleDefinition doorLeverHandleDefinition = new DoorLeverHandleDefinition();
       doorLeverJoint.setSuccessor(doorLeverHandleDefinition);
 
-      PrismaticJointDefinition doorBoltJoint = new PrismaticJointDefinition("doorBoltJoint");
+      PrismaticJointDefinition doorBoltJoint = new PrismaticJointDefinition(getName() + "_doorBoltJoint");
       doorBoltJoint.setAxis(Axis3D.Y);
       doorBoltJoint.setPositionLimits(-DOOR_BOLT_TRAVEL, 0.0);
       doorPanelDefinition.addChildJoint(doorBoltJoint);
@@ -99,7 +123,6 @@ public class DoorDefinition extends RobotDefinition
       initialBoltState = new OneDoFJointState();
       doorBoltJoint.setInitialJointState(initialBoltState);
 
-      DoorBoltDefinition doorBoltDefinition = new DoorBoltDefinition();
       doorBoltJoint.setSuccessor(doorBoltDefinition);
 
       setRootBodyDefinition(rootBodyDefinition);
@@ -107,8 +130,8 @@ public class DoorDefinition extends RobotDefinition
 
    public static void setupPhysics(Robot robot, SimulationSession simulationSession)
    {
-      SimRevoluteJoint doorLeverJoint = (SimRevoluteJoint) robot.getJoint("doorLeverJoint");
-      SimPrismaticJoint doorBoltJoint = (SimPrismaticJoint) robot.getJoint("doorBoltJoint");
+      SimRevoluteJoint doorLeverJoint = (SimRevoluteJoint) robot.getJoint(robot.getName() + "_doorLeverJoint");
+      SimPrismaticJoint doorBoltJoint = (SimPrismaticJoint) robot.getJoint(robot.getName() + "_doorBoltJoint");
 
       simulationSession.addBeforePhysicsCallback(time ->
       {

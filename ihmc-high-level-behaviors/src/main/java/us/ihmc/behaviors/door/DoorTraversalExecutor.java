@@ -25,14 +25,9 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
    private final ROS2SyncedRobotModel syncedRobot;
    private final SceneGraph sceneGraph;
 
-   private final SideDependentList<RevoluteJoint> x1KnuckleJoints = new SideDependentList<>();
-   private final SideDependentList<RevoluteJoint> x2KnuckleJoints = new SideDependentList<>();
-
    private final transient StopAllTrajectoryMessage stopAllTrajectoryMessage = new StopAllTrajectoryMessage();
    private boolean waitForPullScrewToFinish = false;
    private boolean waitForGraspToFinish = false;
-
-   private transient final FramePose3D pushDoorPanelPose = new FramePose3D();
 
    public DoorTraversalExecutor(long id,
                                 CRDTInfo crdtInfo,
@@ -49,15 +44,6 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
       this.sceneGraph = sceneGraph;
-
-      for (RobotSide side : RobotSide.values)
-      {
-         if (syncedRobot.getRobotModel().getRobotVersion().hasSakeGripperJoints(side))
-         {
-            x1KnuckleJoints.put(side, (RevoluteJoint) syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(0));
-            x2KnuckleJoints.put(side, (RevoluteJoint) syncedRobot.getFullRobotModel().getHand(side).getChildrenJoints().get(1));
-         }
-      }
    }
 
    @Override
@@ -75,21 +61,8 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
       updateActionSubtree(this);
 
-      state.getDoorHingeJointAngle().setValue(Double.NaN);
-
-      // TODO: PUSH_DOOR_FRAME_NAME renamed to RIGHT_DOOR_FRAME?
-      SceneNode pushDoorFrameNode = sceneGraph.getNamesToNodesMap().get(DoorSceneNodeDefinitions.PUSH_DOOR_FRAME_NAME);
-      SceneNode pushDoorPanelNode = sceneGraph.getNamesToNodesMap().get(DoorSceneNodeDefinitions.RIGHT_DOOR_PANEL_NAME);
-
       DetectableSceneNode yoloDoorHandleNode = (DetectableSceneNode) sceneGraph.getNamesToNodesMap().get("YOLO door lever");
       StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get("doorStaticHandle");
-
-      if (pushDoorFrameNode != null && pushDoorPanelNode != null)
-      {
-         pushDoorPanelPose.setFromReferenceFrame(pushDoorPanelNode.getNodeFrame());
-         pushDoorPanelPose.changeFrame(pushDoorFrameNode.getNodeFrame());
-         state.getDoorHingeJointAngle().setValue(pushDoorPanelPose.getOrientation().getYaw());
-      }
 
       if (state.getStabilizeDetectionAction() != null && state.getStabilizeDetectionAction().getIsExecuting())
       {
@@ -102,9 +75,9 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
 
       if (state.arePullRetryNodesPresent())
       {
-         // Here we are preventing the below logic from triggering more than once at a time
+         // Check that it pulled the door far enough to consider it open and secured with other hand
          if (!state.getPostPullDoorEvaluationAction().getIsExecuting())
-         {
+         { // Here we are preventing the below logic from triggering more than once at a time
             waitForPullScrewToFinish = false;
          }
          if (!waitForPullScrewToFinish && state.getPostPullDoorEvaluationAction().getIsExecuting())
@@ -127,28 +100,9 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
                   state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
                }
             }
-//            double knuckle1Q = x1KnuckleJoints.get(RobotSide.RIGHT).getQ();
-//            double knuckle2Q = x2KnuckleJoints.get(RobotSide.RIGHT).getQ();
-//            double handOpenAngle = SakeHandParameters.knuckleJointAnglesToHandOpenAngle(knuckle1Q, knuckle2Q);
-//
-//            double lostGraspDetectionHandOpenAngle = getDefinition().getLostGraspDetectionHandOpenAngle().getValue();
-//            if (handOpenAngle < lostGraspDetectionHandOpenAngle)
-//            {
-//               state.getLogger().info("""
-//                                      Retrying pull door. Hand open angle %.2f%s / %.2f%s degrees.
-//                                      Stopping all trajectories.
-//                                      Going back to %s.
-//                                      """.formatted(Math.toDegrees(knuckle1Q),
-//                                                    EuclidCoreMissingTools.DEGREE_SYMBOL,
-//                                                    Math.toDegrees(lostGraspDetectionHandOpenAngle),
-//                                                    EuclidCoreMissingTools.DEGREE_SYMBOL,
-//                                                    state.getWaitToOpenRightHandAction().getDefinition().getName()));
-//               ros2ControllerHelper.publishToController(stopAllTrajectoryMessage);
-//               waitForPullScrewToFinish = true;
-//               state.getActionSequence().setExecutionNextIndex(state.getWaitToOpenRightHandAction().getActionIndex());
-//               state.getPullScrewPrimitiveAction().setIsExecuting(false);
-//            }
          }
+
+         // Check that it grasped the door handle effectively, evaluate distance hand-handle at the end of grasp action
          if (!state.getPostGraspEvaluationAction().getIsExecuting())
          {
             waitForGraspToFinish = false;

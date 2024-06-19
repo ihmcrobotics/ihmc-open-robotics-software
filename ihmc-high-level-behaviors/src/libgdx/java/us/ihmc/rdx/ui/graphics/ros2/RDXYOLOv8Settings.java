@@ -56,9 +56,6 @@ public class RDXYOLOv8Settings extends RDXVisualizer
    {
       ImGui.combo("Sensor Selection", selectedSensor, AVAILABLE_SENSORS);
 
-      demandYOLOv8ICPZed.setAlive(isActive() && selectedSensor.get() == 0);
-      demandYOLOv8ICPRealsense.setAlive(isActive() && selectedSensor.get() == 1);
-
       if (ImGui.sliderFloat("confidenceThreshold", confidenceThreshold.getData(), 0.0f, 1.0f))
          parametersChanged.set();
       if (ImGui.sliderFloat("nmsThreshold", nmsThreshold.getData(), 0.0f, 1.0f))
@@ -101,6 +98,9 @@ public class RDXYOLOv8Settings extends RDXVisualizer
    public void update()
    {
       super.update();
+
+      demandYOLOv8ICPZed.setAlive(isActive() && selectedSensor.get() == 0);
+      demandYOLOv8ICPRealsense.setAlive(isActive() && selectedSensor.get() == 1);
 
       // Publish a settings message if user changed a setting or enough time has passed since last publication
       if (parametersChanged.poll() || messagePublishThrottler.run())

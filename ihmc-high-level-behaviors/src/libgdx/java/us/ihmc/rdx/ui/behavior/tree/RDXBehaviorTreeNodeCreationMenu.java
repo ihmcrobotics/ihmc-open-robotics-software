@@ -4,12 +4,15 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
-import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
+import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
+import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeTopologyOperationQueue;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
+import us.ihmc.behaviors.sequence.actions.PelvisHeightOrientationActionDefinition;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -154,13 +157,17 @@ public class RDXBehaviorTreeNodeCreationMenu
       {
          renderNodeCreationClickable(relativeNode, insertionType, "Basic Node", BehaviorTreeNodeDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Door Traversal", DoorTraversalDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Trash Can Interaction", TrashCanInteractionDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Building Exploration", BuildingExplorationDefinition.class, null);
       }
       if (insertionType == BehaviorTreeNodeInsertionType.INSERT_ROOT)
+      {
          renderNodeCreationClickable(relativeNode, insertionType, "Action Sequence", ActionSequenceDefinition.class, null);
+      }
 
       ImGui.unindent();
 
-      if (parentIsActionSequenceNode || parentIsBasicNode || ancestorIsActionSequenceNode)
+      if (ancestorIsActionSequenceNode)
       {
          ImGui.separator();
 
@@ -170,6 +177,12 @@ public class RDXBehaviorTreeNodeCreationMenu
          ImGui.indent();
 
          renderNodeCreationClickable(relativeNode, insertionType, "Footstep Plan", FootstepPlanActionDefinition.class, null);
+         ImGui.text("Foot Pose: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), FootPoseActionDefinition.class, side);
+         }
          ImGui.text("Hand Pose: ");
          for (RobotSide side : RobotSide.values)
          {
@@ -183,7 +196,7 @@ public class RDXBehaviorTreeNodeCreationMenu
             renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), SakeHandCommandActionDefinition.class, side);
          }
          renderNodeCreationClickable(relativeNode, insertionType, "Chest Orientation", ChestOrientationActionDefinition.class, null);
-         renderNodeCreationClickable(relativeNode, insertionType, "Pelvis Height", PelvisHeightPitchActionDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Pelvis Height", PelvisHeightOrientationActionDefinition.class, null);
          renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitDurationActionDefinition.class, null);
          ImGui.text("Screw Primitive: ");
          for (RobotSide side : RobotSide.values)
@@ -240,6 +253,9 @@ public class RDXBehaviorTreeNodeCreationMenu
    {
       topologyOperationQueue.queueInsertNode(insertionDefinition);
       ImGui.closeCurrentPopup();
+
+      if (insertionDefinition.getParent() != null)
+         insertionDefinition.getParent().setTreeWidgetExpanded(true);
 
       insertionDefinition.getNodeToInsert().setTreeWidgetExpanded(true);
    }

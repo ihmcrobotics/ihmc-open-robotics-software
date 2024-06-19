@@ -12,9 +12,9 @@ import us.ihmc.scs2.definition.visual.VisualDefinition;
 
 public class DoorBoltDefinition extends RigidBodyDefinition
 {
-   public DoorBoltDefinition()
+   public DoorBoltDefinition(String name)
    {
-      super("doorBolt");
+      super(name);
 
       double sizeX = 0.015;
       double sizeY = 0.015;

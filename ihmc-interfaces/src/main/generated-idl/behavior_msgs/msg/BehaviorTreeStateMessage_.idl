@@ -3,14 +3,17 @@
 
 #include "behavior_msgs/msg/./ActionSequenceStateMessage_.idl"
 #include "behavior_msgs/msg/./BasicNodeStateMessage_.idl"
+#include "behavior_msgs/msg/./BuildingExplorationStateMessage_.idl"
 #include "behavior_msgs/msg/./ChestOrientationActionStateMessage_.idl"
 #include "behavior_msgs/msg/./DoorTraversalStateMessage_.idl"
+#include "behavior_msgs/msg/./FootPoseActionStateMessage_.idl"
 #include "behavior_msgs/msg/./FootstepPlanActionStateMessage_.idl"
 #include "behavior_msgs/msg/./HandPoseActionStateMessage_.idl"
 #include "behavior_msgs/msg/./HandWrenchActionStateMessage_.idl"
-#include "behavior_msgs/msg/./PelvisHeightPitchActionStateMessage_.idl"
+#include "behavior_msgs/msg/./PelvisHeightOrientationActionStateMessage_.idl"
 #include "behavior_msgs/msg/./SakeHandCommandActionStateMessage_.idl"
 #include "behavior_msgs/msg/./ScrewPrimitiveActionStateMessage_.idl"
+#include "behavior_msgs/msg/./TrashCanInteractionStateMessage_.idl"
 #include "behavior_msgs/msg/./WaitDurationActionStateMessage_.idl"
 #include "ihmc_common_msgs/msg/./ConfirmableRequestMessage_.idl"
 module behavior_msgs
@@ -27,6 +30,12 @@ module behavior_msgs
 
       const octet DOOR_TRAVERSAL =
       2;
+
+      const octet TRASH_CAN_INTERACTION =
+      3;
+
+      const octet BUILDING_EXPLORATION =
+      4;
 
       const octet CHEST_ORIENTATION_ACTION =
       10;
@@ -46,11 +55,14 @@ module behavior_msgs
       const octet SCREW_PRIMITIVE_ACTION =
       15;
 
-      const octet PELVIS_HEIGHT_PITCH_ACTION =
+      const octet PELVIS_HEIGHT_ORIENTATION_ACTION =
       16;
 
       const octet WAIT_DURATION_ACTION =
       17;
+
+      const octet FOOT_POSE_ACTION =
+      18;
 
 
       /**
@@ -87,14 +99,17 @@ module behavior_msgs
         sequence<behavior_msgs::msg::dds::BasicNodeStateMessage, 200> basic_nodes;
         sequence<behavior_msgs::msg::dds::ActionSequenceStateMessage, 200> action_sequences;
         sequence<behavior_msgs::msg::dds::DoorTraversalStateMessage, 200> door_traversals;
+        sequence<behavior_msgs::msg::dds::TrashCanInteractionStateMessage, 200> trash_can_interactions;
+        sequence<behavior_msgs::msg::dds::BuildingExplorationStateMessage, 200> building_explorations;
         sequence<behavior_msgs::msg::dds::ChestOrientationActionStateMessage, 200> chest_orientation_actions;
         sequence<behavior_msgs::msg::dds::FootstepPlanActionStateMessage, 200> footstep_plan_actions;
         sequence<behavior_msgs::msg::dds::SakeHandCommandActionStateMessage, 200> sake_hand_command_actions;
         sequence<behavior_msgs::msg::dds::HandPoseActionStateMessage, 200> hand_pose_actions;
         sequence<behavior_msgs::msg::dds::HandWrenchActionStateMessage, 200> hand_wrench_actions;
         sequence<behavior_msgs::msg::dds::ScrewPrimitiveActionStateMessage, 200> screw_primitive_actions;
-        sequence<behavior_msgs::msg::dds::PelvisHeightPitchActionStateMessage, 200> pelvis_height_actions;
+        sequence<behavior_msgs::msg::dds::PelvisHeightOrientationActionStateMessage, 200> pelvis_height_actions;
         sequence<behavior_msgs::msg::dds::WaitDurationActionStateMessage, 200> wait_duration_actions;
+        sequence<behavior_msgs::msg::dds::FootPoseActionStateMessage, 200> foot_pose_actions;
       };
     };
   };

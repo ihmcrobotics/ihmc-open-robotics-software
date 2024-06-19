@@ -2,6 +2,7 @@ package us.ihmc.perception.detections.YOLOv8;
 
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.javacpp.IntPointer;
+import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
@@ -47,6 +48,7 @@ public class YOLOv8DetectionExecutor
    private static final int FONT_THICKNESS = 2;
    private static final int LINE_TYPE = opencv_imgproc.LINE_4;
    private static final Scalar BOUNDING_BOX_COLOR = new Scalar(0.0, 196.0, 0.0, 255.0);
+   private static final Mat GREEN_MAT = new Mat(1, 1, opencv_core.CV_8UC3, new Scalar(0.0, 255.0, 0.0, 255.0));
 
    private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor();
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter();
@@ -205,9 +207,12 @@ public class YOLOv8DetectionExecutor
    {
       Mat resultMat = colorImage.get().getCpuImageMat().clone();
 
-      Set<YOLOv8DetectionOutput> detections = yoloResults.getDetections();
-      detections.stream().filter(detection -> detection.confidence() >= yoloConfidenceThreshold).forEach(detection ->
+      Map<YOLOv8DetectionOutput, RawImage> detectionMasks = yoloResults.getTargetSegmentationImages(yoloSegmentationThreshold, targetDetections);
+      detectionMasks.entrySet().stream().filter(entry -> entry.getKey().confidence() >= yoloConfidenceThreshold).forEach(entry ->
       {
+         YOLOv8DetectionOutput detection = entry.getKey();
+         RawImage maskImage = entry.getValue();
+
          String text = String.format("%s: %.2f", detection.objectClass().toString(), detection.confidence());
 
          // Draw the bounding box
@@ -228,6 +233,24 @@ public class YOLOv8DetectionExecutor
                                 FONT_THICKNESS,
                                 LINE_TYPE,
                                 false);
+
+         // Add green tint to show mask
+         // first convert 32F mask to 8U
+         Mat maskMat = new Mat(maskImage.getImageHeight(), maskImage.getImageWidth(), opencv_core.CV_8U);
+         maskImage.getCpuImageMat().convertTo(maskMat, opencv_core.CV_8U, 255.0, 0.0);
+
+         // resize the mask to fit the result image
+         opencv_imgproc.resize(maskMat, maskMat, resultMat.size(), 0.0, 0.0, opencv_imgproc.INTER_NEAREST);
+
+         // ensure the green Mat is same size as image
+         if (resultMat.cols() != GREEN_MAT.cols() || resultMat.rows() != GREEN_MAT.rows())
+            opencv_imgproc.resize(GREEN_MAT, GREEN_MAT, resultMat.size());
+
+         // add a green tint where mask = 255
+         opencv_core.add(resultMat, GREEN_MAT, resultMat, maskMat, -1);
+
+         maskImage.release();
+         maskMat.release();
       });
 
       BytePointer annotatedImagePointer = new BytePointer();

@@ -3,8 +3,12 @@ package us.ihmc.behaviors.behaviorTree;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
+import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionExecutor;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.door.DoorTraversalExecutor;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationExecutor;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceExecutor;
 import us.ihmc.behaviors.sequence.actions.*;
@@ -67,6 +71,14 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       {
          return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
       }
+      if (nodeType == TrashCanInteractionDefinition.class)
+      {
+         return new TrashCanInteractionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
+      }
+      if (nodeType == BuildingExplorationDefinition.class)
+      {
+         return new BuildingExplorationExecutor(id, crdtInfo, saveFileDirectory, sceneGraph);
+      }
       if (nodeType == ChestOrientationActionDefinition.class)
       {
          return new ChestOrientationActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, referenceFrameLibrary);
@@ -96,9 +108,9 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       {
          return new ScrewPrimitiveActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, robotModel, syncedRobot);
       }
-      if (nodeType == PelvisHeightPitchActionDefinition.class)
+      if (nodeType == PelvisHeightOrientationActionDefinition.class)
       {
-         return new PelvisHeightPitchActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
+         return new PelvisHeightOrientationActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
       }
       if (nodeType == SakeHandCommandActionDefinition.class)
       {
@@ -107,6 +119,10 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       if (nodeType == WaitDurationActionDefinition.class)
       {
          return new WaitDurationActionExecutor(id, crdtInfo, saveFileDirectory, syncedRobot);
+      }
+      if (nodeType == FootPoseActionDefinition.class)
+      {
+         return new FootPoseActionExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, referenceFrameLibrary, syncedRobot);
       }
 
       return null;
