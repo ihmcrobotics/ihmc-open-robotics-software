@@ -4,114 +4,93 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.detections.InstantDetection;
+import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 
 public class CenterposeNode extends DetectableSceneNode
 {
-   private int objectID;
-   private Point3D[] vertices3D;
-   private Point3D[] vertices2D;
-   private String objectType;
-   private double confidence;
+   private CenterPoseInstantDetection centerPoseDetection;
+
    private final RigidBodyTransform interpolatedModelTransform = new RigidBodyTransform();
    private int glitchCount;
    private boolean enableTracking;
 
-   public CenterposeNode(long id, String name, int markerID, Point3D[] vertices3D, Point3D[] vertices2D, boolean enableTracking)
+   public CenterposeNode(long nodeID, String name, CenterPoseInstantDetection centerPoseDetection, boolean enableTracking)
    {
-      super(id, name, null); // TODO: FIXME TOMASZ PLEASE
-      this.objectID = markerID;
-      this.vertices3D = vertices3D;
-      this.vertices2D = vertices2D;
+      super(nodeID, name, centerPoseDetection);
+      this.centerPoseDetection = centerPoseDetection;
       this.enableTracking = enableTracking;
    }
 
-   public void update()
+   @Override
+   public void updateDetection(InstantDetection newDetection)
    {
-      RigidBodyTransform detectionTransform = getNodeToParentFrameTransform();
-      FramePose3D detectionPose = new FramePose3D(ReferenceFrame.getWorldFrame(), detectionTransform);
-      FramePose3D interpolatedModelTransformPose = new FramePose3D(ReferenceFrame.getWorldFrame(), interpolatedModelTransform);
-
-      double distance = detectionPose.getPositionDistance(interpolatedModelTransformPose);
-
-      boolean skipUpdate = false;
-      if (distance > 0.5)
+      if (newDetection instanceof CenterPoseInstantDetection newCenterPoseDetection)
       {
-         if (glitchCount < 5)
+         super.updateDetection(newCenterPoseDetection);
+         this.centerPoseDetection = newCenterPoseDetection;
+
+         getNodeToParentFrameTransform().set(centerPoseDetection.getPose());
+
+         RigidBodyTransform detectionTransform = getNodeToParentFrameTransform();
+         FramePose3D detectionPose = new FramePose3D(ReferenceFrame.getWorldFrame(), detectionTransform);
+         FramePose3D interpolatedModelTransformPose = new FramePose3D(ReferenceFrame.getWorldFrame(), interpolatedModelTransform);
+
+         double distance = detectionPose.getPositionDistance(interpolatedModelTransformPose);
+
+         boolean skipUpdate = false;
+         if (distance > 0.5)
          {
-            skipUpdate = true;
-            glitchCount++;
+            if (glitchCount < 5)
+            {
+               skipUpdate = true;
+               glitchCount++;
+            }
+            else
+            {
+               glitchCount = 0;
+            }
          }
-         else
+
+         if (!skipUpdate && enableTracking)
          {
-            glitchCount = 0;
+            double alpha = normalize(distance, 0.001, 1.0);
+            alpha = MathTools.clamp(alpha, 0.001, 1);
+
+            interpolatedModelTransform.interpolate(detectionTransform, alpha);
+            getNodeToParentFrameTransform().set(interpolatedModelTransform);
+            getNodeFrame().update();
          }
       }
-
-      if (!skipUpdate && enableTracking)
-      {
-         double alpha = normalize(distance, 0.001, 1.0);
-         alpha = MathTools.clamp(alpha, 0.001, 1);
-
-         interpolatedModelTransform.interpolate(detectionTransform, alpha);
-         getNodeToParentFrameTransform().set(interpolatedModelTransform);
-         getNodeFrame().update();
-      }
+      else
+         throw new IllegalArgumentException("CenterPoseNode update requires a CenterPoseInstantDetection");
    }
 
    public static double normalize(double value, double min, double max) {
       return (value - min) / (max - min);
    }
 
-   public int getObjectID()
-   {
-      return objectID;
-   }
-
-   public void setObjectID(int objectID)
-   {
-      this.objectID = objectID;
-   }
-
    public Point3D[] getVertices3D()
    {
-      return vertices3D;
+      return centerPoseDetection.getBoundingBoxVertices();
    }
 
-   public void setVertices3D(Point3D[] vertices3D)
+   public Point2D[] getVertices2D()
    {
-      this.vertices3D = vertices3D;
-   }
-
-   public Point3D[] getVertices2D()
-   {
-      return vertices2D;
-   }
-
-   public void setVertices2D(Point3D[] vertices2D)
-   {
-      this.vertices2D = vertices2D;
+      return centerPoseDetection.getBoundingBoxVertices2D();
    }
 
    public String getObjectType()
    {
-      return objectType;
-   }
-
-   public void setObjectType(String objectType)
-   {
-      this.objectType = objectType;
+      return centerPoseDetection.getDetectedObjectName();
    }
 
    public double getConfidence()
    {
-      return confidence;
-   }
-
-   public void setConfidence(double confidence)
-   {
-      this.confidence = confidence;
+      return centerPoseDetection.getConfidence();
    }
 
    public boolean isEnableTracking()

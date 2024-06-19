@@ -18,6 +18,7 @@ import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
+import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -153,13 +154,8 @@ public class ROS2SceneGraphSubscription
          }
          if (localNode instanceof CenterposeNode centerposeNode)
          {
-            centerposeNode.setObjectID(subscriptionNode.getCenterposeNodeMessage().getObjectId());
-            centerposeNode.setConfidence(subscriptionNode.getCenterposeNodeMessage().getConfidence());
-            centerposeNode.setObjectType(subscriptionNode.getCenterposeNodeMessage().getObjectTypeAsString());
-            centerposeNode.setVertices3D(subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices());
-            centerposeNode.setVertices2D(subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices());
+            centerposeNode.updateDetection(CenterPoseInstantDetection.fromMessage(subscriptionNode.getCenterposeNodeMessage()));
             centerposeNode.setEnableTracking(subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
-            // TODO: FIXME TOMASZ PLEASE ADD INSTANT DETECTION UPDATE
          }
          if (localNode instanceof YOLOv8Node yoloNode)
          {

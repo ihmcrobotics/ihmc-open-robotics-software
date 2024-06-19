@@ -200,7 +200,7 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
       ImGui.checkbox(labels.get("Show bounding box"), showBoundingBox);
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Enable tracking"), enableTracking);
-      ImGui.text("ID: %d".formatted(centerposeNode.getObjectID()));
+      ImGui.text("ID: %s".formatted(centerposeNode.getDetection().getDetectedObjectClass()));
       ImGui.sameLine();
    }
 

@@ -122,9 +122,6 @@ public class ROS2SceneGraphPublisher
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.CENTERPOSE_NODE_TYPE);
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getCenterposeSceneNodes().size());
             CenterposeNodeMessage centerposeNodeMessage = sceneGraphMessage.getCenterposeSceneNodes().add();
-            centerposeNodeMessage.setObjectId(centerposeNode.getObjectID());
-            centerposeNodeMessage.setObjectType(centerposeNode.getObjectType());
-            centerposeNodeMessage.setConfidence(centerposeNode.getConfidence());
             for (int i = 0; i < centerposeNodeMessage.getBoundingBoxVertices().length; i++)
             {
                centerposeNodeMessage.getBoundingBoxVertices()[i].set(centerposeNode.getVertices3D()[i]);

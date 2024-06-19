@@ -7,6 +7,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
+import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -71,9 +72,7 @@ public class ROS2SceneGraphTools
       {
          sceneNode = new CenterposeNode(nodeID,
                                         nodeName,
-                                        subscriptionNode.getCenterposeNodeMessage().getObjectId(),
-                                        subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices(),
-                                        subscriptionNode.getCenterposeNodeMessage().getBoundingBox2dVertices(),
+                                        CenterPoseInstantDetection.fromMessage(subscriptionNode.getCenterposeNodeMessage()),
                                         subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
       }
       else if (nodeType == SceneGraphMessage.YOLO_NODE_TYPE)

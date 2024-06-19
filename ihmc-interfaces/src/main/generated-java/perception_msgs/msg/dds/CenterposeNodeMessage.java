@@ -17,22 +17,6 @@ public class CenterposeNodeMessage extends Packet<CenterposeNodeMessage> impleme
             */
    public perception_msgs.msg.dds.DetectableSceneNodeMessage detectable_scene_node_;
    /**
-            * Object ID
-            */
-   public int object_id_;
-   /**
-            * Position and Orientation of the object
-            */
-   public us.ihmc.euclid.geometry.Pose3D pose_;
-   /**
-            * How confident are we about what object it is. Mostly used to NN based detections
-            */
-   public double confidence_;
-   /**
-            * Object Category
-            */
-   public java.lang.StringBuilder object_type_;
-   /**
             * 2D Vertices of the 3d object bounding box projected onto image plane
             */
    public us.ihmc.euclid.tuple3D.Point3D[] bounding_box_2d_vertices_;
@@ -45,8 +29,6 @@ public class CenterposeNodeMessage extends Packet<CenterposeNodeMessage> impleme
    public CenterposeNodeMessage()
    {
       detectable_scene_node_ = new perception_msgs.msg.dds.DetectableSceneNodeMessage();
-      pose_ = new us.ihmc.euclid.geometry.Pose3D();
-      object_type_ = new java.lang.StringBuilder(255);
       bounding_box_2d_vertices_ = new us.ihmc.euclid.tuple3D.Point3D[8];
 
       for(int i1 = 0; i1 < bounding_box_2d_vertices_.length; ++i1)
@@ -70,14 +52,6 @@ public class CenterposeNodeMessage extends Packet<CenterposeNodeMessage> impleme
    public void set(CenterposeNodeMessage other)
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.staticCopy(other.detectable_scene_node_, detectable_scene_node_);
-      object_id_ = other.object_id_;
-
-      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_, pose_);
-      confidence_ = other.confidence_;
-
-      object_type_.setLength(0);
-      object_type_.append(other.object_type_);
-
       for(int i5 = 0; i5 < bounding_box_2d_vertices_.length; ++i5)
       {
             geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.bounding_box_2d_vertices_[i5], bounding_box_2d_vertices_[i5]);}
@@ -97,69 +71,6 @@ public class CenterposeNodeMessage extends Packet<CenterposeNodeMessage> impleme
    public perception_msgs.msg.dds.DetectableSceneNodeMessage getDetectableSceneNode()
    {
       return detectable_scene_node_;
-   }
-
-   /**
-            * Object ID
-            */
-   public void setObjectId(int object_id)
-   {
-      object_id_ = object_id;
-   }
-   /**
-            * Object ID
-            */
-   public int getObjectId()
-   {
-      return object_id_;
-   }
-
-
-   /**
-            * Position and Orientation of the object
-            */
-   public us.ihmc.euclid.geometry.Pose3D getPose()
-   {
-      return pose_;
-   }
-
-   /**
-            * How confident are we about what object it is. Mostly used to NN based detections
-            */
-   public void setConfidence(double confidence)
-   {
-      confidence_ = confidence;
-   }
-   /**
-            * How confident are we about what object it is. Mostly used to NN based detections
-            */
-   public double getConfidence()
-   {
-      return confidence_;
-   }
-
-   /**
-            * Object Category
-            */
-   public void setObjectType(java.lang.String object_type)
-   {
-      object_type_.setLength(0);
-      object_type_.append(object_type);
-   }
-
-   /**
-            * Object Category
-            */
-   public java.lang.String getObjectTypeAsString()
-   {
-      return getObjectType().toString();
-   }
-   /**
-            * Object Category
-            */
-   public java.lang.StringBuilder getObjectType()
-   {
-      return object_type_;
    }
 
 
@@ -208,13 +119,6 @@ public class CenterposeNodeMessage extends Packet<CenterposeNodeMessage> impleme
       if(other == this) return true;
 
       if (!this.detectable_scene_node_.epsilonEquals(other.detectable_scene_node_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.object_id_, other.object_id_, epsilon)) return false;
-
-      if (!this.pose_.epsilonEquals(other.pose_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.confidence_, other.confidence_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.object_type_, other.object_type_, epsilon)) return false;
-
       for(int i9 = 0; i9 < bounding_box_2d_vertices_.length; ++i9)
       {
               if (!this.bounding_box_2d_vertices_[i9].epsilonEquals(other.bounding_box_2d_vertices_[i9], epsilon)) return false;
@@ -241,13 +145,6 @@ public class CenterposeNodeMessage extends Packet<CenterposeNodeMessage> impleme
       CenterposeNodeMessage otherMyClass = (CenterposeNodeMessage) other;
 
       if (!this.detectable_scene_node_.equals(otherMyClass.detectable_scene_node_)) return false;
-      if(this.object_id_ != otherMyClass.object_id_) return false;
-
-      if (!this.pose_.equals(otherMyClass.pose_)) return false;
-      if(this.confidence_ != otherMyClass.confidence_) return false;
-
-      if (!us.ihmc.idl.IDLTools.equals(this.object_type_, otherMyClass.object_type_)) return false;
-
       for(int i13 = 0; i13 < bounding_box_2d_vertices_.length; ++i13)
       {
                 if (!this.bounding_box_2d_vertices_[i13].equals(otherMyClass.bounding_box_2d_vertices_[i13])) return false;
@@ -270,14 +167,6 @@ public class CenterposeNodeMessage extends Packet<CenterposeNodeMessage> impleme
       builder.append("CenterposeNodeMessage {");
       builder.append("detectable_scene_node=");
       builder.append(this.detectable_scene_node_);      builder.append(", ");
-      builder.append("object_id=");
-      builder.append(this.object_id_);      builder.append(", ");
-      builder.append("pose=");
-      builder.append(this.pose_);      builder.append(", ");
-      builder.append("confidence=");
-      builder.append(this.confidence_);      builder.append(", ");
-      builder.append("object_type=");
-      builder.append(this.object_type_);      builder.append(", ");
       builder.append("bounding_box_2d_vertices=");
       builder.append(java.util.Arrays.toString(this.bounding_box_2d_vertices_));      builder.append(", ");
       builder.append("bounding_box_vertices=");

@@ -10,6 +10,7 @@ import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
+import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
 import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
@@ -65,7 +66,6 @@ public class SceneGraph
    private transient final List<String> nodeNameList = new ArrayList<>();
    private transient final Map<String, SceneNode> namesToNodesMap = new HashMap<>();
    private transient final TIntObjectMap<ArUcoMarkerNode> arUcoMarkerIDToNodeMap = new TIntObjectHashMap<>();
-   private transient final TIntObjectMap<CenterposeNode> centerposeDetectedMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
    private transient final Map<PersistentDetection<? extends InstantDetection>, DetectableSceneNode> detectionToNodeMap = new HashMap<>();
 
@@ -140,7 +140,6 @@ public class SceneGraph
       }
       namesToNodesMap.clear();
       arUcoMarkerIDToNodeMap.clear();
-      centerposeDetectedMarkerIDToNodeMap.clear();
       sceneNodesByID.clear();
       updateCaches(rootNode);
    }
@@ -158,10 +157,6 @@ public class SceneGraph
       if (node instanceof ArUcoMarkerNode arUcoMarkerNode)
       {
          arUcoMarkerIDToNodeMap.put(arUcoMarkerNode.getMarkerID(), arUcoMarkerNode);
-      }
-      else if (node instanceof CenterposeNode centerposeNode)
-      {
-         centerposeDetectedMarkerIDToNodeMap.put(centerposeNode.getObjectID(), centerposeNode);
       }
 
       for (SceneNode child : node.getChildren())
@@ -246,11 +241,6 @@ public class SceneGraph
       return arUcoMarkerIDToNodeMap;
    }
 
-   public TIntObjectMap<CenterposeNode> getCenterposeDetectedMarkerIDToNodeMap()
-   {
-      return centerposeDetectedMarkerIDToNodeMap;
-   }
-
    public SortedSet<SceneNode> getSceneNodesByID()
    {
       return sceneNodesByID;
@@ -275,6 +265,8 @@ public class SceneGraph
       Class<?> detectionClass = detection.getInstantDetectionClass();
       if (detectionClass.equals(YOLOv8InstantDetection.class))
          detectableNode = new YOLOv8Node(newNodeID, newNodeName, (YOLOv8InstantDetection) detection.getMostRecentDetection());
+      else if (detectionClass.equals(CenterPoseInstantDetection.class))
+         detectableNode = new CenterposeNode(newNodeID, newNodeName, (CenterPoseInstantDetection) detection.getMostRecentDetection(), true);
       else
       {
          LogTools.error("Logic to handle detections of class {} has not been implemented", detectionClass);
