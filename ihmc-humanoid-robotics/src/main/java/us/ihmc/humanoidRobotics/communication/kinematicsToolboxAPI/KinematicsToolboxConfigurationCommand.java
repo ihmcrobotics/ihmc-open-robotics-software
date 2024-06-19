@@ -67,8 +67,10 @@ public class KinematicsToolboxConfigurationCommand implements Command<Kinematics
       enableSupportPolygonConstraint = other.enableSupportPolygonConstraint;
       disableSupportPolygonConstraint = other.disableSupportPolygonConstraint;
 
+      jointsToDeactivate.clear();
       for (int i = 0; i < other.jointsToDeactivate.size(); i++)
          jointsToDeactivate.add(other.jointsToDeactivate.get(i));
+      jointsToActivate.clear();
       for (int i = 0; i < other.jointsToActivate.size(); i++)
          jointsToActivate.add(other.jointsToActivate.get(i));
    }

@@ -164,6 +164,10 @@ public class InverseKinematicsOptimizationControlModule implements SCS2YoGraphic
       }
 
       DMatrixRMaj jointVelocities = qpSolver.getJointVelocities();
+      for (int i = 0; i < inactiveJointIndices.size(); i++)
+      { // Just to make sure the velocities are 0.0 for the inactive joints.
+         jointVelocities.set(inactiveJointIndices.get(i), 0.0);
+      }
       MomentumReadOnly centroidalMomentumSolution = motionQPInputCalculator.computeCentroidalMomentumFromSolution(jointVelocities);
       inverseKinematicsSolution.setJointVelocities(jointVelocities);
       if (computeJointTorques.getValue())
