@@ -40,12 +40,39 @@ public final class DoorNodeTools
                      doorNode.setOpeningMechanismTypeFromYoloClass(yoloNode.getDetectionClass());
                      modificationQueue.accept(new SceneGraphNodeAddition(doorNode, yoloNode));
 
+                     OpeningMechanismType openingMechanism = doorNode.getOpeningMechanismType();
+                     String visualModelPath = DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH;
+                     RigidBodyTransform yoloVisualModelTransform = new RigidBodyTransform();
+                     switch (openingMechanism)
+                     {
+                        case LEVER_HANDLE, UNKNOWN ->
+                        {
+                           visualModelPath = DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH;
+                           yoloVisualModelTransform.set(DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM);
+                        }
+                        case KNOB ->
+                        {
+                           visualModelPath = DOOR_KNOB_VISUAL_MODEL_FILE_PATH;
+                           yoloVisualModelTransform.set(DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM);
+                        }
+                        case PUSH_BAR ->
+                        {
+                           visualModelPath = DOOR_EMERGENCY_BAR_VISUAL_MODEL_FILE_PATH;
+                           yoloVisualModelTransform.set(DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM);
+                        }
+                        case PULL_HANDLE ->
+                        {
+                           visualModelPath = DOOR_PULL_HANDLE_VISUAL_MODEL_FILE_PATH;
+                           yoloVisualModelTransform.set(DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM);
+                        }
+                     }
+
                      SceneNode doorStaticNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
                                                                             "doorStaticHandle",
                                                                             sceneGraph.getIDToNodeMap(),
                                                                             doorNode.getID(),
                                                                             new RigidBodyTransform(),
-                                                                            DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
+                                                                            visualModelPath,
                                                                             DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM,
                                                                             DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN);
                      LogTools.info("Adding doorStaticHandle to scene graph.");
