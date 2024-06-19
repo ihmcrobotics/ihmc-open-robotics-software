@@ -123,7 +123,8 @@ public class RDXLocomotionManager
       footstepPlanning = new RDXFootstepPlanning(robotModel,
                                                  syncedRobot,
                                                  controllerStatusTracker,
-                                                 locomotionParameters, footstepPlannerParametersToUse,
+                                                 locomotionParameters,
+                                                 footstepPlannerParametersToUse,
                                                  bodyPathPlannerParameters,
                                                  swingFootPlannerParameters);
       interactableFootstepPlan = new RDXInteractableFootstepPlan(controllerStatusTracker);
