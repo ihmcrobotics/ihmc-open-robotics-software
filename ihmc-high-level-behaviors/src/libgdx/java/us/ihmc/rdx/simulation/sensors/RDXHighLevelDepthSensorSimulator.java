@@ -25,6 +25,7 @@ import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
+import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.Time;
@@ -44,6 +45,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.camera.CameraIntrinsics;
 import us.ihmc.perception.elements.DiscretizedColoredPointCloud;
 import us.ihmc.perception.opencl.OpenCLFloatBuffer;
@@ -799,6 +801,53 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       }
 
       return pointCloud;
+   }
+
+   public RawImage createRawColorImageBGR()
+   {
+      GpuMat colorGpuMat = new GpuMat();
+
+      // TODO
+
+      CameraIntrinsics intrinsics = depthSensorSimulator.getCameraIntrinsics();
+      return new RawImage(depthSensorSimulator.getSequenceNumber(),
+                          Instant.now(),
+                          intrinsics.getWidth(),
+                          intrinsics.getHeight(),
+                          0.0f,
+                          null,
+                          colorGpuMat,
+                          opencv_core.CV_8UC3, // BGR
+                          (float) intrinsics.getFx(),
+                          (float) intrinsics.getFy(),
+                          (float) intrinsics.getCx(),
+                          (float) intrinsics.getCy(),
+                          sensorPose.getPosition(),
+                          sensorPose.getOrientation());
+   }
+
+   public RawImage createRawDepthImageDiscretized()
+   {
+      float discretization = 0.001f;
+      GpuMat depthGpuMat = new GpuMat();
+
+      // TODO
+
+      CameraIntrinsics intrinsics = depthSensorSimulator.getCameraIntrinsics();
+      return new RawImage(depthSensorSimulator.getSequenceNumber(),
+                          Instant.now(),
+                          intrinsics.getWidth(),
+                          intrinsics.getHeight(),
+                          0.0f,
+                          null,
+                          depthGpuMat,
+                          opencv_core.CV_16UC1,
+                          (float) intrinsics.getFx(),
+                          (float) intrinsics.getFy(),
+                          (float) intrinsics.getCx(),
+                          (float) intrinsics.getCy(),
+                          sensorPose.getPosition(),
+                          sensorPose.getOrientation());
    }
 
    public void dispose()
