@@ -18,7 +18,7 @@ import us.ihmc.rdx.tools.RDXModelLoader;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.affordances.RDXInteractableTools;
 import us.ihmc.rdx.ui.graphics.RDXFootstepGraphic;
-import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
+import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.rdx.vr.RDXVRControllerModel;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -42,7 +42,7 @@ public class RDXVRHandPlacedFootstepMode
    private DRCRobotModel robotModel;
    private ROS2ControllerHelper controllerHelper;
    private long sequenceId = (UUID.randomUUID().getLeastSignificantBits() % Integer.MAX_VALUE) + Integer.MAX_VALUE;
-   private RDXLocomotionParameters locomotionParameters;
+   private LocomotionParameters locomotionParameters;
    private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
 
    public void create(DRCRobotModel robotModel, ROS2ControllerHelper controllerHelper)
@@ -72,7 +72,7 @@ public class RDXVRHandPlacedFootstepMode
       }
    }
 
-   public void setLocomotionParameters(RDXLocomotionParameters locomotionParameters)
+   public void setLocomotionParameters(LocomotionParameters locomotionParameters)
    {
       this.locomotionParameters = locomotionParameters;
    }

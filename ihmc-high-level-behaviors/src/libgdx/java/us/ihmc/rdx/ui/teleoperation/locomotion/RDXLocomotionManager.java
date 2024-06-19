@@ -18,6 +18,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
+import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiSliderDouble;
 import us.ihmc.rdx.imgui.ImGuiTools;
@@ -47,7 +48,7 @@ public class RDXLocomotionManager
    private final DRCRobotModel robotModel;
    private final ROS2SyncedRobotModel syncedRobot;
    private final CommunicationHelper communicationHelper;
-   private final RDXLocomotionParameters locomotionParameters;
+   private final LocomotionParameters locomotionParameters;
    private final DefaultFootstepPlannerParametersBasics aStarFootstepPlannerParameters;
    private final DefaultFootstepPlannerParametersBasics footstepPlannerParametersToUse = new DefaultFootstepPlannerParameters();
    private final AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters;
@@ -109,8 +110,7 @@ public class RDXLocomotionManager
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;
 
-      locomotionParameters = new RDXLocomotionParameters(robotModel.getSimpleRobotName());
-      locomotionParameters.load();
+      locomotionParameters = robotModel.getLocomotionParameters();
       aStarFootstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       bodyPathPlannerParameters = robotModel.getAStarBodyPathPlannerParameters();
       swingFootPlannerParameters = robotModel.getSwingPlannerParameters();
@@ -147,17 +147,17 @@ public class RDXLocomotionManager
       bodyPathPlanningParametersTuner.create(bodyPathPlannerParameters, false);
       swingFootPlanningParametersTuner.create(swingFootPlannerParameters, false);
 
-      assumeFlatGroundCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.assumeFlatGround);
-      performAStarSearchCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.performAStarSearch);
-      areFootstepsAdjustableCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.areFootstepsAdjustable);
-      planSwingTrajectoriesCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.planSwingTrajectories);
-      replanSwingTrajectoriesOnChangeCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.replanSwingTrajectoriesOnChange);
-      swingTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.swingTime, "s", 0.3, 1.5, "%.2f");
-      transferTimeSlider = locomotionParametersTuner.createDoubleSlider(RDXLocomotionParameters.transferTime, "s", 0.1, 1.5, "%.2f");
+      assumeFlatGroundCheckbox = locomotionParametersTuner.createBooleanCheckbox(LocomotionParameters.assumeFlatGround);
+      performAStarSearchCheckbox = locomotionParametersTuner.createBooleanCheckbox(LocomotionParameters.performAStarSearch);
+      areFootstepsAdjustableCheckbox = locomotionParametersTuner.createBooleanCheckbox(LocomotionParameters.areFootstepsAdjustable);
+      planSwingTrajectoriesCheckbox = locomotionParametersTuner.createBooleanCheckbox(LocomotionParameters.planSwingTrajectories);
+      replanSwingTrajectoriesOnChangeCheckbox = locomotionParametersTuner.createBooleanCheckbox(LocomotionParameters.replanSwingTrajectoriesOnChange);
+      swingTimeSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.swingTime, "s", 0.3, 1.5, "%.2f");
+      transferTimeSlider = locomotionParametersTuner.createDoubleSlider(LocomotionParameters.transferTime, "s", 0.1, 1.5, "%.2f");
       stepAggressivenessSlider = new ImGuiSliderDouble("Step Aggressiveness", "%.2f",aStarFootstepPlannerParameters.getIdealFootstepLength()
                                                                                      / aStarFootstepPlannerParameters.getMaxStepReach());
       turnAggressivenessSlider = new ImGuiSliderDouble("Turn Aggressiveness", "%.2f", 0.5);
-      initialStanceSideRadioButtons = locomotionParametersTuner.createEnumRadioButtons(RDXLocomotionParameters.initialStanceSide, InitialStanceSide.values());
+      initialStanceSideRadioButtons = locomotionParametersTuner.createEnumRadioButtons(LocomotionParameters.initialStanceSide, InitialStanceSide.values());
 
       ballAndArrowMidFeetPosePlacement.create(Color.YELLOW, syncedRobot);
       baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(ballAndArrowMidFeetPosePlacement::processImGui3DViewInput);
@@ -527,7 +527,7 @@ public class RDXLocomotionManager
       interactableFootstepPlan.setHeightMapMessage(heightMapData);
    }
 
-   public RDXLocomotionParameters getLocomotionParameters()
+   public LocomotionParameters getLocomotionParameters()
    {
       return locomotionParameters;
    }
