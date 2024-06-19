@@ -64,6 +64,7 @@ public class RDXLocomotionManager
    private final RDXStoredPropertySetTuner swingFootPlanningParametersTuner = new RDXStoredPropertySetTuner("Swing Foot Planning Parameters (Teleoperation)");
    private ImGuiStoredPropertySetBooleanWidget areFootstepsAdjustableCheckbox;
    private ImGuiStoredPropertySetBooleanWidget assumeFlatGroundCheckbox;
+   private ImGuiStoredPropertySetBooleanWidget performAStarSearchCheckbox;
    private ImGuiStoredPropertySetBooleanWidget planSwingTrajectoriesCheckbox;
    private ImGuiStoredPropertySetBooleanWidget replanSwingTrajectoriesOnChangeCheckbox;
    private ImGuiStoredPropertySetDoubleWidget swingTimeSlider;
@@ -147,6 +148,7 @@ public class RDXLocomotionManager
       swingFootPlanningParametersTuner.create(swingFootPlannerParameters, false);
 
       assumeFlatGroundCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.assumeFlatGround);
+      performAStarSearchCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.performAStarSearch);
       areFootstepsAdjustableCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.areFootstepsAdjustable);
       planSwingTrajectoriesCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.planSwingTrajectories);
       replanSwingTrajectoriesOnChangeCheckbox = locomotionParametersTuner.createBooleanCheckbox(RDXLocomotionParameters.replanSwingTrajectoriesOnChange);
@@ -356,6 +358,7 @@ public class RDXLocomotionManager
       {
          ImGui.indent();
          assumeFlatGroundCheckbox.renderImGuiWidget();
+         performAStarSearchCheckbox.renderImGuiWidget();
          areFootstepsAdjustableCheckbox.renderImGuiWidget();
          planSwingTrajectoriesCheckbox.renderImGuiWidget();
          replanSwingTrajectoriesOnChangeCheckbox.renderImGuiWidget();
