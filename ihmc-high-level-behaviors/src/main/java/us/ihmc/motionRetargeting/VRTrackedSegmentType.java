@@ -11,7 +11,7 @@ public enum VRTrackedSegmentType
    LEFT_WRIST("Left Wrist", RobotSide.LEFT, 0.0, 1.0),
    RIGHT_WRIST("Right Wrist", RobotSide.RIGHT, 0.0, 1.0),
    CHEST("Chest", null, 0.0, 10.0),
-   WAIST("Waist", null, 0.0, 10.0, 50.0, 10.0, 10.0),
+   WAIST("Waist", null, 0.0, 10.0, 50.0, 50.0, 10.0),
    LEFT_ANKLE("Left Ankle", RobotSide.LEFT, 0.0, 0.0),
    RIGHT_ANKLE("Right Ankle", RobotSide.RIGHT, 0.0, 0.0);
 

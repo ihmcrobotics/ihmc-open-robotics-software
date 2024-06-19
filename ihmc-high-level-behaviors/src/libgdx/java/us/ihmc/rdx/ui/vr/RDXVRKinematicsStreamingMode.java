@@ -299,6 +299,23 @@ public class RDXVRKinematicsStreamingMode
             wakeUpToolbox();
 
          gripButtonsValue.put(RobotSide.LEFT, controller.getGripActionData().x());
+
+         InputDigitalActionData leftJoystickButton = controller.getJoystickPressActionData();
+         if (leftJoystickButton.bChanged() && !leftJoystickButton.bState())
+         { // reinitialize toolbox
+            LogTools.warn("Reinitializing toolbox. Forcing intial IK configuration to current robot configuration");
+            if (enabled.get())
+            {
+               sleepToolbox();
+               // Update initial configuration of KST
+               KinematicsToolboxInitialConfigurationMessage initialConfigMessage = KinematicsToolboxMessageFactory.initialConfigurationFromFullRobotModel(
+                       syncedRobot.getFullRobotModel());
+               ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel()
+                       .getSimpleRobotName()), initialConfigMessage);
+               wakeUpToolbox();
+               reinitializeToolbox();
+            }
+         }
       });
 
       vrContext.getController(RobotSide.RIGHT).runIfConnected(controller ->
@@ -759,15 +776,15 @@ public class RDXVRKinematicsStreamingMode
    {
       if (enabled)
       {
-        // Update initial configuration of KST
-         KinematicsToolboxInitialConfigurationMessage initialConfigMessage = KinematicsToolboxMessageFactory.initialConfigurationFromFullRobotModel(
-               syncedRobot.getFullRobotModel());
-         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel()
-                                                                                                                             .getSimpleRobotName()), initialConfigMessage);
          if (!this.enabled.get())
             wakeUpToolbox();
          else
          {
+            // Update initial configuration of KST
+            KinematicsToolboxInitialConfigurationMessage initialConfigMessage = KinematicsToolboxMessageFactory.initialConfigurationFromFullRobotModel(
+                    syncedRobot.getFullRobotModel());
+            ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel()
+                    .getSimpleRobotName()), initialConfigMessage);
             wakeUpToolbox();
             reinitializeToolbox();
          }
