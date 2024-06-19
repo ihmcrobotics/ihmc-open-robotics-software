@@ -109,6 +109,8 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
    private final int imageHeight;
    private final RDXPointCloudRenderer pointCloudRenderer = new RDXPointCloudRenderer();
    private final Mat rgba8Mat;
+   private final Mat bgr8Mat;
+   private final Mat depthDiscretizedMat;
 
    int depthSequenceNumber = 0;
    int colorSequenceNumber = 0;
@@ -239,6 +241,8 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
 
       rgba8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, new BytePointer(depthSensorSimulator.getColorRGBA8Buffer()));
       rgb8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3, new BytePointer(depthSensorSimulator.getColorRGBA8Buffer()));
+      bgr8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3);
+      depthDiscretizedMat = new Mat(imageHeight, imageWidth, opencv_core.CV_16UC1);
 
       publishImagesThread = new Thread(() ->
       {
@@ -805,11 +809,13 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
 
    public RawImage createRawColorImageBGR()
    {
-      GpuMat colorGpuMat = new GpuMat();
-
-      // TODO
-
       CameraIntrinsics intrinsics = depthSensorSimulator.getCameraIntrinsics();
+
+      opencv_imgproc.cvtColor(rgba8Mat, bgr8Mat, opencv_imgproc.COLOR_RGBA2BGR);
+
+      GpuMat colorGpuMat = new GpuMat(intrinsics.getHeight(), intrinsics.getWidth(), opencv_core.CV_8UC3);
+      colorGpuMat.upload(bgr8Mat);
+
       return new RawImage(depthSensorSimulator.getSequenceNumber(),
                           Instant.now(),
                           intrinsics.getWidth(),
@@ -828,17 +834,19 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
 
    public RawImage createRawDepthImageDiscretized()
    {
-      float discretization = 0.001f;
-      GpuMat depthGpuMat = new GpuMat();
-
-      // TODO
-
       CameraIntrinsics intrinsics = depthSensorSimulator.getCameraIntrinsics();
+
+      float discretization = 0.001f;
+      OpenCVTools.convertFloatToShort(depthSensorSimulator.getMetersDepthOpenCVMat(), depthDiscretizedMat, 1.0f / discretization, 0.0);
+
+      GpuMat depthGpuMat = new GpuMat(intrinsics.getHeight(), intrinsics.getWidth(), opencv_core.CV_16UC1);
+      depthGpuMat.upload(depthDiscretizedMat);
+
       return new RawImage(depthSensorSimulator.getSequenceNumber(),
                           Instant.now(),
                           intrinsics.getWidth(),
                           intrinsics.getHeight(),
-                          0.0f,
+                          discretization,
                           null,
                           depthGpuMat,
                           opencv_core.CV_16UC1,
