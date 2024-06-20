@@ -24,3 +24,8 @@ ihmc_common_msgs/SelectionMatrix3DMessage selection_matrix
 # If no frame is provided, the weight matrix will be applied in the center of mass frame which is
 # aligned with the world axes.
 ihmc_common_msgs/WeightMatrix3DMessage weights
+
+# Constraint on the linear velocity for tracking this input.
+# A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+# Set to <= 0.0 to use the default value.
+float64 linear_rate_limitation -1.0

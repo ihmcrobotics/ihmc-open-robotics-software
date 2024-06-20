@@ -17,6 +17,8 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
    private final WeightMatrix3D weightMatrix = new WeightMatrix3D();
 
+   private double linearRateLimitation;
+
    @Override
    public void clear()
    {
@@ -26,6 +28,7 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
       desiredVelocity.setToNaN(ReferenceFrame.getWorldFrame());
       selectionMatrix.resetSelection();
       weightMatrix.clear();
+      linearRateLimitation = -1.0;
    }
 
    @Override
@@ -37,6 +40,7 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
       desiredVelocity.setIncludingFrame(other.desiredVelocity);
       selectionMatrix.set(other.selectionMatrix);
       weightMatrix.set(other.weightMatrix);
+      linearRateLimitation = other.linearRateLimitation;
    }
 
    @Override
@@ -58,6 +62,7 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
       selectionMatrix.selectZAxis(message.getSelectionMatrix().getZSelected());
       weightMatrix.clear();
       weightMatrix.setWeights(message.getWeights().getXWeight(), message.getWeights().getYWeight(), message.getWeights().getZWeight());
+      linearRateLimitation = message.getLinearRateLimitation();
    }
 
    public void setHasDesiredVelocity(boolean hasDesiredVelocity)
@@ -88,6 +93,11 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
    public FrameVector3D getDesiredVelocity()
    {
       return desiredVelocity;
+   }
+
+   public double getLinearRateLimitation()
+   {
+      return linearRateLimitation;
    }
 
    @Override

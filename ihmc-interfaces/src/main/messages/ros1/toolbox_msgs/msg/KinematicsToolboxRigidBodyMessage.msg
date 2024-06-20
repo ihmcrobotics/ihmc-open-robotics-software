@@ -67,4 +67,16 @@ ihmc_common_msgs/WeightMatrix3DMessage angular_weight_matrix
 # Weight matrix used to define the priority of controlling the translation around each axis on the solver side.
 ihmc_common_msgs/WeightMatrix3DMessage linear_weight_matrix
 
+# Constraint on the linear velocity for tracking this input.
+# A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+# Set to <= 0.0 to use the default value.
+# Field default value -1.0
+float64 linear_rate_limitation
+
+# Constraint on the angular velocity for tracking this input.
+# A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+# Set to <= 0.0 to use the default value.
+# Field default value -1.0
+float64 angular_rate_limitation
+
 

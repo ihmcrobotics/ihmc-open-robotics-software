@@ -539,8 +539,24 @@ public class KSTStreamingState implements State
                filteredInputs.removeInput(i);
          }
 
+         if (latestInput.getAngularRateLimitation() > 0.0)
+            angularRateLimit.set(latestInput.getAngularRateLimitation());
+         else
+            angularRateLimit.set(defaultAngularRateLimit.getValue());
+         if (latestInput.getLinearRateLimitation() > 0.0)
+            linearRateLimit.set(latestInput.getLinearRateLimitation());
+         else
+            linearRateLimit.set(defaultLinearRateLimit.getValue());
+
          for (KSTInputStateEstimator inputStateEstimator : inputStateEstimators)
-            inputStateEstimator.update(tools.getTime(), tools.hasNewInputCommand(), filteredInputs, tools.getPreviousInput());
+         {
+            inputStateEstimator.update(tools.getTime(),
+                                       tools.hasNewInputCommand(),
+                                       linearRateLimit.getValue(),
+                                       angularRateLimit.getValue(),
+                                       filteredInputs,
+                                       tools.getPreviousInput());
+         }
 
          /////////////////////////////////////////////////////////////////////////
          ///// We are now ready to submit the commands to the IK controller. /////
@@ -588,15 +604,6 @@ public class KSTStreamingState implements State
                ikCommandInputManager.submitMessages(defaultArmJointMessages.get(robotSide));
             }
          }
-
-         if (latestInput.getAngularRateLimitation() > 0.0)
-            angularRateLimit.set(latestInput.getAngularRateLimitation());
-         else
-            angularRateLimit.set(defaultAngularRateLimit.getValue());
-         if (latestInput.getLinearRateLimitation() > 0.0)
-            linearRateLimit.set(latestInput.getLinearRateLimitation());
-         else
-            linearRateLimit.set(defaultLinearRateLimit.getValue());
 
          if (tools.hasPreviousInput())
          {

@@ -20,6 +20,8 @@ public interface KSTInputStateEstimator
 
    void update(double time,
                boolean isNewInput,
+               double defaultLinearRateLimitation,
+               double defaultAngularRateLimitation,
                KinematicsStreamingToolboxInputCommand latestInputCommand,
                KinematicsStreamingToolboxInputCommand previousRawInputCommand);
 

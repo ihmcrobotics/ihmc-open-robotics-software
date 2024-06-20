@@ -57,6 +57,8 @@ public class KinematicsToolboxHelper
                                           CenterOfMassFeedbackControlCommand feedbackControlCommandToPack)
    {
       feedbackControlCommandToPack.setGains(gains);
+      if (command.getLinearRateLimitation() > 0.0)
+         feedbackControlCommandToPack.getGains().setMaxFeedbackAndFeedbackRate(command.getLinearRateLimitation(), gains.getMaximumFeedbackRate());
       feedbackControlCommandToPack.setWeightsForSolver(command.getWeightMatrix());
       feedbackControlCommandToPack.setSelectionMatrix(command.getSelectionMatrix());
       feedbackControlCommandToPack.setInverseKinematics(command.getDesiredPosition(), command.getDesiredVelocity());
@@ -85,6 +87,16 @@ public class KinematicsToolboxHelper
    {
       feedbackControlCommandToPack.set(base, command.getEndEffector());
       feedbackControlCommandToPack.setGains(gains);
+      if (command.getLinearRateLimitation() > 0.0)
+      {
+         PID3DGains positionGains = feedbackControlCommandToPack.getGains().getPositionGains();
+         positionGains.setMaxFeedbackAndFeedbackRate(command.getLinearRateLimitation(), positionGains.getMaximumFeedbackRate());
+      }
+      if (command.getAngularRateLimitation() > 0.0)
+      {
+         PID3DGains orientationGains = feedbackControlCommandToPack.getGains().getOrientationGains();
+         orientationGains.setMaxFeedbackAndFeedbackRate(command.getLinearRateLimitation(), orientationGains.getMaximumFeedbackRate());
+      }
       feedbackControlCommandToPack.setWeightMatrixForSolver(command.getWeightMatrix());
       feedbackControlCommandToPack.setSelectionMatrix(command.getSelectionMatrix());
       feedbackControlCommandToPack.setInverseKinematics(command.getDesiredPose(), command.getDesiredVelocity());

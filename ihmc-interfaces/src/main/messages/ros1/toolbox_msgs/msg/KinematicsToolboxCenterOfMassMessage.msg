@@ -29,4 +29,10 @@ ihmc_common_msgs/SelectionMatrix3DMessage selection_matrix
 # aligned with the world axes.
 ihmc_common_msgs/WeightMatrix3DMessage weights
 
+# Constraint on the linear velocity for tracking this input.
+# A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+# Set to <= 0.0 to use the default value.
+# Field default value -1.0
+float64 linear_rate_limitation
+
 

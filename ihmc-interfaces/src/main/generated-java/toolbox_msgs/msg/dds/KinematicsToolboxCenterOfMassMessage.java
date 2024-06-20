@@ -46,6 +46,12 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
             * aligned with the world axes.
             */
    public ihmc_common_msgs.msg.dds.WeightMatrix3DMessage weights_;
+   /**
+            * Constraint on the linear velocity for tracking this input.
+            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+            * Set to <= 0.0 to use the default value.
+            */
+   public double linear_rate_limitation_ = -1.0;
 
    public KinematicsToolboxCenterOfMassMessage()
    {
@@ -71,6 +77,8 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       geometry_msgs.msg.dds.Vector3PubSubType.staticCopy(other.desired_linear_velocity_in_world_, desired_linear_velocity_in_world_);
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.selection_matrix_, selection_matrix_);
       ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.staticCopy(other.weights_, weights_);
+      linear_rate_limitation_ = other.linear_rate_limitation_;
+
    }
 
    /**
@@ -149,6 +157,25 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       return weights_;
    }
 
+   /**
+            * Constraint on the linear velocity for tracking this input.
+            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+            * Set to <= 0.0 to use the default value.
+            */
+   public void setLinearRateLimitation(double linear_rate_limitation)
+   {
+      linear_rate_limitation_ = linear_rate_limitation;
+   }
+   /**
+            * Constraint on the linear velocity for tracking this input.
+            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+            * Set to <= 0.0 to use the default value.
+            */
+   public double getLinearRateLimitation()
+   {
+      return linear_rate_limitation_;
+   }
+
 
    public static Supplier<KinematicsToolboxCenterOfMassMessagePubSubType> getPubSubType()
    {
@@ -175,6 +202,8 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       if (!this.desired_linear_velocity_in_world_.epsilonEquals(other.desired_linear_velocity_in_world_, epsilon)) return false;
       if (!this.selection_matrix_.epsilonEquals(other.selection_matrix_, epsilon)) return false;
       if (!this.weights_.epsilonEquals(other.weights_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.linear_rate_limitation_, other.linear_rate_limitation_, epsilon)) return false;
+
 
       return true;
    }
@@ -196,6 +225,8 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       if (!this.desired_linear_velocity_in_world_.equals(otherMyClass.desired_linear_velocity_in_world_)) return false;
       if (!this.selection_matrix_.equals(otherMyClass.selection_matrix_)) return false;
       if (!this.weights_.equals(otherMyClass.weights_)) return false;
+      if(this.linear_rate_limitation_ != otherMyClass.linear_rate_limitation_) return false;
+
 
       return true;
    }
@@ -217,7 +248,9 @@ public class KinematicsToolboxCenterOfMassMessage extends Packet<KinematicsToolb
       builder.append("selection_matrix=");
       builder.append(this.selection_matrix_);      builder.append(", ");
       builder.append("weights=");
-      builder.append(this.weights_);
+      builder.append(this.weights_);      builder.append(", ");
+      builder.append("linear_rate_limitation=");
+      builder.append(this.linear_rate_limitation_);
       builder.append("}");
       return builder.toString();
    }

@@ -33,6 +33,7 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
    private final FramePose3D controlFramePose = new FramePose3D();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
    private final WeightMatrix6D weightMatrix = new WeightMatrix6D();
+   private double linearRateLimitation, angularRateLimitation;
 
    @Override
    public void clear()
@@ -46,6 +47,8 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       selectionMatrix.resetSelection();
       weightMatrix.clear();
       hasDesiredVelocity = false;
+      linearRateLimitation = -1.0;
+      angularRateLimitation = -1.0;
    }
 
    @Override
@@ -61,6 +64,8 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
       weightMatrix.set(other.weightMatrix);
 
       hasDesiredVelocity = other.hasDesiredVelocity;
+      linearRateLimitation = other.linearRateLimitation;
+      angularRateLimitation = other.angularRateLimitation;
    }
 
    @Override
@@ -104,6 +109,9 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
 
       hasDesiredVelocity = message.getHasDesiredAngularVelocity() && message.getHasDesiredLinearVelocity();
       desiredVelocity.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getDesiredAngularVelocityInWorld(), message.getDesiredLinearVelocityInWorld());
+
+      linearRateLimitation = message.getLinearRateLimitation();
+      angularRateLimitation = message.getAngularRateLimitation();
    }
 
    public void setEndEffector(RigidBodyBasics endEffector)
@@ -149,6 +157,16 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
    public boolean getHasDesiredVelocity()
    {
       return hasDesiredVelocity;
+   }
+
+   public double getLinearRateLimitation()
+   {
+      return linearRateLimitation;
+   }
+
+   public double getAngularRateLimitation()
+   {
+      return angularRateLimitation;
    }
 
    @Override

@@ -77,12 +77,16 @@ public class KSTInputFirstOrderStateEstimator implements KSTInputStateEstimator
     * </p>
     *
     * @param time
-    * @param isNewInput         whether the input command is new or not.
-    * @param latestInputCommand the latest input command. Modified when {@code isNewInput} is {@code false}.
+    * @param isNewInput                   whether the input command is new or not.
+    * @param defaultLinearRateLimitation  default limit to use for the linear velocity.
+    * @param defaultAngularRateLimitation default limit to use for the angular velocity.
+    * @param latestInputCommand           the latest input command. Modified when {@code isNewInput} is {@code false}.
     */
    @Override
    public void update(double time,
                       boolean isNewInput,
+                      double defaultLinearRateLimitation,
+                      double defaultAngularRateLimitation,
                       KinematicsStreamingToolboxInputCommand latestInputCommand,
                       KinematicsStreamingToolboxInputCommand previousRawInputCommand)
    {

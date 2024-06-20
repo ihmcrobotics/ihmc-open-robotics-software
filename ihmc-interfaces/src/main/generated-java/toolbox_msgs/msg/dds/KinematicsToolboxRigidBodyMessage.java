@@ -92,6 +92,18 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
             * Weight matrix used to define the priority of controlling the translation around each axis on the solver side.
             */
    public ihmc_common_msgs.msg.dds.WeightMatrix3DMessage linear_weight_matrix_;
+   /**
+            * Constraint on the linear velocity for tracking this input.
+            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+            * Set to <= 0.0 to use the default value.
+            */
+   public double linear_rate_limitation_ = -1.0;
+   /**
+            * Constraint on the angular velocity for tracking this input.
+            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+            * Set to <= 0.0 to use the default value.
+            */
+   public double angular_rate_limitation_ = -1.0;
 
    public KinematicsToolboxRigidBodyMessage()
    {
@@ -133,6 +145,10 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       ihmc_common_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.staticCopy(other.linear_selection_matrix_, linear_selection_matrix_);
       ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.staticCopy(other.angular_weight_matrix_, angular_weight_matrix_);
       ihmc_common_msgs.msg.dds.WeightMatrix3DMessagePubSubType.staticCopy(other.linear_weight_matrix_, linear_weight_matrix_);
+      linear_rate_limitation_ = other.linear_rate_limitation_;
+
+      angular_rate_limitation_ = other.angular_rate_limitation_;
+
    }
 
    /**
@@ -310,6 +326,44 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       return linear_weight_matrix_;
    }
 
+   /**
+            * Constraint on the linear velocity for tracking this input.
+            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+            * Set to <= 0.0 to use the default value.
+            */
+   public void setLinearRateLimitation(double linear_rate_limitation)
+   {
+      linear_rate_limitation_ = linear_rate_limitation;
+   }
+   /**
+            * Constraint on the linear velocity for tracking this input.
+            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+            * Set to <= 0.0 to use the default value.
+            */
+   public double getLinearRateLimitation()
+   {
+      return linear_rate_limitation_;
+   }
+
+   /**
+            * Constraint on the angular velocity for tracking this input.
+            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+            * Set to <= 0.0 to use the default value.
+            */
+   public void setAngularRateLimitation(double angular_rate_limitation)
+   {
+      angular_rate_limitation_ = angular_rate_limitation;
+   }
+   /**
+            * Constraint on the angular velocity for tracking this input.
+            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+            * Set to <= 0.0 to use the default value.
+            */
+   public double getAngularRateLimitation()
+   {
+      return angular_rate_limitation_;
+   }
+
 
    public static Supplier<KinematicsToolboxRigidBodyMessagePubSubType> getPubSubType()
    {
@@ -346,6 +400,10 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       if (!this.linear_selection_matrix_.epsilonEquals(other.linear_selection_matrix_, epsilon)) return false;
       if (!this.angular_weight_matrix_.epsilonEquals(other.angular_weight_matrix_, epsilon)) return false;
       if (!this.linear_weight_matrix_.epsilonEquals(other.linear_weight_matrix_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.linear_rate_limitation_, other.linear_rate_limitation_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.angular_rate_limitation_, other.angular_rate_limitation_, epsilon)) return false;
+
 
       return true;
    }
@@ -377,6 +435,10 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       if (!this.linear_selection_matrix_.equals(otherMyClass.linear_selection_matrix_)) return false;
       if (!this.angular_weight_matrix_.equals(otherMyClass.angular_weight_matrix_)) return false;
       if (!this.linear_weight_matrix_.equals(otherMyClass.linear_weight_matrix_)) return false;
+      if(this.linear_rate_limitation_ != otherMyClass.linear_rate_limitation_) return false;
+
+      if(this.angular_rate_limitation_ != otherMyClass.angular_rate_limitation_) return false;
+
 
       return true;
    }
@@ -414,7 +476,11 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
       builder.append("angular_weight_matrix=");
       builder.append(this.angular_weight_matrix_);      builder.append(", ");
       builder.append("linear_weight_matrix=");
-      builder.append(this.linear_weight_matrix_);
+      builder.append(this.linear_weight_matrix_);      builder.append(", ");
+      builder.append("linear_rate_limitation=");
+      builder.append(this.linear_rate_limitation_);      builder.append(", ");
+      builder.append("angular_rate_limitation=");
+      builder.append(this.angular_rate_limitation_);
       builder.append("}");
       return builder.toString();
    }
