@@ -82,8 +82,6 @@ import java.util.function.Supplier;
  *    in the {@code main} method. When launching only one sensor, comment out the other sensor heartbeats in the
  *    {@code forceEnableAllSensors} method.
  * </p>
- *
- * TODO: Add HumanoidPerceptionModule, add depth image overlap removal.
  */
 public class PerceptionAndAutonomyProcess
 {
