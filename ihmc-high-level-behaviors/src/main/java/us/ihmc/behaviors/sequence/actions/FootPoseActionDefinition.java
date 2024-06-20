@@ -45,6 +45,7 @@ public class FootPoseActionDefinition extends ActionNodeDefinition implements Si
       jsonNode.put("side", side.getValue().getLowerCaseName());
       jsonNode.put("trajectoryDuration", trajectoryDuration.getValue());
       jsonNode.put("parentFrame", parentFrameName.getValue());
+      JSONTools.toJSON(jsonNode, footToParentTransform.getValueReadOnly());
    }
 
    @Override

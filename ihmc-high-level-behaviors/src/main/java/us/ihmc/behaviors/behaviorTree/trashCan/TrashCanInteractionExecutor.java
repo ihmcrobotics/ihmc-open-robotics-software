@@ -5,6 +5,7 @@ import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
@@ -79,15 +80,22 @@ public class TrashCanInteractionExecutor extends BehaviorTreeNodeExecutor<TrashC
          }
 
          // skip action if not related to the selected stance
-         if ( (state.getApproachingLeftAction().getIsExecuting() && state.getStance().getValue() != InteractionStance.LEFT) ||
-              (state.getApproachingFrontAction().getIsExecuting() && state.getStance().getValue() != InteractionStance.FRONT) ||
-              (state.getApproachingRightAction().getIsExecuting() && state.getStance().getValue() != InteractionStance.RIGHT) )
+         if (state.getApproachingLeftAction().getIsExecuting() && state.getStance().getValue() != InteractionStance.LEFT)
          {
-            // skip next action, which is the actual walking action
-            int nextNextIndex = state.getActionSequence().getExecutionNextIndex() + 1;
+            int nextNextIndex = state.getApproachingFrontAction().getActionIndex();
+            state.getActionSequence().setExecutionNextIndex(nextNextIndex);
+         }
+         else if (state.getApproachingFrontAction().getIsExecuting() && state.getStance().getValue() != InteractionStance.FRONT)
+         {
+            int nextNextIndex = state.getApproachingRightAction().getActionIndex();
             state.getActionSequence().setExecutionNextIndex(nextNextIndex);
          }
 
+         if (state.getSetLeftFootDownAction().getIsExecuting())
+         {
+            int nextNextIndex = state.getEndAction().getActionIndex();
+            state.getActionSequence().setExecutionNextIndex(nextNextIndex);
+         }
       }
    }
 
