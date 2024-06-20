@@ -91,6 +91,8 @@ public final class ControllerAPI
       inputMessageClasses.add(KinematicsStreamingToolboxInputMessage.class);
       inputMessageClasses.add(KinematicsStreamingToolboxConfigurationMessage.class);
 
+      inputMessageClasses.add(controller_msgs.msg.dds.BimanualManipulationMessage.class);
+
       // Input messages that don't have a corresponding command
       inputMessageClasses.add(MessageCollection.class);
       inputMessageClasses.add(WholeBodyTrajectoryMessage.class);

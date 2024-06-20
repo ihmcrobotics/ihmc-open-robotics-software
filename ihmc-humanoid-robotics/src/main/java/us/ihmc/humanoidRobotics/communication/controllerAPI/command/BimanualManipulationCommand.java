@@ -83,4 +83,29 @@ public class BimanualManipulationCommand implements Command<BimanualManipulation
    {
       return trackingErrorThreshold;
    }
+   
+   public void setObjectMass(double objectMass)
+   {
+      this.objectMass = objectMass;
+   }
+   
+   public void setSqueezeForce(double squeezeForce)
+   {
+      this.squeezeForce = squeezeForce;
+   }
+   
+   public void setInitializeDuration(double initializeDuration)
+   {
+      this.initializeDuration = initializeDuration;
+   }
+   
+   public void setTrackingErrorThreshold(double trackingErrorThreshold)
+   {
+      this.trackingErrorThreshold = trackingErrorThreshold;
+   }
+   
+   public void setDisable(boolean disable)
+   {
+      this.disable = disable;
+   }
 }
