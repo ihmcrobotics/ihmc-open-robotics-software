@@ -184,6 +184,7 @@ public class ICPControllerQPSolverTest
 
       FrameVector2D previousCMPFeedback = new FrameVector2D();
       previousCMPFeedback.add(copFeedback, cmpCoPDifference);
+      FrameVector2D previousCoPFeedback = new FrameVector2D(copFeedback);
 
       // now set the rate limit, and introduce a large change in the icp error
       double maxCMPRate = 3.0;
@@ -203,26 +204,52 @@ public class ICPControllerQPSolverTest
 
       double maxChange = maxCMPRate * controlDt;
 
-
       FrameVector2D copFeedbackDelta = new FrameVector2D();
-      copFeedbackDelta.sub(unlimitedCopFeedbackExpected, copFeedbackExpected);
+      copFeedbackDelta.sub(unlimitedCopFeedbackExpected, previousCoPFeedback);
       copFeedbackDelta.setX(MathTools.clamp(copFeedbackDelta.getX(), maxChange));
       copFeedbackDelta.setY(MathTools.clamp(copFeedbackDelta.getY(), maxChange));
 
       FrameVector2D limitedCoPFeedbackExpected = new FrameVector2D();
       limitedCoPFeedbackExpected.add(copFeedbackExpected, copFeedbackDelta);
 
-      FrameVector2D cmpFeedback = new FrameVector2D();
-      cmpFeedback.add(copFeedback, cmpCoPDifference);
-
       EuclidFrameTestTools.assertGeometricallyEquals("The CoP feedback is wrong.", limitedCoPFeedbackExpected, copFeedback, epsilon);
       EuclidFrameTestTools.assertGeometricallyEquals("The CMP feedback is wrong.", cmpCoPDifferenceExpected, cmpCoPDifference, epsilon);
+
+      FrameVector2D cmpFeedback = new FrameVector2D();
+      cmpFeedback.add(copFeedback, cmpCoPDifference);
 
       double actualXChange = Math.abs(cmpFeedback.getX() - previousCMPFeedback.getX());
       double actualYChange = Math.abs(cmpFeedback.getY() - previousCMPFeedback.getY());
       assertTrue(actualXChange < maxChange + epsilon, "The actual X change " + actualXChange + " is greater than the maximum allowed change from the rate limit " + maxChange);
       assertTrue(actualYChange < maxChange + epsilon, "The actual Y change " + actualYChange + " is greater than the maximum allowed change from the rate limit " + maxChange);
 
+      // go back in the opposite direction to test the other bounds
+      icpError.set(0.1, 0.2);
+      previousCMPFeedback.add(limitedCoPFeedbackExpected, cmpCoPDifference);
+      previousCoPFeedback.set(limitedCoPFeedbackExpected);
+
+      assertTrue(solver.compute(icpError, perfectCMP));
+
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
+      solver.getCoPFeedbackDifference(copFeedback);
+
+      unlimitedCopFeedbackExpected.set(icpError);
+      unlimitedCopFeedbackExpected.scale(feedbackGain);
+
+      copFeedbackDelta.sub(unlimitedCopFeedbackExpected, previousCoPFeedback);
+      copFeedbackDelta.setX(MathTools.clamp(copFeedbackDelta.getX(), maxChange));
+      copFeedbackDelta.setY(MathTools.clamp(copFeedbackDelta.getY(), maxChange));
+
+      limitedCoPFeedbackExpected.add(previousCoPFeedback, copFeedbackDelta);
+
+      EuclidFrameTestTools.assertGeometricallyEquals("The CoP feedback is wrong.", limitedCoPFeedbackExpected, copFeedback, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("The CMP feedback is wrong.", cmpCoPDifferenceExpected, cmpCoPDifference, epsilon);
+
+      cmpFeedback.add(copFeedback, cmpCoPDifference);
+      actualXChange = Math.abs(cmpFeedback.getX() - previousCMPFeedback.getX());
+      actualYChange = Math.abs(cmpFeedback.getY() - previousCMPFeedback.getY());
+      assertTrue(actualXChange < maxChange + epsilon, "The actual X change " + actualXChange + " is greater than the maximum allowed change from the rate limit " + maxChange);
+      assertTrue(actualYChange < maxChange + epsilon, "The actual Y change " + actualYChange + " is greater than the maximum allowed change from the rate limit " + maxChange);
    }
 
    @Test
