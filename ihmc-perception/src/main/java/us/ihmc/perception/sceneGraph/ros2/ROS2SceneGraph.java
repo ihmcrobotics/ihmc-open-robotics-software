@@ -18,7 +18,8 @@ public class ROS2SceneGraph extends SceneGraph
    private final ROS2ActorDesignation ros2ActorDesignation;
    private final ROS2SceneGraphSubscription sceneGraphSubscription;
    private final ROS2SceneGraphPublisher sceneGraphPublisher = new ROS2SceneGraphPublisher();
-   private final Throttler publishThrottler = new Throttler().setFrequency(SceneGraph.CRDT_SYNC_FREQUENCY);
+   private final Throttler syncThrottler = new Throttler().setFrequency(SceneGraph.CRDT_SYNC_FREQUENCY);
+   private boolean syncThisTick = false;
 
    /**
     * Constructor for on-robot.
@@ -59,8 +60,13 @@ public class ROS2SceneGraph extends SceneGraph
     */
    public void updateSubscription()
    {
-      getRootNode().getCRDTInfo().startNextUpdate();
-      sceneGraphSubscription.update();
+      syncThisTick = syncThrottler.run();
+
+      if (syncThisTick)
+      {
+         getCRDTInfo().startNextUpdate();
+         sceneGraphSubscription.update();
+      }
    }
 
    /**
@@ -70,8 +76,10 @@ public class ROS2SceneGraph extends SceneGraph
     */
    public void updatePublication()
    {
-      if (publishThrottler.run())
+      if (syncThisTick)
          sceneGraphPublisher.publish(this, ros2PublishSubscribeAPI, ros2ActorDesignation.getOutgoingQualifier());
+
+      syncThisTick = false;
    }
 
    public void destroy()
