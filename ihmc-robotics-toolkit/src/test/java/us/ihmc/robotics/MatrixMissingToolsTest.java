@@ -426,7 +426,7 @@ public class MatrixMissingToolsTest
          {
             DMatrixRMaj matrixLessNotAll = new DMatrixRMaj(matrixLess);
             matrixLessNotAll.set(j, matrixMore.get(j) + 0.001);
-            assertFalse(MatrixMissingTools.elementWiseLessThan(matrixLess, matrixMore));
+            assertFalse(MatrixMissingTools.elementWiseLessThan(matrixLess, matrixLessNotAll));
          }
       }
 
