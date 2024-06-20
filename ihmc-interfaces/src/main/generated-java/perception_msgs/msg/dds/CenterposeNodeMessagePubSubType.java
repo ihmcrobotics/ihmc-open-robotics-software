@@ -15,7 +15,7 @@ public class CenterposeNodeMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6414ac89e624d432aaf403920a8f47892c20c935dae472f8e7d8e9039f771df7";
+   		return "beebda92db5337a99d026ea2adc5daaa36fc0b5a1d9ab4fc743a5d1515b8263d";
    }
    
    @Override

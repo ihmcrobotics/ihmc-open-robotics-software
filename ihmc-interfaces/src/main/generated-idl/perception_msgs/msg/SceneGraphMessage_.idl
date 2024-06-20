@@ -1,6 +1,7 @@
 #ifndef __perception_msgs__msg__SceneGraphMessage__idl__
 #define __perception_msgs__msg__SceneGraphMessage__idl__
 
+#include "ihmc_common_msgs/msg/./ConfirmableRequestMessage_.idl"
 #include "perception_msgs/msg/./ArUcoMarkerNodeMessage_.idl"
 #include "perception_msgs/msg/./CenterposeNodeMessage_.idl"
 #include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
@@ -54,9 +55,17 @@ module perception_msgs
       struct SceneGraphMessage
       {
         /**
+         * Monotonically increasing message ID that matches the CRDTInfo update number
+         */
+        unsigned long sequence_id;
+        /**
          * The ID to assign to the next instantiated node
          */
         unsigned long next_id;
+        /**
+         * A mechanism for confirming and ending a freeze early
+         */
+        ihmc_common_msgs::msg::dds::ConfirmableRequestMessage confirmable_request;
         /**
          * A depth first ordered list of types.
          */
