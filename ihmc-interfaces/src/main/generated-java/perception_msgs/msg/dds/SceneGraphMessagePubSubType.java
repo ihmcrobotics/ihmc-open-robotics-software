@@ -15,7 +15,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d2f42ce6b021a2213bb5c0c01d43987a6473a543396fd02d6c3146cc20349ac7";
+   		return "e2d3c8e86f461b88b4dd17a951a08d54247f3051e580adce716757a9ba37a04a";
    }
    
    @Override
@@ -53,6 +53,10 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -100,6 +104,11 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.getCdrSerializedSize(data.getConfirmableRequest(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getSceneTreeTypes().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -160,8 +169,11 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void write(perception_msgs.msg.dds.SceneGraphMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
+
       cdr.write_type_4(data.getNextId());
 
+      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.write(data.getConfirmableRequest(), cdr);
       if(data.getSceneTreeTypes().size() <= 1000)
       cdr.write_type_e(data.getSceneTreeTypes());else
           throw new RuntimeException("scene_tree_types field exceeds the maximum length");
@@ -210,8 +222,11 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void read(perception_msgs.msg.dds.SceneGraphMessage data, us.ihmc.idl.CDR cdr)
    {
+      data.setSequenceId(cdr.read_type_4());
+      	
       data.setNextId(cdr.read_type_4());
       	
+      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.read(data.getConfirmableRequest(), cdr);	
       cdr.read_type_e(data.getSceneTreeTypes());	
       cdr.read_type_e(data.getSceneTreeIndices());	
       cdr.read_type_e(data.getSceneNodes());	
@@ -229,7 +244,10 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void serialize(perception_msgs.msg.dds.SceneGraphMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_4("next_id", data.getNextId());
+      ser.write_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
+
       ser.write_type_e("scene_tree_types", data.getSceneTreeTypes());
       ser.write_type_e("scene_tree_indices", data.getSceneTreeIndices());
       ser.write_type_e("scene_nodes", data.getSceneNodes());
@@ -246,7 +264,10 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.SceneGraphMessage data)
    {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setNextId(ser.read_type_4("next_id"));
+      ser.read_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
+
       ser.read_type_e("scene_tree_types", data.getSceneTreeTypes());
       ser.read_type_e("scene_tree_indices", data.getSceneTreeIndices());
       ser.read_type_e("scene_nodes", data.getSceneNodes());

@@ -461,7 +461,7 @@ public class YOLOv8DetectionManager
 
    public void updateSceneGraph(ROS2SceneGraph sceneGraph)
    {
-      sceneGraph.modifyTree(modificationQueue ->
+      sceneGraph.modifyTreeTopology(modificationQueue ->
       {
          // Handle candidate detections (add or forget)
          Iterator<Entry<YOLOv8DetectionClass, YOLOv8SegmentedDetection>> candidateIterator = candidateDetections.entrySet().iterator();

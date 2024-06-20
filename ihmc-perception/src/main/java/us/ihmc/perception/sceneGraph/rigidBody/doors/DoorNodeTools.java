@@ -20,7 +20,7 @@ public final class DoorNodeTools
     */
    public static void addDoorNodes(SceneGraph sceneGraph)
    {
-      sceneGraph.modifyTree(modificationQueue ->
+      sceneGraph.modifyTreeTopology(modificationQueue ->
       {
          for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
          {

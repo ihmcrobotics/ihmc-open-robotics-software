@@ -47,8 +47,9 @@ public class ROS2SceneGraphSubscription
    private final BiFunction<SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier;
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
    private long numberOfMessagesReceived = 0;
+   private long previousUpdateNumber = -1;
+   private long messageDropCount = 0;
    private int numberOfOnRobotNodes = 0;
-   private boolean localTreeFrozen = false;
    private final ROS2SceneGraphSubscriptionNode subscriptionRootNode = new ROS2SceneGraphSubscriptionNode();
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
 
@@ -90,30 +91,40 @@ public class ROS2SceneGraphSubscription
          {
             SceneGraphMessage sceneGraphMessage = sceneGraphMessageSwapReference.getForThreadTwo();
 
-            numberOfOnRobotNodes = sceneGraphMessage.getSceneTreeIndices().size();
-
             ++numberOfMessagesReceived;
             for (Runnable messageRecievedCallback : messageRecievedCallbacks)
             {
                messageRecievedCallback.run();
             }
 
+            long nextUpdateNumber = sceneGraphMessage.getSequenceId();
+            if (previousUpdateNumber > -1)
+            {
+               long expectedUpdateNumber = previousUpdateNumber + 1;
+               messageDropCount += nextUpdateNumber - expectedUpdateNumber;
+            }
+            previousUpdateNumber = nextUpdateNumber;
+
+            numberOfOnRobotNodes = sceneGraphMessage.getSceneTreeIndices().size();
+
             subscriptionRootNode.clear();
             subscriptionNodeDepthFirstIndex.setValue(0);
             buildSubscriptionTree(sceneGraphMessage, subscriptionRootNode);
 
-            // If the tree was recently modified by the operator, we do not accept
-            // updates the structure of the tree.
-            localTreeFrozen = false;
-            checkTreeModified(sceneGraph.getRootNode());
+            sceneGraph.fromMessage(sceneGraphMessage);
 
-            if (!localTreeFrozen)
-               sceneGraph.getNextID().set(sceneGraphMessage.getNextId());
-
-            sceneGraph.modifyTree(modificationQueue ->
+            if (!sceneGraph.isFrozen())
             {
-               if (!localTreeFrozen)
+               // Clears all unfrozen nodes
+               sceneGraph.modifyTreeTopology(modificationQueue ->
+               {
                   modificationQueue.accept(new SceneGraphClearSubtree(sceneGraph.getRootNode()));
+               });
+            }
+
+
+            sceneGraph.modifyTreeTopology(modificationQueue ->
+            {
 
                updateLocalTreeFromSubscription(subscriptionRootNode, sceneGraph.getRootNode(), null, modificationQueue);
 
@@ -202,16 +213,6 @@ public class ROS2SceneGraphSubscription
          {
             updateLocalTreeFromSubscription(subscriptionChildNode, localChildNode, localNode, modificationQueue);
          }
-      }
-   }
-
-   private void checkTreeModified(SceneNode localNode)
-   {
-      localTreeFrozen |= localNode.isFrozen();
-
-      for (SceneNode child : localNode.getChildren())
-      {
-         checkTreeModified(child);
       }
    }
 
@@ -312,8 +313,8 @@ public class ROS2SceneGraphSubscription
       return numberOfMessagesReceived;
    }
 
-   public boolean getLocalTreeFrozen()
+   public long getMessageDropCount()
    {
-      return localTreeFrozen;
+      return messageDropCount;
    }
 }

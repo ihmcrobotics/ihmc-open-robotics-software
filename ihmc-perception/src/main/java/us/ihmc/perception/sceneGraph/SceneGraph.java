@@ -4,6 +4,10 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import perception_msgs.msg.dds.SceneGraphMessage;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.RequestConfirmFreezable;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
@@ -12,6 +16,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
+import us.ihmc.perception.sceneGraph.topology.SceneGraphTopologyOperationQueue;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
 
 import java.util.ArrayList;
@@ -34,7 +39,7 @@ import java.util.function.Function;
  *
  * The scene graph can be used to represent things a robot is looking for.
  */
-public class SceneGraph
+public class SceneGraph extends RequestConfirmFreezable
 {
    public static final double UPDATE_FREQUENCY = 60.0;
 
@@ -44,7 +49,7 @@ public class SceneGraph
 
    private final AtomicLong nextID = new AtomicLong(1); // Starts at 1 because root node is passed in
    private final SceneNode rootNode;
-   private final Queue<SceneGraphTreeModification> queuedModifications = new LinkedList<>();
+   private final SceneGraphTopologyOperationQueue topologyChangeQueue = new SceneGraphTopologyOperationQueue();
    private final DetectionFilterCollection detectionFilterCollection = new DetectionFilterCollection();
    /**
     * Useful for accessing nodes by ID instead of searching.
@@ -57,19 +62,24 @@ public class SceneGraph
    private transient final TIntObjectMap<ArUcoMarkerNode> arUcoMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final TIntObjectMap<CenterposeNode> centerposeDetectedMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
+   private int numberOfFrozenNodes = 0;
 
+   /** Create without CRDT synchronization. */
    public SceneGraph()
    {
-      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME));
+      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME), ROS2ActorDesignation.OPERATOR);
    }
 
    /**
     * Support passing in the externally created root node so it can be extended
     * by a superclass implementation like for UI nodes.
     */
-   public SceneGraph(SceneNode rootNode)
+   public SceneGraph(SceneNode rootNode, ROS2ActorDesignation actorDesignation)
    {
+      super(new CRDTInfo(actorDesignation, (int) UPDATE_FREQUENCY));
+
       this.rootNode = rootNode;
+
       updateCaches(rootNode);
    }
 
@@ -88,7 +98,7 @@ public class SceneGraph
 
       DoorNodeTools.addDoorNodes(this);
 
-      modifyTree(modificationQueue -> updateOnRobotOnly(rootNode, robotPelvisFrame, modificationQueue));
+      modifyTreeTopology(modificationQueue -> updateOnRobotOnly(rootNode, robotPelvisFrame, modificationQueue));
    }
 
    private void updateOnRobotOnly(SceneNode sceneNode, ReferenceFrame sensorFrame, SceneGraphModificationQueue modificationQueue)
@@ -104,19 +114,20 @@ public class SceneGraph
       }
    }
 
-   public void modifyTree(Consumer<SceneGraphModificationQueue> modifier)
+   /** Convenience method. */
+   public void modifyTreeTopology(Consumer<SceneGraphModificationQueue> modifier)
    {
-      modifier.accept(queuedModifications::add);
 
-      boolean modified = !queuedModifications.isEmpty();
+   }
 
-      while (!queuedModifications.isEmpty())
-      {
-         SceneGraphTreeModification modification = queuedModifications.poll();
-         modification.performOperation();
-      }
+   /**
+    * Use with {@link #getTopologyChangeQueue()}.
+    */
+   public void modifyTreeTopology()
+   {
+      boolean atLeastOnePerformed = topologyChangeQueue.performAllQueuedOperations();
 
-      if (modified)
+      if (atLeastOnePerformed)
          update();
    }
 
@@ -131,6 +142,7 @@ public class SceneGraph
       arUcoMarkerIDToNodeMap.clear();
       centerposeDetectedMarkerIDToNodeMap.clear();
       sceneNodesByID.clear();
+      numberOfFrozenNodes = 0;
       updateCaches(rootNode);
    }
 
@@ -153,10 +165,21 @@ public class SceneGraph
          centerposeDetectedMarkerIDToNodeMap.put(centerposeNode.getObjectID(), centerposeNode);
       }
 
+      if (node.isFrozen())
+         ++numberOfFrozenNodes;
+
       for (SceneNode child : node.getChildren())
       {
          updateCaches(child);
       }
+   }
+
+   public void fromMessage(SceneGraphMessage message)
+   {
+      fromMessage(message.getConfirmableRequest());
+
+      if (!isFrozen())
+         nextID.set(message.getNextId());
    }
 
    public SceneNode getRootNode()
@@ -202,6 +225,16 @@ public class SceneGraph
    public SortedSet<SceneNode> getSceneNodesByID()
    {
       return sceneNodesByID;
+   }
+
+   public SceneGraphTopologyOperationQueue getTopologyChangeQueue()
+   {
+      return topologyChangeQueue;
+   }
+
+   public int getNumberOfFrozenNodes()
+   {
+      return numberOfFrozenNodes;
    }
 
    public ReferenceFrameDynamicCollection asNewDynamicReferenceFrameCollection()

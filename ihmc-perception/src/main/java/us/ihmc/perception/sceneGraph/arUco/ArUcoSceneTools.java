@@ -26,7 +26,7 @@ public class ArUcoSceneTools
    {
       if (!arUcoMarkerDetectionResults.getDetectedIDs().isEmpty())
       {
-         sceneGraph.modifyTree(modificationQueue ->
+         sceneGraph.modifyTreeTopology(modificationQueue ->
          {
             for (TIntIterator iterator = arUcoMarkerDetectionResults.getDetectedIDs().iterator(); iterator.hasNext(); )
             {

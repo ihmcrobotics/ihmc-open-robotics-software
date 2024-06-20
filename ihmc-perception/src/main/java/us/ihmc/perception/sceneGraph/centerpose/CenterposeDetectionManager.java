@@ -55,7 +55,7 @@ public class CenterposeDetectionManager
          imageAquisitionSensorFrame.getReferenceFrame().update();
 
          // Update or add the corresponding CenterposeSceneNode
-         sceneGraph.modifyTree(modificationQueue ->
+         sceneGraph.modifyTreeTopology(modificationQueue ->
          {
           CenterposeNode centerposeNode;
 

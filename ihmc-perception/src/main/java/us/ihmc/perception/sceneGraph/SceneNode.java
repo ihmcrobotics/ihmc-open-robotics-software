@@ -1,6 +1,7 @@
 package us.ihmc.perception.sceneGraph;
 
-import us.ihmc.communication.crdt.DurationFreezable;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.RequestConfirmFreezable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
@@ -15,16 +16,19 @@ import java.util.List;
  *
  * We give each node a name and a reference frame.
  */
-public class SceneNode extends DurationFreezable
+public class SceneNode extends RequestConfirmFreezable
 {
    /** The node's unique ID. */
    private final long id;
    private final String name;
    private final MutableReferenceFrame nodeFrame;
    private final List<SceneNode> children = new ArrayList<>();
+   private SceneNode parent;
 
-   public SceneNode(long id, String name)
+   public SceneNode(long id, String name, CRDTInfo crdtInfo)
    {
+      super(crdtInfo);
+
       this.id = id;
       this.name = name;
       this.nodeFrame = new MutableReferenceFrame(name, ReferenceFrame.getWorldFrame());
@@ -80,11 +84,24 @@ public class SceneNode extends DurationFreezable
     * @return The scene node's children.
     *
     * Warning! Only modify this collection via queued modifications using
-    * {@link SceneGraph#modifyTree}. Otherwise, inconsistency can occur
+    * {@link SceneGraph#modifyTreeTopology}. Otherwise, inconsistency can occur
     * which may cause bad behavior or crashes.
     */
    public List<SceneNode> getChildren()
    {
       return children;
+   }
+
+   public void setParent(SceneNode parent)
+   {
+      this.parent = parent;
+   }
+
+   /**
+    * @return The parent node or null if this is that root node.
+    */
+   public SceneNode getParent()
+   {
+      return parent;
    }
 }

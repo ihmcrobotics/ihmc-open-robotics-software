@@ -22,7 +22,7 @@ public class ROS2SceneGraphTest
       SceneNode child0 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child0");
       SceneNode child1 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1");
       SceneNode child1child0 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1Child0");
-      sceneGraph.modifyTree(modificationQueue ->
+      sceneGraph.modifyTreeTopology(modificationQueue ->
       {
          modificationQueue.accept(new SceneGraphNodeAddition(child0, sceneGraph.getRootNode()));
          modificationQueue.accept(new SceneGraphNodeAddition(child1, sceneGraph.getRootNode()));

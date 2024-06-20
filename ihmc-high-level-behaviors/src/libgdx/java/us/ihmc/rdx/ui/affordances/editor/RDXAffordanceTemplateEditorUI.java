@@ -71,7 +71,7 @@ public class RDXAffordanceTemplateEditorUI
    {
       panel3D = baseUI.getPrimary3DPanel();
       SceneGraph sceneGraph = new SceneGraph();
-      sceneGraph.modifyTree(modificationQueue ->
+      sceneGraph.modifyTreeTopology(modificationQueue ->
                             {
                                DoorSceneNodeDefinitions.ensureRightPushDoorNodesAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());
                                DoorSceneNodeDefinitions.ensureLeftPushDoorNodesAdded(sceneGraph, modificationQueue, sceneGraph.getRootNode());

@@ -24,7 +24,7 @@ public class SceneGraphTest
       Assertions.assertEquals(1, sceneGraph.getIDToNodeMap().size());
       Assertions.assertEquals(0, sceneGraph.getArUcoMarkerIDToNodeMap().size());
 
-      sceneGraph.modifyTree(modificationQueue ->
+      sceneGraph.modifyTreeTopology(modificationQueue ->
       {
          modificationQueue.accept(new SceneGraphNodeAddition(new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child0"), sceneGraph.getRootNode()));
       });
@@ -39,7 +39,7 @@ public class SceneGraphTest
       Assertions.assertEquals(0, sceneGraph.getArUcoMarkerIDToNodeMap().size());
 
       SceneNode child1 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1");
-      sceneGraph.modifyTree(modificationQueue ->
+      sceneGraph.modifyTreeTopology(modificationQueue ->
       {
          modificationQueue.accept(new SceneGraphNodeAddition(child1, sceneGraph.getRootNode()));
          modificationQueue.accept(new SceneGraphNodeAddition(new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1Child0"), child1));
@@ -63,7 +63,7 @@ public class SceneGraphTest
       SceneNode child0 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child0");
       SceneNode child1 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1");
       SceneNode child1child0 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1Child0");
-      sceneGraph.modifyTree(modificationQueue ->
+      sceneGraph.modifyTreeTopology(modificationQueue ->
       {
          modificationQueue.accept(new SceneGraphNodeAddition(child0, sceneGraph.getRootNode()));
          modificationQueue.accept(new SceneGraphNodeAddition(child1, sceneGraph.getRootNode()));
