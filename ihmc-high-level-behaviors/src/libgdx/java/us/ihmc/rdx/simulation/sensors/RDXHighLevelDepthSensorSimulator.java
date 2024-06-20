@@ -25,7 +25,6 @@ import org.bytedeco.opencl._cl_program;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.global.opencv_imgproc;
-import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.Time;
@@ -813,16 +812,13 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
 
       opencv_imgproc.cvtColor(rgba8Mat, bgr8Mat, opencv_imgproc.COLOR_RGBA2BGR);
 
-      GpuMat colorGpuMat = new GpuMat(intrinsics.getHeight(), intrinsics.getWidth(), opencv_core.CV_8UC3);
-      colorGpuMat.upload(bgr8Mat);
-
       return new RawImage(depthSensorSimulator.getSequenceNumber(),
                           Instant.now(),
                           intrinsics.getWidth(),
                           intrinsics.getHeight(),
                           0.0f,
+                          bgr8Mat,
                           null,
-                          colorGpuMat,
                           opencv_core.CV_8UC3, // BGR
                           (float) intrinsics.getFx(),
                           (float) intrinsics.getFy(),
@@ -839,16 +835,13 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       float discretization = 0.001f;
       OpenCVTools.convertFloatToShort(depthSensorSimulator.getMetersDepthOpenCVMat(), depthDiscretizedMat, 1.0f / discretization, 0.0);
 
-      GpuMat depthGpuMat = new GpuMat(intrinsics.getHeight(), intrinsics.getWidth(), opencv_core.CV_16UC1);
-      depthGpuMat.upload(depthDiscretizedMat);
-
       return new RawImage(depthSensorSimulator.getSequenceNumber(),
                           Instant.now(),
                           intrinsics.getWidth(),
                           intrinsics.getHeight(),
                           discretization,
+                          depthDiscretizedMat,
                           null,
-                          depthGpuMat,
                           opencv_core.CV_16UC1,
                           (float) intrinsics.getFx(),
                           (float) intrinsics.getFy(),
