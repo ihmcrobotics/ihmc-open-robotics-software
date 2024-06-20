@@ -12,10 +12,9 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.matrixlib.MatrixTestTools;
-import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ICPControllerQPSolverTest
 {
@@ -79,8 +78,8 @@ public class ICPControllerQPSolverTest
       copFeedbackExpected.set(icpError);
       copFeedbackExpected.scale(3.0);
 
-      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      assertTrue("The CMP Feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon), "The CoP feedback is wrong.");
+      assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon), "The CMP Feedback is wrong.");
    }
 
    @Test
@@ -107,8 +106,8 @@ public class ICPControllerQPSolverTest
       copFeedbackExpected.set(icpError);
       copFeedbackExpected.scale(3.0);
 
-      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon), "The CoP feedback is wrong.");
+      assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon), "The CMP feedback is wrong.");
    }
 
    @Test
@@ -148,8 +147,8 @@ public class ICPControllerQPSolverTest
       copFeedbackExpected.setY(Math.min(copFeedbackExpected.getY(), sideLength));
       copFeedbackExpected.sub(perfectCMP);
 
-      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon), "The CoP feedback is wrong.");
+      assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon), "The CMP feedback is wrong.");
    }
 
    @Test
@@ -196,8 +195,8 @@ public class ICPControllerQPSolverTest
       // find delta
       copFeedbackExpected.sub(perfectCMP);
 
-      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon), "The CoP feedback is wrong.");
+      assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon), "The CMP feedback is wrong.");
    }
 
    private FrameConvexPolygon2D createSupportPolygon(double sideLength)
@@ -341,7 +340,7 @@ public class ICPControllerQPSolverTest
       copFeedbackExpected.setY(Math.min(copFeedbackExpected.getY(), midY));
       copFeedbackExpected.sub(perfectCMP);
 
-      assertFalse("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      assertFalse(copFeedback.epsilonEquals(copFeedbackExpected, epsilon), "The CoP feedback is wrong.");
 
       solver.setDesiredFeedbackDirection(icpError, 1e5);
       assertTrue(solver.compute(icpError, perfectCMP));
@@ -349,8 +348,8 @@ public class ICPControllerQPSolverTest
       solver.getCMPFeedbackDifference(cmpCoPDifference);
       solver.getCoPFeedbackDifference(copFeedback);
 
-      assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      assertTrue(copFeedback.epsilonEquals(copFeedbackExpected, epsilon), "The CoP feedback is wrong.");
+      assertTrue(cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon), "The CMP feedback is wrong.");
    }
 
    private FrameConvexPolygon2D createWeirdSupportPolygon(double footLength, double toeWidth, double heelWidth)
