@@ -95,7 +95,7 @@ public class KinematicsToolboxHelper
       if (command.getAngularRateLimitation() > 0.0)
       {
          PID3DGains orientationGains = feedbackControlCommandToPack.getGains().getOrientationGains();
-         orientationGains.setMaxFeedbackAndFeedbackRate(command.getLinearRateLimitation(), orientationGains.getMaximumFeedbackRate());
+         orientationGains.setMaxFeedbackAndFeedbackRate(command.getAngularRateLimitation(), orientationGains.getMaximumFeedbackRate());
       }
       feedbackControlCommandToPack.setWeightMatrixForSolver(command.getWeightMatrix());
       feedbackControlCommandToPack.setSelectionMatrix(command.getSelectionMatrix());
