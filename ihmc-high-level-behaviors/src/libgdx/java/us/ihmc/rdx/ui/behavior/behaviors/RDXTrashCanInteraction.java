@@ -79,6 +79,7 @@ public class RDXTrashCanInteraction extends RDXBehaviorTreeNode<TrashCanInteract
          ImGui.textColored(ImGuiTools.DARK_RED, "DISABLED");
 
       obstructNodeName.render();
+      ImGui.text("Approach stance: " + state.getStance().getValue().toString());
 
       super.renderNodeSettingsWidgets();
    }
