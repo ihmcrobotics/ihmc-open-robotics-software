@@ -214,6 +214,16 @@ public class RDXVRKinematicsStreamingMode
                                                                  {
                                                                     rdxBiManipulationManager.toggleBiManualManipulationMode();
                                                                     hasSentSqueezeMessage = false;
+
+                                                                    if (!rdxBiManipulationManager.getEnableBiManualManipulationMode())
+                                                                    {
+                                                                       // Disable the bimanual message on the controller side
+                                                                       BimanualManipulationMessage message = rdxBiManipulationManager.getBiManualManipulationMessage();
+                                                                       message.setDisable(true);
+                                                                       message.setObjectMass(0.0);
+                                                                       message.setSqueezeForce(0.0);
+                                                                       ros2ControllerHelper.publishToController(message);
+                                                                    }
                                                                  }
                                                               });
 
@@ -283,6 +293,7 @@ public class RDXVRKinematicsStreamingMode
             ros2ControllerHelper.publishToController(message);
             hasSentSqueezeMessage = true;
          }
+
          outputFrequencyPlot.recordEvent();
       }
    }
