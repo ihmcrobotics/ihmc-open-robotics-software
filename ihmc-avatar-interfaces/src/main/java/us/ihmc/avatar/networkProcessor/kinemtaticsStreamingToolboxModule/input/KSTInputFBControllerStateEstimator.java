@@ -259,7 +259,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
             tempError.normalizeAndLimitToPi();
             tempError.getRotationVector(correctiveVelocity.getAngularPart());
             correctiveVelocity.scale(1.0 / correctionDuration.getValue());
-            estimatedPose.getOrientation().inverseTransform(correctiveVelocity.getAngularPart());
+            estimatedPose.getOrientation().transform(correctiveVelocity.getAngularPart());
 
             if (!input.getHasDesiredVelocity())
             {
@@ -274,6 +274,9 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
                rawInputPose.getOrientation().transform(debugInputVelocity.getAngularPart());
                rawInputVelocity.setMatchingFrame(input.getDesiredVelocity());
             }
+
+            if (rawInputVelocity.containsNaN())
+               rawInputVelocity.setToZero();
 
             estimatedVelocity.set(rawInputVelocity);
             estimatedVelocity.scale(rawVelocityAlpha.getValue());
@@ -413,6 +416,9 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
                KSTTools.computeLinearVelocity(timeInterval, rawInputPosition, position, debugInputVelocity);
                rawInputVelocity.set(debugInputVelocity);
             }
+
+            if (rawInputVelocity.containsNaN())
+               rawInputVelocity.setToZero();
 
             estimatedVelocity.set(rawInputVelocity);
             estimatedVelocity.scale(rawVelocityAlpha.getValue());
