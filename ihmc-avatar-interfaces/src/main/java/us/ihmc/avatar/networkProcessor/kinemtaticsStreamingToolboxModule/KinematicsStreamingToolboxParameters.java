@@ -310,7 +310,6 @@ public class KinematicsStreamingToolboxParameters
       defaultConfiguration.setPelvisTrajectoryFrameId(ReferenceFrame.getWorldFrame().getFrameNameHashCode());
 
       defaultSolverConfiguration.setJointVelocityWeight(1.0);
-      //defaultSolverConfiguration.setDisableJointVelocityLimits(true);
       defaultSolverConfiguration.setEnableJointVelocityLimits(true);
 
       inputFilterMaxLinearDelta = 0.5;

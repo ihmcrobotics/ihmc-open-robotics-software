@@ -847,7 +847,6 @@ public abstract class KinematicsStreamingToolboxControllerTest
       IKStreamingMessageGenerator generator = time ->
       {
          KinematicsStreamingToolboxInputMessage ret = new KinematicsStreamingToolboxInputMessage();
-         // des truc
          return ret;
       };
       return generator;
