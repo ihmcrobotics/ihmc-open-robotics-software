@@ -17,7 +17,7 @@ public class ROS2SceneGraph extends SceneGraph
    private final ROS2ActorDesignation ros2ActorDesignation;
    private final ROS2SceneGraphSubscription sceneGraphSubscription;
    private final ROS2SceneGraphPublisher sceneGraphPublisher = new ROS2SceneGraphPublisher();
-   private final Throttler publishThrottler = new Throttler().setFrequency(SceneGraph.UPDATE_FREQUENCY);
+   private final Throttler publishThrottler = new Throttler().setFrequency(SceneGraph.CRDT_SYNC_FREQUENCY);
 
    /**
     * Constructor for on-robot.
