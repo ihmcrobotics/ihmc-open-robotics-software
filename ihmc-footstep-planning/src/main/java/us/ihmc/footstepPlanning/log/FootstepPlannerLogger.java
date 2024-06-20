@@ -45,6 +45,7 @@ import java.util.stream.Stream;
 
 public class FootstepPlannerLogger
 {
+   private static final SimpleDateFormat directoryDateFormat = new SimpleDateFormat("yyyyMMdd");
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
    private static final int RECOMMENDED_NUMBER_OF_LOGS_TO_KEEP = 500;
    public static final String defaultLogsDirectory;
@@ -195,8 +196,7 @@ public class FootstepPlannerLogger
     */
    public boolean logSession(String logDirectory)
    {
-      String timestamp = dateFormat.format(new Date()).split("_")[0];
-      String logDirectoryWithDate = logDirectory + "/" + timestamp;
+      String logDirectoryWithDate = logDirectory + File.separator + directoryDateFormat.format(new Date());
       String sessionDirectory = generateALogFolderName(logDirectoryWithDate);
       return logSessionWithExactFolderName(sessionDirectory);
    }
