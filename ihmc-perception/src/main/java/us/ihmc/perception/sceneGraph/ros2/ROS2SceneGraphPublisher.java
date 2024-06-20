@@ -50,6 +50,7 @@ public class ROS2SceneGraphPublisher
                        ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                        ROS2IOTopicQualifier ioQualifier)
    {
+      sceneGraphMessage.setSequenceId(sceneGraph.getCRDTInfo().getUpdateNumber());
       sceneGraphMessage.setNextId(sceneGraph.getNextID().intValue());
       sceneGraphMessage.getSceneTreeTypes().clear();
       sceneGraphMessage.getSceneTreeIndices().clear();

@@ -1,5 +1,6 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -17,14 +18,17 @@ public class ROS2SceneGraph extends SceneGraph
    private final ROS2ActorDesignation ros2ActorDesignation;
    private final ROS2SceneGraphSubscription sceneGraphSubscription;
    private final ROS2SceneGraphPublisher sceneGraphPublisher = new ROS2SceneGraphPublisher();
-   private final Throttler publishThrottler = new Throttler().setFrequency(30.0);
+   private final Throttler publishThrottler = new Throttler().setFrequency(SceneGraph.CRDT_SYNC_FREQUENCY);
 
    /**
     * Constructor for on-robot.
     */
    public ROS2SceneGraph(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI)
    {
-      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME), null, ros2PublishSubscribeAPI, ROS2ActorDesignation.ROBOT);
+      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME, new CRDTInfo(ROS2ActorDesignation.ROBOT, (int) SceneGraph.CRDT_SYNC_FREQUENCY)),
+           null,
+           ros2PublishSubscribeAPI,
+           ROS2ActorDesignation.ROBOT);
    }
 
    /**
@@ -37,6 +41,7 @@ public class ROS2SceneGraph extends SceneGraph
                          ROS2ActorDesignation ros2ActorDesignation)
    {
       super(rootNode);
+
       this.ros2PublishSubscribeAPI = ros2PublishSubscribeAPI;
       this.ros2ActorDesignation = ros2ActorDesignation;
 
@@ -54,6 +59,7 @@ public class ROS2SceneGraph extends SceneGraph
     */
    public void updateSubscription()
    {
+      getRootNode().getCRDTInfo().startNextUpdate();
       sceneGraphSubscription.update();
    }
 

@@ -36,7 +36,7 @@ public class RDXQuickATManager extends RDXPanel
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private RDXTeleoperationManager teleoperationManager;
    private SceneGraph sceneGraph;
-   private final SceneNode defaultNode = new SceneNode(100, "");
+   private SceneNode defaultNode;
    private SceneNode selectedNode = defaultNode;
 
    private final WorkspaceResourceDirectory resourceDirectory = new WorkspaceResourceDirectory(getClass(), "/quickATs");
@@ -68,6 +68,9 @@ public class RDXQuickATManager extends RDXPanel
    {
       this.teleoperationManager = teleoperationManager;
       this.sceneGraph = sceneGraph;
+
+      defaultNode = new SceneNode(100, "", sceneGraph.getCRDTInfo());
+
       nodeNames = sceneGraph.getNodeNameList();
 
       quickATDirectory = new ImGuiDirectory(resourceDirectory.getFilesystemDirectory().toString(),
