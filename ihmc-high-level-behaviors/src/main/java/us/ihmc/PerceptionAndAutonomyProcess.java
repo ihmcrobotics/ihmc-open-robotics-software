@@ -267,9 +267,9 @@ public class PerceptionAndAutonomyProcess
    }
 
    /** Needs to be a separate method to allow constructing test bench version. */
-   public void addContinuousHiking(ROS2Node ros2Node, DRCRobotModel robotModel)
+   public void addContinuousHiking(ROS2Node ros2Node, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
    {
-      continuousHikingManager = new ContinuousHikingManager(ros2Node, robotModel);
+      continuousHikingManager = new ContinuousHikingManager(ros2Node, robotModel, syncedRobot);
    }
 
    /** Needs to be a separate method to allow constructing test bench version. */

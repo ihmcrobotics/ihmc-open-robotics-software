@@ -15,17 +15,14 @@ import us.ihmc.tools.thread.RestartableThrottledThread;
  */
 public class ContinuousHikingManager
 {
-   private final ROS2SyncedRobotModel syncedRobot;
    private final ContinuousPlannerSchedulingTask continuousHiking;
    private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
    private final RestartableThrottledThread parameterUpdateThread;
    private HeightMapData latestHeightMapData;
 
-   public ContinuousHikingManager(ROS2Node ros2Node, DRCRobotModel robotModel)
+   public ContinuousHikingManager(ROS2Node ros2Node, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
    {
       ROS2ControllerHelper ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
-      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2ControllerHelper.getROS2NodeInterface());
-      syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
 
       ContinuousHikingParameters continuousPlanningParameters = new ContinuousHikingParameters();
 
@@ -61,6 +58,5 @@ public class ContinuousHikingManager
    {
       parameterUpdateThread.stop();
       continuousHiking.destroy();
-      syncedRobot.destroy();
    }
 }
