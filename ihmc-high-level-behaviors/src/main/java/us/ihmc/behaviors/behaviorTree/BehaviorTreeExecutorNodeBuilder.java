@@ -5,6 +5,8 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.door.DoorTraversalExecutor;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationExecutor;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceExecutor;
 import us.ihmc.behaviors.sequence.actions.*;
@@ -66,6 +68,10 @@ public class BehaviorTreeExecutorNodeBuilder implements BehaviorTreeNodeStateBui
       if (nodeType == DoorTraversalDefinition.class)
       {
          return new DoorTraversalExecutor(id, crdtInfo, saveFileDirectory, ros2ControllerHelper, syncedRobot, sceneGraph);
+      }
+      if (nodeType == BuildingExplorationDefinition.class)
+      {
+         return new BuildingExplorationExecutor(id, crdtInfo, saveFileDirectory);
       }
       if (nodeType == ChestOrientationActionDefinition.class)
       {

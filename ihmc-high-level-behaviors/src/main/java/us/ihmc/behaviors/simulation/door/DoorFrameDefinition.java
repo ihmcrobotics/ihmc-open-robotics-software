@@ -15,9 +15,9 @@ import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters.
 
 public class DoorFrameDefinition extends RigidBodyDefinition
 {
-   public DoorFrameDefinition()
+   public DoorFrameDefinition(String name)
    {
-      super("frameBody");
+      super(name);
 
       double pillarSizeX = DOOR_FRAME_PILLAR_SIZE_X;
       double pillarSizeY = DOOR_FRAME_PILLAR_SIZE_X;
