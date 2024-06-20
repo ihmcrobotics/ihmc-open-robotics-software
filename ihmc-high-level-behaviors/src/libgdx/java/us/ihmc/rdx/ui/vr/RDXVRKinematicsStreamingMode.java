@@ -382,7 +382,9 @@ public class RDXVRKinematicsStreamingMode
                                                                                            trackerReferenceFrames.get(segmentType.getSegmentName()).getReferenceFrame(),
                                                                                            segmentType.getSegmentName(),
                                                                                            segmentType.getPositionWeight(),
-                                                                                           segmentType.getOrientationWeight());
+                                                                                           segmentType.getOrientationWeight(),
+                                                                                           segmentType.getLinearRateLimitation(),
+                                                                                           segmentType.getAngularRateLimitation());
                         message.setHasDesiredLinearVelocity(true);
                         message.getDesiredLinearVelocityInWorld().set(tracker.getLinearVelocity());
                         message.setHasDesiredAngularVelocity(true);
@@ -421,7 +423,9 @@ public class RDXVRKinematicsStreamingMode
                                                                                            segmentType.getSegmentSide()).getReferenceFrame(),
                                                                                      segmentType.getSegmentName(),
                                                                                      segmentType.getPositionWeight(),
-                                                                                     segmentType.getOrientationWeight());
+                                                                                     segmentType.getOrientationWeight(),
+                                                                                     segmentType.getLinearRateLimitation(),
+                                                                                     segmentType.getAngularRateLimitation());
                   message.getControlFramePositionInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getPosition());
                   message.getControlFrameOrientationInEndEffector().set(ikControlFramePoses.get(segmentType.getSegmentSide()).getOrientation());
 
@@ -454,7 +458,9 @@ public class RDXVRKinematicsStreamingMode
                                                                                   motionRetargeting.getDesiredFrame(segmentType),
                                                                                   segmentType.getSegmentName(),
                                                                                   segmentType.getPositionWeight(),
-                                                                                  segmentType.getOrientationWeight());
+                                                                                  segmentType.getOrientationWeight(),
+                                                                                  segmentType.getLinearRateLimitation(),
+                                                                                  segmentType.getAngularRateLimitation());
                // TODO. Linear desired velocities from controller/trackers are probably wrong now because of scaling.
                // TODO. Figure out if they are really needed
                if (segmentType.isHandRelated())
@@ -604,7 +610,9 @@ public class RDXVRKinematicsStreamingMode
                                                                     ReferenceFrame desiredControlFrame,
                                                                     String frameName,
                                                                     Vector3D positionWeight,
-                                                                    Vector3D orientationWeight)
+                                                                    Vector3D orientationWeight,
+                                                                    double linearMomentumLimit,
+                                                                    double angularMomentumLimit)
    {
       KinematicsToolboxRigidBodyMessage message = new KinematicsToolboxRigidBodyMessage();
       message.setEndEffectorHashCode(segment.hashCode());
@@ -637,6 +645,9 @@ public class RDXVRKinematicsStreamingMode
       message.getAngularSelectionMatrix().setZSelected(orientationWeight.getZ() != 0.0);
       angularWeightMatrix.setZAxisWeight(orientationWeight.getZ());
       message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(angularWeightMatrix));
+
+      message.setLinearRateLimitation(linearMomentumLimit);
+      message.setAngularRateLimitation(angularMomentumLimit);
 
       return message;
    }
