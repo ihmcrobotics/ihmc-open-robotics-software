@@ -167,7 +167,7 @@ public class RDXBehaviorTreeNodeCreationMenu
 
       ImGui.unindent();
 
-      if (ancestorIsActionSequenceNode)
+      if (parentIsActionSequenceNode || ancestorIsActionSequenceNode)
       {
          ImGui.separator();
 
