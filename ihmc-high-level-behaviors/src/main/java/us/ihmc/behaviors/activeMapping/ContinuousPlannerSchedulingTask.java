@@ -78,6 +78,7 @@ public class ContinuousPlannerSchedulingTask
 
 
       StepValidityChecker stepValidityChecker = new StepValidityChecker(continuousPlanner, robotModel, referenceFrames, registry);
+      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Helper, simpleRobotName);
 
       State notStartedState = new NotStartedState(ros2Helper,
                                                   simpleRobotName,
@@ -85,14 +86,14 @@ public class ContinuousPlannerSchedulingTask
                                                   commandMessage,
                                                   stepValidityChecker,
                                                   continuousPlanner,
+                                                  controllerFootstepQueueMonitor,
                                                   continuousHikingParameters,
                                                   terrainMap,
                                                   debugger);
 
-      State readyToPlanState = new ReadyToPlanState(ros2Helper,
-                                                    simpleRobotName,
-                                                    commandMessage,
+      State readyToPlanState = new ReadyToPlanState(commandMessage,
                                                     continuousPlanner,
+                                                    controllerFootstepQueueMonitor,
                                                     continuousHikingParameters,
                                                     terrainMap,
                                                     debugger);
@@ -101,6 +102,7 @@ public class ContinuousPlannerSchedulingTask
                                                         simpleRobotName,
                                                         referenceFrames,
                                                         continuousPlanner,
+                                                        controllerFootstepQueueMonitor,
                                                         continuousHikingParameters);
 
       stateMachineFactory.addState(ContinuousHikingState.NOT_STARTED, notStartedState);

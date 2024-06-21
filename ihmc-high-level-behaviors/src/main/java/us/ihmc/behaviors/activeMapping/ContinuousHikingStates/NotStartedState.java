@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingState;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
+import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -31,15 +32,13 @@ public class NotStartedState implements State
    private final HumanoidReferenceFrames referenceFrames;
    private final AtomicReference<ContinuousWalkingCommandMessage> commandMessage;
    private final ContinuousPlanner continuousPlanner;
+   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
    private final StepValidityChecker stepValidityChecker;
    private final ContinuousHikingParameters continuousHikingParameters;
    private final TerrainMapData terrainMap;
    private final TerrainPlanningDebugger debugger;
 
    private final ROS2PublisherBasics<PauseWalkingMessage> pauseWalkingPublisher;
-   private List<QueuedFootstepStatusMessage> controllerQueue;
-
-   private int controllerQueueSize = 0;
 
    public NotStartedState(ROS2Helper ros2Helper,
                           String simpleRobotName,
@@ -47,6 +46,7 @@ public class NotStartedState implements State
                           AtomicReference<ContinuousWalkingCommandMessage> commandMessage,
                           StepValidityChecker stepValidityChecker,
                           ContinuousPlanner continuousPlanner,
+                          ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                           ContinuousHikingParameters continuousHikingParameters,
                           TerrainMapData terrainMap,
                           TerrainPlanningDebugger debugger)
@@ -54,32 +54,13 @@ public class NotStartedState implements State
       this.referenceFrames = referenceFrames;
       this.commandMessage = commandMessage;
       this.continuousPlanner = continuousPlanner;
+      this.controllerFootstepQueueMonitor = controllerFootstepQueueMonitor;
       this.continuousHikingParameters = continuousHikingParameters;
       this.terrainMap = terrainMap;
       this.debugger = debugger;
 
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
-
       pauseWalkingPublisher = ros2Helper.getROS2NodeInterface().createPublisher(HumanoidControllerAPI.getTopic(PauseWalkingMessage.class, simpleRobotName));
       this.stepValidityChecker = stepValidityChecker;
-   }
-
-   private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)
-   {
-      // Set the that controller queue size before getting the new one
-      statistics.setLastFootstepQueueLength(controllerQueueSize);
-
-      if (!continuousHikingParameters.getEnableContinuousWalking())
-         return;
-
-      controllerQueue = footstepQueueStatusMessage.getQueuedFootstepList();
-      if (controllerQueueSize != footstepQueueStatusMessage.getQueuedFootstepList().size())
-      {
-         String message = String.format("State: [%s]: Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size());
-         LogTools.warn(message );
-         statistics.appendString(message);
-      }
-      controllerQueueSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
    }
 
 
@@ -134,7 +115,8 @@ public class NotStartedState implements State
 
          if (continuousPlanner.isPlanAvailable())
          {
-            stepValidityChecker.checkNextStepIsValid(continuousPlanner.getLimitedFootstepDataListMessage(continuousHikingParameters, controllerQueue));
+            stepValidityChecker.checkNextStepIsValid(continuousPlanner.getLimitedFootstepDataListMessage(continuousHikingParameters,
+                                                                                                         controllerFootstepQueueMonitor.getControllerFootstepQueue()));
          }
          else
          {

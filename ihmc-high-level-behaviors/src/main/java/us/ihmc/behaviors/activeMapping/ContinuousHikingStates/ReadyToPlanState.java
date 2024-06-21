@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingState;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
+import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
@@ -24,53 +25,28 @@ public class ReadyToPlanState implements State
 {
    private final AtomicReference<ContinuousWalkingCommandMessage> commandMessage;
    private final ContinuousPlanner continuousPlanner;
+   private final ControllerFootstepQueueMonitor controllerFootstepQueueMonitor;
    private final ContinuousHikingParameters continuousHikingParameters;
    private final TerrainMapData terrainMap;
    private final TerrainPlanningDebugger debugger;
 
    private final AtomicReference<FootstepStatusMessage> latestFootstepStatusMessage = new AtomicReference<>();
-   private List<QueuedFootstepStatusMessage> controllerQueue;
-   private int controllerQueueSize = 0;
 
-   public ReadyToPlanState(ROS2Helper ros2Helper,
-                           String simpleRobotName,
-                           AtomicReference<ContinuousWalkingCommandMessage> commandMessage,
+   public ReadyToPlanState(AtomicReference<ContinuousWalkingCommandMessage> commandMessage,
                            ContinuousPlanner continuousPlanner,
+                           ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                            ContinuousHikingParameters continuousHikingParameters,
                            TerrainMapData terrainMap,
                            TerrainPlanningDebugger debugger)
    {
       this.commandMessage = commandMessage;
       this.continuousPlanner = continuousPlanner;
+      this.controllerFootstepQueueMonitor = controllerFootstepQueueMonitor;
       this.continuousHikingParameters = continuousHikingParameters;
       this.terrainMap = terrainMap;
       this.debugger = debugger;
 
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
-   }
-
-   private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)
-   {
-      if (!continuousHikingParameters.getEnableContinuousWalking())
-         return;
-
-      controllerQueue = footstepQueueStatusMessage.getQueuedFootstepList();
-      if (controllerQueueSize != footstepQueueStatusMessage.getQueuedFootstepList().size())
-      {
-         String message = String.format("State: [%s]: Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size());
-         LogTools.warn(message);
-         statistics.appendString(message);
-      }
-      controllerQueueSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
-   }
-
-   /*
-    * Callback to receive a message each time there is a change in the FootstepStatusMessage
-    */
-   private void footstepStatusReceived(FootstepStatusMessage footstepStatusMessage)
-   {
-      this.latestFootstepStatusMessage.set(footstepStatusMessage);
+      controllerFootstepQueueMonitor.attachFootstepStatusMessageConsumer(latestFootstepStatusMessage::set);
    }
 
    private boolean didPlanningLoop;
@@ -89,7 +65,7 @@ public class ReadyToPlanState implements State
 
       if (continuousHikingParameters.getStepPublisherEnabled())
       {
-         continuousPlanner.getImminentStanceFromLatestStatus(latestFootstepStatusMessage, controllerQueue);
+         continuousPlanner.getImminentStanceFromLatestStatus(latestFootstepStatusMessage, controllerFootstepQueueMonitor.getControllerFootstepQueue());
       }
 
       debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());

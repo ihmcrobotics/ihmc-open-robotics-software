@@ -6,6 +6,7 @@ import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
+import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -27,9 +28,7 @@ public class WaitingToLandState implements State
 
    private final ROS2Topic<FootstepDataListMessage> controllerFootstepDataTopic;
    private final ContinuousPlanner continuousPlanner;
-
-   private int controllerQueueSize = 0;
-   private List<QueuedFootstepStatusMessage> controllerQueue;
+   private final ControllerFootstepQueueMonitor controllerQueueMonitor;
 
    private final AtomicReference<FootstepStatusMessage> latestFootstepStatusMessage = new AtomicReference<>();
 
@@ -37,36 +36,19 @@ public class WaitingToLandState implements State
                              String simpleRobotName,
                              HumanoidReferenceFrames referenceFrames,
                              ContinuousPlanner continuousPlanner,
+                             ControllerFootstepQueueMonitor controllerQueueMonitor,
                              ContinuousHikingParameters continuousHikingParameters)
    {
       this.ros2Helper = ros2Helper;
       this.referenceFrames = referenceFrames;
       this.continuousHikingParameters = continuousHikingParameters;
       this.continuousPlanner = continuousPlanner;
+      this.controllerQueueMonitor = controllerQueueMonitor;
 
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
-      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
+      controllerQueueMonitor.attachFootstepStatusMessageConsumer(this::footstepStatusReceived);
 
       controllerFootstepDataTopic = HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, simpleRobotName);
       ros2Helper.createPublisher(controllerFootstepDataTopic);
-   }
-
-   private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)
-   {
-      // Set the that controller queue size before getting the new one
-      statistics.setLastFootstepQueueLength(controllerQueueSize);
-
-      if (!continuousHikingParameters.getEnableContinuousWalking())
-         return;
-
-      controllerQueue = footstepQueueStatusMessage.getQueuedFootstepList();
-      if (controllerQueueSize != footstepQueueStatusMessage.getQueuedFootstepList().size())
-      {
-         String message = String.format("State: [%s]: Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size());
-         LogTools.warn(message);
-         statistics.appendString(message);
-      }
-      controllerQueueSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
    }
 
    /*
@@ -108,7 +90,7 @@ public class WaitingToLandState implements State
       {
          if (continuousPlanner.isPlanAvailable())
          {
-            FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(continuousHikingParameters, controllerQueue);
+            FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(continuousHikingParameters, controllerQueueMonitor.getControllerFootstepQueue());
 
             String message = String.format("State: [%s]: Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller");
             LogTools.info(message);
@@ -127,8 +109,7 @@ public class WaitingToLandState implements State
       continuousPlanner.setPlanAvailable(false);
       continuousPlanner.transitionCallback();
       statistics.setStartWaitingTime();
-
-
+      
       LogTools.warn("Entering [WAITING_TO_LAND] state");
    }
 
