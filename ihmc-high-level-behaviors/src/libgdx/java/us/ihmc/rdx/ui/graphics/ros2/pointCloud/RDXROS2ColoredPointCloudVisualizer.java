@@ -27,6 +27,7 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.string.StringTools;
+import us.ihmc.tools.thread.RestartableThrottledThread;
 
 import java.util.List;
 import java.util.Set;
@@ -68,6 +69,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
    private final MutableReferenceFrame colorFrame = new MutableReferenceFrame();
    private final RigidBodyTransform depthToColorTransform = new RigidBodyTransform();
 
+   private final RestartableThrottledThread kernelAndMeshUpdateThread;
 
    public RDXROS2ColoredPointCloudVisualizer(String title,
                                              PubSubImplementation pubSubImplementation,
@@ -87,6 +89,33 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
          else if (!isActive && realtimeROS2Node != null)
             unsubscribe();
       });
+
+      kernelAndMeshUpdateThread = new RestartableThrottledThread(getClass().getSimpleName() + "KernelAndMeshUpdate", 15.0, () ->
+      {
+         if (pointCloudRenderer != null && pointCloudRenderer.getVertexBuffer() != null)
+         {
+            pointCloudRenderer.updateMeshFastestBeforeKernel();
+//            pointCloudVertexBuffer.syncWithBackingBuffer(); // TODO: Is this necessary?
+
+            synchronized (depthChannel.getDecompressionAccessSyncObject())
+            {
+               if (usingColor)
+               {
+                  synchronized (colorChannel.getDecompressionAccessSyncObject())
+                  {
+                     runKernels();
+                  }
+               }
+               else
+               {
+                  runKernels();
+               }
+            }
+
+            pointCloudRenderer.updateMeshFastestAfterKernel();
+         }
+      });
+      kernelAndMeshUpdateThread.start();
    }
 
    private void subscribe()
@@ -151,25 +180,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
                pointCloudVertexBuffer.createOpenCLBufferObject(openCLManager);
             }
 
-            pointCloudRenderer.updateMeshFastestBeforeKernel();
-            pointCloudVertexBuffer.syncWithBackingBuffer(); // TODO: Is this necessary?
 
-            synchronized (depthChannel.getDecompressionAccessSyncObject())
-            {
-               if (usingColor)
-               {
-                  synchronized (colorChannel.getDecompressionAccessSyncObject())
-                  {
-                     runKernels();
-                  }
-               }
-               else
-               {
-                  runKernels();
-               }
-            }
-
-            pointCloudRenderer.updateMeshFastestAfterKernel();
          }
       }
    }
@@ -257,6 +268,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
    @Override
    public void destroy()
    {
+      kernelAndMeshUpdateThread.stop();
       depthChannel.destroy();
       colorChannel.destroy();
       unsubscribe();
