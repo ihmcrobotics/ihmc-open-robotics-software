@@ -13,11 +13,6 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
       set(ContinuousHikingParameters.enableContinuousWalking, enableContinuousWalking);
    }
 
-   default void setShortcutIsPressed(boolean shortcutIsPressed)
-   {
-      set(ContinuousHikingParameters.shortcutIsPressed, shortcutIsPressed);
-   }
-
    default void setStepPublisherEnabled(boolean stepPublisherEnabled)
    {
       set(ContinuousHikingParameters.stepPublisherEnabled, stepPublisherEnabled);

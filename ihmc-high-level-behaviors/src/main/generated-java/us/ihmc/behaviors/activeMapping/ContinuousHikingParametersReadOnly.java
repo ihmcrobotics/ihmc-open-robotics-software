@@ -15,11 +15,6 @@ public interface ContinuousHikingParametersReadOnly extends StoredPropertySetRea
       return get(enableContinuousWalking);
    }
 
-   default boolean getShortcutIsPressed()
-   {
-      return get(shortcutIsPressed);
-   }
-
    default boolean getStepPublisherEnabled()
    {
       return get(stepPublisherEnabled);
