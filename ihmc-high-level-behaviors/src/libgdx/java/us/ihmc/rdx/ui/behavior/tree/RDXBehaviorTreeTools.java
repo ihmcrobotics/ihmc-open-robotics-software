@@ -35,7 +35,7 @@ public class RDXBehaviorTreeTools
       {
          return actionSequence;
       }
-      else if (node.getParent() == null)
+      else if (node == null || node.getParent() == null)
       {
          return null;
       }
