@@ -70,6 +70,11 @@ public class RDXScriptedMotionMode
    private final ImDouble beachBallFlexDuration = new ImDouble();
    private final ImDouble beachBallOverheadDuration = new ImDouble();
    private final ImDouble dabOnThemHatersDuration = new ImDouble();
+   private final ImDouble bicepCurlSimpleDuration = new ImDouble();
+   private final ImDouble bicepCurlDuration = new ImDouble();
+   private final ImDouble frontRaiseDuration = new ImDouble();
+   private final ImDouble lateralRaiseDuration = new ImDouble();
+   private final ImDouble shoulderPressDuration = new ImDouble();
    private final ImDouble reachabilityArmsBackDuration = new ImDouble();
    private final ImDouble reachabilityArmsForwardDuration = new ImDouble();
    private final ImDouble reachabilityArmsSidewaysDuration = new ImDouble();
@@ -214,11 +219,23 @@ public class RDXScriptedMotionMode
             case BEACH_BALL_FLEX:
             case BEACH_BALL_OVERHEAD:
             case DAB_ON_THEM_HATERS:
+            case BICEP_CURL_SIMPLE:
+            case BICEP_CURL:
+            case FRONT_RAISE:
+            case LATERAL_RAISE:
+            case SHOULDER_PRESS:
+            case SHOULDER_PRESS_INITIAL:
+            case SHOULDER_PRESS_RETURN:
             case REACHABILITY_ARMS_UP:
             case REACHABILITY_ARMS_FORWARD:
             case REACHABILITY_ARMS_SIDEWAYS:
             case REACHABILITY_ARMS_BACK:
                armTrajectoryMessage = trajectoryStreamer.generateArmTrajectoryMessage(trajectoryType, robotSide);
+               if (armTrajectoryMessage == null)
+               {
+                  // If there's no message, don't publish it.
+                  break;
+               }
                ros2ControllerHelper.publishToController(armTrajectoryMessage);
                break;
             case REACHABILITY_SWEEP:
@@ -347,25 +364,25 @@ public class RDXScriptedMotionMode
       //         trajectoryType = ScriptedTrajectoryType.STRETCH_OUT_ARMS;
       //      }
 
+      // Home Configuration
+      if (ImGui.radioButton(labels.get("Home Configuration"), trajectoryType == ScriptedTrajectoryType.HOME_CONFIGURATION))
+      {
+         trajectoryType = ScriptedTrajectoryType.HOME_CONFIGURATION;
+      }
+      ImGui.sameLine();
+      ImGui.pushItemWidth(70.0f);
+      homeDuration.set(trajectoryStreamer.getTrajectoryDuration(ScriptedTrajectoryType.HOME_CONFIGURATION));
+      if (ImGui.inputDouble("##homeConfigurationDuration", homeDuration))
+      {
+         trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.HOME_CONFIGURATION, homeDuration.get());
+      }
+
       // Ensure the collapsing headers are open on the first frame.
       if (isFirstFrame)
          ImGui.setNextItemOpen(true);
 
       if (ImGui.collapsingHeader(labels.get("Jointspace Scripted Trajectories:")))
       {
-         // Home Configuration
-         if (ImGui.radioButton(labels.get("Home Configuration"), trajectoryType == ScriptedTrajectoryType.HOME_CONFIGURATION))
-         {
-            trajectoryType = ScriptedTrajectoryType.HOME_CONFIGURATION;
-         }
-         ImGui.sameLine();
-         ImGui.pushItemWidth(70.0f);
-         homeDuration.set(trajectoryStreamer.getTrajectoryDuration(ScriptedTrajectoryType.HOME_CONFIGURATION));
-         if (ImGui.inputDouble("##homeConfigurationDuration", homeDuration))
-         {
-            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.HOME_CONFIGURATION, homeDuration.get());
-         }
-
          // Wrist ROM
          if (ImGui.radioButton(labels.get("Wrist ROM"), trajectoryType == ScriptedTrajectoryType.WRIST_RANGE_OF_MOTION))
          {
@@ -565,9 +582,86 @@ public class RDXScriptedMotionMode
          {
             trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.ROM_GRIPPER_YAW, gripperYawRomDuration.get());
          }
-
-         isFirstFrame = false;
       }
+
+      if (isFirstFrame)
+         ImGui.setNextItemOpen(true);
+
+      if (ImGui.collapsingHeader(labels.get("Weight Lifting Trajectories:")))
+      {
+         // Bicep Curl Simple
+         if (ImGui.radioButton(labels.get("Bicep Curl Simple"), trajectoryType == ScriptedTrajectoryType.BICEP_CURL_SIMPLE))
+         {
+            trajectoryType = ScriptedTrajectoryType.BICEP_CURL_SIMPLE;
+         }
+         ImGui.sameLine();
+         bicepCurlSimpleDuration.set(trajectoryStreamer.getTrajectoryDuration(ScriptedTrajectoryType.BICEP_CURL_SIMPLE));
+         if (ImGui.inputDouble("##bicepCurlSimpleDuration", bicepCurlSimpleDuration))
+         {
+            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.BICEP_CURL_SIMPLE, bicepCurlSimpleDuration.get());
+         }
+
+         // Bicep Curl
+         if (ImGui.radioButton(labels.get("Bicep Curl"), trajectoryType == ScriptedTrajectoryType.BICEP_CURL))
+         {
+            trajectoryType = ScriptedTrajectoryType.BICEP_CURL;
+         }
+         ImGui.sameLine();
+         bicepCurlDuration.set(trajectoryStreamer.getTrajectoryDuration(ScriptedTrajectoryType.BICEP_CURL));
+         if (ImGui.inputDouble("##bicepCurlDuration", bicepCurlDuration))
+         {
+            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.BICEP_CURL, bicepCurlDuration.get());
+         }
+
+         // Front Raise
+         if (ImGui.radioButton(labels.get("Front Raise"), trajectoryType == ScriptedTrajectoryType.FRONT_RAISE))
+         {
+            trajectoryType = ScriptedTrajectoryType.FRONT_RAISE;
+         }
+         ImGui.sameLine();
+         frontRaiseDuration.set(trajectoryStreamer.getTrajectoryDuration(ScriptedTrajectoryType.FRONT_RAISE));
+         if (ImGui.inputDouble("##frontRaiseDuration", frontRaiseDuration))
+         {
+            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.FRONT_RAISE, frontRaiseDuration.get());
+         }
+
+         // Lateral Raise
+         if (ImGui.radioButton(labels.get("Lateral Raise"), trajectoryType == ScriptedTrajectoryType.LATERAL_RAISE))
+         {
+            trajectoryType = ScriptedTrajectoryType.LATERAL_RAISE;
+         }
+         ImGui.sameLine();
+         lateralRaiseDuration.set(trajectoryStreamer.getTrajectoryDuration(ScriptedTrajectoryType.LATERAL_RAISE));
+         if (ImGui.inputDouble("##lateralRaiseDuration", lateralRaiseDuration))
+         {
+            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.LATERAL_RAISE, lateralRaiseDuration.get());
+         }
+
+         // Shoulder Press
+         if (ImGui.radioButton(labels.get("Shoulder Press"), trajectoryType == ScriptedTrajectoryType.SHOULDER_PRESS))
+         {
+            trajectoryType = ScriptedTrajectoryType.SHOULDER_PRESS;
+         }
+         ImGui.sameLine();
+         shoulderPressDuration.set(trajectoryStreamer.getTrajectoryDuration(ScriptedTrajectoryType.SHOULDER_PRESS));
+         if (ImGui.inputDouble("##shoulderPressDuration", shoulderPressDuration))
+         {
+            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.SHOULDER_PRESS, shoulderPressDuration.get());
+            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.SHOULDER_PRESS_INITIAL, shoulderPressDuration.get());
+            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.SHOULDER_PRESS_RETURN, shoulderPressDuration.get());
+         }
+         ImGui.sameLine();
+         if (ImGui.radioButton(labels.get("Initialize"), trajectoryType == ScriptedTrajectoryType.SHOULDER_PRESS_INITIAL))
+         {
+            trajectoryType = ScriptedTrajectoryType.SHOULDER_PRESS_INITIAL;
+         }
+         ImGui.sameLine();
+         if (ImGui.radioButton(labels.get("Return"), trajectoryType == ScriptedTrajectoryType.SHOULDER_PRESS_RETURN))
+         {
+            trajectoryType = ScriptedTrajectoryType.SHOULDER_PRESS_RETURN;
+         }
+      }
+      isFirstFrame = false;
 
       if (ImGui.button(labels.get("Execute Trajectory")))
       {
