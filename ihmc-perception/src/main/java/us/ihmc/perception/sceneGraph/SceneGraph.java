@@ -36,7 +36,10 @@ import java.util.function.Function;
  */
 public class SceneGraph
 {
+   /** This is the frequency the scene graph is expected to be updated on the robot. */
    public static final double UPDATE_FREQUENCY = 60.0;
+   /** This is the frequency the CRDT syncs the scene graph state between operator and robot. */
+   public static final double CRDT_SYNC_FREQUENCY = UPDATE_FREQUENCY / 2.0;
 
    /** The root node is always ID 0 and all nodes in the tree are unique. */
    public static long ROOT_NODE_ID = 0;

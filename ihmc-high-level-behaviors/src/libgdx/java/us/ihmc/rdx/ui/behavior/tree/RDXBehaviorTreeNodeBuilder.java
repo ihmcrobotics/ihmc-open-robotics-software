@@ -4,7 +4,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateBuilder;
+import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeInitialization;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
@@ -14,6 +16,8 @@ import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.actions.*;
 import us.ihmc.rdx.ui.behavior.behaviors.RDXDoorTraversal;
+import us.ihmc.rdx.ui.behavior.behaviors.RDXTrashCanInteraction;
+import us.ihmc.rdx.ui.behavior.behaviors.RDXBuildingExploration;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -66,6 +70,14 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       {
          return new RDXDoorTraversal(id, crdtInfo, saveFileDirectory, syncedRobot);
       }
+      if (nodeType == TrashCanInteractionDefinition.class)
+      {
+         return new RDXTrashCanInteraction(id, crdtInfo, saveFileDirectory, syncedRobot);
+      }
+      if (nodeType == BuildingExplorationDefinition.class)
+      {
+         return new RDXBuildingExploration(id, crdtInfo, saveFileDirectory, syncedRobot);
+      }
 
       // Actions:
       if (nodeType == ChestOrientationActionDefinition.class)
@@ -109,16 +121,16 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       {
          return new RDXScrewPrimitiveAction(id, crdtInfo, saveFileDirectory, panel3D, referenceFrameLibrary, syncedRobot);
       }
-      if (nodeType == PelvisHeightPitchActionDefinition.class)
+      if (nodeType == PelvisHeightOrientationActionDefinition.class)
       {
-         return new RDXPelvisHeightPitchAction(id,
-                                               crdtInfo,
-                                               saveFileDirectory,
-                                               panel3D,
-                                               robotModel,
-                                               syncedRobot.getFullRobotModel(),
-                                               selectionCollisionModel,
-                                               referenceFrameLibrary);
+         return new RDXPelvisHeightOrientationAction(id,
+                                                     crdtInfo,
+                                                     saveFileDirectory,
+                                                     panel3D,
+                                                     robotModel,
+                                                     syncedRobot.getFullRobotModel(),
+                                                     selectionCollisionModel,
+                                                     referenceFrameLibrary);
       }
       if (nodeType == SakeHandCommandActionDefinition.class)
       {
@@ -127,6 +139,17 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
       if (nodeType == WaitDurationActionDefinition.class)
       {
          return new RDXWaitDurationAction(id, crdtInfo, saveFileDirectory);
+      }
+      if (nodeType == FootPoseActionDefinition.class)
+      {
+         return new RDXFootPoseAction(id,
+                                      crdtInfo,
+                                      saveFileDirectory,
+                                      panel3D,
+                                      robotModel,
+                                      syncedRobot.getFullRobotModel(),
+                                      selectionCollisionModel,
+                                      referenceFrameLibrary);
       }
       else
       {

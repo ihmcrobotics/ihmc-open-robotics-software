@@ -148,7 +148,7 @@ public class FootstepPlannerLogVisualizerController
 
    public void bindControls()
    {
-      messager.addTopicListener(FootstepPlannerMessagerAPI.RequestLoadLog, type -> loadLog(type));
+      messager.addTopicListener(FootstepPlannerMessagerAPI.RequestLoadLog, this::loadLog);
 
       AtomicReference<HeightMapMessage> heightMapMessage = messager.createInput(FootstepPlannerMessagerAPI.HeightMapData);
       messager.addTopicListener(FootstepPlannerMessagerAPI.GraphData,

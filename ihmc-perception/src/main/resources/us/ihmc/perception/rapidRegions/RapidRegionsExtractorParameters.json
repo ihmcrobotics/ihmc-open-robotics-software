@@ -21,9 +21,9 @@
     "upperBound" : 1.5
   },
   "Merge distance threshold" : {
-    "value" : 2.0,
+    "value" : 1.005,
     "lowerBound" : 0.0,
-    "upperBound" : 1.0
+    "upperBound" : 2.0
   },
   "Merge angular threshold" : {
     "value" : 0.889163,
@@ -36,7 +36,7 @@
     "upperBound" : 8
   },
   "Patch size" : {
-    "value" : 4,
+    "value" : 7,
     "lowerBound" : 2,
     "upperBound" : 20
   },

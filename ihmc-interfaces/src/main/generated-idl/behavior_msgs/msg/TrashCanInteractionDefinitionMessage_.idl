@@ -1,0 +1,25 @@
+#ifndef __behavior_msgs__msg__TrashCanInteractionDefinitionMessage__idl__
+#define __behavior_msgs__msg__TrashCanInteractionDefinitionMessage__idl__
+
+#include "behavior_msgs/msg/./BehaviorTreeNodeDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::TrashCanInteractionDefinitionMessage_")
+      struct TrashCanInteractionDefinitionMessage
+      {
+        /**
+         * Parent definition fields
+         */
+        behavior_msgs::msg::dds::BehaviorTreeNodeDefinitionMessage definition;
+        string obstructed_node_name;
+      };
+    };
+  };
+};
+
+#endif
