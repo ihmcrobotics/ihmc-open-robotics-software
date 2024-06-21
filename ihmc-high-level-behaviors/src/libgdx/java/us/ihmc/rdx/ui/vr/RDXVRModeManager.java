@@ -1,6 +1,5 @@
 package us.ihmc.rdx.ui.vr;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -11,16 +10,12 @@ import org.lwjgl.openvr.InputDigitalActionData;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.motionRetargeting.DefaultRetargetingParameters;
 import us.ihmc.motionRetargeting.RetargetingParameters;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
-import us.ihmc.rdx.imgui.RDX3DSituatedImGuiPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.teleoperation.RDXScriptedTrajectoryStreamer.ScriptedTrajectoryType;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -32,7 +27,7 @@ import java.util.Set;
 public class RDXVRModeManager
 {
    private RDXVRKinematicsStreamingMode kinematicsStreamingMode;
-   private RDXScriptedMotionMode scriptedMotionMode;
+   private RDXScriptedTrajectoryMode scriptedTrajectoryMode;
 //   private RDX3DSituatedImGuiPanel leftHandPanel;
 //   private final FramePose3D leftHandPanelPose = new FramePose3D();
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -70,8 +65,8 @@ public class RDXVRModeManager
          kinematicsStreamingMode = new RDXVRKinematicsStreamingMode(syncedRobot, controllerHelper, retargetingParameters, sceneGraph);
          kinematicsStreamingMode.create(baseUI.getVRManager().getContext());
 
-         scriptedMotionMode = new RDXScriptedMotionMode(syncedRobot, controllerHelper, sceneGraph);
-         scriptedMotionMode.create(baseUI.getVRManager().getContext());
+         scriptedTrajectoryMode = new RDXScriptedTrajectoryMode(syncedRobot, controllerHelper, sceneGraph);
+         scriptedTrajectoryMode.create(baseUI.getVRManager().getContext());
       }
 
       baseUI.getImGuiPanelManager().addPanel("VR Mode Manager", this::renderImGuiWidgets);
@@ -117,7 +112,7 @@ public class RDXVRModeManager
                                                                 if (bButton.bChanged() && !bButton.bState())
                                                                 {
                                                                    //TODO: switch modes here instead of executing scripted
-                                                                   if (mode == RDXVRMode.SCRIPTED_MOTION && !scriptedMotionMode.isScriptedMotionExecuting())
+                                                                   if (mode == RDXVRMode.SCRIPTED_MOTION && !scriptedTrajectoryMode.isScriptedMotionExecuting())
                                                                    {
                                                                       mode = RDXVRMode.WHOLE_BODY_IK_STREAMING;
                                                                    }
@@ -137,8 +132,8 @@ public class RDXVRModeManager
          }
          case SCRIPTED_MOTION ->
          {
-            if (scriptedMotionMode != null)
-               scriptedMotionMode.processVRInput(vrContext);
+            if (scriptedTrajectoryMode != null)
+               scriptedTrajectoryMode.processVRInput(vrContext);
          }
       }
    }
@@ -147,8 +142,8 @@ public class RDXVRModeManager
    {
       if (kinematicsStreamingMode != null)
          kinematicsStreamingMode.update(mode == RDXVRMode.WHOLE_BODY_IK_STREAMING);
-      if (scriptedMotionMode != null)
-         scriptedMotionMode.update(mode == RDXVRMode.SCRIPTED_MOTION);
+      if (scriptedTrajectoryMode != null)
+         scriptedTrajectoryMode.update(mode == RDXVRMode.SCRIPTED_MOTION);
 //      leftHandPanel.update();
    }
 
@@ -195,8 +190,8 @@ public class RDXVRModeManager
          }
          case SCRIPTED_MOTION ->
          {
-            if (scriptedMotionMode != null)
-               scriptedMotionMode.renderImGuiWidgets();
+            if (scriptedTrajectoryMode != null)
+               scriptedTrajectoryMode.renderImGuiWidgets();
          }
       }
    }

@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImDouble;
@@ -37,7 +38,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RDXScriptedMotionMode
+public class RDXScriptedTrajectoryMode
 {
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2ControllerHelper ros2ControllerHelper;
@@ -60,6 +61,7 @@ public class RDXScriptedMotionMode
    private boolean isTrajectoryMessageSent = false;
    private boolean isTrajectoryCompleted = false;
    private int reachabilitySweepCounter = 0;
+   private TIntObjectHashMap<ScriptedTrajectoryType> reachabilityTrajectoryMap = new TIntObjectHashMap<>();
    private boolean isFirstFrame = true;
    ImDouble tempDuration = new ImDouble(4.0);
 
@@ -75,6 +77,8 @@ public class RDXScriptedMotionMode
    private final ImDouble frontRaiseDuration = new ImDouble();
    private final ImDouble lateralRaiseDuration = new ImDouble();
    private final ImDouble shoulderPressDuration = new ImDouble();
+   private final ImDouble continuousWeightMovingDuration = new ImDouble();
+   private final ImDouble continuousWeightTwirlDuration = new ImDouble();
    private final ImDouble reachabilityArmsBackDuration = new ImDouble();
    private final ImDouble reachabilityArmsForwardDuration = new ImDouble();
    private final ImDouble reachabilityArmsSidewaysDuration = new ImDouble();
@@ -87,7 +91,7 @@ public class RDXScriptedMotionMode
    private final ImDouble wristRollRomDuration = new ImDouble();
    private final ImDouble gripperYawRomDuration = new ImDouble();
 
-   public RDXScriptedMotionMode(ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2ControllerHelper, SceneGraph sceneGraph)
+   public RDXScriptedTrajectoryMode(ROS2SyncedRobotModel syncedRobot, ROS2ControllerHelper ros2ControllerHelper, SceneGraph sceneGraph)
    {
       this.syncedRobot = syncedRobot;
       this.robotModel = syncedRobot.getRobotModel();
@@ -111,6 +115,14 @@ public class RDXScriptedMotionMode
       }
 
       trajectoryStreamer = new RDXScriptedTrajectoryStreamer(armJoints, defaultScriptedTrajectoryDuration);
+
+      // Assign each reachability trajectory to an integer.
+      reachabilityTrajectoryMap.put(0, ScriptedTrajectoryType.REACHABILITY_ARMS_BACK);
+      reachabilityTrajectoryMap.put(1, ScriptedTrajectoryType.REACHABILITY_ARMS_SIDEWAYS);
+      reachabilityTrajectoryMap.put(2, ScriptedTrajectoryType.REACHABILITY_ARMS_FORWARD);
+      reachabilityTrajectoryMap.put(3, ScriptedTrajectoryType.REACHABILITY_ARMS_UP);
+      reachabilityTrajectoryMap.put(4, ScriptedTrajectoryType.HOME_CONFIGURATION);
+//      reachabilityTrajectoryMap.put(5, ScriptedTrajectoryType.WRIST_RANGE_OF_MOTION);
 
       //TODO: Add additional logic for joint space trajectories
       // Check for completion of the trajectories.
@@ -230,6 +242,8 @@ public class RDXScriptedMotionMode
             case REACHABILITY_ARMS_FORWARD:
             case REACHABILITY_ARMS_SIDEWAYS:
             case REACHABILITY_ARMS_BACK:
+            case CONTINUOUS_WEIGHT_MOVING:
+            case CONTINUOUS_WEIGHT_TWIRL:
                armTrajectoryMessage = trajectoryStreamer.generateArmTrajectoryMessage(trajectoryType, robotSide);
                if (armTrajectoryMessage == null)
                {
@@ -239,53 +253,13 @@ public class RDXScriptedMotionMode
                ros2ControllerHelper.publishToController(armTrajectoryMessage);
                break;
             case REACHABILITY_SWEEP:
-               if (reachabilitySweepCounter == 0)
+               armTrajectoryMessage = trajectoryStreamer.generateArmTrajectoryMessage(reachabilityTrajectoryMap.get(reachabilitySweepCounter), robotSide);
+               ros2ControllerHelper.publishToController(armTrajectoryMessage);
+               if (robotSide == RobotSide.RIGHT)
                {
-                  armTrajectoryMessage = trajectoryStreamer.generateArmTrajectoryMessage(ScriptedTrajectoryType.REACHABILITY_ARMS_BACK, robotSide);
-                  ros2ControllerHelper.publishToController(armTrajectoryMessage);
-                  if (robotSide == RobotSide.RIGHT)
-                     reachabilitySweepCounter++;
-               }
-               else if (reachabilitySweepCounter == 1)
-               {
-                  armTrajectoryMessage = trajectoryStreamer.generateArmTrajectoryMessage(ScriptedTrajectoryType.REACHABILITY_ARMS_SIDEWAYS, robotSide);
-                  ros2ControllerHelper.publishToController(armTrajectoryMessage);
-                  if (robotSide == RobotSide.RIGHT)
-                     reachabilitySweepCounter++;
-               }
-               else if (reachabilitySweepCounter == 2)
-               {
-                  armTrajectoryMessage = trajectoryStreamer.generateArmTrajectoryMessage(ScriptedTrajectoryType.REACHABILITY_ARMS_FORWARD, robotSide);
-                  ros2ControllerHelper.publishToController(armTrajectoryMessage);
-                  if (robotSide == RobotSide.RIGHT)
-                     reachabilitySweepCounter++;
-               }
-               else if (reachabilitySweepCounter == 3)
-               {
-                  armTrajectoryMessage = trajectoryStreamer.generateArmTrajectoryMessage(ScriptedTrajectoryType.REACHABILITY_ARMS_UP, robotSide);
-                  ros2ControllerHelper.publishToController(armTrajectoryMessage);
-                  if (robotSide == RobotSide.RIGHT)
-                     reachabilitySweepCounter++;
-               }
-               else if (reachabilitySweepCounter == 4)
-               {
-                  armTrajectoryMessage = trajectoryStreamer.generateArmTrajectoryMessage(ScriptedTrajectoryType.HOME_CONFIGURATION, robotSide);
-                  ros2ControllerHelper.publishToController(armTrajectoryMessage);
-                  if (robotSide == RobotSide.RIGHT)
-                     reachabilitySweepCounter++;
-               }
-               else if (reachabilitySweepCounter == 5)
-               {
-                  armTrajectoryMessage = trajectoryStreamer.generateArmTrajectoryMessage(ScriptedTrajectoryType.WRIST_RANGE_OF_MOTION, robotSide);
-                  ros2ControllerHelper.publishToController(armTrajectoryMessage);
-                  if (robotSide == RobotSide.RIGHT)
-                     reachabilitySweepCounter++;
-               }
-               else
-               {
-                  armTrajectoryMessage = trajectoryStreamer.generateArmTrajectoryMessage(ScriptedTrajectoryType.HOME_CONFIGURATION, robotSide);
-                  ros2ControllerHelper.publishToController(armTrajectoryMessage);
-                  if (robotSide == RobotSide.RIGHT)
+                  reachabilitySweepCounter++;
+
+                  if (reachabilitySweepCounter > 4)
                      reachabilitySweepCounter = 0;
                }
                break;
@@ -659,6 +633,30 @@ public class RDXScriptedMotionMode
          if (ImGui.radioButton(labels.get("Return"), trajectoryType == ScriptedTrajectoryType.SHOULDER_PRESS_RETURN))
          {
             trajectoryType = ScriptedTrajectoryType.SHOULDER_PRESS_RETURN;
+         }
+
+         // Continuous Weight Moving
+         if (ImGui.radioButton(labels.get("Continuous Weight Moving"), trajectoryType == ScriptedTrajectoryType.CONTINUOUS_WEIGHT_MOVING))
+         {
+            trajectoryType = ScriptedTrajectoryType.CONTINUOUS_WEIGHT_MOVING;
+         }
+         ImGui.sameLine();
+         continuousWeightMovingDuration.set(trajectoryStreamer.getTrajectoryDuration(ScriptedTrajectoryType.CONTINUOUS_WEIGHT_MOVING));
+         if (ImGui.inputDouble("##continuousWeightMovingDuration", continuousWeightMovingDuration))
+         {
+            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.CONTINUOUS_WEIGHT_MOVING, continuousWeightMovingDuration.get());
+         }
+
+         // Continuous Weight Twirl
+         if (ImGui.radioButton(labels.get("Continuous Weight Twirl"), trajectoryType == ScriptedTrajectoryType.CONTINUOUS_WEIGHT_TWIRL))
+         {
+            trajectoryType = ScriptedTrajectoryType.CONTINUOUS_WEIGHT_TWIRL;
+         }
+         ImGui.sameLine();
+         continuousWeightTwirlDuration.set(trajectoryStreamer.getTrajectoryDuration(ScriptedTrajectoryType.CONTINUOUS_WEIGHT_TWIRL));
+         if (ImGui.inputDouble("##continuousWeightTwirlDuration", continuousWeightTwirlDuration))
+         {
+            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.CONTINUOUS_WEIGHT_TWIRL, continuousWeightTwirlDuration.get());
          }
       }
       isFirstFrame = false;
