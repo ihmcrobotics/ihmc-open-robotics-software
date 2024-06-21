@@ -170,12 +170,13 @@ public class PlanAvailableState implements State
       {
          continuousHikingState.set(ContinuousHikingState.READY_TO_PLAN);
       }
+
+      if (!continuousHikingParameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
+         continuousHikingState.set(ContinuousHikingState.NOT_STARTED);
    }
 
    @Override
    public void onExit(double timeInState)
    {
-      if (!continuousHikingParameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
-         continuousHikingState.set(ContinuousHikingState.NOT_STARTED);
    }
 }

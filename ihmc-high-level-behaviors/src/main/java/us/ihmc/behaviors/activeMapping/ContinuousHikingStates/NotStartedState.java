@@ -121,12 +121,13 @@ public class NotStartedState implements State
             statistics.appendString(message);
          }
       }
+
+      if (!continuousHikingParameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
+         continuousHikingState.set(ContinuousHikingState.NOT_STARTED);
    }
 
    @Override
    public void onExit(double timeInState)
    {
-      if (!continuousHikingParameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
-         continuousHikingState.set(ContinuousHikingState.NOT_STARTED);
    }
 }
