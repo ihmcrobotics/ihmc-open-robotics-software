@@ -7,9 +7,7 @@ import ihmc_common_msgs.msg.dds.StoredPropertySetMessagePubSubType;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.HeightMapMessagePubSubType;
 import toolbox_msgs.msg.dds.*;
-import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -33,11 +31,11 @@ import us.ihmc.yoVariables.variable.YoVariableType;
 
 import javax.swing.*;
 import java.io.*;
-import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class FootstepPlannerLogLoader
 {
@@ -75,12 +73,21 @@ public class FootstepPlannerLogLoader
          }
 
          SortedSet<Path> sortedLogFolderPaths = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
-         PathTools.walkFlat(Paths.get(FootstepPlannerLogger.defaultLogsDirectory), (path, type) -> {
-            if (type == BasicPathVisitor.PathType.DIRECTORY
-                && path.getFileName().toString().endsWith(FootstepPlannerLogger.FOOTSTEP_PLANNER_LOG_POSTFIX))
-               sortedLogFolderPaths.add(path);
-            return FileVisitResult.CONTINUE;
-         });
+
+         try (Stream<Path> paths = Files.walk(Path.of(FootstepPlannerLogger.defaultLogsDirectory)))
+         {
+            paths.filter(Files::isDirectory).forEach(dir ->
+                                                     {
+                                                        if (dir.getFileName().toString().endsWith(FootstepPlannerLogger.FOOTSTEP_PLANNER_LOG_POSTFIX))
+                                                        {
+                                                           sortedLogFolderPaths.add(dir);
+                                                        }
+                                                     });
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException(e);
+         }
 
          if (loadRequestType == LoadRequestType.LATEST)
          {
@@ -152,6 +159,8 @@ public class FootstepPlannerLogLoader
          LogTools.error("The given file isn't a directory. This method should receive a directory as input");
          return LoadResult.ERROR;
       }
+
+      LogTools.info("Loading log: " + logDirectory.getAbsolutePath());
 
       try
       {
