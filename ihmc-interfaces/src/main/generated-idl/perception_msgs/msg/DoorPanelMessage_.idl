@@ -1,0 +1,22 @@
+#ifndef __perception_msgs__msg__DoorPanelMessage__idl__
+#define __perception_msgs__msg__DoorPanelMessage__idl__
+
+#include "perception_msgs/msg/./PlanarRegionMessage_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::DoorPanelMessage_")
+      struct DoorPanelMessage
+      {
+        perception_msgs::msg::dds::PlanarRegionMessage planar_region;
+        unsigned long long planar_region_last_update_time_millis;
+      };
+    };
+  };
+};
+
+#endif

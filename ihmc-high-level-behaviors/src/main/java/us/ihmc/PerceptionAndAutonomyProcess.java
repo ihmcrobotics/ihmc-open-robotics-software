@@ -530,7 +530,7 @@ public class PerceptionAndAutonomyProcess
       if (newPlanarRegions.poll())
          for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
             if (sceneNode instanceof DoorNode doorNode)
-               doorNode.filterAndSetDoorPlanarRegionFromPlanarRegionsList(newPlanarRegions.read());
+               doorNode.getDoorPanel().filterAndSetPlanarRegionFromPlanarRegionsList(newPlanarRegions.read());
 
       // Update general stuff
       sceneGraph.updateOnRobotOnly(robotPelvisFrame);

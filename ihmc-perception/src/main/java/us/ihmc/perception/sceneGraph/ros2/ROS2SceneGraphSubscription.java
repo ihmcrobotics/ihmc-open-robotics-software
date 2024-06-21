@@ -13,7 +13,6 @@ import perception_msgs.msg.dds.YOLOv8NodeMessage;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -28,7 +27,6 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeReplacement;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.OpeningMechanismType;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.tools.thread.SwapReference;
 
@@ -176,11 +174,12 @@ public class ROS2SceneGraphSubscription
          }
          if (localNode instanceof DoorNode doorNode)
          {
-            doorNode.setOpeningMechanismType(OpeningMechanismType.fromByte(subscriptionNode.getDoorNodeMessage().getOpeningMechanismType()));
-            doorNode.getDoorPlanarRegion().set(PlanarRegionMessageConverter.convertToPlanarRegion(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegion()));
-            doorNode.setDoorPlanarRegionUpdateTime(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegionUpdateTimeMillis());
-            doorNode.setOpeningMechanismPoint3D(subscriptionNode.getDoorNodeMessage().getOpeningMechanismPoint());
-            doorNode.setOpeningMechanismPose3D(subscriptionNode.getDoorNodeMessage().getOpeningMechanismPose());
+            // TODO: DOORNODES
+//            doorNode.setOpeningMechanismType(DoorOpeningMechanismType.fromByte(subscriptionNode.getDoorNodeMessage().getOpeningMechanismType()));
+//            doorNode.getDoorPlanarRegion().set(PlanarRegionMessageConverter.convertToPlanarRegion(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegion()));
+//            doorNode.setDoorPlanarRegionUpdateTime(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegionUpdateTimeMillis());
+//            doorNode.setOpeningMechanismPoint3D(subscriptionNode.getDoorNodeMessage().getOpeningMechanismPoint());
+//            doorNode.setOpeningMechanismPose3D(subscriptionNode.getDoorNodeMessage().getOpeningMechanismPose());
          }
 
          if (localParentNode != null) // Parent of root node is null

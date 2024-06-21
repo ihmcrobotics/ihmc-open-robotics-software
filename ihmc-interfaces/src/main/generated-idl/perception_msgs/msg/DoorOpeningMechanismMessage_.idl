@@ -1,0 +1,22 @@
+#ifndef __perception_msgs__msg__DoorOpeningMechanismMessage__idl__
+#define __perception_msgs__msg__DoorOpeningMechanismMessage__idl__
+
+#include "geometry_msgs/msg/./Pose_.idl"
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::DoorOpeningMechanismMessage_")
+      struct DoorOpeningMechanismMessage
+      {
+        octet type;
+        geometry_msgs::msg::dds::Pose grasp_pose;
+      };
+    };
+  };
+};
+
+#endif
