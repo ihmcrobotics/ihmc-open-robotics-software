@@ -1,5 +1,6 @@
 package us.ihmc.perception.sceneGraph.rigidBody.doors;
 
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.Axis2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -25,9 +26,9 @@ public class DoorNode extends SceneNode
    private final DoorPanel doorPanel = new DoorPanel(this);
    private final List<DoorOpeningMechanism> openingMechanisms = new ArrayList<>();
 
-   public DoorNode(long id)
+   public DoorNode(long id, CRDTInfo crdtInfo)
    {
-      super(id, "Door" + id);
+      super(id, "Door" + id, crdtInfo);
    }
 
    public Pose3D getDoorFramePose()

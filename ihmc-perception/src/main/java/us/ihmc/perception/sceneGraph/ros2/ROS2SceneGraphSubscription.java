@@ -45,6 +45,8 @@ public class ROS2SceneGraphSubscription
    private final BiFunction<SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier;
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
    private long numberOfMessagesReceived = 0;
+   private long previousUpdateNumber = -1;
+   private long messageDropCount = 0;
    private int numberOfOnRobotNodes = 0;
    private boolean localTreeFrozen = false;
    private final ROS2SceneGraphSubscriptionNode subscriptionRootNode = new ROS2SceneGraphSubscriptionNode();
@@ -95,6 +97,14 @@ public class ROS2SceneGraphSubscription
             {
                messageRecievedCallback.run();
             }
+
+            long nextUpdateNumber = sceneGraphMessage.getSequenceId();
+            if (previousUpdateNumber > -1)
+            {
+               long expectedUpdateNumber = previousUpdateNumber + 1;
+               messageDropCount += nextUpdateNumber - expectedUpdateNumber;
+            }
+            previousUpdateNumber = nextUpdateNumber;
 
             subscriptionRootNode.clear();
             subscriptionNodeDepthFirstIndex.setValue(0);
@@ -202,6 +212,9 @@ public class ROS2SceneGraphSubscription
             updateLocalTreeFromSubscription(subscriptionChildNode, localChildNode, localNode, modificationQueue);
          }
       }
+
+      // Update the state after iterating over children, because node can unfreeze at this time
+      localNode.fromMessage(subscriptionNode.getSceneNodeMessage().getConfirmableRequest());
    }
 
    private void checkTreeModified(SceneNode localNode)
@@ -311,8 +324,8 @@ public class ROS2SceneGraphSubscription
       return numberOfMessagesReceived;
    }
 
-   public boolean getLocalTreeFrozen()
+   public long getMessageDropCount()
    {
-      return localTreeFrozen;
+      return messageDropCount;
    }
 }

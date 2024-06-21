@@ -2,6 +2,7 @@
 #define __perception_msgs__msg__SceneNodeMessage__idl__
 
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
+#include "ihmc_common_msgs/msg/./ConfirmableRequestMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -24,6 +25,10 @@ module perception_msgs
          * The name of the scene node
          */
         string name;
+        /**
+         * A mechanism for confirming and ending a freeze early
+         */
+        ihmc_common_msgs::msg::dds::ConfirmableRequestMessage confirmable_request;
         /**
          * Transform of the node's frame to world frame
          */

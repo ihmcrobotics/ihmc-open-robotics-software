@@ -21,6 +21,10 @@ public class SceneNodeMessage extends Packet<SceneNodeMessage> implements Settab
             */
    public java.lang.StringBuilder name_;
    /**
+            * A mechanism for confirming and ending a freeze early
+            */
+   public ihmc_common_msgs.msg.dds.ConfirmableRequestMessage confirmable_request_;
+   /**
             * Transform of the node's frame to world frame
             */
    public controller_msgs.msg.dds.RigidBodyTransformMessage transform_to_world_;
@@ -32,6 +36,7 @@ public class SceneNodeMessage extends Packet<SceneNodeMessage> implements Settab
    public SceneNodeMessage()
    {
       name_ = new java.lang.StringBuilder(255);
+      confirmable_request_ = new ihmc_common_msgs.msg.dds.ConfirmableRequestMessage();
       transform_to_world_ = new controller_msgs.msg.dds.RigidBodyTransformMessage();
    }
 
@@ -48,6 +53,7 @@ public class SceneNodeMessage extends Packet<SceneNodeMessage> implements Settab
       name_.setLength(0);
       name_.append(other.name_);
 
+      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.staticCopy(other.confirmable_request_, confirmable_request_);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.staticCopy(other.transform_to_world_, transform_to_world_);
       number_of_children_ = other.number_of_children_;
 
@@ -90,6 +96,15 @@ public class SceneNodeMessage extends Packet<SceneNodeMessage> implements Settab
    public java.lang.StringBuilder getName()
    {
       return name_;
+   }
+
+
+   /**
+            * A mechanism for confirming and ending a freeze early
+            */
+   public ihmc_common_msgs.msg.dds.ConfirmableRequestMessage getConfirmableRequest()
+   {
+      return confirmable_request_;
    }
 
 
@@ -138,6 +153,7 @@ public class SceneNodeMessage extends Packet<SceneNodeMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon)) return false;
 
+      if (!this.confirmable_request_.epsilonEquals(other.confirmable_request_, epsilon)) return false;
       if (!this.transform_to_world_.epsilonEquals(other.transform_to_world_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_children_, other.number_of_children_, epsilon)) return false;
 
@@ -158,6 +174,7 @@ public class SceneNodeMessage extends Packet<SceneNodeMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_)) return false;
 
+      if (!this.confirmable_request_.equals(otherMyClass.confirmable_request_)) return false;
       if (!this.transform_to_world_.equals(otherMyClass.transform_to_world_)) return false;
       if(this.number_of_children_ != otherMyClass.number_of_children_) return false;
 
@@ -175,6 +192,8 @@ public class SceneNodeMessage extends Packet<SceneNodeMessage> implements Settab
       builder.append(this.id_);      builder.append(", ");
       builder.append("name=");
       builder.append(this.name_);      builder.append(", ");
+      builder.append("confirmable_request=");
+      builder.append(this.confirmable_request_);      builder.append(", ");
       builder.append("transform_to_world=");
       builder.append(this.transform_to_world_);      builder.append(", ");
       builder.append("number_of_children=");
