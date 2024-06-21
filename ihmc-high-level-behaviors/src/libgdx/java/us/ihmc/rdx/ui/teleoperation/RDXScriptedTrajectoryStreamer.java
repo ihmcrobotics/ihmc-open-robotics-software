@@ -301,50 +301,50 @@ public class RDXScriptedTrajectoryStreamer
                }
                break;
             case BICEP_CURL_SIMPLE:
-               if (side == RobotSide.LEFT)
-               {
+//               if (side == RobotSide.LEFT)
+//               {
                   waypoints.put(side, List.of(List.of(0.0, 0.0, 0.0, -1.3, 0.0, 0.0, 0.0),
                                               List.of(0.0, 0.0, 0.0, -2.2, 0.0, 0.0, 0.0),
                                               List.of(0.0, 0.0, 0.0, -1.3, 0.0, 0.0, 0.0)));
-               }
+//               }
                break;
             case BICEP_CURL:
-               if (side == RobotSide.LEFT)
-               {
+//               if (side == RobotSide.LEFT)
+//               {
                   waypoints.put(side, List.of(List.of(0.0, 0.0, 0.0, -1.3, side.negateIfRightSide(-1.57), 0.0, 0.0),
                                               List.of(0.3, 0.0, side.negateIfRightSide(-0.2), -2.2, 0.0, 0.0, 0.0),
                                               List.of(0.0, 0.0, 0.0, -1.3, side.negateIfRightSide(-1.57), 0.0, 0.0)));
-               }
+//               }
                break;
             case FRONT_RAISE:
-               if (side == RobotSide.LEFT)
-               {
+//               if (side == RobotSide.LEFT)
+//               {
                   waypoints.put(side,
                                 List.of(List.of(0.0, 0.0, 0.0, -1.3, 0.0, 0.0, 0.0),
-                                        List.of(-1.5, side.negateIfRightSide(0.6), 0.0, 0.0, side.negateIfRightSide(0.6), 0.0, 0.0),
+                                        List.of(-1.8, side.negateIfRightSide(0.9), 0.0, 0.0, side.negateIfRightSide(0.6), 0.0, 0.0),
                                         List.of(0.0, 0.0, 0.0, -1.3, 0.0, 0.0, 0.0)));
-               }
+//               }
                break;
             case LATERAL_RAISE:
-               if (side == RobotSide.LEFT)
-               {
+//               if (side == RobotSide.LEFT)
+//               {
                   waypoints.put(side,
                                 List.of(List.of(0.0, 0.0, 0.0, -1.5, 0.0, 0.0, 0.0),
-                                        List.of(0.0, side.negateIfRightSide(1.57), 0.0, 0.0, side.negateIfRightSide(1.57), 0.0, 0.0),
+                                        List.of(0.0, side.negateIfRightSide(1.8), 0.0, 0.0, side.negateIfRightSide(1.57), 0.0, 0.0),
                                         List.of(0.0, 0.0, 0.0, -1.5, 0.0, 0.0, 0.0)));
-               }
+//               }
                break;
             case SHOULDER_PRESS:
-               if (side == RobotSide.LEFT)
-               {
+//               if (side == RobotSide.LEFT)
+//               {
                   waypoints.put(side,
                                 List.of(List.of(-3.14, side.negateIfRightSide(1.4), side.negateIfRightSide(-1.5), 0.0, side.negateIfRightSide(-1.57), 0.0, 0.0),
                                         List.of(-3.14, side.negateIfRightSide(2.5), side.negateIfRightSide(-1.5), -1.1, side.negateIfRightSide(-1.57), 0.0, 0.0)));
-               }
+//               }
                break;
             case SHOULDER_PRESS_INITIAL:
-               if (side == RobotSide.LEFT)
-               {
+//               if (side == RobotSide.LEFT)
+//               {
                   waypoints.put(side,
                                 List.of(
                                       homeConfiguration,
@@ -353,11 +353,11 @@ public class RDXScriptedTrajectoryStreamer
                                         List.of(-1.6, side.negateIfRightSide(1.5), side.negateIfRightSide(-0.9), 0.0, 0.0, 0.0, 0.0),
                                         //List.of(-2.3, side.negateIfRightSide(2.0), side.negateIfRightSide(-1.2), -0.5, 0.0, 0.0, 0.0),
                                         List.of(-3.14, side.negateIfRightSide(2.5), side.negateIfRightSide(-1.5), -1.1, side.negateIfRightSide(-1.57), 0.0, 0.0)));
-               }
+//               }
                break;
             case SHOULDER_PRESS_RETURN:
-               if (side == RobotSide.LEFT)
-               {
+//               if (side == RobotSide.LEFT)
+//               {
                   waypoints.put(side, List.of(
 //                                              List.of(-3.14, side.negateIfRightSide(2.5), side.negateIfRightSide(-1.5), -1.1, side.negateIfRightSide(-1.57), 0.0, 0.0),
                                               List.of(-3.14, side.negateIfRightSide(1.4), side.negateIfRightSide(-1.5), 0.0, side.negateIfRightSide(-1.57), 0.0, 0.0),
@@ -366,11 +366,11 @@ public class RDXScriptedTrajectoryStreamer
                                               List.of(-0.9, side.negateIfRightSide(1.25), side.negateIfRightSide(1.0), 0.0, 0.0, 0.0, 0.0),
 //                                              List.of(-0.2, side.negateIfRightSide(1.0), side.negateIfRightSide(0.5), -0.9, 0.0, 0.0, 0.0),
                                               homeConfiguration));
-               }
+//               }
                break;
             case CONTINUOUS_WEIGHT_MOVING:
-               if (side == RobotSide.LEFT)
-               {
+//               if (side == RobotSide.LEFT)
+//               {
                   waypoints.put(side, List.of(
                         List.of(1.0, side.negateIfRightSide(0.47), side.negateIfRightSide(1.0), -0.5, side.negateIfRightSide(1.0), 0.0, 0.0),
                         List.of(0.5, side.negateIfRightSide(2.3), side.negateIfRightSide(1.0), 0.0, 0.0, 0.0, 0.0),
@@ -378,11 +378,11 @@ public class RDXScriptedTrajectoryStreamer
                         List.of(-3.0, side.negateIfRightSide(1.4), side.negateIfRightSide(0.0), 0.0, 0.0, 0.0, 0.0),
                         List.of(-1.0, side.negateIfRightSide(1.2), side.negateIfRightSide(0.0), 0.0, 0.0, 0.0, 0.0),
                         homeConfiguration));
-               }
+//               }
                break;
             case CONTINUOUS_WEIGHT_TWIRL:
-               if (side == RobotSide.LEFT)
-               {
+//               if (side == RobotSide.LEFT)
+//               {
                   waypoints.put(side, List.of(
                         List.of(1.0, side.negateIfRightSide(0.47), side.negateIfRightSide(1.0), -0.5, side.negateIfRightSide(1.0), 0.0, side.negateIfRightSide(0.0)),
                         List.of(0.5, side.negateIfRightSide(2.3), side.negateIfRightSide(1.0), 0.0, side.negateIfRightSide(0.0), 0.0, side.negateIfRightSide(0.0)),
@@ -390,7 +390,7 @@ public class RDXScriptedTrajectoryStreamer
                         List.of(-3.0, side.negateIfRightSide(1.4), side.negateIfRightSide(0.0), 0.0, side.negateIfRightSide(-1.0), 0.0, side.negateIfRightSide(-2.0)),
                         List.of(-1.0, side.negateIfRightSide(1.2), side.negateIfRightSide(0.0), 0.0, side.negateIfRightSide(0.0), 0.0, side.negateIfRightSide(0.0)),
                         homeConfiguration));
-               }
+//               }
                break;
             default:
                throw new RuntimeException("Unhandled trajectory type: " + trajectoryType);
