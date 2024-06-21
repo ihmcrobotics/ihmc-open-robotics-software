@@ -1,6 +1,10 @@
 package us.ihmc.perception.sceneGraph;
 
 import us.ihmc.perception.detections.InstantDetection;
+import us.ihmc.perception.detections.PersistentDetection;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * An object that is currently detected or not currently detected,
@@ -8,23 +12,55 @@ import us.ihmc.perception.detections.InstantDetection;
  */
 public class DetectableSceneNode extends SceneNode
 {
-   private InstantDetection detection;
+   private List<PersistentDetection<? extends InstantDetection>> detections = new ArrayList<>();
    private boolean currentlyDetected;
 
-   public DetectableSceneNode(long id, String name, InstantDetection detection)
+   public DetectableSceneNode(long id, String name, PersistentDetection<? extends InstantDetection> detection)
    {
       super(id, name);
-      this.detection = detection;
+      detections.add(detection);
    }
 
-   public void updateDetection(InstantDetection newDetection)
+   public DetectableSceneNode(long id, String name, List<PersistentDetection<? extends InstantDetection>> detections)
    {
-      detection = newDetection;
+      super(id, name);
+      setDetections(detections);
    }
 
-   public InstantDetection getDetection()
+
+   public void update()
    {
-      return detection;
+
+   }
+
+   public void setDetections(List<PersistentDetection<? extends InstantDetection>> detections)
+   {
+      this.detections = detections;
+   }
+
+   /**
+    * Add a new {@link PersistentDetection} to the set of detections this node corresponds to
+    * @param detection New {@link PersistentDetection} being added.
+    * @return True if the detection is added to the set, false if the set already contained the detection.
+    */
+   public boolean addNewDetection(PersistentDetection<? extends InstantDetection> detection)
+   {
+      return detections.add(detection);
+   }
+
+   public boolean hasDetection(PersistentDetection<? extends InstantDetection> detection)
+   {
+      return detections.contains(detection);
+   }
+
+   public List<PersistentDetection<? extends InstantDetection>> getDetections()
+   {
+      return detections;
+   }
+
+   public PersistentDetection<? extends InstantDetection> getDetection(int detectionIndex)
+   {
+      return detections.get(detectionIndex);
    }
 
    public void setCurrentlyDetected(boolean currentlyDetected)
@@ -35,5 +71,13 @@ public class DetectableSceneNode extends SceneNode
    public boolean getCurrentlyDetected()
    {
       return currentlyDetected;
+   }
+
+   @Override
+   public void destroy()
+   {
+      super.destroy();
+
+      detections.forEach(PersistentDetection::markForDeletion);
    }
 }

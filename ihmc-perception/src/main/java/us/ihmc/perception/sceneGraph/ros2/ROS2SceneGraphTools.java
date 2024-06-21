@@ -6,6 +6,8 @@ import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.detections.InstantDetection;
+import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
@@ -85,7 +87,7 @@ public class ROS2SceneGraphTools
       }
       else if (nodeType == SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE)
       {
-         sceneNode = new DetectableSceneNode(nodeID, nodeName, null); // TODO: FIXME TOMASZ PLEASE
+         sceneNode = new DetectableSceneNode(nodeID, nodeName, (PersistentDetection<? extends InstantDetection>) null); // TODO: FIXME TOMASZ PLEASE
       }
       else if (nodeType == SceneGraphMessage.PRIMITIVE_RIGID_BODY_NODE_TYPE)
       {

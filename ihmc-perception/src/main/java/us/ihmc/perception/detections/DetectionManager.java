@@ -5,7 +5,9 @@ import us.ihmc.robotics.time.TimeTools;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Set;
 
@@ -32,6 +34,18 @@ public class DetectionManager
       setDefaultHistorySeconds(defaultHistorySeconds);
    }
 
+   /**
+    * Adds an instant detection of a specified type to the {@code DetectionManager}.
+    * The added detection will be matched to a {@link PersistentDetection}, or a new
+    * {@link PersistentDetection} will be created if no match is found.
+    * This method is thread safe only when called on different detection class types.
+    * When detections of the same type are being added, this method is NOT thread safe.
+    * @param newInstantDetection The new {@link InstantDetection} to add.
+    * @param classType The class of the type of {@link InstantDetection} being added.
+    *                  E.g. {@link us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection}
+    *                  or {@link us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection}
+    * @param <T> Class extending {@link InstantDetection}. Must match the passed in {@code classType}.
+    */
    public <T extends InstantDetection> void addDetection(T newInstantDetection, Class<T> classType)
    {
       DetectionPair<T> bestMatch = null;
@@ -55,15 +69,30 @@ public class DetectionManager
          }
       }
 
-      if (bestMatch != null)
-         bestMatch.confirmDetectionMatch();
-      else
-         persistentDetections.add(new PersistentDetection<>(newInstantDetection,
-                                                            defaultStabilityThreshold,
-                                                            defaultStabilityFrequency,
-                                                            defaultHistorySeconds));
+      synchronized (persistentDetectionsLock)
+      {
+         if (bestMatch != null)
+            bestMatch.confirmDetectionMatch();
+         else
+            persistentDetections.add(new PersistentDetection<>(newInstantDetection,
+                                                               defaultStabilityThreshold,
+                                                               defaultStabilityFrequency,
+                                                               defaultHistorySeconds));
+      }
    }
 
+   /**
+    * Adds a set of instant detections of a specified type to the {@code DetectionManager}.
+    * The added detections will be matched to existing {@link PersistentDetection}s,
+    * or if a new detection is unmatched, a new {@link PersistentDetection} will be created.
+    * This method is thread safe only when called on different detection class types.
+    * When detections of the same type are being added, this method is NOT thread safe.
+    * @param newInstantDetections Set of {@link InstantDetection}s, ideally all from the same detection frame.
+    * @param classType The class of the type of {@link InstantDetection} being added.
+    *                  E.g. {@link us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection}
+    *                  or {@link us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection}
+    * @param <T> Class extending {@link InstantDetection}. Must match the passed in {@code classType}.
+    */
    public <T extends InstantDetection> void addDetections(Set<T> newInstantDetections, Class<T> classType)
    {
       PriorityQueue<DetectionPair<T>> possibleMatches = new PriorityQueue<>();
@@ -169,13 +198,16 @@ public class DetectionManager
    {
       synchronized (persistentDetectionsLock)
       {
-         persistentDetections.forEach(detection -> detection.updateHistory(now));
+         Iterator<PersistentDetection<? extends InstantDetection>> detectionIterator = persistentDetections.iterator();
+         while (detectionIterator.hasNext())
+         {
+            PersistentDetection<? extends InstantDetection> detection = detectionIterator.next();
+            if (detection.isReadyForDeletion())
+               detectionIterator.remove();
+            else
+               detection.updateHistory(now);
+         }
       }
-   }
-
-   public boolean removeDetection(PersistentDetection<? extends InstantDetection> detectionToRemove)
-   {
-      return persistentDetections.remove(detectionToRemove);
    }
 
    public void setMatchDistanceThreshold(double matchDistance)

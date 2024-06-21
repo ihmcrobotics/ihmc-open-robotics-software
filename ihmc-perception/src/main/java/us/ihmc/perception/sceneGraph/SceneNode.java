@@ -87,4 +87,13 @@ public class SceneNode extends DurationFreezable
    {
       return children;
    }
+
+   /**
+    * This method is called when the node is removed from the scene graph.
+    * Note that this method does not destroy this node's children as they may want to be adopted by another node.
+    */
+   public void destroy()
+   {
+
+   }
 }

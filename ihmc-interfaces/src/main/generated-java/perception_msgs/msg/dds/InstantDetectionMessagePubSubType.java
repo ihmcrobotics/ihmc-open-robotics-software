@@ -15,7 +15,7 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1dc5cc30d2399a42765b2839b4d5f50296af15709c5290dbeaf7d12a777a3cfa";
+   		return "921d188a43dd32403d8f142e865f52127c1751d18448effcf0a125a362cf3722";
    }
    
    @Override
@@ -60,6 +60,15 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 5000; ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.Point32PubSubType.getMaxCdrSerializedSize(current_alignment);}
+      for(int i0 = 0; i0 < (8); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
+      for(int i0 = 0; i0 < (8); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -84,6 +93,19 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getCdrSerializedSize(data.getDetectionTime(), current_alignment);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getYoloObjectPointCloud().size(); ++i0)
+      {
+          current_alignment += geometry_msgs.msg.dds.Point32PubSubType.getCdrSerializedSize(data.getYoloObjectPointCloud().get(i0), current_alignment);}
+
+      for(int i0 = 0; i0 < data.getCenterPoseBoundingBox2dVertices().length; ++i0)
+      {
+              current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getCenterPoseBoundingBox2dVertices()[i0], current_alignment);
+      }
+      for(int i0 = 0; i0 < data.getCenterPoseBoundingBoxVertices().length; ++i0)
+      {
+              current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getCenterPoseBoundingBoxVertices()[i0], current_alignment);
+      }
 
       return current_alignment - initial_alignment;
    }
@@ -102,6 +124,20 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getObjectPose(), cdr);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getDetectionTime(), cdr);
+      if(data.getYoloObjectPointCloud().size() <= 5000)
+      cdr.write_type_e(data.getYoloObjectPointCloud());else
+          throw new RuntimeException("yolo_object_point_cloud field exceeds the maximum length");
+
+      for(int i0 = 0; i0 < data.getCenterPoseBoundingBox2dVertices().length; ++i0)
+      {
+        	geometry_msgs.msg.dds.PointPubSubType.write(data.getCenterPoseBoundingBox2dVertices()[i0], cdr);		
+      }
+
+      for(int i0 = 0; i0 < data.getCenterPoseBoundingBoxVertices().length; ++i0)
+      {
+        	geometry_msgs.msg.dds.PointPubSubType.write(data.getCenterPoseBoundingBoxVertices()[i0], cdr);		
+      }
+
    }
 
    public static void read(perception_msgs.msg.dds.InstantDetectionMessage data, us.ihmc.idl.CDR cdr)
@@ -112,6 +148,17 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getObjectPose(), cdr);	
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getDetectionTime(), cdr);	
+      cdr.read_type_e(data.getYoloObjectPointCloud());	
+      for(int i0 = 0; i0 < data.getCenterPoseBoundingBox2dVertices().length; ++i0)
+      {
+        	geometry_msgs.msg.dds.PointPubSubType.read(data.getCenterPoseBoundingBox2dVertices()[i0], cdr);	
+      }
+      	
+      for(int i0 = 0; i0 < data.getCenterPoseBoundingBoxVertices().length; ++i0)
+      {
+        	geometry_msgs.msg.dds.PointPubSubType.read(data.getCenterPoseBoundingBoxVertices()[i0], cdr);	
+      }
+      	
 
    }
 
@@ -125,6 +172,9 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       ser.write_type_a("detection_time", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getDetectionTime());
 
+      ser.write_type_e("yolo_object_point_cloud", data.getYoloObjectPointCloud());
+      ser.write_type_f("center_pose_bounding_box_2d_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getCenterPoseBoundingBox2dVertices());
+      ser.write_type_f("center_pose_bounding_box_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getCenterPoseBoundingBoxVertices());
    }
 
    @Override
@@ -137,6 +187,9 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       ser.read_type_a("detection_time", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getDetectionTime());
 
+      ser.read_type_e("yolo_object_point_cloud", data.getYoloObjectPointCloud());
+      ser.read_type_f("center_pose_bounding_box_2d_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getCenterPoseBoundingBox2dVertices());
+      ser.read_type_f("center_pose_bounding_box_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getCenterPoseBoundingBoxVertices());
    }
 
    public static void staticCopy(perception_msgs.msg.dds.InstantDetectionMessage src, perception_msgs.msg.dds.InstantDetectionMessage dest)

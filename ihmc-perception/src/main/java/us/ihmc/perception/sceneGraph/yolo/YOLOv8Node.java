@@ -3,55 +3,47 @@ package us.ihmc.perception.sceneGraph.yolo;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
+import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
-import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 
 public class YOLOv8Node extends DetectableSceneNode
 {
-   private YOLOv8InstantDetection yoloDetection;
    private final RigidBodyTransform centroidToObjectTransform = new RigidBodyTransform();
    private Pose3D objectPose;
 
-   public YOLOv8Node(long id, String name, YOLOv8InstantDetection detection)
+   public YOLOv8Node(long id, String name, PersistentDetection<YOLOv8InstantDetection> detection)
    {
       this(id,
            name,
            detection,
            new Pose3D(),
-           detection.getPose());
+           detection.getMostRecentDetection().getPose());
    }
 
    public YOLOv8Node(long id,
                      String name,
-                     YOLOv8InstantDetection detection,
+                     PersistentDetection<YOLOv8InstantDetection> detection,
                      RigidBodyTransformBasics centroidToObjectTransform,
                      Pose3D objectPose)
    {
       super(id, name, detection);
 
-      this.yoloDetection = detection;
       this.centroidToObjectTransform.set(centroidToObjectTransform);
       this.objectPose = objectPose;
    }
 
    @Override
-   public void updateDetection(InstantDetection newDetection)
+   public void update()
    {
-      if (newDetection instanceof YOLOv8InstantDetection newYoloDetection)
-      {
-         super.updateDetection(newYoloDetection);
-         yoloDetection = newYoloDetection;
+      super.update();
 
-         objectPose.set(getDetection().getPose());
-         objectPose.appendTransform(centroidToObjectTransform);
+      objectPose.set(getDetection(0).getMostRecentDetection().getPose());
+      objectPose.appendTransform(centroidToObjectTransform);
 
-         getNodeToParentFrameTransform().set(objectPose);
-         getNodeFrame().update();
-      }
-      else
-         throw new IllegalArgumentException("YOLOv8Node update requires a YOLOv8InstantDetection");
+      getNodeToParentFrameTransform().set(objectPose);
+      getNodeFrame().update();
    }
 
    public RigidBodyTransform getCentroidToObjectTransform()
@@ -64,14 +56,14 @@ public class YOLOv8Node extends DetectableSceneNode
       this.centroidToObjectTransform.set(centroidToObjectTransform);
    }
 
-   public YOLOv8InstantDetection getYoloDetection()
+   public YOLOv8InstantDetection getMostRecentDetection()
    {
-      return yoloDetection;
+      return (YOLOv8InstantDetection) getDetection(0).getMostRecentDetection();
    }
 
    public YOLOv8DetectionClass getDetectionClass()
    {
-      return YOLOv8DetectionClass.fromName(yoloDetection.getDetectedObjectName());
+      return YOLOv8DetectionClass.fromName(getMostRecentDetection().getDetectedObjectName());
    }
 
    public Pose3D getObjectPose()

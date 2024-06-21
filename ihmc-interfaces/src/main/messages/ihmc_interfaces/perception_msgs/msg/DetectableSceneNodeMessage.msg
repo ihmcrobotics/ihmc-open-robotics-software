@@ -5,7 +5,7 @@
 perception_msgs/SceneNodeMessage scene_node
 
 # Instant detection information
-perception_msgs/InstantDetectionMessage instant_detection
+perception_msgs/PersistentDetectionMessage[<=50] detections
 
 # Whether or not the node is currently detected
 bool currently_detected

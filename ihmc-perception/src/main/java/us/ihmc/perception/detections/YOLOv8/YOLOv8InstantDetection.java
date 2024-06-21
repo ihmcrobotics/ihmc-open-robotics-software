@@ -36,16 +36,16 @@ public class YOLOv8InstantDetection extends InstantDetection
       return objectPointCloud;
    }
 
-   public static YOLOv8InstantDetection fromMessage(YOLOv8NodeMessage message)
-   {
-      List<Point3D32> objectPointCloud = new ArrayList<>(message.getObjectPointCloud());
-
-      InstantDetectionMessage instantDetectionMessage = message.getDetectableSceneNode().getInstantDetection();
-      return new YOLOv8InstantDetection(instantDetectionMessage.getDetectedObjectClass().toString(),
-                                        instantDetectionMessage.getDetectedObjectName().toString(),
-                                        instantDetectionMessage.getConfidence(),
-                                        instantDetectionMessage.getObjectPose(),
-                                        MessageTools.toInstant(instantDetectionMessage.getDetectionTime()),
-                                        objectPointCloud);
-   }
+//   public static YOLOv8InstantDetection fromMessage(YOLOv8NodeMessage message)
+//   {
+//      List<Point3D32> objectPointCloud = new ArrayList<>(message.getObjectPointCloud());
+//
+//      InstantDetectionMessage instantDetectionMessage = message.getDetectableSceneNode().getInstantDetection();
+//      return new YOLOv8InstantDetection(instantDetectionMessage.getDetectedObjectClass().toString(),
+//                                        instantDetectionMessage.getDetectedObjectName().toString(),
+//                                        instantDetectionMessage.getConfidence(),
+//                                        instantDetectionMessage.getObjectPose(),
+//                                        MessageTools.toInstant(instantDetectionMessage.getDetectionTime()),
+//                                        objectPointCloud);
+//   }
 }

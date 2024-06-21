@@ -1,7 +1,7 @@
 #ifndef __perception_msgs__msg__DetectableSceneNodeMessage__idl__
 #define __perception_msgs__msg__DetectableSceneNodeMessage__idl__
 
-#include "perception_msgs/msg/./InstantDetectionMessage_.idl"
+#include "perception_msgs/msg/./PersistentDetectionMessage_.idl"
 #include "perception_msgs/msg/./SceneNodeMessage_.idl"
 module perception_msgs
 {
@@ -24,7 +24,7 @@ module perception_msgs
         /**
          * Instant detection information
          */
-        perception_msgs::msg::dds::InstantDetectionMessage instant_detection;
+        sequence<perception_msgs::msg::dds::PersistentDetectionMessage, 50> detections;
         /**
          * Whether or not the node is currently detected
          */

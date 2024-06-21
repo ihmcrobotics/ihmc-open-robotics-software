@@ -1,5 +1,7 @@
 package us.ihmc.perception.sceneGraph.arUco;
 
+import us.ihmc.perception.detections.InstantDetection;
+import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.filters.BreakFrequencyAlphaCalculator;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.robotics.math.filters.AlphaFilteredRigidBodyTransform;
@@ -23,7 +25,7 @@ public class ArUcoMarkerNode extends DetectableSceneNode
     */
    public ArUcoMarkerNode(long id, String name, int markerID, double markerSize)
    {
-      super(id, name, null); // TODO: FIXME TOMASZ PLEASE
+      super(id, name, (PersistentDetection<? extends InstantDetection>) null); // TODO: FIXME TOMASZ PLEASE
 
       this.markerID = markerID;
       this.markerSize = markerSize;

@@ -1,7 +1,6 @@
 #ifndef __perception_msgs__msg__YOLOv8NodeMessage__idl__
 #define __perception_msgs__msg__YOLOv8NodeMessage__idl__
 
-#include "geometry_msgs/msg/./Point32_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
 #include "geometry_msgs/msg/./Transform_.idl"
 #include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
@@ -22,10 +21,6 @@ module perception_msgs
          * Detectable scene node information
          */
         perception_msgs::msg::dds::DetectableSceneNodeMessage detectable_scene_node;
-        /**
-         * Extra data from YOLOv8InstantDetection
-         */
-        sequence<geometry_msgs::msg::dds::Point32, 5000> object_point_cloud;
         /**
          * YOLOv8Node data
          */

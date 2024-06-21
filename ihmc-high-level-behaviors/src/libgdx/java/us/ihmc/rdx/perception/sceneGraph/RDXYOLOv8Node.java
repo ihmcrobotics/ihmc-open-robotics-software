@@ -6,10 +6,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
-import imgui.type.ImDouble;
-import imgui.type.ImFloat;
-import imgui.type.ImInt;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
@@ -57,15 +53,15 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
 
       confidencePlot.setWidth((int) (0.65 * ImGui.getWindowWidth()));
-      ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.greenRedGradientColor((float) yoloNode.getYoloDetection().getConfidence(), 1.0f, 0.0f));
-      confidencePlot.render(yoloNode.getDetection().getConfidence());
+      ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.greenRedGradientColor((float) yoloNode.getMostRecentDetection().getConfidence(), 1.0f, 0.0f));
+      confidencePlot.render(yoloNode.getDetections().getConfidence());
       ImGui.popStyleColor();
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      List<Point3D32> renderablePointCloud = yoloNode.getYoloDetection().getObjectPointCloud();
+      List<Point3D32> renderablePointCloud = yoloNode.getMostRecentDetection().getObjectPointCloud();
       objectPointCloudRenderer.setPointsToRender(renderablePointCloud, Color.GREEN);
       objectPointCloudRenderer.updateMesh();
       objectPointCloudRenderer.getRenderables(renderables, pool);

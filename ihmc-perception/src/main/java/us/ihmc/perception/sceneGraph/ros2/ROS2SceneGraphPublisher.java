@@ -5,6 +5,7 @@ import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.InstantDetectionMessage;
+import perception_msgs.msg.dds.PersistentDetectionMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
@@ -137,10 +138,10 @@ public class ROS2SceneGraphPublisher
 
             // set point cloud
             yoloNodeMessage.getObjectPointCloud().clear();
-            for (int i = 0; i < 5000 && i < yoloNode.getYoloDetection().getObjectPointCloud().size(); i++)
+            for (int i = 0; i < 5000 && i < yoloNode.getMostRecentDetection().getObjectPointCloud().size(); i++)
             {
                Point3D32 point = yoloNodeMessage.getObjectPointCloud().add();
-               point.set(yoloNode.getYoloDetection().getObjectPointCloud().get(i));
+               point.set(yoloNode.getMostRecentDetection().getObjectPointCloud().get(i));
             }
 
             yoloNodeMessage.getCentroidToObjectTransform().set(yoloNode.getCentroidToObjectTransform());
@@ -157,11 +158,11 @@ public class ROS2SceneGraphPublisher
          detectableSceneNodeMessage.setCurrentlyDetected(detectableSceneNode.getCurrentlyDetected());
 
          instantDetectionMessage = detectableSceneNodeMessage.getInstantDetection();
-         instantDetectionMessage.setDetectedObjectClass(detectableSceneNode.getDetection().getDetectedObjectClass());
-         instantDetectionMessage.setDetectedObjectName(detectableSceneNode.getDetection().getDetectedObjectName());
-         instantDetectionMessage.setConfidence(detectableSceneNode.getDetection().getConfidence());
-         instantDetectionMessage.getObjectPose().set(detectableSceneNode.getDetection().getPose());
-         MessageTools.toMessage(detectableSceneNode.getDetection().getDetectionTime(), instantDetectionMessage.getDetectionTime());
+         instantDetectionMessage.setDetectedObjectClass(detectableSceneNode.getDetections().getDetectedObjectClass());
+         instantDetectionMessage.setDetectedObjectName(detectableSceneNode.getDetections().getDetectedObjectName());
+         instantDetectionMessage.setConfidence(detectableSceneNode.getDetections().getConfidence());
+         instantDetectionMessage.getObjectPose().set(detectableSceneNode.getDetections().getPose());
+         MessageTools.toMessage(detectableSceneNode.getDetections().getDetectionTime(), instantDetectionMessage.getDetectionTime());
 
          sceneNodeMessage = detectableSceneNodeMessage.getSceneNode();
       }

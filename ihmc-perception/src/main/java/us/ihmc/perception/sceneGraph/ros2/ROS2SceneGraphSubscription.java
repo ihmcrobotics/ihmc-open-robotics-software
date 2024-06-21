@@ -117,8 +117,6 @@ public class ROS2SceneGraphSubscription
                   modificationQueue.accept(new SceneGraphClearSubtree(sceneGraph.getRootNode()));
 
                updateLocalTreeFromSubscription(subscriptionRootNode, sceneGraph.getRootNode(), null, modificationQueue);
-
-               // FIXME: We seem to be missing now the destroy functionality if nodes didn't get added back
             });
          }
       }
@@ -154,12 +152,12 @@ public class ROS2SceneGraphSubscription
          }
          if (localNode instanceof CenterposeNode centerposeNode)
          {
-            centerposeNode.updateDetection(CenterPoseInstantDetection.fromMessage(subscriptionNode.getCenterposeNodeMessage()));
+            centerposeNode.update();
             centerposeNode.setEnableTracking(subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
          }
          if (localNode instanceof YOLOv8Node yoloNode)
          {
-            yoloNode.updateDetection(YOLOv8InstantDetection.fromMessage(subscriptionNode.getYOLONodeMessage()));
+            yoloNode.update();
             yoloNode.setCentroidToObjectTransform(subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform());
             yoloNode.setObjectPose(subscriptionNode.getYOLONodeMessage().getObjectPose());
          }

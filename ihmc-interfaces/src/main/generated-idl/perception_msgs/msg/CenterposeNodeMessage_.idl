@@ -1,7 +1,6 @@
 #ifndef __perception_msgs__msg__CenterposeNodeMessage__idl__
 #define __perception_msgs__msg__CenterposeNodeMessage__idl__
 
-#include "geometry_msgs/msg/./Point_.idl"
 #include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
 module perception_msgs
 {
@@ -21,14 +20,6 @@ module perception_msgs
          * The detectable scene node information
          */
         perception_msgs::msg::dds::DetectableSceneNodeMessage detectable_scene_node;
-        /**
-         * 2D Vertices of the 3d object bounding box projected onto image plane
-         */
-        geometry_msgs::msg::dds::Point bounding_box_2d_vertices[8];
-        /**
-         * 3d Vertices of the 3d object Bounding box
-         */
-        geometry_msgs::msg::dds::Point bounding_box_vertices[8];
         boolean enable_tracking;
       };
     };

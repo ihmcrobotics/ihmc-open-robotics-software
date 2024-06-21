@@ -15,7 +15,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "ddf5b82e37355deecca85eddca8e86bd20850ddf17b01efac85dc67ed59973e2";
+   		return "e88bd94dced3a1a23cde2493b6e6f9e91a33c75b54b6083a6fe6086ea31a9b5f";
    }
    
    @Override
@@ -54,8 +54,9 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += perception_msgs.msg.dds.SceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += perception_msgs.msg.dds.InstantDetectionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
-
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
+      {
+          current_alignment += perception_msgs.msg.dds.PersistentDetectionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -73,7 +74,10 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += perception_msgs.msg.dds.SceneNodeMessagePubSubType.getCdrSerializedSize(data.getSceneNode(), current_alignment);
 
-      current_alignment += perception_msgs.msg.dds.InstantDetectionMessagePubSubType.getCdrSerializedSize(data.getInstantDetection(), current_alignment);
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getDetections().size(); ++i0)
+      {
+          current_alignment += perception_msgs.msg.dds.PersistentDetectionMessagePubSubType.getCdrSerializedSize(data.getDetections().get(i0), current_alignment);}
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -85,7 +89,10 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    public static void write(perception_msgs.msg.dds.DetectableSceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.write(data.getSceneNode(), cdr);
-      perception_msgs.msg.dds.InstantDetectionMessagePubSubType.write(data.getInstantDetection(), cdr);
+      if(data.getDetections().size() <= 50)
+      cdr.write_type_e(data.getDetections());else
+          throw new RuntimeException("detections field exceeds the maximum length");
+
       cdr.write_type_7(data.getCurrentlyDetected());
 
    }
@@ -93,7 +100,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    public static void read(perception_msgs.msg.dds.DetectableSceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.read(data.getSceneNode(), cdr);	
-      perception_msgs.msg.dds.InstantDetectionMessagePubSubType.read(data.getInstantDetection(), cdr);	
+      cdr.read_type_e(data.getDetections());	
       data.setCurrentlyDetected(cdr.read_type_7());
       	
 
@@ -104,8 +111,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       ser.write_type_a("scene_node", new perception_msgs.msg.dds.SceneNodeMessagePubSubType(), data.getSceneNode());
 
-      ser.write_type_a("instant_detection", new perception_msgs.msg.dds.InstantDetectionMessagePubSubType(), data.getInstantDetection());
-
+      ser.write_type_e("detections", data.getDetections());
       ser.write_type_7("currently_detected", data.getCurrentlyDetected());
    }
 
@@ -114,8 +120,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       ser.read_type_a("scene_node", new perception_msgs.msg.dds.SceneNodeMessagePubSubType(), data.getSceneNode());
 
-      ser.read_type_a("instant_detection", new perception_msgs.msg.dds.InstantDetectionMessagePubSubType(), data.getInstantDetection());
-
+      ser.read_type_e("detections", data.getDetections());
       data.setCurrentlyDetected(ser.read_type_7("currently_detected"));
    }
 

@@ -42,18 +42,18 @@ public class CenterPoseInstantDetection extends InstantDetection
       return boundingBoxVertices2D;
    }
 
-   public static CenterPoseInstantDetection fromMessage(CenterposeNodeMessage message)
-   {
-      Point3D[] boundingBoxVertices = message.getBoundingBoxVertices();
-      Point2D[] boundingBoxVertices2D = Arrays.stream(message.getBoundingBox2dVertices()).map(Point2D::new).toArray(Point2D[]::new);
-
-      InstantDetectionMessage instantDetectionMessage = message.getDetectableSceneNode().getInstantDetection();
-      return new CenterPoseInstantDetection(instantDetectionMessage.getDetectedObjectClassAsString(),
-                                            instantDetectionMessage.getDetectedObjectNameAsString(),
-                                            instantDetectionMessage.getConfidence(),
-                                            instantDetectionMessage.getObjectPose(),
-                                            MessageTools.toInstant(instantDetectionMessage.getDetectionTime()),
-                                            boundingBoxVertices,
-                                            boundingBoxVertices2D);
-   }
+//   public static CenterPoseInstantDetection fromMessage(CenterposeNodeMessage message)
+//   {
+//      Point3D[] boundingBoxVertices = message.getBoundingBoxVertices();
+//      Point2D[] boundingBoxVertices2D = Arrays.stream(message.getBoundingBox2dVertices()).map(Point2D::new).toArray(Point2D[]::new);
+//
+//      InstantDetectionMessage instantDetectionMessage = message.getDetectableSceneNode().getInstantDetection();
+//      return new CenterPoseInstantDetection(instantDetectionMessage.getDetectedObjectClassAsString(),
+//                                            instantDetectionMessage.getDetectedObjectNameAsString(),
+//                                            instantDetectionMessage.getConfidence(),
+//                                            instantDetectionMessage.getObjectPose(),
+//                                            MessageTools.toInstant(instantDetectionMessage.getDetectionTime()),
+//                                            boundingBoxVertices,
+//                                            boundingBoxVertices2D);
+//   }
 }

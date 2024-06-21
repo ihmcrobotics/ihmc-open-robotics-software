@@ -7,21 +7,21 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
 public class PersistentDetection<T extends InstantDetection>
 {
    // The first element of this set is the oldest detection, and the last element is the most recent detection
-   private final TreeSet<T> detectionHistory = new TreeSet<>(Comparator.comparing(InstantDetection::getDetectionTime));
+   private final SortedSet<T> detectionHistory = new TreeSet<>(Comparator.comparing(InstantDetection::getDetectionTime));
    private Duration historyDuration;
 
-   private final Class<?> instantDetectionClass;
-   private final String detectedObjectClass;
-   private final String detectedObjectName;
-   private final Instant firstDetectionTime;
+   private final InstantDetection firstDetection;
 
    private double stabilityConfidenceThreshold;
    private double stabilityDetectionFrequency;
+
+   private boolean readyForDeletion = false;
 
    public PersistentDetection(T firstDetection)
    {
@@ -35,10 +35,7 @@ public class PersistentDetection<T extends InstantDetection>
 
    public PersistentDetection(T firstDetection, double stabilityConfidenceThreshold, double stabilityDetectionFrequency, Duration historyDuration)
    {
-      instantDetectionClass = firstDetection.getClass();
-      detectedObjectClass = firstDetection.getDetectedObjectClass();
-      detectedObjectName = firstDetection.getDetectedObjectName();
-      firstDetectionTime = firstDetection.getDetectionTime();
+      this.firstDetection = firstDetection;
 
       addDetection(firstDetection);
       setStabilityConfidenceThreshold(stabilityConfidenceThreshold);
@@ -54,9 +51,9 @@ public class PersistentDetection<T extends InstantDetection>
    public void addDetection(T newDetection)
    {
       // ensure only detection of the same class are added to the history
-      if (!newDetection.getDetectedObjectClass().equals(detectedObjectClass))
+      if (!newDetection.getDetectedObjectClass().equals(getDetectedObjectClass()))
          throw new IllegalArgumentException(String.format("New detection's class (%s) does not match original detection's class (%s)",
-                                                          newDetection.getDetectedObjectClass(), detectedObjectClass));
+                                                          newDetection.getDetectedObjectClass(), getDetectedObjectClass()));
 
       detectionHistory.add(newDetection);
    }
@@ -72,17 +69,18 @@ public class PersistentDetection<T extends InstantDetection>
 
    public Class<?> getInstantDetectionClass()
    {
-      return instantDetectionClass;
+      return getMostRecentDetection().getClass();
    }
 
    public String getDetectedObjectClass()
    {
-      return detectedObjectClass;
+      return firstDetection.getDetectedObjectClass();
    }
 
    public String getDetectedObjectName()
    {
-      return detectedObjectName;
+      return firstDetection
+            .getDetectedObjectName();
    }
 
    public int getHistorySize()
@@ -130,7 +128,7 @@ public class PersistentDetection<T extends InstantDetection>
 
    public boolean isOldEnough(Instant now)
    {
-      return firstDetectionTime.isBefore(now.minus(historyDuration));
+      return firstDetection.getDetectionTime().isBefore(now.minus(historyDuration));
    }
 
    public boolean isStable()
@@ -199,6 +197,21 @@ public class PersistentDetection<T extends InstantDetection>
    {
       // Remove detections that are too old
       detectionHistory.removeIf(detection -> detectionExpired(detection, now) && !detection.equals(getMostRecentDetection()));
+   }
+
+   public SortedSet<T> getDetectionHistory()
+   {
+      return detectionHistory;
+   }
+
+   public void markForDeletion()
+   {
+      readyForDeletion = true;
+   }
+
+   public boolean isReadyForDeletion()
+   {
+      return readyForDeletion;
    }
 
    private boolean detectionExpired(InstantDetection detection, Instant now)
