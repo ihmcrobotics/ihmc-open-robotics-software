@@ -99,7 +99,6 @@ public class RDXRapidHeightMapExtractionDemo
             createForPerspective(720, 1280);
 
             humanoidPerceptionUI = new RDXHumanoidPerceptionUI(humanoidPerception, ros2Helper);
-            humanoidPerceptionUI.initializeHeightMapVisualizer(ros2Helper);
             humanoidPerceptionUI.initializeHeightMapUI(ros2Helper);
 
             HeightMapParameters heightMapParameters = humanoidPerception.getRapidHeightMapExtractor().getHeightMapParameters();
@@ -108,7 +107,6 @@ public class RDXRapidHeightMapExtractionDemo
             humanoidPerceptionUI.addChild(heightMapParametersTuner);
 
             baseUI.getImGuiPanelManager().addPanel(humanoidPerceptionUI);
-            baseUI.getPrimaryScene().addRenderableProvider(humanoidPerceptionUI.getHeightMapVisualizer());
 
             updateHeightMap();
 

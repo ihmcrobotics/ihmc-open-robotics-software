@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.log.LogTools;
@@ -72,12 +72,12 @@ public class NarrowPassageBodyPathOptimizer
    private TickAndUpdatable tickAndUpdatable;
    private final BagOfBalls waypointPointGraphic;
 
-   public NarrowPassageBodyPathOptimizer(FootstepPlannerParametersReadOnly footstepPlannerParameters, YoRegistry parentRegistry)
+   public NarrowPassageBodyPathOptimizer(DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters, YoRegistry parentRegistry)
    {
       this(footstepPlannerParameters, null, null, parentRegistry);
    }
 
-   public NarrowPassageBodyPathOptimizer(FootstepPlannerParametersReadOnly footstepPlannerParameters,
+   public NarrowPassageBodyPathOptimizer(DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters,
                                          TickAndUpdatable tickAndUpdatable,
                                          YoGraphicsListRegistry graphicsListRegistry,
                                          YoRegistry parentRegistry)

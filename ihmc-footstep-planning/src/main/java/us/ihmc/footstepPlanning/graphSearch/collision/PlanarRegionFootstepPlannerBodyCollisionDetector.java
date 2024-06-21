@@ -4,7 +4,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.HashMap;
@@ -23,7 +23,7 @@ public class PlanarRegionFootstepPlannerBodyCollisionDetector
    private final DoubleSupplier bodyBoxBaseY;
    private final DoubleSupplier bodyBoxBaseZ;
 
-   public PlanarRegionFootstepPlannerBodyCollisionDetector(FootstepPlannerParametersReadOnly parameters)
+   public PlanarRegionFootstepPlannerBodyCollisionDetector(DefaultFootstepPlannerParametersReadOnly parameters)
    {
       this(parameters::getBodyBoxDepth,
            parameters::getBodyBoxWidth,

@@ -7,24 +7,22 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import perception_msgs.msg.dds.SteppableRegionsListCollectionMessage;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.perception.steppableRegions.SteppableRegionsAPI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.imgui.ImGuiFrequencyPlot;
-import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXSteppableRegionGraphic;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.Set;
 
-public class RDXSteppableRegionsVisualizer extends RDXVisualizer
+public class RDXSteppableRegionsVisualizer extends RDXROS2SingleTopicVisualizer<SteppableRegionsListCollectionMessage>
 {
    private final RDXSteppableRegionGraphic steppableRegionGraphic = new RDXSteppableRegionGraphic();
 
    private final ResettableExceptionHandlingExecutorService executorService;
-   private final ImGuiFrequencyPlot frequencyPlot = new ImGuiFrequencyPlot();
    private final ImInt yawToShow = new ImInt(0);
    private final ImBoolean renderHeightMap = new ImBoolean(true);
    private final ImBoolean renderPlanes = new ImBoolean(false);
@@ -43,6 +41,12 @@ public class RDXSteppableRegionsVisualizer extends RDXVisualizer
    }
 
    @Override
+   public ROS2Topic<SteppableRegionsListCollectionMessage> getTopic()
+   {
+      return SteppableRegionsAPI.STEPPABLE_REGIONS_OUTPUT;
+   }
+
+   @Override
    public void create()
    {
       super.create();
@@ -57,7 +61,6 @@ public class RDXSteppableRegionsVisualizer extends RDXVisualizer
 
    public void acceptSteppableRegionsCollection(SteppableRegionsListCollectionMessage steppableRegionsListCollection)
    {
-      frequencyPlot.recordEvent();
       if (isActive())
       {
          if (steppableRegionsListCollection == null)
@@ -65,15 +68,17 @@ public class RDXSteppableRegionsVisualizer extends RDXVisualizer
 
          receivedRegions = steppableRegionsListCollection.getRegionsPerYaw().get(yawToShow.get());
          executorService.clearQueueAndExecute(() ->
-                                              {
-                                                 steppableRegionGraphic.setRenderHeightMap(renderHeightMap.get());
-                                                 steppableRegionGraphic.setRenderPlanes(renderPlanes.get());
-                                                 steppableRegionGraphic.setInPaintHeight(inPaintHeight.get());
-                                                 steppableRegionGraphic.setRenderGroundPlane(renderGroundPlane.get());
-                                                 steppableRegionGraphic.setRenderGroundCells(renderGroundCells.get());
-                                                 steppableRegionGraphic.generateMeshesAsync(steppableRegionsListCollection, yawToShow.get());
-                                              });
+         {
+            steppableRegionGraphic.setRenderHeightMap(renderHeightMap.get());
+            steppableRegionGraphic.setRenderPlanes(renderPlanes.get());
+            steppableRegionGraphic.setInPaintHeight(inPaintHeight.get());
+            steppableRegionGraphic.setRenderGroundPlane(renderGroundPlane.get());
+            steppableRegionGraphic.setRenderGroundCells(renderGroundCells.get());
+            steppableRegionGraphic.generateMeshesAsync(steppableRegionsListCollection, yawToShow.get());
+         });
       }
+
+      getFrequency().ping();
    }
 
    @Override
@@ -89,8 +94,6 @@ public class RDXSteppableRegionsVisualizer extends RDXVisualizer
    @Override
    public void renderImGuiWidgets()
    {
-      super.renderImGuiWidgets();
-
       ImGui.checkbox("Render Height Map", renderHeightMap);
       ImGui.checkbox("Render Planes", renderPlanes);
       ImGui.checkbox("In Paint Height", inPaintHeight);
@@ -101,10 +104,8 @@ public class RDXSteppableRegionsVisualizer extends RDXVisualizer
       {
          executorService.interruptAndReset();
       }
-      imgui.internal.ImGui.text("Regions rendered: " + receivedRegions);
-      imgui.internal.ImGui.sliderInt("Yaw to show", yawToShow.getData(), 0, 4);
-
-      frequencyPlot.renderImGuiWidgets();
+      ImGui.text("Regions rendered: " + receivedRegions);
+      ImGui.sliderInt("Yaw to show", yawToShow.getData(), 0, 4);
    }
 
    @Override

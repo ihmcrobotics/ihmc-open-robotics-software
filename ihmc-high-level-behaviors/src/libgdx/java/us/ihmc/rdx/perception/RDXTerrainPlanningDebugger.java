@@ -80,16 +80,16 @@ public class RDXTerrainPlanningDebugger implements RenderableProvider
       startFootstepGraphics = new SideDependentList<>(new RDXFootstepGraphic(contactPoints, RobotSide.LEFT),
                                                       new RDXFootstepGraphic(contactPoints, RobotSide.RIGHT));
 
-      goalFootstepGraphics.get(RobotSide.RIGHT).setColor(new Color(1.0f, 1.0f, 1.0f, 0.5f));
+      goalFootstepGraphics.get(RobotSide.RIGHT).setColor(new Color(0.0f, 0.0f, 0.0f, 1.0f));
       goalFootstepGraphics.get(RobotSide.RIGHT).create();
 
-      goalFootstepGraphics.get(RobotSide.LEFT).setColor(new Color(1.0f, 1.0f, 1.0f, 0.5f));
+      goalFootstepGraphics.get(RobotSide.LEFT).setColor(new Color(0.0f, 0.0f, 0.0f, 1.0f));
       goalFootstepGraphics.get(RobotSide.LEFT).create();
 
-      startFootstepGraphics.get(RobotSide.RIGHT).setColor(new Color(0.0f, 0.0f, 0.0f, 1.0f));
+      startFootstepGraphics.get(RobotSide.RIGHT).setColor(new Color(1.0f, 1.0f, 1.0f, 1.0f));
       startFootstepGraphics.get(RobotSide.RIGHT).create();
 
-      startFootstepGraphics.get(RobotSide.LEFT).setColor(new Color(0.0f, 0.0f, 0.0f, 1.0f));
+      startFootstepGraphics.get(RobotSide.LEFT).setColor(new Color(1.0f, 1.0f, 1.0f, 1.0f));
       startFootstepGraphics.get(RobotSide.LEFT).create();
 
       footstepPlanGraphic.setColor(RobotSide.LEFT, Color.GRAY);

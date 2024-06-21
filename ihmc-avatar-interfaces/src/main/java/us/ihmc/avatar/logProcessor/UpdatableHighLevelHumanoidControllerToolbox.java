@@ -57,6 +57,7 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
             omega0,
             feet,
             controlDT,
+            false,
             updatables,
             contactableBodies,
             yoGraphicsListRegistry,

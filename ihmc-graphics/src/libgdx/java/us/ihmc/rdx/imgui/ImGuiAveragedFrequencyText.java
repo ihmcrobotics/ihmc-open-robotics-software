@@ -1,15 +1,13 @@
 package us.ihmc.rdx.imgui;
 
 import imgui.internal.ImGui;
-import us.ihmc.tools.thread.Throttler;
 import us.ihmc.tools.time.FrequencyCalculator;
 
 public class ImGuiAveragedFrequencyText
 {
-   public static final int HISTORY = 100;
-   private final FrequencyCalculator averagedFrequencyCalculator = new FrequencyCalculator(HISTORY);
-   private final Throttler throttler = new Throttler().setFrequency(1.0);
-   private String fpsString = "0 Hz";
+   private final FrequencyCalculator averagedFrequencyCalculator = new FrequencyCalculator();
+   private long lastQueryTimeMs;
+   private String text;
 
    public void ping()
    {
@@ -18,10 +16,19 @@ public class ImGuiAveragedFrequencyText
 
    public void render()
    {
-      if (throttler.run())
+      ImGui.text(getText());
+   }
+
+   public String getText()
+   {
+      long now = System.currentTimeMillis();
+
+      if (now - lastQueryTimeMs > 500)
       {
-         fpsString = "%3d Hz".formatted((int) averagedFrequencyCalculator.getFrequency());
+         text = "%3d Hz".formatted((int) averagedFrequencyCalculator.getFrequencyDecaying());
+         lastQueryTimeMs = now;
       }
-      ImGui.text(fpsString);
+
+      return text;
    }
 }

@@ -14,23 +14,23 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
+import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.depthData.PointCloudData;
 import us.ihmc.perception.heightMap.HeightMapInputData;
 import us.ihmc.perception.heightMap.HeightMapUpdater;
-import us.ihmc.log.LogTools;
-import us.ihmc.perception.BytedecoImage;
-import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.logging.PerceptionDataLoader;
 import us.ihmc.perception.logging.PerceptionLoggerConstants;
+import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.tools.PerceptionDataTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.ros2.RDXHeightMapVisualizer;
+import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2HeightMapVisualizer;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -53,7 +53,7 @@ public class RDXHeightMapExtractionDemo
    private final ArrayList<Quaternion> sensorOrientationBuffer = new ArrayList<>();
 
    private final HeightMapUpdater heightMapUpdater = new HeightMapUpdater();
-   private final RDXHeightMapVisualizer heightMapVisualizer = new RDXHeightMapVisualizer();
+   private final RDXROS2HeightMapVisualizer heightMapVisualizer = new RDXROS2HeightMapVisualizer("Height Map");
    private final RDXStoredPropertySetTuner heightMapParameters;
    private final RDXStoredPropertySetTuner heightMapFitlerParameters;
 

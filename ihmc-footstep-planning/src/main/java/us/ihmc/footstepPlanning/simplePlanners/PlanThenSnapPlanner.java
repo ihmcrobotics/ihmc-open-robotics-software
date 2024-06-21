@@ -8,7 +8,7 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapSnapWiggler;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
@@ -25,7 +25,7 @@ public class PlanThenSnapPlanner
    private final HeightMapPolygonSnapper snapper;
    private final HeightMapSnapWiggler wiggler;
 
-   public PlanThenSnapPlanner(FootstepPlannerParametersBasics footstepPlannerParameters, SideDependentList<ConvexPolygon2D> footPolygons)
+   public PlanThenSnapPlanner(DefaultFootstepPlannerParametersBasics footstepPlannerParameters, SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.turnWalkTurnPlanner = new TurnWalkTurnPlanner(footstepPlannerParameters);
       this.footPolygons = footPolygons;
@@ -58,7 +58,7 @@ public class PlanThenSnapPlanner
       FootstepPlanningResult result = turnWalkTurnPlanner.plan();
       footstepPlan = turnWalkTurnPlanner.getPlan();
 
-      if (internalEnvironmentHandler.hasHeightMap())
+      if (!internalEnvironmentHandler.hasHeightMap())
          return result;
 
       int numberOfFootsteps = footstepPlan.getNumberOfSteps();

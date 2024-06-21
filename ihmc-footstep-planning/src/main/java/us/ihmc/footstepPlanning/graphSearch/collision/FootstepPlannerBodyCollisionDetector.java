@@ -6,7 +6,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.HeightMapCollisionDetector;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
@@ -29,7 +29,7 @@ public class FootstepPlannerBodyCollisionDetector
    private final DoubleSupplier bodyBoxBaseY;
    private final DoubleSupplier bodyBoxBaseZ;
 
-   public FootstepPlannerBodyCollisionDetector(FootstepPlannerParametersReadOnly parameters)
+   public FootstepPlannerBodyCollisionDetector(DefaultFootstepPlannerParametersReadOnly parameters)
    {
       this(parameters::getBodyBoxDepth,
            parameters::getBodyBoxWidth,

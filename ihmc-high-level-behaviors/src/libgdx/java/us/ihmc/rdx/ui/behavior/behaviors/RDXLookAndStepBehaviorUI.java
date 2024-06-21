@@ -17,12 +17,12 @@ import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonsMessage;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -170,7 +170,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
                                                        }
                                                     });
       referenceAlpha = new ImDoubleWrapper(footstepPlannerRemotePropertySet.getStoredPropertySet(),
-                                           FootstepPlannerParameterKeys.referencePlanAlpha,
+                                           DefaultFootstepPlannerParameters.referencePlanAlpha,
                                            alpha ->
                                            {
                                               if (ImGuiTools.volatileInputDouble("Reference alpha", alpha))
