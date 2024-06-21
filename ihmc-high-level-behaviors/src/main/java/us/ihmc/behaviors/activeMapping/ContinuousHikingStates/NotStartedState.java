@@ -1,11 +1,14 @@
 package us.ihmc.behaviors.activeMapping.ContinuousHikingStates;
 
 import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
+import controller_msgs.msg.dds.FootstepQueueStatusMessage;
 import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingState;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.communication.HumanoidControllerAPI;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
@@ -18,6 +21,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.statistics;
@@ -25,35 +29,59 @@ import static us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.st
 public class NotStartedState implements State
 {
    private final HumanoidReferenceFrames referenceFrames;
-   private final YoEnum<ContinuousHikingState> continuousHikingState;
    private final AtomicReference<ContinuousWalkingCommandMessage> commandMessage;
    private final ContinuousPlanner continuousPlanner;
+   private final StepValidityChecker stepValidityChecker;
    private final ContinuousHikingParameters continuousHikingParameters;
    private final TerrainMapData terrainMap;
    private final TerrainPlanningDebugger debugger;
 
    private final ROS2PublisherBasics<PauseWalkingMessage> pauseWalkingPublisher;
+   private List<QueuedFootstepStatusMessage> controllerQueue;
 
-   public NotStartedState(ROS2Node ros2Node,
+   private int controllerQueueSize = 0;
+
+   public NotStartedState(ROS2Helper ros2Helper,
                           String simpleRobotName,
                           HumanoidReferenceFrames referenceFrames,
-                          YoEnum<ContinuousHikingState> continuousHikingState,
                           AtomicReference<ContinuousWalkingCommandMessage> commandMessage,
+                          StepValidityChecker stepValidityChecker,
                           ContinuousPlanner continuousPlanner,
                           ContinuousHikingParameters continuousHikingParameters,
                           TerrainMapData terrainMap,
                           TerrainPlanningDebugger debugger)
    {
       this.referenceFrames = referenceFrames;
-      this.continuousHikingState = continuousHikingState;
       this.commandMessage = commandMessage;
       this.continuousPlanner = continuousPlanner;
       this.continuousHikingParameters = continuousHikingParameters;
       this.terrainMap = terrainMap;
       this.debugger = debugger;
 
-      pauseWalkingPublisher = ros2Node.createPublisher(HumanoidControllerAPI.getTopic(PauseWalkingMessage.class, simpleRobotName));
+      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
+
+      pauseWalkingPublisher = ros2Helper.getROS2NodeInterface().createPublisher(HumanoidControllerAPI.getTopic(PauseWalkingMessage.class, simpleRobotName));
+      this.stepValidityChecker = stepValidityChecker;
    }
+
+   private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)
+   {
+      // Set the that controller queue size before getting the new one
+      statistics.setLastFootstepQueueLength(controllerQueueSize);
+
+      if (!continuousHikingParameters.getEnableContinuousWalking())
+         return;
+
+      controllerQueue = footstepQueueStatusMessage.getQueuedFootstepList();
+      if (controllerQueueSize != footstepQueueStatusMessage.getQueuedFootstepList().size())
+      {
+         String message = String.format("State: [%s]: Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size());
+         LogTools.warn(message );
+         statistics.appendString(message);
+      }
+      controllerQueueSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
+   }
+
 
    @Override
    public void onEntry()
@@ -66,8 +94,6 @@ public class NotStartedState implements State
    {
       if (!continuousHikingParameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
       {
-         continuousHikingState.set(ContinuousHikingState.NOT_STARTED);
-
          PauseWalkingMessage message = new PauseWalkingMessage();
 
          if (continuousPlanner.isInitialized())
@@ -108,26 +134,27 @@ public class NotStartedState implements State
 
          if (continuousPlanner.isPlanAvailable())
          {
-            continuousHikingState.set(ContinuousHikingState.PLAN_AVAILABLE);
+            stepValidityChecker.checkNextStepIsValid(continuousPlanner.getLimitedFootstepDataListMessage(continuousHikingParameters, controllerQueue));
          }
          else
          {
-            continuousHikingState.set(ContinuousHikingState.NOT_STARTED);
             continuousPlanner.setInitialized(false);
 
-            String message = "";
-            LogTools.error(message = String.format("State: [%s]: Initialization failed... will retry initializing next tick",
-                                                   continuousHikingState.getEnumValue()));
+            String message = String.format("State: [%s]: Initialization failed... will retry initializing next tick");
+            LogTools.error(message);
             statistics.appendString(message);
          }
       }
-
-      if (!continuousHikingParameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
-         continuousHikingState.set(ContinuousHikingState.NOT_STARTED);
    }
 
    @Override
    public void onExit(double timeInState)
    {
+   }
+
+   @Override
+   public boolean isDone(double timeInState)
+   {
+      return continuousPlanner.isPlanAvailable();
    }
 }

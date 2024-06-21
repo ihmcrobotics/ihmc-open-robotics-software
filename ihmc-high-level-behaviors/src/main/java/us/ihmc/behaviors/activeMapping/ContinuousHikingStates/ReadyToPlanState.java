@@ -22,7 +22,6 @@ import static us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.st
 
 public class ReadyToPlanState implements State
 {
-   private final YoEnum<ContinuousHikingState> continuousHikingState;
    private final AtomicReference<ContinuousWalkingCommandMessage> commandMessage;
    private final ContinuousPlanner continuousPlanner;
    private final ContinuousHikingParameters continuousHikingParameters;
@@ -32,18 +31,15 @@ public class ReadyToPlanState implements State
    private final AtomicReference<FootstepStatusMessage> latestFootstepStatusMessage = new AtomicReference<>();
    private List<QueuedFootstepStatusMessage> controllerQueue;
    private int controllerQueueSize = 0;
-   private String message = "";
 
    public ReadyToPlanState(ROS2Helper ros2Helper,
                            String simpleRobotName,
-                           YoEnum<ContinuousHikingState> continuousHikingState,
                            AtomicReference<ContinuousWalkingCommandMessage> commandMessage,
                            ContinuousPlanner continuousPlanner,
                            ContinuousHikingParameters continuousHikingParameters,
                            TerrainMapData terrainMap,
                            TerrainPlanningDebugger debugger)
    {
-      this.continuousHikingState = continuousHikingState;
       this.commandMessage = commandMessage;
       this.continuousPlanner = continuousPlanner;
       this.continuousHikingParameters = continuousHikingParameters;
@@ -62,8 +58,8 @@ public class ReadyToPlanState implements State
       controllerQueue = footstepQueueStatusMessage.getQueuedFootstepList();
       if (controllerQueueSize != footstepQueueStatusMessage.getQueuedFootstepList().size())
       {
-         LogTools.warn(message = String.format("State: [%s]: Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size(),
-                                               continuousHikingState.getEnumValue()));
+         String message = String.format("State: [%s]: Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size());
+         LogTools.warn(message);
          statistics.appendString(message);
       }
       controllerQueueSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
@@ -77,10 +73,13 @@ public class ReadyToPlanState implements State
       this.latestFootstepStatusMessage.set(footstepStatusMessage);
    }
 
+   private boolean didPlanningLoop;
+
    @Override
    public void onEntry()
    {
       LogTools.warn("Entering [READY_TO_PLAN] state");
+      didPlanningLoop = false;
    }
 
    @Override
@@ -105,25 +104,18 @@ public class ReadyToPlanState implements State
          debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
       }
 
-      if (continuousPlanner.isPlanAvailable())
-      {
-         continuousHikingState.set(ContinuousHikingState.PLAN_AVAILABLE);
-      }
-      else
-      {
-         // TODO: Add replanning. Replanned plan valid only until the foot lands.
-         continuousHikingState.set(ContinuousHikingState.WAITING_TO_LAND);
-         LogTools.error(message = String.format("State: [%s]: Planning failed... will try again when current step is completed",
-                                                continuousHikingState.getEnumValue()));
-         statistics.appendString(message);
-      }
-
-      if (!continuousHikingParameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
-         continuousHikingState.set(ContinuousHikingState.NOT_STARTED);
+      didPlanningLoop = true;
    }
 
    @Override
    public void onExit(double timeInState)
    {
    }
+
+   @Override
+   public boolean isDone(double timeInState)
+   {
+      return didPlanningLoop;
+   }
+
 }

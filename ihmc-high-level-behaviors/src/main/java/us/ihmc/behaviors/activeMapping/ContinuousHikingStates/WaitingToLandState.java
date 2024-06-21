@@ -1,43 +1,72 @@
 package us.ihmc.behaviors.activeMapping.ContinuousHikingStates;
 
-import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepQueueStatusMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
-import us.ihmc.behaviors.activeMapping.ContinuousHikingState;
+import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.ros2.ROS2Topic;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.statistics;
 
 public class WaitingToLandState implements State
 {
+   private final ROS2Helper ros2Helper;
    private final HumanoidReferenceFrames referenceFrames;
-   private final YoEnum<ContinuousHikingState> continuousHikingState;
-   private final AtomicReference<ContinuousWalkingCommandMessage> commandMessage;
    private final ContinuousHikingParameters continuousHikingParameters;
+
+   private final ROS2Topic<FootstepDataListMessage> controllerFootstepDataTopic;
+   private final ContinuousPlanner continuousPlanner;
+
+   private int controllerQueueSize = 0;
+   private List<QueuedFootstepStatusMessage> controllerQueue;
 
    private final AtomicReference<FootstepStatusMessage> latestFootstepStatusMessage = new AtomicReference<>();
 
    public WaitingToLandState(ROS2Helper ros2Helper,
                              String simpleRobotName,
                              HumanoidReferenceFrames referenceFrames,
-                             YoEnum<ContinuousHikingState> continuousHikingState,
-                             AtomicReference<ContinuousWalkingCommandMessage> commandMessage,
+                             ContinuousPlanner continuousPlanner,
                              ContinuousHikingParameters continuousHikingParameters)
    {
+      this.ros2Helper = ros2Helper;
       this.referenceFrames = referenceFrames;
-      this.continuousHikingState = continuousHikingState;
-      this.commandMessage = commandMessage;
       this.continuousHikingParameters = continuousHikingParameters;
+      this.continuousPlanner = continuousPlanner;
 
+      ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
       ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
+
+      controllerFootstepDataTopic = HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, simpleRobotName);
+      ros2Helper.createPublisher(controllerFootstepDataTopic);
+   }
+
+   private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)
+   {
+      // Set the that controller queue size before getting the new one
+      statistics.setLastFootstepQueueLength(controllerQueueSize);
+
+      if (!continuousHikingParameters.getEnableContinuousWalking())
+         return;
+
+      controllerQueue = footstepQueueStatusMessage.getQueuedFootstepList();
+      if (controllerQueueSize != footstepQueueStatusMessage.getQueuedFootstepList().size())
+      {
+         String message = String.format("State: [%s]: Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size());
+         LogTools.warn(message);
+         statistics.appendString(message);
+      }
+      controllerQueueSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
    }
 
    /*
@@ -48,13 +77,7 @@ public class WaitingToLandState implements State
       if (!continuousHikingParameters.getEnableContinuousWalking())
          return;
 
-      if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED)
-      {
-         continuousHikingState.set(ContinuousHikingState.READY_TO_PLAN);
-         statistics.endStepTime();
-         statistics.startStepTime();
-      }
-      else if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
+      if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
       {
          // TODO: Use the transfer time (starting now) to start planning (if WAITING_TO_LAND then plan again)
          statistics.incrementTotalStepsCompleted();
@@ -72,20 +95,52 @@ public class WaitingToLandState implements State
    }
 
    @Override
+   public boolean isDone(double timeInState)
+   {
+      FootstepStatusMessage footstepStatusMessage = latestFootstepStatusMessage.get();
+      return footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED;
+   }
+
+   @Override
    public void onEntry()
    {
+      if (continuousHikingParameters.getStepPublisherEnabled())
+      {
+         if (continuousPlanner.isPlanAvailable())
+         {
+            FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(continuousHikingParameters, controllerQueue);
+
+            String message = String.format("State: [%s]: Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller");
+            LogTools.info(message);
+            statistics.appendString(message);
+
+            ros2Helper.publish(controllerFootstepDataTopic, footstepDataList);
+         }
+         else
+         {
+            String message = String.format("State: [%s]: Planning failed... will try again when current step is completed");
+            LogTools.error(message);
+            statistics.appendString(message);
+         }
+      }
+
+      continuousPlanner.setPlanAvailable(false);
+      continuousPlanner.transitionCallback();
+      statistics.setStartWaitingTime();
+
+
       LogTools.warn("Entering [WAITING_TO_LAND] state");
    }
 
    @Override
    public void doAction(double timeInState)
    {
-      if (!continuousHikingParameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
-         continuousHikingState.set(ContinuousHikingState.NOT_STARTED);
    }
 
    @Override
    public void onExit(double timeInState)
    {
+      statistics.endStepTime();
+      statistics.startStepTime();
    }
 }
