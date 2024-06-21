@@ -5,7 +5,6 @@ import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
@@ -20,6 +19,8 @@ import java.util.List;
 
 public class DoorNode extends SceneNode
 {
+   private static final Pose3D ZERO_POSE = new Pose3D();
+
    private final Pose3D doorFramePose = new Pose3D(); // To know which way the door opens. X points in the direction that the door swings.
    private final DoorPanel doorPanel = new DoorPanel(this);
    private final List<DoorOpeningMechanism> openingMechanisms = new ArrayList<>();
@@ -61,6 +62,17 @@ public class DoorNode extends SceneNode
                                             planarRegion.getNormalX(),
                                             planarRegion.getNormalY());
 
+         double yaw = TupleTools.angle(Axis2D.X, doorLineNormal.getDirection());
+
+         // If doorFramePose is zero, this means we are just now perceiving the door.
+         // We assume all doors are "push doors" when we first see them.
+         // TODO: remove assumption door is a "push door" when we first see it
+         if (doorFramePose.epsilonEquals(ZERO_POSE, 0.0))
+         {
+            doorFramePose.getTranslation().set(planarRegionCentroidInWorld);
+            doorFramePose.getRotation().setYawPitchRoll(Math.PI * yaw, 0.0, 0.0);
+         }
+
          // Update the opening mechanism poses with the planar region orientation,
          // special case for the LEVER_HANDLE
          for (DoorOpeningMechanism openingMechanism : openingMechanisms)
@@ -68,7 +80,6 @@ public class DoorNode extends SceneNode
             Pose3D openingMechanismPose = openingMechanism.getGraspPose();
             Point2D openingMechanismPointInWorld2D = new Point2D(openingMechanismPose.getTranslation());
             RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(openingMechanismPointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
-            double yaw = TupleTools.angle(Axis2D.X, doorLineNormal.getDirection());
             double pitch = 0.0;
             double roll = 0.0;
             if (openingMechanism.getType() == DoorOpeningMechanismType.LEVER_HANDLE)
