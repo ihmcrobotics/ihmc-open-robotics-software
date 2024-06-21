@@ -58,7 +58,7 @@ public class NotStartedState implements State
    @Override
    public void onEntry()
    {
-      LogTools.warn(continuousHikingState.getEnumValue());
+      LogTools.warn("Entering [NOT_STATED] state");
    }
 
    @Override

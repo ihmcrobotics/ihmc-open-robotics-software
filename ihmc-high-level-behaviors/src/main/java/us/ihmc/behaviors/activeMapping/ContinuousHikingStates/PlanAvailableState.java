@@ -109,7 +109,7 @@ public class PlanAvailableState implements State
    @Override
    public void onEntry()
    {
-      LogTools.warn(continuousHikingState.getEnumValue());
+      LogTools.warn("Entering [PLAN_AVAILABLE] state");
    }
 
    @Override

@@ -74,7 +74,7 @@ public class WaitingToLandState implements State
    @Override
    public void onEntry()
    {
-      LogTools.warn(continuousHikingState.getEnumValue());
+      LogTools.warn("Entering [WAITING_TO_LAND] state");
    }
 
    @Override

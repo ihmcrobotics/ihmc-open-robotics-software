@@ -80,7 +80,7 @@ public class ReadyToPlanState implements State
    @Override
    public void onEntry()
    {
-      LogTools.warn(continuousHikingState.getEnumValue());
+      LogTools.warn("Entering [READY_TO_PLAN] state");
    }
 
    @Override

@@ -14,6 +14,7 @@ import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
 import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -50,7 +51,7 @@ public class ContinuousPlannerSchedulingTask
    private final ContinuousPlanner continuousPlanner;
 
    public StateMachine<ContinuousHikingState, State> stateMachine;
-   public YoEnum<ContinuousHikingState> continuousHikingMode;
+   public static YoEnum<ContinuousHikingState> continuousHikingMode;
 
    public static ContinuousPlannerStatistics statistics = new ContinuousPlannerStatistics();
 
@@ -80,6 +81,7 @@ public class ContinuousPlannerSchedulingTask
       stateMachineFactory.setRegistry(registry);
 
       continuousHikingMode = new YoEnum<>("ContinuousHikingMode", registry, ContinuousHikingState.class, true);
+      continuousHikingMode.set(ContinuousHikingState.NOT_STARTED);
 
       State notStartedState = new NotStartedState(ros2Node,
                                                   simpleRobotName,
@@ -142,6 +144,9 @@ public class ContinuousPlannerSchedulingTask
    {
       continuousPlanner.syncParametersCallback();
 
+      // When the state machine does a transition, it will set continuousHikingState to null, that way when it goes into the next state.
+      // It doesn't have any transition that needs to happen yet until we set one in order to go to the next state
+      // TODO fix statistic prints because the enum gets reset to null when going into a new state, so those prints are useless
       stateMachine.doActionAndTransition();
    }
 
