@@ -213,6 +213,9 @@ public class ROS2SceneGraphSubscription
             updateLocalTreeFromSubscription(subscriptionChildNode, localChildNode, localNode, modificationQueue);
          }
       }
+
+      // Update the state after iterating over children, because node can unfreeze at this time
+      localNode.fromMessage(subscriptionNode.getSceneNodeMessage().getConfirmableRequest());
    }
 
    private void checkTreeModified(SceneNode localNode)

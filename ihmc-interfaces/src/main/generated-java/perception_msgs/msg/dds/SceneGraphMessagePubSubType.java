@@ -15,7 +15,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "e2d3c8e86f461b88b4dd17a951a08d54247f3051e580adce716757a9ba37a04a";
+   		return "28287e0b25f4f692dda1c106263e90afe4c4cad74397540e9d2e7f450a0ce5b5";
    }
    
    @Override
@@ -55,8 +55,6 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -107,8 +105,6 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
-      current_alignment += ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.getCdrSerializedSize(data.getConfirmableRequest(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getSceneTreeTypes().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -173,7 +169,6 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       cdr.write_type_4(data.getNextId());
 
-      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.write(data.getConfirmableRequest(), cdr);
       if(data.getSceneTreeTypes().size() <= 1000)
       cdr.write_type_e(data.getSceneTreeTypes());else
           throw new RuntimeException("scene_tree_types field exceeds the maximum length");
@@ -226,7 +221,6 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       	
       data.setNextId(cdr.read_type_4());
       	
-      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.read(data.getConfirmableRequest(), cdr);	
       cdr.read_type_e(data.getSceneTreeTypes());	
       cdr.read_type_e(data.getSceneTreeIndices());	
       cdr.read_type_e(data.getSceneNodes());	
@@ -246,8 +240,6 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_4("next_id", data.getNextId());
-      ser.write_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
-
       ser.write_type_e("scene_tree_types", data.getSceneTreeTypes());
       ser.write_type_e("scene_tree_indices", data.getSceneTreeIndices());
       ser.write_type_e("scene_nodes", data.getSceneNodes());
@@ -266,8 +258,6 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setNextId(ser.read_type_4("next_id"));
-      ser.read_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
-
       ser.read_type_e("scene_tree_types", data.getSceneTreeTypes());
       ser.read_type_e("scene_tree_indices", data.getSceneTreeIndices());
       ser.read_type_e("scene_nodes", data.getSceneNodes());

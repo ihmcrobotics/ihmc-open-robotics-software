@@ -32,10 +32,6 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
             */
    public long next_id_;
    /**
-            * A mechanism for confirming and ending a freeze early
-            */
-   public ihmc_common_msgs.msg.dds.ConfirmableRequestMessage confirmable_request_;
-   /**
             * A depth first ordered list of types.
             */
    public us.ihmc.idl.IDLSequence.Byte  scene_tree_types_;
@@ -84,7 +80,6 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
 
    public SceneGraphMessage()
    {
-      confirmable_request_ = new ihmc_common_msgs.msg.dds.ConfirmableRequestMessage();
       scene_tree_types_ = new us.ihmc.idl.IDLSequence.Byte (1000, "type_9");
 
       scene_tree_indices_ = new us.ihmc.idl.IDLSequence.Long (1000, "type_4");
@@ -113,7 +108,6 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
 
       next_id_ = other.next_id_;
 
-      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.staticCopy(other.confirmable_request_, confirmable_request_);
       scene_tree_types_.set(other.scene_tree_types_);
       scene_tree_indices_.set(other.scene_tree_indices_);
       scene_nodes_.set(other.scene_nodes_);
@@ -155,15 +149,6 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
    public long getNextId()
    {
       return next_id_;
-   }
-
-
-   /**
-            * A mechanism for confirming and ending a freeze early
-            */
-   public ihmc_common_msgs.msg.dds.ConfirmableRequestMessage getConfirmableRequest()
-   {
-      return confirmable_request_;
    }
 
 
@@ -289,7 +274,6 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.next_id_, other.next_id_, epsilon)) return false;
 
-      if (!this.confirmable_request_.epsilonEquals(other.confirmable_request_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.scene_tree_types_, other.scene_tree_types_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsLongSequence(this.scene_tree_indices_, other.scene_tree_indices_, epsilon)) return false;
@@ -374,7 +358,6 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
 
       if(this.next_id_ != otherMyClass.next_id_) return false;
 
-      if (!this.confirmable_request_.equals(otherMyClass.confirmable_request_)) return false;
       if (!this.scene_tree_types_.equals(otherMyClass.scene_tree_types_)) return false;
       if (!this.scene_tree_indices_.equals(otherMyClass.scene_tree_indices_)) return false;
       if (!this.scene_nodes_.equals(otherMyClass.scene_nodes_)) return false;
@@ -400,8 +383,6 @@ public class SceneGraphMessage extends Packet<SceneGraphMessage> implements Sett
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("next_id=");
       builder.append(this.next_id_);      builder.append(", ");
-      builder.append("confirmable_request=");
-      builder.append(this.confirmable_request_);      builder.append(", ");
       builder.append("scene_tree_types=");
       builder.append(this.scene_tree_types_);      builder.append(", ");
       builder.append("scene_tree_indices=");
