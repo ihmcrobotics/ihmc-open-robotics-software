@@ -13,6 +13,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -26,12 +27,14 @@ import us.ihmc.perception.RapidHeightMapManager;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.centerPose.CenterPoseDetectionSubscriber;
+import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
 import us.ihmc.perception.ouster.OusterDepthImageRetriever;
 import us.ihmc.perception.ouster.OusterNetServer;
 import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
+import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
 import us.ihmc.perception.realsense.RealsenseConfiguration;
 import us.ihmc.perception.realsense.RealsenseDeviceManager;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -83,8 +86,6 @@ import java.util.function.Supplier;
  *    in the {@code main} method. When launching only one sensor, comment out the other sensor heartbeats in the
  *    {@code forceEnableAllSensors} method.
  * </p>
- *
- * TODO: Add HumanoidPerceptionModule
  */
 public class PerceptionAndAutonomyProcess
 {
@@ -118,7 +119,6 @@ public class PerceptionAndAutonomyProcess
 
    private final DepthImageOverlapRemover overlapRemover = new DepthImageOverlapRemover();
 
-   // Sensor Data
    private ROS2DemandGraphNode depthOverlapRemovalDemandNode;
    private ROS2DemandGraphNode zedPointCloudDemandNode;
    private ROS2DemandGraphNode zedColorDemandNode;
@@ -151,7 +151,6 @@ public class PerceptionAndAutonomyProcess
    private final SideDependentList<BlackflyImagePublisher> blackflyImagePublishers = new SideDependentList<>();
    private final RestartableThread blackflyProcessAndPublishThread;
 
-   // Detections
    private final DetectionManager detectionManager;
 
    private final RestartableThread arUcoMarkerDetectionThread;
@@ -176,6 +175,7 @@ public class PerceptionAndAutonomyProcess
 
    @Nullable
    private RapidPlanarRegionsExtractor planarRegionsExtractor;
+   private ROS2StoredPropertySet<RapidRegionsExtractorParameters> planarRegionsExtractorParameterSync;
    private final RestartableThrottledThread planarRegionsExtractorThread;
    private final TypedNotification<PlanarRegionsList> newPlanarRegions = new TypedNotification<>();
    private ROS2DemandGraphNode planarRegionsDemandNode;
@@ -571,9 +571,12 @@ public class PerceptionAndAutonomyProcess
                                                                      fy,
                                                                      cx,
                                                                      cy);
-
             planarRegionsExtractor.getDebugger().setEnabled(false);
+
+            planarRegionsExtractorParameterSync = new ROS2StoredPropertySet<>(ros2Helper, PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS, planarRegionsExtractor.getParameters());
          }
+
+         planarRegionsExtractorParameterSync.updateAndPublishThrottledStatus();
 
          FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
 
