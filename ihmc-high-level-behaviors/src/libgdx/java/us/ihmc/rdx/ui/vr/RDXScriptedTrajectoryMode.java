@@ -65,7 +65,6 @@ public class RDXScriptedTrajectoryMode
    private int shoulderPressSweepCounter = 0;
    private final TIntObjectHashMap<ScriptedTrajectoryType> shoulderPressTrajectoryMap = new TIntObjectHashMap<>();
    private boolean isFirstFrame = true;
-   ImDouble tempDuration = new ImDouble(4.0);
 
    private RDXVRControllerModel controllerModel = RDXVRControllerModel.UNKNOWN;
 
@@ -214,7 +213,7 @@ public class RDXScriptedTrajectoryMode
       // Send messages to the hands or arms based on the scripted trajectories
       for (RobotSide robotSide : RobotSide.values)
       {
-         ArmTrajectoryMessage armTrajectoryMessage;
+         ArmTrajectoryMessage armTrajectoryMessage = null;
          switch (trajectoryType)
          {
             //TODO: (CD) Don't use this until the taskspace gains are tuned.
@@ -252,20 +251,12 @@ public class RDXScriptedTrajectoryMode
             case CONTINUOUS_WEIGHT_MOVING:
             case CONTINUOUS_WEIGHT_TWIRL:
                armTrajectoryMessage = trajectoryStreamer.generateArmTrajectoryMessage(trajectoryType, robotSide);
-               if (armTrajectoryMessage == null)
-               {
-                  // If there's no message, don't publish it.
-                  break;
-               }
-               ros2ControllerHelper.publishToController(armTrajectoryMessage);
                break;
             case REACHABILITY_SWEEP:
                armTrajectoryMessage = trajectoryStreamer.generateArmTrajectoryMessage(reachabilityTrajectoryMap.get(reachabilitySweepCounter), robotSide);
-               ros2ControllerHelper.publishToController(armTrajectoryMessage);
                if (robotSide == RobotSide.RIGHT)
                {
                   reachabilitySweepCounter++;
-
                   if (reachabilitySweepCounter > 4)
                      reachabilitySweepCounter = 0;
                }
@@ -275,19 +266,18 @@ public class RDXScriptedTrajectoryMode
                if (robotSide == RobotSide.RIGHT)
                {
                   shoulderPressSweepCounter++;
-
                   if (shoulderPressSweepCounter > 2)
                      shoulderPressSweepCounter = 0;
                }
-               if (armTrajectoryMessage == null)
-               {
-                  // If there's no message, don't publish it.
-                  break;
-               }
-               ros2ControllerHelper.publishToController(armTrajectoryMessage);
                break;
             default:
                throw new RuntimeException("Unhandled trajectory type: " + trajectoryType);
+         }
+
+         if (armTrajectoryMessage != null)
+         {
+            // Only publish if the message was populated.
+            ros2ControllerHelper.publishToController(armTrajectoryMessage);
          }
       }
 
@@ -451,7 +441,8 @@ public class RDXScriptedTrajectoryMode
          // Reachability Sweep
          if (ImGui.radioButton(labels.get("Reachability Sweep"), trajectoryType == ScriptedTrajectoryType.REACHABILITY_SWEEP))
          {
-            trajectoryType = ScriptedTrajectoryType.REACHABILITY_SWEEP;
+            if(!streamToController.get())
+               trajectoryType = ScriptedTrajectoryType.REACHABILITY_SWEEP;
          }
 
          // Reachability Arms Back
@@ -649,7 +640,8 @@ public class RDXScriptedTrajectoryMode
          // Shoulder Press Sweep
          if (ImGui.radioButton(labels.get("Shoulder Press Sweep"), trajectoryType == ScriptedTrajectoryType.SHOULDER_PRESS_SWEEP))
          {
-            trajectoryType = ScriptedTrajectoryType.SHOULDER_PRESS_SWEEP;
+            if(!streamToController.get())
+               trajectoryType = ScriptedTrajectoryType.SHOULDER_PRESS_SWEEP;
          }
 
          // Shoulder Press
