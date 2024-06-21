@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiMouseButton;
 import imgui.type.ImInt;
+import org.apache.commons.lang3.mutable.MutableObject;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -24,8 +25,10 @@ import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
+import us.ihmc.rdx.imgui.ImGuiInputDouble;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
+import us.ihmc.rdx.imgui.ImGuiSliderDouble;
 import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
@@ -124,9 +127,31 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       for (int i = 0; i < HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS; i++)
       {
          int jointIndex = i;
+
+         OneDoFJointBasics armJoint = syncedRobot.getFullRobotModel().getArmJoint(definition.getSide(), robotModel.getJointMap().getArmJointNames()[i]);
+         double jointLimitLower = armJoint.getJointLimitLower();
+         double jointLimitUpper = armJoint.getJointLimitUpper();
+
+         final MutableObject<ImGuiInputDouble> fancyInput = new MutableObject<>();
+         final MutableObject<ImGuiSliderDouble> fancySlider = new MutableObject<>();
          jointAngleWidgets[i] = new ImDoubleWrapper(() -> getDefinition().getJointAngles().getValue()[jointIndex],
                                                     jointAngle -> getDefinition().getJointAngles().getValue()[jointIndex] = jointAngle,
-                                                    imDouble -> ImGui.inputDouble(labels.get("j" + jointIndex), imDouble));
+         imDouble ->
+         {
+            if (fancyInput.getValue() == null)
+            {
+               fancyInput.setValue(new ImGuiInputDouble("j" + jointIndex, "%.3f", imDouble));
+               fancyInput.getValue().setWidgetWidth(119.0f);
+
+               fancySlider.setValue(new ImGuiSliderDouble("", "", imDouble));
+            }
+
+            fancyInput.getValue().render(0.01, 0.1);
+
+            ImGui.sameLine();
+            fancySlider.getValue().setWidgetText("%.1f%s".formatted(Math.toDegrees(imDouble.get()), EuclidCoreMissingTools.DEGREE_SYMBOL));
+            fancySlider.getValue().render(jointLimitLower, jointLimitUpper);
+         });
       }
       holdPoseInWorldLaterWrapper = new ImBooleanWrapper(definition::getHoldPoseInWorldLater,
                                                          definition::setHoldPoseInWorldLater,
