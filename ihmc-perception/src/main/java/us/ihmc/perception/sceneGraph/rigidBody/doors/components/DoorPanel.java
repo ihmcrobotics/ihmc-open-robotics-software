@@ -50,7 +50,7 @@ public class DoorPanel
          //            PlanarRegion doorPlanarRegion = planarRegionsList.findClosestPlanarRegionToPointByProjectionOntoXYPlane(doorLeverPointInWorld.getX(),
          //                                                                                                                    doorLeverPointInWorld.getY());
 
-         PlanarRegion doorPlanarRegion = null;
+         PlanarRegion candidatePlanarRegion = null;
 
          for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
          {
@@ -65,19 +65,19 @@ public class DoorPanel
             if (planarRegion.getArea() < ((DoorModelParameters.DOOR_PANEL_HEIGHT * DoorModelParameters.DOOR_PANEL_WIDTH) / 5))
                continue;
 
-            if (doorPlanarRegion == null)
+            if (candidatePlanarRegion == null)
             {
-               doorPlanarRegion = planarRegion;
+               candidatePlanarRegion = planarRegion;
                continue;
             }
 
-            if (planarRegion.getArea() > doorPlanarRegion.getArea())
-               doorPlanarRegion = planarRegion;
+            if (planarRegion.getArea() > candidatePlanarRegion.getArea())
+               candidatePlanarRegion = planarRegion;
          }
 
-         if (doorPlanarRegion != null)
+         if (candidatePlanarRegion != null)
          {
-            setPlanarRegion(doorPlanarRegion);
+            setPlanarRegion(candidatePlanarRegion);
             setPlanarRegionLastUpdateTimeMillis(System.currentTimeMillis());
          }
       }
