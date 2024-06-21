@@ -4,6 +4,8 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
@@ -60,10 +62,12 @@ public class SceneGraph
    private transient final TIntObjectMap<ArUcoMarkerNode> arUcoMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final TIntObjectMap<CenterposeNode> centerposeDetectedMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
+   private int numberOfFrozenNodes = 0;
 
+   /** Create without CRDT synchronization. */
    public SceneGraph()
    {
-      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME));
+      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME, new CRDTInfo(ROS2ActorDesignation.OPERATOR, (int) CRDT_SYNC_FREQUENCY)));
    }
 
    /**
@@ -134,6 +138,7 @@ public class SceneGraph
       arUcoMarkerIDToNodeMap.clear();
       centerposeDetectedMarkerIDToNodeMap.clear();
       sceneNodesByID.clear();
+      numberOfFrozenNodes = 0;
       updateCaches(rootNode);
    }
 
@@ -156,6 +161,9 @@ public class SceneGraph
          centerposeDetectedMarkerIDToNodeMap.put(centerposeNode.getObjectID(), centerposeNode);
       }
 
+      if (node.isFrozen())
+         ++numberOfFrozenNodes;
+
       for (SceneNode child : node.getChildren())
       {
          updateCaches(child);
@@ -165,6 +173,11 @@ public class SceneGraph
    public SceneNode getRootNode()
    {
       return rootNode;
+   }
+
+   public CRDTInfo getCRDTInfo()
+   {
+      return rootNode.getCRDTInfo();
    }
 
    public AtomicLong getNextID()
@@ -205,6 +218,11 @@ public class SceneGraph
    public SortedSet<SceneNode> getSceneNodesByID()
    {
       return sceneNodesByID;
+   }
+
+   public int getNumberOfFrozenNodes()
+   {
+      return numberOfFrozenNodes;
    }
 
    public ReferenceFrameDynamicCollection asNewDynamicReferenceFrameCollection()

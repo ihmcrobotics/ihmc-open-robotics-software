@@ -15,7 +15,7 @@ public class SceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4cdf4fa3092b10060f7d9bfe5af9389312d0b6cf96be32565169526081a73f92";
+   		return "ca25a45e13424ef0f85ebeea7bb407ce74c28e53277cc06634d73ff5a901095a";
    }
    
    @Override
@@ -55,6 +55,8 @@ public class SceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+      current_alignment += ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
@@ -77,6 +79,8 @@ public class SceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
 
+      current_alignment += ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.getCdrSerializedSize(data.getConfirmableRequest(), current_alignment);
+
       current_alignment += controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.getCdrSerializedSize(data.getTransformToWorld(), current_alignment);
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
@@ -94,6 +98,7 @@ public class SceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       cdr.write_type_d(data.getName());else
           throw new RuntimeException("name field exceeds the maximum length");
 
+      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.write(data.getConfirmableRequest(), cdr);
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.write(data.getTransformToWorld(), cdr);
       cdr.write_type_3(data.getNumberOfChildren());
 
@@ -104,6 +109,7 @@ public class SceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       data.setId(cdr.read_type_4());
       	
       cdr.read_type_d(data.getName());	
+      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.read(data.getConfirmableRequest(), cdr);	
       controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType.read(data.getTransformToWorld(), cdr);	
       data.setNumberOfChildren(cdr.read_type_3());
       	
@@ -115,6 +121,8 @@ public class SceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       ser.write_type_4("id", data.getId());
       ser.write_type_d("name", data.getName());
+      ser.write_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
+
       ser.write_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
       ser.write_type_3("number_of_children", data.getNumberOfChildren());
@@ -125,6 +133,8 @@ public class SceneNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       data.setId(ser.read_type_4("id"));
       ser.read_type_d("name", data.getName());
+      ser.read_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
+
       ser.read_type_a("transform_to_world", new controller_msgs.msg.dds.RigidBodyTransformMessagePubSubType(), data.getTransformToWorld());
 
       data.setNumberOfChildren(ser.read_type_3("number_of_children"));

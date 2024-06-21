@@ -217,7 +217,8 @@ public class DoorSceneNodeDefinitions
                                                           sceneGraph.getIDToNodeMap(),
                                                           parentNode.getID(), LEFT_DOOR_PANEL_TO_MARKER_TRANSFORM,
                                                           DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
-                                                          PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                          PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                          sceneGraph.getCRDTInfo());
          LogTools.info("Adding LeftDoorPanel to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(leftDoorPanel, parentNode));
       }
@@ -232,7 +233,8 @@ public class DoorSceneNodeDefinitions
                                                      PUSH_DOOR_FRAME_TO_PANEL_TRANSFORM,
                                                      DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
                                                      PUSH_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
-                                                     DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
+                                                     DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN,
+                                                     sceneGraph.getCRDTInfo());
          LogTools.info("Adding PushDoorFrame to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(pushDoorFrame, leftDoorPanel));
       }
@@ -244,7 +246,8 @@ public class DoorSceneNodeDefinitions
                                                                 sceneGraph.getIDToNodeMap(),
                                                                 parentNode.getID(), LEFT_DOOR_OPENER_TO_MARKER_TRANSFORM,
                                                                 DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
-                                                                LEFT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                                LEFT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                sceneGraph.getCRDTInfo());
          LogTools.info("Adding LeftDoorLeverHandle to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(leftDoorLeverHandle, parentNode));
       }
@@ -256,7 +259,8 @@ public class DoorSceneNodeDefinitions
                                                          sceneGraph.getIDToNodeMap(),
                                                          parentNode.getID(), LEFT_DOOR_OPENER_TO_MARKER_TRANSFORM,
                                                          DOOR_KNOB_VISUAL_MODEL_FILE_PATH,
-                                                         DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                         DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                         sceneGraph.getCRDTInfo());
          LogTools.info("Adding LeftDoorKnob to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(leftDoorKnob, parentNode));
       }
@@ -268,7 +272,8 @@ public class DoorSceneNodeDefinitions
                                                                  sceneGraph.getIDToNodeMap(),
                                                                  parentNode.getID(), LEFT_DOOR_OPENER_TO_MARKER_TRANSFORM,
                                                                  DOOR_EMERGENCY_BAR_VISUAL_MODEL_FILE_PATH,
-                                                                 LEFT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                                 LEFT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                 sceneGraph.getCRDTInfo());
          LogTools.info("Adding LeftEmergencyBar to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(leftDoorEmergencyBar, parentNode));
       }
@@ -284,7 +289,8 @@ public class DoorSceneNodeDefinitions
                                                           sceneGraph.getIDToNodeMap(),
                                                           parentNode.getID(), LEFT_DOOR_PANEL_TO_MARKER_TRANSFORM,
                                                           DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
-                                                          PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                          PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                          sceneGraph.getCRDTInfo());
          LogTools.info("Adding LeftDoorPanel to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(leftDoorPanel, parentNode));
       }
@@ -299,7 +305,8 @@ public class DoorSceneNodeDefinitions
                                                      PULL_DOOR_FRAME_TO_PANEL_TRANSFORM,
                                                      DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
                                                      PULL_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
-                                                     DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
+                                                     DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN,
+                                                     sceneGraph.getCRDTInfo());
          LogTools.info("Adding PullDoorFrame to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(pullDoorFrame, leftDoorPanel));
       }
@@ -311,7 +318,8 @@ public class DoorSceneNodeDefinitions
                                                                 sceneGraph.getIDToNodeMap(),
                                                                 parentNode.getID(), LEFT_DOOR_OPENER_TO_MARKER_TRANSFORM,
                                                                 DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
-                                                                LEFT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                                LEFT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                sceneGraph.getCRDTInfo());
          LogTools.info("Adding LeftDoorLeverHandle to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(leftDoorLeverHandle, parentNode));
       }
@@ -323,7 +331,8 @@ public class DoorSceneNodeDefinitions
                                                           sceneGraph.getIDToNodeMap(),
                                                           parentNode.getID(), LEFT_DOOR_OPENER_TO_MARKER_TRANSFORM,
                                                           DOOR_KNOB_VISUAL_MODEL_FILE_PATH,
-                                                          DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                          DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                         sceneGraph.getCRDTInfo());
          LogTools.info("Adding LeftDoorKnob to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(leftDoorKnob, parentNode));
       }
@@ -335,7 +344,8 @@ public class DoorSceneNodeDefinitions
                                                                  sceneGraph.getIDToNodeMap(),
                                                                  parentNode.getID(), LEFT_DOOR_OPENER_TO_MARKER_TRANSFORM,
                                                                  DOOR_EMERGENCY_BAR_VISUAL_MODEL_FILE_PATH,
-                                                                 LEFT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                                 LEFT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                 sceneGraph.getCRDTInfo());
          LogTools.info("Adding LeftEmergencyBar to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(leftDoorEmergencyBar, parentNode));
       }
@@ -350,7 +360,8 @@ public class DoorSceneNodeDefinitions
                                                            sceneGraph.getIDToNodeMap(),
                                                            parentNode.getID(), RIGHT_DOOR_PANEL_TO_MARKER_TRANSFORM,
                                                            DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
-                                                           PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                           PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                           sceneGraph.getCRDTInfo());
          LogTools.info("Adding RightDoorPanel to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(rightDoorPanel, parentNode));
       }
@@ -365,7 +376,8 @@ public class DoorSceneNodeDefinitions
                                                      PULL_DOOR_FRAME_TO_PANEL_TRANSFORM,
                                                      DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
                                                      PULL_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
-                                                     DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
+                                                     DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN,
+                                                     sceneGraph.getCRDTInfo());
          LogTools.info("Adding PullDoorFrame to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(pushDoorFrame, rightDoorPanel));
       }
@@ -377,7 +389,8 @@ public class DoorSceneNodeDefinitions
                                                                  sceneGraph.getIDToNodeMap(),
                                                                  parentNode.getID(), RIGHT_DOOR_OPENER_TO_MARKER_TRANSFORM,
                                                                  DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
-                                                                 RIGHT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                                 RIGHT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                 sceneGraph.getCRDTInfo());
          LogTools.info("Adding RightDoorLeverHandle to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(rightDoorLeverHandle, parentNode));
       }
@@ -389,7 +402,8 @@ public class DoorSceneNodeDefinitions
                                                           sceneGraph.getIDToNodeMap(),
                                                           parentNode.getID(), RIGHT_DOOR_OPENER_TO_MARKER_TRANSFORM,
                                                           DOOR_KNOB_VISUAL_MODEL_FILE_PATH,
-                                                          DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                          DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                          sceneGraph.getCRDTInfo());
          LogTools.info("Adding RightDoorKnob to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(rightDoorKnob, parentNode));
       }
@@ -401,7 +415,8 @@ public class DoorSceneNodeDefinitions
                                                                   sceneGraph.getIDToNodeMap(),
                                                                   parentNode.getID(), RIGHT_DOOR_OPENER_TO_MARKER_TRANSFORM,
                                                                   DOOR_EMERGENCY_BAR_VISUAL_MODEL_FILE_PATH,
-                                                                  RIGHT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                                  RIGHT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                  sceneGraph.getCRDTInfo());
          LogTools.info("Adding RightEmergencyBar to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(rightDoorEmergencyBar, parentNode));
       }
@@ -416,7 +431,8 @@ public class DoorSceneNodeDefinitions
                                                           sceneGraph.getIDToNodeMap(),
                                                           parentNode.getID(), RIGHT_DOOR_PANEL_TO_MARKER_TRANSFORM,
                                                           DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
-                                                          PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                          PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                           sceneGraph.getCRDTInfo());
          LogTools.info("Adding RightDoorPanel to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(rightDoorPanel, parentNode));
       }
@@ -431,7 +447,8 @@ public class DoorSceneNodeDefinitions
                                                      PUSH_DOOR_FRAME_TO_PANEL_TRANSFORM,
                                                      DOOR_FRAME_VISUAL_MODEL_FILE_PATH,
                                                      PUSH_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
-                                                     DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
+                                                     DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN,
+                                                     sceneGraph.getCRDTInfo());
          LogTools.info("Adding PushDoorFrame to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(pushDoorFrame, rightDoorPanel));
       }
@@ -443,7 +460,8 @@ public class DoorSceneNodeDefinitions
                                                                  sceneGraph.getIDToNodeMap(),
                                                                  parentNode.getID(), RIGHT_DOOR_OPENER_TO_MARKER_TRANSFORM,
                                                                  DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
-                                                                 RIGHT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                                 RIGHT_DOOR_LEVER_HANDLE_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                 sceneGraph.getCRDTInfo());
          LogTools.info("Adding RightDoorLeverHandle to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(rightDoorLeverHandle, parentNode));
       }
@@ -455,7 +473,8 @@ public class DoorSceneNodeDefinitions
                                                           sceneGraph.getIDToNodeMap(),
                                                           parentNode.getID(), RIGHT_DOOR_OPENER_TO_MARKER_TRANSFORM,
                                                           DOOR_KNOB_VISUAL_MODEL_FILE_PATH,
-                                                          DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                          DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                          sceneGraph.getCRDTInfo());
          LogTools.info("Adding RightDoorKnob to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(rightDoorKnob, parentNode));
       }
@@ -467,7 +486,8 @@ public class DoorSceneNodeDefinitions
                                                                   sceneGraph.getIDToNodeMap(),
                                                                   parentNode.getID(), RIGHT_DOOR_OPENER_TO_MARKER_TRANSFORM,
                                                                   DOOR_EMERGENCY_BAR_VISUAL_MODEL_FILE_PATH,
-                                                                  RIGHT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                                  RIGHT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                                  sceneGraph.getCRDTInfo());
          LogTools.info("Adding RightEmergencyBar to scene graph.");
          modificationQueue.accept(new SceneGraphNodeAddition(rightDoorEmergencyBar, parentNode));
       }
