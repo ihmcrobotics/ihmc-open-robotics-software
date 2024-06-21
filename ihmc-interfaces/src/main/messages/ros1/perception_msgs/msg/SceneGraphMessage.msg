@@ -21,6 +21,9 @@ int8 YOLO_NODE_TYPE=7
 
 int8 DOOR_NODE_TYPE=8
 
+# Monotonically increasing message ID that matches the CRDTInfo update number
+uint32 sequence_id
+
 # The ID to assign to the next instantiated node
 uint32 next_id
 
