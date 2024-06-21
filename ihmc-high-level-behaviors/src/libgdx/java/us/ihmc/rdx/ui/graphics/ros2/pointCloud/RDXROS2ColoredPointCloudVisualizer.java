@@ -92,7 +92,7 @@ public class RDXROS2ColoredPointCloudVisualizer extends RDXROS2MultiTopicVisuali
 
       kernelAndMeshUpdateThread = new RestartableThrottledThread(getClass().getSimpleName() + "KernelAndMeshUpdate", 15.0, () ->
       {
-         if (pointCloudRenderer != null && pointCloudRenderer.getVertexBuffer() != null)
+         if (pointCloudRenderer != null)
          {
             pointCloudRenderer.updateMeshFastestBeforeKernel();
 //            pointCloudVertexBuffer.syncWithBackingBuffer(); // TODO: Is this necessary?

@@ -288,15 +288,18 @@ public class RDXPointCloudRenderer implements RenderableProvider
     */
    public void updateMeshFastestBeforeKernel()
    {
-      FloatBuffer floatBuffer = renderable.meshPart.mesh.getVerticesBuffer();
-      floatBuffer.position(0);
-      int numberOfPointsNow;
-      if (!hasTurnedOver)
-         numberOfPointsNow = (currentSegmentIndex + 1) * pointsPerSegment;
-      else // After one cycle, we are just updating now; if you don't you'll get a progressive flicker
-         numberOfPointsNow = maxPoints;
-      floatBuffer.limit(numberOfPointsNow * floatsPerVertex);
-      renderable.meshPart.size = numberOfPointsNow;
+      if (renderable.meshPart.mesh != null)
+      {
+         FloatBuffer floatBuffer = renderable.meshPart.mesh.getVerticesBuffer();
+         floatBuffer.position(0);
+         int numberOfPointsNow;
+         if (!hasTurnedOver)
+            numberOfPointsNow = (currentSegmentIndex + 1) * pointsPerSegment;
+         else // After one cycle, we are just updating now; if you don't you'll get a progressive flicker
+            numberOfPointsNow = maxPoints;
+         floatBuffer.limit(numberOfPointsNow * floatsPerVertex);
+         renderable.meshPart.size = numberOfPointsNow;
+      }
    }
 
    /**
