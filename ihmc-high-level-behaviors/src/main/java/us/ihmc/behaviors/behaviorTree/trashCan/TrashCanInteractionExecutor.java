@@ -60,11 +60,7 @@ public class TrashCanInteractionExecutor extends BehaviorTreeNodeExecutor<TrashC
             String obstructedNodeName = definition.getObstructedNode().getValue();
             if (!obstructedNodeName.isEmpty())
             {
-               if (obstructedNodeName.contains(DoorSceneNodeDefinitions.RIGHT_DOOR_PANEL_NAME))
-               {
-                  state.getStance().setValue(InteractionStance.RIGHT);
-               }
-               else if (obstructedNodeName.contains(DoorSceneNodeDefinitions.LEFT_DOOR_PANEL_NAME))
+               if (obstructedNodeName.contains("Door"))
                {
                   state.getStance().setValue(InteractionStance.LEFT);
                }
@@ -75,7 +71,7 @@ public class TrashCanInteractionExecutor extends BehaviorTreeNodeExecutor<TrashC
             }
             else
             {
-               state.getStance().setValue(InteractionStance.FRONT);
+               state.getStance().setValue(InteractionStance.LEFT);
             }
          }
 
@@ -87,9 +83,10 @@ public class TrashCanInteractionExecutor extends BehaviorTreeNodeExecutor<TrashC
          }
          else if (state.getApproachingFrontAction().getIsExecuting() && state.getStance().getValue() != InteractionStance.FRONT)
          {
-            int nextNextIndex = state.getApproachingRightAction().getActionIndex();
+            int nextNextIndex = state.getEndAction().getActionIndex();
             state.getActionSequence().setExecutionNextIndex(nextNextIndex);
          }
+
 
          if (state.getSetLeftFootDownAction().getIsExecuting())
          {
