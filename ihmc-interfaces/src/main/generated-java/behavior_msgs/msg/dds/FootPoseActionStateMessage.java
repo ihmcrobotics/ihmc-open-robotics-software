@@ -6,7 +6,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
-public class PelvisHeightPitchActionStateMessage extends Packet<PelvisHeightPitchActionStateMessage> implements Settable<PelvisHeightPitchActionStateMessage>, EpsilonComparable<PelvisHeightPitchActionStateMessage>
+public class FootPoseActionStateMessage extends Packet<FootPoseActionStateMessage> implements Settable<FootPoseActionStateMessage>, EpsilonComparable<FootPoseActionStateMessage>
 {
    /**
             * Parent state fields
@@ -15,24 +15,24 @@ public class PelvisHeightPitchActionStateMessage extends Packet<PelvisHeightPitc
    /**
             * Definition
             */
-   public behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage definition_;
+   public behavior_msgs.msg.dds.FootPoseActionDefinitionMessage definition_;
 
-   public PelvisHeightPitchActionStateMessage()
+   public FootPoseActionStateMessage()
    {
       state_ = new behavior_msgs.msg.dds.ActionNodeStateMessage();
-      definition_ = new behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage();
+      definition_ = new behavior_msgs.msg.dds.FootPoseActionDefinitionMessage();
    }
 
-   public PelvisHeightPitchActionStateMessage(PelvisHeightPitchActionStateMessage other)
+   public FootPoseActionStateMessage(FootPoseActionStateMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(PelvisHeightPitchActionStateMessage other)
+   public void set(FootPoseActionStateMessage other)
    {
       behavior_msgs.msg.dds.ActionNodeStateMessagePubSubType.staticCopy(other.state_, state_);
-      behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
+      behavior_msgs.msg.dds.FootPoseActionDefinitionMessagePubSubType.staticCopy(other.definition_, definition_);
    }
 
 
@@ -48,25 +48,25 @@ public class PelvisHeightPitchActionStateMessage extends Packet<PelvisHeightPitc
    /**
             * Definition
             */
-   public behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage getDefinition()
+   public behavior_msgs.msg.dds.FootPoseActionDefinitionMessage getDefinition()
    {
       return definition_;
    }
 
 
-   public static Supplier<PelvisHeightPitchActionStateMessagePubSubType> getPubSubType()
+   public static Supplier<FootPoseActionStateMessagePubSubType> getPubSubType()
    {
-      return PelvisHeightPitchActionStateMessagePubSubType::new;
+      return FootPoseActionStateMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return PelvisHeightPitchActionStateMessagePubSubType::new;
+      return FootPoseActionStateMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(PelvisHeightPitchActionStateMessage other, double epsilon)
+   public boolean epsilonEquals(FootPoseActionStateMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -82,9 +82,9 @@ public class PelvisHeightPitchActionStateMessage extends Packet<PelvisHeightPitc
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof PelvisHeightPitchActionStateMessage)) return false;
+      if(!(other instanceof FootPoseActionStateMessage)) return false;
 
-      PelvisHeightPitchActionStateMessage otherMyClass = (PelvisHeightPitchActionStateMessage) other;
+      FootPoseActionStateMessage otherMyClass = (FootPoseActionStateMessage) other;
 
       if (!this.state_.equals(otherMyClass.state_)) return false;
       if (!this.definition_.equals(otherMyClass.definition_)) return false;
@@ -97,7 +97,7 @@ public class PelvisHeightPitchActionStateMessage extends Packet<PelvisHeightPitc
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("PelvisHeightPitchActionStateMessage {");
+      builder.append("FootPoseActionStateMessage {");
       builder.append("state=");
       builder.append(this.state_);      builder.append(", ");
       builder.append("definition=");

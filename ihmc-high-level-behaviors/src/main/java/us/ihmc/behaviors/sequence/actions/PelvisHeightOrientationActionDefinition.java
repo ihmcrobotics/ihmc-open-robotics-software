@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.sequence.actions;
 
-import behavior_msgs.msg.dds.PelvisHeightPitchActionDefinitionMessage;
+import behavior_msgs.msg.dds.PelvisHeightOrientationActionDefinitionMessage;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
@@ -15,7 +15,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.tools.io.JSONTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
-public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
+public class PelvisHeightOrientationActionDefinition extends ActionNodeDefinition
 {
    private final CRDTUnidirectionalDouble trajectoryDuration;
    private final CRDTUnidirectionalString parentFrameName;
@@ -26,7 +26,7 @@ public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
    private String onDiskParentFrameName;
    private final RigidBodyTransform onDiskPelvisToParentTransform = new RigidBodyTransform();
 
-   public PelvisHeightPitchActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
+   public PelvisHeightOrientationActionDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       super(crdtInfo, saveFileDirectory);
 
@@ -87,7 +87,7 @@ public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
       return !unchanged;
    }
 
-   public void toMessage(PelvisHeightPitchActionDefinitionMessage message)
+   public void toMessage(PelvisHeightOrientationActionDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());
 
@@ -96,7 +96,7 @@ public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
       pelvisToParentTransform.toMessage(message.getPelvisTransformToParent());
    }
 
-   public void fromMessage(PelvisHeightPitchActionDefinitionMessage message)
+   public void fromMessage(PelvisHeightOrientationActionDefinitionMessage message)
    {
       super.fromMessage(message.getDefinition());
 
@@ -112,10 +112,27 @@ public class PelvisHeightPitchActionDefinition extends ActionNodeDefinition
                                                               height);
    }
 
+   public void setYaw(double yaw)
+   {
+      RotationMatrixBasics rotation = pelvisToParentTransform.getValue().getRotation();
+      pelvisToParentTransform.getValue().getRotation().setYawPitchRoll(yaw, rotation.getPitch(), rotation.getRoll());
+   }
+
    public void setPitch(double pitch)
    {
       RotationMatrixBasics rotation = pelvisToParentTransform.getValue().getRotation();
       pelvisToParentTransform.getValue().getRotation().setYawPitchRoll(rotation.getYaw(), pitch, rotation.getRoll());
+   }
+
+   public void setRoll(double roll)
+   {
+      RotationMatrixBasics rotation = pelvisToParentTransform.getValue().getRotation();
+      pelvisToParentTransform.getValue().getRotation().setYawPitchRoll(rotation.getYaw(), rotation.getPitch(), roll);
+   }
+
+   public RotationMatrixBasics getRotation()
+   {
+      return pelvisToParentTransform.getValue().getRotation();
    }
 
    public double getHeight()

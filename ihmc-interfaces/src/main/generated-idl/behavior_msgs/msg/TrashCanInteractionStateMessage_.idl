@@ -1,0 +1,33 @@
+#ifndef __behavior_msgs__msg__TrashCanInteractionStateMessage__idl__
+#define __behavior_msgs__msg__TrashCanInteractionStateMessage__idl__
+
+#include "behavior_msgs/msg/./BehaviorTreeNodeStateMessage_.idl"
+#include "behavior_msgs/msg/./TrashCanInteractionDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::TrashCanInteractionStateMessage_")
+      struct TrashCanInteractionStateMessage
+      {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::BehaviorTreeNodeStateMessage state;
+        /**
+         * Definition
+         */
+        behavior_msgs::msg::dds::TrashCanInteractionDefinitionMessage definition;
+        /**
+         * FRONT (0), LEFT (1) or RIGHT (2)
+         */
+        long stance;
+      };
+    };
+  };
+};
+
+#endif

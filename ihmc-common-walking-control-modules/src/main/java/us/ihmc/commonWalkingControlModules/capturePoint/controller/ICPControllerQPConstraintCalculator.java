@@ -5,6 +5,7 @@ import static us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPCon
 
 import org.ejml.data.DMatrixRMaj;
 
+import org.ejml.data.Matrix;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.qpInput.ICPInequalityInput;
 import us.ihmc.matrixlib.MatrixTools;
@@ -70,11 +71,27 @@ public class ICPControllerQPConstraintCalculator
       int offset = 0;
       if (hasXMax || hasYMax)
       { // set X & Y CoP upper bound
-         MatrixTools.setMatrixBlock(inputToPack.Aineq, offset, copFeedbackIndex, maxFeedbackTransform, 0, 0, 2, 2, 1.0);
+         if (maxFeedbackTransform == null)
+         {
+            inputToPack.Aineq.set(offset, copFeedbackIndex, 1.0);
+            inputToPack.Aineq.set(offset + 1, copFeedbackIndex + 1, 1.0);
+         }
+         else
+         {
+            MatrixTools.setMatrixBlock(inputToPack.Aineq, offset, copFeedbackIndex, maxFeedbackTransform, 0, 0, 2, 2, 1.0);
+         }
 
          if (useAngularMomentum)
          { // add in the CMP effects
-            MatrixTools.setMatrixBlock(inputToPack.Aineq, offset, cmpFeedbackIndex, maxFeedbackTransform, 0, 0, 2, 2, 1.0);
+            if (maxFeedbackTransform == null)
+            {
+               inputToPack.Aineq.set(offset, cmpFeedbackIndex, 1.0);
+               inputToPack.Aineq.set(offset + 1, cmpFeedbackIndex + 1, 1.0);
+            }
+            else
+            {
+               MatrixTools.setMatrixBlock(inputToPack.Aineq, offset, cmpFeedbackIndex, maxFeedbackTransform, 0, 0, 2, 2, 1.0);
+            }
          }
          inputToPack.bineq.set(offset, maxXMagnitude);
          inputToPack.bineq.set(offset + 1, maxYMagnitude);
@@ -84,11 +101,27 @@ public class ICPControllerQPConstraintCalculator
 
       if (hasXMin || hasYMin)
       { // set X & Y CoP lower bound
-         MatrixTools.setMatrixBlock(inputToPack.Aineq, offset, copFeedbackIndex, maxFeedbackTransform, 0, 0, 2, 2, -1.0);
+         if (maxFeedbackTransform == null)
+         {
+            inputToPack.Aineq.set(offset, copFeedbackIndex, -1.0);
+            inputToPack.Aineq.set(offset + 1, copFeedbackIndex + 1, -1.0);
+         }
+         else
+         {
+            MatrixTools.setMatrixBlock(inputToPack.Aineq, offset, copFeedbackIndex, maxFeedbackTransform, 0, 0, 2, 2, -1.0);
+         }
 
          if (useAngularMomentum)
          { // add in the CMP effects
-            MatrixTools.setMatrixBlock(inputToPack.Aineq, offset, cmpFeedbackIndex, maxFeedbackTransform, 0, 0, 2, 2, -1.0);
+            if (maxFeedbackTransform == null)
+            {
+               inputToPack.Aineq.set(offset, cmpFeedbackIndex, -1.0);
+               inputToPack.Aineq.set(offset + 1, cmpFeedbackIndex + 1, -1.0);
+            }
+            else
+            {
+               MatrixTools.setMatrixBlock(inputToPack.Aineq, offset, cmpFeedbackIndex, maxFeedbackTransform, 0, 0, 2, 2, -1.0);
+            }
          }
          inputToPack.bineq.set(offset, -minXMagnitude);
          inputToPack.bineq.set(offset + 1, -minYMagnitude);
@@ -139,6 +172,6 @@ public class ICPControllerQPConstraintCalculator
       double maxYValue = previousYValue + controlDT * maxYRate;
       double minYValue = previousYValue - controlDT * maxYRate;
 
-      calculateMaxFeedbackMagnitudeConstraint(inputToPack, new DMatrixRMaj(2, 2), minXValue, maxXValue, minYValue, maxYValue, useAngularMomentum);
+      calculateMaxFeedbackMagnitudeConstraint(inputToPack, null, minXValue, maxXValue, minYValue, maxYValue, useAngularMomentum);
    }
 }

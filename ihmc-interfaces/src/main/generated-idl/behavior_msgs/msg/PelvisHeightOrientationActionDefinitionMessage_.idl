@@ -1,5 +1,5 @@
-#ifndef __behavior_msgs__msg__PelvisHeightPitchActionDefinitionMessage__idl__
-#define __behavior_msgs__msg__PelvisHeightPitchActionDefinitionMessage__idl__
+#ifndef __behavior_msgs__msg__PelvisHeightOrientationActionDefinitionMessage__idl__
+#define __behavior_msgs__msg__PelvisHeightOrientationActionDefinitionMessage__idl__
 
 #include "behavior_msgs/msg/./ActionNodeDefinitionMessage_.idl"
 #include "controller_msgs/msg/./RigidBodyTransformMessage_.idl"
@@ -10,8 +10,8 @@ module behavior_msgs
     module dds
     {
 
-      @TypeCode(type="behavior_msgs::msg::dds_::PelvisHeightPitchActionDefinitionMessage_")
-      struct PelvisHeightPitchActionDefinitionMessage
+      @TypeCode(type="behavior_msgs::msg::dds_::PelvisHeightOrientationActionDefinitionMessage_")
+      struct PelvisHeightOrientationActionDefinitionMessage
       {
         /**
          * Parent definition fields
