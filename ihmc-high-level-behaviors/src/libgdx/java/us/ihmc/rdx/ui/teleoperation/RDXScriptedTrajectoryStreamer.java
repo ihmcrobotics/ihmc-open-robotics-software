@@ -348,10 +348,8 @@ public class RDXScriptedTrajectoryStreamer
                   waypoints.put(side,
                                 List.of(
                                       homeConfiguration,
-//                                        List.of(-0.2, side.negateIfRightSide(1.0), side.negateIfRightSide(0.5), -0.9, 0.0, 0.0, 0.0),
-                                        List.of(-0.9, side.negateIfRightSide(1.25), side.negateIfRightSide(1.0), 0.0, 0.0, 0.0, 0.0),
+                                        List.of(-0.9, side.negateIfRightSide(1.25), side.negateIfRightSide(0.5), 0.0, 0.0, 0.0, 0.0),
                                         List.of(-1.6, side.negateIfRightSide(1.5), side.negateIfRightSide(-0.9), 0.0, 0.0, 0.0, 0.0),
-                                        //List.of(-2.3, side.negateIfRightSide(2.0), side.negateIfRightSide(-1.2), -0.5, 0.0, 0.0, 0.0),
                                         List.of(-3.14, side.negateIfRightSide(2.5), side.negateIfRightSide(-1.5), -1.1, side.negateIfRightSide(-1.57), 0.0, 0.0)));
 //               }
                break;
@@ -359,12 +357,9 @@ public class RDXScriptedTrajectoryStreamer
 //               if (side == RobotSide.LEFT)
 //               {
                   waypoints.put(side, List.of(
-//                                              List.of(-3.14, side.negateIfRightSide(2.5), side.negateIfRightSide(-1.5), -1.1, side.negateIfRightSide(-1.57), 0.0, 0.0),
                                               List.of(-3.14, side.negateIfRightSide(1.4), side.negateIfRightSide(-1.5), 0.0, side.negateIfRightSide(-1.57), 0.0, 0.0),
-//                                              List.of(-2.3, side.negateIfRightSide(2.0), side.negateIfRightSide(-1.2), -0.5, 0.0, 0.0, 0.0),
                                               List.of(-1.6, side.negateIfRightSide(1.5), side.negateIfRightSide(-0.9), 0.0, 0.0, 0.0, 0.0),
-                                              List.of(-0.9, side.negateIfRightSide(1.25), side.negateIfRightSide(1.0), 0.0, 0.0, 0.0, 0.0),
-//                                              List.of(-0.2, side.negateIfRightSide(1.0), side.negateIfRightSide(0.5), -0.9, 0.0, 0.0, 0.0),
+                                              List.of(-0.9, side.negateIfRightSide(1.25), side.negateIfRightSide(0.5), 0.0, 0.0, 0.0, 0.0),
                                               homeConfiguration));
 //               }
                break;
