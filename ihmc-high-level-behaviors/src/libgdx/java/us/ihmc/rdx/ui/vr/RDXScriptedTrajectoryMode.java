@@ -57,11 +57,13 @@ public class RDXScriptedTrajectoryMode
 
    private ReferenceFrame chestFrame;
    private final RigidBodyTransform chestTransformToWorld = new RigidBodyTransform();
-   private ScriptedTrajectoryType trajectoryType = ScriptedTrajectoryType.STRETCH_OUT_ARMS;
+   private ScriptedTrajectoryType trajectoryType = ScriptedTrajectoryType.HOME_CONFIGURATION;
    private boolean isTrajectoryMessageSent = false;
    private boolean isTrajectoryCompleted = false;
    private int reachabilitySweepCounter = 0;
-   private TIntObjectHashMap<ScriptedTrajectoryType> reachabilityTrajectoryMap = new TIntObjectHashMap<>();
+   private final TIntObjectHashMap<ScriptedTrajectoryType> reachabilityTrajectoryMap = new TIntObjectHashMap<>();
+   private int shoulderPressSweepCounter = 0;
+   private final TIntObjectHashMap<ScriptedTrajectoryType> shoulderPressTrajectoryMap = new TIntObjectHashMap<>();
    private boolean isFirstFrame = true;
    ImDouble tempDuration = new ImDouble(4.0);
 
@@ -123,6 +125,11 @@ public class RDXScriptedTrajectoryMode
       reachabilityTrajectoryMap.put(3, ScriptedTrajectoryType.REACHABILITY_ARMS_UP);
       reachabilityTrajectoryMap.put(4, ScriptedTrajectoryType.HOME_CONFIGURATION);
 //      reachabilityTrajectoryMap.put(5, ScriptedTrajectoryType.WRIST_RANGE_OF_MOTION);
+
+      // Assign each shoulder press trajectory to an integer.
+      shoulderPressTrajectoryMap.put(0, ScriptedTrajectoryType.SHOULDER_PRESS_INITIAL);
+      shoulderPressTrajectoryMap.put(1, ScriptedTrajectoryType.SHOULDER_PRESS);
+      shoulderPressTrajectoryMap.put(2, ScriptedTrajectoryType.SHOULDER_PRESS_RETURN);
 
       //TODO: Add additional logic for joint space trajectories
       // Check for completion of the trajectories.
@@ -263,7 +270,22 @@ public class RDXScriptedTrajectoryMode
                      reachabilitySweepCounter = 0;
                }
                break;
+            case SHOULDER_PRESS_SWEEP:
+               armTrajectoryMessage = trajectoryStreamer.generateArmTrajectoryMessage(shoulderPressTrajectoryMap.get(shoulderPressSweepCounter), robotSide);
+               if (robotSide == RobotSide.RIGHT)
+               {
+                  shoulderPressSweepCounter++;
 
+                  if (shoulderPressSweepCounter > 2)
+                     shoulderPressSweepCounter = 0;
+               }
+               if (armTrajectoryMessage == null)
+               {
+                  // If there's no message, don't publish it.
+                  break;
+               }
+               ros2ControllerHelper.publishToController(armTrajectoryMessage);
+               break;
             default:
                throw new RuntimeException("Unhandled trajectory type: " + trajectoryType);
          }
@@ -302,6 +324,21 @@ public class RDXScriptedTrajectoryMode
             sendScriptedTrajectories();
             // If the reachability counter makes it back to zero, then the chain of trajectories is completed.
             if (reachabilitySweepCounter == 0)
+            {
+               //reset
+               streamToController.set(false);
+            }
+            else
+            {
+               streamToController.set(true);
+               isTrajectoryMessageSent = true;
+            }
+         }
+         else if(trajectoryType == ScriptedTrajectoryType.SHOULDER_PRESS_SWEEP && !isTrajectoryMessageSent && streamToController.get())
+         {
+            sendScriptedTrajectories();
+            // If the shoulder press counter makes it back to zero, then the chain of trajectories is completed.
+            if (shoulderPressSweepCounter == 0)
             {
                //reset
                streamToController.set(false);
@@ -404,8 +441,6 @@ public class RDXScriptedTrajectoryMode
          {
             trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.DAB_ON_THEM_HATERS, dabOnThemHatersDuration.get());
          }
-
-         ImGui.popItemWidth(); // Reset item width if necessary
       }
 
       if (isFirstFrame)
@@ -611,6 +646,12 @@ public class RDXScriptedTrajectoryMode
             trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.LATERAL_RAISE, lateralRaiseDuration.get());
          }
 
+         // Shoulder Press Sweep
+         if (ImGui.radioButton(labels.get("Shoulder Press Sweep"), trajectoryType == ScriptedTrajectoryType.SHOULDER_PRESS_SWEEP))
+         {
+            trajectoryType = ScriptedTrajectoryType.SHOULDER_PRESS_SWEEP;
+         }
+
          // Shoulder Press
          if (ImGui.radioButton(labels.get("Shoulder Press"), trajectoryType == ScriptedTrajectoryType.SHOULDER_PRESS))
          {
@@ -621,8 +662,9 @@ public class RDXScriptedTrajectoryMode
          if (ImGui.inputDouble("##shoulderPressDuration", shoulderPressDuration))
          {
             trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.SHOULDER_PRESS, shoulderPressDuration.get());
-            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.SHOULDER_PRESS_INITIAL, shoulderPressDuration.get());
-            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.SHOULDER_PRESS_RETURN, shoulderPressDuration.get());
+            // These durations are increased by a factor because the arm has much farther to travel in the initial and return trajectories.
+            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.SHOULDER_PRESS_INITIAL, 2.75*shoulderPressDuration.get());
+            trajectoryStreamer.setTrajectoryDuration(ScriptedTrajectoryType.SHOULDER_PRESS_RETURN, 3.0*shoulderPressDuration.get());
          }
          ImGui.sameLine();
          if (ImGui.radioButton(labels.get("Initialize"), trajectoryType == ScriptedTrajectoryType.SHOULDER_PRESS_INITIAL))

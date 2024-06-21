@@ -44,7 +44,7 @@ public class RDXScriptedTrajectoryStreamer
    private final SideDependentList<OneDoFJointBasics[]> armJoints;
    private final Map<ScriptedTrajectoryType, SideDependentList<List<List<Double>>>> jointAngleWaypointsMap = new HashMap<>();
    private final Map<ScriptedTrajectoryType, Double> trajectoryTimes = new HashMap<>();
-   private final double minimumAllowedDuration = 2.0;
+   private final double minimumAllowedDuration = 1.0;
 
    public RDXScriptedTrajectoryStreamer(SideDependentList<OneDoFJointBasics[]> armJoints, double trajectoryTime)
    {
@@ -71,7 +71,7 @@ public class RDXScriptedTrajectoryStreamer
       {
          // TODO: find a better way to differentiate between taskspace and jointspace trajectories
          if (trajectoryType == ScriptedTrajectoryType.HAND_CIRCLES || trajectoryType == ScriptedTrajectoryType.STRETCH_OUT_ARMS
-             || trajectoryType == ScriptedTrajectoryType.REACHABILITY_SWEEP)
+             || trajectoryType == ScriptedTrajectoryType.REACHABILITY_SWEEP || trajectoryType == ScriptedTrajectoryType.SHOULDER_PRESS_SWEEP)
          {
             continue;
          }
@@ -107,6 +107,7 @@ public class RDXScriptedTrajectoryStreamer
       SHOULDER_PRESS,
       SHOULDER_PRESS_INITIAL,
       SHOULDER_PRESS_RETURN,
+      SHOULDER_PRESS_SWEEP,
       CONTINUOUS_WEIGHT_MOVING,
       CONTINUOUS_WEIGHT_TWIRL,
    }
@@ -345,23 +346,37 @@ public class RDXScriptedTrajectoryStreamer
                if (side == RobotSide.LEFT)
                {
                   waypoints.put(side,
-                                List.of(List.of(-3.14, side.negateIfRightSide(2.5), side.negateIfRightSide(-1.5), -1.1, side.negateIfRightSide(-1.57), 0.0, 0.0)));
+                                List.of(
+                                      homeConfiguration,
+//                                        List.of(-0.2, side.negateIfRightSide(1.0), side.negateIfRightSide(0.5), -0.9, 0.0, 0.0, 0.0),
+                                        List.of(-0.9, side.negateIfRightSide(1.25), side.negateIfRightSide(1.0), 0.0, 0.0, 0.0, 0.0),
+                                        List.of(-1.6, side.negateIfRightSide(1.5), side.negateIfRightSide(-0.9), 0.0, 0.0, 0.0, 0.0),
+                                        //List.of(-2.3, side.negateIfRightSide(2.0), side.negateIfRightSide(-1.2), -0.5, 0.0, 0.0, 0.0),
+                                        List.of(-3.14, side.negateIfRightSide(2.5), side.negateIfRightSide(-1.5), -1.1, side.negateIfRightSide(-1.57), 0.0, 0.0)));
                }
                break;
             case SHOULDER_PRESS_RETURN:
                if (side == RobotSide.LEFT)
                {
-                  waypoints.put(side, List.of(homeConfiguration));
+                  waypoints.put(side, List.of(
+//                                              List.of(-3.14, side.negateIfRightSide(2.5), side.negateIfRightSide(-1.5), -1.1, side.negateIfRightSide(-1.57), 0.0, 0.0),
+                                              List.of(-3.14, side.negateIfRightSide(1.4), side.negateIfRightSide(-1.5), 0.0, side.negateIfRightSide(-1.57), 0.0, 0.0),
+//                                              List.of(-2.3, side.negateIfRightSide(2.0), side.negateIfRightSide(-1.2), -0.5, 0.0, 0.0, 0.0),
+                                              List.of(-1.6, side.negateIfRightSide(1.5), side.negateIfRightSide(-0.9), 0.0, 0.0, 0.0, 0.0),
+                                              List.of(-0.9, side.negateIfRightSide(1.25), side.negateIfRightSide(1.0), 0.0, 0.0, 0.0, 0.0),
+//                                              List.of(-0.2, side.negateIfRightSide(1.0), side.negateIfRightSide(0.5), -0.9, 0.0, 0.0, 0.0),
+                                              homeConfiguration));
                }
                break;
             case CONTINUOUS_WEIGHT_MOVING:
                if (side == RobotSide.LEFT)
                {
                   waypoints.put(side, List.of(
-                        List.of(1.0, side.negateIfRightSide(0.47), side.negateIfRightSide(1.0), -0.5, 0.0, 0.0, 0.0),
-                        List.of(0.0, side.negateIfRightSide(2.3), side.negateIfRightSide(1.0), 0.0, 0.0, 0.0, 0.0),
-                        List.of(0.0, side.negateIfRightSide(1.4), side.negateIfRightSide(0.0), 0.0, 0.0, 0.0, 0.0),
+                        List.of(1.0, side.negateIfRightSide(0.47), side.negateIfRightSide(1.0), -0.5, side.negateIfRightSide(1.0), 0.0, 0.0),
+                        List.of(0.5, side.negateIfRightSide(2.3), side.negateIfRightSide(1.0), 0.0, 0.0, 0.0, 0.0),
+                        List.of(0.0, side.negateIfRightSide(1.7), side.negateIfRightSide(0.0), 0.0, 0.0, 0.0, 0.0),
                         List.of(-3.0, side.negateIfRightSide(1.4), side.negateIfRightSide(0.0), 0.0, 0.0, 0.0, 0.0),
+                        List.of(-1.0, side.negateIfRightSide(1.2), side.negateIfRightSide(0.0), 0.0, 0.0, 0.0, 0.0),
                         homeConfiguration));
                }
                break;
@@ -369,10 +384,11 @@ public class RDXScriptedTrajectoryStreamer
                if (side == RobotSide.LEFT)
                {
                   waypoints.put(side, List.of(
-                        List.of(1.0, side.negateIfRightSide(0.47), side.negateIfRightSide(1.0), -0.5, side.negateIfRightSide(-2.0), 0.0, side.negateIfRightSide(-2.0)),
-                        List.of(0.0, side.negateIfRightSide(2.3), side.negateIfRightSide(1.0), 0.0, side.negateIfRightSide(0.0), 0.0, side.negateIfRightSide(0.0)),
-                        List.of(0.0, side.negateIfRightSide(1.4), side.negateIfRightSide(0.0), 0.0, side.negateIfRightSide(2.0), 0.0, side.negateIfRightSide(1.0)),
+                        List.of(1.0, side.negateIfRightSide(0.47), side.negateIfRightSide(1.0), -0.5, side.negateIfRightSide(1.0), 0.0, side.negateIfRightSide(0.0)),
+                        List.of(0.5, side.negateIfRightSide(2.3), side.negateIfRightSide(1.0), 0.0, side.negateIfRightSide(0.0), 0.0, side.negateIfRightSide(0.0)),
+                        List.of(0.0, side.negateIfRightSide(1.7), side.negateIfRightSide(0.0), 0.0, side.negateIfRightSide(2.0), 0.0, side.negateIfRightSide(1.0)),
                         List.of(-3.0, side.negateIfRightSide(1.4), side.negateIfRightSide(0.0), 0.0, side.negateIfRightSide(-1.0), 0.0, side.negateIfRightSide(-2.0)),
+                        List.of(-1.0, side.negateIfRightSide(1.2), side.negateIfRightSide(0.0), 0.0, side.negateIfRightSide(0.0), 0.0, side.negateIfRightSide(0.0)),
                         homeConfiguration));
                }
                break;
