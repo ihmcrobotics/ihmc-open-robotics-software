@@ -402,6 +402,9 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                }
             }
          }
+         jointspaceWeightWidget.renderImGuiWidget();
+         positionErrorToleranceInput.renderImGuiWidget();
+         orientationErrorToleranceDegreesInput.renderImGuiWidget();
       }
       else
       {
