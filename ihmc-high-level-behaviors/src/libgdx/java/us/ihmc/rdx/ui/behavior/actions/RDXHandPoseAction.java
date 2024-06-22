@@ -60,6 +60,8 @@ import us.ihmc.wholeBodyController.HandTransformTools;
 import java.util.ArrayList;
 import java.util.List;
 
+import static us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS;
+
 public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPoseActionDefinition>
 {
    private final HandPoseActionState state;
@@ -80,7 +82,9 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final ImDoubleWrapper trajectoryDurationWidget;
    private final String[] configurations = new String[PresetArmConfiguration.values().length + 1];
    private final ImInt currentConfiguration = new ImInt(PresetArmConfiguration.HOME.ordinal() + 1);
-   private final ImDoubleWrapper[] jointAngleWidgets = new ImDoubleWrapper[HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS];
+   private final ImDoubleWrapper[] jointAngleWidgets = new ImDoubleWrapper[MAX_NUMBER_OF_JOINTS];
+   private final SideDependentList<double[]> jointLowerLimits = new SideDependentList<>();
+   private final SideDependentList<double[]> jointUpperLimits = new SideDependentList<>();
    private final ImGuiSliderDoubleWrapper linearPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper angularPositionWeightWidget;
    private final ImGuiSliderDoubleWrapper jointspaceWeightWidget;
@@ -102,7 +106,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                             RobotCollisionModel selectionCollisionModel,
                             ReferenceFrameLibrary referenceFrameLibrary)
    {
-      super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+      super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary, robotModel));
 
       state = getState();
       definition = getDefinition();
@@ -124,14 +128,26 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          configurations[configurationIndex++] = preset.name();
       }
 
-      for (int i = 0; i < HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS; i++)
+      for (RobotSide side : RobotSide.values)
+      {
+         ArmJointName[] armJointNames = robotModel.getJointMap().getArmJointNames(side);
+
+         jointLowerLimits.put(side, new double[armJointNames.length]);
+         jointUpperLimits.put(side, new double[armJointNames.length]);
+
+         int jointIndex = 0;
+         for (ArmJointName armJointName : armJointNames)
+         {
+            OneDoFJointBasics armJoint = syncedRobot.getFullRobotModel().getArmJoint(side, armJointName);
+            jointLowerLimits.get(side)[jointIndex] = armJoint.getJointLimitLower();
+            jointUpperLimits.get(side)[jointIndex] = armJoint.getJointLimitUpper();
+            ++jointIndex;
+         }
+      }
+
+      for (int i = 0; i < MAX_NUMBER_OF_JOINTS; i++)
       {
          int jointIndex = i;
-
-         OneDoFJointBasics armJoint = syncedRobot.getFullRobotModel().getArmJoint(definition.getSide(), robotModel.getJointMap().getArmJointNames()[i]);
-         double jointLimitLower = armJoint.getJointLimitLower();
-         double jointLimitUpper = armJoint.getJointLimitUpper();
-
          final MutableObject<ImGuiInputDouble> fancyInput = new MutableObject<>();
          final MutableObject<ImGuiSliderDouble> fancySlider = new MutableObject<>();
          jointAngleWidgets[i] = new ImDoubleWrapper(() -> getDefinition().getJointAngles().getValue()[jointIndex],
@@ -150,7 +166,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
             ImGui.sameLine();
             fancySlider.getValue().setWidgetText("%.1f%s".formatted(Math.toDegrees(imDouble.get()), EuclidCoreMissingTools.DEGREE_SYMBOL));
-            fancySlider.getValue().render(jointLimitLower, jointLimitUpper);
+            fancySlider.getValue().render(jointLowerLimits.get(definition.getSide())[jointIndex], jointUpperLimits.get(definition.getSide())[jointIndex]);
          });
       }
       holdPoseInWorldLaterWrapper = new ImBooleanWrapper(definition::getHoldPoseInWorldLater,
