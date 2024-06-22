@@ -23,14 +23,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.rdx.imgui.ImBooleanWrapper;
-import us.ihmc.rdx.imgui.ImDoubleWrapper;
-import us.ihmc.rdx.imgui.ImGuiInputDouble;
-import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
-import us.ihmc.rdx.imgui.ImGuiReferenceFrameLibraryCombo;
-import us.ihmc.rdx.imgui.ImGuiSliderDouble;
-import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
-import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
+import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -309,42 +302,42 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          {
             highlightModels.get(definition.getSide()).setTransparency(0.5);
          }
+      }
 
-         ActionSequenceState actionSequence = BehaviorTreeTools.findActionSequenceAncestor(state);
-         if (actionSequence != null)
+      ActionSequenceState actionSequence = BehaviorTreeTools.findActionSequenceAncestor(state);
+      if (actionSequence != null)
+      {
+         HandPoseActionState previousHandAction = actionSequence.findNextPreviousAction(HandPoseActionState.class,
+                                                                                        getState().getActionIndex(),
+                                                                                        definition.getSide());
+
+         boolean previousHandActionExists = previousHandAction != null;
+         boolean weAreAfterIt = previousHandActionExists && actionSequence.getExecutionNextIndex() > previousHandAction.getActionIndex();
+
+         boolean previousIsExecuting = previousHandActionExists && previousHandAction.getIsExecuting();
+         boolean showFromPreviousHand = previousHandActionExists;
+         boolean showFromCurrentHand = !showFromPreviousHand && state.getIsNextForExecution() && ! previousIsExecuting;
+
+         ReferenceFrame fromFrame = null;
+         if (showFromPreviousHand)
          {
-            HandPoseActionState previousHandAction = actionSequence.findNextPreviousAction(HandPoseActionState.class,
-                                                                                           getState().getActionIndex(),
-                                                                                           definition.getSide());
+            fromFrame = previousHandAction.getPalmFrame().getReferenceFrame();
+         }
+         if (showFromCurrentHand)
+         {
+            fromFrame = syncedRobot.getReferenceFrames().getHandFrame(definition.getSide());
+         }
 
-            boolean previousHandActionExists = previousHandAction != null;
-            boolean weAreAfterIt = previousHandActionExists && actionSequence.getExecutionNextIndex() > previousHandAction.getActionIndex();
-
-            boolean previousIsExecuting = previousHandActionExists && previousHandAction.getIsExecuting();
-            boolean showFromPreviousHand = previousHandActionExists;
-            boolean showFromCurrentHand = !showFromPreviousHand && state.getIsNextForExecution() && ! previousIsExecuting;
-
-            ReferenceFrame fromFrame = null;
-            if (showFromPreviousHand)
-            {
-               fromFrame = previousHandAction.getPalmFrame().getReferenceFrame();
-            }
-            if (showFromCurrentHand)
-            {
-               fromFrame = syncedRobot.getReferenceFrames().getHandFrame(definition.getSide());
-            }
-
-            if (fromFrame != null)
-            {
-               double lineWidth = 0.01;
-               trajectoryGraphic.update(lineWidth,
-                                        fromFrame.getTransformToRoot(),
-                                        getState().getPalmFrame().getReferenceFrame().getTransformToRoot());
-            }
-            else
-            {
-               trajectoryGraphic.clear();
-            }
+         if (fromFrame != null)
+         {
+            double lineWidth = 0.01;
+            trajectoryGraphic.update(lineWidth,
+                                     fromFrame.getTransformToRoot(),
+                                     getState().getPalmFrame().getReferenceFrame().getTransformToRoot());
+         }
+         else
+         {
+            trajectoryGraphic.clear();
          }
       }
    }
