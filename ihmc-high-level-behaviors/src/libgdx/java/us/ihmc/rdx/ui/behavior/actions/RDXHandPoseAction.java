@@ -83,6 +83,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
    private final String[] configurations = new String[PresetArmConfiguration.values().length + 1];
    private final ImInt currentConfiguration = new ImInt(PresetArmConfiguration.HOME.ordinal() + 1);
    private final ImDoubleWrapper[] jointAngleWidgets = new ImDoubleWrapper[MAX_NUMBER_OF_JOINTS];
+   private final SideDependentList<ArmJointName[]> jointNames = new SideDependentList<>();
    private final SideDependentList<double[]> jointLowerLimits = new SideDependentList<>();
    private final SideDependentList<double[]> jointUpperLimits = new SideDependentList<>();
    private final ImGuiSliderDoubleWrapper linearPositionWeightWidget;
@@ -132,6 +133,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       {
          ArmJointName[] armJointNames = robotModel.getJointMap().getArmJointNames(side);
 
+         jointNames.put(side, armJointNames);
          jointLowerLimits.put(side, new double[armJointNames.length]);
          jointUpperLimits.put(side, new double[armJointNames.length]);
 
@@ -165,7 +167,9 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             fancyInput.getValue().render(0.01, 0.1);
 
             ImGui.sameLine();
-            fancySlider.getValue().setWidgetText("%.1f%s".formatted(Math.toDegrees(imDouble.get()), EuclidCoreMissingTools.DEGREE_SYMBOL));
+            fancySlider.getValue().setWidgetText("%s %.1f%s".formatted(jointNames.get(definition.getSide())[jointIndex].name(),
+                                                                       Math.toDegrees(imDouble.get()),
+                                                                       EuclidCoreMissingTools.DEGREE_SYMBOL));
             fancySlider.getValue().render(jointLowerLimits.get(definition.getSide())[jointIndex], jointUpperLimits.get(definition.getSide())[jointIndex]);
          });
       }
