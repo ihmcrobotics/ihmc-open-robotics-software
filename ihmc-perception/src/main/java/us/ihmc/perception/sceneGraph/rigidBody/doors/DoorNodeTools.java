@@ -36,7 +36,9 @@ public final class DoorNodeTools
                {
                   if (yoloNode.getChildren().isEmpty())
                   {
-                     DoorNode doorNode = new DoorNode(sceneGraph.getNextID().getAndIncrement(), "Door");
+                     DoorNode doorNode = new DoorNode(sceneGraph.getNextID().getAndIncrement(),
+                                                      "Door",
+                                                      sceneGraph.getCRDTInfo());
                      doorNode.setOpeningMechanismTypeFromYoloClass(yoloNode.getDetectionClass());
                      modificationQueue.accept(new SceneGraphNodeAddition(doorNode, yoloNode));
 
@@ -74,7 +76,8 @@ public final class DoorNodeTools
                                                                             new RigidBodyTransform(),
                                                                             visualModelPath,
                                                                             yoloVisualModelTransform,
-                                                                            DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN);
+                                                                            DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN,
+                                                                            sceneGraph.getCRDTInfo());
                      LogTools.info("Adding doorStaticHandle to scene graph.");
                      modificationQueue.accept(new SceneGraphNodeAddition(doorStaticNode, doorNode));
                   }

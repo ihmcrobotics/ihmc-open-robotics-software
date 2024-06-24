@@ -38,6 +38,7 @@ public class RDXSCS2Robot
                                                                     robotDefinition,
                                                                     mirroredRobotRegistry,
                                                                     Gdx.app::postRunnable);
+      RDXMultiBodySystemFactories.setupFourbars(rootBody, robotDefinition, RDXVisualTools.NO_SCALING, false);
       robotLinkedYoRegistry = yoManager.newLinkedYoRegistry(mirroredRobotRegistry);
       mirroredRobotRegistry.getVariables().forEach(yoVariable ->
       {

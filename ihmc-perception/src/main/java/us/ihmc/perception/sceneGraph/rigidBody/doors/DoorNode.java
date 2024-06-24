@@ -1,5 +1,6 @@
 package us.ihmc.perception.sceneGraph.rigidBody.doors;
 
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.Axis2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -24,9 +25,9 @@ public class DoorNode extends SceneNode
    private final PlanarRegion doorPlanarRegion = new PlanarRegion();
    private long doorPlanarRegionUpdateTimeMillis;
 
-   public DoorNode(long id, String name)
+   public DoorNode(long id, String name, CRDTInfo crdtInfo)
    {
-      super(id, name);
+      super(id, name, crdtInfo);
    }
 
    public OpeningMechanismType getOpeningMechanismType()
