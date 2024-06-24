@@ -35,7 +35,7 @@ public class InstantDetectionMessage extends Packet<InstantDetectionMessage> imp
       detected_object_name_ = new java.lang.StringBuilder(255);
       object_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       detection_time_ = new ihmc_common_msgs.msg.dds.InstantMessage();
-      yolo_object_point_cloud_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D32> (5000, new geometry_msgs.msg.dds.Point32PubSubType());
+      yolo_object_point_cloud_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D32> (255, new geometry_msgs.msg.dds.Point32PubSubType());
       center_pose_bounding_box_2d_vertices_ = new us.ihmc.euclid.tuple3D.Point3D[8];
 
       for(int i1 = 0; i1 < center_pose_bounding_box_2d_vertices_.length; ++i1)

@@ -29,7 +29,7 @@ module perception_msgs
         /**
          * YOLOv8InstantDetection fields:
          */
-        sequence<geometry_msgs::msg::dds::Point32, 5000> yolo_object_point_cloud;
+        sequence<geometry_msgs::msg::dds::Point32, 255> yolo_object_point_cloud;
         /**
          * CenterPoseInstantDetection fields:
          */

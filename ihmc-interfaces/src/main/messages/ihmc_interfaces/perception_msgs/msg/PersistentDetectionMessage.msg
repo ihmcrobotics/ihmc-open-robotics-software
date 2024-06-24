@@ -1,5 +1,5 @@
 # History
-perception_msgs/InstantDetectionMessage[<=200] detection_history
+perception_msgs/InstantDetectionMessage[<=31] detection_history
 ihmc_common_msgs/DurationMessage history_duration
 
 # First detections

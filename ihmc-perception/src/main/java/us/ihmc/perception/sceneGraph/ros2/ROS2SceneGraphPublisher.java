@@ -53,6 +53,7 @@ public class ROS2SceneGraphPublisher
                        ROS2PublishSubscribeAPI ros2PublishSubscribeAPI,
                        ROS2IOTopicQualifier ioQualifier)
    {
+      sceneGraphMessage.setSequenceId(sceneGraph.getCRDTInfo().getUpdateNumber());
       sceneGraphMessage.setNextId(sceneGraph.getNextID().intValue());
       sceneGraphMessage.getSceneTreeTypes().clear();
       sceneGraphMessage.getSceneTreeIndices().clear();
@@ -187,6 +188,7 @@ public class ROS2SceneGraphPublisher
 
       sceneNodeMessage.setId(sceneNode.getID());
       sceneNodeMessage.setName(sceneNode.getName());
+      sceneNode.toMessage(sceneNodeMessage.getConfirmableRequest());
       sceneNodePose.setToZero(sceneNode.getNodeFrame());
       sceneNodePose.changeFrame(ReferenceFrame.getWorldFrame());
       sceneNodePose.get(sceneNodeToWorldTransform);

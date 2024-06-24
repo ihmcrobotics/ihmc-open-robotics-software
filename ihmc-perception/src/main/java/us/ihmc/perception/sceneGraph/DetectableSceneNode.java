@@ -6,6 +6,8 @@ import us.ihmc.perception.detections.PersistentDetection;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.communication.crdt.CRDTInfo;
+
 /**
  * An object that is currently detected or not currently detected,
  * as such with objects tracked via ArUco markers or YOLO.
@@ -15,15 +17,15 @@ public class DetectableSceneNode extends SceneNode
    private List<PersistentDetection<? extends InstantDetection>> detections = new ArrayList<>();
    private boolean currentlyDetected;
 
-   public DetectableSceneNode(long id, String name, PersistentDetection<? extends InstantDetection> detection)
+   public DetectableSceneNode(long id, String name, PersistentDetection<? extends InstantDetection> detection, CRDTInfo crdtInfo)
    {
-      super(id, name);
+      super(id, name, crdtInfo);
       detections.add(detection);
    }
 
-   public DetectableSceneNode(long id, String name, List<PersistentDetection<? extends InstantDetection>> detections)
+   public DetectableSceneNode(long id, String name, List<PersistentDetection<? extends InstantDetection>> detections, CRDTInfo crdtInfo)
    {
-      super(id, name);
+      super(id, name, crdtInfo);
       setDetections(detections);
    }
 

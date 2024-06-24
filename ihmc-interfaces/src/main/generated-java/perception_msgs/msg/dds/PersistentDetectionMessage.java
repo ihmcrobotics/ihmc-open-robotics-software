@@ -26,7 +26,7 @@ public class PersistentDetectionMessage extends Packet<PersistentDetectionMessag
 
    public PersistentDetectionMessage()
    {
-      detection_history_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.InstantDetectionMessage> (200, new perception_msgs.msg.dds.InstantDetectionMessagePubSubType());
+      detection_history_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.InstantDetectionMessage> (31, new perception_msgs.msg.dds.InstantDetectionMessagePubSubType());
       history_duration_ = new ihmc_common_msgs.msg.dds.DurationMessage();
       first_detection_ = new perception_msgs.msg.dds.InstantDetectionMessage();
 

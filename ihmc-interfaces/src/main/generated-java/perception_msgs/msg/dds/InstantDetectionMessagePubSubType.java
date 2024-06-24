@@ -15,7 +15,7 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "921d188a43dd32403d8f142e865f52127c1751d18448effcf0a125a362cf3722";
+   		return "1fa88e6840a7cd5e0d2b23f19c7d27f2a728b15b7a4cccbffbfe7b25a09c51d8";
    }
    
    @Override
@@ -60,7 +60,7 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 5000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 255; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.Point32PubSubType.getMaxCdrSerializedSize(current_alignment);}
       for(int i0 = 0; i0 < (8); ++i0)
@@ -124,7 +124,7 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getObjectPose(), cdr);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getDetectionTime(), cdr);
-      if(data.getYoloObjectPointCloud().size() <= 5000)
+      if(data.getYoloObjectPointCloud().size() <= 255)
       cdr.write_type_e(data.getYoloObjectPointCloud());else
           throw new RuntimeException("yolo_object_point_cloud field exceeds the maximum length");
 

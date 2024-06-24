@@ -15,7 +15,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "3fb77cff8d061117ebc806d63ba46331ce92d844bcaac5cfa8fbeec3c1c8057b";
+   		return "cf26457a98c35ce15cdf1b4fd1e9691ce230bbb6be5a333b292db3d01b0003e0";
    }
    
    @Override
@@ -51,6 +51,8 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    public static int getMaxCdrSerializedSize(int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -97,6 +99,9 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    public final static int getCdrSerializedSize(perception_msgs.msg.dds.SceneGraphMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -160,6 +165,8 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void write(perception_msgs.msg.dds.SceneGraphMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
+
       cdr.write_type_4(data.getNextId());
 
       if(data.getSceneTreeTypes().size() <= 1000)
@@ -210,6 +217,8 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void read(perception_msgs.msg.dds.SceneGraphMessage data, us.ihmc.idl.CDR cdr)
    {
+      data.setSequenceId(cdr.read_type_4());
+      	
       data.setNextId(cdr.read_type_4());
       	
       cdr.read_type_e(data.getSceneTreeTypes());	
@@ -229,6 +238,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void serialize(perception_msgs.msg.dds.SceneGraphMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_4("next_id", data.getNextId());
       ser.write_type_e("scene_tree_types", data.getSceneTreeTypes());
       ser.write_type_e("scene_tree_indices", data.getSceneTreeIndices());
@@ -246,6 +256,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.SceneGraphMessage data)
    {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setNextId(ser.read_type_4("next_id"));
       ser.read_type_e("scene_tree_types", data.getSceneTreeTypes());
       ser.read_type_e("scene_tree_indices", data.getSceneTreeIndices());

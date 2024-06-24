@@ -16,7 +16,7 @@ module perception_msgs
         /**
          * History
          */
-        sequence<perception_msgs::msg::dds::InstantDetectionMessage, 200> detection_history;
+        sequence<perception_msgs::msg::dds::InstantDetectionMessage, 31> detection_history;
         ihmc_common_msgs::msg::dds::DurationMessage history_duration;
         /**
          * First detections

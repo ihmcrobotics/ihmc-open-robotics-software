@@ -3,6 +3,7 @@ package us.ihmc.perception.sceneGraph.ros2;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -35,6 +36,7 @@ public class ROS2SceneGraphTools
       byte nodeType = subscriptionNode.getType();
       long nodeID = subscriptionNode.getSceneNodeMessage().getId();
       String nodeName = subscriptionNode.getSceneNodeMessage().getNameAsString();
+      CRDTInfo crdtInfo = sceneGraph.getCRDTInfo();
 
       if (nodeType == SceneGraphMessage.PREDEFINED_RIGID_BODY_NODE_TYPE || nodeType == SceneGraphMessage.STATIC_RELATIVE_NODE_TYPE)
       {
@@ -53,7 +55,8 @@ public class ROS2SceneGraphTools
                                                     initialTransformToParent,
                                                     predefinedRigidBodySceneNodeMessage.getVisualModelFilePathAsString(),
                                                     visualTransformToParent,
-                                                    subscriptionNode.getStaticRelativeSceneNodeMessage().getDistanceToDisableTracking());
+                                                    subscriptionNode.getStaticRelativeSceneNodeMessage().getDistanceToDisableTracking(),
+                                                    crdtInfo);
          }
          else // PREDEFINED_RIGID_BODY_NODE_TYPE
          {
@@ -63,7 +66,8 @@ public class ROS2SceneGraphTools
                                                          predefinedRigidBodySceneNodeMessage.getInitialParentId(),
                                                          initialTransformToParent,
                                                          predefinedRigidBodySceneNodeMessage.getVisualModelFilePathAsString(),
-                                                         visualTransformToParent);
+                                                         visualTransformToParent,
+                                                         crdtInfo);
          }
       }
       else if (nodeType == SceneGraphMessage.ARUCO_MARKER_NODE_TYPE)
@@ -71,7 +75,8 @@ public class ROS2SceneGraphTools
          sceneNode = new ArUcoMarkerNode(nodeID,
                                          nodeName,
                                          subscriptionNode.getArUcoMarkerNodeMessage().getMarkerId(),
-                                         subscriptionNode.getArUcoMarkerNodeMessage().getMarkerSize());
+                                         subscriptionNode.getArUcoMarkerNodeMessage().getMarkerSize(),
+                                         crdtInfo);
       }
       else if (nodeType == SceneGraphMessage.CENTERPOSE_NODE_TYPE)
       {
@@ -81,7 +86,8 @@ public class ROS2SceneGraphTools
                                                                                         .getDetectableSceneNode()
                                                                                         .getDetections()
                                                                                         .get(0), CenterPoseInstantDetection.class),
-                                        subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
+                                        subscriptionNode.getCenterposeNodeMessage().getEnableTracking(),
+                                        crdtInfo);
       }
       else if (nodeType == SceneGraphMessage.YOLO_NODE_TYPE)
       {
@@ -90,7 +96,8 @@ public class ROS2SceneGraphTools
                                     PersistentDetection.fromMessage(subscriptionNode.getYOLONodeMessage().getDetectableSceneNode().getDetections().get(0),
                                                                     YOLOv8InstantDetection.class),
                                     subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform(),
-                                    subscriptionNode.getYOLONodeMessage().getObjectPose());
+                                    subscriptionNode.getYOLONodeMessage().getObjectPose(),
+                                    crdtInfo);
       }
       else if (nodeType == SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE)
       {
@@ -100,7 +107,7 @@ public class ROS2SceneGraphTools
             // FIXME THIS WON't WORK TOMASZ
             detections.add(PersistentDetection.fromMessage(subscriptionNode.getDetectableSceneNodeMessage().getDetections().get(i), InstantDetection.class));
 
-         sceneNode = new DetectableSceneNode(nodeID, nodeName, detections);
+         sceneNode = new DetectableSceneNode(nodeID, nodeName, detections, crdtInfo);
       }
       else if (nodeType == SceneGraphMessage.PRIMITIVE_RIGID_BODY_NODE_TYPE)
       {
@@ -112,11 +119,12 @@ public class ROS2SceneGraphTools
                                                      sceneGraph.getIDToNodeMap(),
                                                      primitiveRigidBodySceneNodeMessage.getInitialParentId(),
                                                      initialTransformToParent,
-                                                     PrimitiveRigidBodyShape.fromString(primitiveRigidBodySceneNodeMessage.getShapeAsString()));
+                                                     PrimitiveRigidBodyShape.fromString(primitiveRigidBodySceneNodeMessage.getShapeAsString()),
+                                                     crdtInfo);
       }
       else if (nodeType == SceneGraphMessage.DOOR_NODE_TYPE)
       {
-         DoorNode doorNode = new DoorNode(nodeID, nodeName);
+         DoorNode doorNode = new DoorNode(nodeID, nodeName, crdtInfo);
          doorNode.setOpeningMechanismType(OpeningMechanismType.fromByte(subscriptionNode.getDoorNodeMessage().getOpeningMechanismType()));
          doorNode.getDoorPlanarRegion().set(PlanarRegionMessageConverter.convertToPlanarRegion(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegion()));
          doorNode.setDoorPlanarRegionUpdateTime(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegionUpdateTimeMillis());
@@ -126,7 +134,7 @@ public class ROS2SceneGraphTools
       }
       else
       {
-         sceneNode = new SceneNode(nodeID, nodeName);
+         sceneNode = new SceneNode(nodeID, nodeName, crdtInfo);
       }
 
       sceneGraph.getIDToNodeMap().put(nodeID, sceneNode); // Make sure any new nodes are in the map // TODO: Probably remove not necessary

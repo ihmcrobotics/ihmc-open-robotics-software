@@ -1,5 +1,6 @@
 package us.ihmc.perception.sceneGraph.yolo;
 
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
@@ -13,22 +14,24 @@ public class YOLOv8Node extends DetectableSceneNode
    private final RigidBodyTransform centroidToObjectTransform = new RigidBodyTransform();
    private Pose3D objectPose;
 
-   public YOLOv8Node(long id, String name, PersistentDetection<YOLOv8InstantDetection> detection)
+   public YOLOv8Node(long id, String name, PersistentDetection<YOLOv8InstantDetection> detection, CRDTInfo crdtInfo)
    {
       this(id,
            name,
            detection,
            new Pose3D(),
-           detection.getMostRecentDetection().getPose());
+           detection.getMostRecentDetection().getPose(),
+           crdtInfo);
    }
 
    public YOLOv8Node(long id,
                      String name,
                      PersistentDetection<YOLOv8InstantDetection> detection,
                      RigidBodyTransformBasics centroidToObjectTransform,
-                     Pose3D objectPose)
+                     Pose3D objectPose,
+                     CRDTInfo crdtInfo)
    {
-      super(id, name, detection);
+      super(id, name, detection, crdtInfo);
 
       this.centroidToObjectTransform.set(centroidToObjectTransform);
       this.objectPose = objectPose;

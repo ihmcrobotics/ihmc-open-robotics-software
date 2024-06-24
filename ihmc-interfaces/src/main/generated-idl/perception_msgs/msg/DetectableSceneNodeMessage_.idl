@@ -24,7 +24,7 @@ module perception_msgs
         /**
          * Instant detection information
          */
-        sequence<perception_msgs::msg::dds::PersistentDetectionMessage, 50> detections;
+        sequence<perception_msgs::msg::dds::PersistentDetectionMessage, 7> detections;
         /**
          * Whether or not the node is currently detected
          */

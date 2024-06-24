@@ -4,6 +4,8 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.DetectionManager;
@@ -71,10 +73,12 @@ public class SceneGraph
    private transient final TIntObjectMap<ArUcoMarkerNode> arUcoMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
    private transient final Set<DetectableSceneNode> detectableSceneNodes = new HashSet<>();
+   private int numberOfFrozenNodes = 0;
 
+   /** Create without CRDT synchronization. */
    public SceneGraph()
    {
-      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME));
+      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME, new CRDTInfo(ROS2ActorDesignation.OPERATOR, (int) CRDT_SYNC_FREQUENCY)));
    }
 
    /**
@@ -147,6 +151,7 @@ public class SceneGraph
       arUcoMarkerIDToNodeMap.clear();
       sceneNodesByID.clear();
       detectableSceneNodes.clear();
+      numberOfFrozenNodes = 0;
       updateCaches(rootNode);
    }
 
@@ -193,6 +198,9 @@ public class SceneGraph
          arUcoMarkerIDToNodeMap.put(arUcoMarkerNode.getMarkerID(), arUcoMarkerNode);
       }
 
+      if (node.isFrozen())
+         ++numberOfFrozenNodes;
+
       for (SceneNode child : node.getChildren())
       {
          updateCaches(child);
@@ -217,7 +225,7 @@ public class SceneGraph
          if (!claimed && detection.isOldEnough())
          {
             if (detection.isStable())
-               addNodeFromDetection(detection);
+               addNodeFromDetection(detection); // FIXME figure out how to do CRDTInfo stuff, TOMASZ
             else
                detection.markForDeletion();
          }
@@ -227,6 +235,11 @@ public class SceneGraph
    public SceneNode getRootNode()
    {
       return rootNode;
+   }
+
+   public CRDTInfo getCRDTInfo()
+   {
+      return rootNode.getCRDTInfo();
    }
 
    public AtomicLong getNextID()
@@ -264,6 +277,11 @@ public class SceneGraph
       return sceneNodesByID;
    }
 
+   public int getNumberOfFrozenNodes()
+   {
+      return numberOfFrozenNodes;
+   }
+
    public ReferenceFrameDynamicCollection asNewDynamicReferenceFrameCollection()
    {
       Function<String, ReferenceFrame> frameLookup = nodeName ->
@@ -284,9 +302,9 @@ public class SceneGraph
 
       Class<?> detectionClass = detection.getInstantDetectionClass();
       if (detectionClass.equals(YOLOv8InstantDetection.class))
-         detectableNode = new YOLOv8Node(newNodeID, newNodeName, (PersistentDetection<YOLOv8InstantDetection>) detection);
+         detectableNode = new YOLOv8Node(newNodeID, newNodeName, (PersistentDetection<YOLOv8InstantDetection>) detection, getCRDTInfo());
       else if (detectionClass.equals(CenterPoseInstantDetection.class))
-         detectableNode = new CenterposeNode(newNodeID, newNodeName, (PersistentDetection<CenterPoseInstantDetection>) detection, true);
+         detectableNode = new CenterposeNode(newNodeID, newNodeName, (PersistentDetection<CenterPoseInstantDetection>) detection, true, getCRDTInfo());
       else
       {
          LogTools.error("Logic to handle detections of class {} has not been implemented", detectionClass);

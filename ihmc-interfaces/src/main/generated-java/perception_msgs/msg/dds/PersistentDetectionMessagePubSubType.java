@@ -15,7 +15,7 @@ public class PersistentDetectionMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "7edaafcc5bc2a5e5300e0ab3afb118e82117e89526278792af77a3ec633441ea";
+   		return "c97eeab02780af0d2ab50e7a36e594d6364a15ef9219ea6303d80ab8adc33c72";
    }
    
    @Override
@@ -52,7 +52,7 @@ public class PersistentDetectionMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 31; ++i0)
       {
           current_alignment += perception_msgs.msg.dds.InstantDetectionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += ihmc_common_msgs.msg.dds.DurationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -102,7 +102,7 @@ public class PersistentDetectionMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(perception_msgs.msg.dds.PersistentDetectionMessage data, us.ihmc.idl.CDR cdr)
    {
-      if(data.getDetectionHistory().size() <= 200)
+      if(data.getDetectionHistory().size() <= 31)
       cdr.write_type_e(data.getDetectionHistory());else
           throw new RuntimeException("detection_history field exceeds the maximum length");
 

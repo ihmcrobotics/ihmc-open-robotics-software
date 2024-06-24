@@ -15,7 +15,7 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "dcb7b3493507eac049d528f7cc3d3af22ee03f788ebd7c70b1a7cd46a9b45376";
+   		return "6a9ae1256d36373bf586d130f90a4e7ab03537b6fe235b8ebc878e0c0af0bdb9";
    }
    
    @Override

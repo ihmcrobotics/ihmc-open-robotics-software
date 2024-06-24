@@ -1,6 +1,7 @@
 package us.ihmc.perception.sceneGraph.centerpose;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -19,9 +20,9 @@ public class CenterposeNode extends DetectableSceneNode
    private int glitchCount;
    private boolean enableTracking;
 
-   public CenterposeNode(long nodeID, String name, PersistentDetection<CenterPoseInstantDetection> centerPoseDetection, boolean enableTracking)
+   public CenterposeNode(long nodeID, String name, PersistentDetection<CenterPoseInstantDetection> centerPoseDetection, boolean enableTracking, CRDTInfo crdtInfo)
    {
-      super(nodeID, name, centerPoseDetection);
+      super(nodeID, name, centerPoseDetection, crdtInfo);
       this.enableTracking = enableTracking;
    }
 

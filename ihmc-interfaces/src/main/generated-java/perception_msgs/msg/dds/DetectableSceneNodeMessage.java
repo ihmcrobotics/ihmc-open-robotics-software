@@ -28,7 +28,7 @@ public class DetectableSceneNodeMessage extends Packet<DetectableSceneNodeMessag
    public DetectableSceneNodeMessage()
    {
       scene_node_ = new perception_msgs.msg.dds.SceneNodeMessage();
-      detections_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.PersistentDetectionMessage> (50, new perception_msgs.msg.dds.PersistentDetectionMessagePubSubType());
+      detections_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.PersistentDetectionMessage> (7, new perception_msgs.msg.dds.PersistentDetectionMessagePubSubType());
 
    }
 

@@ -126,36 +126,39 @@ public class ZEDColorDepthImagePublisher
 
    private ImageMessage createDepthImageMessage(RawImage depthImageToPublish)
    {
-      if (depthImageToPublish != null && depthImageToPublish.isAvailable())
-         depthImageToPublish.get();
-
       ImageMessage depthImageMessage = new ImageMessage();
 
-      // Encode depth image to png
-      BytePointer depthPNGPointer = new BytePointer();
-      OpenCVTools.compressImagePNG(depthImageToPublish.getCpuImageMat(), depthPNGPointer);
+      if (depthImageToPublish != null && depthImageToPublish.isAvailable())
+      {
+         depthImageToPublish.get();
 
-      // Publish image
-      ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(depthPNGPointer.limit());
-      imageMessageDataPacker.pack(depthImageMessage, depthPNGPointer);
-      MessageTools.toMessage(depthImageToPublish.getAcquisitionTime(), depthImageMessage.getAcquisitionTime());
-      depthImageMessage.setFocalLengthXPixels(depthImageToPublish.getFocalLengthX());
-      depthImageMessage.setFocalLengthYPixels(depthImageToPublish.getFocalLengthY());
-      depthImageMessage.setPrincipalPointXPixels(depthImageToPublish.getPrincipalPointX());
-      depthImageMessage.setPrincipalPointYPixels(depthImageToPublish.getPrincipalPointY());
-      depthImageMessage.setImageWidth(depthImageToPublish.getImageWidth());
-      depthImageMessage.setImageHeight(depthImageToPublish.getImageHeight());
-      depthImageMessage.getPosition().set(depthImageToPublish.getPosition());
-      depthImageMessage.getOrientation().set(depthImageToPublish.getOrientation());
-      depthImageMessage.setSequenceNumber(depthImageToPublish.getSequenceNumber());
-      depthImageMessage.setDepthDiscretization(depthImageToPublish.getDepthDiscretization());
-      CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
-      ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
+         // Encode depth image to png
+         BytePointer depthPNGPointer = new BytePointer();
+         OpenCVTools.compressImagePNG(depthImageToPublish.getCpuImageMat(), depthPNGPointer);
 
-      // Close GpuMat
-      depthPNGPointer.close();
+         // Publish image
+         ImageMessageDataPacker imageMessageDataPacker = new ImageMessageDataPacker(depthPNGPointer.limit());
+         imageMessageDataPacker.pack(depthImageMessage, depthPNGPointer);
+         MessageTools.toMessage(depthImageToPublish.getAcquisitionTime(), depthImageMessage.getAcquisitionTime());
+         depthImageMessage.setFocalLengthXPixels(depthImageToPublish.getFocalLengthX());
+         depthImageMessage.setFocalLengthYPixels(depthImageToPublish.getFocalLengthY());
+         depthImageMessage.setPrincipalPointXPixels(depthImageToPublish.getPrincipalPointX());
+         depthImageMessage.setPrincipalPointYPixels(depthImageToPublish.getPrincipalPointY());
+         depthImageMessage.setImageWidth(depthImageToPublish.getImageWidth());
+         depthImageMessage.setImageHeight(depthImageToPublish.getImageHeight());
+         depthImageMessage.getPosition().set(depthImageToPublish.getPosition());
+         depthImageMessage.getOrientation().set(depthImageToPublish.getOrientation());
+         depthImageMessage.setSequenceNumber(depthImageToPublish.getSequenceNumber());
+         depthImageMessage.setDepthDiscretization(depthImageToPublish.getDepthDiscretization());
+         CameraModel.PINHOLE.packMessageFormat(depthImageMessage);
+         ImageMessageFormat.DEPTH_PNG_16UC1.packMessageFormat(depthImageMessage);
 
-      depthImageToPublish.release();
+         // Close GpuMat
+         depthPNGPointer.close();
+
+         depthImageToPublish.release();
+      }
+
       return depthImageMessage;
    }
 
