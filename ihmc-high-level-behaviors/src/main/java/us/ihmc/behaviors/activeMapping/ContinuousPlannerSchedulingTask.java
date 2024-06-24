@@ -80,7 +80,7 @@ public class ContinuousPlannerSchedulingTask
                                                                                                          statistics);
 
       // Create the different states
-      State notStartedState = new DoNothingState(ros2Helper, simpleRobotName, referenceFrames, continuousPlanner, debugger);
+      State notStartedState = new DoNothingState(ros2Helper, simpleRobotName, referenceFrames, continuousPlanner);
       State readyToPlanState = new ReadyToPlanState(commandMessage,
                                                     continuousPlanner,
                                                     controllerFootstepQueueMonitor,

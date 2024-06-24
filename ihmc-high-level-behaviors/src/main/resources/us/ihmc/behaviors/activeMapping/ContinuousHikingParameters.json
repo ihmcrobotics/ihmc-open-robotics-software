@@ -1,7 +1,7 @@
 {
   "title" : "Continuous Hiking parameters",
-  "Enable continuous walking" : false,
-  "Step publisher enabled" : false,
+  "Enable continuous walking" : true,
+  "Step publisher enabled" : true,
   "Override entire queue each step" : true,
   "Number of steps to send" : 3,
   "Goal pose forward distance" : 1.6,
@@ -10,6 +10,7 @@
   "Transfer time" : 0.4,
   "Planner timeout fraction" : 0.3,
   "Planning without reference timeout" : 1.3,
+  "Percent throw swing to plan to" : 0.5,
   "Log footstep plans" : true,
   "Next Waypoint Distance Margin" : 0.92
 }

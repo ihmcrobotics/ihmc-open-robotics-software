@@ -36,14 +36,8 @@ public class StepValidityChecker
 
    }
 
-   public boolean checkNextStepIsValid(FootstepDataListMessage footstepDataList)
+   public boolean checkNextStepIsValid(FramePose3DReadOnly stanceFootPose, FramePose3DReadOnly candidateStepPose)
    {
-      FramePose3DReadOnly stanceFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(), continuousPlanner.getImminentFootstepPose());
-
-      FramePose3DReadOnly candidateStepPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
-                                                              footstepDataList.getFootstepDataList().get(0).getLocation(),
-                                                              footstepDataList.getFootstepDataList().get(0).getOrientation());
-
       BipedalFootstepPlannerNodeRejectionReason reason;
       FramePose3D startOfSwingPose = new FramePose3D();
 
@@ -56,10 +50,4 @@ public class StepValidityChecker
 
       return isNextStepValid;
    }
-
-   public boolean isNextStepValid()
-   {
-      return isNextStepValid;
-   }
-
 }

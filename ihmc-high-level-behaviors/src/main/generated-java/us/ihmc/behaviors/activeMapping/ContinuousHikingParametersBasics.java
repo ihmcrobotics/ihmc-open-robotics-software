@@ -58,6 +58,11 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
       set(ContinuousHikingParameters.planningWithoutReferenceTimeout, planningWithoutReferenceTimeout);
    }
 
+   default void setPercentThrowSwingToPlanTo(double percentThrowSwingToPlanTo)
+   {
+      set(ContinuousHikingParameters.percentThrowSwingToPlanTo, percentThrowSwingToPlanTo);
+   }
+
    default void setLogFootstepPlans(boolean logFootstepPlans)
    {
       set(ContinuousHikingParameters.logFootstepPlans, logFootstepPlans);

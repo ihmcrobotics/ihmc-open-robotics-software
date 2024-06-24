@@ -17,19 +17,16 @@ public class DoNothingState implements State
 {
    private final HumanoidReferenceFrames referenceFrames;
    private final ContinuousPlanner continuousPlanner;
-   private final TerrainPlanningDebugger debugger;
 
    private final ROS2PublisherBasics<PauseWalkingMessage> pauseWalkingPublisher;
 
    public DoNothingState(ROS2Helper ros2Helper,
                          String simpleRobotName,
                          HumanoidReferenceFrames referenceFrames,
-                         ContinuousPlanner continuousPlanner,
-                         TerrainPlanningDebugger debugger)
+                         ContinuousPlanner continuousPlanner)
    {
       this.referenceFrames = referenceFrames;
       this.continuousPlanner = continuousPlanner;
-      this.debugger = debugger;
 
       pauseWalkingPublisher = ros2Helper.getROS2NodeInterface().createPublisher(HumanoidControllerAPI.getTopic(PauseWalkingMessage.class, simpleRobotName));
    }
@@ -59,11 +56,6 @@ public class DoNothingState implements State
       closerToGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       fartherToGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      if (continuousPlanner.updateImminentStance(fartherToGoalFootPose, closerToGoalFootPose, closerSide))
-      {
-         debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
-      }
-
       continuousPlanner.setInitialized(false);
       continuousPlanner.requestMonteCarloPlannerReset();
    }
@@ -71,5 +63,9 @@ public class DoNothingState implements State
    @Override
    public void onExit(double timeInState)
    {
+      // We are leaving this state, and going to create a footstep plan to use, initialize the continuous planner here
+      // This gets initialized here because then it only happens once when we start walking, allowing us to know where we started from
+      continuousPlanner.initialize();
+      continuousPlanner.setPlanAvailable(false);
    }
 }
