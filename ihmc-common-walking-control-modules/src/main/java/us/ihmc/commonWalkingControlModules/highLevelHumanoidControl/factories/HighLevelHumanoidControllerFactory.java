@@ -545,6 +545,9 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          createUserDesiredControllerCommandGenerator();
 
 //      controllerToolbox.setupDiagnosticPostureAdjustmentProvider();
+      List<String> jointsToCheckTorqueFeasibilityInMultiContact = walkingControllerParameters.getJointsToCheckTorqueFeasibilityInMultiContact();
+      if (jointsToCheckTorqueFeasibilityInMultiContact != null)
+         controllerToolbox.getWholeBodyContactState().setupForSelectedJoints(jointsToCheckTorqueFeasibilityInMultiContact::contains);
       controllerToolbox.setupMultiContactPostureAdjustmentProvider();
 
       double defaultTransferTime = walkingControllerParameters.getDefaultTransferTime();

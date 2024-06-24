@@ -12,9 +12,8 @@ import us.ihmc.robotics.screwTheory.GeometricJacobian;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
-import us.ihmc.yoVariables.variable.YoLong;
 
-public class CenterOfMassStabilityMarginPostureOptimizer
+public class HeuristicCoMMarginPostureCalculator
 {
    private static final boolean CHECK_EPSILON_SATURATION = true;
    private static final int LINEAR_DIMENSIONS = 3;
@@ -24,15 +23,11 @@ public class CenterOfMassStabilityMarginPostureOptimizer
    private final CenterOfMassStabilityMarginRegionCalculator staticStabilityRegionCalculator;
    private final WholeBodyContactState contactState;
 
-   private final TIntArrayList lowestMarginIndices = new TIntArrayList();
+   private final TIntArrayList lowestMarginVertexIndices = new TIntArrayList();
    private final YoDouble marginEpsilon = new YoDouble("marginEpsilon", registry);
 
    // Debug variables
    private final YoInteger tickCount = new YoInteger("tickCount", registry);
-   private final YoLong vertexHash = new YoLong("vertexHash", registry);
-   private final int[] primes = {7, 97, 59, 13, 23, 109, 37, 41, 53, 73, 89, 109, 127};
-   private final StringBuilder stringBuilder = new StringBuilder();
-   private final YoLong jointNameHash = new YoLong("jointNameHash", registry);
 
    private final YoInteger numberOfSaturatedTorqueConstraints = new YoInteger("numberOfSaturatedTorqueConstraints", registry);
    private final YoDouble weightFactorTotal = new YoDouble("weightFactorTotal", registry);
@@ -51,10 +46,10 @@ public class CenterOfMassStabilityMarginPostureOptimizer
    private final DMatrixRMaj actuationMargin = new DMatrixRMaj(0);
    private final DMatrixRMaj actuationMarginViolation = new DMatrixRMaj(0);
 
-   public CenterOfMassStabilityMarginPostureOptimizer(CenterOfMassStabilityMarginRegionCalculator staticStabilityRegionCalculator,
-                                                      WholeBodyContactState contactState,
-                                                      double controlDT,
-                                                      YoRegistry parentRegistry)
+   public HeuristicCoMMarginPostureCalculator(CenterOfMassStabilityMarginRegionCalculator staticStabilityRegionCalculator,
+                                              WholeBodyContactState contactState,
+                                              double controlDT,
+                                              YoRegistry parentRegistry)
    {
       this.staticStabilityRegionCalculator = staticStabilityRegionCalculator;
       this.contactState = contactState;
@@ -80,7 +75,8 @@ public class CenterOfMassStabilityMarginPostureOptimizer
 
    public void computePostureAdjustment()
    {
-      staticStabilityRegionCalculator.collectLowestMarginIndices(lowestMarginIndices, marginEpsilon.getValue());
+      staticStabilityRegionCalculator.collectLowestMarginVertexIndices(lowestMarginVertexIndices, marginEpsilon.getValue());
+
       graspMatrixMotionDerivative.reshape(LINEAR_DIMENSIONS * contactState.getNumberOfContactPoints(), contactState.getNumberOfJoints());
       graspMatrixTransposeMotionDerivative.reshape(contactState.getNumberOfJoints(), LINEAR_DIMENSIONS * contactState.getNumberOfContactPoints());
 
@@ -96,20 +92,6 @@ public class CenterOfMassStabilityMarginPostureOptimizer
       numberOfSaturatedTorqueConstraints.set(0);
       weightFactorTotal.set(0.0);
       tickCount.increment();
-
-      vertexHash.set(0);
-      for (int i = 0; i < lowestMarginIndices.size(); i++)
-      {
-         vertexHash.set(vertexHash.getValue() * primes[i] + lowestMarginIndices.get(i));
-      }
-      stringBuilder.setLength(0);
-
-      for (int vertexIndex = 0; vertexIndex < lowestMarginIndices.size(); vertexIndex++)
-      {
-         computeTorqueReductionMotion(lowestMarginIndices.get(vertexIndex));
-      }
-
-      jointNameHash.set(stringBuilder.toString().hashCode());
 
       for (int i = 0; i < qdOptimizedPosture.length; i++)
       {
@@ -176,8 +158,6 @@ public class CenterOfMassStabilityMarginPostureOptimizer
 
             OneDoFJointBasics joint = contactState.getJointFromActuationConstraintIndex(activeSetIndex);
             boolean isUpperBound = contactState.isActuationConstraintUpperBound(activeSetIndex);
-            stringBuilder.append(joint.getName());
-
             computeTorqueReductionMotionForJoint(resolvedForce, joint, isUpperBound, 1.0);
          }
       }
@@ -222,9 +202,9 @@ public class CenterOfMassStabilityMarginPostureOptimizer
       }
    }
 
-   public TIntArrayList getLowestMarginIndices()
+   public TIntArrayList getLowestMarginVertexIndices()
    {
-      return lowestMarginIndices;
+      return lowestMarginVertexIndices;
    }
 
    private static boolean isJointPresent(JointBasics[] joints, JointBasics jointToCheckIfPresent)

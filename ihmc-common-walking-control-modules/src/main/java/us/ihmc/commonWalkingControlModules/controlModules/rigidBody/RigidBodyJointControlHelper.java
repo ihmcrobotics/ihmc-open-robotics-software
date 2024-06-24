@@ -631,7 +631,7 @@ public class RigidBodyJointControlHelper
       }
       if (postureAdjustmentProvider.isEnabled())
       {
-         desiredPosition += postureAdjustmentProvider.getDesiredJointPositionOffset(joints[jointIdx].getName());
+         desiredPosition += postureAdjustmentProvider.getDesiredJointPositionOffset(joints[jointIdx]);
       }
       return desiredPosition;
    }
@@ -653,7 +653,7 @@ public class RigidBodyJointControlHelper
       }
       if (postureAdjustmentProvider.isEnabled())
       {
-         desiredVelocity += postureAdjustmentProvider.getDesiredJointVelocityOffset(joints[jointIdx].getName());
+         desiredVelocity += postureAdjustmentProvider.getDesiredJointVelocityOffset(joints[jointIdx]);
       }
       return desiredVelocity;
    }
@@ -667,7 +667,7 @@ public class RigidBodyJointControlHelper
       }
       if (postureAdjustmentProvider.isEnabled())
       {
-         desiredAcceleration += postureAdjustmentProvider.getDesiredJointAccelerationOffset(joints[jointIdx].getName());
+         desiredAcceleration += postureAdjustmentProvider.getDesiredJointAccelerationOffset(joints[jointIdx]);
       }
       return desiredAcceleration;
    }

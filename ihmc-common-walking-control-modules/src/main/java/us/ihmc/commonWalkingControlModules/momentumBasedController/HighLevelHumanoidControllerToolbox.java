@@ -1121,7 +1121,13 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
 
    public void setupMultiContactPostureAdjustmentProvider()
    {
-      postureAdjustmentProvider = new MultiContactPostureAdjustmentCalculator(multiContactRegionCalculator, wholeBodyContactState, registry);
+      postureAdjustmentProvider = new MultiContactPostureAdjustmentCalculator(multiContactRegionCalculator,
+                                                                              wholeBodyContactState,
+                                                                              fullRobotModel,
+                                                                              controlledJoints,
+                                                                              centerOfMassFrame,
+                                                                              controlDT,
+                                                                              registry);
    }
 
    public WholeBodyPostureAdjustmentProvider getPostureAdjustmentProvider()

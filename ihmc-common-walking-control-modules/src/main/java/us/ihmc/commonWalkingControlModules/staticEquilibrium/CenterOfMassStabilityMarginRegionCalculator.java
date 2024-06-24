@@ -35,15 +35,15 @@ public class CenterOfMassStabilityMarginRegionCalculator implements SCS2YoGraphi
    private static final int NULL_MARGIN_INDEX = -1;
 
    // Hand-crafted vertex query order
-   private static final int[] VERTEX_ORDER = new int[]{0, 6, 12, 3, 9, 15, 1, 4, 7, 10, 13, 16, 2, 5, 8, 11, 14, 17};
-   private static final int DIRECTIONS_TO_OPTIMIZE = VERTEX_ORDER.length;
+   static final int[] VERTEX_ORDER = new int[]{0, 6, 12, 3, 9, 15, 1, 4, 7, 10, 13, 16, 2, 5, 8, 11, 14, 17};
+   public static final int DIRECTIONS_TO_OPTIMIZE = VERTEX_ORDER.length;
+   final static double DELTA_ANGLE = 2.0 * Math.PI / DIRECTIONS_TO_OPTIMIZE;
 
    private final String namePrefix;
    private ColorDefinition polygonGraphicColor = ColorDefinitions.Black();
    private ColorDefinition lowestMarginEdgeGraphicColor = ColorDefinitions.Red();
 
    /* Status variables */
-   private final double deltaAngle = 2.0 * Math.PI / DIRECTIONS_TO_OPTIMIZE;
    private final YoInteger queryCounter;
    private final YoBoolean hasSolvedWholeRegion;
    private final CenterOfMassStabilityMarginOptimizationModule optimizationModule;
@@ -55,9 +55,10 @@ public class CenterOfMassStabilityMarginRegionCalculator implements SCS2YoGraphi
    /* Fields to monitor nearest constraint edge */
    private final DMatrixRMaj[] resolvedForces = new DMatrixRMaj[DIRECTIONS_TO_OPTIMIZE];
    private final TIntArrayList[] saturatedConstraintIndices = new TIntArrayList[DIRECTIONS_TO_OPTIMIZE];
+   private final TIntArrayList[] solutionBasisIndices = new TIntArrayList[DIRECTIONS_TO_OPTIMIZE];
    private final YoDouble[] minDictionaryRHSColumnEntries = new YoDouble[DIRECTIONS_TO_OPTIMIZE];
-   private final YoFramePoint2D nearestConstraintVertexA;
-   private final YoFramePoint2D nearestConstraintVertexB;
+   private final YoFramePoint2D[] nearestConstraintVertexA = new YoFramePoint2D[DIRECTIONS_TO_OPTIMIZE];
+   private final YoFramePoint2D[] nearestConstraintVertexB = new YoFramePoint2D[DIRECTIONS_TO_OPTIMIZE];
    private final YoInteger lowestMarginEdgeIndex;
    private final YoDouble centerOfMassStabilityMargin;
 
@@ -83,18 +84,21 @@ public class CenterOfMassStabilityMarginRegionCalculator implements SCS2YoGraphi
          optimizedVertices[query_idx] = new YoFramePoint2D("comStabilityMarginVertex" + query_idx, ReferenceFrame.getWorldFrame(), registry);
          resolvedForces[query_idx] = new DMatrixRMaj(0);
          saturatedConstraintIndices[query_idx] = new TIntArrayList();
+         solutionBasisIndices[query_idx] = new TIntArrayList();
          minDictionaryRHSColumnEntries[query_idx] = new YoDouble("minDictionaryRHSColumnEntry" + query_idx, registry);
          comEdgeMargin[query_idx] = new YoDouble("comEdgeMargin" + query_idx, registry);
+         nearestConstraintVertexA[query_idx] = new YoFramePoint2D("nearestConstraintVertexA_" + query_idx, ReferenceFrame.getWorldFrame(), registry);
+         nearestConstraintVertexB[query_idx] = new YoFramePoint2D("nearestConstraintVertexB_" + query_idx, ReferenceFrame.getWorldFrame(), registry);
 
          minDictionaryRHSColumnEntries[query_idx].setToNaN();
          comEdgeMargin[query_idx].setToNaN();
+         nearestConstraintVertexA[query_idx].setToNaN();
+         nearestConstraintVertexB[query_idx].setToNaN();
       }
 
       feasibleCoMRegion = new YoFrameConvexPolygon2D("comStabilityMarginPolygon", ReferenceFrame.getWorldFrame(), DIRECTIONS_TO_OPTIMIZE, registry);
       feasibleCoMRegion.setToNaN();
 
-      nearestConstraintVertexA = new YoFramePoint2D("nearestConstraintVertexA", ReferenceFrame.getWorldFrame(), registry);
-      nearestConstraintVertexB = new YoFramePoint2D("nearestConstraintVertexB", ReferenceFrame.getWorldFrame(), registry);
       lowestMarginEdgeIndex = new YoInteger("lowestMarginEdgeIndex", registry);
       centerOfMassStabilityMargin = new YoDouble("centerOfMassStabilityMargin", registry);
       lowestMarginEdgeIndex.set(NULL_MARGIN_INDEX);
@@ -119,13 +123,14 @@ public class CenterOfMassStabilityMarginRegionCalculator implements SCS2YoGraphi
          optimizedVertices[query_idx].setToNaN();
          resolvedForces[query_idx].zero();
          saturatedConstraintIndices[query_idx].reset();
+         solutionBasisIndices[query_idx].reset();
+         nearestConstraintVertexA[query_idx].setToNaN();
+         nearestConstraintVertexB[query_idx].setToNaN();
       }
 
       hasSolvedWholeRegion.set(false);
       queryCounter.set(0);
 
-      nearestConstraintVertexA.setToNaN();
-      nearestConstraintVertexB.setToNaN();
       lowestMarginEdgeIndex.set(NULL_MARGIN_INDEX);
       centerOfMassStabilityMargin.set(Double.POSITIVE_INFINITY);
    }
@@ -156,14 +161,16 @@ public class CenterOfMassStabilityMarginRegionCalculator implements SCS2YoGraphi
 
    public boolean performCoMRegionQuery(int queryIndex)
    {
-      double queryX = Math.cos(queryIndex * deltaAngle);
-      double queryY = Math.sin(queryIndex * deltaAngle);
+      double queryX = queryDirectionX(queryIndex);
+      double queryY = queryDirectionY(queryIndex);
       boolean success = optimizationModule.solve(queryX, queryY);
 
       if (success)
       {
          saturatedConstraintIndices[queryIndex].reset();
+         solutionBasisIndices[queryIndex].reset();
 
+         solutionBasisIndices[queryIndex].addAll(optimizationModule.getLinearProgramSolver().getBasisIndices());
          TIntArrayList nonBasisIndices = optimizationModule.getLinearProgramSolver().getNonBasisIndices();
          for (int i = 1; i < nonBasisIndices.size(); i++)
          {
@@ -193,6 +200,7 @@ public class CenterOfMassStabilityMarginRegionCalculator implements SCS2YoGraphi
          optimizedVertices[queryIndex].setToNaN();
          resolvedForces[queryIndex].zero();
          saturatedConstraintIndices[queryIndex].reset();
+         solutionBasisIndices[queryIndex].reset();
          hasSolvedWholeRegion.set(false);
          comEdgeMargin[queryIndex].setToNaN();
          minDictionaryRHSColumnEntries[queryIndex].setToNaN();
@@ -223,6 +231,22 @@ public class CenterOfMassStabilityMarginRegionCalculator implements SCS2YoGraphi
       return true;
    }
 
+   public static double queryDirectionX(int index)
+   {
+      return Math.cos(index * DELTA_ANGLE);
+   }
+
+   public static double queryDirectionY(int index)
+   {
+      return Math.sin(index * DELTA_ANGLE);
+   }
+
+   // TODO should make package private later?
+   public CenterOfMassStabilityMarginOptimizationModule getOptimizationModule()
+   {
+      return optimizationModule;
+   }
+
    private void updateNearestVertex(int edgeIndex)
    {
       YoFramePoint2D v0 = optimizedVertices[getVertexAOfEdge(edgeIndex)];
@@ -237,7 +261,7 @@ public class CenterOfMassStabilityMarginRegionCalculator implements SCS2YoGraphi
       FramePoint3DReadOnly centerOfMass = centerOfMassSupplier.get();
       centerOfMass.getReferenceFrame().checkReferenceFrameMatch(v0.getReferenceFrame());
 
-      double margin = EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(centerOfMass.getX(), centerOfMass.getY(), v0, v1);
+      double margin = EuclidGeometryTools.distanceFromPoint2DToLine2D(centerOfMass.getX(), centerOfMass.getY(), v0, v1);
       comEdgeMargin[edgeIndex].set(margin);
 
       double minimumMarginDistance = Double.POSITIVE_INFINITY;
@@ -257,8 +281,6 @@ public class CenterOfMassStabilityMarginRegionCalculator implements SCS2YoGraphi
       {
          centerOfMassStabilityMargin.set(minimumMarginDistance);
          lowestMarginEdgeIndex.set(minimumMarginEdgeIndex);
-         nearestConstraintVertexA.set(optimizedVertices[getVertexAOfEdge(minimumMarginEdgeIndex)]);
-         nearestConstraintVertexB.set(optimizedVertices[getVertexBOfEdge(minimumMarginEdgeIndex)]);
       }
    }
 
@@ -343,9 +365,14 @@ public class CenterOfMassStabilityMarginRegionCalculator implements SCS2YoGraphi
       return saturatedConstraintIndices[index];
    }
 
-   public int collectLowestMarginIndices(TIntArrayList lowestMarginIndices, double epsilon)
+   public TIntArrayList getSolutionBasisIndices(int index)
    {
-      lowestMarginIndices.reset();
+      return solutionBasisIndices[index];
+   }
+
+   public int collectLowestMarginVertexIndices(TIntArrayList lowestMarginVertexIndices, double epsilon)
+   {
+      lowestMarginVertexIndices.reset();
 
       if (!hasNearestConstraintEdge())
          return 0;
@@ -354,17 +381,23 @@ public class CenterOfMassStabilityMarginRegionCalculator implements SCS2YoGraphi
 
       for (int edgeIndex = 0; edgeIndex < DIRECTIONS_TO_OPTIMIZE; edgeIndex++)
       {
+         int indexA = getVertexAOfEdge(edgeIndex);
+         int indexB = getVertexBOfEdge(edgeIndex);
+
          if (!Double.isNaN(comEdgeMargin[edgeIndex].getValue()) && comEdgeMargin[edgeIndex].getValue() < centerOfMassStabilityMargin.getValue() + epsilon)
          {
-            int indexA = getVertexAOfEdge(edgeIndex);
-            if (!lowestMarginIndices.contains(indexA))
-               lowestMarginIndices.add(indexA);
-
-            int indexB = getVertexBOfEdge(edgeIndex);
-            if (!lowestMarginIndices.contains(indexB))
-               lowestMarginIndices.add(indexB);
-
+            if (!lowestMarginVertexIndices.contains(indexA))
+               lowestMarginVertexIndices.add(indexA);
+            if (!lowestMarginVertexIndices.contains(indexB))
+               lowestMarginVertexIndices.add(indexB);
+            nearestConstraintVertexA[edgeIndex].set(optimizedVertices[indexA]);
+            nearestConstraintVertexB[edgeIndex].set(optimizedVertices[indexB]);
             numberOfLowMarginEdges++;
+         }
+         else
+         {
+            nearestConstraintVertexA[edgeIndex].setToNaN();
+            nearestConstraintVertexB[edgeIndex].setToNaN();
          }
       }
 
@@ -385,12 +418,15 @@ public class CenterOfMassStabilityMarginRegionCalculator implements SCS2YoGraphi
 
       if (showNearestSupportEdgeGraphic)
       {
-         YoGraphicLine2DDefinition nearestSegmentGraphic = YoGraphicDefinitionFactory.newYoGraphicLineSegment2DDefinition(namePrefix + "nearestConstraintViz",
-                                                                                                                          nearestConstraintVertexA,
-                                                                                                                          nearestConstraintVertexB,
-                                                                                                                          lowestMarginEdgeGraphicColor);
-         nearestSegmentGraphic.setStrokeWidth(2.5);
-         group.addChild(nearestSegmentGraphic);
+         for (int query_idx = 0; query_idx < DIRECTIONS_TO_OPTIMIZE; query_idx++)
+         {
+            YoGraphicLine2DDefinition nearestSegmentGraphic = YoGraphicDefinitionFactory.newYoGraphicLineSegment2DDefinition(namePrefix + "nearestConstraintViz" + query_idx,
+                                                                                                                             nearestConstraintVertexA[query_idx],
+                                                                                                                             nearestConstraintVertexB[query_idx],
+                                                                                                                             lowestMarginEdgeGraphicColor);
+            nearestSegmentGraphic.setStrokeWidth(1.0);
+            group.addChild(nearestSegmentGraphic);
+         }
       }
 
       if (CenterOfMassStabilityMarginOptimizationModule.DEBUG)

@@ -4,7 +4,9 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.linearAlgebra.DampedNullspaceCalculator;
 import us.ihmc.robotics.linearAlgebra.DampedQRNullspaceCalculator;
+import us.ihmc.robotics.linearAlgebra.SVDNullspaceCalculator;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
 
 import java.util.Random;
@@ -44,7 +46,7 @@ public class JacobianProjectionTest
       double nullspaceProjectionAlpha = 0.001;
       DampedQRNullspaceCalculator nullspaceCalculator = new DampedQRNullspaceCalculator(100, nullspaceProjectionAlpha);
       nullspaceCalculator.projectOntoNullspace(qdRandomTranspose, jacobian);
-//      nullspaceCalculator.computeNullspaceProjector(jacobian, jacobianNullspaceProjector);
+      nullspaceCalculator.computeNullspaceProjector(jacobian, jacobianNullspaceProjector);
 
       // Check J qd is close to zero
       DMatrixRMaj qdRandomProjected = new DMatrixRMaj(7, 1);
@@ -57,8 +59,29 @@ public class JacobianProjectionTest
       System.out.println(spatialVelocityProjected);
    }
 
+   private static void testSimpleNullspaceProjection()
+   {
+      DMatrixRMaj J = new DMatrixRMaj(2, 4);
+      J.set(0, 0, 1.0);
+      J.set(1, 1, 1.0);
+      J.set(0, 2, Math.sqrt(0.5));
+      J.set(1, 2, Math.sqrt(0.5));
+      J.set(0, 3, -Math.sqrt(0.3));
+      J.set(1, 3, Math.sqrt(0.5));
+
+      SVDNullspaceCalculator calculator = new SVDNullspaceCalculator(10, false);
+      calculator.setMatrix(J, 2);
+      DMatrixRMaj nullspace = calculator.getNullspace();
+
+      DMatrixRMaj v1 = new DMatrixRMaj(0);
+      DMatrixRMaj v2 = new DMatrixRMaj(0);
+
+      System.out.println(nullspace);
+   }
+
    public static void main(String[] args)
    {
-      testJacobianProjection();
+//      testJacobianProjection();
+      testSimpleNullspaceProjection();
    }
 }

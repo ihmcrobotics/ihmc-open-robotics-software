@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
@@ -20,16 +21,15 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
-import us.ihmc.scs2.definition.visual.ColorDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
-import us.ihmc.scs2.definition.yoGraphic.YoGraphicLine2DDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
@@ -118,6 +118,8 @@ public class CenterOfMassStabilityMarginOptimizationModule implements SCS2YoGrap
    /* Yo-Position of optimized CoM */
    private final YoFramePoint3D yoOptimizedCoM = new YoFramePoint3D("optimizedCoM", ReferenceFrame.getWorldFrame(), registry);
 
+   private final YoDouble equalityConstraintEpsilon = new YoDouble("equalityConstraintEpilson", registry);
+
    /* Indices for CoM position variables in x_force */
    private int cx_index;
    private int cy_index;
@@ -128,7 +130,7 @@ public class CenterOfMassStabilityMarginOptimizationModule implements SCS2YoGrap
    private int cx_neg_index;
    private int cy_neg_index;
 
-   /* Yo-Variables to debug in cases the solver failes*/
+   /* Yo-Variables to debug in cases the solver fails */
    private YoBoolean failedForPhaseI = new YoBoolean("failedForPhaseI", registry);
    private final YoEnum<LPFailureReason> failureReason = new YoEnum<>("failureReason", registry, LPFailureReason.class, true);
 
@@ -186,6 +188,8 @@ public class CenterOfMassStabilityMarginOptimizationModule implements SCS2YoGrap
             graphicsListRegistry.registerYoGraphicsList(graphicsList);
          }
       }
+
+      equalityConstraintEpsilon.set(0.0);
 
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -294,7 +298,7 @@ public class CenterOfMassStabilityMarginOptimizationModule implements SCS2YoGrap
       DMatrixRMaj A_actuation = contactState.getActuationConstraintMatrix();
       DMatrixRMaj b_actuation = contactState.getActuationConstraintVector();
 
-      // Ain [f c] <= bin  ---> diag(Aeq, -Aeq, A_actuation) [f c] <= [beq -beq b_actuation]
+      // Ain [f c] <= bin  ---> [Aeq, -Aeq, A_actuation]^T [f c] <= [beq -beq b_actuation]^T
       Ain.reshape(2 * Aeq.getNumRows() + A_actuation.getNumRows(), nominalDecisionVariables);
       bin.reshape(2 * beq.getNumRows() + b_actuation.getNumRows(), 1);
 
@@ -304,8 +308,11 @@ public class CenterOfMassStabilityMarginOptimizationModule implements SCS2YoGrap
 
       MatrixTools.setMatrixBlock(bin, 0, 0, beq, 0, 0, beq.getNumRows(), beq.getNumCols(), 1.0);
       MatrixTools.setMatrixBlock(bin, beq.getNumRows(), 0, beq, 0, 0, beq.getNumRows(), beq.getNumCols(), -1.0);
-      MatrixTools.setMatrixBlock(bin, 2 * beq.getNumRows(), 0, b_actuation, 0, 0, b_actuation.getNumRows(), b_actuation.getNumCols(), 1.0);
 
+      // Add equality constraint epsilon here so that it only effects the static equilibrium equality constraint
+      CommonOps_DDRM.add(bin, equalityConstraintEpsilon.getValue());
+
+      MatrixTools.setMatrixBlock(bin, 2 * beq.getNumRows(), 0, b_actuation, 0, 0, b_actuation.getNumRows(), b_actuation.getNumCols(), 1.0);
 
       ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
       //////////////////////////////////////// Compute solver augmented inequality constraint ////////////////////////////////////////
@@ -349,6 +356,14 @@ public class CenterOfMassStabilityMarginOptimizationModule implements SCS2YoGrap
       updateGraphics();
 
       return foundSolution;
+   }
+
+   public Point2D solveForFixedBasis(TIntArrayList basisIndices)
+   {
+      linearProgramSolver.solveForFixedBasis(Ain_rho, bin, basisIndices, solutionRho);
+      CommonOps_DDRM.mult(rhoToForce, solutionRho, solutionForce);
+      optimizedCoM.set(solutionForce.get(cx_index), solutionForce.get(cy_index));
+      return optimizedCoM;
    }
 
    private void updateGraphics()

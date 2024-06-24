@@ -28,7 +28,7 @@ public class DiagnosticPostureAdjustmentCalculator implements WholeBodyPostureAd
    private final MovingReferenceFrame midFeetZUpFrame;
    private final AxisAngle pelvisOrientationOffset = new AxisAngle();
 
-   private final Map<String, YoFunctionGeneratorNew> oneDoFJointNameToGenerator = new HashMap<>();
+   private final Map<OneDoFJointBasics, YoFunctionGeneratorNew> oneDoFJointNameToGenerator = new HashMap<>();
 
    public DiagnosticPostureAdjustmentCalculator(OneDoFJointBasics[] oneDoFJoints, MovingReferenceFrame midFeetZUpFrame, double controlDT, YoRegistry parentRegistry)
    {
@@ -42,7 +42,7 @@ public class DiagnosticPostureAdjustmentCalculator implements WholeBodyPostureAd
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          oneDoFJointFunctionGenerators[i] = new YoFunctionGeneratorNew(prefix + oneDoFJoints[i].getName(), controlDT, registry);
-         oneDoFJointNameToGenerator.put(oneDoFJoints[i].getName(), oneDoFJointFunctionGenerators[i]);
+         oneDoFJointNameToGenerator.put(oneDoFJoints[i], oneDoFJointFunctionGenerators[i]);
       }
 
       pelvisOrientationAxis.set(Axis3D.X);
@@ -74,21 +74,21 @@ public class DiagnosticPostureAdjustmentCalculator implements WholeBodyPostureAd
    }
 
    @Override
-   public double getDesiredJointPositionOffset(String jointName)
+   public double getDesiredJointPositionOffset(OneDoFJointBasics joint)
    {
-      return oneDoFJointNameToGenerator.get(jointName).getValue();
+      return oneDoFJointNameToGenerator.get(joint).getValue();
    }
 
    @Override
-   public double getDesiredJointVelocityOffset(String jointName)
+   public double getDesiredJointVelocityOffset(OneDoFJointBasics joint)
    {
-      return oneDoFJointNameToGenerator.get(jointName).getValueDot();
+      return oneDoFJointNameToGenerator.get(joint).getValueDot();
    }
 
    @Override
-   public double getDesiredJointAccelerationOffset(String jointName)
+   public double getDesiredJointAccelerationOffset(OneDoFJointBasics joint)
    {
-      return oneDoFJointNameToGenerator.get(jointName).getValueDDot();
+      return oneDoFJointNameToGenerator.get(joint).getValueDDot();
    }
 
    @Override

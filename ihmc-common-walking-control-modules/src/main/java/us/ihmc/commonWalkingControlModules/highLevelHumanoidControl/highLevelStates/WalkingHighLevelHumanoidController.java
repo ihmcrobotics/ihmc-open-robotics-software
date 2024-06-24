@@ -95,7 +95,7 @@ import java.util.stream.Stream;
 public class WalkingHighLevelHumanoidController implements JointLoadStatusProvider, SCS2YoGraphicHolder
 {
    private static final boolean ENABLE_LEG_ELASTICITY_DEBUGGATOR = false;
-   private static final boolean ENABLE_MULTI_CONTACT_STABILITY_REGION = true;
+   private static final boolean CONSTRAIN_COP_WITH_MULTI_CONTACT_STABILITY_REGION = true;
 
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -795,7 +795,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       {
          updateWholeBodyContactState();
          controllerToolbox.updateMultiContactCoMRegion();
-         if (ENABLE_MULTI_CONTACT_STABILITY_REGION && controllerToolbox.getMultiContactRegionCalculator().hasSolvedWholeRegion())
+         if (CONSTRAIN_COP_WITH_MULTI_CONTACT_STABILITY_REGION && controllerToolbox.getMultiContactRegionCalculator().hasSolvedWholeRegion())
             multiContactStabilityRegion = controllerToolbox.getMultiContactRegionCalculator().getFeasibleCoMRegion();
       }
 
@@ -820,6 +820,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private void updateWholeBodyContactState()
    {
+      if (!hasContactStateChanged())
+      {
+         return;
+      }
+
       WholeBodyContactState wholeBodyContactState = controllerToolbox.getWholeBodyContactState();
       wholeBodyContactState.clear();
 
@@ -830,6 +835,21 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       // Set upper body contact points
       for (int i = 0; i < bodyManagers.size(); i++)
          bodyManagers.get(i).updateWholeBodyContactState(wholeBodyContactState);
+   }
+
+   private boolean hasContactStateChanged()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (controllerToolbox.getFootContactState(robotSide).pollContactHasChangedNotification())
+            return true;
+      }
+      for (int i = 0; i < bodyManagers.size(); i++)
+      {
+         if (bodyManagers.get(i).peekContactHasChangedNotification())
+            return true;
+      }
+      return false;
    }
 
    private void reportStatusMessages()

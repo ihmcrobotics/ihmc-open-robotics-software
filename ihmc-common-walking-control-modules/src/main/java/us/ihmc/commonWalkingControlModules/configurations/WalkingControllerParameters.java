@@ -873,4 +873,12 @@ public abstract class WalkingControllerParameters
    {
       return 0.8;
    }
+
+   /**
+    * Returns list of joints that CenterOfMassStabilityMarginOptimizationModule will check for torque validity
+    */
+   public List<String> getJointsToCheckTorqueFeasibilityInMultiContact()
+   {
+      return null;
+   }
 }

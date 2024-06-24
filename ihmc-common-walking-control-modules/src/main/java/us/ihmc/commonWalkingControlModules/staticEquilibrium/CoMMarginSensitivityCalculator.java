@@ -5,7 +5,10 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -23,14 +26,18 @@ import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory.DefaultPoint
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLineSegment2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator.DIRECTIONS_TO_OPTIMIZE;
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator.*;
 
-public class CoMMarginPostureOptimizerOneStepLookAhead implements SCS2YoGraphicHolder
+public class CoMMarginSensitivityCalculator implements SCS2YoGraphicHolder
 {
+   public static final double DT = 1.0e-2;
+   private static final int MAX_NULLSPACE = 10;
+
    private final YoRegistry registry;
    private final VertexLookAheadData[] predictionData = new VertexLookAheadData[DIRECTIONS_TO_OPTIMIZE];
    private final CenterOfMassStabilityMarginRegionCalculator staticStabilityRegionCalculator;
@@ -50,13 +57,16 @@ public class CoMMarginPostureOptimizerOneStepLookAhead implements SCS2YoGraphicH
    private final Vector3D pelvisRotationVectorAdjustment = new Vector3D();
    private final Quaternion pelvisRotationQuaternionAdjustment = new Quaternion();
 
+   // Computed sensitivity values, indexed as [vertex index identifier][nullspace index identifier]
+   private final YoFrameVector2D[][] sensitivityValues = new YoFrameVector2D[DIRECTIONS_TO_OPTIMIZE][MAX_NULLSPACE];
+
    private final ExecutionTimer fixedBasisSolveTimer;
 
-   public CoMMarginPostureOptimizerOneStepLookAhead(String prefix,
-                                                    CenterOfMassStabilityMarginRegionCalculator staticStabilityRegionCalculator,
-                                                    FullHumanoidRobotModel fullRobotModel,
-                                                    WholeBodyContactState contactState,
-                                                    YoRegistry parentRegistry)
+   public CoMMarginSensitivityCalculator(String prefix,
+                                         CenterOfMassStabilityMarginRegionCalculator staticStabilityRegionCalculator,
+                                         FullHumanoidRobotModel fullRobotModel,
+                                         WholeBodyContactState contactState,
+                                         YoRegistry parentRegistry)
    {
       registry = new YoRegistry(prefix + getClass().getSimpleName());
       this.staticStabilityRegionCalculator = staticStabilityRegionCalculator;
@@ -69,6 +79,14 @@ public class CoMMarginPostureOptimizerOneStepLookAhead implements SCS2YoGraphicH
       for (int i = 0; i < DIRECTIONS_TO_OPTIMIZE; i++)
       {
          predictionData[i] = new VertexLookAheadData(i);
+      }
+
+      for (int nullspace_idx = 0; nullspace_idx < MAX_NULLSPACE; nullspace_idx++)
+      {
+         for (int verted_idx = 0; verted_idx < DIRECTIONS_TO_OPTIMIZE; verted_idx++)
+         {
+            sensitivityValues[verted_idx][nullspace_idx] = new YoFrameVector2D("sensitivity_" + nullspace_idx + "_" + verted_idx, ReferenceFrame.getWorldFrame(), registry);
+         }
       }
 
       cachedJointAngles = new double[contactState.getNumberOfJoints()];
@@ -93,7 +111,7 @@ public class CoMMarginPostureOptimizerOneStepLookAhead implements SCS2YoGraphicH
 
       if (integrateWithCurrentVelocities || wholeBodyVelocityForIntegration != null)
       {
-         integrateOneTimestep(integrateWithCurrentVelocities, wholeBodyVelocityForIntegration, integrationDT);
+         integrateOneTimestep(integrateWithCurrentVelocities, wholeBodyVelocityForIntegration);
       }
 
       if (setJointVelocitiesToZero)
@@ -134,6 +152,55 @@ public class CoMMarginPostureOptimizerOneStepLookAhead implements SCS2YoGraphicH
       }
    }
 
+   // Assumes velocity is unit magnitude
+   public Tuple2DReadOnly computeSensitivity(int nullspaceIndex, int vertexIndex, DMatrixRMaj velocity, Runnable integrationCallback)
+   {
+      YoFramePoint2D v0 = staticStabilityRegionCalculator.getOptimizedVertex(vertexIndex);
+
+      saveCurrentRobotState();
+      integrateOneTimestep(false, velocity);
+
+      integrationCallback.run();
+
+      TIntArrayList solutionBasis = staticStabilityRegionCalculator.getSolutionBasisIndices(vertexIndex);
+      Point2D v1 = staticStabilityRegionCalculator.getOptimizationModule().solveForFixedBasis(solutionBasis);
+      writeInitialRobotState();
+
+      // delta c
+      sensitivityValues[vertexIndex][nullspaceIndex].sub(v1, v0);
+
+      // delta c / dt (we leave out |q_dot| from the denominator)
+//      sensitivityValues[vertexIndex][nullspaceIndex].scale(1.0 / DT);
+
+//      return v1;
+      return sensitivityValues[vertexIndex][nullspaceIndex];
+
+//      YoFramePoint2D v0 = staticStabilityRegionCalculator.getOptimizedVertex(vertexIndex);
+//      saveCurrentRobotState();
+////      integrateOneTimestep(false, velocity);
+//      integrationCallback.run();
+//
+////      fullRobotModel.updateFrames();
+////      contactState.update();
+//      optimizationModule.updateContactState(contactState);
+//
+////      TIntArrayList solutionBasisIndices = staticStabilityRegionCalculator.getSolutionBasisIndices(vertexIndex);
+////      Point2D v1 = optimizationModule.solveForFixedBasis(solutionBasisIndices);
+//
+//      staticStabilityRegionCalculator.performCoMRegionQuery(vertexIndex);
+//      YoFramePoint2D v1 = staticStabilityRegionCalculator.getOptimizedVertex(vertexIndex);
+//
+//      // delta c
+//      sensitivityValues[vertexIndex][nullspaceIndex].sub(v1, v0);
+//
+//      // delta c / dt (we leave out |q_dot| from the denominator)
+//      sensitivityValues[vertexIndex][nullspaceIndex].scale(1.0 / DT);
+//
+//      writeInitialRobotState();
+//
+//      return v1; // sensitivityValues[vertexIndex][nullspaceIndex];
+   }
+
    private void setJointVelocitiesToZero()
    {
       // Set all joint velocities to zero
@@ -162,7 +229,7 @@ public class CoMMarginPostureOptimizerOneStepLookAhead implements SCS2YoGraphicH
       }
    }
 
-   private void integrateOneTimestep(boolean integrateWithCurrentVelocities, DMatrixRMaj wholeBodyVelocityForIntegration, double integrationDT)
+   private void integrateOneTimestep(boolean integrateWithCurrentVelocities, DMatrixRMaj wholeBodyVelocityForIntegration)
    {
       FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
 
@@ -182,9 +249,9 @@ public class CoMMarginPostureOptimizerOneStepLookAhead implements SCS2YoGraphicH
 
       Pose3DBasics fullRobotModelRootJointPose = rootJoint.getJointPose();
       Point3DBasics rootJointPosition = fullRobotModelRootJointPose.getPosition();
-      rootJointPosition.scaleAdd(integrationDT, pelvisLinearVelocityPostureAdjustment, rootJointPosition);
+      rootJointPosition.scaleAdd(DT, pelvisLinearVelocityPostureAdjustment, rootJointPosition);
 
-      pelvisRotationVectorAdjustment.setAndScale(integrationDT, pelvisAngularVelocityPostureAdjustment);
+      pelvisRotationVectorAdjustment.setAndScale(DT, pelvisAngularVelocityPostureAdjustment);
       pelvisRotationQuaternionAdjustment.setRotationVector(pelvisRotationVectorAdjustment);
       fullRobotModelRootJointPose.getOrientation().append(pelvisRotationQuaternionAdjustment);
 
@@ -192,7 +259,7 @@ public class CoMMarginPostureOptimizerOneStepLookAhead implements SCS2YoGraphicH
       {
          int spatialDimensions = 6;
          double qd = integrateWithCurrentVelocities ? oneDoFJoints[i].getQd() : wholeBodyVelocityForIntegration.get(spatialDimensions + i, 0);
-         oneDoFJoints[i].setQ(oneDoFJoints[i].getQ() + integrationDT * qd);
+         oneDoFJoints[i].setQ(oneDoFJoints[i].getQ() + DT * qd);
       }
    }
 
@@ -230,8 +297,8 @@ public class CoMMarginPostureOptimizerOneStepLookAhead implements SCS2YoGraphicH
          predictedVertexDistance = new YoDouble("predictedVertexDistance" + index, registry);
          isPredictedVertexOptimal = new YoBoolean("isPredictedVertexOptimal" + index, registry);
 
-         queryDirectionX = CenterOfMassStabilityMarginRegionCalculator.queryDirectionX(index);
-         queryDirectionY = CenterOfMassStabilityMarginRegionCalculator.queryDirectionY(index);
+         queryDirectionX = queryDirectionX(index);
+         queryDirectionY = queryDirectionY(index);
       }
 
       void clear()

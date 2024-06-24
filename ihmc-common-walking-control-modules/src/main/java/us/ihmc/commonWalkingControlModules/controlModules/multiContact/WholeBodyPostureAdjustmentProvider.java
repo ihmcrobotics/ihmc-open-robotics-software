@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controlModules.multiContact;
 
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
 /**
  * Interface for modifying the whole-body posture of the robot.
@@ -24,19 +25,19 @@ public interface WholeBodyPostureAdjustmentProvider
     * Desired position offset of a 1-dof joint. Used in RigidBodyJointControlHelper and
     * affects JOINTSPACE, TASKSPACE (if hybrid mode) and LOAD-BEARING (if jointspace is active)
     */
-   double getDesiredJointPositionOffset(String jointName);
+   double getDesiredJointPositionOffset(OneDoFJointBasics jointName);
 
    /**
     * Desired velocity offset of a 1-dof joint. Used in RigidBodyJointControlHelper and
     * affects JOINTSPACE, TASKSPACE (if hybrid mode) and LOAD-BEARING (if jointspace is active)
     */
-   double getDesiredJointVelocityOffset(String jointName);
+   double getDesiredJointVelocityOffset(OneDoFJointBasics jointName);
 
    /**
     * Desired feed-forward acceleration offset of a 1-dof joint. Used in RigidBodyJointControlHelper and
     * affects JOINTSPACE, TASKSPACE (if hybrid mode) and LOAD-BEARING (if jointspace is active)
     */
-   double getDesiredJointAccelerationOffset(String jointName);
+   double getDesiredJointAccelerationOffset(OneDoFJointBasics jointName);
 
    /**
     * Desired vertical position offset of the floating-base (pelvis). Used in CenterOfMassHeightControlState.
@@ -84,19 +85,19 @@ public interface WholeBodyPostureAdjustmentProvider
          }
 
          @Override
-         public double getDesiredJointPositionOffset(String jointName)
+         public double getDesiredJointPositionOffset(OneDoFJointBasics jointName)
          {
             return 0.0;
          }
 
          @Override
-         public double getDesiredJointVelocityOffset(String jointName)
+         public double getDesiredJointVelocityOffset(OneDoFJointBasics jointName)
          {
             return 0.0;
          }
 
          @Override
-         public double getDesiredJointAccelerationOffset(String jointName)
+         public double getDesiredJointAccelerationOffset(OneDoFJointBasics jointName)
          {
             return 0.0;
          }
