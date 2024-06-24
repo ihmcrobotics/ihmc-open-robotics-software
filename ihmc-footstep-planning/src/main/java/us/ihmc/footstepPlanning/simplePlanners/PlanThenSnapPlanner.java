@@ -58,7 +58,7 @@ public class PlanThenSnapPlanner
       FootstepPlanningResult result = turnWalkTurnPlanner.plan();
       footstepPlan = turnWalkTurnPlanner.getPlan();
 
-      if (internalEnvironmentHandler.hasHeightMap())
+      if (!internalEnvironmentHandler.hasHeightMap())
          return result;
 
       int numberOfFootsteps = footstepPlan.getNumberOfSteps();

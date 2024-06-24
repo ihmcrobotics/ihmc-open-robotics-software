@@ -54,14 +54,7 @@ public class RDXBehaviorTreeNodeCreationMenu
     */
    public void renderImGuiWidgets(RDXBehaviorTreeNode<?, ?> relativeNode, BehaviorTreeNodeInsertionType insertionType)
    {
-      boolean parentIsActionSequenceNode = relativeNode instanceof RDXActionSequence && insertionType == BehaviorTreeNodeInsertionType.INSERT_AS_CHILD;
-      boolean parentIsBasicNode = relativeNode != null
-                               && relativeNode.getClass().equals(RDXBehaviorTreeNode.class)
-                               && insertionType == BehaviorTreeNodeInsertionType.INSERT_AS_CHILD
-                               && RDXBehaviorTreeTools.findActionSequenceAncestor(relativeNode) != null;
-      boolean ancestorIsActionSequenceNode = relativeNode instanceof RDXActionNode<?, ?>
-                                          && RDXBehaviorTreeTools.findActionSequenceAncestor(relativeNode) != null
-            && (insertionType == BehaviorTreeNodeInsertionType.INSERT_AFTER || insertionType == BehaviorTreeNodeInsertionType.INSERT_BEFORE);
+      boolean actionSequenceIsPresent = RDXBehaviorTreeTools.findActionSequenceAncestor(relativeNode) != null;
 
       ImGui.pushFont(ImGuiTools.getSmallBoldFont());
       ImGui.text("From file:");
@@ -167,7 +160,7 @@ public class RDXBehaviorTreeNodeCreationMenu
 
       ImGui.unindent();
 
-      if (ancestorIsActionSequenceNode)
+      if (actionSequenceIsPresent)
       {
          ImGui.separator();
 

@@ -227,7 +227,8 @@ public class DoorSceneNodeDefinitions
                                                           DOOR_PANEL_VISUAL_MODEL_FILE_PATH,
                                                           pushDoor ?
                                                                 PUSH_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM :
-                                                                PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                                PULL_DOOR_PANEL_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                          sceneGraph.getCRDTInfo());
          modificationQueue.accept(new SceneGraphNodeAddition(doorPanelNode, parentNode));
       }
 
@@ -244,7 +245,8 @@ public class DoorSceneNodeDefinitions
                                                      pushDoor ?
                                                            PUSH_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM :
                                                            PULL_DOOR_FRAME_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
-                                                     DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN);
+                                                     DOOR_FRAME_MAXIMUM_DISTANCE_TO_LOCK_IN,
+                                                     sceneGraph.getCRDTInfo());
          modificationQueue.accept(new SceneGraphNodeAddition(doorFrameNode, parentNode));
       }
 
@@ -266,7 +268,8 @@ public class DoorSceneNodeDefinitions
                                                              parentNode.getID(),
                                                              doorOpenerToMarkerTransform,
                                                              DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
-                                                             leverToVisualModelTransform);
+                                                             leverToVisualModelTransform,
+                                                             sceneGraph.getCRDTInfo());
             modificationQueue.accept(new SceneGraphNodeAddition(doorLeverNode, parentNode));
          }
       }
@@ -283,7 +286,8 @@ public class DoorSceneNodeDefinitions
                                                             parentNode.getID(),
                                                             doorOpenerToMarkerTransform,
                                                             DOOR_KNOB_VISUAL_MODEL_FILE_PATH,
-                                                            DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                            DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                            sceneGraph.getCRDTInfo());
             modificationQueue.accept(new SceneGraphNodeAddition(doorKnobNode, parentNode));
          }
       }
@@ -300,7 +304,8 @@ public class DoorSceneNodeDefinitions
                                                                parentNode.getID(),
                                                                doorOpenerToMarkerTransform,
                                                                DOOR_EMERGENCY_BAR_VISUAL_MODEL_FILE_PATH,
-                                                               LEFT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+                                                               LEFT_DOOR_EMERGENCY_BAR_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM,
+                                                               sceneGraph.getCRDTInfo());
             modificationQueue.accept(new SceneGraphNodeAddition(doorPushBarNode, parentNode));
          }
       }
