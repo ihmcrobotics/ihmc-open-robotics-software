@@ -12,7 +12,13 @@ module perception_msgs
       @TypeCode(type="perception_msgs::msg::dds_::DoorPanelMessage_")
       struct DoorPanelMessage
       {
+        /**
+         * The closest fit planar region that represents the door panel
+         */
         perception_msgs::msg::dds::PlanarRegionMessage planar_region;
+        /**
+         * The time in milliseconds the planar region was last updated
+         */
         unsigned long long planar_region_last_update_time_millis;
       };
     };

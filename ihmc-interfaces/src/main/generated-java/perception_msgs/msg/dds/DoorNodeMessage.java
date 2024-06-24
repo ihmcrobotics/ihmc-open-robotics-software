@@ -12,8 +12,17 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
             * The base scene node information
             */
    public perception_msgs.msg.dds.SceneNodeMessage scene_node_;
+   /**
+            * The pose of the door frame (X points in the direction the door opens)
+            */
    public us.ihmc.euclid.geometry.Pose3D door_frame_pose_;
+   /**
+            * The door panel
+            */
    public perception_msgs.msg.dds.DoorPanelMessage door_panel_;
+   /**
+            * The door opening mechanisms
+            */
    public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.DoorOpeningMechanismMessage>  opening_mechanisms_;
 
    public DoorNodeMessage()
@@ -49,18 +58,27 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
    }
 
 
+   /**
+            * The pose of the door frame (X points in the direction the door opens)
+            */
    public us.ihmc.euclid.geometry.Pose3D getDoorFramePose()
    {
       return door_frame_pose_;
    }
 
 
+   /**
+            * The door panel
+            */
    public perception_msgs.msg.dds.DoorPanelMessage getDoorPanel()
    {
       return door_panel_;
    }
 
 
+   /**
+            * The door opening mechanisms
+            */
    public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.DoorOpeningMechanismMessage>  getOpeningMechanisms()
    {
       return opening_mechanisms_;

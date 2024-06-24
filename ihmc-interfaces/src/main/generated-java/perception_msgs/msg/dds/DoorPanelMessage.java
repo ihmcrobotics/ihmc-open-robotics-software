@@ -8,7 +8,13 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class DoorPanelMessage extends Packet<DoorPanelMessage> implements Settable<DoorPanelMessage>, EpsilonComparable<DoorPanelMessage>
 {
+   /**
+            * The closest fit planar region that represents the door panel
+            */
    public perception_msgs.msg.dds.PlanarRegionMessage planar_region_;
+   /**
+            * The time in milliseconds the planar region was last updated
+            */
    public long planar_region_last_update_time_millis_;
 
    public DoorPanelMessage()
@@ -30,15 +36,24 @@ public class DoorPanelMessage extends Packet<DoorPanelMessage> implements Settab
    }
 
 
+   /**
+            * The closest fit planar region that represents the door panel
+            */
    public perception_msgs.msg.dds.PlanarRegionMessage getPlanarRegion()
    {
       return planar_region_;
    }
 
+   /**
+            * The time in milliseconds the planar region was last updated
+            */
    public void setPlanarRegionLastUpdateTimeMillis(long planar_region_last_update_time_millis)
    {
       planar_region_last_update_time_millis_ = planar_region_last_update_time_millis;
    }
+   /**
+            * The time in milliseconds the planar region was last updated
+            */
    public long getPlanarRegionLastUpdateTimeMillis()
    {
       return planar_region_last_update_time_millis_;

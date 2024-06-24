@@ -8,8 +8,19 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMessage> implements Settable<DoorOpeningMechanismMessage>, EpsilonComparable<DoorOpeningMechanismMessage>
 {
+   /**
+            * The type of door opening mechanism (see DoorOpeningMechanism.DoorOpeningMechanismType)
+            */
    public byte type_;
+   /**
+            * The side of the door the opening mechanism is mounted to
+            * 0 PUSH
+            * 1 PULL
+            */
    public byte door_side_;
+   /**
+            * The grasp pose of the opening mechanism
+            */
    public us.ihmc.euclid.geometry.Pose3D grasp_pose_;
 
    public DoorOpeningMechanismMessage()
@@ -32,25 +43,44 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.grasp_pose_, grasp_pose_);
    }
 
+   /**
+            * The type of door opening mechanism (see DoorOpeningMechanism.DoorOpeningMechanismType)
+            */
    public void setType(byte type)
    {
       type_ = type;
    }
+   /**
+            * The type of door opening mechanism (see DoorOpeningMechanism.DoorOpeningMechanismType)
+            */
    public byte getType()
    {
       return type_;
    }
 
+   /**
+            * The side of the door the opening mechanism is mounted to
+            * 0 PUSH
+            * 1 PULL
+            */
    public void setDoorSide(byte door_side)
    {
       door_side_ = door_side;
    }
+   /**
+            * The side of the door the opening mechanism is mounted to
+            * 0 PUSH
+            * 1 PULL
+            */
    public byte getDoorSide()
    {
       return door_side_;
    }
 
 
+   /**
+            * The grasp pose of the opening mechanism
+            */
    public us.ihmc.euclid.geometry.Pose3D getGraspPose()
    {
       return grasp_pose_;
