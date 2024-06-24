@@ -1,7 +1,6 @@
 package us.ihmc.perception.detections.YOLOv8;
 
 import perception_msgs.msg.dds.InstantDetectionMessage;
-import perception_msgs.msg.dds.YOLOv8NodeMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -36,16 +35,27 @@ public class YOLOv8InstantDetection extends InstantDetection
       return objectPointCloud;
    }
 
-//   public static YOLOv8InstantDetection fromMessage(YOLOv8NodeMessage message)
-//   {
-//      List<Point3D32> objectPointCloud = new ArrayList<>(message.getObjectPointCloud());
-//
-//      InstantDetectionMessage instantDetectionMessage = message.getDetectableSceneNode().getInstantDetection();
-//      return new YOLOv8InstantDetection(instantDetectionMessage.getDetectedObjectClass().toString(),
-//                                        instantDetectionMessage.getDetectedObjectName().toString(),
-//                                        instantDetectionMessage.getConfidence(),
-//                                        instantDetectionMessage.getObjectPose(),
-//                                        MessageTools.toInstant(instantDetectionMessage.getDetectionTime()),
-//                                        objectPointCloud);
-//   }
+   @Override
+   public void toMessage(InstantDetectionMessage message)
+   {
+      super.toMessage(message);
+      message.getYoloObjectPointCloud().clear();
+      for (int i = 0; i < message.getYoloObjectPointCloud().capacity() && i < objectPointCloud.size(); ++i)
+      {
+         Point3D32 point = message.getYoloObjectPointCloud().add();
+         point.set(objectPointCloud.get(i));
+      }
+   }
+
+   public static YOLOv8InstantDetection fromMessage(InstantDetectionMessage message)
+   {
+      List<Point3D32> objectPointCloud = new ArrayList<>(message.getYoloObjectPointCloud());
+
+      return new YOLOv8InstantDetection(message.getDetectedObjectClassAsString(),
+                                        message.getDetectedObjectNameAsString(),
+                                        message.getConfidence(),
+                                        message.getObjectPose(),
+                                        MessageTools.toInstant(message.getDetectionTime()),
+                                        objectPointCloud);
+   }
 }

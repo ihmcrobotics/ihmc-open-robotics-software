@@ -1,6 +1,5 @@
 package us.ihmc.perception.detections.centerPose;
 
-import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.InstantDetectionMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -42,18 +41,28 @@ public class CenterPoseInstantDetection extends InstantDetection
       return boundingBoxVertices2D;
    }
 
-//   public static CenterPoseInstantDetection fromMessage(CenterposeNodeMessage message)
-//   {
-//      Point3D[] boundingBoxVertices = message.getBoundingBoxVertices();
-//      Point2D[] boundingBoxVertices2D = Arrays.stream(message.getBoundingBox2dVertices()).map(Point2D::new).toArray(Point2D[]::new);
-//
-//      InstantDetectionMessage instantDetectionMessage = message.getDetectableSceneNode().getInstantDetection();
-//      return new CenterPoseInstantDetection(instantDetectionMessage.getDetectedObjectClassAsString(),
-//                                            instantDetectionMessage.getDetectedObjectNameAsString(),
-//                                            instantDetectionMessage.getConfidence(),
-//                                            instantDetectionMessage.getObjectPose(),
-//                                            MessageTools.toInstant(instantDetectionMessage.getDetectionTime()),
-//                                            boundingBoxVertices,
-//                                            boundingBoxVertices2D);
-//   }
+   @Override
+   public void toMessage(InstantDetectionMessage message)
+   {
+      super.toMessage(message);
+      for (int i = 0; i < 8; ++i)
+      {
+         message.getCenterPoseBoundingBoxVertices()[i].set(boundingBoxVertices[i]);
+         message.getCenterPoseBoundingBox2dVertices()[i].set(boundingBoxVertices2D[i]);
+      }
+   }
+
+   public static CenterPoseInstantDetection fromMessage(InstantDetectionMessage message)
+   {
+      Point3D[] boundingBoxVertices = message.getCenterPoseBoundingBoxVertices();
+      Point2D[] boundingBoxVertices2D = Arrays.stream(message.getCenterPoseBoundingBox2dVertices()).map(Point2D::new).toArray(Point2D[]::new);
+
+      return new CenterPoseInstantDetection(message.getDetectedObjectClassAsString(),
+                                            message.getDetectedObjectNameAsString(),
+                                            message.getConfidence(),
+                                            message.getObjectPose(),
+                                            MessageTools.toInstant(message.getDetectionTime()),
+                                            boundingBoxVertices,
+                                            boundingBoxVertices2D);
+   }
 }

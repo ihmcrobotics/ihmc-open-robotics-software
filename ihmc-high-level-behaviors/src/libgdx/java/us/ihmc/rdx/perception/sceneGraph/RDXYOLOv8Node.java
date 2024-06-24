@@ -54,7 +54,7 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
 
       confidencePlot.setWidth((int) (0.65 * ImGui.getWindowWidth()));
       ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.greenRedGradientColor((float) yoloNode.getMostRecentDetection().getConfidence(), 1.0f, 0.0f));
-      confidencePlot.render(yoloNode.getDetections().getConfidence());
+      confidencePlot.render(yoloNode.getDetection(0).getMostRecentDetection().getConfidence());
       ImGui.popStyleColor();
    }
 

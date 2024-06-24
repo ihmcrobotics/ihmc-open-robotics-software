@@ -23,6 +23,9 @@ import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyScene
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ROS2SceneGraphTools
 {
    public static SceneNode createNodeFromMessage(ROS2SceneGraphSubscriptionNode subscriptionNode, SceneGraph sceneGraph)
@@ -74,20 +77,30 @@ public class ROS2SceneGraphTools
       {
          sceneNode = new CenterposeNode(nodeID,
                                         nodeName,
-                                        CenterPoseInstantDetection.fromMessage(subscriptionNode.getCenterposeNodeMessage()),
+                                        PersistentDetection.fromMessage(subscriptionNode.getCenterposeNodeMessage()
+                                                                                        .getDetectableSceneNode()
+                                                                                        .getDetections()
+                                                                                        .get(0), CenterPoseInstantDetection.class),
                                         subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
       }
       else if (nodeType == SceneGraphMessage.YOLO_NODE_TYPE)
       {
          sceneNode = new YOLOv8Node(nodeID,
                                     nodeName,
-                                    YOLOv8InstantDetection.fromMessage(subscriptionNode.getYOLONodeMessage()),
+                                    PersistentDetection.fromMessage(subscriptionNode.getYOLONodeMessage().getDetectableSceneNode().getDetections().get(0),
+                                                                    YOLOv8InstantDetection.class),
                                     subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform(),
                                     subscriptionNode.getYOLONodeMessage().getObjectPose());
       }
       else if (nodeType == SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE)
       {
-         sceneNode = new DetectableSceneNode(nodeID, nodeName, (PersistentDetection<? extends InstantDetection>) null); // TODO: FIXME TOMASZ PLEASE
+         List<PersistentDetection<? extends InstantDetection>> detections = new ArrayList<>();
+
+         for (int i = 0; i < subscriptionNode.getDetectableSceneNodeMessage().getDetections().size(); ++i)
+            // FIXME THIS WON't WORK TOMASZ
+            detections.add(PersistentDetection.fromMessage(subscriptionNode.getDetectableSceneNodeMessage().getDetections().get(i), InstantDetection.class));
+
+         sceneNode = new DetectableSceneNode(nodeID, nodeName, detections);
       }
       else if (nodeType == SceneGraphMessage.PRIMITIVE_RIGID_BODY_NODE_TYPE)
       {

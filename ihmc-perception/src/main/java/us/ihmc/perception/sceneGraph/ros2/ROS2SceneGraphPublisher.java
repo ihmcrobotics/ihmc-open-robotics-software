@@ -12,6 +12,7 @@ import perception_msgs.msg.dds.SceneGraphMessage;
 import perception_msgs.msg.dds.SceneNodeMessage;
 import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
 import perception_msgs.msg.dds.YOLOv8NodeMessage;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -123,10 +124,6 @@ public class ROS2SceneGraphPublisher
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.CENTERPOSE_NODE_TYPE);
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getCenterposeSceneNodes().size());
             CenterposeNodeMessage centerposeNodeMessage = sceneGraphMessage.getCenterposeSceneNodes().add();
-            for (int i = 0; i < centerposeNodeMessage.getBoundingBoxVertices().length; i++)
-            {
-               centerposeNodeMessage.getBoundingBoxVertices()[i].set(centerposeNode.getVertices3D()[i]);
-            }
             centerposeNodeMessage.setEnableTracking(centerposeNode.isEnableTracking());
             detectableSceneNodeMessage = centerposeNodeMessage.getDetectableSceneNode();
          }
@@ -135,17 +132,9 @@ public class ROS2SceneGraphPublisher
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.YOLO_NODE_TYPE);
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getYoloSceneNodes().size());
             YOLOv8NodeMessage yoloNodeMessage = sceneGraphMessage.getYoloSceneNodes().add();
-
-            // set point cloud
-            yoloNodeMessage.getObjectPointCloud().clear();
-            for (int i = 0; i < 5000 && i < yoloNode.getMostRecentDetection().getObjectPointCloud().size(); i++)
-            {
-               Point3D32 point = yoloNodeMessage.getObjectPointCloud().add();
-               point.set(yoloNode.getMostRecentDetection().getObjectPointCloud().get(i));
-            }
-
             yoloNodeMessage.getCentroidToObjectTransform().set(yoloNode.getCentroidToObjectTransform());
             yoloNodeMessage.getObjectPose().set(yoloNode.getObjectPose());
+            yoloNodeMessage.getFilteredObjectPose().set(yoloNode.getObjectPose()); // FIXME Maybe set this to something else?
 
             detectableSceneNodeMessage = yoloNodeMessage.getDetectableSceneNode();
          }
@@ -157,12 +146,10 @@ public class ROS2SceneGraphPublisher
          }
          detectableSceneNodeMessage.setCurrentlyDetected(detectableSceneNode.getCurrentlyDetected());
 
-         instantDetectionMessage = detectableSceneNodeMessage.getInstantDetection();
-         instantDetectionMessage.setDetectedObjectClass(detectableSceneNode.getDetections().getDetectedObjectClass());
-         instantDetectionMessage.setDetectedObjectName(detectableSceneNode.getDetections().getDetectedObjectName());
-         instantDetectionMessage.setConfidence(detectableSceneNode.getDetections().getConfidence());
-         instantDetectionMessage.getObjectPose().set(detectableSceneNode.getDetections().getPose());
-         MessageTools.toMessage(detectableSceneNode.getDetections().getDetectionTime(), instantDetectionMessage.getDetectionTime());
+         detectableSceneNodeMessage.getDetections().clear();
+         RecyclingArrayList<PersistentDetectionMessage> detectionMessages = detectableSceneNodeMessage.getDetections();
+         for (int i = 0; i < detectableSceneNodeMessage.getDetections().capacity() && i < detectableSceneNode.getDetections().size(); ++i)
+            detectableSceneNode.getDetection(i).toMessage(detectionMessages.add());
 
          sceneNodeMessage = detectableSceneNodeMessage.getSceneNode();
       }

@@ -1,6 +1,7 @@
 package us.ihmc.perception.detections;
 
 import perception_msgs.msg.dds.InstantDetectionMessage;
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
@@ -9,6 +10,8 @@ import java.time.Instant;
 
 public abstract class InstantDetection
 {
+   private static final double EPSILON = 1E-7;
+
    private final String detectedObjectClass;
    private final String detectedObjectName;
    private final double confidence;
@@ -61,5 +64,23 @@ public abstract class InstantDetection
       message.setConfidence(confidence);
       message.getObjectPose().set(pose);
       MessageTools.toMessage(detectionTime, message.getDetectionTime());
+   }
+
+   @Override
+   public boolean equals(Object other)
+   {
+      if (this == other)
+         return true;
+
+      if (other instanceof InstantDetection otherDetection)
+      {
+         return detectedObjectClass.equals(otherDetection.detectedObjectClass)
+                && detectedObjectName.equals(otherDetection.detectedObjectName)
+                && MathTools.epsilonEquals(confidence, otherDetection.confidence, EPSILON)
+                && pose.epsilonEquals(otherDetection.pose, EPSILON)
+                && detectionTime.equals(otherDetection.detectionTime);
+      }
+      else
+         return false;
    }
 }

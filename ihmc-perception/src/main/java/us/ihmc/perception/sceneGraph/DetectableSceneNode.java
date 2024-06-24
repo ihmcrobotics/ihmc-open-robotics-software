@@ -27,7 +27,6 @@ public class DetectableSceneNode extends SceneNode
       setDetections(detections);
    }
 
-
    public void update()
    {
 
