@@ -52,6 +52,13 @@ public class RDXYOLOv8Settings extends RDXVisualizer
    }
 
    @Override
+   public void updateHeartbeat()
+   {
+      demandYOLOv8ICPZed.setAlive(isActive() && selectedSensor.get() == 0);
+      demandYOLOv8ICPRealsense.setAlive(isActive() && selectedSensor.get() == 1);
+   }
+
+   @Override
    public void renderImGuiWidgets()
    {
       ImGui.combo("Sensor Selection", selectedSensor, AVAILABLE_SENSORS);
@@ -98,9 +105,6 @@ public class RDXYOLOv8Settings extends RDXVisualizer
    public void update()
    {
       super.update();
-
-      demandYOLOv8ICPZed.setAlive(isActive() && selectedSensor.get() == 0);
-      demandYOLOv8ICPRealsense.setAlive(isActive() && selectedSensor.get() == 1);
 
       // Publish a settings message if user changed a setting or enough time has passed since last publication
       if (parametersChanged.poll() || messagePublishThrottler.run())
