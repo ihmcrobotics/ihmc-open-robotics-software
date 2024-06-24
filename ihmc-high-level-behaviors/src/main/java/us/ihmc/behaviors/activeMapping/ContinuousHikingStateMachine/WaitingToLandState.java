@@ -88,6 +88,7 @@ public class WaitingToLandState implements State
    @Override
    public boolean isDone(double timeInState)
    {
+      //TODO this is a bit messy, cleanup please
       if (controllerQueueMonitor.getFootstepStatusMessage() != null)
       {
          FootstepStatusMessage footstepStatusMessage = controllerQueueMonitor.getFootstepStatusMessage().get();
