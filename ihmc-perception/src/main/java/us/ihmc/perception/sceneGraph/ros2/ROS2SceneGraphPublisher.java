@@ -189,7 +189,8 @@ public class ROS2SceneGraphPublisher
          for (DoorOpeningMechanism openingMechanism : doorNode.getOpeningMechanisms())
          {
             DoorOpeningMechanismMessage doorOpeningMechanismMessage = doorNodeMessage.getOpeningMechanisms().add();
-            doorOpeningMechanismMessage.setType(openingMechanism.getType().toByte());
+            doorOpeningMechanismMessage.setType(openingMechanism.getType().getByteValue());
+            doorOpeningMechanismMessage.setDoorSide(openingMechanism.getDoorSide().getByteValue());
             doorOpeningMechanismMessage.getGraspPose().set(openingMechanism.getGraspPose());
          }
          sceneNodeMessage = doorNodeMessage.getSceneNode();

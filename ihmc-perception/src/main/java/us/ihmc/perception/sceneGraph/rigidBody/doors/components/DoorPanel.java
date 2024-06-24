@@ -45,7 +45,8 @@ public class DoorPanel
 
    public void fromMessage(DoorPanelMessage message)
    {
-      // TODO: DOORNODES
+      planarRegion.set(PlanarRegionMessageConverter.convertToPlanarRegion(message.getPlanarRegion()));
+      planarRegionLastUpdateTimeMillis = message.getPlanarRegionLastUpdateTimeMillis();
    }
 
    public void filterAndSetPlanarRegionFromPlanarRegionsList(PlanarRegionsList planarRegionsList)

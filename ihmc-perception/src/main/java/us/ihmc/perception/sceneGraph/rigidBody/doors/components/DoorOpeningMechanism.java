@@ -133,7 +133,7 @@ public class DoorOpeningMechanism
          this.byteValue = byteValue;
       }
 
-      public byte toByte()
+      public byte getByteValue()
       {
          return byteValue;
       }
@@ -142,7 +142,7 @@ public class DoorOpeningMechanism
       {
          for (DoorOpeningMechanismType value : values())
          {
-            if (value.toByte() == b)
+            if (value.getByteValue() == b)
                return value;
          }
          return null;

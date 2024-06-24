@@ -28,33 +28,6 @@ import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinit
 
 public class DoorNode extends SceneNode
 {
-   public enum DoorSide
-   {
-      PUSH((byte) 0), PULL((byte) 1);
-
-      private final byte byteValue;
-
-      DoorSide(byte byteValue)
-      {
-         this.byteValue = byteValue;
-      }
-
-      public byte getByteValue()
-      {
-         return byteValue;
-      }
-
-      public static DoorSide fromByte(byte byteValue)
-      {
-         for (DoorSide value : values())
-         {
-            if (value.getByteValue() == byteValue)
-               return value;
-         }
-         return null;
-      }
-   }
-
    private static final Pose3D ZERO_POSE = new Pose3D();
 
    private final Pose3D doorFramePose = new Pose3D(); // To know which way the door opens. X points in the direction that the door swings.
@@ -184,5 +157,32 @@ public class DoorNode extends SceneNode
       // TODO: DOORNODES
 
       return null;
+   }
+
+   public enum DoorSide
+   {
+      PUSH((byte) 0), PULL((byte) 1);
+
+      private final byte byteValue;
+
+      DoorSide(byte byteValue)
+      {
+         this.byteValue = byteValue;
+      }
+
+      public byte getByteValue()
+      {
+         return byteValue;
+      }
+
+      public static DoorSide fromByte(byte byteValue)
+      {
+         for (DoorSide value : values())
+         {
+            if (value.getByteValue() == byteValue)
+               return value;
+         }
+         return null;
+      }
    }
 }
