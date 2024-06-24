@@ -17,6 +17,12 @@ public class ImGuiInputDouble extends ImGuiFancyWidget
       imDouble = new ImDouble(initialValue);
    }
 
+   public ImGuiInputDouble(String label, String format, ImDouble imDouble)
+   {
+      super(label, format);
+      this.imDouble = imDouble;
+   }
+
    /**
     * Won't show the + and - buttons.
     */
