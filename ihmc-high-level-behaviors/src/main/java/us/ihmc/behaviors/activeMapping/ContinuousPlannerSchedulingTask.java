@@ -133,9 +133,6 @@ public class ContinuousPlannerSchedulingTask
    {
       continuousPlanner.syncParametersCallback();
 
-      // When the state machine does a transition, it will set continuousHikingState to null, that way when it goes into the next state.
-      // It doesn't have any transition that needs to happen yet until we set one in order to go to the next state
-      // TODO fix statistic prints because the enum gets reset to null when going into a new state, so those prints are useless
       stateMachine.doActionAndTransition();
    }
 
