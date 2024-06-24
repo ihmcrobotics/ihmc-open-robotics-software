@@ -1,8 +1,7 @@
-package us.ihmc.behaviors.activeMapping.ContinuousHikingStatesAndTransitions;
+package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 
 import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -22,13 +21,6 @@ public class StopContinuousHikingTransitionCondition implements StateTransitionC
    @Override
    public boolean testCondition(double timeInCurrentState)
    {
-      if (!continuousHikingParameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking())
-      {
-         LogTools.info(("STOPPING CONTINUOUS HIKING $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$44"));
-         return true;
-      }
-
-      return false;
+      return !continuousHikingParameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking();
    }
-
 }

@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.activeMapping.ContinuousHikingStatesAndTransitions;
+package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;

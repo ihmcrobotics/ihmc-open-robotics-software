@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.activeMapping.ContinuousHikingStatesAndTransitions;
+package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;

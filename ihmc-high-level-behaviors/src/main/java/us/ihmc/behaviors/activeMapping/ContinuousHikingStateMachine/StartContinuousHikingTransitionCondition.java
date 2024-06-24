@@ -1,4 +1,4 @@
-package us.ihmc.behaviors.activeMapping.ContinuousHikingStatesAndTransitions;
+package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 
 import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
@@ -11,8 +11,8 @@ public class StartContinuousHikingTransitionCondition implements StateTransition
    private final AtomicReference<ContinuousWalkingCommandMessage> commandMessage;
    private final ContinuousHikingParameters continuousHikingParameters;
 
-
-   public StartContinuousHikingTransitionCondition(AtomicReference<ContinuousWalkingCommandMessage> commandMessage, ContinuousHikingParameters continuousHikingParameters)
+   public StartContinuousHikingTransitionCondition(AtomicReference<ContinuousWalkingCommandMessage> commandMessage,
+                                                   ContinuousHikingParameters continuousHikingParameters)
    {
       this.commandMessage = commandMessage;
       this.continuousHikingParameters = continuousHikingParameters;

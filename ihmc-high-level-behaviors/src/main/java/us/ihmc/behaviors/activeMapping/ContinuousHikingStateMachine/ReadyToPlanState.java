@@ -1,10 +1,10 @@
-package us.ihmc.behaviors.activeMapping.ContinuousHikingStatesAndTransitions;
+package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 
 import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
+import us.ihmc.behaviors.activeMapping.ContinuousPlannerStatistics;
 import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
@@ -14,8 +14,6 @@ import us.ihmc.robotics.stateMachine.core.State;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.statistics;
-
 public class ReadyToPlanState implements State
 {
    private final AtomicReference<ContinuousWalkingCommandMessage> commandMessage;
@@ -24,6 +22,7 @@ public class ReadyToPlanState implements State
    private final ContinuousHikingParameters continuousHikingParameters;
    private final TerrainMapData terrainMap;
    private final TerrainPlanningDebugger debugger;
+   private final ContinuousPlannerStatistics statistics;
    private final StepValidityChecker stepValidityChecker;
 
    public ReadyToPlanState(AtomicReference<ContinuousWalkingCommandMessage> commandMessage,
@@ -32,6 +31,7 @@ public class ReadyToPlanState implements State
                            ContinuousHikingParameters continuousHikingParameters,
                            TerrainMapData terrainMap,
                            TerrainPlanningDebugger debugger,
+                           ContinuousPlannerStatistics statistics,
                            StepValidityChecker stepValidityChecker)
    {
       this.commandMessage = commandMessage;
@@ -40,13 +40,14 @@ public class ReadyToPlanState implements State
       this.continuousHikingParameters = continuousHikingParameters;
       this.terrainMap = terrainMap;
       this.debugger = debugger;
+      this.statistics = statistics;
       this.stepValidityChecker = stepValidityChecker;
    }
 
    @Override
    public void onEntry()
    {
-      LogTools.warn("Entering [READY_TO_PLAN] state");
+      LogTools.warn(String.format("Entering %s", getClass().getSimpleName()));
 
       continuousPlanner.initialize();
       continuousPlanner.setPlanAvailable(false);

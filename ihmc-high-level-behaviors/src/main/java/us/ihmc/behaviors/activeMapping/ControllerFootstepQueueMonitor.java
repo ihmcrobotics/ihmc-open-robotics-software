@@ -9,12 +9,8 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
-
-import static us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.statistics;
 
 public class ControllerFootstepQueueMonitor
 {
@@ -23,10 +19,15 @@ public class ControllerFootstepQueueMonitor
    private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>(new FootstepStatusMessage());
 
    private final HumanoidReferenceFrames referenceFrames;
+   private final ContinuousPlannerStatistics statistics;
 
-   public ControllerFootstepQueueMonitor(ROS2Helper ros2Helper, String simpleRobotName, HumanoidReferenceFrames referenceFrames)
+   public ControllerFootstepQueueMonitor(ROS2Helper ros2Helper,
+                                         String simpleRobotName,
+                                         HumanoidReferenceFrames referenceFrames,
+                                         ContinuousPlannerStatistics statistics)
    {
       this.referenceFrames = referenceFrames;
+      this.statistics = statistics;
       ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepQueueStatusMessage.class, simpleRobotName), this::footstepQueueStatusReceived);
       ros2Helper.subscribeViaCallback(HumanoidControllerAPI.getTopic(FootstepStatusMessage.class, simpleRobotName), this::footstepStatusReceived);
    }

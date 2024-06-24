@@ -1,48 +1,40 @@
-package us.ihmc.behaviors.activeMapping.ContinuousHikingStatesAndTransitions;
+package us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
+import us.ihmc.behaviors.activeMapping.ContinuousPlannerStatistics;
 import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.ros2.ROS2Topic;
-
-import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.statistics;
 
 public class WaitingToLandState implements State
 {
    private final ROS2Helper ros2Helper;
-   private final HumanoidReferenceFrames referenceFrames;
    private final ContinuousHikingParameters continuousHikingParameters;
 
    private final ROS2Topic<FootstepDataListMessage> controllerFootstepDataTopic;
    private final ContinuousPlanner continuousPlanner;
    private final ControllerFootstepQueueMonitor controllerQueueMonitor;
-   private final TerrainPlanningDebugger debugger;
    private FootstepStatusMessage previousFootstepStatusMessage = null;
+   private final ContinuousPlannerStatistics statistics;
 
    public WaitingToLandState(ROS2Helper ros2Helper,
                              String simpleRobotName,
-                             HumanoidReferenceFrames referenceFrames,
                              ContinuousPlanner continuousPlanner,
                              ControllerFootstepQueueMonitor controllerQueueMonitor,
-                             ContinuousHikingParameters continuousHikingParameters, TerrainPlanningDebugger debugger)
+                             ContinuousHikingParameters continuousHikingParameters,
+                             ContinuousPlannerStatistics statistics)
    {
       this.ros2Helper = ros2Helper;
-      this.referenceFrames = referenceFrames;
       this.continuousHikingParameters = continuousHikingParameters;
       this.continuousPlanner = continuousPlanner;
       this.controllerQueueMonitor = controllerQueueMonitor;
-      this.debugger = debugger;
+      this.statistics = statistics;
 
       controllerFootstepDataTopic = HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, simpleRobotName);
       ros2Helper.createPublisher(controllerFootstepDataTopic);
@@ -51,11 +43,14 @@ public class WaitingToLandState implements State
    @Override
    public void onEntry()
    {
+      LogTools.warn(String.format("Entering %s", getClass().getSimpleName()));
+
       if (continuousHikingParameters.getStepPublisherEnabled())
       {
          if (continuousPlanner.isPlanAvailable())
          {
-            FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(continuousHikingParameters, controllerQueueMonitor.getControllerFootstepQueue());
+            FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(continuousHikingParameters,
+                                                                                                           controllerQueueMonitor.getControllerFootstepQueue());
 
             String message = String.format("State: Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller");
             LogTools.info(message);
@@ -65,7 +60,7 @@ public class WaitingToLandState implements State
          }
          else
          {
-            String message = String.format("State:Planning failed... will try again when current step is completed");
+            String message = "State:Planning failed... will try again when current step is completed";
             LogTools.error(message);
             statistics.appendString(message);
          }
@@ -74,7 +69,7 @@ public class WaitingToLandState implements State
       continuousPlanner.setPlanAvailable(false);
       continuousPlanner.transitionCallback();
       statistics.setStartWaitingTime();
-      
+
       LogTools.warn("Entering [WAITING_TO_LAND] state");
    }
 
