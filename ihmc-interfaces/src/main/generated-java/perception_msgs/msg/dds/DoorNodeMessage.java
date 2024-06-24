@@ -13,32 +13,25 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
             */
    public perception_msgs.msg.dds.SceneNodeMessage scene_node_;
    /**
-            * The type of door opening mechanism detected
+            * The pose of the door frame (X points in the direction the door opens)
             */
-   public byte opening_mechanism_type_;
+   public us.ihmc.euclid.geometry.Pose3D door_frame_pose_;
    /**
-            * The 3D point of the detected door hardware
+            * The door panel
             */
-   public us.ihmc.euclid.tuple3D.Point3D opening_mechanism_point_;
+   public perception_msgs.msg.dds.DoorPanelMessage door_panel_;
    /**
-            * The pose of the detected door hardware wrt the door planar region
+            * The door opening mechanisms
             */
-   public us.ihmc.euclid.geometry.Pose3D opening_mechanism_pose_;
-   /**
-            * The planar region we assume is the door panel
-            */
-   public perception_msgs.msg.dds.PlanarRegionMessage door_planar_region_;
-   /**
-            * The last time the door planar region was updated
-            */
-   public long door_planar_region_update_time_millis_;
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.DoorOpeningMechanismMessage>  opening_mechanisms_;
 
    public DoorNodeMessage()
    {
       scene_node_ = new perception_msgs.msg.dds.SceneNodeMessage();
-      opening_mechanism_point_ = new us.ihmc.euclid.tuple3D.Point3D();
-      opening_mechanism_pose_ = new us.ihmc.euclid.geometry.Pose3D();
-      door_planar_region_ = new perception_msgs.msg.dds.PlanarRegionMessage();
+      door_frame_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      door_panel_ = new perception_msgs.msg.dds.DoorPanelMessage();
+      opening_mechanisms_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.DoorOpeningMechanismMessage> (100, new perception_msgs.msg.dds.DoorOpeningMechanismMessagePubSubType());
+
    }
 
    public DoorNodeMessage(DoorNodeMessage other)
@@ -50,13 +43,9 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
    public void set(DoorNodeMessage other)
    {
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.staticCopy(other.scene_node_, scene_node_);
-      opening_mechanism_type_ = other.opening_mechanism_type_;
-
-      geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.opening_mechanism_point_, opening_mechanism_point_);
-      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.opening_mechanism_pose_, opening_mechanism_pose_);
-      perception_msgs.msg.dds.PlanarRegionMessagePubSubType.staticCopy(other.door_planar_region_, door_planar_region_);
-      door_planar_region_update_time_millis_ = other.door_planar_region_update_time_millis_;
-
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.door_frame_pose_, door_frame_pose_);
+      perception_msgs.msg.dds.DoorPanelMessagePubSubType.staticCopy(other.door_panel_, door_panel_);
+      opening_mechanisms_.set(other.opening_mechanisms_);
    }
 
 
@@ -68,61 +57,31 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       return scene_node_;
    }
 
+
    /**
-            * The type of door opening mechanism detected
+            * The pose of the door frame (X points in the direction the door opens)
             */
-   public void setOpeningMechanismType(byte opening_mechanism_type)
+   public us.ihmc.euclid.geometry.Pose3D getDoorFramePose()
    {
-      opening_mechanism_type_ = opening_mechanism_type;
-   }
-   /**
-            * The type of door opening mechanism detected
-            */
-   public byte getOpeningMechanismType()
-   {
-      return opening_mechanism_type_;
+      return door_frame_pose_;
    }
 
 
    /**
-            * The 3D point of the detected door hardware
+            * The door panel
             */
-   public us.ihmc.euclid.tuple3D.Point3D getOpeningMechanismPoint()
+   public perception_msgs.msg.dds.DoorPanelMessage getDoorPanel()
    {
-      return opening_mechanism_point_;
+      return door_panel_;
    }
 
 
    /**
-            * The pose of the detected door hardware wrt the door planar region
+            * The door opening mechanisms
             */
-   public us.ihmc.euclid.geometry.Pose3D getOpeningMechanismPose()
+   public us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.DoorOpeningMechanismMessage>  getOpeningMechanisms()
    {
-      return opening_mechanism_pose_;
-   }
-
-
-   /**
-            * The planar region we assume is the door panel
-            */
-   public perception_msgs.msg.dds.PlanarRegionMessage getDoorPlanarRegion()
-   {
-      return door_planar_region_;
-   }
-
-   /**
-            * The last time the door planar region was updated
-            */
-   public void setDoorPlanarRegionUpdateTimeMillis(long door_planar_region_update_time_millis)
-   {
-      door_planar_region_update_time_millis_ = door_planar_region_update_time_millis;
-   }
-   /**
-            * The last time the door planar region was updated
-            */
-   public long getDoorPlanarRegionUpdateTimeMillis()
-   {
-      return door_planar_region_update_time_millis_;
+      return opening_mechanisms_;
    }
 
 
@@ -144,12 +103,14 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       if(other == this) return true;
 
       if (!this.scene_node_.epsilonEquals(other.scene_node_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.opening_mechanism_type_, other.opening_mechanism_type_, epsilon)) return false;
-
-      if (!this.opening_mechanism_point_.epsilonEquals(other.opening_mechanism_point_, epsilon)) return false;
-      if (!this.opening_mechanism_pose_.epsilonEquals(other.opening_mechanism_pose_, epsilon)) return false;
-      if (!this.door_planar_region_.epsilonEquals(other.door_planar_region_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.door_planar_region_update_time_millis_, other.door_planar_region_update_time_millis_, epsilon)) return false;
+      if (!this.door_frame_pose_.epsilonEquals(other.door_frame_pose_, epsilon)) return false;
+      if (!this.door_panel_.epsilonEquals(other.door_panel_, epsilon)) return false;
+      if (this.opening_mechanisms_.size() != other.opening_mechanisms_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.opening_mechanisms_.size(); i++)
+         {  if (!this.opening_mechanisms_.get(i).epsilonEquals(other.opening_mechanisms_.get(i), epsilon)) return false; }
+      }
 
 
       return true;
@@ -165,13 +126,9 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       DoorNodeMessage otherMyClass = (DoorNodeMessage) other;
 
       if (!this.scene_node_.equals(otherMyClass.scene_node_)) return false;
-      if(this.opening_mechanism_type_ != otherMyClass.opening_mechanism_type_) return false;
-
-      if (!this.opening_mechanism_point_.equals(otherMyClass.opening_mechanism_point_)) return false;
-      if (!this.opening_mechanism_pose_.equals(otherMyClass.opening_mechanism_pose_)) return false;
-      if (!this.door_planar_region_.equals(otherMyClass.door_planar_region_)) return false;
-      if(this.door_planar_region_update_time_millis_ != otherMyClass.door_planar_region_update_time_millis_) return false;
-
+      if (!this.door_frame_pose_.equals(otherMyClass.door_frame_pose_)) return false;
+      if (!this.door_panel_.equals(otherMyClass.door_panel_)) return false;
+      if (!this.opening_mechanisms_.equals(otherMyClass.opening_mechanisms_)) return false;
 
       return true;
    }
@@ -184,16 +141,12 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       builder.append("DoorNodeMessage {");
       builder.append("scene_node=");
       builder.append(this.scene_node_);      builder.append(", ");
-      builder.append("opening_mechanism_type=");
-      builder.append(this.opening_mechanism_type_);      builder.append(", ");
-      builder.append("opening_mechanism_point=");
-      builder.append(this.opening_mechanism_point_);      builder.append(", ");
-      builder.append("opening_mechanism_pose=");
-      builder.append(this.opening_mechanism_pose_);      builder.append(", ");
-      builder.append("door_planar_region=");
-      builder.append(this.door_planar_region_);      builder.append(", ");
-      builder.append("door_planar_region_update_time_millis=");
-      builder.append(this.door_planar_region_update_time_millis_);
+      builder.append("door_frame_pose=");
+      builder.append(this.door_frame_pose_);      builder.append(", ");
+      builder.append("door_panel=");
+      builder.append(this.door_panel_);      builder.append(", ");
+      builder.append("opening_mechanisms=");
+      builder.append(this.opening_mechanisms_);
       builder.append("}");
       return builder.toString();
    }

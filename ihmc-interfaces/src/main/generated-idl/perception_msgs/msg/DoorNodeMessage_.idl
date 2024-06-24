@@ -1,9 +1,9 @@
 #ifndef __perception_msgs__msg__DoorNodeMessage__idl__
 #define __perception_msgs__msg__DoorNodeMessage__idl__
 
-#include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
-#include "perception_msgs/msg/./PlanarRegionMessage_.idl"
+#include "perception_msgs/msg/./DoorOpeningMechanismMessage_.idl"
+#include "perception_msgs/msg/./DoorPanelMessage_.idl"
 #include "perception_msgs/msg/./SceneNodeMessage_.idl"
 module perception_msgs
 {
@@ -20,25 +20,17 @@ module perception_msgs
          */
         perception_msgs::msg::dds::SceneNodeMessage scene_node;
         /**
-         * The type of door opening mechanism detected
+         * The pose of the door frame (X points in the direction the door opens)
          */
-        octet opening_mechanism_type;
+        geometry_msgs::msg::dds::Pose door_frame_pose;
         /**
-         * The 3D point of the detected door hardware
+         * The door panel
          */
-        geometry_msgs::msg::dds::Point opening_mechanism_point;
+        perception_msgs::msg::dds::DoorPanelMessage door_panel;
         /**
-         * The pose of the detected door hardware wrt the door planar region
+         * The door opening mechanisms
          */
-        geometry_msgs::msg::dds::Pose opening_mechanism_pose;
-        /**
-         * The planar region we assume is the door panel
-         */
-        perception_msgs::msg::dds::PlanarRegionMessage door_planar_region;
-        /**
-         * The last time the door planar region was updated
-         */
-        unsigned long long door_planar_region_update_time_millis;
+        sequence<perception_msgs::msg::dds::DoorOpeningMechanismMessage> opening_mechanisms;
       };
     };
   };
