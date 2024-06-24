@@ -151,4 +151,9 @@ public class DampedSVDNullspaceCalculator implements DampedNullspaceCalculator
          dampedSigmaToPack.set(i, i, dampedSigma);
       }
    }
+
+   public DMatrixRMaj getNullspace()
+   {
+      return nullspace;
+   }
 }
