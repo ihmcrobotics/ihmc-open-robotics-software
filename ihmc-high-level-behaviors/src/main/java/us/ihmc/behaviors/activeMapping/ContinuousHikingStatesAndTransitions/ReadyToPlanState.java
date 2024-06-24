@@ -1,22 +1,17 @@
-package us.ihmc.behaviors.activeMapping.ContinuousHikingStates;
+package us.ihmc.behaviors.activeMapping.ContinuousHikingStatesAndTransitions;
 
 import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
-import controller_msgs.msg.dds.FootstepQueueStatusMessage;
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
-import us.ihmc.behaviors.activeMapping.ContinuousHikingState;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
-import us.ihmc.communication.HumanoidControllerAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.yoVariables.variable.YoEnum;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.statistics;
@@ -29,15 +24,15 @@ public class ReadyToPlanState implements State
    private final ContinuousHikingParameters continuousHikingParameters;
    private final TerrainMapData terrainMap;
    private final TerrainPlanningDebugger debugger;
-
-   private final AtomicReference<FootstepStatusMessage> latestFootstepStatusMessage = new AtomicReference<>();
+   private final StepValidityChecker stepValidityChecker;
 
    public ReadyToPlanState(AtomicReference<ContinuousWalkingCommandMessage> commandMessage,
                            ContinuousPlanner continuousPlanner,
                            ControllerFootstepQueueMonitor controllerFootstepQueueMonitor,
                            ContinuousHikingParameters continuousHikingParameters,
                            TerrainMapData terrainMap,
-                           TerrainPlanningDebugger debugger)
+                           TerrainPlanningDebugger debugger,
+                           StepValidityChecker stepValidityChecker)
    {
       this.commandMessage = commandMessage;
       this.continuousPlanner = continuousPlanner;
@@ -45,17 +40,16 @@ public class ReadyToPlanState implements State
       this.continuousHikingParameters = continuousHikingParameters;
       this.terrainMap = terrainMap;
       this.debugger = debugger;
-
-      controllerFootstepQueueMonitor.attachFootstepStatusMessageConsumer(latestFootstepStatusMessage::set);
+      this.stepValidityChecker = stepValidityChecker;
    }
-
-   private boolean didPlanningLoop;
 
    @Override
    public void onEntry()
    {
       LogTools.warn("Entering [READY_TO_PLAN] state");
-      didPlanningLoop = false;
+
+      continuousPlanner.initialize();
+      continuousPlanner.setPlanAvailable(false);
    }
 
    @Override
@@ -65,11 +59,13 @@ public class ReadyToPlanState implements State
 
       if (continuousHikingParameters.getStepPublisherEnabled())
       {
-         continuousPlanner.getImminentStanceFromLatestStatus(latestFootstepStatusMessage, controllerFootstepQueueMonitor.getControllerFootstepQueue());
+         if (controllerFootstepQueueMonitor.getFootstepStatusMessage() != null)
+            continuousPlanner.getImminentStanceFromLatestStatus(controllerFootstepQueueMonitor.getFootstepStatusMessage(),
+                                                                controllerFootstepQueueMonitor.getControllerFootstepQueue());
       }
 
-      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
       continuousPlanner.setGoalWaypointPoses();
+      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
       continuousPlanner.planToGoal(commandMessage.get());
       continuousPlanner.logFootStePlan();
 
@@ -80,7 +76,16 @@ public class ReadyToPlanState implements State
          debugger.publishMonteCarloNodesForVisualization(continuousPlanner.getMonteCarloFootstepPlanner().getRoot(), terrainMap);
       }
 
-      didPlanningLoop = true;
+      if (continuousPlanner.isPlanAvailable())
+      {
+         stepValidityChecker.checkNextStepIsValid(continuousPlanner.getLimitedFootstepDataListMessage(continuousHikingParameters,
+                                                                                                      controllerFootstepQueueMonitor.getControllerFootstepQueue()));
+
+         FootstepDataListMessage message = FootstepDataMessageConverter.createFootstepDataListFromPlan(continuousPlanner.getLatestFootstepPlan(),
+                                                                                                       continuousHikingParameters.getSwingTime(),
+                                                                                                       continuousHikingParameters.getTransferTime());
+         debugger.publishPlannedFootsteps(message);
+      }
    }
 
    @Override
@@ -91,7 +96,6 @@ public class ReadyToPlanState implements State
    @Override
    public boolean isDone(double timeInState)
    {
-      return didPlanningLoop;
+      return continuousPlanner.isPlanAvailable() && continuousHikingParameters.getStepPublisherEnabled();
    }
-
 }

@@ -1,18 +1,8 @@
-package us.ihmc.behaviors.activeMapping.ContinuousHikingStates;
+package us.ihmc.behaviors.activeMapping.ContinuousHikingStatesAndTransitions;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
-import us.ihmc.behaviors.activeMapping.ContinuousHikingState;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
-
-import static us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.statistics;
 
 public class StartingStepTransitionCondition implements StateTransitionCondition
 {

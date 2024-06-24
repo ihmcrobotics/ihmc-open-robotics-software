@@ -3,7 +3,7 @@ package us.ihmc.behaviors.activeMapping;
 import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
 import ihmc_common_msgs.msg.dds.PoseListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.activeMapping.ContinuousHikingStates.*;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingStatesAndTransitions.*;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -11,7 +11,6 @@ import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
 import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -20,7 +19,6 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
@@ -76,54 +74,59 @@ public class ContinuousPlannerSchedulingTask
       stateMachineFactory.setNamePrefix("ContinuousHikingStateMachine");
       stateMachineFactory.setRegistry(registry);
 
-
       StepValidityChecker stepValidityChecker = new StepValidityChecker(continuousPlanner, robotModel, referenceFrames, registry);
-      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Helper, simpleRobotName);
+      ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Helper, simpleRobotName, referenceFrames);
 
-      State notStartedState = new NotStartedState(ros2Helper,
-                                                  simpleRobotName,
-                                                  referenceFrames,
-                                                  commandMessage,
-                                                  stepValidityChecker,
-                                                  continuousPlanner,
-                                                  controllerFootstepQueueMonitor,
-                                                  continuousHikingParameters,
-                                                  terrainMap,
-                                                  debugger);
+      State notStartedState = new DoNothingState(ros2Helper,
+                                                 simpleRobotName,
+                                                 referenceFrames,
+                                                 continuousPlanner,
+                                                 debugger);
 
       State readyToPlanState = new ReadyToPlanState(commandMessage,
                                                     continuousPlanner,
                                                     controllerFootstepQueueMonitor,
                                                     continuousHikingParameters,
                                                     terrainMap,
-                                                    debugger);
+                                                    debugger,
+                                                    stepValidityChecker);
 
       State waitingtoLandState = new WaitingToLandState(ros2Helper,
                                                         simpleRobotName,
                                                         referenceFrames,
                                                         continuousPlanner,
                                                         controllerFootstepQueueMonitor,
-                                                        continuousHikingParameters);
+                                                        continuousHikingParameters,
+                                                        debugger);
 
-      stateMachineFactory.addState(ContinuousHikingState.NOT_STARTED, notStartedState);
+      // Adding the different states
+      stateMachineFactory.addState(ContinuousHikingState.DO_NOTHING, notStartedState);
       stateMachineFactory.addState(ContinuousHikingState.WAITING_TO_LAND, waitingtoLandState);
       stateMachineFactory.addState(ContinuousHikingState.READY_TO_PLAN, readyToPlanState);
 
-      stateMachineFactory.addTransition(ContinuousHikingState.NOT_STARTED, ContinuousHikingState.WAITING_TO_LAND, new StartingStepTransitionCondition(continuousPlanner,
-                                                                                                                                                      stepValidityChecker,
-                                                                                                                                                      continuousHikingParameters));
+      StartContinuousHikingTransitionCondition startContinuousHikingTransitionCondition = new StartContinuousHikingTransitionCondition(commandMessage,
+                                                                                                                                       continuousHikingParameters);
+
+      stateMachineFactory.addTransition(ContinuousHikingState.DO_NOTHING, ContinuousHikingState.READY_TO_PLAN, startContinuousHikingTransitionCondition);
+
+      StopContinuousHikingTransitionCondition stopContinuousHikingTransitionCondition = new StopContinuousHikingTransitionCondition(continuousHikingParameters,
+                                                                                                                                    commandMessage);
+      //TODO is matters what orders these are added in, if the first condition is true it won't do the rest
+
+      // From any given state we can go back to DO_NOTHING and stop ContinuousHiking
+      stateMachineFactory.addTransition(ContinuousHikingState.WAITING_TO_LAND, ContinuousHikingState.DO_NOTHING, stopContinuousHikingTransitionCondition);
+      stateMachineFactory.addTransition(ContinuousHikingState.READY_TO_PLAN, ContinuousHikingState.DO_NOTHING, stopContinuousHikingTransitionCondition);
+
+
+      PlanAgainTransitionCondition planAgainTransitionCondition = new PlanAgainTransitionCondition(continuousPlanner, continuousHikingParameters);
+
+      stateMachineFactory.addTransition(ContinuousHikingState.READY_TO_PLAN, ContinuousHikingState.READY_TO_PLAN, planAgainTransitionCondition);
+
+//      stateMachineFactory.addTransition(ContinuousHikingState.DO_NOTHING, ContinuousHikingState.WAITING_TO_LAND, startingStepTransitionCondition);
       stateMachineFactory.addDoneTransition(ContinuousHikingState.READY_TO_PLAN, ContinuousHikingState.WAITING_TO_LAND);
       stateMachineFactory.addDoneTransition(ContinuousHikingState.WAITING_TO_LAND, ContinuousHikingState.READY_TO_PLAN);
 
-      StopContinuousWalkingTransitionCondition stopContinuousWalkingTransitionCondition = new StopContinuousWalkingTransitionCondition(continuousHikingParameters,
-                                                                                                                                       commandMessage);
-
-      stateMachineFactory.addTransition(ContinuousHikingState.WAITING_TO_LAND, ContinuousHikingState.NOT_STARTED, stopContinuousWalkingTransitionCondition);
-      stateMachineFactory.addTransition(ContinuousHikingState.READY_TO_PLAN, ContinuousHikingState.NOT_STARTED, stopContinuousWalkingTransitionCondition);
-
-
-      stateMachine = stateMachineFactory.build(ContinuousHikingState.NOT_STARTED);
-
+      stateMachine = stateMachineFactory.build(ContinuousHikingState.DO_NOTHING);
       executorService.scheduleWithFixedDelay(this::tickStateMachine, 1500, CONTINUOUS_PLANNING_DELAY_MS, TimeUnit.MILLISECONDS);
    }
 

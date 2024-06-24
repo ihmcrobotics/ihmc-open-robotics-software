@@ -430,7 +430,6 @@ public class ContinuousPlanner
                                                  List<QueuedFootstepStatusMessage> controllerQueue)
    {
       RobotSide imminentFootSide = RobotSide.fromByte(footstepStatusMessage.get().getRobotSide());
-      assert imminentFootSide != null;
 
       int index = getNextIndexOnOppositeSide(RobotSide.fromByte(footstepStatusMessage.get().getRobotSide()), controllerQueue);
 

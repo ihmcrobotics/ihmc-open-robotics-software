@@ -1,21 +1,19 @@
-package us.ihmc.behaviors.activeMapping.ContinuousHikingStates;
+package us.ihmc.behaviors.activeMapping.ContinuousHikingStatesAndTransitions;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepQueueStatusMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.QueuedFootstepStatusMessage;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.ros2.ROS2Topic;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.statistics;
@@ -29,58 +27,25 @@ public class WaitingToLandState implements State
    private final ROS2Topic<FootstepDataListMessage> controllerFootstepDataTopic;
    private final ContinuousPlanner continuousPlanner;
    private final ControllerFootstepQueueMonitor controllerQueueMonitor;
-
-   private final AtomicReference<FootstepStatusMessage> latestFootstepStatusMessage = new AtomicReference<>();
+   private final TerrainPlanningDebugger debugger;
+   private FootstepStatusMessage previousFootstepStatusMessage = null;
 
    public WaitingToLandState(ROS2Helper ros2Helper,
                              String simpleRobotName,
                              HumanoidReferenceFrames referenceFrames,
                              ContinuousPlanner continuousPlanner,
                              ControllerFootstepQueueMonitor controllerQueueMonitor,
-                             ContinuousHikingParameters continuousHikingParameters)
+                             ContinuousHikingParameters continuousHikingParameters, TerrainPlanningDebugger debugger)
    {
       this.ros2Helper = ros2Helper;
       this.referenceFrames = referenceFrames;
       this.continuousHikingParameters = continuousHikingParameters;
       this.continuousPlanner = continuousPlanner;
       this.controllerQueueMonitor = controllerQueueMonitor;
-
-      controllerQueueMonitor.attachFootstepStatusMessageConsumer(this::footstepStatusReceived);
+      this.debugger = debugger;
 
       controllerFootstepDataTopic = HumanoidControllerAPI.getTopic(FootstepDataListMessage.class, simpleRobotName);
       ros2Helper.createPublisher(controllerFootstepDataTopic);
-   }
-
-   /*
-    * Callback to receive a message each time there is a change in the FootstepStatusMessage
-    */
-   private void footstepStatusReceived(FootstepStatusMessage footstepStatusMessage)
-   {
-      if (!continuousHikingParameters.getEnableContinuousWalking())
-         return;
-
-      if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
-      {
-         // TODO: Use the transfer time (starting now) to start planning (if WAITING_TO_LAND then plan again)
-         statistics.incrementTotalStepsCompleted();
-
-         double distance = referenceFrames.getSoleFrame(RobotSide.LEFT)
-                                          .getTransformToDesiredFrame(referenceFrames.getSoleFrame(RobotSide.RIGHT))
-                                          .getTranslation()
-                                          .norm();
-         statistics.setLastLengthCompleted((float) distance);
-
-         statistics.logToFile(true, true);
-      }
-
-      this.latestFootstepStatusMessage.set(footstepStatusMessage);
-   }
-
-   @Override
-   public boolean isDone(double timeInState)
-   {
-      FootstepStatusMessage footstepStatusMessage = latestFootstepStatusMessage.get();
-      return footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED;
    }
 
    @Override
@@ -92,7 +57,7 @@ public class WaitingToLandState implements State
          {
             FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(continuousHikingParameters, controllerQueueMonitor.getControllerFootstepQueue());
 
-            String message = String.format("State: [%s]: Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller");
+            String message = String.format("State: Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller");
             LogTools.info(message);
             statistics.appendString(message);
 
@@ -100,7 +65,7 @@ public class WaitingToLandState implements State
          }
          else
          {
-            String message = String.format("State: [%s]: Planning failed... will try again when current step is completed");
+            String message = String.format("State:Planning failed... will try again when current step is completed");
             LogTools.error(message);
             statistics.appendString(message);
          }
@@ -123,5 +88,21 @@ public class WaitingToLandState implements State
    {
       statistics.endStepTime();
       statistics.startStepTime();
+   }
+
+   @Override
+   public boolean isDone(double timeInState)
+   {
+      if (controllerQueueMonitor.getFootstepStatusMessage() != null)
+      {
+         FootstepStatusMessage footstepStatusMessage = controllerQueueMonitor.getFootstepStatusMessage().get();
+         if (previousFootstepStatusMessage != null && previousFootstepStatusMessage.getSequenceId() == footstepStatusMessage.getSequenceId())
+            return false;
+
+         previousFootstepStatusMessage = footstepStatusMessage;
+         return footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_STARTED;
+      }
+
+      return false;
    }
 }

@@ -1,7 +1,6 @@
-package us.ihmc.behaviors.activeMapping.ContinuousHikingStates;
+package us.ihmc.behaviors.activeMapping.ContinuousHikingStatesAndTransitions;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
@@ -13,11 +12,8 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWigg
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepPoseHeuristicChecker;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import static us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.statistics;
 
 public class StepValidityChecker
 {
