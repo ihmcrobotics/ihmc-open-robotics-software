@@ -55,7 +55,7 @@ public final class DoorNodeTools
                         case KNOB ->
                         {
                            visualModelPath = DOOR_KNOB_VISUAL_MODEL_FILE_PATH;
-                           yoloVisualModelTransform.set(DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM);
+                           yoloVisualModelTransform.set(DOOR_KNOB_TO_YOLO_VISUAL_MODEL_TRANSFORM);
                         }
                         case PUSH_BAR ->
                         {
