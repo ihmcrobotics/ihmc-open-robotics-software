@@ -25,6 +25,7 @@ public class SceneGraphNodeAddition implements SceneGraphTreeModification
       parent.getChildren().add(nodeToAdd);
       ensureParentFramesAreConsistent(nodeToAdd, parent);
       parent.freeze();
+      nodeToAdd.freeze();
    }
 
    /**
