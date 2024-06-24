@@ -15,7 +15,7 @@ public class DoorOpeningMechanismMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0f6bf2d0e9e7499d51ac46265a671968286dea08a97ce7a4bec4b5dcba8b3fec";
+   		return "cb84d3ee40561e49251977a1989b7ee9fa577cd919e52e4b77141ca94bd76197";
    }
    
    @Override
@@ -54,6 +54,8 @@ public class DoorOpeningMechanismMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -72,6 +74,9 @@ public class DoorOpeningMechanismMessagePubSubType implements us.ihmc.pubsub.Top
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getGraspPose(), current_alignment);
 
 
@@ -82,12 +87,16 @@ public class DoorOpeningMechanismMessagePubSubType implements us.ihmc.pubsub.Top
    {
       cdr.write_type_9(data.getType());
 
+      cdr.write_type_9(data.getDoorSide());
+
       geometry_msgs.msg.dds.PosePubSubType.write(data.getGraspPose(), cdr);
    }
 
    public static void read(perception_msgs.msg.dds.DoorOpeningMechanismMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setType(cdr.read_type_9());
+      	
+      data.setDoorSide(cdr.read_type_9());
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getGraspPose(), cdr);	
 
@@ -97,6 +106,7 @@ public class DoorOpeningMechanismMessagePubSubType implements us.ihmc.pubsub.Top
    public final void serialize(perception_msgs.msg.dds.DoorOpeningMechanismMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_9("type", data.getType());
+      ser.write_type_9("door_side", data.getDoorSide());
       ser.write_type_a("grasp_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGraspPose());
 
    }
@@ -105,6 +115,7 @@ public class DoorOpeningMechanismMessagePubSubType implements us.ihmc.pubsub.Top
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.DoorOpeningMechanismMessage data)
    {
       data.setType(ser.read_type_9("type"));
+      data.setDoorSide(ser.read_type_9("door_side"));
       ser.read_type_a("grasp_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGraspPose());
 
    }

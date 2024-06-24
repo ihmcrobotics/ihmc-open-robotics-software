@@ -5,4 +5,4 @@ geometry_msgs/Pose door_frame_pose
 
 perception_msgs/DoorPanelMessage door_panel
 
-perception_msgs/DoorOpeningMechanismMessage[<=8] opening_mechanisms
+perception_msgs/DoorOpeningMechanismMessage[] opening_mechanisms

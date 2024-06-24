@@ -20,8 +20,8 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions.DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN;
@@ -30,14 +30,36 @@ public class DoorNode extends SceneNode
 {
    public enum DoorSide
    {
-      PUSH, PULL
+      PUSH((byte) 0), PULL((byte) 1);
+
+      private final byte byteValue;
+
+      DoorSide(byte byteValue)
+      {
+         this.byteValue = byteValue;
+      }
+
+      public byte getByteValue()
+      {
+         return byteValue;
+      }
+
+      public static DoorSide fromByte(byte byteValue)
+      {
+         for (DoorSide value : values())
+         {
+            if (value.getByteValue() == byteValue)
+               return value;
+         }
+         return null;
+      }
    }
 
    private static final Pose3D ZERO_POSE = new Pose3D();
 
    private final Pose3D doorFramePose = new Pose3D(); // To know which way the door opens. X points in the direction that the door swings.
    private final DoorPanel doorPanel = new DoorPanel(this);
-   private final List<DoorOpeningMechanism> openingMechanisms = new ArrayList<>();
+   private final Set<DoorOpeningMechanism> openingMechanisms = new HashSet<>();
 
    public DoorNode(long id, CRDTInfo crdtInfo)
    {
@@ -147,14 +169,14 @@ public class DoorNode extends SceneNode
       return doorPanel;
    }
 
-   public List<DoorOpeningMechanism> getOpeningMechanisms()
+   public Set<DoorOpeningMechanism> getOpeningMechanisms()
    {
       return openingMechanisms;
    }
 
-   public List<DoorOpeningMechanism> getOpeningMechanisms(DoorSide doorSide)
+   public Set<DoorOpeningMechanism> getOpeningMechanisms(DoorSide doorSide)
    {
-      return openingMechanisms.stream().filter(openingMechanism -> openingMechanism.getDoorSide() == doorSide).collect(Collectors.toList());
+      return openingMechanisms.stream().filter(openingMechanism -> openingMechanism.getDoorSide() == doorSide).collect(Collectors.toSet());
    }
 
    public DoorSide getDoorSideRelativeTo(Point3D position)

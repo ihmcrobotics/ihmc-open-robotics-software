@@ -15,8 +15,8 @@ import javax.annotation.Nullable;
 public class DoorOpeningMechanism
 {
    private final DoorOpeningMechanismType type;
-   private final Pose3D graspPose = new Pose3D();
    private final DoorSide doorSide;
+   private final Pose3D graspPose = new Pose3D();
 
    public DoorOpeningMechanism(DoorSide doorSide, DoorOpeningMechanismType type)
    {
@@ -124,11 +124,28 @@ public class DoorOpeningMechanism
 
    public enum DoorOpeningMechanismType
    {
-      UNKNOWN, LEVER_HANDLE, KNOB, PUSH_BAR, PULL_HANDLE;
+      UNKNOWN((byte) 0), LEVER_HANDLE((byte) 1), KNOB((byte) 2), PUSH_BAR((byte) 3), PULL_HANDLE((byte) 4);
+
+      final byte byteValue;
+
+      DoorOpeningMechanismType(byte byteValue)
+      {
+         this.byteValue = byteValue;
+      }
+
+      public byte toByte()
+      {
+         return byteValue;
+      }
 
       public static DoorOpeningMechanismType fromByte(byte b)
       {
-         return DoorOpeningMechanismType.values()[b];
+         for (DoorOpeningMechanismType value : values())
+         {
+            if (value.toByte() == b)
+               return value;
+         }
+         return null;
       }
    }
 }

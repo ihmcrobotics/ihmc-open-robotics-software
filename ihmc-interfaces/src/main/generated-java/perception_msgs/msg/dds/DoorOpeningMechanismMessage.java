@@ -9,6 +9,7 @@ import us.ihmc.pubsub.TopicDataType;
 public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMessage> implements Settable<DoorOpeningMechanismMessage>, EpsilonComparable<DoorOpeningMechanismMessage>
 {
    public byte type_;
+   public byte door_side_;
    public us.ihmc.euclid.geometry.Pose3D grasp_pose_;
 
    public DoorOpeningMechanismMessage()
@@ -26,6 +27,8 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
    {
       type_ = other.type_;
 
+      door_side_ = other.door_side_;
+
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.grasp_pose_, grasp_pose_);
    }
 
@@ -36,6 +39,15 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
    public byte getType()
    {
       return type_;
+   }
+
+   public void setDoorSide(byte door_side)
+   {
+      door_side_ = door_side;
+   }
+   public byte getDoorSide()
+   {
+      return door_side_;
    }
 
 
@@ -64,6 +76,8 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.type_, other.type_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.door_side_, other.door_side_, epsilon)) return false;
+
       if (!this.grasp_pose_.epsilonEquals(other.grasp_pose_, epsilon)) return false;
 
       return true;
@@ -80,6 +94,8 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
 
       if(this.type_ != otherMyClass.type_) return false;
 
+      if(this.door_side_ != otherMyClass.door_side_) return false;
+
       if (!this.grasp_pose_.equals(otherMyClass.grasp_pose_)) return false;
 
       return true;
@@ -93,6 +109,8 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
       builder.append("DoorOpeningMechanismMessage {");
       builder.append("type=");
       builder.append(this.type_);      builder.append(", ");
+      builder.append("door_side=");
+      builder.append(this.door_side_);      builder.append(", ");
       builder.append("grasp_pose=");
       builder.append(this.grasp_pose_);
       builder.append("}");

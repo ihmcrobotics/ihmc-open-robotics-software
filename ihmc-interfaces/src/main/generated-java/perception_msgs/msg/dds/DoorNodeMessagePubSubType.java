@@ -15,7 +15,7 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "de56353b8dd2737003b223932578141676513dd6342984c189116dd10edbbc2e";
+   		return "143704435859b97632e49738992159a17dc3127ba2906ecc0b082beb56f04cf1";
    }
    
    @Override
@@ -58,7 +58,7 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
 
       current_alignment += perception_msgs.msg.dds.DoorPanelMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 8; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += perception_msgs.msg.dds.DoorOpeningMechanismMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
@@ -94,7 +94,7 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.write(data.getSceneNode(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getDoorFramePose(), cdr);
       perception_msgs.msg.dds.DoorPanelMessagePubSubType.write(data.getDoorPanel(), cdr);
-      if(data.getOpeningMechanisms().size() <= 8)
+      if(data.getOpeningMechanisms().size() <= 100)
       cdr.write_type_e(data.getOpeningMechanisms());else
           throw new RuntimeException("opening_mechanisms field exceeds the maximum length");
 

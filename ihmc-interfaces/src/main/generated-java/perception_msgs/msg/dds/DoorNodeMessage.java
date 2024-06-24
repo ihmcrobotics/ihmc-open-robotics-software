@@ -21,7 +21,7 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       scene_node_ = new perception_msgs.msg.dds.SceneNodeMessage();
       door_frame_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       door_panel_ = new perception_msgs.msg.dds.DoorPanelMessage();
-      opening_mechanisms_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.DoorOpeningMechanismMessage> (8, new perception_msgs.msg.dds.DoorOpeningMechanismMessagePubSubType());
+      opening_mechanisms_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.DoorOpeningMechanismMessage> (100, new perception_msgs.msg.dds.DoorOpeningMechanismMessagePubSubType());
 
    }
 

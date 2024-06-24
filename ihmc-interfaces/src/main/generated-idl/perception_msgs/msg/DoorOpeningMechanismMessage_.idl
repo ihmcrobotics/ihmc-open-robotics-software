@@ -13,6 +13,7 @@ module perception_msgs
       struct DoorOpeningMechanismMessage
       {
         octet type;
+        octet door_side;
         geometry_msgs::msg::dds::Pose grasp_pose;
       };
     };

@@ -21,7 +21,7 @@ module perception_msgs
         perception_msgs::msg::dds::SceneNodeMessage scene_node;
         geometry_msgs::msg::dds::Pose door_frame_pose;
         perception_msgs::msg::dds::DoorPanelMessage door_panel;
-        sequence<perception_msgs::msg::dds::DoorOpeningMechanismMessage, 8> opening_mechanisms;
+        sequence<perception_msgs::msg::dds::DoorOpeningMechanismMessage> opening_mechanisms;
       };
     };
   };

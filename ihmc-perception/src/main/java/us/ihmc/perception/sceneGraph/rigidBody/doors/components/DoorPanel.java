@@ -1,5 +1,7 @@
 package us.ihmc.perception.sceneGraph.rigidBody.doors.components;
 
+import perception_msgs.msg.dds.DoorPanelMessage;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters;
@@ -10,7 +12,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class DoorPanel
 {
-   private final DoorNode doorNode;
+   private transient final DoorNode doorNode;
+
    private final PlanarRegion planarRegion = new PlanarRegion();
    private long planarRegionLastUpdateTimeMillis;
 
@@ -32,6 +35,17 @@ public class DoorPanel
    public void setPlanarRegionLastUpdateTimeMillis(long planarRegionLastUpdateTimeMillis)
    {
       this.planarRegionLastUpdateTimeMillis = planarRegionLastUpdateTimeMillis;
+   }
+
+   public void toMessage(DoorPanelMessage message)
+   {
+      message.getPlanarRegion().set(PlanarRegionMessageConverter.convertToPlanarRegionMessage(planarRegion));
+      message.setPlanarRegionLastUpdateTimeMillis(planarRegionLastUpdateTimeMillis);
+   }
+
+   public void fromMessage(DoorPanelMessage message)
+   {
+      // TODO: DOORNODES
    }
 
    public void filterAndSetPlanarRegionFromPlanarRegionsList(PlanarRegionsList planarRegionsList)
