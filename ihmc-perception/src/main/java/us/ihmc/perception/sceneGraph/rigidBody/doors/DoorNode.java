@@ -26,11 +26,6 @@ import java.util.stream.Collectors;
 
 import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions.DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN;
 
-/**
- * Unhandled types of doors:
- * - doors which can be pushed from both sides
- * - revolving doors
- */
 public class DoorNode extends SceneNode
 {
    public enum DoorSide
