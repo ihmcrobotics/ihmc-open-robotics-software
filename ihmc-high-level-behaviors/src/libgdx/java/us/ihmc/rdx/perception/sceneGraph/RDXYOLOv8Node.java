@@ -42,9 +42,11 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
    }
 
    @Override
-   public void update(SceneGraphModificationQueue modificationQueue)
+   public void update(SceneGraph sceneGraph)
    {
-      super.update(modificationQueue);
+      super.update(sceneGraph);
+
+      yoloNode.update(sceneGraph);
    }
 
    @Override
@@ -53,15 +55,15 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
 
       confidencePlot.setWidth((int) (0.65 * ImGui.getWindowWidth()));
-      ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.greenRedGradientColor((float) yoloNode.getMostRecentDetection().getConfidence(), 1.0f, 0.0f));
-      confidencePlot.render(yoloNode.getDetection(0).getMostRecentDetection().getConfidence());
+      ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.greenRedGradientColor((float) yoloNode.getYOLODetection().getConfidence(), 1.0f, 0.0f));
+      confidencePlot.render(yoloNode.getYOLODetection().getConfidence());
       ImGui.popStyleColor();
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      List<Point3D32> renderablePointCloud = yoloNode.getMostRecentDetection().getObjectPointCloud();
+      List<Point3D32> renderablePointCloud = yoloNode.getYOLODetection().getObjectPointCloud();
       objectPointCloudRenderer.setPointsToRender(renderablePointCloud, Color.GREEN);
       objectPointCloudRenderer.updateMesh();
       objectPointCloudRenderer.getRenderables(renderables, pool);

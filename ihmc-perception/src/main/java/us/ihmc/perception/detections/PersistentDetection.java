@@ -1,12 +1,7 @@
 package us.ihmc.perception.detections;
 
-import org.apache.commons.lang3.NotImplementedException;
-import perception_msgs.msg.dds.PersistentDetectionMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
-import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
-import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
 import us.ihmc.robotics.time.TimeTools;
 
 import java.time.Duration;
@@ -14,9 +9,9 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.UUID;
 
 public class PersistentDetection<T extends InstantDetection>
 {
@@ -25,6 +20,7 @@ public class PersistentDetection<T extends InstantDetection>
    // The first element of this set is the oldest detection, and the last element is the most recent detection
    private final SortedSet<T> detectionHistory = new TreeSet<>(Comparator.comparing(InstantDetection::getDetectionTime));
    private Duration historyDuration;
+   private final UUID id = UUID.randomUUID();
 
    private final InstantDetection firstDetection;
 
@@ -68,6 +64,7 @@ public class PersistentDetection<T extends InstantDetection>
                                                           getDetectedObjectClass()));
 
       detectionHistory.add(newDetection);
+      newDetection.setPersistentDetectionID(id);
    }
 
    /**
@@ -97,6 +94,11 @@ public class PersistentDetection<T extends InstantDetection>
    public int getHistorySize()
    {
       return detectionHistory.size();
+   }
+
+   public UUID getID()
+   {
+      return id;
    }
 
    /**
@@ -138,6 +140,7 @@ public class PersistentDetection<T extends InstantDetection>
    {
       detectionHistory.clear();
       detectionHistory.addAll(newHistory);
+      detectionHistory.forEach(instantDetection -> instantDetection.setPersistentDetectionID(id));
       updateHistory();
    }
 
@@ -237,45 +240,6 @@ public class PersistentDetection<T extends InstantDetection>
    private boolean detectionExpired(InstantDetection detection, Instant now)
    {
       return detection.getDetectionTime().isBefore(now.minus(historyDuration));
-   }
-
-   public void toMessage(PersistentDetectionMessage message)
-   {
-      message.getDetectionHistory().clear();
-      Iterator<T> historyIterator = detectionHistory.iterator();
-      for (int i = 0; historyIterator.hasNext() && i < message.getDetectionHistory().capacity(); ++i)
-         historyIterator.next().toMessage(message.getDetectionHistory().add());
-   }
-
-   @SuppressWarnings("unchecked")
-   public static <T extends InstantDetection> PersistentDetection<T> fromMessage(PersistentDetectionMessage message, Class<T> classType)
-   {
-      InstantDetection firstDetection;
-      PersistentDetection<T> persistentDetection;
-      SortedSet<T> newDetectionHistory = new TreeSet<>(Comparator.comparing(InstantDetection::getDetectionTime));
-
-      if (classType.equals(YOLOv8InstantDetection.class))
-      {
-         firstDetection = YOLOv8InstantDetection.fromMessage(message.getFirstDetection());
-         for (int i = 0; i < message.getDetectionHistory().size(); ++i)
-            newDetectionHistory.add((T) YOLOv8InstantDetection.fromMessage(message.getDetectionHistory().get(i)));
-      }
-      else if (classType.equals(CenterPoseInstantDetection.class))
-      {
-         firstDetection = CenterPoseInstantDetection.fromMessage(message.getFirstDetection());
-         for (int i = 0; i < message.getDetectionHistory().size(); ++i)
-            newDetectionHistory.add((T) CenterPoseInstantDetection.fromMessage(message.getDetectionHistory().get(i)));
-      }
-      else
-         throw new NotImplementedException("This method lacks the implementation to handle this class of detection");
-
-      persistentDetection = new PersistentDetection<>((T) firstDetection,
-                                                      message.getStabilityConfidenceThreshold(),
-                                                      message.getStabilityDetectionFrequency(),
-                                                      MessageTools.toDuration(message.getHistoryDuration()));
-      persistentDetection.setDetectionHistory(newDetectionHistory);
-
-      return persistentDetection;
    }
 
    @Override

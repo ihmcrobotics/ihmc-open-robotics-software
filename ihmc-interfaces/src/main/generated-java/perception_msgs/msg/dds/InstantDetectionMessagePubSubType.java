@@ -15,7 +15,7 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1fa88e6840a7cd5e0d2b23f19c7d27f2a728b15b7a4cccbffbfe7b25a09c51d8";
+   		return "af750cbd004ae4bfc64172f67f7a4e6628326bea9351a7faf466eec0e6e6d2f9";
    }
    
    @Override
@@ -60,7 +60,9 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 255; ++i0)
+      current_alignment += ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 511; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.Point32PubSubType.getMaxCdrSerializedSize(current_alignment);}
       for(int i0 = 0; i0 < (8); ++i0)
@@ -93,6 +95,8 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += ihmc_common_msgs.msg.dds.InstantMessagePubSubType.getCdrSerializedSize(data.getDetectionTime(), current_alignment);
 
+      current_alignment += ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.getCdrSerializedSize(data.getPersistentDetectionId(), current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getYoloObjectPointCloud().size(); ++i0)
       {
@@ -124,7 +128,8 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getObjectPose(), cdr);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getDetectionTime(), cdr);
-      if(data.getYoloObjectPointCloud().size() <= 255)
+      ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.write(data.getPersistentDetectionId(), cdr);
+      if(data.getYoloObjectPointCloud().size() <= 511)
       cdr.write_type_e(data.getYoloObjectPointCloud());else
           throw new RuntimeException("yolo_object_point_cloud field exceeds the maximum length");
 
@@ -148,6 +153,7 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
       	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getObjectPose(), cdr);	
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getDetectionTime(), cdr);	
+      ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.read(data.getPersistentDetectionId(), cdr);	
       cdr.read_type_e(data.getYoloObjectPointCloud());	
       for(int i0 = 0; i0 < data.getCenterPoseBoundingBox2dVertices().length; ++i0)
       {
@@ -172,6 +178,8 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       ser.write_type_a("detection_time", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getDetectionTime());
 
+      ser.write_type_a("persistent_detection_id", new ihmc_common_msgs.msg.dds.UUIDMessagePubSubType(), data.getPersistentDetectionId());
+
       ser.write_type_e("yolo_object_point_cloud", data.getYoloObjectPointCloud());
       ser.write_type_f("center_pose_bounding_box_2d_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getCenterPoseBoundingBox2dVertices());
       ser.write_type_f("center_pose_bounding_box_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getCenterPoseBoundingBoxVertices());
@@ -186,6 +194,8 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
       ser.read_type_a("object_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getObjectPose());
 
       ser.read_type_a("detection_time", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getDetectionTime());
+
+      ser.read_type_a("persistent_detection_id", new ihmc_common_msgs.msg.dds.UUIDMessagePubSubType(), data.getPersistentDetectionId());
 
       ser.read_type_e("yolo_object_point_cloud", data.getYoloObjectPointCloud());
       ser.read_type_f("center_pose_bounding_box_2d_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getCenterPoseBoundingBox2dVertices());

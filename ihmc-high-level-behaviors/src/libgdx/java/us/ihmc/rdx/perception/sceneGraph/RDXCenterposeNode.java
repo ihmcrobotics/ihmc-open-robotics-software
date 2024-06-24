@@ -73,9 +73,9 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
    }
 
    @Override
-   public void update(SceneGraphModificationQueue modificationQueue)
+   public void update(SceneGraph sceneGraph)
    {
-      super.update(modificationQueue);
+      super.update(sceneGraph);
 
       centerposeNode.setEnableTracking(enableTracking.get());
 
@@ -200,7 +200,7 @@ public class RDXCenterposeNode extends RDXDetectableSceneNode
       ImGui.checkbox(labels.get("Show bounding box"), showBoundingBox);
       ImGui.sameLine();
       ImGui.checkbox(labels.get("Enable tracking"), enableTracking);
-      ImGui.text("ID: %s".formatted(centerposeNode.getDetection(0).getDetectedObjectClass()));
+      ImGui.text("ID: %s".formatted(centerposeNode.getCenterPoseDetection().getDetectedObjectClass()));
       ImGui.sameLine();
    }
 

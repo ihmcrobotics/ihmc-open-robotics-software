@@ -15,7 +15,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4ac3c35aa8f38d2f80854ab8858da574fc443b528f80fa24e6732449988bebef";
+   		return "c91ca36723a1a92101f2a2bf1e27b94f8454805be2c09e19084a892c6bf3c62f";
    }
    
    @Override
@@ -54,9 +54,9 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
 
       current_alignment += perception_msgs.msg.dds.SceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 7; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 15; ++i0)
       {
-          current_alignment += perception_msgs.msg.dds.PersistentDetectionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += perception_msgs.msg.dds.InstantDetectionMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -75,9 +75,9 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
       current_alignment += perception_msgs.msg.dds.SceneNodeMessagePubSubType.getCdrSerializedSize(data.getSceneNode(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      for(int i0 = 0; i0 < data.getDetections().size(); ++i0)
+      for(int i0 = 0; i0 < data.getLatestDetections().size(); ++i0)
       {
-          current_alignment += perception_msgs.msg.dds.PersistentDetectionMessagePubSubType.getCdrSerializedSize(data.getDetections().get(i0), current_alignment);}
+          current_alignment += perception_msgs.msg.dds.InstantDetectionMessagePubSubType.getCdrSerializedSize(data.getLatestDetections().get(i0), current_alignment);}
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -89,9 +89,9 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    public static void write(perception_msgs.msg.dds.DetectableSceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.write(data.getSceneNode(), cdr);
-      if(data.getDetections().size() <= 7)
-      cdr.write_type_e(data.getDetections());else
-          throw new RuntimeException("detections field exceeds the maximum length");
+      if(data.getLatestDetections().size() <= 15)
+      cdr.write_type_e(data.getLatestDetections());else
+          throw new RuntimeException("latest_detections field exceeds the maximum length");
 
       cdr.write_type_7(data.getCurrentlyDetected());
 
@@ -100,7 +100,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    public static void read(perception_msgs.msg.dds.DetectableSceneNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       perception_msgs.msg.dds.SceneNodeMessagePubSubType.read(data.getSceneNode(), cdr);	
-      cdr.read_type_e(data.getDetections());	
+      cdr.read_type_e(data.getLatestDetections());	
       data.setCurrentlyDetected(cdr.read_type_7());
       	
 
@@ -111,7 +111,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       ser.write_type_a("scene_node", new perception_msgs.msg.dds.SceneNodeMessagePubSubType(), data.getSceneNode());
 
-      ser.write_type_e("detections", data.getDetections());
+      ser.write_type_e("latest_detections", data.getLatestDetections());
       ser.write_type_7("currently_detected", data.getCurrentlyDetected());
    }
 
@@ -120,7 +120,7 @@ public class DetectableSceneNodeMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       ser.read_type_a("scene_node", new perception_msgs.msg.dds.SceneNodeMessagePubSubType(), data.getSceneNode());
 
-      ser.read_type_e("detections", data.getDetections());
+      ser.read_type_e("latest_detections", data.getLatestDetections());
       data.setCurrentlyDetected(ser.read_type_7("currently_detected"));
    }
 

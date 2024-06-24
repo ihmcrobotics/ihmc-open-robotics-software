@@ -162,12 +162,18 @@ public class ROS2SceneGraphSubscription
          }
          if (localNode instanceof CenterposeNode centerposeNode)
          {
-            centerposeNode.update();
+            centerposeNode.updateDetection(CenterPoseInstantDetection.fromMessage(subscriptionNode.getCenterposeNodeMessage()
+                                                                                                  .getDetectableSceneNode()
+                                                                                                  .getLatestDetections()
+                                                                                                  .get(0)));
             centerposeNode.setEnableTracking(subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
          }
          if (localNode instanceof YOLOv8Node yoloNode)
          {
-            yoloNode.update();
+            yoloNode.updateDetection(YOLOv8InstantDetection.fromMessage(subscriptionNode.getYOLONodeMessage()
+                                                                                        .getDetectableSceneNode()
+                                                                                        .getLatestDetections()
+                                                                                        .get(0)));
             yoloNode.setCentroidToObjectTransform(subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform());
             yoloNode.setObjectPose(subscriptionNode.getYOLONodeMessage().getObjectPose());
          }

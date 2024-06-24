@@ -1,5 +1,6 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
+import org.apache.commons.lang3.NotImplementedException;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
@@ -7,11 +8,8 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.detections.InstantDetection;
-import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
-import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
@@ -23,9 +21,6 @@ import us.ihmc.perception.sceneGraph.rigidBody.doors.OpeningMechanismType;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class ROS2SceneGraphTools
 {
@@ -82,10 +77,10 @@ public class ROS2SceneGraphTools
       {
          sceneNode = new CenterposeNode(nodeID,
                                         nodeName,
-                                        PersistentDetection.fromMessage(subscriptionNode.getCenterposeNodeMessage()
-                                                                                        .getDetectableSceneNode()
-                                                                                        .getDetections()
-                                                                                        .get(0), CenterPoseInstantDetection.class),
+                                        CenterPoseInstantDetection.fromMessage(subscriptionNode.getCenterposeNodeMessage()
+                                                                                               .getDetectableSceneNode()
+                                                                                               .getLatestDetections()
+                                                                                               .get(0)),
                                         subscriptionNode.getCenterposeNodeMessage().getEnableTracking(),
                                         crdtInfo);
       }
@@ -93,21 +88,17 @@ public class ROS2SceneGraphTools
       {
          sceneNode = new YOLOv8Node(nodeID,
                                     nodeName,
-                                    PersistentDetection.fromMessage(subscriptionNode.getYOLONodeMessage().getDetectableSceneNode().getDetections().get(0),
-                                                                    YOLOv8InstantDetection.class),
+                                    YOLOv8InstantDetection.fromMessage(subscriptionNode.getYOLONodeMessage()
+                                                                                       .getDetectableSceneNode()
+                                                                                       .getLatestDetections()
+                                                                                       .get(0)),
                                     subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform(),
                                     subscriptionNode.getYOLONodeMessage().getObjectPose(),
                                     crdtInfo);
       }
       else if (nodeType == SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE)
       {
-         List<PersistentDetection<? extends InstantDetection>> detections = new ArrayList<>();
-
-         for (int i = 0; i < subscriptionNode.getDetectableSceneNodeMessage().getDetections().size(); ++i)
-            // FIXME THIS WON't WORK TOMASZ
-            detections.add(PersistentDetection.fromMessage(subscriptionNode.getDetectableSceneNodeMessage().getDetections().get(i), InstantDetection.class));
-
-         sceneNode = new DetectableSceneNode(nodeID, nodeName, detections, crdtInfo);
+         throw new NotImplementedException("TOMASZ YOU LEFT THIS BUG IN THE CODE");
       }
       else if (nodeType == SceneGraphMessage.PRIMITIVE_RIGID_BODY_NODE_TYPE)
       {

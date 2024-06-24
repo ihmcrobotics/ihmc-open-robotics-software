@@ -40,7 +40,7 @@ public class YOLOv8InstantDetection extends InstantDetection
    {
       super.toMessage(message);
       message.getYoloObjectPointCloud().clear();
-      for (int i = 0; i < message.getYoloObjectPointCloud().capacity() && i < objectPointCloud.size(); ++i)
+      for (int i = 0; i < message.getYoloObjectPointCloud().getCurrentCapacity() && i < objectPointCloud.size(); ++i)
       {
          Point3D32 point = message.getYoloObjectPointCloud().add();
          point.set(objectPointCloud.get(i));

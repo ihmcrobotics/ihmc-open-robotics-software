@@ -1,12 +1,15 @@
 package us.ihmc.perception.sceneGraph;
 
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
 
-import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
-
-import us.ihmc.communication.crdt.CRDTInfo;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * An object that is currently detected or not currently detected,
@@ -14,54 +17,70 @@ import us.ihmc.communication.crdt.CRDTInfo;
  */
 public class DetectableSceneNode extends SceneNode
 {
-   private List<PersistentDetection<? extends InstantDetection>> detections = new ArrayList<>();
+   private final Map<UUID, InstantDetection> latestDetections = new HashMap<>();
    private boolean currentlyDetected;
 
-   public DetectableSceneNode(long id, String name, PersistentDetection<? extends InstantDetection> detection, CRDTInfo crdtInfo)
+   public DetectableSceneNode(long id, String name, InstantDetection detection, CRDTInfo crdtInfo)
    {
       super(id, name, crdtInfo);
-      detections.add(detection);
+      latestDetections.put(detection.getPersistentDetectionID(), detection);
    }
 
-   public DetectableSceneNode(long id, String name, List<PersistentDetection<? extends InstantDetection>> detections, CRDTInfo crdtInfo)
+   public DetectableSceneNode(long id, String name, List<InstantDetection> detections, CRDTInfo crdtInfo)
    {
       super(id, name, crdtInfo);
-      setDetections(detections);
+      setLatestDetections(detections);
    }
 
-   public void update()
+   public void update(SceneGraph sceneGraph)
    {
 
    }
 
-   public void setDetections(List<PersistentDetection<? extends InstantDetection>> detections)
+   public void updateDetection(InstantDetection newDetection)
    {
-      this.detections = detections;
+      UUID newDetectionID = newDetection.getPersistentDetectionID();
+      if (latestDetections.containsKey(newDetectionID) && newDetection.getDetectionTime().isAfter(latestDetections.get(newDetectionID).getDetectionTime()))
+         latestDetections.replace(newDetection.getPersistentDetectionID(), newDetection);
+   }
+
+   public void setLatestDetections(Collection<? extends InstantDetection> newLatestDetections)
+   {
+      latestDetections.clear();
+      for (InstantDetection detection : newLatestDetections)
+      {
+         latestDetections.put(detection.getPersistentDetectionID(), detection);
+      }
    }
 
    /**
-    * Add a new {@link PersistentDetection} to the set of detections this node corresponds to
-    * @param detection New {@link PersistentDetection} being added.
+    * Add a new {@link InstantDetection} to the set of detections this node corresponds to
+    * @param detection New {@link InstantDetection} being added.
     * @return True if the detection is added to the set, false if the set already contained the detection.
     */
-   public boolean addNewDetection(PersistentDetection<? extends InstantDetection> detection)
+   public boolean addNewDetection(InstantDetection detection)
    {
-      return detections.add(detection);
+      return latestDetections.putIfAbsent(detection.getPersistentDetectionID(), detection) == null;
    }
 
-   public boolean hasDetection(PersistentDetection<? extends InstantDetection> detection)
+   public boolean hasMatchingDetection(InstantDetection detectionToMatch)
    {
-      return detections.contains(detection);
+      return latestDetections.containsKey(detectionToMatch.getPersistentDetectionID());
    }
 
-   public List<PersistentDetection<? extends InstantDetection>> getDetections()
+   public boolean hasMatchingDetection(PersistentDetection<? extends InstantDetection> detectionToMatch)
    {
-      return detections;
+      return latestDetections.containsKey(detectionToMatch.getID());
    }
 
-   public PersistentDetection<? extends InstantDetection> getDetection(int detectionIndex)
+   public Collection<? extends InstantDetection> getLatestDetections()
    {
-      return detections.get(detectionIndex);
+      return latestDetections.values();
+   }
+
+   public InstantDetection getDetection(UUID detectionId)
+   {
+      return latestDetections.get(detectionId);
    }
 
    public void setCurrentlyDetected(boolean currentlyDetected)
@@ -75,10 +94,19 @@ public class DetectableSceneNode extends SceneNode
    }
 
    @Override
-   public void destroy()
+   public void destroy(SceneGraph sceneGraph)
    {
-      super.destroy();
+      super.destroy(sceneGraph);
 
-      detections.forEach(PersistentDetection::markForDeletion);
+      DetectionManager detectionManager = sceneGraph.getDetectionManager();
+      if (detectionManager != null)
+      {
+         latestDetections.forEach((id, instantDetection) ->
+         {
+            PersistentDetection<? extends InstantDetection> persistentDetection = detectionManager.getDetection(id, instantDetection.getClass());
+            if (persistentDetection != null)
+               persistentDetection.markForDeletion();
+         });
+      }
    }
 }

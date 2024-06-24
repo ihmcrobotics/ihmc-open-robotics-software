@@ -62,6 +62,7 @@ public class SceneGraph
    private final SceneNode rootNode;
    private final Queue<SceneGraphTreeModification> queuedModifications = new LinkedList<>();
    private final DetectionFilterCollection detectionFilterCollection = new DetectionFilterCollection();
+   private DetectionManager detectionManager = null;
    /**
     * Useful for accessing nodes by ID instead of searching.
     * Also, sometimes, the tree will be disassembled and this is used in putting it
@@ -164,7 +165,7 @@ public class SceneGraph
       for (long id : idToNodeMap.keys())
       {
          if (!existingSceneNodeIDs.contains(id))
-            idToNodeMap.get(id).destroy();
+            idToNodeMap.get(id).destroy(this);
       }
    }
 
@@ -207,17 +208,22 @@ public class SceneGraph
       }
    }
 
-   public void updateDetections(DetectionManager detectionManager)
+   public void updateDetections()
    {
+      if (detectionManager == null)
+         return;
+
       Set<PersistentDetection<? extends InstantDetection>> detections = detectionManager.updateAndGetDetections();
       for (PersistentDetection<? extends InstantDetection> detection : detections)
       {
          boolean claimed = false;
          for (DetectableSceneNode node : detectableSceneNodes)
          {
-            if (node.hasDetection(detection))
+            if (node.hasMatchingDetection(detection))
             {
-               node.update();
+               node.updateDetection(detection.getMostRecentDetection());
+               node.setCurrentlyDetected(detection.isStable());
+               node.update(this);
                claimed = true;
             }
          }
@@ -225,7 +231,7 @@ public class SceneGraph
          if (!claimed && detection.isOldEnough())
          {
             if (detection.isStable())
-               addNodeFromDetection(detection); // FIXME figure out how to do CRDTInfo stuff, TOMASZ
+               addNodeFromDetection(detection);
             else
                detection.markForDeletion();
          }
@@ -292,8 +298,17 @@ public class SceneGraph
       return new ReferenceFrameDynamicCollection(nodeNameList, frameLookup);
    }
 
+   public void setDetectionManager(DetectionManager detectionManager)
+   {
+      this.detectionManager = detectionManager;
+   }
+
+   public DetectionManager getDetectionManager()
+   {
+      return detectionManager;
+   }
+
    // Don't worry, I've got this
-   @SuppressWarnings("unchecked")
    private void addNodeFromDetection(PersistentDetection<? extends InstantDetection> detection)
    {
       DetectableSceneNode detectableNode;
@@ -302,9 +317,9 @@ public class SceneGraph
 
       Class<?> detectionClass = detection.getInstantDetectionClass();
       if (detectionClass.equals(YOLOv8InstantDetection.class))
-         detectableNode = new YOLOv8Node(newNodeID, newNodeName, (PersistentDetection<YOLOv8InstantDetection>) detection, getCRDTInfo());
+         detectableNode = new YOLOv8Node(newNodeID, newNodeName, (YOLOv8InstantDetection) detection.getMostRecentDetection(), getCRDTInfo());
       else if (detectionClass.equals(CenterPoseInstantDetection.class))
-         detectableNode = new CenterposeNode(newNodeID, newNodeName, (PersistentDetection<CenterPoseInstantDetection>) detection, true, getCRDTInfo());
+         detectableNode = new CenterposeNode(newNodeID, newNodeName, (CenterPoseInstantDetection) detection.getMostRecentDetection(), true, getCRDTInfo());
       else
       {
          LogTools.error("Logic to handle detections of class {} has not been implemented", detectionClass);

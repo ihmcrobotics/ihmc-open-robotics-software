@@ -25,9 +25,10 @@ import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.IterativeClosestPointManager;
 import us.ihmc.perception.RapidHeightMapManager;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.detections.DetectionManager;
-import us.ihmc.perception.detections.centerPose.CenterPoseDetectionSubscriber;
 import us.ihmc.perception.comms.PerceptionComms;
+import us.ihmc.perception.detections.DetectionManager;
+import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionExecutor;
+import us.ihmc.perception.detections.centerPose.CenterPoseDetectionSubscriber;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.ouster.OusterDepthImagePublisher;
@@ -43,7 +44,6 @@ import us.ihmc.perception.sceneGraph.arUco.ArUcoDetectionUpdater;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionExecutor;
 import us.ihmc.perception.sensorHead.BlackflyLensProperties;
 import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
@@ -252,6 +252,7 @@ public class PerceptionAndAutonomyProcess
       arUcoMarkerDetectionThread.start();
 
       sceneGraph = new ROS2SceneGraph(ros2Helper);
+      sceneGraph.setDetectionManager(detectionManager);
       sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", SceneGraph.UPDATE_FREQUENCY, this::updateSceneGraph);
 
       centerPoseDetectionSubscriber = new CenterPoseDetectionSubscriber(detectionManager);
@@ -527,10 +528,9 @@ public class PerceptionAndAutonomyProcess
       else
          centerPoseDetectionSubscriber.unsubscribe();
 
-      ReferenceFrame robotPelvisFrame = robotPelvisFrameSupplier.get();
+      sceneGraph.updateDetections();
 
-      // Update detections
-      sceneGraph.updateDetections(detectionManager);
+      ReferenceFrame robotPelvisFrame = robotPelvisFrameSupplier.get();
 
       if (newPlanarRegions.poll())
          for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())

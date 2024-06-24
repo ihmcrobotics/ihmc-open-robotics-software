@@ -5,11 +5,11 @@ import us.ihmc.robotics.time.TimeTools;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.PriorityQueue;
 import java.util.Set;
+import java.util.UUID;
 
 public class DetectionManager
 {
@@ -161,6 +161,7 @@ public class DetectionManager
       }
    }
 
+   @SuppressWarnings("unchecked")
    public <T extends InstantDetection> Set<PersistentDetection<T>> getDetectionsOfType(Class<T> classType)
    {
       Set<PersistentDetection<T>> typeDetections = new HashSet<>();
@@ -187,6 +188,30 @@ public class DetectionManager
       {
          return new HashSet<>(persistentDetections);
       }
+   }
+
+   public PersistentDetection<? extends InstantDetection> getDetection(UUID detectionID)
+   {
+      Set<PersistentDetection<? extends InstantDetection>> detections = getDetections();
+      for (PersistentDetection<? extends InstantDetection> detection : detections)
+      {
+         if (detection.getID().equals(detectionID))
+            return detection;
+      }
+
+      return null;
+   }
+
+   public <T extends InstantDetection> PersistentDetection<T> getDetection(UUID detectionID, Class<T> classType)
+   {
+      Set<PersistentDetection<T>> detections = getDetectionsOfType(classType);
+      for (PersistentDetection<T> detection : detections)
+      {
+         if (detection.getID().equals(detectionID))
+            return detection;
+      }
+
+      return null;
    }
 
    public void updateDetections()

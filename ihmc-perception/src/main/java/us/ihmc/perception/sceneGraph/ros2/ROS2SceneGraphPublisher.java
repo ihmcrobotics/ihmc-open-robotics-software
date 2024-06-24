@@ -5,7 +5,6 @@ import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.InstantDetectionMessage;
-import perception_msgs.msg.dds.PersistentDetectionMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
@@ -21,7 +20,6 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -109,7 +107,6 @@ public class ROS2SceneGraphPublisher
       else if (sceneNode instanceof DetectableSceneNode detectableSceneNode)
       {
          DetectableSceneNodeMessage detectableSceneNodeMessage;
-         InstantDetectionMessage instantDetectionMessage;
          if (sceneNode instanceof ArUcoMarkerNode arUcoMarkerNode)
          {
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.ARUCO_MARKER_NODE_TYPE);
@@ -147,10 +144,9 @@ public class ROS2SceneGraphPublisher
          }
          detectableSceneNodeMessage.setCurrentlyDetected(detectableSceneNode.getCurrentlyDetected());
 
-         detectableSceneNodeMessage.getDetections().clear();
-         RecyclingArrayList<PersistentDetectionMessage> detectionMessages = detectableSceneNodeMessage.getDetections();
-         for (int i = 0; i < detectableSceneNodeMessage.getDetections().capacity() && i < detectableSceneNode.getDetections().size(); ++i)
-            detectableSceneNode.getDetection(i).toMessage(detectionMessages.add());
+         RecyclingArrayList<InstantDetectionMessage> detectionMessages = detectableSceneNodeMessage.getLatestDetections();
+         detectionMessages.clear();
+         detectableSceneNode.getLatestDetections().forEach(detection -> detection.toMessage(detectionMessages.add()));
 
          sceneNodeMessage = detectableSceneNodeMessage.getSceneNode();
       }

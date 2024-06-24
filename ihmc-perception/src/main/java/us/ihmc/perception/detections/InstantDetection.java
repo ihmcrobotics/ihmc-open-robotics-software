@@ -4,12 +4,13 @@ import perception_msgs.msg.dds.InstantDetectionMessage;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 
 import java.time.Instant;
+import java.util.UUID;
 
 public abstract class InstantDetection
 {
+   public static final UUID UNMATCHED_DETECTION_ID = new UUID(0L, 0L);
    private static final double EPSILON = 1E-7;
 
    private final String detectedObjectClass;
@@ -17,6 +18,7 @@ public abstract class InstantDetection
    private final double confidence;
    private final Pose3D pose;
    private final Instant detectionTime;
+   private UUID persistentDetectionID = UNMATCHED_DETECTION_ID;
 
    public InstantDetection(String detectedObjectClass, double confidence, Pose3D pose, Instant detectionTime)
    {
@@ -57,6 +59,16 @@ public abstract class InstantDetection
       return detectionTime;
    }
 
+   public UUID getPersistentDetectionID()
+   {
+      return persistentDetectionID;
+   }
+
+   public void setPersistentDetectionID(UUID persistentDetectionID)
+   {
+      this.persistentDetectionID = persistentDetectionID;
+   }
+
    public void toMessage(InstantDetectionMessage message)
    {
       message.setDetectedObjectClass(detectedObjectClass);
@@ -64,6 +76,7 @@ public abstract class InstantDetection
       message.setConfidence(confidence);
       message.getObjectPose().set(pose);
       MessageTools.toMessage(detectionTime, message.getDetectionTime());
+      MessageTools.toMessage(persistentDetectionID, message.getPersistentDetectionId());
    }
 
    @Override
@@ -78,7 +91,8 @@ public abstract class InstantDetection
                 && detectedObjectName.equals(otherDetection.detectedObjectName)
                 && MathTools.epsilonEquals(confidence, otherDetection.confidence, EPSILON)
                 && pose.epsilonEquals(otherDetection.pose, EPSILON)
-                && detectionTime.equals(otherDetection.detectionTime);
+                && detectionTime.equals(otherDetection.detectionTime)
+                && persistentDetectionID.equals(otherDetection.persistentDetectionID);
       }
       else
          return false;

@@ -5,6 +5,7 @@
 #include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
 #include "ihmc_common_msgs/msg/./InstantMessage_.idl"
+#include "ihmc_common_msgs/msg/./UUIDMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -26,10 +27,11 @@ module perception_msgs
         double confidence;
         geometry_msgs::msg::dds::Pose object_pose;
         ihmc_common_msgs::msg::dds::InstantMessage detection_time;
+        ihmc_common_msgs::msg::dds::UUIDMessage persistent_detection_id;
         /**
          * YOLOv8InstantDetection fields:
          */
-        sequence<geometry_msgs::msg::dds::Point32, 255> yolo_object_point_cloud;
+        sequence<geometry_msgs::msg::dds::Point32, 511> yolo_object_point_cloud;
         /**
          * CenterPoseInstantDetection fields:
          */

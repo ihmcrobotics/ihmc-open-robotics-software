@@ -7,31 +7,32 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.perception.detections.InstantDetection;
-import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 
-import java.util.Collection;
+import java.util.UUID;
 
 public class CenterposeNode extends DetectableSceneNode
 {
+   private final UUID detectionUUID;
    private final RigidBodyTransform interpolatedModelTransform = new RigidBodyTransform();
    private int glitchCount;
    private boolean enableTracking;
 
-   public CenterposeNode(long nodeID, String name, PersistentDetection<CenterPoseInstantDetection> centerPoseDetection, boolean enableTracking, CRDTInfo crdtInfo)
+   public CenterposeNode(long nodeID, String name, CenterPoseInstantDetection centerPoseDetection, boolean enableTracking, CRDTInfo crdtInfo)
    {
       super(nodeID, name, centerPoseDetection, crdtInfo);
       this.enableTracking = enableTracking;
+      detectionUUID = centerPoseDetection.getPersistentDetectionID();
    }
 
    @Override
-   public void update()
+   public void update(SceneGraph sceneGraph)
    {
-      super.update();
+      super.update(sceneGraph);
 
-      getNodeToParentFrameTransform().set(getDetection(0).getMostRecentDetection().getPose());
+      getNodeToParentFrameTransform().set(getDetection(detectionUUID).getPose());
 
       RigidBodyTransform detectionTransform = getNodeToParentFrameTransform();
       FramePose3D detectionPose = new FramePose3D(ReferenceFrame.getWorldFrame(), detectionTransform);
@@ -70,22 +71,22 @@ public class CenterposeNode extends DetectableSceneNode
 
    public Point3D[] getVertices3D()
    {
-      return getMostRecentDetection().getBoundingBoxVertices();
+      return getCenterPoseDetection().getBoundingBoxVertices();
    }
 
    public Point2D[] getVertices2D()
    {
-      return getMostRecentDetection().getBoundingBoxVertices2D();
+      return getCenterPoseDetection().getBoundingBoxVertices2D();
    }
 
    public String getObjectType()
    {
-      return getMostRecentDetection().getDetectedObjectName();
+      return getCenterPoseDetection().getDetectedObjectName();
    }
 
    public double getConfidence()
    {
-      return getMostRecentDetection().getConfidence();
+      return getCenterPoseDetection().getConfidence();
    }
 
    public boolean isEnableTracking()
@@ -98,8 +99,8 @@ public class CenterposeNode extends DetectableSceneNode
       this.enableTracking = enableTracking;
    }
 
-   public CenterPoseInstantDetection getMostRecentDetection()
+   public CenterPoseInstantDetection getCenterPoseDetection()
    {
-      return (CenterPoseInstantDetection) getDetection(0).getMostRecentDetection();
+      return (CenterPoseInstantDetection) getDetection(detectionUUID);
    }
 }
