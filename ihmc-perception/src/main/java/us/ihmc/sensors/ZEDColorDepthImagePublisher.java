@@ -84,8 +84,11 @@ public class ZEDColorDepthImagePublisher
             newDepthImageAvailable.await();
          }
 
-         ros2DepthImagePublisher.publish(createDepthImageMessage(nextGpuDepthImage));
-         lastDepthSequenceNumber = nextGpuDepthImage.getSequenceNumber();
+         if (nextGpuDepthImage != null)
+         {
+            ros2DepthImagePublisher.publish(createDepthImageMessage(nextGpuDepthImage));
+            lastDepthSequenceNumber = nextGpuDepthImage.getSequenceNumber();
+         }
       }
       catch (InterruptedException interruptedException)
       {
