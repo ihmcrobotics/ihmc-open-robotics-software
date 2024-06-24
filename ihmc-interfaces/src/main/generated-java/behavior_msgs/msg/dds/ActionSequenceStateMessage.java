@@ -32,6 +32,10 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
             * Request manual execution of the next action
             */
    public boolean manual_execution_requested_;
+   /**
+            * Allows the operator to disable concurrency during authoring
+            */
+   public boolean concurrency_enabled_;
 
    public ActionSequenceStateMessage()
    {
@@ -58,6 +62,8 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
       next_action_rejection_tooltip_.append(other.next_action_rejection_tooltip_);
 
       manual_execution_requested_ = other.manual_execution_requested_;
+
+      concurrency_enabled_ = other.concurrency_enabled_;
 
    }
 
@@ -148,6 +154,21 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
       return manual_execution_requested_;
    }
 
+   /**
+            * Allows the operator to disable concurrency during authoring
+            */
+   public void setConcurrencyEnabled(boolean concurrency_enabled)
+   {
+      concurrency_enabled_ = concurrency_enabled;
+   }
+   /**
+            * Allows the operator to disable concurrency during authoring
+            */
+   public boolean getConcurrencyEnabled()
+   {
+      return concurrency_enabled_;
+   }
+
 
    public static Supplier<ActionSequenceStateMessagePubSubType> getPubSubType()
    {
@@ -176,6 +197,8 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.manual_execution_requested_, other.manual_execution_requested_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.concurrency_enabled_, other.concurrency_enabled_, epsilon)) return false;
+
 
       return true;
    }
@@ -199,6 +222,8 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
 
       if(this.manual_execution_requested_ != otherMyClass.manual_execution_requested_) return false;
 
+      if(this.concurrency_enabled_ != otherMyClass.concurrency_enabled_) return false;
+
 
       return true;
    }
@@ -220,7 +245,9 @@ public class ActionSequenceStateMessage extends Packet<ActionSequenceStateMessag
       builder.append("next_action_rejection_tooltip=");
       builder.append(this.next_action_rejection_tooltip_);      builder.append(", ");
       builder.append("manual_execution_requested=");
-      builder.append(this.manual_execution_requested_);
+      builder.append(this.manual_execution_requested_);      builder.append(", ");
+      builder.append("concurrency_enabled=");
+      builder.append(this.concurrency_enabled_);
       builder.append("}");
       return builder.toString();
    }

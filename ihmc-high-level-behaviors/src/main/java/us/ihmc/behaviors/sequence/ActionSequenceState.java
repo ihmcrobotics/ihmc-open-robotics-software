@@ -18,6 +18,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
    private final CRDTBidirectionalBoolean automaticExecution;
    private final CRDTBidirectionalInteger executionNextIndex;
    private final CRDTUnidirectionalNotification manualExecutionRequested;
+   private final CRDTUnidirectionalBoolean concurrencyEnabled;
    private final CRDTUnidirectionalString nextActionRejectionTooltip;
 
    private transient final MutableInt actionIndex = new MutableInt();
@@ -30,6 +31,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       automaticExecution = new CRDTBidirectionalBoolean(this, false);
       executionNextIndex = new CRDTBidirectionalInteger(this, 0);
       manualExecutionRequested = new CRDTUnidirectionalNotification(ROS2ActorDesignation.OPERATOR, crdtInfo, this);
+      concurrencyEnabled = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, false);
       nextActionRejectionTooltip = new CRDTUnidirectionalString(ROS2ActorDesignation.ROBOT, crdtInfo, "");
    }
 
@@ -68,6 +70,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       message.setAutomaticExecution(automaticExecution.toMessage());
       message.setExecutionNextIndex(executionNextIndex.toMessage());
       message.setManualExecutionRequested(manualExecutionRequested.toMessage());
+      message.setConcurrencyEnabled(concurrencyEnabled.toMessage());
       message.setNextActionRejectionTooltip(nextActionRejectionTooltip.toMessage());
    }
 
@@ -80,6 +83,7 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
       automaticExecution.fromMessage(message.getAutomaticExecution());
       executionNextIndex.fromMessage(message.getExecutionNextIndex());
       manualExecutionRequested.fromMessage(message.getManualExecutionRequested());
+      concurrencyEnabled.fromMessage(message.getConcurrencyEnabled());
       nextActionRejectionTooltip.fromMessage(message.getNextActionRejectionTooltipAsString());
    }
 
@@ -159,6 +163,16 @@ public class ActionSequenceState extends BehaviorTreeNodeState<ActionSequenceDef
    public void setManualExecutionRequested()
    {
       manualExecutionRequested.set();
+   }
+
+   public boolean getConcurrencyEnabled()
+   {
+      return concurrencyEnabled.getValue();
+   }
+
+   public void setConcurrencyEnabled(boolean concurrencyEnabled)
+   {
+      this.concurrencyEnabled.setValue(concurrencyEnabled);
    }
 
    public List<ActionNodeState<?>> getActionChildren()
