@@ -24,6 +24,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.CameraModel;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.ImageMessageFormat;
+import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.tools.ImageMessageDataPacker;
@@ -53,7 +54,7 @@ public class YOLOv8DetectionExecutor
    private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor();
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter();
 
-   private final List<BiConsumer<Set<YOLOv8InstantDetection>, Class<YOLOv8InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
+   private final List<BiConsumer<Set<InstantDetection>, Class<?>>> detectionConsumerCallbacks = new ArrayList<>();
 
    private final ROS2DemandGraphNode annotatedImageDemandNode;
    private final ROS2PublisherBasics<ImageMessage> annotatedImagePublisher;
@@ -93,7 +94,7 @@ public class YOLOv8DetectionExecutor
       });
    }
 
-   public void addDetectionConsumerCallback(BiConsumer<Set<YOLOv8InstantDetection>, Class<YOLOv8InstantDetection>> callback)
+   public void addDetectionConsumerCallback(BiConsumer<Set<InstantDetection>, Class<?>> callback)
    {
       detectionConsumerCallbacks.add(callback);
    }
@@ -122,7 +123,7 @@ public class YOLOv8DetectionExecutor
             Map<YOLOv8DetectionOutput, RawImage> simpleDetectionMap = yoloResults.getTargetSegmentationImages(yoloSegmentationThreshold, targetDetections);
 
             // Create set of instant detections from results
-            Set<YOLOv8InstantDetection> yoloInstantDetections = new HashSet<>();
+            Set<InstantDetection> yoloInstantDetections = new HashSet<>();
             for (Map.Entry<YOLOv8DetectionOutput, RawImage> simpleDetectionEntry : simpleDetectionMap.entrySet())
             {
                YOLOv8DetectionOutput simpleDetection = simpleDetectionEntry.getKey();

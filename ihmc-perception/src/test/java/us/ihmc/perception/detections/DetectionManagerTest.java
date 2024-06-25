@@ -2,6 +2,7 @@ package us.ihmc.perception.detections;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.Pose3D;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
@@ -25,8 +26,8 @@ public class DetectionManagerTest
       DetectionManager detectionManager = new DetectionManager();
 
       // Generate test detection sets
-      Set<InstantDetection> testDetectionsA = generateDetectionFrame(3, InstantDetection.class);
-      Set<InstantDetection> testDetectionsB = generateDetectionFrame(3, InstantDetection.class);
+      Set<InstantDetection> testDetectionsA = generateDetectionFrame(3);
+      Set<InstantDetection> testDetectionsB = generateDetectionFrame(3);
 
       // add the detection sets to detection manager
       assertDoesNotThrow(() -> detectionManager.addDetections(testDetectionsA, InstantDetection.class));
@@ -56,11 +57,11 @@ public class DetectionManagerTest
       DetectionManager detectionManager = new DetectionManager();
 
       // Generate the first frame of detections & add to detection manager
-      Set<InstantDetection> firstFrame = generateDetectionFrame(3, InstantDetection.class);
+      Set<InstantDetection> firstFrame = generateDetectionFrame(3);
       detectionManager.addDetections(firstFrame, InstantDetection.class);
 
       // Generate second frame of detections & add to detection manager
-      Set<InstantDetection> secondFrame = generateDetectionFrame(2, InstantDetection.class);
+      Set<InstantDetection> secondFrame = generateDetectionFrame(2);
       detectionManager.addDetections(secondFrame, InstantDetection.class);
 
       // Ensure detection manager has 3 detections
@@ -95,7 +96,7 @@ public class DetectionManagerTest
          int numToGenerate = i % (maxDetections + 1);
 
          // Two threads attempt to add different classes of detections concurrently. This should not throw exceptions.
-         Set<InstantDetection> detectionFrameA = generateDetectionFrame(numToGenerate, InstantDetection.class);
+         Set<InstantDetection> detectionFrameA = generateDetectionFrame(numToGenerate);
          Thread threadA = new Thread(() ->
          {
             ThreadTools.sleep(random.nextInt(10));
@@ -110,7 +111,7 @@ public class DetectionManagerTest
             }
          }, "TestThreadA");
 
-         Set<InstantDetection> detectionFrameB = generateDetectionFrame(2 * numToGenerate, InstantDetection.class);
+         Set<InstantDetection> detectionFrameB = generateDetectionFrame(2 * numToGenerate);
          Thread threadB = new Thread (() ->
          {
             ThreadTools.sleep(random.nextInt(10));
@@ -162,7 +163,7 @@ public class DetectionManagerTest
          {
             try
             {
-               Set<InstantDetection> detectionsA = generateDetectionFrame(100, InstantDetection.class);
+               Set<InstantDetection> detectionsA = generateDetectionFrame(100);
                detectionManager.addDetections(detectionsA, InstantDetection.class);
             }
             catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e)
@@ -179,7 +180,7 @@ public class DetectionManagerTest
          {
             try
             {
-               Set<InstantDetection> detectionsB = generateDetectionFrame(100, InstantDetection.class);
+               Set<InstantDetection> detectionsB = generateDetectionFrame(100);
                detectionManager.addDetections(detectionsB, InstantDetection.class);
             }
             catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e)
@@ -257,10 +258,10 @@ public class DetectionManagerTest
 
       for (int i = 0; i < 5; ++i)
       {
-         Set<InstantDetection> testDetectionsA = generateDetectionFrame(5, startTime.minusSeconds(i), InstantDetection.class);
+         Set<InstantDetection> testDetectionsA = generateDetectionFrame(5, startTime.minusSeconds(i));
          detectionManager.addDetections(testDetectionsA, InstantDetection.class);
 
-         Set<InstantDetection> testDetectionsB = generateDetectionFrame(5, startTime.minusSeconds(i), InstantDetection.class);
+         Set<InstantDetection> testDetectionsB = generateDetectionFrame(5, startTime.minusSeconds(i));
          detectionManager.addDetections(testDetectionsB, InstantDetection.class);
       }
 
@@ -296,20 +297,20 @@ public class DetectionManagerTest
       }
    }
 
-   public static <T extends InstantDetection> Set<T> generateDetectionFrame(int numberToGenerate, Class<T> typeToGenerate)
+   public static Set<InstantDetection> generateDetectionFrame(int numberToGenerate)
          throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException
    {
-      return generateDetectionFrame(numberToGenerate, Instant.now(), typeToGenerate);
+      return generateDetectionFrame(numberToGenerate, Instant.now());
    }
 
-   public static <T extends InstantDetection> Set<T> generateDetectionFrame(int numberToGenerate, Instant now, Class<T> typeToGenerate)
+   public static Set<InstantDetection> generateDetectionFrame(int numberToGenerate, Instant now)
          throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException
    {
-      Set<T> testDetections = new HashSet<>();
+      Set<InstantDetection> testDetections = new HashSet<>();
 
       for (int i = 0; i < numberToGenerate; ++i)
       {
-         T testDetection  = typeToGenerate.getDeclaredConstructor(String.class, Instant.class).newInstance(typeToGenerate.getSimpleName() + i, now);
+         InstantDetection testDetection  = new InstantDetection("detection_" + i, 1.0, new Pose3D(), now);
          testDetections.add(testDetection);
       }
 
