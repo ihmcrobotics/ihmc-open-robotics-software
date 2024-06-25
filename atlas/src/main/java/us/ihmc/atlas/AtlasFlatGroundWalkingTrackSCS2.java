@@ -18,7 +18,7 @@ import us.ihmc.simulationToolkit.controllers.OscillateFeetPerturber;
 
 public class AtlasFlatGroundWalkingTrackSCS2
 {
-   private static final boolean USE_FEET_PERTURBER = true;
+   private static final boolean USE_FEET_PERTURBER = false;
    private static final boolean USE_STAND_PREP = false;
    private static final boolean USE_IMPULSE_BASE_PHYSICS_ENGINE = false;
 
