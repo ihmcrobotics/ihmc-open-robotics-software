@@ -19,7 +19,7 @@ import java.util.UUID;
  *    <li>{@link us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection}</li>
  * </ul>
  */
-public abstract class InstantDetection
+public class InstantDetection
 {
    public static final UUID UNMATCHED_DETECTION_ID = new UUID(0L, 0L);
    private static final double EPSILON = 1E-7;
