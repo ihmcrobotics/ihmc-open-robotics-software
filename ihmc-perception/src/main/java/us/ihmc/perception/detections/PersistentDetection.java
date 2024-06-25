@@ -25,7 +25,6 @@ public class PersistentDetection
    private Duration historyDuration;
    private final UUID id = UUID.randomUUID();
 
-   private final InstantDetection firstDetection;
    // TODO: finish this frame
    private final ReferenceFrame detectionInWorldFrame;
 
@@ -34,20 +33,8 @@ public class PersistentDetection
 
    private boolean readyForDeletion = false;
 
-   public PersistentDetection(InstantDetection firstDetection)
+   public PersistentDetection(InstantDetection firstDetection, double stabilityConfidenceThreshold, double stabilityDetectionFrequency, double historyDuration)
    {
-      this(firstDetection, 0.5, 5.0, 1.0);
-   }
-
-   public PersistentDetection(InstantDetection firstDetection, double stabilityConfidenceThreshold, double stabilityDetectionFrequency, double historyDurationSeconds)
-   {
-      this(firstDetection, stabilityConfidenceThreshold, stabilityDetectionFrequency, TimeTools.durationOfSeconds(historyDurationSeconds));
-   }
-
-   public PersistentDetection(InstantDetection firstDetection, double stabilityConfidenceThreshold, double stabilityDetectionFrequency, Duration historyDuration)
-   {
-      this.firstDetection = firstDetection;
-
       String detectionInWorldFrameName = "persistentDetection_" + id.toString().substring(0, 5);
       detectionInWorldFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(detectionInWorldFrameName,
                                                                                                 ReferenceFrame.getWorldFrame(),
@@ -56,7 +43,7 @@ public class PersistentDetection
       addDetection(firstDetection);
       setStabilityConfidenceThreshold(stabilityConfidenceThreshold);
       setStabilityDetectionFrequency(stabilityDetectionFrequency);
-      setHistoryDuration(historyDuration);
+      setHistoryDuration(TimeTools.durationOfSeconds(historyDuration));
    }
 
    /**
@@ -77,6 +64,11 @@ public class PersistentDetection
       newDetection.setPersistentDetectionID(id);
    }
 
+   public InstantDetection getOldestDetection()
+   {
+      return detectionHistory.first();
+   }
+
    /**
     * @return The most recent {@link InstantDetection} added to the history,
     *       based on the detection's {@link java.time.Instant}.
@@ -93,12 +85,12 @@ public class PersistentDetection
 
    public String getDetectedObjectClass()
    {
-      return firstDetection.getDetectedObjectClass();
+      return getMostRecentDetection().getDetectedObjectClass();
    }
 
    public String getDetectedObjectName()
    {
-      return firstDetection.getDetectedObjectName();
+      return getMostRecentDetection().getDetectedObjectName();
    }
 
    public int getHistorySize()
@@ -161,7 +153,7 @@ public class PersistentDetection
 
    public boolean isOldEnough(Instant now)
    {
-      return firstDetection.getDetectionTime().isBefore(now.minus(historyDuration));
+      return detectionHistory.first().getDetectionTime().isBefore(now.minus(historyDuration));
    }
 
    public boolean isStable()
@@ -182,7 +174,8 @@ public class PersistentDetection
    public double getAverageConfidence()
    {
       double confidenceSum = 0.0;
-      for (InstantDetection detection : detectionHistory) {
+      for (InstantDetection detection : detectionHistory)
+      {
          confidenceSum += detection.getConfidence();
       }
 
@@ -261,8 +254,8 @@ public class PersistentDetection
       if (other instanceof PersistentDetection otherDetection)
       {
          return getInstantDetectionClass().equals(otherDetection.getInstantDetectionClass())
-                && getMostRecentDetection().equals(otherDetection.getMostRecentDetection()) && historyDuration.equals(otherDetection.historyDuration)
-                && firstDetection.equals(otherDetection.firstDetection)
+                && getMostRecentDetection().equals(otherDetection.getMostRecentDetection())
+                && historyDuration.equals(otherDetection.historyDuration)
                 && MathTools.epsilonEquals(stabilityConfidenceThreshold, otherDetection.stabilityConfidenceThreshold, EPSILON)
                 && MathTools.epsilonEquals(stabilityDetectionFrequency, otherDetection.stabilityDetectionFrequency, EPSILON);
       }

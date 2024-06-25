@@ -15,7 +15,7 @@ public class PersistentDetectionTest
       Instant startInstant = Instant.now();
 
       InstantDetection mostRecentDetection = new InstantDetection("TestDetection", 0.5, new Pose3D(), startInstant);
-      PersistentDetection persistentDetection = new PersistentDetection(mostRecentDetection);
+      PersistentDetection persistentDetection = new PersistentDetection(mostRecentDetection, 0.5, 5.0, 1.0);
       for (int i = 1; i < 10; ++i)
       {
          InstantDetection testDetection = new InstantDetection("TestDetection", 1.0, new Pose3D(), startInstant.minusSeconds(i));
@@ -56,7 +56,7 @@ public class PersistentDetectionTest
       {
          InstantDetection testDetection = new InstantDetection("TestDetection", 1.0, new Pose3D(), startInstant.plusSeconds(i));
          if (persistentDetection == null)
-            persistentDetection = new PersistentDetection(testDetection);
+            persistentDetection = new PersistentDetection(testDetection, 0.5, 5.0, 1.0);
          else
             persistentDetection.addDetection(testDetection);
       }
@@ -98,7 +98,7 @@ public class PersistentDetectionTest
       InstantDetection detectionClassA = new InstantDetection("ClassA", 1.0, new Pose3D(), Instant.now());
       InstantDetection detectionClassB = new InstantDetection("ClassB", 1.0, new Pose3D(), Instant.now());
 
-      PersistentDetection persistentDetection = new PersistentDetection(detectionClassA);
+      PersistentDetection persistentDetection = new PersistentDetection(detectionClassA, 0.5, 5.0, 1.0);
 
       // Don't allow addition of a different class type
       assertThrows(IllegalArgumentException.class, () -> persistentDetection.addDetection(detectionClassB));
