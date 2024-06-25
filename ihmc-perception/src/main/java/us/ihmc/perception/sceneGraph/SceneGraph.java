@@ -213,8 +213,8 @@ public class SceneGraph
       if (detectionManager == null)
          return;
 
-      Set<PersistentDetection<?>> detections = detectionManager.updateAndGetDetections();
-      for (PersistentDetection<?> detection : detections)
+      Set<PersistentDetection> detections = detectionManager.updateAndGetDetections();
+      for (PersistentDetection detection : detections)
       {
          boolean claimed = false;
          for (DetectableSceneNode node : detectableSceneNodes)
@@ -309,7 +309,7 @@ public class SceneGraph
    }
 
    // Don't worry, I've got this
-   private void addNodeFromDetection(PersistentDetection<? extends InstantDetection> detection)
+   private void addNodeFromDetection(PersistentDetection detection)
    {
       DetectableSceneNode detectableNode;
       long newNodeID = getNextID().getAndIncrement();

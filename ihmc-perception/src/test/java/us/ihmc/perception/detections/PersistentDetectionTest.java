@@ -23,7 +23,7 @@ public class PersistentDetectionTest
       Instant startInstant = Instant.now();
 
       TestDetection mostRecentDetection = new TestDetection("TestDetection", 0.5, startInstant);
-      PersistentDetection<TestDetection> persistentDetection = new PersistentDetection<>(mostRecentDetection);
+      PersistentDetection persistentDetection = new PersistentDetection(mostRecentDetection);
       for (int i = 1; i < 10; ++i)
       {
          TestDetection testDetection = new TestDetection("TestDetection", 1.0, startInstant.minusSeconds(i));
@@ -38,14 +38,14 @@ public class PersistentDetectionTest
    @Test
    public void testAverageConfidence()
    {
-      PersistentDetection<TestDetection> persistentDetection = null;
+      PersistentDetection persistentDetection = null;
 
       Instant startInstant = Instant.now();
       for (int i = 0; i < 10; ++i)
       {
          TestDetection testDetection = new TestDetection("TestDetection", i / 10.0, startInstant.minusSeconds(i));
          if (persistentDetection == null)
-            persistentDetection = new PersistentDetection<>(testDetection, 0.5, 0.0, 10.0);
+            persistentDetection = new PersistentDetection(testDetection, 0.5, 0.0, 10.0);
          else
             persistentDetection.addDetection(testDetection);
       }
@@ -57,14 +57,14 @@ public class PersistentDetectionTest
    @Test
    public void testDetectionFrequency()
    {
-      PersistentDetection<TestDetection> persistentDetection = null;
+      PersistentDetection persistentDetection = null;
 
       Instant startInstant = Instant.now();
       for (int i = 0; i < 10; ++i)
       {
          TestDetection testDetection = new TestDetection("TestDetection", 1.0, startInstant.plusSeconds(i));
          if (persistentDetection == null)
-            persistentDetection = new PersistentDetection<>(testDetection);
+            persistentDetection = new PersistentDetection(testDetection);
          else
             persistentDetection.addDetection(testDetection);
       }
@@ -77,14 +77,14 @@ public class PersistentDetectionTest
    @Test
    public void testIsStableDetection()
    {
-      PersistentDetection<TestDetection> persistentDetection = null;
+      PersistentDetection persistentDetection = null;
 
       Instant startInstant = Instant.now();
       for (int i = 0; i < 10; ++i)
       {
          TestDetection testDetection = new TestDetection("TestDetection", (10.0 - i) / 10.0, startInstant.plusSeconds(i));
          if (persistentDetection == null)
-            persistentDetection = new PersistentDetection<>(testDetection, 0.4, 0.5, 10.0);
+            persistentDetection = new PersistentDetection(testDetection, 0.4, 0.5, 10.0);
          else
             persistentDetection.addDetection(testDetection);
       }
@@ -106,7 +106,7 @@ public class PersistentDetectionTest
       TestDetection detectionClassA = new TestDetection("ClassA", 1.0, Instant.now());
       TestDetection detectionClassB = new TestDetection("ClassB", 1.0, Instant.now());
 
-      PersistentDetection<TestDetection> persistentDetection = new PersistentDetection<>(detectionClassA);
+      PersistentDetection persistentDetection = new PersistentDetection(detectionClassA);
 
       // Don't allow addition of a different class type
       assertThrows(IllegalArgumentException.class, () -> persistentDetection.addDetection(detectionClassB));
@@ -115,6 +115,6 @@ public class PersistentDetectionTest
       assertThrows(IllegalArgumentException.class, () -> persistentDetection.setHistoryDuration(-1.0));
 
       // Don't allow bad arguments in construction
-      assertThrows(IllegalArgumentException.class, () -> new PersistentDetection<>(detectionClassA, 1.0, 0.0, -0.5));
+      assertThrows(IllegalArgumentException.class, () -> new PersistentDetection(detectionClassA, 1.0, 0.0, -0.5));
    }
 }

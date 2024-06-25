@@ -16,12 +16,12 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
 
-public class PersistentDetection<T extends InstantDetection>
+public class PersistentDetection
 {
    private static final double EPSILON = 1E-7;
 
    // The first element of this set is the oldest detection, and the last element is the most recent detection
-   private final SortedSet<T> detectionHistory = new TreeSet<>(Comparator.comparing(InstantDetection::getDetectionTime));
+   private final SortedSet<InstantDetection> detectionHistory = new TreeSet<>(Comparator.comparing(InstantDetection::getDetectionTime));
    private Duration historyDuration;
    private final UUID id = UUID.randomUUID();
 
@@ -34,17 +34,17 @@ public class PersistentDetection<T extends InstantDetection>
 
    private boolean readyForDeletion = false;
 
-   public PersistentDetection(T firstDetection)
+   public PersistentDetection(InstantDetection firstDetection)
    {
       this(firstDetection, 0.5, 5.0, 1.0);
    }
 
-   public PersistentDetection(T firstDetection, double stabilityConfidenceThreshold, double stabilityDetectionFrequency, double historyDurationSeconds)
+   public PersistentDetection(InstantDetection firstDetection, double stabilityConfidenceThreshold, double stabilityDetectionFrequency, double historyDurationSeconds)
    {
       this(firstDetection, stabilityConfidenceThreshold, stabilityDetectionFrequency, TimeTools.durationOfSeconds(historyDurationSeconds));
    }
 
-   public PersistentDetection(T firstDetection, double stabilityConfidenceThreshold, double stabilityDetectionFrequency, Duration historyDuration)
+   public PersistentDetection(InstantDetection firstDetection, double stabilityConfidenceThreshold, double stabilityDetectionFrequency, Duration historyDuration)
    {
       this.firstDetection = firstDetection;
 
@@ -65,7 +65,7 @@ public class PersistentDetection<T extends InstantDetection>
     * @param newDetection A new {@link InstantDetection} of the same class as the first detection
     *                     added to this {@link PersistentDetection}
     */
-   public void addDetection(T newDetection)
+   public void addDetection(InstantDetection newDetection)
    {
       // ensure only detection of the same class are added to the history
       if (!newDetection.getDetectedObjectClass().equals(getDetectedObjectClass()))
@@ -81,7 +81,7 @@ public class PersistentDetection<T extends InstantDetection>
     * @return The most recent {@link InstantDetection} added to the history,
     *       based on the detection's {@link java.time.Instant}.
     */
-   public T getMostRecentDetection()
+   public InstantDetection getMostRecentDetection()
    {
       return detectionHistory.last();
    }
@@ -146,7 +146,7 @@ public class PersistentDetection<T extends InstantDetection>
       this.stabilityDetectionFrequency = stabilityDetectionFrequency;
    }
 
-   public void setDetectionHistory(Collection<T> newHistory)
+   public void setDetectionHistory(Collection<InstantDetection> newHistory)
    {
       detectionHistory.clear();
       detectionHistory.addAll(newHistory);
@@ -182,7 +182,7 @@ public class PersistentDetection<T extends InstantDetection>
    public double getAverageConfidence()
    {
       double confidenceSum = 0.0;
-      for (T detection : detectionHistory) {
+      for (InstantDetection detection : detectionHistory) {
          confidenceSum += detection.getConfidence();
       }
 
@@ -232,7 +232,7 @@ public class PersistentDetection<T extends InstantDetection>
       detectionHistory.removeIf(detection -> detectionExpired(detection, now) && !detection.equals(getMostRecentDetection()));
    }
 
-   public SortedSet<T> getDetectionHistory()
+   public SortedSet<InstantDetection> getDetectionHistory()
    {
       return detectionHistory;
    }
@@ -258,7 +258,7 @@ public class PersistentDetection<T extends InstantDetection>
       if (this == other)
          return true;
 
-      if (other instanceof PersistentDetection<? extends InstantDetection> otherDetection)
+      if (other instanceof PersistentDetection otherDetection)
       {
          return getInstantDetectionClass().equals(otherDetection.getInstantDetectionClass())
                 && getMostRecentDetection().equals(otherDetection.getMostRecentDetection()) && historyDuration.equals(otherDetection.historyDuration)

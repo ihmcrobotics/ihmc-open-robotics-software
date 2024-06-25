@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public class DetectionManager
 {
-   private final Set<PersistentDetection<? extends InstantDetection>> persistentDetections = new HashSet<>();
+   private final Set<PersistentDetection> persistentDetections = new HashSet<>();
    private final Object persistentDetectionsLock = new Object();
 
    private double matchDistanceSquared;
@@ -50,8 +50,8 @@ public class DetectionManager
    {
       DetectionPair<T> bestMatch = null;
 
-      Set<PersistentDetection<T>> sameTypePersistentDetections = getDetectionsOfType(classType);
-      for (PersistentDetection<T> persistentDetection : sameTypePersistentDetections)
+      Set<PersistentDetection> sameTypePersistentDetections = getDetectionsOfType(classType);
+      for (PersistentDetection persistentDetection : sameTypePersistentDetections)
       {
          // matches must be of the same class
          if (persistentDetection.getDetectedObjectClass().equals(newInstantDetection.getDetectedObjectClass()))
@@ -74,10 +74,10 @@ public class DetectionManager
          if (bestMatch != null)
             bestMatch.confirmDetectionMatch();
          else
-            persistentDetections.add(new PersistentDetection<>(newInstantDetection,
-                                                               defaultStabilityThreshold,
-                                                               defaultStabilityFrequency,
-                                                               defaultHistorySeconds));
+            persistentDetections.add(new PersistentDetection(newInstantDetection,
+                                                             defaultStabilityThreshold,
+                                                             defaultStabilityFrequency,
+                                                             defaultHistorySeconds));
       }
    }
 
@@ -99,10 +99,10 @@ public class DetectionManager
 
       // Keep track of unmatched detections
       Set<T> unmatchedNewDetections = new HashSet<>(newInstantDetections);
-      Set<PersistentDetection<T>> unmatchedPersistentDetections = getDetectionsOfType(classType);
+      Set<PersistentDetection> unmatchedPersistentDetections = getDetectionsOfType(classType);
 
       // Find all possible matches
-      for (PersistentDetection<T> persistentDetection : unmatchedPersistentDetections)
+      for (PersistentDetection persistentDetection : unmatchedPersistentDetections)
       {
          for (T newInstantDetection : newInstantDetections)
          {
@@ -125,7 +125,7 @@ public class DetectionManager
       {
          // Get the best match
          DetectionPair<T> detectionPair = possibleMatches.poll();
-         PersistentDetection<T> persistentDetection = detectionPair.persistentDetection;
+         PersistentDetection persistentDetection = detectionPair.persistentDetection;
          T newInstantDetection = detectionPair.instantDetection;
 
          // If it hasn't been used already, update the persistent detection
@@ -145,14 +145,14 @@ public class DetectionManager
 
          // create new persistent detections from unmatched new detections
          for (T unmatchedNewDetection : unmatchedNewDetections)
-            persistentDetections.add(new PersistentDetection<>(unmatchedNewDetection,
-                                                               defaultStabilityThreshold,
-                                                               defaultStabilityFrequency,
-                                                               defaultHistorySeconds));
+            persistentDetections.add(new PersistentDetection(unmatchedNewDetection,
+                                                             defaultStabilityThreshold,
+                                                             defaultStabilityFrequency,
+                                                             defaultHistorySeconds));
       }
    }
 
-   public <T extends InstantDetection> Set<PersistentDetection<T>> updateAndGetDetectionsOfType(Class<T> classType)
+   public <T extends InstantDetection> Set<PersistentDetection> updateAndGetDetectionsOfType(Class<T> classType)
    {
       synchronized (persistentDetectionsLock)
       {
@@ -162,27 +162,27 @@ public class DetectionManager
    }
 
    @SuppressWarnings("unchecked")
-   public <T extends InstantDetection> Set<PersistentDetection<T>> getDetectionsOfType(Class<T> classType)
+   public <T extends InstantDetection> Set<PersistentDetection> getDetectionsOfType(Class<T> classType)
    {
-      Set<PersistentDetection<T>> typeDetections = new HashSet<>();
+      Set<PersistentDetection> typeDetections = new HashSet<>();
 
       synchronized (persistentDetectionsLock)
       {
-         for (PersistentDetection<? extends InstantDetection> persistentDetection : persistentDetections)
+         for (PersistentDetection persistentDetection : persistentDetections)
             if (persistentDetection.getInstantDetectionClass().equals(classType))
-               typeDetections.add((PersistentDetection<T>) persistentDetection);
+               typeDetections.add((PersistentDetection) persistentDetection);
       }
 
       return typeDetections;
    }
 
-   public Set<PersistentDetection<? extends InstantDetection>> updateAndGetDetections()
+   public Set<PersistentDetection> updateAndGetDetections()
    {
       updateDetections();
       return getDetections();
    }
 
-   public Set<PersistentDetection<? extends InstantDetection>> getDetections()
+   public Set<PersistentDetection> getDetections()
    {
       synchronized(persistentDetectionsLock)
       {
@@ -190,10 +190,10 @@ public class DetectionManager
       }
    }
 
-   public PersistentDetection<? extends InstantDetection> getDetection(UUID detectionID)
+   public PersistentDetection getDetection(UUID detectionID)
    {
-      Set<PersistentDetection<? extends InstantDetection>> detections = getDetections();
-      for (PersistentDetection<? extends InstantDetection> detection : detections)
+      Set<PersistentDetection> detections = getDetections();
+      for (PersistentDetection detection : detections)
       {
          if (detection.getID().equals(detectionID))
             return detection;
@@ -202,10 +202,10 @@ public class DetectionManager
       return null;
    }
 
-   public <T extends InstantDetection> PersistentDetection<T> getDetection(UUID detectionID, Class<T> classType)
+   public <T extends InstantDetection> PersistentDetection getDetection(UUID detectionID, Class<T> classType)
    {
-      Set<PersistentDetection<T>> detections = getDetectionsOfType(classType);
-      for (PersistentDetection<T> detection : detections)
+      Set<PersistentDetection> detections = getDetectionsOfType(classType);
+      for (PersistentDetection detection : detections)
       {
          if (detection.getID().equals(detectionID))
             return detection;
@@ -223,10 +223,10 @@ public class DetectionManager
    {
       synchronized (persistentDetectionsLock)
       {
-         Iterator<PersistentDetection<? extends InstantDetection>> detectionIterator = persistentDetections.iterator();
+         Iterator<PersistentDetection> detectionIterator = persistentDetections.iterator();
          while (detectionIterator.hasNext())
          {
-            PersistentDetection<? extends InstantDetection> detection = detectionIterator.next();
+            PersistentDetection detection = detectionIterator.next();
             if (detection.isReadyForDeletion())
                detectionIterator.remove();
             else
@@ -260,7 +260,7 @@ public class DetectionManager
       this.defaultHistorySeconds = TimeTools.toDoubleSeconds(historyDuration);
    }
 
-   private record DetectionPair<T extends InstantDetection>(PersistentDetection<T> persistentDetection, T instantDetection)
+   private record DetectionPair<T extends InstantDetection>(PersistentDetection persistentDetection, T instantDetection)
          implements Comparable<DetectionPair<? extends InstantDetection>>
    {
       public double getDistanceSquared()

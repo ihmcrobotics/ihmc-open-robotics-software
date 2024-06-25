@@ -2,7 +2,6 @@ package us.ihmc.perception.detections;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.geometry.Pose3D;
 
 import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
@@ -20,47 +19,31 @@ public class DetectionManagerTest
    private static final Random random = new Random(0);
    private static final AtomicBoolean testPassed = new AtomicBoolean(true);
 
-   private static class TestDetectionA extends InstantDetection
-   {
-      public TestDetectionA(String detectionClass, Instant detectionTime)
-      {
-         super(detectionClass, 0.0, new Pose3D(), detectionTime);
-      }
-   }
-
-   private static class TestDetectionB extends InstantDetection
-   {
-      public TestDetectionB(String detectionClass, Instant detectionTime)
-      {
-         super(detectionClass, 1.0, new Pose3D(), detectionTime);
-      }
-   }
-
    @Test
    public void testAddDetections() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException
    {
       DetectionManager detectionManager = new DetectionManager();
 
       // Generate test detection sets
-      Set<TestDetectionA> testDetectionsA = generateDetectionFrame(3, TestDetectionA.class);
-      Set<TestDetectionB> testDetectionsB = generateDetectionFrame(3, TestDetectionB.class);
+      Set<InstantDetection> testDetectionsA = generateDetectionFrame(3, InstantDetection.class);
+      Set<InstantDetection> testDetectionsB = generateDetectionFrame(3, InstantDetection.class);
 
       // add the detection sets to detection manager
-      assertDoesNotThrow(() -> detectionManager.addDetections(testDetectionsA, TestDetectionA.class));
-      assertDoesNotThrow(() -> detectionManager.addDetections(testDetectionsB, TestDetectionB.class));
+      assertDoesNotThrow(() -> detectionManager.addDetections(testDetectionsA, InstantDetection.class));
+      assertDoesNotThrow(() -> detectionManager.addDetections(testDetectionsB, InstantDetection.class));
 
       // check whether detection manager received the sets properly
-      Set<PersistentDetection<TestDetectionA>> storedDetectionsA = detectionManager.getDetectionsOfType(TestDetectionA.class);
+      Set<PersistentDetection> storedDetectionsA = detectionManager.getDetectionsOfType(InstantDetection.class);
       assertEquals(3, storedDetectionsA.size());
-      for (PersistentDetection<TestDetectionA> persistentDetection : storedDetectionsA)
+      for (PersistentDetection persistentDetection : storedDetectionsA)
       {
          assertNotNull(persistentDetection.getMostRecentDetection());
          assertTrue(testDetectionsA.contains(persistentDetection.getMostRecentDetection()));
       }
 
-      Set<PersistentDetection<TestDetectionB>> storedDetectionsB = detectionManager.getDetectionsOfType(TestDetectionB.class);
+      Set<PersistentDetection> storedDetectionsB = detectionManager.getDetectionsOfType(InstantDetection.class);
       assertEquals(3, storedDetectionsB.size());
-      for (PersistentDetection<TestDetectionB> persistentDetection : storedDetectionsB)
+      for (PersistentDetection persistentDetection : storedDetectionsB)
       {
          assertNotNull(persistentDetection.getMostRecentDetection());
          assertTrue(testDetectionsB.contains(persistentDetection.getMostRecentDetection()));
@@ -73,20 +56,20 @@ public class DetectionManagerTest
       DetectionManager detectionManager = new DetectionManager();
 
       // Generate the first frame of detections & add to detection manager
-      Set<TestDetectionA> firstFrame = generateDetectionFrame(3, TestDetectionA.class);
-      detectionManager.addDetections(firstFrame, TestDetectionA.class);
+      Set<InstantDetection> firstFrame = generateDetectionFrame(3, InstantDetection.class);
+      detectionManager.addDetections(firstFrame, InstantDetection.class);
 
       // Generate second frame of detections & add to detection manager
-      Set<TestDetectionA> secondFrame = generateDetectionFrame(2, TestDetectionA.class);
-      detectionManager.addDetections(secondFrame, TestDetectionA.class);
+      Set<InstantDetection> secondFrame = generateDetectionFrame(2, InstantDetection.class);
+      detectionManager.addDetections(secondFrame, InstantDetection.class);
 
       // Ensure detection manager has 3 detections
-      Set<PersistentDetection<TestDetectionA>> persistentDetections = detectionManager.getDetectionsOfType(TestDetectionA.class);
+      Set<PersistentDetection> persistentDetections = detectionManager.getDetectionsOfType(InstantDetection.class);
       assertEquals(3, persistentDetections.size());
 
       // Ensure detection manager matched only 2 detections, and left one old detection
       int numContained = 0;
-      for (PersistentDetection<TestDetectionA> persistentDetection : persistentDetections)
+      for (PersistentDetection persistentDetection : persistentDetections)
       {
          if (secondFrame.contains(persistentDetection.getMostRecentDetection()))
             numContained++;
@@ -112,13 +95,13 @@ public class DetectionManagerTest
          int numToGenerate = i % (maxDetections + 1);
 
          // Two threads attempt to add different classes of detections concurrently. This should not throw exceptions.
-         Set<TestDetectionA> detectionFrameA = generateDetectionFrame(numToGenerate, TestDetectionA.class);
+         Set<InstantDetection> detectionFrameA = generateDetectionFrame(numToGenerate, InstantDetection.class);
          Thread threadA = new Thread(() ->
          {
             ThreadTools.sleep(random.nextInt(10));
             try
             {
-               detectionManager.addDetections(detectionFrameA, TestDetectionA.class);
+               detectionManager.addDetections(detectionFrameA, InstantDetection.class);
             }
             catch (Exception e)
             {
@@ -127,13 +110,13 @@ public class DetectionManagerTest
             }
          }, "TestThreadA");
 
-         Set<TestDetectionB> detectionFrameB = generateDetectionFrame(2 * numToGenerate, TestDetectionB.class);
+         Set<InstantDetection> detectionFrameB = generateDetectionFrame(2 * numToGenerate, InstantDetection.class);
          Thread threadB = new Thread (() ->
          {
             ThreadTools.sleep(random.nextInt(10));
             try
             {
-               detectionManager.addDetections(detectionFrameB, TestDetectionB.class);
+               detectionManager.addDetections(detectionFrameB, InstantDetection.class);
             }
             catch (Exception e)
             {
@@ -152,10 +135,10 @@ public class DetectionManagerTest
       }
 
       // Number of detections in detection manager should be correct after all runs
-      Set<PersistentDetection<TestDetectionA>> detectionsA = detectionManager.getDetectionsOfType(TestDetectionA.class);
+      Set<PersistentDetection> detectionsA = detectionManager.getDetectionsOfType(InstantDetection.class);
       assertEquals(maxDetections, detectionsA.size());
 
-      Set<PersistentDetection<TestDetectionB>> detectionsB = detectionManager.getDetectionsOfType(TestDetectionB.class);
+      Set<PersistentDetection> detectionsB = detectionManager.getDetectionsOfType(InstantDetection.class);
       assertEquals(2 * maxDetections, detectionsB.size());
    }
 
@@ -179,8 +162,8 @@ public class DetectionManagerTest
          {
             try
             {
-               Set<TestDetectionA> detectionsA = generateDetectionFrame(100, TestDetectionA.class);
-               detectionManager.addDetections(detectionsA, TestDetectionA.class);
+               Set<InstantDetection> detectionsA = generateDetectionFrame(100, InstantDetection.class);
+               detectionManager.addDetections(detectionsA, InstantDetection.class);
             }
             catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e)
             {
@@ -196,8 +179,8 @@ public class DetectionManagerTest
          {
             try
             {
-               Set<TestDetectionB> detectionsB = generateDetectionFrame(100, TestDetectionB.class);
-               detectionManager.addDetections(detectionsB, TestDetectionB.class);
+               Set<InstantDetection> detectionsB = generateDetectionFrame(100, InstantDetection.class);
+               detectionManager.addDetections(detectionsB, InstantDetection.class);
             }
             catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e)
             {
@@ -217,8 +200,8 @@ public class DetectionManagerTest
       {
          detectionManager.updateDetections();
 
-         Set<PersistentDetection<TestDetectionA>> detectionsA = detectionManager.getDetectionsOfType(TestDetectionA.class);
-         Set<PersistentDetection<TestDetectionB>> detectionsB = detectionManager.getDetectionsOfType(TestDetectionB.class);
+         Set<PersistentDetection> detectionsA = detectionManager.getDetectionsOfType(InstantDetection.class);
+         Set<PersistentDetection> detectionsB = detectionManager.getDetectionsOfType(InstantDetection.class);
 
          // Once detections are received, there should be 100 of them.
          if (!detectionsA.isEmpty() || receivedDetectionsA)
@@ -234,14 +217,14 @@ public class DetectionManagerTest
 
          detectionsA.forEach(detection ->
          {
-            assertEquals(TestDetectionA.class, detection.getInstantDetectionClass());
-            assertTrue(detection.getDetectedObjectClass().contains(TestDetectionA.class.getSimpleName()));
+            assertEquals(InstantDetection.class, detection.getInstantDetectionClass());
+            assertTrue(detection.getDetectedObjectClass().contains(InstantDetection.class.getSimpleName()));
          });
 
          detectionsB.forEach(detection ->
          {
-            assertEquals(TestDetectionB.class, detection.getInstantDetectionClass());
-            assertTrue(detection.getDetectedObjectClass().contains(TestDetectionB.class.getSimpleName()));
+            assertEquals(InstantDetection.class, detection.getInstantDetectionClass());
+            assertTrue(detection.getDetectedObjectClass().contains(InstantDetection.class.getSimpleName()));
          });
 
          ThreadTools.sleep(10);
@@ -274,24 +257,24 @@ public class DetectionManagerTest
 
       for (int i = 0; i < 5; ++i)
       {
-         Set<TestDetectionA> testDetectionsA = generateDetectionFrame(5, startTime.minusSeconds(i), TestDetectionA.class);
-         detectionManager.addDetections(testDetectionsA, TestDetectionA.class);
+         Set<InstantDetection> testDetectionsA = generateDetectionFrame(5, startTime.minusSeconds(i), InstantDetection.class);
+         detectionManager.addDetections(testDetectionsA, InstantDetection.class);
 
-         Set<TestDetectionB> testDetectionsB = generateDetectionFrame(5, startTime.minusSeconds(i), TestDetectionB.class);
-         detectionManager.addDetections(testDetectionsB, TestDetectionB.class);
+         Set<InstantDetection> testDetectionsB = generateDetectionFrame(5, startTime.minusSeconds(i), InstantDetection.class);
+         detectionManager.addDetections(testDetectionsB, InstantDetection.class);
       }
 
       detectionManager.updateDetections(startTime);
 
-      Set<PersistentDetection<TestDetectionA>> persistentDetectionsA = detectionManager.getDetectionsOfType(TestDetectionA.class);
-      for (PersistentDetection<TestDetectionA> persistentDetection : persistentDetectionsA)
+      Set<PersistentDetection> persistentDetectionsA = detectionManager.getDetectionsOfType(InstantDetection.class);
+      for (PersistentDetection persistentDetection : persistentDetectionsA)
       {
          assertFalse(persistentDetection.isStable());
          assertEquals(3, persistentDetection.getHistorySize());
       }
 
-      Set<PersistentDetection<TestDetectionB>> persistentDetectionsB = detectionManager.getDetectionsOfType(TestDetectionB.class);
-      for (PersistentDetection<TestDetectionB> persistentDetection : persistentDetectionsB)
+      Set<PersistentDetection> persistentDetectionsB = detectionManager.getDetectionsOfType(InstantDetection.class);
+      for (PersistentDetection persistentDetection : persistentDetectionsB)
       {
          assertTrue(persistentDetection.isStable());
          assertEquals(3, persistentDetection.getHistorySize());
@@ -300,13 +283,13 @@ public class DetectionManagerTest
       Instant future = startTime.plusSeconds(3);
       detectionManager.updateDetections(future);
 
-      for (PersistentDetection<TestDetectionA> persistentDetection : persistentDetectionsA)
+      for (PersistentDetection persistentDetection : persistentDetectionsA)
       {
          assertFalse(persistentDetection.isStable());
          assertEquals(1, persistentDetection.getHistorySize());
       }
 
-      for (PersistentDetection<TestDetectionB> persistentDetection : persistentDetectionsB)
+      for (PersistentDetection persistentDetection : persistentDetectionsB)
       {
          assertFalse(persistentDetection.isStable());
          assertEquals(1, persistentDetection.getHistorySize());

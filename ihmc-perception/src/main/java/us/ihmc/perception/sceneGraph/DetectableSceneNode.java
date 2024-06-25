@@ -68,7 +68,7 @@ public class DetectableSceneNode extends SceneNode
       return latestDetections.containsKey(detectionToMatch.getPersistentDetectionID());
    }
 
-   public boolean hasMatchingDetection(PersistentDetection<? extends InstantDetection> detectionToMatch)
+   public boolean hasMatchingDetection(PersistentDetection detectionToMatch)
    {
       return latestDetections.containsKey(detectionToMatch.getID());
    }
@@ -103,7 +103,7 @@ public class DetectableSceneNode extends SceneNode
       {
          latestDetections.forEach((id, instantDetection) ->
          {
-            PersistentDetection<? extends InstantDetection> persistentDetection = detectionManager.getDetection(id, instantDetection.getClass());
+            PersistentDetection persistentDetection = detectionManager.getDetection(id, instantDetection.getClass());
             if (persistentDetection != null)
                persistentDetection.markForDeletion();
          });
