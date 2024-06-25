@@ -32,6 +32,8 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -246,6 +248,43 @@ public class AtlasWalkingTrajectoryPathFrameTest
       assertWalkingFrameMatchMidFeetZUpFrame();
    }
 
+   @Tag("controller-api-4")
+   @Test
+   public void testLargeStepForward()
+   {
+      DRCRobotModel robotModel = getRobotModel();
+      SCS2AvatarTestingSimulationFactory factory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                         simulationTestingParameters);
+      simulationTestHelper = factory.createAvatarTestingSimulation();
+
+      FreeFloatingPendulumRobotDefinition pendulumRobotDefinition = setupPendulum();
+
+      simulationTestHelper.start();
+
+      prepareHand(getHandName(), pendulumRobotDefinition);
+
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      FramePose3D startPose = new FramePose3D(simulationTestHelper.getControllerReferenceFrames().getMidFootZUpGroundFrame());
+      startPose.changeFrame(worldFrame);
+      FootstepPlan footstepPlan = new FootstepPlan();
+      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(new Pose3D(0.9, -steppingParameters.getInPlaceWidth()/2, 0.0, 0.0, 0.0, 0.0)));
+      footstepPlan.addFootstep(RobotSide.LEFT, new FramePose3D(new Pose3D(0.9, steppingParameters.getInPlaceWidth()/2, 0.0, 0.0, 0.0, 0.0)));
+
+      FootstepDataListMessage steps = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.25, 1.0);
+      simulationTestHelper.publishToController(steps);
+
+      pendulumAttachmentController.oscillationCalculator.clear();
+      pendulumAttachmentController.rootJoint.getJointTwist().setToZero();
+
+      assertWalkingFrameMatchMidFeetZUpFrame();
+      assertTrue(simulationTestHelper.simulateNow(2.0));
+      assertCorrectControlMode();
+      assertTrue(simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
+      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < 0.03);
+      assertWalkingFrameMatchMidFeetZUpFrame();
+   }
+
    @Tag("controller-api-2")
    @Test
    public void testWalkingCircle()
@@ -291,7 +330,7 @@ public class AtlasWalkingTrajectoryPathFrameTest
 
    @Tag("controller-api-2")
    @Test
-   public void testLargeForwardStep()
+   public void testCinderBlockWalking()
    {
       CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
       cinderBlockFieldEnvironment.addFlatGround();
