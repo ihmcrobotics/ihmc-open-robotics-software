@@ -1,9 +1,6 @@
 package us.ihmc.perception.sceneGraph;
 
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
@@ -21,7 +18,6 @@ import java.util.UUID;
 public class DetectableSceneNode extends SceneNode
 {
    private final Map<UUID, InstantDetection> latestDetections = new HashMap<>();
-   private final Map<UUID, ReferenceFrame> detectionFramesInWorld = new HashMap<>();
    private boolean currentlyDetected;
 
    public DetectableSceneNode(long id, String name, InstantDetection detection, CRDTInfo crdtInfo)
@@ -38,21 +34,7 @@ public class DetectableSceneNode extends SceneNode
 
    public void update(SceneGraph sceneGraph)
    {
-      latestDetections.forEach((persistentDetectionID, instantDetection) ->
-      {
-         ReferenceFrame detectionFrame = detectionFramesInWorld.get(persistentDetectionID);
 
-         if (detectionFrame == null)
-         {
-            String frameName = "detection-" + persistentDetectionID.toString().substring(0, 5);
-            detectionFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(frameName,
-                                                                                               ReferenceFrame.getWorldFrame(),
-                                                                                               new RigidBodyTransform());
-            detectionFramesInWorld.put(persistentDetectionID, detectionFrame);
-         }
-
-         detectionFrame.getTransformToParent().set(instantDetection.getPose());
-      });
    }
 
    public void updateDetection(InstantDetection newDetection)
@@ -78,15 +60,6 @@ public class DetectableSceneNode extends SceneNode
     */
    public boolean addNewDetection(InstantDetection detection)
    {
-      if (!latestDetections.containsKey(detection.getPersistentDetectionID()))
-      {
-         String frameName = "detection-" + detection.getPersistentDetectionID().toString().substring(0, 5);
-         ReferenceFrame detectionFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(frameName,
-                                                                                                           ReferenceFrame.getWorldFrame(),
-                                                                                                           new RigidBodyTransform());
-         detectionFramesInWorld.put(detection.getPersistentDetectionID(), detectionFrame);
-      }
-
       return latestDetections.putIfAbsent(detection.getPersistentDetectionID(), detection) == null;
    }
 
@@ -108,16 +81,6 @@ public class DetectableSceneNode extends SceneNode
    public InstantDetection getDetection(UUID detectionId)
    {
       return latestDetections.get(detectionId);
-   }
-
-   public Map<UUID, ReferenceFrame> getDetectionFramesInWorld()
-   {
-      return detectionFramesInWorld;
-   }
-
-   public ReferenceFrame getDetectionFrameInWorld(UUID detectionId)
-   {
-      return detectionFramesInWorld.get(detectionId);
    }
 
    public void setCurrentlyDetected(boolean currentlyDetected)

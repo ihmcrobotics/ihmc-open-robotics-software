@@ -213,8 +213,8 @@ public class SceneGraph
       if (detectionManager == null)
          return;
 
-      Set<PersistentDetection<? extends InstantDetection>> detections = detectionManager.updateAndGetDetections();
-      for (PersistentDetection<? extends InstantDetection> detection : detections)
+      Set<PersistentDetection<?>> detections = detectionManager.updateAndGetDetections();
+      for (PersistentDetection<?> detection : detections)
       {
          boolean claimed = false;
          for (DetectableSceneNode node : detectableSceneNodes)
