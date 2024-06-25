@@ -161,16 +161,8 @@ public class DetectionManagerTest
       {
          for (int i = 0; i < numRuns && testPassed.get(); ++i)
          {
-            try
-            {
-               Set<InstantDetection> detectionsA = generateDetectionFrame(100);
-               detectionManager.addDetections(detectionsA, InstantDetection.class);
-            }
-            catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e)
-            {
-               e.printStackTrace();
-               testPassed.set(false);
-            }
+            Set<InstantDetection> detectionsA = generateDetectionFrame(100);
+            detectionManager.addDetections(detectionsA, InstantDetection.class);
          }
       }, "AdditionThreadA");
 
@@ -178,16 +170,8 @@ public class DetectionManagerTest
       {
          for (int i = 0; i < numRuns && testPassed.get(); ++i)
          {
-            try
-            {
-               Set<InstantDetection> detectionsB = generateDetectionFrame(100);
-               detectionManager.addDetections(detectionsB, InstantDetection.class);
-            }
-            catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e)
-            {
-               e.printStackTrace();
-               testPassed.set(false);
-            }
+            Set<InstantDetection> detectionsB = generateDetectionFrame(100);
+            detectionManager.addDetections(detectionsB, InstantDetection.class);
          }
       }, "AdditionThreadB");
 
@@ -298,13 +282,11 @@ public class DetectionManagerTest
    }
 
    public static Set<InstantDetection> generateDetectionFrame(int numberToGenerate)
-         throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException
    {
       return generateDetectionFrame(numberToGenerate, Instant.now());
    }
 
    public static Set<InstantDetection> generateDetectionFrame(int numberToGenerate, Instant now)
-         throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException
    {
       Set<InstantDetection> testDetections = new HashSet<>();
 
