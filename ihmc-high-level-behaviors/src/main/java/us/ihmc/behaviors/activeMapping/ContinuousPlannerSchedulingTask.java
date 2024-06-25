@@ -11,6 +11,7 @@ import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
 import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -73,22 +74,20 @@ public class ContinuousPlannerSchedulingTask
       stateMachineFactory.setNamePrefix("ContinuousHikingStateMachine");
       stateMachineFactory.setRegistry(registry);
 
-      StepValidityChecker stepValidityChecker = new StepValidityChecker(continuousPlanner, robotModel, referenceFrames, registry);
       ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Helper,
                                                                                                          simpleRobotName,
                                                                                                          referenceFrames,
                                                                                                          statistics);
 
       // Create the different states
-      State notStartedState = new DoNothingState(ros2Helper, simpleRobotName, referenceFrames, continuousPlanner, debugger);
+      State notStartedState = new DoNothingState(ros2Helper, simpleRobotName, referenceFrames, continuousPlanner);
       State readyToPlanState = new ReadyToPlanState(commandMessage,
                                                     continuousPlanner,
                                                     controllerFootstepQueueMonitor,
                                                     continuousHikingParameters,
                                                     terrainMap,
                                                     debugger,
-                                                    statistics,
-                                                    stepValidityChecker);
+                                                    statistics);
       State waitingtoLandState = new WaitingToLandState(ros2Helper,
                                                         simpleRobotName,
                                                         continuousPlanner,
@@ -98,14 +97,14 @@ public class ContinuousPlannerSchedulingTask
 
       // Adding the different states
       stateMachineFactory.addState(ContinuousHikingState.DO_NOTHING, notStartedState);
-      stateMachineFactory.addState(ContinuousHikingState.WAITING_TO_LAND, waitingtoLandState);
       stateMachineFactory.addState(ContinuousHikingState.READY_TO_PLAN, readyToPlanState);
+      stateMachineFactory.addState(ContinuousHikingState.WAITING_TO_LAND, waitingtoLandState);
 
       // Create different conditions
       StartContinuousHikingTransitionCondition startContinuousHikingTransitionCondition = new StartContinuousHikingTransitionCondition(commandMessage,
                                                                                                                                        continuousHikingParameters);
-      StopContinuousHikingTransitionCondition stopContinuousHikingTransitionCondition = new StopContinuousHikingTransitionCondition(continuousHikingParameters,
-                                                                                                                                    commandMessage);
+      StopContinuousHikingTransitionCondition stopContinuousHikingTransitionCondition = new StopContinuousHikingTransitionCondition(commandMessage,
+                                                                                                                                    continuousHikingParameters);
       PlanAgainTransitionCondition planAgainTransitionCondition = new PlanAgainTransitionCondition(continuousPlanner, continuousHikingParameters);
 
       // From any given state we can go back to DO_NOTHING and stop ContinuousHiking
@@ -123,6 +122,8 @@ public class ContinuousPlannerSchedulingTask
       stateMachineFactory.addDoneTransition(ContinuousHikingState.WAITING_TO_LAND, ContinuousHikingState.READY_TO_PLAN);
 
       stateMachine = stateMachineFactory.build(ContinuousHikingState.DO_NOTHING);
+      stateMachineFactory.addStateChangedListener((from, to) -> LogTools.warn("STATE CHANGED! ( " + from + " -> " + to + " )"));
+
       executorService.scheduleWithFixedDelay(this::tickStateMachine, 1500, CONTINUOUS_PLANNING_DELAY_MS, TimeUnit.MILLISECONDS);
    }
 
