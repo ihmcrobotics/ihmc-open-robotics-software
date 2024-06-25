@@ -5,9 +5,9 @@
     "ArUco Marker Detection" : false,
     "ArUco Marker Detection Image" : false,
     "Environment" : false,
-    "Global Visualizers" : true,
-    "Scene Graph" : true,
-    "VR Settings" : false,
-    "VR Thread Debugger" : false
+    "Perception Visualizers" : true,
+    "/ihmc/yolo/annotated_image###us.ihmc.rdx.ui.graphics.RDXOpenCVVideoVisualizer:/ihmc/yolo/annotated_image" : true,
+    "Pose3D Gizmo Tuner (object)" : false,
+    "Scene Graph" : true
   }
 }

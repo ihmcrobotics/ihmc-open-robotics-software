@@ -3,13 +3,16 @@ package us.ihmc.rdx.perception.sceneGraph;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetector;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerROS2Publisher;
 import us.ihmc.perception.sceneGraph.SceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
-import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.perception.sceneGraph.yolo.YOLOv8DetectionManager;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.perception.RDXOpenCVArUcoMarkerDetectionUI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -20,8 +23,11 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ArUcoMarkerPosesVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
+import us.ihmc.rdx.ui.interactable.RDXInteractableObject;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.tools.thread.Throttler;
 
 /**
@@ -38,6 +44,7 @@ public class RDXSceneGraphDemo
    private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
    private OpenCVArUcoMarkerDetector arUcoMarkerDetector;
    private OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults;
+   private YOLOv8DetectionManager yolov8DetectionManager;
    private ROS2SceneGraph onRobotSceneGraph;
    private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
    private ReferenceFrameLibrary referenceFrameLibrary;
@@ -55,12 +62,19 @@ public class RDXSceneGraphDemo
          {
             baseUI.create(RDXSceneLevel.VIRTUAL, RDXSceneLevel.MODEL, RDXSceneLevel.GROUND_TRUTH);
 
-            ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_scene_graph_demo");
+            PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
+            ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "perception_scene_graph_demo");
             ros2Helper = new ROS2Helper(ros2Node);
 
             perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
             baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
             baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
+
+            RDXROS2ImageMessageVisualizer yoloAnnotatedImageVisualizer = new RDXROS2ImageMessageVisualizer("YOLOv8 Annotated Image",
+                                                                                                           pubSubImplementation,
+                                                                                                           PerceptionAPI.YOLO_ANNOTATED_IMAGE);
+            yoloAnnotatedImageVisualizer.setActive(true);
+            perceptionVisualizerPanel.addVisualizer(yoloAnnotatedImageVisualizer);
 
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
@@ -83,6 +97,32 @@ public class RDXSceneGraphDemo
             arUcoMarkerDetector.setSourceImageForDetection(simulatedCamera.getLowLevelSimulator().getRGBA8888ColorImage());
             arUcoMarkerDetector.setCameraInstrinsics(simulatedCamera.getDepthCameraIntrinsics());
             arUcoMarkerDetectionResults = new OpenCVArUcoMarkerDetectionResults();
+
+            RDXInteractableObject interactableKnob = new RDXInteractableObject(baseUI);
+            interactableKnob.load(DoorSceneNodeDefinitions.DOOR_KNOB_VISUAL_MODEL_FILE_PATH,
+                                  DoorSceneNodeDefinitions.DOOR_KNOB_VISUAL_MODEL_TO_NODE_FRAME_TRANSFORM);
+            interactableKnob.getSelectablePose3DGizmo().setSelected(true);
+            baseUI.getPrimaryScene().addRenderableProvider(interactableKnob.getModelInstance(), RDXSceneLevel.GROUND_TRUTH);
+            baseUI.getPrimaryScene().addRenderableProvider(interactableKnob.getSelectablePose3DGizmo()::getVirtualRenderables, RDXSceneLevel.VIRTUAL);
+
+            RestartableThrottledThread yoloDetectionThread = new RestartableThrottledThread("YOLODetection", 8.0, () ->
+            {
+               if (yolov8DetectionManager == null)
+               {
+                  yolov8DetectionManager = new YOLOv8DetectionManager(ros2Helper, yoloAnnotatedImageVisualizer::isActive);
+                  yolov8DetectionManager.setRobotFrame(sensorPoseGizmo.getGizmoFrame());
+               }
+
+               RawImage rawColorImageBGR;
+               RawImage rawDepthImageDiscretized;
+               synchronized (simulatedCamera)
+               {
+                  rawColorImageBGR = simulatedCamera.createRawColorImageBGR();
+                  rawDepthImageDiscretized = simulatedCamera.createRawDepthImageDiscretized();
+               }
+               yolov8DetectionManager.runYOLODetection(rawColorImageBGR, rawDepthImageDiscretized);
+            });
+            yoloDetectionThread.start();
 
             onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
 
@@ -116,7 +156,10 @@ public class RDXSceneGraphDemo
             boolean runPerception = perceptionThottler.run();
 
             environmentBuilder.update();
-            simulatedCamera.render(baseUI.getPrimaryScene());
+            synchronized (simulatedCamera)
+            {
+               simulatedCamera.render(baseUI.getPrimaryScene());
+            }
             if (runPerception)
             {
                arUcoMarkerDetector.update();
@@ -146,6 +189,7 @@ public class RDXSceneGraphDemo
          @Override
          public void dispose()
          {
+            yolov8DetectionManager.destroy();
             perceptionVisualizerPanel.destroy();
             simulatedCamera.dispose();
             baseUI.dispose();

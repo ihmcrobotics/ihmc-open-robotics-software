@@ -394,6 +394,8 @@ public class PerceptionAndAutonomyProcess
          if (zedDepthImage != null && !zedDepthImage.isEmpty() && icpManager.isDemanded())
             icpManager.setEnvironmentPointCloud(zedDepthImage);
 
+
+
          if (yoloZEDDemandNode.isDemanded())
             yolov8DetectionManager.runYOLODetection(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
 
