@@ -207,6 +207,49 @@ public class AtlasWalkingTrajectoryPathFrameTest
 
    @Tag("controller-api-2")
    @Test
+   public void testWalkingCircle()
+   {
+      DRCRobotModel robotModel = getRobotModel();
+      SCS2AvatarTestingSimulationFactory factory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                         new FlatGroundEnvironment(),
+                                                                                                                         simulationTestingParameters);
+      simulationTestHelper = factory.createAvatarTestingSimulation();
+
+      FreeFloatingPendulumRobotDefinition pendulumRobotDefinition = setupPendulum();
+
+      simulationTestHelper.start();
+
+      prepareHand(getHandName(), pendulumRobotDefinition);
+
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      FramePose3D startPose = new FramePose3D(simulationTestHelper.getControllerReferenceFrames().getMidFootZUpGroundFrame());
+      startPose.changeFrame(worldFrame);
+      FootstepDataListMessage steps = EndToEndTestTools.generateCircleSteps(RobotSide.LEFT,
+                                                                            10,
+                                                                            a -> steppingParameters.getDefaultStepLength(),
+                                                                            steppingParameters.getInPlaceWidth(),
+                                                                            0.75,
+                                                                            0.25,
+                                                                            startPose,
+                                                                            true,
+                                                                            RobotSide.RIGHT,
+                                                                            1.0);
+      simulationTestHelper.publishToController(steps);
+
+      pendulumAttachmentController.oscillationCalculator.clear();
+      pendulumAttachmentController.rootJoint.getJointTwist().setToZero();
+
+      assertWalkingFrameMatchMidFeetZUpFrame();
+      assertTrue(simulationTestHelper.simulateNow(2.0));
+      assertCorrectControlMode();
+      assertTrue(simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
+      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < pendulumAttachmentController.getMaxAngleStandardDeviation().getValue());
+      assertWalkingFrameMatchMidFeetZUpFrame();
+   }
+
+   @Tag("controller-api-2")
+   @Test
    public void testWalkingForwardWithSlipping()
    {
       DRCRobotModel robotModel = getRobotModel();
@@ -271,49 +314,6 @@ public class AtlasWalkingTrajectoryPathFrameTest
       footstepPlan.addFootstep(RobotSide.LEFT, new FramePose3D(new Pose3D(0.9, steppingParameters.getInPlaceWidth()/2, 0.0, 0.0, 0.0, 0.0)));
 
       FootstepDataListMessage steps = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.25, 1.0);
-      simulationTestHelper.publishToController(steps);
-
-      pendulumAttachmentController.oscillationCalculator.clear();
-      pendulumAttachmentController.rootJoint.getJointTwist().setToZero();
-
-      assertWalkingFrameMatchMidFeetZUpFrame();
-      assertTrue(simulationTestHelper.simulateNow(2.0));
-      assertCorrectControlMode();
-      assertTrue(simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
-      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < pendulumAttachmentController.getMaxAngleStandardDeviation().getValue());
-      assertWalkingFrameMatchMidFeetZUpFrame();
-   }
-
-   @Tag("controller-api-2")
-   @Test
-   public void testWalkingCircle()
-   {
-      DRCRobotModel robotModel = getRobotModel();
-      SCS2AvatarTestingSimulationFactory factory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
-                                                                                                                         new FlatGroundEnvironment(),
-                                                                                                                         simulationTestingParameters);
-      simulationTestHelper = factory.createAvatarTestingSimulation();
-
-      FreeFloatingPendulumRobotDefinition pendulumRobotDefinition = setupPendulum();
-
-      simulationTestHelper.start();
-
-      prepareHand(getHandName(), pendulumRobotDefinition);
-
-      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-      FramePose3D startPose = new FramePose3D(simulationTestHelper.getControllerReferenceFrames().getMidFootZUpGroundFrame());
-      startPose.changeFrame(worldFrame);
-      FootstepDataListMessage steps = EndToEndTestTools.generateCircleSteps(RobotSide.LEFT,
-                                                                            10,
-                                                                            a -> steppingParameters.getDefaultStepLength(),
-                                                                            steppingParameters.getInPlaceWidth(),
-                                                                            0.75,
-                                                                            0.25,
-                                                                            startPose,
-                                                                            true,
-                                                                            RobotSide.RIGHT,
-                                                                            1.0);
       simulationTestHelper.publishToController(steps);
 
       pendulumAttachmentController.oscillationCalculator.clear();
