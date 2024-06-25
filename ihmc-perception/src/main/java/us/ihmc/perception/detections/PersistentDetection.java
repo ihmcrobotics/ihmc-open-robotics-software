@@ -9,7 +9,6 @@ import us.ihmc.robotics.time.TimeTools;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -54,6 +53,16 @@ public class PersistentDetection
       newDetection.setPersistentDetectionID(id);
    }
 
+   /**
+    * Clears history items older than {@code now - historyDuration}, except for the most recent detection.
+    * @param now Present time instant.
+    */
+   public void updateHistory(Instant now)
+   {
+      // Remove detections that are too old
+      detectionHistory.removeIf(detection -> detectionExpired(detection, now) && !detection.equals(getMostRecentDetection()));
+   }
+
    public InstantDetection getOldestDetection()
    {
       return detectionHistory.first();
@@ -88,11 +97,6 @@ public class PersistentDetection
       return detectionHistory.size();
    }
 
-   public UUID getID()
-   {
-      return id;
-   }
-
    /**
     * Set the duration of detection history stored by this object.
     * {@link InstantDetection} objects older than this duration will be removed from the history.
@@ -106,7 +110,7 @@ public class PersistentDetection
 
    /**
     * Set the duration of detection history stored by this object.
-    * {@link InstantDetection} objects older than this duration will be removed from the history when {@link #updateHistory()} is called.
+    * {@link InstantDetection} objects older than this duration will be removed from the history when {@link #updateHistory} is called.
     *
     * @param historyDuration Duration of history to store. Must be positive.
     */
@@ -116,16 +120,6 @@ public class PersistentDetection
          throw new IllegalArgumentException("History duration must be a positive duration");
 
       this.historyDuration = historyDuration;
-   }
-
-   public void setStabilityConfidenceThreshold(double stabilityConfidenceThreshold)
-   {
-      this.stabilityConfidenceThreshold = stabilityConfidenceThreshold;
-   }
-
-   public void setStabilityDetectionFrequency(double stabilityDetectionFrequency)
-   {
-      this.stabilityDetectionFrequency = stabilityDetectionFrequency;
    }
 
    public boolean isOldEnough()
@@ -150,7 +144,7 @@ public class PersistentDetection
 
    /**
     * Calculates the average confidence of the {@link InstantDetection}s in the stored history.
-    * {@link #updateHistory()} should be called before this method to get the up-to-date value!
+    * {@link #updateHistory} should be called before this method to get the up-to-date value!
     * @return Average confidence of {@link InstantDetection}s in history
     */
    public double getAverageConfidence()
@@ -176,11 +170,6 @@ public class PersistentDetection
       return (getHistorySize() - 1.0) / Conversions.nanosecondsToSeconds(periodNanos);
    }
 
-   public double getDetectionFrequencyDecaying()
-   {
-      return getDetectionFrequencyDecaying(Instant.now());
-   }
-
    public double getDetectionFrequencyDecaying(Instant now)
    {
       Instant oldestDetectionTime = detectionHistory.first().getDetectionTime();
@@ -189,22 +178,9 @@ public class PersistentDetection
       return getHistorySize() / Conversions.nanosecondsToSeconds(periodNanos);
    }
 
-   /**
-    * Clears history items older than {@code historyDuration}, except for the most recent detection.
-    */
-   public void updateHistory()
+   private boolean detectionExpired(InstantDetection detection, Instant now)
    {
-      updateHistory(Instant.now());
-   }
-
-   /**
-    * Clears history items older than {@code now - historyDuration}, except for the most recent detection.
-    * @param now Present time instant.
-    */
-   public void updateHistory(Instant now)
-   {
-      // Remove detections that are too old
-      detectionHistory.removeIf(detection -> detectionExpired(detection, now) && !detection.equals(getMostRecentDetection()));
+      return detection.getDetectionTime().isBefore(now.minus(historyDuration));
    }
 
    public SortedSet<InstantDetection> getDetectionHistory()
@@ -222,8 +198,18 @@ public class PersistentDetection
       return readyForDeletion;
    }
 
-   private boolean detectionExpired(InstantDetection detection, Instant now)
+   public void setStabilityConfidenceThreshold(double stabilityConfidenceThreshold)
    {
-      return detection.getDetectionTime().isBefore(now.minus(historyDuration));
+      this.stabilityConfidenceThreshold = stabilityConfidenceThreshold;
+   }
+
+   public void setStabilityDetectionFrequency(double stabilityDetectionFrequency)
+   {
+      this.stabilityDetectionFrequency = stabilityDetectionFrequency;
+   }
+
+   public UUID getID()
+   {
+      return id;
    }
 }
