@@ -27,7 +27,7 @@ public class DetectableSceneNode extends SceneNode
    public DetectableSceneNode(long id, String name, InstantDetection detection, CRDTInfo crdtInfo)
    {
       super(id, name, crdtInfo);
-      latestDetections.put(detection.getPersistentDetectionID(), detection);
+      addNewDetection(detection);
    }
 
    public DetectableSceneNode(long id, String name, List<InstantDetection> detections, CRDTInfo crdtInfo)
@@ -67,7 +67,7 @@ public class DetectableSceneNode extends SceneNode
       latestDetections.clear();
       for (InstantDetection detection : newLatestDetections)
       {
-         latestDetections.put(detection.getPersistentDetectionID(), detection);
+         addNewDetection(detection);
       }
    }
 
@@ -78,6 +78,15 @@ public class DetectableSceneNode extends SceneNode
     */
    public boolean addNewDetection(InstantDetection detection)
    {
+      if (!latestDetections.containsKey(detection.getPersistentDetectionID()))
+      {
+         String frameName = "detection-" + detection.getPersistentDetectionID().toString().substring(0, 5);
+         ReferenceFrame detectionFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(frameName,
+                                                                                                           ReferenceFrame.getWorldFrame(),
+                                                                                                           new RigidBodyTransform());
+         detectionFramesInWorld.put(detection.getPersistentDetectionID(), detectionFrame);
+      }
+
       return latestDetections.putIfAbsent(detection.getPersistentDetectionID(), detection) == null;
    }
 
