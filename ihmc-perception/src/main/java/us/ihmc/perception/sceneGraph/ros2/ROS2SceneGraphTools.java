@@ -118,7 +118,11 @@ public class ROS2SceneGraphTools
       else if (nodeType == SceneGraphMessage.DOOR_NODE_TYPE)
       {
          // TODO: DOORNODES
-         DoorNode doorNode = new DoorNode(nodeID, crdtInfo);
+         YOLOv8InstantDetection instantDetection = YOLOv8InstantDetection.fromMessage(subscriptionNode.getYOLONodeMessage()
+                                                                                                      .getDetectableSceneNode()
+                                                                                                      .getLatestDetections()
+                                                                                                      .get(0));
+         DoorNode doorNode = new DoorNode(nodeID, instantDetection, crdtInfo);
          doorNode.getDoorFramePose().set(subscriptionNode.getDoorNodeMessage().getDoorFramePose());
          doorNode.getDoorPanel().fromMessage(subscriptionNode.getDoorNodeMessage().getDoorPanel());
          doorNode.getOpeningMechanisms().clear(); // TODO should we clear the list every time?

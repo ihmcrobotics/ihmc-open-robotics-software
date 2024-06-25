@@ -298,7 +298,8 @@ public class ROS2SceneGraphSubscription
          {
             DoorNodeMessage doorNodeMessage = sceneGraphMessage.getDoorSceneNodes().get(indexInTypesList);
             subscriptionNode.setDoorNodeMessage(doorNodeMessage);
-            subscriptionNode.setSceneNodeMessage(doorNodeMessage.getSceneNode());
+            subscriptionNode.setDetectableSceneNodeMessage(doorNodeMessage.getDetectableSceneNode());
+            subscriptionNode.setSceneNodeMessage(doorNodeMessage.getDetectableSceneNode().getSceneNode());
          }
       }
 

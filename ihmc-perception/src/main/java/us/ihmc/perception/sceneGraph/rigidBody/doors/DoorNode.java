@@ -9,6 +9,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
+import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
@@ -26,7 +28,7 @@ import java.util.stream.Collectors;
 
 import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions.DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN;
 
-public class DoorNode extends SceneNode
+public class DoorNode extends DetectableSceneNode
 {
    private static final Pose3D ZERO_POSE = new Pose3D();
 
@@ -34,9 +36,9 @@ public class DoorNode extends SceneNode
    private final DoorPanel doorPanel = new DoorPanel(this);
    private final Set<DoorOpeningMechanism> openingMechanisms = new HashSet<>();
 
-   public DoorNode(long id, CRDTInfo crdtInfo)
+   public DoorNode(long id, YOLOv8InstantDetection instantDetection, CRDTInfo crdtInfo)
    {
-      super(id, "Door" + id, crdtInfo);
+      super(id, "Door" + id, instantDetection, crdtInfo);
    }
 
    public void update(SceneGraph sceneGraph)

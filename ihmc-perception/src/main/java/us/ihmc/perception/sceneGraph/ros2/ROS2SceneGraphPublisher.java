@@ -137,6 +137,23 @@ public class ROS2SceneGraphPublisher
 
             detectableSceneNodeMessage = yoloNodeMessage.getDetectableSceneNode();
          }
+         else if (sceneNode instanceof DoorNode doorNode)
+         {
+            // TODO: DOORNODES
+            sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.DOOR_NODE_TYPE);
+            sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getDoorSceneNodes().size());
+            DoorNodeMessage doorNodeMessage =  sceneGraphMessage.getDoorSceneNodes().add();
+            doorNodeMessage.getDoorFramePose().set(doorNode.getDoorFramePose());
+            doorNode.getDoorPanel().toMessage(doorNodeMessage.getDoorPanel());
+            for (DoorOpeningMechanism openingMechanism : doorNode.getOpeningMechanisms())
+            {
+               DoorOpeningMechanismMessage doorOpeningMechanismMessage = doorNodeMessage.getOpeningMechanisms().add();
+               doorOpeningMechanismMessage.setType(openingMechanism.getType().getByteValue());
+               doorOpeningMechanismMessage.setDoorSide(openingMechanism.getDoorSide().getByteValue());
+               doorOpeningMechanismMessage.getGraspPose().set(openingMechanism.getGraspPose());
+            }
+            detectableSceneNodeMessage = doorNodeMessage.getDetectableSceneNode();
+         }
          else
          {
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE);
@@ -162,23 +179,6 @@ public class ROS2SceneGraphPublisher
          MessageTools.toMessage(reshapableRigidBodySceneNode.getInitialTransformToParent(),
                                 primitiveRigidBodySceneNodeMessage.getInitialTransformToParent());
          sceneNodeMessage = primitiveRigidBodySceneNodeMessage.getSceneNode();
-      }
-      else if (sceneNode instanceof DoorNode doorNode)
-      {
-         // TODO: DOORNODES
-         sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.DOOR_NODE_TYPE);
-         sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getDoorSceneNodes().size());
-         DoorNodeMessage doorNodeMessage =  sceneGraphMessage.getDoorSceneNodes().add();
-         doorNodeMessage.getDoorFramePose().set(doorNode.getDoorFramePose());
-         doorNode.getDoorPanel().toMessage(doorNodeMessage.getDoorPanel());
-         for (DoorOpeningMechanism openingMechanism : doorNode.getOpeningMechanisms())
-         {
-            DoorOpeningMechanismMessage doorOpeningMechanismMessage = doorNodeMessage.getOpeningMechanisms().add();
-            doorOpeningMechanismMessage.setType(openingMechanism.getType().getByteValue());
-            doorOpeningMechanismMessage.setDoorSide(openingMechanism.getDoorSide().getByteValue());
-            doorOpeningMechanismMessage.getGraspPose().set(openingMechanism.getGraspPose());
-         }
-         sceneNodeMessage = doorNodeMessage.getSceneNode();
       }
       else // In this case the node is just the most basic type
       {

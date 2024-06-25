@@ -2,9 +2,9 @@
 #define __perception_msgs__msg__DoorNodeMessage__idl__
 
 #include "geometry_msgs/msg/./Pose_.idl"
+#include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
 #include "perception_msgs/msg/./DoorOpeningMechanismMessage_.idl"
 #include "perception_msgs/msg/./DoorPanelMessage_.idl"
-#include "perception_msgs/msg/./SceneNodeMessage_.idl"
 module perception_msgs
 {
   module msg
@@ -18,7 +18,7 @@ module perception_msgs
         /**
          * The base scene node information
          */
-        perception_msgs::msg::dds::SceneNodeMessage scene_node;
+        perception_msgs::msg::dds::DetectableSceneNodeMessage detectable_scene_node;
         /**
          * The pose of the door frame (X points in the direction the door opens)
          */
