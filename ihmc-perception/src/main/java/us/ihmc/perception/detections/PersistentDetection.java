@@ -2,6 +2,9 @@ package us.ihmc.perception.detections;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.time.TimeTools;
 
 import java.time.Duration;
@@ -23,6 +26,8 @@ public class PersistentDetection<T extends InstantDetection>
    private final UUID id = UUID.randomUUID();
 
    private final InstantDetection firstDetection;
+   // TODO: finish this frame
+   private final ReferenceFrame detectionInWorldFrame;
 
    private double stabilityConfidenceThreshold;
    private double stabilityDetectionFrequency;
@@ -42,6 +47,11 @@ public class PersistentDetection<T extends InstantDetection>
    public PersistentDetection(T firstDetection, double stabilityConfidenceThreshold, double stabilityDetectionFrequency, Duration historyDuration)
    {
       this.firstDetection = firstDetection;
+
+      String detectionInWorldFrameName = "persistentDetection_" + id.toString().substring(0, 5);
+      detectionInWorldFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(detectionInWorldFrameName,
+                                                                                                ReferenceFrame.getWorldFrame(),
+                                                                                                new RigidBodyTransform());
 
       addDetection(firstDetection);
       setStabilityConfidenceThreshold(stabilityConfidenceThreshold);
