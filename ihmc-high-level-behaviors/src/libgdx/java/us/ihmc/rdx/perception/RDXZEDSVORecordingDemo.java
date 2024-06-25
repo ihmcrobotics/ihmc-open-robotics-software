@@ -22,8 +22,8 @@ import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;
 
 public class RDXZEDSVORecordingDemo
 {
-   private static final RecordMode RECORD_MODE = RecordMode.PLAYBACK; // If you set to PLAYBACK, you must specify a valid SVO_FILE_NAME below
-   private static final String SVO_FILE_NAME = "/home/d/.ihmc/logs/perception/20240625_154000_ZEDRecording.svo2"; // If it's null, a unique file name with a timestamp will be generated
+   private static final RecordMode RECORD_MODE = RecordMode.RECORD; // If you set to PLAYBACK, you must specify a valid SVO_FILE_NAME below
+   private static final String SVO_FILE_NAME = null; // If it's null, a unique file name with a timestamp will be generated
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ROS2Node ros2Node;
