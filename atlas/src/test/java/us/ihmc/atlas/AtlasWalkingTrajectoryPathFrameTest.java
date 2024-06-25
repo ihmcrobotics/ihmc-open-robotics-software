@@ -92,7 +92,6 @@ public class AtlasWalkingTrajectoryPathFrameTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-      //      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @AfterEach
@@ -162,7 +161,7 @@ public class AtlasWalkingTrajectoryPathFrameTest
       assertTrue(simulationTestHelper.simulateNow(2.0));
       assertCorrectControlMode();
       assertTrue(simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(stepsInPlace, robotModel.getWalkingControllerParameters())));
-      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < 0.03);
+      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < pendulumAttachmentController.getMaxAngleStandardDeviation().getValue());
       assertWalkingFrameMatchMidFeetZUpFrame();
    }
 
@@ -281,7 +280,7 @@ public class AtlasWalkingTrajectoryPathFrameTest
       assertTrue(simulationTestHelper.simulateNow(2.0));
       assertCorrectControlMode();
       assertTrue(simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
-      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < 0.03);
+      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < pendulumAttachmentController.getMaxAngleStandardDeviation().getValue());
       assertWalkingFrameMatchMidFeetZUpFrame();
    }
 
@@ -356,7 +355,16 @@ public class AtlasWalkingTrajectoryPathFrameTest
       EndToEndTestTools.setStepDurations(footsteps, 1.5 * walkingControllerParameters.getDefaultSwingTime(), Double.NaN);
       simulationTestHelper.publishToController(footsteps);
       double simulationTime = 1.1 * EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
+
+      pendulumAttachmentController.oscillationCalculator.clear();
+      pendulumAttachmentController.rootJoint.getJointTwist().setToZero();
+
+      assertWalkingFrameMatchMidFeetZUpFrame();
+      assertTrue(simulationTestHelper.simulateNow(2.0));
+      assertCorrectControlMode();
       Assertions.assertTrue(simulationTestHelper.simulateNow(simulationTime));
+      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < pendulumAttachmentController.getMaxAngleStandardDeviation().getValue());
+      assertWalkingFrameMatchMidFeetZUpFrame();
    }
 
    public double getStepHeightOffset()
