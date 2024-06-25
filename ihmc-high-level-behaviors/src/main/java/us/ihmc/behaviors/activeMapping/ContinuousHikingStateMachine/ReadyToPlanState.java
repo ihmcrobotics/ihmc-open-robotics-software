@@ -9,7 +9,6 @@ import us.ihmc.behaviors.activeMapping.ContinuousPlannerStatistics;
 import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.stateMachine.core.State;
 
