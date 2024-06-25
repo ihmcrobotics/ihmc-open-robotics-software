@@ -39,7 +39,7 @@ public class ZEDColorDepthImageRetriever
       ZEDJavaAPINativeLibrary.load();
    }
 
-   private static final int CAMERA_FPS = 30;
+   protected static final int CAMERA_FPS = 30;
    private static final float MILLIMETER_TO_METERS = 0.001f;
 
    private final int cameraID;

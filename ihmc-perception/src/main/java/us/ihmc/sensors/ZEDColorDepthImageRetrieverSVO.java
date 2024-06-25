@@ -48,7 +48,7 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
       SL_InitParameters initParameters = getInitParameters();
       boolean openCameraResult = checkError("sl_open_camera", sl_open_camera(getCameraID(), initParameters, 0, svoFileName, "", 0, "", "", ""));
       if (recordMode == RecordMode.RECORD)
-         sl_enable_recording(getCameraID(), svoFileName, SL_SVO_COMPRESSION_MODE_H264, 8000, 30, true);
+         sl_enable_recording(getCameraID(), svoFileName, SL_SVO_COMPRESSION_MODE_H264, 8000, ZEDColorDepthImageRetriever.CAMERA_FPS, true);
       return openCameraResult;
    }
 
