@@ -6,12 +6,12 @@ import controller_msgs.msg.dds.HandWrenchTrajectoryMessage;
 import controller_msgs.msg.dds.PrepareForLocomotionMessage;
 import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.scs2.SCS2AvatarSimulation;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulation;
 import us.ihmc.avatar.testTools.scs2.SCS2AvatarTestingSimulationFactory;
@@ -32,8 +32,6 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
-import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -59,6 +57,9 @@ import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimJointBasics;
 import us.ihmc.scs2.simulation.robot.multiBodySystem.interfaces.SimRigidBodyBasics;
 import us.ihmc.scs2.simulation.robot.trackers.ExternalWrenchPoint;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
+import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldEnvironment.CinderBlockStackDescription;
+import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldEnvironment.CinderBlockType;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationToolkit.controllers.OscillateFeetPerturber;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -68,6 +69,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoLong;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.robotics.Assert.assertTrue;
@@ -290,8 +293,17 @@ public class AtlasWalkingTrajectoryPathFrameTest
    @Test
    public void testLargeForwardStep()
    {
+      CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
+      cinderBlockFieldEnvironment.addFlatGround();
+      List<List<Pose3D>> cinderBlockPoses = cinderBlockFieldEnvironment.addCustomCinderBlockField2D(steppingStonesB(new RigidBodyTransform(new Quaternion(),
+                                                                                                                                           new Vector3D(0.1,
+                                                                                                                                                        0.8,
+                                                                                                                                                        0.0))));
+      FootstepDataListMessage footsteps = generateFootstepsForSteppingStonesB(cinderBlockPoses, getStepHeightOffset());
+
       DRCRobotModel robotModel = getRobotModel();
       SCS2AvatarTestingSimulationFactory factory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                         cinderBlockFieldEnvironment,
                                                                                                                          simulationTestingParameters);
       simulationTestHelper = factory.createAvatarTestingSimulation();
 
@@ -302,25 +314,108 @@ public class AtlasWalkingTrajectoryPathFrameTest
       prepareHand(getHandName(), pendulumRobotDefinition);
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-      FramePose3D startPose = new FramePose3D(simulationTestHelper.getControllerReferenceFrames().getMidFootZUpGroundFrame());
-      startPose.changeFrame(worldFrame);
-      FootstepPlan footstepPlan = new FootstepPlan();
-      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(new Pose3D(0.8, -steppingParameters.getInPlaceWidth()/2, 0.0, 0.0, 0.0, 0.0)));
-      footstepPlan.addFootstep(RobotSide.LEFT, new FramePose3D(new Pose3D(0.8, steppingParameters.getInPlaceWidth()/2, 0.0, 0.0, 0.0, 0.0)));
+      EndToEndTestTools.setStepDurations(footsteps, 1.5 * walkingControllerParameters.getDefaultSwingTime(), Double.NaN);
+      simulationTestHelper.publishToController(footsteps);
+      double simulationTime = 1.1 * EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
+      Assertions.assertTrue(simulationTestHelper.simulateNow(simulationTime));
+   }
 
-      FootstepDataListMessage steps = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.25, 1.0);
-      simulationTestHelper.publishToController(steps);
+   public double getStepHeightOffset()
+   {
+      return 0.0;
+   }
 
-      pendulumAttachmentController.oscillationCalculator.clear();
-      pendulumAttachmentController.rootJoint.getJointTwist().setToZero();
+   private static FootstepDataListMessage generateFootstepsForSteppingStonesB(List<? extends List<? extends Pose3DReadOnly>> cinderBlockPoses, double zOffset)
+   {
+      FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
-      assertWalkingFrameMatchMidFeetZUpFrame();
-      assertTrue(simulationTestHelper.simulateNow(2.0));
-      assertCorrectControlMode();
-      assertTrue(simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
-      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < pendulumAttachmentController.getMaxAngleStandardDeviation().getValue());
-      assertWalkingFrameMatchMidFeetZUpFrame();
+      double yawOffset = 0.0;
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(1).get(5), 0.0, -0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(1).get(6), 0.0, 0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(2).get(5), 0.0, -0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(3).get(6), 0.0, 0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(4).get(5), 0.0, -0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(5).get(6), 0.0, 0.08, zOffset, yawOffset);
+      yawOffset = 0.25 * Math.PI;
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(6).get(5), 0.0, 0.0, zOffset, yawOffset);
+      yawOffset = 0.50 * Math.PI;
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(7).get(4), 0.0, 0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(6).get(3), 0.0, -0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(7).get(2), 0.0, 0.08, zOffset, yawOffset);
+      yawOffset = 0.75 * Math.PI;
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(6).get(1), 0.0, 0.04, zOffset, yawOffset);
+      yawOffset = Math.PI;
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(5).get(0), 0.0, 0.08, zOffset, yawOffset);
+
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(4).get(1), 0.0, 0.08, zOffset, yawOffset);
+      yawOffset = 0.85 * Math.PI;
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(3).get(1), 0.02, -0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(2).get(0), 0.0, 0.12, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(2).get(0), 0.0, -0.12, zOffset, yawOffset);
+      yawOffset = Math.PI;
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(1).get(1), 0.0, -0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(1).get(0), 0.0, 0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(0).get(1), 0.0, -0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(0).get(0), 0.0, 0.08, zOffset, yawOffset);
+
+      return footsteps;
+   }
+
+   private static void addFootstepFromCBPose(FootstepDataListMessage footsteps,
+                                             RobotSide stepSide,
+                                             Pose3DReadOnly cinderBlockPose,
+                                             double xOffset,
+                                             double yOffset,
+                                             double zOffset,
+                                             double yawOffset)
+   {
+      Pose3D footstepPose = new Pose3D(cinderBlockPose);
+      footstepPose.appendYawRotation(yawOffset);
+      footstepPose.appendTranslation(xOffset, yOffset, zOffset);
+      footsteps.getFootstepDataList().add().set(HumanoidMessageTools.createFootstepDataMessage(stepSide, footstepPose));
+   }
+
+   public static List<List<CinderBlockStackDescription>> steppingStonesB(RigidBodyTransformReadOnly startPose)
+   {
+      // @formatter:off
+      int[][] stackSizes = new int[][]
+            {
+                  {0, 0, 0, 0, 0, 0, 0},
+                  {1, 1, 0, 0, 0, 1, 1},
+                  {2, 0, 0, 0, 0, 2, 0},
+                  {0, 1, 0, 0, 2, 0, 2},
+                  {0, 1, 0, 0, 3, 2, 0},
+                  {2, 0, 0, 0, 0, 0, 2},
+                  {0, 2, 0, 3, 0, 2, 0},
+                  {1, 1, 2, 2, 2, 0, 2},
+                  {2, 0, 1, 0, 0, 1, 0}
+            };
+      // @formatter:on
+
+      CinderBlockType FLAT = CinderBlockType.FLAT;
+      CinderBlockType SLLE = CinderBlockType.SLANTED_LEFT;
+      CinderBlockType SLFW = CinderBlockType.SLANTED_FORWARD;
+      CinderBlockType SLRI = CinderBlockType.SLANTED_RIGHT;
+      CinderBlockType SLBK = CinderBlockType.SLANTED_BACK;
+
+      // @formatter:off
+      CinderBlockType[][] types = new CinderBlockType[][]
+            {
+                  {null, null, null, null, null, null, null},
+                  {SLBK, SLBK, null, null, null, SLBK, SLBK},
+                  {FLAT, null, null, null, null, SLRI, null},
+                  {null, FLAT, null, null, null, null, SLLE},
+                  {null, FLAT, null, null, null, SLBK, null},
+                  {FLAT, null, null, null, null, null, FLAT},
+                  {null, FLAT, SLFW, null, null, SLFW, null},
+                  {SLFW, SLFW, FLAT, FLAT, SLFW, null, SLLE},
+                  {FLAT, null, SLBK, null, null, FLAT, null},
+                  };
+      // @formatter:on
+
+      RigidBodyTransform centerBasePose = new RigidBodyTransform(startPose);
+      centerBasePose.appendTranslation(0.5 * stackSizes.length * CinderBlockFieldEnvironment.cinderBlockLength, 0.0, 0.0);
+      return CinderBlockStackDescription.grid2D(centerBasePose, stackSizes, types);
    }
 
    private void assertWalkingFrameMatchMidFeetZUpFrame()
