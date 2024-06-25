@@ -1,6 +1,5 @@
 package us.ihmc.perception.detections;
 
-import org.jetbrains.annotations.NotNull;
 import us.ihmc.robotics.time.TimeTools;
 
 import java.time.Duration;
@@ -48,7 +47,7 @@ public class DetectionManager
     */
    public <T extends InstantDetection> void addDetection(T newInstantDetection, Class<T> classType)
    {
-      DetectionPair<T> bestMatch = null;
+      DetectionPair bestMatch = null;
 
       Set<PersistentDetection> sameTypePersistentDetections = getDetectionsOfType(classType);
       for (PersistentDetection persistentDetection : sameTypePersistentDetections)
@@ -64,7 +63,7 @@ public class DetectionManager
             if (distanceSquared < matchDistanceSquared)
             {
                if (bestMatch == null || bestMatch.getDistanceSquared() > distanceSquared)
-                  bestMatch = new DetectionPair<>(persistentDetection, newInstantDetection);
+                  bestMatch = new DetectionPair(persistentDetection, newInstantDetection);
             }
          }
       }
@@ -91,20 +90,19 @@ public class DetectionManager
     * @param classType The class of the type of {@link InstantDetection} being added.
     *                  E.g. {@link us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection}
     *                  or {@link us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection}
-    * @param <T> Class extending {@link InstantDetection}. Must match the passed in {@code classType}.
     */
-   public <T extends InstantDetection> void addDetections(Set<T> newInstantDetections, Class<T> classType)
+   public void addDetections(Set<InstantDetection> newInstantDetections, Class<?> classType)
    {
-      PriorityQueue<DetectionPair<T>> possibleMatches = new PriorityQueue<>();
+      PriorityQueue<DetectionPair> possibleMatches = new PriorityQueue<>();
 
       // Keep track of unmatched detections
-      Set<T> unmatchedNewDetections = new HashSet<>(newInstantDetections);
+      Set<InstantDetection> unmatchedNewDetections = new HashSet<>(newInstantDetections);
       Set<PersistentDetection> unmatchedPersistentDetections = getDetectionsOfType(classType);
 
       // Find all possible matches
       for (PersistentDetection persistentDetection : unmatchedPersistentDetections)
       {
-         for (T newInstantDetection : newInstantDetections)
+         for (InstantDetection newInstantDetection : newInstantDetections)
          {
             // matches must be of the same class
             if (persistentDetection.getDetectedObjectClass().equals(newInstantDetection.getDetectedObjectClass()))
@@ -115,18 +113,18 @@ public class DetectionManager
                                                            .distanceSquared(newInstantDetection.getPose().getPosition());
                // matches must be close enough
                if (distanceSquared < matchDistanceSquared)
-                  possibleMatches.add(new DetectionPair<>(persistentDetection, newInstantDetection));
+                  possibleMatches.add(new DetectionPair(persistentDetection, newInstantDetection));
             }
          }
       }
 
-      Set<DetectionPair<T>> matchedDetections = new HashSet<>();
+      Set<DetectionPair> matchedDetections = new HashSet<>();
       while(!unmatchedNewDetections.isEmpty() && !unmatchedPersistentDetections.isEmpty() && !possibleMatches.isEmpty())
       {
          // Get the best match
-         DetectionPair<T> detectionPair = possibleMatches.poll();
-         PersistentDetection persistentDetection = detectionPair.persistentDetection;
-         T newInstantDetection = detectionPair.instantDetection;
+         DetectionPair detectionPair = possibleMatches.poll();
+         PersistentDetection persistentDetection = detectionPair.getPersistentDetection();
+         InstantDetection newInstantDetection = detectionPair.getInstantDetection();
 
          // If it hasn't been used already, update the persistent detection
          if (unmatchedPersistentDetections.contains(persistentDetection)
@@ -144,7 +142,7 @@ public class DetectionManager
          matchedDetections.forEach(DetectionPair::confirmDetectionMatch);
 
          // create new persistent detections from unmatched new detections
-         for (T unmatchedNewDetection : unmatchedNewDetections)
+         for (InstantDetection unmatchedNewDetection : unmatchedNewDetections)
             persistentDetections.add(new PersistentDetection(unmatchedNewDetection,
                                                              defaultStabilityThreshold,
                                                              defaultStabilityFrequency,
@@ -161,8 +159,7 @@ public class DetectionManager
       }
    }
 
-   @SuppressWarnings("unchecked")
-   public <T extends InstantDetection> Set<PersistentDetection> getDetectionsOfType(Class<T> classType)
+   public Set<PersistentDetection> getDetectionsOfType(Class<?> classType)
    {
       Set<PersistentDetection> typeDetections = new HashSet<>();
 
@@ -170,7 +167,7 @@ public class DetectionManager
       {
          for (PersistentDetection persistentDetection : persistentDetections)
             if (persistentDetection.getInstantDetectionClass().equals(classType))
-               typeDetections.add((PersistentDetection) persistentDetection);
+               typeDetections.add(persistentDetection);
       }
 
       return typeDetections;
@@ -258,25 +255,5 @@ public class DetectionManager
    public void setDefaultHistoryDuration(Duration historyDuration)
    {
       this.defaultHistorySeconds = TimeTools.toDoubleSeconds(historyDuration);
-   }
-
-   private record DetectionPair<T extends InstantDetection>(PersistentDetection persistentDetection, T instantDetection)
-         implements Comparable<DetectionPair<? extends InstantDetection>>
-   {
-      public double getDistanceSquared()
-      {
-         return persistentDetection.getMostRecentDetection().getPose().getPosition().distanceSquared(instantDetection.getPose().getPosition());
-      }
-
-      public void confirmDetectionMatch()
-      {
-         persistentDetection.addDetection(instantDetection);
-      }
-
-      @Override
-      public int compareTo(@NotNull DetectionPair<? extends InstantDetection> other)
-      {
-         return Double.compare(getDistanceSquared(), other.getDistanceSquared());
-      }
    }
 }

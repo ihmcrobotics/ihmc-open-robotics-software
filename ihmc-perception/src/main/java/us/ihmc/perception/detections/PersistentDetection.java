@@ -1,7 +1,6 @@
 package us.ihmc.perception.detections;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -40,7 +39,8 @@ public class PersistentDetection
                                                                                                 ReferenceFrame.getWorldFrame(),
                                                                                                 new RigidBodyTransform());
 
-      addDetection(firstDetection);
+      detectionHistory.add(firstDetection);
+      firstDetection.setPersistentDetectionID(id);
       setStabilityConfidenceThreshold(stabilityConfidenceThreshold);
       setStabilityDetectionFrequency(stabilityDetectionFrequency);
       setHistoryDuration(TimeTools.durationOfSeconds(historyDuration));
@@ -136,14 +136,6 @@ public class PersistentDetection
    public void setStabilityDetectionFrequency(double stabilityDetectionFrequency)
    {
       this.stabilityDetectionFrequency = stabilityDetectionFrequency;
-   }
-
-   public void setDetectionHistory(Collection<InstantDetection> newHistory)
-   {
-      detectionHistory.clear();
-      detectionHistory.addAll(newHistory);
-      detectionHistory.forEach(instantDetection -> instantDetection.setPersistentDetectionID(id));
-      updateHistory();
    }
 
    public boolean isOldEnough()
@@ -243,23 +235,5 @@ public class PersistentDetection
    private boolean detectionExpired(InstantDetection detection, Instant now)
    {
       return detection.getDetectionTime().isBefore(now.minus(historyDuration));
-   }
-
-   @Override
-   public boolean equals(Object other)
-   {
-      if (this == other)
-         return true;
-
-      if (other instanceof PersistentDetection otherDetection)
-      {
-         return getInstantDetectionClass().equals(otherDetection.getInstantDetectionClass())
-                && getMostRecentDetection().equals(otherDetection.getMostRecentDetection())
-                && historyDuration.equals(otherDetection.historyDuration)
-                && MathTools.epsilonEquals(stabilityConfidenceThreshold, otherDetection.stabilityConfidenceThreshold, EPSILON)
-                && MathTools.epsilonEquals(stabilityDetectionFrequency, otherDetection.stabilityDetectionFrequency, EPSILON);
-      }
-      else
-         return false;
    }
 }
