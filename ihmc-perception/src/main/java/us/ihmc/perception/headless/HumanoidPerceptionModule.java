@@ -1,5 +1,8 @@
 package us.ihmc.perception.headless;
 
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
@@ -29,6 +32,7 @@ import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.timing.PerceptionStatistics;
 import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.rdx.ui.graphics.RDXGlobalHeightMapGraphic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -36,6 +40,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.sensorProcessing.globalHeightMap.GlobalHeightMap;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
@@ -76,6 +81,7 @@ public class HumanoidPerceptionModule
    private HeightMapData latestHeightMapData;
    private BytedecoImage realsenseDepthImage;
 
+
    private final PerceptionStatistics perceptionStatistics = new PerceptionStatistics();
    private final Notification resetHeightMapRequested = new Notification();
 
@@ -86,9 +92,16 @@ public class HumanoidPerceptionModule
    private boolean occupancyGridEnabled = false;
    public boolean heightMapDataBeingProcessed = false;
 
+   private final GlobalHeightMap globalHeightMap;
+   private final RDXGlobalHeightMapGraphic rdxGlobalHeightMapGraphic;
+
    public HumanoidPerceptionModule(OpenCLManager openCLManager)
    {
       this.openCLManager = openCLManager;
+
+      // Initialize the global height map and RDX graphic
+      this.globalHeightMap = new GlobalHeightMap();
+      this.rdxGlobalHeightMapGraphic = new RDXGlobalHeightMapGraphic();
    }
 
    public void initializeRealsenseDepthImage(int height, int width)
@@ -155,6 +168,9 @@ public class HumanoidPerceptionModule
                                          rapidHeightMapExtractor.reset();
                                       }
                                       updateRapidHeightMap(ros2Helper, cameraFrame, cameraZUpFrame);
+                                      // New code to handle global height map and RDX graphic update
+                                      HeightMapMessage heightMapMessage = getGlobalHeightMapMessage();
+                                      rdxGlobalHeightMapGraphic.generateMeshesAsync(heightMapMessage);
                                    }
 
                                    Instant acquisitionTime = Instant.now();
@@ -399,6 +415,8 @@ public class HumanoidPerceptionModule
 
       if (localizationAndMappingTask != null)
          localizationAndMappingTask.destroy();
+
+      destroyHeightMapGraphics();
    }
 
    public RapidHeightMapExtractor getRapidHeightMapExtractor()
@@ -459,5 +477,15 @@ public class HumanoidPerceptionModule
    public PerceptionStatistics getPerceptionStatistics()
    {
       return perceptionStatistics;
+   }
+
+   public void renderHeightMap(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      rdxGlobalHeightMapGraphic.getRenderables(renderables, pool);
+   }
+
+   public void destroyHeightMapGraphics()
+   {
+      rdxGlobalHeightMapGraphic.destroy();
    }
 }
