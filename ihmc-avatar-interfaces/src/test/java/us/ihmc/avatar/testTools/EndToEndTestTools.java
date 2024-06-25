@@ -1062,4 +1062,63 @@ public class EndToEndTestTools
       output.add(center);
       return output;
    }
+
+   public static FootstepDataListMessage generateStairsFootsteps(boolean slow,
+                                                                boolean up,
+                                                                double stepHeight,
+                                                                double stepLength,
+                                                                double stanceWidth,
+                                                                int numberOfSteps)
+   {
+      FootstepDataListMessage footsteps = new FootstepDataListMessage();
+
+      double x = 0.0;
+      double z = 0.0;
+
+      if (slow)
+      {
+         for (int i = 0; i < numberOfSteps + 1; i++)
+         {
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               FootstepDataMessage footstep = footsteps.getFootstepDataList().add();
+               footstep.setRobotSide(robotSide.toByte());
+               footstep.getLocation().set(x, 0.5 * robotSide.negateIfRightSide(stanceWidth), z);
+            }
+
+            x += stepLength;
+            z += up ? stepHeight : -stepHeight;
+         }
+      }
+      else
+      {
+         RobotSide stepSide = RobotSide.LEFT;
+
+         FootstepDataMessage footstep = footsteps.getFootstepDataList().add();
+         footstep.setRobotSide(stepSide.toByte());
+         footstep.getLocation().set(x, 0.5 * stepSide.negateIfRightSide(stanceWidth), z);
+         stepSide = stepSide.getOppositeSide();
+
+         for (int i = 0; i < numberOfSteps + 1; i++)
+         {
+            footstep = footsteps.getFootstepDataList().add();
+            footstep.setRobotSide(stepSide.toByte());
+            footstep.getLocation().set(x, 0.5 * stepSide.negateIfRightSide(stanceWidth), z);
+
+            stepSide = stepSide.getOppositeSide();
+
+            if (i < numberOfSteps)
+            {
+               x += stepLength;
+               z += up ? stepHeight : -stepHeight;
+            }
+         }
+
+         footstep = footsteps.getFootstepDataList().add();
+         footstep.setRobotSide(stepSide.toByte());
+         footstep.getLocation().set(x, 0.5 * stepSide.negateIfRightSide(stanceWidth), z);
+      }
+
+      return footsteps;
+   }
 }
