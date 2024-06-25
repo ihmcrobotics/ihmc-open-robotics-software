@@ -10,6 +10,11 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Extends {@link InstantDetection} by holding onto the depth points that coorespond to
+ * the detected segmentation of the object. This has already undergone segmentation erosion
+ * and outlier points removed.
+ */
 public class YOLOv8InstantDetection extends InstantDetection
 {
    private final List<Point3D32> objectPointCloud;

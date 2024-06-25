@@ -8,6 +8,17 @@ import us.ihmc.euclid.geometry.Pose3D;
 import java.time.Instant;
 import java.util.UUID;
 
+/**
+ * Represents a single detection directly and immediately from a perception algorithm which does
+ * not already have stability filtering, history, or persistent tracking built in.
+ * A new instance of this is created for each detected element for each frame.
+ *
+ * The main subclasses are:
+ * <ul>
+ *    <li>{@link us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection}</li>
+ *    <li>{@link us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection}</li>
+ * </ul>
+ */
 public abstract class InstantDetection
 {
    public static final UUID UNMATCHED_DETECTION_ID = new UUID(0L, 0L);
