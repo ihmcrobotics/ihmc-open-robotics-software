@@ -40,7 +40,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class YOLOv8DetectionExecutor
 {
@@ -54,7 +54,7 @@ public class YOLOv8DetectionExecutor
    private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor();
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter();
 
-   private final List<BiConsumer<Set<InstantDetection>, Class<?>>> detectionConsumerCallbacks = new ArrayList<>();
+   private final List<Consumer<Set<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
 
    private final ROS2DemandGraphNode annotatedImageDemandNode;
    private final ROS2PublisherBasics<ImageMessage> annotatedImagePublisher;
@@ -94,7 +94,7 @@ public class YOLOv8DetectionExecutor
       });
    }
 
-   public void addDetectionConsumerCallback(BiConsumer<Set<InstantDetection>, Class<?>> callback)
+   public void addDetectionConsumerCallback(Consumer<Set<InstantDetection>> callback)
    {
       detectionConsumerCallbacks.add(callback);
    }
@@ -160,8 +160,7 @@ public class YOLOv8DetectionExecutor
             }
 
             // Submit the callbacks to be processed
-            yoloExecutorService.submit(() -> detectionConsumerCallbacks.forEach(callback -> callback.accept(yoloInstantDetections,
-                                                                                                            YOLOv8InstantDetection.class)));
+            yoloExecutorService.submit(() -> detectionConsumerCallbacks.forEach(callback -> callback.accept(yoloInstantDetections)));
 
             // If annotated image is demanded, create and publish it
             if (annotatedImageDemandNode.isDemanded())

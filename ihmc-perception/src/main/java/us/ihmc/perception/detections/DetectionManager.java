@@ -86,18 +86,18 @@ public class DetectionManager
     * or if a new detection is unmatched, a new {@link PersistentDetection} will be created.
     * This method is thread safe only when called on different detection class types.
     * When detections of the same type are being added, this method is NOT thread safe.
+    *
     * @param newInstantDetections Set of {@link InstantDetection}s, ideally all from the same detection frame.
-    * @param classType The class of the type of {@link InstantDetection} being added.
-    *                  E.g. {@link us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection}
-    *                  or {@link us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection}
     */
-   public void addDetections(Set<InstantDetection> newInstantDetections, Class<?> classType)
+   public <T extends InstantDetection> void addDetections(Set<T> newInstantDetections)
    {
       PriorityQueue<DetectionPair> possibleMatches = new PriorityQueue<>();
 
+      Object oneOfTheDetections = newInstantDetections.toArray()[0];
+
       // Keep track of unmatched detections
       Set<InstantDetection> unmatchedNewDetections = new HashSet<>(newInstantDetections);
-      Set<PersistentDetection> unmatchedPersistentDetections = getDetectionsOfType(classType);
+      Set<PersistentDetection> unmatchedPersistentDetections = getDetectionsOfType(oneOfTheDetections.getClass());
 
       // Find all possible matches
       for (PersistentDetection persistentDetection : unmatchedPersistentDetections)
