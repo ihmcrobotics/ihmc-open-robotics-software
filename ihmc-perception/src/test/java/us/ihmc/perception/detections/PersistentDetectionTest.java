@@ -100,9 +100,6 @@ public class PersistentDetectionTest
 
       PersistentDetection persistentDetection = new PersistentDetection(detectionClassA, 0.5, 5.0, 1.0);
 
-      // Don't allow addition of a different class type
-      assertThrows(IllegalArgumentException.class, () -> persistentDetection.addDetection(detectionClassB));
-
       // Don't allow a negative history length
       assertThrows(IllegalArgumentException.class, () -> persistentDetection.setHistoryDuration(-1.0));
 

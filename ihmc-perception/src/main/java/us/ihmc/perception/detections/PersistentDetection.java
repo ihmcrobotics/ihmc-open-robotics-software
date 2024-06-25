@@ -39,27 +39,17 @@ public class PersistentDetection
                                                                                                 ReferenceFrame.getWorldFrame(),
                                                                                                 new RigidBodyTransform());
 
-      detectionHistory.add(firstDetection);
-      firstDetection.setPersistentDetectionID(id);
+      addDetection(firstDetection);
       setStabilityConfidenceThreshold(stabilityConfidenceThreshold);
       setStabilityDetectionFrequency(stabilityDetectionFrequency);
       setHistoryDuration(TimeTools.durationOfSeconds(historyDuration));
    }
 
    /**
-    * Add a new instant detection to the history of detections
-    *
-    * @param newDetection A new {@link InstantDetection} of the same class as the first detection
-    *                     added to this {@link PersistentDetection}
+    * Add a new instant detection to the history of detections.
     */
    public void addDetection(InstantDetection newDetection)
    {
-      // ensure only detection of the same class are added to the history
-      if (!newDetection.getDetectedObjectClass().equals(getDetectedObjectClass()))
-         throw new IllegalArgumentException(String.format("New detection's class (%s) does not match original detection's class (%s)",
-                                                          newDetection.getDetectedObjectClass(),
-                                                          getDetectedObjectClass()));
-
       detectionHistory.add(newDetection);
       newDetection.setPersistentDetectionID(id);
    }
