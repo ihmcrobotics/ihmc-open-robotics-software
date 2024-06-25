@@ -286,14 +286,14 @@ public class DetectionManagerTest
       Set<PersistentDetection<TestDetectionA>> persistentDetectionsA = detectionManager.getDetectionsOfType(TestDetectionA.class);
       for (PersistentDetection<TestDetectionA> persistentDetection : persistentDetectionsA)
       {
-         assertFalse(persistentDetection.isStable());
+         assertFalse(persistentDetection.isStable(startTime));
          assertEquals(3, persistentDetection.getHistorySize());
       }
 
       Set<PersistentDetection<TestDetectionB>> persistentDetectionsB = detectionManager.getDetectionsOfType(TestDetectionB.class);
       for (PersistentDetection<TestDetectionB> persistentDetection : persistentDetectionsB)
       {
-         assertTrue(persistentDetection.isStable());
+         assertTrue(persistentDetection.isStable(startTime));
          assertEquals(3, persistentDetection.getHistorySize());
       }
 
@@ -302,13 +302,13 @@ public class DetectionManagerTest
 
       for (PersistentDetection<TestDetectionA> persistentDetection : persistentDetectionsA)
       {
-         assertFalse(persistentDetection.isStable());
+         assertFalse(persistentDetection.isStable(future));
          assertEquals(1, persistentDetection.getHistorySize());
       }
 
       for (PersistentDetection<TestDetectionB> persistentDetection : persistentDetectionsB)
       {
-         assertFalse(persistentDetection.isStable());
+         assertFalse(persistentDetection.isStable(future));
          assertEquals(1, persistentDetection.getHistorySize());
       }
    }
