@@ -8,7 +8,6 @@ import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerStatistics;
 import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
-import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -25,7 +24,6 @@ public class ReadyToPlanState implements State
    private final TerrainMapData terrainMap;
    private final TerrainPlanningDebugger debugger;
    private final ContinuousPlannerStatistics statistics;
-   private final StepValidityChecker stepValidityChecker;
 
    private final StopWatch stopWatch = new StopWatch();
    double timeInSwingToStopPlanningAndWaitTillNextAttempt = 0;
@@ -36,8 +34,7 @@ public class ReadyToPlanState implements State
                            ContinuousHikingParameters continuousHikingParameters,
                            TerrainMapData terrainMap,
                            TerrainPlanningDebugger debugger,
-                           ContinuousPlannerStatistics statistics,
-                           StepValidityChecker stepValidityChecker)
+                           ContinuousPlannerStatistics statistics)
    {
       this.commandMessage = commandMessage;
       this.continuousPlanner = continuousPlanner;
@@ -46,12 +43,12 @@ public class ReadyToPlanState implements State
       this.terrainMap = terrainMap;
       this.debugger = debugger;
       this.statistics = statistics;
-      this.stepValidityChecker = stepValidityChecker;
    }
 
    @Override
    public void onEntry()
    {
+      continuousPlanner.setPlanAvailable(false);
       stopWatch.reset();
       LogTools.warn(String.format("Entering %s", getClass().getSimpleName()));
       debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
@@ -90,28 +87,10 @@ public class ReadyToPlanState implements State
       // We know that we have a plan, and that only gets set to true when we have at least one step in the plan, so we know it's not empty
       if (continuousPlanner.isPlanAvailable())
       {
-         boolean isValid;
-         FootstepPlan footstepPlan = continuousPlanner.getLatestFootstepPlan();
-
-         isValid = stepValidityChecker.checkNextStepIsValid(continuousPlanner.getImminentFootstepPose(), footstepPlan.getFootstep(0).getFootstepPose());
-         for (int i = 1; i < footstepPlan.getNumberOfSteps(); i++)
-         {
-            isValid = stepValidityChecker.checkNextStepIsValid(footstepPlan.getFootstep(i - 1).getFootstepPose(),
-                                                               footstepPlan.getFootstep(i).getFootstepPose());
-         }
-
-         // If all the footsteps in the plan are valid steps, then we will publish this plan to the controller
-         if (isValid)
-         {
-            FootstepDataListMessage message = FootstepDataMessageConverter.createFootstepDataListFromPlan(continuousPlanner.getLatestFootstepPlan(),
-                                                                                                          continuousHikingParameters.getSwingTime(),
-                                                                                                          continuousHikingParameters.getTransferTime());
-            debugger.publishPlannedFootsteps(message);
-         }
-         else
-         {
-            continuousPlanner.setPlanAvailable(false);
-         }
+         FootstepDataListMessage message = FootstepDataMessageConverter.createFootstepDataListFromPlan(continuousPlanner.getLatestFootstepPlan(),
+                                                                                                       continuousHikingParameters.getSwingTime(),
+                                                                                                       continuousHikingParameters.getTransferTime());
+         debugger.publishPlannedFootsteps(message);
       }
    }
 

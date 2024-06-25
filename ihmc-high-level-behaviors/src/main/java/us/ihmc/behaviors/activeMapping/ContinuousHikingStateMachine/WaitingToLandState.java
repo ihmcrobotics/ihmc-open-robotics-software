@@ -57,16 +57,17 @@ public class WaitingToLandState implements State
             statistics.appendString(message);
 
             ros2Helper.publish(controllerFootstepDataTopic, footstepDataList);
+            continuousPlanner.setPlanAvailable(false);
          }
          else
          {
-            String message = "State:Planning failed... will try again when current step is completed";
+            continuousPlanner.setLatestFootstepPlan(null);
+            String message = "State: Planning failed... will try again when current step is completed";
             LogTools.error(message);
             statistics.appendString(message);
          }
       }
 
-      continuousPlanner.setPlanAvailable(false);
       continuousPlanner.transitionCallback();
       statistics.setStartWaitingTime();
 

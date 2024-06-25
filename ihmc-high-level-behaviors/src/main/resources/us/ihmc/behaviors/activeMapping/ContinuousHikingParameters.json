@@ -1,7 +1,7 @@
 {
   "title" : "Continuous Hiking parameters",
-  "Enable continuous walking" : true,
-  "Step publisher enabled" : true,
+  "Enable continuous walking" : false,
+  "Step publisher enabled" : false,
   "Override entire queue each step" : true,
   "Number of steps to send" : 3,
   "Goal pose forward distance" : 1.6,

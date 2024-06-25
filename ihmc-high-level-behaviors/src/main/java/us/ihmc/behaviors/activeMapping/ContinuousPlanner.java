@@ -73,9 +73,9 @@ public class ContinuousPlanner
    private final FootstepPlanningModule footstepPlanner;
    private FootstepPlan monteCarloReferencePlan;
    private TerrainMapData latestTerrainMapData;
-   private FootstepPlan previousFootstepPlan;
    private HeightMapData latestHeightMapData;
    private final TerrainPlanningDebugger debugger;
+   private FootstepPlan previousFootstepPlan;
    private FootstepPlan latestFootstepPlan;
    private final FootstepPlannerLogger logger;
 
@@ -446,7 +446,23 @@ public class ContinuousPlanner
          FramePose3D leftSolePose = new FramePose3D(ReferenceFrame.getWorldFrame(), referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame());
          FramePose3D rightSolePose = new FramePose3D(ReferenceFrame.getWorldFrame(), referenceFrames.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame());
 
-         updateImminentStance(rightSolePose, leftSolePose, RobotSide.LEFT);
+         double leftSolePositionInXFromRobot = referenceFrames.getSoleFrame(RobotSide.LEFT)
+                                                              .getTransformToDesiredFrame(referenceFrames.getMidFeetUnderPelvisFrame())
+                                                              .getTranslationX();
+         double rightSolePositionInXFromRobot = referenceFrames.getSoleFrame(RobotSide.RIGHT)
+                                                               .getTransformToDesiredFrame(referenceFrames.getMidFeetUnderPelvisFrame())
+                                                               .getTranslationX();
+         RobotSide robotSide = leftSolePositionInXFromRobot > rightSolePositionInXFromRobot ? RobotSide.LEFT : RobotSide.RIGHT;
+
+         if (robotSide == RobotSide.LEFT)
+         {
+            updateImminentStance(rightSolePose, leftSolePose, robotSide);
+         }
+         else
+         {
+            updateImminentStance(leftSolePose, rightSolePose, robotSide);
+         }
+
          planFromRobot = false;
       }
       else if (latestFootstepStatusMessage != null)
@@ -590,6 +606,11 @@ public class ContinuousPlanner
    public boolean isPlanAvailable()
    {
       return planAvailable;
+   }
+
+   public void setLatestFootstepPlan(FootstepPlan latestFootstepPlan)
+   {
+      this.previousFootstepPlan = latestFootstepPlan;
    }
 
    public void setLatestFootstepStatusMessage(AtomicReference<FootstepStatusMessage> latestFootstepStatusMessage)

@@ -6,7 +6,6 @@ import us.ihmc.communication.HumanoidControllerAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -47,6 +46,7 @@ public class DoNothingState implements State
       {
          message.setPause(true);
          message.setClearRemainingFootstepQueue(true);
+         continuousPlanner.setLatestFootstepPlan(null);
          pauseWalkingPublisher.publish(message);
       }
 

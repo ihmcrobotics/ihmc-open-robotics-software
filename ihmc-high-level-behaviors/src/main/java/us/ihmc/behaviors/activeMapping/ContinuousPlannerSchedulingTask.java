@@ -73,7 +73,6 @@ public class ContinuousPlannerSchedulingTask
       stateMachineFactory.setNamePrefix("ContinuousHikingStateMachine");
       stateMachineFactory.setRegistry(registry);
 
-      StepValidityChecker stepValidityChecker = new StepValidityChecker(continuousPlanner, robotModel, referenceFrames, registry);
       ControllerFootstepQueueMonitor controllerFootstepQueueMonitor = new ControllerFootstepQueueMonitor(ros2Helper,
                                                                                                          simpleRobotName,
                                                                                                          referenceFrames,
@@ -87,8 +86,7 @@ public class ContinuousPlannerSchedulingTask
                                                     continuousHikingParameters,
                                                     terrainMap,
                                                     debugger,
-                                                    statistics,
-                                                    stepValidityChecker);
+                                                    statistics);
       State waitingtoLandState = new WaitingToLandState(ros2Helper,
                                                         simpleRobotName,
                                                         continuousPlanner,
