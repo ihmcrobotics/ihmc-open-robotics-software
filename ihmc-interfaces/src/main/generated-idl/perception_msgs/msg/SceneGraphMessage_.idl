@@ -54,6 +54,10 @@ module perception_msgs
       struct SceneGraphMessage
       {
         /**
+         * Monotonically increasing message ID that matches the CRDTInfo update number
+         */
+        unsigned long sequence_id;
+        /**
          * The ID to assign to the next instantiated node
          */
         unsigned long next_id;

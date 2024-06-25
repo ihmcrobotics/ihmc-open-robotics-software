@@ -4,8 +4,9 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiTableColumnFlags;
-import imgui.internal.ImGui;
+import imgui.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.tuple3D.Vector3D32;
@@ -55,7 +56,10 @@ public class RDXSceneGraphUI
 
    public RDXSceneGraphUI(ROS2PublishSubscribeAPI ros2PublishSubscribeAPI, RDX3DPanel panel3D)
    {
-      sceneGraph = new ROS2SceneGraph(new SceneNode(SceneGraph.ROOT_NODE_ID, SceneGraph.ROOT_NODE_NAME), (sceneGraph, ros2SceneGraphSubscriptionNode) ->
+      sceneGraph = new ROS2SceneGraph(new SceneNode(SceneGraph.ROOT_NODE_ID,
+                                                    SceneGraph.ROOT_NODE_NAME,
+                                                    new CRDTInfo(ROS2ActorDesignation.OPERATOR, (int) SceneGraph.CRDT_SYNC_FREQUENCY)),
+                                      (sceneGraph, ros2SceneGraphSubscriptionNode) ->
       {
          RDXSceneNode uiSceneNode = RDXSceneGraphTools.createNodeFromMessage(ros2SceneGraphSubscriptionNode, panel3D, labels, sceneGraph);
          addUISceneNode(uiSceneNode);
@@ -335,6 +339,32 @@ public class RDXSceneGraphUI
             ImGui.endMenu();
          }
          ImGui.popItemWidth();
+
+         // Prevent jumping around when it changes
+         float nodeCountsTextWidth = ImGuiTools.calcTextSizeX("Operator: 000 Robot: 000 ");
+         float frozenStatusTextWidth = ImGuiTools.calcTextSizeX("State: Frozen (000)");
+         float frequencyTextWidth = ImGuiTools.calcTextSizeX("000 Hz ");
+         float droppedTextWidth = ImGuiTools.calcTextSizeX("Dropped: 0000");
+         float rightMargin = 20.0f;
+
+         ImGui.sameLine(ImGui.getWindowSizeX() - nodeCountsTextWidth - frozenStatusTextWidth - frequencyTextWidth - droppedTextWidth - rightMargin);
+         int numberOfLocalNodes = sceneGraph.getIDToNodeMap().size();
+         ImGui.text("Operator: %3d  Robot: %3d".formatted(numberOfLocalNodes, sceneGraph.getSceneGraphSubscription().getNumberOfOnRobotNodes()));
+
+         ImGui.sameLine(ImGui.getWindowSizeX() - frozenStatusTextWidth - frequencyTextWidth - droppedTextWidth - rightMargin);
+         int numberOfFrozenNodes = sceneGraph.getNumberOfFrozenNodes();
+         ImGui.text("State:");
+         ImGui.sameLine();
+         if (numberOfFrozenNodes > 0)
+            ImGui.textColored(ImGuiTools.LIGHT_BLUE, "Frozen (%d)".formatted(numberOfFrozenNodes));
+         else
+            ImGui.text("Normal");
+
+         ImGui.sameLine(ImGui.getWindowSizeX() - frequencyTextWidth - droppedTextWidth - rightMargin);
+         subscriptionFrequencyText.render();
+
+         ImGui.sameLine(ImGui.getWindowSizeX() - droppedTextWidth - rightMargin);
+         ImGui.text("Dropped: %4d".formatted(sceneGraph.getSceneGraphSubscription().getMessageDropCount()));
       }
 
       ImGui.endMenuBar();
@@ -346,18 +376,6 @@ public class RDXSceneGraphUI
       {
          renderMenuBar(modificationQueue);
 
-         int numberOfLocalNodes = sceneGraph.getIDToNodeMap().size();
-         ImGui.text("UI nodes: %d   On robot nodes: %d   State: ".formatted(numberOfLocalNodes,
-                                                                            sceneGraph.getSceneGraphSubscription().getNumberOfOnRobotNodes()));
-         ImGui.sameLine();
-         if (sceneGraph.getSceneGraphSubscription().getLocalTreeFrozen())
-            ImGui.textColored(ImGuiTools.LIGHT_BLUE, "Frozen");
-         else
-            ImGui.text("Normal");
-         ImGui.pushItemWidth(100.0f);
-         subscriptionFrequencyText.render();
-         ImGui.popItemWidth();
-         ImGui.sameLine();
          ImGui.checkbox(labels.get("Show graphics"), showGraphics);
          ImGui.sameLine();
          ImGui.checkbox(labels.get("View as tree"), viewAsTree);

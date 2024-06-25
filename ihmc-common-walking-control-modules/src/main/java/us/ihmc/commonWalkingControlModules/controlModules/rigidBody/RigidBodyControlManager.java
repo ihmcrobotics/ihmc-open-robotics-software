@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.rigidBody;
 
-import controller_msgs.msg.dds.WrenchTrajectoryStatusMessage;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
@@ -73,6 +72,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final YoBoolean stateSwitched;
    private final YoBoolean doPrepareForLocomotion;
+   private boolean hasContactStateChanged = false;
 
    public RigidBodyControlManager(RigidBodyBasics bodyToControl,
                                   RigidBodyBasics baseBody,
@@ -183,6 +183,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       if (contactableBody != null)
       {
          loadBearingControlState = new RigidBodyLoadBearingControlState(bodyToControl,
+                                                                        baseBody,
                                                                         elevator,
                                                                         yoTime,
                                                                         jointControlHelper,
@@ -207,7 +208,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       checkDefaultControlMode(defaultControlMode, this.homePose, bodyName);
       String description = "WARNING: only " + RigidBodyControlMode.JOINTSPACE + " or " + RigidBodyControlMode.TASKSPACE + " possible!";
       this.defaultControlMode = new EnumParameter<>(namePrefix
-            + "DefaultControlMode", description, registry, RigidBodyControlMode.class, false, defaultControlMode);
+                                                    + "DefaultControlMode", description, registry, RigidBodyControlMode.class, false, defaultControlMode);
       this.defaultControlMode.addListener(parameter -> checkDefaultControlMode(this.defaultControlMode.getValue(), this.homePose, bodyName));
 
       stateMachine = setupStateMachine(namePrefix, yoTime, defaultControlMode);
@@ -249,7 +250,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
    /**
     * Sets the behavior for {@link #prepareForLocomotion()}.
-    * 
+    *
     * @param value whether {@link #prepareForLocomotion()} should be enabled or not.
     */
    public void setDoPrepareForLocomotion(boolean value)
@@ -318,7 +319,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    {
       if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
       { // If in LOADBEARING mode, execute the trajectory in that state
-         loadBearingControlState.handleOrientationTrajectoryCommand(command);
+         loadBearingControlState.handleAsOrientationTrajectoryCommand(command);
       }
       else if (taskspaceControlState.handleTrajectoryCommand(command))
       { // Otherwise execute in TASKSPACE mode
@@ -354,8 +355,13 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    {
       computeDesiredJointPositions(initialJointPositions);
 
-      if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions))
-      {
+      if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
+      { // If in LOADBEARING mode, execute the trajectory in that state
+         loadBearingControlState.handleAsOrientationTrajectoryCommand(taskspaceCommand);
+         loadBearingControlState.handleJointTrajectoryCommand(jointSpaceCommand, initialJointPositions);
+      }
+      else if (taskspaceControlState.handleHybridTrajectoryCommand(taskspaceCommand, jointSpaceCommand, initialJointPositions))
+      { // Otherwise execute in TASKSPACE mode
          requestState(taskspaceControlState.getControlMode());
       }
       else
@@ -529,7 +535,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       }
       if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
       {
-//         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " is already load bearing. Changing contact point must be done first be exiting state.");
+         //         LogTools.warn(getClass().getSimpleName() + " for " + bodyName + " is already load bearing. Changing contact point must be done first be exiting state.");
          return;
       }
 
@@ -553,6 +559,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
 
       loadBearingControlState.load(coefficientOfFriction, contactPointInBodyFrame, contactNormalInWorldFrame, jointspaceControlActive, orientationControlActive);
       requestState(loadBearingControlState.getControlMode());
+      hasContactStateChanged = true;
    }
 
    public void unload()
@@ -560,14 +567,16 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
       if (stateMachine.getCurrentStateKey() == RigidBodyControlMode.LOADBEARING)
       {
          if (defaultControlMode.getValue() == RigidBodyControlMode.JOINTSPACE && loadBearingControlState.isJointspaceControlActive())
-         {
+         { // Maintain current desired joint angles if possible
             jointspaceControlState.holdCurrentDesired();
             requestState(jointspaceControlState.getControlMode());
          }
          else
-         {
+         { // Otherwise hold current taskspace pose
             hold();
          }
+
+         hasContactStateChanged = true;
       }
    }
 
@@ -602,7 +611,7 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
             desiredJointPositionsToPack[i] = jointspaceControlState.getJointDesiredPosition(i);
       }
       else if (loadBearingControlState != null && stateMachine.getCurrentStateKey() == loadBearingControlState.getControlMode()
-          && loadBearingControlState.isJointspaceControlActive())
+               && loadBearingControlState.isJointspaceControlActive())
       {
          for (int i = 0; i < jointsToControl.length; i++)
             desiredJointPositionsToPack[i] = loadBearingControlState.getJointDesiredPosition(i);
@@ -687,6 +696,18 @@ public class RigidBodyControlManager implements SCS2YoGraphicHolder
    {
       if (loadBearingControlState != null)
          loadBearingControlState.setControllerCoreOutput(controllerCoreOutput);
+   }
+
+   public boolean pollContactHasChangedNotification()
+   {
+      return hasContactStateChanged;
+   }
+
+   public boolean peekContactHasChangedNotification()
+   {
+      boolean hasContactStateChanged = this.hasContactStateChanged;
+      this.hasContactStateChanged = false;
+      return hasContactStateChanged;
    }
 
    @Override

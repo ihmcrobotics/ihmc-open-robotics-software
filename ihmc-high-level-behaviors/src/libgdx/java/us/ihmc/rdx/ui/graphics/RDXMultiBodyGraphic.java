@@ -5,8 +5,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.mecano.multiBodySystem.CrossFourBarJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.CrossFourBarJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -15,7 +13,6 @@ import us.ihmc.rdx.simulation.scs2.RDXFrameNodePart;
 import us.ihmc.rdx.simulation.scs2.RDXMultiBodySystemFactories;
 import us.ihmc.rdx.simulation.scs2.RDXRigidBody;
 import us.ihmc.rdx.simulation.scs2.RDXVisualTools;
-import us.ihmc.scs2.definition.robot.CrossFourBarJointDefinition;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.tools.thread.Activator;
 
@@ -46,13 +43,9 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
       ThreadTools.startAsDaemon(() ->
       {
          multiBody = loadRigidBody(originalRootBody, robotDefinition, scaleFactor, createReferenceFrameGraphics);
+         RDXMultiBodySystemFactories.setupFourbars(multiBody, robotDefinition, scaleFactor, createReferenceFrameGraphics);
          robotLoadedActivator.activate();
       }, getClass().getSimpleName() + "Loading");
-   }
-
-   private RDXRigidBody loadRigidBody(RigidBodyBasics rigidBody, RobotDefinition robotDefinition)
-   {
-      return loadRigidBody(rigidBody, robotDefinition, RDXVisualTools.NO_SCALING, false);
    }
 
    private RDXRigidBody loadRigidBody(RigidBodyBasics rigidBody, RobotDefinition robotDefinition, double scaleFactor, boolean createReferenceFrameGraphics)
@@ -67,23 +60,6 @@ public class RDXMultiBodyGraphic extends RDXVisualizer
 
       for (JointBasics childrenJoint : rigidBody.getChildrenJoints())
       {
-         if (childrenJoint instanceof CrossFourBarJointReadOnly)
-         {
-            CrossFourBarJoint fourBarJoint = (CrossFourBarJoint) childrenJoint;
-            CrossFourBarJointDefinition fourBarJointDefinition = (CrossFourBarJointDefinition) robotDefinition.getJointDefinition(fourBarJoint.getName());
-
-            fourBarJoint.getJointA().setSuccessor(RDXMultiBodySystemFactories.toRDXRigidBody(fourBarJoint.getBodyDA(),
-                                                                                             fourBarJointDefinition.getBodyDA(),
-                                                                                             executorToRunLaterOnThreadWithGraphicsContext,
-                                                                                             scaleFactor,
-                                                                                             createReferenceFrameGraphics));
-            fourBarJoint.getJointB().setSuccessor(RDXMultiBodySystemFactories.toRDXRigidBody(fourBarJoint.getBodyBC(),
-                                                                                             fourBarJointDefinition.getBodyBC(),
-                                                                                             executorToRunLaterOnThreadWithGraphicsContext,
-                                                                                             scaleFactor,
-                                                                                             createReferenceFrameGraphics));
-         }
-
          childrenJoint.setSuccessor(loadRigidBody(childrenJoint.getSuccessor(), robotDefinition, scaleFactor, createReferenceFrameGraphics));
       }
 

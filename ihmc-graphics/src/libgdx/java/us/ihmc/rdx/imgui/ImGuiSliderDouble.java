@@ -17,6 +17,12 @@ public class ImGuiSliderDouble extends ImGuiFancyWidget
       imDouble = new ImDouble(initialValue);
    }
 
+   public ImGuiSliderDouble(String label, String format, ImDouble imDouble)
+   {
+      super(label, format);
+      this.imDouble = imDouble;
+   }
+
    /**
     * Shows the slider.
     */

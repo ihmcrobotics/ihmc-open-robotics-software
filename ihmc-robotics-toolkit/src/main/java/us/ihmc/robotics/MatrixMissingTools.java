@@ -7,7 +7,6 @@ import org.ejml.data.DMatrix3x3;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.simple.SimpleMatrix;
-
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -471,5 +470,65 @@ public class MatrixMissingTools
    public static void negate(DMatrixRMaj matrix)
    {
       CommonOps_DDRM.scale(-1.0, matrix);
+   }
+
+   /**
+    * Garbage-free matrix power calculation.
+    * <p>
+    * The addition of a temporary matrix in the method signature is to ensure this method performs no allocations.
+    * </p>
+    *
+    * @param input        the matrix that will be raised to {@code power}. Not modified.
+    * @param power        power to raise {@code matrix} to.
+    * @param resultToPack matrix to store result in. Modified.
+    */
+   public static void power(DMatrixRMaj input, int power, DMatrixRMaj resultToPack)
+   {
+      DMatrixRMaj temporaryMatrix = new DMatrixRMaj(input.numRows, input.numCols);
+
+      if (input.numCols != resultToPack.numCols && input.numCols != temporaryMatrix.numCols)
+         throw new IllegalArgumentException("The matrices have incompatible column sizes.");
+      if (input.numRows != resultToPack.numRows && input.numRows != temporaryMatrix.numRows)
+         throw new IllegalArgumentException("The matrices have incompatible row sizes.");
+
+      resultToPack.set(input);
+
+      if (power > 1)
+      {
+         for (int k = 0; k < power - 1; k++)
+         {
+            CommonOps_DDRM.mult(input, resultToPack, temporaryMatrix);
+            resultToPack.set(temporaryMatrix);
+         }
+      }
+   }
+
+   /**
+    * Comparing elements of two matrices.
+    * This method results true when all elements in a is less than b. <br>
+    *
+    *  !!!!!!! a < b !!!!!!!!!  not  a > b
+    * @param a compare matrix. all elements should be less than those of b matrix
+    * @param b compare matirx. all elements should be larger than those of a matrix
+    * @return returns true when a < b  and returns false when b > a
+    */
+   public static boolean elementWiseLessThan(DMatrixRMaj a, DMatrixRMaj b)
+   {
+      if (a.numCols != b.numCols)
+         throw new IllegalArgumentException("The A and B must have the same number of cols : [A cols: " + a.getNumCols() + ", b cols: " + b.getNumCols());
+      if (a.numRows != b.numRows)
+         throw new IllegalArgumentException("The A and B must have the same number of rows : [A cols: " + a.getNumRows() + ", b cols: " + b.getNumRows());
+
+      for (int i = 0; i < a.numRows; i++)
+      {
+         for (int j = 0; j < a.numCols; j++)
+         {
+            double valA = a.get(i, j);
+            double valB = b.get(i, j);
+            if (valA >= valB)
+               return false;
+         }
+      }
+      return true;
    }
 }

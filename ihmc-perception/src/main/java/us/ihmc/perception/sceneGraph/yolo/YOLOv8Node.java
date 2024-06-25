@@ -1,5 +1,6 @@
 package us.ihmc.perception.sceneGraph.yolo;
 
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -27,7 +28,13 @@ public class YOLOv8Node extends DetectableSceneNode
    private final RigidBodyTransform centroidToObjectTransform = new RigidBodyTransform();
    private Pose3D objectPose;
 
-   public YOLOv8Node(long id, String name, YOLOv8DetectionClass detectionClass, double confidence, List<Point3D32> objectPointCloud, Point3D32 objectCentroid)
+   public YOLOv8Node(long id,
+                     String name,
+                     YOLOv8DetectionClass detectionClass,
+                     double confidence,
+                     List<Point3D32> objectPointCloud,
+                     Point3D32 objectCentroid,
+                     CRDTInfo crdtInfo)
    {
       this(id,
            name,
@@ -39,7 +46,8 @@ public class YOLOv8Node extends DetectableSceneNode
            objectPointCloud,
            objectCentroid,
            new Pose3D(objectCentroid, new RotationMatrix()),
-           new Pose3D(objectCentroid, new RotationMatrix()));
+           new Pose3D(objectCentroid, new RotationMatrix()),
+           crdtInfo);
    }
 
    public YOLOv8Node(long id,
@@ -52,9 +60,10 @@ public class YOLOv8Node extends DetectableSceneNode
                      List<Point3D32> objectPointCloud,
                      Point3D32 objectCentroid,
                      RigidBodyTransformBasics centroidToObjectTransform,
-                     Pose3D objectPose)
+                     Pose3D objectPose,
+                     CRDTInfo crdtInfo)
    {
-      super(id, name);
+      super(id, name, crdtInfo);
 
       this.maskErosionKernelRadius = maskErosionKernelRadius;
       this.outlierFilterThreshold = outlierFilterThreshold;

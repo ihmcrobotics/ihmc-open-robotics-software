@@ -1,6 +1,7 @@
 package us.ihmc.perception.sceneGraph;
 
-import us.ihmc.communication.crdt.DurationFreezable;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.crdt.RequestConfirmFreezable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
@@ -15,7 +16,7 @@ import java.util.List;
  *
  * We give each node a name and a reference frame.
  */
-public class SceneNode extends DurationFreezable
+public class SceneNode extends RequestConfirmFreezable
 {
    /** The node's unique ID. */
    private final long id;
@@ -23,8 +24,10 @@ public class SceneNode extends DurationFreezable
    private final MutableReferenceFrame nodeFrame;
    private final List<SceneNode> children = new ArrayList<>();
 
-   public SceneNode(long id, String name)
+   public SceneNode(long id, String name, CRDTInfo crdtInfo)
    {
+      super(crdtInfo);
+
       this.id = id;
       this.name = name;
       this.nodeFrame = new MutableReferenceFrame(name, ReferenceFrame.getWorldFrame());

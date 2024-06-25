@@ -34,7 +34,8 @@ public class RDXPrimitiveRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<R
                                                                               sceneGraph.getIDToNodeMap(),
                                                                               parent.getID(),
                                                                               new RigidBodyTransform(),
-                                                                              shape);
+                                                                              shape,
+                                                                              sceneGraph.getCRDTInfo());
       return new RDXPrimitiveRigidBodySceneNode(sceneNode, RDXBaseUI.getInstance().getPrimary3DPanel());
    }
 
@@ -46,7 +47,8 @@ public class RDXPrimitiveRigidBodySceneNodeBuilder extends RDXSceneNodeBuilder<R
                                                                               sceneGraph.getIDToNodeMap(),
                                                                               parent.getID(),
                                                                               new RigidBodyTransform(),
-                                                                              shape);
+                                                                              shape,
+                                                                              sceneGraph.getCRDTInfo());
       return new RDXPrimitiveRigidBodySceneNode(lengths, radii, sceneNode, RDXBaseUI.getInstance().getPrimary3DPanel());
    }
 

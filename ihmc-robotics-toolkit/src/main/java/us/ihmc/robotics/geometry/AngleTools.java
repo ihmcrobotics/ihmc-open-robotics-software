@@ -7,7 +7,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -38,7 +40,7 @@ public class AngleTools
 
    public static double angleMinusPiToPi(Vector2DReadOnly startVector, Vector2DReadOnly endVector)
    {
-      double absoluteAngle = Math.acos(startVector.dot(endVector) / startVector.length() / endVector.length());
+      double absoluteAngle = Math.acos(startVector.dot(endVector) / startVector.norm() / endVector.norm());
 
       Vector3D start3d = new Vector3D(startVector.getX(), startVector.getY(), 0.0);
       Vector3D end3d = new Vector3D(endVector.getX(), endVector.getY(), 0.0);
@@ -308,7 +310,7 @@ public class AngleTools
     * @param noTranslationTolerance tolerance for determining if path angle should be determined
     * @return number between -PI and PI
     */
-   public static double calculateHeading(FramePose2D startPose, FramePoint2D endPoint, double headingOffset, double noTranslationTolerance)
+   public static double calculateHeading(FramePose2DReadOnly startPose, FramePoint2DReadOnly endPoint, double headingOffset, double noTranslationTolerance)
    {
       double deltaX = endPoint.getX() - startPose.getX();
       double deltaY = endPoint.getY() - startPose.getY();
@@ -349,7 +351,7 @@ public class AngleTools
     * @param endPoint  end position
     * @return number between -PI and PI
     */
-   public static double calculateHeading(Point2D32 startPose, Point2D32 endPoint)
+   public static double calculateHeading(Point2DReadOnly startPose, Point2DReadOnly endPoint)
    {
       double deltaX = endPoint.getX() - startPose.getX();
       double deltaY = endPoint.getY() - startPose.getY();

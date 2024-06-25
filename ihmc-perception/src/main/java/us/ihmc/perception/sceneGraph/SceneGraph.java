@@ -4,6 +4,8 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
@@ -36,7 +38,10 @@ import java.util.function.Function;
  */
 public class SceneGraph
 {
+   /** This is the frequency the scene graph is expected to be updated on the robot. */
    public static final double UPDATE_FREQUENCY = 60.0;
+   /** This is the frequency the CRDT syncs the scene graph state between operator and robot. */
+   public static final double CRDT_SYNC_FREQUENCY = UPDATE_FREQUENCY / 2.0;
 
    /** The root node is always ID 0 and all nodes in the tree are unique. */
    public static long ROOT_NODE_ID = 0;
@@ -57,10 +62,12 @@ public class SceneGraph
    private transient final TIntObjectMap<ArUcoMarkerNode> arUcoMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final TIntObjectMap<CenterposeNode> centerposeDetectedMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
+   private int numberOfFrozenNodes = 0;
 
+   /** Create without CRDT synchronization. */
    public SceneGraph()
    {
-      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME));
+      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME, new CRDTInfo(ROS2ActorDesignation.OPERATOR, (int) CRDT_SYNC_FREQUENCY)));
    }
 
    /**
@@ -131,6 +138,7 @@ public class SceneGraph
       arUcoMarkerIDToNodeMap.clear();
       centerposeDetectedMarkerIDToNodeMap.clear();
       sceneNodesByID.clear();
+      numberOfFrozenNodes = 0;
       updateCaches(rootNode);
    }
 
@@ -153,6 +161,9 @@ public class SceneGraph
          centerposeDetectedMarkerIDToNodeMap.put(centerposeNode.getObjectID(), centerposeNode);
       }
 
+      if (node.isFrozen())
+         ++numberOfFrozenNodes;
+
       for (SceneNode child : node.getChildren())
       {
          updateCaches(child);
@@ -162,6 +173,11 @@ public class SceneGraph
    public SceneNode getRootNode()
    {
       return rootNode;
+   }
+
+   public CRDTInfo getCRDTInfo()
+   {
+      return rootNode.getCRDTInfo();
    }
 
    public AtomicLong getNextID()
@@ -202,6 +218,11 @@ public class SceneGraph
    public SortedSet<SceneNode> getSceneNodesByID()
    {
       return sceneNodesByID;
+   }
+
+   public int getNumberOfFrozenNodes()
+   {
+      return numberOfFrozenNodes;
    }
 
    public ReferenceFrameDynamicCollection asNewDynamicReferenceFrameCollection()

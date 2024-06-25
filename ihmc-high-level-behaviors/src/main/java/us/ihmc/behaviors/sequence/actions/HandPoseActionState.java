@@ -1,13 +1,18 @@
 package us.ihmc.behaviors.sequence.actions;
 
 import behavior_msgs.msg.dds.HandPoseActionStateMessage;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.communication.crdt.*;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+
+import static us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS;
 
 public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinition>
 {
@@ -23,8 +28,13 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
    private final CRDTUnidirectionalVector3D torque;
    private final CRDTUnidirectionalDoubleArray jointAngles;
    private final CRDTUnidirectionalDouble solutionQuality;
+   private final SideDependentList<Integer> numberOfJoints = new SideDependentList<>();
 
-   public HandPoseActionState(long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory, ReferenceFrameLibrary referenceFrameLibrary)
+   public HandPoseActionState(long id,
+                              CRDTInfo crdtInfo,
+                              WorkspaceResourceDirectory saveFileDirectory,
+                              ReferenceFrameLibrary referenceFrameLibrary,
+                              DRCRobotModel robotModel)
    {
       super(id, new HandPoseActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
@@ -36,8 +46,11 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
                                                                                               goalChestToWorldTransform.getValueReadOnly());
       force = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
       torque = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
-      jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS);
+      jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, MAX_NUMBER_OF_JOINTS);
       solutionQuality = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+
+      for (RobotSide side : RobotSide.values)
+         numberOfJoints.put(side, robotModel.getJointMap().getArmJointNamesAsStrings(side).size());
    }
 
    @Override
@@ -55,7 +68,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
       goalChestToWorldTransform.toMessage(message.getGoalChestTransformToWorld());
       force.toMessage(message.getForce());
       torque.toMessage(message.getTorque());
-      for (int i = 0; i < HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS; i++)
+      for (int i = 0; i < MAX_NUMBER_OF_JOINTS; i++)
       {
          jointAngles.toMessage(message.getJointAngles());
       }
@@ -104,6 +117,11 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
    public CRDTUnidirectionalDoubleArray getJointAngles()
    {
       return jointAngles;
+   }
+
+   public int getNumberOfJoints()
+   {
+      return numberOfJoints.get(getDefinition().getSide());
    }
 
    public double getSolutionQuality()

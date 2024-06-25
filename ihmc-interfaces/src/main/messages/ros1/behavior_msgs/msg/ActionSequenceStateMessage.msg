@@ -17,4 +17,7 @@ string next_action_rejection_tooltip
 # Request manual execution of the next action
 bool manual_execution_requested
 
+# Allows the operator to disable concurrency during authoring
+bool concurrency_enabled
+
 

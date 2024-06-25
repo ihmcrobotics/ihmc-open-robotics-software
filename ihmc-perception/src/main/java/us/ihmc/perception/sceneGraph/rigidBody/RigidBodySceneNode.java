@@ -1,6 +1,7 @@
 package us.ihmc.perception.sceneGraph.rigidBody;
 
 import gnu.trove.map.TLongObjectMap;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -20,9 +21,10 @@ public class RigidBodySceneNode extends SceneNode
                              String name,
                              TLongObjectMap<SceneNode> sceneGraphIDToNodeMap,
                              long initialParentNodeID,
-                             RigidBodyTransformReadOnly initialTransformToParent)
+                             RigidBodyTransformReadOnly initialTransformToParent,
+                             CRDTInfo crdtInfo)
    {
-      super(id, name);
+      super(id, name, crdtInfo);
       this.sceneGraphIDToNodeMap = sceneGraphIDToNodeMap;
       this.initialParentNodeID = initialParentNodeID;
       this.initialTransformToParent.set(initialTransformToParent);

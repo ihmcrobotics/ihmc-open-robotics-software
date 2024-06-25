@@ -31,7 +31,11 @@ public class RDXBehaviorTreeTools
 
    public static RDXActionSequence findActionSequenceAncestor(RDXBehaviorTreeNode<?, ?> node)
    {
-      if (node.getParent() == null)
+      if (node instanceof RDXActionSequence actionSequence)
+      {
+         return actionSequence;
+      }
+      else if (node == null || node.getParent() == null)
       {
          return null;
       }

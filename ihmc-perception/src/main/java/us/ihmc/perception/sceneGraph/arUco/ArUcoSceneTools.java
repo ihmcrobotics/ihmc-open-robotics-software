@@ -1,6 +1,7 @@
 package us.ihmc.perception.sceneGraph.arUco;
 
 import gnu.trove.iterator.TIntIterator;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
@@ -50,7 +51,8 @@ public class ArUcoSceneTools
                         sceneGraph.getDetectionFilterCollection().removeFilter(detectedID);
 
                         String nodeName = "ArUcoMarker%d".formatted(detectedID);
-                        arUcoMarkerNode = new ArUcoMarkerNode(sceneGraph.getNextID().getAndIncrement(), nodeName, detectedID, markerSize);
+                        CRDTInfo crdtInfo = sceneGraph.getCRDTInfo();
+                        arUcoMarkerNode = new ArUcoMarkerNode(sceneGraph.getNextID().getAndIncrement(), nodeName, detectedID, markerSize, crdtInfo);
                         LogTools.info("Adding detected ArUco marker {} to scene graph as {}", detectedID, nodeName);
                         modificationQueue.accept(new SceneGraphNodeAddition(arUcoMarkerNode, sceneGraph.getRootNode()));
                         sceneGraph.getArUcoMarkerIDToNodeMap().put(detectedID, arUcoMarkerNode); // Prevent it getting added twice

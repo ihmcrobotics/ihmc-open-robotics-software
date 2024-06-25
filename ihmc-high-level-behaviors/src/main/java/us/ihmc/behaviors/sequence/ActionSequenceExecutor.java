@@ -160,15 +160,27 @@ public class ActionSequenceExecutor extends BehaviorTreeNodeExecutor<ActionSeque
          return false;
       }
 
-      int executeAfterActionIndex = nextNodeToExecute.calculateExecuteAfterActionIndex(getState().getActionChildren());
-
-      if (executeAfterActionIndex < 0) // Execute after beginning
+      if (state.getConcurrencyEnabled())
       {
-         return true;
+         int executeAfterActionIndex = nextNodeToExecute.calculateExecuteAfterActionIndex(getState().getActionChildren());
+
+         if (executeAfterActionIndex < 0) // Execute after beginning
+         {
+            return true;
+         }
+         else
+         {
+            return !executorChildren.get(executeAfterActionIndex).getState().getIsExecuting();
+         }
       }
       else
       {
-         return !executorChildren.get(executeAfterActionIndex).getState().getIsExecuting();
+         boolean anyActionExecuting = false;
+         for (ActionNodeExecutor<?, ?> executorChild : executorChildren)
+         {
+            anyActionExecuting |= executorChild.getState().getIsExecuting();
+         }
+         return  !anyActionExecuting;
       }
    }
 
