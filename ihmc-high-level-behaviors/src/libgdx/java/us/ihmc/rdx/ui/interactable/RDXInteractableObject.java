@@ -77,8 +77,7 @@ public class RDXInteractableObject implements RenderableProvider
       if (modelInstance != null)
          modelInstance.getRenderables(renderables, pool);
 
-      if (selectablePose3DGizmo.getSelected().get())
-         selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
+      selectablePose3DGizmo.getVirtualRenderables(renderables, pool);
    }
 
    public RigidBodyTransform getTransformToWorld()
