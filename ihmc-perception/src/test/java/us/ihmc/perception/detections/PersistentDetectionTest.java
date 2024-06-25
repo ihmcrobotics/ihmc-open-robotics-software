@@ -9,24 +9,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class PersistentDetectionTest
 {
-   private static class TestDetection extends InstantDetection
-   {
-      public TestDetection(String detectionClass, double confidence, Instant detectionTime)
-      {
-         super(detectionClass, confidence, new Pose3D(), detectionTime);
-      }
-   }
-
    @Test
    public void testGetMostRecentDetection()
    {
       Instant startInstant = Instant.now();
 
-      TestDetection mostRecentDetection = new TestDetection("TestDetection", 0.5, startInstant);
+      InstantDetection mostRecentDetection = new InstantDetection("TestDetection", 0.5, new Pose3D(), startInstant);
       PersistentDetection persistentDetection = new PersistentDetection(mostRecentDetection);
       for (int i = 1; i < 10; ++i)
       {
-         TestDetection testDetection = new TestDetection("TestDetection", 1.0, startInstant.minusSeconds(i));
+         InstantDetection testDetection = new InstantDetection("TestDetection", 1.0, new Pose3D(), startInstant.minusSeconds(i));
          persistentDetection.addDetection(testDetection);
       }
       assertEquals(mostRecentDetection, persistentDetection.getMostRecentDetection());
@@ -43,7 +35,7 @@ public class PersistentDetectionTest
       Instant startInstant = Instant.now();
       for (int i = 0; i < 10; ++i)
       {
-         TestDetection testDetection = new TestDetection("TestDetection", i / 10.0, startInstant.minusSeconds(i));
+         InstantDetection testDetection = new InstantDetection("TestDetection", i / 10.0, new Pose3D(), startInstant.minusSeconds(i));
          if (persistentDetection == null)
             persistentDetection = new PersistentDetection(testDetection, 0.5, 0.0, 10.0);
          else
@@ -62,7 +54,7 @@ public class PersistentDetectionTest
       Instant startInstant = Instant.now();
       for (int i = 0; i < 10; ++i)
       {
-         TestDetection testDetection = new TestDetection("TestDetection", 1.0, startInstant.plusSeconds(i));
+         InstantDetection testDetection = new InstantDetection("TestDetection", 1.0, new Pose3D(), startInstant.plusSeconds(i));
          if (persistentDetection == null)
             persistentDetection = new PersistentDetection(testDetection);
          else
@@ -82,7 +74,7 @@ public class PersistentDetectionTest
       Instant startInstant = Instant.now();
       for (int i = 0; i < 10; ++i)
       {
-         TestDetection testDetection = new TestDetection("TestDetection", (10.0 - i) / 10.0, startInstant.plusSeconds(i));
+         InstantDetection testDetection = new InstantDetection("TestDetection", (10.0 - i) / 10.0, new Pose3D(), startInstant.plusSeconds(i));
          if (persistentDetection == null)
             persistentDetection = new PersistentDetection(testDetection, 0.4, 0.5, 10.0);
          else
@@ -103,8 +95,8 @@ public class PersistentDetectionTest
    @Test
    public void testExceptions()
    {
-      TestDetection detectionClassA = new TestDetection("ClassA", 1.0, Instant.now());
-      TestDetection detectionClassB = new TestDetection("ClassB", 1.0, Instant.now());
+      InstantDetection detectionClassA = new InstantDetection("ClassA", 1.0, new Pose3D(), Instant.now());
+      InstantDetection detectionClassB = new InstantDetection("ClassB", 1.0, new Pose3D(), Instant.now());
 
       PersistentDetection persistentDetection = new PersistentDetection(detectionClassA);
 
