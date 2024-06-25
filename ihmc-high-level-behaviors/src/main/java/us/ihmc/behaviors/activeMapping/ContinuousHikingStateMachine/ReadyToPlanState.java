@@ -50,7 +50,6 @@ public class ReadyToPlanState implements State
    {
       continuousPlanner.setPlanAvailable(false);
       stopWatch.reset();
-      LogTools.warn(String.format("Entering %s", getClass().getSimpleName()));
       debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
       timeInSwingToStopPlanningAndWaitTillNextAttempt = continuousHikingParameters.getSwingTime() * continuousHikingParameters.getPercentThrowSwingToPlanTo();
       stopWatch.start();

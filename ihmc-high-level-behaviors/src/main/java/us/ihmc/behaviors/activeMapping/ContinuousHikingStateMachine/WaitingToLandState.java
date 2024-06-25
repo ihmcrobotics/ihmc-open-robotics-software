@@ -70,8 +70,6 @@ public class WaitingToLandState implements State
 
       continuousPlanner.transitionCallback();
       statistics.setStartWaitingTime();
-
-      LogTools.warn("Entering [WAITING_TO_LAND] state");
    }
 
    @Override

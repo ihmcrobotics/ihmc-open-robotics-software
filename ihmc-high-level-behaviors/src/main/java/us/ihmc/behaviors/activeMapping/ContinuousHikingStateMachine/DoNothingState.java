@@ -33,7 +33,6 @@ public class DoNothingState implements State
    @Override
    public void onEntry()
    {
-      LogTools.warn(String.format("Entering %s", getClass().getSimpleName()));
    }
 
    @Override

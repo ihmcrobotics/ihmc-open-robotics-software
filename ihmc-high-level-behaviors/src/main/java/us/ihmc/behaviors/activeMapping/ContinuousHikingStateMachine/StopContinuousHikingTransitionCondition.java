@@ -8,14 +8,14 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class StopContinuousHikingTransitionCondition implements StateTransitionCondition
 {
-   private final ContinuousHikingParameters continuousHikingParameters;
    private final AtomicReference<ContinuousWalkingCommandMessage> commandMessage;
+   private final ContinuousHikingParameters continuousHikingParameters;
 
-   public StopContinuousHikingTransitionCondition(ContinuousHikingParameters continuousHikingParameters,
-                                                  AtomicReference<ContinuousWalkingCommandMessage> commandMessage)
+   public StopContinuousHikingTransitionCondition(AtomicReference<ContinuousWalkingCommandMessage> commandMessage,
+                                                  ContinuousHikingParameters continuousHikingParameters)
    {
-      this.continuousHikingParameters = continuousHikingParameters;
       this.commandMessage = commandMessage;
+      this.continuousHikingParameters = continuousHikingParameters;
    }
 
    @Override
