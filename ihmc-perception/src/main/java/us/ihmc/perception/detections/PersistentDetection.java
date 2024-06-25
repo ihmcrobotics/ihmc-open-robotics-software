@@ -2,8 +2,7 @@ package us.ihmc.perception.detections;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.time.TimeTools;
 
 import java.time.Duration;
@@ -16,15 +15,14 @@ import java.util.UUID;
 
 public class PersistentDetection
 {
-   private static final double EPSILON = 1E-7;
-
    // The first element of this set is the oldest detection, and the last element is the most recent detection
    private final SortedSet<InstantDetection> detectionHistory = new TreeSet<>(Comparator.comparing(InstantDetection::getDetectionTime));
    private Duration historyDuration;
    private final UUID id = UUID.randomUUID();
 
-   // TODO: finish this frame
-   private final ReferenceFrame detectionInWorldFrame;
+   /** Represents the pose of the latest instant detection. */
+   private final MutableReferenceFrame detectionFrame = new MutableReferenceFrame("persistentDetection_" + id.toString().substring(0, 5),
+                                                                                  ReferenceFrame.getWorldFrame());
 
    private double stabilityConfidenceThreshold;
    private double stabilityDetectionFrequency;
@@ -33,11 +31,6 @@ public class PersistentDetection
 
    public PersistentDetection(InstantDetection firstDetection, double stabilityConfidenceThreshold, double stabilityDetectionFrequency, double historyDuration)
    {
-      String detectionInWorldFrameName = "persistentDetection_" + id.toString().substring(0, 5);
-      detectionInWorldFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(detectionInWorldFrameName,
-                                                                                                ReferenceFrame.getWorldFrame(),
-                                                                                                new RigidBodyTransform());
-
       addDetection(firstDetection);
       setStabilityConfidenceThreshold(stabilityConfidenceThreshold);
       setStabilityDetectionFrequency(stabilityDetectionFrequency);
@@ -51,6 +44,8 @@ public class PersistentDetection
    {
       detectionHistory.add(newDetection);
       newDetection.setPersistentDetectionID(id);
+
+      detectionFrame.update(transformToWorld -> transformToWorld.set(getMostRecentDetection().getPose()));
    }
 
    /**
@@ -211,5 +206,10 @@ public class PersistentDetection
    public UUID getID()
    {
       return id;
+   }
+
+   public ReferenceFrame getDetectionFrame()
+   {
+      return detectionFrame.getReferenceFrame();
    }
 }
