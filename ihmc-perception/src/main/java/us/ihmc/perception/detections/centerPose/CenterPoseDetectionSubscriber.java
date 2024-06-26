@@ -94,6 +94,6 @@ public class CenterPoseDetectionSubscriber
                                                                                boundingBoxVertices,
                                                                                boundingBox2DVertices);
 
-      detectionManager.addDetection(newDetection, CenterPoseInstantDetection.class);
+      detectionManager.addDetection(newDetection);
    }
 }

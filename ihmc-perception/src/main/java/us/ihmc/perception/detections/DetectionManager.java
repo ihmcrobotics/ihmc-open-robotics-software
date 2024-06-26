@@ -40,16 +40,13 @@ public class DetectionManager
     * This method is thread safe only when called on different detection class types.
     * When detections of the same type are being added, this method is NOT thread safe.
     * @param newInstantDetection The new {@link InstantDetection} to add.
-    * @param classType The class of the type of {@link InstantDetection} being added.
-    *                  E.g. {@link us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection}
-    *                  or {@link us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection}
     * @param <T> Class extending {@link InstantDetection}. Must match the passed in {@code classType}.
     */
-   public <T extends InstantDetection> void addDetection(T newInstantDetection, Class<T> classType)
+   public <T extends InstantDetection> void addDetection(T newInstantDetection)
    {
       DetectionPair bestMatch = null;
 
-      Set<PersistentDetection> sameTypePersistentDetections = getDetectionsOfType(classType);
+      Set<PersistentDetection> sameTypePersistentDetections = getDetectionsOfType(newInstantDetection.getClass());
       for (PersistentDetection persistentDetection : sameTypePersistentDetections)
       {
          // matches must be of the same class
