@@ -7,14 +7,17 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
-import java.util.UUID;
 
 public class DetectionManager
 {
+   /** All persistent detections managed by this class */
    private final Set<PersistentDetection> persistentDetections = new HashSet<>();
+   /** Set of detections that have become valid for the first time. Only accessed by the SceneGraph*/
+   private final Set<PersistentDetection> newlyValidDetections = new HashSet<>();
    private final Object persistentDetectionsLock = new Object();
 
    private double maxMatchDistanceSquared;
@@ -125,7 +128,7 @@ public class DetectionManager
 
    public List<PersistentDetection> getDetectionsOfType(Class<?> classType)
    {
-      List<PersistentDetection> typeDetections = new ArrayList<>();
+      List<PersistentDetection> typeDetections = new LinkedList<>();
 
       synchronized (persistentDetectionsLock)
       {
@@ -137,12 +140,6 @@ public class DetectionManager
       return typeDetections;
    }
 
-   public Set<PersistentDetection> updateAndGetDetections()
-   {
-      updateDetections();
-      return getDetections();
-   }
-
    public Set<PersistentDetection> getDetections()
    {
       synchronized(persistentDetectionsLock)
@@ -151,27 +148,14 @@ public class DetectionManager
       }
    }
 
-   public PersistentDetection getDetection(UUID detectionID)
+   public Set<PersistentDetection> getNewlyValidDetections()
    {
-      Set<PersistentDetection> detections = getDetections();
-      for (PersistentDetection detection : detections)
-      {
-         if (detection.getID().equals(detectionID))
-            return detection;
-      }
-
-      return null;
+      return newlyValidDetections;
    }
 
-   public <T extends InstantDetection> PersistentDetection getDetection(UUID detectionID, Class<T> classType)
+   public void clearNewlyValidDetections()
    {
-      for (PersistentDetection detection : getDetectionsOfType(classType))
-      {
-         if (detection.getID().equals(detectionID))
-            return detection;
-      }
-
-      return null;
+      newlyValidDetections.clear();
    }
 
    public void updateDetections()
@@ -190,7 +174,11 @@ public class DetectionManager
             if (detection.isReadyForDeletion())
                detectionIterator.remove();
             else
+            {
                detection.updateHistory(now);
+               if (detection.hasBecomeValid().poll())
+                  newlyValidDetections.add(detection);
+            }
          }
       }
    }

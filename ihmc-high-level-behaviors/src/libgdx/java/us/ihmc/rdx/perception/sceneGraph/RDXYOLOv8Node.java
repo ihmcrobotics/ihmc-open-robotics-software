@@ -23,8 +23,6 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
 {
    private final YOLOv8Node yoloNode;
 
-   private final ImGuiUniqueLabelMap labels;
-
    private final ImGuiPlot confidencePlot;
 
    private final RDXPointCloudRenderer objectPointCloudRenderer = new RDXPointCloudRenderer();
@@ -33,7 +31,6 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
    {
       super(yoloNode);
       this.yoloNode = yoloNode;
-      this.labels = labels;
 
       confidencePlot = new ImGuiPlot(labels.get("Confidence"), 1000, 230, 22);
       confidencePlot.setYScale(0.0f, 1.0f);
@@ -42,28 +39,20 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
    }
 
    @Override
-   public void update(SceneGraph sceneGraph)
-   {
-      super.update(sceneGraph);
-
-      yoloNode.update(sceneGraph);
-   }
-
-   @Override
    public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
 
       confidencePlot.setWidth((int) (0.65 * ImGui.getWindowWidth()));
-      ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.greenRedGradientColor((float) yoloNode.getYOLODetection().getConfidence(), 1.0f, 0.0f));
-      confidencePlot.render(yoloNode.getYOLODetection().getConfidence());
+      ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.greenRedGradientColor((float) yoloNode.getConfidence(), 1.0f, 0.0f));
+      confidencePlot.render(yoloNode.getConfidence());
       ImGui.popStyleColor();
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
-      List<Point3D32> renderablePointCloud = yoloNode.getYOLODetection().getObjectPointCloud();
+      List<Point3D32> renderablePointCloud = yoloNode.getObjectPointCloud();
       objectPointCloudRenderer.setPointsToRender(renderablePointCloud, Color.GREEN);
       objectPointCloudRenderer.updateMesh();
       objectPointCloudRenderer.getRenderables(renderables, pool);

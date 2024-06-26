@@ -5,14 +5,12 @@ import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
 import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.DoorOpeningMechanismMessage;
-import perception_msgs.msg.dds.InstantDetectionMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
 import perception_msgs.msg.dds.SceneNodeMessage;
 import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
 import perception_msgs.msg.dds.YOLOv8NodeMessage;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
@@ -20,6 +18,7 @@ import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -123,6 +122,14 @@ public class ROS2SceneGraphPublisher
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.CENTERPOSE_NODE_TYPE);
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getCenterposeSceneNodes().size());
             CenterposeNodeMessage centerposeNodeMessage = sceneGraphMessage.getCenterposeSceneNodes().add();
+            centerposeNodeMessage.setConfidence(centerposeNode.getConfidence());
+            centerposeNodeMessage.setObjectType(centerposeNode.getObjectType());
+            centerposeNodeMessage.setObjectId(centerposeNode.getObjectID());
+            for (int i = 0; i < 8; ++i)
+            {
+               centerposeNodeMessage.getBoundingBoxVertices()[i].set(centerposeNode.getVertices3D()[i]);
+               centerposeNodeMessage.getBoundingBoxVertices2d()[i].set(centerposeNode.getVertices2D()[i]);
+            }
             centerposeNodeMessage.setEnableTracking(centerposeNode.isEnableTracking());
             detectableSceneNodeMessage = centerposeNodeMessage.getDetectableSceneNode();
          }
@@ -131,7 +138,13 @@ public class ROS2SceneGraphPublisher
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.YOLO_NODE_TYPE);
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getYoloSceneNodes().size());
             YOLOv8NodeMessage yoloNodeMessage = sceneGraphMessage.getYoloSceneNodes().add();
-            yoloNodeMessage.getCentroidToObjectTransform().set(yoloNode.getCentroidToObjectTransform());
+            yoloNodeMessage.setConfidence(yoloNode.getConfidence());
+            yoloNodeMessage.getObjectPointCloud().clear();
+            for (int i = 0; i < yoloNodeMessage.getObjectPointCloud().getCurrentCapacity() && i < yoloNode.getObjectPointCloud().size(); ++i)
+            {
+               Point3D32 point = yoloNodeMessage.getObjectPointCloud().add();
+               point.set(yoloNode.getObjectPointCloud().get(i));
+            }            yoloNodeMessage.getCentroidToObjectTransform().set(yoloNode.getCentroidToObjectTransform());
             yoloNodeMessage.getObjectPose().set(yoloNode.getObjectPose());
             yoloNodeMessage.getFilteredObjectPose().set(yoloNode.getObjectPose()); // FIXME Maybe set this to something else?
 
@@ -160,12 +173,8 @@ public class ROS2SceneGraphPublisher
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getDetectableSceneNodes().size());
             detectableSceneNodeMessage = sceneGraphMessage.getDetectableSceneNodes().add();
          }
+
          detectableSceneNodeMessage.setCurrentlyDetected(detectableSceneNode.getCurrentlyDetected());
-
-         RecyclingArrayList<InstantDetectionMessage> detectionMessages = detectableSceneNodeMessage.getLatestDetections();
-         detectionMessages.clear();
-         detectableSceneNode.getLatestDetections().forEach(detection -> detection.toMessage(detectionMessages.add()));
-
          sceneNodeMessage = detectableSceneNodeMessage.getSceneNode();
       }
       else if (sceneNode instanceof PrimitiveRigidBodySceneNode reshapableRigidBodySceneNode)

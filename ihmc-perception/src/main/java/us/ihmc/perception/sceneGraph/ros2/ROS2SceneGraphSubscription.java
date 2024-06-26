@@ -17,8 +17,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
-import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -36,6 +35,7 @@ import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.tools.thread.SwapReference;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.function.BiFunction;
 
 /**
@@ -164,18 +164,17 @@ public class ROS2SceneGraphSubscription
          }
          if (localNode instanceof CenterposeNode centerposeNode)
          {
-            centerposeNode.updateDetection(CenterPoseInstantDetection.fromMessage(subscriptionNode.getCenterposeNodeMessage()
-                                                                                                  .getDetectableSceneNode()
-                                                                                                  .getLatestDetections()
-                                                                                                  .get(0)));
+            centerposeNode.setConfidence(subscriptionNode.getCenterposeNodeMessage().getConfidence());
+            centerposeNode.setBoundingBoxVertices(subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices());
+            centerposeNode.setBoundingBoxVertices2D(Arrays.stream(subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices2d())
+                                                          .map(Point2D::new)
+                                                          .toArray(Point2D[]::new));
             centerposeNode.setEnableTracking(subscriptionNode.getCenterposeNodeMessage().getEnableTracking());
          }
          if (localNode instanceof YOLOv8Node yoloNode)
          {
-            yoloNode.updateDetection(YOLOv8InstantDetection.fromMessage(subscriptionNode.getYOLONodeMessage()
-                                                                                        .getDetectableSceneNode()
-                                                                                        .getLatestDetections()
-                                                                                        .get(0)));
+            yoloNode.setConfidence(subscriptionNode.getYOLONodeMessage().getConfidence());
+            yoloNode.setObjectPointCloud(subscriptionNode.getYOLONodeMessage().getObjectPointCloud());
             yoloNode.setCentroidToObjectTransform(subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform());
             yoloNode.setObjectPose(subscriptionNode.getYOLONodeMessage().getObjectPose());
          }
