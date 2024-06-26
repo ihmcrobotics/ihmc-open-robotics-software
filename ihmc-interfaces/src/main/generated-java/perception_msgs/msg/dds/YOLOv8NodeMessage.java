@@ -15,6 +15,8 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
             * Detectable scene node information
             */
    public perception_msgs.msg.dds.DetectableSceneNodeMessage detectable_scene_node_;
+   public double confidence_;
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D32>  object_point_cloud_;
    /**
             * YOLOv8Node data
             */
@@ -25,9 +27,11 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
    public YOLOv8NodeMessage()
    {
       detectable_scene_node_ = new perception_msgs.msg.dds.DetectableSceneNodeMessage();
+      object_point_cloud_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D32> (511, new geometry_msgs.msg.dds.Point32PubSubType());
       centroid_to_object_transform_ = new us.ihmc.euclid.transform.QuaternionBasedTransform();
       object_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       filtered_object_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+
    }
 
    public YOLOv8NodeMessage(YOLOv8NodeMessage other)
@@ -39,6 +43,9 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
    public void set(YOLOv8NodeMessage other)
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.staticCopy(other.detectable_scene_node_, detectable_scene_node_);
+      confidence_ = other.confidence_;
+
+      object_point_cloud_.set(other.object_point_cloud_);
       geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.centroid_to_object_transform_, centroid_to_object_transform_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.object_pose_, object_pose_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.filtered_object_pose_, filtered_object_pose_);
@@ -51,6 +58,21 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
    public perception_msgs.msg.dds.DetectableSceneNodeMessage getDetectableSceneNode()
    {
       return detectable_scene_node_;
+   }
+
+   public void setConfidence(double confidence)
+   {
+      confidence_ = confidence;
+   }
+   public double getConfidence()
+   {
+      return confidence_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D32>  getObjectPointCloud()
+   {
+      return object_point_cloud_;
    }
 
 
@@ -93,6 +115,15 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       if(other == this) return true;
 
       if (!this.detectable_scene_node_.epsilonEquals(other.detectable_scene_node_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.confidence_, other.confidence_, epsilon)) return false;
+
+      if (this.object_point_cloud_.size() != other.object_point_cloud_.size()) { return false; }
+      else
+      {
+         for (int i = 0; i < this.object_point_cloud_.size(); i++)
+         {  if (!this.object_point_cloud_.get(i).epsilonEquals(other.object_point_cloud_.get(i), epsilon)) return false; }
+      }
+
       if (!this.centroid_to_object_transform_.epsilonEquals(other.centroid_to_object_transform_, epsilon)) return false;
       if (!this.object_pose_.epsilonEquals(other.object_pose_, epsilon)) return false;
       if (!this.filtered_object_pose_.epsilonEquals(other.filtered_object_pose_, epsilon)) return false;
@@ -110,6 +141,9 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       YOLOv8NodeMessage otherMyClass = (YOLOv8NodeMessage) other;
 
       if (!this.detectable_scene_node_.equals(otherMyClass.detectable_scene_node_)) return false;
+      if(this.confidence_ != otherMyClass.confidence_) return false;
+
+      if (!this.object_point_cloud_.equals(otherMyClass.object_point_cloud_)) return false;
       if (!this.centroid_to_object_transform_.equals(otherMyClass.centroid_to_object_transform_)) return false;
       if (!this.object_pose_.equals(otherMyClass.object_pose_)) return false;
       if (!this.filtered_object_pose_.equals(otherMyClass.filtered_object_pose_)) return false;
@@ -125,6 +159,10 @@ public class YOLOv8NodeMessage extends Packet<YOLOv8NodeMessage> implements Sett
       builder.append("YOLOv8NodeMessage {");
       builder.append("detectable_scene_node=");
       builder.append(this.detectable_scene_node_);      builder.append(", ");
+      builder.append("confidence=");
+      builder.append(this.confidence_);      builder.append(", ");
+      builder.append("object_point_cloud=");
+      builder.append(this.object_point_cloud_);      builder.append(", ");
       builder.append("centroid_to_object_transform=");
       builder.append(this.centroid_to_object_transform_);      builder.append(", ");
       builder.append("object_pose=");

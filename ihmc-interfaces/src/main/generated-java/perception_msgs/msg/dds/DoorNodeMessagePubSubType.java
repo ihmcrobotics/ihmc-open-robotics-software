@@ -15,7 +15,7 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "02377b8a4b7399af3b152d88486e4dc4504cf1fb5ba5ce2f4d278e42ed73d28b";
+   		return "2be668f84000285509eed041781e0f9238f7faa4c168feacd591b946b3e9f8e3";
    }
    
    @Override

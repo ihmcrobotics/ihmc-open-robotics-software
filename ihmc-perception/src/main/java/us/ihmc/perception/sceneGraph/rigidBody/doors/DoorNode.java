@@ -36,9 +36,15 @@ public class DoorNode extends DetectableSceneNode
    private final DoorPanel doorPanel = new DoorPanel(this);
    private final Set<DoorOpeningMechanism> openingMechanisms = new HashSet<>();
 
+   public DoorNode(long id, CRDTInfo crdtInfo)
+   {
+      this(id, null, crdtInfo);
+   }
+
    public DoorNode(long id, YOLOv8InstantDetection instantDetection, CRDTInfo crdtInfo)
    {
-      super(id, "Door" + id, instantDetection, crdtInfo);
+      super(id, "Door" + id, crdtInfo);
+      // TODO: Add detection assignment
    }
 
    public void update(SceneGraph sceneGraph)

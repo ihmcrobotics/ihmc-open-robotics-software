@@ -21,14 +21,6 @@ public abstract class RDXDetectableSceneNode extends RDXSceneNode
    }
 
    @Override
-   public void update(SceneGraph sceneGraph)
-   {
-      super.update(sceneGraph);
-
-      detectableSceneNode.update(sceneGraph);
-   }
-
-   @Override
    public void renderImGuiWidgets(SceneGraphModificationQueue modificationQueue, SceneGraph sceneGraph)
    {
       super.renderImGuiWidgets(modificationQueue, sceneGraph);

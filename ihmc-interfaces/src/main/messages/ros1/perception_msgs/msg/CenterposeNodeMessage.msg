@@ -4,6 +4,16 @@
 # The detectable scene node information
 perception_msgs/DetectableSceneNodeMessage detectable_scene_node
 
+string object_type
+
+int32 object_id
+
+float64 confidence
+
+geometry_msgs/Point[] bounding_box_vertices
+
+geometry_msgs/Point[] bounding_box_vertices_2d
+
 bool enable_tracking
 
 

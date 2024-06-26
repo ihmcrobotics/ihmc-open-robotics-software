@@ -4,12 +4,12 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
+import gnu.trove.set.hash.THashSet;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.detections.DetectionManager;
-import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
@@ -20,6 +20,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
@@ -71,8 +72,8 @@ public class SceneGraph
    private transient final List<String> nodeNameList = new ArrayList<>();
    private transient final Map<String, SceneNode> namesToNodesMap = new HashMap<>();
    private transient final TIntObjectMap<ArUcoMarkerNode> arUcoMarkerIDToNodeMap = new TIntObjectHashMap<>();
-   private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
-   private transient final Set<DetectableSceneNode> detectableSceneNodes = new HashSet<>();
+   private transient final TIntObjectMap<CenterposeNode> centerposeDetectedMarkerIDToNodeMap = new TIntObjectHashMap<>();   private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
+   private transient final THashSet<YOLOv8Node> yoloNodes = new THashSet<>();
    private int numberOfFrozenNodes = 0;
 
    /** Create without CRDT synchronization. */
@@ -149,8 +150,9 @@ public class SceneGraph
       }
       namesToNodesMap.clear();
       arUcoMarkerIDToNodeMap.clear();
+      centerposeDetectedMarkerIDToNodeMap.clear();
+      yoloNodes.clear();
       sceneNodesByID.clear();
-      detectableSceneNodes.clear();
       numberOfFrozenNodes = 0;
       updateCaches(rootNode);
    }
@@ -188,14 +190,17 @@ public class SceneGraph
       namesToNodesMap.put(node.getName(), node);
       sceneNodesByID.add(node);
 
-      if (node instanceof DetectableSceneNode detectableSceneNode)
-      {
-         detectableSceneNodes.add(detectableSceneNode);
-      }
-
       if (node instanceof ArUcoMarkerNode arUcoMarkerNode)
       {
          arUcoMarkerIDToNodeMap.put(arUcoMarkerNode.getMarkerID(), arUcoMarkerNode);
+      }
+      else if (node instanceof CenterposeNode centerposeNode)
+      {
+         centerposeDetectedMarkerIDToNodeMap.put(centerposeNode.getObjectID(), centerposeNode);
+      }
+      else if (node instanceof YOLOv8Node yoloNode)
+      {
+         yoloNodes.add(yoloNode);
       }
 
       if (node.isFrozen())
@@ -209,29 +214,19 @@ public class SceneGraph
 
    public void updateDetections(DetectionManager detectionManager)
    {
-      Set<PersistentDetection> detections = detectionManager.updateAndGetDetections();
-      for (PersistentDetection detection : detections)
-      {
-         boolean claimed = false;
-         for (DetectableSceneNode node : detectableSceneNodes)
-         {
-            if (node.hasMatchingDetection(detection))
-            {
-               node.updateDetection(detection.getMostRecentDetection());
-               node.setCurrentlyDetected(detection.isStable());
-               node.update(this);
-               claimed = true;
-            }
-         }
+      detectionManager.updateDetections();
 
-         if (!claimed && detection.isOldEnough())
-         {
-            if (detection.isStable())
-               addNodeFromDetection(detection);
-            else
-               detection.markForDeletion();
-         }
-      }
+      Set<PersistentDetection> newlyValidDetections = detectionManager.getNewlyValidDetections();
+      for (PersistentDetection newDetection : newlyValidDetections)
+         addNodeFromDetection(newDetection);
+
+      for (YOLOv8Node yoloNode : yoloNodes)
+         yoloNode.update();
+      for (CenterposeNode centerPoseNode : centerposeDetectedMarkerIDToNodeMap.valueCollection())
+         centerPoseNode.update();
+      // TODO DOOR DETECTION?
+
+      detectionManager.clearNewlyValidDetections();
    }
 
    public SceneNode getRootNode()
@@ -294,7 +289,6 @@ public class SceneGraph
       return new ReferenceFrameDynamicCollection(nodeNameList, frameLookup);
    }
 
-   // Don't worry, I've got this
    private void addNodeFromDetection(PersistentDetection detection)
    {
       DetectableSceneNode detectableNode;
@@ -303,9 +297,9 @@ public class SceneGraph
 
       Class<?> detectionClass = detection.getInstantDetectionClass();
       if (detectionClass.equals(YOLOv8InstantDetection.class))
-         detectableNode = new YOLOv8Node(newNodeID, newNodeName, (YOLOv8InstantDetection) detection.getMostRecentDetection(), getCRDTInfo());
+         detectableNode = new YOLOv8Node(newNodeID, newNodeName, detection, getCRDTInfo());
       else if (detectionClass.equals(CenterPoseInstantDetection.class))
-         detectableNode = new CenterposeNode(newNodeID, newNodeName, (CenterPoseInstantDetection) detection.getMostRecentDetection(), true, getCRDTInfo());
+         detectableNode = new CenterposeNode(newNodeID, newNodeName, detection, true, getCRDTInfo());
       else
       {
          LogTools.error("Logic to handle detections of class {} has not been implemented", detectionClass);
@@ -315,7 +309,6 @@ public class SceneGraph
       if (detectableNode != null)
       {
          modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(detectableNode, rootNode)));
-         detectableSceneNodes.add(detectableNode);
       }
    }
 }

@@ -8,8 +8,10 @@ import perception_msgs.msg.dds.SceneGraphMessage;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
+import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
@@ -23,6 +25,8 @@ import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMecha
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
+
+import java.util.Arrays;
 
 public class ROS2SceneGraphTools
 {
@@ -79,28 +83,29 @@ public class ROS2SceneGraphTools
       {
          sceneNode = new CenterposeNode(nodeID,
                                         nodeName,
-                                        CenterPoseInstantDetection.fromMessage(subscriptionNode.getCenterposeNodeMessage()
-                                                                                               .getDetectableSceneNode()
-                                                                                               .getLatestDetections()
-                                                                                               .get(0)),
                                         subscriptionNode.getCenterposeNodeMessage().getEnableTracking(),
+                                        subscriptionNode.getCenterposeNodeMessage().getObjectTypeAsString(),
+                                        subscriptionNode.getCenterposeNodeMessage().getObjectId(),
+                                        subscriptionNode.getCenterposeNodeMessage().getConfidence(),
+                                        subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices(),
+                                        Arrays.stream(subscriptionNode.getCenterposeNodeMessage().getBoundingBoxVertices2d())
+                                              .map(Point2D::new)
+                                              .toArray(Point2D[]::new),
                                         crdtInfo);
       }
       else if (nodeType == SceneGraphMessage.YOLO_NODE_TYPE)
       {
          sceneNode = new YOLOv8Node(nodeID,
                                     nodeName,
-                                    YOLOv8InstantDetection.fromMessage(subscriptionNode.getYOLONodeMessage()
-                                                                                       .getDetectableSceneNode()
-                                                                                       .getLatestDetections()
-                                                                                       .get(0)),
+                                    subscriptionNode.getYOLONodeMessage().getConfidence(),
+                                    subscriptionNode.getYOLONodeMessage().getObjectPointCloud(),
                                     subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform(),
                                     subscriptionNode.getYOLONodeMessage().getObjectPose(),
                                     crdtInfo);
       }
       else if (nodeType == SceneGraphMessage.DETECTABLE_SCENE_NODE_TYPE)
       {
-         throw new NotImplementedException("TOMASZ YOU LEFT THIS BUG IN THE CODE");
+         sceneNode = new DetectableSceneNode(nodeID, nodeName, crdtInfo);
       }
       else if (nodeType == SceneGraphMessage.PRIMITIVE_RIGID_BODY_NODE_TYPE)
       {
@@ -118,11 +123,7 @@ public class ROS2SceneGraphTools
       else if (nodeType == SceneGraphMessage.DOOR_NODE_TYPE)
       {
          // TODO: DOORNODES
-         YOLOv8InstantDetection instantDetection = YOLOv8InstantDetection.fromMessage(subscriptionNode.getYOLONodeMessage()
-                                                                                                      .getDetectableSceneNode()
-                                                                                                      .getLatestDetections()
-                                                                                                      .get(0));
-         DoorNode doorNode = new DoorNode(nodeID, instantDetection, crdtInfo);
+         DoorNode doorNode = new DoorNode(nodeID, crdtInfo);
          doorNode.getDoorFramePose().set(subscriptionNode.getDoorNodeMessage().getDoorFramePose());
          doorNode.getDoorPanel().fromMessage(subscriptionNode.getDoorNodeMessage().getDoorPanel());
          doorNode.getOpeningMechanisms().clear(); // TODO should we clear the list every time?

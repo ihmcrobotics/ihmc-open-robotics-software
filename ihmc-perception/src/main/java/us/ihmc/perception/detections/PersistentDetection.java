@@ -1,6 +1,7 @@
 package us.ihmc.perception.detections;
 
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.time.TimeTools;
@@ -17,6 +18,7 @@ public class PersistentDetection
 {
    // The first element of this set is the oldest detection, and the last element is the most recent detection
    private final SortedSet<InstantDetection> detectionHistory = new TreeSet<>(Comparator.comparing(InstantDetection::getDetectionTime));
+   private final InstantDetection firstDetection;
    private Duration historyDuration;
    private final UUID id = UUID.randomUUID();
 
@@ -27,10 +29,14 @@ public class PersistentDetection
    private double stabilityConfidenceThreshold;
    private double stabilityDetectionFrequency;
 
+   private boolean isValid = false;
+   private final Notification hasBecomeValidNotification = new Notification();
    private boolean readyForDeletion = false;
 
    public PersistentDetection(InstantDetection firstDetection, double stabilityConfidenceThreshold, double stabilityDetectionFrequency, double historyDuration)
    {
+      this.firstDetection = firstDetection;
+
       addDetection(firstDetection);
       setStabilityConfidenceThreshold(stabilityConfidenceThreshold);
       setStabilityDetectionFrequency(stabilityDetectionFrequency);
@@ -56,6 +62,24 @@ public class PersistentDetection
    {
       // Remove detections that are too old
       detectionHistory.removeIf(detection -> detectionExpired(detection, now) && !detection.equals(getMostRecentDetection()));
+
+      if (!isValid)
+      {
+         if (isOldEnough(now))
+         {
+            System.out.println("CONF: " + getAverageConfidence());
+            System.out.println("FREQ: " + getDetectionFrequencyDecaying(now));
+            if (isStable(now))
+            {
+               isValid = true;
+               hasBecomeValidNotification.set();
+            }
+            else
+            {
+               markForDeletion();
+            }
+         }
+      }
    }
 
    public InstantDetection getOldestDetection()
@@ -124,7 +148,7 @@ public class PersistentDetection
 
    public boolean isOldEnough(Instant now)
    {
-      return detectionHistory.first().getDetectionTime().isBefore(now.minus(historyDuration));
+      return firstDetection.getDetectionTime().isBefore(now.minus(historyDuration));
    }
 
    public boolean isStable()
@@ -135,6 +159,16 @@ public class PersistentDetection
    public boolean isStable(Instant now)
    {
       return getDetectionFrequencyDecaying(now) > stabilityDetectionFrequency && getAverageConfidence() > stabilityConfidenceThreshold;
+   }
+
+   public boolean isValid()
+   {
+      return isValid;
+   }
+
+   public Notification hasBecomeValid()
+   {
+      return hasBecomeValidNotification;
    }
 
    /**
