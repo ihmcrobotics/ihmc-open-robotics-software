@@ -1,6 +1,7 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
 import org.jetbrains.annotations.Nullable;
+import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -100,51 +101,67 @@ public class RDXSceneGraphDemo
             baseUI.getPrimaryScene().addRenderableProvider(sceneGraphUI::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(sceneGraphUI.getPanel());
 
-            // Setup perception update thread
-            RestartableThrottledThread perceptionUpdateThread = new RestartableThrottledThread("PerceptionUpdateThread", 30.0, () ->
+            RestartableThrottledThread perceptionUpdateThread = new RestartableThrottledThread("PerceptionUpdateThread", 30.0, new RunnableThatThrows()
             {
-               if (yolov8DetectionManager == null)
+               private void runYOLO()
                {
-                  yolov8DetectionManager = new YOLOv8DetectionManager(ros2Helper, yoloAnnotatedImageVisualizer::isActive);
+                  if (yolov8DetectionManager == null)
+                  {
+                     yolov8DetectionManager = new YOLOv8DetectionManager(ros2Helper, yoloAnnotatedImageVisualizer::isActive);
+                     if (SENSOR_MODE == SensorMode.SIMULATED)
+                     {
+                        yolov8DetectionManager.setRobotFrame(sensorPoseGizmo.getGizmoFrame());
+                     }
+                     else if (SENSOR_MODE == SensorMode.ZED_SVO_RECORDING)
+                     {
+                        // TODO: Use ZED IMU data?
+                        yolov8DetectionManager.setRobotFrame(ReferenceFrame.getWorldFrame());
+                     }
+                  }
+
+                  RawImage yoloColorImageBGR = null;
+                  RawImage yoloDepthImageDiscretized = null;
+
                   if (SENSOR_MODE == SensorMode.SIMULATED)
                   {
-                     yolov8DetectionManager.setRobotFrame(sensorPoseGizmo.getGizmoFrame());
+                     synchronized (simulatedCamera)
+                     {
+                        yoloColorImageBGR = simulatedCamera.createRawColorImageBGR();
+                        yoloDepthImageDiscretized = simulatedCamera.createRawDepthImageDiscretized();
+                     }
                   }
                   else if (SENSOR_MODE == SensorMode.ZED_SVO_RECORDING)
                   {
-                     // TODO: Use ZED IMU data?
-                     yolov8DetectionManager.setRobotFrame(ReferenceFrame.getWorldFrame());
+                     RawImage depthImage = zedColorDepthImageRetrieverSVO.getLatestRawDepthImage();
+                     RawImage leftColorImage = zedColorDepthImageRetrieverSVO.getLatestRawColorImage(RobotSide.LEFT);
+                     RawImage rightColorImage = zedColorDepthImageRetrieverSVO.getLatestRawColorImage(RobotSide.RIGHT);
+
+                     zedColorDepthImagePublisher.setNextGpuDepthImage(depthImage);
+                     zedColorDepthImagePublisher.setNextColorImage(leftColorImage, RobotSide.LEFT);
+                     zedColorDepthImagePublisher.setNextColorImage(rightColorImage, RobotSide.RIGHT);
+
+                     yoloColorImageBGR = leftColorImage;
+                     yoloDepthImageDiscretized = depthImage;
                   }
-               }
 
-               RawImage yoloColorImageBGR = null;
-               RawImage yoloDepthImageDiscretized = null;
-
-               if (SENSOR_MODE == SensorMode.SIMULATED)
-               {
-                  synchronized (simulatedCamera)
+                  if (yoloColorImageBGR != null && yoloDepthImageDiscretized != null && yoloColorImageBGR.isAvailable() && yoloDepthImageDiscretized.isAvailable())
                   {
-                     yoloColorImageBGR = simulatedCamera.createRawColorImageBGR();
-                     yoloDepthImageDiscretized = simulatedCamera.createRawDepthImageDiscretized();
+                     yolov8DetectionManager.runYOLODetection(yoloColorImageBGR, yoloDepthImageDiscretized);
                   }
                }
-               else if (SENSOR_MODE == SensorMode.ZED_SVO_RECORDING)
+
+               private void updateSceneGraph()
                {
-                  RawImage depthImage = zedColorDepthImageRetrieverSVO.getLatestRawDepthImage();
-                  RawImage leftColorImage = zedColorDepthImageRetrieverSVO.getLatestRawColorImage(RobotSide.LEFT);
-                  RawImage rightColorImage = zedColorDepthImageRetrieverSVO.getLatestRawColorImage(RobotSide.RIGHT);
-
-                  zedColorDepthImagePublisher.setNextGpuDepthImage(depthImage);
-                  zedColorDepthImagePublisher.setNextColorImage(leftColorImage, RobotSide.LEFT);
-                  zedColorDepthImagePublisher.setNextColorImage(rightColorImage, RobotSide.RIGHT);
-
-                  yoloColorImageBGR = leftColorImage;
-                  yoloDepthImageDiscretized = depthImage;
+                  // TODO:
                }
 
-               if (yoloColorImageBGR != null && yoloDepthImageDiscretized != null && yoloColorImageBGR.isAvailable() && yoloDepthImageDiscretized.isAvailable())
+               // Main perception thread loop
+               @Override
+               public void run() throws Throwable
                {
-                  yolov8DetectionManager.runYOLODetection(yoloColorImageBGR, yoloDepthImageDiscretized);
+                  runYOLO();
+
+                  updateSceneGraph();
                }
             });
             perceptionUpdateThread.start();
