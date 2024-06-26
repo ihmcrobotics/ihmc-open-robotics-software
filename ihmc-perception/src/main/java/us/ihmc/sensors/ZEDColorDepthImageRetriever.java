@@ -79,6 +79,7 @@ public class ZEDColorDepthImageRetriever
    private SideDependentList<Long> lastColorSequenceNumbers = new SideDependentList<>(-1L, -1L);
 
    private boolean initialized = false;
+   private boolean paused;
 
    public ZEDColorDepthImageRetriever(int cameraID,
                                       Supplier<ReferenceFrame> sensorFrameSupplier,
@@ -89,7 +90,7 @@ public class ZEDColorDepthImageRetriever
 
       zedGrabThread = new RestartableThread("ZEDImageGrabber", () ->
       {
-         if (depthDemandNode == null || colorDemandNode == null || depthDemandNode.isDemanded() || colorDemandNode.isDemanded())
+         if (!paused && (depthDemandNode == null || colorDemandNode == null || depthDemandNode.isDemanded() || colorDemandNode.isDemanded()))
          {
             if (!initialized)
             {
@@ -136,9 +137,10 @@ public class ZEDColorDepthImageRetriever
             }
          }
          else
-            ThreadTools.sleep(500);
+         {
+            ThreadTools.sleep(100);
+         }
       });
-      start();
    }
 
    private void retrieveAndSaveColorImage(RobotSide side)
@@ -406,6 +408,16 @@ public class ZEDColorDepthImageRetriever
    public int getCameraID()
    {
       return cameraID;
+   }
+
+   public void setPaused(boolean paused)
+   {
+      this.paused = paused;
+   }
+
+   public boolean isPaused()
+   {
+      return paused;
    }
 
    public long getGrabSequenceNumber()

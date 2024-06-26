@@ -2,6 +2,7 @@ package us.ihmc.rdx.perception;
 
 import imgui.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
@@ -19,20 +20,23 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ZEDColorDepthImagePublisher;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO;
 import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;
+import us.ihmc.tools.IHMCCommonPaths;
+import us.ihmc.tools.thread.RestartableThrottledThread;
 
 public class RDXZEDSVORecordingDemo
 {
-   private static final RecordMode RECORD_MODE = RecordMode.RECORD; // If you set to PLAYBACK, you must specify a valid SVO_FILE_NAME below
-   private static final String SVO_FILE_NAME = null; // If it's null, a unique file name with a timestamp will be generated
+   //   private static final RecordMode RECORD_MODE = RecordMode.RECORD; // If you set to PLAYBACK, you must specify a valid SVO_FILE_NAME below
+   //   private static final String SVO_FILE_NAME = null; // If it's null, a unique file name with a timestamp will be generated
 
    // Demo file on Google Drive https://drive.google.com/file/d/1wF5tFVqEJM21uK12g_O5GpvACPJhXKZ1/view
    // Uncomment below lines to play it back
-   // private static final RecordMode RECORD_MODE = RecordMode.PLAYBACK;
-   // private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toAbsolutePath() + "/20240625_154000_ZEDRecording_Demo.svo2";
+   private static final RecordMode RECORD_MODE = RecordMode.PLAYBACK;
+   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toAbsolutePath() + "/20240625_154000_ZEDRecording_Demo.svo2";
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ROS2Node ros2Node;
    private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
+   private RDXZEDSVORecorderPanel recorderPanel;
 
    private final ZEDColorDepthImageRetrieverSVO zedColorDepthImageRetrieverSVO;
    private final ZEDColorDepthImagePublisher zedColorDepthImagePublisher;
@@ -41,12 +45,26 @@ public class RDXZEDSVORecordingDemo
    {
       Runtime.getRuntime().addShutdownHook(new Thread(this::dispose));
 
-      zedColorDepthImageRetrieverSVO = new ZEDColorDepthImageRetrieverSVO(0, ReferenceFrame::getWorldFrame, null, null, RECORD_MODE, SVO_FILE_NAME);
+      PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
+      ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "zed_svo_recording_demo");
+
+      zedColorDepthImageRetrieverSVO = new ZEDColorDepthImageRetrieverSVO(ros2Node, 0, ReferenceFrame::getWorldFrame, null, null, RECORD_MODE, SVO_FILE_NAME);
       zedColorDepthImageRetrieverSVO.start();
 
       zedColorDepthImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES,
                                                                     PerceptionAPI.ZED2_DEPTH,
                                                                     PerceptionAPI.ZED2_CUT_OUT_DEPTH);
+
+      RestartableThrottledThread perceptionUpdateThread = new RestartableThrottledThread("PerceptionUpdateThread", 30.0, () ->
+      {
+         RawImage depthImage = zedColorDepthImageRetrieverSVO.getLatestRawDepthImage();
+         RawImage leftColorImage = zedColorDepthImageRetrieverSVO.getLatestRawColorImage(RobotSide.LEFT);
+         RawImage rightColorImage = zedColorDepthImageRetrieverSVO.getLatestRawColorImage(RobotSide.RIGHT);
+         zedColorDepthImagePublisher.setNextColorImage(leftColorImage.get(), RobotSide.LEFT);
+         zedColorDepthImagePublisher.setNextColorImage(rightColorImage.get(), RobotSide.RIGHT);
+         zedColorDepthImagePublisher.setNextGpuDepthImage(depthImage.get());
+      });
+      perceptionUpdateThread.start();
 
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -55,12 +73,11 @@ public class RDXZEDSVORecordingDemo
          {
             baseUI.create(RDXSceneLevel.VIRTUAL, RDXSceneLevel.MODEL, RDXSceneLevel.GROUND_TRUTH);
 
-            PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
-            ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "zed_svo_recording_demo");
-
             perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
             baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
             baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
+
+            recorderPanel = new RDXZEDSVORecorderPanel(ros2Node);
 
             addZEDVisualizers(perceptionVisualizerPanel);
 
@@ -72,13 +89,7 @@ public class RDXZEDSVORecordingDemo
          {
             perceptionVisualizerPanel.update();
 
-            // TODO: move to thread?
-            RawImage depthImage = zedColorDepthImageRetrieverSVO.getLatestRawDepthImage();
-            RawImage leftColorImage = zedColorDepthImageRetrieverSVO.getLatestRawColorImage(RobotSide.LEFT);
-            RawImage rightColorImage = zedColorDepthImageRetrieverSVO.getLatestRawColorImage(RobotSide.RIGHT);
-            zedColorDepthImagePublisher.setNextColorImage(leftColorImage.get(), RobotSide.LEFT);
-            zedColorDepthImagePublisher.setNextColorImage(rightColorImage.get(), RobotSide.RIGHT);
-            zedColorDepthImagePublisher.setNextGpuDepthImage(depthImage.get());
+            recorderPanel.update();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();

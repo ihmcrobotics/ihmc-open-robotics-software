@@ -1,9 +1,14 @@
 package us.ihmc.sensors;
 
+import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
+import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2DemandGraphNode;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
+import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.zed.SL_InitParameters;
 
 import javax.annotation.Nullable;
@@ -17,15 +22,12 @@ import static us.ihmc.zed.global.zed.*;
 // https://www.stereolabs.com/docs/video/recording
 public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
 {
-   public enum RecordMode
-   {
-      RECORD, PLAYBACK
-   }
-
    private final RecordMode recordMode;
    private String svoFileName;
+   private final RestartableThrottledThread publishInfoThread;
 
-   public ZEDColorDepthImageRetrieverSVO(int cameraID,
+   public ZEDColorDepthImageRetrieverSVO(ROS2Node ros2Node,
+                                         int cameraID,
                                          Supplier<ReferenceFrame> sensorFrameSupplier,
                                          ROS2DemandGraphNode depthDemandNode,
                                          ROS2DemandGraphNode colorDemandNode,
@@ -41,6 +43,24 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
 
       this.recordMode = recordMode;
       this.svoFileName = Objects.requireNonNullElseGet(svoFileName, this::generateSVOFileName);
+
+      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
+
+      ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_SET_POSITION, int64 -> setCurrentPosition((int) int64.getData()));
+      ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_PAUSE, () -> setPaused(true));
+      ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_PLAY, () -> setPaused(false));
+
+      publishInfoThread = new RestartableThrottledThread("PublishSVOInfoThread", ZEDColorDepthImageRetriever.CAMERA_FPS, () ->
+      {
+         ZEDSVOCurrentFileMessage message = new ZEDSVOCurrentFileMessage();
+
+         message.setCurrentFileName(svoFileName);
+         message.setRecordMode(recordMode.toByte());
+         message.setCurrentPosition(getCurrentPosition());
+         message.setLength(getLength());
+
+         ros2Helper.publish(PerceptionAPI.ZED_SVO_CURRENT_FILE, message);
+      });
    }
 
    private String generateSVOFileName()
@@ -87,6 +107,8 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
          LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
       }
 
+      publishInfoThread.start();
+
       super.start();
    }
 
@@ -107,6 +129,8 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
          System.out.println("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
       }
 
+      publishInfoThread.stop();
+
       svoFileName = null;
 
       super.stop();
@@ -116,5 +140,52 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
    public String getSVOFileName()
    {
       return svoFileName;
+   }
+
+   public int getLength()
+   {
+      return sl_get_svo_number_of_frames(getCameraID());
+   }
+
+   public int getCurrentPosition()
+   {
+      return sl_get_svo_position(getCameraID());
+   }
+
+   public void setCurrentPosition(int position)
+   {
+      sl_set_svo_position(getCameraID(), position);
+   }
+
+   public void pauseRecording(boolean pause)
+   {
+      sl_pause_recording(getCameraID(), pause);
+   }
+
+   public enum RecordMode
+   {
+      RECORD((byte) 0), PLAYBACK((byte) 1);
+
+      private final byte byteValue;
+
+      RecordMode(byte byteValue)
+      {
+         this.byteValue = byteValue;
+      }
+
+      public byte toByte()
+      {
+         return byteValue;
+      }
+
+      public static RecordMode fromByte(byte b)
+      {
+         for (RecordMode value : values())
+         {
+            if (value.byteValue == b)
+               return value;
+         }
+         return null;
+      }
    }
 }

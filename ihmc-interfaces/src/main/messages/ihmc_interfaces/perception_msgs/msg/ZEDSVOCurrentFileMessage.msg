@@ -1,0 +1,4 @@
+string current_file_name
+byte record_mode
+int64 current_position
+int64 length

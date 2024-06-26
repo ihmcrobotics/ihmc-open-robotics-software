@@ -381,6 +381,11 @@ public class RDX3DPanel extends RDXPanel
       imGuiOverlayAdditions.add(imGuiOverlayAddition);
    }
 
+   public boolean overlayPanelExists(String panelName)
+   {
+      return overlayPanels.containsKey(panelName);
+   }
+
    public void addOverlayPanel(String panelName, Runnable imGuiRender)
    {
       RDX3DOverlayPanel panel = new RDX3DOverlayPanel(panelName, imGuiRender, this);

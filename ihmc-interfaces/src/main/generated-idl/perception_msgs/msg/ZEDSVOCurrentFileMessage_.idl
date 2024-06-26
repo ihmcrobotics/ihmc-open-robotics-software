@@ -1,0 +1,23 @@
+#ifndef __perception_msgs__msg__ZEDSVOCurrentFileMessage__idl__
+#define __perception_msgs__msg__ZEDSVOCurrentFileMessage__idl__
+
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::ZEDSVOCurrentFileMessage_")
+      struct ZEDSVOCurrentFileMessage
+      {
+        string current_file_name;
+        octet record_mode;
+        long long current_position;
+        long long length;
+      };
+    };
+  };
+};
+
+#endif
