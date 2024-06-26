@@ -48,6 +48,8 @@ public class DetectionManager
     * The added detections will be matched to existing {@link PersistentDetection}s,
     * or if a new detection is unmatched, a new {@link PersistentDetection} will be created.
     * This method is thread safe only when called on different detection class types.
+    * For example, you can add YOLO  & CenterPose detection concurrently,
+    * but you cannot add two sets of YOLO detections concurrently.
     * When detections of the same type are being added, this method is NOT thread safe.
     *
     * @param newInstantDetections Set of {@link InstantDetection}s, ideally all from the same detection frame.
