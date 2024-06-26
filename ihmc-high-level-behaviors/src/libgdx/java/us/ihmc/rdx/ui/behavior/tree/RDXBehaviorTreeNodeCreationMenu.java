@@ -4,6 +4,7 @@ import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionDefinition;
 import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
@@ -17,7 +18,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
-import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 import us.ihmc.rdx.ui.behavior.sequence.RDXAvailableBehaviorTreeFile;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -54,10 +54,80 @@ public class RDXBehaviorTreeNodeCreationMenu
     */
    public void renderImGuiWidgets(RDXBehaviorTreeNode<?, ?> relativeNode, BehaviorTreeNodeInsertionType insertionType)
    {
-      boolean actionSequenceIsPresent = RDXBehaviorTreeTools.findActionSequenceAncestor(relativeNode) != null;
+      if (insertionType == BehaviorTreeNodeInsertionType.INSERT_ROOT)
+      {
+         ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+         ImGui.text("Start from scratch:");
+         ImGui.popFont();
+         ImGui.indent();
+
+         renderNodeCreationClickable(relativeNode, insertionType, "Root Node", BehaviorTreeRootNodeDefinition.class, null);
+      }
+      else
+      {
+         ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+         ImGui.text("Control nodes:");
+         ImGui.popFont();
+         ImGui.indent();
+
+         renderNodeCreationClickable(relativeNode, insertionType, "Basic Node", BehaviorTreeNodeDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Action Sequence", ActionSequenceDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Door Traversal", DoorTraversalDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Trash Can Interaction", TrashCanInteractionDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Building Exploration", BuildingExplorationDefinition.class, null);
+
+         ImGui.unindent();
+
+         ImGui.separator();
+
+         ImGui.pushFont(ImGuiTools.getSmallBoldFont());
+         ImGui.text("Actions:");
+         ImGui.popFont();
+         ImGui.indent();
+
+         renderNodeCreationClickable(relativeNode, insertionType, "Footstep Plan", FootstepPlanActionDefinition.class, null);
+         ImGui.text("Foot Pose: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), FootPoseActionDefinition.class, side);
+         }
+         ImGui.text("Hand Pose: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandPoseActionDefinition.class, side);
+         }
+         ImGui.text("Sake Hand Command: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), SakeHandCommandActionDefinition.class, side);
+         }
+         renderNodeCreationClickable(relativeNode, insertionType, "Chest Orientation", ChestOrientationActionDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Pelvis Height", PelvisHeightOrientationActionDefinition.class, null);
+         renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitDurationActionDefinition.class, null);
+         ImGui.text("Screw Primitive: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), ScrewPrimitiveActionDefinition.class, side);
+         }
+         ImGui.textDisabled("Hand Wrench: ");
+         for (RobotSide side : RobotSide.values)
+         {
+            ImGui.sameLine();
+            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandWrenchActionDefinition.class, side);
+         }
+
+         ImGui.unindent();
+      }
+      ImGui.unindent();
+      ImGui.spacing();
+      ImGui.separator();
 
       ImGui.pushFont(ImGuiTools.getSmallBoldFont());
-      ImGui.text("From file:");
+      ImGui.text("Load existing tree from file:");
       ImGui.popFont();
 
       for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
@@ -135,76 +205,6 @@ public class RDXBehaviorTreeNodeCreationMenu
 
             ImGui.endTooltip();
          }
-      }
-      ImGui.unindent();
-      ImGui.spacing();
-
-      ImGui.separator();
-
-      ImGui.pushFont(ImGuiTools.getSmallBoldFont());
-      ImGui.text("Control nodes:");
-      ImGui.popFont();
-      ImGui.indent();
-
-      if (relativeNode != null)
-      {
-         renderNodeCreationClickable(relativeNode, insertionType, "Basic Node", BehaviorTreeNodeDefinition.class, null);
-         renderNodeCreationClickable(relativeNode, insertionType, "Door Traversal", DoorTraversalDefinition.class, null);
-         renderNodeCreationClickable(relativeNode, insertionType, "Trash Can Interaction", TrashCanInteractionDefinition.class, null);
-         renderNodeCreationClickable(relativeNode, insertionType, "Building Exploration", BuildingExplorationDefinition.class, null);
-      }
-      if (insertionType == BehaviorTreeNodeInsertionType.INSERT_ROOT)
-      {
-         renderNodeCreationClickable(relativeNode, insertionType, "Action Sequence", ActionSequenceDefinition.class, null);
-      }
-
-      ImGui.unindent();
-
-      if (actionSequenceIsPresent)
-      {
-         ImGui.separator();
-
-         ImGui.pushFont(ImGuiTools.getSmallBoldFont());
-         ImGui.text("Actions:");
-         ImGui.popFont();
-         ImGui.indent();
-
-         renderNodeCreationClickable(relativeNode, insertionType, "Footstep Plan", FootstepPlanActionDefinition.class, null);
-         ImGui.text("Foot Pose: ");
-         for (RobotSide side : RobotSide.values)
-         {
-            ImGui.sameLine();
-            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), FootPoseActionDefinition.class, side);
-         }
-         ImGui.text("Hand Pose: ");
-         for (RobotSide side : RobotSide.values)
-         {
-            ImGui.sameLine();
-            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandPoseActionDefinition.class, side);
-         }
-         ImGui.text("Sake Hand Command: ");
-         for (RobotSide side : RobotSide.values)
-         {
-            ImGui.sameLine();
-            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), SakeHandCommandActionDefinition.class, side);
-         }
-         renderNodeCreationClickable(relativeNode, insertionType, "Chest Orientation", ChestOrientationActionDefinition.class, null);
-         renderNodeCreationClickable(relativeNode, insertionType, "Pelvis Height", PelvisHeightOrientationActionDefinition.class, null);
-         renderNodeCreationClickable(relativeNode, insertionType, "Wait", WaitDurationActionDefinition.class, null);
-         ImGui.text("Screw Primitive: ");
-         for (RobotSide side : RobotSide.values)
-         {
-            ImGui.sameLine();
-            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), ScrewPrimitiveActionDefinition.class, side);
-         }
-         ImGui.textDisabled("Hand Wrench: ");
-         for (RobotSide side : RobotSide.values)
-         {
-            ImGui.sameLine();
-            renderNodeCreationClickable(relativeNode, insertionType, side.getPascalCaseName(), HandWrenchActionDefinition.class, side);
-         }
-
-         ImGui.unindent();
       }
    }
 

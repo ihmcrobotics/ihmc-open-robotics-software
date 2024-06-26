@@ -270,9 +270,6 @@ public class RDXBehaviorTree
       }
       else
       {
-         ImGui.pushFont(ImGuiTools.getMediumFont());
-         ImGui.text("Add a root node:");
-         ImGui.popFont();
          nodeCreationMenu.renderImGuiWidgets(rootNode, BehaviorTreeNodeInsertionType.INSERT_ROOT);
       }
    }
