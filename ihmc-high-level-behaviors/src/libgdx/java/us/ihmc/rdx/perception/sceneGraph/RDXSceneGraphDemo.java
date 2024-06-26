@@ -38,7 +38,8 @@ public class RDXSceneGraphDemo
    }
 
    private static final SensorMode SENSOR_MODE = SensorMode.ZED_SVO_RECORDING;
-   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240626_145046_ZEDRecording-WalkONRCourse.svo2")
+   // Drive folder with recordings https://drive.google.com/drive/u/0/folders/17TIgXgNPslUyzBFWy6Waev11fx__3w9D
+   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240625_154000_ZEDRecording_Demo.svo2")
                                                                                         .toAbsolutePath()
                                                                                         .toString();
    private static final PubSubImplementation PUB_SUB_IMPLEMENTATION = PubSubImplementation.FAST_RTPS;
