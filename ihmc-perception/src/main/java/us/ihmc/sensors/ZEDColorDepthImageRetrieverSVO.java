@@ -9,6 +9,7 @@ import us.ihmc.zed.SL_InitParameters;
 import javax.annotation.Nullable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import static us.ihmc.zed.global.zed.*;
@@ -39,7 +40,14 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
       }
 
       this.recordMode = recordMode;
-      this.svoFileName = svoFileName;
+      this.svoFileName = Objects.requireNonNullElseGet(svoFileName, this::generateSVOFileName);
+   }
+
+   private String generateSVOFileName()
+   {
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+      String depthLogFileName = dateFormat.format(new Date()) + "_" + "ZEDRecording.svo2";
+      return IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toAbsolutePath() + "/" + depthLogFileName;
    }
 
    @Override
@@ -67,9 +75,7 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
    {
       if (recordMode == RecordMode.RECORD)
       {
-         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
-         String depthLogFileName = dateFormat.format(new Date()) + "_" + "ZEDRecording.svo2";
-         svoFileName = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toAbsolutePath() + "/" + depthLogFileName;
+         svoFileName = generateSVOFileName();
          LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
          LogTools.info("Starting recording: " + svoFileName);
          LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
