@@ -1,12 +1,9 @@
 package us.ihmc.behaviors.activeMapping;
 
 import behavior_msgs.msg.dds.ContinuousWalkingCommandMessage;
-import ihmc_common_msgs.msg.dds.PoseListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.*;
-import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
 import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
@@ -21,7 +18,6 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
@@ -41,7 +37,6 @@ public class ContinuousPlannerSchedulingTask
                                                                                                           getClass(),
                                                                                                           ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
-   private final TerrainPlanningDebugger debugger;
    private final ContinuousPlanner continuousPlanner;
    public StateMachine<ContinuousHikingState, State> stateMachine;
    private TerrainMapData terrainMap;
@@ -58,7 +53,7 @@ public class ContinuousPlannerSchedulingTask
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND, commandMessage::set);
 
       MonteCarloFootstepPlannerParameters monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
-      debugger = new TerrainPlanningDebugger(ros2Node, monteCarloPlannerParameters);
+      TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, monteCarloPlannerParameters);
       this.continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, continuousHikingParameters, monteCarloPlannerParameters, debugger);
 
       ContinuousPlannerStatistics statistics = new ContinuousPlannerStatistics();
@@ -83,8 +78,7 @@ public class ContinuousPlannerSchedulingTask
                                                     continuousPlanner,
                                                     controllerFootstepQueueMonitor,
                                                     continuousHikingParameters,
-                                                    terrainMap,
-                                                    debugger,
+                                                    terrainMap, debugger,
                                                     statistics);
       State waitingtoLandState = new WaitingToLandState(ros2Helper,
                                                         simpleRobotName,
@@ -120,7 +114,7 @@ public class ContinuousPlannerSchedulingTask
       stateMachineFactory.addDoneTransition(ContinuousHikingState.WAITING_TO_LAND, ContinuousHikingState.READY_TO_PLAN);
 
       stateMachine = stateMachineFactory.build(ContinuousHikingState.DO_NOTHING);
-      stateMachineFactory.addStateChangedListener((from, to) -> LogTools.warn("STATE CHANGED! ( " + from + " -> " + to + " )"));
+      stateMachineFactory.addStateChangedListener((from, to) -> LogTools.warn("STATE CHANGED: ( " + from + " -> " + to + " )"));
 
       executorService.scheduleWithFixedDelay(this::tickStateMachine, 1500, CONTINUOUS_PLANNING_DELAY_MS, TimeUnit.MILLISECONDS);
    }

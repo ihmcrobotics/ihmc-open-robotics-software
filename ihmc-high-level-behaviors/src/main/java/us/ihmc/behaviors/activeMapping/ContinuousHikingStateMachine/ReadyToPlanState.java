@@ -31,6 +31,10 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ReadyToPlanState implements State
 {
+   // These could be put into tunable parameters but for now they were left here
+   private static final float X_RANDOM_MARGIN = 0.2f;
+   private static final float NOMINAL_STANCE_WIDTH = 0.22f;
+
    private final HumanoidReferenceFrames referenceFrames;
    private final AtomicReference<ContinuousWalkingCommandMessage> commandMessage;
    private final ContinuousPlanner continuousPlanner;
@@ -39,11 +43,19 @@ public class ReadyToPlanState implements State
    private final TerrainMapData terrainMap;
    private final TerrainPlanningDebugger debugger;
    private final ContinuousPlannerStatistics statistics;
-   private final List<SideDependentList<Pose3D>> walkToGoalWayPointList = new ArrayList<>();
+   private final List<SideDependentList<FramePose3D>> walkToGoalWayPointList = new ArrayList<>();
    private final Point3D robotLocation = new Point3D();
    private final StopWatch stopWatch = new StopWatch();
    double timeInSwingToStopPlanningAndWaitTillNextAttempt = 0;
-   private PlanningMode mode;
+
+   public enum PlanningMode
+   {
+      FAST_HIKING, WALK_TO_GOAL
+   }
+
+   // The default mode for when things start up
+   private PlanningMode planningMode = PlanningMode.FAST_HIKING;
+
    public ReadyToPlanState(ROS2Helper ros2Helper,
                            HumanoidReferenceFrames referenceFrames,
                            AtomicReference<ContinuousWalkingCommandMessage> commandMessage,
@@ -90,7 +102,7 @@ public class ReadyToPlanState implements State
 
       // Set up the imminent stance and goal poses in which to plan from
       continuousPlanner.setImminentStanceToPlanFrom();
-      SideDependentList<FramePose3D> goalPoses = returnGoalStuff();
+      SideDependentList<FramePose3D> goalPoses = getGoalPosesBasedOnPlanningMode();
       continuousPlanner.setGoalWaypointPoses(goalPoses.get(RobotSide.LEFT), goalPoses.get(RobotSide.RIGHT));
       debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
 
@@ -115,62 +127,57 @@ public class ReadyToPlanState implements State
       }
    }
 
-   public void addWayPointToList(Pose3D leftFootGoalPose, Pose3D rightFootGoalPose)
-   {
-      mode = PlanningMode.WALK_TO_GOAL;
-      //TODO make sure we don't add the same values twice
-      SideDependentList<Pose3D> latestWayPoint = new SideDependentList<>();
-      latestWayPoint.put(RobotSide.LEFT, leftFootGoalPose);
-      latestWayPoint.put(RobotSide.RIGHT, rightFootGoalPose);
-
-      LogTools.info("Added waypoint for WALK_TO_GOAL");
-      walkToGoalWayPointList.add(latestWayPoint);
-   }
-
-   public void addWayPointCheckPointToList(PoseListMessage poseListMessage)
-   {
-      List<Pose3D> poses = MessageTools.unpackPoseListMessage(poseListMessage);
-      addWayPointToList(poses.get(0), poses.get(1));
-      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
-   }
-
-   float xRandomMargin = 0.2f;
-   float nominalStanceWidth = 0.22f;
-
-   public SideDependentList<FramePose3D> returnGoalStuff()
+   public SideDependentList<FramePose3D> getGoalPosesBasedOnPlanningMode()
    {
       SideDependentList<FramePose3D> goalPoses = new SideDependentList<>();
 
-      if (walkToGoalWayPointList.isEmpty())
+      switch (this.planningMode)
       {
-         ContinuousPlanningTools.setRandomizedStraightGoalPoses(continuousPlanner.getWalkingStartMidPose(),
-                                                                continuousPlanner.getStartingStancePose(),
-                                                                goalPoses,
-                                                                (float) continuousHikingParameters.getGoalPoseForwardDistance(),
-                                                                xRandomMargin,
-                                                                (float) continuousHikingParameters.getGoalPoseUpDistance(),
-                                                                nominalStanceWidth);
-
-         return goalPoses;
-      }
-
-      Vector3DBasics robotLocationVector = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation();
-      robotLocation.set(robotLocationVector);
-      double distanceToGoalPose = ContinuousPlanningTools.getDistanceFromRobotToGoalPoseOnXYPlane(robotLocation, goalPoses);
-
-      if (distanceToGoalPose < continuousHikingParameters.getNextWaypointDistanceMargin())
-      {
-         LogTools.info("Removed goal from list... ready to go to the next one");
-         walkToGoalWayPointList.remove(0);
-
-         if (!walkToGoalWayPointList.isEmpty())
+         case FAST_HIKING ->
          {
-            goalPoses.get(RobotSide.LEFT).set(walkToGoalWayPointList.get(0).get(RobotSide.LEFT));
-            goalPoses.get(RobotSide.RIGHT).set(walkToGoalWayPointList.get(0).get(RobotSide.RIGHT));
+            ContinuousPlanningTools.setRandomizedStraightGoalPoses(continuousPlanner.getWalkingStartMidPose(),
+                                                                   continuousPlanner.getStartingStancePose(),
+                                                                   goalPoses,
+                                                                   (float) continuousHikingParameters.getGoalPoseForwardDistance(),
+                                                                   X_RANDOM_MARGIN,
+                                                                   (float) continuousHikingParameters.getGoalPoseUpDistance(),
+                                                                   NOMINAL_STANCE_WIDTH);
+
+            return goalPoses;
          }
-         else
+
+         // This allows for walking to a goal that isn't straight forward, its assumed that if there is no goal we will just resume walking straight forward
+         case WALK_TO_GOAL ->
          {
-            continuousHikingParameters.setEnableContinuousWalking(false);
+            // These goal poses are empty but that's ok because we will just plan the next loop and get a real one, the mode needs to be set though
+            if (walkToGoalWayPointList.isEmpty())
+            {
+               this.planningMode = PlanningMode.FAST_HIKING;
+               return goalPoses;
+            }
+
+            // Set the goalPoses here so that we return a good value regardless of what happens next
+            goalPoses = walkToGoalWayPointList.get(0);
+
+            Vector3DBasics robotLocationVector = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation();
+            robotLocation.set(robotLocationVector);
+            double distanceToGoalPose = ContinuousPlanningTools.getDistanceFromRobotToGoalPoseOnXYPlane(robotLocation, goalPoses);
+
+            if (distanceToGoalPose < continuousHikingParameters.getNextWaypointDistanceMargin())
+            {
+               walkToGoalWayPointList.remove(0);
+
+               if (!walkToGoalWayPointList.isEmpty())
+               {
+                  goalPoses = walkToGoalWayPointList.get(0);
+               }
+               else
+               {
+                  continuousHikingParameters.setEnableContinuousWalking(false);
+               }
+            }
+
+            return goalPoses;
          }
       }
 
@@ -185,12 +192,34 @@ public class ReadyToPlanState implements State
    @Override
    public boolean isDone(double timeInState)
    {
+      // Checks for how much time of the current step we have been planning for, stop planning if the step is close to completing
       boolean stopPlanningAndCompleteCurrentStep = stopWatch.getTime() > timeInSwingToStopPlanningAndWaitTillNextAttempt;
       return stopPlanningAndCompleteCurrentStep || (continuousPlanner.isPlanAvailable() && continuousHikingParameters.getStepPublisherEnabled());
    }
 
-   public enum PlanningMode
+   public void addWayPointCheckPointToList(PoseListMessage poseListMessage)
    {
-      EXECUTE_AND_PAUSE, FRONTIER_EXPANSION, ACTIVE_SEARCH, FAST_HIKING, WALK_TO_GOAL
+      List<Pose3D> poses = MessageTools.unpackPoseListMessage(poseListMessage);
+      addWayPointToList(poses.get(0), poses.get(1));
+      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
+   }
+
+   public void addWayPointToList(Pose3D leftFootGoalPose, Pose3D rightFootGoalPose)
+   {
+      FramePose3D leftFootPose = new FramePose3D();
+      FramePose3D rightFootPose = new FramePose3D();
+
+      leftFootPose.set(leftFootGoalPose);
+      rightFootPose.set(rightFootGoalPose);
+
+      planningMode = PlanningMode.WALK_TO_GOAL;
+      SideDependentList<FramePose3D> latestWayPoint = new SideDependentList<>();
+      latestWayPoint.put(RobotSide.LEFT, leftFootPose);
+      latestWayPoint.put(RobotSide.RIGHT, rightFootPose);
+      continuousPlanner.setGoalWaypointPoses(latestWayPoint.get(RobotSide.LEFT), latestWayPoint.get(RobotSide.RIGHT));
+
+      LogTools.info("Added waypoint for WALK_TO_GOAL");
+      walkToGoalWayPointList.add(latestWayPoint);
+      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
    }
 }

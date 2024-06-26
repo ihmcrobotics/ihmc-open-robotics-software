@@ -67,7 +67,6 @@ public class ContinuousPlanner
    private FootstepPlan monteCarloReferencePlan;
    private TerrainMapData latestTerrainMapData;
    private HeightMapData latestHeightMapData;
-   private final TerrainPlanningDebugger debugger;
    private FootstepPlan previousFootstepPlan;
    private FootstepPlan latestFootstepPlan;
    private final FootstepPlannerLogger logger;
@@ -87,7 +86,6 @@ public class ContinuousPlanner
    {
       this.continuousHikingParameters = continuousHikingParameters;
       this.referenceFrames = humanoidReferenceFrames;
-      this.debugger = debugger;
       this.active = true;
 
       this.monteCarloFootstepPlannerParameters = monteCarloPlannerParameters;
@@ -268,7 +266,7 @@ public class ContinuousPlanner
             if (continuousHikingParameters.getStepPublisherEnabled())
                this.previousFootstepPlan.remove(0);
 
-            // THis may TODO be the case where when the step publisher isn't enabled we can not rmeove one, becuase we nare't walking
+            // If the step publisher isn't enabled, we don't want to remove a step because we aren't walking, and that will mess up the reference plan
             if (!continuousHikingParameters.getOverrideEntireQueueEachStep())
                this.previousFootstepPlan.remove(1);
 
