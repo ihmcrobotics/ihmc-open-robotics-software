@@ -10,6 +10,7 @@ import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.zed.SL_InitParameters;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
@@ -37,6 +38,13 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
       if (recordMode == RecordMode.PLAYBACK && svoFileName == null)
       {
          throw new RuntimeException("Must specify an SVO file name for playback");
+      }
+
+      File svoFile = new File(svoFileName);
+
+      if (recordMode == RecordMode.PLAYBACK && !svoFile.exists())
+      {
+         throw new RuntimeException("SVO file does not exist");
       }
 
       this.recordMode = recordMode;
