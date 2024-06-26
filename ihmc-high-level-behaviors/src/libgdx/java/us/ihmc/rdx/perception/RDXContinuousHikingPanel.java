@@ -169,25 +169,13 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    {
       LogTools.debug("Received footstep plan: {}", footstepDataListMessage.getFootstepDataList().size());
 
+      FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage);
+      List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = SwingPlannerTools.computeTrajectories(swingTrajectoryParameters,
+                                                                                                                positionTrajectoryGenerator,
+                                                                                                                startStancePose,
+                                                                                                                plan);
       terrainPlanningDebugger.generateFootstepPlanGraphic(footstepDataListMessage);
-      if (activePerceptionModule != null && localRenderMode.get())
-      {
-         terrainPlanningDebugger.generateSwingGraphics(activePerceptionModule.getContinuousPlannerSchedulingTask()
-                                                                             .getContinuousPlanner()
-                                                                             .getLatestFootstepPlan(),
-                                                       activePerceptionModule.getContinuousPlannerSchedulingTask()
-                                                                             .getContinuousPlanner()
-                                                                             .getLatestSwingTrajectories());
-      }
-      else
-      {
-         FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage);
-         List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = SwingPlannerTools.computeTrajectories(swingTrajectoryParameters,
-                                                                                                                   positionTrajectoryGenerator,
-                                                                                                                   startStancePose,
-                                                                                                                   plan);
-         terrainPlanningDebugger.generateSwingGraphics(plan, swingTrajectories);
-      }
+      terrainPlanningDebugger.generateSwingGraphics(plan, swingTrajectories);
    }
 
    public void onMonteCarloPlanReceived(FootstepDataListMessage message)
@@ -234,6 +222,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    public void destroy()
    {
+      commandPublisher.remove();
+      activePerceptionModule.destroy();
       stancePoseSelectionPanel.destroy();
       terrainPlanningDebugger.destroy();
    }

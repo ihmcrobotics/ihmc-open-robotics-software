@@ -17,8 +17,19 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.Random;
 
-public class ContinuousPlanningTools
+public class ContinuousPlannerTools
 {
+   public static RobotSide getCloserSideToGoal(SideDependentList<FramePose3D> startingStancePose, SideDependentList<FramePose3D> goalStancePose)
+   {
+      double leftDistance = startingStancePose.get(RobotSide.LEFT).getPosition().distance(goalStancePose.get(RobotSide.LEFT).getPosition());
+      double rightDistance = startingStancePose.get(RobotSide.RIGHT).getPosition().distance(goalStancePose.get(RobotSide.RIGHT).getPosition());
+
+      if (leftDistance < rightDistance + 0.01)
+         return RobotSide.LEFT;
+      else
+         return RobotSide.RIGHT;
+   }
+
    public static double getDistanceFromRobotToGoalPoseOnXYPlane(Point3DReadOnly robotPositionInWorld, SideDependentList<FramePose3D> goalPoses)
    {
       FramePose3D leftGoalPose = goalPoses.get(RobotSide.LEFT);
@@ -32,11 +43,11 @@ public class ContinuousPlanningTools
    }
 
    public static SideDependentList<FramePose3D> setRandomizedStraightGoalPoses(FramePose3D walkingStartPose,
-                                                                                       SideDependentList<FramePose3D> stancePose,
-                                                                                       float xDistance,
-                                                                                       float xRandomMargin,
-                                                                                       float zDistance,
-                                                                                       float nominalStanceWidth)
+                                                                               SideDependentList<FramePose3D> stancePose,
+                                                                               float xDistance,
+                                                                               float xRandomMargin,
+                                                                               float zDistance,
+                                                                               float nominalStanceWidth)
    {
       float offsetX = (float) (Math.random() * xRandomMargin - xRandomMargin / 2.0f);
 
@@ -101,9 +112,10 @@ public class ContinuousPlanningTools
          goalPoseToPack.get(RobotSide.LEFT).set(sensorZUpToWorldTransform);
 
          if (random != null)
-            goalPoseToPack.get(RobotSide.LEFT).appendTranslation(random.nextDouble(xDistance - xMargin / 2.0f, xDistance + xMargin / 2.0f),
-                                                                 random.nextDouble(-yBound, yBound),
-                                                                 heightAtGoalPose + zOffset);
+            goalPoseToPack.get(RobotSide.LEFT)
+                          .appendTranslation(random.nextDouble(xDistance - xMargin / 2.0f, xDistance + xMargin / 2.0f),
+                                             random.nextDouble(-yBound, yBound),
+                                             heightAtGoalPose + zOffset);
          else
             goalPoseToPack.get(RobotSide.LEFT).appendTranslation(xDistance, nominalStanceWidth / 2.0f, heightAtGoalPose + zOffset);
 
@@ -118,7 +130,7 @@ public class ContinuousPlanningTools
                                                  int gridSize,
                                                  float resolution,
                                                  float minimumDistanceToNode,
-                                                   float maximumYawDifference)
+                                                 float maximumYawDifference)
    {
       Pose2D goalPose = new Pose2D(gridOrigin, 0.0);
       Point2D robotLocation = new Point2D(robotPose.getX(), robotPose.getY());

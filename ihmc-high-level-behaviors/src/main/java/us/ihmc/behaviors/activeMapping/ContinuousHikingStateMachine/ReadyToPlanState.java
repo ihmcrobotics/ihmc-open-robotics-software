@@ -7,7 +7,7 @@ import org.apache.commons.lang.time.StopWatch;
 import us.ihmc.behaviors.activeMapping.ContinuousHikingParameters;
 import us.ihmc.behaviors.activeMapping.ContinuousPlanner;
 import us.ihmc.behaviors.activeMapping.ContinuousPlannerStatistics;
-import us.ihmc.behaviors.activeMapping.ContinuousPlanningTools;
+import us.ihmc.behaviors.activeMapping.ContinuousPlannerTools;
 import us.ihmc.behaviors.activeMapping.ControllerFootstepQueueMonitor;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -135,12 +135,12 @@ public class ReadyToPlanState implements State
       {
          case FAST_HIKING ->
          {
-            goalPoses = ContinuousPlanningTools.setRandomizedStraightGoalPoses(continuousPlanner.getWalkingStartMidPose(),
-                                                                               continuousPlanner.getStartingStancePose(),
-                                                                               (float) continuousHikingParameters.getGoalPoseForwardDistance(),
-                                                                               X_RANDOM_MARGIN,
-                                                                               (float) continuousHikingParameters.getGoalPoseUpDistance(),
-                                                                               NOMINAL_STANCE_WIDTH);
+            goalPoses = ContinuousPlannerTools.setRandomizedStraightGoalPoses(continuousPlanner.getWalkingStartMidPose(),
+                                                                              continuousPlanner.getStartingStancePose(),
+                                                                              (float) continuousHikingParameters.getGoalPoseForwardDistance(),
+                                                                              X_RANDOM_MARGIN,
+                                                                              (float) continuousHikingParameters.getGoalPoseUpDistance(),
+                                                                              NOMINAL_STANCE_WIDTH);
 
             return goalPoses;
          }
@@ -160,7 +160,7 @@ public class ReadyToPlanState implements State
 
             Vector3DBasics robotLocationVector = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation();
             robotLocation.set(robotLocationVector);
-            double distanceToGoalPose = ContinuousPlanningTools.getDistanceFromRobotToGoalPoseOnXYPlane(robotLocation, goalPoses);
+            double distanceToGoalPose = ContinuousPlannerTools.getDistanceFromRobotToGoalPoseOnXYPlane(robotLocation, goalPoses);
 
             if (distanceToGoalPose < continuousHikingParameters.getNextWaypointDistanceMargin())
             {
