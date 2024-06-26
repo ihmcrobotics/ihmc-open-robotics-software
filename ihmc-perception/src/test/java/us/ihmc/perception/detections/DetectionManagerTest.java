@@ -12,14 +12,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@SuppressWarnings("CallToPrintStackTrace")
 public class DetectionManagerTest
 {
    private static final Random random = new Random(0);
@@ -31,15 +29,15 @@ public class DetectionManagerTest
       DetectionManager detectionManager = new DetectionManager();
 
       // Generate test detection sets
-      Set<YOLOv8InstantDetection> testDetectionsA = createYoloDetections(3, Instant.now());
-      Set<CenterPoseInstantDetection> testDetectionsB = createCenterposeDetections(3, Instant.now());
+      List<YOLOv8InstantDetection> testDetectionsA = createYoloDetections(3, Instant.now());
+      List<CenterPoseInstantDetection> testDetectionsB = createCenterposeDetections(3, Instant.now());
 
       // add the detection sets to detection manager
       assertDoesNotThrow(() -> detectionManager.addDetections(testDetectionsA));
       assertDoesNotThrow(() -> detectionManager.addDetections(testDetectionsB));
 
       // check whether detection manager received the sets properly
-      Set<PersistentDetection> storedDetectionsA = detectionManager.getDetectionsOfType(YOLOv8InstantDetection.class);
+      List<PersistentDetection> storedDetectionsA = detectionManager.getDetectionsOfType(YOLOv8InstantDetection.class);
       assertEquals(3, storedDetectionsA.size());
       for (PersistentDetection persistentDetection : storedDetectionsA)
       {
@@ -47,7 +45,7 @@ public class DetectionManagerTest
          assertTrue(testDetectionsA.contains(persistentDetection.getMostRecentDetection()));
       }
 
-      Set<PersistentDetection> storedDetectionsB = detectionManager.getDetectionsOfType(CenterPoseInstantDetection.class);
+      List<PersistentDetection> storedDetectionsB = detectionManager.getDetectionsOfType(CenterPoseInstantDetection.class);
       assertEquals(3, storedDetectionsB.size());
       for (PersistentDetection persistentDetection : storedDetectionsB)
       {
@@ -62,15 +60,15 @@ public class DetectionManagerTest
       DetectionManager detectionManager = new DetectionManager();
 
       // Generate the first frame of detections & add to detection manager
-      Set<YOLOv8InstantDetection> firstFrame = createYoloDetections(3, Instant.now());
+      List<YOLOv8InstantDetection> firstFrame = createYoloDetections(3, Instant.now());
       detectionManager.addDetections(firstFrame);
 
       // Generate second frame of detections & add to detection manager
-      Set<YOLOv8InstantDetection> secondFrame = createYoloDetections(2, Instant.now());
+      List<YOLOv8InstantDetection> secondFrame = createYoloDetections(2, Instant.now());
       detectionManager.addDetections(secondFrame);
 
       // Ensure detection manager has 3 detections
-      Set<PersistentDetection> persistentDetections = detectionManager.getDetectionsOfType(YOLOv8InstantDetection.class);
+      List<PersistentDetection> persistentDetections = detectionManager.getDetectionsOfType(YOLOv8InstantDetection.class);
       assertEquals(3, persistentDetections.size());
 
       // Ensure detection manager matched only 2 detections, and left one old detection
@@ -86,8 +84,7 @@ public class DetectionManagerTest
    }
 
    @Test
-   public void testConcurrentDetectionAddition()
-         throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, InterruptedException
+   public void testConcurrentDetectionAddition() throws InterruptedException
    {
       testPassed.set(true);
       DetectionManager detectionManager = new DetectionManager();
@@ -101,7 +98,7 @@ public class DetectionManagerTest
          int numToGenerate = i % (maxDetections + 1);
 
          // Two threads attempt to add different classes of detections concurrently. This should not throw exceptions.
-         Set<YOLOv8InstantDetection> detectionFrameA = createYoloDetections(numToGenerate, Instant.now());
+         List<YOLOv8InstantDetection> detectionFrameA = createYoloDetections(numToGenerate, Instant.now());
          Thread threadA = new Thread(() ->
          {
             ThreadTools.sleep(random.nextInt(10));
@@ -116,7 +113,7 @@ public class DetectionManagerTest
             }
          }, "TestThreadA");
 
-         Set<CenterPoseInstantDetection> detectionFrameB = createCenterposeDetections(2 * numToGenerate, Instant.now());
+         List<CenterPoseInstantDetection> detectionFrameB = createCenterposeDetections(2 * numToGenerate, Instant.now());
          Thread threadB = new Thread (() ->
          {
             ThreadTools.sleep(random.nextInt(10));
@@ -141,10 +138,10 @@ public class DetectionManagerTest
       }
 
       // Number of detections in detection manager should be correct after all runs
-      Set<PersistentDetection> detectionsA = detectionManager.getDetectionsOfType(YOLOv8InstantDetection.class);
+      List<PersistentDetection> detectionsA = detectionManager.getDetectionsOfType(YOLOv8InstantDetection.class);
       assertEquals(maxDetections, detectionsA.size());
 
-      Set<PersistentDetection> detectionsB = detectionManager.getDetectionsOfType(CenterPoseInstantDetection.class);
+      List<PersistentDetection> detectionsB = detectionManager.getDetectionsOfType(CenterPoseInstantDetection.class);
       assertEquals(2 * maxDetections, detectionsB.size());
    }
 
@@ -166,7 +163,7 @@ public class DetectionManagerTest
       {
          for (int i = 0; i < numRuns && testPassed.get(); ++i)
          {
-            Set<YOLOv8InstantDetection> detectionsA = createYoloDetections(100, Instant.now());
+            List<YOLOv8InstantDetection> detectionsA = createYoloDetections(100, Instant.now());
             detectionManager.addDetections(detectionsA);
          }
       }, "AdditionThreadA");
@@ -175,7 +172,7 @@ public class DetectionManagerTest
       {
          for (int i = 0; i < numRuns && testPassed.get(); ++i)
          {
-            Set<CenterPoseInstantDetection> detectionsB = createCenterposeDetections(100, Instant.now());
+            List<CenterPoseInstantDetection> detectionsB = createCenterposeDetections(100, Instant.now());
             detectionManager.addDetections(detectionsB);
          }
       }, "AdditionThreadB");
@@ -190,8 +187,8 @@ public class DetectionManagerTest
       {
          detectionManager.updateDetections();
 
-         Set<PersistentDetection> detectionsA = detectionManager.getDetectionsOfType(InstantDetection.class);
-         Set<PersistentDetection> detectionsB = detectionManager.getDetectionsOfType(InstantDetection.class);
+         List<PersistentDetection> detectionsA = detectionManager.getDetectionsOfType(InstantDetection.class);
+         List<PersistentDetection> detectionsB = detectionManager.getDetectionsOfType(InstantDetection.class);
 
          // Once detections are received, there should be 100 of them.
          if (!detectionsA.isEmpty() || receivedDetectionsA)
@@ -247,23 +244,23 @@ public class DetectionManagerTest
 
       for (int i = 0; i < 5; ++i)
       {
-         Set<YOLOv8InstantDetection> testDetectionsA = createYoloDetections(5, startTime.minusSeconds(i));
+         List<YOLOv8InstantDetection> testDetectionsA = createYoloDetections(5, startTime.minusSeconds(i));
          detectionManager.addDetections(testDetectionsA);
 
-         Set<CenterPoseInstantDetection> testDetectionsB = createCenterposeDetections(5, startTime.minusSeconds(i));
+         List<CenterPoseInstantDetection> testDetectionsB = createCenterposeDetections(5, startTime.minusSeconds(i));
          detectionManager.addDetections(testDetectionsB);
       }
 
       detectionManager.updateDetections(startTime);
 
-      Set<PersistentDetection> persistentDetectionsA = detectionManager.getDetectionsOfType(InstantDetection.class);
+      List<PersistentDetection> persistentDetectionsA = detectionManager.getDetectionsOfType(InstantDetection.class);
       for (PersistentDetection persistentDetection : persistentDetectionsA)
       {
          assertFalse(persistentDetection.isStable());
          assertEquals(3, persistentDetection.getHistorySize());
       }
 
-      Set<PersistentDetection> persistentDetectionsB = detectionManager.getDetectionsOfType(InstantDetection.class);
+      List<PersistentDetection> persistentDetectionsB = detectionManager.getDetectionsOfType(InstantDetection.class);
       for (PersistentDetection persistentDetection : persistentDetectionsB)
       {
          assertTrue(persistentDetection.isStable());
@@ -286,9 +283,9 @@ public class DetectionManagerTest
       }
    }
 
-   public static Set<YOLOv8InstantDetection> createYoloDetections(int numberToGenerate, Instant now)
+   public static List<YOLOv8InstantDetection> createYoloDetections(int numberToGenerate, Instant now)
    {
-      Set<YOLOv8InstantDetection> testDetections = new HashSet<>();
+      List<YOLOv8InstantDetection> testDetections = new ArrayList<>();
 
       for (int i = 0; i < numberToGenerate; ++i)
       {
@@ -299,9 +296,9 @@ public class DetectionManagerTest
       return testDetections;
    }
 
-   public static Set<CenterPoseInstantDetection> createCenterposeDetections(int numberToGenerate, Instant now)
+   public static List<CenterPoseInstantDetection> createCenterposeDetections(int numberToGenerate, Instant now)
    {
-      Set<CenterPoseInstantDetection> testDetections = new HashSet<>();
+      List<CenterPoseInstantDetection> testDetections = new ArrayList<>();
 
       for (int i = 0; i < numberToGenerate; ++i)
       {

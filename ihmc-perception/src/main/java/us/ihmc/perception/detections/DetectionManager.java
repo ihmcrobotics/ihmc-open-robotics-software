@@ -4,8 +4,10 @@ import us.ihmc.robotics.time.TimeTools;
 
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.UUID;
@@ -46,7 +48,7 @@ public class DetectionManager
    {
       DetectionPair bestMatch = null;
 
-      Set<PersistentDetection> sameTypePersistentDetections = getDetectionsOfType(newInstantDetection.getClass());
+      List<PersistentDetection> sameTypePersistentDetections = getDetectionsOfType(newInstantDetection.getClass());
       for (PersistentDetection persistentDetection : sameTypePersistentDetections)
       {
          // matches must be of the same class
@@ -86,15 +88,13 @@ public class DetectionManager
     *
     * @param newInstantDetections Set of {@link InstantDetection}s, ideally all from the same detection frame.
     */
-   public <T extends InstantDetection> void addDetections(Set<T> newInstantDetections)
+   public <T extends InstantDetection> void addDetections(List<T> newInstantDetections)
    {
       PriorityQueue<DetectionPair> possibleMatches = new PriorityQueue<>();
 
-      Object oneOfTheDetections = newInstantDetections.toArray()[0];
-
       // Keep track of unmatched detections
       Set<InstantDetection> unmatchedNewDetections = new HashSet<>(newInstantDetections);
-      Set<PersistentDetection> unmatchedPersistentDetections = getDetectionsOfType(oneOfTheDetections.getClass());
+      List<PersistentDetection> unmatchedPersistentDetections = getDetectionsOfType(newInstantDetections.get(0).getClass());
 
       // Find all possible matches
       for (PersistentDetection persistentDetection : unmatchedPersistentDetections)
@@ -116,7 +116,7 @@ public class DetectionManager
       }
 
       Set<DetectionPair> matchedDetections = new HashSet<>();
-      while(!unmatchedNewDetections.isEmpty() && !unmatchedPersistentDetections.isEmpty() && !possibleMatches.isEmpty())
+      while (!unmatchedNewDetections.isEmpty() && !unmatchedPersistentDetections.isEmpty() && !possibleMatches.isEmpty())
       {
          // Get the best match
          DetectionPair detectionPair = possibleMatches.poll();
@@ -147,7 +147,7 @@ public class DetectionManager
       }
    }
 
-   public <T extends InstantDetection> Set<PersistentDetection> updateAndGetDetectionsOfType(Class<T> classType)
+   public <T extends InstantDetection> List<PersistentDetection> updateAndGetDetectionsOfType(Class<T> classType)
    {
       synchronized (persistentDetectionsLock)
       {
@@ -156,9 +156,9 @@ public class DetectionManager
       }
    }
 
-   public Set<PersistentDetection> getDetectionsOfType(Class<?> classType)
+   public List<PersistentDetection> getDetectionsOfType(Class<?> classType)
    {
-      Set<PersistentDetection> typeDetections = new HashSet<>();
+      List<PersistentDetection> typeDetections = new ArrayList<>();
 
       synchronized (persistentDetectionsLock)
       {
@@ -198,8 +198,7 @@ public class DetectionManager
 
    public <T extends InstantDetection> PersistentDetection getDetection(UUID detectionID, Class<T> classType)
    {
-      Set<PersistentDetection> detections = getDetectionsOfType(classType);
-      for (PersistentDetection detection : detections)
+      for (PersistentDetection detection : getDetectionsOfType(classType))
       {
          if (detection.getID().equals(detectionID))
             return detection;

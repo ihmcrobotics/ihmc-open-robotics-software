@@ -54,7 +54,7 @@ public class YOLOv8DetectionExecutor
    private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor();
    private final OpenCLDepthImageSegmenter segmenter = new OpenCLDepthImageSegmenter();
 
-   private final List<Consumer<Set<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
+   private final List<Consumer<List<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
 
    private final ROS2DemandGraphNode annotatedImageDemandNode;
    private final ROS2PublisherBasics<ImageMessage> annotatedImagePublisher;
@@ -94,7 +94,7 @@ public class YOLOv8DetectionExecutor
       });
    }
 
-   public void addDetectionConsumerCallback(Consumer<Set<InstantDetection>> callback)
+   public void addDetectionConsumerCallback(Consumer<List<InstantDetection>> callback)
    {
       detectionConsumerCallbacks.add(callback);
    }
@@ -122,8 +122,8 @@ public class YOLOv8DetectionExecutor
             // Get the object masks from the results
             Map<YOLOv8DetectionOutput, RawImage> simpleDetectionMap = yoloResults.getTargetSegmentationImages(yoloSegmentationThreshold, targetDetections);
 
-            // Create set of instant detections from results
-            Set<InstantDetection> yoloInstantDetections = new HashSet<>();
+            // Create list of instant detections from results
+            List<InstantDetection> yoloInstantDetections = new ArrayList<>();
             for (Map.Entry<YOLOv8DetectionOutput, RawImage> simpleDetectionEntry : simpleDetectionMap.entrySet())
             {
                YOLOv8DetectionOutput simpleDetection = simpleDetectionEntry.getKey();
