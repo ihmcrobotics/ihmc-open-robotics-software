@@ -138,7 +138,7 @@ public class ZEDColorDepthImageRetriever
          else
             ThreadTools.sleep(500);
       });
-      zedGrabThread.start();
+      start();
    }
 
    private void retrieveAndSaveColorImage(RobotSide side)
