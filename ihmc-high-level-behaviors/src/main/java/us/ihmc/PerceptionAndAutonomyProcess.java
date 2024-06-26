@@ -252,7 +252,6 @@ public class PerceptionAndAutonomyProcess
       arUcoMarkerDetectionThread.start();
 
       sceneGraph = new ROS2SceneGraph(ros2Helper);
-      sceneGraph.setDetectionManager(detectionManager);
       sceneGraphUpdateThread = new RestartableThrottledThread("SceneGraphUpdater", SceneGraph.UPDATE_FREQUENCY, this::updateSceneGraph);
 
       centerPoseDetectionSubscriber = new CenterPoseDetectionSubscriber(detectionManager);
@@ -528,7 +527,7 @@ public class PerceptionAndAutonomyProcess
       else
          centerPoseDetectionSubscriber.unsubscribe();
 
-      sceneGraph.updateDetections();
+      sceneGraph.updateDetections(detectionManager);
 
       ReferenceFrame robotPelvisFrame = robotPelvisFrameSupplier.get();
 

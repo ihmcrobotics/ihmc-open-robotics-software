@@ -1,14 +1,15 @@
 package us.ihmc.perception.sceneGraph;
 
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -18,6 +19,7 @@ import java.util.UUID;
 public class DetectableSceneNode extends SceneNode
 {
    private final Map<UUID, InstantDetection> latestDetections = new HashMap<>();
+   private final Set<PersistentDetection> persistentDetections = new HashSet<>();
    private boolean currentlyDetected;
 
    public DetectableSceneNode(long id, String name, InstantDetection detection, CRDTInfo crdtInfo)
@@ -98,15 +100,7 @@ public class DetectableSceneNode extends SceneNode
    {
       super.destroy(sceneGraph);
 
-      DetectionManager detectionManager = sceneGraph.getDetectionManager();
-      if (detectionManager != null)
-      {
-         latestDetections.forEach((id, instantDetection) ->
-         {
-            PersistentDetection persistentDetection = detectionManager.getDetection(id, instantDetection.getClass());
-            if (persistentDetection != null)
-               persistentDetection.markForDeletion();
-         });
-      }
+      for (PersistentDetection persistentDetection : persistentDetections)
+         persistentDetection.markForDeletion();
    }
 }

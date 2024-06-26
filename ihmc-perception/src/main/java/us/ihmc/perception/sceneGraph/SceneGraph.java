@@ -62,7 +62,6 @@ public class SceneGraph
    private final SceneNode rootNode;
    private final Queue<SceneGraphTreeModification> queuedModifications = new LinkedList<>();
    private final DetectionFilterCollection detectionFilterCollection = new DetectionFilterCollection();
-   private DetectionManager detectionManager = null;
    /**
     * Useful for accessing nodes by ID instead of searching.
     * Also, sometimes, the tree will be disassembled and this is used in putting it
@@ -208,11 +207,8 @@ public class SceneGraph
       }
    }
 
-   public void updateDetections()
+   public void updateDetections(DetectionManager detectionManager)
    {
-      if (detectionManager == null)
-         return;
-
       Set<PersistentDetection> detections = detectionManager.updateAndGetDetections();
       for (PersistentDetection detection : detections)
       {
@@ -296,16 +292,6 @@ public class SceneGraph
          return sceneNode == null ? null : sceneNode.getNodeFrame();
       };
       return new ReferenceFrameDynamicCollection(nodeNameList, frameLookup);
-   }
-
-   public void setDetectionManager(DetectionManager detectionManager)
-   {
-      this.detectionManager = detectionManager;
-   }
-
-   public DetectionManager getDetectionManager()
-   {
-      return detectionManager;
    }
 
    // Don't worry, I've got this
