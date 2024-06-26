@@ -6,6 +6,7 @@ import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.zed.SL_InitParameters;
@@ -24,11 +25,11 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
    private final String svoFileName;
    private final RestartableThrottledThread publishInfoThread;
 
-   public ZEDColorDepthImageRetrieverSVO(int cameraID,
+   public ZEDColorDepthImageRetrieverSVO(ROS2Node ros2Node,
+                                         int cameraID,
                                          Supplier<ReferenceFrame> sensorFrameSupplier,
                                          ROS2DemandGraphNode depthDemandNode,
                                          ROS2DemandGraphNode colorDemandNode,
-                                         ROS2Helper ros2Helper,
                                          RecordMode recordMode,
                                          String svoFileName)
    {
@@ -41,6 +42,8 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
 
       this.recordMode = recordMode;
       this.svoFileName = Objects.requireNonNullElseGet(svoFileName, this::generateSVOFileName);
+
+      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_SET_POSITION, int64 -> setCurrentPosition((int) int64.getData()));
       ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_PAUSE, () ->
