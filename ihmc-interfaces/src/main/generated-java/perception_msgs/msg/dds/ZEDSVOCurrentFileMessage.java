@@ -8,9 +8,21 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class ZEDSVOCurrentFileMessage extends Packet<ZEDSVOCurrentFileMessage> implements Settable<ZEDSVOCurrentFileMessage>, EpsilonComparable<ZEDSVOCurrentFileMessage>
 {
+   /**
+            * The file name of the current SVO file that is being recorded to or being played back
+            */
    public java.lang.StringBuilder current_file_name_;
+   /**
+            * The record mode (0=record, 1=playback)
+            */
    public byte record_mode_;
+   /**
+            * The current position index of the current SVO file
+            */
    public long current_position_;
+   /**
+            * The length of the current SVO file
+            */
    public long length_;
 
    public ZEDSVOCurrentFileMessage()
@@ -37,43 +49,70 @@ public class ZEDSVOCurrentFileMessage extends Packet<ZEDSVOCurrentFileMessage> i
 
    }
 
+   /**
+            * The file name of the current SVO file that is being recorded to or being played back
+            */
    public void setCurrentFileName(java.lang.String current_file_name)
    {
       current_file_name_.setLength(0);
       current_file_name_.append(current_file_name);
    }
 
+   /**
+            * The file name of the current SVO file that is being recorded to or being played back
+            */
    public java.lang.String getCurrentFileNameAsString()
    {
       return getCurrentFileName().toString();
    }
+   /**
+            * The file name of the current SVO file that is being recorded to or being played back
+            */
    public java.lang.StringBuilder getCurrentFileName()
    {
       return current_file_name_;
    }
 
+   /**
+            * The record mode (0=record, 1=playback)
+            */
    public void setRecordMode(byte record_mode)
    {
       record_mode_ = record_mode;
    }
+   /**
+            * The record mode (0=record, 1=playback)
+            */
    public byte getRecordMode()
    {
       return record_mode_;
    }
 
+   /**
+            * The current position index of the current SVO file
+            */
    public void setCurrentPosition(long current_position)
    {
       current_position_ = current_position;
    }
+   /**
+            * The current position index of the current SVO file
+            */
    public long getCurrentPosition()
    {
       return current_position_;
    }
 
+   /**
+            * The length of the current SVO file
+            */
    public void setLength(long length)
    {
       length_ = length;
    }
+   /**
+            * The length of the current SVO file
+            */
    public long getLength()
    {
       return length_;
