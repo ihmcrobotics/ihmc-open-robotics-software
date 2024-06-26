@@ -40,8 +40,8 @@ public class ControllerFootstepQueueMonitor
       controllerQueue = footstepQueueStatusMessage.getQueuedFootstepList();
       if (controllerQueueSize != footstepQueueStatusMessage.getQueuedFootstepList().size())
       {
-         String message = String.format("State: Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size());
-         LogTools.warn(message);
+         String message = String.format("Latest Controller Queue Footstep Size: " + footstepQueueStatusMessage.getQueuedFootstepList().size());
+         LogTools.info(message);
          statistics.appendString(message);
       }
       controllerQueueSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
@@ -66,7 +66,7 @@ public class ControllerFootstepQueueMonitor
                                           .norm();
          statistics.setLastLengthCompleted((float) distance);
 
-         statistics.logToFile(true, true);
+         statistics.logToFile(true, false);
       }
 
       this.footstepStatusMessage.set(footstepStatusMessage);

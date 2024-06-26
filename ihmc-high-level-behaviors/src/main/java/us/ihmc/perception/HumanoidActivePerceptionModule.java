@@ -60,10 +60,9 @@ public class HumanoidActivePerceptionModule
    public void initializeContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
                                                          ROS2Node ros2Node,
                                                          HumanoidReferenceFrames referenceFrames,
-                                                         ContinuousHikingParameters continuousHikingParameters,
-                                                         ContinuousPlanner.PlanningMode mode)
+                                                         ContinuousHikingParameters continuousHikingParameters)
    {
-      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel, ros2Node, referenceFrames, continuousHikingParameters, mode);
+      continuousPlannerSchedulingTask = new ContinuousPlannerSchedulingTask(robotModel, ros2Node, referenceFrames, continuousHikingParameters);
    }
 
    public void update(ReferenceFrame sensorFrame, boolean display)
