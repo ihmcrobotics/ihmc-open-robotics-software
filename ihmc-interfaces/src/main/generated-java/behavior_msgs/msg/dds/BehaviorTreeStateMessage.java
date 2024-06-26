@@ -14,11 +14,12 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> implements Settable<BehaviorTreeStateMessage>, EpsilonComparable<BehaviorTreeStateMessage>
 {
-   public static final byte BASIC_NODE = (byte) 0;
-   public static final byte ACTION_SEQUENCE = (byte) 1;
-   public static final byte DOOR_TRAVERSAL = (byte) 2;
-   public static final byte TRASH_CAN_INTERACTION = (byte) 3;
-   public static final byte BUILDING_EXPLORATION = (byte) 4;
+   public static final byte ROOT_NODE = (byte) 0;
+   public static final byte BASIC_NODE = (byte) 1;
+   public static final byte ACTION_SEQUENCE = (byte) 2;
+   public static final byte DOOR_TRAVERSAL = (byte) 3;
+   public static final byte TRASH_CAN_INTERACTION = (byte) 4;
+   public static final byte BUILDING_EXPLORATION = (byte) 5;
    public static final byte CHEST_ORIENTATION_ACTION = (byte) 10;
    public static final byte FOOTSTEP_PLAN_ACTION = (byte) 11;
    public static final byte SAKE_HAND_COMMAND_ACTION = (byte) 12;

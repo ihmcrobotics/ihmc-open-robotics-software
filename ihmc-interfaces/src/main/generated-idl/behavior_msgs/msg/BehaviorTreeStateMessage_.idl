@@ -22,20 +22,23 @@ module behavior_msgs
   {
     module dds
     {
-      const octet BASIC_NODE =
+      const octet ROOT_NODE =
       0;
 
-      const octet ACTION_SEQUENCE =
+      const octet BASIC_NODE =
       1;
 
-      const octet DOOR_TRAVERSAL =
+      const octet ACTION_SEQUENCE =
       2;
 
-      const octet TRASH_CAN_INTERACTION =
+      const octet DOOR_TRAVERSAL =
       3;
 
-      const octet BUILDING_EXPLORATION =
+      const octet TRASH_CAN_INTERACTION =
       4;
+
+      const octet BUILDING_EXPLORATION =
+      5;
 
       const octet CHEST_ORIENTATION_ACTION =
       10;
