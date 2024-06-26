@@ -28,6 +28,15 @@ import java.util.stream.Collectors;
 
 import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions.DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN;
 
+/**
+ * A node that represents a door.
+ * This includes a frame, hinged swinging panel that swings one way,
+ * and opening mechanisms on either side of the panel.
+ *
+ * The X forward direction of this node points straight through the frame,
+ * towards the side that the door panel swings open to.
+ * The the origin of the frame is positioned at the bottom of the panel hinge.
+ */
 public class DoorNode extends DetectableSceneNode
 {
    private static final Pose3D ZERO_POSE = new Pose3D();
