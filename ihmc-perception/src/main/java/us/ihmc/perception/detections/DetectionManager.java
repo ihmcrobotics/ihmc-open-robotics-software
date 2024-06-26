@@ -17,7 +17,7 @@ public class DetectionManager
    private final Set<PersistentDetection> persistentDetections = new HashSet<>();
    private final Object persistentDetectionsLock = new Object();
 
-   private double matchDistanceSquared;
+   private double maxMatchDistanceSquared;
    private double defaultStabilityThreshold;
    private double defaultStabilityFrequency;
    private double defaultHistorySeconds;
@@ -56,8 +56,8 @@ public class DetectionManager
    {
       List<PersistentDetection> persistentDetectionsOfClass = getDetectionsOfType(newInstantDetections.get(0).getClass());
 
-      // Find all possible matches
-      PriorityQueue<DetectionPair> possibleMatches = new PriorityQueue<>();
+      // Find all possible matches, sorting by distance to get the closest matches
+      PriorityQueue<DetectionPair> potentialMatches = new PriorityQueue<>();
       for (PersistentDetection persistentDetection : persistentDetectionsOfClass)
       {
          for (InstantDetection newInstantDetection : newInstantDetections)
@@ -70,40 +70,41 @@ public class DetectionManager
                                                            .getPosition()
                                                            .distanceSquared(newInstantDetection.getPose().getPosition());
                // matches must be close enough
-               if (distanceSquared < matchDistanceSquared)
-                  possibleMatches.add(new DetectionPair(persistentDetection, newInstantDetection));
+               if (distanceSquared < maxMatchDistanceSquared)
+                  potentialMatches.add(new DetectionPair(persistentDetection, newInstantDetection));
             }
          }
       }
 
-      // Keep track of unmatched detections
-      Set<InstantDetection> unmatchedNewDetections = new HashSet<>(newInstantDetections);
-      List<PersistentDetection> unmatchedPersistentDetections = persistentDetectionsOfClass;
-      Set<DetectionPair> matchedDetections = new HashSet<>();
-      while (!unmatchedNewDetections.isEmpty() && !unmatchedPersistentDetections.isEmpty() && !possibleMatches.isEmpty())
+      // Build a new set of the best-aligning potential matches one by one, ensuring no duplicates
+      Set<InstantDetection> remainingNewDetections = new HashSet<>(newInstantDetections);
+      List<PersistentDetection> remainingPersistentDetections = persistentDetectionsOfClass;
+      List<DetectionPair> validAndBestMatches = new ArrayList<>();
+      while (!remainingNewDetections.isEmpty() && !remainingPersistentDetections.isEmpty() && !potentialMatches.isEmpty())
       {
-         // Get the best match
-         DetectionPair detectionPair = possibleMatches.poll();
+         // Get the next closest match
+         DetectionPair detectionPair = potentialMatches.poll();
          PersistentDetection persistentDetection = detectionPair.getPersistentDetection();
          InstantDetection newInstantDetection = detectionPair.getInstantDetection();
 
-         // If it hasn't been used already, update the persistent detection
-         if (unmatchedPersistentDetections.contains(persistentDetection)
-             && unmatchedNewDetections.contains(newInstantDetection))
+         // If it hasn't been used already, validate the match
+         if (remainingPersistentDetections.contains(persistentDetection)
+             && remainingNewDetections.contains(newInstantDetection))
          {
-            matchedDetections.add(detectionPair);
-            unmatchedPersistentDetections.remove(persistentDetection);
-            unmatchedNewDetections.remove(newInstantDetection);
+            validAndBestMatches.add(detectionPair);
+            remainingPersistentDetections.remove(persistentDetection);
+            remainingNewDetections.remove(newInstantDetection);
          }
       }
 
       synchronized(persistentDetectionsLock)
       {
          // add the matched new instant detections to the persistent detections' histories
-         matchedDetections.forEach(DetectionPair::confirmDetectionMatch);
+         for (DetectionPair match : validAndBestMatches)
+            match.getPersistentDetection().addDetection(match.getInstantDetection());
 
          // create new persistent detections from unmatched new detections
-         for (InstantDetection unmatchedNewDetection : unmatchedNewDetections)
+         for (InstantDetection unmatchedNewDetection : remainingNewDetections)
             persistentDetections.add(new PersistentDetection(unmatchedNewDetection,
                                                              defaultStabilityThreshold,
                                                              defaultStabilityFrequency,
@@ -194,7 +195,7 @@ public class DetectionManager
 
    public void setMatchDistanceThreshold(double matchDistance)
    {
-      matchDistanceSquared = matchDistance * matchDistance;
+      maxMatchDistanceSquared = matchDistance * matchDistance;
    }
 
    public void setDefaultStabilityThreshold(double defaultStabilityThreshold)
