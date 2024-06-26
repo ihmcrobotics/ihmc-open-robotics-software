@@ -46,21 +46,15 @@ import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProvider
 {
-   private final ROS2PublisherBasics<ContinuousWalkingCommandMessage> commandPublisher;
-   private final ContinuousWalkingCommandMessage commandMessage = new ContinuousWalkingCommandMessage();
-   private final AtomicReference<FootstepDataListMessage> footstepDataListMessage = new AtomicReference<>(null);
-   private final AtomicReference<FootstepDataListMessage> monteCarloPlanDataListMessage = new AtomicReference<>(null);
-   private final SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-   private final SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-
-   private final RDXStancePoseSelectionPanel stancePoseSelectionPanel;
-
    private static final int numberOfKnotPoints = 12;
    private static final int maxIterationsOptimization = 100;
+   private final ROS2PublisherBasics<ContinuousWalkingCommandMessage> commandPublisher;
+   private final ContinuousWalkingCommandMessage commandMessage = new ContinuousWalkingCommandMessage();
+   private final SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private final RDXStancePoseSelectionPanel stancePoseSelectionPanel;
    private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator(numberOfKnotPoints,
                                                                                                                              maxIterationsOptimization);
 
@@ -122,43 +116,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    public void update(TerrainMapData terrainMapData, HeightMapData heightMapData)
    {
-      updateFootstepGraphics();
-
       terrainPlanningDebugger.update(terrainMapData);
       stancePoseSelectionPanel.update(terrainMapData, heightMapData);
-   }
-
-   public void updateFootstepGraphics()
-   {
-      if (footstepDataListMessage.get() != null)
-      {
-         terrainPlanningDebugger.generateFootstepPlanGraphic(footstepDataListMessage.get());
-         if (activePerceptionModule != null && localRenderMode.get())
-         {
-            terrainPlanningDebugger.generateSwingGraphics(activePerceptionModule.getContinuousPlannerSchedulingTask()
-                                                                                .getContinuousPlanner()
-                                                                                .getLatestFootstepPlan(),
-                                                          activePerceptionModule.getContinuousPlannerSchedulingTask()
-                                                                                .getContinuousPlanner()
-                                                                                .getLatestSwingTrajectories());
-         }
-         else
-         {
-            FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage.get());
-            List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = SwingPlannerTools.computeTrajectories(swingTrajectoryParameters,
-                                                                                                                      positionTrajectoryGenerator,
-                                                                                                                      startStancePose,
-                                                                                                                      plan);
-            terrainPlanningDebugger.generateSwingGraphics(plan, swingTrajectories);
-         }
-         footstepDataListMessage.set(null);
-      }
-
-      if (monteCarloPlanDataListMessage.get() != null)
-      {
-         terrainPlanningDebugger.generateMonteCarloPlanGraphic(monteCarloPlanDataListMessage.get());
-         monteCarloPlanDataListMessage.set(null);
-      }
    }
 
    public void renderImGuiWidgets()
@@ -191,10 +150,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    }
 
    /**
-   We have received the start and goal pose from the process, lets unpack this message and visualize the start and goal on the UI.
+    * We have received the start and goal pose from the process, lets unpack this message and visualize the start and goal on the UI.
     */
    public void onStartAndGoalPosesReceived(PoseListMessage poseListMessage)
    {
+      SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
       List<Pose3D> poses = MessageTools.unpackPoseListMessage(poseListMessage);
       startStancePose.get(RobotSide.LEFT).set(poses.get(0));
       startStancePose.get(RobotSide.RIGHT).set(poses.get(1));
@@ -205,16 +165,35 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       terrainPlanningDebugger.generateStartAndGoalFootstepGraphics(startStancePose, goalStancePose);
    }
 
-   public void onPlannedFootstepsReceived(FootstepDataListMessage message)
+   public void onPlannedFootstepsReceived(FootstepDataListMessage footstepDataListMessage)
    {
-      LogTools.debug("Received footstep plan: {}", message.getFootstepDataList().size());
-      this.footstepDataListMessage.set(message);
+      LogTools.debug("Received footstep plan: {}", footstepDataListMessage.getFootstepDataList().size());
+
+      terrainPlanningDebugger.generateFootstepPlanGraphic(footstepDataListMessage);
+      if (activePerceptionModule != null && localRenderMode.get())
+      {
+         terrainPlanningDebugger.generateSwingGraphics(activePerceptionModule.getContinuousPlannerSchedulingTask()
+                                                                             .getContinuousPlanner()
+                                                                             .getLatestFootstepPlan(),
+                                                       activePerceptionModule.getContinuousPlannerSchedulingTask()
+                                                                             .getContinuousPlanner()
+                                                                             .getLatestSwingTrajectories());
+      }
+      else
+      {
+         FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage);
+         List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = SwingPlannerTools.computeTrajectories(swingTrajectoryParameters,
+                                                                                                                   positionTrajectoryGenerator,
+                                                                                                                   startStancePose,
+                                                                                                                   plan);
+         terrainPlanningDebugger.generateSwingGraphics(plan, swingTrajectories);
+      }
    }
 
    public void onMonteCarloPlanReceived(FootstepDataListMessage message)
    {
       LogTools.debug("Received Monte-Carlo Plan: {}", message.getFootstepDataList().size());
-      this.monteCarloPlanDataListMessage.set(message);
+      terrainPlanningDebugger.generateMonteCarloPlanGraphic(message);
    }
 
    private void publishInputCommandMessage()
