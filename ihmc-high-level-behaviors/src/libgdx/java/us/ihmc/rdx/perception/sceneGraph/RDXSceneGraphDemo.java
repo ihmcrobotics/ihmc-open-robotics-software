@@ -11,6 +11,7 @@ import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionExecutor;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.rdx.perception.RDXZEDSVORecorderPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
@@ -70,6 +71,7 @@ public class RDXSceneGraphDemo
    @Nullable
    private RawImage zedDepthImage;
    private final SideDependentList<RawImage> zedColorImages = new SideDependentList<>();
+   private RDXZEDSVORecorderPanel zedSVORecorderPanel;
 
    public RDXSceneGraphDemo()
    {
@@ -176,6 +178,10 @@ public class RDXSceneGraphDemo
                   simulatedCamera.render(baseUI.getPrimaryScene());
                }
             }
+            else if (SENSOR_MODE == SensorMode.ZED_SVO_RECORDING)
+            {
+               zedSVORecorderPanel.update();
+            }
 
             sceneGraphUI.update();
             perceptionVisualizerPanel.update();
@@ -239,6 +245,8 @@ public class RDXSceneGraphDemo
       zedColorDepthImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES,
                                                                     PerceptionAPI.ZED2_DEPTH,
                                                                     PerceptionAPI.ZED2_CUT_OUT_DEPTH);
+
+      zedSVORecorderPanel = new RDXZEDSVORecorderPanel(ros2Helper);
    }
 
    private void createVisualizers()
