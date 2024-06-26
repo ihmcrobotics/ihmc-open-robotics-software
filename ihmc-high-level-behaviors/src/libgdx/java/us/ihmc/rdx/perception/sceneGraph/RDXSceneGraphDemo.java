@@ -120,10 +120,10 @@ public class RDXSceneGraphDemo
                         zedColorImages.put(side, zedColorDepthImageRetrieverSVO.getLatestRawColorImage(side));
                      }
 
-                     zedColorDepthImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
+                     zedColorDepthImagePublisher.setNextGpuDepthImage(zedDepthImage);
                      for (RobotSide side : RobotSide.values)
                      {
-                        zedColorDepthImagePublisher.setNextColorImage(zedColorImages.get(side).get(), side);
+                        zedColorDepthImagePublisher.setNextColorImage(zedColorImages.get(side), side);
                      }
                   }
 
