@@ -10,6 +10,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.tools.thread.Throttler;
 
 public class RDXZEDSVORecorderPanel
 {
@@ -20,20 +21,17 @@ public class RDXZEDSVORecorderPanel
    private final ROS2Helper ros2Helper;
    private ZEDSVOCurrentFileMessage latestMessage;
 
-   private ImInt requestedPosition = new ImInt();
-   private boolean paused = false;
+   private final ImInt requestedPosition = new ImInt();
+   private boolean holdingOnToTheSlider;
+   private boolean paused;
 
-   private long lastTimeSinceSVOInfoMessageMillis;
+   private final Throttler requestThrottler = new Throttler().setFrequency(5.0);
 
    public RDXZEDSVORecorderPanel(ROS2Node ros2Node)
    {
       ros2Helper = new ROS2Helper(ros2Node);
 
-      ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_CURRENT_FILE, zedsvoCurrentFileMessage ->
-      {
-         this.latestMessage = zedsvoCurrentFileMessage;
-         lastTimeSinceSVOInfoMessageMillis = System.currentTimeMillis();
-      });
+      ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_CURRENT_FILE, message -> this.latestMessage = message);
    }
 
    public void update()
@@ -41,15 +39,10 @@ public class RDXZEDSVORecorderPanel
       RDXBaseUI baseUI = RDXBaseUI.getInstance();
 
       boolean overlayPanelExists = baseUI.getPrimary3DPanel().overlayPanelExists(PANEL_NAME);
-      boolean updatedRecently = System.currentTimeMillis() - lastTimeSinceSVOInfoMessageMillis < 3000;
 
-      if (!overlayPanelExists && updatedRecently)
+      if (!overlayPanelExists && latestMessage != null)
       {
          baseUI.getPrimary3DPanel().addOverlayPanel(PANEL_NAME, this::render);
-      }
-      else if (overlayPanelExists && !updatedRecently)
-      {
-         baseUI.getPrimary3DPanel().removeOverlayPanel(PANEL_NAME);
       }
    }
 
@@ -59,21 +52,24 @@ public class RDXZEDSVORecorderPanel
       ImGui.sameLine();
       ImGui.textWrapped(latestMessage.getCurrentFileName().toString());
 
-      if (!paused)
+      if (!holdingOnToTheSlider)
          requestedPosition.set((int) latestMessage.getCurrentPosition());
 
       if (ImGuiTools.sliderInt(labels.get("Position"), requestedPosition, 0, (int) latestMessage.getLength()))
       {
-         ros2Helper.publish(PerceptionAPI.ZED_SVO_PAUSE);
-         paused = true;
+         holdingOnToTheSlider = true;
+
+         if (requestThrottler.run())
+         {
+            Int64 positionMessage = new Int64();
+            positionMessage.setData(requestedPosition.get());
+            ros2Helper.publish(PerceptionAPI.ZED_SVO_SET_POSITION, positionMessage);
+         }
       }
+      // Called once you let go of the slider
       if (ImGui.isItemDeactivatedAfterEdit())
       {
-         Int64 positionMessage = new Int64();
-         positionMessage.setData(requestedPosition.get());
-         ros2Helper.publish(PerceptionAPI.ZED_SVO_SET_POSITION, positionMessage);
-         ros2Helper.publish(PerceptionAPI.ZED_SVO_PLAY);
-         paused = false;
+         holdingOnToTheSlider = false;
       }
 
       ImGui.sameLine();

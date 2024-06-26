@@ -11,7 +11,6 @@ import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.zed.SL_InitParameters;
 
-import javax.annotation.Nullable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
@@ -23,7 +22,7 @@ import static us.ihmc.zed.global.zed.*;
 public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
 {
    private final RecordMode recordMode;
-   private String svoFileName;
+   private final String svoFileName;
    private final RestartableThrottledThread publishInfoThread;
 
    public ZEDColorDepthImageRetrieverSVO(ROS2Node ros2Node,
@@ -47,20 +46,56 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_SET_POSITION, int64 -> setCurrentPosition((int) int64.getData()));
-      ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_PAUSE, () -> setPaused(true));
-      ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_PLAY, () -> setPaused(false));
+      ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_PAUSE, () ->
+      {
+         if (recordMode == RecordMode.RECORD)
+         {
+            pauseRecording(true);
+         }
+         else if (recordMode == RecordMode.PLAYBACK)
+         {
+            stop();
+         }
+      });
+      ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_PLAY, () ->
+      {
+         if (recordMode == RecordMode.RECORD)
+         {
+            pauseRecording(false);
+         }
+         else if (recordMode == RecordMode.PLAYBACK)
+         {
+            start();
+         }
+      });
 
       publishInfoThread = new RestartableThrottledThread("PublishSVOInfoThread", ZEDColorDepthImageRetriever.CAMERA_FPS, () ->
       {
          ZEDSVOCurrentFileMessage message = new ZEDSVOCurrentFileMessage();
 
-         message.setCurrentFileName(svoFileName);
+         message.setCurrentFileName(this.svoFileName);
          message.setRecordMode(recordMode.toByte());
          message.setCurrentPosition(getCurrentPosition());
          message.setLength(getLength());
 
          ros2Helper.publish(PerceptionAPI.ZED_SVO_CURRENT_FILE, message);
       });
+
+      publishInfoThread.start();
+
+      if (recordMode == RecordMode.RECORD)
+      {
+         svoFileName = generateSVOFileName();
+         LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
+         LogTools.info("Starting recording: " + svoFileName);
+         LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
+      }
+      else
+      {
+         LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
+         LogTools.info("Starting playback: " + svoFileName);
+         LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
+      }
    }
 
    private String generateSVOFileName()
@@ -84,36 +119,14 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
    protected SL_InitParameters getInitParameters()
    {
       SL_InitParameters parentInitParameters = super.getInitParameters();
-      parentInitParameters.svo_real_time_mode(true);
+      parentInitParameters.svo_real_time_mode(false);
       if (recordMode == RecordMode.PLAYBACK)
          parentInitParameters.input_type(SL_INPUT_TYPE_SVO);
       return parentInitParameters;
    }
 
    @Override
-   public void start()
-   {
-      if (recordMode == RecordMode.RECORD)
-      {
-         svoFileName = generateSVOFileName();
-         LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
-         LogTools.info("Starting recording: " + svoFileName);
-         LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
-      }
-      else
-      {
-         LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
-         LogTools.info("Starting playback: " + svoFileName);
-         LogTools.info("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
-      }
-
-      publishInfoThread.start();
-
-      super.start();
-   }
-
-   @Override
-   public void stop()
+   public void destroy()
    {
       if (recordMode == RecordMode.RECORD)
       {
@@ -129,17 +142,7 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
          System.out.println("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
       }
 
-      publishInfoThread.stop();
-
-      svoFileName = null;
-
-      super.stop();
-   }
-
-   @Nullable
-   public String getSVOFileName()
-   {
-      return svoFileName;
+      super.destroy();
    }
 
    public int getLength()
