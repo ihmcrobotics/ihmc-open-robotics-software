@@ -2,6 +2,7 @@ package us.ihmc.behaviors.behaviorTree.ros2;
 
 import behavior_msgs.msg.dds.*;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionState;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationState;
 import us.ihmc.behaviors.door.DoorTraversalState;
@@ -37,7 +38,13 @@ public class ROS2BehaviorTreeMessageTools
 
    public static void packMessage(BehaviorTreeNodeState nodeState, BehaviorTreeStateMessage treeStateMessage)
    {
-      if (nodeState instanceof ActionSequenceState actionSequenceState)
+      if (nodeState instanceof BehaviorTreeRootNodeState rootNodeState)
+      {
+         treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.ROOT_NODE);
+         treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getRootNodes().size());
+         rootNodeState.toMessage(treeStateMessage.getRootNodes().add());
+      }
+      else if (nodeState instanceof ActionSequenceState actionSequenceState)
       {
          treeStateMessage.getBehaviorTreeTypes().add(BehaviorTreeStateMessage.ACTION_SEQUENCE);
          treeStateMessage.getBehaviorTreeIndices().add(treeStateMessage.getActionSequences().size());
@@ -127,7 +134,11 @@ public class ROS2BehaviorTreeMessageTools
 
    public static void fromMessage(ROS2BehaviorTreeSubscriptionNode subscriptionNode, BehaviorTreeNodeState<?> nodeState)
    {
-      if (nodeState instanceof ActionSequenceState actionSequenceState)
+      if (nodeState instanceof BehaviorTreeRootNodeState rootNodeState)
+      {
+         rootNodeState.fromMessage(subscriptionNode.getBehaviorTreeRootNodeStateMessage());
+      }
+      else if (nodeState instanceof ActionSequenceState actionSequenceState)
       {
          actionSequenceState.fromMessage(subscriptionNode.getActionSequenceStateMessage());
       }
@@ -197,6 +208,13 @@ public class ROS2BehaviorTreeMessageTools
             BasicNodeStateMessage basicNodeStateMessage = treeStateMessage.getBasicNodes().get(indexInTypesList);
             subscriptionNode.setBehaviorTreeNodeStateMessage(basicNodeStateMessage.getState());
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(basicNodeStateMessage.getDefinition());
+         }
+         case BehaviorTreeStateMessage.ROOT_NODE ->
+         {
+            BehaviorTreeRootNodeStateMessage rootNodeStateMessage = treeStateMessage.getRootNodes().get(indexInTypesList);
+            subscriptionNode.setBehaviorTreeRootNodeStateMessage(rootNodeStateMessage);
+            subscriptionNode.setBehaviorTreeNodeStateMessage(rootNodeStateMessage.getState());
+            subscriptionNode.setBehaviorTreeNodeDefinitionMessage(rootNodeStateMessage.getDefinition().getDefinition());
          }
          case BehaviorTreeStateMessage.ACTION_SEQUENCE ->
          {

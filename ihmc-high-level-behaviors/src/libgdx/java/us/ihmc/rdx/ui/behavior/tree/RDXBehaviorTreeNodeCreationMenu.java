@@ -230,10 +230,8 @@ public class RDXBehaviorTreeNodeCreationMenu
 
             if (insertionDefinition.getNodeToInsert() instanceof RDXActionNode<?, ?> newAction)
             {
-               // We want to to best effort initialization
-               RDXActionSequence actionSequenceOrNull = null;
-               if (insertionDefinition.getParent() instanceof RDXActionSequence actionSequence)
-                  actionSequenceOrNull = actionSequence;
+               // We want to do best effort initialization
+               RDXBehaviorTreeRootNode actionSequenceOrNull = tree.getRootNode();
                tree.getNodeBuilder().initializeActionNode(actionSequenceOrNull, newAction, insertionDefinition.getInsertionIndex(), side);
             }
 

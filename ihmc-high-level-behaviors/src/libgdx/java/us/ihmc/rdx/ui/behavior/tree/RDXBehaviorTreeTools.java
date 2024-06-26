@@ -1,17 +1,15 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 
 import java.util.function.Consumer;
 
 public class RDXBehaviorTreeTools
 {
-   public static RDXBehaviorTreeNode<?, ?> findRootNode(RDXBehaviorTreeNode<?, ?> node)
+   public static RDXBehaviorTreeRootNode findRootNode(RDXBehaviorTreeNode<?, ?> node)
    {
-      while (!node.isRootNode())
-         node = node.getParent();
-
-      return node;
+      return (RDXBehaviorTreeRootNode) BehaviorTreeTools.findRootNodeGeneral(node);
    }
 
    public static void runForSubtreeNodes(RDXBehaviorTreeNode<?, ?> node, Consumer<RDXBehaviorTreeNode<?, ?>> operation)

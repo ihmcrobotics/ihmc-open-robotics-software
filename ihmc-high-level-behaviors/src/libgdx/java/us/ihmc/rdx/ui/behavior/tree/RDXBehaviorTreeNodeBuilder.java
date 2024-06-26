@@ -158,7 +158,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
    }
 
    // This method is in this class because we have a syncedRobot here.
-   public void initializeActionNode(@Nullable RDXActionSequence actionSequence,
+   public void initializeActionNode(@Nullable RDXBehaviorTreeRootNode actionSequence,
                                     RDXActionNode<?, ?> newAction,
                                     int insertionIndex,
                                     RobotSide sideOfNewAction)

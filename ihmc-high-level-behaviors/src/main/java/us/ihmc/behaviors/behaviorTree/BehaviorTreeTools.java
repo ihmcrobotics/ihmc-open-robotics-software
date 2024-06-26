@@ -11,7 +11,22 @@ import java.util.function.Consumer;
 
 public class BehaviorTreeTools
 {
-   public static BehaviorTreeNodeDefinition findRootNode(BehaviorTreeNodeDefinition node)
+   public static BehaviorTreeRootNodeExecutor findRootNode(BehaviorTreeNodeExecutor<?, ?> node)
+   {
+      return (BehaviorTreeRootNodeExecutor) findRootNodeGeneral(node);
+   }
+
+   public static BehaviorTreeRootNodeState findRootNode(BehaviorTreeNodeState<?> node)
+   {
+      return (BehaviorTreeRootNodeState) findRootNodeGeneral(node);
+   }
+
+   public static BehaviorTreeRootNodeDefinition findRootNode(BehaviorTreeNodeDefinition node)
+   {
+      return (BehaviorTreeRootNodeDefinition) findRootNodeGeneral(node);
+   }
+
+   public static BehaviorTreeNode<?> findRootNodeGeneral(BehaviorTreeNode<?> node)
    {
       while (!node.isRootNode())
          node = node.getParent();
