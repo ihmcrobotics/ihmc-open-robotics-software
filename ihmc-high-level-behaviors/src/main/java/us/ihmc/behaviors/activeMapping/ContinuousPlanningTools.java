@@ -31,21 +31,22 @@ public class ContinuousPlanningTools
       return middleDistanceBetweenGoalPoses.distanceXY(robotPositionInWorld);
    }
 
-   public static void setRandomizedStraightGoalPoses(FramePose3D walkingStartPose,
-                                                     SideDependentList<FramePose3D> stancePose,
-                                                     SideDependentList<FramePose3D> goalPose,
-                                                     float xDistance,
-                                                     float xRandomMargin,
-                                                     float zDistance,
-                                                     float nominalStanceWidth)
+   public static SideDependentList<FramePose3D> setRandomizedStraightGoalPoses(FramePose3D walkingStartPose,
+                                                                                       SideDependentList<FramePose3D> stancePose,
+                                                                                       float xDistance,
+                                                                                       float xRandomMargin,
+                                                                                       float zDistance,
+                                                                                       float nominalStanceWidth)
    {
       float offsetX = (float) (Math.random() * xRandomMargin - xRandomMargin / 2.0f);
 
       FramePose3D finalGoalMidPose = new FramePose3D();
       finalGoalMidPose.interpolate(stancePose.get(RobotSide.LEFT), stancePose.get(RobotSide.RIGHT), 0.5);
 
+      SideDependentList<FramePose3D> goalPose = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
       {
+         goalPose.put(side, new FramePose3D());
          RigidBodyTransform stanceToWalkingFrameTransform = new RigidBodyTransform();
          RigidBodyTransform worldToWalkingFrameTransform = new RigidBodyTransform();
 
@@ -60,8 +61,11 @@ public class ContinuousPlanningTools
          goalPose.get(side).appendTranslation(xWalkDistance + xDistance + offsetX, 0, finalGoalMidPose.getZ() + zDistance - walkingStartPose.getZ());
       }
 
+      // These are done after because of the ( - ) or ( + ) for the nominal stance
       goalPose.get(RobotSide.LEFT).appendTranslation(0.0, nominalStanceWidth / 2.0f, 0.0);
       goalPose.get(RobotSide.RIGHT).appendTranslation(0.0, -nominalStanceWidth / 2.0f, 0.0);
+
+      return goalPose;
    }
 
    public static void generateSensorZUpToStraightGoalFootPoses(HeightMapData latestHeightMapData,
