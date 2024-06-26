@@ -20,6 +20,7 @@ public class ROS2BehaviorTreeMessageTools
    {
       treeStateMessage.getBehaviorTreeTypes().clear();
       treeStateMessage.getBehaviorTreeIndices().clear();
+      treeStateMessage.getRootNodes().clear();
       treeStateMessage.getBasicNodes().clear();
       treeStateMessage.getActionSequences().clear();
       treeStateMessage.getDoorTraversals().clear();
