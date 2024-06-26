@@ -24,7 +24,7 @@ public class DetectionManagerTest
    private static final AtomicBoolean testPassed = new AtomicBoolean(true);
 
    @Test
-   public void testAddDetections() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException
+   public void testAddDetections()
    {
       DetectionManager detectionManager = new DetectionManager();
 
@@ -55,7 +55,7 @@ public class DetectionManagerTest
    }
 
    @Test
-   public void testMatchingDetections() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException
+   public void testMatchingDetections()
    {
       DetectionManager detectionManager = new DetectionManager();
 
@@ -232,7 +232,7 @@ public class DetectionManagerTest
    }
 
    @Test
-   public void testDetectionStability() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException
+   public void testDetectionStability()
    {
       DetectionManager detectionManager = new DetectionManager();
       detectionManager.setMatchDistanceThreshold(0.5);
