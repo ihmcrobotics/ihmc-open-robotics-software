@@ -33,7 +33,7 @@ public class RDXZEDSVORecordingDemo
    private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toAbsolutePath() + "/20240625_154000_ZEDRecording_Demo.svo2";
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private ROS2Node ros2Node;
+   private final ROS2Node ros2Node;
    private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
    private RDXZEDSVORecorderPanel recorderPanel;
 
