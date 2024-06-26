@@ -10,8 +10,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -43,11 +42,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class ContinuousPlanner
 {
-   public enum PlanningMode
-   {
-      EXECUTE_AND_PAUSE, FRONTIER_EXPANSION, ACTIVE_SEARCH, FAST_HIKING, WALK_TO_GOAL
-   }
-
    private final SideDependentList<FramePose3D> startingStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final HumanoidReferenceFrames referenceFrames;
@@ -57,7 +51,6 @@ public class ContinuousPlanner
    private final FramePose3D imminentFootstepPose = new FramePose3D();
    private RobotSide imminentFootstepSide = RobotSide.LEFT;
    private ContinuousWalkingCommandMessage command;
-   private PlanningMode mode;
 
    private AtomicReference<FootstepStatusMessage> latestFootstepStatusMessage = new AtomicReference<>(new FootstepStatusMessage());
    private List<QueuedFootstepStatusMessage> controllerQueue = new ArrayList<>();
@@ -86,15 +79,8 @@ public class ContinuousPlanner
    private boolean active;
    private double previousContinuousHikingSwingTime = 0.0;
 
-   private final List<SideDependentList<Pose3D>> walkToGoalWayPointList = new ArrayList<>();
-   private final Point3D robotLocation = new Point3D();
-
-   float xRandomMargin = 0.2f;
-   float nominalStanceWidth = 0.22f;
-
    public ContinuousPlanner(DRCRobotModel robotModel,
                             HumanoidReferenceFrames humanoidReferenceFrames,
-                            PlanningMode mode,
                             ContinuousHikingParameters continuousHikingParameters,
                             MonteCarloFootstepPlannerParameters monteCarloPlannerParameters,
                             TerrainPlanningDebugger debugger)
@@ -103,7 +89,6 @@ public class ContinuousPlanner
       this.referenceFrames = humanoidReferenceFrames;
       this.debugger = debugger;
       this.active = true;
-      this.mode = mode;
 
       this.monteCarloFootstepPlannerParameters = monteCarloPlannerParameters;
       footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel, "ForContinuousWalking");
@@ -334,51 +319,10 @@ public class ContinuousPlanner
       }
    }
 
-   public void setGoalWaypointPoses()
+   public void setGoalWaypointPoses(FramePose3DReadOnly leftGoalPose, FramePose3DReadOnly rightGoalPose)
    {
-      switch (this.mode)
-      {
-         case FAST_HIKING:
-            ContinuousPlanningTools.setRandomizedStraightGoalPoses(walkingStartMidPose,
-                                                                   startingStancePose,
-                                                                   goalStancePose,
-                                                                   (float) continuousHikingParameters.getGoalPoseForwardDistance(),
-                                                                   xRandomMargin,
-                                                                   (float) continuousHikingParameters.getGoalPoseUpDistance(),
-                                                                   nominalStanceWidth);
-            break;
-         case WALK_TO_GOAL:
-            if (walkToGoalWayPointList.isEmpty())
-            {
-               mode = PlanningMode.FAST_HIKING;
-               return;
-            }
-
-            goalStancePose.get(RobotSide.LEFT).set(walkToGoalWayPointList.get(0).get(RobotSide.LEFT));
-            goalStancePose.get(RobotSide.RIGHT).set(walkToGoalWayPointList.get(0).get(RobotSide.RIGHT));
-
-            Vector3DBasics robotLocationVector = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation();
-            robotLocation.set(robotLocationVector);
-            double distanceToGoalPose = ContinuousPlanningTools.getDistanceFromRobotToGoalPoseOnXYPlane(robotLocation, goalStancePose);
-
-            if (distanceToGoalPose < continuousHikingParameters.getNextWaypointDistanceMargin())
-            {
-               LogTools.info("Removed goal from list... ready to go to the next one");
-               walkToGoalWayPointList.remove(0);
-
-               if (!walkToGoalWayPointList.isEmpty())
-               {
-                  goalStancePose.get(RobotSide.LEFT).set(walkToGoalWayPointList.get(0).get(RobotSide.LEFT));
-                  goalStancePose.get(RobotSide.RIGHT).set(walkToGoalWayPointList.get(0).get(RobotSide.RIGHT));
-                  debugger.publishStartAndGoalForVisualization(getStartingStancePose(), getGoalStancePose());
-               }
-               else
-               {
-                  continuousHikingParameters.setEnableContinuousWalking(false);
-               }
-            }
-            break;
-      }
+      goalStancePose.get(RobotSide.LEFT).set(leftGoalPose);
+      goalStancePose.get(RobotSide.RIGHT).set(rightGoalPose);
    }
 
    public FootstepPlannerRequest createFootstepPlannerRequest(SideDependentList<FramePose3D> startPose, SideDependentList<FramePose3D> goalPose)
@@ -678,14 +622,15 @@ public class ContinuousPlanner
       return startingStancePose;
    }
 
+   public FramePose3D getWalkingStartMidPose()
+   {
+      return walkingStartMidPose;
+   }
+
+
    public void setContinuousPlannerStatistics(ContinuousPlannerStatistics continuousPlannerStatistics)
    {
       this.statistics = continuousPlannerStatistics;
-   }
-
-   public PlanningMode getMode()
-   {
-      return mode;
    }
 
    public void setLatestHeightMapData(HeightMapData heightMapData)
@@ -701,22 +646,6 @@ public class ContinuousPlanner
    public void requestMonteCarloPlannerReset()
    {
       resetMonteCarloFootstepPlanner = true;
-   }
-
-   public void addWayPointToList(Pose3D leftFootGoalPose, Pose3D rightFootGoalPose)
-   {
-      mode = PlanningMode.WALK_TO_GOAL;
-      //TODO make sure we don't add the same values twice
-      SideDependentList<Pose3D> latestWayPoint = new SideDependentList<>();
-      latestWayPoint.put(RobotSide.LEFT, leftFootGoalPose);
-      latestWayPoint.put(RobotSide.RIGHT, rightFootGoalPose);
-
-      LogTools.info("Added waypoint for WALK_TO_GOAL");
-      walkToGoalWayPointList.add(latestWayPoint);
-
-      // Until the first waypoint is removed from this list, that is the current goal
-      goalStancePose.get(RobotSide.LEFT).set(walkToGoalWayPointList.get(0).get(RobotSide.LEFT));
-      goalStancePose.get(RobotSide.RIGHT).set(walkToGoalWayPointList.get(0).get(RobotSide.RIGHT));
    }
 }
 

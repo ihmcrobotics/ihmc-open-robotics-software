@@ -42,28 +42,24 @@ public class ContinuousPlannerSchedulingTask
                                                                                                           ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
    private final TerrainPlanningDebugger debugger;
-   private TerrainMapData terrainMap;
-
    private final ContinuousPlanner continuousPlanner;
-
    public StateMachine<ContinuousHikingState, State> stateMachine;
+   private TerrainMapData terrainMap;
 
    public ContinuousPlannerSchedulingTask(DRCRobotModel robotModel,
                                           ROS2Node ros2Node,
                                           HumanoidReferenceFrames referenceFrames,
-                                          ContinuousHikingParameters continuousHikingParameters,
-                                          ContinuousPlanner.PlanningMode mode)
+                                          ContinuousHikingParameters continuousHikingParameters)
    {
       String simpleRobotName = robotModel.getSimpleRobotName();
 
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       AtomicReference<ContinuousWalkingCommandMessage> commandMessage = new AtomicReference<>(new ContinuousWalkingCommandMessage());
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND, commandMessage::set);
-      ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLACED_GOAL_FOOTSTEPS, this::addWayPointCheckPointToList);
 
       MonteCarloFootstepPlannerParameters monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
       debugger = new TerrainPlanningDebugger(ros2Node, monteCarloPlannerParameters);
-      this.continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, mode, continuousHikingParameters, monteCarloPlannerParameters, debugger);
+      this.continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, continuousHikingParameters, monteCarloPlannerParameters, debugger);
 
       ContinuousPlannerStatistics statistics = new ContinuousPlannerStatistics();
       continuousPlanner.setContinuousPlannerStatistics(statistics);
@@ -81,7 +77,9 @@ public class ContinuousPlannerSchedulingTask
 
       // Create the different states
       State notStartedState = new DoNothingState(ros2Helper, simpleRobotName, referenceFrames, continuousPlanner);
-      State readyToPlanState = new ReadyToPlanState(commandMessage,
+      State readyToPlanState = new ReadyToPlanState(ros2Helper,
+                                                    referenceFrames,
+                                                    commandMessage,
                                                     continuousPlanner,
                                                     controllerFootstepQueueMonitor,
                                                     continuousHikingParameters,
@@ -156,12 +154,5 @@ public class ContinuousPlannerSchedulingTask
    public void destroy()
    {
       executorService.shutdown();
-   }
-
-   public void addWayPointCheckPointToList(PoseListMessage poseListMessage)
-   {
-      List<Pose3D> poses = MessageTools.unpackPoseListMessage(poseListMessage);
-      continuousPlanner.addWayPointToList(poses.get(0), poses.get(1));
-      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
    }
 }
