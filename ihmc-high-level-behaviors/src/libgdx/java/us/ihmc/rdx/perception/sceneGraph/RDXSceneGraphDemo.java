@@ -141,8 +141,6 @@ public class RDXSceneGraphDemo
                   if (yolov8DetectionExecutor == null)
                   {
                      yolov8DetectionExecutor = new YOLOv8DetectionExecutor(ros2Helper, yoloAnnotatedImageVisualizer::isActive);
-                     yolov8DetectionExecutor.addDetectionConsumerCallback(instantDetections -> System.out.println(
-                           "Detection count " + instantDetections.size()));
                      yolov8DetectionExecutor.addDetectionConsumerCallback(detectionManager::addDetections);
                   }
 
