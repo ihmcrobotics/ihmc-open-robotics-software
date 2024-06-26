@@ -96,7 +96,6 @@ public class PersistentDetectionTest
    public void testExceptions()
    {
       InstantDetection detectionClassA = new InstantDetection("ClassA", 1.0, new Pose3D(), Instant.now());
-      InstantDetection detectionClassB = new InstantDetection("ClassB", 1.0, new Pose3D(), Instant.now());
 
       PersistentDetection persistentDetection = new PersistentDetection(detectionClassA, 0.5, 5.0, 1.0);
 

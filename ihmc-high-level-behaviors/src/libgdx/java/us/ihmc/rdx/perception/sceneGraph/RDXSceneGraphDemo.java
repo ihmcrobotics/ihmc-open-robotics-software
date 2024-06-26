@@ -19,6 +19,7 @@ import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.RDXYOLOv8Settings;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -50,6 +51,7 @@ public class RDXSceneGraphDemo
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
    private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
+   private RDXYOLOv8Settings yoloSettingsVisualizer;
    private RDXROS2ImageMessageVisualizer yoloAnnotatedImageVisualizer;
    private YOLOv8DetectionExecutor yolov8DetectionExecutor;
    private ROS2SceneGraph onRobotSceneGraph;
@@ -152,7 +154,7 @@ public class RDXSceneGraphDemo
                   }
                   else if (SENSOR_MODE == SensorMode.ZED_SVO_RECORDING)
                   {
-                     yolov8DetectionExecutor.runYOLODetection(zedColorImages.get(RobotSide.LEFT).get(), zedDepthImage.get());
+                     yolov8DetectionExecutor.runYOLODetection(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
                   }
                }
 
@@ -288,6 +290,13 @@ public class RDXSceneGraphDemo
                                                                                                     PerceptionAPI.ZED2_DEPTH);
          zed2DepthImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_DEPTH);
          perceptionVisualizerPanel.addVisualizer(zed2DepthImageVisualizer);
+      }
+
+      // Create YOLO settings viz
+      {
+         yoloSettingsVisualizer = new RDXYOLOv8Settings("YOLOv8 Settings", ros2Helper);
+         yoloSettingsVisualizer.setActive(true);
+         perceptionVisualizerPanel.addVisualizer(yoloSettingsVisualizer);
       }
 
       // Create YOLO annotated image viz
