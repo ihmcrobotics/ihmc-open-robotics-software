@@ -689,6 +689,7 @@ public class ImGuiTools
       downArrowKey = ImGui.getKeyIndex(ImGuiKey.DownArrow);
       leftArrowKey = ImGui.getKeyIndex(ImGuiKey.LeftArrow);
       rightArrowKey = ImGui.getKeyIndex(ImGuiKey.RightArrow);
+      userKeysHaveBeenMapped = true;
    }
 
    public static int getSpaceKey()
