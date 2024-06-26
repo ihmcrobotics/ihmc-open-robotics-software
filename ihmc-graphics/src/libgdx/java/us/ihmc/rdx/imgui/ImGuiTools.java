@@ -67,11 +67,11 @@ public class ImGuiTools
    public static final double SMALL_TO_MEDIUM_SCALE = 1.25;
    public static final double SMALL_TO_LARGE_SCALE = 2.4;
 
-   private static TIntObjectMap<ImFont> consoleFont = new TIntObjectHashMap<>();
-   private static TIntObjectMap<ImFont> smallFont = new TIntObjectHashMap<>();
-   private static TIntObjectMap<ImFont> smallBoldFont = new TIntObjectHashMap<>();
-   private static TIntObjectMap<ImFont> mediumFont = new TIntObjectHashMap<>();
-   private static TIntObjectMap<ImFont> bigFont = new TIntObjectHashMap<>();
+   private static final TIntObjectMap<ImFont> consoleFont = new TIntObjectHashMap<>();
+   private static final TIntObjectMap<ImFont> smallFont = new TIntObjectHashMap<>();
+   private static final TIntObjectMap<ImFont> smallBoldFont = new TIntObjectHashMap<>();
+   private static final TIntObjectMap<ImFont> mediumFont = new TIntObjectHashMap<>();
+   private static final TIntObjectMap<ImFont> bigFont = new TIntObjectHashMap<>();
 
    private static boolean userKeysHaveBeenMapped = false;
    private static int spaceKey;
@@ -503,14 +503,8 @@ public class ImGuiTools
       return label + "###" + thisObject.getClass().getName() + ":" + label;
    }
 
-   /** @deprecated Use ImGuiUniqueLabelMap instead. */
-   public static String uniqueIDOnly(Object thisObject, String label)
-   {
-      return "###" + thisObject.getClass().getName() + ":" + label;
-   }
-
    /**
-    * See https://github.com/ocornut/imgui/blob/master/docs/FONTS.md
+    * See <a href="https://github.com/ocornut/imgui/blob/master/docs/FONTS.md">FONTS.md</a>
     * and ImGuiGlfwFreeTypeDemo in this project
     */
    public static void setupFonts(ImGuiIO io)
@@ -689,6 +683,7 @@ public class ImGuiTools
       downArrowKey = ImGui.getKeyIndex(ImGuiKey.DownArrow);
       leftArrowKey = ImGui.getKeyIndex(ImGuiKey.LeftArrow);
       rightArrowKey = ImGui.getKeyIndex(ImGuiKey.RightArrow);
+      userKeysHaveBeenMapped = true;
    }
 
    public static int getSpaceKey()

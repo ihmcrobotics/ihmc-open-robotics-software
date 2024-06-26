@@ -136,9 +136,10 @@ public class ZEDColorDepthImageRetriever
             }
          }
          else
+         {
             ThreadTools.sleep(500);
+         }
       });
-      start();
    }
 
    private void retrieveAndSaveColorImage(RobotSide side)
