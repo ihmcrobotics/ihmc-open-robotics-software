@@ -54,6 +54,8 @@ public class RDXSceneGraphDemo
    private ROS2SceneGraph onRobotSceneGraph;
    private RDXSceneGraphUI sceneGraphUI;
 
+   private RestartableThrottledThread perceptionUpdateThread;
+
    // Simulated sensor related things
    @Nullable
    private RDXPose3DGizmo sensorPoseGizmo;
@@ -106,7 +108,7 @@ public class RDXSceneGraphDemo
             baseUI.getPrimaryScene().addRenderableProvider(sceneGraphUI::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(sceneGraphUI.getPanel());
 
-            RestartableThrottledThread perceptionUpdateThread = new RestartableThrottledThread("PerceptionUpdateThread", 30.0, new RunnableThatThrows()
+            perceptionUpdateThread = new RestartableThrottledThread("PerceptionUpdateThread", 30.0, new RunnableThatThrows()
             {
                // Main perception thread loop
                @Override
@@ -194,8 +196,6 @@ public class RDXSceneGraphDemo
                simulatedCamera.dispose();
             }
 
-            yolov8DetectionExecutor.destroy();
-
             perceptionVisualizerPanel.destroy();
             baseUI.dispose();
          }
@@ -204,10 +204,14 @@ public class RDXSceneGraphDemo
 
    private void destroy()
    {
+      yolov8DetectionExecutor.destroy();
+
       if (zedColorDepthImageRetrieverSVO != null)
          zedColorDepthImageRetrieverSVO.destroy();
       if (zedColorDepthImagePublisher != null)
          zedColorDepthImagePublisher.destroy();
+
+      perceptionUpdateThread.stop();
    }
 
    private void setupSimulatedSensor()
