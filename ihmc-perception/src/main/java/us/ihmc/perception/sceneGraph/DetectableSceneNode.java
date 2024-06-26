@@ -1,5 +1,7 @@
 package us.ihmc.perception.sceneGraph;
 
+import us.ihmc.communication.crdt.CRDTInfo;
+
 /**
  * An object that is currently detected or not currently detected,
  * as such with objects tracked via ArUco markers or YOLO.
@@ -8,9 +10,9 @@ public class DetectableSceneNode extends SceneNode
 {
    private boolean currentlyDetected;
 
-   public DetectableSceneNode(long id, String name)
+   public DetectableSceneNode(long id, String name, CRDTInfo crdtInfo)
    {
-      super(id, name);
+      super(id, name, crdtInfo);
    }
 
    public void setCurrentlyDetected(boolean currentlyDetected)

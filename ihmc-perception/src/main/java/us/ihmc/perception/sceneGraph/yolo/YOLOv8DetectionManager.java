@@ -480,7 +480,8 @@ public class YOLOv8DetectionManager
                                                           candidateDetection.getDetection().objectClass(),
                                                           candidateDetection.getDetection().confidence(),
                                                           candidateDetection.getObjectPointCloud(),
-                                                          candidateDetection.getCentroid());
+                                                          candidateDetection.getCentroid(),
+                                                          sceneGraph.getCRDTInfo());
                   modificationQueue.accept(new SceneGraphNodeAddition(newYoloNode, sceneGraph.getRootNode()));
                   detectedNodes.put(candidateDetection.getDetection().objectClass(), newYoloNode);
                   detectedObjects.put(candidateDetection.getDetection().objectClass(), candidateDetection);

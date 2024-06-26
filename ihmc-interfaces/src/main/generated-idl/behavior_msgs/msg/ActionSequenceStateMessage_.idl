@@ -37,6 +37,10 @@ module behavior_msgs
          * Request manual execution of the next action
          */
         boolean manual_execution_requested;
+        /**
+         * Allows the operator to disable concurrency during authoring
+         */
+        boolean concurrency_enabled;
       };
     };
   };
