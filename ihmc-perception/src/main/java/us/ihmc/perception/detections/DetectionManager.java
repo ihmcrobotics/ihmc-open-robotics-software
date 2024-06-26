@@ -36,47 +36,11 @@ public class DetectionManager
    }
 
    /**
-    * Adds an instant detection of a specified type to the {@code DetectionManager}.
-    * The added detection will be matched to a {@link PersistentDetection}, or a new
-    * {@link PersistentDetection} will be created if no match is found.
-    * This method is thread safe only when called on different detection class types.
-    * When detections of the same type are being added, this method is NOT thread safe.
-    * @param newInstantDetection The new {@link InstantDetection} to add.
-    * @param <T> Class extending {@link InstantDetection}. Must match the passed in {@code classType}.
+    * Adds a detection using {@link #addDetections}
     */
    public <T extends InstantDetection> void addDetection(T newInstantDetection)
    {
-      DetectionPair bestMatch = null;
-
-      List<PersistentDetection> sameTypePersistentDetections = getDetectionsOfType(newInstantDetection.getClass());
-      for (PersistentDetection persistentDetection : sameTypePersistentDetections)
-      {
-         // matches must be of the same class
-         if (persistentDetection.getDetectedObjectClass().equals(newInstantDetection.getDetectedObjectClass()))
-         {
-            double distanceSquared = persistentDetection.getMostRecentDetection()
-                                                        .getPose()
-                                                        .getPosition()
-                                                        .distanceSquared(newInstantDetection.getPose().getPosition());
-            // matches must be close enough
-            if (distanceSquared < matchDistanceSquared)
-            {
-               if (bestMatch == null || bestMatch.getDistanceSquared() > distanceSquared)
-                  bestMatch = new DetectionPair(persistentDetection, newInstantDetection);
-            }
-         }
-      }
-
-      synchronized (persistentDetectionsLock)
-      {
-         if (bestMatch != null)
-            bestMatch.confirmDetectionMatch();
-         else
-            persistentDetections.add(new PersistentDetection(newInstantDetection,
-                                                             defaultStabilityThreshold,
-                                                             defaultStabilityFrequency,
-                                                             defaultHistorySeconds));
-      }
+      addDetections(List.of(newInstantDetection));
    }
 
    /**
