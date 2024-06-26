@@ -196,7 +196,7 @@ public class FootstepPlannerLogger
     */
    public boolean logSession(String logDirectory)
    {
-      String logDirectoryWithDate = logDirectory + File.separator + directoryDateFormat.format(new Date());
+      String logDirectoryWithDate = logDirectory + directoryDateFormat.format(new Date());
       String sessionDirectory = generateALogFolderName(logDirectoryWithDate);
       return logSessionWithExactFolderName(sessionDirectory);
    }
