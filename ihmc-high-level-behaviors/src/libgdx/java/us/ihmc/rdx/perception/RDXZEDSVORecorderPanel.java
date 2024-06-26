@@ -61,15 +61,15 @@ public class RDXZEDSVORecorderPanel
 
          if (requestThrottler.run())
          {
-            Int64 positionMessage = new Int64();
-            positionMessage.setData(requestedPosition.get());
-            ros2Helper.publish(PerceptionAPI.ZED_SVO_SET_POSITION, positionMessage);
+            publishPositionRequest();
          }
       }
       // Called once you let go of the slider
       if (ImGui.isItemDeactivatedAfterEdit())
       {
          holdingOnToTheSlider = false;
+
+         publishPositionRequest();
       }
 
       ImGui.sameLine();
@@ -79,5 +79,12 @@ public class RDXZEDSVORecorderPanel
          ros2Helper.publish(paused ? PerceptionAPI.ZED_SVO_PLAY : PerceptionAPI.ZED_SVO_PAUSE);
          paused = !paused;
       }
+   }
+
+   private void publishPositionRequest()
+   {
+      Int64 positionMessage = new Int64();
+      positionMessage.setData(requestedPosition.get());
+      ros2Helper.publish(PerceptionAPI.ZED_SVO_SET_POSITION, positionMessage);
    }
 }
