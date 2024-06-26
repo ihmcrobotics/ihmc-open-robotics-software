@@ -72,6 +72,7 @@ public class YOLOv8Node extends DetectableSceneNode
       yoloDetection = null;
    }
 
+   @Override
    public void update()
    {
       setCurrentlyDetected(yoloDetection.isStable());

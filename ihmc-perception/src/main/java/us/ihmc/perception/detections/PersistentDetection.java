@@ -67,8 +67,6 @@ public class PersistentDetection
       {
          if (isOldEnough(now))
          {
-            System.out.println("CONF: " + getAverageConfidence());
-            System.out.println("FREQ: " + getDetectionFrequencyDecaying(now));
             if (isStable(now))
             {
                isValid = true;

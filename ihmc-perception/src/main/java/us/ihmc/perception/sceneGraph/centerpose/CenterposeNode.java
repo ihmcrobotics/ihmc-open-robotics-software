@@ -66,6 +66,7 @@ public class CenterposeNode extends DetectableSceneNode
       this.objectDetection = null;
    }
 
+   @Override
    public void update()
    {
       setCurrentlyDetected(objectDetection.isStable());

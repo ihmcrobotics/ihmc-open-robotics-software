@@ -4,7 +4,6 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
-import gnu.trove.set.hash.THashSet;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -71,8 +70,7 @@ public class SceneGraph
    private transient final List<String> nodeNameList = new ArrayList<>();
    private transient final Map<String, SceneNode> namesToNodesMap = new HashMap<>();
    private transient final TIntObjectMap<ArUcoMarkerNode> arUcoMarkerIDToNodeMap = new TIntObjectHashMap<>();
-   private transient final TIntObjectMap<CenterposeNode> centerposeDetectedMarkerIDToNodeMap = new TIntObjectHashMap<>();   private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
-   private transient final THashSet<YOLOv8Node> yoloNodes = new THashSet<>();
+   private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
    private int numberOfFrozenNodes = 0;
 
    /** Create without CRDT synchronization. */
@@ -111,6 +109,8 @@ public class SceneGraph
 
    private void updateOnRobotOnly(SceneNode sceneNode, ReferenceFrame sensorFrame, SceneGraphModificationQueue modificationQueue)
    {
+      sceneNode.update();
+
       if (sceneNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {
          staticRelativeSceneNode.updateTrackingState(sensorFrame, modificationQueue);
@@ -141,7 +141,6 @@ public class SceneGraph
    private void update()
    {
       destroyRemovedSceneNodes();
-
       idToNodeMap.clear();
       synchronized (nodeNameList)
       {
@@ -149,8 +148,6 @@ public class SceneGraph
       }
       namesToNodesMap.clear();
       arUcoMarkerIDToNodeMap.clear();
-      centerposeDetectedMarkerIDToNodeMap.clear();
-      yoloNodes.clear();
       sceneNodesByID.clear();
       numberOfFrozenNodes = 0;
       updateCaches(rootNode);
@@ -193,14 +190,6 @@ public class SceneGraph
       {
          arUcoMarkerIDToNodeMap.put(arUcoMarkerNode.getMarkerID(), arUcoMarkerNode);
       }
-      else if (node instanceof CenterposeNode centerposeNode)
-      {
-         centerposeDetectedMarkerIDToNodeMap.put(centerposeNode.getObjectID(), centerposeNode);
-      }
-      else if (node instanceof YOLOv8Node yoloNode)
-      {
-         yoloNodes.add(yoloNode);
-      }
 
       if (node.isFrozen())
          ++numberOfFrozenNodes;
@@ -218,12 +207,6 @@ public class SceneGraph
       Set<PersistentDetection> newlyValidDetections = detectionManager.getNewlyValidDetections();
       for (PersistentDetection newDetection : newlyValidDetections)
          addNodeFromDetection(newDetection);
-
-      for (YOLOv8Node yoloNode : yoloNodes)
-         yoloNode.update();
-      for (CenterposeNode centerPoseNode : centerposeDetectedMarkerIDToNodeMap.valueCollection())
-         centerPoseNode.update();
-      // TODO DOOR DETECTION?
 
       detectionManager.clearNewlyValidDetections();
    }
