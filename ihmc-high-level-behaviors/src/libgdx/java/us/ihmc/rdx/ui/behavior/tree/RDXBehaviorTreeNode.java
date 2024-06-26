@@ -44,6 +44,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    private boolean mouseHoveringNodeLine;
    private boolean anySpecificWidgetOnLineClicked = false;
    private boolean treeWidgetExpanded = false;
+   private int previousNumberOfChildren = 0;
    private boolean isNameBeingEdited = false;
    private transient final ImString imNodeNameText = new ImString();
    private transient final ImString notesText = new ImString(1500);
@@ -73,6 +74,12 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
    public void update()
    {
       BehaviorTreeNodeLayer.super.update();
+
+      // Automatically expand if less than 5 children are added at once
+      int deltaChildren = getChildren().size() - previousNumberOfChildren;
+      previousNumberOfChildren = getChildren().size();
+      if (deltaChildren > 0 && deltaChildren < 5)
+         treeWidgetExpanded = true;
 
       while (!state.getLogger().getRecentMessages().isEmpty())
       {
