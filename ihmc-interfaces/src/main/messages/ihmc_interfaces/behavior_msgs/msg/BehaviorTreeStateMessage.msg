@@ -37,6 +37,8 @@ byte[<=1000] behavior_tree_types
 # it's type.
 uint32[<=1000] behavior_tree_indices
 
+behavior_msgs/BehaviorTreeRootNodeStateMessage[<=1] root_nodes
+
 behavior_msgs/BasicNodeStateMessage[<=200] basic_nodes
 
 behavior_msgs/ActionSequenceStateMessage[<=200] action_sequences

@@ -3,6 +3,7 @@
 
 #include "behavior_msgs/msg/./ActionSequenceStateMessage_.idl"
 #include "behavior_msgs/msg/./BasicNodeStateMessage_.idl"
+#include "behavior_msgs/msg/./BehaviorTreeRootNodeStateMessage_.idl"
 #include "behavior_msgs/msg/./BuildingExplorationStateMessage_.idl"
 #include "behavior_msgs/msg/./ChestOrientationActionStateMessage_.idl"
 #include "behavior_msgs/msg/./DoorTraversalStateMessage_.idl"
@@ -99,6 +100,7 @@ module behavior_msgs
          * it's type.
          */
         sequence<unsigned long, 1000> behavior_tree_indices;
+        sequence<behavior_msgs::msg::dds::BehaviorTreeRootNodeStateMessage, 1> root_nodes;
         sequence<behavior_msgs::msg::dds::BasicNodeStateMessage, 200> basic_nodes;
         sequence<behavior_msgs::msg::dds::ActionSequenceStateMessage, 200> action_sequences;
         sequence<behavior_msgs::msg::dds::DoorTraversalStateMessage, 200> door_traversals;

@@ -50,6 +50,8 @@ int8[] behavior_tree_types
 # it's type.
 uint32[] behavior_tree_indices
 
+behavior_msgs/BehaviorTreeRootNodeStateMessage[] root_nodes
+
 behavior_msgs/BasicNodeStateMessage[] basic_nodes
 
 behavior_msgs/ActionSequenceStateMessage[] action_sequences
