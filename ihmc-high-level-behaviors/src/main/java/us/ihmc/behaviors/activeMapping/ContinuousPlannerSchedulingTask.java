@@ -23,7 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * This class is responsible for scheduling the continuous planner state machine. It is responsible for handling the state transitions and the logic of the
+ * This class is responsible for scheduling the continuous hiking state machine. It is responsible for handling the state transitions and the logic of the
  * state machine.
  */
 public class ContinuousPlannerSchedulingTask

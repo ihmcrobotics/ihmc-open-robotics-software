@@ -52,7 +52,7 @@ public class TerrainPlanningDebugger
    private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
    private ContinuousWalkingStatusMessage statusMessage = new ContinuousWalkingStatusMessage();
 
-   private ROS2PublisherBasics<FootstepDataListMessage> publisherForUI;
+   private ROS2PublisherBasics<FootstepDataListMessage> plannedFootstesPublisherForUI;
    private ROS2PublisherBasics<ContinuousWalkingStatusMessage> statusPublisher;
    private ROS2PublisherBasics<FootstepDataListMessage> monteCarloPlanPublisherForUI;
    private ROS2PublisherBasics<PoseListMessage> startAndGoalPublisherForUI;
@@ -67,7 +67,7 @@ public class TerrainPlanningDebugger
       this.parameters = parameters;
       if (ros2Node != null)
       {
-         publisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.PLANNED_FOOTSTEPS);
+         plannedFootstesPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.PLANNED_FOOTSTEPS);
          statusPublisher = ros2Node.createPublisher(ContinuousWalkingAPI.CONTINUOUS_WALKING_STATUS);
          monteCarloPlanPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN);
          startAndGoalPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS);
@@ -292,7 +292,7 @@ public class TerrainPlanningDebugger
 
    public void publishPlannedFootsteps(FootstepDataListMessage plannedFootstepsMessage)
    {
-      publisherForUI.publish(plannedFootstepsMessage);
+      plannedFootstesPublisherForUI.publish(plannedFootstepsMessage);
    }
 
    public void printContactMap()

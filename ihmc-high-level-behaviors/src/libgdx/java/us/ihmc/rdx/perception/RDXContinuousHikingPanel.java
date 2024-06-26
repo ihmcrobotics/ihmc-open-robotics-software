@@ -29,7 +29,6 @@ import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
-import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.SwingPlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.HumanoidActivePerceptionModule;
@@ -51,43 +50,36 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProvider
 {
+   private final ROS2PublisherBasics<ContinuousWalkingCommandMessage> commandPublisher;
    private final ContinuousWalkingCommandMessage commandMessage = new ContinuousWalkingCommandMessage();
    private final AtomicReference<FootstepDataListMessage> footstepDataListMessage = new AtomicReference<>(null);
    private final AtomicReference<FootstepDataListMessage> monteCarloPlanDataListMessage = new AtomicReference<>(null);
    private final SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
 
-   private final ImBoolean renderEnabled = new ImBoolean(true);
-   private final ImBoolean localRenderMode = new ImBoolean(false);
-   private final ImBoolean useMonteCarloReference = new ImBoolean(false);
-   private final ImBoolean useHybridPlanner = new ImBoolean(false);
-   private final ImBoolean useAStarFootstepPlanner = new ImBoolean(true);
-   private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
-
-   private RDXStancePoseSelectionPanel stancePoseSelectionPanel;
-   private final ROS2PublisherBasics<ContinuousWalkingCommandMessage> commandPublisher;
+   private final RDXStancePoseSelectionPanel stancePoseSelectionPanel;
 
    private static final int numberOfKnotPoints = 12;
    private static final int maxIterationsOptimization = 100;
    private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator(numberOfKnotPoints,
                                                                                                                              maxIterationsOptimization);
 
-   private RDXTerrainPlanningDebugger terrainPlanningDebugger;
-   private HumanoidActivePerceptionModule activePerceptionModule;
-   private SwingPlannerParametersBasics swingPlannerParameters;
-   private SwingTrajectoryParameters swingTrajectoryParameters;
-   private ContinuousHikingParameters continuousHikingParameters;
-   private Controller currentController;
+   private final RDXTerrainPlanningDebugger terrainPlanningDebugger;
+   private final HumanoidActivePerceptionModule activePerceptionModule;
+   private final SwingTrajectoryParameters swingTrajectoryParameters;
+   private final ContinuousHikingParameters continuousHikingParameters;
+   private final RDXStoredPropertySetTuner continuousHikingParametersTuner = new RDXStoredPropertySetTuner("Continuous Hiking Parameters (Active Mapping)");
 
-   private boolean currentControllerConnected;
-
-   private final RDXStoredPropertySetTuner continuousPlanningParametersTuner = new RDXStoredPropertySetTuner("Continuous Walking Parameters (Active Mapper)");
+   private final ImBoolean localRenderMode = new ImBoolean(false);
+   private final ImBoolean useMonteCarloReference = new ImBoolean(false);
+   private final ImBoolean useHybridPlanner = new ImBoolean(false);
+   private final ImBoolean useAStarFootstepPlanner = new ImBoolean(true);
+   private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
 
    public RDXContinuousHikingPanel(ROS2Helper ros2Helper,
-                                   HumanoidActivePerceptionModule activePerceptionModule,
                                    DRCRobotModel robotModel,
+                                   HumanoidActivePerceptionModule activePerceptionModule,
                                    ContinuousHikingParameters continuousHikingParameters,
-                                   SwingPlannerParametersBasics swingPlannerParameters,
                                    SwingTrajectoryParameters swingTrajectoryParameters,
                                    MonteCarloFootstepPlannerParameters monteCarloPlannerParameters)
    {
@@ -95,7 +87,6 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       setRenderMethod(this::renderImGuiWidgets);
 
       this.activePerceptionModule = activePerceptionModule;
-      this.swingPlannerParameters = swingPlannerParameters;
       this.swingTrajectoryParameters = swingTrajectoryParameters;
       this.continuousHikingParameters = continuousHikingParameters;
 
@@ -126,17 +117,13 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
                                       message -> terrainPlanningDebugger.reset());
 
       LogTools.info("Continuous Hiking Parameters Save File " + continuousHikingParameters.findSaveFileDirectory().toString());
-      continuousPlanningParametersTuner.create(continuousHikingParameters, false);
+      continuousHikingParametersTuner.create(continuousHikingParameters, false);
    }
 
    public void update(TerrainMapData terrainMapData, HeightMapData heightMapData)
    {
-      if (!renderEnabled.get())
-         return;
-
       updateFootstepGraphics();
 
-      terrainPlanningDebugger.generateStartAndGoalFootstepGraphics(startStancePose, goalStancePose);
       terrainPlanningDebugger.update(terrainMapData);
       stancePoseSelectionPanel.update(terrainMapData, heightMapData);
    }
@@ -180,9 +167,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       ImGui.text("And the enabled checkbox must be checked");
       ImGui.text("By holding CTRL the robot will walk forward");
       ImGui.separator();
-      continuousPlanningParametersTuner.renderImGuiWidgets();
+      continuousHikingParametersTuner.renderImGuiWidgets();
 
-      ImGui.checkbox("Render", renderEnabled);
       ImGui.checkbox("Local Render Mode", localRenderMode);
       ImGui.checkbox("Use A* Footstep Planner", useAStarFootstepPlanner);
       ImGui.checkbox("Use Monte-Carlo Footstep Planner", useMonteCarloFootstepPlanner);
@@ -200,11 +186,23 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (renderEnabled.get())
-      {
-         stancePoseSelectionPanel.getRenderables(renderables, pool);
-         terrainPlanningDebugger.getRenderables(renderables, pool);
-      }
+      stancePoseSelectionPanel.getRenderables(renderables, pool);
+      terrainPlanningDebugger.getRenderables(renderables, pool);
+   }
+
+   /**
+   We have received the start and goal pose from the process, lets unpack this message and visualize the start and goal on the UI.
+    */
+   public void onStartAndGoalPosesReceived(PoseListMessage poseListMessage)
+   {
+      List<Pose3D> poses = MessageTools.unpackPoseListMessage(poseListMessage);
+      startStancePose.get(RobotSide.LEFT).set(poses.get(0));
+      startStancePose.get(RobotSide.RIGHT).set(poses.get(1));
+      goalStancePose.get(RobotSide.LEFT).set(poses.get(2));
+      goalStancePose.get(RobotSide.RIGHT).set(poses.get(3));
+
+      // Visualize the start and goal poses on the UI
+      terrainPlanningDebugger.generateStartAndGoalFootstepGraphics(startStancePose, goalStancePose);
    }
 
    public void onPlannedFootstepsReceived(FootstepDataListMessage message)
@@ -219,26 +217,17 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       this.monteCarloPlanDataListMessage.set(message);
    }
 
-   public void onStartAndGoalPosesReceived(PoseListMessage poseListMessage)
-   {
-      List<Pose3D> poses = MessageTools.unpackPoseListMessage(poseListMessage);
-      startStancePose.get(RobotSide.LEFT).set(poses.get(0));
-      startStancePose.get(RobotSide.RIGHT).set(poses.get(1));
-      goalStancePose.get(RobotSide.LEFT).set(poses.get(2));
-      goalStancePose.get(RobotSide.RIGHT).set(poses.get(3));
-   }
-
    private void publishInputCommandMessage()
    {
-      currentController = Controllers.getCurrent();
-      currentControllerConnected = currentController != null;
+      Controller currentController = Controllers.getCurrent();
+      boolean currentJoystickControllerConnected = currentController != null;
 
       boolean walkingEnabled = ImGui.getIO().getKeyCtrl();
       double forwardJoystickValue = 0.0;
       double lateralJoystickValue = 0.0;
       double turningJoystickValue = 0.0;
 
-      if (currentControllerConnected)
+      if (currentJoystickControllerConnected)
       {
          walkingEnabled |= currentController.getButton(currentController.getMapping().buttonR1);
          forwardJoystickValue = -currentController.getAxis(currentController.getMapping().axisLeftY);
@@ -246,7 +235,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
          turningJoystickValue = -currentController.getAxis(currentController.getMapping().axisRightX);
       }
 
-      // Only allow Continuous Walking if the CTRL key is held and the check box is checked
+      // Only allow Continuous Walking if the CTRL key is held and the checkbox is checked
       if (continuousHikingParameters != null && continuousHikingParameters.getEnableContinuousWalking())
       {
          commandMessage.setEnableContinuousWalking(walkingEnabled);
