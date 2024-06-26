@@ -153,7 +153,13 @@ public class RDXSceneGraphDemo
 
                private void updateSceneGraph()
                {
-                  // TODO:
+                  // TODO: finish
+                  onRobotSceneGraph.updateSubscription();
+
+                  yolov8DetectionManager.updateSceneGraph(onRobotSceneGraph);
+
+                  onRobotSceneGraph.updateOnRobotOnly(ReferenceFrame.getWorldFrame());
+                  onRobotSceneGraph.updatePublication();
                }
 
                // Main perception thread loop
