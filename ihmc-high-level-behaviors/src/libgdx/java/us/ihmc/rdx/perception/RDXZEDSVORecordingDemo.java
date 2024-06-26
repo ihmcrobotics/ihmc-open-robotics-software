@@ -5,6 +5,7 @@ import imgui.type.ImBoolean;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
+import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -46,8 +47,9 @@ public class RDXZEDSVORecordingDemo
 
       PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "zed_svo_recording_demo");
+      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-      zedColorDepthImageRetrieverSVO = new ZEDColorDepthImageRetrieverSVO(ros2Node, 0, ReferenceFrame::getWorldFrame, null, null, RECORD_MODE, SVO_FILE_NAME);
+      zedColorDepthImageRetrieverSVO = new ZEDColorDepthImageRetrieverSVO(0, ReferenceFrame::getWorldFrame, null, null, ros2Helper, RECORD_MODE, SVO_FILE_NAME);
       zedColorDepthImageRetrieverSVO.start();
 
       zedColorDepthImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES,
@@ -76,7 +78,7 @@ public class RDXZEDSVORecordingDemo
             baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
             baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
 
-            recorderPanel = new RDXZEDSVORecorderPanel(ros2Node);
+            recorderPanel = new RDXZEDSVORecorderPanel(ros2Helper);
 
             addZEDVisualizers(perceptionVisualizerPanel);
 
