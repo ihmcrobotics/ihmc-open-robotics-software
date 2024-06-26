@@ -1,5 +1,8 @@
 package us.ihmc.perception.detections;
 
+/**
+ * Used to sort matches of instant and persistent detections by proximity.
+ */
 public class DetectionPair implements Comparable<DetectionPair>
 {
    private final PersistentDetection persistentDetection;
@@ -14,11 +17,6 @@ public class DetectionPair implements Comparable<DetectionPair>
    public double getDistanceSquared()
    {
       return persistentDetection.getMostRecentDetection().getPose().getPosition().distanceSquared(instantDetection.getPose().getPosition());
-   }
-
-   public void confirmDetectionMatch()
-   {
-      persistentDetection.addDetection(instantDetection);
    }
 
    @Override

@@ -1,53 +1,80 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
+import org.jetbrains.annotations.Nullable;
+import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetector;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerROS2Publisher;
-import us.ihmc.perception.sceneGraph.SceneObjectDefinitions;
-import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.perception.RawImage;
+import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionExecutor;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
-import us.ihmc.pubsub.DomainFactory;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
-import us.ihmc.rdx.perception.RDXOpenCVArUcoMarkerDetectionUI;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
-import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ArUcoMarkerPosesVisualizer;
-import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.thread.Throttler;
+import us.ihmc.sensors.ZEDColorDepthImagePublisher;
+import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO;
+import us.ihmc.sensors.ZEDColorDepthImageRetrieverSVO.RecordMode;
+import us.ihmc.tools.IHMCCommonPaths;
+import us.ihmc.tools.thread.RestartableThrottledThread;
 
 /**
  * A self contained demo and development environment for our scene graph functionality.
  */
 public class RDXSceneGraphDemo
 {
+   private enum SensorMode
+   {
+      SIMULATED, ZED_SVO_RECORDING
+   }
+
+   private static final SensorMode SENSOR_MODE = SensorMode.ZED_SVO_RECORDING;
+   // Drive folder with recordings https://drive.google.com/drive/u/0/folders/17TIgXgNPslUyzBFWy6Waev11fx__3w9D
+   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240625_154000_ZEDRecording_Demo.svo2")
+                                                                                        .toAbsolutePath()
+                                                                                        .toString();
+   private static final PubSubImplementation PUB_SUB_IMPLEMENTATION = PubSubImplementation.FAST_RTPS;
+
    private final RDXBaseUI baseUI = new RDXBaseUI();
    private ROS2Node ros2Node;
    private ROS2Helper ros2Helper;
-   private RDXEnvironmentBuilder environmentBuilder;
-   private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo("SimulatedSensor");
-   private RDXHighLevelDepthSensorSimulator simulatedCamera;
    private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
-   private OpenCVArUcoMarkerDetector arUcoMarkerDetector;
-   private OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults;
+   private RDXROS2ImageMessageVisualizer yoloAnnotatedImageVisualizer;
+   private YOLOv8DetectionExecutor yolov8DetectionExecutor;
    private ROS2SceneGraph onRobotSceneGraph;
-   private OpenCVArUcoMarkerROS2Publisher arUcoMarkerPublisher;
-   private ReferenceFrameLibrary referenceFrameLibrary;
    private RDXSceneGraphUI sceneGraphUI;
-   private RDXOpenCVArUcoMarkerDetectionUI openCVArUcoMarkerDetectionUI;
-   /** Simulate an update rate more similar to what it would be on the robot. */
-   private final Throttler perceptionThottler = new Throttler().setFrequency(30.0);
+
+   private RestartableThrottledThread perceptionUpdateThread;
+
+   // Simulated sensor related things
+   @Nullable
+   private RDXPose3DGizmo sensorPoseGizmo;
+   @Nullable
+   private RDXHighLevelDepthSensorSimulator simulatedCamera;
+
+   // ZED SVO sensor related things
+   @Nullable
+   private ZEDColorDepthImageRetrieverSVO zedColorDepthImageRetrieverSVO;
+   @Nullable
+   private ZEDColorDepthImagePublisher zedColorDepthImagePublisher;
+   @Nullable
+   private RawImage zedDepthImage;
+   private final SideDependentList<RawImage> zedColorImages = new SideDependentList<>();
 
    public RDXSceneGraphDemo()
    {
+      Runtime.getRuntime().addShutdownHook(new Thread(this::destroy));
+
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
          @Override
@@ -55,88 +82,102 @@ public class RDXSceneGraphDemo
          {
             baseUI.create(RDXSceneLevel.VIRTUAL, RDXSceneLevel.MODEL, RDXSceneLevel.GROUND_TRUTH);
 
-            ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_scene_graph_demo");
+            ros2Node = ROS2Tools.createROS2Node(PUB_SUB_IMPLEMENTATION, "perception_scene_graph_demo");
             ros2Helper = new ROS2Helper(ros2Node);
 
+            // Add perception visualizers
             perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
             baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
             baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
+            createVisualizers();
+            perceptionVisualizerPanel.create();
 
-            environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
-            environmentBuilder.create();
-            baseUI.getImGuiPanelManager().addPanel(environmentBuilder.getPanelName(), environmentBuilder::renderImGuiWidgets);
-            environmentBuilder.loadEnvironment("DoorsForArUcoTesting.json");
+            // Setup sensors
+            if (SENSOR_MODE == SensorMode.SIMULATED)
+            {
+               setupSimulatedSensor();
+            }
+            else if (SENSOR_MODE == SensorMode.ZED_SVO_RECORDING)
+            {
+               setupZEDSVOSensor();
+            }
 
-            sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
-            sensorPoseGizmo.setResizeAutomatically(true);
-            sensorPoseGizmo.getTransformToParent().getTranslation().setZ(0.7);
-            baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
-            baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
-            baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
-
-            simulatedCamera = RDXSimulatedSensorFactory.createBlackflyFisheye(sensorPoseGizmo.getGizmoFrame(), System::nanoTime);
-            simulatedCamera.setSensorEnabled(true);
-            simulatedCamera.setRenderColorVideoDirectly(true);
-            baseUI.getPrimaryScene().addRenderableProvider(simulatedCamera::getRenderables);
-
-            arUcoMarkerDetector = new OpenCVArUcoMarkerDetector();
-            arUcoMarkerDetector.setSourceImageForDetection(simulatedCamera.getLowLevelSimulator().getRGBA8888ColorImage());
-            arUcoMarkerDetector.setCameraInstrinsics(simulatedCamera.getDepthCameraIntrinsics());
-            arUcoMarkerDetectionResults = new OpenCVArUcoMarkerDetectionResults();
-
+            // Setup scene graph
             onRobotSceneGraph = new ROS2SceneGraph(ros2Helper);
-
-            RDXROS2ArUcoMarkerPosesVisualizer arUcoMarkerPosesVisualizer = new RDXROS2ArUcoMarkerPosesVisualizer("ArUco Marker Poses",
-                                                                                                                 ros2Helper,
-                                                                                                                 PerceptionAPI.ARUCO_MARKER_POSES);
-            arUcoMarkerPosesVisualizer.setActive(true);
-            perceptionVisualizerPanel.addVisualizer(arUcoMarkerPosesVisualizer);
-
-            arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetectionResults,
-                                                                      ros2Helper,
-                                                                      SceneObjectDefinitions.ARUCO_MARKER_SIZES,
-                                                                      simulatedCamera.getSensorFrame());
-
-            referenceFrameLibrary = new ReferenceFrameLibrary();
-
             sceneGraphUI = new RDXSceneGraphUI(ros2Helper, baseUI.getPrimary3DPanel());
             baseUI.getPrimaryScene().addRenderableProvider(sceneGraphUI::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(sceneGraphUI.getPanel());
 
-            openCVArUcoMarkerDetectionUI = new RDXOpenCVArUcoMarkerDetectionUI();
-            openCVArUcoMarkerDetectionUI.create(arUcoMarkerDetector.getDetectorParameters());
-            baseUI.getImGuiPanelManager().addPanel(openCVArUcoMarkerDetectionUI.getMainPanel());
+            perceptionUpdateThread = new RestartableThrottledThread("PerceptionUpdateThread", 30.0, new RunnableThatThrows()
+            {
+               // Main perception thread loop
+               @Override
+               public void run() throws Throwable
+               {
+                  if (SENSOR_MODE == SensorMode.ZED_SVO_RECORDING)
+                  {
+                     zedDepthImage = zedColorDepthImageRetrieverSVO.getLatestRawDepthImage();
+                     for (RobotSide side : RobotSide.values)
+                        zedColorImages.put(side, zedColorDepthImageRetrieverSVO.getLatestRawColorImage(side));
 
-            perceptionVisualizerPanel.create();
+                     zedColorDepthImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
+                     for (RobotSide side : RobotSide.values)
+                        zedColorDepthImagePublisher.setNextColorImage(zedColorImages.get(side).get(), side);
+                  }
+
+                  runYOLO();
+
+                  updateSceneGraph();
+               }
+
+               private void runYOLO()
+               {
+                  if (yolov8DetectionExecutor == null)
+                  {
+                     yolov8DetectionExecutor = new YOLOv8DetectionExecutor(ros2Helper, yoloAnnotatedImageVisualizer::isActive);
+                     yolov8DetectionExecutor.addDetectionConsumerCallback(instantDetections -> System.out.println(
+                           "Detection count " + instantDetections.size()));
+                  }
+
+                  if (SENSOR_MODE == SensorMode.SIMULATED)
+                  {
+                     synchronized (simulatedCamera)
+                     {
+                        // TODO:
+                        // yoloColorImageBGR = simulatedCamera.createRawColorImageBGR();
+                        // yoloDepthImageDiscretized = simulatedCamera.createRawDepthImageDiscretized();
+                     }
+                  }
+                  else if (SENSOR_MODE == SensorMode.ZED_SVO_RECORDING)
+                  {
+                     yolov8DetectionExecutor.runYOLODetection(zedColorImages.get(RobotSide.LEFT).get(), zedDepthImage.get());
+                  }
+               }
+
+               private void updateSceneGraph()
+               {
+                  // TODO: finish
+                  onRobotSceneGraph.updateSubscription();
+
+                  onRobotSceneGraph.updateOnRobotOnly(ReferenceFrame.getWorldFrame());
+                  onRobotSceneGraph.updatePublication();
+               }
+            });
+            perceptionUpdateThread.start();
          }
 
          @Override
          public void render()
          {
-            boolean runPerception = perceptionThottler.run();
-
-            environmentBuilder.update();
-            simulatedCamera.render(baseUI.getPrimaryScene());
-            if (runPerception)
+            if (SENSOR_MODE == SensorMode.SIMULATED)
             {
-               arUcoMarkerDetector.update();
-               openCVArUcoMarkerDetectionUI.copyOutputData(arUcoMarkerDetector);
-               arUcoMarkerDetectionResults.copyOutputData(arUcoMarkerDetector);
-            }
-            openCVArUcoMarkerDetectionUI.update();
-
-            if (runPerception)
-            {
-               arUcoMarkerPublisher.update();
-
-               onRobotSceneGraph.updateSubscription();
-               ArUcoSceneTools.updateSceneGraph(arUcoMarkerDetectionResults, simulatedCamera.getSensorFrame(), onRobotSceneGraph);
-               onRobotSceneGraph.updateOnRobotOnly(sensorPoseGizmo.getGizmoFrame());
-               onRobotSceneGraph.updatePublication();
+               synchronized (simulatedCamera)
+               {
+                  simulatedCamera.render(baseUI.getPrimaryScene());
+               }
             }
 
             sceneGraphUI.update();
-
             perceptionVisualizerPanel.update();
 
             baseUI.renderBeforeOnScreenUI();
@@ -146,12 +187,116 @@ public class RDXSceneGraphDemo
          @Override
          public void dispose()
          {
+            if (simulatedCamera != null)
+            {
+               simulatedCamera.dispose();
+            }
+
             perceptionVisualizerPanel.destroy();
-            simulatedCamera.dispose();
             baseUI.dispose();
-            environmentBuilder.destroy();
          }
       });
+   }
+
+   private void destroy()
+   {
+      yolov8DetectionExecutor.destroy();
+
+      if (zedColorDepthImageRetrieverSVO != null)
+         zedColorDepthImageRetrieverSVO.destroy();
+      if (zedColorDepthImagePublisher != null)
+         zedColorDepthImagePublisher.destroy();
+
+      perceptionUpdateThread.stop();
+   }
+
+   private void setupSimulatedSensor()
+   {
+      sensorPoseGizmo = new RDXPose3DGizmo("SimulatedSensor");
+      sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
+      sensorPoseGizmo.setResizeAutomatically(true);
+      sensorPoseGizmo.getTransformToParent().getTranslation().setZ(0.7);
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
+      baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
+
+      simulatedCamera = RDXSimulatedSensorFactory.createBlackflyFisheye(sensorPoseGizmo.getGizmoFrame(), System::nanoTime);
+      simulatedCamera.setSensorEnabled(true);
+      simulatedCamera.setRenderColorVideoDirectly(true);
+      baseUI.getPrimaryScene().addRenderableProvider(simulatedCamera::getRenderables);
+   }
+
+   private void setupZEDSVOSensor()
+   {
+      zedColorDepthImageRetrieverSVO = new ZEDColorDepthImageRetrieverSVO(ros2Node,
+                                                                          0,
+                                                                          ReferenceFrame::getWorldFrame,
+                                                                          null,
+                                                                          null,
+                                                                          RecordMode.PLAYBACK,
+                                                                          SVO_FILE_NAME);
+      zedColorDepthImageRetrieverSVO.start();
+      zedColorDepthImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES,
+                                                                    PerceptionAPI.ZED2_DEPTH,
+                                                                    PerceptionAPI.ZED2_CUT_OUT_DEPTH);
+   }
+
+   private void createVisualizers()
+   {
+      // ZED2 colored point cloud visualizer
+      {
+         RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
+                                                                                                                     PubSubImplementation.FAST_RTPS,
+                                                                                                                     PerceptionAPI.ZED2_DEPTH,
+                                                                                                                     PerceptionAPI.ZED2_COLOR_IMAGES.get(
+                                                                                                                           RobotSide.LEFT));
+         zed2ColoredPointCloudVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_POINT_CLOUD);
+         zed2ColoredPointCloudVisualizer.setActive(true);
+         perceptionVisualizerPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
+      }
+
+      // ZED left color visualizer
+      {
+         RDXROS2ImageMessageVisualizer zedLeftColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Left",
+                                                                                                       PubSubImplementation.FAST_RTPS,
+                                                                                                       PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
+         zedLeftColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
+         perceptionVisualizerPanel.addVisualizer(zedLeftColorImageVisualizer);
+      }
+
+      // ZED 2 color right image visualizer
+      {
+         RDXROS2ImageMessageVisualizer zedRightColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Right",
+                                                                                                        PubSubImplementation.FAST_RTPS,
+                                                                                                        PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT));
+         zedRightColorImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_COLOR);
+         perceptionVisualizerPanel.addVisualizer(zedRightColorImageVisualizer);
+      }
+
+      // ZED 2 depth image visualizer
+      {
+         RDXROS2ImageMessageVisualizer zed2DepthImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Depth Image",
+                                                                                                    PubSubImplementation.FAST_RTPS,
+                                                                                                    PerceptionAPI.ZED2_DEPTH);
+         zed2DepthImageVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_ZED_DEPTH);
+         perceptionVisualizerPanel.addVisualizer(zed2DepthImageVisualizer);
+      }
+
+      // Create YOLO annotated image viz
+      {
+         yoloAnnotatedImageVisualizer = new RDXROS2ImageMessageVisualizer("YOLOv8 Annotated Image", PUB_SUB_IMPLEMENTATION, PerceptionAPI.YOLO_ANNOTATED_IMAGE);
+         yoloAnnotatedImageVisualizer.setActive(true);
+         perceptionVisualizerPanel.addVisualizer(yoloAnnotatedImageVisualizer);
+      }
+
+      // Create ArUcoMarker pose viz
+      {
+         //         RDXROS2ArUcoMarkerPosesVisualizer arUcoMarkerPosesVisualizer = new RDXROS2ArUcoMarkerPosesVisualizer("ArUco Marker Poses",
+         //                                                                                                              ros2Helper,
+         //                                                                                                              PerceptionAPI.ARUCO_MARKER_POSES);
+         //         arUcoMarkerPosesVisualizer.setActive(true);
+         //         perceptionVisualizerPanel.addVisualizer(arUcoMarkerPosesVisualizer);
+      }
    }
 
    public static void main(String[] args)

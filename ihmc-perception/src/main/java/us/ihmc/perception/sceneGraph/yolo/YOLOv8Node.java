@@ -6,14 +6,12 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.detections.PersistentDetection;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 public class YOLOv8Node extends DetectableSceneNode
 {

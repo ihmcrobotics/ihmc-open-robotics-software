@@ -15,7 +15,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -40,6 +39,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 
 public class YOLOv8DetectionExecutor
@@ -56,7 +56,7 @@ public class YOLOv8DetectionExecutor
 
    private final List<Consumer<List<InstantDetection>>> detectionConsumerCallbacks = new ArrayList<>();
 
-   private final ROS2DemandGraphNode annotatedImageDemandNode;
+   private final BooleanSupplier isDemandedSupplier;
    private final ROS2PublisherBasics<ImageMessage> annotatedImagePublisher;
 
    private final YOLOv8ObjectDetector yoloDetector = new YOLOv8ObjectDetector();
@@ -70,9 +70,9 @@ public class YOLOv8DetectionExecutor
 
    private Set<YOLOv8DetectionClass> targetDetections = new HashSet<>();
 
-   public YOLOv8DetectionExecutor(ROS2Helper ros2Helper, ROS2DemandGraphNode annotatedImageDemandNode)
+   public YOLOv8DetectionExecutor(ROS2Helper ros2Helper, BooleanSupplier isDemandedSupplier)
    {
-      this.annotatedImageDemandNode = annotatedImageDemandNode;
+      this.isDemandedSupplier = isDemandedSupplier;
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "yolo_detection_manager");
       annotatedImagePublisher = ros2Node.createPublisher(PerceptionAPI.YOLO_ANNOTATED_IMAGE);
@@ -163,7 +163,7 @@ public class YOLOv8DetectionExecutor
             yoloExecutorService.submit(() -> detectionConsumerCallbacks.forEach(callback -> callback.accept(yoloInstantDetections)));
 
             // If annotated image is demanded, create and publish it
-            if (annotatedImageDemandNode.isDemanded())
+            if (isDemandedSupplier.getAsBoolean())
                annotateAndPublishImage(yoloResults, colorImage);
 
             yoloResults.destroy();

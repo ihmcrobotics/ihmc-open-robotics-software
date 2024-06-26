@@ -222,6 +222,7 @@ public class PerceptionAndAutonomyProcess
       detectionManager = new DetectionManager();
 
       zedImageRetriever = new ZEDColorDepthImageRetriever(ZED_CAMERA_ID, zedFrameSupplier, zedDepthDemandNode, zedColorDemandNode);
+      zedImageRetriever.start();
       zedImagePublisher = new ZEDColorDepthImagePublisher(ZED_COLOR_TOPICS, ZED_DEPTH_TOPIC, ZED_CUT_OUT_DEPTH);
       zedProcessAndPublishThread = new RestartableThread("ZEDImageProcessAndPublish", this::processAndPublishZED);
       zedProcessAndPublishThread.start();
@@ -256,7 +257,7 @@ public class PerceptionAndAutonomyProcess
 
       centerPoseDetectionSubscriber = new CenterPoseDetectionSubscriber(detectionManager);
 
-      yolov8DetectionExecutor = new YOLOv8DetectionExecutor(ros2Helper, yoloAnnotatedImageDemandNode);
+      yolov8DetectionExecutor = new YOLOv8DetectionExecutor(ros2Helper, yoloAnnotatedImageDemandNode::isDemanded);
       yolov8DetectionExecutor.addDetectionConsumerCallback(detectionManager::addDetections);
 
       icpManager = new IterativeClosestPointManager(ros2Helper, sceneGraph);

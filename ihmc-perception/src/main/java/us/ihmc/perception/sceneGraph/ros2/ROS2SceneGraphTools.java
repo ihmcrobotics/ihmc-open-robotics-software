@@ -1,6 +1,5 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
-import org.apache.commons.lang.NotImplementedException;
 import perception_msgs.msg.dds.DoorOpeningMechanismMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
@@ -9,8 +8,6 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
-import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
