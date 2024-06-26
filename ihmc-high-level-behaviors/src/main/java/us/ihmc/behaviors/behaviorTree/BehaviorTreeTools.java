@@ -36,7 +36,11 @@ public class BehaviorTreeTools
 
    public static ActionSequenceDefinition findActionSequenceAncestor(BehaviorTreeNodeDefinition node)
    {
-      if (node.getParent() == null)
+      if (node instanceof ActionSequenceDefinition actionSequence)
+      {
+         return actionSequence;
+      }
+      else if (node == null || node.getParent() == null)
       {
          return null;
       }
@@ -52,7 +56,11 @@ public class BehaviorTreeTools
 
    public static ActionSequenceState findActionSequenceAncestor(BehaviorTreeNodeState node)
    {
-      if (node.getParent() == null)
+      if (node instanceof ActionSequenceState actionSequence)
+      {
+         return actionSequence;
+      }
+      else if (node == null || node.getParent() == null)
       {
          return null;
       }
@@ -68,7 +76,11 @@ public class BehaviorTreeTools
 
    public static ActionSequenceExecutor findActionSequenceAncestor(BehaviorTreeNodeExecutor node)
    {
-      if (node.getParent() == null)
+      if (node instanceof ActionSequenceExecutor actionSequence)
+      {
+         return actionSequence;
+      }
+      else if (node == null || node.getParent() == null)
       {
          return null;
       }

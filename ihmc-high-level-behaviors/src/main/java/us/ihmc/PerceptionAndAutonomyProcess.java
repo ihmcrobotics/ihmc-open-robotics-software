@@ -217,6 +217,7 @@ public class PerceptionAndAutonomyProcess
       initializeDependencyGraph(ros2Helper);
 
       zedImageRetriever = new ZEDColorDepthImageRetriever(ZED_CAMERA_ID, zedFrameSupplier, zedDepthDemandNode, zedColorDemandNode);
+      zedImageRetriever.start();
       zedImagePublisher = new ZEDColorDepthImagePublisher(ZED_COLOR_TOPICS, ZED_DEPTH_TOPIC, ZED_CUT_OUT_DEPTH);
       zedProcessAndPublishThread = new RestartableThread("ZEDImageProcessAndPublish", this::processAndPublishZED);
       zedProcessAndPublishThread.start();

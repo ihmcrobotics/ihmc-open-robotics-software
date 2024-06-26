@@ -130,8 +130,7 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
             setActive(false);
       }
 
-      if (heartbeat != null)
-         heartbeat.setAlive(isActive());
+      updateHeartbeat();
    }
 
    public abstract void renderImGuiWidgets();
@@ -145,6 +144,13 @@ public abstract class RDXVisualizer implements RDXRenderableProvider
       {
          create();
       }
+   }
+
+   /** Some classes have weird heartbeats and need to override this. */
+   public void updateHeartbeat()
+   {
+      if (heartbeat != null)
+         heartbeat.setAlive(isActive());
    }
 
    /**

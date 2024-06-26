@@ -49,7 +49,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                                  DRCRobotModel robotModel,
                                  ROS2SyncedRobotModel syncedRobot)
    {
-      super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+      super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary, robotModel));
 
       state = getState();
       definition = getDefinition();
@@ -312,7 +312,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
       jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
 
-      double[] jointAngles = new double[syncedRobot.getRobotModel().getJointMap().getArmJointNames(getDefinition().getSide()).length];
+      double[] jointAngles = new double[state.getNumberOfJoints()];
 
       if (definition.getUsePredefinedJointAngles())
          for (int i = 0; i < jointAngles.length; i++)
