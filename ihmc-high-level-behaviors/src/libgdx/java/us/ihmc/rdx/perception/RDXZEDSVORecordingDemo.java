@@ -41,6 +41,8 @@ public class RDXZEDSVORecordingDemo
    private final ZEDColorDepthImageRetrieverSVO zedColorDepthImageRetrieverSVO;
    private final ZEDColorDepthImagePublisher zedColorDepthImagePublisher;
 
+   private RestartableThrottledThread perceptionUpdateThread;
+
    public RDXZEDSVORecordingDemo()
    {
       Runtime.getRuntime().addShutdownHook(new Thread(this::dispose));
@@ -56,7 +58,7 @@ public class RDXZEDSVORecordingDemo
                                                                     PerceptionAPI.ZED2_DEPTH,
                                                                     PerceptionAPI.ZED2_CUT_OUT_DEPTH);
 
-      RestartableThrottledThread perceptionUpdateThread = new RestartableThrottledThread("PerceptionUpdateThread", 30.0, () ->
+      perceptionUpdateThread = new RestartableThrottledThread("PerceptionUpdateThread", 30.0, () ->
       {
          RawImage depthImage = zedColorDepthImageRetrieverSVO.getLatestRawDepthImage();
          RawImage leftColorImage = zedColorDepthImageRetrieverSVO.getLatestRawColorImage(RobotSide.LEFT);
@@ -108,6 +110,7 @@ public class RDXZEDSVORecordingDemo
 
    public void dispose()
    {
+      perceptionUpdateThread.stop();
       zedColorDepthImagePublisher.destroy();
       zedColorDepthImageRetrieverSVO.destroy();
    }
