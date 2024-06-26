@@ -8,6 +8,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.tools.UnitConversions;
 
 import java.util.Map;
+import java.util.Vector;
 
 public class KinematicsStreamingToolboxParameters
 {
@@ -148,11 +149,11 @@ public class KinematicsStreamingToolboxParameters
    /**
     * Weight used to minimize the angular momentum in the kinematics solution.
     */
-   private double angularMomentumWeight;
+   private Vector3D angularMomentumWeight;
    /**
     * Weight used to minimize the linear momentum in the kinematics solution.
     */
-   private double linearMomentumWeight;
+   private Vector3D linearMomentumWeight;
    /**
     * Whether to minimize the rate of change of the angular momentum in the kinematics solution.
     */
@@ -273,8 +274,8 @@ public class KinematicsStreamingToolboxParameters
 
       minimizeAngularMomentum = true;
       minimizeLinearMomentum = false;
-      angularMomentumWeight = 0.125;
-      linearMomentumWeight = 0.0;
+      angularMomentumWeight = new Vector3D(0.125, 0.125, 0.125);
+      linearMomentumWeight = new Vector3D();
 
       minimizeAngularMomentumRate = false;
       minimizeLinearMomentumRate = false;
@@ -443,12 +444,12 @@ public class KinematicsStreamingToolboxParameters
       return minimizeLinearMomentum;
    }
 
-   public double getAngularMomentumWeight()
+   public Vector3D getAngularMomentumWeight()
    {
       return angularMomentumWeight;
    }
 
-   public double getLinearMomentumWeight()
+   public Vector3D getLinearMomentumWeight()
    {
       return linearMomentumWeight;
    }
@@ -705,10 +706,20 @@ public class KinematicsStreamingToolboxParameters
 
    public void setAngularMomentumWeight(double angularMomentumWeight)
    {
-      this.angularMomentumWeight = angularMomentumWeight;
+      this.angularMomentumWeight = new Vector3D(angularMomentumWeight, angularMomentumWeight, angularMomentumWeight);
    }
 
    public void setLinearMomentumWeight(double linearMomentumWeight)
+   {
+      this.linearMomentumWeight = new Vector3D(linearMomentumWeight, linearMomentumWeight, linearMomentumWeight);
+   }
+
+   public void setAngularMomentumWeight(Vector3D angularMomentumWeight)
+   {
+      this.angularMomentumWeight = angularMomentumWeight;
+   }
+
+   public void setLinearMomentumWeight(Vector3D linearMomentumWeight)
    {
       this.linearMomentumWeight = linearMomentumWeight;
    }

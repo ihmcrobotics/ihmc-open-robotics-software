@@ -62,6 +62,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
@@ -96,6 +97,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -406,8 +408,8 @@ public class KinematicsToolboxController extends ToolboxController
    /**
     * The weight to be used for minimizing the angular momentum, around 0.1 seems good for a robot that is about 130kg.
     */
-   private final YoDouble angularMomentumWeight = new YoDouble("angularMomentumWeight", registry);
-   private final YoDouble linearMomentumWeight = new YoDouble("linearMomentumWeight", registry);
+   private final YoVector3D angularMomentumWeight = new YoVector3D("angularMomentumWeight", registry);
+   private final YoVector3D linearMomentumWeight = new YoVector3D("linearMomentumWeight", registry);
    private final MomentumCommand momentumCommand = new MomentumCommand();
    /**
     * When {@code true}, the solver will add an objective to minimize the overall rate of change of angular momentum generated.
@@ -498,7 +500,7 @@ public class KinematicsToolboxController extends ToolboxController
       threadTimer = new ThreadTimer("timer", updateDT, registry);
 
       minimizeAngularMomentum.set(false);
-      angularMomentumWeight.set(0.125);
+      angularMomentumWeight.set(0.125, 0.125, 0.125);
 
       enableSelfCollisionAvoidance.set(true);
       enableStaticCollisionAvoidance.set(true);
@@ -875,7 +877,7 @@ public class KinematicsToolboxController extends ToolboxController
 
       if (minimizeAngularMomentum.getValue() || minimizeLinearMomentum.getValue())
       {
-         momentumCommand.setWeight(angularMomentumWeight.getValue(), linearMomentumWeight.getValue());
+         momentumCommand.setWeights(angularMomentumWeight, linearMomentumWeight);
          if (!minimizeAngularMomentum.getValue())
             momentumCommand.setSelectionMatrixForLinearControl();
          else if (!minimizeLinearMomentum.getValue())
@@ -1713,18 +1715,18 @@ public class KinematicsToolboxController extends ToolboxController
       minimizeLinearMomentum.set(enable);
    }
 
-   public void setMomentumWeight(double angularWeight, double linearWeight)
+   public void setMomentumWeight(Vector3D angularWeight, Vector3D linearWeight)
    {
       setAngularMomentumWeight(angularWeight);
       setLinearMomentumWeight(linearWeight);
    }
 
-   public void setAngularMomentumWeight(double weight)
+   public void setAngularMomentumWeight(Vector3D weight)
    {
       angularMomentumWeight.set(weight);
    }
 
-   public void setLinearMomentumWeight(double weight)
+   public void setLinearMomentumWeight(Vector3D weight)
    {
       linearMomentumWeight.set(weight);
    }
