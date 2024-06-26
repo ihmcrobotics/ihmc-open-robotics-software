@@ -90,14 +90,11 @@ public class DetectionManager
     */
    public <T extends InstantDetection> void addDetections(List<T> newInstantDetections)
    {
-      PriorityQueue<DetectionPair> possibleMatches = new PriorityQueue<>();
-
-      // Keep track of unmatched detections
-      Set<InstantDetection> unmatchedNewDetections = new HashSet<>(newInstantDetections);
-      List<PersistentDetection> unmatchedPersistentDetections = getDetectionsOfType(newInstantDetections.get(0).getClass());
+      List<PersistentDetection> persistentDetectionsOfClass = getDetectionsOfType(newInstantDetections.get(0).getClass());
 
       // Find all possible matches
-      for (PersistentDetection persistentDetection : unmatchedPersistentDetections)
+      PriorityQueue<DetectionPair> possibleMatches = new PriorityQueue<>();
+      for (PersistentDetection persistentDetection : persistentDetectionsOfClass)
       {
          for (InstantDetection newInstantDetection : newInstantDetections)
          {
@@ -115,6 +112,9 @@ public class DetectionManager
          }
       }
 
+      // Keep track of unmatched detections
+      Set<InstantDetection> unmatchedNewDetections = new HashSet<>(newInstantDetections);
+      List<PersistentDetection> unmatchedPersistentDetections = persistentDetectionsOfClass;
       Set<DetectionPair> matchedDetections = new HashSet<>();
       while (!unmatchedNewDetections.isEmpty() && !unmatchedPersistentDetections.isEmpty() && !possibleMatches.isEmpty())
       {
