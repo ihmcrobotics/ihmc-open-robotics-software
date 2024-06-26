@@ -28,6 +28,7 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.string.StringTools;
 
 import java.io.ByteArrayOutputStream;
@@ -627,7 +628,10 @@ public class ImGuiTools
 
    public static ImFont getConsoleFont()
    {
-      return consoleFont.get(CURRENT_FONT_SIZE);
+      ImFont font = consoleFont.get(CURRENT_FONT_SIZE);
+      if (!font.isLoaded()) // FIXME: Find issue and fix
+         LogTools.error("Console font %s size %d not loaded!".formatted(font.getDebugName(), CURRENT_FONT_SIZE));
+      return font;
    }
 
    public static ImFontAtlas getFontAtlas()
