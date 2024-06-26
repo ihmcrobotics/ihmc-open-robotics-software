@@ -135,13 +135,12 @@ public class ReadyToPlanState implements State
       {
          case FAST_HIKING ->
          {
-            ContinuousPlanningTools.setRandomizedStraightGoalPoses(continuousPlanner.getWalkingStartMidPose(),
-                                                                   continuousPlanner.getStartingStancePose(),
-                                                                   goalPoses,
-                                                                   (float) continuousHikingParameters.getGoalPoseForwardDistance(),
-                                                                   X_RANDOM_MARGIN,
-                                                                   (float) continuousHikingParameters.getGoalPoseUpDistance(),
-                                                                   NOMINAL_STANCE_WIDTH);
+            goalPoses = ContinuousPlanningTools.setRandomizedStraightGoalPoses(continuousPlanner.getWalkingStartMidPose(),
+                                                                               continuousPlanner.getStartingStancePose(),
+                                                                               (float) continuousHikingParameters.getGoalPoseForwardDistance(),
+                                                                               X_RANDOM_MARGIN,
+                                                                               (float) continuousHikingParameters.getGoalPoseUpDistance(),
+                                                                               NOMINAL_STANCE_WIDTH);
 
             return goalPoses;
          }

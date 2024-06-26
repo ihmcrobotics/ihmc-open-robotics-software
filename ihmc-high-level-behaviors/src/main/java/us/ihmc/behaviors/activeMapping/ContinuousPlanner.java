@@ -417,7 +417,7 @@ public class ContinuousPlanner
    public void updateImminentStance(FramePose3D nextRobotStepAfterCurrent, FramePose3D imminentFootstepPose, RobotSide imminentFootstepSide)
    {
       if (!this.imminentFootstepSide.equals(imminentFootstepSide))
-         LogTools.warn("Updating Imminent Stance: From:{}-to-{} {}", this.imminentFootstepSide, imminentFootstepSide, imminentFootstepPose);
+         LogTools.info("Updating Imminent Stance: From:{}-to-{} Imminent Stance is ( {} )", this.imminentFootstepSide, imminentFootstepSide, imminentFootstepPose);
 
       FramePose3D oldLeftPose = new FramePose3D();
       FramePose3D oldRightPose = new FramePose3D();
