@@ -228,11 +228,11 @@ public class RDXSceneGraphDemo
 
    private void setupZEDSVOSensor()
    {
-      zedColorDepthImageRetrieverSVO = new ZEDColorDepthImageRetrieverSVO(ros2Node,
-                                                                          0,
+      zedColorDepthImageRetrieverSVO = new ZEDColorDepthImageRetrieverSVO(0,
                                                                           ReferenceFrame::getWorldFrame,
                                                                           null,
                                                                           null,
+                                                                          ros2Helper,
                                                                           RecordMode.PLAYBACK,
                                                                           SVO_FILE_NAME);
       zedColorDepthImageRetrieverSVO.start();
