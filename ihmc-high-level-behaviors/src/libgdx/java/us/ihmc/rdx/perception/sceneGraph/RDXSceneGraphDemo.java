@@ -118,15 +118,11 @@ public class RDXSceneGraphDemo
                   {
                      zedDepthImage = zedColorDepthImageRetrieverSVO.getLatestRawDepthImage();
                      for (RobotSide side : RobotSide.values)
-                     {
                         zedColorImages.put(side, zedColorDepthImageRetrieverSVO.getLatestRawColorImage(side));
-                     }
 
-                     zedColorDepthImagePublisher.setNextGpuDepthImage(zedDepthImage);
+                     zedColorDepthImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
                      for (RobotSide side : RobotSide.values)
-                     {
-                        zedColorDepthImagePublisher.setNextColorImage(zedColorImages.get(side), side);
-                     }
+                        zedColorDepthImagePublisher.setNextColorImage(zedColorImages.get(side).get(), side);
                   }
 
                   runYOLO();
@@ -154,7 +150,7 @@ public class RDXSceneGraphDemo
                   }
                   else if (SENSOR_MODE == SensorMode.ZED_SVO_RECORDING)
                   {
-                     yolov8DetectionExecutor.runYOLODetection(zedColorImages.get(RobotSide.LEFT), zedDepthImage);
+                     yolov8DetectionExecutor.runYOLODetection(zedColorImages.get(RobotSide.LEFT).get(), zedDepthImage.get());
                   }
                }
 
