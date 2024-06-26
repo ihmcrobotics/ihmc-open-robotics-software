@@ -42,8 +42,6 @@ public class RDXZEDSVORecordingDemo
       Runtime.getRuntime().addShutdownHook(new Thread(this::dispose));
 
       zedColorDepthImageRetrieverSVO = new ZEDColorDepthImageRetrieverSVO(0, ReferenceFrame::getWorldFrame, null, null, RECORD_MODE, SVO_FILE_NAME);
-      zedColorDepthImageRetrieverSVO.start();
-
       zedColorDepthImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES,
                                                                     PerceptionAPI.ZED2_DEPTH,
                                                                     PerceptionAPI.ZED2_CUT_OUT_DEPTH);
