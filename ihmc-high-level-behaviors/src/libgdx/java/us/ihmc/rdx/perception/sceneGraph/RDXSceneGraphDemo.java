@@ -7,6 +7,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionExecutor;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -42,7 +43,7 @@ public class RDXSceneGraphDemo
 
    private static final SensorMode SENSOR_MODE = SensorMode.ZED_SVO_RECORDING;
    // Drive folder with recordings https://drive.google.com/drive/u/0/folders/17TIgXgNPslUyzBFWy6Waev11fx__3w9D
-   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240625_154000_ZEDRecording_Demo.svo2")
+   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240626_145046_ZEDRecording_WalkONRCourse.svo2")
                                                                                         .toAbsolutePath()
                                                                                         .toString();
    private static final PubSubImplementation PUB_SUB_IMPLEMENTATION = PubSubImplementation.FAST_RTPS;
@@ -53,6 +54,7 @@ public class RDXSceneGraphDemo
    private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
    private RDXYOLOv8Settings yoloSettingsVisualizer;
    private RDXROS2ImageMessageVisualizer yoloAnnotatedImageVisualizer;
+   private DetectionManager detectionManager = new DetectionManager();
    private YOLOv8DetectionExecutor yolov8DetectionExecutor;
    private ROS2SceneGraph onRobotSceneGraph;
    private RDXSceneGraphUI sceneGraphUI;
@@ -141,6 +143,7 @@ public class RDXSceneGraphDemo
                      yolov8DetectionExecutor = new YOLOv8DetectionExecutor(ros2Helper, yoloAnnotatedImageVisualizer::isActive);
                      yolov8DetectionExecutor.addDetectionConsumerCallback(instantDetections -> System.out.println(
                            "Detection count " + instantDetections.size()));
+                     yolov8DetectionExecutor.addDetectionConsumerCallback(detectionManager::addDetections);
                   }
 
                   if (SENSOR_MODE == SensorMode.SIMULATED)
@@ -162,7 +165,7 @@ public class RDXSceneGraphDemo
                {
                   // TODO: finish
                   onRobotSceneGraph.updateSubscription();
-
+                  onRobotSceneGraph.updateDetections(detectionManager);
                   onRobotSceneGraph.updateOnRobotOnly(ReferenceFrame.getWorldFrame());
                   onRobotSceneGraph.updatePublication();
                }
