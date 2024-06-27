@@ -5,16 +5,11 @@ import us.ihmc.euclid.Axis2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.TupleTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
+import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
-import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
-import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism.DoorOpeningMechanismType;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorPanel;
@@ -26,8 +21,6 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions.DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN;
-
 /**
  * A node that represents a door.
  * This includes a frame, hinged swinging panel that swings one way,
@@ -35,7 +28,7 @@ import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinit
  *
  * The X forward direction of this node points straight through the frame,
  * towards the side that the door panel swings open to.
- * The the origin of the frame is positioned at the bottom of the panel hinge.
+ * The origin of the frame is positioned at the bottom of the panel hinge.
  */
 public class DoorNode extends DetectableSceneNode
 {
@@ -50,21 +43,34 @@ public class DoorNode extends DetectableSceneNode
       this(id, null, crdtInfo);
    }
 
-   public DoorNode(long id, YOLOv8InstantDetection instantDetection, CRDTInfo crdtInfo)
+   public DoorNode(long id, PersistentDetection initialDetection, CRDTInfo crdtInfo)
    {
       super(id, "Door" + id, crdtInfo);
-      // TODO: Add detection assignment
+
+      acceptDetection(initialDetection);
    }
 
-   public void update(SceneGraph sceneGraph)
+   public boolean acceptDetection(PersistentDetection detection)
+   {
+      if (detection == null)
+         return false;
+
+      // TODO: DOORNODES
+
+      return false;
+   }
+
+   @Override
+   public void update()
    {
       // Calculate yaw, pitch, roll of opening mechanism pose based on door panel
       updateOpeningMechanismPoses();
 
-      for (DoorOpeningMechanism openingMechanism : openingMechanisms)
-      {
-         updateStaticRelativeChildren(sceneGraph, openingMechanism);
-      }
+      // TODO:
+      // Update door node reference frame
+      //      getNodeFrame();
+
+      super.update();
    }
 
    private void updateOpeningMechanismPoses()
@@ -113,42 +119,41 @@ public class DoorNode extends DetectableSceneNode
    /**
     * These child nodes are used in behaviors
     */
-   private void updateStaticRelativeChildren(SceneGraph sceneGraph, DoorOpeningMechanism openingMechanism)
-   {
-      // Recalculate name each time in case the parent name changes
-      String graspStaticRelativeSceneNodeName = getName() + "_" + openingMechanism.getColloquialName() + "Grasp";
-
-      StaticRelativeSceneNode graspStaticRelativeSceneNode = null;
-
-      for (SceneNode child : getChildren())
-      {
-         if (child instanceof StaticRelativeSceneNode staticRelativeSceneNode)
-         {
-            // TODO: Delete any old static relative children that aren't the correct name?
-            if (child.getName().equals(graspStaticRelativeSceneNodeName))
-            {
-               graspStaticRelativeSceneNode = staticRelativeSceneNode;
-            }
-         }
-      }
-
-      if (graspStaticRelativeSceneNode == null)
-      {
-         graspStaticRelativeSceneNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
-                                                                    graspStaticRelativeSceneNodeName,
-                                                                    sceneGraph.getIDToNodeMap(),
-                                                                    getID(),
-                                                                    new RigidBodyTransform(),
-                                                                    openingMechanism.getVisualModelPath(),
-                                                                    openingMechanism.getVisualModelTransform(),
-                                                                    // TODO: DOORNODES
-                                                                    DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN,
-                                                                    getCRDTInfo());
-         StaticRelativeSceneNode finalGraspStaticRelativeSceneNode = graspStaticRelativeSceneNode;
-         sceneGraph.modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(finalGraspStaticRelativeSceneNode, this)));
-      }
-   }
-
+   //   private void updateStaticRelativeChildren(SceneGraph sceneGraph, DoorOpeningMechanism openingMechanism)
+   //   {
+   //      // Recalculate name each time in case the parent name changes
+   //      String graspStaticRelativeSceneNodeName = getName() + "_" + openingMechanism.getColloquialName() + "Grasp";
+   //
+   //      StaticRelativeSceneNode graspStaticRelativeSceneNode = null;
+   //
+   //      for (SceneNode child : getChildren())
+   //      {
+   //         if (child instanceof StaticRelativeSceneNode staticRelativeSceneNode)
+   //         {
+   //            // TODO: Delete any old static relative children that aren't the correct name?
+   //            if (child.getName().equals(graspStaticRelativeSceneNodeName))
+   //            {
+   //               graspStaticRelativeSceneNode = staticRelativeSceneNode;
+   //            }
+   //         }
+   //      }
+   //
+   //      if (graspStaticRelativeSceneNode == null)
+   //      {
+   //         graspStaticRelativeSceneNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
+   //                                                                    graspStaticRelativeSceneNodeName,
+   //                                                                    sceneGraph.getIDToNodeMap(),
+   //                                                                    getID(),
+   //                                                                    new RigidBodyTransform(),
+   //                                                                    openingMechanism.getVisualModelPath(),
+   //                                                                    openingMechanism.getVisualModelTransform(),
+   //                                                                    // TODO: DOORNODES
+   //                                                                    DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN,
+   //                                                                    getCRDTInfo());
+   //         StaticRelativeSceneNode finalGraspStaticRelativeSceneNode = graspStaticRelativeSceneNode;
+   //         sceneGraph.modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(finalGraspStaticRelativeSceneNode, this)));
+   //      }
+   //   }
    public Pose3D getDoorFramePose()
    {
       return doorFramePose;
@@ -162,6 +167,28 @@ public class DoorNode extends DetectableSceneNode
    public Set<DoorOpeningMechanism> getOpeningMechanisms()
    {
       return openingMechanisms;
+   }
+
+   public DoorOpeningMechanism getLatestUpdatedOpeningMechanism()
+   {
+      DoorOpeningMechanism candidate = null;
+
+      for (DoorOpeningMechanism openingMechanism : openingMechanisms)
+      {
+         if (candidate == null)
+         {
+            candidate = openingMechanism;
+         }
+         else
+         {
+            if (openingMechanism.getLastDetection().getDetectionTime().getEpochSecond() > candidate.getLastDetection().getDetectionTime().getEpochSecond())
+            {
+               candidate = openingMechanism;
+            }
+         }
+      }
+
+      return candidate;
    }
 
    public Set<DoorOpeningMechanism> getOpeningMechanisms(DoorSide doorSide)

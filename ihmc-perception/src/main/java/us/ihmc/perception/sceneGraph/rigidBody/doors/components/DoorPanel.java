@@ -32,6 +32,11 @@ public class DoorPanel
       this.planarRegion.set(planarRegion);
    }
 
+   public long getPlanarRegionLastUpdateTimeMillis()
+   {
+      return planarRegionLastUpdateTimeMillis;
+   }
+
    public void setPlanarRegionLastUpdateTimeMillis(long planarRegionLastUpdateTimeMillis)
    {
       this.planarRegionLastUpdateTimeMillis = planarRegionLastUpdateTimeMillis;
@@ -57,6 +62,11 @@ public class DoorPanel
          setPlanarRegion(new PlanarRegion());
       }
 
+      DoorOpeningMechanism doorOpeningMechanism = doorNode.getLatestUpdatedOpeningMechanism();
+      if (doorOpeningMechanism == null)
+         return; // Early return
+      Point3D doorPointInWorld = new Point3D(doorOpeningMechanism.getGraspPose().getTranslation());
+
       if (!planarRegionsList.isEmpty())
       {
          float epsilon = 0.75f;
@@ -70,10 +80,12 @@ public class DoorPanel
          for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
          {
             Point3DReadOnly planarRegionCentroidInWorld = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
-            // TODO: DOORNODES is this correct?
-            Point3D doorPointInWorld = new Point3D(doorNode.getNodeFrame().getTransformToWorldFrame().getTranslation());
+            double distance = planarRegionCentroidInWorld.distance(doorPointInWorld);
 
-            if (planarRegionCentroidInWorld.distance(doorPointInWorld) > epsilon)
+            System.out.println(doorPointInWorld);
+            System.out.println(distance);
+
+            if (distance > epsilon)
                continue;
 
             // If the planar region is less than 1/5th the area of a door

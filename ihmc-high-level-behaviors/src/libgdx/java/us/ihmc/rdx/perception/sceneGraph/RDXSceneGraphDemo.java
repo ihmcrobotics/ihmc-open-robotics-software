@@ -1,28 +1,46 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
+import org.bytedeco.opencl.global.OpenCL;
 import org.jetbrains.annotations.Nullable;
 import us.ihmc.commons.RunnableThatThrows;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.RawImage;
+import us.ihmc.perception.comms.PerceptionComms;
 import us.ihmc.perception.detections.DetectionManager;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionExecutor;
+import us.ihmc.perception.opencl.OpenCLManager;
+import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
+import us.ihmc.perception.rapidRegions.RapidRegionsExtractorParameters;
+import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
+import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.perception.RDXZEDSVORecorderPanel;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
+import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySet;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
+<<<<<<< Updated upstream
 import us.ihmc.rdx.ui.graphics.ros2.RDXDetectionManagerSettings;
+=======
+import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
+>>>>>>> Stashed changes
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXYOLOv8Settings;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
+import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -45,9 +63,7 @@ public class RDXSceneGraphDemo
 
    private static final SensorMode SENSOR_MODE = SensorMode.ZED_SVO_RECORDING;
    // Drive folder with recordings https://drive.google.com/drive/u/0/folders/17TIgXgNPslUyzBFWy6Waev11fx__3w9D
-   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("HD720_SN24797524_12-15-11.svo2")
-                                                                                        .toAbsolutePath()
-                                                                                        .toString();
+   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("HD720_SN24797524_12-15-11.svo2").toAbsolutePath().toString();
    private static final PubSubImplementation PUB_SUB_IMPLEMENTATION = PubSubImplementation.FAST_RTPS;
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
@@ -56,13 +72,24 @@ public class RDXSceneGraphDemo
    private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
    private RDXYOLOv8Settings yoloSettingsVisualizer;
    private RDXROS2ImageMessageVisualizer yoloAnnotatedImageVisualizer;
+<<<<<<< Updated upstream
    private RDXDetectionManagerSettings detectionManagerSettings;
    private DetectionManager detectionManager;
+=======
+   private RDXROS2FramePlanarRegionsVisualizer planarRegionsVisualizer;
+   private DetectionManager detectionManager = new DetectionManager();
+>>>>>>> Stashed changes
    private YOLOv8DetectionExecutor yolov8DetectionExecutor;
    private ROS2SceneGraph onRobotSceneGraph;
    private RDXSceneGraphUI sceneGraphUI;
 
    private RestartableThrottledThread perceptionUpdateThread;
+
+   // Planar regions stuff
+   private RapidPlanarRegionsExtractor planarRegionsExtractor;
+   private ROS2StoredPropertySet<RapidRegionsExtractorParameters> planarRegionsExtractorParameterSync;
+   private final TypedNotification<PlanarRegionsList> newPlanarRegions = new TypedNotification<>();
+   private final OpenCLManager planarRegionsOpenCLManager = new OpenCLManager();
 
    // Simulated sensor related things
    @Nullable
@@ -120,6 +147,12 @@ public class RDXSceneGraphDemo
             baseUI.getPrimaryScene().addRenderableProvider(sceneGraphUI::getRenderables);
             baseUI.getImGuiPanelManager().addPanel(sceneGraphUI.getPanel());
 
+            // Add rapid region parameters panel
+            ImGuiRemoteROS2StoredPropertySet rapidRegionsParameterPanel = new ImGuiRemoteROS2StoredPropertySet(ros2Helper,
+                                                                                                               new RapidRegionsExtractorParameters(),
+                                                                                                               PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS);
+            baseUI.getImGuiPanelManager().addPanel(rapidRegionsParameterPanel.createPanel());
+
             perceptionUpdateThread = new RestartableThrottledThread("PerceptionUpdateThread", 30.0, new RunnableThatThrows()
             {
                // Main perception thread loop
@@ -139,9 +172,48 @@ public class RDXSceneGraphDemo
                      sensorFrame.update(transform -> transform.set(zedColorDepthImageRetrieverSVO.getLatestSensorPose()));
                   }
 
+                  updatePlanarRegions();
                   runYOLO();
-
                   updateSceneGraph();
+               }
+
+               private void updatePlanarRegions()
+               {
+                  if (planarRegionsExtractor == null)
+                  {
+                     int imageHeight = zedDepthImage.getImageHeight();
+                     int imageWidth = zedDepthImage.getImageWidth();
+                     double fx = zedDepthImage.getFocalLengthX();
+                     double fy = zedDepthImage.getFocalLengthY();
+                     double cx = zedDepthImage.getPrincipalPointX();
+                     double cy = zedDepthImage.getPrincipalPointY();
+                     planarRegionsExtractor = new RapidPlanarRegionsExtractor(planarRegionsOpenCLManager, imageHeight, imageWidth, fx, fy, cx, cy);
+                     planarRegionsExtractor.getDebugger().setEnabled(false);
+
+                     planarRegionsExtractorParameterSync = new ROS2StoredPropertySet<>(ros2Helper,
+                                                                                       PerceptionComms.PERSPECTIVE_RAPID_REGION_PARAMETERS,
+                                                                                       planarRegionsExtractor.getParameters());
+                  }
+
+                  planarRegionsExtractorParameterSync.updateAndPublishThrottledStatus();
+
+                  FramePlanarRegionsList framePlanarRegionsList = new FramePlanarRegionsList();
+
+                  // TODO: Get rid of BytedecoImage, RapidPlanarRegionsExtractor requires it
+                  BytedecoImage bytedecoImage = new BytedecoImage(zedDepthImage.getCpuImageMat().clone());
+                  bytedecoImage.createOpenCLImage(planarRegionsOpenCLManager, OpenCL.CL_MEM_READ_WRITE);
+                  planarRegionsExtractor.update(bytedecoImage, sensorFrame.getReferenceFrame(), framePlanarRegionsList);
+                  planarRegionsExtractor.setProcessing(false);
+                  bytedecoImage.destroy(planarRegionsOpenCLManager);
+
+                  PlanarRegionsList planarRegionsInWorldFrame = framePlanarRegionsList.getPlanarRegionsList().copy();
+                  planarRegionsInWorldFrame.applyTransform(sensorFrame.getReferenceFrame().getTransformToWorldFrame());
+
+                  newPlanarRegions.set(planarRegionsInWorldFrame);
+
+                  PerceptionMessageTools.publishFramePlanarRegionsList(framePlanarRegionsList, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS, ros2Helper);
+
+                  zedDepthImage.release();
                }
 
                private void runYOLO()
@@ -172,6 +244,12 @@ public class RDXSceneGraphDemo
                   // TODO: finish
                   onRobotSceneGraph.updateSubscription();
                   onRobotSceneGraph.updateDetections(detectionManager);
+
+                  if (newPlanarRegions.poll())
+                     for (SceneNode sceneNode : onRobotSceneGraph.getSceneNodesByID())
+                        if (sceneNode instanceof DoorNode doorNode)
+                           doorNode.getDoorPanel().filterAndSetPlanarRegionFromPlanarRegionsList(newPlanarRegions.read());
+
                   onRobotSceneGraph.updateOnRobotOnly(ReferenceFrame.getWorldFrame());
                   onRobotSceneGraph.updatePublication();
                }
@@ -225,11 +303,13 @@ public class RDXSceneGraphDemo
          zedColorDepthImageRetrieverSVO.destroy();
       if (zedColorDepthImagePublisher != null)
          zedColorDepthImagePublisher.destroy();
+
+      planarRegionsOpenCLManager.destroy();
    }
 
    private void setupSimulatedSensor()
    {
-      sensorPoseGizmo = new RDXPose3DGizmo("SimulatedSensor");
+      sensorPoseGizmo = new RDXPose3DGizmo("SimulatedSensorGizmo");
       sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
       sensorPoseGizmo.setResizeAutomatically(true);
       sensorPoseGizmo.getTransformToParent().getTranslation().setZ(0.7);
@@ -245,7 +325,7 @@ public class RDXSceneGraphDemo
 
    private void setupZEDSVOSensor()
    {
-      sensorPoseGizmo = new RDXPose3DGizmo("SimulatedSensor");
+      sensorPoseGizmo = new RDXPose3DGizmo("SVOZEDSensorGizmo");
       sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
       sensorPoseGizmo.setResizeAutomatically(true);
       sensorPoseGizmo.setGizmoFrame(sensorFrame.getReferenceFrame());
@@ -321,6 +401,14 @@ public class RDXSceneGraphDemo
          yoloAnnotatedImageVisualizer = new RDXROS2ImageMessageVisualizer("YOLOv8 Annotated Image", PUB_SUB_IMPLEMENTATION, PerceptionAPI.YOLO_ANNOTATED_IMAGE);
          yoloAnnotatedImageVisualizer.setActive(true);
          perceptionVisualizerPanel.addVisualizer(yoloAnnotatedImageVisualizer);
+      }
+
+      // Create planar regions viz
+      {
+         planarRegionsVisualizer = new RDXROS2FramePlanarRegionsVisualizer("Planar Regions", ros2Node, PerceptionAPI.PERSPECTIVE_RAPID_REGIONS);
+         planarRegionsVisualizer.createRequestHeartbeat(ros2Node, PerceptionAPI.REQUEST_PLANAR_REGIONS);
+         planarRegionsVisualizer.setActive(false);
+         perceptionVisualizerPanel.addVisualizer(planarRegionsVisualizer);
       }
 
       // Create ArUcoMarker pose viz
