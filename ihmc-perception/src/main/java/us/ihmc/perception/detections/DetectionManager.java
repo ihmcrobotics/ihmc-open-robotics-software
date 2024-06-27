@@ -1,6 +1,7 @@
 package us.ihmc.perception.detections;
 
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.robotics.time.TimeTools;
 
@@ -22,24 +23,14 @@ public class DetectionManager
    private final Set<PersistentDetection> newlyValidDetections = new HashSet<>();
    private final Object persistentDetectionsLock = new Object();
 
-   private double maxMatchDistanceSquared = 1.0;
-   private double acceptanceAverageConfidence = 0.6;
-   private double stabilityAverageConfidence = 0.4;
-   private double stabilityDetectionFrequency = 5.0;
-   private double detectionHistoryDuration = 1.0;
+   private final DetectionManagerSettings settings = new DetectionManagerSettings();
+   private final ROS2StoredPropertySet<DetectionManagerSettings> settingsSync;
 
    public DetectionManager(ROS2PublishSubscribeAPI ros2)
    {
       if (ros2 != null)
       {
-         ros2.subscribeViaCallback(PerceptionAPI.DETECTION_MANAGER_SETTINGS, settingsMessage ->
-         {
-            setMatchDistanceThreshold(settingsMessage.getMatchDistanceThreshold());
-            setAcceptanceAverageConfidence(settingsMessage.getAcceptanceAverageConfidence());
-            setStabilityAverageConfidence(settingsMessage.getStabilityAverageConfidence());
-            setStabilityDetectionFrequency(settingsMessage.getStabilityFrequency());
-            setDetectionHistoryDuration(settingsMessage.getDetectionHistoryDuration());
-         });
+         settingsSync = new ROS2StoredPropertySet<>(ros2, PerceptionAPI.DETECTION_MANAGER_SETTINGS, settings);
       }
    }
 
@@ -193,7 +184,7 @@ public class DetectionManager
 
    public void setMatchDistanceThreshold(double matchDistance)
    {
-      maxMatchDistanceSquared = matchDistance * matchDistance;
+      settings.set(DetectionManagerSettings.maxMatchDistanceSquared, matchDistance * matchDistance);
    }
 
    public void setAcceptanceAverageConfidence(double acceptanceAverageConfidence)
