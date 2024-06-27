@@ -42,10 +42,10 @@ public class MonteCarloFootstepPlanner
    private final HashMap<MonteCarloFootstepNode, MonteCarloFootstepNode> visitedNodes = new HashMap<>();
    private final Random random = new Random();
 
-   private SideDependentList<ConvexPolygon2D> footPolygons;
-   private MonteCarloFootstepPlannerParameters parameters;
+   private final SideDependentList<ConvexPolygon2D> footPolygons;
+   private final MonteCarloFootstepPlannerParameters parameters;
    private MonteCarloFootstepPlannerRequest request;
-   private TerrainPlanningDebugger debugger;
+   private final TerrainPlanningDebugger debugger;
    private MonteCarloFootstepNode root;
 
    private boolean planning = false;
