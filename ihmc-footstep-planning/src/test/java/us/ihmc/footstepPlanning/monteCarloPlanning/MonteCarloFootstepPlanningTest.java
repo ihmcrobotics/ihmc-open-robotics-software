@@ -25,8 +25,8 @@ public class MonteCarloFootstepPlanningTest
 
    private OpenCLManager openCLManager = new OpenCLManager();
    private MonteCarloFootstepPlannerParameters plannerParameters = new MonteCarloFootstepPlannerParameters();
-   private TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(null, plannerParameters);
-   private MonteCarloFootstepPlanner planner = new MonteCarloFootstepPlanner(plannerParameters, PlannerTools.createFootPolygons(0.2, 0.1, 0.08), debugger);
+//   private TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(null, plannerParameters);
+   private MonteCarloFootstepPlanner planner = new MonteCarloFootstepPlanner(plannerParameters, PlannerTools.createFootPolygons(0.2, 0.1, 0.08));
    private CameraIntrinsics cameraIntrinsics = new CameraIntrinsics();
    private RapidHeightMapExtractor heightMapExtractor = new RapidHeightMapExtractor(openCLManager);
 
@@ -74,12 +74,12 @@ public class MonteCarloFootstepPlanningTest
                                   planner.getVisitedNodes().size(),
                                   MonteCarloPlannerTools.getLayerCountsString(planner.getRoot())));
 
-      if (displayPlots)
-      {
-         debugger.refresh(terrainMapData);
-         debugger.plotMonteCarloFootstepPlan(plan);
-         debugger.display(0);
-      }
+//      if (displayPlots)
+//      {
+//         debugger.refresh(terrainMapData);
+//         debugger.plotMonteCarloFootstepPlan(plan);
+//         debugger.display(0);
+//      }
 
       Assertions.assertEquals(0.0, 0.0 - 0.0001, 1e-3);
    }

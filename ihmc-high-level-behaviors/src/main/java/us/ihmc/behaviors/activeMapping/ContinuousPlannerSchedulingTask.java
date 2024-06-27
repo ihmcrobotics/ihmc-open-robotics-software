@@ -6,7 +6,6 @@ import us.ihmc.behaviors.activeMapping.ContinuousHikingStateMachine.*;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
-import us.ihmc.footstepPlanning.monteCarloPlanning.TerrainPlanningDebugger;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -28,6 +27,14 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ContinuousPlannerSchedulingTask
 {
+
+   public enum PlanningMode
+   {
+      FAST_HIKING, WALK_TO_GOAL
+   }
+
+   private  PlanningMode planningMode;
+
    /**
     * This is the delay between each tick of the state machine. Set based on perception update rate.
     */
@@ -53,9 +60,16 @@ public class ContinuousPlannerSchedulingTask
       ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.CONTINUOUS_WALKING_COMMAND, commandMessage::set);
 
       MonteCarloFootstepPlannerParameters monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
-      TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, monteCarloPlannerParameters);
+      // The default mode for when things start up
+      planningMode = PlanningMode.FAST_HIKING;
+      TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, monteCarloPlannerParameters, planningMode);
       ContinuousPlannerStatistics statistics = new ContinuousPlannerStatistics();
-      continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, continuousHikingParameters, monteCarloPlannerParameters, debugger, statistics);
+      continuousPlanner = new ContinuousPlanner(robotModel,
+                                                referenceFrames,
+                                                continuousHikingParameters,
+                                                monteCarloPlannerParameters,
+                                                debugger,
+                                                statistics);
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -69,15 +83,16 @@ public class ContinuousPlannerSchedulingTask
                                                                                                          statistics);
 
       // Create the different states
-      State notStartedState = new DoNothingState(ros2Helper, simpleRobotName, referenceFrames, continuousPlanner);
+      State notStartedState = new DoNothingState(ros2Helper, simpleRobotName, referenceFrames, continuousPlanner, debugger);
       State readyToPlanState = new ReadyToPlanState(ros2Helper,
                                                     referenceFrames,
                                                     commandMessage,
                                                     continuousPlanner,
                                                     controllerFootstepQueueMonitor,
                                                     continuousHikingParameters,
-                                                    terrainMap, debugger,
-                                                    statistics);
+                                                    terrainMap,
+                                                    debugger,
+                                                    statistics, planningMode);
       State waitingtoLandState = new WaitingToLandState(ros2Helper,
                                                         simpleRobotName,
                                                         continuousPlanner,
@@ -113,6 +128,7 @@ public class ContinuousPlannerSchedulingTask
 
       stateMachine = stateMachineFactory.build(ContinuousHikingState.DO_NOTHING);
       stateMachineFactory.addStateChangedListener((from, to) -> LogTools.warn("STATE CHANGED: ( " + from + " -> " + to + " )"));
+      stateMachineFactory.addStateChangedListener((from, to) -> planningMode = debugger.getPlanningMode());
 
       executorService.scheduleWithFixedDelay(this::tickStateMachine, 1500, CONTINUOUS_PLANNING_DELAY_MS, TimeUnit.MILLISECONDS);
    }

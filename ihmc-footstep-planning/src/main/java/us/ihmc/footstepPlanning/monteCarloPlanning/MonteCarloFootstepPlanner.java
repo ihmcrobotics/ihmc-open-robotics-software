@@ -45,7 +45,6 @@ public class MonteCarloFootstepPlanner
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final MonteCarloFootstepPlannerParameters parameters;
    private MonteCarloFootstepPlannerRequest request;
-   private final TerrainPlanningDebugger debugger;
    private MonteCarloFootstepNode root;
 
    private boolean planning = false;
@@ -55,12 +54,10 @@ public class MonteCarloFootstepPlanner
    private int uniqueNodeId = 0;
 
    public MonteCarloFootstepPlanner(MonteCarloFootstepPlannerParameters parameters,
-                                    SideDependentList<ConvexPolygon2D> footPolygons,
-                                    TerrainPlanningDebugger debugger)
+                                    SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.parameters = parameters;
       this.footPolygons = footPolygons;
-      this.debugger = debugger;
    }
 
    /**
@@ -76,8 +73,6 @@ public class MonteCarloFootstepPlanner
       planning = true;
 
       // Debug Only
-      debugger.setRequest(request);
-      debugger.refresh(request.getTerrainMapData());
       statistics.startTotalTime();
 
       // Initialize Root
@@ -101,7 +96,6 @@ public class MonteCarloFootstepPlanner
       FootstepPlan plan = MonteCarloPlannerTools.getFootstepPlanFromTree(root, request, parameters, footPolygons);
 
       // Debug Only
-      debugger.printScoreStats(root, request, parameters);
       statistics.stopTotalTime();
       statistics.setLayerCountsString(MonteCarloPlannerTools.getLayerCountsString(root));
       statistics.logToFile(true, true);

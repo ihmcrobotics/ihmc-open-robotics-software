@@ -53,7 +53,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private static final int maxIterationsOptimization = 100;
    private final ROS2PublisherBasics<ContinuousWalkingCommandMessage> commandPublisher;
    private final ContinuousWalkingCommandMessage commandMessage = new ContinuousWalkingCommandMessage();
-   private final SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+   private SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
    private final RDXStancePoseSelectionPanel stancePoseSelectionPanel;
    private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator(numberOfKnotPoints,
                                                                                                                              maxIterationsOptimization);
@@ -63,6 +63,9 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final SwingTrajectoryParameters swingTrajectoryParameters;
    private final ContinuousHikingParameters continuousHikingParameters;
    private final RDXStoredPropertySetTuner continuousHikingParametersTuner = new RDXStoredPropertySetTuner("Continuous Hiking Parameters (Active Mapping)");
+
+   private FootstepPlan latestFootstepPlan;
+   private List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories;
 
    private final ImBoolean localRenderMode = new ImBoolean(false);
    private final ImBoolean useMonteCarloReference = new ImBoolean(false);
@@ -116,6 +119,11 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
 
    public void update(TerrainMapData terrainMapData, HeightMapData heightMapData)
    {
+      if (latestFootstepPlan != null)
+      {
+         terrainPlanningDebugger.generateSwingGraphics(latestFootstepPlan, swingTrajectories);
+      }
+      latestFootstepPlan = null;
       terrainPlanningDebugger.update(terrainMapData);
       stancePoseSelectionPanel.update(terrainMapData, heightMapData);
    }
@@ -155,27 +163,52 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    public void onStartAndGoalPosesReceived(PoseListMessage poseListMessage)
    {
       SideDependentList<FramePose3D> goalStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
-      List<Pose3D> poses = MessageTools.unpackPoseListMessage(poseListMessage);
-      startStancePose.get(RobotSide.LEFT).set(poses.get(0));
-      startStancePose.get(RobotSide.RIGHT).set(poses.get(1));
-      goalStancePose.get(RobotSide.LEFT).set(poses.get(2));
-      goalStancePose.get(RobotSide.RIGHT).set(poses.get(3));
+      SideDependentList<FramePose3D> startStancePose = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+
+      if (!poseListMessage.getPoses().isEmpty())
+      {
+         List<Pose3D> poses = MessageTools.unpackPoseListMessage(poseListMessage);
+         startStancePose.get(RobotSide.LEFT).set(poses.get(0));
+         startStancePose.get(RobotSide.RIGHT).set(poses.get(1));
+         goalStancePose.get(RobotSide.LEFT).set(poses.get(2));
+         goalStancePose.get(RobotSide.RIGHT).set(poses.get(3));
+      }
 
       // Visualize the start and goal poses on the UI
       terrainPlanningDebugger.generateStartAndGoalFootstepGraphics(startStancePose, goalStancePose);
+
+      this.startStancePose = startStancePose;
    }
+
+   //TOD
+   //   we allow for null
+   //   so need
+   //   to chec
+   //   kthat,
+   //   its a
+   //   ay of
+   //   resetting the
+   //   visuals on
+   //   te UI
+   //   side
 
    public void onPlannedFootstepsReceived(FootstepDataListMessage footstepDataListMessage)
    {
-      LogTools.debug("Received footstep plan: {}", footstepDataListMessage.getFootstepDataList().size());
+      FootstepPlan footstepPLan = new FootstepPlan();
+      List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = new ArrayList<>();
 
-      FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage);
-      List<EnumMap<Axis3D, List<PolynomialReadOnly>>> swingTrajectories = SwingPlannerTools.computeTrajectories(swingTrajectoryParameters,
-                                                                                                                positionTrajectoryGenerator,
-                                                                                                                startStancePose,
-                                                                                                                plan);
+      if (!footstepDataListMessage.getFootstepDataList().isEmpty())
+      {
+         LogTools.info("Received footstep plan: {}", footstepDataListMessage.getFootstepDataList().size());
+
+         footstepPLan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage);
+         swingTrajectories = SwingPlannerTools.computeTrajectories(swingTrajectoryParameters, positionTrajectoryGenerator, startStancePose, footstepPLan);
+      }
+
       terrainPlanningDebugger.generateFootstepPlanGraphic(footstepDataListMessage);
-      terrainPlanningDebugger.generateSwingGraphics(plan, swingTrajectories);
+
+      this.latestFootstepPlan = footstepPLan;
+      this.swingTrajectories = swingTrajectories;
    }
 
    public void onMonteCarloPlanReceived(FootstepDataListMessage message)
@@ -203,7 +236,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
       }
 
       // Only allow Continuous Walking if the CTRL key is held and the checkbox is checked
-      if (continuousHikingParameters != null && continuousHikingParameters.getEnableContinuousWalking())
+      if (continuousHikingParameters != null && continuousHikingParameters.getEnableContinuousHiking())
       {
          commandMessage.setEnableContinuousWalking(walkingEnabled);
          commandMessage.setPublishToController(ImGui.getIO().getKeyAlt());

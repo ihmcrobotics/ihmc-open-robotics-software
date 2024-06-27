@@ -19,17 +19,6 @@ import java.util.Random;
 
 public class ContinuousPlannerTools
 {
-   public static RobotSide getCloserSideToGoal(SideDependentList<FramePose3D> startingStancePose, SideDependentList<FramePose3D> goalStancePose)
-   {
-      double leftDistance = startingStancePose.get(RobotSide.LEFT).getPosition().distance(goalStancePose.get(RobotSide.LEFT).getPosition());
-      double rightDistance = startingStancePose.get(RobotSide.RIGHT).getPosition().distance(goalStancePose.get(RobotSide.RIGHT).getPosition());
-
-      if (leftDistance < rightDistance + 0.01)
-         return RobotSide.LEFT;
-      else
-         return RobotSide.RIGHT;
-   }
-
    public static double getDistanceFromRobotToGoalPoseOnXYPlane(Point3DReadOnly robotPositionInWorld, SideDependentList<FramePose3D> goalPoses)
    {
       FramePose3D leftGoalPose = goalPoses.get(RobotSide.LEFT);
