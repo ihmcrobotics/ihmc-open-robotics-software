@@ -43,7 +43,7 @@ public class RDXSceneGraphDemo
 
    private static final SensorMode SENSOR_MODE = SensorMode.ZED_SVO_RECORDING;
    // Drive folder with recordings https://drive.google.com/drive/u/0/folders/17TIgXgNPslUyzBFWy6Waev11fx__3w9D
-   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240626_145046_ZEDRecording_WalkONRCourse.svo2")
+   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240626_161110_ZEDRecording_RobotWalkONRCoursePart1.svo")
                                                                                         .toAbsolutePath()
                                                                                         .toString();
    private static final PubSubImplementation PUB_SUB_IMPLEMENTATION = PubSubImplementation.FAST_RTPS;
@@ -209,14 +209,14 @@ public class RDXSceneGraphDemo
 
    private void destroy()
    {
+      perceptionUpdateThread.stop();
+
       yolov8DetectionExecutor.destroy();
 
       if (zedColorDepthImageRetrieverSVO != null)
          zedColorDepthImageRetrieverSVO.destroy();
       if (zedColorDepthImagePublisher != null)
          zedColorDepthImagePublisher.destroy();
-
-      perceptionUpdateThread.stop();
    }
 
    private void setupSimulatedSensor()
