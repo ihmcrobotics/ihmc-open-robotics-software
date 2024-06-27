@@ -8,6 +8,7 @@ import us.ihmc.scs2.simulation.SimulationSession;
 import java.util.ArrayList;
 import java.util.function.Supplier;
 
+/** TODO: Thinking this can get incorporated at a lower level. */
 public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSession
 {
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
