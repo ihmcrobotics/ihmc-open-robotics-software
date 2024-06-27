@@ -53,7 +53,12 @@ public class ImGuiScrollableLogArea
    {
       ImGui.pushStyleColor(ImGuiCol.ChildBg, ImGui.getColorU32(ImGuiCol.FrameBg));
       ImGui.beginChild(labels.getHidden("logChild"), 0.0f, childHeight);
-      ImGui.pushFont(ImGuiTools.getConsoleFont());
+      boolean pushedFont = false;
+      if (ImGuiTools.getConsoleFont().isLoaded()) // FIXME: We are just doing this because sometimes the font doesn't load.
+      {
+         ImGui.pushFont(ImGuiTools.getConsoleFont());
+         pushedFont = true;
+      }
 
       if (entryLimit > 0)
          while (logEntries.size() > entryLimit)
@@ -93,7 +98,8 @@ public class ImGuiScrollableLogArea
       if (wouldScrollToEnd.poll() && scrollToEnd.get())
          ImGui.setScrollHereY();
 
-      ImGui.popFont();
+      if (pushedFont)
+         ImGui.popFont();
       ImGui.endChild();
       ImGui.popStyleColor();
 

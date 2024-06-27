@@ -5,9 +5,7 @@ import ihmc_common_msgs.msg.dds.StoredPropertySetMessagePubSubType;
 import org.apache.commons.lang3.tuple.Pair;
 import toolbox_msgs.msg.dds.*;
 import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -37,16 +35,17 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableType;
 
 import java.io.*;
-import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Stream;
 
 public class FootstepPlannerLogger
 {
+   private static final SimpleDateFormat directoryDateFormat = new SimpleDateFormat("yyyyMMdd");
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
    private static final int RECOMMENDED_NUMBER_OF_LOGS_TO_KEEP = 500;
    public static final String defaultLogsDirectory;
@@ -102,6 +101,70 @@ public class FootstepPlannerLogger
       this.planner = planner;
    }
 
+   /** Keeps around the recommended number of logs. */
+   public static void deleteOldLogs()
+   {
+      deleteOldLogs(RECOMMENDED_NUMBER_OF_LOGS_TO_KEEP, defaultLogsDirectory);
+   }
+
+   /** It's recommended to leave quite a few logs around, otherwise, we diminish the usefulness of the logging. */
+   public static void deleteOldLogs(int numberOflogsToKeep, String directory)
+   {
+      SortedSet<Path> sortedLogFolderPaths = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
+      SortedSet<Path> otherDirectoriesInLogsFolder = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
+
+      try (Stream<Path> paths = Files.walk(Path.of(directory)))
+      {
+         paths.filter(Files::isDirectory).forEach(dir ->
+                                                  {
+                                                     if (dir.getFileName().toString().endsWith(FootstepPlannerLogger.FOOTSTEP_PLANNER_LOG_POSTFIX))
+                                                     {
+                                                        sortedLogFolderPaths.add(dir);
+                                                     }
+                                                     else
+                                                     {
+                                                        otherDirectoriesInLogsFolder.add(dir);
+                                                     }
+                                                  });
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+
+      while (sortedLogFolderPaths.size() > numberOflogsToKeep)
+      {
+         Path earliestLogDirectory = sortedLogFolderPaths.first();
+         LogTools.warn("Deleting old log {}", earliestLogDirectory);
+         FileTools.deleteQuietly(earliestLogDirectory);
+         sortedLogFolderPaths.remove(earliestLogDirectory);
+      }
+
+      // Remove any empty directories inside the logs folder
+      for (Path path : otherDirectoriesInLogsFolder)
+      {
+         try
+         {
+            if (isDirectoryEmpty(path))
+            {
+               Files.delete(path);
+            }
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException(e);
+         }
+      }
+   }
+
+   private static boolean isDirectoryEmpty(Path dir) throws IOException
+   {
+      try (var dirStream = Files.list(dir))
+      {
+         return dirStream.findAny().isEmpty();
+      }
+   }
+
    public void logSessionAndReportToMessager(Messager messager)
    {
       if(generatingLog.get())
@@ -122,37 +185,6 @@ public class FootstepPlannerLogger
       return logSession(defaultLogsDirectory);
    }
 
-   /** Keeps around the recommended number of logs. */
-   public static void deleteOldLogs()
-   {
-      deleteOldLogs(RECOMMENDED_NUMBER_OF_LOGS_TO_KEEP, defaultLogsDirectory);
-   }
-
-   /** Keeps around the recommended number of logs. */
-   public static void deleteOldLogs(String directory)
-   {
-      deleteOldLogs(RECOMMENDED_NUMBER_OF_LOGS_TO_KEEP, directory);
-   }
-
-   /** It's recommended to leave quite a few logs around, otherwise, we diminish the usefulness of the logging. */
-   public static void deleteOldLogs(int numberOflogsToKeep, String directory)
-   {
-      SortedSet<Path> sortedSet = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
-      PathTools.walkFlat(Paths.get(directory), (path, type) -> {
-         if (type == BasicPathVisitor.PathType.DIRECTORY && path.getFileName().toString().endsWith(FOOTSTEP_PLANNER_LOG_POSTFIX))
-            sortedSet.add(path);
-         return FileVisitResult.CONTINUE;
-      });
-
-      while (sortedSet.size() > numberOflogsToKeep)
-      {
-         Path earliestLogDirectory = sortedSet.first();
-         LogTools.warn("Deleting old log {}", earliestLogDirectory);
-         FileTools.deleteQuietly(earliestLogDirectory);
-         sortedSet.remove(earliestLogDirectory);
-      }
-   }
-
    /**
     * Generates log in the given directory. For example calling with the input "/home/user/.ihmc/logs/" will create (if empty)
     * and populate that directy with log files.
@@ -164,7 +196,8 @@ public class FootstepPlannerLogger
     */
    public boolean logSession(String logDirectory)
    {
-      String sessionDirectory = generateALogFolderName(logDirectory);
+      String logDirectoryWithDate = logDirectory + directoryDateFormat.format(new Date());
+      String sessionDirectory = generateALogFolderName(logDirectoryWithDate);
       return logSessionWithExactFolderName(sessionDirectory);
    }
 
