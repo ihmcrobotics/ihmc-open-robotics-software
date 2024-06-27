@@ -63,6 +63,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
@@ -421,8 +422,8 @@ public class KinematicsToolboxController extends ToolboxController
     * This is not recommended when using this toolbox as an IK solver as it'll increase the number of iterations before converging.
     */
    private final YoBoolean minimizeLinearMomentumRate = new YoBoolean("minimizeLinearMomentumRate", registry);
-   private final YoDouble angularMomentumRateWeight = new YoDouble("angularMomentumRateWeight", registry);
-   private final YoDouble linearMomentumRateWeight = new YoDouble("linearMomentumRateWeight", registry);
+   private final YoVector3D angularMomentumRateWeight = new YoVector3D("angularMomentumRateWeight", registry);
+   private final YoVector3D linearMomentumRateWeight = new YoVector3D("linearMomentumRateWeight", registry);
    private final MomentumCommand momentumCommandForRateMinimization = new MomentumCommand();
 
    /**
@@ -890,7 +891,7 @@ public class KinematicsToolboxController extends ToolboxController
       if (!firstTick && (minimizeAngularMomentumRate.getValue() || minimizeLinearMomentumRate.getValue()))
       {
          // TODO Probably need to scale the weights based on the update DT.
-         momentumCommandForRateMinimization.setWeight(angularMomentumRateWeight.getValue(), linearMomentumRateWeight.getValue());
+         momentumCommandForRateMinimization.setWeights(angularMomentumRateWeight, linearMomentumRateWeight);
          if (!minimizeAngularMomentumRate.getValue())
             momentumCommandForRateMinimization.setSelectionMatrixForLinearControl();
          else if (!minimizeLinearMomentumRate.getValue())
@@ -1753,12 +1754,28 @@ public class KinematicsToolboxController extends ToolboxController
       setLinearMomentumRateWeight(linearWeight);
    }
 
+   public void setMomentumRateWeight(Tuple3DReadOnly angularWeight, Tuple3DReadOnly linearWeight)
+   {
+      setAngularMomentumRateWeight(angularWeight);
+      setLinearMomentumRateWeight(linearWeight);
+   }
+
    public void setAngularMomentumRateWeight(double weight)
+   {
+      angularMomentumRateWeight.set(weight, weight, weight);
+   }
+
+   public void setAngularMomentumRateWeight(Tuple3DReadOnly weight)
    {
       angularMomentumRateWeight.set(weight);
    }
 
    public void setLinearMomentumRateWeight(double weight)
+   {
+      linearMomentumRateWeight.set(weight, weight, weight);
+   }
+
+   public void setLinearMomentumRateWeight(Tuple3DReadOnly weight)
    {
       linearMomentumRateWeight.set(weight);
    }

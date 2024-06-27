@@ -5,6 +5,7 @@ import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.tools.UnitConversions;
 
 import java.util.Map;
@@ -165,11 +166,11 @@ public class KinematicsStreamingToolboxParameters
    /**
     * Weight used to minimize the rate of change of the angular momentum in the kinematics solution.
     */
-   private double angularMomentumRateWeight;
+   private Vector3D angularMomentumRateWeight;
    /**
     * Weight used to minimize the rate of change of the linear momentum in the kinematics solution.
     */
-   private double linearMomentumRateWeight;
+   private Vector3D linearMomentumRateWeight;
    /**
     * Duration used to smoothly initiate the streaming to the controller.
     */
@@ -219,10 +220,8 @@ public class KinematicsStreamingToolboxParameters
    private double inputFilterMaxLinearVelocity;
    private double inputFilterMaxAngularVelocity;
 
-
    private boolean useStreamingPublisher;
    private double publishingPeriod;
-
 
    private InputStateEstimatorType inputStateEstimatorType;
 
@@ -279,8 +278,8 @@ public class KinematicsStreamingToolboxParameters
 
       minimizeAngularMomentumRate = false;
       minimizeLinearMomentumRate = false;
-      angularMomentumRateWeight = 0.0;
-      linearMomentumRateWeight = 0.0;
+      angularMomentumRateWeight = new Vector3D();
+      linearMomentumRateWeight = new Vector3D();
 
       defaultStreamingBlendingDuration = 2.0;
 
@@ -464,12 +463,12 @@ public class KinematicsStreamingToolboxParameters
       return minimizeLinearMomentumRate;
    }
 
-   public double getAngularMomentumRateWeight()
+   public Vector3D getAngularMomentumRateWeight()
    {
       return angularMomentumRateWeight;
    }
 
-   public double getLinearMomentumRateWeight()
+   public Vector3D getLinearMomentumRateWeight()
    {
       return linearMomentumRateWeight;
    }
@@ -736,12 +735,22 @@ public class KinematicsStreamingToolboxParameters
 
    public void setAngularMomentumRateWeight(double angularMomentumRateWeight)
    {
-      this.angularMomentumRateWeight = angularMomentumRateWeight;
+      this.angularMomentumRateWeight = new Vector3D(angularMomentumRateWeight, angularMomentumRateWeight, angularMomentumRateWeight);
+   }
+
+   public void setAngularMomentumRateWeight(Tuple3DReadOnly angularMomentumRateWeight)
+   {
+      this.angularMomentumRateWeight = new Vector3D(angularMomentumRateWeight);
    }
 
    public void setLinearMomentumRateWeight(double linearMomentumRateWeight)
    {
-      this.linearMomentumRateWeight = linearMomentumRateWeight;
+      this.linearMomentumRateWeight = new Vector3D(linearMomentumRateWeight, linearMomentumRateWeight, linearMomentumRateWeight);
+   }
+
+   public void setLinearMomentumRateWeight(Tuple3DReadOnly linearMomentumRateWeight)
+   {
+      this.linearMomentumRateWeight = new Vector3D(linearMomentumRateWeight);
    }
 
    public void setDefaultStreamingBlendingDuration(double defaultStreamingBlendingDuration)

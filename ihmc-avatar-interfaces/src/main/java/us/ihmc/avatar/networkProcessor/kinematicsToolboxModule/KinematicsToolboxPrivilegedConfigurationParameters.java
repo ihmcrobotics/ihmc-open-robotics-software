@@ -4,5 +4,15 @@ import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigu
 
 public class KinematicsToolboxPrivilegedConfigurationParameters extends JointPrivilegedConfigurationParameters
 {
+   @Override
+   public double getNullspaceProjectionAlpha()
+   {
+      return 0.05;
+   }
 
+   @Override
+   public double getDefaultWeight()
+   {
+      return 2.0;
+   }
 }

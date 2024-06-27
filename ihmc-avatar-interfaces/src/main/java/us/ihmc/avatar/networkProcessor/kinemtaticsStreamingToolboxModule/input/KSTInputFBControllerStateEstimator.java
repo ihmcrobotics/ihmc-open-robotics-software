@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
@@ -41,6 +42,8 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
 
    private final YoDouble correctionDuration = new YoDouble("correctionDuration", registry);
    private final YoDouble rawVelocityAlpha = new YoDouble("rawVelocityAlpha", registry);
+   private final YoDouble maxDeltaLinearVelocity = new YoDouble("maxDeltaLinearVelocity", registry);
+   private final YoDouble maxDeltaAngularVelocity = new YoDouble("maxDeltaAngularVelocity", registry);
    private final double updateDT;
    /**
     * Period at which the input is updated. This is used to clamp the correction of the estimated pose. Should preferably be filtered.
@@ -67,6 +70,9 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
 
       correctionDuration.set(parameters.getInputPoseCorrectionDuration());
       rawVelocityAlpha.set(parameters.getInputVelocityRawAlpha());
+      maxDeltaLinearVelocity.set(2.0);
+      maxDeltaAngularVelocity.set(2.0);
+
       inputVelocityDecayDuration.set(parameters.getInputVelocityDecayDuration());
 
       parentRegistry.addChild(registry);
@@ -174,6 +180,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
       private final YoLong lastInputTimestamp;
       private final YoFramePose3D rawInputPose;
       private final YoFixedFrameSpatialVector rawInputVelocity;
+      private final YoFixedFrameSpatialVector clampedInputVelocity;
       private final YoFixedFrameSpatialVector debugInputVelocity;
       private final YoDouble nextTimeTriggerForDecay;
       private final YoDouble inputVelocityDecayFactor;
@@ -199,10 +206,15 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
                                           new YoFrameQuaternion(namePrefix + "RawInputOrientation", worldFrame, registry));
          rawInputVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "RawInputAngularVelocity", worldFrame, registry),
                                                           new YoFrameVector3D(namePrefix + "RawInputLinearVelocity", worldFrame, registry));
+         clampedInputVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "ClampedInputAngularVelocity", worldFrame, registry),
+                                                              new YoFrameVector3D(namePrefix + "ClampedInputLinearVelocity", worldFrame, registry));
 
          nextTimeTriggerForDecay = new YoDouble(namePrefix + "NextTimeTriggerForDecay", registry);
          inputVelocityDecayFactor = new YoDouble(namePrefix + "InputVelocityDecayFactor", registry);
       }
+
+      private final Vector3D rawLinearDeltaVelocity = new Vector3D();
+      private final Vector3D rawAngularDeltaVelocity = new Vector3D();
 
       public void reset()
       {
@@ -217,6 +229,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
          rawInputVelocity.setToZero();
          nextTimeTriggerForDecay.set(0.0);
          inputVelocityDecayFactor.set(0.0);
+         clampedInputVelocity.setToZero();
       }
 
       private final Quaternion tempError = new Quaternion();
@@ -276,13 +289,26 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
             }
 
             if (rawInputVelocity.containsNaN())
+            {
                rawInputVelocity.setToZero();
+               clampedInputVelocity.setToZero();
+            }
+            else
+            {
+               rawLinearDeltaVelocity.sub(rawInputVelocity.getLinearPart(), clampedInputVelocity.getLinearPart());
+               rawAngularDeltaVelocity.sub(rawInputVelocity.getAngularPart(), clampedInputVelocity.getAngularPart());
+               rawLinearDeltaVelocity.clipToMaxNorm(maxDeltaLinearVelocity.getValue());
+               rawAngularDeltaVelocity.clipToMaxNorm(maxDeltaAngularVelocity.getValue());
+               clampedInputVelocity.getLinearPart().add(rawLinearDeltaVelocity);
+               clampedInputVelocity.getAngularPart().add(rawAngularDeltaVelocity);
+            }
 
-            estimatedVelocity.set(rawInputVelocity);
+            estimatedVelocity.set(clampedInputVelocity);
             estimatedVelocity.scale(rawVelocityAlpha.getValue());
             estimatedVelocity.add(correctiveVelocity);
             estimatedVelocity.getLinearPart().clipToMaxNorm(defaultLinearRateLimitation);
             estimatedVelocity.getAngularPart().clipToMaxNorm(defaultAngularRateLimitation);
+
             estimatedDecayingVelocity.set(estimatedVelocity);
             KSTTools.integrateLinearVelocity(updateDT, estimatedPose.getPosition(), estimatedDecayingVelocity.getLinearPart(), estimatedPose.getPosition());
             KSTTools.integrateAngularVelocity(updateDT,
@@ -296,6 +322,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
          lastInputTimestamp.set(inputTimestamp);
          rawInputPose.set(pose);
          nextTimeTriggerForDecay.set(time + correctionDuration.getValue());
+         inputVelocityDecayFactor.set(0.0);
       }
 
       public void predict(double time)
@@ -432,6 +459,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
          lastInputTimestamp.set(inputTimestamp);
          rawInputPosition.set(position);
          nextTimeTriggerForDecay.set(time + correctionDuration.getValue());
+         inputVelocityDecayFactor.set(0.0);
       }
 
       public void predict(double time)
