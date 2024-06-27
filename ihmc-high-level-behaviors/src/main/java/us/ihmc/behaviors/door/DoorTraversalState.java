@@ -2,6 +2,11 @@ package us.ihmc.behaviors.door;
 
 import behavior_msgs.msg.dds.DoorTraversalStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
+import us.ihmc.behaviors.sequence.ActionNodeState;
+import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
+import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
@@ -52,7 +57,7 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    {
       super.update();
 
-//      actionSequence = BehaviorTreeTools.findActionSequenceAncestor(this);
+//      actionSequence = BehaviorTreeTools.findRootNode(this);
 
       updateActionSubtree(this);
    }
