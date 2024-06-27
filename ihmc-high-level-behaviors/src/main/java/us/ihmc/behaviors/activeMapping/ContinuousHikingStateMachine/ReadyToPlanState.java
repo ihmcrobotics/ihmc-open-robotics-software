@@ -52,7 +52,6 @@ public class ReadyToPlanState implements State
    {
       FAST_HIKING, WALK_TO_GOAL
    }
-
    // The default mode for when things start up
    private PlanningMode planningMode = PlanningMode.FAST_HIKING;
 
@@ -83,7 +82,7 @@ public class ReadyToPlanState implements State
    {
       continuousPlanner.setPlanAvailable(false);
       stopWatch.reset();
-      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
+      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartStancePose(), continuousPlanner.getGoalStancePose());
       timeInSwingToStopPlanningAndWaitTillNextAttempt = continuousHikingParameters.getSwingTime() * continuousHikingParameters.getPercentThroughSwingToPlanTo();
       stopWatch.start();
    }
@@ -104,7 +103,7 @@ public class ReadyToPlanState implements State
       continuousPlanner.setImminentStanceToPlanFrom();
       SideDependentList<FramePose3D> goalPoses = getGoalPosesBasedOnPlanningMode();
       continuousPlanner.setGoalWaypointPoses(goalPoses.get(RobotSide.LEFT), goalPoses.get(RobotSide.RIGHT));
-      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
+      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartStancePose(), continuousPlanner.getGoalStancePose());
 
       // Plan to the goal and log the plan
       continuousPlanner.planToGoal(commandMessage.get());
@@ -136,7 +135,7 @@ public class ReadyToPlanState implements State
          case FAST_HIKING ->
          {
             goalPoses = ContinuousPlannerTools.setRandomizedStraightGoalPoses(continuousPlanner.getWalkingStartMidPose(),
-                                                                              continuousPlanner.getStartingStancePose(),
+                                                                              continuousPlanner.getStartStancePose(),
                                                                               (float) continuousHikingParameters.getGoalPoseForwardDistance(),
                                                                               X_RANDOM_MARGIN,
                                                                               (float) continuousHikingParameters.getGoalPoseUpDistance(),
@@ -200,7 +199,7 @@ public class ReadyToPlanState implements State
    {
       List<Pose3D> poses = MessageTools.unpackPoseListMessage(poseListMessage);
       addWayPointToList(poses.get(0), poses.get(1));
-      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
+      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartStancePose(), continuousPlanner.getGoalStancePose());
    }
 
    public void addWayPointToList(Pose3D leftFootGoalPose, Pose3D rightFootGoalPose)
@@ -219,6 +218,6 @@ public class ReadyToPlanState implements State
 
       LogTools.info("Added waypoint for WALK_TO_GOAL");
       walkToGoalWayPointList.add(latestWayPoint);
-      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
+      debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartStancePose(), continuousPlanner.getGoalStancePose());
    }
 }

@@ -49,7 +49,7 @@ public class DoNothingState implements State
          pauseWalkingPublisher.publish(message);
       }
 
-      RobotSide closerSide = ContinuousPlannerTools.getCloserSideToGoal(continuousPlanner.getStartingStancePose(), continuousPlanner.getGoalStancePose());
+      RobotSide closerSide = ContinuousPlannerTools.getCloserSideToGoal(continuousPlanner.getStartStancePose(), continuousPlanner.getGoalStancePose());
       FramePose3D closerToGoalFootPose = new FramePose3D(referenceFrames.getSoleFrame(closerSide));
       FramePose3D fartherToGoalFootPose = new FramePose3D(referenceFrames.getSoleFrame(closerSide.getOppositeSide()));
       closerToGoalFootPose.changeFrame(ReferenceFrame.getWorldFrame());

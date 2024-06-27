@@ -54,10 +54,8 @@ public class ContinuousPlannerSchedulingTask
 
       MonteCarloFootstepPlannerParameters monteCarloPlannerParameters = new MonteCarloFootstepPlannerParameters();
       TerrainPlanningDebugger debugger = new TerrainPlanningDebugger(ros2Node, monteCarloPlannerParameters);
-      this.continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, continuousHikingParameters, monteCarloPlannerParameters, debugger);
-
       ContinuousPlannerStatistics statistics = new ContinuousPlannerStatistics();
-      continuousPlanner.setContinuousPlannerStatistics(statistics);
+      continuousPlanner = new ContinuousPlanner(robotModel, referenceFrames, continuousHikingParameters, monteCarloPlannerParameters, debugger, statistics);
 
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
