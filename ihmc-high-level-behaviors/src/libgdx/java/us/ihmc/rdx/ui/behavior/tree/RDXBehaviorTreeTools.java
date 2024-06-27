@@ -1,17 +1,14 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
-import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 
 import java.util.function.Consumer;
 
 public class RDXBehaviorTreeTools
 {
-   public static RDXBehaviorTreeNode<?, ?> findRootNode(RDXBehaviorTreeNode<?, ?> node)
+   public static RDXBehaviorTreeRootNode findRootNode(RDXBehaviorTreeNode<?, ?> node)
    {
-      while (!node.isRootNode())
-         node = node.getParent();
-
-      return node;
+      return (RDXBehaviorTreeRootNode) BehaviorTreeTools.findRootNodeGeneral(node);
    }
 
    public static void runForSubtreeNodes(RDXBehaviorTreeNode<?, ?> node, Consumer<RDXBehaviorTreeNode<?, ?>> operation)
@@ -27,26 +24,6 @@ public class RDXBehaviorTreeTools
    public static void runForEntireTree(RDXBehaviorTreeNode<?, ?> anyNode, Consumer<RDXBehaviorTreeNode<?, ?>> operation)
    {
       runForSubtreeNodes(findRootNode(anyNode), operation);
-   }
-
-   public static RDXActionSequence findActionSequenceAncestor(RDXBehaviorTreeNode<?, ?> node)
-   {
-      if (node instanceof RDXActionSequence actionSequence)
-      {
-         return actionSequence;
-      }
-      else if (node == null || node.getParent() == null)
-      {
-         return null;
-      }
-      else if (node.getParent() instanceof RDXActionSequence actionSequence)
-      {
-         return actionSequence;
-      }
-      else
-      {
-         return findActionSequenceAncestor(node.getParent());
-      }
    }
 
    public static void clearOtherNodeSelections(RDXBehaviorTreeNode<?, ?> anyNode)

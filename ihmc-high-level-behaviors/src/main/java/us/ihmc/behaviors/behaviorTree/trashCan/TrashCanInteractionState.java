@@ -2,9 +2,9 @@ package us.ihmc.behaviors.behaviorTree.trashCan;
 
 import behavior_msgs.msg.dds.TrashCanInteractionStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -22,7 +22,7 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
    public static final String APPROACH_FRONT = "Approach Front";
    public static final String APPROACH_RIGHT = "Approach Right";
 
-   private ActionSequenceState actionSequence;
+   private BehaviorTreeRootNodeState actionSequence;
    private WaitDurationActionState computeStanceAction;
    private WaitDurationActionState approachingLeftAction;
    private WaitDurationActionState approachingRightAction;
@@ -44,7 +44,7 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
    {
       super.update();
 
-      actionSequence = BehaviorTreeTools.findActionSequenceAncestor(this);
+      actionSequence = BehaviorTreeTools.findRootNode(this);
 
       updateActionSubtree(this);
    }
@@ -137,7 +137,7 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
       return isValid;
    }
 
-   public ActionSequenceState getActionSequence()
+   public BehaviorTreeRootNodeState getActionSequence()
    {
       return actionSequence;
    }
