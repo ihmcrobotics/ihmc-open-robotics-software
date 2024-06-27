@@ -1,0 +1,28 @@
+#ifndef __perception_msgs__msg__DetectionManagerSettingsMessage__idl__
+#define __perception_msgs__msg__DetectionManagerSettingsMessage__idl__
+
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * TODO: Having these parameter/settings messages kinda sucks.
+       * Should try to get a better system.
+       */
+      @TypeCode(type="perception_msgs::msg::dds_::DetectionManagerSettingsMessage_")
+      struct DetectionManagerSettingsMessage
+      {
+        float match_distance_threshold;
+        float acceptance_average_confidence;
+        float stability_average_confidence;
+        float stability_frequency;
+        float detection_history_duration;
+      };
+    };
+  };
+};
+
+#endif

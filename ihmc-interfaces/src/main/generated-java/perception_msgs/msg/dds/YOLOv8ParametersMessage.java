@@ -7,6 +7,8 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
+       * TODO: Having these parameter/settings messages kinda sucks.
+       * Should try to get a better system.
        * Parameters for running YOLOv8
        */
 public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> implements Settable<YOLOv8ParametersMessage>, EpsilonComparable<YOLOv8ParametersMessage>

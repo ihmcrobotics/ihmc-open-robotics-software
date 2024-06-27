@@ -1,3 +1,5 @@
+# TODO: Having these parameter/settings messages kinda sucks.
+# Should try to get a better system.
 # Parameters for running YOLOv8
 
 # Confidence required to consider a mask a valid detection
