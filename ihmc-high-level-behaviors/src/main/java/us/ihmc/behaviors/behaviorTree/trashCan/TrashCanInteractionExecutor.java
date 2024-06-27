@@ -6,10 +6,9 @@ import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneObjectDefinitions;
-import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
+
 
 public class TrashCanInteractionExecutor extends BehaviorTreeNodeExecutor<TrashCanInteractionState, TrashCanInteractionDefinition>
 {
@@ -59,11 +58,7 @@ public class TrashCanInteractionExecutor extends BehaviorTreeNodeExecutor<TrashC
             String obstructedNodeName = definition.getObstructedNode().getValue();
             if (!obstructedNodeName.isEmpty())
             {
-               if (obstructedNodeName.contains(DoorSceneNodeDefinitions.RIGHT_DOOR_PANEL_NAME))
-               {
-                  state.getStance().setValue(InteractionStance.RIGHT);
-               }
-               else if (obstructedNodeName.contains(DoorSceneNodeDefinitions.LEFT_DOOR_PANEL_NAME))
+               if (obstructedNodeName.contains("Door"))
                {
                   state.getStance().setValue(InteractionStance.LEFT);
                }
@@ -74,20 +69,28 @@ public class TrashCanInteractionExecutor extends BehaviorTreeNodeExecutor<TrashC
             }
             else
             {
-               state.getStance().setValue(InteractionStance.FRONT);
+               state.getStance().setValue(InteractionStance.LEFT);
             }
          }
 
          // skip action if not related to the selected stance
-         if ( (state.getApproachingLeftAction().getIsExecuting() && state.getStance().getValue() != InteractionStance.LEFT) ||
-              (state.getApproachingFrontAction().getIsExecuting() && state.getStance().getValue() != InteractionStance.FRONT) ||
-              (state.getApproachingRightAction().getIsExecuting() && state.getStance().getValue() != InteractionStance.RIGHT) )
+         if (state.getApproachingLeftAction().getIsExecuting() && state.getStance().getValue() != InteractionStance.LEFT)
          {
-            // skip next action, which is the actual walking action
-            int nextNextIndex = state.getActionSequence().getExecutionNextIndex() + 1;
+            int nextNextIndex = state.getApproachingFrontAction().getActionIndex();
+            state.getActionSequence().setExecutionNextIndex(nextNextIndex);
+         }
+         else if (state.getApproachingFrontAction().getIsExecuting() && state.getStance().getValue() != InteractionStance.FRONT)
+         {
+            int nextNextIndex = state.getEndAction().getActionIndex();
             state.getActionSequence().setExecutionNextIndex(nextNextIndex);
          }
 
+
+         if (state.getSetLeftFootDownAction().getIsExecuting())
+         {
+            int nextNextIndex = state.getEndAction().getActionIndex();
+            state.getActionSequence().setExecutionNextIndex(nextNextIndex);
+         }
       }
    }
 
