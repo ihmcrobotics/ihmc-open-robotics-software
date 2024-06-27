@@ -1,0 +1,49 @@
+#ifndef __behavior_msgs__msg__BehaviorTreeRootNodeStateMessage__idl__
+#define __behavior_msgs__msg__BehaviorTreeRootNodeStateMessage__idl__
+
+#include "behavior_msgs/msg/./BehaviorTreeNodeStateMessage_.idl"
+#include "behavior_msgs/msg/./BehaviorTreeRootNodeDefinitionMessage_.idl"
+module behavior_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeRootNodeStateMessage_")
+      struct BehaviorTreeRootNodeStateMessage
+      {
+        /**
+         * Parent state fields
+         */
+        behavior_msgs::msg::dds::BehaviorTreeNodeStateMessage state;
+        /**
+         * Definition
+         */
+        behavior_msgs::msg::dds::BehaviorTreeRootNodeDefinitionMessage definition;
+        /**
+         * If the sequence is currently set to proceed automatically
+         */
+        boolean automatic_execution;
+        /**
+         * The index of the action that is set to execute next
+         */
+        unsigned short execution_next_index;
+        /**
+         * Next action rejection tooltip
+         */
+        string next_action_rejection_tooltip;
+        /**
+         * Request manual execution of the next action
+         */
+        boolean manual_execution_requested;
+        /**
+         * Allows the operator to disable concurrency during authoring
+         */
+        boolean concurrency_enabled;
+      };
+    };
+  };
+};
+
+#endif

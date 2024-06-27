@@ -2,9 +2,9 @@ package us.ihmc.behaviors.door;
 
 import behavior_msgs.msg.dds.DoorTraversalStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.behaviors.sequence.actions.ScrewPrimitiveActionState;
 import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -26,7 +26,7 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    @Nullable
    private DoorNode doorNode;
 
-   private ActionSequenceState actionSequence;
+   private BehaviorTreeRootNodeState actionSequence;
    private WaitDurationActionState stabilizeDetectionAction;
    private WaitDurationActionState waitToOpenRightHandAction;
    private ScrewPrimitiveActionState pullScrewPrimitiveAction;
@@ -49,7 +49,7 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    {
       super.update();
 
-      actionSequence = BehaviorTreeTools.findActionSequenceAncestor(this);
+      actionSequence = BehaviorTreeTools.findRootNode(this);
 
       updateActionSubtree(this);
    }
@@ -140,7 +140,7 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       this.doorNode = doorNode;
    }
 
-   public ActionSequenceState getActionSequence()
+   public BehaviorTreeRootNodeState getActionSequence()
    {
       return actionSequence;
    }
