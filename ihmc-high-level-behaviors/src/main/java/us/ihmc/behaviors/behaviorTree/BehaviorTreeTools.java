@@ -49,66 +49,6 @@ public class BehaviorTreeTools
       runForSubtreeNodes(findRootNode(anyNode), operation);
    }
 
-   public static ActionSequenceDefinition findActionSequenceAncestor(BehaviorTreeNodeDefinition node)
-   {
-      if (node instanceof ActionSequenceDefinition actionSequence)
-      {
-         return actionSequence;
-      }
-      else if (node == null || node.getParent() == null)
-      {
-         return null;
-      }
-      else if (node.getParent() instanceof ActionSequenceDefinition actionSequence)
-      {
-         return actionSequence;
-      }
-      else
-      {
-         return findActionSequenceAncestor(node.getParent());
-      }
-   }
-
-   public static ActionSequenceState findActionSequenceAncestor(BehaviorTreeNodeState node)
-   {
-      if (node instanceof ActionSequenceState actionSequence)
-      {
-         return actionSequence;
-      }
-      else if (node == null || node.getParent() == null)
-      {
-         return null;
-      }
-      else if (node.getParent() instanceof ActionSequenceState actionSequence)
-      {
-         return actionSequence;
-      }
-      else
-      {
-         return findActionSequenceAncestor(node.getParent());
-      }
-   }
-
-   public static ActionSequenceExecutor findActionSequenceAncestor(BehaviorTreeNodeExecutor node)
-   {
-      if (node instanceof ActionSequenceExecutor actionSequence)
-      {
-         return actionSequence;
-      }
-      else if (node == null || node.getParent() == null)
-      {
-         return null;
-      }
-      else if (node.getParent() instanceof ActionSequenceExecutor actionSequence)
-      {
-         return actionSequence;
-      }
-      else
-      {
-         return findActionSequenceAncestor(node.getParent());
-      }
-   }
-
    public static List<ActionNodeDefinition> buildListOfActionDefinitions(BehaviorTreeNodeDefinition rootNode)
    {
       List<ActionNodeDefinition> actionDefinitions = new ArrayList<>();
