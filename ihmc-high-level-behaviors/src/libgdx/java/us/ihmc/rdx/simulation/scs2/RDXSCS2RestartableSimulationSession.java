@@ -93,7 +93,7 @@ public class RDXSCS2RestartableSimulationSession extends RDXSCS2SimulationSessio
    {
       if (isSessionThreadRunning())
       {
-         endSession();
+         stopSession();
 
          for (Runnable destroyable : destroyables)
          {
