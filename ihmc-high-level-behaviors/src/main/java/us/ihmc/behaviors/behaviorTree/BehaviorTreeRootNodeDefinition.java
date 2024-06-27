@@ -13,6 +13,22 @@ public class BehaviorTreeRootNodeDefinition extends BehaviorTreeNodeDefinition
       super(crdtInfo, saveFileDirectory);
    }
 
+   /** We don't want to save the root node. */
+   @Override
+   public void saveToFile()
+   {
+      for (BehaviorTreeNodeDefinition child : getChildren())
+      {
+         child.saveToFile();
+      }
+   }
+
+   @Override
+   public boolean hasChanges()
+   {
+      return false;
+   }
+
    public void toMessage(BehaviorTreeRootNodeDefinitionMessage message)
    {
       super.toMessage(message.getDefinition());

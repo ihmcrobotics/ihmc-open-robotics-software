@@ -151,13 +151,10 @@ public class RDXBehaviorTreeNodeCreationMenu
          {
             if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
             {
+               RDXBehaviorTreeNode<?, ?> loadedNode = null;
                try
                {
-                  RDXBehaviorTreeNode<?, ?> loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, topologyOperationQueue);
-                  BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
-                        = BehaviorTreeNodeInsertionDefinition.build(loadedNode, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
-
-                  complete(insertionDefinition);
+                  loadedNode = tree.getFileLoader().loadFromFile(indexedTreeFile, topologyOperationQueue);
                }
                catch (Exception e)
                {
@@ -166,6 +163,24 @@ public class RDXBehaviorTreeNodeCreationMenu
                                  Please run the JSON sanitizer in debug mode with the NullPointerException breakpoint enabled.
                                  Error: {}
                                  """, textToDisplay, e.getMessage());
+               }
+
+               if (loadedNode != null)
+               {
+                  RDXBehaviorTreeNode<?, ?> nodeToInsert = loadedNode;
+
+                  if (tree.getRootNode() == null) // Automatically add a root node if there isn't one
+                  {
+                     nodeToInsert = new RDXBehaviorTreeRootNode(tree.getBehaviorTreeState().getAndIncrementNextID(),
+                                                                tree.getBehaviorTreeState().getCRDTInfo(),
+                                                                tree.getBehaviorTreeState().getSaveFileDirectory());
+                     topologyOperationQueue.queueAddAndFreezeNode(loadedNode, nodeToInsert);
+                  }
+
+                  BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
+                        = BehaviorTreeNodeInsertionDefinition.build(nodeToInsert, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
+
+                  complete(insertionDefinition);
                }
             }
          }
@@ -223,7 +238,6 @@ public class RDXBehaviorTreeNodeCreationMenu
                                                                 tree.getBehaviorTreeState().getAndIncrementNextID(),
                                                                 tree.getBehaviorTreeState().getCRDTInfo(),
                                                                 tree.getBehaviorTreeState().getSaveFileDirectory());
-
 
             BehaviorTreeNodeInsertionDefinition<RDXBehaviorTreeNode<?, ?>> insertionDefinition
                   = BehaviorTreeNodeInsertionDefinition.build(newNode, tree.getBehaviorTreeState(), tree::setRootNode, relativeNode, insertionType);
