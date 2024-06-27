@@ -9,7 +9,6 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.Throttler;
 
 public class RDXZEDSVORecorderPanel
@@ -27,10 +26,9 @@ public class RDXZEDSVORecorderPanel
 
    private final Throttler requestThrottler = new Throttler().setFrequency(5.0);
 
-   public RDXZEDSVORecorderPanel(ROS2Node ros2Node)
+   public RDXZEDSVORecorderPanel(ROS2Helper ros2Helper)
    {
-      ros2Helper = new ROS2Helper(ros2Node);
-
+      this.ros2Helper = ros2Helper;
       ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_CURRENT_FILE, message -> this.latestMessage = message);
    }
 

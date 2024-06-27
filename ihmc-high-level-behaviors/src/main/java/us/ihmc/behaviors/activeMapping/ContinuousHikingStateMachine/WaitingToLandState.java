@@ -43,8 +43,6 @@ public class WaitingToLandState implements State
    @Override
    public void onEntry()
    {
-      LogTools.warn(String.format("Entering %s", getClass().getSimpleName()));
-
       if (continuousHikingParameters.getStepPublisherEnabled())
       {
          if (continuousPlanner.isPlanAvailable())
@@ -52,7 +50,7 @@ public class WaitingToLandState implements State
             FootstepDataListMessage footstepDataList = continuousPlanner.getLimitedFootstepDataListMessage(continuousHikingParameters,
                                                                                                            controllerQueueMonitor.getControllerFootstepQueue());
 
-            String message = String.format("State: Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller");
+            String message = String.format("Sending (" + footstepDataList.getFootstepDataList().size() + ") steps to controller");
             LogTools.info(message);
             statistics.appendString(message);
 

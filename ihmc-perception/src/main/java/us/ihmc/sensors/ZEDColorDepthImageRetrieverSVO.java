@@ -6,11 +6,11 @@ import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.zed.SL_InitParameters;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
@@ -25,11 +25,11 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
    private final String svoFileName;
    private final RestartableThrottledThread publishInfoThread;
 
-   public ZEDColorDepthImageRetrieverSVO(ROS2Node ros2Node,
-                                         int cameraID,
+   public ZEDColorDepthImageRetrieverSVO(int cameraID,
                                          Supplier<ReferenceFrame> sensorFrameSupplier,
                                          ROS2DemandGraphNode depthDemandNode,
                                          ROS2DemandGraphNode colorDemandNode,
+                                         ROS2Helper ros2Helper,
                                          RecordMode recordMode,
                                          String svoFileName)
    {
@@ -40,10 +40,15 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
          throw new RuntimeException("Must specify an SVO file name for playback");
       }
 
+      File svoFile = new File(svoFileName);
+
+      if (recordMode == RecordMode.PLAYBACK && !svoFile.exists())
+      {
+         throw new RuntimeException("SVO file does not exist");
+      }
+
       this.recordMode = recordMode;
       this.svoFileName = Objects.requireNonNullElseGet(svoFileName, this::generateSVOFileName);
-
-      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
       ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_SET_POSITION, int64 -> setCurrentPosition((int) int64.getData()));
       ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_PAUSE, () ->
@@ -141,6 +146,8 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
          System.out.println("Stopping playback: " + svoFileName);
          System.out.println("| | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | | ");
       }
+
+      publishInfoThread.stop();
 
       super.destroy();
    }
