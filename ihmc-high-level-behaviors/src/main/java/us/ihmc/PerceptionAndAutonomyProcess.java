@@ -7,6 +7,7 @@ import us.ihmc.avatar.colorVision.BlackflyImageRetriever;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.activeMapping.ContinuousHikingManager;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeExecutor;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
@@ -185,6 +186,8 @@ public class PerceptionAndAutonomyProcess
    private final RestartableThrottledThread heightMapExtractorThread;
    private ROS2DemandGraphNode heightMapDemandNode;
 
+   private ContinuousHikingManager continuousHikingManager;
+
    private ROS2SyncedRobotModel behaviorTreeSyncedRobot;
    private ReferenceFrameLibrary behaviorTreeReferenceFrameLibrary;
    private ROS2BehaviorTreeExecutor behaviorTreeExecutor;
@@ -267,6 +270,12 @@ public class PerceptionAndAutonomyProcess
    }
 
    /** Needs to be a separate method to allow constructing test bench version. */
+   public void addContinuousHiking(ROS2Node ros2Node, DRCRobotModel robotModel, ROS2SyncedRobotModel syncedRobot)
+   {
+      continuousHikingManager = new ContinuousHikingManager(ros2Node, robotModel, syncedRobot);
+   }
+
+   /** Needs to be a separate method to allow constructing test bench version. */
    public void addBehaviorTree(ROS2Node ros2Node, DRCRobotModel robotModel)
    {
       ROS2ControllerHelper ros2ControllerHelper = new ROS2ControllerHelper(ros2Node, robotModel);
@@ -320,6 +329,9 @@ public class PerceptionAndAutonomyProcess
       }
 
       sceneGraphUpdateThread.stop();
+
+      if (continuousHikingManager != null)
+         continuousHikingManager.destroy();
 
       if (behaviorTreeExecutor != null)
       {
@@ -615,6 +627,9 @@ public class PerceptionAndAutonomyProcess
                                  realsenseFrameSupplier.get(),
                                  realsenseZUpFrameSupplier.get(),
                                  ros2Helper);
+
+         if (continuousHikingManager != null)
+            continuousHikingManager.setHeightMapDataAsync(heightMapManager.getHeightMapExtractor());
 
          latestRealsenseDepthImage.release();
       }
