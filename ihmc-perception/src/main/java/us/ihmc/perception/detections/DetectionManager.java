@@ -1,5 +1,7 @@
 package us.ihmc.perception.detections;
 
+import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.robotics.time.TimeTools;
 
 import java.time.Duration;
@@ -20,22 +22,25 @@ public class DetectionManager
    private final Set<PersistentDetection> newlyValidDetections = new HashSet<>();
    private final Object persistentDetectionsLock = new Object();
 
-   private double maxMatchDistanceSquared;
-   private double defaultStabilityThreshold;
-   private double defaultStabilityFrequency;
-   private double defaultHistorySeconds;
+   private double maxMatchDistanceSquared = 1.0;
+   private double acceptanceAverageConfidence = 0.6;
+   private double stabilityAverageConfidence = 0.4;
+   private double stabilityDetectionFrequency = 5.0;
+   private double detectionHistoryDuration = 1.0;
 
-   public DetectionManager()
+   public DetectionManager(ROS2PublishSubscribeAPI ros2)
    {
-      this(1.0, 0.5, 5.0, 1.0);
-   }
-
-   public DetectionManager(double matchDistanceThreshold, double defaultStabilityThreshold, double defaultStabilityFrequency, double defaultHistorySeconds)
-   {
-      setMatchDistanceThreshold(matchDistanceThreshold);
-      setDefaultStabilityThreshold(defaultStabilityThreshold);
-      setDefaultStabilityFrequency(defaultStabilityFrequency);
-      setDefaultHistorySeconds(defaultHistorySeconds);
+      if (ros2 != null)
+      {
+         ros2.subscribeViaCallback(PerceptionAPI.DETECTION_MANAGER_SETTINGS, settingsMessage ->
+         {
+            setMatchDistanceThreshold(settingsMessage.getMatchDistanceThreshold());
+            setAcceptanceAverageConfidence(settingsMessage.getAcceptanceAverageConfidence());
+            setStabilityAverageConfidence(settingsMessage.getStabilityAverageConfidence());
+            setStabilityDetectionFrequency(settingsMessage.getStabilityFrequency());
+            setDetectionHistoryDuration(settingsMessage.getDetectionHistoryDuration());
+         });
+      }
    }
 
    /**
@@ -111,9 +116,9 @@ public class DetectionManager
          // create new persistent detections from unmatched new detections
          for (InstantDetection unmatchedNewDetection : remainingNewDetections)
             persistentDetections.add(new PersistentDetection(unmatchedNewDetection,
-                                                             defaultStabilityThreshold,
-                                                             defaultStabilityFrequency,
-                                                             defaultHistorySeconds));
+                                                             acceptanceAverageConfidence,
+                                                             stabilityDetectionFrequency,
+                                                             detectionHistoryDuration));
       }
    }
 
@@ -177,7 +182,10 @@ public class DetectionManager
             {
                detection.updateHistory(now);
                if (detection.hasBecomeValid().poll())
+               {
+                  detection.setStabilityConfidenceThreshold(stabilityAverageConfidence);
                   newlyValidDetections.add(detection);
+               }
             }
          }
       }
@@ -188,23 +196,28 @@ public class DetectionManager
       maxMatchDistanceSquared = matchDistance * matchDistance;
    }
 
-   public void setDefaultStabilityThreshold(double defaultStabilityThreshold)
+   public void setAcceptanceAverageConfidence(double acceptanceAverageConfidence)
    {
-      this.defaultStabilityThreshold = defaultStabilityThreshold;
+      this.acceptanceAverageConfidence = acceptanceAverageConfidence;
    }
 
-   public void setDefaultStabilityFrequency(double defaultStabilityFrequency)
+   public void setStabilityAverageConfidence(double stabilityAverageConfidence)
    {
-      this.defaultStabilityFrequency = defaultStabilityFrequency;
+      this.stabilityAverageConfidence = stabilityAverageConfidence;
    }
 
-   public void setDefaultHistorySeconds(double historyLengthSeconds)
+   public void setStabilityDetectionFrequency(double stabilityDetectionFrequency)
    {
-      this.defaultHistorySeconds = historyLengthSeconds;
+      this.stabilityDetectionFrequency = stabilityDetectionFrequency;
    }
 
-   public void setDefaultHistoryDuration(Duration historyDuration)
+   public void setDetectionHistoryDuration(double historyLengthSeconds)
    {
-      this.defaultHistorySeconds = TimeTools.toDoubleSeconds(historyDuration);
+      this.detectionHistoryDuration = historyLengthSeconds;
+   }
+
+   public void setDetectionHistoryDuration(Duration historyDuration)
+   {
+      this.detectionHistoryDuration = TimeTools.toDoubleSeconds(historyDuration);
    }
 }

@@ -17,6 +17,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+/*
+ *  FIXME: It doesn't make sense to have a visualizer for settings.
+ *  This is only meant to be a short-term solution
+ *  We should really make a better system to house settings for detections.
+ */
 public class RDXYOLOv8Settings extends RDXVisualizer
 {
    private static final String[] AVAILABLE_SENSORS = {"ZED", "D455"};

@@ -20,11 +20,11 @@ public class RDXDetectionManagerSettings extends RDXVisualizer
 
    private final ROS2PublishSubscribeAPI ros2;
 
-   private final ImFloat matchDistanceThreshold = new ImFloat();
-   private final ImFloat acceptanceConfidence = new ImFloat();
-   private final ImFloat stabilityConfidence = new ImFloat();
-   private final ImFloat stabilityFrequency = new ImFloat();
-   private final ImFloat historyDuration = new ImFloat();
+   private final ImFloat matchDistanceThreshold = new ImFloat(1.0f);
+   private final ImFloat acceptanceConfidence = new ImFloat(0.6f);
+   private final ImFloat stabilityConfidence = new ImFloat(0.4f);
+   private final ImFloat stabilityFrequency = new ImFloat(10.0f);
+   private final ImFloat historyDuration = new ImFloat(1.0f);
 
    private final Throttler messagePublishThrottler = new Throttler().setPeriod(MESSAGE_PUBLISH_PERIOD);
    private final Notification parametersChanged = new Notification();

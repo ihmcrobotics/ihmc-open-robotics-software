@@ -25,7 +25,7 @@ import perception_msgs.msg.dds.SceneGraphMessage;
 import perception_msgs.msg.dds.VideoPacket;
 import perception_msgs.msg.dds.YOLOv8ParametersMessage;
 import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
-import std_msgs.msg.dds.Bool;
+import perception_msgs.msg.dds.DetectionManagerSettingsMessage;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
 import std_msgs.msg.dds.Int64;
@@ -175,6 +175,9 @@ public final class PerceptionAPI
    public static final ROS2Topic<DetectedObjectPacket> ICP_RESULT = IHMC_ROOT.withModule("iterative_closest_point")
                                                                              .withSuffix("result")
                                                                              .withType(DetectedObjectPacket.class);
+   public static final ROS2Topic<DetectionManagerSettingsMessage> DETECTION_MANAGER_SETTINGS = IHMC_ROOT.withModule("detections")
+                                                                                                        .withSuffix("settings")
+                                                                                                        .withType(DetectionManagerSettingsMessage.class);
    public static final ROS2Topic<BallDetectionParametersMessage> BALL_DETECTION_PARAMETERS = IHMC_ROOT.withModule("ping_pong_ball")
                                                                                                       .withSuffix("detection_parameters")
                                                                                                       .withType(BallDetectionParametersMessage.class);

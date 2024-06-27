@@ -19,6 +19,7 @@ import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.ros2.RDXDetectionManagerSettings;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXYOLOv8Settings;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
@@ -55,7 +56,8 @@ public class RDXSceneGraphDemo
    private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
    private RDXYOLOv8Settings yoloSettingsVisualizer;
    private RDXROS2ImageMessageVisualizer yoloAnnotatedImageVisualizer;
-   private DetectionManager detectionManager = new DetectionManager();
+   private RDXDetectionManagerSettings detectionManagerSettings;
+   private DetectionManager detectionManager;
    private YOLOv8DetectionExecutor yolov8DetectionExecutor;
    private ROS2SceneGraph onRobotSceneGraph;
    private RDXSceneGraphUI sceneGraphUI;
@@ -92,6 +94,8 @@ public class RDXSceneGraphDemo
 
             ros2Node = ROS2Tools.createROS2Node(PUB_SUB_IMPLEMENTATION, "perception_scene_graph_demo");
             ros2Helper = new ROS2Helper(ros2Node);
+
+            detectionManager = new DetectionManager(ros2Helper);
 
             // Add perception visualizers
             perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
@@ -299,9 +303,15 @@ public class RDXSceneGraphDemo
          perceptionVisualizerPanel.addVisualizer(zed2DepthImageVisualizer);
       }
 
+      // Create detection manager settings
+      {
+         detectionManagerSettings = new RDXDetectionManagerSettings("Detection Manager Settings", ros2Helper);
+         perceptionVisualizerPanel.addVisualizer(detectionManagerSettings);
+      }
+
       // Create YOLO settings viz
       {
-         yoloSettingsVisualizer = new RDXYOLOv8Settings("YOLOv8 Settings", ros2Helper);
+         yoloSettingsVisualizer = new RDXYOLOv8Settings("YOLOv8", ros2Helper);
          yoloSettingsVisualizer.setActive(true);
          perceptionVisualizerPanel.addVisualizer(yoloSettingsVisualizer);
       }

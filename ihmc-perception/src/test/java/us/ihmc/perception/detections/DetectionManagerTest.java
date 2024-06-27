@@ -8,7 +8,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
 
-import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -26,7 +25,7 @@ public class DetectionManagerTest
    @Test
    public void testAddDetections()
    {
-      DetectionManager detectionManager = new DetectionManager();
+      DetectionManager detectionManager = new DetectionManager(null);
 
       // Generate test detection sets
       List<YOLOv8InstantDetection> testDetectionsA = createYoloDetections(3, Instant.now());
@@ -57,7 +56,7 @@ public class DetectionManagerTest
    @Test
    public void testMatchingDetections()
    {
-      DetectionManager detectionManager = new DetectionManager();
+      DetectionManager detectionManager = new DetectionManager(null);
 
       // Generate the first frame of detections & add to detection manager
       List<YOLOv8InstantDetection> firstFrame = createYoloDetections(3, Instant.now());
@@ -87,7 +86,7 @@ public class DetectionManagerTest
    public void testConcurrentDetectionAddition() throws InterruptedException
    {
       testPassed.set(true);
-      DetectionManager detectionManager = new DetectionManager();
+      DetectionManager detectionManager = new DetectionManager(null);
 
       int numRuns = 1000; // If test is passing when it really shouldn't, try increasing these numbers. Ensure numRuns >= maxDetections
       int maxDetections = 1000;
@@ -153,8 +152,8 @@ public class DetectionManagerTest
    {
       testPassed.set(true);
 
-      DetectionManager detectionManager = new DetectionManager();
-      detectionManager.setDefaultHistoryDuration(Duration.ofDays(5));
+      DetectionManager detectionManager = new DetectionManager(null);
+      detectionManager.setDetectionHistoryDuration(Duration.ofDays(5));
       detectionManager.setMatchDistanceThreshold(10.0);
 
       // Create the two addition threads
@@ -234,11 +233,11 @@ public class DetectionManagerTest
    @Test
    public void testDetectionStability()
    {
-      DetectionManager detectionManager = new DetectionManager();
+      DetectionManager detectionManager = new DetectionManager(null);
       detectionManager.setMatchDistanceThreshold(0.5);
-      detectionManager.setDefaultStabilityThreshold(0.5);
-      detectionManager.setDefaultStabilityFrequency(0.9);
-      detectionManager.setDefaultHistorySeconds(2.5);
+      detectionManager.setStabilityAverageConfidence(0.5);
+      detectionManager.setStabilityDetectionFrequency(0.9);
+      detectionManager.setDetectionHistoryDuration(2.5);
 
       Instant startTime = Instant.now();
 

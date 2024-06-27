@@ -219,7 +219,7 @@ public class PerceptionAndAutonomyProcess
 
       initializeDependencyGraph(ros2Helper);
 
-      detectionManager = new DetectionManager();
+      detectionManager = new DetectionManager(ros2Helper);
 
       zedImageRetriever = new ZEDColorDepthImageRetriever(ZED_CAMERA_ID, zedFrameSupplier, zedDepthDemandNode::isDemanded, zedColorDemandNode::isDemanded);
       zedImageRetriever.start();

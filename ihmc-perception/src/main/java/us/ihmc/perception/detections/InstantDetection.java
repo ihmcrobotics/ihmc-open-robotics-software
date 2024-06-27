@@ -24,7 +24,9 @@ public class InstantDetection
    public static final UUID UNMATCHED_DETECTION_ID = new UUID(0L, 0L);
    private static final double EPSILON = 1E-7;
 
+   /** The object's identifying class (e.g. {@link us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass} or simply the ArUco marker number*/
    private final String detectedObjectClass;
+   /** Colloquial name of the detected object (e.g. "Shoe", "Door Lever", etc)*/
    private final String detectedObjectName;
    private final double confidence;
    private final Pose3D pose;
