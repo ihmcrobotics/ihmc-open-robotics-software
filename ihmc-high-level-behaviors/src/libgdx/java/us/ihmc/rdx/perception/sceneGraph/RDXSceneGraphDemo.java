@@ -31,11 +31,8 @@ import us.ihmc.rdx.ui.ImGuiRemoteROS2StoredPropertySet;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
 import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
-<<<<<<< Updated upstream
 import us.ihmc.rdx.ui.graphics.ros2.RDXDetectionManagerSettings;
-=======
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2FramePlanarRegionsVisualizer;
->>>>>>> Stashed changes
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXYOLOv8Settings;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
@@ -72,13 +69,9 @@ public class RDXSceneGraphDemo
    private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
    private RDXYOLOv8Settings yoloSettingsVisualizer;
    private RDXROS2ImageMessageVisualizer yoloAnnotatedImageVisualizer;
-<<<<<<< Updated upstream
+   private RDXROS2FramePlanarRegionsVisualizer planarRegionsVisualizer;
    private RDXDetectionManagerSettings detectionManagerSettings;
    private DetectionManager detectionManager;
-=======
-   private RDXROS2FramePlanarRegionsVisualizer planarRegionsVisualizer;
-   private DetectionManager detectionManager = new DetectionManager();
->>>>>>> Stashed changes
    private YOLOv8DetectionExecutor yolov8DetectionExecutor;
    private ROS2SceneGraph onRobotSceneGraph;
    private RDXSceneGraphUI sceneGraphUI;
