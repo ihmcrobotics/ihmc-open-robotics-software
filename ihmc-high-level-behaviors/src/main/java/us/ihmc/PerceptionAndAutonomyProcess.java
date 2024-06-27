@@ -221,7 +221,7 @@ public class PerceptionAndAutonomyProcess
 
       detectionManager = new DetectionManager();
 
-      zedImageRetriever = new ZEDColorDepthImageRetriever(ZED_CAMERA_ID, zedFrameSupplier, zedDepthDemandNode, zedColorDemandNode);
+      zedImageRetriever = new ZEDColorDepthImageRetriever(ZED_CAMERA_ID, zedFrameSupplier, zedDepthDemandNode::isDemanded, zedColorDemandNode::isDemanded);
       zedImageRetriever.start();
       zedImagePublisher = new ZEDColorDepthImagePublisher(ZED_COLOR_TOPICS, ZED_DEPTH_TOPIC, ZED_CUT_OUT_DEPTH);
       zedProcessAndPublishThread = new RestartableThread("ZEDImageProcessAndPublish", this::processAndPublishZED);

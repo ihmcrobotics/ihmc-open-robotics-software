@@ -22,6 +22,7 @@ import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXYOLOv8Settings;
 import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Node;
@@ -75,6 +76,7 @@ public class RDXSceneGraphDemo
    @Nullable
    private RawImage zedDepthImage;
    private final SideDependentList<RawImage> zedColorImages = new SideDependentList<>();
+   private final MutableReferenceFrame sensorFrame = new MutableReferenceFrame();
    private RDXZEDSVORecorderPanel zedSVORecorderPanel;
 
    public RDXSceneGraphDemo()
@@ -129,6 +131,8 @@ public class RDXSceneGraphDemo
                      zedColorDepthImagePublisher.setNextGpuDepthImage(zedDepthImage.get());
                      for (RobotSide side : RobotSide.values)
                         zedColorDepthImagePublisher.setNextColorImage(zedColorImages.get(side).get(), side);
+
+                     sensorFrame.update(transform -> transform.set(zedColorDepthImageRetrieverSVO.getLatestSensorPose()));
                   }
 
                   runYOLO();
@@ -237,13 +241,15 @@ public class RDXSceneGraphDemo
 
    private void setupZEDSVOSensor()
    {
-      zedColorDepthImageRetrieverSVO = new ZEDColorDepthImageRetrieverSVO(0,
-                                                                          ReferenceFrame::getWorldFrame,
-                                                                          null,
-                                                                          null,
-                                                                          ros2Helper,
-                                                                          RecordMode.PLAYBACK,
-                                                                          SVO_FILE_NAME);
+      sensorPoseGizmo = new RDXPose3DGizmo("SimulatedSensor");
+      sensorPoseGizmo.create(baseUI.getPrimary3DPanel());
+      sensorPoseGizmo.setResizeAutomatically(true);
+      sensorPoseGizmo.setGizmoFrame(sensorFrame.getReferenceFrame());
+      baseUI.getPrimary3DPanel().addImGui3DViewPickCalculator(sensorPoseGizmo::calculate3DViewPick);
+      baseUI.getPrimary3DPanel().addImGui3DViewInputProcessor(sensorPoseGizmo::process3DViewInput);
+      baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
+
+      zedColorDepthImageRetrieverSVO = new ZEDColorDepthImageRetrieverSVO(0, () -> true, () -> true, ros2Helper, RecordMode.PLAYBACK, SVO_FILE_NAME);
       zedColorDepthImageRetrieverSVO.start();
       zedColorDepthImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES,
                                                                     PerceptionAPI.ZED2_DEPTH,
