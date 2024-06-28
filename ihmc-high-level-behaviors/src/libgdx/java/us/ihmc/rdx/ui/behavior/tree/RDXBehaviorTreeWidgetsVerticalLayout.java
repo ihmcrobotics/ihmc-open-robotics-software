@@ -46,7 +46,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          node.renderContextMenuItems();
 
          ImGui.separator();
-         if (!node.isRootNode() && !(node instanceof RDXActionSequence))
+         if (!node.isRootNode())
          {
             if (ImGui.menuItem(labels.get("Insert Node Before...")))
             {
@@ -57,7 +57,7 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
                queuePopupModal.set(() -> popNodeCreationModalDialog(node, BehaviorTreeNodeInsertionType.INSERT_AFTER));
             }
          }
-         if (node.getChildren().isEmpty() && !(node instanceof RDXActionNode<?, ?>))
+         if (!(node instanceof RDXActionNode<?, ?>))
          {
             if (ImGui.menuItem(labels.get("Add Child Node...")))
             {
