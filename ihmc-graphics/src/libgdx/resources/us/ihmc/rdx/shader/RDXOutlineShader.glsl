@@ -41,9 +41,7 @@ uniform float u_depth_max;
 uniform vec4 u_outer_color;
 uniform vec4 u_inner_color;
 
-#ifdef DISTANCE_FALLOFF
-uniform float u_depthRange;
-#endif
+//uniform float u_depthRange;
 
 void main()
 {
@@ -67,10 +65,9 @@ void main()
         {
             gl_FragColor = u_outer_color;
         }
-        #ifdef DISTANCE_FALLOFF
-        float centerDepth = dot(texture2D(u_texture, v_texCoords2), bitShifts);
-        gl_FragColor.a *= 1.0 - pow(centerDepth, u_depthRange);
-        #endif
+
+//        float centerDepth = dot(texture2D(u_texture, v_texCoords2), bitShifts);
+//        gl_FragColor.a *= 1.0 - pow(centerDepth, u_depthRange);
     }
     else
     {
