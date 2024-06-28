@@ -290,6 +290,7 @@ public class RDXVRKinematicsStreamingMode
          {
             HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.LEFT);
             sendHandCommand(RobotSide.LEFT, handConfiguration);
+            vrContext.loadTrackerRolesFromFile();
          }
 
          // Check if left joystick is pressed in order to trigger recording or replay of motion
@@ -303,7 +304,7 @@ public class RDXVRKinematicsStreamingMode
          InputDigitalActionData leftJoystickButton = controller.getJoystickPressActionData();
          if (leftJoystickButton.bChanged() && !leftJoystickButton.bState())
          { // reinitialize toolbox
-            LogTools.warn("Reinitializing toolbox. Forcing intial IK configuration to current robot configuration");
+            LogTools.warn("Reinitializing toolbox. Forcing initial IK configuration to current robot configuration");
             if (enabled.get())
             {
                sleepToolbox();
@@ -344,7 +345,6 @@ public class RDXVRKinematicsStreamingMode
       else
       {
          streamingFootstepEnabled = false;
-         pausedForWalking = false;
       }
 
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
@@ -696,27 +696,25 @@ public class RDXVRKinematicsStreamingMode
                ghostRobotGraphic.update();
          }
 
-         if (streamingFootstepEnabled)
+         // Resumes streaming once walking is done
+         if (pausedForWalking && controllerStatusTracker.getFinishedWalkingNotification().poll())
          {
-            // Resumes streaming once walking is done
-            if (pausedForWalking && controllerStatusTracker.getFinishedWalkingNotification().poll())
+            LogTools.info("Finished walking. Resuming streaming");
+            // Restart KST
+            sleepToolbox();
+            lastStepCompletionTime = System.currentTimeMillis();
+            reintializingToolbox = true;
+         }
+         else if (pausedForWalking && reintializingToolbox)
+         {
+            // Wait a bit for robot to stabilize on last footsteps
+            if (System.currentTimeMillis() - lastStepCompletionTime > RDXVRPrescientFootstepStreaming.WAIT_TIME_AFTER_STEP)
             {
-               LogTools.info("Finished walking. Resuming streaming");
-               // Restart KST
-               sleepToolbox();
-               lastStepCompletionTime = System.currentTimeMillis();
-               reintializingToolbox = true;
-            }
-            else if (pausedForWalking && reintializingToolbox)
-            {
-               // Wait a bit for robot to stabilize on last footsteps
-               if (System.currentTimeMillis() - lastStepCompletionTime > RDXVRPrescientFootstepStreaming.WAIT_TIME_AFTER_STEP)
-               {
-                  setEnabled(true);
-                  visualizeIKPreviewGraphic(true);
-                  pausedForWalking = false;
-                  streamToController.set(true);
-               }
+               pausedForWalking = false;
+               setEnabled(true);
+               visualizeIKPreviewGraphic(true);
+               streamToController.set(true);
+               reintializingToolbox = false;
             }
          }
       }
@@ -809,7 +807,6 @@ public class RDXVRKinematicsStreamingMode
          motionRetargeting.setControlArmsOnly(controlArmsOnly.get());
          motionRetargeting.setArmScaling(armScaling.get());
          motionRetargeting.setCoMTracking(comTracking.get());
-         reintializingToolbox = false;
       }
       else
       {

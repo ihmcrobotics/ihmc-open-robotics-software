@@ -12,16 +12,16 @@ public class RDXVRModeControls
    private final RDXVRModeManager vrModeManager;
    private boolean wasVRReady = false;
    private final ImBoolean renderOnLeftHand = new ImBoolean(false);
+   private final RDXBaseUI baseUI;
 
    public RDXVRModeControls(RDXVRModeManager vrModeManager)
    {
       this.vrModeManager = vrModeManager;
+      baseUI = RDXBaseUI.getInstance();
    }
 
    public void update()
    {
-      RDXBaseUI baseUI = RDXBaseUI.getInstance();
-
       boolean isVRReady = baseUI.getVRManager().isVRReady();
 
       if (isVRReady && !wasVRReady)
@@ -39,6 +39,17 @@ public class RDXVRModeControls
    public void render()
    {
       ImGui.checkbox("Render on left hand", renderOnLeftHand);
+
+      ImGuiTools.separatorText("Trackers");
+      if (ImGui.button("Save roles"))
+      {
+         baseUI.getVRManager().getContext().saveTrackerRolesToFile();
+      }
+      ImGui.sameLine();
+      if (ImGui.button("Load roles"))
+      {
+         baseUI.getVRManager().getContext().loadTrackerRolesFromFile();
+      }
 
       ImGuiTools.separatorText("Stereo vision");
       vrModeManager.getStereoVision().renderControls();

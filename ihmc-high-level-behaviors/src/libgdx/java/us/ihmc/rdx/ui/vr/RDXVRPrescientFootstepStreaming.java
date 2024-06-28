@@ -24,7 +24,7 @@ public class RDXVRPrescientFootstepStreaming
    private static final double STRIDE_LENGTH = 0.25; // fixed stride length in meters
    private static final double STABILITY_THRESHOLD = 0.005; // stability threshold
    private static final int STABILITY_ITERATIONS = 20; // Number of stable iterations
-   private static final int TURNING_THRESHOLD = 15; // Degrees variation for ankle tracker to trigger 45 deg turn on robot
+   private static final int TURNING_THRESHOLD = 20; // Degrees variation for ankle tracker to trigger 45 deg turn on robot
    public static final int WAIT_TIME_BEFORE_STEP = 100; // [ms] time to wait before walking, need some time for the stop streaming status to get to the controller
    public static final int WAIT_TIME_AFTER_STEP = 100; // [ms] time to wait before restarting streaming
 
