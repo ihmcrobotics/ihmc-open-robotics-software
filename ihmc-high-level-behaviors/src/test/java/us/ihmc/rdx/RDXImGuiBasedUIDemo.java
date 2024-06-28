@@ -86,9 +86,9 @@ public class RDXImGuiBasedUIDemo
 
             textForArea.set("Text for area");
 
-            RDXOutlineShader outlineShader = new RDXOutlineShader();
-//            outlineShader.create();
-            LogTools.info("Outline shader created: {}", outlineShader);
+//            RDXOutlineShader outlineShader = new RDXOutlineShader();
+////            outlineShader.create();
+//            LogTools.info("Outline shader created: {}", outlineShader);
 
          }
 
