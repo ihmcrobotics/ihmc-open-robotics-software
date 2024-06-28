@@ -11,7 +11,6 @@ import us.ihmc.rdx.tools.LibGDXTools;
 
 public class RDXOutlineShader
 {
-
    private final ShaderProgram shaderProgram;
    private final SpriteBatch spriteBatch;
 
@@ -23,11 +22,6 @@ public class RDXOutlineShader
 
    public RDXOutlineShader()
    {
-//
-//      create();
-//      getBaseShader().register(DefaultShader.Inputs.projTrans, DefaultShader.Setters.projTrans);
-
-
       String path = RDXOutlineShader.class.getName().replace(".", "/") + ".glsl";
       Pair<String, String> shaderStrings = LibGDXTools.loadCombinedShader(path);
       String vertexShader = shaderStrings.getLeft();
@@ -39,11 +33,7 @@ public class RDXOutlineShader
       LogTools.info("OpenGL shader compilation output for {}:\n{}", path, shaderProgram.getLog());
 
       spriteBatch = new SpriteBatch();
-
-
-      // TODO: We need to ShaderProgram#bind at some point?
    }
-
 
    public void render(Texture depthTexture)
    {
