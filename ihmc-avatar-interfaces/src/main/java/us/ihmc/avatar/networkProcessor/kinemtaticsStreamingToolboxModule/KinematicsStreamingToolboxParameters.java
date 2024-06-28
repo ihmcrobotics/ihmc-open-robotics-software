@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import toolbox_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import toolbox_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.output.KSTFBOutputProcessor;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -132,6 +133,14 @@ public class KinematicsStreamingToolboxParameters
     * Scale factor used to downscale the joint velocity solution before sending it to the controller.
     */
    private double outputJointVelocityScale;
+   /**
+    * When using {@link KSTFBOutputProcessor}, this is the proportional gain used in the processor.
+    */
+   private double outputFeedbackGain;
+   /**
+    * When using {@link KSTFBOutputProcessor}, this is the damping ratio used in the processor.
+    */
+   private double outputFeedbackDampingRatio;
    /**
     * Break frequency used for the low-pass filter used to filter the output of the IK solver.
     */
@@ -269,6 +278,8 @@ public class KinematicsStreamingToolboxParameters
       defaultLinearRateLimit = 1.5;
       defaultAngularRateLimit = 10.0;
       outputJointVelocityScale = 0.75;
+      outputFeedbackGain = 500.0;
+      outputFeedbackDampingRatio = 1.0;
       outputLPFBreakFrequency = Double.POSITIVE_INFINITY;
 
       minimizeAngularMomentum = true;
@@ -426,6 +437,16 @@ public class KinematicsStreamingToolboxParameters
    public double getOutputJointVelocityScale()
    {
       return outputJointVelocityScale;
+   }
+
+   public double getOutputFeedbackGain()
+   {
+      return outputFeedbackGain;
+   }
+
+   public double getOutputFeedbackDampingRatio()
+   {
+      return outputFeedbackDampingRatio;
    }
 
    public double getOutputLPFBreakFrequency()
@@ -686,6 +707,16 @@ public class KinematicsStreamingToolboxParameters
    public void setOutputJointVelocityScale(double outputJointVelocityScale)
    {
       this.outputJointVelocityScale = outputJointVelocityScale;
+   }
+
+   public void setOutputFeedbackGain(double outputFeedbackGain)
+   {
+      this.outputFeedbackGain = outputFeedbackGain;
+   }
+
+   public void setOutputFeedbackDampingRatio(double outputFeedbackDampingRatio)
+   {
+      this.outputFeedbackDampingRatio = outputFeedbackDampingRatio;
    }
 
    public void setOutputLPFBreakFrequency(double outputLPFBreakFrequency)
