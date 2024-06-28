@@ -120,7 +120,7 @@ public class RDXVRContext
                                                                                                               RobotSide.RIGHT,
                                                                                                               vrPlayAreaYUpZBackFrame));
    private final Map<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
-   private final Map<String, RDXVRTracker> trackers =  new HashMap<>();
+   private final Map<String, RDXVRTracker> trackers =  new HashMap<>(); // <serial number, tracker>
    private final Map<String, String> savedTrackersRoleMap = new HashMap<>(); // <role, serial number>
    private final Map<String, String> trackersRoleMap = new HashMap<>(); // <role, serial number>
    private final SortedSet<String> availableTrackerRoles = new TreeSet<>()
@@ -545,7 +545,7 @@ public class RDXVRContext
       resetTrackerRoles();
       for (var roleMap : savedTrackersRoleMap.entrySet())
       {
-         if (!roleMap.getValue().isEmpty())
+         if (!roleMap.getValue().isEmpty() && trackers.containsKey(roleMap.getValue()))
          {
             trackersRoleMap.put(roleMap.getKey(), roleMap.getValue());
             availableTrackerRoles.remove(roleMap.getKey());
