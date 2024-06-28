@@ -122,7 +122,7 @@ public class KinematicsToolboxController extends ToolboxController
    private static final double GLOBAL_PROPORTIONAL_GAIN = 1200.0;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final double DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT = 0.025;
+   private static final double DEFAULT_PRIVILEGED_CONFIGURATION_WEIGHT = 2.0;
    private static final double DEFAULT_PRIVILEGED_CONFIGURATION_GAIN = 50.0;
 
    /**
