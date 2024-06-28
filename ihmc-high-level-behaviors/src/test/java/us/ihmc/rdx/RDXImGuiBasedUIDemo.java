@@ -7,8 +7,10 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.logging.log4j.Level;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.log.LogTools;
 import us.ihmc.rdx.imgui.ImGuiMovingPlot;
 import us.ihmc.rdx.imgui.ImGuiTools;
+import us.ihmc.rdx.shader.RDXOutlineShader;
 import us.ihmc.rdx.tools.BoxesDemoModel;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.ui.RDX3DPanel;
@@ -83,6 +85,11 @@ public class RDXImGuiBasedUIDemo
             logArea.submitEntry(Level.TRACE, "Test trace level.");
 
             textForArea.set("Text for area");
+
+            RDXOutlineShader outlineShader = new RDXOutlineShader();
+            outlineShader.create();
+            LogTools.info("Outline shader created: {}", outlineShader);
+
          }
 
          @Override
