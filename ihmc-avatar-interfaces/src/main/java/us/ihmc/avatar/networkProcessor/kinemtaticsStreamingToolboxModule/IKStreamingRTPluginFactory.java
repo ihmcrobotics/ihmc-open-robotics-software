@@ -3,6 +3,7 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import toolbox_msgs.msg.dds.KinematicsStreamingToolboxInputMessage;
 import toolbox_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.AvatarControllerThreadInterface;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
@@ -15,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerCore.command.CrossRobotCommandResolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
@@ -36,6 +36,7 @@ import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
+import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -247,15 +248,6 @@ public class IKStreamingRTPluginFactory
 
          walkingOutputManager.attachStatusMessageListener(CapturabilityBasedStatus.class, kinematicsStreamingToolboxController::updateCapturabilityBasedStatus);
 
-         ToolboxStateMessage message = new ToolboxStateMessage();
-         ros2Node.createSubscription(inputTopic.withTypeName(ToolboxStateMessage.class), s ->
-         {
-            s.takeNextData(message, null);
-            newToolboxStateRequestedRef.set(ToolboxState.fromByte(message.getRequestedToolboxState()));
-         });
-
-         toolboxState.set(ToolboxState.SLEEP);
-
          HumanoidRobotContextJointData processedJointData = new HumanoidRobotContextJointData(desiredFullRobotModel.getOneDoFJoints().length);
          ForceSensorDataHolder forceSensorDataHolderForController = new ForceSensorDataHolder(Arrays.asList(desiredFullRobotModel.getForceSensorDefinitions()));
          CenterOfMassDataHolder centerOfMassDataHolderForController = new CenterOfMassDataHolder();
@@ -270,6 +262,21 @@ public class IKStreamingRTPluginFactory
          contextDataFactory.setProcessedJointData(processedJointData);
          contextDataFactory.setSensorDataContext(new SensorDataContext(desiredFullRobotModel));
          humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
+
+         ros2Node.createSubscription(inputTopic.withTypeName(KinematicsStreamingToolboxInputMessage.class), s ->
+         {
+            if (robotMotionStatusHolder.getCurrentRobotMotionStatus() == RobotMotionStatus.STANDING)
+               newToolboxStateRequestedRef.set(ToolboxState.WAKE_UP);
+         });
+         ToolboxStateMessage message = new ToolboxStateMessage();
+         ros2Node.createSubscription(inputTopic.withTypeName(ToolboxStateMessage.class), s ->
+         {
+            s.takeNextData(message, null);
+            if (robotMotionStatusHolder.getCurrentRobotMotionStatus() == RobotMotionStatus.STANDING)
+               newToolboxStateRequestedRef.set(ToolboxState.fromByte(message.getRequestedToolboxState()));
+         });
+
+         toolboxState.set(ToolboxState.SLEEP);
 
          kinematicsStreamingToolboxController.setRobotStateUpdater(new ContextBasedRobotStateUpdater(humanoidRobotContextData,
                                                                                                      desiredFullRobotModel,
@@ -302,6 +309,9 @@ public class IKStreamingRTPluginFactory
                   break;
             }
          }
+
+         if (humanoidRobotContextData.getRobotMotionStatusHolder().getCurrentRobotMotionStatus() == RobotMotionStatus.IN_MOTION)
+            toolboxState.set(ToolboxState.SLEEP);
 
          long currentMonotonicClockTime = System.nanoTime(); // FIXME ?
          if (initialTime < 0)
