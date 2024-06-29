@@ -3,6 +3,7 @@ package us.ihmc.rdx.ui.vr;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.GoHomeMessage;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import org.lwjgl.openvr.InputDigitalActionData;
@@ -27,6 +28,7 @@ import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFa
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.motionRetargeting.RetargetingParameters;
@@ -57,6 +59,7 @@ import us.ihmc.ros2.ROS2Input;
 import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
 import us.ihmc.scs2.definition.visual.MaterialDefinition;
+import us.ihmc.scs2.simulation.robot.Robot;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.Throttler;
 
@@ -311,10 +314,24 @@ public class RDXVRKinematicsStreamingMode
                // Update initial configuration of KST
                KinematicsToolboxInitialConfigurationMessage initialConfigMessage = KinematicsToolboxMessageFactory.initialConfigurationFromFullRobotModel(
                        syncedRobot.getFullRobotModel());
+               List<OneDoFJointBasics> oneDoFJoints = Arrays.asList(syncedRobot.getFullRobotModel().getOneDoFJoints());
+               for (RobotSide robotSide : RobotSide.values)
+               {
+                  int shyIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH));
+                  int shxIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL));
+                  int shzIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_YAW));
+                  int elyIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.ELBOW_PITCH));
+
+                  initialConfigMessage.getInitialJointAngles().set(shyIndex, -0.5f);
+                  initialConfigMessage.getInitialJointAngles().set(shxIndex, robotSide.negateIfRightSide(-0.3f));
+                  initialConfigMessage.getInitialJointAngles().set(shzIndex, robotSide.negateIfRightSide(-0.5f));
+                  initialConfigMessage.getInitialJointAngles().set(elyIndex, -2.2f);
+               }
                ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel()
                        .getSimpleRobotName()), initialConfigMessage);
                wakeUpToolbox();
                reinitializeToolbox();
+               wakeUpToolbox();
             }
          }
       });
@@ -333,6 +350,24 @@ public class RDXVRKinematicsStreamingMode
         { // do not want to close grippers while interacting with the panel
            HandConfiguration handConfiguration = nextHandConfiguration(RobotSide.RIGHT);
            sendHandCommand(RobotSide.RIGHT, handConfiguration);
+
+           double trajectoryTime = 1.5;
+           GoHomeMessage homePelvis = new GoHomeMessage();
+           homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
+           homePelvis.setTrajectoryTime(trajectoryTime);
+           ros2ControllerHelper.publishToController(homePelvis);
+
+           GoHomeMessage homeChest = new GoHomeMessage();
+           homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
+           homeChest.setTrajectoryTime(trajectoryTime);
+
+           RDXBaseUI.pushNotification("Commanding home pose...");
+           ros2ControllerHelper.publishToController(homeChest);
+
+           prescientFootstepStreaming.reset();
+           pausedForWalking = false;
+           streamingFootstepEnabled = false;
+           reintializingToolbox = false;
         }
 
          gripButtonsValue.put(RobotSide.RIGHT, controller.getGripActionData().x());
@@ -501,16 +536,6 @@ public class RDXVRKinematicsStreamingMode
             lockPelvis(toolboxInputMessage);
          }
 
-         if (enabled.get())
-            toolboxInputMessage.setStreamToController(streamToController.get());
-         else
-            toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
-
-         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
-         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
-         outputFrequencyPlot.recordEvent();
-
-
          // Stepping with ankle trackers
          if (streamingFootstepEnabled)
          {
@@ -549,6 +574,15 @@ public class RDXVRKinematicsStreamingMode
          {
             prescientFootstepStreaming.reset();
          }
+
+         if (enabled.get())
+            toolboxInputMessage.setStreamToController(streamToController.get());
+         else
+            toolboxInputMessage.setStreamToController(kinematicsRecorder.isReplaying());
+
+         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputToolboxConfigurationTopic(syncedRobot.getRobotModel().getSimpleRobotName()), ikSolverConfigurationMessage);
+         ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputCommandTopic(syncedRobot.getRobotModel().getSimpleRobotName()), toolboxInputMessage);
+         outputFrequencyPlot.recordEvent();
       }
    }
 
@@ -792,10 +826,26 @@ public class RDXVRKinematicsStreamingMode
             // Update initial configuration of KST
             KinematicsToolboxInitialConfigurationMessage initialConfigMessage = KinematicsToolboxMessageFactory.initialConfigurationFromFullRobotModel(
                     syncedRobot.getFullRobotModel());
+            List<OneDoFJointBasics> oneDoFJoints = Arrays.asList(syncedRobot.getFullRobotModel().getOneDoFJoints());
+
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               int shyIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH));
+               int shxIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL));
+               int shzIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.SHOULDER_YAW));
+               int elyIndex = oneDoFJoints.indexOf(syncedRobot.getFullRobotModel().getArmJoint(robotSide, ArmJointName.ELBOW_PITCH));
+
+               initialConfigMessage.getInitialJointAngles().set(shyIndex, -0.5f);
+               initialConfigMessage.getInitialJointAngles().set(shxIndex, robotSide.negateIfRightSide(-0.3f));
+               initialConfigMessage.getInitialJointAngles().set(shzIndex, robotSide.negateIfRightSide(-0.5f));
+               initialConfigMessage.getInitialJointAngles().set(elyIndex, -2.2f);
+            }
+
             ros2ControllerHelper.publish(KinematicsStreamingToolboxModule.getInputStreamingInitialConfigurationTopic(syncedRobot.getRobotModel()
                     .getSimpleRobotName()), initialConfigMessage);
             wakeUpToolbox();
             reinitializeToolbox();
+            wakeUpToolbox();
          }
          kinematicsRecorder.setReplay(false); // Check no concurrency replay and streaming
          initialPelvisFrame = null;
@@ -812,6 +862,13 @@ public class RDXVRKinematicsStreamingMode
       {
          streamingDisabled.poll();
          sleepToolbox();
+         prescientFootstepStreaming.reset();
+         pausedForWalking = false;
+         streamingFootstepEnabled = false;
+         reintializingToolbox = false;
+
+         visualizeIKPreviewGraphic(true);
+         streamToController.set(false);
       }
 
       if (enabled != this.enabled.get())
