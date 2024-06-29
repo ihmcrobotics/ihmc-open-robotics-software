@@ -198,8 +198,8 @@ public class RDXVRKinematicsStreamingMode
          parameters.setPublishingPeriod(0.006); // Publishing period in seconds.
          boolean usingRealtimePlugin = false;
          parameters.setStreamIntegrationDuration(usingRealtimePlugin ? 2.0 * parameters.getPublishingPeriod() : 0.1);
-         parameters.setDefaultChestMessageAngularWeight(1.0, 1.0, 0.5);
-         parameters.setDefaultPelvisMessageLinearWeight(10.0, 10.0, 20.0);
+         parameters.setHoldChestAngularWeight(1.0, 1.0, 0.5);
+         parameters.setHoldPelvisLinearWeight(10.0, 10.0, 20.0);
          parameters.setDefaultLinearRateLimit(10.0);
          parameters.setDefaultAngularRateLimit(100.0);
          parameters.setDefaultLinearWeight(10.0);

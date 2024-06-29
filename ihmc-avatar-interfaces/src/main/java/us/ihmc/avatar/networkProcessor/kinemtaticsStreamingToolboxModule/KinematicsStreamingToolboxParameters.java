@@ -10,7 +10,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.tools.UnitConversions;
 
 import java.util.Map;
-import java.util.Vector;
 
 public class KinematicsStreamingToolboxParameters
 {
@@ -73,41 +72,65 @@ public class KinematicsStreamingToolboxParameters
    /**
     * Default weight for holding the arms at the robot initial configuration when no arm message is received.
     */
-   private double defaultArmMessageWeight;
+   private double holdArmWeight;
    /**
     * Default weight for holding the neck at the robot initial configuration when no neck message is received.
     */
-   private double defaultNeckMessageWeight;
+   private double holdNeckWeight;
    /**
     * Default weight for holding the pelvis at the robot initial configuration when no pelvis message is received.
     */
-   private final Vector3D defaultPelvisMessageLinearWeight = new Vector3D();
+   private final Vector3D holdPelvisLinearWeight = new Vector3D();
    /**
     * Default weight for holding the pelvis at the robot initial configuration when no pelvis message is received.
     */
-   private final Vector3D defaultPelvisMessageAngularWeight = new Vector3D();
+   private final Vector3D holdPelvisAngularWeight = new Vector3D();
    /**
     * Default weight for holding the chest at the robot initial configuration when no chest message is received.
     */
-   private final Vector3D defaultChestMessageAngularWeight = new Vector3D();
+   private final Vector3D holdChestAngularWeight = new Vector3D();
 
    /**
     * Default weight for locking the pelvis at the robot initial configuration when no pelvis message is received.
     */
-   private double defaultPelvisMessageLockWeight;
+   private double lockPelvisWeight;
    /**
     * Default weight for locking the chest at the robot initial configuration when no chest message is received.
     */
-   private double defaultChestMessageLockWeight;
+   private double lockChestWeight;
 
    /**
     * Default weight for input messages for which no weight is provided.
     */
-   private double defaultLinearWeight;
+   private Vector3D defaultLinearWeight = new Vector3D();
    /**
     * Default weight for input messages for which no weight is provided.
     */
-   private double defaultAngularWeight;
+   private Vector3D defaultAngularWeight = new Vector3D();
+   /**
+    * Default weight for pelvis input messages for which no weight is provided.
+    */
+   private Vector3D defaultPelvisLinearWeight = new Vector3D();
+   /**
+    * Default weight for pelvis input messages for which no weight is provided.
+    */
+   private Vector3D defaultPelvisAngularWeight = new Vector3D();
+   /**
+    * Default weight for chest input messages for which no weight is provided.
+    */
+   private Vector3D defaultChestLinearWeight = new Vector3D();
+   /**
+    * Default weight for chest input messages for which no weight is provided.
+    */
+   private Vector3D defaultChestAngularWeight = new Vector3D();
+   /**
+    * Default weight for hand input messages for which no weight is provided.
+    */
+   private Vector3D defaultHandLinearWeight = new Vector3D();
+   /**
+    * Default weight for hand input messages for which no weight is provided.
+    */
+   private Vector3D defaultHandAngularWeight = new Vector3D();
    /**
     * Default gain for the linear part of a taskspace objective.
     */
@@ -260,17 +283,23 @@ public class KinematicsStreamingToolboxParameters
       centerOfMassSafeMargin = 0.05;
       centerOfMassHoldWeight = 0.001;
       publishingSolutionPeriod = UnitConversions.hertzToSeconds(60.0);
-      defaultArmMessageWeight = 10.0;
-      defaultNeckMessageWeight = 10.0;
-      defaultPelvisMessageLinearWeight.set(2.5, 2.5, 2.5);
-      defaultPelvisMessageAngularWeight.set(1.0, 1.0, 1.0);
-      defaultChestMessageAngularWeight.set(0.75, 0.75, 0.75);
+      holdArmWeight = 10.0;
+      holdNeckWeight = 10.0;
+      holdPelvisLinearWeight.set(2.5, 2.5, 2.5);
+      holdPelvisAngularWeight.set(1.0, 1.0, 1.0);
+      holdChestAngularWeight.set(0.75, 0.75, 0.75);
 
-      defaultPelvisMessageLockWeight = 1000.0;
-      defaultChestMessageLockWeight = 1000.0;
+      lockPelvisWeight = 1000.0;
+      lockChestWeight = 1000.0;
 
-      defaultLinearWeight = 20.0;
-      defaultAngularWeight = 1.0;
+      defaultLinearWeight.set(20.0, 20.0, 20.0);
+      defaultAngularWeight.set(1.0, 1.0, 1.0);
+      defaultPelvisLinearWeight.set(defaultLinearWeight);
+      defaultPelvisAngularWeight.set(defaultAngularWeight);
+      defaultChestLinearWeight.set(defaultLinearWeight);
+      defaultChestAngularWeight.set(defaultAngularWeight);
+      defaultHandLinearWeight.set(defaultLinearWeight);
+      defaultHandAngularWeight.set(defaultAngularWeight);
 
       defaultLinearGain = 50.0;
       defaultAngularGain = 50.0;
@@ -364,49 +393,79 @@ public class KinematicsStreamingToolboxParameters
       return publishingSolutionPeriod;
    }
 
-   public double getDefaultArmMessageWeight()
+   public double getHoldArmWeight()
    {
-      return defaultArmMessageWeight;
+      return holdArmWeight;
    }
 
-   public double getDefaultNeckMessageWeight()
+   public double getHoldNeckWeight()
    {
-      return defaultNeckMessageWeight;
+      return holdNeckWeight;
    }
 
-   public Vector3D getDefaultPelvisMessageLinearWeight()
+   public Vector3D getHoldPelvisLinearWeight()
    {
-      return defaultPelvisMessageLinearWeight;
+      return holdPelvisLinearWeight;
    }
 
-   public Vector3D getDefaultPelvisMessageAngularWeight()
+   public Vector3D getHoldPelvisAngularWeight()
    {
-      return defaultPelvisMessageAngularWeight;
+      return holdPelvisAngularWeight;
    }
 
-   public Vector3D getDefaultChestMessageAngularWeight()
+   public Vector3D getHoldChestAngularWeight()
    {
-      return defaultChestMessageAngularWeight;
+      return holdChestAngularWeight;
    }
 
-   public double getDefaultPelvisMessageLockWeight()
+   public double getLockPelvisWeight()
    {
-      return defaultPelvisMessageLockWeight;
+      return lockPelvisWeight;
    }
 
-   public double getDefaultChestMessageLockWeight()
+   public double getLockChestWeight()
    {
-      return defaultChestMessageLockWeight;
+      return lockChestWeight;
    }
 
-   public double getDefaultLinearWeight()
+   public Vector3D getDefaultLinearWeight()
    {
       return defaultLinearWeight;
    }
 
-   public double getDefaultAngularWeight()
+   public Vector3D getDefaultAngularWeight()
    {
       return defaultAngularWeight;
+   }
+
+   public Vector3D getDefaultPelvisLinearWeight()
+   {
+      return defaultPelvisLinearWeight;
+   }
+
+   public Vector3D getDefaultPelvisAngularWeight()
+   {
+      return defaultPelvisAngularWeight;
+   }
+
+   public Vector3D getDefaultChestLinearWeight()
+   {
+      return defaultChestLinearWeight;
+   }
+
+   public Vector3D getDefaultChestAngularWeight()
+   {
+      return defaultChestAngularWeight;
+   }
+
+   public Vector3D getDefaultHandLinearWeight()
+   {
+      return defaultHandLinearWeight;
+   }
+
+   public Vector3D getDefaultHandAngularWeight()
+   {
+      return defaultHandAngularWeight;
    }
 
    public double getDefaultLinearGain()
@@ -634,49 +693,119 @@ public class KinematicsStreamingToolboxParameters
       this.publishingSolutionPeriod = publishingSolutionPeriod;
    }
 
-   public void setDefaultArmMessageWeight(double defaultArmMessageWeight)
+   public void setHoldArmWeight(double holdArmWeight)
    {
-      this.defaultArmMessageWeight = defaultArmMessageWeight;
+      this.holdArmWeight = holdArmWeight;
    }
 
-   public void setDefaultNeckMessageWeight(double defaultNeckMessageWeight)
+   public void setHoldNeckWeight(double holdNeckWeight)
    {
-      this.defaultNeckMessageWeight = defaultNeckMessageWeight;
+      this.holdNeckWeight = holdNeckWeight;
    }
 
-   public void setDefaultPelvisMessageLinearWeight(double xWeight, double yWeight, double zWeight)
+   public void setHoldPelvisLinearWeight(double xWeight, double yWeight, double zWeight)
    {
-      this.defaultPelvisMessageLinearWeight.set(xWeight, yWeight, zWeight);
+      this.holdPelvisLinearWeight.set(xWeight, yWeight, zWeight);
    }
 
-   public void setDefaultPelvisMessageAngularWeight(double xWeight, double yWeight, double zWeight)
+   public void setHoldPelvisAngularWeight(double xWeight, double yWeight, double zWeight)
    {
-      this.defaultPelvisMessageAngularWeight.set(xWeight, yWeight, zWeight);
+      this.holdPelvisAngularWeight.set(xWeight, yWeight, zWeight);
    }
 
-   public void setDefaultChestMessageAngularWeight(double xWeight, double yWeight, double zWeight)
+   public void setHoldChestAngularWeight(double xWeight, double yWeight, double zWeight)
    {
-      this.defaultChestMessageAngularWeight.set(xWeight, yWeight, zWeight);
+      this.holdChestAngularWeight.set(xWeight, yWeight, zWeight);
    }
 
-   public void setDefaultPelvisMessageLockWeight(double defaultPelvisMessageLockWeight)
+   public void setLockPelvisWeight(double lockPelvisWeight)
    {
-      this.defaultPelvisMessageLockWeight = defaultPelvisMessageLockWeight;
+      this.lockPelvisWeight = lockPelvisWeight;
    }
 
-   public void setDefaultChestMessageLockWeight(double defaultChestMessageLockWeight)
+   public void setLockChestWeight(double lockChestWeight)
    {
-      this.defaultChestMessageLockWeight = defaultChestMessageLockWeight;
+      this.lockChestWeight = lockChestWeight;
    }
 
    public void setDefaultLinearWeight(double defaultLinearWeight)
    {
-      this.defaultLinearWeight = defaultLinearWeight;
+      this.defaultLinearWeight = new Vector3D(defaultLinearWeight, defaultLinearWeight, defaultLinearWeight);
+   }
+
+   public void setDefaultLinearWeight(Tuple3DReadOnly defaultLinearWeight)
+   {
+      this.defaultLinearWeight = new Vector3D(defaultLinearWeight);
    }
 
    public void setDefaultAngularWeight(double defaultAngularWeight)
    {
-      this.defaultAngularWeight = defaultAngularWeight;
+      this.defaultAngularWeight = new Vector3D(defaultAngularWeight, defaultAngularWeight, defaultAngularWeight);
+   }
+
+   public void setDefaultAngularWeight(Tuple3DReadOnly defaultAngularWeight)
+   {
+      this.defaultAngularWeight = new Vector3D(defaultAngularWeight);
+   }
+
+   public void setDefaultPelvisLinearWeight(double defaultPelvisLinearWeight)
+   {
+      this.defaultPelvisLinearWeight = new Vector3D(defaultPelvisLinearWeight, defaultPelvisLinearWeight, defaultPelvisLinearWeight);
+   }
+
+   public void setDefaultPelvisLinearWeight(Tuple3DReadOnly defaultPelvisLinearWeight)
+   {
+      this.defaultPelvisLinearWeight = new Vector3D(defaultPelvisLinearWeight);
+   }
+
+   public void setDefaultPelvisAngularWeight(double defaultPelvisAngularWeight)
+   {
+      this.defaultPelvisAngularWeight = new Vector3D(defaultPelvisAngularWeight, defaultPelvisAngularWeight, defaultPelvisAngularWeight);
+   }
+
+   public void setDefaultPelvisAngularWeight(Tuple3DReadOnly defaultPelvisAngularWeight)
+   {
+      this.defaultPelvisAngularWeight = new Vector3D(defaultPelvisAngularWeight);
+   }
+
+   public void setDefaultChestLinearWeight(double defaultChestLinearWeight)
+   {
+      this.defaultChestLinearWeight = new Vector3D(defaultChestLinearWeight, defaultChestLinearWeight, defaultChestLinearWeight);
+   }
+
+   public void setDefaultChestLinearWeight(Tuple3DReadOnly defaultChestLinearWeight)
+   {
+      this.defaultChestLinearWeight = new Vector3D(defaultChestLinearWeight);
+   }
+
+   public void setDefaultChestAngularWeight(double defaultChestAngularWeight)
+   {
+      this.defaultChestAngularWeight = new Vector3D(defaultChestAngularWeight, defaultChestAngularWeight, defaultChestAngularWeight);
+   }
+
+   public void setDefaultChestAngularWeight(Tuple3DReadOnly defaultChestAngularWeight)
+   {
+      this.defaultChestAngularWeight = new Vector3D(defaultChestAngularWeight);
+   }
+
+   public void setDefaultHandLinearWeight(double defaultHandLinearWeight)
+   {
+      this.defaultHandLinearWeight = new Vector3D(defaultHandLinearWeight, defaultHandLinearWeight, defaultHandLinearWeight);
+   }
+
+   public void setDefaultHandLinearWeight(Tuple3DReadOnly defaultHandLinearWeight)
+   {
+      this.defaultHandLinearWeight = new Vector3D(defaultHandLinearWeight);
+   }
+
+   public void setDefaultHandAngularWeight(double defaultHandAngularWeight)
+   {
+      this.defaultHandAngularWeight = new Vector3D(defaultHandAngularWeight, defaultHandAngularWeight, defaultHandAngularWeight);
+   }
+
+   public void setDefaultHandAngularWeight(Tuple3DReadOnly defaultHandAngularWeight)
+   {
+      this.defaultHandAngularWeight = new Vector3D(defaultHandAngularWeight);
    }
 
    public void setDefaultLinearGain(double defaultLinearGain)

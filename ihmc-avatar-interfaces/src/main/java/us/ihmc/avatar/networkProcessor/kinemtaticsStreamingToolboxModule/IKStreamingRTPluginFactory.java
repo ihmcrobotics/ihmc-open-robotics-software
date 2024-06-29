@@ -265,14 +265,14 @@ public class IKStreamingRTPluginFactory
 
          ros2Node.createSubscription(inputTopic.withTypeName(KinematicsStreamingToolboxInputMessage.class), s ->
          {
-            if (robotMotionStatusHolder.getCurrentRobotMotionStatus() == RobotMotionStatus.STANDING)
+            if (robotMotionStatusHolder.getCurrentRobotMotionStatus() != RobotMotionStatus.STANDING)
                newToolboxStateRequestedRef.set(ToolboxState.WAKE_UP);
          });
          ToolboxStateMessage message = new ToolboxStateMessage();
          ros2Node.createSubscription(inputTopic.withTypeName(ToolboxStateMessage.class), s ->
          {
             s.takeNextData(message, null);
-            if (robotMotionStatusHolder.getCurrentRobotMotionStatus() == RobotMotionStatus.STANDING)
+            if (robotMotionStatusHolder.getCurrentRobotMotionStatus() != RobotMotionStatus.STANDING)
                newToolboxStateRequestedRef.set(ToolboxState.fromByte(message.getRequestedToolboxState()));
          });
 
