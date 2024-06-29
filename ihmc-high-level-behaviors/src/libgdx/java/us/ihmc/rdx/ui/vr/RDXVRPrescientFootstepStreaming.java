@@ -18,14 +18,14 @@ import us.ihmc.robotics.robotSide.SideDependentList;
  */
 public class RDXVRPrescientFootstepStreaming
 {
-   private static final double STEP_THRESHOLD = 0.06; // movement threshold
+   private static final double STEP_THRESHOLD = 0.08; // movement threshold
    private static final double LIFT_THRESHOLD = 0.02; // lift threshold
    private static final double STRIDE_LENGTH = 0.20; // fixed stride length
    private static final double STABILITY_THRESHOLD = 0.005; // stability threshold
    private static final int STABILITY_ITERATIONS = 20; // Number of stable iterations
-   private static final int TURNING_THRESHOLD = 10; // Degrees variation for ankle tracker to trigger 33.3 deg turn on robot
+   private static final int TURNING_THRESHOLD = 12; // Degrees variation for ankle tracker to trigger 33.3 deg turn on robot
    public static final int WAIT_TIME_BEFORE_STEP = 50; // [ms] time to wait before walking, need some time for the stop streaming status to get to the controller
-   public static final int WAIT_TIME_AFTER_STEP = 1000; // [ms] time to wait before restarting streaming
+   public static final int WAIT_TIME_AFTER_STEP = 500; // [ms] time to wait before restarting streaming
 
    private final ROS2SyncedRobotModel syncedRobot;
    private final RDXManualFootstepPlacement footstepPlacer;
@@ -122,10 +122,17 @@ public class RDXVRPrescientFootstepStreaming
                      // Place and send footstep
                      footstepPlacer.createNewFootstep(side);
                      footstepPlacer.setFootstepPose(new FramePose3D(ReferenceFrame.getWorldFrame(), currentRobotFootTransformInWorld));
-                     footstepPlacer.checkAndPlaceFootstep();
-                     footstepPlacer.exitPlacement();
-                     isUserStepping.put(side, true);
-                     readyToStep.set();
+                     if(footstepPlacer.checkAndPlaceFootstep())
+                     {
+                        footstepPlacer.exitPlacement();
+                        isUserStepping.put(side, true);
+                        readyToStep.clear();
+                        readyToStep.set();
+                     }
+                     else
+                     {
+                        footstepPlacer.exitPlacement();
+                     }
                   }
                }
             }

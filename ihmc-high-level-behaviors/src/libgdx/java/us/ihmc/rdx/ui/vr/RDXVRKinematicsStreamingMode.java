@@ -107,7 +107,6 @@ public class RDXVRKinematicsStreamingMode
    private final RDXManualFootstepPlacement footstepPlacer;
    private boolean pausedForWalking = false;
    private final SideDependentList<Float> gripButtonsValue = new SideDependentList<>();
-   private boolean streamingFootstepEnabled = false;
    @Nullable
    private KinematicsStreamingToolboxModule toolbox;
    private final KinematicsToolboxConfigurationMessage ikSolverConfigurationMessage = new KinematicsToolboxConfigurationMessage();
@@ -297,14 +296,13 @@ public class RDXVRKinematicsStreamingMode
          }
 
          // Check if left joystick is pressed in order to trigger recording or replay of motion
-         InputDigitalActionData joystickButton = controller.getJoystickPressActionData();
-         kinematicsRecorder.processRecordReplayInput(joystickButton);
+         InputDigitalActionData leftJoystickButton = controller.getJoystickPressActionData();
+         gripButtonsValue.put(RobotSide.LEFT, controller.getGripActionData().x());
+
+         kinematicsRecorder.processRecordReplayInput(leftJoystickButton);
          if (kinematicsRecorder.isReplayingEnabled().get())
             wakeUpToolbox();
 
-         gripButtonsValue.put(RobotSide.LEFT, controller.getGripActionData().x());
-
-         InputDigitalActionData leftJoystickButton = controller.getJoystickPressActionData();
          if (leftJoystickButton.bChanged() && !leftJoystickButton.bState())
          { // reinitialize toolbox
             LogTools.warn("Reinitializing toolbox. Forcing initial IK configuration to current robot configuration");
@@ -366,21 +364,11 @@ public class RDXVRKinematicsStreamingMode
 
            prescientFootstepStreaming.reset();
            pausedForWalking = false;
-           streamingFootstepEnabled = false;
            reintializingToolbox = false;
         }
 
          gripButtonsValue.put(RobotSide.RIGHT, controller.getGripActionData().x());
       });
-
-      if (gripButtonsValue.get(RobotSide.LEFT) > 0.5f && gripButtonsValue.get(RobotSide.RIGHT) > 0.5f)
-      {
-         streamingFootstepEnabled = true;
-      }
-      else
-      {
-         streamingFootstepEnabled = false;
-      }
 
       if ((enabled.get() || kinematicsRecorder.isReplaying()) && toolboxInputStreamRateLimiter.run(streamPeriod))
       {
@@ -537,7 +525,7 @@ public class RDXVRKinematicsStreamingMode
          }
 
          // Stepping with ankle trackers
-         if (streamingFootstepEnabled)
+         if (gripButtonsValue.get(RobotSide.LEFT) > 0.5f && gripButtonsValue.get(RobotSide.RIGHT) > 0.5f)
          {
             prescientFootstepStreaming.streamFootsteps();
 
@@ -563,6 +551,7 @@ public class RDXVRKinematicsStreamingMode
             }
             else
             {
+               sleepToolbox();
                if (prescientFootstepStreaming.getReadyToStepNotification().poll())
                {
                   LogTools.info("Stepping");
@@ -735,7 +724,6 @@ public class RDXVRKinematicsStreamingMode
          {
             LogTools.info("Finished walking. Resuming streaming");
             // Restart KST
-            sleepToolbox();
             lastStepCompletionTime = System.currentTimeMillis();
             reintializingToolbox = true;
          }
@@ -864,7 +852,6 @@ public class RDXVRKinematicsStreamingMode
          sleepToolbox();
          prescientFootstepStreaming.reset();
          pausedForWalking = false;
-         streamingFootstepEnabled = false;
          reintializingToolbox = false;
 
          visualizeIKPreviewGraphic(true);

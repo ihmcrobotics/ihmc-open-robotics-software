@@ -253,7 +253,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       placeFootstep();
    }
 
-   public void checkAndPlaceFootstep()
+   public boolean checkAndPlaceFootstep()
    {
       // This allows us to check the current footstep being placed and flash that footstep if its unreasonable
       FramePose3DReadOnly candidateStepPose = getFootstepBeingPlacedPoseORLastFootstepPose();
@@ -269,10 +269,12 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          // If safe to place footstep
          RDXInteractableFootstep addedStep = footstepPlan.getNextFootstep();
          addedStep.copyFrom(baseUI, footstepBeingPlaced);
+         return true;
       }
       else
       {
          LogTools.info("Footstep Rejected, unfeasible");
+         return false;
       }
    }
 
