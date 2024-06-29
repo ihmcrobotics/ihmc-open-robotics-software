@@ -659,8 +659,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       WalkingState currentState = stateMachine.getCurrentState();
       commandConsumer.update();
       commandConsumer.consumeHeadCommands();
-      commandConsumer.consumeChestCommands();
-      commandConsumer.consumePelvisHeightCommands();
+      commandConsumer.consumeChestCommands(currentState, allowUpperBodyMotionDuringLocomotion.getBooleanValue());
+      commandConsumer.consumePelvisHeightCommands(currentState, allowUpperBodyMotionDuringLocomotion.getBooleanValue());
       commandConsumer.consumeGoHomeMessages();
       commandConsumer.consumeFootLoadBearingCommands(currentState);
       commandConsumer.consumeStopAllTrajectoryCommands();
