@@ -204,9 +204,9 @@ public class RDXScriptedTrajectoryStreamer
             case ROM_ELBOW:
                waypoints.put(side, List.of(homeConfiguration,
                                            // Elbow ROM
-                                           List.of(-3.1, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.6), -0.5, 0.0, 0.0, 0.0),
-                                           List.of(-3.1, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.6), lowerLimits[3], 0.0, 0.0, 0.0),
-                                           List.of(-3.1, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.6), -0.5, 0.0, 0.0, 0.0),
+                                           List.of(-3.1, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.6), -0.5, side.negateIfRightSide(1.00), 0.0, side.negateIfRightSide(1.00)),
+                                           List.of(-3.1, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.6), lowerLimits[3], side.negateIfRightSide(1.57), 0.0, side.negateIfRightSide(1.57)),
+                                           List.of(-3.1, side.negateIfRightSide(2.7), side.negateIfRightSide(-1.6), -0.5, side.negateIfRightSide(1.00), 0.0, side.negateIfRightSide(1.00)),
                                            List.of(-1.1, side.negateIfRightSide(2.7), 0.0, -1.6, 0.0, 0.0, 0.0),
                                            homeConfiguration));
                break;
