@@ -28,10 +28,7 @@ public class DetectionManager
 
    public DetectionManager(ROS2PublishSubscribeAPI ros2)
    {
-      if (ros2 != null)
-      {
-         settingsSync = new ROS2StoredPropertySet<>(ros2, PerceptionAPI.DETECTION_MANAGER_SETTINGS, settings);
-      }
+      settingsSync = ros2 == null ? null : new ROS2StoredPropertySet<>(ros2, PerceptionAPI.DETECTION_MANAGER_SETTINGS, settings);
    }
 
    /**
@@ -71,7 +68,7 @@ public class DetectionManager
                                                            .getPosition()
                                                            .distanceSquared(newInstantDetection.getPose().getPosition());
                // matches must be close enough
-               if (distanceSquared < maxMatchDistanceSquared)
+               if (distanceSquared < settings.getMaxMatchDistanceSquared())
                   potentialMatches.add(new DetectionPair(persistentDetection, newInstantDetection));
             }
          }
@@ -107,9 +104,9 @@ public class DetectionManager
          // create new persistent detections from unmatched new detections
          for (InstantDetection unmatchedNewDetection : remainingNewDetections)
             persistentDetections.add(new PersistentDetection(unmatchedNewDetection,
-                                                             acceptanceAverageConfidence,
-                                                             stabilityDetectionFrequency,
-                                                             detectionHistoryDuration));
+                                                             settings.getAcceptanceAverageConfidence(),
+                                                             settings.getStabilityDetectionFrequency(),
+                                                             settings.getDetectionHistoryDuration()));
       }
    }
 
@@ -161,6 +158,9 @@ public class DetectionManager
 
    public void updateDetections(Instant now)
    {
+      if (settingsSync != null)
+         settingsSync.updateAndPublishThrottledStatus();
+
       synchronized (persistentDetectionsLock)
       {
          Iterator<PersistentDetection> detectionIterator = persistentDetections.iterator();
@@ -174,7 +174,7 @@ public class DetectionManager
                detection.updateHistory(now);
                if (detection.hasBecomeValid().poll())
                {
-                  detection.setStabilityConfidenceThreshold(stabilityAverageConfidence);
+                  detection.setStabilityConfidenceThreshold(settings.getStabilityAverageConfidence());
                   newlyValidDetections.add(detection);
                }
             }
@@ -184,31 +184,31 @@ public class DetectionManager
 
    public void setMatchDistanceThreshold(double matchDistance)
    {
-      settings.set(DetectionManagerSettings.maxMatchDistanceSquared, matchDistance * matchDistance);
+      settings.setMaxMatchDistanceSquared(matchDistance * matchDistance);
    }
 
    public void setAcceptanceAverageConfidence(double acceptanceAverageConfidence)
    {
-      this.acceptanceAverageConfidence = acceptanceAverageConfidence;
+      settings.setAcceptanceAverageConfidence(acceptanceAverageConfidence);
    }
 
    public void setStabilityAverageConfidence(double stabilityAverageConfidence)
    {
-      this.stabilityAverageConfidence = stabilityAverageConfidence;
+      settings.setStabilityAverageConfidence(stabilityAverageConfidence);
    }
 
    public void setStabilityDetectionFrequency(double stabilityDetectionFrequency)
    {
-      this.stabilityDetectionFrequency = stabilityDetectionFrequency;
+      settings.setStabilityDetectionFrequency(stabilityDetectionFrequency);
    }
 
    public void setDetectionHistoryDuration(double historyLengthSeconds)
    {
-      this.detectionHistoryDuration = historyLengthSeconds;
+      settings.setDetectionHistoryDuration(historyLengthSeconds);
    }
 
    public void setDetectionHistoryDuration(Duration historyDuration)
    {
-      this.detectionHistoryDuration = TimeTools.toDoubleSeconds(historyDuration);
+      settings.setDetectionHistoryDuration(TimeTools.toDoubleSeconds(historyDuration));
    }
 }

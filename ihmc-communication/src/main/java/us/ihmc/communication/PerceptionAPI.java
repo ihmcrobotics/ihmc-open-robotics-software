@@ -25,7 +25,6 @@ import perception_msgs.msg.dds.SceneGraphMessage;
 import perception_msgs.msg.dds.VideoPacket;
 import perception_msgs.msg.dds.YOLOv8ParametersMessage;
 import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
-import perception_msgs.msg.dds.DetectionManagerSettingsMessage;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
 import std_msgs.msg.dds.Int64;

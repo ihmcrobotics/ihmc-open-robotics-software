@@ -54,7 +54,7 @@ public class DetectionManagerSettings extends StoredPropertySet
       set(DetectionManagerSettings.acceptanceAverageConfidence, acceptanceAverageConfidence);
    }
 
-   public void setStabilityAverageConfidenced(double stabilityAverageConfidence)
+   public void setStabilityAverageConfidence(double stabilityAverageConfidence)
    {
       set(DetectionManagerSettings.stabilityAverageConfidence, stabilityAverageConfidence);
    }
