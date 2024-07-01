@@ -20,12 +20,9 @@ import java.util.concurrent.TimeUnit;
 
 public class PerceptionBasedContinuousHiking
 {
-   private final ROS2SyncedRobotModel syncedRobot;
-   private final ROS2Helper ros2Helper;
-   private ROS2StoredPropertySetGroup ros2PropertySetGroup;
-   private TerrainPerceptionProcessWithDriver perceptionTask;
-   private HumanoidActivePerceptionModule activePerceptionModule;
-   private final ContinuousHikingParameters continuousPlanningParameters = new ContinuousHikingParameters();
+   private final ROS2StoredPropertySetGroup ros2PropertySetGroup;
+   private final TerrainPerceptionProcessWithDriver perceptionTask;
+   private final HumanoidActivePerceptionModule activePerceptionModule;
 
    protected final ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(1,
                                                                                                           getClass(),
@@ -34,8 +31,8 @@ public class PerceptionBasedContinuousHiking
    public PerceptionBasedContinuousHiking(DRCRobotModel robotModel, String realsenseSerialNumber)
    {
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "nadia_terrain_perception_node");
-      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
-      ros2Helper = new ROS2Helper(ros2Node);
+      ROS2SyncedRobotModel syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
+      ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
       ros2PropertySetGroup = new ROS2StoredPropertySetGroup(ros2Helper);
       syncedRobot.initializeToDefaultRobotInitialSetup(0.0, 0.0, 0.0, 0.0);
       perceptionTask = new TerrainPerceptionProcessWithDriver(realsenseSerialNumber,
@@ -43,8 +40,7 @@ public class PerceptionBasedContinuousHiking
                                                               robotModel.getCollisionBoxProvider(),
                                                               robotModel.createFullRobotModel(),
                                                               RealsenseConfiguration.D455_COLOR_720P_DEPTH_720P_30HZ,
-                                                              ros2PropertySetGroup,
-                                                              ros2Helper,
+                                                              ros2PropertySetGroup, ros2Helper,
                                                               PerceptionAPI.D455_DEPTH_IMAGE,
                                                               PerceptionAPI.D455_COLOR_IMAGE,
                                                               PerceptionAPI.PERSPECTIVE_RAPID_REGIONS,
@@ -52,6 +48,7 @@ public class PerceptionBasedContinuousHiking
                                                               syncedRobot::update);
 
       activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters());
+      ContinuousHikingParameters continuousPlanningParameters = new ContinuousHikingParameters();
       activePerceptionModule.initializeContinuousPlannerSchedulingTask(robotModel, ros2Node, syncedRobot.getReferenceFrames(), continuousPlanningParameters);
 
       ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.CONTINUOUS_WALKING_PARAMETERS, continuousPlanningParameters);

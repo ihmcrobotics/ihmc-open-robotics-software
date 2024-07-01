@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.monteCarloPlanning;
+package us.ihmc.behaviors.activeMapping;
 
 import behavior_msgs.msg.dds.ContinuousWalkingStatusMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -7,6 +7,7 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Size;
+import us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask.PlanningMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -15,6 +16,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.MonteCarloFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.communication.ContinuousWalkingAPI;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepNode;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloFootstepPlannerRequest;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloPlannerTools;
+import us.ihmc.footstepPlanning.monteCarloPlanning.MonteCarloTreeNode;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.gpuHeightMap.HeatMapGenerator;
 import us.ihmc.perception.heightMap.TerrainMapData;
@@ -52,22 +57,24 @@ public class TerrainPlanningDebugger
    private HeatMapGenerator contactHeatMapGenerator = new HeatMapGenerator();
    private ContinuousWalkingStatusMessage statusMessage = new ContinuousWalkingStatusMessage();
 
-   private ROS2PublisherBasics<FootstepDataListMessage> publisherForUI;
+   private ROS2PublisherBasics<FootstepDataListMessage> plannedFootstesPublisherForUI;
    private ROS2PublisherBasics<ContinuousWalkingStatusMessage> statusPublisher;
    private ROS2PublisherBasics<FootstepDataListMessage> monteCarloPlanPublisherForUI;
    private ROS2PublisherBasics<PoseListMessage> startAndGoalPublisherForUI;
    private ROS2PublisherBasics<PoseListMessage> monteCarloNodesPublisherForUI;
    private MonteCarloFootstepPlannerRequest request;
    private MonteCarloFootstepPlannerParameters parameters;
+   private PlanningMode planningMode;
 
    private Mat contactHeatMapImage;
 
-   public TerrainPlanningDebugger(ROS2Node ros2Node, MonteCarloFootstepPlannerParameters parameters)
+   public TerrainPlanningDebugger(ROS2Node ros2Node, MonteCarloFootstepPlannerParameters parameters, PlanningMode planningMode)
    {
       this.parameters = parameters;
+      this.planningMode = planningMode;
       if (ros2Node != null)
       {
-         publisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.PLANNED_FOOTSTEPS);
+         plannedFootstesPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.PLANNED_FOOTSTEPS);
          statusPublisher = ros2Node.createPublisher(ContinuousWalkingAPI.CONTINUOUS_WALKING_STATUS);
          monteCarloPlanPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.MONTE_CARLO_FOOTSTEP_PLAN);
          startAndGoalPublisherForUI = ros2Node.createPublisher(ContinuousWalkingAPI.START_AND_GOAL_FOOTSTEPS);
@@ -159,7 +166,7 @@ public class TerrainPlanningDebugger
       plotFootPoses(heightMapColorImage, request.getStartFootPoses(), 2);
       plotFootstepPlan(heightMapColorImage, plan);
       plotFootPoses(heightMapColorImage, request.getGoalFootPoses(), 3);
-      
+
       plotFootPoses(contactHeatMapColorImage, request.getStartFootPoses(), 2);
       plotFootstepPlan(contactHeatMapColorImage, plan);
       plotFootPoses(contactHeatMapColorImage, request.getGoalFootPoses(), 3);
@@ -229,10 +236,10 @@ public class TerrainPlanningDebugger
       ArrayList<MonteCarloTreeNode> optimalPath = new ArrayList<>();
       MonteCarloPlannerTools.getOptimalPath(root, optimalPath);
 
-      for (int i = 1; i<optimalPath.size(); i++)
+      for (int i = 1; i < optimalPath.size(); i++)
       {
          MonteCarloFootstepNode footstepNode = (MonteCarloFootstepNode) optimalPath.get(i);
-         MonteCarloFootstepNode previousNode = (MonteCarloFootstepNode) optimalPath.get(i-1);
+         MonteCarloFootstepNode previousNode = (MonteCarloFootstepNode) optimalPath.get(i - 1);
          double totalScore = MonteCarloPlannerTools.scoreFootstepNode(previousNode, footstepNode, request, parameters, true);
       }
    }
@@ -249,6 +256,25 @@ public class TerrainPlanningDebugger
       MessageTools.packPoseListMessage(poses, poseListMessage);
 
       startAndGoalPublisherForUI.publish(poseListMessage);
+   }
+
+   public void resetVisualizationForUIPublisher()
+   {
+      PoseListMessage poseListMessage = new PoseListMessage();
+      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+
+      if (planningMode == PlanningMode.FAST_HIKING)
+      {
+         startAndGoalPublisherForUI.publish(poseListMessage);
+         monteCarloNodesPublisherForUI.publish(poseListMessage);
+         plannedFootstesPublisherForUI.publish(footstepDataListMessage);
+      }
+
+      if (planningMode == PlanningMode.WALK_TO_GOAL)
+      {
+         monteCarloNodesPublisherForUI.publish(poseListMessage);
+         plannedFootstesPublisherForUI.publish(footstepDataListMessage);
+      }
    }
 
    public void publishMonteCarloNodesForVisualization(MonteCarloTreeNode root, TerrainMapData terrainMap)
@@ -292,7 +318,7 @@ public class TerrainPlanningDebugger
 
    public void publishPlannedFootsteps(FootstepDataListMessage plannedFootstepsMessage)
    {
-      publisherForUI.publish(plannedFootstepsMessage);
+      plannedFootstesPublisherForUI.publish(plannedFootstepsMessage);
    }
 
    public void printContactMap()
@@ -319,6 +345,16 @@ public class TerrainPlanningDebugger
    public Mat getDisplayImage()
    {
       return stacked;
+   }
+
+   public PlanningMode getPlanningMode()
+   {
+      return planningMode;
+   }
+
+   public void setPlanningMode(PlanningMode planningMode)
+   {
+      this.planningMode = planningMode;
    }
 
    public void setEnabled(boolean enabled)

@@ -11,6 +11,10 @@ public class StopContinuousHikingTransitionCondition implements StateTransitionC
    private final AtomicReference<ContinuousWalkingCommandMessage> commandMessage;
    private final ContinuousHikingParameters continuousHikingParameters;
 
+   /**
+    * This transition is used in the {@link us.ihmc.behaviors.activeMapping.ContinuousPlannerSchedulingTask} to determine whether the Continuous Hiking state
+    * machine should be stopped. We want to be able to stop the state machine from whatever state we are in.
+    */
    public StopContinuousHikingTransitionCondition(AtomicReference<ContinuousWalkingCommandMessage> commandMessage,
                                                   ContinuousHikingParameters continuousHikingParameters)
    {
@@ -21,6 +25,6 @@ public class StopContinuousHikingTransitionCondition implements StateTransitionC
    @Override
    public boolean testCondition(double timeInCurrentState)
    {
-      return !continuousHikingParameters.getEnableContinuousWalking() || !commandMessage.get().getEnableContinuousWalking();
+      return !continuousHikingParameters.getEnableContinuousHiking() || !commandMessage.get().getEnableContinuousWalking();
    }
 }
