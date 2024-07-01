@@ -27,6 +27,7 @@ import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityDa
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
+import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.perception.depthData.CollisionBoxProvider;
@@ -207,6 +208,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
     * @return parameters used in the user interface only.
     */
    public default UIParameters getUIParameters()
+   {
+      return null;
+   }
+
+   public default LocomotionParameters getLocomotionParameters()
    {
       return null;
    }
