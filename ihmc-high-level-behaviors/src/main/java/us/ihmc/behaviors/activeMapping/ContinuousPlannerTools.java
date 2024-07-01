@@ -40,8 +40,8 @@ public class ContinuousPlannerTools
    {
       float offsetX = (float) (Math.random() * xRandomMargin - xRandomMargin / 2.0f);
 
-      FramePose3D finalGoalMidPose = new FramePose3D();
-      finalGoalMidPose.interpolate(stancePose.get(RobotSide.LEFT), stancePose.get(RobotSide.RIGHT), 0.5);
+      FramePose3D stanceMidPose = new FramePose3D();
+      stanceMidPose.interpolate(stancePose.get(RobotSide.LEFT), stancePose.get(RobotSide.RIGHT), 0.5);
 
       SideDependentList<FramePose3D> goalPose = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
@@ -50,7 +50,7 @@ public class ContinuousPlannerTools
          RigidBodyTransform stanceToWalkingFrameTransform = new RigidBodyTransform();
          RigidBodyTransform worldToWalkingFrameTransform = new RigidBodyTransform();
 
-         stanceToWalkingFrameTransform.set(finalGoalMidPose);
+         stanceToWalkingFrameTransform.set(stanceMidPose);
          worldToWalkingFrameTransform.set(walkingStartPose);
          worldToWalkingFrameTransform.invert();
          stanceToWalkingFrameTransform.multiply(worldToWalkingFrameTransform);
@@ -58,7 +58,7 @@ public class ContinuousPlannerTools
          double xWalkDistance = stanceToWalkingFrameTransform.getTranslation().norm();
          goalPose.get(side).getPosition().set(walkingStartPose.getPosition());
          goalPose.get(side).getOrientation().set(walkingStartPose.getOrientation());
-         goalPose.get(side).appendTranslation(xWalkDistance + xDistance + offsetX, 0, finalGoalMidPose.getZ() + zDistance - walkingStartPose.getZ());
+         goalPose.get(side).appendTranslation(xWalkDistance + xDistance + offsetX, 0, stanceMidPose.getZ() + zDistance - walkingStartPose.getZ());
       }
 
       // These are done after because of the ( - ) or ( + ) for the nominal stance
