@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.sequence;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -9,7 +10,7 @@ import javax.annotation.Nullable;
 
 public class ActionNodeInitialization
 {
-   public static void initializeAction(@Nullable ActionSequenceState actionSequence,
+   public static void initializeAction(@Nullable BehaviorTreeRootNodeState actionSequence,
                                        ActionNodeState<?> newAction,
                                        int indexOfInsertion,
                                        @Nullable RobotSide sideOfNewAction,
@@ -146,7 +147,7 @@ public class ActionNodeInitialization
     *         This helps the authoring process by initializing new actions with
     *         spatially consistent values.
     */
-   private static String findConvenientParentFrameName(@Nullable ActionSequenceState actionSequence,
+   private static String findConvenientParentFrameName(@Nullable BehaviorTreeRootNodeState actionSequence,
                                                        Class<? extends ActionNodeState<?>> actionClass,
                                                        int indexOfInsertion,
                                                        @Nullable RobotSide side)
@@ -165,7 +166,7 @@ public class ActionNodeInitialization
       return ReferenceFrame.getWorldFrame().getName();
    }
 
-   public static <T extends ActionNodeState<?>> T findNextPreviousAction(@Nullable ActionSequenceState actionSequence,
+   public static <T extends ActionNodeState<?>> T findNextPreviousAction(@Nullable BehaviorTreeRootNodeState actionSequence,
                                                                          Class<T> actionClass,
                                                                          int indexOfInsertion,
                                                                          @Nullable RobotSide side)

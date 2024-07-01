@@ -161,7 +161,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
          ImGui.getWindowDrawList().addRectFilled(lineMin.x, lineMin.y, lineMax.x, lineMax.y, ImGui.getColorU32(ImGuiCol.Header));
       }
 
-      if (textHovered && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
+      if (!isRootNode() && textHovered && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Left))
       {
          setSpecificWidgetOnRowClicked();
          RDXBehaviorTreeTools.clearOtherNodeSelections(this);
@@ -202,14 +202,17 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
 
    public void renderContextMenuItems()
    {
-      if (ImGui.menuItem(labels.get("Rename...")))
+      if (!isRootNode())
       {
-         RDXBehaviorTreeTools.runForEntireTree(this, node -> node.setNameBeingEdited(false));
-         isNameBeingEdited = true;
-         imNodeNameText.set(definition.getName());
-      }
+         if (ImGui.menuItem(labels.get("Rename...")))
+         {
+            RDXBehaviorTreeTools.runForEntireTree(this, node -> node.setNameBeingEdited(false));
+            isNameBeingEdited = true;
+            imNodeNameText.set(definition.getName());
+         }
 
-      ImGui.separator();
+         ImGui.separator();
+      }
 
       if (definition.isJSONRoot())
       {
@@ -223,7 +226,7 @@ public class RDXBehaviorTreeNode<S extends BehaviorTreeNodeState<D>,
             definition.setName(definition.getName().replace(".json", ""));
          }
       }
-      else
+      else if (!isRootNode())
       {
          if (ImGui.menuItem(labels.get("Convert to JSON Root")))
          {

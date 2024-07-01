@@ -626,12 +626,25 @@ public class ImGuiTools
       return smallBoldFont.get(CURRENT_FONT_SIZE);
    }
 
+   private static boolean printedConsoleFontError = false;
+
    public static ImFont getConsoleFont()
    {
       ImFont font = consoleFont.get(CURRENT_FONT_SIZE);
       if (!font.isLoaded()) // FIXME: Find issue and fix
-         LogTools.error("Console font %s size %d not loaded!".formatted(font.getDebugName(), CURRENT_FONT_SIZE));
-      return font;
+      {
+         if (!printedConsoleFontError)
+         {
+            printedConsoleFontError = true;
+            LogTools.error("Console font %s size %d not loaded!".formatted(font.getDebugName(), CURRENT_FONT_SIZE));
+         }
+
+         return getSmallFont();
+      }
+      else
+      {
+         return font;
+      }
    }
 
    public static ImFontAtlas getFontAtlas()
