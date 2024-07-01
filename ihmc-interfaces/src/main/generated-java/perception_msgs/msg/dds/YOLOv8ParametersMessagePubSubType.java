@@ -15,7 +15,7 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "1ace564eb205859a161234c4b74df0b2d523dd1be241e487c5f4f2f8535af970";
+   		return "3ffea2d1d15b4509990f8bc39b809f83ff0a3954328123b168e90fd9f894bc33";
    }
    
    @Override
@@ -60,6 +60,8 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -74,6 +76,9 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
    public final static int getCdrSerializedSize(perception_msgs.msg.dds.YOLOv8ParametersMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -103,7 +108,9 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       cdr.write_type_5(data.getSegmentationThreshold());
 
-      cdr.write_type_5(data.getCandidateAcceptanceThreshold());
+      cdr.write_type_2(data.getErosionKernelRadius());
+
+      cdr.write_type_5(data.getOutlierThreshold());
 
       if(data.getTargetDetectionClasses().size() <= 100)
       cdr.write_type_e(data.getTargetDetectionClasses());else
@@ -119,7 +126,9 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
       	
       data.setSegmentationThreshold(cdr.read_type_5());
       	
-      data.setCandidateAcceptanceThreshold(cdr.read_type_5());
+      data.setErosionKernelRadius(cdr.read_type_2());
+      	
+      data.setOutlierThreshold(cdr.read_type_5());
       	
       cdr.read_type_e(data.getTargetDetectionClasses());	
 
@@ -131,7 +140,8 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
       ser.write_type_5("confidence_threshold", data.getConfidenceThreshold());
       ser.write_type_5("non_maximum_suppression_threshold", data.getNonMaximumSuppressionThreshold());
       ser.write_type_5("segmentation_threshold", data.getSegmentationThreshold());
-      ser.write_type_5("candidate_acceptance_threshold", data.getCandidateAcceptanceThreshold());
+      ser.write_type_2("erosion_kernel_radius", data.getErosionKernelRadius());
+      ser.write_type_5("outlier_threshold", data.getOutlierThreshold());
       ser.write_type_e("target_detection_classes", data.getTargetDetectionClasses());
    }
 
@@ -141,7 +151,8 @@ public class YOLOv8ParametersMessagePubSubType implements us.ihmc.pubsub.TopicDa
       data.setConfidenceThreshold(ser.read_type_5("confidence_threshold"));
       data.setNonMaximumSuppressionThreshold(ser.read_type_5("non_maximum_suppression_threshold"));
       data.setSegmentationThreshold(ser.read_type_5("segmentation_threshold"));
-      data.setCandidateAcceptanceThreshold(ser.read_type_5("candidate_acceptance_threshold"));
+      data.setErosionKernelRadius(ser.read_type_2("erosion_kernel_radius"));
+      data.setOutlierThreshold(ser.read_type_5("outlier_threshold"));
       ser.read_type_e("target_detection_classes", data.getTargetDetectionClasses());
    }
 

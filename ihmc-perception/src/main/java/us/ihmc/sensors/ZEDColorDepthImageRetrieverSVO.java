@@ -6,6 +6,7 @@ import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.zed.SL_InitParameters;
@@ -14,6 +15,7 @@ import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import static us.ihmc.zed.global.zed.*;
@@ -21,19 +23,33 @@ import static us.ihmc.zed.global.zed.*;
 // https://www.stereolabs.com/docs/video/recording
 public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
 {
+   private final MutableReferenceFrame measuredSensorFrame = new MutableReferenceFrame("zedSVOFrame", ReferenceFrame.getWorldFrame());
+
    private final RecordMode recordMode;
    private final String svoFileName;
    private final RestartableThrottledThread publishInfoThread;
 
    public ZEDColorDepthImageRetrieverSVO(int cameraID,
-                                         Supplier<ReferenceFrame> sensorFrameSupplier,
-                                         ROS2DemandGraphNode depthDemandNode,
-                                         ROS2DemandGraphNode colorDemandNode,
+                                         BooleanSupplier depthDemandSupplier,
+                                         BooleanSupplier colorDemandSupplier,
                                          ROS2Helper ros2Helper,
                                          RecordMode recordMode,
                                          String svoFileName)
    {
-      super(cameraID, sensorFrameSupplier, depthDemandNode, colorDemandNode);
+      this(cameraID, ReferenceFrame::getWorldFrame, true, depthDemandSupplier, colorDemandSupplier, ros2Helper, recordMode, svoFileName);
+
+   }
+
+   public ZEDColorDepthImageRetrieverSVO(int cameraID,
+                                         Supplier<ReferenceFrame> sensorFrameSupplier,
+                                         boolean useSensorPoseTracking,
+                                         BooleanSupplier depthDemandSupplier,
+                                         BooleanSupplier colorDemandSupplier,
+                                         ROS2Helper ros2Helper,
+                                         RecordMode recordMode,
+                                         String svoFileName)
+   {
+      super(cameraID, sensorFrameSupplier, depthDemandSupplier, colorDemandSupplier, useSensorPoseTracking);
 
       if (recordMode == RecordMode.PLAYBACK && svoFileName == null)
       {

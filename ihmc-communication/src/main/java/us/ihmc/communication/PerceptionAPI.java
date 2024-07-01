@@ -25,10 +25,10 @@ import perception_msgs.msg.dds.SceneGraphMessage;
 import perception_msgs.msg.dds.VideoPacket;
 import perception_msgs.msg.dds.YOLOv8ParametersMessage;
 import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
-import std_msgs.msg.dds.Bool;
 import std_msgs.msg.dds.Empty;
 import std_msgs.msg.dds.Float64;
 import std_msgs.msg.dds.Int64;
+import us.ihmc.communication.property.StoredPropertySetROS2TopicPair;
 import us.ihmc.communication.ros2.ROS2IOTopicPair;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -175,6 +175,7 @@ public final class PerceptionAPI
    public static final ROS2Topic<DetectedObjectPacket> ICP_RESULT = IHMC_ROOT.withModule("iterative_closest_point")
                                                                              .withSuffix("result")
                                                                              .withType(DetectedObjectPacket.class);
+   public static final StoredPropertySetROS2TopicPair DETECTION_MANAGER_SETTINGS = new StoredPropertySetROS2TopicPair("detections", "settings");
    public static final ROS2Topic<BallDetectionParametersMessage> BALL_DETECTION_PARAMETERS = IHMC_ROOT.withModule("ping_pong_ball")
                                                                                                       .withSuffix("detection_parameters")
                                                                                                       .withType(BallDetectionParametersMessage.class);

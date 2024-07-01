@@ -1,0 +1,25 @@
+#ifndef __ihmc_common_msgs__msg__DurationMessage__idl__
+#define __ihmc_common_msgs__msg__DurationMessage__idl__
+
+module ihmc_common_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * Message for java.time.Duration. See:
+       * https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/Duration.html
+       */
+      @TypeCode(type="ihmc_common_msgs::msg::dds_::DurationMessage_")
+      struct DurationMessage
+      {
+        long long seconds;
+        long nanos;
+      };
+    };
+  };
+};
+
+#endif

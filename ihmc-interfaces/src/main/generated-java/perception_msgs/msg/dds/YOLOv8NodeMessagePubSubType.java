@@ -15,7 +15,7 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "4fa99065ebfbd80a85c7eab79aa94cc729cb9bcc3d1c622569e79b47c8c6ac15";
+   		return "a06520510f3e38c1aa0824b89433395fd3107f7dc8dbee4c8d9953eeb470db63";
    }
    
    @Override
@@ -54,20 +54,11 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 5000; ++i0)
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 511; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.Point32PubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += geometry_msgs.msg.dds.Point32PubSubType.getMaxCdrSerializedSize(current_alignment);
-
       current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -89,17 +80,6 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.getCdrSerializedSize(data.getDetectableSceneNode(), current_alignment);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getDetectionClass().length() + 1;
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -107,8 +87,6 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       for(int i0 = 0; i0 < data.getObjectPointCloud().size(); ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.Point32PubSubType.getCdrSerializedSize(data.getObjectPointCloud().get(i0), current_alignment);}
-
-      current_alignment += geometry_msgs.msg.dds.Point32PubSubType.getCdrSerializedSize(data.getObjectCentroid(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getCdrSerializedSize(data.getCentroidToObjectTransform(), current_alignment);
 
@@ -123,23 +101,12 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    public static void write(perception_msgs.msg.dds.YOLOv8NodeMessage data, us.ihmc.idl.CDR cdr)
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.write(data.getDetectableSceneNode(), cdr);
-      cdr.write_type_2(data.getMaskErosionKernelRadius());
-
-      cdr.write_type_6(data.getOutlierFilterThreshold());
-
-      cdr.write_type_5(data.getDetectionAcceptanceThreshold());
-
-      if(data.getDetectionClass().length() <= 255)
-      cdr.write_type_d(data.getDetectionClass());else
-          throw new RuntimeException("detection_class field exceeds the maximum length");
-
       cdr.write_type_6(data.getConfidence());
 
-      if(data.getObjectPointCloud().size() <= 5000)
+      if(data.getObjectPointCloud().size() <= 511)
       cdr.write_type_e(data.getObjectPointCloud());else
           throw new RuntimeException("object_point_cloud field exceeds the maximum length");
 
-      geometry_msgs.msg.dds.Point32PubSubType.write(data.getObjectCentroid(), cdr);
       geometry_msgs.msg.dds.TransformPubSubType.write(data.getCentroidToObjectTransform(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getObjectPose(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getFilteredObjectPose(), cdr);
@@ -148,17 +115,9 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    public static void read(perception_msgs.msg.dds.YOLOv8NodeMessage data, us.ihmc.idl.CDR cdr)
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.read(data.getDetectableSceneNode(), cdr);	
-      data.setMaskErosionKernelRadius(cdr.read_type_2());
-      	
-      data.setOutlierFilterThreshold(cdr.read_type_6());
-      	
-      data.setDetectionAcceptanceThreshold(cdr.read_type_5());
-      	
-      cdr.read_type_d(data.getDetectionClass());	
       data.setConfidence(cdr.read_type_6());
       	
       cdr.read_type_e(data.getObjectPointCloud());	
-      geometry_msgs.msg.dds.Point32PubSubType.read(data.getObjectCentroid(), cdr);	
       geometry_msgs.msg.dds.TransformPubSubType.read(data.getCentroidToObjectTransform(), cdr);	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getObjectPose(), cdr);	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getFilteredObjectPose(), cdr);	
@@ -170,14 +129,8 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       ser.write_type_a("detectable_scene_node", new perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType(), data.getDetectableSceneNode());
 
-      ser.write_type_2("mask_erosion_kernel_radius", data.getMaskErosionKernelRadius());
-      ser.write_type_6("outlier_filter_threshold", data.getOutlierFilterThreshold());
-      ser.write_type_5("detection_acceptance_threshold", data.getDetectionAcceptanceThreshold());
-      ser.write_type_d("detection_class", data.getDetectionClass());
       ser.write_type_6("confidence", data.getConfidence());
       ser.write_type_e("object_point_cloud", data.getObjectPointCloud());
-      ser.write_type_a("object_centroid", new geometry_msgs.msg.dds.Point32PubSubType(), data.getObjectCentroid());
-
       ser.write_type_a("centroid_to_object_transform", new geometry_msgs.msg.dds.TransformPubSubType(), data.getCentroidToObjectTransform());
 
       ser.write_type_a("object_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getObjectPose());
@@ -191,14 +144,8 @@ public class YOLOv8NodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    {
       ser.read_type_a("detectable_scene_node", new perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType(), data.getDetectableSceneNode());
 
-      data.setMaskErosionKernelRadius(ser.read_type_2("mask_erosion_kernel_radius"));
-      data.setOutlierFilterThreshold(ser.read_type_6("outlier_filter_threshold"));
-      data.setDetectionAcceptanceThreshold(ser.read_type_5("detection_acceptance_threshold"));
-      ser.read_type_d("detection_class", data.getDetectionClass());
       data.setConfidence(ser.read_type_6("confidence"));
       ser.read_type_e("object_point_cloud", data.getObjectPointCloud());
-      ser.read_type_a("object_centroid", new geometry_msgs.msg.dds.Point32PubSubType(), data.getObjectCentroid());
-
       ser.read_type_a("centroid_to_object_transform", new geometry_msgs.msg.dds.TransformPubSubType(), data.getCentroidToObjectTransform());
 
       ser.read_type_a("object_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getObjectPose());

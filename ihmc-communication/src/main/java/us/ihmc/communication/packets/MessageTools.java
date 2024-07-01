@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Level;
 import perception_msgs.msg.dds.*;
 import std_msgs.msg.dds.Bool;
 import toolbox_msgs.msg.dds.*;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -45,6 +46,7 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
@@ -1340,6 +1342,18 @@ public class MessageTools
    public static Instant toInstant(InstantMessage instantMessage)
    {
       return Instant.ofEpochSecond(instantMessage.getSecondsSinceEpoch(), instantMessage.getAdditionalNanos());
+   }
+
+   public static void toMessage(Duration duration, DurationMessage durationMessage)
+   {
+      durationMessage.setSeconds(duration.getSeconds());
+      durationMessage.setNanos(duration.getNano());
+   }
+
+   public static Duration toDuration(DurationMessage durationMessage)
+   {
+      long totalNanos = Conversions.secondsToNanoseconds(durationMessage.getSeconds()) + durationMessage.getNanos();
+      return Duration.ofNanos(totalNanos);
    }
 
    public static void toMessage(UUID uuid, UUIDMessage uuidMessage)

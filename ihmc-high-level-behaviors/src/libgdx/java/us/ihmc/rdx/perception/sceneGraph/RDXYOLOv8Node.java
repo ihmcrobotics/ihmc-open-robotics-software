@@ -6,10 +6,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
-import imgui.type.ImDouble;
-import imgui.type.ImFloat;
-import imgui.type.ImInt;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
@@ -27,18 +23,7 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
 {
    private final YOLOv8Node yoloNode;
 
-   private final ImGuiUniqueLabelMap labels;
-
-   /**
-    * The mask erosion kernel radius determines how much the YOLO mask is eroded,
-    * i.e. how much it is shrunk.
-    * A larger radius will result is more shrinkage, and a radius of 0 will not shrink the mask.
-    * Erosion is useful when the YOLO mask is slightly larger than the object it detects.
-    */
-   private final ImInt maskErosionKernelRadius;
-   private final ImDouble outlierFilterThreshold;
-   private final ImFloat detectionAcceptanceThreshold;
-   private final ImGuiPlot confidencePlot = new ImGuiPlot("Confidence", 1000, 230, 22);
+   private final ImGuiPlot confidencePlot;
 
    private final RDXPointCloudRenderer objectPointCloudRenderer = new RDXPointCloudRenderer();
 
@@ -46,25 +31,11 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
    {
       super(yoloNode);
       this.yoloNode = yoloNode;
-      this.labels = labels;
 
-      maskErosionKernelRadius = new ImInt(yoloNode.getMaskErosionKernelRadius());
-      outlierFilterThreshold = new ImDouble(yoloNode.getOutlierFilterThreshold());
-      detectionAcceptanceThreshold = new ImFloat(yoloNode.getDetectionAcceptanceThreshold());
-
+      confidencePlot = new ImGuiPlot(labels.get("Confidence"), 1000, 230, 22);
       confidencePlot.setYScale(0.0f, 1.0f);
 
       objectPointCloudRenderer.create(5000);
-   }
-
-   @Override
-   public void update(SceneGraphModificationQueue modificationQueue)
-   {
-      super.update(modificationQueue);
-
-      yoloNode.setMaskErosionKernelRadius(maskErosionKernelRadius.get());
-      yoloNode.setOutlierFilterThreshold(outlierFilterThreshold.get());
-      yoloNode.setDetectionAcceptanceThreshold(detectionAcceptanceThreshold.get());
    }
 
    @Override
@@ -76,13 +47,6 @@ public class RDXYOLOv8Node extends RDXDetectableSceneNode
       ImGui.pushStyleColor(ImGuiCol.PlotLines, ImGuiTools.greenRedGradientColor((float) yoloNode.getConfidence(), 1.0f, 0.0f));
       confidencePlot.render(yoloNode.getConfidence());
       ImGui.popStyleColor();
-
-      if (ImGuiTools.volatileInputInt(labels.get("Mask Erosion Kernel Radius"), maskErosionKernelRadius))
-         maskErosionKernelRadius.set(MathTools.clamp(maskErosionKernelRadius.get(), 0, 10));
-      if (ImGuiTools.volatileInputDouble(labels.get("Outlier Filter Threshold"), outlierFilterThreshold))
-         outlierFilterThreshold.set(MathTools.clamp(outlierFilterThreshold.get(), 0.0, 5.0));
-      if (ImGuiTools.volatileInputFloat(labels.get("Detection Acceptance Threshold"), detectionAcceptanceThreshold))
-         detectionAcceptanceThreshold.set((float) MathTools.clamp(detectionAcceptanceThreshold.get(), 0.0f, 1.0f));
    }
 
    @Override

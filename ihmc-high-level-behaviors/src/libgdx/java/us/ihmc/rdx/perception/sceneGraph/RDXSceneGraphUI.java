@@ -3,8 +3,8 @@ package us.ihmc.rdx.perception.sceneGraph;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.flag.ImGuiTableColumnFlags;
 import imgui.ImGui;
+import imgui.flag.ImGuiTableColumnFlags;
 import imgui.type.ImBoolean;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
@@ -88,7 +88,7 @@ public class RDXSceneGraphUI
    public void update()
    {
       sceneGraph.updateSubscription();
-      sceneGraph.modifyTree(modificationQueue -> uiSceneNodes.values().forEach(node -> node.update(modificationQueue)));
+      uiSceneNodes.values().forEach(node -> node.update(sceneGraph));
       sceneGraph.updatePublication();
 
       for (SceneNode sceneNode : uiSceneNodes.keySet())

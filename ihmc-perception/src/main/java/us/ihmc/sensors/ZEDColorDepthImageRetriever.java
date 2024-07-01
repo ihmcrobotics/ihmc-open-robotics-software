@@ -6,7 +6,6 @@ import org.bytedeco.opencv.global.opencv_cudaimgproc;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
@@ -15,9 +14,13 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.RestartableThread;
 import us.ihmc.zed.SL_CalibrationParameters;
+import us.ihmc.zed.SL_CameraInformation;
 import us.ihmc.zed.SL_InitParameters;
+import us.ihmc.zed.SL_PositionalTrackingParameters;
+import us.ihmc.zed.SL_Quaternion;
 import us.ihmc.zed.SL_RecordingStatus;
 import us.ihmc.zed.SL_RuntimeParameters;
+import us.ihmc.zed.SL_Vector3;
 import us.ihmc.zed.library.ZEDJavaAPINativeLibrary;
 
 import java.time.Instant;
@@ -25,6 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import static us.ihmc.zed.global.zed.*;
@@ -35,7 +39,8 @@ import static us.ihmc.zed.global.zed.*;
  */
 public class ZEDColorDepthImageRetriever
 {
-   static {
+   static
+   {
       ZEDJavaAPINativeLibrary.load();
    }
 
@@ -52,6 +57,7 @@ public class ZEDColorDepthImageRetriever
    private final SideDependentList<Float> cameraFocalLengthY = new SideDependentList<>();
    private final SideDependentList<Float> cameraPrincipalPointX = new SideDependentList<>();
    private final SideDependentList<Float> cameraPrincipalPointY = new SideDependentList<>();
+   private float sensorCenterToCameraDistanceY = 0.0f;
 
    private Pointer colorImagePointer;
    private Pointer depthImagePointer;
@@ -64,6 +70,13 @@ public class ZEDColorDepthImageRetriever
    private final SideDependentList<GpuMat> colorGpuMats = new SideDependentList<>();
    private final SideDependentList<RawImage> colorImages = new SideDependentList<>(null, null);
    private RawImage depthImage = null;
+
+   private final FramePose3D retrievedSensorPose = new FramePose3D(ReferenceFrame.getWorldFrame());
+
+   private final boolean useSensorPositionalTracking;
+   private final Supplier<ReferenceFrame> sensorFrameSupplier;
+   private final BooleanSupplier depthDemandSupplier;
+   private final BooleanSupplier colorDemandSupplier;
 
    // Frame poses of left and right cameras of ZED. Depth is always in the left pose.
    private final SideDependentList<FramePose3D> cameraFramePoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
@@ -82,64 +95,86 @@ public class ZEDColorDepthImageRetriever
 
    public ZEDColorDepthImageRetriever(int cameraID,
                                       Supplier<ReferenceFrame> sensorFrameSupplier,
-                                      ROS2DemandGraphNode depthDemandNode,
-                                      ROS2DemandGraphNode colorDemandNode)
+                                      BooleanSupplier depthDemandSupplier,
+                                      BooleanSupplier colorDemandSupplier)
+   {
+      this(cameraID, sensorFrameSupplier, depthDemandSupplier, colorDemandSupplier, false);
+   }
+
+   public ZEDColorDepthImageRetriever(int cameraID,
+                                      Supplier<ReferenceFrame> sensorFrameSupplier,
+                                      BooleanSupplier depthDemandSupplier,
+                                      BooleanSupplier colorDemandSupplier,
+                                      boolean useSensorPositionalTracking)
    {
       this.cameraID = cameraID;
+      this.sensorFrameSupplier = sensorFrameSupplier;
+      this.depthDemandSupplier = depthDemandSupplier;
+      this.colorDemandSupplier = colorDemandSupplier;
+      this.useSensorPositionalTracking = useSensorPositionalTracking;
 
-      zedGrabThread = new RestartableThread("ZEDImageGrabber", () ->
+      zedGrabThread = new RestartableThread("ZEDImageGrabber", this::grabSensorData);
+   }
+
+   private void grabSensorData()
+   {
+      if (depthDemandSupplier.getAsBoolean() || colorDemandSupplier.getAsBoolean())
       {
-         if (depthDemandNode == null || colorDemandNode == null || depthDemandNode.isDemanded() || colorDemandNode.isDemanded())
+         if (!initialized)
          {
-            if (!initialized)
-            {
-               if (startZED())
-                  initialized = true;
-               else
-                  ThreadTools.sleep(3000);
-            }
+            if (startZED())
+               initialized = true;
             else
-            {
-               // sl_grab is blocking, and will wait for next frame available. No need to use throttler
-               int grabReturnState = sl_grab(cameraID, zedRuntimeParameters);
-               // Check if it reached the end of a recording
-               if (grabReturnState == SL_ERROR_CODE_END_OF_SVOFILE_REACHED)
-               {
-                  // Start at the beginning so the recording loops over and over
-                  sl_set_svo_position(cameraID, 0);
-               }
-               else
-               {
-                  checkError("sl_grab", grabReturnState);
-               }
-
-               // Frame supplier provides frame pose of center of camera. Add Y to get left camera's frame pose
-               for (RobotSide side : RobotSide.values)
-               {
-                  cameraFramePoses.get(side).setToZero(sensorFrameSupplier.get());
-                  cameraFramePoses.get(side).getPosition().addY(side.negateIfRightSide(zedModelData.getCenterToCameraDistance()));
-                  cameraFramePoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
-               }
-
-               retrieveAndSaveDepthImage();
-               retrieveAndSaveColorImage(RobotSide.LEFT);
-               retrieveAndSaveColorImage(RobotSide.RIGHT);
-               grabSequenceNumber++;
-
-               // Occasionally print something if recording
-               SL_RecordingStatus recordingStatus = sl_get_recording_status(cameraID);
-               if (!recordingStatus.isNull() && recordingStatus.is_recording() && (grabSequenceNumber % 300 == 0))
-               {
-                  LogTools.info(getClass() + " recording from ZED camera ID: " + cameraID);
-               }
-               recordingStatus.close();
-            }
+               ThreadTools.sleep(3000);
          }
          else
          {
-            ThreadTools.sleep(500);
+            // sl_grab is blocking, and will wait for next frame available. No need to use throttler
+            int grabReturnState = sl_grab(cameraID, zedRuntimeParameters);
+            // Check if it reached the end of a recording
+            if (grabReturnState == SL_ERROR_CODE_END_OF_SVOFILE_REACHED)
+            {
+               // Start at the beginning so the recording loops over and over
+               restartSVO();
+
+               return;
+            }
+            else
+            {
+               checkError("sl_grab", grabReturnState);
+            }
+
+            retrieveAndSaveSensorPose();
+
+            // Frame supplier provides frame pose of center of camera. Add Y to get left camera's frame pose
+            for (RobotSide side : RobotSide.values)
+            {
+               if (useSensorPositionalTracking)
+                  cameraFramePoses.get(side).set(retrievedSensorPose);
+               else
+                  cameraFramePoses.get(side).setToZero(sensorFrameSupplier.get());
+               cameraFramePoses.get(side).getPosition().addY(side.negateIfRightSide(sensorCenterToCameraDistanceY));
+               cameraFramePoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
+            }
+
+            retrieveAndSaveDepthImage();
+            retrieveAndSaveColorImage(RobotSide.LEFT);
+            retrieveAndSaveColorImage(RobotSide.RIGHT);
+            grabSequenceNumber++;
+
+            // Occasionally print something if recording
+            SL_RecordingStatus recordingStatus = sl_get_recording_status(cameraID);
+            if (!recordingStatus.isNull() && recordingStatus.is_recording() && (grabSequenceNumber % 300 == 0))
+            {
+               LogTools.info(getClass() + " recording from ZED camera ID: " + cameraID);
+            }
+            recordingStatus.close();
          }
-      });
+      }
+      else
+      {
+         ThreadTools.sleep(500);
+      }
    }
 
    private void retrieveAndSaveColorImage(RobotSide side)
@@ -237,6 +272,20 @@ public class ZEDColorDepthImageRetriever
       }
    }
 
+   private void retrieveAndSaveSensorPose()
+   {
+      SL_Quaternion rotation = new SL_Quaternion();
+      SL_Vector3 translation = new SL_Vector3();
+      sl_get_position(cameraID, rotation, translation, SL_REFERENCE_FRAME_WORLD);
+
+      retrievedSensorPose.getRotation().set(rotation.x(), rotation.y(), rotation.z(), rotation.w());
+      retrievedSensorPose.getTranslation().set(translation.x(), translation.y(), translation.z());
+      retrievedSensorPose.appendTranslation(0.0, -sensorCenterToCameraDistanceY, 0.0);
+
+      rotation.close();
+      translation.close();
+   }
+
    public RawImage getLatestRawDepthImage()
    {
       newDepthImageLock.lock();
@@ -277,6 +326,11 @@ public class ZEDColorDepthImageRetriever
       }
 
       return colorImages.get(side).get();
+   }
+
+   public FramePose3D getLatestSensorPose()
+   {
+      return retrievedSensorPose;
    }
 
    public ZEDModelData getZedModelData()
@@ -373,6 +427,10 @@ public class ZEDColorDepthImageRetriever
       if (!success)
          return success;
 
+      // Enable position tracking
+      SL_PositionalTrackingParameters positionalTrackingParameters = sl_get_positional_tracking_parameters(cameraID);
+      sl_enable_positional_tracking(cameraID, positionalTrackingParameters, "");
+
       zedRuntimeParameters.enable_depth(true);
       zedRuntimeParameters.confidence_threshold(100);
       zedRuntimeParameters.reference_frame(SL_REFERENCE_FRAME_CAMERA);
@@ -394,6 +452,10 @@ public class ZEDColorDepthImageRetriever
       imageWidth = sl_get_width(cameraID);
       imageHeight = sl_get_height(cameraID);
 
+      SL_CameraInformation cameraInformation = sl_get_camera_information(cameraID, 0, 0);
+      sensorCenterToCameraDistanceY = cameraInformation.camera_configuration().calibration_parameters().translation().y() * -0.5f;
+
+
       colorImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U8_C4, SL_MEM_GPU));
       depthImagePointer = new Pointer(sl_mat_create_new(imageWidth, imageHeight, SL_MAT_TYPE_U16_C1, SL_MEM_GPU));
 
@@ -412,6 +474,28 @@ public class ZEDColorDepthImageRetriever
    public long getGrabSequenceNumber()
    {
       return grabSequenceNumber;
+   }
+
+   private void restartSVO()
+   {
+      sl_set_svo_position(cameraID, 0);
+
+      SL_Quaternion zeroRotation = new SL_Quaternion();
+      zeroRotation.x(0.0f);
+      zeroRotation.y(0.0f);
+      zeroRotation.z(0.0f);
+      zeroRotation.w(1.0f);
+
+      SL_Vector3 zeroTranslation = new SL_Vector3();
+      zeroTranslation.x(0.0f);
+      zeroTranslation.y(0.0f);
+      zeroTranslation.z(0.0f);
+
+      sl_reset_positional_tracking(cameraID, zeroRotation, zeroTranslation);
+      retrievedSensorPose.setToZero();
+
+      zeroRotation.close();
+      zeroTranslation.close();
    }
 
    protected boolean checkError(String functionName, int returnedState)

@@ -8,151 +8,225 @@ import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
-import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.detections.PersistentDetection;
+import us.ihmc.perception.sceneGraph.DetectableSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism.DoorOpeningMechanismType;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorPanel;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class DoorNode extends SceneNode
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+/**
+ * A node that represents a door.
+ * This includes a frame, hinged swinging panel that swings one way,
+ * and opening mechanisms on either side of the panel.
+ *
+ * The X forward direction of this node points straight through the frame,
+ * towards the side that the door panel swings open to.
+ * The origin of the frame is positioned at the bottom of the panel hinge.
+ */
+public class DoorNode extends DetectableSceneNode
 {
-   private OpeningMechanismType openingMechanismType;
-   private final Point3D openingMechanismPoint3D = new Point3D();
-   private final Pose3D openingMechanismPose3D = new Pose3D();
+   private static final Pose3D ZERO_POSE = new Pose3D();
 
-   private final PlanarRegion doorPlanarRegion = new PlanarRegion();
-   private long doorPlanarRegionUpdateTimeMillis;
+   private final Pose3D doorFramePose = new Pose3D(); // To know which way the door opens. X points in the direction that the door swings.
+   private final DoorPanel doorPanel = new DoorPanel(this);
+   private final Set<DoorOpeningMechanism> openingMechanisms = new HashSet<>();
 
-   public DoorNode(long id, String name, CRDTInfo crdtInfo)
+   public DoorNode(long id, CRDTInfo crdtInfo)
    {
-      super(id, name, crdtInfo);
+      this(id, null, crdtInfo);
    }
 
-   public OpeningMechanismType getOpeningMechanismType()
+   public DoorNode(long id, PersistentDetection initialDetection, CRDTInfo crdtInfo)
    {
-      return openingMechanismType;
+      super(id, "Door" + id, crdtInfo);
+
+      acceptDetection(initialDetection);
    }
 
-   public void setOpeningMechanismType(OpeningMechanismType openingMechanismType)
+   public boolean acceptDetection(PersistentDetection detection)
    {
-      this.openingMechanismType = openingMechanismType;
+      if (detection == null)
+         return false;
+
+      // TODO: DOORNODES
+
+      return false;
    }
 
-   public void setOpeningMechanismTypeFromYoloClass(YOLOv8DetectionClass yoloClass)
+   @Override
+   public void update()
    {
-      switch (yoloClass)
+      // Calculate yaw, pitch, roll of opening mechanism pose based on door panel
+      updateOpeningMechanismPoses();
+
+      // TODO:
+      // Update door node reference frame
+      //      getNodeFrame();
+
+      super.update();
+   }
+
+   private void updateOpeningMechanismPoses()
+   {
+      PlanarRegion planarRegion = doorPanel.getPlanarRegion();
+
+      if (planarRegion.getArea() > 0)
       {
-         case DOOR_LEVER -> setOpeningMechanismType(OpeningMechanismType.LEVER_HANDLE);
-         case DOOR_KNOB -> setOpeningMechanismType(OpeningMechanismType.KNOB);
-         case DOOR_PULL_HANDLE -> setOpeningMechanismType(OpeningMechanismType.PULL_HANDLE);
-         case DOOR_PUSH_BAR -> setOpeningMechanismType(OpeningMechanismType.PUSH_BAR);
-      }
-   }
+         // Update the scene node reference frame
+         getNodeToParentFrameTransform().set(planarRegion.getTransformToWorld());
+         getNodeFrame().update();
 
-   public Point3D getOpeningMechanismPoint3D()
-   {
-      return openingMechanismPoint3D;
-   }
+         Point3DReadOnly planarRegionCentroidInWorld = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
+         Line2D doorLineNormal = new Line2D(planarRegionCentroidInWorld.getX(),
+                                            planarRegionCentroidInWorld.getY(),
+                                            planarRegion.getNormalX(),
+                                            planarRegion.getNormalY());
 
-   public void setOpeningMechanismPoint3D(Point3D point3D)
-   {
-      this.openingMechanismPoint3D.set(point3D);
-   }
+         double yaw = TupleTools.angle(Axis2D.X, doorLineNormal.getDirection());
 
-   public Pose3D getOpeningMechanismPose3D()
-   {
-      return openingMechanismPose3D;
-   }
-
-   public void setOpeningMechanismPose3D(Pose3D pose3D)
-   {
-      this.openingMechanismPose3D.set(pose3D);
-   }
-
-   public PlanarRegion getDoorPlanarRegion()
-   {
-      return doorPlanarRegion;
-   }
-
-   public void setDoorPlanarRegion(PlanarRegion planarRegion)
-   {
-      this.doorPlanarRegion.set(planarRegion);
-   }
-
-   public long getDoorPlanarRegionUpdateTime()
-   {
-      return doorPlanarRegionUpdateTimeMillis;
-   }
-
-   public void setDoorPlanarRegionUpdateTime(long doorPlanarRegionUpdateTimeMillis)
-   {
-      this.doorPlanarRegionUpdateTimeMillis = doorPlanarRegionUpdateTimeMillis;
-   }
-
-   public void filterAndSetDoorPlanarRegionFromPlanarRegionsList(PlanarRegionsList planarRegionsList)
-   {
-      // Check if the current door planar region is old
-      if (System.currentTimeMillis() - doorPlanarRegionUpdateTimeMillis > 2000)
-      {
-         setDoorPlanarRegion(new PlanarRegion());
-      }
-
-      if (!planarRegionsList.isEmpty())
-      {
-         float epsilon = 0.75f;
-
-         // TODO: fixme doesn't work
-         //            PlanarRegion doorPlanarRegion = planarRegionsList.findClosestPlanarRegionToPointByProjectionOntoXYPlane(doorLeverPointInWorld.getX(),
-         //                                                                                                                    doorLeverPointInWorld.getY());
-
-         PlanarRegion doorPlanarRegion = null;
-
-         for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
+         // If doorFramePose is zero, this means we are just now perceiving the door.
+         // We assume all doors are "push doors" when we first see them.
+         // TODO: remove assumption door is a "push door" when we first see it
+         if (doorFramePose.epsilonEquals(ZERO_POSE, 0.0))
          {
-            Point3DReadOnly planarRegionCentroidInWorld = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
+            doorFramePose.getTranslation().set(planarRegionCentroidInWorld);
+            doorFramePose.getRotation().setYawPitchRoll(Math.PI * yaw, 0.0, 0.0);
+         }
 
-            if (planarRegionCentroidInWorld.distance(openingMechanismPoint3D) > epsilon)
-               continue;
+         // Update the opening mechanism poses with the planar region orientation,
+         // special case for the LEVER_HANDLE
+         for (DoorOpeningMechanism openingMechanism : openingMechanisms)
+         {
+            Pose3D openingMechanismPose = openingMechanism.getGraspPose();
+            Point2D openingMechanismPointInWorld2D = new Point2D(openingMechanismPose.getTranslation());
+            RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(openingMechanismPointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
+            double pitch = 0.0;
+            double roll = 0.0;
+            if (openingMechanism.getType() == DoorOpeningMechanismType.LEVER_HANDLE)
+               roll += doorSide == RobotSide.LEFT ? Math.PI : 0.0;
+            openingMechanismPose.getRotation().setYawPitchRoll(yaw, pitch, roll);
+         }
+      }
+   }
 
-            // If the planar region is less than 1/5th the area of a door
-            if (planarRegion.getArea() < ((DoorModelParameters.DOOR_PANEL_HEIGHT * DoorModelParameters.DOOR_PANEL_WIDTH) / 5))
-               continue;
+   /**
+    * These child nodes are used in behaviors
+    */
+   //   private void updateStaticRelativeChildren(SceneGraph sceneGraph, DoorOpeningMechanism openingMechanism)
+   //   {
+   //      // Recalculate name each time in case the parent name changes
+   //      String graspStaticRelativeSceneNodeName = getName() + "_" + openingMechanism.getColloquialName() + "Grasp";
+   //
+   //      StaticRelativeSceneNode graspStaticRelativeSceneNode = null;
+   //
+   //      for (SceneNode child : getChildren())
+   //      {
+   //         if (child instanceof StaticRelativeSceneNode staticRelativeSceneNode)
+   //         {
+   //            // TODO: Delete any old static relative children that aren't the correct name?
+   //            if (child.getName().equals(graspStaticRelativeSceneNodeName))
+   //            {
+   //               graspStaticRelativeSceneNode = staticRelativeSceneNode;
+   //            }
+   //         }
+   //      }
+   //
+   //      if (graspStaticRelativeSceneNode == null)
+   //      {
+   //         graspStaticRelativeSceneNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
+   //                                                                    graspStaticRelativeSceneNodeName,
+   //                                                                    sceneGraph.getIDToNodeMap(),
+   //                                                                    getID(),
+   //                                                                    new RigidBodyTransform(),
+   //                                                                    openingMechanism.getVisualModelPath(),
+   //                                                                    openingMechanism.getVisualModelTransform(),
+   //                                                                    // TODO: DOORNODES
+   //                                                                    DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN,
+   //                                                                    getCRDTInfo());
+   //         StaticRelativeSceneNode finalGraspStaticRelativeSceneNode = graspStaticRelativeSceneNode;
+   //         sceneGraph.modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(finalGraspStaticRelativeSceneNode, this)));
+   //      }
+   //   }
+   public Pose3D getDoorFramePose()
+   {
+      return doorFramePose;
+   }
 
-            if (doorPlanarRegion == null)
+   public DoorPanel getDoorPanel()
+   {
+      return doorPanel;
+   }
+
+   public Set<DoorOpeningMechanism> getOpeningMechanisms()
+   {
+      return openingMechanisms;
+   }
+
+   public DoorOpeningMechanism getLatestUpdatedOpeningMechanism()
+   {
+      DoorOpeningMechanism candidate = null;
+
+      for (DoorOpeningMechanism openingMechanism : openingMechanisms)
+      {
+         if (candidate == null)
+         {
+            candidate = openingMechanism;
+         }
+         else
+         {
+            if (openingMechanism.getLastDetection().getDetectionTime().getEpochSecond() > candidate.getLastDetection().getDetectionTime().getEpochSecond())
             {
-               doorPlanarRegion = planarRegion;
-               continue;
+               candidate = openingMechanism;
             }
-
-            if (planarRegion.getArea() > doorPlanarRegion.getArea())
-               doorPlanarRegion = planarRegion;
-         }
-
-         if (doorPlanarRegion != null)
-         {
-            setDoorPlanarRegion(doorPlanarRegion);
-            setDoorPlanarRegionUpdateTime(System.currentTimeMillis());
          }
       }
 
-      // Calculate yaw, pitch, roll of opening mechanism pose
-      Point3DReadOnly planarRegionCentroidInWorld = PlanarRegionTools.getCentroid3DInWorld(doorPlanarRegion);
-      Line2D doorLineNormal = new Line2D(planarRegionCentroidInWorld.getX(),
-                                         planarRegionCentroidInWorld.getY(),
-                                         doorPlanarRegion.getNormalX(),
-                                         doorPlanarRegion.getNormalY());
-      Point2D openingMechanismPointInWorld2D = new Point2D(openingMechanismPoint3D);
-      RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(openingMechanismPointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
-      double yaw = TupleTools.angle(Axis2D.X, doorLineNormal.getDirection());
-      double pitch = 0.0;
-      double roll = 0.0;
-      if (openingMechanismType == OpeningMechanismType.LEVER_HANDLE)
-         roll += doorSide == RobotSide.LEFT ? Math.PI : 0.0;
-      openingMechanismPose3D.getTranslation().set(openingMechanismPoint3D);
-      openingMechanismPose3D.getRotation().setYawPitchRoll(yaw, pitch, roll);
+      return candidate;
+   }
 
-      getNodeToParentFrameTransform().getRotation().set(openingMechanismPose3D.getRotation());
-      getNodeFrame().update();
+   public Set<DoorOpeningMechanism> getOpeningMechanisms(DoorSide doorSide)
+   {
+      return openingMechanisms.stream().filter(openingMechanism -> openingMechanism.getDoorSide() == doorSide).collect(Collectors.toSet());
+   }
+
+   public DoorSide getDoorSideRelativeTo(Point3D position)
+   {
+      // TODO: DOORNODES
+
+      return null;
+   }
+
+   public enum DoorSide
+   {
+      PUSH((byte) 0), PULL((byte) 1);
+
+      private final byte byteValue;
+
+      DoorSide(byte byteValue)
+      {
+         this.byteValue = byteValue;
+      }
+
+      public byte getByteValue()
+      {
+         return byteValue;
+      }
+
+      public static DoorSide fromByte(byte byteValue)
+      {
+         for (DoorSide value : values())
+         {
+            if (value.getByteValue() == byteValue)
+               return value;
+         }
+         return null;
+      }
    }
 }

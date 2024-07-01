@@ -33,6 +33,11 @@ public class SceneNode extends RequestConfirmFreezable
       this.nodeFrame = new MutableReferenceFrame(name, ReferenceFrame.getWorldFrame());
    }
 
+   public void update()
+   {
+
+   }
+
    public long getID()
    {
       return id;
@@ -89,5 +94,14 @@ public class SceneNode extends RequestConfirmFreezable
    public List<SceneNode> getChildren()
    {
       return children;
+   }
+
+   /**
+    * This method is called when the node is removed from the scene graph.
+    * Note that this method does not destroy this node's children as they may want to be adopted by another node.
+    */
+   public void destroy(SceneGraph sceneGraph)
+   {
+
    }
 }

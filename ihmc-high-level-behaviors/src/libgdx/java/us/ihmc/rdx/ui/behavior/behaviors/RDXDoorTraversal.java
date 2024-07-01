@@ -77,11 +77,11 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
    {
       ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
 
-      renderNodePresenceStatus(DoorTraversalState.STABILIZE_DETECTION, state.getStabilizeDetectionAction());
-      renderNodePresenceStatus(DoorTraversalState.WAIT_TO_OPEN_RIGHT_HAND, state.getWaitToOpenRightHandAction());
-      renderNodePresenceStatus(DoorTraversalState.POST_GRASP_HANDLE, state.getPostGraspEvaluationAction());
-      renderNodePresenceStatus(DoorTraversalState.POST_PULL_DOOR, state.getPostPullDoorEvaluationAction());
-      renderNodePresenceStatus(DoorTraversalState.PULL_SCREW_PRIMITIVE, state.getPullScrewPrimitiveAction());
+//      renderNodePresenceStatus(DoorTraversalState.STABILIZE_DETECTION, state.getStabilizeDetectionAction());
+//      renderNodePresenceStatus(DoorTraversalState.WAIT_TO_OPEN_RIGHT_HAND, state.getWaitToOpenRightHandAction());
+//      renderNodePresenceStatus(DoorTraversalState.POST_GRASP_HANDLE, state.getPostGraspEvaluationAction());
+//      renderNodePresenceStatus(DoorTraversalState.POST_PULL_DOOR, state.getPostPullDoorEvaluationAction());
+//      renderNodePresenceStatus(DoorTraversalState.PULL_SCREW_PRIMITIVE, state.getPullScrewPrimitiveAction());
 
       ImGui.text("Pull door retry: ");
       ImGui.sameLine();
@@ -97,16 +97,16 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
       openedDoorHandleDistanceFromStartSlider.setWidgetText("%.2f".formatted(getDefinition().getOpenedDoorHandleDistanceFromStart().getValue()));
       openedDoorHandleDistanceFromStartSlider.renderImGuiWidget();
 
-         boolean pullScrewPrimitiveIsExecuting = false;
-         if (state.arePullRetryNodesPresent())
-         {
-            pullScrewPrimitiveIsExecuting = state.getPullScrewPrimitiveAction().getIsExecuting();
-         }
-         ImGui.beginDisabled(state.arePullRetryNodesPresent());
-         ImGui.text("Pull screw primitive node: Executing: %b".formatted(pullScrewPrimitiveIsExecuting));
-         ImGui.endDisabled();
+//      boolean pullScrewPrimitiveIsExecuting = false;
+//      if (state.arePullRetryNodesPresent())
+//      {
+//         pullScrewPrimitiveIsExecuting = state.getPullScrewPrimitiveAction().getIsExecuting();
+//      }
+//      ImGui.beginDisabled(state.arePullRetryNodesPresent());
+//      ImGui.text("Pull screw primitive node: Executing: %b".formatted(pullScrewPrimitiveIsExecuting));
+//      ImGui.endDisabled();
 
-      ImGui.text("Door hinge joint angle: %.2f%s".formatted(Math.toDegrees(state.getDoorHingeJointAngle().getValue()), EuclidCoreMissingTools.DEGREE_SYMBOL));
+//      ImGui.text("Door hinge joint angle: %.2f%s".formatted(Math.toDegrees(state.getDoorHingeJointAngle().getValue()), EuclidCoreMissingTools.DEGREE_SYMBOL));
 
       super.renderNodeSettingsWidgets();
    }
