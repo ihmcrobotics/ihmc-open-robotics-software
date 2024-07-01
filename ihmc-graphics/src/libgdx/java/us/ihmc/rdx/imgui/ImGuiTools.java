@@ -28,6 +28,7 @@ import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.string.StringTools;
 
 import java.io.ByteArrayOutputStream;
@@ -67,11 +68,11 @@ public class ImGuiTools
    public static final double SMALL_TO_MEDIUM_SCALE = 1.25;
    public static final double SMALL_TO_LARGE_SCALE = 2.4;
 
-   private static TIntObjectMap<ImFont> consoleFont = new TIntObjectHashMap<>();
-   private static TIntObjectMap<ImFont> smallFont = new TIntObjectHashMap<>();
-   private static TIntObjectMap<ImFont> smallBoldFont = new TIntObjectHashMap<>();
-   private static TIntObjectMap<ImFont> mediumFont = new TIntObjectHashMap<>();
-   private static TIntObjectMap<ImFont> bigFont = new TIntObjectHashMap<>();
+   private static final TIntObjectMap<ImFont> consoleFont = new TIntObjectHashMap<>();
+   private static final TIntObjectMap<ImFont> smallFont = new TIntObjectHashMap<>();
+   private static final TIntObjectMap<ImFont> smallBoldFont = new TIntObjectHashMap<>();
+   private static final TIntObjectMap<ImFont> mediumFont = new TIntObjectHashMap<>();
+   private static final TIntObjectMap<ImFont> bigFont = new TIntObjectHashMap<>();
 
    private static boolean userKeysHaveBeenMapped = false;
    private static int spaceKey;
@@ -503,14 +504,8 @@ public class ImGuiTools
       return label + "###" + thisObject.getClass().getName() + ":" + label;
    }
 
-   /** @deprecated Use ImGuiUniqueLabelMap instead. */
-   public static String uniqueIDOnly(Object thisObject, String label)
-   {
-      return "###" + thisObject.getClass().getName() + ":" + label;
-   }
-
    /**
-    * See https://github.com/ocornut/imgui/blob/master/docs/FONTS.md
+    * See <a href="https://github.com/ocornut/imgui/blob/master/docs/FONTS.md">FONTS.md</a>
     * and ImGuiGlfwFreeTypeDemo in this project
     */
    public static void setupFonts(ImGuiIO io)
@@ -631,9 +626,25 @@ public class ImGuiTools
       return smallBoldFont.get(CURRENT_FONT_SIZE);
    }
 
+   private static boolean printedConsoleFontError = false;
+
    public static ImFont getConsoleFont()
    {
-      return consoleFont.get(CURRENT_FONT_SIZE);
+      ImFont font = consoleFont.get(CURRENT_FONT_SIZE);
+      if (!font.isLoaded()) // FIXME: Find issue and fix
+      {
+         if (!printedConsoleFontError)
+         {
+            printedConsoleFontError = true;
+            LogTools.error("Console font %s size %d not loaded!".formatted(font.getDebugName(), CURRENT_FONT_SIZE));
+         }
+
+         return getSmallFont();
+      }
+      else
+      {
+         return font;
+      }
    }
 
    public static ImFontAtlas getFontAtlas()
@@ -689,6 +700,7 @@ public class ImGuiTools
       downArrowKey = ImGui.getKeyIndex(ImGuiKey.DownArrow);
       leftArrowKey = ImGui.getKeyIndex(ImGuiKey.LeftArrow);
       rightArrowKey = ImGui.getKeyIndex(ImGuiKey.RightArrow);
+      userKeysHaveBeenMapped = true;
    }
 
    public static int getSpaceKey()

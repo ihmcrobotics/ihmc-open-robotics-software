@@ -1,0 +1,35 @@
+#ifndef __perception_msgs__msg__ZEDSVOCurrentFileMessage__idl__
+#define __perception_msgs__msg__ZEDSVOCurrentFileMessage__idl__
+
+module perception_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      @TypeCode(type="perception_msgs::msg::dds_::ZEDSVOCurrentFileMessage_")
+      struct ZEDSVOCurrentFileMessage
+      {
+        /**
+         * The file name of the current SVO file that is being recorded to or being played back
+         */
+        string current_file_name;
+        /**
+         * The record mode (0=record, 1=playback)
+         */
+        octet record_mode;
+        /**
+         * The current position index of the current SVO file
+         */
+        long long current_position;
+        /**
+         * The length of the current SVO file
+         */
+        long long length;
+      };
+    };
+  };
+};
+
+#endif

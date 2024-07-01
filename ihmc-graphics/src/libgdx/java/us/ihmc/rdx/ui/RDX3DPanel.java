@@ -187,7 +187,7 @@ public class RDX3DPanel extends RDXPanel
          int frameBufferWidth = frameBuffer.getWidth();
          int frameBufferHeight = frameBuffer.getHeight();
 
-         // We do this render to get the Z buffer from just the model
+         // We do this render to get the Z buffer from just the model scene level
          if (modelSceneMouseCollisionEnabled && scene.getSceneLevelsToRender().contains(RDXSceneLevel.MODEL))
          {
             frameBuffer.begin();
@@ -379,6 +379,11 @@ public class RDX3DPanel extends RDXPanel
    public void addImGuiOverlayAddition(Runnable imGuiOverlayAddition)
    {
       imGuiOverlayAdditions.add(imGuiOverlayAddition);
+   }
+
+   public boolean overlayPanelExists(String panelName)
+   {
+      return overlayPanels.containsKey(panelName);
    }
 
    public void addOverlayPanel(String panelName, Runnable imGuiRender)
