@@ -21,7 +21,6 @@ import java.util.UUID;
  */
 public class InstantDetection
 {
-   public static final UUID UNMATCHED_DETECTION_ID = new UUID(0L, 0L);
    private static final double EPSILON = 1E-7;
 
    /** The object's identifying class (e.g. {@link us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass} or simply the ArUco marker number*/
@@ -31,7 +30,7 @@ public class InstantDetection
    private final double confidence;
    private final Pose3D pose;
    private final Instant detectionTime;
-   private UUID persistentDetectionID = UNMATCHED_DETECTION_ID;
+   private UUID persistentDetectionID = PersistentDetection.NULL_DETECTION_ID;
 
    public InstantDetection(String detectedObjectClass, double confidence, Pose3D pose, Instant detectionTime)
    {

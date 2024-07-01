@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -30,6 +31,8 @@ import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
+
+import java.util.UUID;
 
 /**
  * Publishes the current state of the complete scene graph.
@@ -152,18 +155,20 @@ public class ROS2SceneGraphPublisher
          }
          else if (sceneNode instanceof DoorNode doorNode)
          {
-            // TODO: DOORNODES
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.DOOR_NODE_TYPE);
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getDoorSceneNodes().size());
             DoorNodeMessage doorNodeMessage =  sceneGraphMessage.getDoorSceneNodes().add();
             doorNodeMessage.getDoorFramePose().set(doorNode.getDoorFramePose());
             doorNode.getDoorPanel().toMessage(doorNodeMessage.getDoorPanel());
-            for (DoorOpeningMechanism openingMechanism : doorNode.getOpeningMechanisms())
+            doorNodeMessage.getOpeningMechanisms().clear();
+            for (DoorOpeningMechanism openingMechanism : doorNode.getOpeningMechanisms().values())
             {
                DoorOpeningMechanismMessage doorOpeningMechanismMessage = doorNodeMessage.getOpeningMechanisms().add();
                doorOpeningMechanismMessage.setType(openingMechanism.getType().getByteValue());
-               doorOpeningMechanismMessage.setDoorSide(openingMechanism.getDoorSide().getByteValue());
-               doorOpeningMechanismMessage.getGraspPose().set(openingMechanism.getGraspPose());
+               doorOpeningMechanismMessage.setDoorSide(openingMechanism.getDoorSide().getBooleanValue());
+               doorOpeningMechanismMessage.getMechanismPose().set(openingMechanism.getMechanismPose());
+               UUID id = openingMechanism.hasDetection() ? openingMechanism.getDetection().getID() : PersistentDetection.NULL_DETECTION_ID;
+               MessageTools.toMessage(id, doorOpeningMechanismMessage.getPersistentDetectionId());
             }
             detectableSceneNodeMessage = doorNodeMessage.getDetectableSceneNode();
          }

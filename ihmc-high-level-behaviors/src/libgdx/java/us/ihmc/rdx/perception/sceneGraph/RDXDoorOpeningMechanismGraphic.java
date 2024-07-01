@@ -1,5 +1,9 @@
 package us.ihmc.rdx.perception.sceneGraph;
 
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
@@ -9,17 +13,18 @@ import us.ihmc.rdx.ui.interactable.RDXInteractableObject;
 
 import javax.annotation.Nullable;
 
-public class RDXDoorOpeningMechanismGraphic
+public class RDXDoorOpeningMechanismGraphic implements RenderableProvider
 {
    private final DoorOpeningMechanism openingMechanism;
 
    public RDXDoorOpeningMechanismGraphic(DoorOpeningMechanism openingMechanism)
    {
       this.openingMechanism = openingMechanism;
+      interactableObject = createInteractableObject();
    }
 
    @Nullable
-   private RDXInteractableObject interactableObject;
+   private final RDXInteractableObject interactableObject;
    private final RigidBodyTransform visualModelTransform = new RigidBodyTransform();
    private final RDXReferenceFrameGraphic frameGraphic = new RDXReferenceFrameGraphic(0.2);
 
@@ -62,6 +67,13 @@ public class RDXDoorOpeningMechanismGraphic
       return interactableObject;
    }
 
+   public void update(RigidBodyTransform openingMechanismTransformToWorld)
+   {
+      if (interactableObject != null)
+         interactableObject.setPose(openingMechanismTransformToWorld);
+      frameGraphic.setPoseInWorldFrame(openingMechanismTransformToWorld);
+   }
+
    public void destroy()
    {
       if (interactableObject != null)
@@ -71,5 +83,13 @@ public class RDXDoorOpeningMechanismGraphic
       }
 
       frameGraphic.dispose();
+   }
+
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      if (interactableObject != null)
+         interactableObject.getRenderables(renderables, pool);
+      frameGraphic.getRenderables(renderables, pool);
    }
 }

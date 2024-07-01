@@ -15,7 +15,7 @@ public class DoorPanelMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "aea9fbf35a91c6ab5d2217f853b0b76a5a5407e62caaf5e5fbb56f4a45ae3eb5";
+   		return "13ad742aa02c308a444eb7bbdec827e4af2f1842fc321fe0f93bc7ddb77fe8f2";
    }
    
    @Override
@@ -56,6 +56,8 @@ public class DoorPanelMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -74,6 +76,8 @@ public class DoorPanelMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.getCdrSerializedSize(data.getPersistentDetectionId(), current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -83,6 +87,7 @@ public class DoorPanelMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.write(data.getPlanarRegion(), cdr);
       cdr.write_type_12(data.getPlanarRegionLastUpdateTimeMillis());
 
+      ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.write(data.getPersistentDetectionId(), cdr);
    }
 
    public static void read(perception_msgs.msg.dds.DoorPanelMessage data, us.ihmc.idl.CDR cdr)
@@ -90,6 +95,7 @@ public class DoorPanelMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       perception_msgs.msg.dds.PlanarRegionMessagePubSubType.read(data.getPlanarRegion(), cdr);	
       data.setPlanarRegionLastUpdateTimeMillis(cdr.read_type_12());
       	
+      ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.read(data.getPersistentDetectionId(), cdr);	
 
    }
 
@@ -99,6 +105,8 @@ public class DoorPanelMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       ser.write_type_a("planar_region", new perception_msgs.msg.dds.PlanarRegionMessagePubSubType(), data.getPlanarRegion());
 
       ser.write_type_12("planar_region_last_update_time_millis", data.getPlanarRegionLastUpdateTimeMillis());
+      ser.write_type_a("persistent_detection_id", new ihmc_common_msgs.msg.dds.UUIDMessagePubSubType(), data.getPersistentDetectionId());
+
    }
 
    @Override
@@ -107,6 +115,8 @@ public class DoorPanelMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       ser.read_type_a("planar_region", new perception_msgs.msg.dds.PlanarRegionMessagePubSubType(), data.getPlanarRegion());
 
       data.setPlanarRegionLastUpdateTimeMillis(ser.read_type_12("planar_region_last_update_time_millis"));
+      ser.read_type_a("persistent_detection_id", new ihmc_common_msgs.msg.dds.UUIDMessagePubSubType(), data.getPersistentDetectionId());
+
    }
 
    public static void staticCopy(perception_msgs.msg.dds.DoorPanelMessage src, perception_msgs.msg.dds.DoorPanelMessage dest)

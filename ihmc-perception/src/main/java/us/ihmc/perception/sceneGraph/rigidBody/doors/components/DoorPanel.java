@@ -1,18 +1,28 @@
 package us.ihmc.perception.sceneGraph.rigidBody.doors.components;
 
 import perception_msgs.msg.dds.DoorPanelMessage;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.perception.detections.InstantDetection;
+import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.Collection;
+import java.util.UUID;
+
 public class DoorPanel
 {
    private transient final DoorNode doorNode;
+
+   private PersistentDetection doorPanelDetection = null;
+   private UUID detectionID;
 
    private final PlanarRegion planarRegion = new PlanarRegion();
    private long planarRegionLastUpdateTimeMillis;
@@ -20,6 +30,44 @@ public class DoorPanel
    public DoorPanel(DoorNode doorNode)
    {
       this.doorNode = doorNode;
+   }
+
+   /**
+    * Accepts a door panel detection if it matches the acceptance criteria
+    * @param newPanelDetection {@link PersistentDetection} of the door panel.
+    * @return true if the detection is accepted, false otherwise.
+    */
+   public boolean acceptDetection(PersistentDetection newPanelDetection, Collection<DoorOpeningMechanism> presentOpeningMechanisms)
+   {
+      if (this.doorPanelDetection == null && DoorNodeTools.detectionIsDoorPanel(newPanelDetection))
+      {
+         if (presentOpeningMechanisms.isEmpty()
+             || presentOpeningMechanisms.stream()
+                                        .anyMatch(openingMechanism -> openingMechanism.getDetection()
+                                                                                      .getMostRecentPosition()
+                                                                                      .distanceSquared(newPanelDetection.getMostRecentPosition())
+                                                                      < DoorNode.PANEL_TO_OPENING_MECHANISM_DISTANCE_THRESHOLD))
+         {
+            this.doorPanelDetection = newPanelDetection;
+            detectionID = doorPanelDetection.getID();
+            return true;
+         }
+      }
+
+      return false;
+   }
+
+   public PersistentDetection getDoorPanelDetection()
+   {
+      return doorPanelDetection;
+   }
+
+   public InstantDetection getLatestDetection()
+   {
+      if (doorPanelDetection == null)
+         return null;
+
+      return doorPanelDetection.getMostRecentDetection();
    }
 
    public PlanarRegion getPlanarRegion()
@@ -46,12 +94,14 @@ public class DoorPanel
    {
       message.getPlanarRegion().set(PlanarRegionMessageConverter.convertToPlanarRegionMessage(planarRegion));
       message.setPlanarRegionLastUpdateTimeMillis(planarRegionLastUpdateTimeMillis);
+      MessageTools.toMessage(detectionID != null ? detectionID : PersistentDetection.NULL_DETECTION_ID, message.getPersistentDetectionId());
    }
 
    public void fromMessage(DoorPanelMessage message)
    {
       planarRegion.set(PlanarRegionMessageConverter.convertToPlanarRegion(message.getPlanarRegion()));
       planarRegionLastUpdateTimeMillis = message.getPlanarRegionLastUpdateTimeMillis();
+      detectionID = MessageTools.toUUID(message.getPersistentDetectionId());
    }
 
    public void filterAndSetPlanarRegionFromPlanarRegionsList(PlanarRegionsList planarRegionsList)
@@ -65,7 +115,7 @@ public class DoorPanel
       DoorOpeningMechanism doorOpeningMechanism = doorNode.getLatestUpdatedOpeningMechanism();
       if (doorOpeningMechanism == null)
          return; // Early return
-      Point3D doorPointInWorld = new Point3D(doorOpeningMechanism.getGraspPose().getTranslation());
+      Point3D doorPointInWorld = new Point3D(doorOpeningMechanism.getMechanismPose().getTranslation());
 
       if (!planarRegionsList.isEmpty())
       {

@@ -18,6 +18,7 @@ import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
@@ -36,6 +37,7 @@ import us.ihmc.tools.thread.SwapReference;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.UUID;
 import java.util.function.BiFunction;
 
 /**
@@ -184,17 +186,26 @@ public class ROS2SceneGraphSubscription
          }
          if (localNode instanceof DoorNode doorNode)
          {
-            // TODO: DOORNODES
             doorNode.getDoorFramePose().set(subscriptionNode.getDoorNodeMessage().getDoorFramePose());
             doorNode.getDoorPanel().fromMessage(subscriptionNode.getDoorNodeMessage().getDoorPanel());
-            doorNode.getOpeningMechanisms().clear(); // TODO should we clear the list every time?
             for (DoorOpeningMechanismMessage doorOpeningMechanismMessage : subscriptionNode.getDoorNodeMessage().getOpeningMechanisms())
             {
-               DoorSide doorSide = DoorSide.fromByte(doorOpeningMechanismMessage.getDoorSide());
-               DoorOpeningMechanismType openingMechanismType = DoorOpeningMechanismType.fromByte(doorOpeningMechanismMessage.getType());
-               DoorOpeningMechanism doorOpeningMechanism = new DoorOpeningMechanism(doorSide, openingMechanismType);
-               doorOpeningMechanism.getGraspPose().set(doorOpeningMechanismMessage.getGraspPose());
-               doorNode.getOpeningMechanisms().add(doorOpeningMechanism);
+               UUID messageDetectionID = MessageTools.toUUID(doorOpeningMechanismMessage.getPersistentDetectionId());
+               if (!messageDetectionID.equals(PersistentDetection.NULL_DETECTION_ID))
+               {
+                  if (doorNode.getOpeningMechanisms().containsKey(messageDetectionID))
+                  {
+                     DoorSide doorSide = DoorSide.fromBoolean(doorOpeningMechanismMessage.getDoorSide());
+                     DoorOpeningMechanismType openingMechanismType = DoorOpeningMechanismType.fromByte(doorOpeningMechanismMessage.getType());
+                     DoorOpeningMechanism doorOpeningMechanism = new DoorOpeningMechanism(doorSide, openingMechanismType, messageDetectionID);
+                     doorOpeningMechanism.getMechanismPose().set(doorOpeningMechanismMessage.getMechanismPose());
+                     doorNode.getOpeningMechanisms().put(messageDetectionID, doorOpeningMechanism);
+                  }
+                  else
+                  {
+                     doorNode.getOpeningMechanisms().get(messageDetectionID).setMechanismPose(doorOpeningMechanismMessage.getMechanismPose());
+                  }
+               }
             }
          }
 

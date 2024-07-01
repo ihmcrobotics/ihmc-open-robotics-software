@@ -15,7 +15,7 @@ public class DoorOpeningMechanismMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "cb84d3ee40561e49251977a1989b7ee9fa577cd919e52e4b77141ca94bd76197";
+   		return "0ccb35e5a56649bb7741512be27d7946fec63c36a41069ab1e3e7b91e29a779b";
    }
    
    @Override
@@ -58,6 +58,8 @@ public class DoorOpeningMechanismMessagePubSubType implements us.ihmc.pubsub.Top
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       return current_alignment - initial_alignment;
    }
@@ -77,7 +79,9 @@ public class DoorOpeningMechanismMessagePubSubType implements us.ihmc.pubsub.Top
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getGraspPose(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getMechanismPose(), current_alignment);
+
+      current_alignment += ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.getCdrSerializedSize(data.getPersistentDetectionId(), current_alignment);
 
 
       return current_alignment - initial_alignment;
@@ -87,18 +91,20 @@ public class DoorOpeningMechanismMessagePubSubType implements us.ihmc.pubsub.Top
    {
       cdr.write_type_9(data.getType());
 
-      cdr.write_type_9(data.getDoorSide());
+      cdr.write_type_7(data.getDoorSide());
 
-      geometry_msgs.msg.dds.PosePubSubType.write(data.getGraspPose(), cdr);
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getMechanismPose(), cdr);
+      ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.write(data.getPersistentDetectionId(), cdr);
    }
 
    public static void read(perception_msgs.msg.dds.DoorOpeningMechanismMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setType(cdr.read_type_9());
       	
-      data.setDoorSide(cdr.read_type_9());
+      data.setDoorSide(cdr.read_type_7());
       	
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getGraspPose(), cdr);	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getMechanismPose(), cdr);	
+      ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.read(data.getPersistentDetectionId(), cdr);	
 
    }
 
@@ -106,8 +112,10 @@ public class DoorOpeningMechanismMessagePubSubType implements us.ihmc.pubsub.Top
    public final void serialize(perception_msgs.msg.dds.DoorOpeningMechanismMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_9("type", data.getType());
-      ser.write_type_9("door_side", data.getDoorSide());
-      ser.write_type_a("grasp_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGraspPose());
+      ser.write_type_7("door_side", data.getDoorSide());
+      ser.write_type_a("mechanism_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getMechanismPose());
+
+      ser.write_type_a("persistent_detection_id", new ihmc_common_msgs.msg.dds.UUIDMessagePubSubType(), data.getPersistentDetectionId());
 
    }
 
@@ -115,8 +123,10 @@ public class DoorOpeningMechanismMessagePubSubType implements us.ihmc.pubsub.Top
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.DoorOpeningMechanismMessage data)
    {
       data.setType(ser.read_type_9("type"));
-      data.setDoorSide(ser.read_type_9("door_side"));
-      ser.read_type_a("grasp_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getGraspPose());
+      data.setDoorSide(ser.read_type_7("door_side"));
+      ser.read_type_a("mechanism_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getMechanismPose());
+
+      ser.read_type_a("persistent_detection_id", new ihmc_common_msgs.msg.dds.UUIDMessagePubSubType(), data.getPersistentDetectionId());
 
    }
 

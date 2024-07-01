@@ -2,7 +2,9 @@ package us.ihmc.perception.detections;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.time.TimeTools;
 
@@ -16,6 +18,8 @@ import java.util.UUID;
 
 public class PersistentDetection
 {
+   public static final UUID NULL_DETECTION_ID = new UUID(0L, 0L);
+
    // The first element of this set is the oldest detection, and the last element is the most recent detection
    private final SortedSet<InstantDetection> detectionHistory = new TreeSet<>(Comparator.comparing(InstantDetection::getDetectionTime));
    private final InstantDetection firstDetection;
@@ -78,6 +82,16 @@ public class PersistentDetection
             }
          }
       }
+   }
+
+   public Pose3DReadOnly getMostRecentPose()
+   {
+      return getMostRecentDetection().getPose();
+   }
+
+   public Point3DReadOnly getMostRecentPosition()
+   {
+      return getMostRecentDetection().getPose().getPosition();
    }
 
    public InstantDetection getOldestDetection()

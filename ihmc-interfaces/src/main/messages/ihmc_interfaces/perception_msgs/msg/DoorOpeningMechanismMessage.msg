@@ -2,9 +2,12 @@
 byte type
 
 # The side of the door the opening mechanism is mounted to
-# 0 PUSH
-# 1 PULL
-byte door_side
+# true  PUSH
+# false PULL
+bool door_side
 
 # The grasp pose of the opening mechanism
-geometry_msgs/Pose grasp_pose
+geometry_msgs/Pose mechanism_pose
+
+# ID of the persistent detection associated with this opening mechanism. May be null.
+ihmc_common_msgs/UUIDMessage persistent_detection_id

@@ -14,18 +14,23 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
    public byte type_;
    /**
             * The side of the door the opening mechanism is mounted to
-            * 0 PUSH
-            * 1 PULL
+            * true  PUSH
+            * false PULL
             */
-   public byte door_side_;
+   public boolean door_side_;
    /**
             * The grasp pose of the opening mechanism
             */
-   public us.ihmc.euclid.geometry.Pose3D grasp_pose_;
+   public us.ihmc.euclid.geometry.Pose3D mechanism_pose_;
+   /**
+            * ID of the persistent detection associated with this opening mechanism. May be null.
+            */
+   public ihmc_common_msgs.msg.dds.UUIDMessage persistent_detection_id_;
 
    public DoorOpeningMechanismMessage()
    {
-      grasp_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      mechanism_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      persistent_detection_id_ = new ihmc_common_msgs.msg.dds.UUIDMessage();
    }
 
    public DoorOpeningMechanismMessage(DoorOpeningMechanismMessage other)
@@ -40,7 +45,8 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
 
       door_side_ = other.door_side_;
 
-      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.grasp_pose_, grasp_pose_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.mechanism_pose_, mechanism_pose_);
+      ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.staticCopy(other.persistent_detection_id_, persistent_detection_id_);
    }
 
    /**
@@ -60,19 +66,19 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
 
    /**
             * The side of the door the opening mechanism is mounted to
-            * 0 PUSH
-            * 1 PULL
+            * true  PUSH
+            * false PULL
             */
-   public void setDoorSide(byte door_side)
+   public void setDoorSide(boolean door_side)
    {
       door_side_ = door_side;
    }
    /**
             * The side of the door the opening mechanism is mounted to
-            * 0 PUSH
-            * 1 PULL
+            * true  PUSH
+            * false PULL
             */
-   public byte getDoorSide()
+   public boolean getDoorSide()
    {
       return door_side_;
    }
@@ -81,9 +87,18 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
    /**
             * The grasp pose of the opening mechanism
             */
-   public us.ihmc.euclid.geometry.Pose3D getGraspPose()
+   public us.ihmc.euclid.geometry.Pose3D getMechanismPose()
    {
-      return grasp_pose_;
+      return mechanism_pose_;
+   }
+
+
+   /**
+            * ID of the persistent detection associated with this opening mechanism. May be null.
+            */
+   public ihmc_common_msgs.msg.dds.UUIDMessage getPersistentDetectionId()
+   {
+      return persistent_detection_id_;
    }
 
 
@@ -106,9 +121,10 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.type_, other.type_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.door_side_, other.door_side_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.door_side_, other.door_side_, epsilon)) return false;
 
-      if (!this.grasp_pose_.epsilonEquals(other.grasp_pose_, epsilon)) return false;
+      if (!this.mechanism_pose_.epsilonEquals(other.mechanism_pose_, epsilon)) return false;
+      if (!this.persistent_detection_id_.epsilonEquals(other.persistent_detection_id_, epsilon)) return false;
 
       return true;
    }
@@ -126,7 +142,8 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
 
       if(this.door_side_ != otherMyClass.door_side_) return false;
 
-      if (!this.grasp_pose_.equals(otherMyClass.grasp_pose_)) return false;
+      if (!this.mechanism_pose_.equals(otherMyClass.mechanism_pose_)) return false;
+      if (!this.persistent_detection_id_.equals(otherMyClass.persistent_detection_id_)) return false;
 
       return true;
    }
@@ -141,8 +158,10 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
       builder.append(this.type_);      builder.append(", ");
       builder.append("door_side=");
       builder.append(this.door_side_);      builder.append(", ");
-      builder.append("grasp_pose=");
-      builder.append(this.grasp_pose_);
+      builder.append("mechanism_pose=");
+      builder.append(this.mechanism_pose_);      builder.append(", ");
+      builder.append("persistent_detection_id=");
+      builder.append(this.persistent_detection_id_);
       builder.append("}");
       return builder.toString();
    }

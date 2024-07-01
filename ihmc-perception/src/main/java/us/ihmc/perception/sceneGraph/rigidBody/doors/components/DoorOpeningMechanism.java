@@ -2,41 +2,78 @@ package us.ihmc.perception.sceneGraph.rigidBody.doors.components;
 
 import com.google.common.base.CaseFormat;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.detections.InstantDetection;
+import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode.DoorSide;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 
 import javax.annotation.Nullable;
+import java.util.UUID;
 
 /**
  * Represents hardware on a door which you have to interact with to open it, could be a knob, lever, deadbolt lock, etc...
  */
 public class DoorOpeningMechanism
 {
+   // Shared over ROS2
    private final DoorOpeningMechanismType type;
    private final DoorSide doorSide;
-   private final Pose3D graspPose = new Pose3D();
-   private InstantDetection lastDetection;
+   private final Pose3D mechanismPose = new Pose3D();
+   private final UUID detectionID; // syncing the detection ID instead of full detection
 
-   public DoorOpeningMechanism(DoorSide doorSide, DoorOpeningMechanismType type)
-   {
-      this.type = type;
-      this.doorSide = doorSide;
-   }
+   // Not shared over ROS2
+   @Nullable
+   private PersistentDetection detection = null;
 
-   public DoorOpeningMechanism(DoorSide doorSide, YOLOv8DetectionClass yolOv8DetectionClass)
+   public DoorOpeningMechanism(DoorSide doorSide, YOLOv8DetectionClass yolOv8DetectionClass, UUID detectionID)
    {
       switch (yolOv8DetectionClass)
       {
-//         case DOOR_LEVER -> type = DoorOpeningMechanismType.LEVER_HANDLE;
-//         case DOOR_KNOB -> type = DoorOpeningMechanismType.KNOB;
-//         case DOOR_PULL_HANDLE -> type = DoorOpeningMechanismType.PULL_HANDLE;
-//         case DOOR_PUSH_BAR -> type = DoorOpeningMechanismType.PUSH_BAR;
+         case DOOR_LEVER -> type = DoorOpeningMechanismType.LEVER_HANDLE;
+         case DOOR_KNOB -> type = DoorOpeningMechanismType.KNOB;
+         case DOOR_PULL_HANDLE -> type = DoorOpeningMechanismType.PULL_HANDLE;
+         case DOOR_PUSH_BAR -> type = DoorOpeningMechanismType.PUSH_BAR;
          default -> type = DoorOpeningMechanismType.UNKNOWN;
       }
       this.doorSide = doorSide;
+      this.detectionID = detectionID;
+   }
+
+   public DoorOpeningMechanism(DoorSide doorSide, DoorOpeningMechanismType type, UUID detectionID)
+   {
+      this.type = type;
+      this.doorSide = doorSide;
+      this.detectionID = detectionID;
+   }
+
+   public void update()
+   {
+      if (detection != null)
+         mechanismPose.set(detection.getMostRecentPose());
+   }
+
+   public UUID getDetectionID()
+   {
+      return detectionID;
+   }
+
+   public void setDetection(PersistentDetection detection)
+   {
+      this.detection = detection;
+   }
+
+   @Nullable
+   public PersistentDetection getDetection()
+   {
+      return detection;
+   }
+
+   public boolean hasDetection()
+   {
+      return detection != null;
    }
 
    public DoorOpeningMechanismType getType()
@@ -49,14 +86,22 @@ public class DoorOpeningMechanism
       return doorSide;
    }
 
-   public Pose3D getGraspPose()
+   public Pose3D getMechanismPose()
    {
-      return graspPose;
+      return mechanismPose;
+   }
+
+   public void setMechanismPose(Pose3DReadOnly newPose)
+   {
+      mechanismPose.set(newPose);
    }
 
    public InstantDetection getLastDetection()
    {
-      return lastDetection;
+      if (detection != null)
+         return detection.getMostRecentDetection();
+
+      return null;
    }
 
    public String getColloquialName()

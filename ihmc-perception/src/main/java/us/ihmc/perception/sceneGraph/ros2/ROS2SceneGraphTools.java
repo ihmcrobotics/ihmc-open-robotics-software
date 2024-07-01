@@ -119,18 +119,18 @@ public class ROS2SceneGraphTools
       }
       else if (nodeType == SceneGraphMessage.DOOR_NODE_TYPE)
       {
-         // TODO: DOORNODES
          DoorNode doorNode = new DoorNode(nodeID, crdtInfo);
          doorNode.getDoorFramePose().set(subscriptionNode.getDoorNodeMessage().getDoorFramePose());
          doorNode.getDoorPanel().fromMessage(subscriptionNode.getDoorNodeMessage().getDoorPanel());
-         doorNode.getOpeningMechanisms().clear(); // TODO should we clear the list every time?
          for (DoorOpeningMechanismMessage doorOpeningMechanismMessage : subscriptionNode.getDoorNodeMessage().getOpeningMechanisms())
          {
-            DoorSide doorSide = DoorSide.fromByte(doorOpeningMechanismMessage.getDoorSide());
+            DoorSide doorSide = DoorSide.fromBoolean(doorOpeningMechanismMessage.getDoorSide());
             DoorOpeningMechanismType openingMechanismType = DoorOpeningMechanismType.fromByte(doorOpeningMechanismMessage.getType());
-            DoorOpeningMechanism doorOpeningMechanism = new DoorOpeningMechanism(doorSide, openingMechanismType);
-            doorOpeningMechanism.getGraspPose().set(doorOpeningMechanismMessage.getGraspPose());
-            doorNode.getOpeningMechanisms().add(doorOpeningMechanism);
+            DoorOpeningMechanism doorOpeningMechanism = new DoorOpeningMechanism(doorSide,
+                                                                                 openingMechanismType,
+                                                                                 MessageTools.toUUID(doorOpeningMechanismMessage.getPersistentDetectionId()));
+            doorOpeningMechanism.getMechanismPose().set(doorOpeningMechanismMessage.getMechanismPose());
+            doorNode.getOpeningMechanisms().put(doorOpeningMechanism.getDetectionID(), doorOpeningMechanism);
          }
          sceneNode = doorNode;
       }

@@ -32,7 +32,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.SortedSet;
@@ -214,11 +213,11 @@ public class SceneGraph
       for (PersistentDetection newlyValidDoorDetection : newlyValidDoorDetections)
       {
          // Does this new detection correspond with an existing door node?
-         Optional<SceneNode> matchedDoorNode = sceneNodesByID.stream()
-                                                             .filter(sceneNode -> sceneNode instanceof DoorNode)
-                                                             .filter(sceneNode -> ((DoorNode) sceneNode).acceptDetection(newlyValidDoorDetection)).findFirst();
+         boolean matched = sceneNodesByID.stream()
+                                         .filter(sceneNode -> sceneNode instanceof DoorNode)
+                                         .anyMatch(sceneNode -> ((DoorNode) sceneNode).acceptDetection(newlyValidDoorDetection));
 
-         if (matchedDoorNode.isEmpty())
+         if (!matched)
          {
             // Create new door node
             DoorNode doorNode = new DoorNode(getNextID().getAndIncrement(), newlyValidDoorDetection, getCRDTInfo());

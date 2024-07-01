@@ -1,5 +1,6 @@
 package us.ihmc.perception.sceneGraph.rigidBody.doors;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.Axis2D;
 import us.ihmc.euclid.geometry.Line2D;
@@ -9,6 +10,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.detections.PersistentDetection;
+import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism.DoorOpeningMechanismType;
@@ -17,8 +19,10 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -32,11 +36,12 @@ import java.util.stream.Collectors;
  */
 public class DoorNode extends DetectableSceneNode
 {
+   public static final double PANEL_TO_OPENING_MECHANISM_DISTANCE_THRESHOLD = MathTools.square(0.75);
    private static final Pose3D ZERO_POSE = new Pose3D();
 
    private final Pose3D doorFramePose = new Pose3D(); // To know which way the door opens. X points in the direction that the door swings.
    private final DoorPanel doorPanel = new DoorPanel(this);
-   private final Set<DoorOpeningMechanism> openingMechanisms = new HashSet<>();
+   private final Map<UUID, DoorOpeningMechanism> openingMechanisms = new HashMap<>();
 
    public DoorNode(long id, CRDTInfo crdtInfo)
    {
@@ -47,17 +52,91 @@ public class DoorNode extends DetectableSceneNode
    {
       super(id, "Door" + id, crdtInfo);
 
-      acceptDetection(initialDetection);
+      if (initialDetection != null && !acceptDetection(initialDetection))
+         throw new IllegalArgumentException("Oops, something went super wrong. FIXME PLEASE");
    }
 
-   public boolean acceptDetection(PersistentDetection detection)
+   /**
+    * Accepts a detection of a door component (e.g. door handle, door panel, etc).
+    * @param doorComponentDetection {@link PersistentDetection} of a door component
+    * @return true if the detection is accepted, false otherwise.
+    */
+   public boolean acceptDetection(PersistentDetection doorComponentDetection)
    {
-      if (detection == null)
+      if (doorComponentDetection == null)
          return false;
 
-      // TODO: DOORNODES
+      if (doorPanel.acceptDetection(doorComponentDetection, openingMechanisms.values()))
+         return true;
+      else
+         return acceptOpeningMechanismDetection(doorComponentDetection);
+   }
 
-      return false;
+   private boolean acceptOpeningMechanismDetection(PersistentDetection doorOpeningMechanismDetection)
+   {
+      // Detection must be of an opening mechanism
+      if (!DoorNodeTools.detectionIsDoorOpeningMechanism(doorOpeningMechanismDetection))
+         return false;
+
+      // Detection must be close enough to the door panel detection (if it has been detected)
+      PersistentDetection panelDetection = doorPanel.getDoorPanelDetection();
+      if (panelDetection != null
+          && panelDetection.getMostRecentPosition().distanceSquared(doorOpeningMechanismDetection.getMostRecentPosition())
+             > PANEL_TO_OPENING_MECHANISM_DISTANCE_THRESHOLD)
+         return false;
+
+      // Detection must be close enough to existing opening mechanisms
+      boolean closeToAllMechanisms = openingMechanisms.isEmpty() ||
+                                    openingMechanisms.values()
+                                                     .stream()
+                                                     .allMatch(openingMechanism ->
+                                                               openingMechanism.getDetection()
+                                                                               .getMostRecentPosition()
+                                                                               .distanceSquared(doorOpeningMechanismDetection.getMostRecentPosition()) < 1.0);
+      if (!closeToAllMechanisms)
+         return false;
+
+      /*
+       * Figure out which side the door mechanism is on, assuming this is the first detection
+       * of a door component for this node.
+       * ALSO ASSUMES ONR DEMO COURSE. THIS WILL NOT WORK UNIVERSALLY.
+       */
+      DoorSide detectionSide;
+      /*
+       * ASSUMPTION: Robot will detect DoorLever and DoorKnob when entering main room.
+       * The doors will be oriented such that they are push doors.
+       * At this moment there will be no opening mechanisms in the list (first detection)
+       */
+      if (doorOpeningMechanismDetection.getDetectedObjectClass().contains("YOLODoorLever")
+          || doorOpeningMechanismDetection.getDetectedObjectClass().contains("YOLODoorKnob"))
+      {
+         detectionSide = DoorSide.PUSH;
+
+         // Not first detection; reverse the sides since our assumption was wrong.
+         if (!openingMechanisms.isEmpty())
+            detectionSide = DoorSide.getOppositeSide(detectionSide);
+      }
+      else if (doorOpeningMechanismDetection.getDetectedObjectClass().contains("YOLOPushBar"))
+      {
+         detectionSide = DoorSide.PUSH;
+      }
+      else // YOLOPullHandle
+      {
+         detectionSide = DoorSide.PULL;
+      }
+
+      // ASSUMPTION: Only one opening mechanism per door side
+      if (!getOpeningMechanisms(detectionSide).isEmpty())
+         return false;
+
+      // Must be new opening mechanism of this door; add to list
+      DoorOpeningMechanism openingMechanism = new DoorOpeningMechanism(detectionSide,
+                                                                       YOLOv8DetectionClass.fromName(doorOpeningMechanismDetection.getDetectedObjectName()),
+                                                                       doorOpeningMechanismDetection.getID());
+      openingMechanism.setDetection(doorOpeningMechanismDetection);
+      openingMechanisms.put(doorOpeningMechanismDetection.getID(), openingMechanism);
+
+      return true;
    }
 
    @Override
@@ -75,6 +154,9 @@ public class DoorNode extends DetectableSceneNode
 
    private void updateOpeningMechanismPoses()
    {
+      for (DoorOpeningMechanism openingMechanism : openingMechanisms.values())
+         openingMechanism.update();
+
       PlanarRegion planarRegion = doorPanel.getPlanarRegion();
 
       if (planarRegion.getArea() > 0)
@@ -102,9 +184,9 @@ public class DoorNode extends DetectableSceneNode
 
          // Update the opening mechanism poses with the planar region orientation,
          // special case for the LEVER_HANDLE
-         for (DoorOpeningMechanism openingMechanism : openingMechanisms)
+         for (DoorOpeningMechanism openingMechanism : openingMechanisms.values())
          {
-            Pose3D openingMechanismPose = openingMechanism.getGraspPose();
+            Pose3D openingMechanismPose = openingMechanism.getMechanismPose();
             Point2D openingMechanismPointInWorld2D = new Point2D(openingMechanismPose.getTranslation());
             RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(openingMechanismPointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
             double pitch = 0.0;
@@ -164,7 +246,7 @@ public class DoorNode extends DetectableSceneNode
       return doorPanel;
    }
 
-   public Set<DoorOpeningMechanism> getOpeningMechanisms()
+   public Map<UUID, DoorOpeningMechanism> getOpeningMechanisms()
    {
       return openingMechanisms;
    }
@@ -173,7 +255,7 @@ public class DoorNode extends DetectableSceneNode
    {
       DoorOpeningMechanism candidate = null;
 
-      for (DoorOpeningMechanism openingMechanism : openingMechanisms)
+      for (DoorOpeningMechanism openingMechanism : openingMechanisms.values())
       {
          if (candidate == null)
          {
@@ -181,7 +263,7 @@ public class DoorNode extends DetectableSceneNode
          }
          else
          {
-            if (openingMechanism.getLastDetection().getDetectionTime().getEpochSecond() > candidate.getLastDetection().getDetectionTime().getEpochSecond())
+            if (openingMechanism.getLastDetection().getDetectionTime().isAfter(candidate.getLastDetection().getDetectionTime()))
             {
                candidate = openingMechanism;
             }
@@ -193,7 +275,7 @@ public class DoorNode extends DetectableSceneNode
 
    public Set<DoorOpeningMechanism> getOpeningMechanisms(DoorSide doorSide)
    {
-      return openingMechanisms.stream().filter(openingMechanism -> openingMechanism.getDoorSide() == doorSide).collect(Collectors.toSet());
+      return openingMechanisms.values().stream().filter(openingMechanism -> openingMechanism.getDoorSide() == doorSide).collect(Collectors.toSet());
    }
 
    public DoorSide getDoorSideRelativeTo(Point3D position)
@@ -205,28 +287,28 @@ public class DoorNode extends DetectableSceneNode
 
    public enum DoorSide
    {
-      PUSH((byte) 0), PULL((byte) 1);
+      PUSH(true), PULL(false);
 
-      private final byte byteValue;
+      private final boolean booleanValue;
 
-      DoorSide(byte byteValue)
+      DoorSide(boolean booleanValue)
       {
-         this.byteValue = byteValue;
+         this.booleanValue = booleanValue;
       }
 
-      public byte getByteValue()
+      public static DoorSide getOppositeSide(DoorSide side)
       {
-         return byteValue;
+         return fromBoolean(!side.getBooleanValue());
       }
 
-      public static DoorSide fromByte(byte byteValue)
+      public boolean getBooleanValue()
       {
-         for (DoorSide value : values())
-         {
-            if (value.getByteValue() == byteValue)
-               return value;
-         }
-         return null;
+         return booleanValue;
+      }
+
+      public static DoorSide fromBoolean(boolean doorSide)
+      {
+         return doorSide ? PUSH : PULL;
       }
    }
 }
