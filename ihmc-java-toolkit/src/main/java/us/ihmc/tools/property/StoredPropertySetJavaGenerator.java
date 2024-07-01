@@ -26,12 +26,12 @@ public class StoredPropertySetJavaGenerator
    private record StoredPropertyFromFile(String titleCasedName, String typeName, String typePrimitiveName, String description) { }
    private final ArrayList<StoredPropertyFromFile> storedPropertiesFromFile = new ArrayList<>();
 
-   public StoredPropertySetJavaGenerator(Class<?> basePropertySetClass, Class<?> classForLoading, Path jsonFilePath)
+   public StoredPropertySetJavaGenerator(Class<?> basePropertySetClass, Path jsonFilePath)
    {
       this.basePropertySetClass = basePropertySetClass;
       this.jsonFilePath = jsonFilePath;
 
-      javaDirectory = new WorkspaceJavaDirectory(classForLoading, "generated-java");
+      javaDirectory = new WorkspaceJavaDirectory(basePropertySetClass, "generated-java");
       jsonFileName = basePropertySetClass.getSimpleName() + ".json";
       primaryJavaFile = new WorkspaceFile(javaDirectory, basePropertySetClass.getSimpleName() + ".java");
       basicsJavaFile = new WorkspaceFile(javaDirectory, basePropertySetClass.getSimpleName() + "Basics.java");

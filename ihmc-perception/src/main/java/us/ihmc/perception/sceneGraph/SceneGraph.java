@@ -19,6 +19,7 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
@@ -31,6 +32,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.SortedSet;
@@ -38,6 +40,7 @@ import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * A scene graph implementation that is really a scene tree. There
@@ -101,8 +104,6 @@ public class SceneGraph
    {
       // This must happen only once per on-robot tick
       detectionFilterCollection.update();
-
-      DoorNodeTools.addDoorNodes(this);
 
       modifyTree(modificationQueue -> updateOnRobotOnly(rootNode, robotPelvisFrame, modificationQueue));
    }
@@ -205,8 +206,28 @@ public class SceneGraph
       detectionManager.updateDetections();
 
       Set<PersistentDetection> newlyValidDetections = detectionManager.getNewlyValidDetections();
-      for (PersistentDetection newDetection : newlyValidDetections)
-         addNodeFromDetection(newDetection);
+
+      // Update or add door nodes
+      Set<PersistentDetection> newlyValidDoorDetections = newlyValidDetections.stream()
+                                                                              .filter(DoorNodeTools::detectionIsDoorComponent)
+                                                                              .collect(Collectors.toSet());
+      for (PersistentDetection newlyValidDoorDetection : newlyValidDoorDetections)
+      {
+         // Does this new detection correspond with an existing door node?
+         Optional<SceneNode> matchedDoorNode = sceneNodesByID.stream()
+                                                             .filter(sceneNode -> sceneNode instanceof DoorNode)
+                                                             .filter(sceneNode -> ((DoorNode) sceneNode).acceptDetection(newlyValidDoorDetection)).findFirst();
+
+         if (matchedDoorNode.isEmpty())
+         {
+            // Create new door node
+            DoorNode doorNode = new DoorNode(getNextID().getAndIncrement(), newlyValidDoorDetection, getCRDTInfo());
+            modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(doorNode, rootNode)));
+         }
+      }
+
+//      for (PersistentDetection newDetection : newlyValidDetections)
+//         addNodeFromDetection(newDetection);
 
       detectionManager.clearNewlyValidDetections();
    }

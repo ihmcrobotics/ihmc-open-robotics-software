@@ -1,64 +1,31 @@
 package us.ihmc.perception.sceneGraph.rigidBody.doors;
 
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.log.LogTools;
-import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
-import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
-import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
+import us.ihmc.perception.detections.PersistentDetection;
+import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
 
-import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class DoorNodeTools
 {
-   public static void addDoorNodes(SceneGraph sceneGraph)
+   private static final List<String> doorComponentDetectionNames = new ArrayList<>();
+
+   static
    {
-      // TODO: DOORNODES
-//      sceneGraph.modifyTree(modificationQueue ->
-//      {
-//         for (SceneNode sceneNode : sceneGraph.getSceneNodesByID())
-//         {
-//            if (sceneNode instanceof YOLOv8Node yoloNode)
-//            {
-//               boolean doorHardwareComponent = switch (yoloNode.getDetectionClass())
-//               {
-//                  case DOOR_PULL_HANDLE, DOOR_KNOB, DOOR_PUSH_BAR, DOOR_LEVER -> true;
-//                  default -> false;
-//               };
-//
-//               if (doorHardwareComponent)
-//               {
-//                  if (yoloNode.getChildren().isEmpty())
-//                  {
-//                     DoorNode doorNode = new DoorNode(sceneGraph.getNextID().getAndIncrement());
-//                     doorNode.setOpeningMechanismTypeFromYoloClass(yoloNode.getDetectionClass());
-//                     modificationQueue.accept(new SceneGraphNodeAddition(doorNode, yoloNode));
-//
-//                     SceneNode doorStaticNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
-//                                                                            "doorStaticHandle",
-//                                                                            sceneGraph.getIDToNodeMap(),
-//                                                                            doorNode.getID(),
-//                                                                            new RigidBodyTransform(),
-//                                                                            DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH,
-//                                                                            DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM,
-//                                                                            DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN);
-//                     LogTools.info("Adding doorStaticHandle to scene graph.");
-//                     modificationQueue.accept(new SceneGraphNodeAddition(doorStaticNode, doorNode));
-//                  }
-//                  else
-//                  {
-//                     for (SceneNode childNode : yoloNode.getChildren())
-//                     {
-//                        if (childNode instanceof DoorNode doorNode)
-//                        {
-//                           doorNode.setOpeningMechanismPoint3D(yoloNode.getObjectPose().getTranslation());
-//                        }
-//                     }
-//                  }
-//               }
-//            }
-//         }
-//      });
+      doorComponentDetectionNames.add("YOLODoorLever");
+      doorComponentDetectionNames.add("YOLODoorKnob");
+      doorComponentDetectionNames.add("YOLOPushBar");
+      doorComponentDetectionNames.add("YOLOPullHandle");
+      doorComponentDetectionNames.add("YOLODoorPanel");
+   }
+
+   public static boolean detectionIsDoorComponent(PersistentDetection detection)
+   {
+      Class<?> detectionClass = detection.getInstantDetectionClass();
+      if (detectionClass.equals(YOLOv8InstantDetection.class))
+      {
+         return doorComponentDetectionNames.contains(detection.getDetectedObjectClass());
+      }
+      return false;
    }
 }

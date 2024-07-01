@@ -3,6 +3,7 @@ package us.ihmc.perception.sceneGraph.rigidBody.doors.components;
 import com.google.common.base.CaseFormat;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode.DoorSide;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
@@ -17,6 +18,7 @@ public class DoorOpeningMechanism
    private final DoorOpeningMechanismType type;
    private final DoorSide doorSide;
    private final Pose3D graspPose = new Pose3D();
+   private InstantDetection lastDetection;
 
    public DoorOpeningMechanism(DoorSide doorSide, DoorOpeningMechanismType type)
    {
@@ -28,10 +30,10 @@ public class DoorOpeningMechanism
    {
       switch (yolOv8DetectionClass)
       {
-         case DOOR_LEVER -> type = DoorOpeningMechanismType.LEVER_HANDLE;
-         case DOOR_KNOB -> type = DoorOpeningMechanismType.KNOB;
-         case DOOR_PULL_HANDLE -> type = DoorOpeningMechanismType.PULL_HANDLE;
-         case DOOR_PUSH_BAR -> type = DoorOpeningMechanismType.PUSH_BAR;
+//         case DOOR_LEVER -> type = DoorOpeningMechanismType.LEVER_HANDLE;
+//         case DOOR_KNOB -> type = DoorOpeningMechanismType.KNOB;
+//         case DOOR_PULL_HANDLE -> type = DoorOpeningMechanismType.PULL_HANDLE;
+//         case DOOR_PUSH_BAR -> type = DoorOpeningMechanismType.PUSH_BAR;
          default -> type = DoorOpeningMechanismType.UNKNOWN;
       }
       this.doorSide = doorSide;
@@ -42,14 +44,19 @@ public class DoorOpeningMechanism
       return type;
    }
 
+   public DoorSide getDoorSide()
+   {
+      return doorSide;
+   }
+
    public Pose3D getGraspPose()
    {
       return graspPose;
    }
 
-   public DoorSide getDoorSide()
+   public InstantDetection getLastDetection()
    {
-      return doorSide;
+      return lastDetection;
    }
 
    public String getColloquialName()
