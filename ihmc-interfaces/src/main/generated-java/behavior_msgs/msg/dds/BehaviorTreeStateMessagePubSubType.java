@@ -15,7 +15,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0d87f209bc6115a9e75b7da6b01c64a6d33a928b732e6699bc97835b8d350ec8";
+   		return "a8dc20465150a3f8bdd2a3d8a3bee1afc832634a9bd34c2f790aa25bd4cc24f9";
    }
    
    @Override
@@ -62,6 +62,9 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1; ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += behavior_msgs.msg.dds.BasicNodeStateMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -132,6 +135,11 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getBehaviorTreeIndices().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getRootNodes().size(); ++i0)
+      {
+          current_alignment += behavior_msgs.msg.dds.BehaviorTreeRootNodeStateMessagePubSubType.getCdrSerializedSize(data.getRootNodes().get(i0), current_alignment);}
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getBasicNodes().size(); ++i0)
@@ -222,6 +230,10 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_e(data.getBehaviorTreeIndices());else
           throw new RuntimeException("behavior_tree_indices field exceeds the maximum length");
 
+      if(data.getRootNodes().size() <= 1)
+      cdr.write_type_e(data.getRootNodes());else
+          throw new RuntimeException("root_nodes field exceeds the maximum length");
+
       if(data.getBasicNodes().size() <= 200)
       cdr.write_type_e(data.getBasicNodes());else
           throw new RuntimeException("basic_nodes field exceeds the maximum length");
@@ -289,6 +301,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
       ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.read(data.getConfirmableRequest(), cdr);	
       cdr.read_type_e(data.getBehaviorTreeTypes());	
       cdr.read_type_e(data.getBehaviorTreeIndices());	
+      cdr.read_type_e(data.getRootNodes());	
       cdr.read_type_e(data.getBasicNodes());	
       cdr.read_type_e(data.getActionSequences());	
       cdr.read_type_e(data.getDoorTraversals());	
@@ -315,6 +328,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       ser.write_type_e("behavior_tree_types", data.getBehaviorTreeTypes());
       ser.write_type_e("behavior_tree_indices", data.getBehaviorTreeIndices());
+      ser.write_type_e("root_nodes", data.getRootNodes());
       ser.write_type_e("basic_nodes", data.getBasicNodes());
       ser.write_type_e("action_sequences", data.getActionSequences());
       ser.write_type_e("door_traversals", data.getDoorTraversals());
@@ -340,6 +354,7 @@ public class BehaviorTreeStateMessagePubSubType implements us.ihmc.pubsub.TopicD
 
       ser.read_type_e("behavior_tree_types", data.getBehaviorTreeTypes());
       ser.read_type_e("behavior_tree_indices", data.getBehaviorTreeIndices());
+      ser.read_type_e("root_nodes", data.getRootNodes());
       ser.read_type_e("basic_nodes", data.getBasicNodes());
       ser.read_type_e("action_sequences", data.getActionSequences());
       ser.read_type_e("door_traversals", data.getDoorTraversals());

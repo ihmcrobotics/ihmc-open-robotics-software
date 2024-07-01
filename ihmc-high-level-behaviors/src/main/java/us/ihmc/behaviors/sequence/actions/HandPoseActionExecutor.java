@@ -12,6 +12,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.inverseKinematics.ArmIKSolver;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeExecutor;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.*;
 import us.ihmc.commons.Conversions;
@@ -49,7 +50,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                                  DRCRobotModel robotModel,
                                  ROS2SyncedRobotModel syncedRobot)
    {
-      super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+      super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary, robotModel));
 
       state = getState();
       definition = getDefinition();
@@ -80,7 +81,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          ChestOrientationActionState concurrentChestOrientationAction = null;
          PelvisHeightOrientationActionState concurrentPelvisHeightPitchAction = null;
 
-         ActionSequenceExecutor actionSequenceExecutor = BehaviorTreeTools.findActionSequenceAncestor(this);
+         BehaviorTreeRootNodeExecutor actionSequenceExecutor = BehaviorTreeTools.findRootNode(this);
          if (actionSequenceExecutor != null)
          {
             if (state.getIsToBeExecutedConcurrently())
@@ -312,7 +313,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
       jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
 
-      double[] jointAngles = new double[syncedRobot.getRobotModel().getJointMap().getArmJointNames(getDefinition().getSide()).length];
+      double[] jointAngles = new double[state.getNumberOfJoints()];
 
       if (definition.getUsePredefinedJointAngles())
          for (int i = 0; i < jointAngles.length; i++)

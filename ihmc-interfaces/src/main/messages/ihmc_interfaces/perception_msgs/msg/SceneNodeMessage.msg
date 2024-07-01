@@ -7,6 +7,9 @@ uint32 id
 # The name of the scene node
 string name
 
+# A mechanism for confirming and ending a freeze early
+ihmc_common_msgs/ConfirmableRequestMessage confirmable_request
+
 # Transform of the node's frame to world frame
 controller_msgs/RigidBodyTransformMessage transform_to_world
 

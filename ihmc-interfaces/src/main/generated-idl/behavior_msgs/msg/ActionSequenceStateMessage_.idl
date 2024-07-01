@@ -21,22 +21,6 @@ module behavior_msgs
          * Definition
          */
         behavior_msgs::msg::dds::ActionSequenceDefinitionMessage definition;
-        /**
-         * If the sequence is currently set to proceed automatically
-         */
-        boolean automatic_execution;
-        /**
-         * The index of the action that is set to execute next
-         */
-        unsigned short execution_next_index;
-        /**
-         * Next action rejection tooltip
-         */
-        string next_action_rejection_tooltip;
-        /**
-         * Request manual execution of the next action
-         */
-        boolean manual_execution_requested;
       };
     };
   };

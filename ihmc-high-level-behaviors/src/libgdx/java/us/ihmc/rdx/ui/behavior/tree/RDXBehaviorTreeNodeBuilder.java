@@ -4,6 +4,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeStateBuilder;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
@@ -58,6 +59,10 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
    public RDXBehaviorTreeNode<?, ?> createNode(Class<?> nodeType, long id, CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
       // Control nodes:
+      if (nodeType == BehaviorTreeRootNodeDefinition.class)
+      {
+         return new RDXBehaviorTreeRootNode(id, crdtInfo, saveFileDirectory);
+      }
       if (nodeType == BehaviorTreeNodeDefinition.class)
       {
          return new RDXBehaviorTreeNode<>(id, crdtInfo, saveFileDirectory);
@@ -158,7 +163,7 @@ public class RDXBehaviorTreeNodeBuilder implements BehaviorTreeNodeStateBuilder
    }
 
    // This method is in this class because we have a syncedRobot here.
-   public void initializeActionNode(@Nullable RDXActionSequence actionSequence,
+   public void initializeActionNode(@Nullable RDXBehaviorTreeRootNode actionSequence,
                                     RDXActionNode<?, ?> newAction,
                                     int insertionIndex,
                                     RobotSide sideOfNewAction)

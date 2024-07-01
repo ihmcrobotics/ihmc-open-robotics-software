@@ -10,6 +10,7 @@ public class ROS2BehaviorTreeSubscriptionNode
    private byte type;
    private BehaviorTreeNodeDefinitionMessage behaviorTreeNodeDefinitionMessage;
    private BehaviorTreeNodeStateMessage behaviorTreeNodeStateMessage;
+   private BehaviorTreeRootNodeStateMessage behaviorTreeRootNodeStateMessage;
    private ActionSequenceStateMessage actionSequenceStateMessage;
    private DoorTraversalStateMessage doorTraversalStateMessage;
    private TrashCanInteractionStateMessage trashCanInteractionStateMessage;
@@ -31,6 +32,7 @@ public class ROS2BehaviorTreeSubscriptionNode
       type = -1;
       behaviorTreeNodeDefinitionMessage = null;
       behaviorTreeNodeStateMessage = null;
+      behaviorTreeRootNodeStateMessage = null;
       actionSequenceStateMessage = null;
       doorTraversalStateMessage = null;
       trashCanInteractionStateMessage = null;
@@ -76,6 +78,16 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setBehaviorTreeNodeStateMessage(BehaviorTreeNodeStateMessage behaviorTreeNodeStateMessage)
    {
       this.behaviorTreeNodeStateMessage = behaviorTreeNodeStateMessage;
+   }
+
+   public BehaviorTreeRootNodeStateMessage getBehaviorTreeRootNodeStateMessage()
+   {
+      return behaviorTreeRootNodeStateMessage;
+   }
+
+   public void setBehaviorTreeRootNodeStateMessage(BehaviorTreeRootNodeStateMessage behaviorTreeRootNodeStateMessage)
+   {
+      this.behaviorTreeRootNodeStateMessage = behaviorTreeRootNodeStateMessage;
    }
 
    public ActionNodeStateMessage getActionNodeStateMessage()
