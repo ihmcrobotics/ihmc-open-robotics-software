@@ -51,6 +51,13 @@ public class ReadyToPlanState implements State
 
    private PlanningMode planningMode;
 
+   /**
+    * This state exists to plan footsteps based on the conditions of the {@link ContinuousHikingParameters}. This state publishes visuals the UI but doesn't
+    * send anything to the controller.
+    * We allow for staying in this state and re-planning over and over without sending any steps. However, if we are sending steps, we only stay in this state
+    * for a percentage of the swing, and if we don't get a good plan by then, we will have to try again when the current step is completed, and we get back to
+    * this state.
+    */
    public ReadyToPlanState(ROS2Helper ros2Helper,
                            HumanoidReferenceFrames referenceFrames,
                            AtomicReference<ContinuousWalkingCommandMessage> commandMessage,
@@ -137,7 +144,6 @@ public class ReadyToPlanState implements State
       return stopPlanningAndCompleteCurrentStep || (continuousPlanner.isPlanAvailable() && continuousHikingParameters.getStepPublisherEnabled());
    }
 
-
    public SideDependentList<FramePose3D> getGoalPosesBasedOnPlanningMode()
    {
       SideDependentList<FramePose3D> goalPoses = new SideDependentList<>();
@@ -159,13 +165,6 @@ public class ReadyToPlanState implements State
          // This allows for walking to a goal that isn't straight forward, its assumed that if there is no goal we will just resume walking straight forward
          case WALK_TO_GOAL ->
          {
-//             These goal poses are empty but that's ok because we will just plan the next loop and get a real one, the mode needs to be set though
-//            if (walkToGoalWayPointList.isEmpty())
-//            {
-//               this.planningMode = PlanningMode.FAST_HIKING;
-//               return goalPoses;
-//            }
-
             // Set the goalPoses here so that we return a good value regardless of what happens next
             goalPoses = walkToGoalWayPointList.get(0);
 
