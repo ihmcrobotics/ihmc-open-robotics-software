@@ -9,6 +9,7 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
@@ -57,15 +58,21 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
       updateActionSubtree(this);
 
       DetectableSceneNode yoloDoorHandleNode = (DetectableSceneNode) sceneGraph.getNamesToNodesMap().get("YOLO door lever");
-      StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get("doorStaticHandle");
+      StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get(DoorNodeTools.DOOR_STATIC_HANDLE_NAME);
 
       if (state.getSetStaticForGraspAction() != null && state.getSetStaticForGraspAction().getIsExecuting() ||
           state.getSetStaticForApproachAction() != null && state.getSetStaticForApproachAction().getIsExecuting())
       {
-         if (staticHandleClosedDoor != null)
+         for (String nodeName : sceneGraph.getNodeNameList())
          {
-            staticHandleClosedDoor.clearOffset();
-            staticHandleClosedDoor.freeze();
+            if (nodeName.startsWith(DoorNodeTools.DOOR_STATIC_HANDLE_NAME))
+            {
+               if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof StaticRelativeSceneNode staticHandleNode)
+               {
+                  staticHandleNode.clearOffset();
+                  staticHandleNode.freeze();
+               }
+            }
          }
       }
 

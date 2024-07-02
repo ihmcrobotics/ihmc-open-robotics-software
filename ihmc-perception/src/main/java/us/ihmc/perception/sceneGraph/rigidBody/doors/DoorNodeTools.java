@@ -12,6 +12,8 @@ import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinit
 
 public final class DoorNodeTools
 {
+   public static final String DOOR_STATIC_HANDLE_NAME = "doorStaticHandle";
+
    /**
     * Creates new door nodes as children of {@link YOLOv8Node}\s which are door components.
     * If a door node already exists as a child of a YOLO node which is a door component, we update
@@ -69,8 +71,9 @@ public final class DoorNodeTools
                         }
                      }
 
+                     String nodeName = DOOR_STATIC_HANDLE_NAME + yoloNode.getDetectionClass().getDefaultNodeName();
                      SceneNode doorStaticNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
-                                                                            "doorStaticHandle",
+                                                                            nodeName,
                                                                             sceneGraph.getIDToNodeMap(),
                                                                             doorNode.getID(),
                                                                             new RigidBodyTransform(),
@@ -78,7 +81,7 @@ public final class DoorNodeTools
                                                                             yoloVisualModelTransform,
                                                                             DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN,
                                                                             sceneGraph.getCRDTInfo());
-                     LogTools.info("Adding doorStaticHandle to scene graph.");
+                     LogTools.info("Adding {} to scene graph.", nodeName);
                      modificationQueue.accept(new SceneGraphNodeAddition(doorStaticNode, doorNode));
                   }
                   else
