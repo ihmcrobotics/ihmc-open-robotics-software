@@ -23,6 +23,10 @@ public class WaitingToLandState implements State
    private FootstepStatusMessage previousFootstepStatusMessage = null;
    private final ContinuousPlannerStatistics statistics;
 
+   /**
+    * This state exists to send a plan to the controller (that is if we have a plan to send). Then we will exist this state when the next step is started. Once
+    * that step is started we want to plan again in order to keep walking, so leave this state.
+    */
    public WaitingToLandState(ROS2Helper ros2Helper,
                              String simpleRobotName,
                              ContinuousPlanner continuousPlanner,
