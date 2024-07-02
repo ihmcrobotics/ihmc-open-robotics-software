@@ -17,7 +17,8 @@ import javax.annotation.Nullable;
 
 public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefinition>
 {
-   public static final String STABILIZE_DETECTION = "Stabilize Detection";
+   public static final String SET_STATIC_FOR_APPROACH = "Set static for approach";
+   public static final String SET_STATIC_FOR_GRASP = "Set static for grasp";
    public static final String WAIT_TO_OPEN_RIGHT_HAND = "Wait to open right hand";
    public static final String PULL_SCREW_PRIMITIVE = "Pull Screw primitive";
    public static final String POST_PULL_DOOR = "Post pull door evaluation";
@@ -27,7 +28,8 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    private DoorNode doorNode;
 
    private BehaviorTreeRootNodeState actionSequence;
-   private WaitDurationActionState stabilizeDetectionAction;
+   private WaitDurationActionState setStaticForApproachAction;
+   private WaitDurationActionState setStaticForGraspAction;
    private WaitDurationActionState waitToOpenRightHandAction;
    private ScrewPrimitiveActionState pullScrewPrimitiveAction;
    private WaitDurationActionState postGraspEvaluationAction;
@@ -56,7 +58,7 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
 
    public void updateActionSubtree(BehaviorTreeNodeState<?> node)
    {
-      stabilizeDetectionAction = null;
+      setStaticForGraspAction = null;
       waitToOpenRightHandAction = null;
       pullScrewPrimitiveAction = null;
       postGraspEvaluationAction = null;
@@ -67,9 +69,14 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
          if (child instanceof ActionNodeState<?> actionNode)
          {
             if (actionNode instanceof WaitDurationActionState waitDurationAction
-                && waitDurationAction.getDefinition().getName().equals(STABILIZE_DETECTION))
+                && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_APPROACH))
             {
-               stabilizeDetectionAction = waitDurationAction;
+               setStaticForApproachAction = waitDurationAction;
+            }
+            if (actionNode instanceof WaitDurationActionState waitDurationAction
+                && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_GRASP))
+            {
+               setStaticForGraspAction = waitDurationAction;
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
                 && waitDurationAction.getDefinition().getName().equals(WAIT_TO_OPEN_RIGHT_HAND))
@@ -145,9 +152,14 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       return actionSequence;
    }
 
-   public WaitDurationActionState getStabilizeDetectionAction()
+   public WaitDurationActionState getSetStaticForApproachAction()
    {
-      return stabilizeDetectionAction;
+      return setStaticForApproachAction;
+   }
+
+   public WaitDurationActionState getSetStaticForGraspAction()
+   {
+      return setStaticForGraspAction;
    }
 
    public WaitDurationActionState getWaitToOpenRightHandAction()
