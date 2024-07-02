@@ -83,9 +83,8 @@ public class RDXVRKinematicsStreamingMode
    private final SideDependentList<MutableReferenceFrame> handDesiredControlFrames = new SideDependentList<>();
    private final SideDependentList<RDXReferenceFrameGraphic> controllerFrameGraphics = new SideDependentList<>();
    private final SideDependentList<Pose3D> ikControlFramePoses = new SideDependentList<>();
-   private final Pose3D ikMidControlFramePose = new Pose3D();
    private final SideDependentList<RDXReferenceFrameGraphic> handFrameGraphics = new SideDependentList<>();
-   private final RDXReferenceFrameGraphic midHandFrameGraphic = new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH);
+   //private final RDXReferenceFrameGraphic midHandFrameGraphic = new RDXReferenceFrameGraphic(FRAME_AXIS_GRAPHICS_LENGTH);
    private final Map<String, MutableReferenceFrame> trackedSegmentDesiredFrame = new HashMap<>();
    private final Map<String, RDXReferenceFrameGraphic> trackerFrameGraphics = new HashMap<>();
    private final ImBoolean showReferenceFrameGraphics = new ImBoolean(true);
@@ -236,7 +235,7 @@ public class RDXVRKinematicsStreamingMode
             handleTrackedSegment(vrContext, toolboxInputMessage, segmentType, additionalTrackedSegments);
 
          //TODO: (CD) This is not yet used. Use to back out orientation-adjusted hand frames or remove
-         midHandFrameGraphic.setToReferenceFrame(rdxBiManipulationManager.getMidHandFrame());
+         // midHandFrameGraphic.setToReferenceFrame(rdxBiManipulationManager.getMidHandFrame());
 
          if (controlArmsOnly.get())
          {
@@ -583,7 +582,6 @@ public class RDXVRKinematicsStreamingMode
          {
             controllerFrameGraphics.get(side).getRenderables(renderables, pool);
             handFrameGraphics.get(side).getRenderables(renderables, pool);
-            midHandFrameGraphic.getRenderables(renderables, pool);
          }
          for (var trackerGraphics : trackerFrameGraphics.entrySet())
             trackerGraphics.getValue().getRenderables(renderables, pool);
@@ -597,7 +595,6 @@ public class RDXVRKinematicsStreamingMode
       {
          controllerFrameGraphics.get(side).dispose();
          handFrameGraphics.get(side).dispose();
-         midHandFrameGraphic.dispose();
       }
    }
 
