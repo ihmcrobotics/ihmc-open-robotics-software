@@ -179,6 +179,17 @@ public class DoorSceneNodeDefinitions
       DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM.appendRollRotation(Math.PI);
       DOOR_HANDLE_TO_YOLO_VISUAL_MODEL_TRANSFORM.appendYawRotation(Math.PI);
    }
+   public static final RigidBodyTransform DOOR_KNOB_TO_YOLO_VISUAL_MODEL_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      DOOR_KNOB_TO_YOLO_VISUAL_MODEL_TRANSFORM.appendRollRotation(Math.PI);
+   }
+   public static final RigidBodyTransform DOOR_PUSH_BAR_TO_YOLO_VISUAL_MODEL_TRANSFORM = new RigidBodyTransform();
+   static
+   {
+      DOOR_PUSH_BAR_TO_YOLO_VISUAL_MODEL_TRANSFORM.appendRollRotation(Math.PI);
+      DOOR_PUSH_BAR_TO_YOLO_VISUAL_MODEL_TRANSFORM.appendTranslation(0.0, 0.26, 0.0);
+   }
 
    public static void ensureNodesAdded(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
