@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
@@ -37,9 +38,8 @@ import java.util.stream.Collectors;
  */
 public class DoorNode extends DetectableSceneNode
 {
-   // TODO: DOORNODES TUNE THESE THRESHOLDS
    // Maximum distance one door component can be from another (squared meters)
-   public static final double DOOR_COMPONENT_DISTANCE_THRESHOLD = MathTools.square(0.75);
+   public static final double DOOR_COMPONENT_DISTANCE_THRESHOLD = MathTools.square(1.5);
    private static final Pose3D NAN_POSE = new Pose3D();
    static
    {
@@ -49,6 +49,9 @@ public class DoorNode extends DetectableSceneNode
    private final Pose3D doorFramePose = new Pose3D(NAN_POSE); // To know which way the door opens. X points in the direction that the door swings.
    private final DoorPanel doorPanel = new DoorPanel(this);
    private final Map<UUID, DoorOpeningMechanism> openingMechanisms = new HashMap<>();
+
+   // translation from opening mechanism to door hinge corner when looking towards push side (invert y is looking towards pull side)
+   private final Vector3D openingMechanismToHingeCornerTranslation = new Vector3D(NAN_POSE.getTranslation());
 
    private boolean lockDoorFramePose = false;
 
@@ -138,6 +141,26 @@ public class DoorNode extends DetectableSceneNode
       if (!getOpeningMechanisms(detectionSide).isEmpty())
          return false;
 
+      // Assign hinge translation if first opening mechanism
+      if (openingMechanisms.isEmpty())
+      {
+         // TODO: Choose values based on opening mechanism type (currently only works with knob and lever)
+         double openerToHingeCornerY = DoorModelParameters.DOOR_PANEL_WIDTH - DoorModelParameters.DOOR_OPENER_INSET;
+
+         /*
+          * ASSUMPTIONS: In the ONR demo course the door's hing locations will be ties to the opening mechanisms
+          * Push Bar    -> right
+          * Door Knob   -> left
+          * Door Handle -> right
+          * (looking at the push side of the door)
+          */
+         if (!doorOpeningMechanismDetection.getDetectedObjectName().toLowerCase().contains("knob"))
+            openerToHingeCornerY *= -1.0;
+
+         double openerToHingeCornerZ = -1.0 * DoorModelParameters.DOOR_OPENER_FROM_BOTTOM_OF_PANEL;
+         openingMechanismToHingeCornerTranslation.set(0.0, openerToHingeCornerY, openerToHingeCornerZ);
+      }
+
       // Must be new opening mechanism of this door; add to list
       DoorOpeningMechanism openingMechanism = new DoorOpeningMechanism(detectionSide,
                                                                        YOLOv8DetectionClass.fromName(doorOpeningMechanismDetection.getDetectedObjectName()),
@@ -188,11 +211,8 @@ public class DoorNode extends DetectableSceneNode
          // If doorFramePose is NaN, this means we are just now perceiving the door.
          // Attempt to set the orientation of the door pose according to the side of perceived opening mechanisms
          // If there are no opening mechanisms, or the opening mechanisms are on different sides, assume push door.
-         // TODO: remove assumption door is a "push door" when we first see it
          if (doorFramePose.containsNaN() || !lockDoorFramePose)
          {
-            doorFramePose.getTranslation().set(planarRegionCentroidInWorld);
-
             // Check if all opening mechanisms are on the same side.
             double doorFrameYaw = planarRegionYaw;
             DoorSide mechanismsSide = allMechanismsAreSameSide(openingMechanisms.values());
@@ -202,6 +222,15 @@ public class DoorNode extends DetectableSceneNode
                doorFrameYaw = doorFrameYaw + Math.PI;
 
             doorFramePose.getRotation().setYawPitchRoll(doorFrameYaw, 0.0, 0.0);
+
+            DoorOpeningMechanism detectedOpeningMechanism = getLatestUpdatedOpeningMechanism();
+            if (detectedOpeningMechanism != null)
+            {
+               doorFramePose.getTranslation().set(detectedOpeningMechanism.getMechanismPose().getTranslation());
+               doorFramePose.appendTranslation(openingMechanismToHingeCornerTranslation); // TODO: Invert y translation if looking at door from opposite side
+            }
+            else
+               doorFramePose.getTranslation().set(planarRegionCentroidInWorld);
          }
 
          // Update the opening mechanism poses with the planar region orientation,
