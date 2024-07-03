@@ -5,7 +5,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
-import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
 
 import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions.*;
@@ -72,17 +72,16 @@ public final class DoorNodeTools
                      }
 
                      String nodeName = DOOR_STATIC_HANDLE_NAME + yoloNode.getDetectionClass().getDefaultNodeName();
-                     SceneNode doorStaticNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
-                                                                            nodeName,
-                                                                            sceneGraph.getIDToNodeMap(),
-                                                                            doorNode.getID(),
-                                                                            new RigidBodyTransform(),
-                                                                            visualModelPath,
-                                                                            yoloVisualModelTransform,
-                                                                            DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN,
-                                                                            sceneGraph.getCRDTInfo());
+                     SceneNode doorStaticNode = new PredefinedRigidBodySceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                                                 nodeName,
+                                                                                 sceneGraph.getIDToNodeMap(),
+                                                                                 doorNode.getID(),
+                                                                                 new RigidBodyTransform(),
+                                                                                 visualModelPath,
+                                                                                 yoloVisualModelTransform,
+                                                                                 sceneGraph.getCRDTInfo());
                      LogTools.info("Adding {} to scene graph.", nodeName);
-                     modificationQueue.accept(new SceneGraphNodeAddition(doorStaticNode, doorNode));
+                     modificationQueue.accept(new SceneGraphNodeAddition(doorStaticNode, sceneGraph.getRootNode()));
                   }
                   else
                   {
