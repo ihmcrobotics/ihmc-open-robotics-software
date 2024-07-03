@@ -2,11 +2,9 @@ package us.ihmc.sensors;
 
 import perception_msgs.msg.dds.ZEDSVOCurrentFileMessage;
 import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2DemandGraphNode;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.thread.RestartableThrottledThread;
 import us.ihmc.zed.SL_InitParameters;
@@ -23,8 +21,6 @@ import static us.ihmc.zed.global.zed.*;
 // https://www.stereolabs.com/docs/video/recording
 public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
 {
-   private final MutableReferenceFrame measuredSensorFrame = new MutableReferenceFrame("zedSVOFrame", ReferenceFrame.getWorldFrame());
-
    private final RecordMode recordMode;
    private final String svoFileName;
    private final RestartableThrottledThread publishInfoThread;
@@ -66,7 +62,12 @@ public class ZEDColorDepthImageRetrieverSVO extends ZEDColorDepthImageRetriever
       this.recordMode = recordMode;
       this.svoFileName = Objects.requireNonNullElseGet(svoFileName, this::generateSVOFileName);
 
-      ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_SET_POSITION, int64 -> setCurrentPosition((int) int64.getData()));
+      ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_SET_POSITION, int64 ->
+      {
+         setCurrentPosition((int) int64.getData());
+         if (!isRunning())
+            grabOneFrame();
+      });
       ros2Helper.subscribeViaCallback(PerceptionAPI.ZED_SVO_PAUSE, () ->
       {
          if (recordMode == RecordMode.RECORD)

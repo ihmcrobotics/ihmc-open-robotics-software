@@ -348,6 +348,16 @@ public class ZEDColorDepthImageRetriever
       zedGrabThread.stop();
    }
 
+   public void grabOneFrame()
+   {
+      zedGrabThread.runOnce();
+   }
+
+   public boolean isRunning()
+   {
+      return zedGrabThread.isRunning();
+   }
+
    public void destroy()
    {
       System.out.println("Destroying " + getClass().getSimpleName());
