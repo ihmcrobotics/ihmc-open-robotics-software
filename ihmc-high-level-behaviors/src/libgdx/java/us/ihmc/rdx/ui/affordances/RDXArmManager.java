@@ -27,6 +27,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
+import us.ihmc.rdx.ui.teleoperation.RDXAbilityHandManager;
 import us.ihmc.rdx.ui.teleoperation.RDXDesiredRobot;
 import us.ihmc.rdx.ui.teleoperation.RDXHandConfigurationManager;
 import us.ihmc.rdx.ui.teleoperation.RDXTeleoperationParameters;
@@ -73,6 +74,7 @@ public class RDXArmManager
    private RDXArmControlMode armControlMode = RDXArmControlMode.JOINTSPACE;
    private ReferenceFrame taskspaceTrajectoryFrame = ReferenceFrame.getWorldFrame();
    private final RDXHandConfigurationManager handManager;
+   private final RDXAbilityHandManager abilityHandManager;
 
    private final SideDependentList<ArmIKSolver> armIKSolvers = new SideDependentList<>();
    private final SideDependentList<OneDoFJointBasics[]> desiredRobotArmJoints = new SideDependentList<>();
@@ -103,6 +105,8 @@ public class RDXArmManager
       this.teleoperationParameters = teleoperationParameters;
       this.interactableHands = interactableHands;
       this.enableWholeBodyIK = enableWholeBodyIK;
+
+      this.abilityHandManager = new RDXAbilityHandManager(communicationHelper.getControllerHelper(), syncedRobot);
 
       for (RobotSide side : RobotSide.values)
       {
@@ -217,6 +221,8 @@ public class RDXArmManager
    public void renderImGuiWidgets()
    {
       handManager.renderImGuiWidgets();
+
+      abilityHandManager.renderImGuiWidgets();
 
       ImGui.text("Arm Presets:");
       ImGui.pushItemWidth(140.0f);

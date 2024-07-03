@@ -45,6 +45,7 @@ libgdxDependencies {
    api("com.badlogicgames.gdx:gdx-bullet:1.11.0")
    api("com.badlogicgames.gdx:gdx-bullet-platform:1.11.0:natives-desktop")
    api("commons-io:commons-io:2.11.0") // IOUtils method was old version without this
+   api("us.ihmc:psyonic-ability-hand-java:1.0.0")
 }
 
 testDependencies {
