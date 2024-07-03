@@ -229,6 +229,37 @@ public class PerceptionMessageTools
       }
    }
 
+   public static Mat convertHeightMapDataToMat(HeightMapData heightMapData, float widthInMeters, float cellSizeInMeters)
+   {
+      int centerIndex = HeightMapTools.computeCenterIndex(widthInMeters, cellSizeInMeters);
+      int cellsPerAxis = 2 * centerIndex + 1;
+
+      // Create a new Mat object to hold the height map data
+      Mat heightMapMat = new Mat(cellsPerAxis, cellsPerAxis, opencv_core.CV_16UC1);
+
+      for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
+      {
+         for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
+         {
+            int key = HeightMapTools.indicesToKey(xIndex, yIndex, centerIndex);
+            double cellHeight = heightMapData.getHeightAt(key);
+
+            // Reverse the height calculation to get the raw height value
+            int height = (int) ((cellHeight + (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightOffset())
+                                * RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
+
+            // Store the height value in the Mat object
+            heightMapMat.ptr(xIndex, yIndex).putShort((short) height);
+
+         }
+      }
+
+      return heightMapMat;
+   }
+
+
+
+
    public static void convertToHeightMapImage(ImageMessage imageMessage,
                                               Mat heightMapImageToPack,
                                               ByteBuffer compressedByteBuffer,

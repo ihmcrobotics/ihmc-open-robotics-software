@@ -32,7 +32,6 @@ import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.timing.PerceptionStatistics;
 import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.rdx.ui.graphics.RDXGlobalHeightMapGraphic;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -64,6 +63,7 @@ public class HumanoidPerceptionModule
    private final ImageMessage globalHeightMapImageMessage = new ImageMessage();
 
    private final BytePointer compressedCroppedHeightMapPointer = new BytePointer();
+   private final BytePointer compressedCroppedGlobalHeightMapPointer = new BytePointer();
    private final BytePointer compressedLocalHeightMapPointer = new BytePointer();
    private final BytePointer compressedInternalHeightMapPointer = new BytePointer();
 
@@ -80,7 +80,7 @@ public class HumanoidPerceptionModule
    private FramePlanarRegionsList sensorFrameRegions;
    private HeightMapData latestHeightMapData;
    private BytedecoImage realsenseDepthImage;
-
+   private GlobalHeightMap globalHeightMap;
 
    private final PerceptionStatistics perceptionStatistics = new PerceptionStatistics();
    private final Notification resetHeightMapRequested = new Notification();
@@ -92,16 +92,9 @@ public class HumanoidPerceptionModule
    private boolean occupancyGridEnabled = false;
    public boolean heightMapDataBeingProcessed = false;
 
-   private final GlobalHeightMap globalHeightMap;
-   private final RDXGlobalHeightMapGraphic rdxGlobalHeightMapGraphic;
-
    public HumanoidPerceptionModule(OpenCLManager openCLManager)
    {
       this.openCLManager = openCLManager;
-
-      // Initialize the global height map and RDX graphic
-      this.globalHeightMap = new GlobalHeightMap();
-      this.rdxGlobalHeightMapGraphic = new RDXGlobalHeightMapGraphic();
    }
 
    public void initializeRealsenseDepthImage(int height, int width)
@@ -168,13 +161,21 @@ public class HumanoidPerceptionModule
                                          rapidHeightMapExtractor.reset();
                                       }
                                       updateRapidHeightMap(ros2Helper, cameraFrame, cameraZUpFrame);
-                                      // New code to handle global height map and RDX graphic update
-                                      HeightMapMessage heightMapMessage = getGlobalHeightMapMessage();
-                                      rdxGlobalHeightMapGraphic.generateMeshesAsync(heightMapMessage);
                                    }
 
                                    Instant acquisitionTime = Instant.now();
                                    Mat croppedHeightMapImage = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
+
+                                   //updating global height map
+                                   Instant globalAcquisitionTime = Instant.now();
+                                   HeightMapData requiredHeightMapData = getLatestHeightMapData();
+                                   globalHeightMap.addHeightMap(requiredHeightMapData);
+//                                   PerceptionMessageTools.convertHeightMapDataToMat(globalHeightMap,globalHeightMap.)
+
+
+
+
+
 
                                    if (ros2Helper != null)
                                    {
@@ -184,10 +185,21 @@ public class HumanoidPerceptionModule
                                                             PerceptionAPI.HEIGHT_MAP_CROPPED,
                                                             croppedHeightMapImageMessage,
                                                             acquisitionTime);
-                                      //               publishHeightMapImage(ros2Helper, localHeightMapImage, compressedLocalHeightMapPointer, PerceptionAPI.HEIGHT_MAP_LOCAL,
-                                      //                                     localHeightMapImageMessage, acquisitionTime);
+               //                                      publishHeightMapImage(ros2Helper, localHeightMapImage, compressedLocalHeightMapPointer, PerceptionAPI.HEIGHT_MAP_LOCAL,
+               //                                                                           localHeightMapImageMessage, acquisitionTime);
                                       //               publishHeightMapImage(ros2Helper, globalHeightMapImage, compressedInternalHeightMapPointer, PerceptionAPI.HEIGHT_MAP_GLOBAL,
                                       //                                     globalHeightMapImageMessage, acquisitionTime);
+
+
+
+
+                                      // Publish the global height map
+//                                      publishHeightMapImage(ros2Helper,
+//                                                            globalHeightMap,
+//                                                            compressedCroppedGlobalHeightMapPointer,
+//                                                            PerceptionAPI.GLOBAL_HEIGHT_MAP,
+//                                                            globalHeightMapImageMessage,
+//                                                            globalAcquisitionTime);
                                    }
                                 });
       }
@@ -212,6 +224,8 @@ public class HumanoidPerceptionModule
                                                          image.cols(),
                                                          (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
    }
+
+
 
    public void publishExternalHeightMapImage(ROS2Helper ros2Helper)
    {
@@ -415,8 +429,6 @@ public class HumanoidPerceptionModule
 
       if (localizationAndMappingTask != null)
          localizationAndMappingTask.destroy();
-
-      destroyHeightMapGraphics();
    }
 
    public RapidHeightMapExtractor getRapidHeightMapExtractor()
@@ -477,15 +489,5 @@ public class HumanoidPerceptionModule
    public PerceptionStatistics getPerceptionStatistics()
    {
       return perceptionStatistics;
-   }
-
-   public void renderHeightMap(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      rdxGlobalHeightMapGraphic.getRenderables(renderables, pool);
-   }
-
-   public void destroyHeightMapGraphics()
-   {
-      rdxGlobalHeightMapGraphic.destroy();
    }
 }
