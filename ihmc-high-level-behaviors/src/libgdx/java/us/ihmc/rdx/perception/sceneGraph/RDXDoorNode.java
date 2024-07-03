@@ -11,6 +11,7 @@ import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
+import us.ihmc.rdx.ui.graphics.RDXReferenceFrameGraphic;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -23,6 +24,7 @@ public class RDXDoorNode extends RDXSceneNode
 {
    private final DoorNode doorNode;
    private final ImGuiUniqueLabelMap labels;
+   private final RDXReferenceFrameGraphic doorFrameGraphic = new RDXReferenceFrameGraphic(0.2);
    private final Map<UUID, RDXDoorOpeningMechanismGraphic> openingMechanismGraphics = new HashMap<>();
    private final RDXPlanarRegionsGraphic doorPanelPlanarRegionGraphic = new RDXPlanarRegionsGraphic();
 
@@ -36,6 +38,9 @@ public class RDXDoorNode extends RDXSceneNode
    @Override
    public void update(SceneGraph sceneGraph)
    {
+      // Update frame graphic
+      doorFrameGraphic.setPoseInWorldFrame(doorNode.getDoorFramePose());
+
       // Update door planar region graphic
       // We set a constant region ID just to get a consistent color in the planar region graphic
       doorNode.getDoorPanel().getPlanarRegion().setRegionId(2222);
@@ -43,6 +48,7 @@ public class RDXDoorNode extends RDXSceneNode
       doorPanelPlanarRegionGraphic.generateMeshes(new PlanarRegionsList(doorNode.getDoorPanel().getPlanarRegion()));
       doorPanelPlanarRegionGraphic.update();
 
+      // Update opening mechanism graphics
       for (DoorOpeningMechanism openingMechanism : doorNode.getOpeningMechanisms().values())
       {
          if (!openingMechanismGraphics.containsKey(openingMechanism.getDetectionID()))
@@ -58,6 +64,11 @@ public class RDXDoorNode extends RDXSceneNode
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
+      if (!doorFrameGraphic.getFramePose3D().containsNaN())
+      {
+         doorFrameGraphic.getRenderables(renderables, pool);
+      }
+
       if (doorNode.getDoorPanel().getPlanarRegion().getArea() > 0.0)
       {
          doorPanelPlanarRegionGraphic.getRenderables(renderables, pool);

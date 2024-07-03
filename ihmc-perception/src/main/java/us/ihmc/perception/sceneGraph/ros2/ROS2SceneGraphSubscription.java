@@ -193,7 +193,7 @@ public class ROS2SceneGraphSubscription
                UUID messageDetectionID = MessageTools.toUUID(doorOpeningMechanismMessage.getPersistentDetectionId());
                if (!messageDetectionID.equals(PersistentDetection.NULL_DETECTION_ID))
                {
-                  if (doorNode.getOpeningMechanisms().containsKey(messageDetectionID))
+                  if (!doorNode.getOpeningMechanisms().containsKey(messageDetectionID))
                   {
                      DoorSide doorSide = DoorSide.fromBoolean(doorOpeningMechanismMessage.getDoorSide());
                      DoorOpeningMechanismType openingMechanismType = DoorOpeningMechanismType.fromByte(doorOpeningMechanismMessage.getType());

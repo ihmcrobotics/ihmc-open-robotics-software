@@ -5,6 +5,8 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.Axis2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -19,6 +21,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -36,10 +39,19 @@ import java.util.stream.Collectors;
  */
 public class DoorNode extends DetectableSceneNode
 {
-   public static final double PANEL_TO_OPENING_MECHANISM_DISTANCE_THRESHOLD = MathTools.square(0.75);
-   private static final Pose3D ZERO_POSE = new Pose3D();
+   // TODO: DOORNODES TUNE THESE THRESHOLDS
+   // Maximum distance one door component can be from another (squared meters)
+   public static final double DOOR_COMPONENT_DISTANCE_THRESHOLD = MathTools.square(0.75);
+   // Distance from robot to planar regions at which planar regions stop updating
+   private static final double PLANAR_REGIONS_UPDATE_DISTANCE_THRESHOLD = MathTools.square(1.5); //
+   private static final Pose3D NAN_POSE = new Pose3D();
+   static
+   {
+      NAN_POSE.setToNaN();
+   }
 
-   private final Pose3D doorFramePose = new Pose3D(); // To know which way the door opens. X points in the direction that the door swings.
+   private FramePose3D robotPoseInWorld = new FramePose3D(NAN_POSE);
+   private final Pose3D doorFramePose = new Pose3D(NAN_POSE); // To know which way the door opens. X points in the direction that the door swings.
    private final DoorPanel doorPanel = new DoorPanel(this);
    private final Map<UUID, DoorOpeningMechanism> openingMechanisms = new HashMap<>();
 
@@ -82,17 +94,17 @@ public class DoorNode extends DetectableSceneNode
       PersistentDetection panelDetection = doorPanel.getDoorPanelDetection();
       if (panelDetection != null
           && panelDetection.getMostRecentPosition().distanceSquared(doorOpeningMechanismDetection.getMostRecentPosition())
-             > PANEL_TO_OPENING_MECHANISM_DISTANCE_THRESHOLD)
+             > DOOR_COMPONENT_DISTANCE_THRESHOLD)
          return false;
 
       // Detection must be close enough to existing opening mechanisms
       boolean closeToAllMechanisms = openingMechanisms.isEmpty() ||
-                                    openingMechanisms.values()
-                                                     .stream()
-                                                     .allMatch(openingMechanism ->
-                                                               openingMechanism.getDetection()
-                                                                               .getMostRecentPosition()
-                                                                               .distanceSquared(doorOpeningMechanismDetection.getMostRecentPosition()) < 1.0);
+         openingMechanisms.values()
+                          .stream()
+                          .allMatch(openingMechanism ->
+                                    openingMechanism.getDetection()
+                                                    .getMostRecentPosition()
+                                                    .distanceSquared(doorOpeningMechanismDetection.getMostRecentPosition()) < DOOR_COMPONENT_DISTANCE_THRESHOLD);
       if (!closeToAllMechanisms)
          return false;
 
@@ -152,6 +164,12 @@ public class DoorNode extends DetectableSceneNode
       super.update();
    }
 
+   public void updateRobotPose(ReferenceFrame robotFrame)
+   {
+      robotPoseInWorld.setToZero(robotFrame);
+      robotPoseInWorld.changeFrame(ReferenceFrame.getWorldFrame());
+   }
+
    private void updateOpeningMechanismPoses()
    {
       for (DoorOpeningMechanism openingMechanism : openingMechanisms.values())
@@ -171,15 +189,26 @@ public class DoorNode extends DetectableSceneNode
                                             planarRegion.getNormalX(),
                                             planarRegion.getNormalY());
 
-         double yaw = TupleTools.angle(Axis2D.X, doorLineNormal.getDirection());
+         double planarRegionYaw = TupleTools.angle(Axis2D.X, doorLineNormal.getDirection());
 
-         // If doorFramePose is zero, this means we are just now perceiving the door.
-         // We assume all doors are "push doors" when we first see them.
+         // If doorFramePose is NaN, this means we are just now perceiving the door.
+         // Attempt to set the orientation of the door pose according to the side of perceived opening mechanisms
+         // If there are no opening mechanisms, or the opening mechanisms are on different sides, assume push door.
          // TODO: remove assumption door is a "push door" when we first see it
-         if (doorFramePose.epsilonEquals(ZERO_POSE, 0.0))
+         if (doorFramePose.containsNaN()
+             || robotPoseInWorld.getPosition().distanceSquared(planarRegionCentroidInWorld) > PLANAR_REGIONS_UPDATE_DISTANCE_THRESHOLD)
          {
             doorFramePose.getTranslation().set(planarRegionCentroidInWorld);
-            doorFramePose.getRotation().setYawPitchRoll(Math.PI * yaw, 0.0, 0.0);
+
+            // Check if all opening mechanisms are on the same side.
+            double doorFrameYaw = planarRegionYaw;
+            DoorSide mechanismsSide = allMechanismsAreSameSide(openingMechanisms.values());
+            if (mechanismsSide != null) // If so, set yaw to match the side
+               doorFrameYaw = mechanismsSide == DoorSide.PUSH ? doorFrameYaw + Math.PI : doorFrameYaw;
+            else // otherwise assume push door
+               doorFrameYaw = doorFrameYaw + Math.PI;
+
+            doorFramePose.getRotation().setYawPitchRoll(doorFrameYaw, 0.0, 0.0); // FIXME incorrect yaw
          }
 
          // Update the opening mechanism poses with the planar region orientation,
@@ -193,7 +222,7 @@ public class DoorNode extends DetectableSceneNode
             double roll = 0.0;
             if (openingMechanism.getType() == DoorOpeningMechanismType.LEVER_HANDLE)
                roll += doorSide == RobotSide.LEFT ? Math.PI : 0.0;
-            openingMechanismPose.getRotation().setYawPitchRoll(yaw, pitch, roll);
+            openingMechanismPose.getRotation().setYawPitchRoll(planarRegionYaw, pitch, roll);
          }
       }
    }
@@ -283,6 +312,25 @@ public class DoorNode extends DetectableSceneNode
       // TODO: DOORNODES
 
       return null;
+   }
+
+   /**
+    * Checks whether all passed in mechanisms are on the same door side.
+    * @return If all opening mechanisms are on the same side, returns that side.
+    * {@code null} if openingMechanisms is empty or contains opening mechanisms of different sides.
+    */
+   private DoorSide allMechanismsAreSameSide(Collection<DoorOpeningMechanism> openingMechanisms)
+   {
+      DoorSide side = null;
+      for (DoorOpeningMechanism openingMechanism : openingMechanisms)
+      {
+         if (side == null)
+            side = openingMechanism.getDoorSide();
+         else if (side != openingMechanism.getDoorSide())
+            return null;
+      }
+
+      return side;
    }
 
    public enum DoorSide

@@ -46,7 +46,7 @@ public class DoorPanel
                                         .anyMatch(openingMechanism -> openingMechanism.getDetection()
                                                                                       .getMostRecentPosition()
                                                                                       .distanceSquared(newPanelDetection.getMostRecentPosition())
-                                                                      < DoorNode.PANEL_TO_OPENING_MECHANISM_DISTANCE_THRESHOLD))
+                                                                      < DoorNode.DOOR_COMPONENT_DISTANCE_THRESHOLD))
          {
             this.doorPanelDetection = newPanelDetection;
             detectionID = doorPanelDetection.getID();
@@ -131,9 +131,6 @@ public class DoorPanel
          {
             Point3DReadOnly planarRegionCentroidInWorld = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
             double distance = planarRegionCentroidInWorld.distance(doorPointInWorld);
-
-            System.out.println(doorPointInWorld);
-            System.out.println(distance);
 
             if (distance > epsilon)
                continue;

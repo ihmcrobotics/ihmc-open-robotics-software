@@ -116,6 +116,11 @@ public class SceneGraph
          staticRelativeSceneNode.updateTrackingState(sensorFrame, modificationQueue);
       }
 
+      if (sceneNode instanceof DoorNode doorNode)
+      {
+         doorNode.updateRobotPose(sensorFrame);
+      }
+
       for (SceneNode child : sceneNode.getChildren())
       {
          updateOnRobotOnly(child, sensorFrame, modificationQueue);

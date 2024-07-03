@@ -8,7 +8,6 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.BytedecoImage;
 import us.ihmc.perception.RawImage;
 import us.ihmc.perception.comms.PerceptionComms;
@@ -60,7 +59,7 @@ public class RDXSceneGraphDemo
 
    private static final SensorMode SENSOR_MODE = SensorMode.ZED_SVO_RECORDING;
    // Drive folder with recordings https://drive.google.com/drive/u/0/folders/17TIgXgNPslUyzBFWy6Waev11fx__3w9D
-   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240626_161110_ZEDRecording_RobotWalkONRCoursePart1.svo2").toAbsolutePath().toString();
+   private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve("20240627_121511_ZEDRecording_WalkONRCourse2.svo2").toAbsolutePath().toString();
    private static final PubSubImplementation PUB_SUB_IMPLEMENTATION = PubSubImplementation.FAST_RTPS;
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
@@ -243,7 +242,7 @@ public class RDXSceneGraphDemo
                         if (sceneNode instanceof DoorNode doorNode)
                            doorNode.getDoorPanel().filterAndSetPlanarRegionFromPlanarRegionsList(newPlanarRegions.read());
 
-                  onRobotSceneGraph.updateOnRobotOnly(ReferenceFrame.getWorldFrame());
+                  onRobotSceneGraph.updateOnRobotOnly(sensorFrame.getReferenceFrame());
                   onRobotSceneGraph.updatePublication();
                }
             });
