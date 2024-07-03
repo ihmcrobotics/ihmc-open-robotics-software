@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class RDXDoorNode extends RDXSceneNode
+public class RDXDoorNode extends RDXDetectableSceneNode
 {
    private final DoorNode doorNode;
    private final ImGuiUniqueLabelMap labels;

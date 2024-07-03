@@ -57,6 +57,11 @@ public class DoorPanel
       return false;
    }
 
+   public boolean isDetected()
+   {
+      return doorPanelDetection != null && doorPanelDetection.isStable();
+   }
+
    public PersistentDetection getDoorPanelDetection()
    {
       return doorPanelDetection;
