@@ -8,6 +8,7 @@ import us.ihmc.behaviors.sequence.ActionNodeExecutor;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.rigidBody.RigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -67,7 +68,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
          {
             if (nodeName.startsWith(DoorNodeTools.DOOR_STATIC_HANDLE_NAME))
             {
-               if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof StaticRelativeSceneNode staticHandleNode)
+               if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof RigidBodySceneNode staticHandleNode)
                {
                   staticHandleNode.clearOffset();
                   staticHandleNode.freeze();
