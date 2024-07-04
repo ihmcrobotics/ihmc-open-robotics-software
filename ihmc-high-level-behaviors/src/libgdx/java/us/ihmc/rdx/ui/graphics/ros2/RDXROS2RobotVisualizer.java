@@ -188,8 +188,9 @@ public class RDXROS2RobotVisualizer extends RDXROS2MultiBodyGraphic
       syncedRobot.getReferenceFrames().getPelvisFrame().getTransformToDesiredFrame(currentHistoryPelvisPose, ReferenceFrame.getWorldFrame());
       if (!EuclidCoreMissingTools.epsilonEquals(lastHistoryPelvisPose, currentHistoryPelvisPose, Math.toRadians(2.0), 0.02))
       {
-         lastHistoryPelvisPose.set(currentHistoryPelvisPose);
-         pelvisPoseHistoryGraphic.update(0.01, currentHistoryPelvisPose);
+         // FIXME: This can crash the UI when it has too many points
+//         lastHistoryPelvisPose.set(currentHistoryPelvisPose);
+//         pelvisPoseHistoryGraphic.update(0.01, currentHistoryPelvisPose);
       }
 
       // Avoid generating the meshes when we aren't showing them, just because the footstep plan graphic isn't super optimized
