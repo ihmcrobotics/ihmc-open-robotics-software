@@ -51,6 +51,12 @@ public class ROS2Helper implements ROS2PublishSubscribeAPI
    }
 
    @Override
+   public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Consumer<T> callback)
+   {
+      return ROS2Tools.createSwapReferenceSubscription(ros2NodeInterface, topic, callback);
+   }
+
+   @Override
    public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Notification callback)
    {
       return ROS2Tools.createSwapReferenceSubscription(ros2NodeInterface, topic, callback);
