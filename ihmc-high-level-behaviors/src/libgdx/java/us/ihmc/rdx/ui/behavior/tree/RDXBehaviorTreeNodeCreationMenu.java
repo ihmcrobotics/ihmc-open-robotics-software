@@ -135,15 +135,11 @@ public class RDXBehaviorTreeNodeCreationMenu
          indexedTreeFile.update();
       }
 
-      indexedTreeFiles.sort(Comparator.comparing((RDXAvailableBehaviorTreeFile file) -> file.getNumberOfFramesInWorld() > 0).reversed()
-                                      .thenComparing(RDXAvailableBehaviorTreeFile::getName));
+      indexedTreeFiles.sort(Comparator.comparing(RDXAvailableBehaviorTreeFile::getName));
 
       ImGui.indent();
       for (RDXAvailableBehaviorTreeFile indexedTreeFile : indexedTreeFiles)
       {
-         if (indexedTreeFile.getReferenceFramesInWorld().isEmpty())
-            ImGui.pushStyleColor(ImGuiCol.Text, ImGui.getColorU32(ImGuiCol.TextDisabled));
-
          String textToDisplay = "%s".formatted(indexedTreeFile.getTreeFile().getFileName(),
                                                                        indexedTreeFile.getNumberOfFramesInWorld(),
                                                                        indexedTreeFile.getReferenceFrameNames().size());
@@ -184,9 +180,6 @@ public class RDXBehaviorTreeNodeCreationMenu
                }
             }
          }
-
-         if (indexedTreeFile.getReferenceFramesInWorld().isEmpty())
-            ImGui.popStyleColor();
 
          if (ImGui.isItemHovered())
          {
