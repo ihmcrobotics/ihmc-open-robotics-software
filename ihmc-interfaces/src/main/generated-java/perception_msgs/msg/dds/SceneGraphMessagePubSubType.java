@@ -15,7 +15,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "27987536f794b0ee7235326ca7979c5c3ad15ea96332e43506e691be5461fd25";
+   		return "f58ca9ff0de44f7c464290d5c64b4b3b43908de14c7f3e3558f4de6d295b8dd6";
    }
    
    @Override

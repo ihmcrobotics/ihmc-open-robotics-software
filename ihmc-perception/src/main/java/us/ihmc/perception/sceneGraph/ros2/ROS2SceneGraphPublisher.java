@@ -159,6 +159,7 @@ public class ROS2SceneGraphPublisher
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getDoorSceneNodes().size());
             DoorNodeMessage doorNodeMessage =  sceneGraphMessage.getDoorSceneNodes().add();
             doorNodeMessage.getDoorFramePose().set(doorNode.getDoorFramePose());
+            doorNodeMessage.setPoseLocked(doorNode.isDoorFramePoseLocked());
             doorNode.getDoorPanel().toMessage(doorNodeMessage.getDoorPanel());
             doorNodeMessage.getOpeningMechanisms().clear();
             for (DoorOpeningMechanism openingMechanism : doorNode.getOpeningMechanisms().values())

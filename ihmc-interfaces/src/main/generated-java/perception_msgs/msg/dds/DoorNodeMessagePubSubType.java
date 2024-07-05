@@ -15,7 +15,7 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "6ab0108bea78302feb5434dcb0a03f0b8354deb21298480bfd21398b89de40fd";
+   		return "abaf4863c0ca3a3e0d516417649c37ac3e9fc932d17958be3489fc9f933aff30";
    }
    
    @Override
@@ -56,6 +56,8 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += perception_msgs.msg.dds.DoorPanelMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
@@ -78,6 +80,9 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getDoorFramePose(), current_alignment);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += perception_msgs.msg.dds.DoorPanelMessagePubSubType.getCdrSerializedSize(data.getDoorPanel(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -93,6 +98,8 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.write(data.getDetectableSceneNode(), cdr);
       geometry_msgs.msg.dds.PosePubSubType.write(data.getDoorFramePose(), cdr);
+      cdr.write_type_7(data.getPoseLocked());
+
       perception_msgs.msg.dds.DoorPanelMessagePubSubType.write(data.getDoorPanel(), cdr);
       if(data.getOpeningMechanisms().size() <= 100)
       cdr.write_type_e(data.getOpeningMechanisms());else
@@ -104,6 +111,8 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.read(data.getDetectableSceneNode(), cdr);	
       geometry_msgs.msg.dds.PosePubSubType.read(data.getDoorFramePose(), cdr);	
+      data.setPoseLocked(cdr.read_type_7());
+      	
       perception_msgs.msg.dds.DoorPanelMessagePubSubType.read(data.getDoorPanel(), cdr);	
       cdr.read_type_e(data.getOpeningMechanisms());	
 
@@ -116,6 +125,7 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
 
       ser.write_type_a("door_frame_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getDoorFramePose());
 
+      ser.write_type_7("pose_locked", data.getPoseLocked());
       ser.write_type_a("door_panel", new perception_msgs.msg.dds.DoorPanelMessagePubSubType(), data.getDoorPanel());
 
       ser.write_type_e("opening_mechanisms", data.getOpeningMechanisms());
@@ -128,6 +138,7 @@ public class DoorNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataType<p
 
       ser.read_type_a("door_frame_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getDoorFramePose());
 
+      data.setPoseLocked(ser.read_type_7("pose_locked"));
       ser.read_type_a("door_panel", new perception_msgs.msg.dds.DoorPanelMessagePubSubType(), data.getDoorPanel());
 
       ser.read_type_e("opening_mechanisms", data.getOpeningMechanisms());

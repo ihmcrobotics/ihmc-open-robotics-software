@@ -17,6 +17,10 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
             */
    public us.ihmc.euclid.geometry.Pose3D door_frame_pose_;
    /**
+            * Whether the pose of the door frame is locked
+            */
+   public boolean pose_locked_;
+   /**
             * The door panel
             */
    public perception_msgs.msg.dds.DoorPanelMessage door_panel_;
@@ -44,6 +48,8 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.staticCopy(other.detectable_scene_node_, detectable_scene_node_);
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.door_frame_pose_, door_frame_pose_);
+      pose_locked_ = other.pose_locked_;
+
       perception_msgs.msg.dds.DoorPanelMessagePubSubType.staticCopy(other.door_panel_, door_panel_);
       opening_mechanisms_.set(other.opening_mechanisms_);
    }
@@ -64,6 +70,21 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
    public us.ihmc.euclid.geometry.Pose3D getDoorFramePose()
    {
       return door_frame_pose_;
+   }
+
+   /**
+            * Whether the pose of the door frame is locked
+            */
+   public void setPoseLocked(boolean pose_locked)
+   {
+      pose_locked_ = pose_locked;
+   }
+   /**
+            * Whether the pose of the door frame is locked
+            */
+   public boolean getPoseLocked()
+   {
+      return pose_locked_;
    }
 
 
@@ -104,6 +125,8 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
 
       if (!this.detectable_scene_node_.epsilonEquals(other.detectable_scene_node_, epsilon)) return false;
       if (!this.door_frame_pose_.epsilonEquals(other.door_frame_pose_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.pose_locked_, other.pose_locked_, epsilon)) return false;
+
       if (!this.door_panel_.epsilonEquals(other.door_panel_, epsilon)) return false;
       if (this.opening_mechanisms_.size() != other.opening_mechanisms_.size()) { return false; }
       else
@@ -127,6 +150,8 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
 
       if (!this.detectable_scene_node_.equals(otherMyClass.detectable_scene_node_)) return false;
       if (!this.door_frame_pose_.equals(otherMyClass.door_frame_pose_)) return false;
+      if(this.pose_locked_ != otherMyClass.pose_locked_) return false;
+
       if (!this.door_panel_.equals(otherMyClass.door_panel_)) return false;
       if (!this.opening_mechanisms_.equals(otherMyClass.opening_mechanisms_)) return false;
 
@@ -143,6 +168,8 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       builder.append(this.detectable_scene_node_);      builder.append(", ");
       builder.append("door_frame_pose=");
       builder.append(this.door_frame_pose_);      builder.append(", ");
+      builder.append("pose_locked=");
+      builder.append(this.pose_locked_);      builder.append(", ");
       builder.append("door_panel=");
       builder.append(this.door_panel_);      builder.append(", ");
       builder.append("opening_mechanisms=");

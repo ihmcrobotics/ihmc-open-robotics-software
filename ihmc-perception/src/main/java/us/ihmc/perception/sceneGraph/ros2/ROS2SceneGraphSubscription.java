@@ -187,6 +187,7 @@ public class ROS2SceneGraphSubscription
          if (localNode instanceof DoorNode doorNode)
          {
             doorNode.getDoorFramePose().set(subscriptionNode.getDoorNodeMessage().getDoorFramePose());
+            doorNode.setDoorFramePoseLock(subscriptionNode.getDoorNodeMessage().getPoseLocked());
             doorNode.getDoorPanel().fromMessage(subscriptionNode.getDoorNodeMessage().getDoorPanel());
             for (DoorOpeningMechanismMessage doorOpeningMechanismMessage : subscriptionNode.getDoorNodeMessage().getOpeningMechanisms())
             {

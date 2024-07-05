@@ -85,6 +85,12 @@ public class RDXDoorNode extends RDXDetectableSceneNode
    {
       super.renderImGuiWidgets(modificationQueue, sceneGraph);
 
+      if (ImGui.checkbox("Pose Locked", doorNode.isDoorFramePoseLocked()))
+      {
+         doorNode.setDoorFramePoseLock(!doorNode.isDoorFramePoseLocked());
+         doorNode.freeze();
+      }
+
       ImGui.text("Planar region info:");
       ImGui.sameLine();
       if (doorNode.getDoorPanel().getPlanarRegion().getArea() > 0.0)
