@@ -38,9 +38,6 @@ public class CRDTUnidirectionalRecyclingArrayList<T> extends CRDTUnidirectionalM
 
    public void fromMessage(Consumer<RecyclingArrayList<T>> valueConsumer)
    {
-      if (isModificationDisallowed())
-      {
-         valueConsumer.accept(getValueInternal());
-      }
+      valueConsumer.accept(getValueInternal());
    }
 }

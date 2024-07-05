@@ -36,9 +36,6 @@ public class CRDTUnidirectionalImmutableField<T> extends CRDTUnidirectionalField
 
    public void fromMessage(T value)
    {
-      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
-      {
-         this.value = value;
-      }
+      this.value = value;
    }
 }
