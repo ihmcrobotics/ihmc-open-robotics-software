@@ -1,14 +1,15 @@
 package us.ihmc.perception.sceneGraph.rigidBody.doors.components;
 
 import com.google.common.base.CaseFormat;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.perception.detections.InstantDetection;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode.DoorSide;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
 import javax.annotation.Nullable;
 import java.util.UUID;
@@ -21,7 +22,7 @@ public class DoorOpeningMechanism
    // Shared over ROS2
    private final DoorOpeningMechanismType type;
    private final DoorSide doorSide;
-   private final Pose3D mechanismPose = new Pose3D();
+   private final MutableReferenceFrame mechanismFrame = new MutableReferenceFrame();
    private final UUID detectionID; // syncing the detection ID instead of full detection
 
    // Not shared over ROS2
@@ -52,7 +53,7 @@ public class DoorOpeningMechanism
    public void update()
    {
       if (detection != null)
-         mechanismPose.set(detection.getMostRecentPose());
+         mechanismFrame.update(transformToWorld -> transformToWorld.set(detection.getFilteredDetectionFrame().getTransformToWorldFrame()));
    }
 
    public UUID getDetectionID()
@@ -86,14 +87,14 @@ public class DoorOpeningMechanism
       return doorSide;
    }
 
-   public Pose3D getMechanismPose()
+   public ReferenceFrame getMechanismFrame()
    {
-      return mechanismPose;
+      return mechanismFrame.getReferenceFrame();
    }
 
-   public void setMechanismPose(Pose3DReadOnly newPose)
+   public void updateMechanismFrame(RigidBodyTransformReadOnly newTransformToWorld)
    {
-      mechanismPose.set(newPose);
+      mechanismFrame.update(transformToWorld -> transformToWorld.set(newTransformToWorld));
    }
 
    public InstantDetection getLastDetection()
@@ -172,6 +173,12 @@ public class DoorOpeningMechanism
          }
       }
       return new RigidBodyTransform();
+   }
+
+   public void destroy()
+   {
+      if (detection != null)
+         detection.markForDeletion();
    }
 
    public enum DoorOpeningMechanismType

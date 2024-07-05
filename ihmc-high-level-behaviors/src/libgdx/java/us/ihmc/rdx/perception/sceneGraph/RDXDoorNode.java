@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.ImGui;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
@@ -33,13 +32,15 @@ public class RDXDoorNode extends RDXDetectableSceneNode
       super(doorNode);
       this.doorNode = doorNode;
       this.labels = labels;
+
+      doorFrameGraphic.setToReferenceFrame(doorNode.getDoorCornerFrame());
    }
 
    @Override
    public void update(SceneGraph sceneGraph)
    {
       // Update frame graphic
-      doorFrameGraphic.setPoseInWorldFrame(doorNode.getDoorFramePose());
+      doorFrameGraphic.updateFromLastGivenFrame();
 
       // Update door planar region graphic
       // We set a constant region ID just to get a consistent color in the planar region graphic
@@ -57,7 +58,7 @@ public class RDXDoorNode extends RDXDetectableSceneNode
             openingMechanismGraphics.put(openingMechanism.getDetectionID(), graphic);
          }
 
-         openingMechanismGraphics.get(openingMechanism.getDetectionID()).update(new RigidBodyTransform(openingMechanism.getMechanismPose()));
+         openingMechanismGraphics.get(openingMechanism.getDetectionID()).update(openingMechanism.getMechanismFrame().getTransformToWorldFrame());
       }
    }
 

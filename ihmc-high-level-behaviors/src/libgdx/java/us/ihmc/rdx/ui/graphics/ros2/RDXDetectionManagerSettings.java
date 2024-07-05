@@ -13,7 +13,6 @@ import us.ihmc.rdx.ui.graphics.RDXVisualizer;
  */
 public class RDXDetectionManagerSettings extends RDXVisualizer
 {
-
    private final DetectionManagerSettings settings = new DetectionManagerSettings();
    private final ImGuiRemoteROS2StoredPropertySet remoteStoredPropertySet;
 

@@ -5,7 +5,10 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.Axis2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.TupleTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -13,11 +16,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism.DoorOpeningMechanismType;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorPanel;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
+import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Collection;
@@ -46,7 +51,7 @@ public class DoorNode extends DetectableSceneNode
       NAN_POSE.setToNaN();
    }
 
-   private final Pose3D doorFramePose = new Pose3D(NAN_POSE); // To know which way the door opens. X points in the direction that the door swings.
+   private final MutableReferenceFrame doorCornerFrame; // To know which way the door opens. X points in the direction that the door swings.
    private final DoorPanel doorPanel = new DoorPanel(this);
    private final Map<UUID, DoorOpeningMechanism> openingMechanisms = new HashMap<>();
 
@@ -63,6 +68,8 @@ public class DoorNode extends DetectableSceneNode
    public DoorNode(long id, PersistentDetection initialDetection, CRDTInfo crdtInfo)
    {
       super(id, "Door" + id, crdtInfo);
+
+      doorCornerFrame = new MutableReferenceFrame("doorCorner_" + super.getID(), ReferenceFrame.getWorldFrame(), NAN_POSE);
 
       if (initialDetection != null && !acceptDetection(initialDetection))
          throw new IllegalArgumentException("Oops, something went super wrong. FIXME PLEASE");
@@ -218,8 +225,10 @@ public class DoorNode extends DetectableSceneNode
          // If doorFramePose is NaN, this means we are just now perceiving the door.
          // Attempt to set the orientation of the door pose according to the side of perceived opening mechanisms
          // If there are no opening mechanisms, or the opening mechanisms are on different sides, assume push door.
-         if (doorFramePose.containsNaN() || !lockDoorFramePose)
+         if (doorCornerFrame.getTransformToParent().containsNaN() || !lockDoorFramePose)
          {
+            RigidBodyTransform doorCornerTransformToWorld = new RigidBodyTransform();
+
             // Check if all opening mechanisms are on the same side.
             double doorFrameYaw = planarRegionYaw;
             DoorSide mechanismsSide = allMechanismsAreSameSide(openingMechanisms.values());
@@ -228,30 +237,33 @@ public class DoorNode extends DetectableSceneNode
             else // otherwise assume push door
                doorFrameYaw = doorFrameYaw + Math.PI;
 
-            doorFramePose.getRotation().setYawPitchRoll(doorFrameYaw, 0.0, 0.0);
+            doorCornerTransformToWorld.getRotation().setYawPitchRoll(doorFrameYaw, 0.0, 0.0);
 
             DoorOpeningMechanism detectedOpeningMechanism = getLatestUpdatedOpeningMechanism();
             if (detectedOpeningMechanism != null)
             {
-               doorFramePose.getTranslation().set(detectedOpeningMechanism.getMechanismPose().getTranslation());
-               doorFramePose.appendTranslation(openingMechanismToHingeCornerTranslation); // TODO: Invert y translation if looking at door from opposite side
+               doorCornerTransformToWorld.getTranslation().set(detectedOpeningMechanism.getMechanismFrame().getTransformToWorldFrame().getTranslation());
+               doorCornerTransformToWorld.appendTranslation(openingMechanismToHingeCornerTranslation); // TODO: Invert y translation if looking at door from opposite side
             }
             else
-               doorFramePose.getTranslation().set(planarRegionCentroidInWorld);
+               doorCornerTransformToWorld.getTranslation().set(planarRegionCentroidInWorld);
+
+            doorCornerFrame.update(transformToWorld -> transformToWorld.set(doorCornerTransformToWorld));
          }
 
          // Update the opening mechanism poses with the planar region orientation,
          // special case for the LEVER_HANDLE
          for (DoorOpeningMechanism openingMechanism : openingMechanisms.values())
          {
-            Pose3D openingMechanismPose = openingMechanism.getMechanismPose();
-            Point2D openingMechanismPointInWorld2D = new Point2D(openingMechanismPose.getTranslation());
+            RigidBodyTransform mechanismTransformToWorld = new RigidBodyTransform(openingMechanism.getMechanismFrame().getTransformToWorldFrame());
+            Point2D openingMechanismPointInWorld2D = new Point2D(mechanismTransformToWorld.getTranslation());
             RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(openingMechanismPointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
             double pitch = 0.0;
             double roll = 0.0;
             if (openingMechanism.getType() == DoorOpeningMechanismType.LEVER_HANDLE)
                roll += doorSide == RobotSide.LEFT ? Math.PI : 0.0;
-            openingMechanismPose.getRotation().setYawPitchRoll(planarRegionYaw, pitch, roll);
+            mechanismTransformToWorld.getRotation().setYawPitchRoll(planarRegionYaw, pitch, roll);
+            openingMechanism.updateMechanismFrame(mechanismTransformToWorld);
          }
       }
    }
@@ -304,9 +316,14 @@ public class DoorNode extends DetectableSceneNode
       return lockDoorFramePose;
    }
 
-   public Pose3D getDoorFramePose()
+   public void updateDoorCornerFrame(RigidBodyTransformReadOnly newTransformToWorld)
    {
-      return doorFramePose;
+      doorCornerFrame.update(transformToWorld -> transformToWorld.set(newTransformToWorld));
+   }
+
+   public ReferenceFrame getDoorCornerFrame()
+   {
+      return doorCornerFrame.getReferenceFrame();
    }
 
    public DoorPanel getDoorPanel()
@@ -371,6 +388,18 @@ public class DoorNode extends DetectableSceneNode
 
       return side;
    }
+
+   @Override
+   public void destroy(SceneGraph sceneGraph)
+   {
+      super.destroy(sceneGraph);
+
+      for (DoorOpeningMechanism openingMechanism : openingMechanisms.values())
+         openingMechanism.destroy();
+
+      doorPanel.destroy();
+   }
+
 
    public enum DoorSide
    {

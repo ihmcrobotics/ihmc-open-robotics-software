@@ -8,6 +8,7 @@ public class DetectionManagerSettings extends StoredPropertySet
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
+   public static final DoubleStoredPropertyKey poseFilterAlpha = keys.addDoubleKey("Pose Filter Alpha", 0.2);
    public static final DoubleStoredPropertyKey maxMatchDistanceSquared = keys.addDoubleKey("Max Match Distance Squared", 1.0);
    public static final DoubleStoredPropertyKey acceptanceAverageConfidence = keys.addDoubleKey("Acceptance Average Confidence", 0.75);
    public static final DoubleStoredPropertyKey stabilityAverageConfidence = keys.addDoubleKey("Stability Average Confidence", 0.4);
@@ -17,6 +18,11 @@ public class DetectionManagerSettings extends StoredPropertySet
    public DetectionManagerSettings()
    {
       super(keys, DetectionManagerSettings.class);
+   }
+
+   public double getPoseFilterAlpha()
+   {
+      return get(poseFilterAlpha);
    }
 
    public double getMaxMatchDistanceSquared()
@@ -42,6 +48,11 @@ public class DetectionManagerSettings extends StoredPropertySet
    public double getDetectionHistoryDuration()
    {
       return get(detectionHistoryDuration);
+   }
+
+   public void setPoseFilterAlpha(double poseFilterAlpha)
+   {
+      set(DetectionManagerSettings.poseFilterAlpha, poseFilterAlpha);
    }
 
    public void setMaxMatchDistanceSquared(double maxMatchDistanceSquared)

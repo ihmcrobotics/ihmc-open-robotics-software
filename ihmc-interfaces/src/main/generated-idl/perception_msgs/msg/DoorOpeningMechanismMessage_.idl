@@ -1,7 +1,7 @@
 #ifndef __perception_msgs__msg__DoorOpeningMechanismMessage__idl__
 #define __perception_msgs__msg__DoorOpeningMechanismMessage__idl__
 
-#include "geometry_msgs/msg/./Pose_.idl"
+#include "geometry_msgs/msg/./Transform_.idl"
 #include "ihmc_common_msgs/msg/./UUIDMessage_.idl"
 module perception_msgs
 {
@@ -24,9 +24,9 @@ module perception_msgs
          */
         boolean door_side;
         /**
-         * The grasp pose of the opening mechanism
+         * The transform of the opening mechanisms frame
          */
-        geometry_msgs::msg::dds::Pose mechanism_pose;
+        geometry_msgs::msg::dds::Transform mechanism_transform_to_world;
         /**
          * ID of the persistent detection associated with this opening mechanism. May be null.
          */

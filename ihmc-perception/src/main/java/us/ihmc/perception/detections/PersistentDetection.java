@@ -4,6 +4,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 import us.ihmc.robotics.time.TimeTools;
@@ -26,9 +27,10 @@ public class PersistentDetection
    private Duration historyDuration;
    private final UUID id = UUID.randomUUID();
 
-   /** Represents the pose of the latest instant detection. */
-   private final MutableReferenceFrame detectionFrame = new MutableReferenceFrame("persistentDetection_" + id.toString().substring(0, 5),
-                                                                                  ReferenceFrame.getWorldFrame());
+   /** An alpha filtered frame representing the pose of the latest detection. */
+   private final MutableReferenceFrame filteredDetectionFrame = new MutableReferenceFrame("persistentDetection_" + id.toString().substring(0, 5),
+                                                                                          ReferenceFrame.getWorldFrame());
+   private double filterAlpha;
 
    private double stabilityConfidenceThreshold;
    private double stabilityDetectionFrequency;
@@ -37,11 +39,19 @@ public class PersistentDetection
    private final Notification hasBecomeValidNotification = new Notification();
    private boolean readyForDeletion = false;
 
-   public PersistentDetection(InstantDetection firstDetection, double stabilityConfidenceThreshold, double stabilityDetectionFrequency, double historyDuration)
+   public PersistentDetection(InstantDetection firstDetection,
+                              double filterAlpha,
+                              double stabilityConfidenceThreshold,
+                              double stabilityDetectionFrequency,
+                              double historyDuration)
    {
       this.firstDetection = firstDetection;
 
+      // Initialize filtered frame with first detection pose
+      filteredDetectionFrame.update(transformToWorld -> transformToWorld.set(firstDetection.getPose()));
+
       addDetection(firstDetection);
+      setFilterAlpha(filterAlpha);
       setStabilityConfidenceThreshold(stabilityConfidenceThreshold);
       setStabilityDetectionFrequency(stabilityDetectionFrequency);
       setHistoryDuration(TimeTools.durationOfSeconds(historyDuration));
@@ -55,7 +65,7 @@ public class PersistentDetection
       detectionHistory.add(newDetection);
       newDetection.setPersistentDetectionID(id);
 
-      detectionFrame.update(transformToWorld -> transformToWorld.set(getMostRecentDetection().getPose()));
+      filteredDetectionFrame.update(transformToWorld -> transformToWorld.interpolate(new RigidBodyTransform(getMostRecentPose()), filterAlpha));
    }
 
    /**
@@ -239,6 +249,11 @@ public class PersistentDetection
       return readyForDeletion;
    }
 
+   public void setFilterAlpha(double filterAlpha)
+   {
+      this.filterAlpha = filterAlpha;
+   }
+
    public void setStabilityConfidenceThreshold(double stabilityConfidenceThreshold)
    {
       this.stabilityConfidenceThreshold = stabilityConfidenceThreshold;
@@ -254,8 +269,8 @@ public class PersistentDetection
       return id;
    }
 
-   public ReferenceFrame getDetectionFrame()
+   public ReferenceFrame getFilteredDetectionFrame()
    {
-      return detectionFrame.getReferenceFrame();
+      return filteredDetectionFrame.getReferenceFrame();
    }
 }

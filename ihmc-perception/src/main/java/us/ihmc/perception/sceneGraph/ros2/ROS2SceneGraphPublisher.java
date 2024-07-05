@@ -158,7 +158,7 @@ public class ROS2SceneGraphPublisher
             sceneGraphMessage.getSceneTreeTypes().add(SceneGraphMessage.DOOR_NODE_TYPE);
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getDoorSceneNodes().size());
             DoorNodeMessage doorNodeMessage =  sceneGraphMessage.getDoorSceneNodes().add();
-            doorNodeMessage.getDoorFramePose().set(doorNode.getDoorFramePose());
+            doorNodeMessage.getDoorCornerTransformToWorld().set(doorNode.getDoorCornerFrame().getTransformToWorldFrame());
             doorNodeMessage.setPoseLocked(doorNode.isDoorFramePoseLocked());
             doorNode.getDoorPanel().toMessage(doorNodeMessage.getDoorPanel());
             doorNodeMessage.getOpeningMechanisms().clear();
@@ -167,7 +167,7 @@ public class ROS2SceneGraphPublisher
                DoorOpeningMechanismMessage doorOpeningMechanismMessage = doorNodeMessage.getOpeningMechanisms().add();
                doorOpeningMechanismMessage.setType(openingMechanism.getType().getByteValue());
                doorOpeningMechanismMessage.setDoorSide(openingMechanism.getDoorSide().getBooleanValue());
-               doorOpeningMechanismMessage.getMechanismPose().set(openingMechanism.getMechanismPose());
+               doorOpeningMechanismMessage.getMechanismTransformToWorld().set(openingMechanism.getMechanismFrame().getTransformToWorldFrame());
                UUID id = openingMechanism.hasDetection() ? openingMechanism.getDetection().getID() : PersistentDetection.NULL_DETECTION_ID;
                MessageTools.toMessage(id, doorOpeningMechanismMessage.getPersistentDetectionId());
             }

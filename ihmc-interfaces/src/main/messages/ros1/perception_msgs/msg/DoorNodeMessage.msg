@@ -2,8 +2,8 @@
 # The base scene node information
 perception_msgs/DetectableSceneNodeMessage detectable_scene_node
 
-# The pose of the door frame (X points in the direction the door opens)
-geometry_msgs/Pose door_frame_pose
+# The transform of the frame of the door corner (X points in the direction the door opens)
+geometry_msgs/Transform door_corner_transform_to_world
 
 # Whether the pose of the door frame is locked
 bool pose_locked

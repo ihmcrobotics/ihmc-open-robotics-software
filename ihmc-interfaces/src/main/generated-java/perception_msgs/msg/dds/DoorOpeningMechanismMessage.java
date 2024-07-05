@@ -19,9 +19,9 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
             */
    public boolean door_side_;
    /**
-            * The grasp pose of the opening mechanism
+            * The transform of the opening mechanisms frame
             */
-   public us.ihmc.euclid.geometry.Pose3D mechanism_pose_;
+   public us.ihmc.euclid.transform.QuaternionBasedTransform mechanism_transform_to_world_;
    /**
             * ID of the persistent detection associated with this opening mechanism. May be null.
             */
@@ -29,7 +29,7 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
 
    public DoorOpeningMechanismMessage()
    {
-      mechanism_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      mechanism_transform_to_world_ = new us.ihmc.euclid.transform.QuaternionBasedTransform();
       persistent_detection_id_ = new ihmc_common_msgs.msg.dds.UUIDMessage();
    }
 
@@ -45,7 +45,7 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
 
       door_side_ = other.door_side_;
 
-      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.mechanism_pose_, mechanism_pose_);
+      geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.mechanism_transform_to_world_, mechanism_transform_to_world_);
       ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.staticCopy(other.persistent_detection_id_, persistent_detection_id_);
    }
 
@@ -85,11 +85,11 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
 
 
    /**
-            * The grasp pose of the opening mechanism
+            * The transform of the opening mechanisms frame
             */
-   public us.ihmc.euclid.geometry.Pose3D getMechanismPose()
+   public us.ihmc.euclid.transform.QuaternionBasedTransform getMechanismTransformToWorld()
    {
-      return mechanism_pose_;
+      return mechanism_transform_to_world_;
    }
 
 
@@ -123,7 +123,7 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.door_side_, other.door_side_, epsilon)) return false;
 
-      if (!this.mechanism_pose_.epsilonEquals(other.mechanism_pose_, epsilon)) return false;
+      if (!this.mechanism_transform_to_world_.epsilonEquals(other.mechanism_transform_to_world_, epsilon)) return false;
       if (!this.persistent_detection_id_.epsilonEquals(other.persistent_detection_id_, epsilon)) return false;
 
       return true;
@@ -142,7 +142,7 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
 
       if(this.door_side_ != otherMyClass.door_side_) return false;
 
-      if (!this.mechanism_pose_.equals(otherMyClass.mechanism_pose_)) return false;
+      if (!this.mechanism_transform_to_world_.equals(otherMyClass.mechanism_transform_to_world_)) return false;
       if (!this.persistent_detection_id_.equals(otherMyClass.persistent_detection_id_)) return false;
 
       return true;
@@ -158,8 +158,8 @@ public class DoorOpeningMechanismMessage extends Packet<DoorOpeningMechanismMess
       builder.append(this.type_);      builder.append(", ");
       builder.append("door_side=");
       builder.append(this.door_side_);      builder.append(", ");
-      builder.append("mechanism_pose=");
-      builder.append(this.mechanism_pose_);      builder.append(", ");
+      builder.append("mechanism_transform_to_world=");
+      builder.append(this.mechanism_transform_to_world_);      builder.append(", ");
       builder.append("persistent_detection_id=");
       builder.append(this.persistent_detection_id_);
       builder.append("}");

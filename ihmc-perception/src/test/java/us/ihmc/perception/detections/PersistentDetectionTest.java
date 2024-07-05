@@ -15,7 +15,7 @@ public class PersistentDetectionTest
       Instant startInstant = Instant.now();
 
       InstantDetection mostRecentDetection = new InstantDetection("TestDetection", 0.5, new Pose3D(), startInstant);
-      PersistentDetection persistentDetection = new PersistentDetection(mostRecentDetection, 0.5, 5.0, 1.0);
+      PersistentDetection persistentDetection = new PersistentDetection(mostRecentDetection, 1.0, 0.5, 5.0, 1.0);
       for (int i = 1; i < 10; ++i)
       {
          InstantDetection testDetection = new InstantDetection("TestDetection", 1.0, new Pose3D(), startInstant.minusSeconds(i));
@@ -37,7 +37,7 @@ public class PersistentDetectionTest
       {
          InstantDetection testDetection = new InstantDetection("TestDetection", i / 10.0, new Pose3D(), startInstant.minusSeconds(i));
          if (persistentDetection == null)
-            persistentDetection = new PersistentDetection(testDetection, 0.5, 0.0, 10.0);
+            persistentDetection = new PersistentDetection(testDetection, 1.0, 0.5, 0.0, 10.0);
          else
             persistentDetection.addDetection(testDetection);
       }
@@ -56,7 +56,7 @@ public class PersistentDetectionTest
       {
          InstantDetection testDetection = new InstantDetection("TestDetection", 1.0, new Pose3D(), startInstant.plusSeconds(i));
          if (persistentDetection == null)
-            persistentDetection = new PersistentDetection(testDetection, 0.5, 5.0, 1.0);
+            persistentDetection = new PersistentDetection(testDetection, 1.0, 0.5, 5.0, 1.0);
          else
             persistentDetection.addDetection(testDetection);
       }
@@ -76,7 +76,7 @@ public class PersistentDetectionTest
       {
          InstantDetection testDetection = new InstantDetection("TestDetection", (10.0 - i) / 10.0, new Pose3D(), startInstant.plusSeconds(i));
          if (persistentDetection == null)
-            persistentDetection = new PersistentDetection(testDetection, 0.4, 0.5, 10.0);
+            persistentDetection = new PersistentDetection(testDetection, 1.0, 0.4, 0.5, 10.0);
          else
             persistentDetection.addDetection(testDetection);
       }
@@ -97,12 +97,12 @@ public class PersistentDetectionTest
    {
       InstantDetection detectionClassA = new InstantDetection("ClassA", 1.0, new Pose3D(), Instant.now());
 
-      PersistentDetection persistentDetection = new PersistentDetection(detectionClassA, 0.5, 5.0, 1.0);
+      PersistentDetection persistentDetection = new PersistentDetection(detectionClassA, 1.0, 0.5, 5.0, 1.0);
 
       // Don't allow a negative history length
       assertThrows(IllegalArgumentException.class, () -> persistentDetection.setHistoryDuration(-1.0));
 
       // Don't allow bad arguments in construction
-      assertThrows(IllegalArgumentException.class, () -> new PersistentDetection(detectionClassA, 1.0, 0.0, -0.5));
+      assertThrows(IllegalArgumentException.class, () -> new PersistentDetection(detectionClassA, 1.0, 1.0, 0.0, -0.5));
    }
 }

@@ -13,9 +13,9 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
             */
    public perception_msgs.msg.dds.DetectableSceneNodeMessage detectable_scene_node_;
    /**
-            * The pose of the door frame (X points in the direction the door opens)
+            * The transform of the frame of the door corner (X points in the direction the door opens)
             */
-   public us.ihmc.euclid.geometry.Pose3D door_frame_pose_;
+   public us.ihmc.euclid.transform.QuaternionBasedTransform door_corner_transform_to_world_;
    /**
             * Whether the pose of the door frame is locked
             */
@@ -32,7 +32,7 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
    public DoorNodeMessage()
    {
       detectable_scene_node_ = new perception_msgs.msg.dds.DetectableSceneNodeMessage();
-      door_frame_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      door_corner_transform_to_world_ = new us.ihmc.euclid.transform.QuaternionBasedTransform();
       door_panel_ = new perception_msgs.msg.dds.DoorPanelMessage();
       opening_mechanisms_ = new us.ihmc.idl.IDLSequence.Object<perception_msgs.msg.dds.DoorOpeningMechanismMessage> (100, new perception_msgs.msg.dds.DoorOpeningMechanismMessagePubSubType());
 
@@ -47,7 +47,7 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
    public void set(DoorNodeMessage other)
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.staticCopy(other.detectable_scene_node_, detectable_scene_node_);
-      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.door_frame_pose_, door_frame_pose_);
+      geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.door_corner_transform_to_world_, door_corner_transform_to_world_);
       pose_locked_ = other.pose_locked_;
 
       perception_msgs.msg.dds.DoorPanelMessagePubSubType.staticCopy(other.door_panel_, door_panel_);
@@ -65,11 +65,11 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
 
 
    /**
-            * The pose of the door frame (X points in the direction the door opens)
+            * The transform of the frame of the door corner (X points in the direction the door opens)
             */
-   public us.ihmc.euclid.geometry.Pose3D getDoorFramePose()
+   public us.ihmc.euclid.transform.QuaternionBasedTransform getDoorCornerTransformToWorld()
    {
-      return door_frame_pose_;
+      return door_corner_transform_to_world_;
    }
 
    /**
@@ -124,7 +124,7 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       if(other == this) return true;
 
       if (!this.detectable_scene_node_.epsilonEquals(other.detectable_scene_node_, epsilon)) return false;
-      if (!this.door_frame_pose_.epsilonEquals(other.door_frame_pose_, epsilon)) return false;
+      if (!this.door_corner_transform_to_world_.epsilonEquals(other.door_corner_transform_to_world_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.pose_locked_, other.pose_locked_, epsilon)) return false;
 
       if (!this.door_panel_.epsilonEquals(other.door_panel_, epsilon)) return false;
@@ -149,7 +149,7 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       DoorNodeMessage otherMyClass = (DoorNodeMessage) other;
 
       if (!this.detectable_scene_node_.equals(otherMyClass.detectable_scene_node_)) return false;
-      if (!this.door_frame_pose_.equals(otherMyClass.door_frame_pose_)) return false;
+      if (!this.door_corner_transform_to_world_.equals(otherMyClass.door_corner_transform_to_world_)) return false;
       if(this.pose_locked_ != otherMyClass.pose_locked_) return false;
 
       if (!this.door_panel_.equals(otherMyClass.door_panel_)) return false;
@@ -166,8 +166,8 @@ public class DoorNodeMessage extends Packet<DoorNodeMessage> implements Settable
       builder.append("DoorNodeMessage {");
       builder.append("detectable_scene_node=");
       builder.append(this.detectable_scene_node_);      builder.append(", ");
-      builder.append("door_frame_pose=");
-      builder.append(this.door_frame_pose_);      builder.append(", ");
+      builder.append("door_corner_transform_to_world=");
+      builder.append(this.door_corner_transform_to_world_);      builder.append(", ");
       builder.append("pose_locked=");
       builder.append(this.pose_locked_);      builder.append(", ");
       builder.append("door_panel=");

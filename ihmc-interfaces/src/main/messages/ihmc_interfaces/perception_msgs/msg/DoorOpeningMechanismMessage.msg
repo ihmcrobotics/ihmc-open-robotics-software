@@ -6,8 +6,8 @@ byte type
 # false PULL
 bool door_side
 
-# The grasp pose of the opening mechanism
-geometry_msgs/Pose mechanism_pose
+# The transform of the opening mechanisms frame
+geometry_msgs/Transform mechanism_transform_to_world
 
 # ID of the persistent detection associated with this opening mechanism. May be null.
 ihmc_common_msgs/UUIDMessage persistent_detection_id

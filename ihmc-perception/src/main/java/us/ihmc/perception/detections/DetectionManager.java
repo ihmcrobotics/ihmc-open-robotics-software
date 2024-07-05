@@ -104,6 +104,7 @@ public class DetectionManager
          // create new persistent detections from unmatched new detections
          for (InstantDetection unmatchedNewDetection : remainingNewDetections)
             persistentDetections.add(new PersistentDetection(unmatchedNewDetection,
+                                                             settings.getPoseFilterAlpha(),
                                                              settings.getAcceptanceAverageConfidence(),
                                                              settings.getStabilityDetectionFrequency(),
                                                              settings.getDetectionHistoryDuration()));
@@ -180,6 +181,11 @@ public class DetectionManager
             }
          }
       }
+   }
+
+   public void setPoseFilterAlpha(double poseFilterAlpha)
+   {
+      settings.setPoseFilterAlpha(poseFilterAlpha);
    }
 
    public void setMatchDistanceThreshold(double matchDistance)

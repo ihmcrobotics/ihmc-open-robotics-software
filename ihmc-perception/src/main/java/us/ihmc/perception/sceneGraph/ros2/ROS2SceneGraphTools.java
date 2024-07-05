@@ -120,7 +120,7 @@ public class ROS2SceneGraphTools
       else if (nodeType == SceneGraphMessage.DOOR_NODE_TYPE)
       {
          DoorNode doorNode = new DoorNode(nodeID, crdtInfo);
-         doorNode.getDoorFramePose().set(subscriptionNode.getDoorNodeMessage().getDoorFramePose());
+         doorNode.updateDoorCornerFrame(subscriptionNode.getDoorNodeMessage().getDoorCornerTransformToWorld());
          doorNode.setDoorFramePoseLock(subscriptionNode.getDoorNodeMessage().getPoseLocked());
          doorNode.getDoorPanel().fromMessage(subscriptionNode.getDoorNodeMessage().getDoorPanel());
          for (DoorOpeningMechanismMessage doorOpeningMechanismMessage : subscriptionNode.getDoorNodeMessage().getOpeningMechanisms())
@@ -130,7 +130,7 @@ public class ROS2SceneGraphTools
             DoorOpeningMechanism doorOpeningMechanism = new DoorOpeningMechanism(doorSide,
                                                                                  openingMechanismType,
                                                                                  MessageTools.toUUID(doorOpeningMechanismMessage.getPersistentDetectionId()));
-            doorOpeningMechanism.getMechanismPose().set(doorOpeningMechanismMessage.getMechanismPose());
+            doorOpeningMechanism.updateMechanismFrame(doorOpeningMechanismMessage.getMechanismTransformToWorld());
             doorNode.getOpeningMechanisms().put(doorOpeningMechanism.getDetectionID(), doorOpeningMechanism);
          }
          sceneNode = doorNode;

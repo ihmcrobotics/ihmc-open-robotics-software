@@ -1,7 +1,7 @@
 #ifndef __perception_msgs__msg__DoorNodeMessage__idl__
 #define __perception_msgs__msg__DoorNodeMessage__idl__
 
-#include "geometry_msgs/msg/./Pose_.idl"
+#include "geometry_msgs/msg/./Transform_.idl"
 #include "perception_msgs/msg/./DetectableSceneNodeMessage_.idl"
 #include "perception_msgs/msg/./DoorOpeningMechanismMessage_.idl"
 #include "perception_msgs/msg/./DoorPanelMessage_.idl"
@@ -20,9 +20,9 @@ module perception_msgs
          */
         perception_msgs::msg::dds::DetectableSceneNodeMessage detectable_scene_node;
         /**
-         * The pose of the door frame (X points in the direction the door opens)
+         * The transform of the frame of the door corner (X points in the direction the door opens)
          */
-        geometry_msgs::msg::dds::Pose door_frame_pose;
+        geometry_msgs::msg::dds::Transform door_corner_transform_to_world;
         /**
          * Whether the pose of the door frame is locked
          */

@@ -186,7 +186,7 @@ public class ROS2SceneGraphSubscription
          }
          if (localNode instanceof DoorNode doorNode)
          {
-            doorNode.getDoorFramePose().set(subscriptionNode.getDoorNodeMessage().getDoorFramePose());
+            doorNode.updateDoorCornerFrame(subscriptionNode.getDoorNodeMessage().getDoorCornerTransformToWorld());
             doorNode.setDoorFramePoseLock(subscriptionNode.getDoorNodeMessage().getPoseLocked());
             doorNode.getDoorPanel().fromMessage(subscriptionNode.getDoorNodeMessage().getDoorPanel());
             for (DoorOpeningMechanismMessage doorOpeningMechanismMessage : subscriptionNode.getDoorNodeMessage().getOpeningMechanisms())
@@ -199,12 +199,12 @@ public class ROS2SceneGraphSubscription
                      DoorSide doorSide = DoorSide.fromBoolean(doorOpeningMechanismMessage.getDoorSide());
                      DoorOpeningMechanismType openingMechanismType = DoorOpeningMechanismType.fromByte(doorOpeningMechanismMessage.getType());
                      DoorOpeningMechanism doorOpeningMechanism = new DoorOpeningMechanism(doorSide, openingMechanismType, messageDetectionID);
-                     doorOpeningMechanism.getMechanismPose().set(doorOpeningMechanismMessage.getMechanismPose());
+                     doorOpeningMechanism.updateMechanismFrame(doorOpeningMechanismMessage.getMechanismTransformToWorld());
                      doorNode.getOpeningMechanisms().put(messageDetectionID, doorOpeningMechanism);
                   }
                   else
                   {
-                     doorNode.getOpeningMechanisms().get(messageDetectionID).setMechanismPose(doorOpeningMechanismMessage.getMechanismPose());
+                     doorNode.getOpeningMechanisms().get(messageDetectionID).updateMechanismFrame(doorOpeningMechanismMessage.getMechanismTransformToWorld());
                   }
                }
             }

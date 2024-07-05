@@ -122,7 +122,7 @@ public class DoorPanel
       DoorOpeningMechanism doorOpeningMechanism = doorNode.getLatestUpdatedOpeningMechanism();
       if (doorOpeningMechanism == null)
          return; // Early return
-      Point3D doorPointInWorld = new Point3D(doorOpeningMechanism.getMechanismPose().getTranslation());
+      Point3D doorPointInWorld = new Point3D(doorOpeningMechanism.getMechanismFrame().getTransformToWorldFrame().getTranslation());
 
       if (!planarRegionsList.isEmpty())
       {
@@ -162,5 +162,11 @@ public class DoorPanel
             setPlanarRegionLastUpdateTimeMillis(System.currentTimeMillis());
          }
       }
+   }
+
+   public void destroy()
+   {
+      if (doorPanelDetection != null)
+         doorPanelDetection.markForDeletion();
    }
 }
