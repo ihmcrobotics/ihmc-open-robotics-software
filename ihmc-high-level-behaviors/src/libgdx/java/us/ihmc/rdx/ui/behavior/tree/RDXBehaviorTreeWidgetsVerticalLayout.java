@@ -142,6 +142,9 @@ public class RDXBehaviorTreeWidgetsVerticalLayout
          case INSERT_AS_CHILD -> node.setModalPopupTitle("Insert as child of \"%s\"".formatted(node.getDefinition().getName()));
       }
 
+      // Update listings every time we pop the node creation dialog
+      tree.getNodeCreationMenu().reindexDirectory();
+
       ImGui.openPopup(node.getModalPopupID());
       LogTools.info("Opening popup {}", node.getModalPopupID());
    }
