@@ -19,11 +19,11 @@ import us.ihmc.scs2.simulation.physicsEngine.PhysicsEngineFactory;
 
 import java.util.List;
 
-public class CenterOfMassStabilityMarginRegionCalculatorVisualizer
+public class CenterOfMassStabilityRegionCalculatorVisualizer
 {
    private static final boolean showSupportRegion = true;
 
-   public CenterOfMassStabilityMarginRegionCalculatorVisualizer(WholeBodyContactStateInterface input)
+   public CenterOfMassStabilityRegionCalculatorVisualizer(WholeBodyContactStateInterface input)
    {
       runWithSCS2(input);
    }
@@ -34,7 +34,7 @@ public class CenterOfMassStabilityMarginRegionCalculatorVisualizer
       scs2.start(true, true, false);
 
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-      CenterOfMassStabilityMarginRegionCalculator calculator = new CenterOfMassStabilityMarginRegionCalculator("", 1.0, scs2.getRootRegistry(), graphicsListRegistry);
+      CenterOfMassStaticStabilityRegionCalculator calculator = new CenterOfMassStaticStabilityRegionCalculator("", 1.0, scs2.getRootRegistry(), graphicsListRegistry);
       calculator.updateContactState(input);
 
       List<YoGraphicDefinition> graphicDefinitions = YoGraphicConversionTools.toYoGraphicDefinitions(graphicsListRegistry);
@@ -117,6 +117,6 @@ public class CenterOfMassStabilityMarginRegionCalculatorVisualizer
 //      WholeBodyContactStateInterface input = ContactStateExamples.createBipedFeetWithSingleHandhold();
       WholeBodyContactStateInterface input = ContactStateExamples.createBipedFeetWithTwoHandholds();
 
-      new CenterOfMassStabilityMarginRegionCalculatorVisualizer(input);
+      new CenterOfMassStabilityRegionCalculatorVisualizer(input);
    }
 }
