@@ -268,44 +268,6 @@ public class DoorNode extends DetectableSceneNode
       }
    }
 
-   /**
-    * These child nodes are used in behaviors
-    */
-   //   private void updateStaticRelativeChildren(SceneGraph sceneGraph, DoorOpeningMechanism openingMechanism)
-   //   {
-   //      // Recalculate name each time in case the parent name changes
-   //      String graspStaticRelativeSceneNodeName = getName() + "_" + openingMechanism.getColloquialName() + "Grasp";
-   //
-   //      StaticRelativeSceneNode graspStaticRelativeSceneNode = null;
-   //
-   //      for (SceneNode child : getChildren())
-   //      {
-   //         if (child instanceof StaticRelativeSceneNode staticRelativeSceneNode)
-   //         {
-   //            // TODO: Delete any old static relative children that aren't the correct name?
-   //            if (child.getName().equals(graspStaticRelativeSceneNodeName))
-   //            {
-   //               graspStaticRelativeSceneNode = staticRelativeSceneNode;
-   //            }
-   //         }
-   //      }
-   //
-   //      if (graspStaticRelativeSceneNode == null)
-   //      {
-   //         graspStaticRelativeSceneNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
-   //                                                                    graspStaticRelativeSceneNodeName,
-   //                                                                    sceneGraph.getIDToNodeMap(),
-   //                                                                    getID(),
-   //                                                                    new RigidBodyTransform(),
-   //                                                                    openingMechanism.getVisualModelPath(),
-   //                                                                    openingMechanism.getVisualModelTransform(),
-   //                                                                    // TODO: DOORNODES
-   //                                                                    DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN,
-   //                                                                    getCRDTInfo());
-   //         StaticRelativeSceneNode finalGraspStaticRelativeSceneNode = graspStaticRelativeSceneNode;
-   //         sceneGraph.modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(finalGraspStaticRelativeSceneNode, this)));
-   //      }
-   //   }
    public void setDoorFramePoseLock(boolean lockPose)
    {
       lockDoorFramePose = lockPose;
@@ -366,6 +328,7 @@ public class DoorNode extends DetectableSceneNode
    public DoorSide getDoorSideRelativeTo(Point3D position)
    {
       // TODO: DOORNODES
+
 
       return null;
    }
