@@ -208,6 +208,11 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
       return numberOfMessagesReceived;
    }
 
+   public long getPreviousSequenceID()
+   {
+      return previousSequenceID;
+   }
+
    public long getMessageDropCount()
    {
       return messageDropCount;

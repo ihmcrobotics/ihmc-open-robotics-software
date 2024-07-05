@@ -92,6 +92,11 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
       ImGui.sameLine(ImGui.getWindowSizeX() - droppedTextWidth - rightMargin);
       ImGui.text("Dropped: %4d".formatted(ros2BehaviorTreeState.getBehaviorTreeSubscription().getMessageDropCount()));
 
+      ImGui.endMenuBar();
+
+      ImGui.text("CRDT#: Local: %d  Robot: %d".formatted(getBehaviorTreeState().getCRDTInfo().getUpdateNumber(),
+                                                         ros2BehaviorTreeState.getBehaviorTreeSubscription().getPreviousSequenceID()));
+
       super.renderImGuiWidgetsPost();
    }
 
