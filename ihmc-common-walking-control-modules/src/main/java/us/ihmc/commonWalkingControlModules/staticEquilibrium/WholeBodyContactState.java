@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.lists.SupplierBuilder;
-import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -17,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -161,18 +159,8 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
          double gravityTorque = gravityCoriolisExternalWrenchMatrixCalculator.getComputedJointTau(oneDoFJoints[i]).get(0, 0);
-         double torqueConstraintLowerBound = oneDoFJoints[i].getEffortLimitLower() - gravityTorque;
-         double torqueConstraintUpperBound = oneDoFJoints[i].getEffortLimitUpper() - gravityTorque;
-
-         if (torqueConstraintLowerBound > torqueConstraintUpperBound)
-         {
-            LogTools.info("Infeasible torque constraint for " + oneDoFJoints[i].getName() + ". Likely due to high coriolis forces.");
-            clear();
-            return;
-         }
-
-         constraintLowerBound.set(i, torqueConstraintLowerBound);
-         constraintUpperBound.set(i, torqueConstraintUpperBound);
+         constraintLowerBound.set(i, oneDoFJoints[i].getEffortLimitLower() - gravityTorque);
+         constraintUpperBound.set(i, oneDoFJoints[i].getEffortLimitUpper() - gravityTorque);
       }
 
       int nContactForceVariables = LINEAR_DIMENSIONS * contactPoints.size();
@@ -365,9 +353,9 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
    }
 
    /**
-    * Given constraintActiveSetIndex, which represents the constraint row of A in the problem constraint Ax <= b,
+    * Given constraintActiveSetIndex, which represents the constraint row oNf A in the problem constraint Ax <= b,
     * this returns true if that row corresponds to a joint actuation constraint or false otherwise when the row corresponds to a
-    * static equilibrium constraint. constraintActiveSetIndex can be obtained from {@link LinearProgramSolver#toConstraintIndex}
+    * static equilibrium constraint.
     */
    public boolean isJointTorqueActuationConstraint(int constraintActiveSetIndex)
    {
@@ -377,32 +365,31 @@ public class WholeBodyContactState implements WholeBodyContactStateInterface
 
    /**
     * Returns the joint corresponding to the constraint row actuationConstraintIndex of A in the problem constraint Ax <= b.
-    * constraintActiveSetIndex can be obtained from {@link LinearProgramSolver#toConstraintIndex}
     */
-   public OneDoFJointBasics getJointFromActuationConstraintIndex(int constraintActiveSetIndex)
+   public OneDoFJointBasics getJointFromActuationConstraintIndex(int actuationConstraintIndex)
    {
       int staticEquilibriumInequalityConstraints = 2 * CenterOfMassStabilityMarginOptimizationModule.STATIC_EQUILIBRIUM_CONSTRAINTS;
-      if (constraintActiveSetIndex < staticEquilibriumInequalityConstraints)
+      if (actuationConstraintIndex < staticEquilibriumInequalityConstraints)
       {
          throw new RuntimeException("Invalid constraint index");
       }
 
-      return oneDoFJoints[(constraintActiveSetIndex - staticEquilibriumInequalityConstraints) % oneDoFJoints.length];
+      return oneDoFJoints[(actuationConstraintIndex - staticEquilibriumInequalityConstraints) % oneDoFJoints.length];
    }
 
    /**
     * Assuming the given index actuationConstraintIndex corresponds to a joint torque bound, returns true
     * if the constraint corresponds to the joint's upper torque bound and false otherwise
     */
-   public boolean isActuationConstraintUpperBound(int constraintActiveSetIndex)
+   public boolean isActuationConstraintUpperBound(int actuationConstraintIndex)
    {
       int staticEquilibriumInequalityConstraints = 2 * CenterOfMassStabilityMarginOptimizationModule.STATIC_EQUILIBRIUM_CONSTRAINTS;
-      if (constraintActiveSetIndex < staticEquilibriumInequalityConstraints)
+      if (actuationConstraintIndex < staticEquilibriumInequalityConstraints)
       {
          throw new RuntimeException("Invalid constraint index");
       }
 
-      return constraintActiveSetIndex - staticEquilibriumInequalityConstraints >= oneDoFJoints.length;
+      return actuationConstraintIndex - staticEquilibriumInequalityConstraints >= oneDoFJoints.length;
    }
 }
 
