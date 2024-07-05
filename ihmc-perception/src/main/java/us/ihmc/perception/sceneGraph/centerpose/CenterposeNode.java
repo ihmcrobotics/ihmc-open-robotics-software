@@ -67,8 +67,10 @@ public class CenterposeNode extends DetectableSceneNode
    }
 
    @Override
-   public void update()
+   public void update(SceneGraph sceneGraph)
    {
+      super.update(sceneGraph);
+
       setCurrentlyDetected(objectDetection.isStable());
       getNodeToParentFrameTransform().set(getMostRecentDetection().getPose());
 
