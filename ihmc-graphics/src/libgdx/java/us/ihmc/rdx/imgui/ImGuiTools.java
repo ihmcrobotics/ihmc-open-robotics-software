@@ -630,21 +630,24 @@ public class ImGuiTools
 
    public static ImFont getConsoleFont()
    {
-      ImFont font = consoleFont.get(CURRENT_FONT_SIZE);
-      if (!font.isLoaded()) // FIXME: Find issue and fix
-      {
-         if (!printedConsoleFontError)
-         {
-            printedConsoleFontError = true;
-            LogTools.error("Console font %s size %d not loaded!".formatted(font.getDebugName(), CURRENT_FONT_SIZE));
-         }
+      // FIXME: The stuff below still doesn't work all the time.
+      return getSmallFont();
 
-         return getSmallFont();
-      }
-      else
-      {
-         return font;
-      }
+//      ImFont font = consoleFont.get(CURRENT_FONT_SIZE);
+//      if (!font.isLoaded()) // FIXME: Find issue and fix
+//      {
+//         if (!printedConsoleFontError)
+//         {
+//            printedConsoleFontError = true;
+//            LogTools.error("Console font %s size %d not loaded!".formatted(font.getDebugName(), CURRENT_FONT_SIZE));
+//         }
+//
+//         return getSmallFont();
+//      }
+//      else
+//      {
+//         return font;
+//      }
    }
 
    public static ImFontAtlas getFontAtlas()
