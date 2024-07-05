@@ -29,7 +29,7 @@ public class RDXYOLOv8Settings extends RDXVisualizer
 
    private final ROS2PublishSubscribeAPI ros2;
 
-   private final ImFloat confidenceThreshold = new ImFloat(0.3f);
+   private final ImFloat confidenceThreshold = new ImFloat(0.8f);
    private final ImFloat nmsThreshold = new ImFloat(0.1f);
    private final ImFloat maskThreshold = new ImFloat(0.0f);
    private final ImFloat outlierRejectionThreshold = new ImFloat(1.0f);

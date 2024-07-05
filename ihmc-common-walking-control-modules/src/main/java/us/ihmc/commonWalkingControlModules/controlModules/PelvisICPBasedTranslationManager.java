@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStaticStabilityRegionCalculator;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -84,7 +84,7 @@ public class PelvisICPBasedTranslationManager
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private FrameConvexPolygon2DReadOnly supportPolygon;
-   private final CenterOfMassStaticStabilityRegionCalculator multiContactCoMRegionCalculator;
+   private final CenterOfMassStabilityMarginRegionCalculator multiContactCoMRegionCalculator;
 
    private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameVector3D tempVelocity = new FrameVector3D();

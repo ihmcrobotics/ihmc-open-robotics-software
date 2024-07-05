@@ -73,8 +73,10 @@ public class YOLOv8Node extends DetectableSceneNode
    }
 
    @Override
-   public void update()
+   public void update(SceneGraph sceneGraph)
    {
+      super.update(sceneGraph);
+
       setCurrentlyDetected(yoloDetection.isStable());
       setConfidence(getMostRecentDetection().getConfidence());
       setObjectPointCloud(getMostRecentDetection().getObjectPointCloud());

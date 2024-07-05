@@ -33,7 +33,7 @@ public class SceneNode extends RequestConfirmFreezable
       this.nodeFrame = new MutableReferenceFrame(name, ReferenceFrame.getWorldFrame());
    }
 
-   public void update()
+   public void update(SceneGraph sceneGraph)
    {
 
    }

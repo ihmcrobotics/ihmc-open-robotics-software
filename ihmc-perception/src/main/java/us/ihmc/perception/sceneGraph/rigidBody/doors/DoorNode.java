@@ -17,6 +17,9 @@ import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
+import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism.DoorOpeningMechanismType;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorPanel;
@@ -31,6 +34,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions.DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN;
 
 /**
  * A node that represents a door.
@@ -186,7 +191,7 @@ public class DoorNode extends DetectableSceneNode
    }
 
    @Override
-   public void update()
+   public void update(SceneGraph sceneGraph)
    {
       // Calculate yaw, pitch, roll of opening mechanism pose based on door panel
       updateOpeningMechanismPoses();
@@ -194,11 +199,13 @@ public class DoorNode extends DetectableSceneNode
       boolean openingMechanismDetected = openingMechanisms.values().stream().anyMatch(mechanism -> mechanism.getDetection().isStable());
       setCurrentlyDetected(doorPanel.isDetected() || openingMechanismDetected);
 
+      for (DoorOpeningMechanism openingMechanism : openingMechanisms.values())
+         updateStaticRelativeChildren(sceneGraph, openingMechanism);
       // TODO:
       // Update door node reference frame
       //      getNodeFrame();
 
-      super.update();
+      super.update(sceneGraph);
    }
 
    private void updateOpeningMechanismPoses()
@@ -271,41 +278,43 @@ public class DoorNode extends DetectableSceneNode
    /**
     * These child nodes are used in behaviors
     */
-   //   private void updateStaticRelativeChildren(SceneGraph sceneGraph, DoorOpeningMechanism openingMechanism)
-   //   {
-   //      // Recalculate name each time in case the parent name changes
-   //      String graspStaticRelativeSceneNodeName = getName() + "_" + openingMechanism.getColloquialName() + "Grasp";
-   //
-   //      StaticRelativeSceneNode graspStaticRelativeSceneNode = null;
-   //
-   //      for (SceneNode child : getChildren())
-   //      {
-   //         if (child instanceof StaticRelativeSceneNode staticRelativeSceneNode)
-   //         {
-   //            // TODO: Delete any old static relative children that aren't the correct name?
-   //            if (child.getName().equals(graspStaticRelativeSceneNodeName))
-   //            {
-   //               graspStaticRelativeSceneNode = staticRelativeSceneNode;
-   //            }
-   //         }
-   //      }
-   //
-   //      if (graspStaticRelativeSceneNode == null)
-   //      {
-   //         graspStaticRelativeSceneNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
-   //                                                                    graspStaticRelativeSceneNodeName,
-   //                                                                    sceneGraph.getIDToNodeMap(),
-   //                                                                    getID(),
-   //                                                                    new RigidBodyTransform(),
-   //                                                                    openingMechanism.getVisualModelPath(),
-   //                                                                    openingMechanism.getVisualModelTransform(),
-   //                                                                    // TODO: DOORNODES
-   //                                                                    DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN,
-   //                                                                    getCRDTInfo());
-   //         StaticRelativeSceneNode finalGraspStaticRelativeSceneNode = graspStaticRelativeSceneNode;
-   //         sceneGraph.modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(finalGraspStaticRelativeSceneNode, this)));
-   //      }
-   //   }
+   private void updateStaticRelativeChildren(SceneGraph sceneGraph, DoorOpeningMechanism openingMechanism)
+   {
+      // Recalculate name each time in case the parent name changes
+      String graspStaticRelativeSceneNodeName = getName() + "_" + openingMechanism.getColloquialName() + "Grasp";
+
+      StaticRelativeSceneNode graspStaticRelativeSceneNode = null;
+
+      for (SceneNode child : getChildren())
+      {
+         if (child instanceof StaticRelativeSceneNode staticRelativeSceneNode)
+         {
+            // TODO: Delete any old static relative children that aren't the correct name?
+            if (child.getName().equals(graspStaticRelativeSceneNodeName))
+            {
+               graspStaticRelativeSceneNode = staticRelativeSceneNode;
+            }
+         }
+      }
+
+      if (graspStaticRelativeSceneNode == null)
+      {
+         graspStaticRelativeSceneNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
+                                                                    graspStaticRelativeSceneNodeName,
+                                                                    sceneGraph.getIDToNodeMap(),
+                                                                    getID(),
+                                                                    new RigidBodyTransform(),
+                                                                    openingMechanism.getVisualModelPath(),
+                                                                    openingMechanism.getVisualModelTransform(),
+                                                                    // TODO: DOORNODES
+                                                                    DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN,
+                                                                    getCRDTInfo());
+         StaticRelativeSceneNode finalGraspStaticRelativeSceneNode = graspStaticRelativeSceneNode;
+         sceneGraph.modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(finalGraspStaticRelativeSceneNode, this)));
+      }
+   }
+
+
    public void setDoorFramePoseLock(boolean lockPose)
    {
       lockDoorFramePose = lockPose;

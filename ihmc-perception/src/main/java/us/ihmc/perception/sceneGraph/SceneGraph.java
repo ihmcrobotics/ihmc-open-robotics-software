@@ -109,7 +109,7 @@ public class SceneGraph
 
    private void updateOnRobotOnly(SceneNode sceneNode, ReferenceFrame sensorFrame, SceneGraphModificationQueue modificationQueue)
    {
-      sceneNode.update();
+      sceneNode.update(this);
 
       if (sceneNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
       {
