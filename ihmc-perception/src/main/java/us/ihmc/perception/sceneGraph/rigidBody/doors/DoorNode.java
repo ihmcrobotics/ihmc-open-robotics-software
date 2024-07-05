@@ -78,7 +78,7 @@ public class DoorNode extends DetectableSceneNode
       if (doorComponentDetection == null)
          return false;
 
-      if (doorPanel.acceptDetection(doorComponentDetection, openingMechanisms.values()))
+      if (doorPanel.acceptDetection(doorComponentDetection))
          return true;
       else
          return acceptOpeningMechanismDetection(doorComponentDetection);
@@ -144,8 +144,11 @@ public class DoorNode extends DetectableSceneNode
       // Assign hinge translation if first opening mechanism
       if (openingMechanisms.isEmpty())
       {
-         // TODO: Choose values based on opening mechanism type (currently only works with knob and lever)
          double openerToHingeCornerY = DoorModelParameters.DOOR_PANEL_WIDTH - DoorModelParameters.DOOR_OPENER_INSET;
+         // Centroid of push bar is further right compared to other opening mechanisms
+         if (doorOpeningMechanismDetection.getDetectedObjectName().contains("YOLOPushBar"))
+            openerToHingeCornerY -= 0.25;
+
 
          /*
           * ASSUMPTIONS: In the ONR demo course the door's hing locations will be ties to the opening mechanisms
@@ -154,10 +157,14 @@ public class DoorNode extends DetectableSceneNode
           * Door Handle -> right
           * (looking at the push side of the door)
           */
-         if (!doorOpeningMechanismDetection.getDetectedObjectName().toLowerCase().contains("knob"))
+         if (!doorOpeningMechanismDetection.getDetectedObjectName().contains("YOLODoorKnob"))
             openerToHingeCornerY *= -1.0;
 
          double openerToHingeCornerZ = -1.0 * DoorModelParameters.DOOR_OPENER_FROM_BOTTOM_OF_PANEL;
+         // Centroid of pull handle is higher up compared to other opening mechanisms
+         if (doorOpeningMechanismDetection.getDetectedObjectName().contains("YOLOPullHandle"))
+            openerToHingeCornerZ -= 0.18;
+
          openingMechanismToHingeCornerTranslation.set(0.0, openerToHingeCornerY, openerToHingeCornerZ);
       }
 
@@ -290,6 +297,11 @@ public class DoorNode extends DetectableSceneNode
    public void setDoorFramePoseLock(boolean lockPose)
    {
       lockDoorFramePose = lockPose;
+   }
+
+   public boolean isDoorFramePoseLocked()
+   {
+      return lockDoorFramePose;
    }
 
    public Pose3D getDoorFramePose()

@@ -37,10 +37,12 @@ public class DoorPanel
     * @param newPanelDetection {@link PersistentDetection} of the door panel.
     * @return true if the detection is accepted, false otherwise.
     */
-   public boolean acceptDetection(PersistentDetection newPanelDetection, Collection<DoorOpeningMechanism> presentOpeningMechanisms)
+   public boolean acceptDetection(PersistentDetection newPanelDetection)
    {
       if (this.doorPanelDetection == null && DoorNodeTools.detectionIsDoorPanel(newPanelDetection))
       {
+         Collection<DoorOpeningMechanism> presentOpeningMechanisms = doorNode.getOpeningMechanisms().values();
+
          if (presentOpeningMechanisms.isEmpty()
              || presentOpeningMechanisms.stream()
                                         .anyMatch(openingMechanism -> openingMechanism.getDetection()
