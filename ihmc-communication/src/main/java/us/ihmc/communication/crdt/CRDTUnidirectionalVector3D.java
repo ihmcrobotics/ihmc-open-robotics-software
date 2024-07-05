@@ -28,9 +28,6 @@ public class CRDTUnidirectionalVector3D extends CRDTUnidirectionalMutableField<V
 
    public void fromMessage(Vector3D message)
    {
-      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
-      {
-         getValueInternal().set(message);
-      }
+      getValueInternal().set(message);
    }
 }

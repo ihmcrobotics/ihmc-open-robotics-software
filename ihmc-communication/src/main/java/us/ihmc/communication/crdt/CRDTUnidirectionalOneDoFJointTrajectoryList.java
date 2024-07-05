@@ -64,19 +64,16 @@ public class CRDTUnidirectionalOneDoFJointTrajectoryList extends CRDTUnidirectio
 
    public void fromMessage(IDLSequence.Object<OneDoFJointTrajectoryMessage> trajectoryMessage)
    {
-      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
+      getValueInternal().clear();
+
+      for (OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage : trajectoryMessage)
       {
-         getValueInternal().clear();
+         RecyclingArrayList<OneDoFTrajectoryPoint> trajectoryPointList = getValueInternal().add();
+         trajectoryPointList.clear();
 
-         for (OneDoFJointTrajectoryMessage oneDoFJointTrajectoryMessage : trajectoryMessage)
+         for (TrajectoryPoint1DMessage trajectoryPointMessage : oneDoFJointTrajectoryMessage.getTrajectoryPoints())
          {
-            RecyclingArrayList<OneDoFTrajectoryPoint> trajectoryPointList = getValueInternal().add();
-            trajectoryPointList.clear();
-
-            for (TrajectoryPoint1DMessage trajectoryPointMessage : oneDoFJointTrajectoryMessage.getTrajectoryPoints())
-            {
-               MessageTools.fromMessage(trajectoryPointMessage, trajectoryPointList.add());
-            }
+            MessageTools.fromMessage(trajectoryPointMessage, trajectoryPointList.add());
          }
       }
    }

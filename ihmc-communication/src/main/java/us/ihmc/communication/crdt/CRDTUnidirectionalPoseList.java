@@ -40,14 +40,11 @@ public class CRDTUnidirectionalPoseList extends CRDTUnidirectionalMutableField<R
 
    public void fromMessage(IDLSequence.Object<Pose3D> trajectoryMessage)
    {
-      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
-      {
-         getValueInternal().clear();
+      getValueInternal().clear();
 
-         for (Pose3D pose3D : trajectoryMessage)
-         {
-            getValueInternal().add().set(pose3D);
-         }
+      for (Pose3D pose3D : trajectoryMessage)
+      {
+         getValueInternal().add().set(pose3D);
       }
    }
 }

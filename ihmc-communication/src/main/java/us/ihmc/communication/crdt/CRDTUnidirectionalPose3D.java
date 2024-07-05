@@ -28,9 +28,6 @@ public class CRDTUnidirectionalPose3D extends CRDTUnidirectionalMutableField<Pos
 
    public void fromMessage(Pose3D poseMessage)
    {
-      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
-      {
-         getValueInternal().set(poseMessage);
-      }
+      getValueInternal().set(poseMessage);
    }
 }
