@@ -7,10 +7,10 @@ import us.ihmc.log.LogTools;
 import java.util.UUID;
 
 /**
- * A rolling average frequency calculator with an optional logging thread to print the frequency once per second.
- * The frequency is calculated on each query to the frequency rather than each new event.
+ * An exponential smoothing frequency calculator with an optional logging thread to print the frequency once per second.
  * Call {@link #ping()} on each new event.
- * Call {@link #getFrequency()} to get the current frequency.
+ * Call {@link #getFrequency()} to get the frequency, which will remain constant if events stop.
+ * Call {@link #getFrequencyDecaying()} to get the current frequency which trends to 0 when there are no events.
  */
 public class FrequencyCalculator
 {
