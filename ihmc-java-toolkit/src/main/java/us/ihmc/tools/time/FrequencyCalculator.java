@@ -7,17 +7,16 @@ import us.ihmc.log.LogTools;
 import java.util.UUID;
 
 /**
- * An exponential smoothing frequency calculator with an optional logging thread to print the frequency once per second.
- * <a href="https://en.wikipedia.org/wiki/Exponential_smoothing">...</a>
+ * A rolling average frequency calculator with an optional logging thread to print the frequency once per second.
+ * The frequency is calculated on each query to the frequency rather than each new event.
  * Call {@link #ping()} on each new event.
- * Call {@link #getFrequency()} to get the frequency, which will remain constant if events stop.
- * Call {@link #getFrequencyDecaying()} to get the current frequency which trends to 0 when there are no events.
+ * Call {@link #getFrequency()} to get the current frequency.
  */
 public class FrequencyCalculator
 {
-   private double alpha = 0.3;
+   private double alpha = 0.5;
    private double lastEventTime = Double.NaN;
-   private double smoothedPeriod = Double.NaN;
+   private double averagePeriod = Double.NaN;
 
    private volatile boolean loggingThreadRunning;
 
@@ -50,7 +49,7 @@ public class FrequencyCalculator
 
    private double calculateFrequency(boolean decay)
    {
-      if (Double.isNaN(smoothedPeriod))
+      if (Double.isNaN(averagePeriod))
       {
          return 0.0;
       }
@@ -59,14 +58,13 @@ public class FrequencyCalculator
          double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
          double ongoingPeriod = currentTime - lastEventTime;
 
-         if (!decay || ongoingPeriod < smoothedPeriod) // Expecting an event after the current average period
+         if (ongoingPeriod < averagePeriod) // Expecting an event after the current average period
          {
-            return 1.0 / smoothedPeriod;
+            return 1.0 / averagePeriod;
          }
          else // Events are slowing down or stopped
          {
-            double psuedoSmoothedPeriod = (1.0 - alpha) * smoothedPeriod + alpha * ongoingPeriod;
-            return 1.0 / psuedoSmoothedPeriod;
+            return 1.0 / ongoingPeriod;
          }
       }
    }
@@ -79,13 +77,13 @@ public class FrequencyCalculator
       {
          double period = currentTime - lastEventTime;
 
-         if (Double.isNaN(smoothedPeriod))
+         if (Double.isNaN(averagePeriod))
          {
-            smoothedPeriod = period;
+            averagePeriod = period;
          }
          else
          {
-            smoothedPeriod = (1.0 - alpha) * smoothedPeriod + alpha * period;
+            averagePeriod = (1.0 - alpha) * averagePeriod + alpha * period;
          }
       }
 
