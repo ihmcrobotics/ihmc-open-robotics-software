@@ -170,6 +170,7 @@ public class HumanoidPerceptionModule
                                    Instant globalAcquisitionTime = Instant.now();
                                    HeightMapData requiredHeightMapData = getLatestHeightMapData();
                                    globalHeightMap.addHeightMap(requiredHeightMapData);
+                                   publishGlobalHeightMap(ros2Helper, globalHeightMap, acquisitionTime);
 //                                   PerceptionMessageTools.convertHeightMapDataToMat(globalHeightMap,globalHeightMap.)
 
 
@@ -223,6 +224,36 @@ public class HumanoidPerceptionModule
                                                          image.rows(),
                                                          image.cols(),
                                                          (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
+   }
+
+   private void publishGlobalHeightMap(ROS2Helper ros2Helper, GlobalHeightMap globalHeightMap, Instant acquisitionTime) {
+      // Assuming you have a publisher for GlobalMap messages
+      Publisher<GlobalMapMessage> globalMapPublisher = ros2Helper.createPublisher("global_height_map_topic", GlobalMapMessage.class);
+
+      // Create a new GlobalMap message
+      GlobalMapMessage globalMapMessage = new GlobalMapMessage();
+
+      // Populate the GlobalMap message with data from globalHeightMap
+      globalMapMessage.setSequenceNumber(sequenceNumber++);
+      globalMapMessage.setAcquisitionTime(acquisitionTime);
+      globalMapMessage.setMapWidthCells(globalHeightMap.getWidthCells());
+      globalMapMessage.setMapHeightCells(globalHeightMap.getHeightCells());
+      globalMapMessage.setMapResolution(globalHeightMap.getResolution());
+      globalMapMessage.setMinHeight(globalHeightMap.getMinHeight());
+      globalMapMessage.setMaxHeight(globalHeightMap.getMaxHeight());
+
+      // Convert height map data to a flattened array (example)
+      float[] heights = globalHeightMap.flattenHeightMap();
+
+      // Set heights in the message
+      globalMapMessage.setHeights(heights);
+
+      // Set map origin and orientation if needed
+      // globalMapMessage.setMapOrigin(...);
+      // globalMapMessage.setMapOrientation(...);
+
+      // Publish the message
+      globalMapPublisher.publish(globalMapMessage);
    }
 
 

@@ -2,7 +2,6 @@ package us.ihmc.sensorProcessing.globalHeightMap;
 
 import com.esotericsoftware.kryo.util.IntMap;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.Collection;
@@ -10,7 +9,7 @@ import java.util.HashSet;
 
 public class GlobalHeightMap
 {
-   private final IntMap<GlobalMapCell> heightMapData = new IntMap<>();
+   private final IntMap<GlobalMapCell> heightMapDataIntMap = new IntMap<>();
    private final HashSet<GlobalMapCell> modifiedCells = new HashSet<>();
 
    public void addHeightMap(HeightMapData heightMapData)
@@ -40,14 +39,23 @@ public class GlobalHeightMap
       int yIndex = GlobalLattice.toIndex(cellPosition.getY());
 
       int hashOfMap = GlobalLattice.hashCodeOfCell(xIndex, yIndex);
-      GlobalMapCell data = heightMapData.get(hashOfMap);
+      GlobalMapCell data = heightMapDataIntMap.get(hashOfMap);
 
       if (data == null)
       {
          data = new GlobalMapCell(resolution, GlobalLattice.toPosition(xIndex), GlobalLattice.toPosition(yIndex));
-         heightMapData.put(hashOfMap, data);
+         heightMapDataIntMap.put(hashOfMap, data);
       }
 
       return data;
    }
+
 }
+
+//# File: GlobalHeightMap.msg
+//float64 grid_resolution_xy   # Resolution of the grid in XY plane
+//float64 grid_size_xy         # Size of the grid in XY plane
+//float64 grid_center_x        # X coordinate of the grid center
+//float64 grid_center_y        # Y coordinate of the grid center
+//float64[] heights            # Array of height values for each cell in the grid
+
