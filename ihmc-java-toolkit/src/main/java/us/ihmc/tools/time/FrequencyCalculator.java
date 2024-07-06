@@ -14,7 +14,7 @@ import java.util.UUID;
  */
 public class FrequencyCalculator
 {
-   private double alpha = 0.5;
+   private double alpha = 0.3;
    private double lastEventTime = Double.NaN;
    private double averagePeriod = Double.NaN;
 
@@ -64,7 +64,8 @@ public class FrequencyCalculator
          }
          else // Events are slowing down or stopped
          {
-            return 1.0 / ongoingPeriod;
+            double psuedoAveragePeriod = (1.0 - alpha) * averagePeriod + alpha * ongoingPeriod;
+            return 1.0 / psuedoAveragePeriod;
          }
       }
    }
