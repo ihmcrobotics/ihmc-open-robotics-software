@@ -8,6 +8,7 @@ import java.util.UUID;
 
 /**
  * An exponential smoothing frequency calculator with an optional logging thread to print the frequency once per second.
+ * <a href="https://en.wikipedia.org/wiki/Exponential_smoothing">...</a>
  * Call {@link #ping()} on each new event.
  * Call {@link #getFrequency()} to get the frequency, which will remain constant if events stop.
  * Call {@link #getFrequencyDecaying()} to get the current frequency which trends to 0 when there are no events.
@@ -16,7 +17,7 @@ public class FrequencyCalculator
 {
    private double alpha = 0.3;
    private double lastEventTime = Double.NaN;
-   private double averagePeriod = Double.NaN;
+   private double smoothedPeriod = Double.NaN;
 
    private volatile boolean loggingThreadRunning;
 
@@ -49,7 +50,7 @@ public class FrequencyCalculator
 
    private double calculateFrequency(boolean decay)
    {
-      if (Double.isNaN(averagePeriod))
+      if (Double.isNaN(smoothedPeriod))
       {
          return 0.0;
       }
@@ -58,14 +59,14 @@ public class FrequencyCalculator
          double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
          double ongoingPeriod = currentTime - lastEventTime;
 
-         if (!decay || ongoingPeriod < averagePeriod) // Expecting an event after the current average period
+         if (!decay || ongoingPeriod < smoothedPeriod) // Expecting an event after the current average period
          {
-            return 1.0 / averagePeriod;
+            return 1.0 / smoothedPeriod;
          }
          else // Events are slowing down or stopped
          {
-            double psuedoAveragePeriod = (1.0 - alpha) * averagePeriod + alpha * ongoingPeriod;
-            return 1.0 / psuedoAveragePeriod;
+            double psuedoSmoothedPeriod = (1.0 - alpha) * smoothedPeriod + alpha * ongoingPeriod;
+            return 1.0 / psuedoSmoothedPeriod;
          }
       }
    }
@@ -78,13 +79,13 @@ public class FrequencyCalculator
       {
          double period = currentTime - lastEventTime;
 
-         if (Double.isNaN(averagePeriod))
+         if (Double.isNaN(smoothedPeriod))
          {
-            averagePeriod = period;
+            smoothedPeriod = period;
          }
          else
          {
-            averagePeriod = (1.0 - alpha) * averagePeriod + alpha * period;
+            smoothedPeriod = (1.0 - alpha) * smoothedPeriod + alpha * period;
          }
       }
 
