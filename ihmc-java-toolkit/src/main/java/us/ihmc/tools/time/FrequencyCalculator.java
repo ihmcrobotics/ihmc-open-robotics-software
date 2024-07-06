@@ -3,10 +3,7 @@ package us.ihmc.tools.time;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.UnitConversions;
 
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.UUID;
 
 /**
@@ -17,8 +14,9 @@ import java.util.UUID;
  */
 public class FrequencyCalculator
 {
-   private double frequency;
-   private final Deque<Long> pingTimes = new LinkedList<>();
+   private double alpha = 0.5;
+   private double lastEventTime = Double.NaN;
+   private double averagePeriod = Double.NaN;
 
    private volatile boolean loggingThreadRunning;
 
@@ -51,36 +49,50 @@ public class FrequencyCalculator
 
    private double calculateFrequency(boolean decay)
    {
-      Long first = pingTimes.peekFirst();
-      Long last = decay ? Long.valueOf(System.nanoTime()) : pingTimes.peekLast();
-      int pings = pingTimes.size();
-
-      if (first != null && last != null && pings > 1)
+      if (Double.isNaN(averagePeriod))
       {
-         long elapsedNanos = last - first;
-         double elapsedSeconds = Conversions.nanosecondsToSeconds(elapsedNanos);
-         double elapsedSecondsAverage = elapsedSeconds / (pings - 1);
-         return UnitConversions.secondsToHertz(elapsedSecondsAverage);
+         return 0.0;
       }
+      else
+      {
+         double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
+         double ongoingPeriod = currentTime - lastEventTime;
 
-      return 0.0;
+         if (ongoingPeriod < averagePeriod) // Expecting an event after the current average period
+         {
+            return 1.0 / averagePeriod;
+         }
+         else // Events are slowing down or stopped
+         {
+            return 1.0 / ongoingPeriod;
+         }
+      }
    }
 
-   public void ping() {
-      pingTimes.add(System.nanoTime());
+   public void ping()
+   {
+      double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
 
-      double frequency = calculateFrequency(false);
-      while (frequency > 0.0 && pingTimes.size() > (frequency * 10))
+      if (!Double.isNaN(lastEventTime))
       {
-         pingTimes.removeFirst();
+         double period = currentTime - lastEventTime;
+
+         if (Double.isNaN(averagePeriod))
+         {
+            averagePeriod = period;
+         }
+         else
+         {
+            averagePeriod = (1.0 - alpha) * averagePeriod + alpha * period;
+         }
       }
 
-      this.frequency = frequency;
+      lastEventTime = currentTime;
    }
 
    public double getFrequency()
    {
-      return frequency;
+      return calculateFrequency(false);
    }
 
    public double getFrequencyDecaying()
