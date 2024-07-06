@@ -58,7 +58,7 @@ public class FrequencyCalculator
          double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
          double ongoingPeriod = currentTime - lastEventTime;
 
-         if (ongoingPeriod < averagePeriod) // Expecting an event after the current average period
+         if (!decay || ongoingPeriod < averagePeriod) // Expecting an event after the current average period
          {
             return 1.0 / averagePeriod;
          }
