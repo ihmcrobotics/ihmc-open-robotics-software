@@ -1,7 +1,7 @@
 package us.ihmc.tools.thread;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.tools.Timer;
+import us.ihmc.commons.thread.ThreadTools;
 
 /**
  * Throttler is used to allow things to happen at a slower rate
@@ -30,7 +30,7 @@ import us.ihmc.tools.Timer;
  */
 public class Throttler
 {
-   private final Timer timer = new Timer();
+   private double resetTime = Double.NaN;
    private double optionallySetPeriod = Double.NaN;
 
    /**
@@ -82,12 +82,27 @@ public class Throttler
     */
    public boolean run(double period)
    {
-      boolean run = !timer.isRunning(period);
-      if (run)
+      double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
+
+      if (Double.isNaN(resetTime)) // First run
       {
-         timer.reset();
+         resetTime = currentTime;
+         return true;
       }
-      return run;
+      else
+      {
+         double elapsedTime = currentTime - resetTime;
+         double overtime = elapsedTime - period;
+         boolean periodHasElapsed = overtime >= 0.0;
+
+         if (periodHasElapsed)
+         {
+            // We subtract the overtime to achieve a more accurate rate
+            resetTime = currentTime - overtime;
+         }
+
+         return periodHasElapsed;
+      }
    }
 
    /**
@@ -107,7 +122,29 @@ public class Throttler
     */
    public void waitAndRun(double period)
    {
-      timer.sleepUntilExpiration(period);
-      timer.reset();
+      double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
+
+      if (Double.isNaN(resetTime)) // First run
+      {
+         resetTime = currentTime;
+      }
+      else
+      {
+         double elapsedTime = currentTime - resetTime;
+         double overtime = elapsedTime - period;
+
+         if (overtime < 0.0)
+         {
+            ThreadTools.sleepSeconds(-overtime); // Guarantees to sleep at least this amount (i.e. will sleep too long)
+
+            // Measure the time again so we can set the reset time correctly
+            currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
+            elapsedTime = currentTime - resetTime;
+            overtime = elapsedTime - period;
+         }
+
+         // We subtract the overtime to achieve a more accurate rate
+         resetTime = currentTime - overtime;
+      }
    }
 }
