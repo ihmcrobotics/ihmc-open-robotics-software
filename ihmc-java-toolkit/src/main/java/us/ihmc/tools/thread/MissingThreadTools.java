@@ -1,5 +1,6 @@
 package us.ihmc.tools.thread;
 
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.RunnableThatThrows;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
@@ -10,6 +11,24 @@ import java.util.concurrent.*;
 
 public class MissingThreadTools
 {
+   /**
+    * {@link ThreadTools#sleepSeconds} can actually return early.
+    * Here we guarantee to sleep the entire duration, which means it will
+    * always sleep a little too long. The amount probably varies by system,
+    * but it has been observed to be less than half a millisecond.
+    *
+    * @param duration to sleep in seconds
+    */
+   public static double sleepAtLeast(double duration)
+   {
+      double amountSlept = 0.0;
+      while (amountSlept < duration)
+      {
+         amountSlept += Conversions.nanosecondsToSeconds(ThreadTools.sleepSeconds(duration - amountSlept));
+      }
+      return amountSlept;
+   }
+
    public static ThreadFactory createNamedThreadFactory(String prefix, boolean daemon)
    {
       boolean includePoolInName = true;

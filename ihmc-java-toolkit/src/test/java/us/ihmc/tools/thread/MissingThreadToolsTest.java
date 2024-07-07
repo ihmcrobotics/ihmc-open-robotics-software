@@ -1,6 +1,7 @@
 package us.ihmc.tools.thread;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -17,6 +18,34 @@ import static us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService.ME
 
 public class MissingThreadToolsTest
 {
+   @Test
+   public void testSleepAtLeast()
+   {
+      assertTrue(conductSleepTest(0.0000000000001));
+      assertTrue(conductSleepTest(0.1));
+      assertTrue(conductSleepTest(0.0001));
+      assertTrue(conductSleepTest(0.0000000005));
+      assertTrue(conductSleepTest(1.1));
+      assertTrue(conductSleepTest(2.0));
+   }
+
+   private boolean conductSleepTest(double sleepDuration)
+   {
+      double before = Conversions.nanosecondsToSeconds(System.nanoTime());
+
+      MissingThreadTools.sleepAtLeast(sleepDuration);
+
+      double after = Conversions.nanosecondsToSeconds(System.nanoTime());
+
+      double overslept = (after - before) - sleepDuration;
+
+      LogTools.info("Overslept %f ms".formatted(Conversions.secondsToMilliseconds(overslept)));
+
+      assertTrue(overslept < 0.005); // Assert we don't oversleep more than 5 milliseconds -- typically a lot lower
+
+      return overslept > 0.0;
+   }
+
    @Test
    public void testSingleScheduleThreadWithThrownException()
    {
