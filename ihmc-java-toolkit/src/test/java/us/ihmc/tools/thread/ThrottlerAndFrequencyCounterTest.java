@@ -55,7 +55,7 @@ public class ThrottlerAndFrequencyCounterTest
       // Decaying sleep
       ThreadTools.sleep((long) (decayTimeSeconds * 1000));
 
-      double targetDecayFrequency = frequencyCalculator.getFrequency() / Math.sqrt(decayTimeSeconds);
+      double targetDecayFrequency = frequencyCalculator.getFrequency() / Math.exp(decayTimeSeconds);
       TestTools.assertEpsilonEquals(frequencyCalculator.getFrequencyDecaying(), targetDecayFrequency, epsilon);
    }
 
@@ -65,6 +65,7 @@ public class ThrottlerAndFrequencyCounterTest
 
       Throttler throttler = new Throttler();
       throttler.setFrequency(targetFrequency);
+      throttler.waitAndRun();
 
       long start = System.currentTimeMillis();
       FrequencyCalculator frequencyCalculator = new FrequencyCalculator(true);
