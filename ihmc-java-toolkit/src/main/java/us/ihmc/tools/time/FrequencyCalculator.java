@@ -3,22 +3,21 @@ package us.ihmc.tools.time;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.UnitConversions;
 
-import java.util.Deque;
-import java.util.LinkedList;
 import java.util.UUID;
 
 /**
- * A rolling average frequency calculator with an optional logging thread to print the frequency once per second.
- * The frequency is calculated on each query to the frequency rather than each new event.
+ * An exponential smoothing frequency calculator with an optional logging thread to print the frequency once per second.
+ * <a href="https://en.wikipedia.org/wiki/Exponential_smoothing">...</a>
  * Call {@link #ping()} on each new event.
- * Call {@link #getFrequency()} to get the current frequency.
+ * Call {@link #getFrequency()} to get the frequency, which will remain constant if events stop.
+ * Call {@link #getFrequencyDecaying()} to get the current frequency which trends to 0 when there are no events.
  */
 public class FrequencyCalculator
 {
-   private double frequency;
-   private final Deque<Long> pingTimes = new LinkedList<>();
+   private double alpha = 0.3;
+   private double lastEventTime = Double.NaN;
+   private double smoothedPeriod = Double.NaN;
 
    private volatile boolean loggingThreadRunning;
 
@@ -51,36 +50,51 @@ public class FrequencyCalculator
 
    private double calculateFrequency(boolean decay)
    {
-      Long first = pingTimes.peekFirst();
-      Long last = decay ? Long.valueOf(System.nanoTime()) : pingTimes.peekLast();
-      int pings = pingTimes.size();
-
-      if (first != null && last != null && pings > 1)
+      if (Double.isNaN(smoothedPeriod))
       {
-         long elapsedNanos = last - first;
-         double elapsedSeconds = Conversions.nanosecondsToSeconds(elapsedNanos);
-         double elapsedSecondsAverage = elapsedSeconds / (pings - 1);
-         return UnitConversions.secondsToHertz(elapsedSecondsAverage);
+         return 0.0;
       }
+      else
+      {
+         double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
+         double ongoingPeriod = currentTime - lastEventTime;
 
-      return 0.0;
+         if (!decay || ongoingPeriod < smoothedPeriod) // Expecting an event after the current average period
+         {
+            return 1.0 / smoothedPeriod;
+         }
+         else // Events are slowing down or stopped
+         {
+            double psuedoSmoothedPeriod = (1.0 - alpha) * smoothedPeriod + alpha * ongoingPeriod;
+            return 1.0 / psuedoSmoothedPeriod;
+         }
+      }
    }
 
-   public void ping() {
-      pingTimes.add(System.nanoTime());
+   public void ping()
+   {
+      double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
 
-      double frequency = calculateFrequency(false);
-      while (frequency > 0.0 && pingTimes.size() > (frequency * 10))
+      if (!Double.isNaN(lastEventTime))
       {
-         pingTimes.removeFirst();
+         double period = currentTime - lastEventTime;
+
+         if (Double.isNaN(smoothedPeriod))
+         {
+            smoothedPeriod = period;
+         }
+         else
+         {
+            smoothedPeriod = (1.0 - alpha) * smoothedPeriod + alpha * period;
+         }
       }
 
-      this.frequency = frequency;
+      lastEventTime = currentTime;
    }
 
    public double getFrequency()
    {
-      return frequency;
+      return calculateFrequency(false);
    }
 
    public double getFrequencyDecaying()
