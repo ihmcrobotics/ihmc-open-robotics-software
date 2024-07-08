@@ -3,6 +3,7 @@ package us.ihmc.tools.time;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.thread.MissingThreadTools;
 
 import java.util.UUID;
 
@@ -35,7 +36,7 @@ public class FrequencyCalculator
             {
                LogTools.info("FrequencyCalculator[" + threadID + "] average rate: " + getFrequency());
 
-               ThreadTools.sleep(1000);
+               MissingThreadTools.sleep(1.0);
             }
          }, getClass().getSimpleName() + "-" + threadID);
 

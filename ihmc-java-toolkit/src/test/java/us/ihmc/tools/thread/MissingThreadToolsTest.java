@@ -21,19 +21,33 @@ public class MissingThreadToolsTest
    @Test
    public void testSleepAtLeast()
    {
-      assertTrue(conductSleepTest(0.0000000000001));
-      assertTrue(conductSleepTest(0.1));
-      assertTrue(conductSleepTest(0.0001));
-      assertTrue(conductSleepTest(0.0000000005));
-      assertTrue(conductSleepTest(1.1));
-      assertTrue(conductSleepTest(2.0));
+      assertTrue(conductSleepTest(0.0000000000001, false));
+      assertTrue(conductSleepTest(0.5e-9, false));
+      assertTrue(conductSleepTest(1e-9, false));
+      assertTrue(conductSleepTest(0.1, false));
+      assertTrue(conductSleepTest(0.0001, false));
+      assertTrue(conductSleepTest(0.0000000005, false));
+      assertTrue(conductSleepTest(1.1, false));
+      assertTrue(conductSleepTest(2.0, false));
+
+      assertTrue(conductSleepTest(0.0000000000001, true));
+      assertTrue(conductSleepTest(0.5e-9, true));
+      assertTrue(conductSleepTest(1e-9, true));
+      assertTrue(conductSleepTest(0.1, true));
+      assertTrue(conductSleepTest(0.0001, true));
+      assertTrue(conductSleepTest(0.0000000005, true));
+      assertTrue(conductSleepTest(1.1, true));
+      assertTrue(conductSleepTest(2.0, true));
    }
 
-   private boolean conductSleepTest(double sleepDuration)
+   private boolean conductSleepTest(double sleepDuration, boolean atLeast)
    {
       double before = Conversions.nanosecondsToSeconds(System.nanoTime());
 
-      MissingThreadTools.sleepAtLeast(sleepDuration);
+      if (atLeast)
+         MissingThreadTools.sleepAtLeast(sleepDuration);
+      else
+         MissingThreadTools.sleep(sleepDuration);
 
       double after = Conversions.nanosecondsToSeconds(System.nanoTime());
 
@@ -44,6 +58,45 @@ public class MissingThreadToolsTest
       assertTrue(overslept < 0.005); // Assert we don't oversleep more than 5 milliseconds -- typically a lot lower
 
       return overslept > 0.0;
+   }
+
+   @Test
+   public void testSecondsDecomposition()
+   {
+      double seconds = 0.017453292519943295;
+      long nanoseconds = (long) (seconds * 1e9);
+      long milliseconds = nanoseconds / 1_000_000L;
+      nanoseconds %= 1_000_000L;
+
+      double seconds2 = milliseconds / 1000.0 + nanoseconds / 1e9;
+      double remaining = seconds - seconds2;
+
+      LogTools.info("Original:      %.40f".formatted(seconds));
+      LogTools.info("Reconstructed: %.40f".formatted(seconds2));
+      LogTools.info("Remaining: %.40f".formatted(remaining));
+      LogTools.info("s %% 1e-9: %.40f".formatted(seconds % 1e-9));
+
+      conductModTest(1.0);
+      conductModTest(0.1);
+      conductModTest(1239991.123);
+      conductModTest(181.232381318381);
+      conductModTest(0.0);
+      conductModTest(1e-9);
+      conductModTest(0.5e-9);
+
+      LogTools.info("%d".formatted((long) 0.7));
+      LogTools.info("%d".formatted((long) 0.3));
+      LogTools.info("%d".formatted((long) 1.0));
+      LogTools.info("%d".formatted((long) 0.0));
+
+      assertEquals(seconds, seconds2, 1e-9);
+   }
+
+   private void conductModTest(double number)
+   {
+      double nanos = number % 1e-9;
+
+      LogTools.info("%.16f: %.35f  %b".formatted(number, nanos, nanos > 1e-9));
    }
 
    @Test

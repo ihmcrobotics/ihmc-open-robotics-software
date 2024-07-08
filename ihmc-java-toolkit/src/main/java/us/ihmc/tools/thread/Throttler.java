@@ -149,10 +149,9 @@ public class Throttler
 
          if (overtime < 0.0)
          {
-            MissingThreadTools.sleepAtLeast(-overtime); // Guarantees to sleep at least this amount (i.e. will sleep too long)
+            // Guarantees to sleep at least this amount (i.e. will sleep too long)
+            currentTime += MissingThreadTools.sleepAtLeast(-overtime);
 
-            // Measure the time again so we can set the reset time correctly
-            currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
             calculateOvertime(period);
          }
 
