@@ -220,6 +220,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
       footstepTimings.clear();
    }
 
+   double finalTransferDuration = 0.0;
    public void addFootsteps(WalkingMessageHandler walkingMessageHandler)
    {
       dirtyFootsteps = true;
@@ -234,6 +235,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
          walkingMessageHandler.peekFootstep(i, footsteps.add());
          walkingMessageHandler.peekTiming(i, footstepTimings.add());
       }
+      finalTransferDuration = walkingMessageHandler.getFinalTransferTime();
    }
 
    public void addFootstep(Footstep footstep, FootstepTiming footstepTiming)
@@ -395,7 +397,14 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
             tempFootPoses.get(footstep.getRobotSide()).set(footstep.getFootstepPose());
             double yaw = computeAverage(tempFootPoses, waypoint.position);
             waypoint.setYaw(previousWaypoint.getYaw() + AngleTools.computeAngleDifferenceMinusPiToPi(yaw, previousWaypoint.getYaw()));
-            waypoint.time.set(previousWaypoint.time.getValue() + footstepTimings.get(i).getStepTime());
+            double waypointDuration = footstepTimings.get(i).getSwingTime() + 0.5 * footstepTimings.get(i).getTransferTime();
+            if (i == 0)
+               waypointDuration += 0.5 * footstepTimings.get(i).getTransferTime();
+            if (i == footsteps.size() - 1)
+               waypointDuration += finalTransferDuration; // add the final transfer duration.
+            else
+               waypointDuration += 0.5 * footstepTimings.get(i + 1).getTransferTime();
+            waypoint.time.set(previousWaypoint.time.getValue() + waypointDuration);
             waypoint.updateViz();
             previousWaypoint = waypoint;
          }
