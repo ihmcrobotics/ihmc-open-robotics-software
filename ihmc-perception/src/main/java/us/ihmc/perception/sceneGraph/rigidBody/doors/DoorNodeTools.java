@@ -30,7 +30,7 @@ public final class DoorNodeTools
             {
                boolean doorHardwareComponent = switch (yoloNode.getDetectionClass())
                {
-                  case DOOR_PULL_HANDLE, DOOR_KNOB, DOOR_PUSH_BAR, DOOR_LEVER -> true;
+                  case DOOR_PULL_HANDLE, DOOR_KNOB, DOOR_LEVER -> true;
                   default -> false;
                };
 
