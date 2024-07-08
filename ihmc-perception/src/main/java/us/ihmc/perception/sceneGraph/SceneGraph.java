@@ -213,16 +213,18 @@ public class SceneGraph
       for (PersistentDetection newlyValidDoorDetection : newlyValidDoorDetections)
       {
          // Does this new detection correspond with an existing door node?
-         boolean matched = sceneNodesByID.stream()
-                                         .filter(sceneNode -> sceneNode instanceof DoorNode)
-                                         .anyMatch(sceneNode -> ((DoorNode) sceneNode).acceptDetection(newlyValidDoorDetection, this));
-
-         if (!matched)
+         modifyTree(modificationQueue ->
          {
-            // Create new door node
-            DoorNode doorNode = new DoorNode(getNextID().getAndIncrement(), newlyValidDoorDetection, getCRDTInfo(), this);
-            modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(doorNode, rootNode)));
-         }
+            boolean matched = sceneNodesByID.stream()
+                                            .filter(sceneNode -> sceneNode instanceof DoorNode)
+                                            .anyMatch(sceneNode -> ((DoorNode) sceneNode).acceptDetection(newlyValidDoorDetection));
+            if (!matched)
+            {
+               // Create new door node
+               DoorNode doorNode = new DoorNode(getNextID().getAndIncrement(), newlyValidDoorDetection, getCRDTInfo());
+               modificationQueue.accept(new SceneGraphNodeAddition(doorNode, rootNode));
+            }
+         });
       }
 
 //      for (PersistentDetection newDetection : newlyValidDetections)

@@ -17,6 +17,7 @@ import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.SceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism.DoorOpeningMechanismType;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorPanel;
@@ -54,6 +55,7 @@ public class DoorNode extends DetectableSceneNode
    private final MutableReferenceFrame doorCornerFrame; // To know which way the door opens. X points in the direction that the door swings.
    private final DoorPanel doorPanel = new DoorPanel(this);
    private final Map<UUID, DoorOpeningMechanism> openingMechanisms = new HashMap<>();
+   private final Map<DoorOpeningMechanism, SceneNode> openingMechanismToHelperNodeMap = new HashMap<>();
 
    // translation from opening mechanism to door hinge corner when looking towards push side (invert y is looking towards pull side)
    private final Vector3D openingMechanismToHingeCornerTranslation = new Vector3D(NAN_POSE.getTranslation());
@@ -62,16 +64,16 @@ public class DoorNode extends DetectableSceneNode
 
    public DoorNode(long id, CRDTInfo crdtInfo)
    {
-      this(id, null, crdtInfo, null);
+      this(id, null, crdtInfo);
    }
 
-   public DoorNode(long id, PersistentDetection initialDetection, CRDTInfo crdtInfo, SceneGraph sceneGraph)
+   public DoorNode(long id, PersistentDetection initialDetection, CRDTInfo crdtInfo)
    {
       super(id, "Door" + id, crdtInfo);
 
       doorCornerFrame = new MutableReferenceFrame("doorCorner_" + super.getID(), ReferenceFrame.getWorldFrame(), NAN_POSE);
 
-      if (initialDetection != null && !acceptDetection(initialDetection, sceneGraph))
+      if (initialDetection != null && !acceptDetection(initialDetection))
          throw new IllegalArgumentException("Oops, something went super wrong. FIXME PLEASE");
    }
 
@@ -80,7 +82,7 @@ public class DoorNode extends DetectableSceneNode
     * @param doorComponentDetection {@link PersistentDetection} of a door component
     * @return true if the detection is accepted, false otherwise.
     */
-   public boolean acceptDetection(PersistentDetection doorComponentDetection, SceneGraph sceneGraph)
+   public boolean acceptDetection(PersistentDetection doorComponentDetection)
    {
       if (doorComponentDetection == null)
          return false;
@@ -88,10 +90,10 @@ public class DoorNode extends DetectableSceneNode
       if (doorPanel.acceptDetection(doorComponentDetection))
          return true;
       else
-         return acceptOpeningMechanismDetection(doorComponentDetection, sceneGraph);
+         return acceptOpeningMechanismDetection(doorComponentDetection);
    }
 
-   private boolean acceptOpeningMechanismDetection(PersistentDetection doorOpeningMechanismDetection, SceneGraph sceneGraph)
+   private boolean acceptOpeningMechanismDetection(PersistentDetection doorOpeningMechanismDetection)
    {
       // Detection must be of an opening mechanism
       if (!DoorNodeTools.detectionIsDoorOpeningMechanism(doorOpeningMechanismDetection))
@@ -182,21 +184,28 @@ public class DoorNode extends DetectableSceneNode
       openingMechanism.setDetection(doorOpeningMechanismDetection);
       openingMechanisms.put(doorOpeningMechanismDetection.getID(), openingMechanism);
 
-      DoorNodeTools.addOpeningMechanismHelperNode(this, openingMechanism, sceneGraph);
-
       return true;
    }
 
    @Override
    public void update(SceneGraph sceneGraph)
    {
+      super.update(sceneGraph);
+
       // Calculate yaw, pitch, roll of opening mechanism pose based on door panel
       updateOpeningMechanismPoses();
 
       boolean openingMechanismDetected = openingMechanisms.values().stream().anyMatch(mechanism -> mechanism.getDetection().isStable());
       setCurrentlyDetected(doorPanel.isDetected() || openingMechanismDetected);
 
-      super.update(sceneGraph);
+      for (DoorOpeningMechanism openingMechanism : openingMechanisms.values())
+      {
+         if (!openingMechanismToHelperNodeMap.containsKey(openingMechanism))
+         {
+            SceneNode helperNode = DoorNodeTools.addOpeningMechanismHelperNode(this, openingMechanism, sceneGraph);
+            openingMechanismToHelperNodeMap.put(openingMechanism, helperNode);
+         }
+      }
    }
 
    private void updateOpeningMechanismPoses()

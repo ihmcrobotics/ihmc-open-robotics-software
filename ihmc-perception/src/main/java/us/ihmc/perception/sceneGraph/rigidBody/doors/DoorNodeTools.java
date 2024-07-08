@@ -63,7 +63,7 @@ public final class DoorNodeTools
       return false;
    }
 
-   public static void addOpeningMechanismHelperNode(DoorNode doorNode, DoorOpeningMechanism openingMechanism, SceneGraph sceneGraph)
+   public static SceneNode addOpeningMechanismHelperNode(DoorNode doorNode, DoorOpeningMechanism openingMechanism, SceneGraph sceneGraph)
    {
       String visualModelPath = DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH;
       RigidBodyTransform modelToPoseTransform = new RigidBodyTransform();
@@ -101,5 +101,6 @@ public final class DoorNodeTools
                                                                   modelToPoseTransform,
                                                                   sceneGraph.getCRDTInfo());
       sceneGraph.modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(doorHelperNode, doorNode)));
+      return doorHelperNode;
    }
 }
