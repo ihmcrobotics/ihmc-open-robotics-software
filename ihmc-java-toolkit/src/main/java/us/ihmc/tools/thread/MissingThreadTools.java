@@ -41,7 +41,12 @@ public class MissingThreadTools
       return amountSlept;
    }
 
-   /** Uses {@link LockSupport#parkNanos} to sleep for floating point seconds. */
+   /**
+    * Uses {@link LockSupport#parkNanos} to sleep for floating point seconds.
+    * {@link LockSupport#parkNanos} is more accurate than {@link Thread#sleep}.
+    * The requested sleep is guaranteed to be at least as long as the requested
+    * amount and can be up to a nanosecond longer.
+    */
    public static void sleep(double seconds)
    {
       double floatingNanos = seconds * 1e9;
