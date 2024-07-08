@@ -13,12 +13,17 @@ import java.util.concurrent.locks.LockSupport;
 public class MissingThreadTools
 {
    /**
-    * {@link ThreadTools#sleepSeconds} can actually return early.
-    * Here we guarantee to sleep the entire duration, which means it will
-    * always sleep a little too long. The amount probably varies by system,
-    * but it has been observed to be less than half a millisecond.
+    * Guarantees a sleep of a minimum duration in floating point seconds
+    * using {@link LockSupport#parkNanos}. It will always sleep a little too long.
+    * The amount overslept probably varies by system, but it has been observed to
+    * be less than half a millisecond.
+    *
+    * {@link ThreadTools#sleepSeconds} can actually return early because it
+    * cuts off the subnanosecond part, allowing it to undersleep by a nanosecond
+    * at most.
     *
     * @param duration to sleep in seconds
+    * @return Exactly how long it actually slept in seconds
     */
    public static double sleepAtLeast(double duration)
    {
