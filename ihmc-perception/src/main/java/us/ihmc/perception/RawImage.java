@@ -1,7 +1,15 @@
 package us.ihmc.perception;
 
+import org.bytedeco.javacpp.BytePointer;
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.global.opencv_imgcodecs;
 import org.bytedeco.opencv.opencv_core.GpuMat;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameQuaternionBasics;
 import us.ihmc.perception.camera.CameraIntrinsics;
@@ -96,6 +104,30 @@ public class RawImage
       this.principalPointY = other.principalPointY;
       this.position = other.position;
       this.orientation = other.orientation;
+   }
+
+   public static RawImage fromMessage(ImageMessage imageMessage)
+   {
+      try (BytePointer compressedImageData = new BytePointer(imageMessage.getData().size());
+           Mat compressedImageMat = new Mat(1, imageMessage.getData().size(), opencv_core.CV_8UC1))
+      {
+         compressedImageData.put(imageMessage.getData().toArray());
+         compressedImageMat.data(compressedImageData);
+         Mat imageMat = new Mat();
+         opencv_imgcodecs.imdecode(compressedImageMat, opencv_imgcodecs.IMREAD_UNCHANGED, imageMat);
+
+         return new RawImage(imageMessage.getSequenceNumber(),
+                             MessageTools.toInstant(imageMessage.getAcquisitionTime()),
+                             imageMessage.getDepthDiscretization(),
+                             imageMat,
+                             null,
+                             imageMessage.getFocalLengthXPixels(),
+                             imageMessage.getFocalLengthYPixels(),
+                             imageMessage.getPrincipalPointXPixels(),
+                             imageMessage.getPrincipalPointYPixels(),
+                             new FramePoint3D(ReferenceFrame.getWorldFrame(), imageMessage.getPosition()),
+                             new FrameQuaternion(ReferenceFrame.getWorldFrame(), imageMessage.getOrientation()));
+      }
    }
 
    public long getSequenceNumber()
