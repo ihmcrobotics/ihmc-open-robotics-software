@@ -113,12 +113,9 @@ public class BlackflyImageRetriever
                      distortedImage.release();
                   distortedImage = new RawImage(sequenceNumber++,
                                                 acquisitionTime,
-                                                imageWidth,
-                                                imageHeight,
                                                 0,
                                                 null,
                                                 sourceImageBGR.clone(),
-                                                opencv_core.CV_8UC3,
                                                 (float) ousterFisheyeColoringIntrinsics.getFocalLengthX(),
                                                 (float) ousterFisheyeColoringIntrinsics.getFocalLengthY(),
                                                 (float) ousterFisheyeColoringIntrinsics.getPrinciplePointX(),

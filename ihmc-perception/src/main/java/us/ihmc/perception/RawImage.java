@@ -20,18 +20,21 @@ import java.util.concurrent.atomic.AtomicInteger;
  * the missing Mat or GpuMat objects by copying the existing image matrix to the CPU or GPU.
  * </p>
  * <p>
- *  To ensure all Mat and GpuMat objects get deallocated properly, this class uses
- *  a reference count. Whenever passing the image to another class, the
- *  {@code RawImage::get()} method should be used instead of passing it directly.
- *  Each class is responsible for releasing the image once it is done using the image.
+ * To ensure all Mat and GpuMat objects get deallocated properly, this class uses
+ * a reference count. The counter is incremented upon construction and each call to
+ * {@link RawImage#get()}, and decremented for each call to {@link RawImage#release()}.
+ * Once the reference count hits zero, the image data is deallocated.
+ * </p>
+ * <p>
+ * Each method should call {@link RawImage#get()} before accessing the image data
+ * to ensure it is not deallocated during access. After the data has been accessed,
+ * {@link RawImage#release()} should be called.
  * </p>
  */
 public class RawImage
 {
    private final long sequenceNumber;
    private final Instant acquisitionTime;
-   private final int imageWidth;
-   private final int imageHeight;
    private final float depthDiscretization;
    /*
     * Although both cpu & gpu image matrices are nullable,
@@ -41,7 +44,6 @@ public class RawImage
    private Mat cpuImageMat;
    @Nullable
    private GpuMat gpuImageMat;
-   private final int openCVType;
    private final float focalLengthX;
    private final float focalLengthY;
    private final float principalPointX;
@@ -53,12 +55,9 @@ public class RawImage
 
    public RawImage(long sequenceNumber,
                    Instant acquisitionTime,
-                   int imageWidth,
-                   int imageHeight,
                    float depthDiscretization,
                    @Nullable Mat cpuImageMat,
                    @Nullable GpuMat gpuImageMat,
-                   int openCVType,
                    float focalLengthX,
                    float focalLengthY,
                    float principalPointX,
@@ -68,12 +67,9 @@ public class RawImage
    {
       this.sequenceNumber = sequenceNumber;
       this.acquisitionTime = acquisitionTime;
-      this.imageWidth = imageWidth;
-      this.imageHeight = imageHeight;
       this.depthDiscretization = depthDiscretization;
       this.cpuImageMat = cpuImageMat;
       this.gpuImageMat = gpuImageMat;
-      this.openCVType = openCVType;
       this.focalLengthX = focalLengthX;
       this.focalLengthY = focalLengthY;
       this.principalPointX = principalPointX;
@@ -86,8 +82,6 @@ public class RawImage
    {
       this.sequenceNumber = other.sequenceNumber;
       this.acquisitionTime = other.acquisitionTime;
-      this.imageWidth = other.imageWidth;
-      this.imageHeight = other.imageHeight;
       this.depthDiscretization = other.depthDiscretization;
       if (!other.isEmpty())
       {
@@ -96,7 +90,6 @@ public class RawImage
          if (other.gpuImageMat != null && !other.gpuImageMat.isNull())
             this.gpuImageMat = other.gpuImageMat.clone();
       }
-      this.openCVType = other.openCVType;
       this.focalLengthX = other.focalLengthX;
       this.focalLengthY = other.focalLengthY;
       this.principalPointX = other.principalPointX;
@@ -117,12 +110,22 @@ public class RawImage
 
    public int getImageWidth()
    {
-      return imageWidth;
+      if (cpuImageMat != null && !cpuImageMat.isNull())
+         return cpuImageMat.cols();
+      else if (gpuImageMat != null && !gpuImageMat.isNull())
+         return gpuImageMat.cols();
+
+      throw new NullPointerException("Neither CPU nor GPU Mats were initialized");
    }
 
    public int getImageHeight()
    {
-      return imageHeight;
+      if (cpuImageMat != null && !cpuImageMat.isNull())
+         return cpuImageMat.rows();
+      else if (gpuImageMat != null && !gpuImageMat.isNull())
+         return gpuImageMat.rows();
+
+      throw new NullPointerException("Neither CPU nor GPU Mats were initialized");
    }
 
    public float getDepthDiscretization()
@@ -138,7 +141,7 @@ public class RawImage
       }
       else if (cpuImageMat == null && !gpuImageMat.isNull())
       {
-         cpuImageMat = new Mat(imageHeight, imageWidth, openCVType);
+         cpuImageMat = new Mat(gpuImageMat.size(), gpuImageMat.type());
          gpuImageMat.download(cpuImageMat);
       }
 
@@ -162,7 +165,7 @@ public class RawImage
       }
       else if (gpuImageMat == null && !cpuImageMat.isNull())
       {
-         gpuImageMat = new GpuMat(imageHeight, imageWidth, openCVType);
+         gpuImageMat = new GpuMat(cpuImageMat.size(), cpuImageMat.type());
          gpuImageMat.upload(cpuImageMat);
       }
 
@@ -180,12 +183,17 @@ public class RawImage
 
    public CameraIntrinsics getIntrinsicsCopy()
    {
-      return new CameraIntrinsics(imageHeight, imageWidth, focalLengthX, focalLengthY, principalPointX, principalPointY);
+      return new CameraIntrinsics(getImageHeight(), getImageWidth(), focalLengthX, focalLengthY, principalPointX, principalPointY);
    }
 
    public int getOpenCVType()
    {
-      return openCVType;
+      if (cpuImageMat != null && !cpuImageMat.isNull())
+         return cpuImageMat.type();
+      else if (gpuImageMat != null && !gpuImageMat.isNull())
+         return gpuImageMat.type();
+
+      throw new NullPointerException("Neither CPU nor GPU Mats were initialized");
    }
 
    public float getFocalLengthX()
@@ -233,7 +241,7 @@ public class RawImage
       if (numberOfReferences.incrementAndGet() > 1)
          return this;
       else
-         throw new NullPointerException("This image has been deallocated");
+         return null;
    }
 
    public void release()
