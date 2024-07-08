@@ -12,6 +12,7 @@ import us.ihmc.robotics.time.TimeTools;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -22,7 +23,8 @@ public class PersistentDetection
    public static final UUID NULL_DETECTION_ID = new UUID(0L, 0L);
 
    // The first element of this set is the oldest detection, and the last element is the most recent detection
-   private final SortedSet<InstantDetection> detectionHistory = new TreeSet<>(Comparator.comparing(InstantDetection::getDetectionTime));
+   private final SortedSet<InstantDetection> detectionHistory
+         = Collections.synchronizedSortedSet(new TreeSet<>(Comparator.comparing(InstantDetection::getDetectionTime)));
    private final InstantDetection firstDetection;
    private Duration historyDuration;
    private final UUID id = UUID.randomUUID();

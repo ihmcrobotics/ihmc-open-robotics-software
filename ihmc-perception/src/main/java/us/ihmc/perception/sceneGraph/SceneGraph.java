@@ -215,12 +215,12 @@ public class SceneGraph
          // Does this new detection correspond with an existing door node?
          boolean matched = sceneNodesByID.stream()
                                          .filter(sceneNode -> sceneNode instanceof DoorNode)
-                                         .anyMatch(sceneNode -> ((DoorNode) sceneNode).acceptDetection(newlyValidDoorDetection));
+                                         .anyMatch(sceneNode -> ((DoorNode) sceneNode).acceptDetection(newlyValidDoorDetection, this));
 
          if (!matched)
          {
             // Create new door node
-            DoorNode doorNode = new DoorNode(getNextID().getAndIncrement(), newlyValidDoorDetection, getCRDTInfo());
+            DoorNode doorNode = new DoorNode(getNextID().getAndIncrement(), newlyValidDoorDetection, getCRDTInfo(), this);
             modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(doorNode, rootNode)));
          }
       }

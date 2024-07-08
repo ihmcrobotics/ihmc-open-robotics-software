@@ -53,7 +53,8 @@ public class DoorOpeningMechanism
    public void update()
    {
       if (detection != null)
-         mechanismFrame.update(transformToWorld -> transformToWorld.set(detection.getFilteredDetectionFrame().getTransformToWorldFrame()));
+         mechanismFrame.update(transformToWorld -> transformToWorld.getTranslation()
+                                                                   .set(detection.getFilteredDetectionFrame().getTransformToWorldFrame().getTranslation()));
    }
 
    public UUID getDetectionID()

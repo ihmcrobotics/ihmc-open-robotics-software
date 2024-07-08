@@ -17,9 +17,6 @@ import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
-import us.ihmc.perception.sceneGraph.SceneNode;
-import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
-import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism.DoorOpeningMechanismType;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorPanel;
@@ -34,8 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions.DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN;
 
 /**
  * A node that represents a door.
@@ -67,16 +62,16 @@ public class DoorNode extends DetectableSceneNode
 
    public DoorNode(long id, CRDTInfo crdtInfo)
    {
-      this(id, null, crdtInfo);
+      this(id, null, crdtInfo, null);
    }
 
-   public DoorNode(long id, PersistentDetection initialDetection, CRDTInfo crdtInfo)
+   public DoorNode(long id, PersistentDetection initialDetection, CRDTInfo crdtInfo, SceneGraph sceneGraph)
    {
       super(id, "Door" + id, crdtInfo);
 
       doorCornerFrame = new MutableReferenceFrame("doorCorner_" + super.getID(), ReferenceFrame.getWorldFrame(), NAN_POSE);
 
-      if (initialDetection != null && !acceptDetection(initialDetection))
+      if (initialDetection != null && !acceptDetection(initialDetection, sceneGraph))
          throw new IllegalArgumentException("Oops, something went super wrong. FIXME PLEASE");
    }
 
@@ -85,7 +80,7 @@ public class DoorNode extends DetectableSceneNode
     * @param doorComponentDetection {@link PersistentDetection} of a door component
     * @return true if the detection is accepted, false otherwise.
     */
-   public boolean acceptDetection(PersistentDetection doorComponentDetection)
+   public boolean acceptDetection(PersistentDetection doorComponentDetection, SceneGraph sceneGraph)
    {
       if (doorComponentDetection == null)
          return false;
@@ -93,10 +88,10 @@ public class DoorNode extends DetectableSceneNode
       if (doorPanel.acceptDetection(doorComponentDetection))
          return true;
       else
-         return acceptOpeningMechanismDetection(doorComponentDetection);
+         return acceptOpeningMechanismDetection(doorComponentDetection, sceneGraph);
    }
 
-   private boolean acceptOpeningMechanismDetection(PersistentDetection doorOpeningMechanismDetection)
+   private boolean acceptOpeningMechanismDetection(PersistentDetection doorOpeningMechanismDetection, SceneGraph sceneGraph)
    {
       // Detection must be of an opening mechanism
       if (!DoorNodeTools.detectionIsDoorOpeningMechanism(doorOpeningMechanismDetection))
@@ -187,6 +182,8 @@ public class DoorNode extends DetectableSceneNode
       openingMechanism.setDetection(doorOpeningMechanismDetection);
       openingMechanisms.put(doorOpeningMechanismDetection.getID(), openingMechanism);
 
+      DoorNodeTools.addOpeningMechanismHelperNode(this, openingMechanism, sceneGraph);
+
       return true;
    }
 
@@ -198,12 +195,6 @@ public class DoorNode extends DetectableSceneNode
 
       boolean openingMechanismDetected = openingMechanisms.values().stream().anyMatch(mechanism -> mechanism.getDetection().isStable());
       setCurrentlyDetected(doorPanel.isDetected() || openingMechanismDetected);
-
-      for (DoorOpeningMechanism openingMechanism : openingMechanisms.values())
-         updateStaticRelativeChildren(sceneGraph, openingMechanism);
-      // TODO:
-      // Update door node reference frame
-      //      getNodeFrame();
 
       super.update(sceneGraph);
    }
@@ -217,10 +208,6 @@ public class DoorNode extends DetectableSceneNode
 
       if (planarRegion.getArea() > 0)
       {
-         // Update the scene node reference frame
-         getNodeToParentFrameTransform().set(planarRegion.getTransformToWorld());
-         getNodeFrame().update();
-
          Point3DReadOnly planarRegionCentroidInWorld = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
          Line2D doorLineNormal = new Line2D(planarRegionCentroidInWorld.getX(),
                                             planarRegionCentroidInWorld.getY(),
@@ -272,48 +259,12 @@ public class DoorNode extends DetectableSceneNode
             mechanismTransformToWorld.getRotation().setYawPitchRoll(planarRegionYaw, pitch, roll);
             openingMechanism.updateMechanismFrame(mechanismTransformToWorld);
          }
+
+         // Update the scene node reference frame
+         getNodeToParentFrameTransform().set(getLatestUpdatedOpeningMechanism().getMechanismFrame().getTransformToWorldFrame());
+         getNodeFrame().update();
       }
    }
-
-   /**
-    * These child nodes are used in behaviors
-    */
-   private void updateStaticRelativeChildren(SceneGraph sceneGraph, DoorOpeningMechanism openingMechanism)
-   {
-      // Recalculate name each time in case the parent name changes
-      String graspStaticRelativeSceneNodeName = getName() + "_" + openingMechanism.getColloquialName() + "Grasp";
-
-      StaticRelativeSceneNode graspStaticRelativeSceneNode = null;
-
-      for (SceneNode child : getChildren())
-      {
-         if (child instanceof StaticRelativeSceneNode staticRelativeSceneNode)
-         {
-            // TODO: Delete any old static relative children that aren't the correct name?
-            if (child.getName().equals(graspStaticRelativeSceneNodeName))
-            {
-               graspStaticRelativeSceneNode = staticRelativeSceneNode;
-            }
-         }
-      }
-
-      if (graspStaticRelativeSceneNode == null)
-      {
-         graspStaticRelativeSceneNode = new StaticRelativeSceneNode(sceneGraph.getNextID().getAndIncrement(),
-                                                                    graspStaticRelativeSceneNodeName,
-                                                                    sceneGraph.getIDToNodeMap(),
-                                                                    getID(),
-                                                                    new RigidBodyTransform(),
-                                                                    openingMechanism.getVisualModelPath(),
-                                                                    openingMechanism.getVisualModelTransform(),
-                                                                    // TODO: DOORNODES
-                                                                    DOOR_YOLO_STATIC_MAXIMUM_DISTANCE_TO_LOCK_IN,
-                                                                    getCRDTInfo());
-         StaticRelativeSceneNode finalGraspStaticRelativeSceneNode = graspStaticRelativeSceneNode;
-         sceneGraph.modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(finalGraspStaticRelativeSceneNode, this)));
-      }
-   }
-
 
    public void setDoorFramePoseLock(boolean lockPose)
    {
@@ -375,6 +326,7 @@ public class DoorNode extends DetectableSceneNode
    public DoorSide getDoorSideRelativeTo(Point3D position)
    {
       // TODO: DOORNODES
+      // Needed for determining whether we're looking at the push or pull handle
 
       return null;
    }
