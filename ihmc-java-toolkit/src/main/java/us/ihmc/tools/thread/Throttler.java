@@ -1,7 +1,6 @@
 package us.ihmc.tools.thread;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.thread.ThreadTools;
 
 /**
  * Throttler is used to allow things to happen at a slower rate
@@ -150,10 +149,9 @@ public class Throttler
 
          if (overtime < 0.0)
          {
-            ThreadTools.sleepSeconds(-overtime); // Guarantees to sleep at least this amount (i.e. will sleep too long)
+            // Guarantees to sleep at least this amount (i.e. will sleep too long)
+            currentTime += MissingThreadTools.sleepAtLeast(-overtime);
 
-            // Measure the time again so we can set the reset time correctly
-            currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
             calculateOvertime(period);
          }
 
