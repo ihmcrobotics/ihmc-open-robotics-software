@@ -33,6 +33,7 @@ import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.lists.YoPreallocatedList;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.math.trajectories.generators.MultiCubicSpline1DSolver;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -68,7 +69,7 @@ import us.ihmc.yoVariables.variable.YoEnum;
  */
 public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
 {
-   private static final boolean VISUALIZE = false;
+   private static final boolean VISUALIZE = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final String WALKING_TRAJECTORY_PATH_FRAME_NAME = "walkingTrajectoryPathFrame";
@@ -80,7 +81,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
    private final String namePrefix = "walkingTrajectoryPath";
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final TrajectoryManager trajectoryManager = new TrajectoryManager();
+   private final TrajectoryManager trajectoryManager;
 
    private final YoPreallocatedList<WaypointData> waypoints;
 
@@ -106,6 +107,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
    private final FramePoint3D firstWaypointInSupportFootFrame = new FramePoint3D();
 
    private final BagOfBalls trajectoryPositionViz;
+   private final BagOfBalls waypointsWTPViz;
    private final YoFrameVector3D currentZUpViz;
    private final YoFrameVector3D currentHeadingViz;
    private final YoBoolean isInDoubleSupport = new YoBoolean(namePrefix + "DoubleSupport", registry);
@@ -145,6 +147,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
       dt = updateDT;
       this.soleFrames = soleFrames;
 
+      trajectoryManager = new TrajectoryManager(registry);
       YoGraphicsList yoGraphicList;
 
       if (yoGraphicsListRegistry != null)
@@ -158,6 +161,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
             yoGraphicList.add(new YoGraphicVector(namePrefix + "CurrentHeadingViz", currentPosition, currentHeadingViz, 0.35, YoAppearance.Blue()));
             yoGraphicList.add(new YoGraphicVector(namePrefix + "CurrentZUpViz", currentPosition, currentZUpViz, 0.25, YoAppearance.Blue()));
             trajectoryPositionViz = new BagOfBalls(100, 0.005, "walkingPathViz", YoAppearance.Red(), registry, yoGraphicsListRegistry);
+            waypointsWTPViz = new BagOfBalls(MAX_NUMBER_OF_FOOTSTEPS+1, 0.005, "waypointWTPViz", YoAppearance.Black(), registry, yoGraphicsListRegistry);
             yoGraphicsListRegistry.registerYoGraphicsList(yoGraphicList);
          }
          else
@@ -167,6 +171,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
             currentZUpViz = null;
             currentHeadingViz = null;
             trajectoryPositionViz = null;
+            waypointsWTPViz = null;
          }
       }
       else
@@ -176,6 +181,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
          currentZUpViz = null;
          currentHeadingViz = null;
          trajectoryPositionViz = null;
+         waypointsWTPViz = null;
       }
 
       waypoints = new YoPreallocatedList<>(WaypointData.class,
@@ -424,6 +430,12 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
             trajectoryManager.computePosition(t, tempBallPosition);
          trajectoryPositionViz.setBall(tempBallPosition, i);
       }
+
+      waypointsWTPViz.hideAll();
+      for (int i = 0; i < waypoints.size(); i++)
+      {
+         waypointsWTPViz.setBall(waypoints.get(i).position, i);
+      }
    }
 
    private final Point3D newWaypointPosition = new Point3D();
@@ -493,8 +505,8 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
          {
             zUpViz = new YoFrameVector3D(namePrefix + "ZUpViz" + nameSuffix, worldFrame, registry);
             headingViz = new YoFrameVector3D(namePrefix + "HeadingViz" + nameSuffix, worldFrame, registry);
-            waypointZUpViz = new YoGraphicVector(nameSuffix + "WaypointZUpViz" + nameSuffix, position, zUpViz, 0.1, YoAppearance.Orange());
-            waypointHeadingViz = new YoGraphicVector(namePrefix + "WaypointHeadingViz" + nameSuffix, position, headingViz, 0.3, YoAppearance.Orange());
+            waypointZUpViz = new YoGraphicVector(nameSuffix + "WaypointZUpViz" + nameSuffix, position, zUpViz, 1.0, YoAppearance.Orange());
+            waypointHeadingViz = new YoGraphicVector(namePrefix + "WaypointHeadingViz" + nameSuffix, position, headingViz, 1.0, YoAppearance.Black());
             yoGraphicsList.add(waypointZUpViz);
             yoGraphicsList.add(waypointHeadingViz);
          }
@@ -551,9 +563,15 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
    {
       private final DMatrixRMaj[] linearSolutions = {new DMatrixRMaj(1, 1), new DMatrixRMaj(1, 1), new DMatrixRMaj(1, 1)};
       private final DMatrixRMaj yawSolution = new DMatrixRMaj(1, 1);
+      private final YoMatrix someMatrix;
       private final MultiCubicSpline1DSolver[] linearSolvers = {new MultiCubicSpline1DSolver(), new MultiCubicSpline1DSolver(), new MultiCubicSpline1DSolver()};
       private final MultiCubicSpline1DSolver yawSolver = new MultiCubicSpline1DSolver();
       private double totalDuration;
+
+      public TrajectoryManager(YoRegistry registry)
+      {
+         someMatrix = new YoMatrix("SolutionX", 8, 1, registry);
+      }
 
       public void initialize(Vector3DReadOnly initialLinearVelocity,
                              double initialYawRate,
@@ -584,6 +602,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
 
             linearSolver.solve(linearSolutions[axis.ordinal()]);
          }
+         someMatrix.set(linearSolutions[Axis3D.X.ordinal()]);
 
          yawSolver.clearWaypoints();
          yawSolver.clearWeights();
@@ -650,9 +669,10 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
          return null;
 
       YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D("CurrentZUp", currentPosition, currentZUpViz, 0.25, ColorDefinitions.Blue()));
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D("CurrentHeading", currentPosition, currentHeadingViz, 0.35, ColorDefinitions.Blue()));
-      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("walkingPath", trajectoryPositionViz.getPositions(), 0.005, ColorDefinitions.Red()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D("CurrentZUp", currentPosition, currentZUpViz, 1.0, ColorDefinitions.Blue()));
+//      group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D("CurrentHeading", currentPosition, currentHeadingViz, 0.35, ColorDefinitions.Blue()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("walkingPath", trajectoryPositionViz.getPositions(), 0.02, ColorDefinitions.Red()));
+      group.addChild(YoGraphicDefinitionFactory.newYoGraphicPointcloud3D("waypointWTP", waypointsWTPViz.getPositions(), 0.04, ColorDefinitions.Black()));
       return group;
    }
 }

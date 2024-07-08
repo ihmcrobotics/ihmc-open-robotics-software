@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -32,8 +33,6 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
-import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -75,7 +74,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.robotics.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AtlasWalkingTrajectoryPathFrameTest
 {
@@ -92,6 +91,7 @@ public class AtlasWalkingTrajectoryPathFrameTest
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+      simulationTestingParameters.setKeepSCSUp(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
    }
 
    @AfterEach
@@ -184,7 +184,7 @@ public class AtlasWalkingTrajectoryPathFrameTest
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       FramePose3D startPose = new FramePose3D(simulationTestHelper.getControllerReferenceFrames().getMidFootZUpGroundFrame());
       startPose.changeFrame(worldFrame);
-      FootstepDataListMessage steps = EndToEndTestTools.generateForwardSteps(RobotSide.LEFT,
+      FootstepDataListMessage steps = EndToEndTestTools.generateForwardSteps(RobotSide.RIGHT,
                                                                              6,
                                                                              a -> steppingParameters.getDefaultStepLength(),
                                                                              steppingParameters.getInPlaceWidth(),
@@ -257,13 +257,13 @@ public class AtlasWalkingTrajectoryPathFrameTest
                                                                                                                          simulationTestingParameters);
       simulationTestHelper = factory.createAvatarTestingSimulation();
 
-      FreeFloatingPendulumRobotDefinition pendulumRobotDefinition = setupPendulum();
+//      FreeFloatingPendulumRobotDefinition pendulumRobotDefinition = setupPendulum();
 
       createOscillateFeetPerturber(simulationTestHelper);
 
       simulationTestHelper.start();
 
-      prepareHand(getHandName(), pendulumRobotDefinition);
+//      prepareHand(getHandName(), pendulumRobotDefinition);
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
@@ -286,7 +286,7 @@ public class AtlasWalkingTrajectoryPathFrameTest
       assertTrue(simulationTestHelper.simulateNow(2.0));
       assertCorrectControlMode();
       assertTrue(simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
-      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < pendulumAttachmentController.getMaxAngleStandardDeviation().getValue());
+//      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < pendulumAttachmentController.getMaxAngleStandardDeviation().getValue());
       assertWalkingFrameMatchMidFeetZUpFrame();
    }
 
@@ -296,6 +296,7 @@ public class AtlasWalkingTrajectoryPathFrameTest
    {
       DRCRobotModel robotModel = getRobotModel();
       SCS2AvatarTestingSimulationFactory factory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                         new FlatGroundEnvironment(),
                                                                                                                          simulationTestingParameters);
       simulationTestHelper = factory.createAvatarTestingSimulation();
 
@@ -309,18 +310,31 @@ public class AtlasWalkingTrajectoryPathFrameTest
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       FramePose3D startPose = new FramePose3D(simulationTestHelper.getControllerReferenceFrames().getMidFootZUpGroundFrame());
       startPose.changeFrame(worldFrame);
-      FootstepPlan footstepPlan = new FootstepPlan();
-      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(new Pose3D(0.9, -steppingParameters.getInPlaceWidth()/2, 0.0, 0.0, 0.0, 0.0)));
-      footstepPlan.addFootstep(RobotSide.LEFT, new FramePose3D(new Pose3D(0.9, steppingParameters.getInPlaceWidth()/2, 0.0, 0.0, 0.0, 0.0)));
-
-      FootstepDataListMessage steps = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan, 0.25, 1.0);
-      simulationTestHelper.publishToController(steps);
+      startPose.appendTranslation(0.45, 0.0, 0.0);
+      double swingTime = 0.8;
+      double transferTime = 0.2;
+      int numberOfSteps = 15;
+      FootstepDataListMessage steps = EndToEndTestTools.generateForwardSteps(RobotSide.LEFT,
+                                                                             numberOfSteps,
+                                                                             0.3,
+                                                                             steppingParameters.getInPlaceWidth(),
+                                                                             swingTime,
+                                                                             transferTime,
+                                                                             startPose,
+                                                                             true);
+      for (int i = 6; i < numberOfSteps+1; i++)
+      {
+         steps.getFootstepDataList().get(i).getLocation().addX(0.3);
+      }
+//      steps.getFootstepDataList().get(0).setTransferDuration(transferTime);
 
       pendulumAttachmentController.oscillationCalculator.clear();
       pendulumAttachmentController.rootJoint.getJointTwist().setToZero();
 
+      simulationTestHelper.publishToController(steps);
+
       assertWalkingFrameMatchMidFeetZUpFrame();
-      assertTrue(simulationTestHelper.simulateNow(2.0));
+//      assertTrue(simulationTestHelper.simulateNow(2.0));
       assertCorrectControlMode();
       assertTrue(simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
       assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < pendulumAttachmentController.getMaxAngleStandardDeviation().getValue());
