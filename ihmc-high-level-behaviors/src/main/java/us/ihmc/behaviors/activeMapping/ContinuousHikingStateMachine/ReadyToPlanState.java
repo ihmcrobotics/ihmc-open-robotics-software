@@ -44,7 +44,7 @@ public class ReadyToPlanState implements State
    private final TerrainMapData terrainMap;
    private final TerrainPlanningDebugger debugger;
    private final ContinuousPlannerStatistics statistics;
-   private final List<SideDependentList<FramePose3D>> walkToGoalWayPointList = new ArrayList<>();
+   private final List<SideDependentList<FramePose3D>> walkToGoalWayPointPoses = new ArrayList<>();
    private final Point3D robotLocation = new Point3D();
    private final StopWatch stopWatch = new StopWatch();
    double timeInSwingToStopPlanningAndWaitTillNextAttempt = 0;
@@ -79,7 +79,7 @@ public class ReadyToPlanState implements State
       this.statistics = statistics;
       this.planningMode = planningMode;
 
-      ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLACED_GOAL_FOOTSTEPS, this::addWayPointCheckPointToList);
+      ros2Helper.subscribeViaCallback(ContinuousWalkingAPI.PLACED_GOAL_FOOTSTEPS, this::addWayPointPoseToList);
    }
 
    @Override
@@ -166,7 +166,7 @@ public class ReadyToPlanState implements State
          case WALK_TO_GOAL ->
          {
             // Set the goalPoses here so that we return a good value regardless of what happens next
-            goalPoses = walkToGoalWayPointList.get(0);
+            goalPoses = walkToGoalWayPointPoses.get(0);
 
             Vector3DBasics robotLocationVector = referenceFrames.getMidFeetZUpFrame().getTransformToWorldFrame().getTranslation();
             robotLocation.set(robotLocationVector);
@@ -174,11 +174,11 @@ public class ReadyToPlanState implements State
 
             if (distanceToGoalPose < continuousHikingParameters.getNextWaypointDistanceMargin())
             {
-               walkToGoalWayPointList.remove(0);
+               walkToGoalWayPointPoses.remove(0);
 
-               if (!walkToGoalWayPointList.isEmpty())
+               if (!walkToGoalWayPointPoses.isEmpty())
                {
-                  goalPoses = walkToGoalWayPointList.get(0);
+                  goalPoses = walkToGoalWayPointPoses.get(0);
                }
                else
                {
@@ -197,7 +197,7 @@ public class ReadyToPlanState implements State
       return goalPoses;
    }
 
-   public void addWayPointCheckPointToList(PoseListMessage poseListMessage)
+   public void addWayPointPoseToList(PoseListMessage poseListMessage)
    {
       List<Pose3D> poses = MessageTools.unpackPoseListMessage(poseListMessage);
       FramePose3D leftFootPose = new FramePose3D();
@@ -213,7 +213,7 @@ public class ReadyToPlanState implements State
       continuousPlanner.setGoalWaypointPoses(latestWayPoint.get(RobotSide.LEFT), latestWayPoint.get(RobotSide.RIGHT));
 
       LogTools.info("Added waypoint for WALK_TO_GOAL");
-      walkToGoalWayPointList.add(latestWayPoint);
+      walkToGoalWayPointPoses.add(latestWayPoint);
       debugger.publishStartAndGoalForVisualization(continuousPlanner.getStartStancePose(), continuousPlanner.getGoalStancePose());
    }
 }
