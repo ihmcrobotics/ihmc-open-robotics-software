@@ -21,7 +21,7 @@ mainDependencies {
    api("us.ihmc:euclid-frame:0.21.0")
    api("us.ihmc:euclid-shape:0.21.0")
    api("us.ihmc:ihmc-javafx-toolkit:17-0.22.9")
-   api("us.ihmc:ihmc-convex-optimization:0.17.18")
+   api("us.ihmc:ihmc-convex-optimization:0.17.19")
    api("us.ihmc:robot-environment-awareness:source")
 }
 
