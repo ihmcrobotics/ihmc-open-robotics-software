@@ -46,7 +46,7 @@ public class DoorNode extends SceneNode
          case DOOR_LEVER -> setOpeningMechanismType(OpeningMechanismType.LEVER_HANDLE);
          case DOOR_KNOB -> setOpeningMechanismType(OpeningMechanismType.KNOB);
          case DOOR_PULL_HANDLE -> setOpeningMechanismType(OpeningMechanismType.PULL_HANDLE);
-         case DOOR_PUSH_BAR -> setOpeningMechanismType(OpeningMechanismType.PUSH_BAR);
+//         case DOOR_PUSH_BAR -> setOpeningMechanismType(OpeningMechanismType.PUSH_BAR);
       }
    }
 

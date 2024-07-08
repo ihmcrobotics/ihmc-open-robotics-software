@@ -14,6 +14,8 @@ import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefinition>
 {
@@ -28,8 +30,8 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    private DoorNode doorNode;
 
    private BehaviorTreeRootNodeState actionSequence;
-   private WaitDurationActionState setStaticForApproachAction;
-   private WaitDurationActionState setStaticForGraspAction;
+   private final List<WaitDurationActionState> setStaticForApproachActions = new ArrayList<>();
+   private final List<WaitDurationActionState> setStaticForGraspActions = new ArrayList<>();
    private WaitDurationActionState waitToOpenRightHandAction;
    private ScrewPrimitiveActionState pullScrewPrimitiveAction;
    private WaitDurationActionState postGraspEvaluationAction;
@@ -58,7 +60,8 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
 
    public void updateActionSubtree(BehaviorTreeNodeState<?> node)
    {
-      setStaticForGraspAction = null;
+      setStaticForApproachActions.clear();
+      setStaticForGraspActions.clear();
       waitToOpenRightHandAction = null;
       pullScrewPrimitiveAction = null;
       postGraspEvaluationAction = null;
@@ -71,12 +74,12 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
             if (actionNode instanceof WaitDurationActionState waitDurationAction
                 && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_APPROACH))
             {
-               setStaticForApproachAction = waitDurationAction;
+               setStaticForApproachActions.add(waitDurationAction);
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
                 && waitDurationAction.getDefinition().getName().equals(SET_STATIC_FOR_GRASP))
             {
-               setStaticForGraspAction = waitDurationAction;
+               setStaticForGraspActions.add(waitDurationAction);
             }
             if (actionNode instanceof WaitDurationActionState waitDurationAction
                 && waitDurationAction.getDefinition().getName().equals(WAIT_TO_OPEN_RIGHT_HAND))
@@ -152,14 +155,14 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
       return actionSequence;
    }
 
-   public WaitDurationActionState getSetStaticForApproachAction()
+   public List<WaitDurationActionState> getSetStaticForApproachActions()
    {
-      return setStaticForApproachAction;
+      return setStaticForApproachActions;
    }
 
-   public WaitDurationActionState getSetStaticForGraspAction()
+   public List<WaitDurationActionState> getSetStaticForGraspActions()
    {
-      return setStaticForGraspAction;
+      return setStaticForGraspActions;
    }
 
    public WaitDurationActionState getWaitToOpenRightHandAction()
