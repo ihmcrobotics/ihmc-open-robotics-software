@@ -88,6 +88,8 @@ public class ROS2SceneGraphSubscription
    {
       if (recievedMessageNotification.poll())
       {
+         sceneGraph.getCRDTInfo().startNextUpdate();
+
          synchronized (sceneGraphMessageSwapReference)
          {
             SceneGraphMessage sceneGraphMessage = sceneGraphMessageSwapReference.getForThreadTwo();

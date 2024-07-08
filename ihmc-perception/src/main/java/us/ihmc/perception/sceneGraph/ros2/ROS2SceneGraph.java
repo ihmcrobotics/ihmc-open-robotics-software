@@ -64,7 +64,6 @@ public class ROS2SceneGraph extends SceneGraph
 
       if (syncThisTick)
       {
-         getCRDTInfo().startNextUpdate();
          sceneGraphSubscription.update();
       }
    }

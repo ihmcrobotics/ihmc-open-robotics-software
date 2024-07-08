@@ -30,9 +30,13 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    public static final byte WAIT_DURATION_ACTION = (byte) 17;
    public static final byte FOOT_POSE_ACTION = (byte) 18;
    /**
-            * Monotonically increasing message ID that matches the CRDTInfo update number
+            * Monotonically increasing message ID
             */
    public long sequence_id_;
+   /**
+            * CRDTInfo update number for statistics only
+            */
+   public long crdt_update_number_;
    /**
             * The ID to assign to the next instantiated node
             */
@@ -102,6 +106,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    {
       sequence_id_ = other.sequence_id_;
 
+      crdt_update_number_ = other.crdt_update_number_;
+
       next_id_ = other.next_id_;
 
       ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.staticCopy(other.confirmable_request_, confirmable_request_);
@@ -125,18 +131,33 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
    }
 
    /**
-            * Monotonically increasing message ID that matches the CRDTInfo update number
+            * Monotonically increasing message ID
             */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Monotonically increasing message ID that matches the CRDTInfo update number
+            * Monotonically increasing message ID
             */
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+   /**
+            * CRDTInfo update number for statistics only
+            */
+   public void setCrdtUpdateNumber(long crdt_update_number)
+   {
+      crdt_update_number_ = crdt_update_number;
+   }
+   /**
+            * CRDTInfo update number for statistics only
+            */
+   public long getCrdtUpdateNumber()
+   {
+      return crdt_update_number_;
    }
 
    /**
@@ -293,6 +314,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.crdt_update_number_, other.crdt_update_number_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.next_id_, other.next_id_, epsilon)) return false;
 
       if (!this.confirmable_request_.epsilonEquals(other.confirmable_request_, epsilon)) return false;
@@ -420,6 +443,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+      if(this.crdt_update_number_ != otherMyClass.crdt_update_number_) return false;
+
       if(this.next_id_ != otherMyClass.next_id_) return false;
 
       if (!this.confirmable_request_.equals(otherMyClass.confirmable_request_)) return false;
@@ -452,6 +477,8 @@ public class BehaviorTreeStateMessage extends Packet<BehaviorTreeStateMessage> i
       builder.append("BehaviorTreeStateMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("crdt_update_number=");
+      builder.append(this.crdt_update_number_);      builder.append(", ");
       builder.append("next_id=");
       builder.append(this.next_id_);      builder.append(", ");
       builder.append("confirmable_request=");

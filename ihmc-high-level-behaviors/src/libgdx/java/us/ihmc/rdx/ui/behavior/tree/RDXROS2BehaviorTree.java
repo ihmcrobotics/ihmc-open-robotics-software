@@ -24,6 +24,9 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    /** Reduce the communication update rate. */
    private final Throttler communicationThrottler = new Throttler().setFrequency(ROS2BehaviorTreeState.SYNC_FREQUENCY);
    private final ImGuiAveragedFrequencyText subscriptionFrequencyText = new ImGuiAveragedFrequencyText();
+   private final ImGuiAveragedFrequencyText publishFrequencyText = new ImGuiAveragedFrequencyText();
+   private final ImGuiAveragedFrequencyText localCRDTUpdateFrequencyText = new ImGuiAveragedFrequencyText();
+   private final ImGuiAveragedFrequencyText remoteCRDTUpdateFrequencyText = new ImGuiAveragedFrequencyText();
 
    public RDXROS2BehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                               DRCRobotModel robotModel,
@@ -53,12 +56,18 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    {
       boolean updateComms = communicationThrottler.run();
       if (updateComms)
+      {
+         localCRDTUpdateFrequencyText.ping();
          ros2BehaviorTreeState.updateSubscription();
+      }
 
       super.update();
 
       if (updateComms)
+      {
          ros2BehaviorTreeState.updatePublication();
+         publishFrequencyText.ping();
+      }
    }
 
    @Override

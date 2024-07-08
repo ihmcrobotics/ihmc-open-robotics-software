@@ -79,9 +79,13 @@ module behavior_msgs
       struct BehaviorTreeStateMessage
       {
         /**
-         * Monotonically increasing message ID that matches the CRDTInfo update number
+         * Monotonically increasing message ID
          */
         unsigned long sequence_id;
+        /**
+         * CRDTInfo update number for statistics only
+         */
+        unsigned long crdt_update_number;
         /**
          * The ID to assign to the next instantiated node
          */

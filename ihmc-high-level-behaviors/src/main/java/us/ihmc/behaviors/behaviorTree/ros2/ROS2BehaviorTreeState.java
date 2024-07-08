@@ -48,7 +48,6 @@ public class ROS2BehaviorTreeState
     */
    public void updateSubscription()
    {
-      behaviorTreeState.getCRDTInfo().startNextUpdate();
       behaviorTreeSubscription.update();
    }
 
