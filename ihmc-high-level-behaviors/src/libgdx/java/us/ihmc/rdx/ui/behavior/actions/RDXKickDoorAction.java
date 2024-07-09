@@ -6,7 +6,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.sequence.actions.KickDoorActionDefinition;
 import us.ihmc.behaviors.sequence.actions.KickDoorActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImDoubleWrapper;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
@@ -33,7 +33,7 @@ public class RDXKickDoorAction extends RDXActionNode<KickDoorActionState, KickDo
                             DRCRobotModel robotModel,
                             ROS2SyncedRobotModel syncedRobot,
                             ReferenceFrameLibrary referenceFrameLibrary,
-                            FootstepPlannerParametersBasics footstepPlannerParameters)
+                            DefaultFootstepPlannerParametersBasics footstepPlannerParameters)
    {
       super(new KickDoorActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 

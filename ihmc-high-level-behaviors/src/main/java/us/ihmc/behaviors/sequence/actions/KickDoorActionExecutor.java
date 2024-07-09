@@ -28,10 +28,7 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
    private final KickDoorActionDefinition definition;
    private final ROS2ControllerHelper ros2ControllerHelper;
    private final ROS2SyncedRobotModel syncedRobot;
-   private final ControllerStatusTracker controllerStatusTracker;
-   private final WalkingControllerParameters walkingControllerParameters;
    private final RobotSide kickSide;
-   private final ReferenceFrameLibrary referenceFrameLibrary;
    private boolean switchToKickControllerMessageSent = false;
    private boolean kickingMessageSent = false;
    private boolean switchToWalkControllerMessageSent = false;
@@ -46,9 +43,7 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
                                  WorkspaceResourceDirectory saveFileDirectory,
                                  ROS2ControllerHelper ros2ControllerHelper,
                                  ROS2SyncedRobotModel syncedRobot,
-                                 ControllerStatusTracker controllerStatusTracker,
-                                 ReferenceFrameLibrary referenceFrameLibrary,
-                                 WalkingControllerParameters walkingControllerParameters)
+                                 ReferenceFrameLibrary referenceFrameLibrary)
    {
       super(new KickDoorActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
@@ -56,11 +51,8 @@ public class KickDoorActionExecutor extends ActionNodeExecutor<KickDoorActionSta
       definition = getDefinition();
       kickSide = definition.getSide();
 
-      this.referenceFrameLibrary = referenceFrameLibrary;
       this.ros2ControllerHelper = ros2ControllerHelper;
       this.syncedRobot = syncedRobot;
-      this.controllerStatusTracker = controllerStatusTracker;
-      this.walkingControllerParameters = walkingControllerParameters;
 
       computeKickMessage();
    }

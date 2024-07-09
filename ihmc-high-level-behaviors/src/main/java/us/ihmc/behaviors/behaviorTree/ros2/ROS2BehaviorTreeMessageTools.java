@@ -345,11 +345,8 @@ public class ROS2BehaviorTreeMessageTools
             subscriptionNode.setBehaviorTreeNodeDefinitionMessage(kickDoorApproachPlanActionStateMessage.getDefinition().getDefinition().getDefinition());
          }
          default ->
-         {
-            Class<?> behaviorClass = nodeEnum.getTypeClass();
-            String name = behaviorClass != null ? behaviorClass.getName() : "Undefined";
-            throw new RuntimeException("Undefined behavior tree state message type " + name);
-         }
+            throw new RuntimeException("Undefined behavior tree state message type.");
+
       }
    }
 }

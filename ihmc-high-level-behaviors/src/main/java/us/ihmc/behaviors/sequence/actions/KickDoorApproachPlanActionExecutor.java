@@ -19,12 +19,11 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.DetachableReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -56,7 +55,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
          TaskspaceTrajectoryTrackingErrorCalculator::new);
    private final FootstepPlan footstepPlanToExecute = new FootstepPlan();
    private final FootstepPlanningModule footstepPlanner;
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
    private final ResettableExceptionHandlingExecutorService footstepPlanningThread = MissingThreadTools.newSingleThreadExecutor("FootstepPlanning", true, 1);
    private final TypedNotification<FootstepPlan> footstepPlanNotification = new TypedNotification<>();
    private final SideDependentList<FramePose3D> liveGoalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
@@ -84,7 +83,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
                                              ReferenceFrameLibrary referenceFrameLibrary,
                                              WalkingControllerParameters walkingControllerParameters,
                                              FootstepPlanningModule footstepPlanner,
-                                             FootstepPlannerParametersBasics footstepPlannerParameters)
+                                             DefaultFootstepPlannerParametersBasics footstepPlannerParameters)
    {
       super(new KickDoorApproachPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
@@ -351,7 +350,7 @@ public class KickDoorApproachPlanActionExecutor extends ActionNodeExecutor<KickD
                                         footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
                                         double idealFootstepLength = 0.5;
                                         footstepPlanner.getFootstepPlannerParameters().setIdealFootstepLength(idealFootstepLength);
-                                        footstepPlanner.getFootstepPlannerParameters().setMaximumStepReach(idealFootstepLength);
+                                        footstepPlanner.getFootstepPlannerParameters().setMaxStepReach(idealFootstepLength);
                                         state.getLogger().info("Planning footsteps...");
                                         FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
                                         FootstepPlan footstepPlan = footstepPlannerOutput.getFootstepPlan();
