@@ -75,8 +75,6 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
    {
       if (recievedMessageNotification.poll())
       {
-         behaviorTreeState.getCRDTInfo().startNextUpdate();
-
          synchronized (behaviorTreeStateMessageSwapReference)
          {
             BehaviorTreeStateMessage behaviorTreeStateMessage = behaviorTreeStateMessageSwapReference.getForThreadTwo();

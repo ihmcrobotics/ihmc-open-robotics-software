@@ -60,12 +60,7 @@ public class ROS2SceneGraph extends SceneGraph
     */
    public void updateSubscription()
    {
-      syncThisTick = syncThrottler.run();
-
-      if (syncThisTick)
-      {
-         sceneGraphSubscription.update();
-      }
+      sceneGraphSubscription.update();
    }
 
    /**
@@ -75,8 +70,29 @@ public class ROS2SceneGraph extends SceneGraph
     */
    public void updatePublication()
    {
+      sceneGraphPublisher.publish(this, ros2PublishSubscribeAPI, ros2ActorDesignation.getOutgoingQualifier());
+
+      // We increment the CRDT update number once per publication,
+      // which done at the SYNC_FREQUENCY.
+      getCRDTInfo().startNextUpdate();
+   }
+
+   public void updateSubscriptionThrottled()
+   {
+      syncThisTick = syncThrottler.run();
+
       if (syncThisTick)
-         sceneGraphPublisher.publish(this, ros2PublishSubscribeAPI, ros2ActorDesignation.getOutgoingQualifier());
+      {
+         updateSubscription();
+      }
+   }
+
+   public void updatePublicationThrottled()
+   {
+      if (syncThisTick)
+      {
+         updatePublication();
+      }
 
       syncThisTick = false;
    }

@@ -87,9 +87,9 @@ public class RDXSceneGraphUI
 
    public void update()
    {
-      sceneGraph.updateSubscription();
+      sceneGraph.updateSubscriptionThrottled();
       sceneGraph.modifyTree(modificationQueue -> uiSceneNodes.values().forEach(node -> node.update(modificationQueue)));
-      sceneGraph.updatePublication();
+      sceneGraph.updatePublicationThrottled();
 
       for (SceneNode sceneNode : uiSceneNodes.keySet())
       {

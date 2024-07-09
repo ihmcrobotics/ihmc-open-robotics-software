@@ -20,11 +20,8 @@ byte PELVIS_HEIGHT_ORIENTATION_ACTION = 16
 byte WAIT_DURATION_ACTION = 17
 byte FOOT_POSE_ACTION = 18
 
-# Monotonically increasing message ID
+# Monotonically increasing message ID that matches the CRDTInfo update number
 uint32 sequence_id
-
-# CRDTInfo update number for statistics only
-uint32 crdt_update_number
 
 # The ID to assign to the next instantiated node
 uint32 next_id

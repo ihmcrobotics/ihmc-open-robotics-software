@@ -510,7 +510,8 @@ public class PerceptionAndAutonomyProcess
 
    private void updateSceneGraph()
    {
-      sceneGraph.updateSubscription();
+      if (sceneGraphUpdateIndex % 2 == 0)
+         sceneGraph.updateSubscription();
       synchronized (sharedArUcoDetectionResults)
       {
          ArUcoSceneTools.updateSceneGraph(sharedArUcoDetectionResults.getForThreadTwo(), blackflyFrameSuppliers.get(RobotSide.RIGHT).get(), sceneGraph);
@@ -535,15 +536,17 @@ public class PerceptionAndAutonomyProcess
 
       // Update general stuff
       sceneGraph.updateOnRobotOnly(robotPelvisFrame);
-      sceneGraph.updatePublication();
+      if (sceneGraphUpdateIndex % 2 == 0)
+         sceneGraph.updatePublication();
 
-      ++sceneGraphUpdateIndex;
-
+      // scene graph & behavior comms are staggered
       if (behaviorTreeExecutor != null && sceneGraphUpdateIndex % 2 == 1)
       {
          behaviorTreeSyncedRobot.update();
          behaviorTreeExecutor.update();
       }
+
+      ++sceneGraphUpdateIndex;
    }
 
    private void updatePlanarRegions()

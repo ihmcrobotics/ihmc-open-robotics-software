@@ -59,6 +59,10 @@ public class ROS2BehaviorTreeState
    public void updatePublication()
    {
       behaviorTreePublisher.publish();
+
+      // We increment the CRDT update number once per publication,
+      // which done at the SYNC_FREQUENCY.
+      behaviorTreeState.getCRDTInfo().startNextUpdate();
    }
 
    public void destroy()
