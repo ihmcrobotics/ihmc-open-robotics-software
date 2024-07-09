@@ -7,6 +7,8 @@ import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencl.global.OpenCL;
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
+import perception_msgs.msg.dds.GlobalMapCellEntry;
+import perception_msgs.msg.dds.GlobalMapCellMap;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
 import us.ihmc.commons.thread.Notification;
@@ -32,6 +34,7 @@ import us.ihmc.perception.rapidRegions.RapidPlanarRegionsExtractor;
 import us.ihmc.perception.timing.PerceptionStatistics;
 import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.perception.tools.PerceptionMessageTools;
+import us.ihmc.pubsub.publisher.Publisher;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -40,6 +43,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.globalHeightMap.GlobalHeightMap;
+import us.ihmc.sensorProcessing.globalHeightMap.GlobalMapCell;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
@@ -47,6 +51,8 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -170,7 +176,6 @@ public class HumanoidPerceptionModule
                                    Instant globalAcquisitionTime = Instant.now();
                                    HeightMapData requiredHeightMapData = getLatestHeightMapData();
                                    globalHeightMap.addHeightMap(requiredHeightMapData);
-                                   publishGlobalHeightMap(ros2Helper, globalHeightMap, acquisitionTime);
 //                                   PerceptionMessageTools.convertHeightMapDataToMat(globalHeightMap,globalHeightMap.)
 
 
@@ -186,25 +191,16 @@ public class HumanoidPerceptionModule
                                                             PerceptionAPI.HEIGHT_MAP_CROPPED,
                                                             croppedHeightMapImageMessage,
                                                             acquisitionTime);
-               //                                      publishHeightMapImage(ros2Helper, localHeightMapImage, compressedLocalHeightMapPointer, PerceptionAPI.HEIGHT_MAP_LOCAL,
-               //                                                                           localHeightMapImageMessage, acquisitionTime);
-                                      //               publishHeightMapImage(ros2Helper, globalHeightMapImage, compressedInternalHeightMapPointer, PerceptionAPI.HEIGHT_MAP_GLOBAL,
-                                      //                                     globalHeightMapImageMessage, acquisitionTime);
 
+                                      publishGlobalHeightMap(ros2Helper, globalHeightMap, globalAcquisitionTime,PerceptionAPI.GLOBAL_HEIGHT_MAP);
 
-
-
-                                      // Publish the global height map
-//                                      publishHeightMapImage(ros2Helper,
-//                                                            globalHeightMap,
-//                                                            compressedCroppedGlobalHeightMapPointer,
-//                                                            PerceptionAPI.GLOBAL_HEIGHT_MAP,
-//                                                            globalHeightMapImageMessage,
-//                                                            globalAcquisitionTime);
                                    }
                                 });
       }
    }
+
+
+
 
    public void publishHeightMapImage(ROS2Helper ros2Helper,
                                      Mat image,
@@ -226,34 +222,28 @@ public class HumanoidPerceptionModule
                                                          (float) RapidHeightMapExtractor.getHeightMapParameters().getHeightScaleFactor());
    }
 
-   private void publishGlobalHeightMap(ROS2Helper ros2Helper, GlobalHeightMap globalHeightMap, Instant acquisitionTime) {
-      // Assuming you have a publisher for GlobalMap messages
-      Publisher<GlobalMapMessage> globalMapPublisher = ros2Helper.createPublisher("global_height_map_topic", GlobalMapMessage.class);
+   private void publishGlobalHeightMap(ROS2Helper ros2Helper, GlobalHeightMap globalHeightMap, Instant acquisitionTime, ROS2Topic<GlobalMapCellMap> topic) {
 
-      // Create a new GlobalMap message
-      GlobalMapMessage globalMapMessage = new GlobalMapMessage();
+      // get the modified cells from the globalheightmap
+      Collection<GlobalMapCell> modifiedCells = globalHeightMap.getModifiedMapCells();
 
-      // Populate the GlobalMap message with data from globalHeightMap
-      globalMapMessage.setSequenceNumber(sequenceNumber++);
-      globalMapMessage.setAcquisitionTime(acquisitionTime);
-      globalMapMessage.setMapWidthCells(globalHeightMap.getWidthCells());
-      globalMapMessage.setMapHeightCells(globalHeightMap.getHeightCells());
-      globalMapMessage.setMapResolution(globalHeightMap.getResolution());
-      globalMapMessage.setMinHeight(globalHeightMap.getMinHeight());
-      globalMapMessage.setMaxHeight(globalHeightMap.getMaxHeight());
+      // Full global map cell map
+      GlobalMapCellMap globalHeightMapModifiedCells = new GlobalMapCellMap();
+      List<GlobalMapCellEntry> collectionOfGlobalMapCells = new ArrayList<>();
 
-      // Convert height map data to a flattened array (example)
-      float[] heights = globalHeightMap.flattenHeightMap();
+      for (GlobalMapCell cell: modifiedCells)
+      {
+         GlobalMapCellEntry globalMapCellEntry = new GlobalMapCellEntry();
+         globalMapCellEntry.setKey(cell.hashCode());
+         globalMapCellEntry.setXIndex(cell.getCenterX());
+         globalMapCellEntry.setYIndex(cell.getCenterY());
+         // Entered a 0 for now as the assumption as this global map cell has only one height
+         globalMapCellEntry.setCellHeight(cell.getHeight(0));
+         collectionOfGlobalMapCells.add(globalMapCellEntry);
+      }
+      globalHeightMapModifiedCells = (GlobalMapCellMap) collectionOfGlobalMapCells;
 
-      // Set heights in the message
-      globalMapMessage.setHeights(heights);
-
-      // Set map origin and orientation if needed
-      // globalMapMessage.setMapOrigin(...);
-      // globalMapMessage.setMapOrientation(...);
-
-      // Publish the message
-      globalMapPublisher.publish(globalMapMessage);
+      ros2Helper.publish(topic, globalHeightMapModifiedCells);
    }
 
 

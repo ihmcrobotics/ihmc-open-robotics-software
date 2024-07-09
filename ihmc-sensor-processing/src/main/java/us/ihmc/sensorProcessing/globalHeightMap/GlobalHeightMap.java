@@ -22,6 +22,7 @@ public class GlobalHeightMap
          Point2DReadOnly cellPosition = heightMapData.getCellPosition(occupiedCell);
 
          GlobalMapCell globalMapCell = getOrCreateDataContainingCell(cellPosition, heightMapData.getGridResolutionXY());
+
          globalMapCell.setHeightAt(cellPosition.getX(), cellPosition.getY(), cellHeight);
 
          modifiedCells.add(globalMapCell);

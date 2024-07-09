@@ -95,3 +95,4 @@ public class RDXGlobalHeightMapGraphic implements RenderableProvider
          mapRenderables.destroy();
    }
 }
+
