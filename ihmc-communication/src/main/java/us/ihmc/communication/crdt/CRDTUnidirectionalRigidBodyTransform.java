@@ -36,11 +36,17 @@ public class CRDTUnidirectionalRigidBodyTransform extends CRDTUnidirectionalMuta
 
    public void fromMessage(RigidBodyTransformMessage rigidBodyTransformMessage)
    {
-      MessageTools.toEuclid(rigidBodyTransformMessage, getValueInternal());
+      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
+      {
+         MessageTools.toEuclid(rigidBodyTransformMessage, getValueInternal());
+      }
    }
 
    public void fromMessage(Pose3D poseMessage)
    {
-      getValueInternal().set(poseMessage);
+      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
+      {
+         getValueInternal().set(poseMessage);
+      }
    }
 }
