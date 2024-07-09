@@ -53,11 +53,14 @@ public class CRDTUnidirectionalSE3Trajectory extends CRDTUnidirectionalMutableFi
 
    public void fromMessage(IDLSequence.Object<SE3TrajectoryPointMessage> trajectoryMessage)
    {
-      getValueInternal().clear();
-
-      for (SE3TrajectoryPointMessage trajectoryPointMessage : trajectoryMessage)
+      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
       {
-         MessageTools.fromMessage(trajectoryPointMessage, getValueInternal().add());
+         getValueInternal().clear();
+
+         for (SE3TrajectoryPointMessage trajectoryPointMessage : trajectoryMessage)
+         {
+            MessageTools.fromMessage(trajectoryPointMessage, getValueInternal().add());
+         }
       }
    }
 
