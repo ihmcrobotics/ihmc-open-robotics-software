@@ -52,13 +52,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    public static final boolean USE_NEW_PELVIS_POSE_CORRECTOR = true;
    private static final boolean ENABLE_JOINT_TORQUES_FROM_FORCE_SENSORS_VIZ = true;
 
-   private enum MomentumEstimatorMode
-   {
-      NONE, SIMPLE, DISTRIBUTED_IMUS, WRENCH_BASED
-   };
-
-   private static final MomentumEstimatorMode MOMENTUM_ESTIMATOR_MODE = MomentumEstimatorMode.NONE;
-
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
    private final YoDouble yoTime = new YoDouble("t_stateEstimator", registry);
@@ -214,7 +207,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
                                                               yoGraphicsListRegistry,
                                                               registry);
 
-      switch (MOMENTUM_ESTIMATOR_MODE)
+      switch (stateEstimatorParameters.getMomentumEstimatorMode())
       {
          case DISTRIBUTED_IMUS:
             momentumStateUpdater = new DistributedIMUBasedCenterOfMassStateUpdater(rootJoint,
@@ -243,7 +236,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
             momentumStateUpdater = null;
             break;
          default:
-            throw new IllegalArgumentException("Unhandled mode: " + MOMENTUM_ESTIMATOR_MODE);
+            throw new IllegalArgumentException("Unhandled mode: " + stateEstimatorParameters.getMomentumEstimatorMode());
       }
 
       if (momentumStateUpdater != null)

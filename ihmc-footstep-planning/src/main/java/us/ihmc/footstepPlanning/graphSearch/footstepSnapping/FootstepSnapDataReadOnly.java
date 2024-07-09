@@ -63,6 +63,8 @@ public interface FootstepSnapDataReadOnly
     */
    double getSnapRMSError();
 
+   double getSnapAreaFraction();
+
    default void packSnapAndWiggleTransform(RigidBodyTransform transformToPack)
    {
       transformToPack.set(getSnapTransform());

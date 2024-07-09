@@ -1,10 +1,11 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController.IKRobotStateUpdater;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters.ClockType;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -19,6 +20,7 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -29,6 +31,9 @@ import java.util.Map;
 import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.SLEEP;
 import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.STREAMING;
 
+/**
+ * The main class for setting up the IK streaming controller.
+ */
 public class KinematicsStreamingToolboxController extends ToolboxController
 {
    public enum KSTState
@@ -52,7 +57,8 @@ public class KinematicsStreamingToolboxController extends ToolboxController
 
    private final KSTTools tools;
 
-   private KSTTimeProvider timeProvider = KSTTimeProvider.createCPUClockBased();
+   private final ExecutionTimer executionTimer = new ExecutionTimer("IKStreamingTimer", registry);
+   private KSTTimeProvider timeProvider;
    private final YoDouble time = new YoDouble("time", registry);
    private final StateMachine<KSTState, State> stateMachine;
 
@@ -63,52 +69,40 @@ public class KinematicsStreamingToolboxController extends ToolboxController
 
    public KinematicsStreamingToolboxController(CommandInputManager commandInputManager,
                                                StatusMessageOutputManager statusOutputManager,
-                                               FullHumanoidRobotModel desiredFullRobotModel,
-                                               FullHumanoidRobotModelFactory fullRobotModelFactory,
-                                               double walkingControllerPeriod,
-                                               double toolboxControllerPeriod,
-                                               YoGraphicsListRegistry yoGraphicsListRegistry,
-                                               YoRegistry parentRegistry)
-   {
-      this(commandInputManager,
-           statusOutputManager,
-           KinematicsStreamingToolboxParameters.defaultParameters(),
-           desiredFullRobotModel,
-           fullRobotModelFactory,
-           walkingControllerPeriod,
-           toolboxControllerPeriod,
-           yoGraphicsListRegistry,
-           parentRegistry);
-   }
-
-   public KinematicsStreamingToolboxController(CommandInputManager commandInputManager,
-                                               StatusMessageOutputManager statusOutputManager,
                                                KinematicsStreamingToolboxParameters parameters,
                                                FullHumanoidRobotModel desiredFullRobotModel,
                                                FullHumanoidRobotModelFactory fullRobotModelFactory,
-                                               double walkingControllerPeriod,
-                                               double toolboxControllerPeriod,
                                                YoGraphicsListRegistry yoGraphicsListRegistry,
                                                YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
+
+      if (parameters.getClockType() == ClockType.CPU_CLOCK)
+         timeProvider = KSTTimeProvider.createCPUClockBased();
+      else if (parameters.getClockType() == ClockType.FIXED_DT)
+         timeProvider = KSTTimeProvider.createFixedDT(parameters.getToolboxUpdatePeriod());
+      else
+         throw new RuntimeException("Unknown clock type: " + parameters.getClockType());
 
       tools = new KSTTools(commandInputManager,
                            statusOutputManager,
                            parameters,
                            desiredFullRobotModel,
                            fullRobotModelFactory,
-                           walkingControllerPeriod,
-                           toolboxControllerPeriod,
                            time,
                            yoGraphicsListRegistry,
                            registry);
 
+      // Sleep state does pretty much nothing.
       sleepState = new KSTSleepState(tools);
+      // Streaming state is where the magic happens.
       streamingState = new KSTStreamingState(tools);
 
       stateMachine = createStateMachine(time);
       isDone.set(false);
+
+      if (parameters.getInitialConfigurationMap() != null)
+         setInitialRobotConfigurationNamedMap(parameters.getInitialConfigurationMap());
    }
 
    /**
@@ -177,6 +171,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    {
       try
       {
+         executionTimer.startMeasurement();
          timeProvider.update();
          time.set(timeProvider.getTime());
 
@@ -201,6 +196,10 @@ public class KinematicsStreamingToolboxController extends ToolboxController
          }
 
          isDone.set(true);
+      }
+      finally
+      {
+         executionTimer.stopMeasurement();
       }
    }
 
@@ -232,9 +231,9 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       return stateMachine.getCurrentStateKey();
    }
 
-   public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
+   public void setRobotStateUpdater(IKRobotStateUpdater robotStateUpdater)
    {
-      tools.updateRobotConfigurationData(newConfigurationData);
+      tools.setRobotStateUpdater(robotStateUpdater);
    }
 
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)

@@ -3,8 +3,8 @@ package us.ihmc.behaviors.simulation.door;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
-import us.ihmc.perception.sceneGraph.multiBodies.door.DoorModelParameters;
-import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.Cylinder3DDefinition;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
@@ -20,9 +20,9 @@ import us.ihmc.scs2.definition.visual.VisualDefinition;
  */
 public class DoorLeverHandleDefinition extends RigidBodyDefinition
 {
-   public DoorLeverHandleDefinition()
+   public DoorLeverHandleDefinition(String name)
    {
-      super("doorLeverHandle");
+      super(name);
 
       double sizeX = 0.065;
       double sizeY = 0.14;

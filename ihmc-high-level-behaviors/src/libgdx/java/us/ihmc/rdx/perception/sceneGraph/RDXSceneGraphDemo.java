@@ -3,12 +3,12 @@ package us.ihmc.rdx.perception.sceneGraph;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetector;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
+import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetector;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerROS2Publisher;
 import us.ihmc.perception.sceneGraph.SceneObjectDefinitions;
-import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
+import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.perception.RDXOpenCVArUcoMarkerDetectionUI;
@@ -18,8 +18,8 @@ import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.simulation.sensors.RDXSimulatedSensorFactory;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ArUcoMarkerPosesVisualizer;
-import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.Throttler;
@@ -35,7 +35,7 @@ public class RDXSceneGraphDemo
    private RDXEnvironmentBuilder environmentBuilder;
    private final RDXPose3DGizmo sensorPoseGizmo = new RDXPose3DGizmo("SimulatedSensor");
    private RDXHighLevelDepthSensorSimulator simulatedCamera;
-   private RDXGlobalVisualizersPanel globalVisualizersUI;
+   private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
    private OpenCVArUcoMarkerDetector arUcoMarkerDetector;
    private OpenCVArUcoMarkerDetectionResults arUcoMarkerDetectionResults;
    private ROS2SceneGraph onRobotSceneGraph;
@@ -58,9 +58,9 @@ public class RDXSceneGraphDemo
             ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, "perception_scene_graph_demo");
             ros2Helper = new ROS2Helper(ros2Node);
 
-            globalVisualizersUI = new RDXGlobalVisualizersPanel();
-            baseUI.getImGuiPanelManager().addPanel(globalVisualizersUI);
-            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersUI);
+            perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
+            baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
+            baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
 
             environmentBuilder = new RDXEnvironmentBuilder(baseUI.getPrimary3DPanel());
             environmentBuilder.create();
@@ -90,7 +90,7 @@ public class RDXSceneGraphDemo
                                                                                                                  ros2Helper,
                                                                                                                  PerceptionAPI.ARUCO_MARKER_POSES);
             arUcoMarkerPosesVisualizer.setActive(true);
-            globalVisualizersUI.addVisualizer(arUcoMarkerPosesVisualizer);
+            perceptionVisualizerPanel.addVisualizer(arUcoMarkerPosesVisualizer);
 
             arUcoMarkerPublisher = new OpenCVArUcoMarkerROS2Publisher(arUcoMarkerDetectionResults,
                                                                       ros2Helper,
@@ -107,7 +107,7 @@ public class RDXSceneGraphDemo
             openCVArUcoMarkerDetectionUI.create(arUcoMarkerDetector.getDetectorParameters());
             baseUI.getImGuiPanelManager().addPanel(openCVArUcoMarkerDetectionUI.getMainPanel());
 
-            globalVisualizersUI.create();
+            perceptionVisualizerPanel.create();
          }
 
          @Override
@@ -137,7 +137,7 @@ public class RDXSceneGraphDemo
 
             sceneGraphUI.update();
 
-            globalVisualizersUI.update();
+            perceptionVisualizerPanel.update();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -146,7 +146,7 @@ public class RDXSceneGraphDemo
          @Override
          public void dispose()
          {
-            globalVisualizersUI.destroy();
+            perceptionVisualizerPanel.destroy();
             simulatedCamera.dispose();
             baseUI.dispose();
             environmentBuilder.destroy();

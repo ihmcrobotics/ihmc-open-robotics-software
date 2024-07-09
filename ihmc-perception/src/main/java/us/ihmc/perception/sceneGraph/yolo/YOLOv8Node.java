@@ -1,30 +1,15 @@
 package us.ihmc.perception.sceneGraph.yolo;
 
-import us.ihmc.communication.PerceptionAPI;
-import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.Axis2D;
-import us.ihmc.euclid.geometry.Line2D;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformBasics;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
-import us.ihmc.perception.tools.PerceptionMessageTools;
-import us.ihmc.robotics.geometry.FramePlanarRegionsList;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.List;
-import java.util.Locale;
 
 public class YOLOv8Node extends DetectableSceneNode
 {
@@ -35,18 +20,21 @@ public class YOLOv8Node extends DetectableSceneNode
 
    // Read from YOLO manager, write to RDX
    private YOLOv8DetectionClass detectionClass;
+   private double confidence;
    private List<Point3D32> objectPointCloud;
    private Point3D32 objectCentroid;
 
    // Set this somewhere
    private final RigidBodyTransform centroidToObjectTransform = new RigidBodyTransform();
    private Pose3D objectPose;
-   private Pose3D filteredObjectPose;
-   private final RigidBodyTransform visualTransformToObjectPose = new RigidBodyTransform();
 
-   private double alpha = 0.30;
-
-   public YOLOv8Node(long id, String name, YOLOv8DetectionClass detectionClass, List<Point3D32> objectPointCloud, Point3D32 objectCentroid)
+   public YOLOv8Node(long id,
+                     String name,
+                     YOLOv8DetectionClass detectionClass,
+                     double confidence,
+                     List<Point3D32> objectPointCloud,
+                     Point3D32 objectCentroid,
+                     CRDTInfo crdtInfo)
    {
       this(id,
            name,
@@ -54,12 +42,12 @@ public class YOLOv8Node extends DetectableSceneNode
            2.0,
            0.2f,
            detectionClass,
+           confidence,
            objectPointCloud,
            objectCentroid,
-           new RigidBodyTransform(),
            new Pose3D(objectCentroid, new RotationMatrix()),
            new Pose3D(objectCentroid, new RotationMatrix()),
-           new RigidBodyTransform());
+           crdtInfo);
    }
 
    public YOLOv8Node(long id,
@@ -68,134 +56,33 @@ public class YOLOv8Node extends DetectableSceneNode
                      double outlierFilterThreshold,
                      float detectionAcceptanceThreshold,
                      YOLOv8DetectionClass detectionClass,
+                     double confidence,
                      List<Point3D32> objectPointCloud,
                      Point3D32 objectCentroid,
                      RigidBodyTransformBasics centroidToObjectTransform,
                      Pose3D objectPose,
-                     Pose3D filteredObjectPose,
-                     RigidBodyTransformBasics visualTransformToObjectPose)
+                     CRDTInfo crdtInfo)
    {
-      super(id, name);
+      super(id, name, crdtInfo);
 
       this.maskErosionKernelRadius = maskErosionKernelRadius;
       this.outlierFilterThreshold = outlierFilterThreshold;
       this.detectionAcceptanceThreshold = detectionAcceptanceThreshold;
       this.detectionClass = detectionClass;
+      this.confidence = confidence;
       this.objectPointCloud = objectPointCloud;
       this.objectCentroid = objectCentroid;
       this.centroidToObjectTransform.set(centroidToObjectTransform);
       this.objectPose = objectPose;
-      this.filteredObjectPose = filteredObjectPose;
-      this.visualTransformToObjectPose.set(visualTransformToObjectPose);
    }
 
    public void update()
    {
       objectPose.getTranslation().set(objectCentroid);
-      objectPose.appendTransform(centroidToObjectTransform);
+//      objectPose.appendTransform(centroidToObjectTransform);
 
-      if (!filteredObjectPose.hasRotation())
-         filteredObjectPose.getRotation().set(objectPose.getRotation());
-
-      filteredObjectPose.interpolate(objectPose, alpha);
-      getNodeToParentFrameTransform().set(filteredObjectPose);
+      getNodeToParentFrameTransform().set(objectPose);
       getNodeFrame().update();
-   }
-
-   private final int switchSideThreshold = 10;
-   private int switchSide = 0;
-   private RobotSide lastSide;
-
-   public void updatePlanarRegions(PlanarRegionsList planarRegionsList, ROS2Helper ros2Helper)
-   {
-      if (isDoorComponentNode())
-      {
-         Point3D objectCentroidInWorld = new Point3D(objectPose.getTranslation());
-
-         if (!planarRegionsList.isEmpty())
-         {
-            float epsilon = 0.75f;
-
-            // TODO: fixme doesn't work
-            //            PlanarRegion doorPlanarRegion = planarRegionsList.findClosestPlanarRegionToPointByProjectionOntoXYPlane(doorLeverPointInWorld.getX(),
-            //                                                                                                                    doorLeverPointInWorld.getY());
-
-            PlanarRegion doorPlanarRegion = null;
-            Point3DReadOnly doorPlanarRegionCentroidInWorld = null;
-
-            for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
-            {
-               Point3DReadOnly planarRegionCentroidInWorld = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
-
-               if (planarRegionCentroidInWorld.distance(objectCentroidInWorld) > epsilon)
-               {
-                  continue;
-               }
-
-               if (planarRegion.getArea() < 0.2)
-               {
-                  continue;
-               }
-
-               if (doorPlanarRegion == null)
-               {
-                  doorPlanarRegion = planarRegion;
-                  doorPlanarRegionCentroidInWorld = planarRegionCentroidInWorld;
-                  continue;
-               }
-
-               if (planarRegion.getArea() > doorPlanarRegion.getArea())
-               {
-                  doorPlanarRegion = planarRegion;
-                  doorPlanarRegionCentroidInWorld = planarRegionCentroidInWorld;
-               }
-            }
-
-            if (doorPlanarRegion != null)
-            {
-               Line2D doorLineNormal = new Line2D(doorPlanarRegionCentroidInWorld.getX(),
-                                                  doorPlanarRegionCentroidInWorld.getY(),
-                                                  doorPlanarRegion.getNormalX(),
-                                                  doorPlanarRegion.getNormalY());
-               Point2D doorLeverPointInWorld2D = new Point2D(objectCentroidInWorld);
-
-               RobotSide doorSide = doorLineNormal.isPointOnLeftSideOfLine(doorLeverPointInWorld2D) ? RobotSide.RIGHT : RobotSide.LEFT;
-
-               if (lastSide == null)
-                  lastSide = doorSide;
-
-               // Glitch filter
-               if (lastSide != doorSide)
-               {
-                  if (++switchSide > switchSideThreshold)
-                  {
-                     // Switch sides
-                     switchSide = 0;
-                     LogTools.info("Door lever switched sides");
-                  }
-                  else
-                  {
-                     doorSide = lastSide;
-                  }
-               }
-
-               double yaw = TupleTools.angle(Axis2D.X, doorLineNormal.getDirection());
-//               double pitch = TupleTools.angle(Axis2D.Y, doorLineNormal.getDirection()) + Math.PI;
-               if (getName().toLowerCase().contains("door lever"))
-                  getObjectPose().getRotation().setYawPitchRoll(yaw, 0.0, doorSide == RobotSide.LEFT ? Math.PI : 0.0);
-               else
-                  getObjectPose().getRotation().setToYawOrientation(yaw);
-
-               PlanarRegionsList doorPlanarRegionsList = new PlanarRegionsList();
-               doorPlanarRegionsList.addPlanarRegion(doorPlanarRegion);
-
-               FramePlanarRegionsList doorFramePlanarRegionsList = new FramePlanarRegionsList();
-               doorFramePlanarRegionsList.setPlanarRegionsList(doorPlanarRegionsList);
-
-               PerceptionMessageTools.publishFramePlanarRegionsList(doorFramePlanarRegionsList, PerceptionAPI.PERSPECTIVE_DOOR_RAPID_REGION, ros2Helper);
-            }
-         }
-      }
    }
 
    public int getMaskErosionKernelRadius()
@@ -238,6 +125,16 @@ public class YOLOv8Node extends DetectableSceneNode
       this.detectionClass = detectionClass;
    }
 
+   public double getConfidence()
+   {
+      return confidence;
+   }
+
+   public void setConfidence(double confidence)
+   {
+      this.confidence = confidence;
+   }
+
    public List<Point3D32> getObjectPointCloud()
    {
       return objectPointCloud;
@@ -276,42 +173,5 @@ public class YOLOv8Node extends DetectableSceneNode
    public void setObjectPose(Pose3D objectPose)
    {
       this.objectPose = objectPose;
-   }
-
-   public Pose3D getFilteredObjectPose()
-   {
-      return filteredObjectPose;
-   }
-
-   public void setFilteredObjectPose(Pose3D filteredObjectPose)
-   {
-      this.filteredObjectPose = filteredObjectPose;
-   }
-
-   public RigidBodyTransform getVisualTransformToObjectPose()
-   {
-      return visualTransformToObjectPose;
-   }
-
-   public void setVisualTransformToObjectPose(RigidBodyTransformBasics visualTransformToObjectPose)
-   {
-      this.visualTransformToObjectPose.set(visualTransformToObjectPose);
-   }
-
-   public double getAlpha()
-   {
-      return alpha;
-   }
-
-   public void setAlpha(double alpha)
-   {
-      this.alpha = alpha;
-   }
-
-   private boolean isDoorComponentNode()
-   {
-      String name = getName().toLowerCase(Locale.ROOT);
-
-      return name.contains("door lever") || name.contains("door pull handle") || name.contains("door push bar");
    }
 }

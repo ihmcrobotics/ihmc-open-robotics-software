@@ -17,8 +17,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnappingTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepChecker;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.HeightMapFootstepChecker;
 import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculator;
@@ -31,6 +30,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
+import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
@@ -49,7 +49,7 @@ public class AStarFootstepPlanner
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final AStarFootstepPlannerIterationConductor iterationConductor;
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
    private final FootstepPlannerEnvironmentHandler plannerEnvironmentHandler;
    private final FootstepSnapAndWiggler snapper;
    private final ParameterBasedStepExpansion nominalExpansion;
@@ -83,7 +83,7 @@ public class AStarFootstepPlanner
    private int iterations = 0;
    private FootstepPlanningResult result = null;
 
-   public AStarFootstepPlanner(FootstepPlannerParametersBasics footstepPlannerParameters,
+   public AStarFootstepPlanner(DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                                SideDependentList<ConvexPolygon2D> footPolygons,
                                WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
                                SwingPlannerParametersBasics swingPlannerParameters,
@@ -100,7 +100,7 @@ public class AStarFootstepPlanner
       this.stopwatch = stopwatch;
       this.statusCallbacks = statusCallbacks;
 
-      this.checker = new HeightMapFootstepChecker(footstepPlannerParameters, footPolygons, snapper, stepReachabilityData, registry);
+      this.checker = new HeightMapFootstepChecker(footstepPlannerParameters, footPolygons, plannerEnvironmentHandler, snapper, stepReachabilityData, registry);
       this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder, plannerEnvironmentHandler, registry);
       this.referenceBasedIdealStepCalculator = new ReferenceBasedIdealStepCalculator(footstepPlannerParameters, idealStepCalculator, registry);
 
@@ -154,9 +154,11 @@ public class AStarFootstepPlanner
 
       // Update what we should use for planning
       boolean hasHeightMap = request.getHeightMapData() != null && !request.getHeightMapData().isEmpty();
-      boolean flatGroundMode = request.getAssumeFlatGround() || !hasHeightMap;
+      boolean hasTerrainMap = request.getTerrainMapData() != null;
+      boolean flatGroundMode = request.getAssumeFlatGround() || (!hasHeightMap && !hasTerrainMap);
 
       HeightMapData heightMapData = flatGroundMode ? null : request.getHeightMapData();
+      TerrainMapData terrainMapData = flatGroundMode ? null : request.getTerrainMapData();
 
       if (flatGroundMode)
       {
@@ -166,6 +168,7 @@ public class AStarFootstepPlanner
 
       snapper.clearSnapData();
       plannerEnvironmentHandler.setHeightMap(heightMapData);
+      plannerEnvironmentHandler.setTerrainMapData(terrainMapData);
 
       checker.setHeightMapData(heightMapData);
       stepCostCalculator.setHeightMapData(heightMapData);

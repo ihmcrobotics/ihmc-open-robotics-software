@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commonWalkingControlModules.referenceFrames.WalkingTrajectoryPath;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStaticStabilityRegionCalculator;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator;
 import us.ihmc.commonWalkingControlModules.staticEquilibrium.WholeBodyContactState;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -108,6 +108,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private final YoDouble yoTime;
    private final double controlDT;
    private final double gravity;
+   private final boolean kinematicsSimulation;
 
    private final SideDependentList<CenterOfMassReferenceFrame> handCenterOfMassFrames;
    private final SideDependentList<YoFrameVector3D> wristRawMeasuredForces;
@@ -167,7 +168,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
    private WalkingMessageHandler walkingMessageHandler;
    private WalkingTrajectoryPath walkingTrajectoryPath;
 
-   private final CenterOfMassStaticStabilityRegionCalculator multiContactRegionCalculator;
+   private final CenterOfMassStabilityMarginRegionCalculator multiContactRegionCalculator;
    private final YoBoolean updateWholeBodyContactState = new YoBoolean("updateWholeBodyContactState", registry);
    private final WholeBodyContactState wholeBodyContactState;
 
@@ -188,6 +189,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
                                              double omega0,
                                              SideDependentList<ContactableFoot> feet,
                                              double controlDT,
+                                             boolean kinematicsSimulation, // Whether to create for non-physical motion generation only
                                              List<Updatable> updatables,
                                              List<ContactablePlaneBody> contactableBodies,
                                              YoGraphicsListRegistry yoGraphicsListRegistry,
@@ -215,6 +217,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       this.referenceFrames = referenceFrames;
       this.controlDT = controlDT;
       this.gravity = gravityZ;
+      this.kinematicsSimulation = kinematicsSimulation;
       this.yoTime = yoTime;
       this.omega0.set(omega0);
 
@@ -345,7 +348,8 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
          }
       }
 
-      multiContactRegionCalculator = new CenterOfMassStaticStabilityRegionCalculator(totalMass.getValue(), registry, yoGraphicsListRegistry);
+      multiContactRegionCalculator = new CenterOfMassStabilityMarginRegionCalculator("", totalMass.getValue(), registry, yoGraphicsListRegistry);
+      multiContactRegionCalculator.setupForStabilityMarginCalculation(centerOfMassStateProvider::getCenterOfMassPosition);
       wholeBodyContactState = new WholeBodyContactState(controlledOneDoFJoints, fullRobotModel.getRootJoint());
 
       String graphicListName = getClass().getSimpleName();
@@ -816,6 +820,12 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       return controlDT;
    }
 
+   /** If the controller is created in a non-physics nominal motion previewing only mode. */
+   public boolean isKinematicsSimulation()
+   {
+      return kinematicsSimulation;
+   }
+
    public FullHumanoidRobotModel getFullRobotModel()
    {
       return fullRobotModel;
@@ -1062,7 +1072,7 @@ public class HighLevelHumanoidControllerToolbox implements CenterOfMassStateProv
       return wholeBodyContactState;
    }
 
-   public CenterOfMassStaticStabilityRegionCalculator getMultiContactRegionCalculator()
+   public CenterOfMassStabilityMarginRegionCalculator getMultiContactRegionCalculator()
    {
       return multiContactRegionCalculator;
    }

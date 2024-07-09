@@ -9,10 +9,10 @@ import us.ihmc.perception.sceneGraph.centerpose.CenterposeDetectionManager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
+import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2DetectedObjectBoundingBoxVisualizer;
-import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2ImageMessageVisualizer;
+import us.ihmc.rdx.ui.graphics.ros2.pointCloud.RDXROS2ColoredPointCloudVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensors.ZEDModelData;
@@ -20,7 +20,7 @@ import us.ihmc.sensors.ZEDModelData;
 public class RDXCenterposeObjectDetectionDemo
 {
    private final RDXBaseUI baseUI = new RDXBaseUI("Centerpose Object Detection Demo");
-   private final RDXGlobalVisualizersPanel globalVisualizersPanel = new RDXGlobalVisualizersPanel();
+   private final RDXPerceptionVisualizersPanel perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
    private final ROS2Helper ros2Helper;
 
    public RDXCenterposeObjectDetectionDemo()
@@ -39,7 +39,7 @@ public class RDXCenterposeObjectDetectionDemo
                                                                                                            PubSubImplementation.FAST_RTPS,
                                                                                                            PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.LEFT));
             zed2LeftColorImageVisualizer.setActive(true);
-            globalVisualizersPanel.addVisualizer(zed2LeftColorImageVisualizer);
+            perceptionVisualizerPanel.addVisualizer(zed2LeftColorImageVisualizer);
 
             ReferenceFrame zedLeftCameraFrame = ZEDModelData.createCameraReferenceFrame(RobotSide.LEFT, ReferenceFrame.getWorldFrame());
             ReferenceFrame centerposeOutputFrame
@@ -55,20 +55,20 @@ public class RDXCenterposeObjectDetectionDemo
                                                                    PerceptionAPI.CENTERPOSE_DETECTED_OBJECT,
                                                                    baseUI.getPrimary3DPanel().getCamera3D());
             centerPoseBoundingBoxVisualizer.setActive(true);
-            globalVisualizersPanel.addVisualizer(centerPoseBoundingBoxVisualizer);
-            zed2LeftColorImageVisualizer.addOverlay(centerPoseBoundingBoxVisualizer::drawVertexOverlay);
+            perceptionVisualizerPanel.addVisualizer(centerPoseBoundingBoxVisualizer);
+            zed2LeftColorImageVisualizer.getOpenCVVideoVisualizer().addOverlay(centerPoseBoundingBoxVisualizer::drawVertexOverlay);
 
             RDXROS2ImageMessageVisualizer zed2RightColorImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Color Right",
                                                                                                             PubSubImplementation.FAST_RTPS,
                                                                                                             PerceptionAPI.ZED2_COLOR_IMAGES.get(RobotSide.RIGHT));
             zed2RightColorImageVisualizer.setActive(true);
-            globalVisualizersPanel.addVisualizer(zed2RightColorImageVisualizer);
+            perceptionVisualizerPanel.addVisualizer(zed2RightColorImageVisualizer);
 
             RDXROS2ImageMessageVisualizer zed2DepthImageVisualizer = new RDXROS2ImageMessageVisualizer("ZED 2 Depth",
                                                                                                        PubSubImplementation.FAST_RTPS,
                                                                                                        PerceptionAPI.ZED2_DEPTH);
             zed2DepthImageVisualizer.setActive(true);
-            globalVisualizersPanel.addVisualizer(zed2DepthImageVisualizer);
+            perceptionVisualizerPanel.addVisualizer(zed2DepthImageVisualizer);
 
             RDXROS2ColoredPointCloudVisualizer zed2ColoredPointCloudVisualizer = new RDXROS2ColoredPointCloudVisualizer("ZED 2 Colored Point Cloud",
                                                                                                                         PubSubImplementation.FAST_RTPS,
@@ -76,17 +76,17 @@ public class RDXCenterposeObjectDetectionDemo
                                                                                                                         PerceptionAPI.ZED2_COLOR_IMAGES.get(
                                                                                                                               RobotSide.LEFT));
             zed2ColoredPointCloudVisualizer.setActive(true);
-            globalVisualizersPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
+            perceptionVisualizerPanel.addVisualizer(zed2ColoredPointCloudVisualizer);
 
-            globalVisualizersPanel.create();
-            baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
-            baseUI.getPrimaryScene().addRenderableProvider(globalVisualizersPanel);
+            perceptionVisualizerPanel.create();
+            baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
+            baseUI.getPrimaryScene().addRenderableProvider(perceptionVisualizerPanel);
          }
 
          @Override
          public void render()
          {
-            globalVisualizersPanel.update();
+            perceptionVisualizerPanel.update();
 
             baseUI.renderBeforeOnScreenUI();
             baseUI.renderEnd();
@@ -95,7 +95,7 @@ public class RDXCenterposeObjectDetectionDemo
          @Override
          public void dispose()
          {
-            globalVisualizersPanel.destroy();
+            perceptionVisualizerPanel.destroy();
             baseUI.dispose();
             ros2Node.destroy();
          }

@@ -4,20 +4,20 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
-import us.ihmc.perception.sceneGraph.multiBodies.door.DoorSceneNodeDefinitions;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorSceneNodeDefinitions;
 import us.ihmc.scs2.definition.collision.CollisionShapeDefinition;
 import us.ihmc.scs2.definition.geometry.Box3DDefinition;
 import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition;
 import us.ihmc.scs2.definition.robot.RigidBodyDefinition;
 import us.ihmc.scs2.definition.visual.VisualDefinition;
 
-import static us.ihmc.perception.sceneGraph.multiBodies.door.DoorModelParameters.*;
+import static us.ihmc.perception.sceneGraph.rigidBody.doors.DoorModelParameters.*;
 
 public class DoorFrameDefinition extends RigidBodyDefinition
 {
-   public DoorFrameDefinition()
+   public DoorFrameDefinition(String name)
    {
-      super("frameBody");
+      super(name);
 
       double pillarSizeX = DOOR_FRAME_PILLAR_SIZE_X;
       double pillarSizeY = DOOR_FRAME_PILLAR_SIZE_X;

@@ -1,6 +1,8 @@
 package us.ihmc.behaviors.behaviorTree;
 
+import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.communication.crdt.CRDTInfo;
@@ -22,6 +24,14 @@ public class BehaviorTreeDefinitionBuilder
       {
          return new DoorTraversalDefinition(crdtInfo, saveFileDirectory);
       }
+      if (definitionType == TrashCanInteractionDefinition.class)
+      {
+         return new TrashCanInteractionDefinition(crdtInfo, saveFileDirectory);
+      }
+      if (definitionType == BuildingExplorationDefinition.class)
+      {
+         return new BuildingExplorationDefinition(crdtInfo, saveFileDirectory);
+      }
       if (definitionType == ChestOrientationActionDefinition.class)
       {
          return new ChestOrientationActionDefinition(crdtInfo, saveFileDirectory);
@@ -42,9 +52,9 @@ public class BehaviorTreeDefinitionBuilder
       {
          return new HandWrenchActionDefinition(crdtInfo, saveFileDirectory);
       }
-      if (definitionType == PelvisHeightPitchActionDefinition.class)
+      if (definitionType == PelvisHeightOrientationActionDefinition.class)
       {
-         return new PelvisHeightPitchActionDefinition(crdtInfo, saveFileDirectory);
+         return new PelvisHeightOrientationActionDefinition(crdtInfo, saveFileDirectory);
       }
       if (definitionType == SakeHandCommandActionDefinition.class)
       {
@@ -57,6 +67,10 @@ public class BehaviorTreeDefinitionBuilder
       if (definitionType == WaitDurationActionDefinition.class)
       {
          return new WaitDurationActionDefinition(crdtInfo, saveFileDirectory);
+      }
+      if (definitionType == FootPoseActionDefinition.class)
+      {
+         return new FootPoseActionDefinition(crdtInfo, saveFileDirectory);
       }
 
       throw new RuntimeException("Node definition type not found: " + definitionType.getSimpleName());

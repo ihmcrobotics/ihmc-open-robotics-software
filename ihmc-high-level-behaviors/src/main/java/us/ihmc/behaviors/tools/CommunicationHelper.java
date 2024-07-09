@@ -32,7 +32,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.SwingPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
@@ -138,7 +138,7 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
 
    public SwingPlanningModule createFootstepPlanPostProcessor()
    {
-      FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       return new SwingPlanningModule(footstepPlannerParameters,
@@ -162,6 +162,12 @@ public class CommunicationHelper implements ROS2ControllerPublishSubscribeAPI
    public <T> void subscribeViaVolatileCallback(ROS2Topic<T> topic, Consumer<T> callback)
    {
       ros2Helper.subscribeViaVolatileCallback(topic, callback);
+   }
+
+   @Override
+   public <T> SwapReference<T> subscribeViaSwapReference(ROS2Topic<T> topic, Consumer<T> callback)
+   {
+      return ros2Helper.subscribeViaSwapReference(topic, callback);
    }
 
    @Override

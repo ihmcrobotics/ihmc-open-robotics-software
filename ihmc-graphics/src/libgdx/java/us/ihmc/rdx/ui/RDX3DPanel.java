@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 
 public class RDX3DPanel extends RDXPanel
@@ -54,6 +55,7 @@ public class RDX3DPanel extends RDXPanel
    private final Map<Object, Consumer<ImGui3DViewInput>> imgui3DViewInputProcessorOwnerKeyMap = new HashMap<>();
    private final RDX3DPanelToolbar toolbar = new RDX3DPanelToolbar();
    private final ArrayList<Runnable> imGuiOverlayAdditions = new ArrayList<>();
+   private final TreeMap<String, RDX3DOverlayPanel> overlayPanels = new TreeMap<>();
    private final Map<Object, Runnable> imGuiOverlayAdditionOwnerKeyMap = new HashMap<>();
    private InputMultiplexer inputMultiplexer;
    private RDXFocusBasedCamera camera3D;
@@ -129,7 +131,7 @@ public class RDX3DPanel extends RDXPanel
 
    public void render()
    {
-      if (getIsShowing().get())
+      if (getIsShowing().get() && ImGuiTools.getCurrentContext() != 0)
       {
          view3DPanelSizeHandler.handleSizeBeforeBegin();
          ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
@@ -185,7 +187,7 @@ public class RDX3DPanel extends RDXPanel
          int frameBufferWidth = frameBuffer.getWidth();
          int frameBufferHeight = frameBuffer.getHeight();
 
-         // We do this render to get the Z buffer from just the model
+         // We do this render to get the Z buffer from just the model scene level
          if (modelSceneMouseCollisionEnabled && scene.getSceneLevelsToRender().contains(RDXSceneLevel.MODEL))
          {
             frameBuffer.begin();
@@ -221,9 +223,18 @@ public class RDX3DPanel extends RDXPanel
          ImGui.getWindowDrawList().addImage(textureID, windowDrawMinX, windowDrawMinY, windowDrawMaxX, windowDrawMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
 
          for (Runnable imguiOverlayAddition : imGuiOverlayAdditions)
-         {
             imguiOverlayAddition.run();
+
+         // Render overlay panels
+         {
+            float previousActiveWindowY = (getWindowPositionY() + 10);
+            for (String overlayPanelName : overlayPanels.keySet())
+            {
+               RDX3DOverlayPanel overlayPanel = overlayPanels.get(overlayPanelName);
+               previousActiveWindowY = overlayPanel.render(previousActiveWindowY);
+            }
          }
+
          toolbar.render(windowSizeX, windowPositionX, windowPositionY);
 
          if (ImGui.isWindowHovered() && ImGui.isMouseDoubleClicked(ImGuiMouseButton.Right))
@@ -368,6 +379,22 @@ public class RDX3DPanel extends RDXPanel
    public void addImGuiOverlayAddition(Runnable imGuiOverlayAddition)
    {
       imGuiOverlayAdditions.add(imGuiOverlayAddition);
+   }
+
+   public boolean overlayPanelExists(String panelName)
+   {
+      return overlayPanels.containsKey(panelName);
+   }
+
+   public void addOverlayPanel(String panelName, Runnable imGuiRender)
+   {
+      RDX3DOverlayPanel panel = new RDX3DOverlayPanel(panelName, imGuiRender, this);
+      overlayPanels.put(panelName, panel);
+   }
+
+   public void removeOverlayPanel(String panelName)
+   {
+      overlayPanels.remove(panelName);
    }
 
    public void addImGui3DViewPickCalculator(Object ownerKey, Consumer<ImGui3DViewInput> calculate3DViewPick)

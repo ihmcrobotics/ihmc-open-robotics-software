@@ -3,20 +3,24 @@
 # reduce the complexity of logic in figuring out when nodes are currently under
 # consideration.
 
-byte BASIC_NODE = 0
-byte ACTION_SEQUENCE = 1
-byte DOOR_TRAVERSAL = 2
+byte ROOT_NODE = 0
+byte BASIC_NODE = 1
+byte ACTION_SEQUENCE = 2
+byte DOOR_TRAVERSAL = 3
+byte TRASH_CAN_INTERACTION = 4
+byte BUILDING_EXPLORATION = 5
 
-byte CHEST_ORIENTATION_ACTION = 3
-byte FOOTSTEP_PLAN_ACTION = 4
-byte SAKE_HAND_COMMAND_ACTION = 5
-byte HAND_POSE_ACTION = 6
-byte HAND_WRENCH_ACTION = 7
-byte SCREW_PRIMITIVE_ACTION = 8
-byte PELVIS_HEIGHT_PITCH_ACTION = 9
-byte WAIT_DURATION_ACTION = 10
-byte KICK_DOOR_ACTION = 11
-byte KICK_DOOR_APPROACH_ACTION = 12
+byte CHEST_ORIENTATION_ACTION = 10
+byte FOOTSTEP_PLAN_ACTION = 11
+byte SAKE_HAND_COMMAND_ACTION = 12
+byte HAND_POSE_ACTION = 13
+byte HAND_WRENCH_ACTION = 14
+byte SCREW_PRIMITIVE_ACTION = 15
+byte PELVIS_HEIGHT_ORIENTATION_ACTION = 16
+byte WAIT_DURATION_ACTION = 17
+byte FOOT_POSE_ACTION = 18
+byte KICK_DOOR_ACTION = 19
+byte KICK_DOOR_APPROACH_ACTION = 20
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
 uint32 sequence_id
@@ -35,11 +39,17 @@ byte[<=1000] behavior_tree_types
 # it's type.
 uint32[<=1000] behavior_tree_indices
 
+behavior_msgs/BehaviorTreeRootNodeStateMessage[<=1] root_nodes
+
 behavior_msgs/BasicNodeStateMessage[<=200] basic_nodes
 
 behavior_msgs/ActionSequenceStateMessage[<=200] action_sequences
 
 behavior_msgs/DoorTraversalStateMessage[<=200] door_traversals
+
+behavior_msgs/TrashCanInteractionStateMessage[<=200] trash_can_interactions
+
+behavior_msgs/BuildingExplorationStateMessage[<=200] building_explorations
 
 behavior_msgs/ChestOrientationActionStateMessage[<=200] chest_orientation_actions
 
@@ -53,9 +63,11 @@ behavior_msgs/HandWrenchActionStateMessage[<=200] hand_wrench_actions
 
 behavior_msgs/ScrewPrimitiveActionStateMessage[<=200] screw_primitive_actions
 
-behavior_msgs/PelvisHeightPitchActionStateMessage[<=200] pelvis_height_actions
+behavior_msgs/PelvisHeightOrientationActionStateMessage[<=200] pelvis_height_actions
 
 behavior_msgs/WaitDurationActionStateMessage[<=200] wait_duration_actions
+
+behavior_msgs/FootPoseActionStateMessage[<=200] foot_pose_actions
 
 behavior_msgs/KickDoorActionStateMessage[<=200] kick_door_actions
 

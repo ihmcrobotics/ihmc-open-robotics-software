@@ -7,7 +7,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -22,6 +21,8 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
 {
    private final CenterOfPressureDataHolder centerOfPressureDataHolder;
    private final DesiredExternalWrenchHolder desiredExternalWrenchHolder;
+   private final FrameVector3D linearMomentum = new FrameVector3D();
+   private final FrameVector3D angularMomentum = new FrameVector3D();
    private final FrameVector3D linearMomentumRate = new FrameVector3D();
    private final FrameVector3D angularMomentumRate = new FrameVector3D();
    private final RootJointDesiredConfigurationData rootJointDesiredConfigurationData = new RootJointDesiredConfigurationData();
@@ -45,6 +46,8 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
    {
       this.centerOfPressureDataHolder = centerOfPressureDataHolder;
       this.desiredExternalWrenchHolder = desiredExternalWrenchHolder;
+      linearMomentum.setToNaN(ReferenceFrame.getWorldFrame());
+      angularMomentum.setToNaN(ReferenceFrame.getWorldFrame());
       linearMomentumRate.setToNaN(ReferenceFrame.getWorldFrame());
       angularMomentumRate.setToNaN(ReferenceFrame.getWorldFrame());
       if (lowLevelControllerOutput != null)
@@ -104,17 +107,34 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
       return desiredExternalWrenchHolder.getDesiredExternalWrench(desiredExternalWrenchToPack, rigidBody);
    }
 
+   public void setLinearMomentum(FrameVector3DReadOnly linearMomentum)
+   {
+      this.linearMomentum.setIncludingFrame(linearMomentum);
+   }
+
+   @Override
+   public FrameVector3D getLinearMomentum()
+   {
+      return linearMomentum;
+   }
+
+   public void setAngularMomentum(FrameVector3DReadOnly angularMomentum)
+   {
+      this.angularMomentum.setIncludingFrame(angularMomentum);
+   }
+
+   @Override
+   public FrameVector3D getAngularMomentum()
+   {
+      return angularMomentum;
+   }
+
    public void setLinearMomentumRate(FrameVector3DReadOnly linearMomentumRate)
    {
       this.linearMomentumRate.setIncludingFrame(linearMomentumRate);
    }
 
    @Override
-   public void getLinearMomentumRate(FrameVector3DBasics linearMomentumRateToPack)
-   {
-      linearMomentumRateToPack.setIncludingFrame(linearMomentumRate);
-   }
-
    public FrameVector3D getLinearMomentumRate()
    {
       return linearMomentumRate;
@@ -126,11 +146,6 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
    }
 
    @Override
-   public void getAngularMomentumRate(FrameVector3DBasics angularMomentumRateToPack)
-   {
-      angularMomentumRateToPack.setIncludingFrame(angularMomentumRate);
-   }
-
    public FrameVector3D getAngularMomentumRate()
    {
       return angularMomentumRate;

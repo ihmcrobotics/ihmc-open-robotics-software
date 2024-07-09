@@ -1,17 +1,19 @@
 package us.ihmc.perception.sceneGraph.ros2;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import us.ihmc.ros2.ROS2Input;
 import perception_msgs.msg.dds.ArUcoMarkerNodeMessage;
 import perception_msgs.msg.dds.CenterposeNodeMessage;
 import perception_msgs.msg.dds.DetectableSceneNodeMessage;
+import perception_msgs.msg.dds.DoorNodeMessage;
 import perception_msgs.msg.dds.PredefinedRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.PrimitiveRigidBodySceneNodeMessage;
 import perception_msgs.msg.dds.SceneGraphMessage;
 import perception_msgs.msg.dds.StaticRelativeSceneNodeMessage;
 import perception_msgs.msg.dds.YOLOv8NodeMessage;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.ros2.ROS2IOTopicQualifier;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -25,8 +27,12 @@ import us.ihmc.perception.sceneGraph.modification.SceneGraphClearSubtree;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeReplacement;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.OpeningMechanismType;
 import us.ihmc.perception.sceneGraph.yolo.YOLOv8Node;
+import us.ihmc.tools.thread.SwapReference;
 
+import java.util.ArrayList;
 import java.util.function.BiFunction;
 
 /**
@@ -34,13 +40,17 @@ import java.util.function.BiFunction;
  */
 public class ROS2SceneGraphSubscription
 {
-   private final ROS2Input<SceneGraphMessage> sceneGraphSubscription;
+   private final SwapReference<SceneGraphMessage> sceneGraphMessageSwapReference;
+   private final Notification recievedMessageNotification = new Notification();
+   private final ArrayList<Runnable> messageRecievedCallbacks = new ArrayList<>();
    private final SceneGraph sceneGraph;
    private final BiFunction<SceneGraph, ROS2SceneGraphSubscriptionNode, SceneNode> newNodeSupplier;
    private final RigidBodyTransform nodeToWorldTransform = new RigidBodyTransform();
    private long numberOfMessagesReceived = 0;
+   private long previousUpdateNumber = -1;
+   private long messageDropCount = 0;
+   private int numberOfOnRobotNodes = 0;
    private boolean localTreeFrozen = false;
-   private SceneGraphMessage latestSceneGraphMessage;
    private final ROS2SceneGraphSubscriptionNode subscriptionRootNode = new ROS2SceneGraphSubscriptionNode();
    private final MutableInt subscriptionNodeDepthFirstIndex = new MutableInt();
 
@@ -65,7 +75,8 @@ public class ROS2SceneGraphSubscription
       else
          this.newNodeSupplier = (uneeded, subscriptionNode) -> ROS2SceneGraphTools.createNodeFromMessage(subscriptionNode, sceneGraph);
 
-      sceneGraphSubscription = ros2PublishSubscribeAPI.subscribe(PerceptionAPI.SCENE_GRAPH.getTopic(ioQualifier));
+      sceneGraphMessageSwapReference = ros2PublishSubscribeAPI.subscribeViaSwapReference(PerceptionAPI.SCENE_GRAPH.getTopic(ioQualifier),
+                                                                                         recievedMessageNotification);
    }
 
    /**
@@ -75,32 +86,50 @@ public class ROS2SceneGraphSubscription
     */
    public void update()
    {
-      if (sceneGraphSubscription.getMessageNotification().poll())
+      if (recievedMessageNotification.poll())
       {
-         ++numberOfMessagesReceived;
-         latestSceneGraphMessage = sceneGraphSubscription.getMessageNotification().read();
-
-         subscriptionRootNode.clear();
-         subscriptionNodeDepthFirstIndex.setValue(0);
-         buildSubscriptionTree(latestSceneGraphMessage, subscriptionRootNode);
-
-         // If the tree was recently modified by the operator, we do not accept
-         // updates the structure of the tree.
-         localTreeFrozen = false;
-         checkTreeModified(sceneGraph.getRootNode());
-
-         if (!localTreeFrozen)
-            sceneGraph.getNextID().setValue(latestSceneGraphMessage.getNextId());
-
-         sceneGraph.modifyTree(modificationQueue ->
+         synchronized (sceneGraphMessageSwapReference)
          {
+            SceneGraphMessage sceneGraphMessage = sceneGraphMessageSwapReference.getForThreadTwo();
+
+            numberOfOnRobotNodes = sceneGraphMessage.getSceneTreeIndices().size();
+
+            ++numberOfMessagesReceived;
+            for (Runnable messageRecievedCallback : messageRecievedCallbacks)
+            {
+               messageRecievedCallback.run();
+            }
+
+            long nextUpdateNumber = sceneGraphMessage.getSequenceId();
+            if (previousUpdateNumber > -1)
+            {
+               long expectedUpdateNumber = previousUpdateNumber + 1;
+               messageDropCount += nextUpdateNumber - expectedUpdateNumber;
+            }
+            previousUpdateNumber = nextUpdateNumber;
+
+            subscriptionRootNode.clear();
+            subscriptionNodeDepthFirstIndex.setValue(0);
+            buildSubscriptionTree(sceneGraphMessage, subscriptionRootNode);
+
+            // If the tree was recently modified by the operator, we do not accept
+            // updates the structure of the tree.
+            localTreeFrozen = false;
+            checkTreeModified(sceneGraph.getRootNode());
+
             if (!localTreeFrozen)
-               modificationQueue.accept(new SceneGraphClearSubtree(sceneGraph.getRootNode()));
+               sceneGraph.getNextID().set(sceneGraphMessage.getNextId());
 
-            updateLocalTreeFromSubscription(subscriptionRootNode, sceneGraph.getRootNode(), null, modificationQueue);
+            sceneGraph.modifyTree(modificationQueue ->
+            {
+               if (!localTreeFrozen)
+                  modificationQueue.accept(new SceneGraphClearSubtree(sceneGraph.getRootNode()));
 
-            // FIXME: We seem to be missing now the destroy functionality if nodes didn't get added back
-         });
+               updateLocalTreeFromSubscription(subscriptionRootNode, sceneGraph.getRootNode(), null, modificationQueue);
+
+               // FIXME: We seem to be missing now the destroy functionality if nodes didn't get added back
+            });
+         }
       }
    }
 
@@ -146,16 +175,22 @@ public class ROS2SceneGraphSubscription
             yoloNode.setOutlierFilterThreshold(subscriptionNode.getYOLONodeMessage().getOutlierFilterThreshold());
             yoloNode.setDetectionAcceptanceThreshold(subscriptionNode.getYOLONodeMessage().getDetectionAcceptanceThreshold());
             yoloNode.setDetectionClass(YOLOv8DetectionClass.valueOf(subscriptionNode.getYOLONodeMessage().getDetectionClassAsString()));
+            yoloNode.setConfidence(subscriptionNode.getYOLONodeMessage().getConfidence());
             yoloNode.setObjectPointCloud(subscriptionNode.getYOLONodeMessage().getObjectPointCloud());
             yoloNode.setCentroidToObjectTransform(subscriptionNode.getYOLONodeMessage().getCentroidToObjectTransform());
             yoloNode.setObjectPose(subscriptionNode.getYOLONodeMessage().getObjectPose());
-            yoloNode.setFilteredObjectPose(subscriptionNode.getYOLONodeMessage().getFilteredObjectPose());
-            yoloNode.setVisualTransformToObjectPose(subscriptionNode.getYOLONodeMessage().getVisualTransformToObjectPose());
-            yoloNode.setAlpha(subscriptionNode.getYOLONodeMessage().getAlphaFilter());
          }
          if (localNode instanceof StaticRelativeSceneNode staticRelativeSceneNode)
          {
             staticRelativeSceneNode.setDistanceToDisableTracking(subscriptionNode.getStaticRelativeSceneNodeMessage().getDistanceToDisableTracking());
+         }
+         if (localNode instanceof DoorNode doorNode)
+         {
+            doorNode.setOpeningMechanismType(OpeningMechanismType.fromByte(subscriptionNode.getDoorNodeMessage().getOpeningMechanismType()));
+            doorNode.getDoorPlanarRegion().set(PlanarRegionMessageConverter.convertToPlanarRegion(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegion()));
+            doorNode.setDoorPlanarRegionUpdateTime(subscriptionNode.getDoorNodeMessage().getDoorPlanarRegionUpdateTimeMillis());
+            doorNode.setOpeningMechanismPoint3D(subscriptionNode.getDoorNodeMessage().getOpeningMechanismPoint());
+            doorNode.setOpeningMechanismPose3D(subscriptionNode.getDoorNodeMessage().getOpeningMechanismPose());
          }
 
          if (localParentNode != null) // Parent of root node is null
@@ -178,6 +213,9 @@ public class ROS2SceneGraphSubscription
             updateLocalTreeFromSubscription(subscriptionChildNode, localChildNode, localNode, modificationQueue);
          }
       }
+
+      // Update the state after iterating over children, because node can unfreeze at this time
+      localNode.fromMessage(subscriptionNode.getSceneNodeMessage().getConfirmableRequest());
    }
 
    private void checkTreeModified(SceneNode localNode)
@@ -250,6 +288,12 @@ public class ROS2SceneGraphSubscription
             subscriptionNode.setPrimitiveRigidBodySceneNodeMessage(primitiveRigidBodySceneNodeMessage);
             subscriptionNode.setSceneNodeMessage(primitiveRigidBodySceneNodeMessage.getSceneNode());
          }
+         case SceneGraphMessage.DOOR_NODE_TYPE ->
+         {
+            DoorNodeMessage doorNodeMessage = sceneGraphMessage.getDoorSceneNodes().get(indexInTypesList);
+            subscriptionNode.setDoorNodeMessage(doorNodeMessage);
+            subscriptionNode.setSceneNodeMessage(doorNodeMessage.getSceneNode());
+         }
       }
 
       for (int i = 0; i < subscriptionNode.getSceneNodeMessage().getNumberOfChildren(); i++)
@@ -263,12 +307,17 @@ public class ROS2SceneGraphSubscription
 
    public void destroy()
    {
-      sceneGraphSubscription.destroy();
+
    }
 
-   public ROS2Input<SceneGraphMessage> getSceneGraphSubscription()
+   public void registerMessageReceivedCallback(Runnable callback)
    {
-      return sceneGraphSubscription;
+      messageRecievedCallbacks.add(callback);
+   }
+
+   public int getNumberOfOnRobotNodes()
+   {
+      return numberOfOnRobotNodes;
    }
 
    public long getNumberOfMessagesReceived()
@@ -276,13 +325,8 @@ public class ROS2SceneGraphSubscription
       return numberOfMessagesReceived;
    }
 
-   public SceneGraphMessage getLatestSceneGraphMessage()
+   public long getMessageDropCount()
    {
-      return latestSceneGraphMessage;
-   }
-
-   public boolean getLocalTreeFrozen()
-   {
-      return localTreeFrozen;
+      return messageDropCount;
    }
 }

@@ -2,6 +2,7 @@ package us.ihmc.perception.sceneGraph;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.robotics.EuclidCoreTestMissingTools;
@@ -14,10 +15,11 @@ public class SceneGraphTest
    public void testBasicOperations()
    {
       SceneGraph sceneGraph = new SceneGraph();
+      CRDTInfo crdtInfo = sceneGraph.getCRDTInfo();
 
       Assertions.assertEquals(0, sceneGraph.getRootNode().getChildren().size());
 
-      Assertions.assertEquals(1, sceneGraph.getNextID().getValue());
+      Assertions.assertEquals(1, sceneGraph.getNextID().get());
       Assertions.assertEquals(1, sceneGraph.getIDToNodeMap().size());
       Assertions.assertEquals(1, sceneGraph.getNodeNameList().size());
       Assertions.assertEquals(1, sceneGraph.getNamesToNodesMap().size());
@@ -26,29 +28,29 @@ public class SceneGraphTest
 
       sceneGraph.modifyTree(modificationQueue ->
       {
-         modificationQueue.accept(new SceneGraphNodeAddition(new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child0"), sceneGraph.getRootNode()));
+         modificationQueue.accept(new SceneGraphNodeAddition(new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child0", crdtInfo), sceneGraph.getRootNode()));
       });
 
       Assertions.assertEquals(1, sceneGraph.getRootNode().getChildren().size());
 
-      Assertions.assertEquals(2, sceneGraph.getNextID().getValue());
+      Assertions.assertEquals(2, sceneGraph.getNextID().get());
       Assertions.assertEquals(2, sceneGraph.getIDToNodeMap().size());
       Assertions.assertEquals(2, sceneGraph.getNodeNameList().size());
       Assertions.assertEquals(2, sceneGraph.getNamesToNodesMap().size());
       Assertions.assertEquals(2, sceneGraph.getIDToNodeMap().size());
       Assertions.assertEquals(0, sceneGraph.getArUcoMarkerIDToNodeMap().size());
 
-      SceneNode child1 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1");
+      SceneNode child1 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1", crdtInfo);
       sceneGraph.modifyTree(modificationQueue ->
       {
          modificationQueue.accept(new SceneGraphNodeAddition(child1, sceneGraph.getRootNode()));
-         modificationQueue.accept(new SceneGraphNodeAddition(new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1Child0"), child1));
+         modificationQueue.accept(new SceneGraphNodeAddition(new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1Child0", crdtInfo), child1));
       });
 
       Assertions.assertEquals(2, sceneGraph.getRootNode().getChildren().size());
       Assertions.assertEquals(1, child1.getChildren().size());
 
-      Assertions.assertEquals(4, sceneGraph.getNextID().getValue());
+      Assertions.assertEquals(4, sceneGraph.getNextID().get());
       Assertions.assertEquals(4, sceneGraph.getIDToNodeMap().size());
       Assertions.assertEquals(4, sceneGraph.getNodeNameList().size());
       Assertions.assertEquals(4, sceneGraph.getNamesToNodesMap().size());
@@ -60,9 +62,10 @@ public class SceneGraphTest
    public void testMovingNodes()
    {
       SceneGraph sceneGraph = new SceneGraph();
-      SceneNode child0 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child0");
-      SceneNode child1 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1");
-      SceneNode child1child0 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1Child0");
+      CRDTInfo crdtInfo = sceneGraph.getCRDTInfo();
+      SceneNode child0 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child0", crdtInfo);
+      SceneNode child1 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1", crdtInfo);
+      SceneNode child1child0 = new SceneNode(sceneGraph.getNextID().getAndIncrement(), "Child1Child0", crdtInfo);
       sceneGraph.modifyTree(modificationQueue ->
       {
          modificationQueue.accept(new SceneGraphNodeAddition(child0, sceneGraph.getRootNode()));

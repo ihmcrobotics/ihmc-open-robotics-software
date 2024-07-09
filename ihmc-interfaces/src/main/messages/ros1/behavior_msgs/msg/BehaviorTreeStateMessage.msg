@@ -3,31 +3,39 @@
 # reduce the complexity of logic in figuring out when nodes are currently under
 # consideration.
 
-int8 BASIC_NODE=0
+int8 ROOT_NODE=0
 
-int8 ACTION_SEQUENCE=1
+int8 BASIC_NODE=1
 
-int8 DOOR_TRAVERSAL=2
+int8 ACTION_SEQUENCE=2
 
-int8 CHEST_ORIENTATION_ACTION=3
+int8 DOOR_TRAVERSAL=3
 
-int8 FOOTSTEP_PLAN_ACTION=4
+int8 TRASH_CAN_INTERACTION=4
 
-int8 SAKE_HAND_COMMAND_ACTION=5
+int8 BUILDING_EXPLORATION=5
 
-int8 HAND_POSE_ACTION=6
+int8 CHEST_ORIENTATION_ACTION=10
 
-int8 HAND_WRENCH_ACTION=7
+int8 FOOTSTEP_PLAN_ACTION=11
 
-int8 SCREW_PRIMITIVE_ACTION=8
+int8 SAKE_HAND_COMMAND_ACTION=12
 
-int8 PELVIS_HEIGHT_PITCH_ACTION=9
+int8 HAND_POSE_ACTION=13
 
-int8 WAIT_DURATION_ACTION=10
+int8 HAND_WRENCH_ACTION=14
 
-int8 KICK_DOOR_ACTION=11
+int8 SCREW_PRIMITIVE_ACTION=15
 
-int8 KICK_DOOR_APPROACH_ACTION=12
+int8 PELVIS_HEIGHT_ORIENTATION_ACTION=16
+
+int8 WAIT_DURATION_ACTION=17
+
+int8 FOOT_POSE_ACTION=18
+
+int8 KICK_DOOR_ACTION=19
+
+int8 KICK_DOOR_APPROACH_ACTION=20
 
 # Monotonically increasing message ID that matches the CRDTInfo update number
 uint32 sequence_id
@@ -46,11 +54,17 @@ int8[] behavior_tree_types
 # it's type.
 uint32[] behavior_tree_indices
 
+behavior_msgs/BehaviorTreeRootNodeStateMessage[] root_nodes
+
 behavior_msgs/BasicNodeStateMessage[] basic_nodes
 
 behavior_msgs/ActionSequenceStateMessage[] action_sequences
 
 behavior_msgs/DoorTraversalStateMessage[] door_traversals
+
+behavior_msgs/TrashCanInteractionStateMessage[] trash_can_interactions
+
+behavior_msgs/BuildingExplorationStateMessage[] building_explorations
 
 behavior_msgs/ChestOrientationActionStateMessage[] chest_orientation_actions
 
@@ -64,9 +78,11 @@ behavior_msgs/HandWrenchActionStateMessage[] hand_wrench_actions
 
 behavior_msgs/ScrewPrimitiveActionStateMessage[] screw_primitive_actions
 
-behavior_msgs/PelvisHeightPitchActionStateMessage[] pelvis_height_actions
+behavior_msgs/PelvisHeightOrientationActionStateMessage[] pelvis_height_actions
 
 behavior_msgs/WaitDurationActionStateMessage[] wait_duration_actions
+
+behavior_msgs/FootPoseActionStateMessage[] foot_pose_actions
 
 behavior_msgs/KickDoorActionStateMessage[] kick_door_actions
 

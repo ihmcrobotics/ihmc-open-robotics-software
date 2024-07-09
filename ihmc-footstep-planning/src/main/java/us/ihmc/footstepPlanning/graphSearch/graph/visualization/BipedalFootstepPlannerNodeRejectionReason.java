@@ -3,18 +3,12 @@ package us.ihmc.footstepPlanning.graphSearch.graph.visualization;
 public enum BipedalFootstepPlannerNodeRejectionReason
 {
    STEP_TOO_HIGH_OR_LOW,
-   STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED,
-   STEP_TOO_FORWARD_AND_DOWN,
-   STEP_TOO_WIDE_AND_DOWN,
    STEP_TOO_FAR,
-   STEP_TOO_FAR_AND_HIGH,
-   STEP_TOO_WIDE_AND_HIGH,
    STEP_NOT_WIDE_ENOUGH,
    STEP_IN_PLACE,
    NOT_ENOUGH_AREA,
    COULD_NOT_SNAP,
    SURFACE_NORMAL_TOO_STEEP_TO_SNAP,
-   TOO_MUCH_PENETRATION_AFTER_WIGGLE,
    STEP_NOT_LONG_ENOUGH,
    STEP_TOO_WIDE,
    OBSTACLE_BLOCKING_BODY,
@@ -26,6 +20,7 @@ public enum BipedalFootstepPlannerNodeRejectionReason
    SWING_REACH_TOO_LARGE,
    REACHABILITY_CHECK,
    RMS_ERROR_TOO_HIGH,
+   STEP_ON_CLIFF_EDGE,
    HEIGHT_MAP_NONTRAVERSABLE;
 
    public static final BipedalFootstepPlannerNodeRejectionReason[] values = values();

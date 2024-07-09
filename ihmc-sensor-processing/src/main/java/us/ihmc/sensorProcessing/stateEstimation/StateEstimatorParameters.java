@@ -171,6 +171,11 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       return 1.0e-4;
    }
 
+   public MomentumEstimatorMode getMomentumEstimatorMode()
+   {
+      return MomentumEstimatorMode.NONE;
+   }
+
    /** The smaller the value, the more it trusts the IMU **/
    public abstract double getCenterOfMassVelocityFusingFrequency();
 
@@ -205,5 +210,17 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
    public boolean correctTrustedFeetPositions()
    {
       return false;
+   }
+
+   public enum MomentumEstimatorMode
+   {
+      /** Default mode: the state estimator does not instantiate a momentum estimator, the controller will have to compute it using kinematics data. */
+      NONE,
+      /** Old implementation from Georg and Jerry: estimates the CoM acceleration from F/T sensors and uses that to refines the momentum estimate. */
+      SIMPLE,
+      /** Effective when the robot has many IMUs and the kinematics is not trusted (unsensed backlash or elasticity). Exploit as much as possible measurements from IMUs to refine every rigid-body state. */
+      DISTRIBUTED_IMUS,
+      /** Similar to the {@link #SIMPLE} estimator, version from the paper: "Humanoid Momentum Estimation Using Sensed Contact Wrenches". */
+      WRENCH_BASED
    }
 }

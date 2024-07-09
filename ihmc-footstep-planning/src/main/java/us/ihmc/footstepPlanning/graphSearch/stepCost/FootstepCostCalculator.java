@@ -14,7 +14,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculatorInterface;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -31,11 +31,10 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
    private static final double cliffCost = 0.3;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DefaultFootstepPlannerParametersReadOnly parameters;
    private final FootstepSnapperReadOnly snapper;
    private final IdealStepCalculatorInterface idealStepCalculator;
    private final ToDoubleFunction<FootstepGraphNode> heuristics;
-   private final SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygons;
    private final SideDependentList<ConvexPolygon2DReadOnly> scaledFootPolygons = new SideDependentList<>();
 
    private final RigidBodyTransform stanceStepTransform = new RigidBodyTransform();
@@ -58,7 +57,7 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
    private final ConvexPolygon2D scaledFootPolygon = new ConvexPolygon2D();
    private final Plane3D bestFitPlane = new Plane3D();
 
-   public FootstepCostCalculator(FootstepPlannerParametersReadOnly parameters,
+   public FootstepCostCalculator(DefaultFootstepPlannerParametersReadOnly parameters,
                                  FootstepSnapperReadOnly snapper,
                                  IdealStepCalculatorInterface idealStepCalculator,
                                  ToDoubleFunction<FootstepGraphNode> heuristics,
@@ -69,7 +68,6 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       this.snapper = snapper;
       this.idealStepCalculator = idealStepCalculator;
       this.heuristics = heuristics;
-      this.footPolygons = footPolygons;
 
       /* Scale's by a factor of the foot length/width */
       double polygonScaleFactor = 0.65;
@@ -160,16 +158,12 @@ public class FootstepCostCalculator implements FootstepCostCalculatorInterface
       FootstepSnapDataReadOnly snapData = snapper.snapFootstep(footstep);
       if (snapData != null)
       {
-         double area;
-         ConvexPolygon2DReadOnly footholdAfterSnap = snapData.getCroppedFoothold();
-         if (footholdAfterSnap.isEmpty() || footholdAfterSnap.containsNaN())
+         double areaFraction = snapData.getSnapAreaFraction();
+         if (Double.isNaN(areaFraction))
          {
             return 0.0;
          }
-         area = footholdAfterSnap.getArea();
-
-         double footArea = footPolygons.get(footstep.getRobotSide()).getArea();
-         double percentAreaUnoccupied = Math.max(0.0, 1.0 - area / footArea);
+         double percentAreaUnoccupied = Math.max(0.0, 1.0 - areaFraction);
          return percentAreaUnoccupied * parameters.getFootholdAreaWeight();
       }
       else

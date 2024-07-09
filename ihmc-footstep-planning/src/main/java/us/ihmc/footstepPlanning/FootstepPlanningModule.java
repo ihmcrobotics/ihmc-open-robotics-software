@@ -25,7 +25,7 @@ import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.HeightMapFootstepChecker;
 import us.ihmc.footstepPlanning.log.*;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
@@ -54,7 +54,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private ROS2NodeInterface ros2Node;
    private boolean manageROS2Node = false;
    private final AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters;
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
 
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
    private final AStarBodyPathPlannerInterface bodyPathPlannerInterface;
@@ -105,7 +105,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public FootstepPlanningModule(String name,
                                  AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters,
-                                 FootstepPlannerParametersBasics footstepPlannerParameters,
+                                 DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                                  SwingPlannerParametersBasics swingPlannerParameters,
                                  WalkingControllerParameters walkingControllerParameters,
                                  SideDependentList<ConvexPolygon2D> footPolygons,
@@ -123,7 +123,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public FootstepPlanningModule(String name,
                                  AStarBodyPathPlannerParametersBasics aStarBodyPathPlannerParameters,
-                                 FootstepPlannerParametersBasics footstepPlannerParameters,
+                                 DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                                  SwingPlannerParametersBasics swingPlannerParameters,
                                  WalkingControllerParameters walkingControllerParameters,
                                  SideDependentList<ConvexPolygon2D> footPolygons,
@@ -444,7 +444,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       swingReplanStatusCallbacks.add(callback);
    }
 
-   public FootstepPlannerParametersBasics getFootstepPlannerParameters()
+   public DefaultFootstepPlannerParametersBasics getFootstepPlannerParameters()
    {
       return footstepPlannerParameters;
    }

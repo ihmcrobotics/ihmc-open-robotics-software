@@ -143,7 +143,7 @@ public class ImPlotYoGraphPanel
    {
       ImGui.text("Controller host: " + controllerHost);
 
-      ImGui.combo(ImGuiTools.uniqueIDOnly(this, "Profile"), serverSelectedIndex, serverGraphGroupNames, serverGraphGroupNames.length);
+      ImGui.combo(labels.get("Profile"), serverSelectedIndex, serverGraphGroupNames, serverGraphGroupNames.length);
       ImGui.sameLine();
       if (yoClientHelper.isConnecting())
       {
@@ -151,14 +151,14 @@ public class ImPlotYoGraphPanel
       }
       else if (!yoClientHelper.isConnected())
       {
-         if (ImGui.button(ImGuiTools.uniqueLabel(this, "Connect")))
+         if (ImGui.button(labels.get("Connect")))
          {
             startYoVariableClient(serverGraphGroupNames[serverSelectedIndex.get()]);
          }
       }
       else
       {
-         if (ImGui.button(ImGuiTools.uniqueLabel(this, "Disconnect")))
+         if (ImGui.button(labels.get("Disconnect")))
          {
             destroy();
          }

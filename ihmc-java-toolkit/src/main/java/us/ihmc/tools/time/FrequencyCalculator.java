@@ -1,59 +1,110 @@
 package us.ihmc.tools.time;
 
-import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.tools.UnitConversions;
+import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.log.LogTools;
+import us.ihmc.tools.thread.MissingThreadTools;
 
-import java.util.ArrayDeque;
+import java.util.UUID;
 
+/**
+ * An exponential smoothing frequency calculator with an optional logging thread to print the frequency once per second.
+ * <a href="https://en.wikipedia.org/wiki/Exponential_smoothing">...</a>
+ * Call {@link #ping()} on each new event.
+ * Call {@link #getFrequency()} to get the frequency, which will remain constant if events stop.
+ * Call {@link #getFrequencyDecaying()} to get the current frequency which trends to 0 when there are no events.
+ */
 public class FrequencyCalculator
 {
-   private volatile double frequency;
-   private final ArrayDeque<Double> deltas = new ArrayDeque<>();
-   private final Stopwatch stopwatch = new Stopwatch().start();
-   private final int history;
+   private double alpha = 0.3;
+   private double lastEventTime = Double.NaN;
+   private double smoothedPeriod = Double.NaN;
 
-   /**
-    * History of 3.
-    */
-   public FrequencyCalculator()
+   private volatile boolean loggingThreadRunning;
+
+   public FrequencyCalculator(boolean enableLoggingThread)
    {
-      this(3);
+      if (enableLoggingThread)
+      {
+         String threadID = UUID.randomUUID().toString().substring(0, 5);
+
+         Thread loggingThread = new Thread(() ->
+         {
+            loggingThreadRunning = true;
+
+            while (loggingThreadRunning)
+            {
+               LogTools.info("FrequencyCalculator[" + threadID + "] average rate: " + getFrequency());
+
+               MissingThreadTools.sleep(1.0);
+            }
+         }, getClass().getSimpleName() + "-" + threadID);
+
+         loggingThread.start();
+      }
    }
 
-   /**
-    * History if one yields the latest calculation only.
-    * @param history 1 or more.
-    */
-   public FrequencyCalculator(int history)
+   public FrequencyCalculator()
    {
-      this.history = history;
+      this(false);
+   }
+
+   private double calculateFrequency(boolean decay)
+   {
+      if (Double.isNaN(smoothedPeriod))
+      {
+         return 0.0;
+      }
+      else
+      {
+         double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
+         double ongoingPeriod = currentTime - lastEventTime;
+
+         if (!decay || ongoingPeriod < smoothedPeriod) // Expecting an event after the current average period
+         {
+            return 1.0 / smoothedPeriod;
+         }
+         else // Events are slowing down or stopped
+         {
+            double psuedoSmoothedPeriod = (1.0 - alpha) * smoothedPeriod + alpha * ongoingPeriod;
+            return 1.0 / psuedoSmoothedPeriod;
+         }
+      }
    }
 
    public void ping()
    {
-      double elapsed = stopwatch.lap();
-      deltas.addLast(elapsed);
+      double currentTime = Conversions.nanosecondsToSeconds(System.nanoTime());
 
-      while (deltas.size() > history)
+      if (!Double.isNaN(lastEventTime))
       {
-         deltas.removeFirst();
+         double period = currentTime - lastEventTime;
+
+         if (Double.isNaN(smoothedPeriod))
+         {
+            smoothedPeriod = period;
+         }
+         else
+         {
+            smoothedPeriod = (1.0 - alpha) * smoothedPeriod + alpha * period;
+         }
       }
 
-      double totalElapsed = 0.0;
-      for (Double delta : deltas)
-      {
-         totalElapsed += delta;
-      }
-      frequency = UnitConversions.secondsToHertz(totalElapsed / deltas.size());
+      lastEventTime = currentTime;
    }
 
    public double getFrequency()
    {
-      return frequency;
+      return calculateFrequency(false);
    }
 
-   public boolean anyPingsYet()
+   public double getFrequencyDecaying()
    {
-      return !deltas.isEmpty();
+      return calculateFrequency(true);
+   }
+
+   public void destroy()
+   {
+      loggingThreadRunning = false;
    }
 }

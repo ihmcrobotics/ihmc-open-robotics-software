@@ -1,22 +1,15 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
-
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyTaskspaceControlState;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStaticStabilityRegionCalculator;
+import us.ihmc.commonWalkingControlModules.staticEquilibrium.CenterOfMassStabilityMarginRegionCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -40,6 +33,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
+
+import static us.ihmc.communication.packets.Packet.INVALID_MESSAGE_ID;
 
 public class PelvisICPBasedTranslationManager
 {
@@ -89,7 +84,7 @@ public class PelvisICPBasedTranslationManager
 
    private final BipedSupportPolygons bipedSupportPolygons;
    private FrameConvexPolygon2DReadOnly supportPolygon;
-   private final CenterOfMassStaticStabilityRegionCalculator multiContactCoMRegionCalculator;
+   private final CenterOfMassStabilityMarginRegionCalculator multiContactCoMRegionCalculator;
 
    private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameVector3D tempVelocity = new FrameVector3D();
@@ -357,24 +352,24 @@ public class PelvisICPBasedTranslationManager
          clearCommandQueue(se3Trajectory.getCommandId());
          initialPelvisPositionTime.set(yoTime.getDoubleValue());
 
-         if (se3Trajectory.getNumberOfTrajectoryPoints() != 1)
+         if (se3Trajectory.getNumberOfTrajectoryPoints() == 0 || se3Trajectory.getNumberOfTrajectoryPoints() > 2)
          {
-            LogTools.warn("When streaming, trajectories should contain only 1 trajectory point, was: " + se3Trajectory.getNumberOfTrajectoryPoints());
+            LogTools.warn("When streaming, trajectories should contain either 1 or 2 trajectory point(s), was: " + se3Trajectory.getNumberOfTrajectoryPoints());
             holdCurrentPosition();
             return;
          }
 
-         FrameSE3TrajectoryPoint trajectoryPoint = se3Trajectory.getTrajectoryPoint(0);
+         FrameSE3TrajectoryPoint firstPoint = se3Trajectory.getTrajectoryPoint(0);
 
-         if (trajectoryPoint.getTime() != 0.0)
+         if (firstPoint.getTime() != 0.0)
          {
-            LogTools.warn("When streaming, the trajectory point should have a time of zero, was: " + trajectoryPoint.getTime());
+            LogTools.warn("When streaming, the trajectory point should have a time of zero, was: " + firstPoint.getTime());
             holdCurrentPosition();
             return;
          }
 
          // Applying the time offset to the trajectory point:
-         trajectoryPointLocal.setIncludingFrame(trajectoryPoint);
+         trajectoryPointLocal.setIncludingFrame(firstPoint);
          // When a message is delayed during shipping over network, timeOffset > streamTimestampOffset.getValue().
          // This new time will put the trajectory point in the past, closer to when it should have been received.
          if (!streamTimestampOffset.isNaN())
@@ -383,11 +378,31 @@ public class PelvisICPBasedTranslationManager
          positionTrajectoryGenerator.clear();
          positionTrajectoryGenerator.changeFrame(worldFrame);
          positionTrajectoryGenerator.appendWaypoint(trajectoryPointLocal);
-         tempPosition.setIncludingFrame(trajectoryPointLocal.getLinearVelocity());
-         tempPosition.scaleAdd(se3Trajectory.getStreamIntegrationDuration(), trajectoryPoint.getPosition());
-         positionTrajectoryGenerator.appendWaypoint(se3Trajectory.getStreamIntegrationDuration() + trajectoryPointLocal.getTime(),
-                                                    tempPosition,
-                                                    trajectoryPoint.getLinearVelocity());
+
+         if (se3Trajectory.getNumberOfTrajectoryPoints() == 1)
+         { // No extrapolation provided, so we do it here.
+            tempPosition.setIncludingFrame(trajectoryPointLocal.getLinearVelocity());
+            tempPosition.scaleAdd(se3Trajectory.getStreamIntegrationDuration(), firstPoint.getPosition());
+            positionTrajectoryGenerator.appendWaypoint(se3Trajectory.getStreamIntegrationDuration() + trajectoryPointLocal.getTime(),
+                                                       tempPosition,
+                                                       firstPoint.getLinearVelocity());
+         }
+         else
+         {
+            FrameSE3TrajectoryPoint secondPoint = se3Trajectory.getTrajectoryPoint(1);
+
+            if (secondPoint.getTime() != se3Trajectory.getStreamIntegrationDuration())
+            {
+               LogTools.warn("When streaming, the second trajectory point should have a time equal to the integration duration, was: " + secondPoint.getTime());
+               holdCurrentPosition();
+               return;
+            }
+
+            double secondPointTime = se3Trajectory.getStreamIntegrationDuration() + trajectoryPointLocal.getTime();
+            trajectoryPointLocal.setIncludingFrame(secondPoint);
+            trajectoryPointLocal.setTime(secondPointTime);
+            positionTrajectoryGenerator.appendWaypoint(trajectoryPointLocal);
+         }
 
          if (supportFrame != null)
             positionTrajectoryGenerator.changeFrame(supportFrame);
@@ -421,7 +436,7 @@ public class PelvisICPBasedTranslationManager
       if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
       {
          LogTools.warn("Previous command ID mismatch: previous ID from command = " + previousCommandId + ", last message ID received by the controller = "
-               + lastCommandId.getLongValue() + ". Aborting motion.");
+                       + lastCommandId.getLongValue() + ". Aborting motion.");
          return false;
       }
 

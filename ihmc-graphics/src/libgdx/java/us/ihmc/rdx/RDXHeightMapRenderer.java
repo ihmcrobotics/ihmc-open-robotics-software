@@ -14,16 +14,13 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.bytedeco.javacpp.BytePointer;
 import org.lwjgl.opengl.GL41;
-import us.ihmc.commons.InterpolationTools;
-import us.ihmc.commons.MathTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.rdx.shader.RDXShader;
 import us.ihmc.rdx.shader.RDXUniform;
 
 import java.nio.FloatBuffer;
-import java.util.stream.IntStream;
 
 /**
  * Renders a height map as a point cloud. The height map is stored as a 16-bit grayscale image.
@@ -32,12 +29,18 @@ import java.util.stream.IntStream;
  * 0 is the metric -3.2768f height, and 65536 is the 3.2768f height.
  * The height is scaled up by 10,000 for storage as 16-bit value (short)
  */
+
+/**
+ * This has been updated to use {@link us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew}, please use that going forward, this implementation has bugs with
+ * interacting with collisions
+ * from the mouse
+ */
+@Deprecated
 public class RDXHeightMapRenderer implements RenderableProvider
 {
    private Renderable renderable;
 
    public static final int FLOATS_PER_CELL = 8;
-   public static final int BYTES_PER_VERTEX = FLOATS_PER_CELL * Float.BYTES;
    private final VertexAttributes vertexAttributes = new VertexAttributes(new VertexAttribute(VertexAttributes.Usage.Position,
                                                                                               3,
                                                                                               ShaderProgram.POSITION_ATTRIBUTE),
@@ -49,13 +52,12 @@ public class RDXHeightMapRenderer implements RenderableProvider
                                                                                               GL41.GL_FLOAT,
                                                                                               false,
                                                                                               "a_size"));
-   private final RDXUniform screenWidthUniform = RDXUniform.createGlobalUniform("u_screenWidth", (shader, inputID, renderable, combinedAttributes) ->
-   {
-      shader.set(inputID, shader.camera.viewportWidth);
-   });
-   private int multiColor = 0;
+   private final RDXUniform screenWidthUniform = RDXUniform.createGlobalUniform("u_screenWidth",
+                                                                                (shader, inputID, renderable, combinedAttributes) -> shader.set(inputID,
+                                                                                                                                                shader.camera.viewportWidth));
    private final RDXUniform multiColorUniform = RDXUniform.createGlobalUniform("u_multiColor", (shader, inputID, renderable, combinedAttributes) ->
    {
+      int multiColor = 0;
       shader.set(inputID, multiColor);
    });
 
@@ -94,6 +96,7 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
    public void update(RigidBodyTransform zUpFrameToWorld,
                       BytePointer heightMapPointer,
+                      float heightOffset,
                       float gridCenterX,
                       float gridCenterY,
                       int centerIndex,
@@ -104,35 +107,27 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
       int cellsPerAxis = 2 * centerIndex + 1;
 
-      Point3D spritePoint = new Point3D();
       for (int xIndex = 0; xIndex < cellsPerAxis; xIndex++)
       {
          for (int yIndex = 0; yIndex < cellsPerAxis; yIndex++)
          {
-            spritePoint.setToZero();
-
-            double xPosition = indexToCoordinate(xIndex, gridCenterX, cellSizeXYInMeters, centerIndex); // + 1.5f
-            double yPosition = indexToCoordinate(yIndex, gridCenterY, cellSizeXYInMeters, centerIndex);
+            double xPosition = HeightMapTools.indexToCoordinate(xIndex, gridCenterX, cellSizeXYInMeters, centerIndex);
+            double yPosition = HeightMapTools.indexToCoordinate(yIndex, gridCenterY, cellSizeXYInMeters, centerIndex);
 
             /* look at the header docs for decoding the height map values as below */
             int heightIndex = xIndex * cellsPerAxis + yIndex;
             int vertexIndex = heightIndex * FLOATS_PER_CELL;
             int height = heightMapPointer.getShort(heightIndex * 2L) & 0xFFFF;
             float zPosition = ((float) height / heightScalingFactor);
-            zPosition -= 3.2768f;
+            zPosition -= heightOffset;
 
-            spritePoint.set(xPosition, yPosition, zPosition);
-            intermediateVertexBuffer[vertexIndex] = (float) spritePoint.getX();
-            intermediateVertexBuffer[vertexIndex + 1] = (float) spritePoint.getY();
-            intermediateVertexBuffer[vertexIndex + 2] = (float) spritePoint.getZ();
-
-            Color color = computeColorFromHeight(zPosition);
-
-            /* For the brighter ones */
-            //float heightRatio = (zPosition / maxHeight);
-            //color.set(Math.abs(1.0f - heightRatio), Math.max(100.0f * heightRatio, 1.0f), Math.abs(1.0f - heightRatio), Math.abs(0.3f + 10.0f * heightRatio));
+            intermediateVertexBuffer[vertexIndex] = (float) xPosition;
+            intermediateVertexBuffer[vertexIndex + 1] = (float) yPosition;
+            intermediateVertexBuffer[vertexIndex + 2] = zPosition;
 
             // Color (0.0 to 1.0)
+            double[] redGreenBlue = HeightMapTools.getRedGreenBlue(zPosition);
+            Color color = new Color((float) redGreenBlue[0], (float) redGreenBlue[1], (float) redGreenBlue[2], 1.0f);
             intermediateVertexBuffer[vertexIndex + 3] = color.r;
             intermediateVertexBuffer[vertexIndex + 4] = color.g;
             intermediateVertexBuffer[vertexIndex + 5] = color.b;
@@ -145,69 +140,6 @@ public class RDXHeightMapRenderer implements RenderableProvider
 
       renderable.meshPart.size = totalCells;
       renderable.meshPart.mesh.setVertices(intermediateVertexBuffer, 0, totalCells * FLOATS_PER_CELL);
-   }
-
-   public static Color computeColorFromHeight(double height)
-   {
-      // Using interpolation between key color points
-      double r = 0, g = 0, b = 0;
-      double redR = 1.0, redG = 0.0, redB = 0.0;
-      double magentaR = 1.0, magentaG = 0.0, magentaB = 1.0;
-      double orangeR = 1.0, orangeG = 200.0 / 255.0, orangeB = 0.0;
-      double yellowR = 1.0, yellowG = 1.0, yellowB = 0.0;
-      double blueR = 0.0, blueG = 0.0, blueB = 1.0;
-      double greenR = 0.0, greenG = 1.0, greenB = 0.0;
-      double gradientSize = 0.2;
-      double gradientLength = 1.0;
-      double alpha = height % gradientLength;
-      if (alpha < 0)
-         alpha = 1 + alpha;
-      while (alpha > 5 * gradientSize)
-         alpha -= 5 * gradientSize;
-
-      if (alpha <= gradientSize * 1)
-      {
-         r = InterpolationTools.linearInterpolate(magentaR, blueR, (alpha) / gradientSize);
-         g = InterpolationTools.linearInterpolate(magentaG, blueG, (alpha) / gradientSize);
-         b = InterpolationTools.linearInterpolate(magentaB, blueB, (alpha) / gradientSize);
-      }
-      else if (alpha <= gradientSize * 2)
-      {
-         r = InterpolationTools.linearInterpolate(blueR, greenR, (alpha - gradientSize * 1) / gradientSize);
-         g = InterpolationTools.linearInterpolate(blueG, greenG, (alpha - gradientSize * 1) / gradientSize);
-         b = InterpolationTools.linearInterpolate(blueB, greenB, (alpha - gradientSize * 1) / gradientSize);
-      }
-      else if (alpha <= gradientSize * 3)
-      {
-         r = InterpolationTools.linearInterpolate(greenR, yellowR, (alpha - gradientSize * 2) / gradientSize);
-         g = InterpolationTools.linearInterpolate(greenG, yellowG, (alpha - gradientSize * 2) / gradientSize);
-         b = InterpolationTools.linearInterpolate(greenB, yellowB, (alpha - gradientSize * 2) / gradientSize);
-      }
-      else if (alpha <= gradientSize * 4)
-      {
-         r = InterpolationTools.linearInterpolate(yellowR, orangeR, (alpha - gradientSize * 3) / gradientSize);
-         g = InterpolationTools.linearInterpolate(yellowG, orangeG, (alpha - gradientSize * 3) / gradientSize);
-         b = InterpolationTools.linearInterpolate(yellowB, orangeB, (alpha - gradientSize * 3) / gradientSize);
-      }
-      else if (alpha <= gradientSize * 5)
-      {
-         r = InterpolationTools.linearInterpolate(orangeR, redR, (alpha - gradientSize * 4) / gradientSize);
-         g = InterpolationTools.linearInterpolate(orangeG, redG, (alpha - gradientSize * 4) / gradientSize);
-         b = InterpolationTools.linearInterpolate(orangeB, redB, (alpha - gradientSize * 4) / gradientSize);
-      }
-      else
-      {
-         throw new RuntimeException("no valid color");
-      }
-
-      if (r == 0.0 && g == 0.0 && b == 0.0)
-         throw new RuntimeException("Shouldn't return black.)");
-      return new Color((float) r, (float) g, (float) b, 1.0f);
-   }
-
-   public static double indexToCoordinate(int index, double gridCenter, double resolution, int centerIndex)
-   {
-      return (index - centerIndex) * resolution + gridCenter;
    }
 
    public FloatBuffer getVertexBuffer()

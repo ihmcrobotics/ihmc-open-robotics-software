@@ -28,7 +28,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -62,7 +62,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
    private final FramePose3D solePose = new FramePose3D();
    private final FootstepPlan footstepPlanToExecute = new FootstepPlan();
    private final FootstepPlanningModule footstepPlanner;
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
    private final ResettableExceptionHandlingExecutorService footstepPlanningThread = MissingThreadTools.newSingleThreadExecutor("FootstepPlanning", true, 1);
    private final TypedNotification<FootstepPlan> footstepPlanNotification = new TypedNotification<>();
    private final SideDependentList<FramePose3D> liveGoalFeetPoses = new SideDependentList<>(() -> new FramePose3D());
@@ -78,7 +78,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
                                      ReferenceFrameLibrary referenceFrameLibrary,
                                      WalkingControllerParameters walkingControllerParameters,
                                      FootstepPlanningModule footstepPlanner,
-                                     FootstepPlannerParametersBasics footstepPlannerParameters)
+                                     DefaultFootstepPlannerParametersBasics footstepPlannerParameters)
    {
       super(new FootstepPlanActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
 
@@ -297,7 +297,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
          footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
          double idealFootstepLength = 0.5;
          footstepPlanner.getFootstepPlannerParameters().setIdealFootstepLength(idealFootstepLength);
-         footstepPlanner.getFootstepPlannerParameters().setMaximumStepReach(idealFootstepLength);
+         footstepPlanner.getFootstepPlannerParameters().setMaxStepReach(idealFootstepLength);
          state.getLogger().info("Planning footsteps...");
          FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
          FootstepPlan footstepPlan = footstepPlannerOutput.getFootstepPlan();
@@ -340,6 +340,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlanToExecute,
                                                                                                                     definition.getSwingDuration(),
                                                                                                                     definition.getTransferDuration());
+//      footstepDataListMessage.setTrustHeightOfFootsteps(false); // FIXME: This assumes flat ground
       double finalTransferDuration = 0.01; // We don't want any unecessary pauses at the end; but it can't be 0
       footstepDataListMessage.setFinalTransferDuration(finalTransferDuration);
       footstepDataListMessage.getQueueingProperties().setExecutionMode(definition.getExecutionMode().getValue().toByte());

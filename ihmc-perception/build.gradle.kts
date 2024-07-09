@@ -16,13 +16,11 @@ ihmc {
    configureDependencyResolution()
    javaDirectory("main", "generated-java")
    javaDirectory("slam-wrapper", "generated-java")
-   javaDirectory("mapsense-wrapper", "generated-java")
    configurePublications()
 }
 
 mainDependencies {
    api(ihmc.sourceSetProject("slam-wrapper"))
-   api(ihmc.sourceSetProject("mapsense-wrapper"))
    // For experimenting with local OpenCV:
    // api(files("/usr/local/share/OpenCV/java/opencv-310.jar"))
 
@@ -80,6 +78,9 @@ mainDependencies {
    api("us.ihmc:spinnaker:$spinnakerVersion:windows-x86_64") {
       exclude(group = "us.ihmc", module = "javacpp")
    }
+   api("us.ihmc:zed-java-api:4.1.2") {
+      exclude(group = "org.bytedeco")
+   }
    val hdf5Version = "1.14.1-1.5.9"
    api("org.bytedeco:hdf5:$hdf5Version")
    api("org.bytedeco:hdf5:$hdf5Version:linux-x86_64")
@@ -90,13 +91,6 @@ mainDependencies {
    api("org.bytedeco:cuda:$cudaVersion:linux-x86_64")
    api("org.bytedeco:cuda:$cudaVersion:linux-arm64")
    api("org.bytedeco:cuda:$cudaVersion:windows-x86_64")
-   val zedVersion = "4.0.6-1.5.9"
-   api("us.ihmc:zed:$zedVersion") {
-      exclude(group = "us.ihmc", module = "javacpp")
-   }
-   api("us.ihmc:zed:$zedVersion:linux-x86_64") {
-      exclude(group = "us.ihmc", module = "javacpp")
-   }
 
    api("us.ihmc:euclid:0.21.0")
    api("us.ihmc:simulation-construction-set:0.25.1")
@@ -113,6 +107,8 @@ mainDependencies {
 
    api("com.microsoft.onnxruntime:onnxruntime:1.11.0")
    api("com.microsoft.onnxruntime:onnxruntime_gpu:1.11.0")
+
+   api("com.badlogicgames.gdx:gdx-bullet:1.11.0")
 }
 
 testDependencies {
@@ -123,11 +119,6 @@ testDependencies {
 }
 
 slamWrapperDependencies {
-   api("org.bytedeco:javacpp:1.5.9")
-   api("us.ihmc:ihmc-java-toolkit:source")
-}
-
-mapsenseWrapperDependencies {
    api("org.bytedeco:javacpp:1.5.9")
    api("us.ihmc:ihmc-java-toolkit:source")
 }

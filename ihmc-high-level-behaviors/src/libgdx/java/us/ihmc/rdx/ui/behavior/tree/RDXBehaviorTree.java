@@ -15,7 +15,7 @@ import us.ihmc.behaviors.behaviorTree.topology.BehaviorTreeNodeInsertionType;
 import us.ihmc.behaviors.behaviorTree.ros2.ROS2BehaviorTreeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.rdx.imgui.ImGuiExpandCollapseRenderer;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
@@ -24,7 +24,6 @@ import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.behavior.sequence.RDXActionSequence;
 import us.ihmc.rdx.vr.RDXVRContext;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameLibrary;
@@ -37,7 +36,7 @@ public class RDXBehaviorTree
    private final RDXBehaviorTreeNodeBuilder nodeBuilder;
    private final BehaviorTreeExtensionSubtreeRebuilder treeRebuilder;
    private final BehaviorTreeState behaviorTreeState;
-   private RDXBehaviorTreeNode<?, ?> rootNode;
+   private RDXBehaviorTreeRootNode rootNode;
    /**
     * Useful for accessing nodes by ID instead of searching.
     * Also, sometimes, the tree will be disassembled and this is used in putting it
@@ -62,7 +61,7 @@ public class RDXBehaviorTree
                           RDXBaseUI baseUI,
                           RDX3DPanel panel3D,
                           ReferenceFrameLibrary referenceFrameLibrary,
-                          FootstepPlannerParametersBasics footstepPlannerParametersBasics)
+                          DefaultFootstepPlannerParametersBasics footstepPlannerParametersBasics)
    {
       this.treeFilesDirectory = treeFilesDirectory;
 
@@ -176,10 +175,7 @@ public class RDXBehaviorTree
 
       if (rootNode != null)
       {
-         if (rootNode instanceof RDXActionSequence actionSequence)
-         {
-            actionSequence.renderExecutionControlAndProgressWidgets();
-         }
+         rootNode.renderExecutionControlAndProgressWidgets();
 
          float cursorYAfterControlWidgets = ImGui.getCursorPosY();
 
@@ -274,9 +270,6 @@ public class RDXBehaviorTree
       }
       else
       {
-         ImGui.pushFont(ImGuiTools.getMediumFont());
-         ImGui.text("Add a root node:");
-         ImGui.popFont();
          nodeCreationMenu.renderImGuiWidgets(rootNode, BehaviorTreeNodeInsertionType.INSERT_ROOT);
       }
    }
@@ -366,10 +359,10 @@ public class RDXBehaviorTree
 
    public void setRootNode(BehaviorTreeNodeLayer<?, ?, ?, ?> rootNode)
    {
-      this.rootNode = (RDXBehaviorTreeNode<?, ?>) rootNode;
+      this.rootNode = (RDXBehaviorTreeRootNode) rootNode;
    }
 
-   public RDXBehaviorTreeNode<?, ?> getRootNode()
+   public RDXBehaviorTreeRootNode getRootNode()
    {
       return rootNode;
    }

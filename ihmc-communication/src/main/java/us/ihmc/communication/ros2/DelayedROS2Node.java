@@ -298,9 +298,45 @@ public class DelayedROS2Node implements ROS2NodeInterface
       }
 
       @Override
+      public boolean hasMatched()
+      {
+         return false;
+      }
+
+      @Override
       public boolean isAvailable()
       {
          return subscriber.isAvailable() && !dataTaken;
+      }
+
+      @Override
+      public boolean isRemoved()
+      {
+         return false;
+      }
+
+      @Override
+      public long getNumberOfReceivedMessages()
+      {
+         return 0;
+      }
+
+      @Override
+      public long getCurrentMessageSize()
+      {
+         return 0;
+      }
+
+      @Override
+      public long getLargestMessageSize()
+      {
+         return 0;
+      }
+
+      @Override
+      public long getCumulativePayloadBytes()
+      {
+         return 0;
       }
    }
 

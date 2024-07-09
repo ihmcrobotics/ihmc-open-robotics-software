@@ -1,0 +1,26 @@
+# Created by Polycam
+# object name: Trash can
+newmtl Trash can_0
+Ka 0.000 0.000 0.000
+Kd 1.000 1.000 1.000
+Ks 0.000 0.000 0.000
+Tr 0.000000
+illum 1
+Ns 1.000000
+map_Kd Trash can_0_jOV4yiXZ.jpg
+newmtl Trash can_1
+Ka 0.000 0.000 0.000
+Kd 1.000 1.000 1.000
+Ks 0.000 0.000 0.000
+Tr 0.000000
+illum 1
+Ns 1.000000
+map_Kd Trash can_1_jOV4yiXZ.jpg
+newmtl Trash can_2
+Ka 0.000 0.000 0.000
+Kd 1.000 1.000 1.000
+Ks 0.000 0.000 0.000
+Tr 0.000000
+illum 1
+Ns 1.000000
+map_Kd Trash can_2_jOV4yiXZ.jpg

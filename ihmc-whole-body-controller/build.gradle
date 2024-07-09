@@ -6,7 +6,6 @@ plugins {
    id("us.ihmc.scs") version "0.4"
 
    id("org.hidetake.ssh") version "2.9.0"
-   id("application")
 }
 
 ihmc {
@@ -46,7 +45,7 @@ benchmarksDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-convex-optimization:0.17.18")
+   api("us.ihmc:ihmc-convex-optimization:0.17.19")
 }
 
 remotes {
@@ -55,17 +54,5 @@ remotes {
       user = "<username>"
       password = "<password>"
       fileTransfer = "scp"
-   }
-}
-
-mainClassName = 'us.ihmc.realtime.barrierScheduler.benchmarks.BarrierSchedulerMatrixMultiplyBenchmark'
-task deploy(dependsOn: ['installDist']) {
-   doLast {
-      ssh.run {
-         session(remotes.rtComputer) {
-            put(from: "${buildDir}/install/${project.name}", into: '.')
-            execute("chmod +x " + "./${project.name}/bin/${project.name}")
-         }
-      }
    }
 }

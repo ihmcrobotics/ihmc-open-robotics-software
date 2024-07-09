@@ -2,7 +2,6 @@ package us.ihmc.rdx.ui.footstepPlanner;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
@@ -20,7 +19,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.InitialStanceSide;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
@@ -28,9 +27,9 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
+import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.tools.thread.Throttler;
@@ -42,16 +41,16 @@ public class RDXFootstepPlanning
    private final ROS2SyncedRobotModel syncedRobot;
    private final ControllerStatusTracker controllerStatusTracker;
    private final FootstepPlanningModule footstepPlanner;
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final DefaultFootstepPlannerParametersBasics footstepPlannerParameters;
    private final AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters;
    private final SwingPlannerParametersBasics swingFootPlannerParameters;
-   private final RDXLocomotionParameters locomotionParameters;
+   private final LocomotionParameters locomotionParameters;
    private final MovingReferenceFrame midFeetZUpFrame;
    private final FootstepPlannerLogger footstepPlannerLogger;
    private final ResettableExceptionHandlingExecutorService executor;
    private final Throttler planningThrottler = new Throttler().setFrequency(5.0);
    private final TypedNotification<Pose3DReadOnly> planningRequestNotification = new TypedNotification<>();
-   private volatile HeightMapMessage heightMapMessage = null;
+   private volatile HeightMapData heightMapData = null;
    private final FramePose3D midFeetZUpPose = new FramePose3D();
    private final FramePose3D startPose = new FramePose3D();
    /**
@@ -66,8 +65,8 @@ public class RDXFootstepPlanning
    public RDXFootstepPlanning(DRCRobotModel robotModel,
                               ROS2SyncedRobotModel syncedRobot,
                               ControllerStatusTracker controllerStatusTracker,
-                              RDXLocomotionParameters locomotionParameters,
-                              FootstepPlannerParametersBasics footstepPlannerParameters,
+                              LocomotionParameters locomotionParameters,
+                              DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                               AStarBodyPathPlannerParametersBasics bodyPathPlannerParameters,
                               SwingPlannerParametersBasics swingFootPlannerParameters)
    {
@@ -98,7 +97,7 @@ public class RDXFootstepPlanning
          if (planningRequestNotification.poll())
          {
             Pose3DReadOnly goalPoseInWorld = planningRequestNotification.read();
-            executor.clearQueueAndExecute(() -> planOnAsynchronousThread(goalPoseInWorld, heightMapMessage));
+            executor.clearQueueAndExecute(() -> planOnAsynchronousThread(goalPoseInWorld, heightMapData));
          }
       }
    }
@@ -113,7 +112,7 @@ public class RDXFootstepPlanning
       planningRequestNotification.set(new Pose3D(goalPoseInWorld));
    }
 
-   private void planOnAsynchronousThread(Pose3DReadOnly goalPose, HeightMapMessage heightMapMessage)
+   private void planOnAsynchronousThread(Pose3DReadOnly goalPose, HeightMapData heightMapData)
    {
       // Set to false as soon as we start, so it can be set to true at any point now.
       terminatePlan = false;
@@ -163,10 +162,10 @@ public class RDXFootstepPlanning
       boolean assumeFlatGround = true;
       if (!locomotionParameters.getAssumeFlatGround())
       {
-         if (heightMapMessage != null)
+         if (heightMapData != null)
          {
             assumeFlatGround = false;
-            footstepPlannerRequest.setHeightMapData(HeightMapMessageTools.unpackMessage(heightMapMessage));
+            footstepPlannerRequest.setHeightMapData(heightMapData);
          }
       }
       footstepPlannerRequest.setAssumeFlatGround(assumeFlatGround);
@@ -243,9 +242,9 @@ public class RDXFootstepPlanning
       }
    }
 
-   public void setHeightMapData(HeightMapMessage heightMapMessage)
+   public void setHeightMapData(HeightMapData heightMapMessage)
    {
-      this.heightMapMessage = heightMapMessage;
+      this.heightMapData = heightMapMessage;
    }
 
    public TypedNotification<FootstepPlannerOutput> getPlannerOutputNotification()

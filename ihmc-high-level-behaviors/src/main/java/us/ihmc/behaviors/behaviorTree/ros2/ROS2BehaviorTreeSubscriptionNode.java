@@ -10,8 +10,11 @@ public class ROS2BehaviorTreeSubscriptionNode
    private byte type;
    private BehaviorTreeNodeDefinitionMessage behaviorTreeNodeDefinitionMessage;
    private BehaviorTreeNodeStateMessage behaviorTreeNodeStateMessage;
+   private BehaviorTreeRootNodeStateMessage behaviorTreeRootNodeStateMessage;
    private ActionSequenceStateMessage actionSequenceStateMessage;
    private DoorTraversalStateMessage doorTraversalStateMessage;
+   private TrashCanInteractionStateMessage trashCanInteractionStateMessage;
+   private BuildingExplorationStateMessage buildingExplorationStateMessage;
    private ActionNodeStateMessage actionNodeStateMessage;
    private ChestOrientationActionStateMessage chestOrientationActionStateMessage;
    private FootstepPlanActionStateMessage footstepPlanActionStateMessage;
@@ -19,8 +22,9 @@ public class ROS2BehaviorTreeSubscriptionNode
    private HandPoseActionStateMessage handPoseActionStateMessage;
    private HandWrenchActionStateMessage handWrenchActionStateMessage;
    private ScrewPrimitiveActionStateMessage screwPrimitiveActionStateMessage;
-   private PelvisHeightPitchActionStateMessage pelvisHeightPitchActionStateMessage;
+   private PelvisHeightOrientationActionStateMessage pelvisHeightOrientationActionStateMessage;
    private WaitDurationActionStateMessage waitDurationActionStateMessage;
+   private FootPoseActionStateMessage footPoseActionStateMessage;
    private KickDoorActionStateMessage kickDoorActionStateMessage;
    private KickDoorApproachPlanStateMessage kickDoorApproachPlanActionStateMessage;
    private final List<ROS2BehaviorTreeSubscriptionNode> children = new ArrayList<>();
@@ -30,8 +34,11 @@ public class ROS2BehaviorTreeSubscriptionNode
       type = -1;
       behaviorTreeNodeDefinitionMessage = null;
       behaviorTreeNodeStateMessage = null;
+      behaviorTreeRootNodeStateMessage = null;
       actionSequenceStateMessage = null;
       doorTraversalStateMessage = null;
+      trashCanInteractionStateMessage = null;
+      buildingExplorationStateMessage = null;
       actionNodeStateMessage = null;
       chestOrientationActionStateMessage = null;
       footstepPlanActionStateMessage = null;
@@ -39,8 +46,9 @@ public class ROS2BehaviorTreeSubscriptionNode
       handPoseActionStateMessage = null;
       handWrenchActionStateMessage = null;
       screwPrimitiveActionStateMessage = null;
-      pelvisHeightPitchActionStateMessage = null;
+      pelvisHeightOrientationActionStateMessage = null;
       waitDurationActionStateMessage = null;
+      footPoseActionStateMessage = null;
       kickDoorActionStateMessage = null;
       kickDoorApproachPlanActionStateMessage = null;
       children.clear();
@@ -76,6 +84,16 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.behaviorTreeNodeStateMessage = behaviorTreeNodeStateMessage;
    }
 
+   public BehaviorTreeRootNodeStateMessage getBehaviorTreeRootNodeStateMessage()
+   {
+      return behaviorTreeRootNodeStateMessage;
+   }
+
+   public void setBehaviorTreeRootNodeStateMessage(BehaviorTreeRootNodeStateMessage behaviorTreeRootNodeStateMessage)
+   {
+      this.behaviorTreeRootNodeStateMessage = behaviorTreeRootNodeStateMessage;
+   }
+
    public ActionNodeStateMessage getActionNodeStateMessage()
    {
       return actionNodeStateMessage;
@@ -104,6 +122,26 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setDoorTraversalStateMessage(DoorTraversalStateMessage doorTraversalStateMessage)
    {
       this.doorTraversalStateMessage = doorTraversalStateMessage;
+   }
+
+   public TrashCanInteractionStateMessage getTrashCanInteractionStateMessage()
+   {
+      return trashCanInteractionStateMessage;
+   }
+
+   public void setTrashCanInteractionStateMessage(TrashCanInteractionStateMessage trashCanInteractionStateMessage)
+   {
+      this.trashCanInteractionStateMessage = trashCanInteractionStateMessage;
+   }
+
+   public BuildingExplorationStateMessage getBuildingExplorationStateMessage()
+   {
+      return buildingExplorationStateMessage;
+   }
+
+   public void setBuildingExplorationStateMessage(BuildingExplorationStateMessage buildingExplorationStateMessage)
+   {
+      this.buildingExplorationStateMessage = buildingExplorationStateMessage;
    }
 
    public ChestOrientationActionStateMessage getChestOrientationActionStateMessage()
@@ -166,14 +204,14 @@ public class ROS2BehaviorTreeSubscriptionNode
       this.screwPrimitiveActionStateMessage = screwPrimitiveActionStateMessage;
    }
 
-   public PelvisHeightPitchActionStateMessage getPelvisHeightPitchActionStateMessage()
+   public PelvisHeightOrientationActionStateMessage getPelvisHeightOrientationActionStateMessage()
    {
-      return pelvisHeightPitchActionStateMessage;
+      return pelvisHeightOrientationActionStateMessage;
    }
 
-   public void setPelvisHeightPitchActionStateMessage(PelvisHeightPitchActionStateMessage pelvisHeightPitchActionStateMessage)
+   public void setPelvisHeightOrientationActionStateMessage(PelvisHeightOrientationActionStateMessage pelvisHeightOrientationActionStateMessage)
    {
-      this.pelvisHeightPitchActionStateMessage = pelvisHeightPitchActionStateMessage;
+      this.pelvisHeightOrientationActionStateMessage = pelvisHeightOrientationActionStateMessage;
    }
 
    public WaitDurationActionStateMessage getWaitDurationActionStateMessage()
@@ -184,6 +222,16 @@ public class ROS2BehaviorTreeSubscriptionNode
    public void setWaitDurationActionStateMessage(WaitDurationActionStateMessage waitDurationActionStateMessage)
    {
       this.waitDurationActionStateMessage = waitDurationActionStateMessage;
+   }
+
+   public FootPoseActionStateMessage getFootPoseActionStateMessage()
+   {
+      return footPoseActionStateMessage;
+   }
+
+   public void setFootPoseActionStateMessage(FootPoseActionStateMessage footPoseActionStateMessage)
+   {
+      this.footPoseActionStateMessage = footPoseActionStateMessage;
    }
 
    public KickDoorActionStateMessage getKickDoorActionStateMessage()

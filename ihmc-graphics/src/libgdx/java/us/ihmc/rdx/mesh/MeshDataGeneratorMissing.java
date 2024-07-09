@@ -1,5 +1,6 @@
 package us.ihmc.rdx.mesh;
 
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
@@ -105,6 +106,90 @@ public class MeshDataGeneratorMissing
          triangleIndices[index++] = northPoleIndex;
          triangleIndices[index++] = (latitudeN - 2) * longitudeN + nextLongitudeIndex;
          triangleIndices[index++] = (latitudeN - 2) * longitudeN + longitudeIndex;
+      }
+
+      return new MeshDataHolder(points, textPoints, triangleIndices, normals);
+   }
+
+   public static MeshDataHolder InvertedHemiEllipsoidNoBottom(float xRadius, float yRadius, float zRadius, int latitudeN, int longitudeN)
+   {
+      return InvertedHemiEllipsoidNoBottom(xRadius, yRadius, zRadius, latitudeN, longitudeN, (float) Math.toRadians(180.0f));
+   }
+
+   public static MeshDataHolder InvertedHemiEllipsoidNoBottom(float xRadius, float yRadius, float zRadius, int latitudeN, int longitudeN, float fov)
+   {
+      // Reminder of longitude and latitude: http://www.geographyalltheway.com/ks3_geography/maps_atlases/longitude_latitude.htm
+      Point3D32[] points = new Point3D32[latitudeN * longitudeN + 1];
+      Vector3D32[] normals = new Vector3D32[latitudeN * longitudeN + 1];
+      TexCoord2f[] textPoints = new TexCoord2f[latitudeN * longitudeN + 1];
+
+      for (int longitudeIndex = 0; longitudeIndex < longitudeN; longitudeIndex++)
+      {
+         float longitudeAngle = TwoPi * ((float) longitudeIndex / (float) longitudeN);
+
+         for (int latitudeIndex = 0; latitudeIndex < latitudeN; latitudeIndex++)
+         {
+            float latitudeAngle = (float) EuclidCoreTools.interpolate(HalfPi - 0.5 * fov, HalfPi, (double) latitudeIndex / (double) (latitudeN - 1));
+
+            float cosLongitude = (float) Math.cos(longitudeAngle);
+            float sinLongitude = (float) Math.sin(longitudeAngle);
+            float cosLatitude = (float) Math.cos(latitudeAngle);
+            float sinLatitude = (float) Math.sin(latitudeAngle);
+
+            int currentIndex = latitudeIndex * longitudeN + longitudeIndex;
+            float normalX = cosLongitude * cosLatitude;
+            float normalY = sinLongitude * cosLatitude;
+            float normalZ = sinLatitude;
+            float vertexX = xRadius * normalX;
+            float vertexY = yRadius * normalY;
+            float vertexZ = zRadius * normalZ;
+            points[currentIndex] = new Point3D32(vertexX, vertexY, vertexZ);
+
+            normals[currentIndex] = new Vector3D32(normalX, normalY, normalZ);
+
+            float textureX = longitudeAngle / HalfPi;
+            float textureY = (float) (0.5 * sinLatitude + 0.5);
+            textPoints[currentIndex] = new TexCoord2f(textureX, textureY);
+         }
+      }
+
+      // North pole
+      int northPoleIndex = latitudeN * longitudeN;
+      points[northPoleIndex] = new Point3D32(0.0f, 0.0f, zRadius);
+      normals[northPoleIndex] = new Vector3D32(0.0f, 0.0f, 1.0f);
+      textPoints[northPoleIndex] = new TexCoord2f(1.0f, 1.0f);
+
+      int numberOfTriangles = 2 * latitudeN * longitudeN + longitudeN;
+      int[] triangleIndices = new int[3 * numberOfTriangles];
+
+      int index = 0;
+
+      // Mid-latitude faces
+      for (int latitudeIndex = 0; latitudeIndex < latitudeN - 1; latitudeIndex++)
+      {
+         for (int longitudeIndex = 0; longitudeIndex < longitudeN; longitudeIndex++)
+         {
+            int nextLongitudeIndex = (longitudeIndex + 1) % longitudeN;
+            int nextLatitudeIndex = latitudeIndex + 1;
+
+            // Lower triangles
+            triangleIndices[index++] = latitudeIndex * longitudeN + longitudeIndex;
+            triangleIndices[index++] = nextLatitudeIndex * longitudeN + longitudeIndex;
+            triangleIndices[index++] = latitudeIndex * longitudeN + nextLongitudeIndex;
+            // Upper triangles
+            triangleIndices[index++] = latitudeIndex * longitudeN + nextLongitudeIndex;
+            triangleIndices[index++] = nextLatitudeIndex * longitudeN + longitudeIndex;
+            triangleIndices[index++] = nextLatitudeIndex * longitudeN + nextLongitudeIndex;
+         }
+      }
+
+      // North pole faces
+      for (int longitudeIndex = 0; longitudeIndex < longitudeN; longitudeIndex++)
+      {
+         int nextLongitudeIndex = (longitudeIndex + 1) % longitudeN;
+         triangleIndices[index++] = northPoleIndex;
+         triangleIndices[index++] = (latitudeN - 1) * longitudeN + nextLongitudeIndex;
+         triangleIndices[index++] = (latitudeN - 1) * longitudeN + longitudeIndex;
       }
 
       return new MeshDataHolder(points, textPoints, triangleIndices, normals);

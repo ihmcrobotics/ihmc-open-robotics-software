@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -31,7 +31,7 @@ public class BodyCollisionPoint
    // Scale applied to position shift, used to converge on center of oscillation
    private static double shiftAlpha = 1;
 
-   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
+   private final DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final YoFramePose3D startingWaypoint;
    private final YoFramePose3D optimizedWaypoint;
    private final YoFramePoseUsingYawPitchRoll collisionBoxPose;
@@ -48,7 +48,7 @@ public class BodyCollisionPoint
    private final YoGraphicCoordinateSystem adjustmentGraphic;
 
    public BodyCollisionPoint(int index,
-                             FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                             DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters,
                              YoGraphicsListRegistry graphicsListRegistry,
                              YoRegistry registry)
    {

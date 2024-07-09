@@ -6,12 +6,14 @@ import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.opencv_core.Mat;
 import perception_msgs.msg.dds.HeightMapMessage;
 import perception_msgs.msg.dds.ImageMessage;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.perception.BytedecoImage;
@@ -30,6 +32,7 @@ import us.ihmc.perception.tools.PerceptionMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -74,6 +77,7 @@ public class HumanoidPerceptionModule
    private BytedecoImage realsenseDepthImage;
 
    private final PerceptionStatistics perceptionStatistics = new PerceptionStatistics();
+   private final Notification resetHeightMapRequested = new Notification();
 
    private boolean rapidRegionsEnabled = false;
    private boolean sphericalRegionsEnabled = false;
@@ -154,9 +158,7 @@ public class HumanoidPerceptionModule
                                    }
 
                                    Instant acquisitionTime = Instant.now();
-                                   Mat croppedHeightMapImage = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
-                                   Mat localHeightMapImage = rapidHeightMapExtractor.getLocalHeightMapImage().getBytedecoOpenCVMat();
-                                   Mat globalHeightMapImage = rapidHeightMapExtractor.getInternalGlobalHeightMapImage().getBytedecoOpenCVMat();
+                                   Mat croppedHeightMapImage = rapidHeightMapExtractor.getTerrainMapData().getHeightMap();
 
                                    if (ros2Helper != null)
                                    {
@@ -208,7 +210,9 @@ public class HumanoidPerceptionModule
                                                               PerceptionAPI.HEIGHT_MAP_CROPPED,
                                                               croppedHeightMapImageMessage,
                                                               ros2Helper,
-                                                              cameraPose,
+                                                              new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                                              rapidHeightMapExtractor.getSensorOrigin(),
+                                                                              new Quaternion()),
                                                               acquisitionTime,
                                                               rapidHeightMapExtractor.getSequenceNumber(),
                                                               heightMapImage.rows(),
@@ -229,6 +233,9 @@ public class HumanoidPerceptionModule
 
    private void updateRapidHeightMap(ROS2Helper ros2Helper, ReferenceFrame cameraFrame, ReferenceFrame cameraZUpFrame)
    {
+      if (resetHeightMapRequested.poll())
+         rapidHeightMapExtractor.reset();
+
       RigidBodyTransform sensorToWorld = cameraFrame.getTransformToWorldFrame();
       RigidBodyTransform sensorToGround = cameraFrame.getTransformToDesiredFrame(cameraZUpFrame);
       RigidBodyTransform groundToWorld = cameraZUpFrame.getTransformToWorldFrame();
@@ -276,12 +283,17 @@ public class HumanoidPerceptionModule
       this.rapidPlanarRegionsExtractor.getDebugger().setEnabled(false);
    }
 
-   public void initializeHeightMapExtractor(CameraIntrinsics cameraIntrinsics)
+   public void initializeHeightMapExtractor(ROS2Helper ros2Helper, HumanoidReferenceFrames referenceFrames, CameraIntrinsics cameraIntrinsics)
    {
       LogTools.info("Rapid Height Map: {}", cameraIntrinsics);
-      rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager);
+      rapidHeightMapExtractor = new RapidHeightMapExtractor(openCLManager,
+                                                            referenceFrames.getSoleFrame(RobotSide.LEFT),
+                                                            referenceFrames.getSoleFrame(RobotSide.RIGHT));
       rapidHeightMapExtractor.setDepthIntrinsics(cameraIntrinsics);
       rapidHeightMapExtractor.create(realsenseDepthImage, 1);
+
+      if (ros2Helper != null)
+         ros2Helper.subscribeViaVolatileCallback(PerceptionAPI.RESET_HEIGHT_MAP, message -> resetHeightMapRequested.set());
    }
 
    public void initializeBodyCollisionFilter(FullHumanoidRobotModel fullRobotModel, CollisionBoxProvider collisionBoxProvider)
@@ -420,19 +432,7 @@ public class HumanoidPerceptionModule
 
    public HeightMapData getLatestHeightMapData()
    {
-      Mat heightMapMat = rapidHeightMapExtractor.getCroppedGlobalHeightMapImage();
-      if (latestHeightMapData == null)
-      {
-         latestHeightMapData = new HeightMapData((float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters(),
-                                                 (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
-                                                 rapidHeightMapExtractor.getSensorOrigin().getX(),
-                                                 rapidHeightMapExtractor.getSensorOrigin().getY());
-      }
-      PerceptionMessageTools.convertToHeightMapData(heightMapMat,
-                                                    latestHeightMapData,
-                                                    rapidHeightMapExtractor.getSensorOrigin(),
-                                                    (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalWidthInMeters(),
-                                                    (float) RapidHeightMapExtractor.getHeightMapParameters().getGlobalCellSizeInMeters());
+      latestHeightMapData = RapidHeightMapExtractor.packHeightMapData(rapidHeightMapExtractor, latestHeightMapData);
       return latestHeightMapData;
    }
 
@@ -454,5 +454,10 @@ public class HumanoidPerceptionModule
    public void setSphericalRegionsEnabled(boolean sphericalRegionsEnabled)
    {
       this.sphericalRegionsEnabled = sphericalRegionsEnabled;
+   }
+
+   public PerceptionStatistics getPerceptionStatistics()
+   {
+      return perceptionStatistics;
    }
 }

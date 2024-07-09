@@ -4,7 +4,8 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.HeightMapPolygonSnapper;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -22,10 +23,11 @@ public class BodyPathLSTraversibilityCalculator
    private static final double alphaNode1 = 0.05;
    private static final double alphaEdge = 0.5;
 
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DefaultFootstepPlannerParametersReadOnly parameters;
    private final Pose2D bodyPose = new Pose2D();
    private final Pose2D stepPose = new Pose2D();
 
+   private final FootstepPlannerEnvironmentHandler internalEnvironmentHandler = new FootstepPlannerEnvironmentHandler();
    private final HeightMapPolygonSnapper snapper = new HeightMapPolygonSnapper();
    private final Map<BodyPathLatticePoint, Double> gridHeightMap;
 
@@ -51,7 +53,7 @@ public class BodyPathLSTraversibilityCalculator
    private final TDoubleArrayList traversibilityCosts = new TDoubleArrayList();
    private HeightMapData heightMapData;
 
-   public BodyPathLSTraversibilityCalculator(FootstepPlannerParametersReadOnly parameters,
+   public BodyPathLSTraversibilityCalculator(DefaultFootstepPlannerParametersReadOnly parameters,
                                              SideDependentList<ConvexPolygon2D> footPolygons,
                                              Map<BodyPathLatticePoint, Double> gridHeightMap,
                                              YoRegistry registry)
@@ -153,7 +155,6 @@ public class BodyPathLSTraversibilityCalculator
       traversibilityCosts.clear();
       validSteps.get(side).set(0);
 
-      double fullFootholdArea = footPolygons.get(side).getArea();
       double maxAreaToPenalize = 0.9;
       double minAreaThreshold = 0.65;
 
@@ -168,6 +169,7 @@ public class BodyPathLSTraversibilityCalculator
       TDoubleArrayList inclineAlphas = new TDoubleArrayList();
 
       Pose2D rotatedBodyPose = new Pose2D();
+      internalEnvironmentHandler.setHeightMap(heightMapData);
 
       for (int ti = 0; ti < yawOffsets.size(); ti++)
       {
@@ -191,9 +193,9 @@ public class BodyPathLSTraversibilityCalculator
 
                double heightWindow = 0.2;
                RigidBodyTransform snapTransform = snapper.snapPolygonToHeightMap(footPolygon,
-                                                                                 heightMapData,
+                                                                                 internalEnvironmentHandler,
                                                                                  parameters.getHeightMapSnapThreshold(),
-                                                                                 parameters.getMinimumSurfaceInclineRadians(),
+                                                                                 parameters.getMinSurfaceIncline(),
                                                                                  parentHeight - heightWindow);
                if (snapTransform == null)
                {
@@ -214,7 +216,7 @@ public class BodyPathLSTraversibilityCalculator
                   double rmsAlpha = Math.max(0.0,
                                              (snapper.getRMSError() - parameters.getRMSMinErrorToPenalize()) / (parameters.getRMSErrorThreshold()
                                                                                                                 - parameters.getRMSMinErrorToPenalize()));
-                  double areaAlpha = Math.max(0.0, 1.0 - (snapper.getArea() / fullFootholdArea - minAreaThreshold) / (maxAreaToPenalize - minAreaThreshold));
+                  double areaAlpha = Math.max(0.0, 1.0 - (snapper.getAreaFraction() - minAreaThreshold) / (maxAreaToPenalize - minAreaThreshold));
                   double inclineAlpha = Math.max(0.0,
                                                  (Math.acos(snapTransform.getM22()) - minSurfaceInclineToPenalize) / (maxSurfaceIncline
                                                                                                                       - minSurfaceInclineToPenalize));

@@ -2,7 +2,6 @@ package us.ihmc.rdx.tools;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 
 public class LibGDXApplicationCreator
@@ -30,18 +29,6 @@ public class LibGDXApplicationCreator
       Lwjgl3ApplicationConfiguration applicationConfiguration = new Lwjgl3ApplicationConfiguration();
       applicationConfiguration.setTitle(title);
       applicationConfiguration.setWindowedMode((int) width, (int) height);
-      // TODO: These options are work in progress. Not sure what is the best setting for everyone.
-      if (Boolean.parseBoolean(System.getProperty("rdx.free.spin")))
-      {
-         applicationConfiguration.setIdleFPS(Integer.MAX_VALUE);
-         applicationConfiguration.setForegroundFPS(Integer.MAX_VALUE);
-      }
-      else
-      {
-         applicationConfiguration.setIdleFPS(30); // probably need to implement pause before idle FPS does anything
-         applicationConfiguration.setForegroundFPS(240);
-      }
-      applicationConfiguration.useVsync(false); // vsync on seems to limit FPS to 30 so keep off
       applicationConfiguration.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4);
       applicationConfiguration.setOpenGLEmulation(Lwjgl3ApplicationConfiguration.GLEmulation.GL30, 4, 6);
       applicationConfiguration.setWindowIcon("icons/rdx-icon16.png", "icons/rdx-icon32.png", "icons/rdx-icon48.png");

@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.convexOptimization.linearProgram.LinearProgramSolver;
+import us.ihmc.convexOptimization.linearProgram.SolverMethod;
+import us.ihmc.convexOptimization.linearProgram.SolverStatistics.LinearProgramFailureReason;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -17,9 +19,16 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.robotics.SCS2YoGraphicHolder;
+import us.ihmc.scs2.definition.visual.ColorDefinitions;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinition;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicDefinitionFactory;
+import us.ihmc.scs2.definition.yoGraphic.YoGraphicGroupDefinition;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,9 +61,9 @@ import java.util.List;
  *    <li>x is CoM position in R<sup>2</sup></li>
  * </ul>
  */
-public class CenterOfMassStabilityMarginOptimizationModule
+public class CenterOfMassStabilityMarginOptimizationModule implements SCS2YoGraphicHolder
 {
-   private static final boolean DEBUG = false;
+   static final boolean DEBUG = false;
    static final double GRAVITY = 9.81;
    static final int NUM_BASIS_VECTORS = 4;
    static final int MAX_CONTACT_POINTS = 12;
@@ -70,6 +79,7 @@ public class CenterOfMassStabilityMarginOptimizationModule
 
    private final List<YoFramePoint3D> contactPointPositions = new ArrayList<>();
    private final List<YoFrameVector3D> basisVectors = new ArrayList<>();
+   private final List<YoFrameVector3D> resolvedForces = new ArrayList<>();
 
    private int numberOfContactPoints;
    /* Number of decision variables in x_force = [f_0x, f_0y, ..., c_x, c_y] */
@@ -116,6 +126,10 @@ public class CenterOfMassStabilityMarginOptimizationModule
    private int cx_neg_index;
    private int cy_neg_index;
 
+   /* Yo-Variables to debug in cases the solver failes*/
+   private YoBoolean failedForPhaseI = new YoBoolean("failedForPhaseI", registry);
+   private final YoEnum<LinearProgramFailureReason> failureReason = new YoEnum<>("failureReason", registry, LinearProgramFailureReason.class, true);
+
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameVector3D tempVector = new FrameVector3D();
    private final AxisAngle tempAxisAngle = new AxisAngle();
@@ -132,6 +146,7 @@ public class CenterOfMassStabilityMarginOptimizationModule
       for (int i = 0; i < MAX_CONTACT_POINTS; i++)
       {
          contactPointPositions.add(new YoFramePoint3D("contactPoint" + i, ReferenceFrame.getWorldFrame(), debugRegistry));
+         resolvedForces.add(new YoFrameVector3D("resolvedForce" + i, ReferenceFrame.getWorldFrame(), debugRegistry));
 
          for (int j = 0; j < NUM_BASIS_VECTORS; j++)
          {
@@ -140,25 +155,34 @@ public class CenterOfMassStabilityMarginOptimizationModule
       }
 
       if (DEBUG)
+      {
          registry.addChild(debugRegistry);
 
-      if (DEBUG && graphicsListRegistry != null)
-      {
-         YoGraphicsList graphicsList = new YoGraphicsList(getClass().getSimpleName());
-         for (int contactIdx = 0; contactIdx < MAX_CONTACT_POINTS; contactIdx++)
+         if (graphicsListRegistry != null)
          {
-            YoGraphicPosition contactPointGraphic = new YoGraphicPosition("contactPointGraphic" + contactIdx, contactPointPositions.get(contactIdx), 0.01, YoAppearance.Black());
-            graphicsList.add(contactPointGraphic);
-
-            for (int basisIdx = 0; basisIdx < NUM_BASIS_VECTORS; basisIdx++)
+            YoGraphicsList graphicsList = new YoGraphicsList(getClass().getSimpleName());
+            for (int contactIdx = 0; contactIdx < MAX_CONTACT_POINTS; contactIdx++)
             {
-               YoGraphicVector basisVectorGraphic = new YoGraphicVector("basisGraphic" + contactIdx + "_" + basisIdx, contactPointPositions.get(contactIdx), basisVectors.get(getBasisIndex(contactIdx, basisIdx)), 0.15, YoAppearance.Black());
-               graphicsList.add(basisVectorGraphic);
-            }
-         }
+               YoGraphicPosition contactPointGraphic = new YoGraphicPosition("contactPointGraphic" + contactIdx,
+                                                                             contactPointPositions.get(contactIdx),
+                                                                             0.01,
+                                                                             YoAppearance.Black());
+               graphicsList.add(contactPointGraphic);
 
-         graphicsList.add(new YoGraphicPosition("optimizedCoMGraphic", yoOptimizedCoM, 0.03, YoAppearance.Red()));
-         graphicsListRegistry.registerYoGraphicsList(graphicsList);
+               for (int basisIdx = 0; basisIdx < NUM_BASIS_VECTORS; basisIdx++)
+               {
+                  YoGraphicVector basisVectorGraphic = new YoGraphicVector("basisGraphic" + contactIdx + "_" + basisIdx,
+                                                                           contactPointPositions.get(contactIdx),
+                                                                           basisVectors.get(getBasisIndex(contactIdx, basisIdx)),
+                                                                           0.15,
+                                                                           YoAppearance.Black());
+                  graphicsList.add(basisVectorGraphic);
+               }
+            }
+
+            graphicsList.add(new YoGraphicPosition("optimizedCoMGraphic", yoOptimizedCoM, 0.03, YoAppearance.Red()));
+            graphicsListRegistry.registerYoGraphicsList(graphicsList);
+         }
       }
 
       if (parentRegistry != null)
@@ -169,7 +193,9 @@ public class CenterOfMassStabilityMarginOptimizationModule
    {
       clear();
 
-      /* Compute contact point positions and corresponding basis vectors */
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      //////////////////////////////// Compute contact point positions and corresponding basis vectors ////////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       numberOfContactPoints = contactState.getNumberOfContactPoints();
 
@@ -194,7 +220,9 @@ public class CenterOfMassStabilityMarginOptimizationModule
          }
       }
 
-      /* Compute nominal equality constraint to enforce static equilibrium */
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////// Compute nominal equality constraint to enforce static equilibrium ///////////////////////////////
+      /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       nominalDecisionVariables = LINEAR_DIMENSIONS * contactState.getNumberOfContactPoints() + CoM_DIMENSIONS;
       Aeq.reshape(STATIC_EQUILIBRIUM_CONSTRAINTS, nominalDecisionVariables);
@@ -225,7 +253,9 @@ public class CenterOfMassStabilityMarginOptimizationModule
       Aeq.set(4, cx_index, mg);
       beq.set(2, 0, mg);
 
-      /* Compute map from positive x to nominal x */
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////////// Compute map from positive x to nominal x ///////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       rhoDecisionVariables = NUM_BASIS_VECTORS * contactState.getNumberOfContactPoints() + 2 * CoM_DIMENSIONS;
       rhoToForce.reshape(nominalDecisionVariables, rhoDecisionVariables);
@@ -254,11 +284,15 @@ public class CenterOfMassStabilityMarginOptimizationModule
       rhoToForce.set(cx_index, cx_neg_index, -1.0);
       rhoToForce.set(cy_index, cy_neg_index, -1.0);
 
-      /* Assemble nominal augmented inequality constraint */
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      /////////////////////////////////////// Assemble nominal augmented inequality constraint ///////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+      // Actuation constraint C f <= d, where f = [f_0x, f_0y, f_0z, f_1x... ] are teh ground reaction forces in world frame
       DMatrixRMaj A_actuation = contactState.getActuationConstraintMatrix();
       DMatrixRMaj b_actuation = contactState.getActuationConstraintVector();
 
+      // Ain [f c] <= bin  ---> diag(Aeq, -Aeq, A_actuation) [f c] <= [beq -beq b_actuation]
       Ain.reshape(2 * Aeq.getNumRows() + A_actuation.getNumRows(), nominalDecisionVariables);
       bin.reshape(2 * beq.getNumRows() + b_actuation.getNumRows(), 1);
 
@@ -270,7 +304,10 @@ public class CenterOfMassStabilityMarginOptimizationModule
       MatrixTools.setMatrixBlock(bin, beq.getNumRows(), 0, beq, 0, 0, beq.getNumRows(), beq.getNumCols(), -1.0);
       MatrixTools.setMatrixBlock(bin, 2 * beq.getNumRows(), 0, b_actuation, 0, 0, b_actuation.getNumRows(), b_actuation.getNumCols(), 1.0);
 
-      /* Compute solver augmented inequality constraint */
+
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+      //////////////////////////////////////// Compute solver augmented inequality constraint ////////////////////////////////////////
+      ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
       Ain_rho.reshape(Ain.getNumRows(), rhoDecisionVariables);
       CommonOps_DDRM.mult(Ain, rhoToForce, Ain_rho);
@@ -292,7 +329,7 @@ public class CenterOfMassStabilityMarginOptimizationModule
       rewardVectorC.set(cy_pos_index, 0, queryDirectionY);
       rewardVectorC.set(cy_neg_index, 0, -queryDirectionY);
 
-      foundSolution = linearProgramSolver.solve(rewardVectorC, Ain_rho, bin, solutionRho);
+      foundSolution = linearProgramSolver.solve(rewardVectorC, Ain_rho, bin, solutionRho, SolverMethod.SIMPLEX);
       if (foundSolution)
       {
          CommonOps_DDRM.mult(rhoToForce, solutionRho, solutionForce);
@@ -303,9 +340,29 @@ public class CenterOfMassStabilityMarginOptimizationModule
          optimizedCoM.setToNaN();
       }
 
+      failureReason.set(linearProgramSolver.getSimplexStatistics().getFailureReason());
+      failedForPhaseI.set(linearProgramSolver.getSimplexStatistics().isFailedForPhaseI());
+
       yoOptimizedCoM.set(optimizedCoM, 0.0);
+      updateGraphics();
 
       return foundSolution;
+   }
+
+   private void updateGraphics()
+   {
+      if (!DEBUG)
+         return;
+
+      for (int i = 0; i < numberOfContactPoints; i++)
+      {
+         getResolvedForce(i, resolvedForces.get(i));
+      }
+   }
+
+   public LinearProgramSolver getLinearProgramSolver()
+   {
+      return linearProgramSolver;
    }
 
    public boolean foundSolution()
@@ -325,6 +382,14 @@ public class CenterOfMassStabilityMarginOptimizationModule
       resolvedForceToPack.setZ(solutionForce.get(LINEAR_DIMENSIONS * contactIdx + Axis3D.Z.ordinal()));
    }
 
+   /**
+    * Returns the optimized (3n_c + 2) x 1 vector of forces and CoM, [f_0x f_0y f_0z f_1x ... f_nz c_x c_y]
+    */
+   public DMatrixRMaj getOptimizedForceAndCoM()
+   {
+      return solutionForce;
+   }
+
    int getNumberOfContactPoints()
    {
       return numberOfContactPoints;
@@ -333,6 +398,36 @@ public class CenterOfMassStabilityMarginOptimizationModule
    YoFramePoint3D getYoContactPointPosition(int contactIdx)
    {
       return contactPointPositions.get(contactIdx);
+   }
+
+   @Override
+   public YoGraphicDefinition getSCS2YoGraphics()
+   {
+      YoGraphicGroupDefinition group = new YoGraphicGroupDefinition(getClass().getSimpleName());
+
+      if (DEBUG)
+      {
+         for (int i = 0; i < contactPointPositions.size(); i++)
+         {
+            group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D("contactPoint" + i,
+                                                                          contactPointPositions.get(i),
+                                                                          resolvedForces.get(i),
+                                                                          1.1 / mg,
+                                                                          ColorDefinitions.Red()));
+            for (int j = 0; j < NUM_BASIS_VECTORS; j++)
+            {
+               group.addChild(YoGraphicDefinitionFactory.newYoGraphicArrow3D("beta" + getBasisIndex(i, j),
+                                                                             contactPointPositions.get(i),
+                                                                             basisVectors.get(getBasisIndex(i, j)),
+                                                                             0.2,
+                                                                             ColorDefinitions.Black()));
+            }
+         }
+
+         group.addChild(YoGraphicDefinitionFactory.newYoGraphicPoint3D("optimizedCoM", yoOptimizedCoM, 0.05, ColorDefinitions.Red()));
+      }
+
+      return group;
    }
 
    private void clear()
@@ -364,6 +459,9 @@ public class CenterOfMassStabilityMarginOptimizationModule
       {
          basisVectors.get(i).setToNaN();
       }
+
+      failedForPhaseI.set(false);
+      failureReason.set(null);
    }
 
    public YoRegistry getRegistry()

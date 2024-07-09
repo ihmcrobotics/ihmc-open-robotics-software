@@ -1,7 +1,6 @@
 package us.ihmc.rdx.ui.affordances;
 
 import org.apache.commons.lang3.tuple.Pair;
-import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -10,13 +9,12 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.SwingPlanningModule;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.heightMap.HeightMapData;
-import us.ihmc.sensorProcessing.heightMap.HeightMapMessageTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
@@ -26,7 +24,7 @@ public class RDXSwingPlanningModule
 {
    private final SwingPlanningModule swingPlanningModule;
    private final ROS2SyncedRobotModel syncedRobot;
-   private HeightMapMessage heightMapMessage;
+   private HeightMapData heightMapData;
    private SwingPlannerParametersReadOnly swingPlannerParameters;
 
    private final SideDependentList<FramePose3DBasics> startFootPoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
@@ -35,7 +33,7 @@ public class RDXSwingPlanningModule
    private boolean isCurrentlyPlanning = false;
 
    public RDXSwingPlanningModule(ROS2SyncedRobotModel syncedRobot,
-                                 FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                                 DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters,
                                  SwingPlannerParametersBasics swingPlannerParameters,
                                  WalkingControllerParameters walkingControllerParameters,
                                  SideDependentList<ConvexPolygon2D> footPolygons)
@@ -45,9 +43,9 @@ public class RDXSwingPlanningModule
       swingPlanningModule = new SwingPlanningModule(footstepPlannerParameters, swingPlannerParameters, walkingControllerParameters, footPolygons);
    }
 
-   public void setHeightMapData(HeightMapMessage heightMapData)
+   public void setHeightMapData(HeightMapData heightMapData)
    {
-      this.heightMapMessage = heightMapData;
+      this.heightMapData = heightMapData;
    }
 
    public void setSwingPlannerParameters(SwingPlannerParametersReadOnly swingPlannerParameters)
@@ -71,7 +69,7 @@ public class RDXSwingPlanningModule
       setInitialFeet();
       FootstepPlan tempPlan = createFakeFootstepPlan(footstepPlan);
 
-      HeightMapData heightMapData = HeightMapMessageTools.unpackMessage(heightMapMessage);
+      HeightMapData heightMapData = this.heightMapData;
       swingPlanningModule.getSwingPlannerParameters().set(swingPlannerParameters);
       swingPlanningModule.computeSwingWaypoints(heightMapData,
                                                 tempPlan,

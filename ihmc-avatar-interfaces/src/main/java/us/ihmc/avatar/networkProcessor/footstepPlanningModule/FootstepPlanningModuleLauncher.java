@@ -13,7 +13,7 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.communication.FootstepPlannerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
@@ -76,7 +76,30 @@ public class FootstepPlanningModuleLauncher
    {
       String moduleName = robotModel.getSimpleRobotName();
 
-      FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+      SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
+      StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();
+
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
+      SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons(robotModel);
+
+      return new FootstepPlanningModule(moduleName,
+                                        robotModel.getAStarBodyPathPlannerParameters(),
+                                        footstepPlannerParameters,
+                                        swingPlannerParameters,
+                                        walkingControllerParameters,
+                                        footPolygons,
+                                        stepReachabilityData);
+   }
+
+   /**
+    * Creates a FootstepPlanningModule object given a DRCRobotModel
+    */
+   public static FootstepPlanningModule createModule(DRCRobotModel robotModel, String suffix)
+   {
+      String moduleName = robotModel.getSimpleRobotName();
+
+      DefaultFootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters(suffix);
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
       StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();
 

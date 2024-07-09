@@ -10,6 +10,7 @@ import org.ejml.data.BMatrixRMaj;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.property.ROS2StoredPropertySet;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -23,8 +24,8 @@ import us.ihmc.perception.opencl.OpenCLFloatBuffer;
 import us.ihmc.perception.opencl.OpenCLManager;
 import us.ihmc.perception.tools.PerceptionFilterTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.FramePlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 
 import java.util.Comparator;
@@ -161,11 +162,11 @@ public class RapidPlanarRegionsExtractor
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
 
-      this.parameters = new RapidRegionsExtractorParameters(version);
-      this.parameters.set(RapidRegionsExtractorParameters.focalLengthXPixels, fx);
-      this.parameters.set(RapidRegionsExtractorParameters.focalLengthYPixels, fy);
-      this.parameters.set(RapidRegionsExtractorParameters.principalOffsetXPixels, cx);
-      this.parameters.set(RapidRegionsExtractorParameters.principalOffsetYPixels, cy);
+      parameters = new RapidRegionsExtractorParameters(version);
+      parameters.set(RapidRegionsExtractorParameters.focalLengthXPixels, fx);
+      parameters.set(RapidRegionsExtractorParameters.focalLengthYPixels, fy);
+      parameters.set(RapidRegionsExtractorParameters.principalOffsetXPixels, cx);
+      parameters.set(RapidRegionsExtractorParameters.principalOffsetYPixels, cy);
 
       rapidPlanarRegionsCustomizer = new RapidPlanarRegionsCustomizer();
       perspectiveBackProjectionKernel = openCLManager.createKernel(planarRegionExtractionProgram, "perspectiveBackProjectionKernel");
@@ -717,10 +718,10 @@ public class RapidPlanarRegionsExtractor
 
    public void destroy()
    {
-      currentFeatureGrid.destroy();
-      patchGraph.destroy(openCLManager);
-      openCLManager.destroy();
-      // TODO: Destroy the rest
+      // TODO: calling these destroy methods cause a native crash
+//      currentFeatureGrid.destroy();
+//      patchGraph.destroy(openCLManager);
+//      openCLManager.destroy();
    }
 
    public RapidPlanarRegionsCustomizer getRapidPlanarRegionsCustomizer()

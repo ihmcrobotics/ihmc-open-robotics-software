@@ -3,10 +3,10 @@ package us.ihmc.rdx.ui.behavior.sequence;
 import imgui.ImGui;
 import imgui.flag.ImGuiCol;
 import imgui.type.ImString;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.behaviors.sequence.ActionNodeDefinition;
 import us.ihmc.behaviors.sequence.ActionNodeState;
-import us.ihmc.behaviors.sequence.ActionSequenceState;
 import us.ihmc.rdx.imgui.ImGuiFlashingColors;
 import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiHollowArrowRenderer;
@@ -14,6 +14,7 @@ import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeNode;
+import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeRootNode;
 import us.ihmc.rdx.ui.behavior.tree.RDXBehaviorTreeTools;
 
 import java.util.List;
@@ -59,7 +60,7 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    @Override
    public void renderTreeViewIconArea()
    {
-      RDXActionSequence actionSequence = RDXBehaviorTreeTools.findActionSequenceAncestor(this);
+      RDXBehaviorTreeRootNode actionSequence = RDXBehaviorTreeTools.findRootNode(this);
       if (actionSequence != null)
       {
          // Not displaying this now until we calculate it correctly. @dcalvert
@@ -91,7 +92,7 @@ public abstract class RDXActionNode<S extends ActionNodeState<D>,
    {
       ImGui.text("Type: %s   Index: %d".formatted(getActionTypeTitle(), state.getActionIndex()));
 
-      ActionSequenceState actionSequence = BehaviorTreeTools.findActionSequenceAncestor(state);
+      BehaviorTreeRootNodeState actionSequence = BehaviorTreeTools.findRootNode(state);
 
       if (actionSequence != null)
       {

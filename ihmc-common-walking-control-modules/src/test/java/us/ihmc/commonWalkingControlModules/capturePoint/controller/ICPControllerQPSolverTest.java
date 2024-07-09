@@ -5,6 +5,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
@@ -12,10 +13,9 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.matrixlib.MatrixTestTools;
-import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class ICPControllerQPSolverTest
 {
@@ -79,8 +79,8 @@ public class ICPControllerQPSolverTest
       copFeedbackExpected.set(icpError);
       copFeedbackExpected.scale(3.0);
 
-      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      assertTrue("The CMP Feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      EuclidFrameTestTools.assertGeometricallyEquals("The CoP feedback is wrong.", copFeedbackExpected, copFeedback, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("The CMP feedback is wrong.", cmpCoPDifferenceExpected, cmpCoPDifference, epsilon);
    }
 
    @Test
@@ -107,8 +107,8 @@ public class ICPControllerQPSolverTest
       copFeedbackExpected.set(icpError);
       copFeedbackExpected.scale(3.0);
 
-      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      EuclidFrameTestTools.assertGeometricallyEquals("The CoP feedback is wrong.", copFeedbackExpected, copFeedback, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("The CMP feedback is wrong.", cmpCoPDifferenceExpected, cmpCoPDifference, epsilon);
    }
 
    @Test
@@ -148,8 +148,108 @@ public class ICPControllerQPSolverTest
       copFeedbackExpected.setY(Math.min(copFeedbackExpected.getY(), sideLength));
       copFeedbackExpected.sub(perfectCMP);
 
-      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      EuclidFrameTestTools.assertGeometricallyEquals("The CoP feedback is wrong.", copFeedbackExpected, copFeedback, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("The CMP feedback is wrong.", cmpCoPDifferenceExpected, cmpCoPDifference, epsilon);
+   }
+
+   @Test
+   public void testStandingWithRateLimitConstraints()
+   {
+      ICPControllerQPSolver solver = new ICPControllerQPSolver(10);
+      solver.setMaxNumberOfIterations(10);
+
+      // create support polygon constraint
+      double feedbackGain = 3.0;
+      solver.setFeedbackConditions(0.1, feedbackGain, 100000.0);
+
+      FrameVector2D icpError = new FrameVector2D(worldFrame, 0.05, 0.10);
+      FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.05, 0.01);
+
+      assertTrue(solver.compute(icpError, perfectCMP));
+
+      FrameVector2D cmpCoPDifference = new FrameVector2D();
+      FrameVector2D copFeedback = new FrameVector2D();
+
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
+      solver.getCoPFeedbackDifference(copFeedback);
+
+      FrameVector2D cmpCoPDifferenceExpected = new FrameVector2D();
+      FrameVector2D copFeedbackExpected = new FrameVector2D();
+
+      copFeedbackExpected.set(icpError);
+      copFeedbackExpected.scale(feedbackGain);
+
+      EuclidFrameTestTools.assertGeometricallyEquals("The CoP feedback is wrong.", copFeedbackExpected, copFeedback, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("The CMP feedback is wrong.", cmpCoPDifferenceExpected, cmpCoPDifference, epsilon);
+
+      FrameVector2D previousCMPFeedback = new FrameVector2D();
+      previousCMPFeedback.add(copFeedback, cmpCoPDifference);
+      FrameVector2D previousCoPFeedback = new FrameVector2D(copFeedback);
+
+      // now set the rate limit, and introduce a large change in the icp error
+      double maxCMPRate = 3.0;
+      double controlDt = 1e-3;
+      solver.setMaximumFeedbackRate(maxCMPRate, controlDt);
+
+      icpError.set(-0.05, -0.1);
+
+      assertTrue(solver.compute(icpError, perfectCMP));
+
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
+      solver.getCoPFeedbackDifference(copFeedback);
+
+      FrameVector2D unlimitedCopFeedbackExpected = new FrameVector2D();
+      unlimitedCopFeedbackExpected.set(icpError);
+      unlimitedCopFeedbackExpected.scale(feedbackGain);
+
+      double maxChange = maxCMPRate * controlDt;
+
+      FrameVector2D copFeedbackDelta = new FrameVector2D();
+      copFeedbackDelta.sub(unlimitedCopFeedbackExpected, previousCoPFeedback);
+      copFeedbackDelta.setX(MathTools.clamp(copFeedbackDelta.getX(), maxChange));
+      copFeedbackDelta.setY(MathTools.clamp(copFeedbackDelta.getY(), maxChange));
+
+      FrameVector2D limitedCoPFeedbackExpected = new FrameVector2D();
+      limitedCoPFeedbackExpected.add(copFeedbackExpected, copFeedbackDelta);
+
+      EuclidFrameTestTools.assertGeometricallyEquals("The CoP feedback is wrong.", limitedCoPFeedbackExpected, copFeedback, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("The CMP feedback is wrong.", cmpCoPDifferenceExpected, cmpCoPDifference, epsilon);
+
+      FrameVector2D cmpFeedback = new FrameVector2D();
+      cmpFeedback.add(copFeedback, cmpCoPDifference);
+
+      double actualXChange = Math.abs(cmpFeedback.getX() - previousCMPFeedback.getX());
+      double actualYChange = Math.abs(cmpFeedback.getY() - previousCMPFeedback.getY());
+      assertTrue(actualXChange < maxChange + epsilon, "The actual X change " + actualXChange + " is greater than the maximum allowed change from the rate limit " + maxChange);
+      assertTrue(actualYChange < maxChange + epsilon, "The actual Y change " + actualYChange + " is greater than the maximum allowed change from the rate limit " + maxChange);
+
+      // go back in the opposite direction to test the other bounds
+      icpError.set(0.1, 0.2);
+      previousCMPFeedback.add(limitedCoPFeedbackExpected, cmpCoPDifference);
+      previousCoPFeedback.set(limitedCoPFeedbackExpected);
+
+      assertTrue(solver.compute(icpError, perfectCMP));
+
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
+      solver.getCoPFeedbackDifference(copFeedback);
+
+      unlimitedCopFeedbackExpected.set(icpError);
+      unlimitedCopFeedbackExpected.scale(feedbackGain);
+
+      copFeedbackDelta.sub(unlimitedCopFeedbackExpected, previousCoPFeedback);
+      copFeedbackDelta.setX(MathTools.clamp(copFeedbackDelta.getX(), maxChange));
+      copFeedbackDelta.setY(MathTools.clamp(copFeedbackDelta.getY(), maxChange));
+
+      limitedCoPFeedbackExpected.add(previousCoPFeedback, copFeedbackDelta);
+
+      EuclidFrameTestTools.assertGeometricallyEquals("The CoP feedback is wrong.", limitedCoPFeedbackExpected, copFeedback, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("The CMP feedback is wrong.", cmpCoPDifferenceExpected, cmpCoPDifference, epsilon);
+
+      cmpFeedback.add(copFeedback, cmpCoPDifference);
+      actualXChange = Math.abs(cmpFeedback.getX() - previousCMPFeedback.getX());
+      actualYChange = Math.abs(cmpFeedback.getY() - previousCMPFeedback.getY());
+      assertTrue(actualXChange < maxChange + epsilon, "The actual X change " + actualXChange + " is greater than the maximum allowed change from the rate limit " + maxChange);
+      assertTrue(actualYChange < maxChange + epsilon, "The actual Y change " + actualYChange + " is greater than the maximum allowed change from the rate limit " + maxChange);
    }
 
    @Test
@@ -196,8 +296,8 @@ public class ICPControllerQPSolverTest
       // find delta
       copFeedbackExpected.sub(perfectCMP);
 
-      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      EuclidFrameTestTools.assertGeometricallyEquals("The CoP feedback is wrong.", copFeedbackExpected, copFeedback, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("The CMP feedback is wrong.", cmpCoPDifferenceExpected, cmpCoPDifference, epsilon);
    }
 
    private FrameConvexPolygon2D createSupportPolygon(double sideLength)
@@ -341,7 +441,7 @@ public class ICPControllerQPSolverTest
       copFeedbackExpected.setY(Math.min(copFeedbackExpected.getY(), midY));
       copFeedbackExpected.sub(perfectCMP);
 
-      assertFalse("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      assertFalse(copFeedback.epsilonEquals(copFeedbackExpected, epsilon), "The CoP feedback is wrong.");
 
       solver.setDesiredFeedbackDirection(icpError, 1e5);
       assertTrue(solver.compute(icpError, perfectCMP));
@@ -349,8 +449,9 @@ public class ICPControllerQPSolverTest
       solver.getCMPFeedbackDifference(cmpCoPDifference);
       solver.getCoPFeedbackDifference(copFeedback);
 
-      assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      EuclidFrameTestTools.assertGeometricallyEquals("The CoP feedback is wrong.", copFeedbackExpected, copFeedback, epsilon);
+      EuclidFrameTestTools.assertGeometricallyEquals("The CMP feedback is wrong.", cmpCoPDifferenceExpected, cmpCoPDifference, epsilon);
+
    }
 
    private FrameConvexPolygon2D createWeirdSupportPolygon(double footLength, double toeWidth, double heelWidth)

@@ -1,7 +1,7 @@
 package us.ihmc.rdx.vr;
 
 import com.badlogic.gdx.math.Matrix4;
-import org.lwjgl.openvr.*;
+import org.lwjgl.openvr.VR;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -40,12 +40,12 @@ public class RDXVRTracker extends RDXVRTrackedDevice
                                                                                 trackerYBackZLeftXRightToXForwardZUp);
    }
 
-   public void update(TrackedDevicePose.Buffer trackedDevicePoses)
+   public void update(RDXVRTrackedDevicePose[] trackedDevicePoses)
    {
       setConnected(getDeviceIndex() != VR.k_unTrackedDeviceIndexInvalid);
 
-      xForwardZUpTrackerFrame.update();
       super.update(trackedDevicePoses);
+      xForwardZUpTrackerFrame.update();
    }
 
    public void runIfConnected(Consumer<us.ihmc.rdx.vr.RDXVRTracker> runIfConnected)

@@ -36,10 +36,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import perception_msgs.msg.dds.HeightMapMessage;
-import perception_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.ros2.ROS2PublisherBasics;
-import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -47,7 +44,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParameters;
 import us.ihmc.footstepPlanning.AStarBodyPathPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -65,9 +62,7 @@ import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerParametersUIContro
 import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerStatusBarController;
 import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerTestDashboardController;
 import us.ihmc.footstepPlanning.ui.controllers.MainTabController;
-import us.ihmc.footstepPlanning.ui.controllers.RobotOperationTabController;
 import us.ihmc.footstepPlanning.ui.controllers.SwingPlannerParametersUIController;
-import us.ihmc.footstepPlanning.ui.controllers.VisibilityGraphsParametersUIController;
 import us.ihmc.footstepPlanning.ui.controllers.VisualizationController;
 import us.ihmc.footstepPlanning.ui.viewers.BodyPathLogRenderer;
 import us.ihmc.footstepPlanning.ui.viewers.BodyPathMeshViewer;
@@ -87,8 +82,6 @@ import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.HeightMapDataSetName;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.OcTreeViewer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.PlanarRegionViewer;
@@ -174,7 +167,7 @@ public class FootstepPlannerUI
    public FootstepPlannerUI(Stage primaryStage,
                             JavaFXMessager messager,
                             AStarBodyPathPlannerParametersBasics aStarBodyPathParameters,
-                            FootstepPlannerParametersBasics plannerParameters,
+                            DefaultFootstepPlannerParametersBasics plannerParameters,
                             SwingPlannerParametersBasics swingPlannerParameters,
                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             WalkingControllerParameters walkingControllerParameters,
@@ -200,7 +193,7 @@ public class FootstepPlannerUI
    public FootstepPlannerUI(Stage primaryStage,
                             JavaFXMessager messager,
                             AStarBodyPathPlannerParametersBasics aStarBodyPathParameters,
-                            FootstepPlannerParametersBasics plannerParameters,
+                            DefaultFootstepPlannerParametersBasics plannerParameters,
                             SwingPlannerParametersBasics swingPlannerParameters,
                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             FullHumanoidRobotModelFactory previewModelFactory,
@@ -528,7 +521,7 @@ public class FootstepPlannerUI
    public static FootstepPlannerUI createUI(Stage primaryStage,
                                             JavaFXMessager messager,
                                             AStarBodyPathPlannerParametersBasics aStarBodyPathParameters,
-                                            FootstepPlannerParametersBasics plannerParameters,
+                                            DefaultFootstepPlannerParametersBasics plannerParameters,
                                             SwingPlannerParametersBasics swingPlannerParameters,
                                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                                             FullHumanoidRobotModelFactory previewModelFactory,

@@ -11,7 +11,12 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.*;
+import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.LimbName;
+import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.partNames.RobotSpecificJointNames;
+import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -69,7 +74,9 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
    public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel, HumanoidRobotSensorInformation sensorInformation)
    {
-      this(fullRobotModel, new MovingCenterOfMassReferenceFrame("centerOfMass", fullRobotModel.getElevatorFrame(), fullRobotModel.getElevator()), sensorInformation);
+      this(fullRobotModel,
+           new MovingCenterOfMassReferenceFrame("centerOfMass", fullRobotModel.getElevatorFrame(), fullRobotModel.getElevator()),
+           sensorInformation);
    }
 
    public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel,
@@ -127,8 +134,9 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          }
       }
 
-      if (!fullRobotModel.getLidarSensorNames().isEmpty() && fullRobotModel.getLidarSensorNames().get(0) != null
-            && !fullRobotModel.getLidarSensorNames().get(0).isEmpty())
+      if (!fullRobotModel.getLidarSensorNames().isEmpty() && fullRobotModel.getLidarSensorNames().get(0) != null && !fullRobotModel.getLidarSensorNames()
+                                                                                                                                   .get(0)
+                                                                                                                                   .isEmpty())
       {
          String lidarSensorName = fullRobotModel.getLidarSensorNames().get(0);
          ReferenceFrame lidarBaseFrame = fullRobotModel.getLidarBaseFrame(lidarSensorName);
@@ -168,7 +176,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
             for (ArmJointName armJointName : robotJointNames.getArmJointNames())
             {
                OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
-               if(armJoint != null)
+               if (armJoint != null)
                {
                   this.armJointFrames.get(robotSide).put(armJointName, armJoint.getFrameAfterJoint());
                }
@@ -243,7 +251,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          situationalAwarenessCameraFrame.set(RobotSide.RIGHT, sensorInformation.getSituationalAwarenessCameraFrame(RobotSide.RIGHT, this));
          experimentalCameraFrame = sensorInformation.getExperimentalCameraFrame(this);
          ousterLidarFrame = sensorInformation.getOusterLidarFrame(this);
-         steppingCameraZUpFrame = sensorInformation.getSteppingCameraZUpFrame(this);
+         steppingCameraZUpFrame = new ZUpFrame(steppingCameraFrame, "steppingCameraZUp");
       }
    }
 
@@ -367,7 +375,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
     * located at a key position for grasping.
     * <p>
     * TODO rename the method to getHandControlFrame(RobotSide).
-    * 
+    *
     * @param robotSide from which hand the control frame has to be returned.
     * @return the hand control frame.
     */
@@ -411,11 +419,12 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          steppingCameraZUpFrame.update();
       if (objectDetectionCameraFrame != null)
          objectDetectionCameraFrame.update();
-      situationalAwarenessCameraFrame.forEach((side, frame) ->
+      for (RobotSide robotSide : RobotSide.values)
       {
+         ReferenceFrame frame = situationalAwarenessCameraFrame.get(robotSide);
          if (frame != null)
             frame.update();
-      });
+      }
       if (experimentalCameraFrame != null)
          experimentalCameraFrame.update();
       if (ousterLidarFrame != null)

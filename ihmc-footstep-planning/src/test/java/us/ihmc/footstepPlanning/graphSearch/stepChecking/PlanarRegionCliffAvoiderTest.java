@@ -9,13 +9,11 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.PlanarRegionFootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.YoVariablesForFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -64,10 +62,10 @@ public class PlanarRegionCliffAvoiderTest
 
       double epsilon = 1e-6;
       double minimumDistanceFromCliffBottom = 0.2 - epsilon;
-      FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
       new YoVariablesForFootstepPlannerParameters(registry, parameters);
       parameters.setCliffBaseHeightToAvoid(0.01);
-      parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
+      parameters.setMinDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
 
       double footLength = 0.2;
       double footWidth = 0.1;
@@ -121,10 +119,10 @@ public class PlanarRegionCliffAvoiderTest
       double footLength = 0.2;
       double footWidth = 0.1;
 
-      FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
       new YoVariablesForFootstepPlannerParameters(registry, parameters);
       parameters.setCliffBaseHeightToAvoid(cliffHeightToAvoid);
-      parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
+      parameters.setMinDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
 
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
       PlanarRegionFootstepSnapAndWiggler snapper = new PlanarRegionFootstepSnapAndWiggler(footPolygons, parameters);
@@ -198,10 +196,10 @@ public class PlanarRegionCliffAvoiderTest
 
       double epsilon = 1e-6;
       double minimumDistanceFromCliffTop = 0.2 - epsilon;
-      FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
       new YoVariablesForFootstepPlannerParameters(registry, parameters);
       parameters.setCliffTopHeightToAvoid(0.01);
-      parameters.setMinimumDistanceFromCliffTops(minimumDistanceFromCliffTop);
+      parameters.setMinDistanceFromCliffTops(minimumDistanceFromCliffTop);
 
       double footLength = 0.2;
       double footWidth = 0.1;

@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.sequence;
 
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
+import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.behaviors.sequence.actions.*;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -9,7 +10,7 @@ import javax.annotation.Nullable;
 
 public class ActionNodeInitialization
 {
-   public static void initializeAction(@Nullable ActionSequenceState actionSequence,
+   public static void initializeAction(@Nullable BehaviorTreeRootNodeState actionSequence,
                                        ActionNodeState<?> newAction,
                                        int indexOfInsertion,
                                        @Nullable RobotSide sideOfNewAction,
@@ -82,6 +83,36 @@ public class ActionNodeInitialization
          kickDoorAction.getDefinition().setSide(sideOfNewAction);
          kickDoorAction.update();
       }
+      if (newAction instanceof FootPoseActionState footPoseAction)
+      {
+         // Set the new action to where the last one was for faster authoring
+         footPoseAction.getDefinition().setSide(sideOfNewAction);
+         footPoseAction.getDefinition().setParentFrameName(findConvenientParentFrameName(actionSequence,
+                                                                                         FootPoseActionState.class,
+                                                                                         indexOfInsertion,
+                                                                                         sideOfNewAction));
+         footPoseAction.getState().update();
+
+         FootPoseActionState nextPreviousFootPoseAction = findNextPreviousAction(actionSequence,
+                                                                                 FootPoseActionState.class,
+                                                                                 indexOfInsertion,
+                                                                                 sideOfNewAction);
+         if (nextPreviousFootPoseAction != null && nextPreviousFootPoseAction.getFootFrame().isChildOfWorld())
+         {
+            // Set pose to previous hand pose
+            footPoseAction.getDefinition().setParentFrameName(nextPreviousFootPoseAction.getDefinition().getParentFrameName());
+            footPoseAction.getDefinition().getFootToParentTransform().getValue()
+                          .set(nextPreviousFootPoseAction.getDefinition().getFootToParentTransform().getValueReadOnly());
+         }
+         else // set to current robot's hand pose
+         {
+            footPoseAction.getDefinition().setParentFrameName(ReferenceFrame.getWorldFrame().getName());
+            syncedRobot.getReferenceFrames().getFootFrame(sideOfNewAction)
+                       .getTransformToDesiredFrame(footPoseAction.getDefinition().getFootToParentTransform().getValue(),
+                                                   ReferenceFrame.getWorldFrame());
+         }
+         footPoseAction.update();
+      }
       else if (newAction instanceof ChestOrientationActionState chestOrientationAction)
       {
          ChestOrientationActionState nextPreviousAction = findNextPreviousAction(actionSequence, ChestOrientationActionState.class, indexOfInsertion, null);
@@ -101,9 +132,9 @@ public class ActionNodeInitialization
          }
          chestOrientationAction.update();
       }
-      else if (newAction instanceof PelvisHeightPitchActionState pelvisHeightPitchAction)
+      else if (newAction instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
       {
-         PelvisHeightPitchActionState nextPreviousAction = findNextPreviousAction(actionSequence, PelvisHeightPitchActionState.class, indexOfInsertion, null);
+         PelvisHeightOrientationActionState nextPreviousAction = findNextPreviousAction(actionSequence, PelvisHeightOrientationActionState.class, indexOfInsertion, null);
          if (nextPreviousAction != null && nextPreviousAction.getPelvisFrame().isChildOfWorld())
          {
             pelvisHeightPitchAction.getDefinition().setParentFrameName(nextPreviousAction.getDefinition().getParentFrameName());
@@ -146,7 +177,7 @@ public class ActionNodeInitialization
     *         This helps the authoring process by initializing new actions with
     *         spatially consistent values.
     */
-   private static String findConvenientParentFrameName(@Nullable ActionSequenceState actionSequence,
+   private static String findConvenientParentFrameName(@Nullable BehaviorTreeRootNodeState actionSequence,
                                                        Class<? extends ActionNodeState<?>> actionClass,
                                                        int indexOfInsertion,
                                                        @Nullable RobotSide side)
@@ -165,7 +196,7 @@ public class ActionNodeInitialization
       return ReferenceFrame.getWorldFrame().getName();
    }
 
-   public static <T extends ActionNodeState<?>> T findNextPreviousAction(@Nullable ActionSequenceState actionSequence,
+   public static <T extends ActionNodeState<?>> T findNextPreviousAction(@Nullable BehaviorTreeRootNodeState actionSequence,
                                                                          Class<T> actionClass,
                                                                          int indexOfInsertion,
                                                                          @Nullable RobotSide side)

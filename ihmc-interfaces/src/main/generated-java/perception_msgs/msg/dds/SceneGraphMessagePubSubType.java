@@ -15,7 +15,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "355f90d94e6fdd1f606b2bb54f547bd40b14ebae1233dd9ef6f46d63aa3789cb";
+   		return "28287e0b25f4f692dda1c106263e90afe4c4cad74397540e9d2e7f450a0ce5b5";
    }
    
    @Override
@@ -54,6 +54,8 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (1000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -82,6 +84,9 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += perception_msgs.msg.dds.YOLOv8NodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      {
+          current_alignment += perception_msgs.msg.dds.DoorNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -94,6 +99,9 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    public final static int getCdrSerializedSize(perception_msgs.msg.dds.SceneGraphMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -146,12 +154,19 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       {
           current_alignment += perception_msgs.msg.dds.YOLOv8NodeMessagePubSubType.getCdrSerializedSize(data.getYoloSceneNodes().get(i0), current_alignment);}
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getDoorSceneNodes().size(); ++i0)
+      {
+          current_alignment += perception_msgs.msg.dds.DoorNodeMessagePubSubType.getCdrSerializedSize(data.getDoorSceneNodes().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
 
    public static void write(perception_msgs.msg.dds.SceneGraphMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
+
       cdr.write_type_4(data.getNextId());
 
       if(data.getSceneTreeTypes().size() <= 1000)
@@ -194,10 +209,16 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.write_type_e(data.getYoloSceneNodes());else
           throw new RuntimeException("yolo_scene_nodes field exceeds the maximum length");
 
+      if(data.getDoorSceneNodes().size() <= 200)
+      cdr.write_type_e(data.getDoorSceneNodes());else
+          throw new RuntimeException("door_scene_nodes field exceeds the maximum length");
+
    }
 
    public static void read(perception_msgs.msg.dds.SceneGraphMessage data, us.ihmc.idl.CDR cdr)
    {
+      data.setSequenceId(cdr.read_type_4());
+      	
       data.setNextId(cdr.read_type_4());
       	
       cdr.read_type_e(data.getSceneTreeTypes());	
@@ -210,12 +231,14 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.read_type_e(data.getStaticRelativeSceneNodes());	
       cdr.read_type_e(data.getPrimitiveRigidBodySceneNodes());	
       cdr.read_type_e(data.getYoloSceneNodes());	
+      cdr.read_type_e(data.getDoorSceneNodes());	
 
    }
 
    @Override
    public final void serialize(perception_msgs.msg.dds.SceneGraphMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_4("next_id", data.getNextId());
       ser.write_type_e("scene_tree_types", data.getSceneTreeTypes());
       ser.write_type_e("scene_tree_indices", data.getSceneTreeIndices());
@@ -227,11 +250,13 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.write_type_e("static_relative_scene_nodes", data.getStaticRelativeSceneNodes());
       ser.write_type_e("primitive_rigid_body_scene_nodes", data.getPrimitiveRigidBodySceneNodes());
       ser.write_type_e("yolo_scene_nodes", data.getYoloSceneNodes());
+      ser.write_type_e("door_scene_nodes", data.getDoorSceneNodes());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, perception_msgs.msg.dds.SceneGraphMessage data)
    {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setNextId(ser.read_type_4("next_id"));
       ser.read_type_e("scene_tree_types", data.getSceneTreeTypes());
       ser.read_type_e("scene_tree_indices", data.getSceneTreeIndices());
@@ -243,6 +268,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.read_type_e("static_relative_scene_nodes", data.getStaticRelativeSceneNodes());
       ser.read_type_e("primitive_rigid_body_scene_nodes", data.getPrimitiveRigidBodySceneNodes());
       ser.read_type_e("yolo_scene_nodes", data.getYoloSceneNodes());
+      ser.read_type_e("door_scene_nodes", data.getDoorSceneNodes());
    }
 
    public static void staticCopy(perception_msgs.msg.dds.SceneGraphMessage src, perception_msgs.msg.dds.SceneGraphMessage dest)

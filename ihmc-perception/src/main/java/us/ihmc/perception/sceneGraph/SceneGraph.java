@@ -4,7 +4,8 @@ import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.TLongObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TLongObjectHashMap;
-import org.apache.commons.lang3.mutable.MutableLong;
+import us.ihmc.communication.crdt.CRDTInfo;
+import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.filters.DetectionFilterCollection;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoMarkerNode;
@@ -12,9 +13,19 @@ import us.ihmc.perception.sceneGraph.centerpose.CenterposeNode;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphTreeModification;
 import us.ihmc.perception.sceneGraph.rigidBody.StaticRelativeSceneNode;
+import us.ihmc.perception.sceneGraph.rigidBody.doors.DoorNodeTools;
 import us.ihmc.robotics.referenceFrames.ReferenceFrameDynamicCollection;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.SortedSet;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -27,13 +38,16 @@ import java.util.function.Function;
  */
 public class SceneGraph
 {
+   /** This is the frequency the scene graph is expected to be updated on the robot. */
    public static final double UPDATE_FREQUENCY = 60.0;
+   /** This is the frequency the CRDT syncs the scene graph state between operator and robot. */
+   public static final double CRDT_SYNC_FREQUENCY = UPDATE_FREQUENCY / 2.0;
 
    /** The root node is always ID 0 and all nodes in the tree are unique. */
    public static long ROOT_NODE_ID = 0;
    public static String ROOT_NODE_NAME = "SceneGraphRoot";
 
-   private final MutableLong nextID = new MutableLong(1); // Starts at 1 because root node is passed in
+   private final AtomicLong nextID = new AtomicLong(1); // Starts at 1 because root node is passed in
    private final SceneNode rootNode;
    private final Queue<SceneGraphTreeModification> queuedModifications = new LinkedList<>();
    private final DetectionFilterCollection detectionFilterCollection = new DetectionFilterCollection();
@@ -48,10 +62,12 @@ public class SceneGraph
    private transient final TIntObjectMap<ArUcoMarkerNode> arUcoMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final TIntObjectMap<CenterposeNode> centerposeDetectedMarkerIDToNodeMap = new TIntObjectHashMap<>();
    private transient final SortedSet<SceneNode> sceneNodesByID = new TreeSet<>(Comparator.comparingLong(SceneNode::getID));
+   private int numberOfFrozenNodes = 0;
 
+   /** Create without CRDT synchronization. */
    public SceneGraph()
    {
-      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME));
+      this(new SceneNode(ROOT_NODE_ID, ROOT_NODE_NAME, new CRDTInfo(ROS2ActorDesignation.OPERATOR, (int) CRDT_SYNC_FREQUENCY)));
    }
 
    /**
@@ -76,6 +92,8 @@ public class SceneGraph
    {
       // This must happen only once per on-robot tick
       detectionFilterCollection.update();
+
+      DoorNodeTools.addDoorNodes(this);
 
       modifyTree(modificationQueue -> updateOnRobotOnly(rootNode, robotPelvisFrame, modificationQueue));
    }
@@ -120,6 +138,7 @@ public class SceneGraph
       arUcoMarkerIDToNodeMap.clear();
       centerposeDetectedMarkerIDToNodeMap.clear();
       sceneNodesByID.clear();
+      numberOfFrozenNodes = 0;
       updateCaches(rootNode);
    }
 
@@ -142,6 +161,9 @@ public class SceneGraph
          centerposeDetectedMarkerIDToNodeMap.put(centerposeNode.getObjectID(), centerposeNode);
       }
 
+      if (node.isFrozen())
+         ++numberOfFrozenNodes;
+
       for (SceneNode child : node.getChildren())
       {
          updateCaches(child);
@@ -153,7 +175,12 @@ public class SceneGraph
       return rootNode;
    }
 
-   public MutableLong getNextID()
+   public CRDTInfo getCRDTInfo()
+   {
+      return rootNode.getCRDTInfo();
+   }
+
+   public AtomicLong getNextID()
    {
       return nextID;
    }
@@ -191,6 +218,11 @@ public class SceneGraph
    public SortedSet<SceneNode> getSceneNodesByID()
    {
       return sceneNodesByID;
+   }
+
+   public int getNumberOfFrozenNodes()
+   {
+      return numberOfFrozenNodes;
    }
 
    public ReferenceFrameDynamicCollection asNewDynamicReferenceFrameCollection()

@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import perception_msgs.msg.dds.HeightMapMessage;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.CommunicationHelper;
@@ -18,16 +17,17 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.vr.RDXVRContext;
-import us.ihmc.rdx.ui.teleoperation.locomotion.RDXLocomotionParameters;
+import us.ihmc.footstepPlanning.LocomotionParameters;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.heightMap.HeightMapData;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -49,10 +49,10 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    private RDXFootstepChecker stepChecker;
    private RDXSwingPlanningModule swingPlanningModule;
    private SideDependentList<ConvexPolygon2D> defaultPolygons;
-   private RDXLocomotionParameters locomotionParameters;
-   private SwingPlannerParametersBasics swingFootPlannerParameters;
+   private LocomotionParameters locomotionParameters;
+   private SwingPlannerParametersBasics swingPlannerParameters;
 
-   private final AtomicReference<HeightMapMessage> heightMapDataReference = new AtomicReference<>();
+   private final AtomicReference<HeightMapData> heightMapDataReference = new AtomicReference<>();
 
    private int previousPlanLength;
    private boolean wasPlanUpdated = false;
@@ -65,15 +65,15 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
    public void create(RDXBaseUI baseUI,
                       CommunicationHelper communicationHelper,
                       ROS2SyncedRobotModel syncedRobot,
-                      RDXLocomotionParameters locomotionParameters,
-                      FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                      LocomotionParameters locomotionParameters,
+                      DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters,
                       SwingPlannerParametersBasics swingFootPlannerParameters)
    {
       this.baseUI = baseUI;
       this.communicationHelper = communicationHelper;
       this.syncedRobot = syncedRobot;
       this.locomotionParameters = locomotionParameters;
-      this.swingFootPlannerParameters = swingFootPlannerParameters;
+      this.swingPlannerParameters = swingFootPlannerParameters;
 
       defaultPolygons = FootstepPlanningModuleLauncher.createFootPolygons(communicationHelper.getRobotModel());
       stepChecker = new RDXFootstepChecker(baseUI, syncedRobot, controllerStatusTracker, defaultPolygons, footstepPlannerParameters);
@@ -85,11 +85,11 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
       clear();
    }
 
-   public void setHeightMapMessage(HeightMapMessage heightMapMessage)
+   public void setHeightMapMessage(HeightMapData heightMapData)
    {
-      heightMapDataReference.set(heightMapMessage);
+      heightMapDataReference.set(heightMapData);
       if (swingPlanningModule != null)
-         swingPlanningModule.setHeightMapData(heightMapMessage);
+         swingPlanningModule.setHeightMapData(heightMapData);
    }
 
    public void calculateVRPick(RDXVRContext vrContext)
@@ -218,11 +218,11 @@ public class RDXInteractableFootstepPlan implements RenderableProvider
 
       if (wasPlanUpdated && locomotionParameters.getReplanSwingTrajectoryOnChange() && !swingPlanningModule.getIsCurrentlyPlanning())
       {
-         HeightMapMessage heightMapMessage = heightMapDataReference.getAndSet(null);
-         if (heightMapMessage != null)
-            swingPlanningModule.setHeightMapData(heightMapMessage);
+         HeightMapData heightMapData = heightMapDataReference.getAndSet(null);
+         if (heightMapData != null)
+            swingPlanningModule.setHeightMapData(heightMapData);
 
-         swingPlanningModule.setSwingPlannerParameters(swingFootPlannerParameters);
+         swingPlanningModule.setSwingPlannerParameters(swingPlannerParameters);
          swingPlanningModule.updateAysnc(footsteps, SwingPlannerType.MULTI_WAYPOINT_POSITION);
 
          wasPlanUpdated = false;

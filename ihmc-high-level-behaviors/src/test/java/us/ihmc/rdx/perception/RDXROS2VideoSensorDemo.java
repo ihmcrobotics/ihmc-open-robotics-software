@@ -1,6 +1,7 @@
 package us.ihmc.rdx.perception;
 
 import us.ihmc.communication.PerceptionAPI;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.simulation.environment.RDXEnvironmentBuilder;
@@ -8,9 +9,8 @@ import us.ihmc.rdx.simulation.environment.object.RDXEnvironmentObject;
 import us.ihmc.rdx.simulation.sensors.RDXHighLevelDepthSensorSimulator;
 import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.gizmo.RDXPose3DGizmo;
+import us.ihmc.rdx.ui.graphics.RDXPerceptionVisualizersPanel;
 import us.ihmc.rdx.ui.graphics.ros2.RDXROS2BigVideoVisualizer;
-import us.ihmc.rdx.ui.graphics.RDXGlobalVisualizersPanel;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 public class RDXROS2VideoSensorDemo
 {
@@ -25,7 +25,7 @@ public class RDXROS2VideoSensorDemo
       baseUI.launchRDXApplication(new Lwjgl3ApplicationAdapter()
       {
 
-         private RDXGlobalVisualizersPanel globalVisualizersPanel;
+         private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
 
          @Override
          public void create()
@@ -44,15 +44,15 @@ public class RDXROS2VideoSensorDemo
             baseUI.getPrimaryScene().addRenderableProvider(sensorPoseGizmo, RDXSceneLevel.VIRTUAL);
 
             PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
-            globalVisualizersPanel = new RDXGlobalVisualizersPanel();
+            perceptionVisualizerPanel = new RDXPerceptionVisualizersPanel();
 
             RDXROS2BigVideoVisualizer videoVisualizer = new RDXROS2BigVideoVisualizer("Video",
                                                                                       pubSubImplementation,
                                                                                       PerceptionAPI.BIG_VIDEO);
-            globalVisualizersPanel.addVisualizer(videoVisualizer);
+            perceptionVisualizerPanel.addVisualizer(videoVisualizer);
 
-            globalVisualizersPanel.create();
-            baseUI.getImGuiPanelManager().addPanel(globalVisualizersPanel);
+            perceptionVisualizerPanel.create();
+            baseUI.getImGuiPanelManager().addPanel(perceptionVisualizerPanel);
 
             // https://www.scratchapixel.com/lessons/3d-basic-rendering/perspective-and-orthographic-projection-matrix/opengl-perspective-projection-matrix
             double publishRateHz = 60.0;
@@ -94,7 +94,7 @@ public class RDXROS2VideoSensorDemo
          public void render()
          {
             highLevelDepthSensorSimulator.render(baseUI.getPrimaryScene());
-            globalVisualizersPanel.update();
+            perceptionVisualizerPanel.update();
 
             for (RDXEnvironmentObject allObject : environmentBuilder.getAllObjects())
             {

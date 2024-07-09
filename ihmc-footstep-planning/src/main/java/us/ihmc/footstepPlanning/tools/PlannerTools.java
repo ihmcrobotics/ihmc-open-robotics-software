@@ -4,6 +4,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,7 +18,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -30,6 +31,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlannerTools
@@ -41,14 +43,18 @@ public class PlannerTools
 
    public static ConvexPolygon2D createFootPolygon(double footLength, double heelWidth, double toeWidth)
    {
-      ConvexPolygon2D footPolygon = new ConvexPolygon2D();
-      footPolygon.addVertex(footLength / 2.0, toeWidth / 2.0);
-      footPolygon.addVertex(footLength / 2.0, -toeWidth / 2.0);
-      footPolygon.addVertex(-footLength / 2.0, heelWidth / 2.0);
-      footPolygon.addVertex(-footLength / 2.0, -heelWidth / 2.0);
-      footPolygon.update();
+      return new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(createFootContactPoints(footLength, heelWidth, toeWidth)));
+   }
 
-      return footPolygon;
+   public static ArrayList<Point2D> createFootContactPoints(double footLength, double heelWidth, double toeWidth)
+   {
+      ArrayList<Point2D> contactPoints = new ArrayList<>();
+      contactPoints.add(new Point2D(footLength / 2.0, toeWidth / 2.0));
+      contactPoints.add(new Point2D(footLength / 2.0, -toeWidth / 2.0));
+      contactPoints.add(new Point2D(-footLength / 2.0, heelWidth / 2.0));
+      contactPoints.add(new Point2D(-footLength / 2.0, -heelWidth / 2.0));
+
+      return contactPoints;
    }
 
    public static ConvexPolygon2D createFootPolygon(double footLength, double footWidth)
@@ -189,7 +195,7 @@ public class PlannerTools
    public static boolean doesPathContainBodyCollisions(Pose3DReadOnly robotPose,
                                                        List<? extends Pose3DReadOnly> bodyPathWaypoints,
                                                        PlanarRegionsList planarRegionsList,
-                                                       FootstepPlannerParametersReadOnly parameters,
+                                                       DefaultFootstepPlannerParametersReadOnly parameters,
                                                        double horizonDistanceToCheck)
    {
       BodyCollisionData collisionData = detectCollisionsAlongBodyPath(robotPose,
@@ -203,7 +209,7 @@ public class PlannerTools
    public static BodyCollisionData detectCollisionsAlongBodyPath(Pose3DReadOnly robotPose,
                                                                  List<? extends Pose3DReadOnly> bodyPathWaypoints,
                                                                  PlanarRegionsList planarRegionsList,
-                                                                 FootstepPlannerParametersReadOnly parameters,
+                                                                 DefaultFootstepPlannerParametersReadOnly parameters,
                                                                  double horizonDistanceToCheck)
    {
       WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
@@ -265,7 +271,7 @@ public class PlannerTools
 
    /**
     * Calculates the total expected duration of a footstep plan, which depends
-    * on parameters outside of {@link FootstepPlannerParametersReadOnly}.
+    * on parameters outside of {@link DefaultFootstepPlannerParametersReadOnly}.
     */
    public static double calculateNominalTotalPlanExecutionDuration(FootstepPlan footstepPlan,
                                                                    double defaultSwingDuration,

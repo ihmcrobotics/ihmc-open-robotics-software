@@ -45,8 +45,8 @@ public class FootstepPlanningModuleTest
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalPose);
 
       // disable wiggling. causes latency of around 0.15s
-      planningModule.getFootstepPlannerParameters().setMaximumXYWiggleDistance(0.0);
-      planningModule.getFootstepPlannerParameters().setMaximumYawWiggle(0.0);
+      planningModule.getFootstepPlannerParameters().setMaxXYWiggleDistance(0.0);
+      planningModule.getFootstepPlannerParameters().setMaxYawWiggle(0.0);
 
       Stopwatch stopwatch = new Stopwatch();
       double publishPeriod = 1.0;
@@ -115,7 +115,7 @@ public class FootstepPlanningModuleTest
    public void testGoalProximityWhenGoalIsReachable()
    {
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
-      planningModule.getFootstepPlannerParameters().setMaximumBranchFactor(0);
+      planningModule.getFootstepPlannerParameters().setMaxBranchFactor(0);
 
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.addRectangle(6.0, 6.0);
@@ -336,6 +336,6 @@ public class FootstepPlanningModuleTest
       FootstepPlan plan = output.getFootstepPlan();
 
       double finalStepX = plan.getFootstep(plan.getNumberOfSteps() - 1).getFootstepPose().getX();
-      Assertions.assertTrue(MathTools.intervalContains(finalStepX, xThreshold, xThreshold + planningModule.getFootstepPlannerParameters().getMaximumStepReach(), 1e-5));
+      Assertions.assertTrue(MathTools.intervalContains(finalStepX, xThreshold, xThreshold + planningModule.getFootstepPlannerParameters().getMaxStepReach(), 1e-5));
    }
 }

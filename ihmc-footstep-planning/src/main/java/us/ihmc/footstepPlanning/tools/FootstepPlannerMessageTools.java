@@ -5,7 +5,7 @@ import toolbox_msgs.msg.dds.FootstepPlanningRequestPacket;
 import toolbox_msgs.msg.dds.VisibilityGraphsParametersPacket;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -43,7 +43,7 @@ public class FootstepPlannerMessageTools
       return message;
    }
 
-   public static void copyParametersToPacket(FootstepPlannerParametersPacket packet, FootstepPlannerParametersReadOnly parameters)
+   public static void copyParametersToPacket(FootstepPlannerParametersPacket packet, DefaultFootstepPlannerParametersReadOnly parameters)
    {
       if (parameters == null)
       {
@@ -51,45 +51,35 @@ public class FootstepPlannerMessageTools
       }
 
       packet.setReferencePlanAlpha(parameters.getReferencePlanAlpha());
-      packet.setCheckForBodyBoxCollisions(parameters.checkForBodyBoxCollisions());
-      packet.setCheckForPathCollisions(parameters.checkForPathCollisions());
+      packet.setCheckForBodyBoxCollisions(parameters.getCheckForBodyBoxCollisions());
+      packet.setCheckForPathCollisions(parameters.getCheckForPathCollisions());
       packet.setIdealFootstepWidth(parameters.getIdealFootstepWidth());
       packet.setIdealFootstepLength(parameters.getIdealFootstepLength());
       packet.setIdealSideStepWidth(parameters.getIdealSideStepWidth());
       packet.setIdealBackStepLength(parameters.getIdealBackStepLength());
-      packet.setIdealStepLengthAtMaxStepZ(parameters.getIdealStepLengthAtMaxStepZ());
       packet.setWiggleInsideDeltaTarget(parameters.getWiggleInsideDeltaTarget());
       packet.setWiggleInsideDeltaMinimum(parameters.getWiggleInsideDeltaMinimum());
-      packet.setMaximumStepReach(parameters.getMaximumStepReach());
-      packet.setMaximumStepYaw(parameters.getMaximumStepYaw());
-      packet.setUseReachabilityMap(parameters.getUseStepReachabilityMap());
+      packet.setMaximumStepReach(parameters.getMaxStepReach());
+      packet.setMaximumStepYaw(parameters.getMaxStepYaw());
+      packet.setUseReachabilityMap(parameters.getUseReachabilityMap());
       packet.setSolutionQualityThreshold(parameters.getSolutionQualityThreshold());
-      packet.setMinimumStepWidth(parameters.getMinimumStepWidth());
-      packet.setMinimumStepLength(parameters.getMinimumStepLength());
-      packet.setMinimumStepYaw(parameters.getMinimumStepYaw());
-      packet.setMaximumStepReachWhenSteppingUp(parameters.getMaximumStepReachWhenSteppingUp());
-      packet.setMaximumStepWidthWhenSteppingUp(parameters.getMaximumStepWidthWhenSteppingUp());
-      packet.setMaximumStepZWhenSteppingUp(parameters.getMaximumStepZWhenSteppingUp());
-      packet.setMaximumStepXWhenForwardAndDown(parameters.getMaximumStepXWhenForwardAndDown());
-      packet.setMaximumStepYWhenForwardAndDown(parameters.getMaximumStepYWhenForwardAndDown());
-      packet.setMaximumStepZWhenForwardAndDown(parameters.getMaximumStepZWhenForwardAndDown());
+      packet.setMinimumStepWidth(parameters.getMinStepWidth());
+      packet.setMinimumStepLength(parameters.getMinStepLength());
+      packet.setMinimumStepYaw(parameters.getMinStepYaw());
       packet.setMaximumStepZ(parameters.getMaxStepZ());
       packet.setMaximumSwingZ(parameters.getMaxSwingZ());
       packet.setMaximumSwingReach(parameters.getMaxSwingReach());
-      packet.setMinimumStepZWhenFullyPitched(parameters.getMinimumStepZWhenFullyPitched());
-      packet.setMaximumStepXWhenFullyPitched(parameters.getMaximumStepXWhenFullyPitched());
-      packet.setStepYawReductionFactorAtMaxReach(parameters.getStepYawReductionFactorAtMaxReach());
-      packet.setMinimumFootholdPercent(parameters.getMinimumFootholdPercent());
-      packet.setMinimumSurfaceInclineRadians(parameters.getMinimumSurfaceInclineRadians());
+      packet.setMinimumFootholdPercent(parameters.getMinFootholdPercent());
+      packet.setMinimumSurfaceInclineRadians(parameters.getMinSurfaceIncline());
       packet.setWiggleWhilePlanning(parameters.getWiggleWhilePlanning());
       packet.setEnableConcaveHullWiggler(parameters.getEnableConcaveHullWiggler());
-      packet.setMaximumXyWiggleDistance(parameters.getMaximumXYWiggleDistance());
-      packet.setMaximumYawWiggle(parameters.getMaximumYawWiggle());
-      packet.setMaximumZPenetrationOnValleyRegions(parameters.getMaximumZPenetrationOnValleyRegions());
-      packet.setMaximumStepWidth(parameters.getMaximumStepWidth());
-      packet.setMinimumDistanceFromCliffBottoms(parameters.getMinimumDistanceFromCliffBottoms());
-      packet.setCliffBaseHeightToAvoid(parameters.getCliffBaseHeightToAvoid());
-      packet.setMinimumDistanceFromCliffTops(parameters.getMinimumDistanceFromCliffTops());
+      packet.setMaximumXyWiggleDistance(parameters.getMaxXYWiggleDistance());
+      packet.setMaximumYawWiggle(parameters.getMaxYawWiggle());
+      packet.setMaximumZPenetrationOnValleyRegions(parameters.getMaxZPenetrationOnValleyRegions());
+      packet.setMaximumStepWidth(parameters.getMaxStepWidth());
+      packet.setMinimumDistanceFromCliffBottoms(parameters.getMinDistanceFromCliffBottoms());
+      packet.setCliffBaseHeightToAvoid(parameters.getCliffBottomHeightToAvoid());
+      packet.setMinimumDistanceFromCliffTops(parameters.getMinDistanceFromCliffTops());
       packet.setCliffTopHeightToAvoid(parameters.getCliffTopHeightToAvoid());
       packet.setBodyBoxHeight(parameters.getBodyBoxHeight());
       packet.setBodyBoxDepth(parameters.getBodyBoxDepth());
@@ -100,8 +90,8 @@ public class FootstepPlannerMessageTools
       packet.setMaximumSnapHeight(parameters.getMaximumSnapHeight());
       packet.setMinClearanceFromStance(parameters.getMinClearanceFromStance());
       packet.setFinalTurnProximity(parameters.getFinalTurnProximity());
-      packet.setMaximumBranchFactor(parameters.getMaximumBranchFactor());
-      packet.setEnableExpansionMask(parameters.getEnabledExpansionMask());
+      packet.setMaximumBranchFactor(parameters.getMaxBranchFactor());
+      packet.setEnableExpansionMask(parameters.getEnableExpansionMask());
       packet.setEnableShinCollisionCheck(parameters.getEnableShinCollisionCheck());
       packet.setShinToeClearance(parameters.getShinToeClearance());
       packet.setShinHeelClearance(parameters.getShinHeelClearance());
@@ -111,8 +101,10 @@ public class FootstepPlannerMessageTools
       packet.setRmsErrorCost(parameters.getRMSErrorCost());
       packet.setRmsMinErrorToPenalize(parameters.getRMSMinErrorToPenalize());
       packet.setHeightMapSnapThreshold(parameters.getHeightMapSnapThreshold());
+      packet.setCliffHeightThreshold(parameters.getCliffHeightThreshold());
+      packet.setScaledFootPolygonPercentage(parameters.getScaledFootPolygonPercentage());
 
-      packet.setAStarHeuristicsWeight(parameters.getAStarHeuristicsWeight().getValue());
+      packet.setAStarHeuristicsWeight(parameters.getAStarHeuristicsWeight());
       packet.setYawWeight(parameters.getYawWeight());
       packet.setPitchWeight(parameters.getPitchWeight());
       packet.setRollWeight(parameters.getRollWeight());

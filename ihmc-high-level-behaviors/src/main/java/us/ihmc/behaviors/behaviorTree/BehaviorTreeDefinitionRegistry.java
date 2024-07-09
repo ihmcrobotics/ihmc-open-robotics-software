@@ -1,70 +1,42 @@
 package us.ihmc.behaviors.behaviorTree;
 
 import behavior_msgs.msg.dds.BehaviorTreeStateMessage;
-import com.esotericsoftware.kryo.util.IntMap;
+import us.ihmc.behaviors.behaviorTree.trashCan.TrashCanInteractionDefinition;
+import us.ihmc.behaviors.buildingExploration.BuildingExplorationDefinition;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.sequence.ActionSequenceDefinition;
 import us.ihmc.behaviors.sequence.actions.*;
 
-import java.util.HashMap;
-
-public enum BehaviorTreeDefinitionRegistry
+public class BehaviorTreeDefinitionRegistry
 {
-   BASIC_NODE(BehaviorTreeNodeDefinition.class),
-   ACTION_SEQUENCE(ActionSequenceDefinition.class),
-   DOOR_TRAVERSAL(DoorTraversalDefinition.class),
-   CHEST_ORIENTATION_ACTION(ChestOrientationActionDefinition.class),
-   FOOTSTEP_PLAN_ACTION(FootstepPlanActionDefinition.class),
-   HAND_POSE_ACTION(HandPoseActionDefinition.class),
-   HAND_WRENCH_ACTION(HandWrenchActionDefinition.class),
-   SCREW_PRIMITIVE_ACTION(ScrewPrimitiveActionDefinition.class),
-   PELVIS_HEIGHT_PITCH_ACTION(PelvisHeightPitchActionDefinition.class),
-   SAKE_HAND_COMMAND_ACTION(SakeHandCommandActionDefinition.class),
-   WAIT_DURATION_ACTION(WaitDurationActionDefinition.class),
-   KICK_DOOR_ACTION(KickDoorActionDefinition.class),
-   KICK_DOOR_APPROACH_ACTION(KickDoorApproachPlanActionDefinition.class);
+   private record RegistryRecord(Class<?> typeClass, byte messageByte) { }
 
-   private final Class<?> typeClass;
-
-   private BehaviorTreeDefinitionRegistry(Class<?> typeClass)
+   private static final RegistryRecord[] DEFINITIONS = new RegistryRecord[]
    {
-      this.typeClass = typeClass;
-   }
+      new RegistryRecord(BehaviorTreeRootNodeDefinition.class, BehaviorTreeStateMessage.ROOT_NODE),
+      new RegistryRecord(BehaviorTreeNodeDefinition.class, BehaviorTreeStateMessage.BASIC_NODE),
+      new RegistryRecord(ActionSequenceDefinition.class, BehaviorTreeStateMessage.ACTION_SEQUENCE),
+      new RegistryRecord(DoorTraversalDefinition.class, BehaviorTreeStateMessage.DOOR_TRAVERSAL),
+      new RegistryRecord(TrashCanInteractionDefinition.class, BehaviorTreeStateMessage.TRASH_CAN_INTERACTION),
+      new RegistryRecord(BuildingExplorationDefinition.class, BehaviorTreeStateMessage.BUILDING_EXPLORATION),
 
-   public static BehaviorTreeDefinitionRegistry[] values = values();
-
-   public static BehaviorTreeDefinitionRegistry fromByte(byte index)
-   {
-      return values[index];
-   }
-
-   public byte toByte()
-   {
-      return (byte) ordinal();
-   }
-
-   public Class<?> getTypeClass()
-   {
-      return typeClass;
-   }
-
-   public static BehaviorTreeDefinitionRegistry getTypeFromClass(Class<?> clazz)
-   {
-      for (BehaviorTreeDefinitionRegistry type : values)
-      {
-         if (type.getTypeClass().equals(clazz))
-            return type;
-      }
-
-      return null;
-   }
+      new RegistryRecord(ChestOrientationActionDefinition.class, BehaviorTreeStateMessage.CHEST_ORIENTATION_ACTION),
+      new RegistryRecord(FootstepPlanActionDefinition.class, BehaviorTreeStateMessage.FOOTSTEP_PLAN_ACTION),
+      new RegistryRecord(HandPoseActionDefinition.class, BehaviorTreeStateMessage.HAND_POSE_ACTION),
+      new RegistryRecord(HandWrenchActionDefinition.class, BehaviorTreeStateMessage.HAND_WRENCH_ACTION),
+      new RegistryRecord(ScrewPrimitiveActionDefinition.class, BehaviorTreeStateMessage.SCREW_PRIMITIVE_ACTION),
+      new RegistryRecord(PelvisHeightOrientationActionDefinition.class, BehaviorTreeStateMessage.PELVIS_HEIGHT_ORIENTATION_ACTION),
+      new RegistryRecord(SakeHandCommandActionDefinition.class, BehaviorTreeStateMessage.SAKE_HAND_COMMAND_ACTION),
+      new RegistryRecord(WaitDurationActionDefinition.class, BehaviorTreeStateMessage.WAIT_DURATION_ACTION),
+      new RegistryRecord(FootPoseActionDefinition.class, BehaviorTreeStateMessage.FOOT_POSE_ACTION)
+   };
 
    public static Class<?> getClassFromTypeName(String typeName)
    {
-      for (BehaviorTreeDefinitionRegistry definitionType : values)
+      for (RegistryRecord definitionEntry : DEFINITIONS)
       {
-         if (typeName.equals(definitionType.getTypeClass().getSimpleName()))
-            return definitionType.typeClass;
+         if (typeName.equals(definitionEntry.typeClass().getSimpleName()))
+            return definitionEntry.typeClass();
       }
 
       return null;
@@ -72,6 +44,12 @@ public enum BehaviorTreeDefinitionRegistry
 
    public static Class<?> getNodeStateClass(byte nodeType)
    {
-      return fromByte(nodeType).getTypeClass();
+      for (RegistryRecord definitionEntry : DEFINITIONS)
+      {
+         if (nodeType == definitionEntry.messageByte())
+            return definitionEntry.typeClass();
+      }
+
+      return null;
    }
 }

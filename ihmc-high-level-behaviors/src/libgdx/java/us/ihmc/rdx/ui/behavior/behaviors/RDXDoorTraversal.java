@@ -6,6 +6,7 @@ import us.ihmc.avatar.sakeGripper.SakeHandParameters;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
 import us.ihmc.behaviors.door.DoorTraversalDefinition;
 import us.ihmc.behaviors.door.DoorTraversalState;
+import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImGuiLabelledWidgetAligner;
 import us.ihmc.rdx.imgui.ImGuiSliderDoubleWrapper;
@@ -17,6 +18,7 @@ import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, DoorTraversalDefinition>
 {
@@ -77,7 +79,8 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
    {
       ImGui.text("Type: %s   ID: %d".formatted(getDefinition().getClass().getSimpleName(), getState().getID()));
 
-      renderNodePresenceStatus(DoorTraversalState.STABILIZE_DETECTION, state.getStabilizeDetectionAction());
+      renderNodePresenceStatus(DoorTraversalState.SET_STATIC_FOR_APPROACH, state.getSetStaticForApproachActions());
+      renderNodePresenceStatus(DoorTraversalState.SET_STATIC_FOR_GRASP, state.getSetStaticForGraspActions());
       renderNodePresenceStatus(DoorTraversalState.WAIT_TO_OPEN_RIGHT_HAND, state.getWaitToOpenRightHandAction());
       renderNodePresenceStatus(DoorTraversalState.POST_GRASP_HANDLE, state.getPostGraspEvaluationAction());
       renderNodePresenceStatus(DoorTraversalState.POST_PULL_DOOR, state.getPostPullDoorEvaluationAction());
@@ -97,12 +100,14 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
       openedDoorHandleDistanceFromStartSlider.setWidgetText("%.2f".formatted(getDefinition().getOpenedDoorHandleDistanceFromStart().getValue()));
       openedDoorHandleDistanceFromStartSlider.renderImGuiWidget();
 
-      boolean pullScrewPrimitiveIsExecuting = false;
-      if (state.arePullRetryNodesPresent())
-         pullScrewPrimitiveIsExecuting = state.getPullScrewPrimitiveAction().getIsExecuting();
-      ImGui.beginDisabled(state.arePullRetryNodesPresent());
-      ImGui.text("Pull screw primitive node: Executing: %b".formatted(state.getPullScrewPrimitiveAction().getIsExecuting()));
-      ImGui.endDisabled();
+         boolean pullScrewPrimitiveIsExecuting = false;
+         if (state.arePullRetryNodesPresent())
+         {
+            pullScrewPrimitiveIsExecuting = state.getPullScrewPrimitiveAction().getIsExecuting();
+         }
+         ImGui.beginDisabled(state.arePullRetryNodesPresent());
+         ImGui.text("Pull screw primitive node: Executing: %b".formatted(pullScrewPrimitiveIsExecuting));
+         ImGui.endDisabled();
 
       ImGui.text("Door hinge joint angle: %.2f%s".formatted(Math.toDegrees(state.getDoorHingeJointAngle().getValue()), EuclidCoreMissingTools.DEGREE_SYMBOL));
 
@@ -117,5 +122,15 @@ public class RDXDoorTraversal extends RDXBehaviorTreeNode<DoorTraversalState, Do
          ImGui.textColored(ImGuiTools.DARK_RED, "MISSING");
       else
          ImGui.textColored(ImGuiTools.DARK_GREEN, "FOUND");
+   }
+
+   private void renderNodePresenceStatus(String expectedName, List<WaitDurationActionState> nodes)
+   {
+      ImGui.text("%s: ".formatted(expectedName));
+      ImGui.sameLine();
+      if (nodes.isEmpty())
+         ImGui.textColored(ImGuiTools.DARK_RED, "MISSING");
+      else
+         ImGui.textColored(ImGuiTools.DARK_GREEN, "FOUND %d".formatted(nodes.size()));
    }
 }

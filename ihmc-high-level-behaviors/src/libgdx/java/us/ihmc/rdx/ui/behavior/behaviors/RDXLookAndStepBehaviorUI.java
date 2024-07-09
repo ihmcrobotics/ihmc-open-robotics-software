@@ -17,13 +17,12 @@ import toolbox_msgs.msg.dds.FootstepPlannerRejectionReasonsMessage;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.MinimalFootstep;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
-import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ReferenceBasedIdealStepCalculator;
 import us.ihmc.rdx.imgui.*;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.sceneManager.RDXSceneLevel;
@@ -36,7 +35,7 @@ import us.ihmc.rdx.ui.graphics.RDXBoxVisualizer;
 import us.ihmc.rdx.ui.graphics.RDXFootstepPlanGraphic;
 import us.ihmc.rdx.ui.yo.ImGuiYoDoublePlot;
 import us.ihmc.rdx.ui.yo.ImPlotYoHelperDoublePlotLine;
-import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphic;
+import us.ihmc.rdx.ui.graphics.RDXHeightMapGraphicNew;
 import us.ihmc.rdx.visualizers.RDXPlanarRegionsGraphic;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
@@ -75,7 +74,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
    private final RDXSphereAndArrowGraphic subGoalGraphic = new RDXSphereAndArrowGraphic();
    private final RDXPlanarRegionsGraphic planarRegionsGraphic = new RDXPlanarRegionsGraphic();
    private final RDXPlanarRegionsGraphic receivedRegionsGraphic = new RDXPlanarRegionsGraphic();
-   private final RDXHeightMapGraphic heightMapGraphic = new RDXHeightMapGraphic();
+   private final RDXHeightMapGraphicNew heightMapGraphic = new RDXHeightMapGraphicNew();
    private final RDXBodyPathPlanGraphic bodyPathPlanGraphic = new RDXBodyPathPlanGraphic();
    private final RDXFootstepPlanGraphic footstepPlanGraphic;
    private final RDXFootstepPlanGraphic commandedFootstepsGraphic;
@@ -104,7 +103,6 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
          if (regions != null)
             planarRegionsGraphic.generateMeshesAsync(PlanarRegionMessageConverter.convertToPlanarRegionsList(regions));
       });
-      heightMapGraphic.getRenderGroundPlane().set(false);
       helper.subscribeViaCallback(HEIGHT_MAP_FOR_UI, heightMapGraphic::generateMeshesAsync);
       helper.subscribeViaCallback(RECEIVED_PLANAR_REGIONS_FOR_UI, regions ->
       {
@@ -172,7 +170,7 @@ public class RDXLookAndStepBehaviorUI extends RDXBehaviorUIInterface
                                                        }
                                                     });
       referenceAlpha = new ImDoubleWrapper(footstepPlannerRemotePropertySet.getStoredPropertySet(),
-                                           FootstepPlannerParameterKeys.referencePlanAlpha,
+                                           DefaultFootstepPlannerParameters.referencePlanAlpha,
                                            alpha ->
                                            {
                                               if (ImGuiTools.volatileInputDouble("Reference alpha", alpha))
