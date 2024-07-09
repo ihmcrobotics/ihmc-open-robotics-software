@@ -33,7 +33,6 @@ import us.ihmc.log.LogTools;
  * <p>
  * The {@link #unfreeze} method works by rewinding the "update number to unfreeze",
  * which was previously set to a higher number which served as the timeout.
- * Once there are no unconfirmed req or the timeout update
  * </p>
  *
  * <p>
@@ -114,7 +113,7 @@ public class RequestConfirmFreezable implements Freezable
 
       if (needToSendRequest.poll())
       {
-         long requestNumber = nextRequestID.incrementAndGet();
+         long requestNumber = nextRequestID.getAndIncrement();
          unconfirmedRequests.add(requestNumber);
          requestTimeouts.put(requestNumber, updateNumberToUnfreeze);
       }
@@ -154,8 +153,6 @@ public class RequestConfirmFreezable implements Freezable
             recentConfirmations.add(confirmationNumber);
             confirmationTimeouts.put(confirmationNumber, crdtInfo.getUpdateNumber() + crdtInfo.getMaxFreezeDuration());
          }
-
-         nextRequestID.setValue(confirmationNumber + 1); // Avoid duplicate request numbers for clarity
       }
 
       for (int i = 0; i < message.getConfirmationNumbers().size(); i++)
@@ -209,5 +206,10 @@ public class RequestConfirmFreezable implements Freezable
    public CRDTInfo getCRDTInfo()
    {
       return crdtInfo;
+   }
+
+   /** for tests only */ long getNextRequestID()
+   {
+      return nextRequestID.longValue();
    }
 }
