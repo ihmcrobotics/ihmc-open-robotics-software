@@ -7,7 +7,7 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
 public class RequestConfirmFreezableTest
 {
    @Test
-   public void test()
+   public void testOfflineFreezing()
    {
       int maxFreezeDuration = 30;
       RequestConfirmFreezable operatorNode = createOperatorNode(maxFreezeDuration);
@@ -16,6 +16,33 @@ public class RequestConfirmFreezableTest
       Assertions.assertFalse(operatorNode.isFrozen());
       Assertions.assertFalse(robotNode.isFrozen());
 
+      operatorNode.freeze();
+      Assertions.assertTrue(operatorNode.isFrozen());
+
+      robotNode.freeze();
+      Assertions.assertTrue(robotNode.isFrozen());
+
+      operatorNode.unfreeze();
+      Assertions.assertFalse(operatorNode.isFrozen());
+
+      robotNode.unfreeze();
+      Assertions.assertFalse(robotNode.isFrozen());
+
+      operatorNode.freeze();
+      for (int i = 0; i < maxFreezeDuration; i++)
+      {
+         Assertions.assertTrue(operatorNode.isFrozen());
+         operatorNode.getCRDTInfo().startNextUpdate();
+      }
+      Assertions.assertFalse(operatorNode.isFrozen());
+
+      robotNode.freeze();
+      for (int i = 0; i < maxFreezeDuration; i++)
+      {
+         Assertions.assertTrue(robotNode.isFrozen());
+         robotNode.getCRDTInfo().startNextUpdate();
+      }
+      Assertions.assertFalse(robotNode.isFrozen());
    }
 
    private RequestConfirmFreezable createOperatorNode(int maxFreezeDuration)
