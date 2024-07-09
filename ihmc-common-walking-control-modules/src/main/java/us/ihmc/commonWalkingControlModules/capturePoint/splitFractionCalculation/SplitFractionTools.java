@@ -17,16 +17,22 @@ public class SplitFractionTools
       if (currentShift == -1.0)
          return desiredShift;
 
+      // TODO apply some clamps on the shifts
+
       if (desiredShift > nominalShift)
       {
          double desiredPercentShiftForward = (desiredShift - nominalShift) / (1.0 - nominalShift);
          double desiredShiftForward = desiredPercentShiftForward * (1.0 - currentShift);
+
+         // TODO clamp the output
          return currentShift + desiredShiftForward;
       }
       else
       {
          double desiredPercentShiftBackward = (nominalShift - desiredShift) / nominalShift;
          double desiredShiftBackward = desiredPercentShiftBackward * currentShift;
+
+         // TODO clamp the output
          return currentShift - desiredShiftBackward;
       }
    }
