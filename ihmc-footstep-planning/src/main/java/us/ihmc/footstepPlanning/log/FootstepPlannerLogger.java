@@ -29,6 +29,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -49,21 +50,23 @@ public class FootstepPlannerLogger
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
    private static final int RECOMMENDED_NUMBER_OF_LOGS_TO_KEEP = 500;
    public static final String defaultLogsDirectory;
+
    static
    {
-      String incomingLogsDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator;
+      String incomingLogsDirectory;
       if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
       {
-         incomingLogsDirectory = incomingLogsDirectory + "bamboo-logs" + File.separator
-                                                       + System.getenv("bamboo_planKey") + File.separator
-                                                       + System.getenv("bamboo_buildResultKey") + File.separator;
+         incomingLogsDirectory =
+               System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "bamboo-logs" + File.separator + System.getenv("bamboo_planKey")
+               + File.separator + System.getenv("bamboo_buildResultKey") + File.separator;
       }
       else
       {
-         incomingLogsDirectory = incomingLogsDirectory + "logs" + File.separator;
+         incomingLogsDirectory = IHMCCommonPaths.ASTAR_FOOTSTEP_PLANNER_DIRECTORY.toString();
       }
       defaultLogsDirectory = incomingLogsDirectory;
    }
+
    public static final String FOOTSTEP_PLANNER_LOG_POSTFIX = "_FootstepPlannerLog";
 
    // File names
@@ -107,7 +110,10 @@ public class FootstepPlannerLogger
       deleteOldLogs(RECOMMENDED_NUMBER_OF_LOGS_TO_KEEP, defaultLogsDirectory);
    }
 
-   /** It's recommended to leave quite a few logs around, otherwise, we diminish the usefulness of the logging. */
+   /**
+    * It's recommended to leave quite a few logs around, otherwise, we diminish the usefulness of the logging.
+    * This method expects the folder to exist or it will throw an exception
+    */
    public static void deleteOldLogs(int numberOflogsToKeep, String directory)
    {
       SortedSet<Path> sortedLogFolderPaths = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
@@ -167,7 +173,7 @@ public class FootstepPlannerLogger
 
    public void logSessionAndReportToMessager(Messager messager)
    {
-      if(generatingLog.get())
+      if (generatingLog.get())
          return;
 
       generatingLog.set(true);
@@ -196,7 +202,7 @@ public class FootstepPlannerLogger
     */
    public boolean logSession(String logDirectory)
    {
-      String logDirectoryWithDate = logDirectory + directoryDateFormat.format(new Date());
+      String logDirectoryWithDate = logDirectory + File.separator + directoryDateFormat.format(new Date());
       String sessionDirectory = generateALogFolderName(logDirectoryWithDate);
       return logSessionWithExactFolderName(sessionDirectory);
    }
@@ -246,7 +252,7 @@ public class FootstepPlannerLogger
          e.printStackTrace();
          return false;
       }
-      
+
       // log planner iteration header file
       try
       {
@@ -315,7 +321,8 @@ public class FootstepPlannerLogger
 
             for (int j = 0; j < iterationData.getChildNodes().size(); j++)
             {
-               FootstepPlannerEdgeData edgeData = planner.getEdgeDataMap().get(new GraphEdge<>(iterationData.getParentNode(), iterationData.getChildNodes().get(j)));
+               FootstepPlannerEdgeData edgeData = planner.getEdgeDataMap()
+                                                         .get(new GraphEdge<>(iterationData.getParentNode(), iterationData.getChildNodes().get(j)));
                if (edgeData != null) // Sometimes it's not there. Not sure if that's expected. TODO: Verify. @dcalvert
                {
                   // indicate start of data
@@ -366,11 +373,13 @@ public class FootstepPlannerLogger
 
             for (int j = 0; j < iterationData.getChildNodes().size(); j++)
             {
-               AStarBodyPathEdgeData edgeData = planner.getBodyPathEdgeDataMap().get(new GraphEdge<>(iterationData.getParentNode(), iterationData.getChildNodes().get(j)));
+               AStarBodyPathEdgeData edgeData = planner.getBodyPathEdgeDataMap()
+                                                       .get(new GraphEdge<>(iterationData.getParentNode(), iterationData.getChildNodes().get(j)));
                if (edgeData == null)
                {
                   System.out.println();
-                  throw new RuntimeException("No edge data!" + "\n Parent: " + iterationData.getParentNode() + "\n Child: " + iterationData.getChildNodes().get(j));
+                  throw new RuntimeException(
+                        "No edge data!" + "\n Parent: " + iterationData.getParentNode() + "\n Child: " + iterationData.getChildNodes().get(j));
                }
 
                // indicate start of data
@@ -462,7 +471,7 @@ public class FootstepPlannerLogger
             YoEnum<?> yoEnum = (YoEnum<?>) yoVariable;
             Class<?> enumType = yoEnum.getEnumType();
             fileWriter.write("," + enumIndexMap.get(enumType));
-            fileWriter.write( "," + yoEnum.isNullAllowed());
+            fileWriter.write("," + yoEnum.isNullAllowed());
          }
 
          fileWriter.write(newLine);
@@ -499,9 +508,7 @@ public class FootstepPlannerLogger
       }
       else
       {
-         writeLine(numTabs, name + ":" +
-                            node.getXIndex() + "," +
-                            node.getYIndex());
+         writeLine(numTabs, name + ":" + node.getXIndex() + "," + node.getYIndex());
       }
    }
 
@@ -515,15 +522,9 @@ public class FootstepPlannerLogger
       {
          DiscreteFootstep firstStep = node.getFirstStep();
          DiscreteFootstep secondStep = node.getSecondStep();
-         writeLine(numTabs, name + ":" +
-                   firstStep.getXIndex() + "," +
-                   firstStep.getYIndex() + "," +
-                   firstStep.getYawIndex() + "," +
-                   firstStep.getRobotSide().ordinal() + "," +
-                   secondStep.getXIndex() + "," +
-                   secondStep.getYIndex() + "," +
-                   secondStep.getYawIndex() + "," +
-                   secondStep.getRobotSide().ordinal());
+         writeLine(numTabs,
+                   name + ":" + firstStep.getXIndex() + "," + firstStep.getYIndex() + "," + firstStep.getYawIndex() + "," + firstStep.getRobotSide().ordinal()
+                   + "," + secondStep.getXIndex() + "," + secondStep.getYIndex() + "," + secondStep.getYawIndex() + "," + secondStep.getRobotSide().ordinal());
       }
    }
 
@@ -588,18 +589,19 @@ public class FootstepPlannerLogger
    {
       writeLine(numTabs, name);
       writeLine(numTabs + 1, "connections:" + visibilityMap.getConnections().size());
-      for(Connection connection : visibilityMap.getConnections())
+      for (Connection connection : visibilityMap.getConnections())
       {
          ConnectionPoint3D sourcePoint = connection.getSourcePoint();
          ConnectionPoint3D targetPoint = connection.getTargetPoint();
-         writeLine(numTabs + 2, EuclidCoreIOTools.getStringOf(",",
-                                                                            EuclidCoreIOTools.getStringFormat(8, 8),
-                                                                            sourcePoint.getX(),
-                                                                            sourcePoint.getY(),
-                                                                            sourcePoint.getZ(),
-                                                                            targetPoint.getX(),
-                                                                            targetPoint.getY(),
-                                                                            targetPoint.getZ()));
+         writeLine(numTabs + 2,
+                   EuclidCoreIOTools.getStringOf(",",
+                                                 EuclidCoreIOTools.getStringFormat(8, 8),
+                                                 sourcePoint.getX(),
+                                                 sourcePoint.getY(),
+                                                 sourcePoint.getZ(),
+                                                 targetPoint.getX(),
+                                                 targetPoint.getY(),
+                                                 targetPoint.getZ()));
       }
       writeLine(numTabs + 1, "vertices:" + visibilityMap.getVertices().size());
       for (ConnectionPoint3D vertex : visibilityMap.getVertices())
