@@ -114,7 +114,7 @@ public class RequestConfirmFreezable implements Freezable
 
       if (needToSendRequest.poll())
       {
-         long requestNumber = nextRequestID.incrementAndGet();
+         long requestNumber = nextRequestID.getAndIncrement();
          unconfirmedRequests.add(requestNumber);
          requestTimeouts.put(requestNumber, updateNumberToUnfreeze);
       }
@@ -154,8 +154,6 @@ public class RequestConfirmFreezable implements Freezable
             recentConfirmations.add(confirmationNumber);
             confirmationTimeouts.put(confirmationNumber, crdtInfo.getUpdateNumber() + crdtInfo.getMaxFreezeDuration());
          }
-
-         nextRequestID.setValue(confirmationNumber + 1); // Avoid duplicate request numbers for clarity
       }
 
       for (int i = 0; i < message.getConfirmationNumbers().size(); i++)
@@ -209,5 +207,10 @@ public class RequestConfirmFreezable implements Freezable
    public CRDTInfo getCRDTInfo()
    {
       return crdtInfo;
+   }
+
+   /** for tests only */ long getNextRequestID()
+   {
+      return nextRequestID.longValue();
    }
 }
