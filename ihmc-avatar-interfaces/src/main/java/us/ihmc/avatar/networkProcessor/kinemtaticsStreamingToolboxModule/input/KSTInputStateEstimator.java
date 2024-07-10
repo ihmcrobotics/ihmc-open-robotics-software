@@ -41,6 +41,4 @@ public interface KSTInputStateEstimator
    {
       return null;
    }
-
-   void initialize();
 }

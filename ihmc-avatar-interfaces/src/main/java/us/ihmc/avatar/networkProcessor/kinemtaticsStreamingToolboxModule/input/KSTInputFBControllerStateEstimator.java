@@ -3,11 +3,14 @@ package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.input;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTools;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxParameters;
 import us.ihmc.commons.Conversions;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
@@ -15,6 +18,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
+import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
@@ -195,7 +199,6 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
       FramePose3DReadOnly getEstimatedPose();
 
       SpatialVectorReadOnly getEstimatedVelocity();
-
    }
 
    private class SingleEndEffectorEstimatorValentine implements SingleEndEffectorStateEstimatorBase
@@ -204,8 +207,6 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
 
       private final YoFramePose3D estimatedPose;
       private final YoFixedFrameSpatialVector estimatedVelocity;
-      private final YoFixedFrameSpatialVector estimatedDecayingVelocity;
-
       private final YoFixedFrameSpatialVector estimatedAcceleration;
 
       private final YoDouble lastUpdateTime;
@@ -213,8 +214,6 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
       private final YoFramePose3D rawInputPose;
       private final YoFixedFrameSpatialVector rawInputVelocity;
       private final YoFixedFrameSpatialVector debugInputVelocity;
-      private final YoDouble nextTimeTriggerForDecay;
-      private final YoDouble inputVelocityDecayFactor;
 
       private FrameVector3D positionVectorError = new FrameVector3D();
       private FrameVector3D linearVelocityVectorError = new FrameVector3D();
@@ -234,14 +233,11 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
       public SingleEndEffectorEstimatorValentine(RigidBodyReadOnly endEffector)
       {
 
-
          String namePrefix = endEffector.getName() + "_FBC_";
          estimatedPose = new YoFramePose3D(new YoFramePoint3D(namePrefix + "EstimatedPosition", worldFrame, registry),
                                            new YoFrameQuaternion(namePrefix + "EstimatedOrientation", worldFrame, registry));
          estimatedVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "EstimatedAngularVelocity", worldFrame, registry),
                                                            new YoFrameVector3D(namePrefix + "EstimatedLinearVelocity", worldFrame, registry));
-         estimatedDecayingVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "EstimatedDecayingAngularVelocity", worldFrame, registry),
-                                                                   new YoFrameVector3D(namePrefix + "EstimatedDecayingLinearVelocity", worldFrame, registry));
 
          estimatedAcceleration = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "EstimatedAngularAcceleration", worldFrame, registry),
                                                                new YoFrameVector3D(namePrefix + "EstimatedLinearAcceleration", worldFrame, registry));
@@ -255,128 +251,146 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
                                           new YoFrameQuaternion(namePrefix + "RawInputOrientation", worldFrame, registry));
          rawInputVelocity = new YoFixedFrameSpatialVector(new YoFrameVector3D(namePrefix + "RawInputAngularVelocity", worldFrame, registry),
                                                           new YoFrameVector3D(namePrefix + "RawInputLinearVelocity", worldFrame, registry));
-
-         nextTimeTriggerForDecay = new YoDouble(namePrefix + "NextTimeTriggerForDecay", registry);
-         inputVelocityDecayFactor = new YoDouble(namePrefix + "InputVelocityDecayFactor", registry);
       }
-
 
       @Override
       public void reset()
       {
          estimatedPose.setToZero();
          estimatedVelocity.setToZero();
-         estimatedDecayingVelocity.setToZero();
          estimatedAcceleration.setToZero();
          debugInputVelocity.setToZero();
          lastUpdateTime.set(Double.NaN);
          lastInputTimestamp.set(Long.MIN_VALUE);
          rawInputPose.setToZero();
          rawInputVelocity.setToZero();
-         nextTimeTriggerForDecay.set(0.0);
-         inputVelocityDecayFactor.set(0.0);
       }
 
-
+      @Override
       public void update(double time,
                          double defaultLinearRateLimitation,
                          double defaultAngularRateLimitation,
                          long inputTimestamp,
                          KinematicsToolboxRigidBodyCommand input)
       {
-         //LINEAR FEEDBACK
+         // For visualization
+         FramePose3D inputPose = input.getDesiredPose();
 
-         positionVectorError.sub(input.getControlFramePose().getPosition(), estimatedPose.getPosition());
-         linearVelocityVectorError.sub(input.getDesiredVelocity().getLinearPart(), estimatedVelocity.getLinearPart());
+         if (lastUpdateTime.isNaN())
+         {
+            estimatedPose.set(inputPose);
 
-         positionVectorError.scale(gains.getKp());
-         linearVelocityVectorError.scale(gains.getKd());
+            if (!input.getHasDesiredVelocity())
+            {
+               estimatedVelocity.setToZero();
+               rawInputVelocity.setToZero();
+            }
+            else
+            {
+               estimatedVelocity.setMatchingFrame(input.getDesiredVelocity());
+               estimatedVelocity.getLinearPart().clipToMaxNorm(defaultLinearRateLimitation);
+               estimatedVelocity.getAngularPart().clipToMaxNorm(defaultAngularRateLimitation);
+               rawInputVelocity.setMatchingFrame(input.getDesiredVelocity());
+            }
 
-         linearFeedbackWorldFrame.add(positionVectorError, linearVelocityVectorError); // This is in world-frame
+            estimatedAcceleration.setToZero();
+         }
+         else
+         {
+            if (!input.getHasDesiredVelocity())
+            {
+               double timeInterval = Conversions.nanosecondsToSeconds(inputTimestamp - lastInputTimestamp.getLongValue());
+               KSTTools.computeSpatialVelocity(timeInterval, rawInputPose, inputPose, rawInputVelocity);
+               rawInputPose.getOrientation().transform(rawInputVelocity.getAngularPart());
+            }
+            else
+            {
+               double timeInterval = Conversions.nanosecondsToSeconds(inputTimestamp - lastInputTimestamp.getLongValue());
+               KSTTools.computeSpatialVelocity(timeInterval, rawInputPose, inputPose, debugInputVelocity);
+               rawInputPose.getOrientation().transform(debugInputVelocity.getAngularPart());
+               rawInputVelocity.setMatchingFrame(input.getDesiredVelocity());
+            }
 
-         //ANGULAR FEEDBACK
+            // TODO Handle when rawInputVelocity contains NaN (can happen because sometimes the VR headset sends NaNs)
 
-         quaternionError.difference(estimatedPose.getOrientation(), input.getControlFramePose().getOrientation());
-         quaternionError.getRotationVector(rotationVectorErrorBodyFrame); // expressed in body-frame estimated
-         angularVelocityErrorBodyFrame.sub(input.getDesiredVelocity().getAngularPart(), estimatedVelocity.getAngularPart()); // Velocities are expressed in world frame
-         estimatedPose.inverseTransform(angularVelocityErrorBodyFrame); // This is now in the body-fixed frame
+            //LINEAR FEEDBACK
 
-         rotationVectorErrorBodyFrame.scale(gains.getKp());
-         angularVelocityErrorBodyFrame.scale(gains.getKd());
+            positionVectorError.sub(inputPose.getPosition(), estimatedPose.getPosition());
+            linearVelocityVectorError.sub(rawInputVelocity.getLinearPart(), estimatedVelocity.getLinearPart());
 
-         angularFeedbackBodyFrame.add(rotationVectorErrorBodyFrame, angularVelocityErrorBodyFrame); // This is in body-frame as described by the estimatedPose
+            positionVectorError.scale(gains.getKp());
+            linearVelocityVectorError.scale(gains.getKd());
 
-         angularAccelerationBodyFrame.set(angularFeedbackBodyFrame);
+            linearFeedbackWorldFrame.add(positionVectorError, linearVelocityVectorError); // This is in world-frame
 
-         YoFrameVector3D estimatedLinearAccelerationWorldFrame = estimatedAcceleration.getLinearPart();
-         YoFrameVector3D estimatedAngularAccelerationWorldFrame = estimatedAcceleration.getAngularPart();
+            //ANGULAR FEEDBACK
 
-         estimatedLinearAccelerationWorldFrame.set(linearFeedbackWorldFrame);
-         estimatedPose.transform(angularAccelerationBodyFrame, estimatedAngularAccelerationWorldFrame);
+            quaternionError.difference(estimatedPose.getOrientation(), inputPose.getOrientation());
+            quaternionError.getRotationVector(rotationVectorErrorBodyFrame); // expressed in body-frame estimated
+            angularVelocityErrorBodyFrame.sub(rawInputVelocity.getAngularPart(), estimatedVelocity.getAngularPart()); // Velocities are expressed in world frame
+            estimatedPose.inverseTransform(angularVelocityErrorBodyFrame); // This is now in the body-fixed frame
 
+            rotationVectorErrorBodyFrame.scale(gains.getKp());
+            angularVelocityErrorBodyFrame.scale(gains.getKd());
 
-         //  POSITION IN WORLDFRAME
+            angularFeedbackBodyFrame.add(rotationVectorErrorBodyFrame,
+                                         angularVelocityErrorBodyFrame); // This is in body-frame as described by the estimatedPose
 
-         estimatedPose.getPosition().scaleAdd((updateDT*updateDT)/2, estimatedLinearAccelerationWorldFrame, estimatedPose.getPosition());
-         estimatedPose.getPosition().scaleAdd(updateDT, estimatedVelocity.getLinearPart(), estimatedPose.getPosition());
+            angularAccelerationBodyFrame.set(angularFeedbackBodyFrame);
 
+            YoFrameVector3D estimatedLinearAccelerationWorldFrame = estimatedAcceleration.getLinearPart();
+            YoFrameVector3D estimatedAngularAccelerationWorldFrame = estimatedAcceleration.getAngularPart();
 
-          // LINEAR VELOCITY IN WORLDFRAME
+            estimatedLinearAccelerationWorldFrame.set(linearFeedbackWorldFrame);
+            estimatedPose.transform(angularAccelerationBodyFrame, estimatedAngularAccelerationWorldFrame);
 
-         estimatedVelocity.getLinearPart().scaleAdd(updateDT, estimatedLinearAccelerationWorldFrame, estimatedVelocity.getLinearPart());
+            //  POSITION IN WORLDFRAME
 
+            estimatedPose.getPosition().scaleAdd((updateDT * updateDT) / 2, estimatedLinearAccelerationWorldFrame, estimatedPose.getPosition());
+            estimatedPose.getPosition().scaleAdd(updateDT, estimatedVelocity.getLinearPart(), estimatedPose.getPosition());
 
-         //  ORIENTATION
+            // LINEAR VELOCITY IN WORLDFRAME
 
-         estimatedPose.inverseTransform(estimatedVelocity.getAngularPart(), angularVelocityBodyFrame);
+            estimatedVelocity.getLinearPart().scaleAdd(updateDT, estimatedLinearAccelerationWorldFrame, estimatedVelocity.getLinearPart());
 
-         orientationUpdate.setAndScale(updateDT, angularVelocityBodyFrame);
-         orientationUpdate.scaleAdd((updateDT*updateDT)/2, angularAccelerationBodyFrame, orientationUpdate);
+            //  ORIENTATION
 
-         deltaOrientation.setRotationVector(orientationUpdate);
+            estimatedPose.inverseTransform(estimatedVelocity.getAngularPart(), angularVelocityBodyFrame);
 
-         estimatedPose.getOrientation().append(deltaOrientation);
-         estimatedPose.transform(estimatedPose.getOrientation());
+            orientationUpdate.setAndScale(updateDT, angularVelocityBodyFrame);
+            orientationUpdate.scaleAdd((updateDT * updateDT) / 2, angularAccelerationBodyFrame, orientationUpdate);
 
-         //  ANGULAR VELOCITY
+            deltaOrientation.setRotationVector(orientationUpdate);
 
-         estimatedVelocity.getAngularPart().scaleAdd(updateDT, angularAccelerationBodyFrame, estimatedVelocity.getAngularPart());
-         estimatedPose.transform(estimatedVelocity.getAngularPart());
+            estimatedPose.getOrientation().append(deltaOrientation);
+            estimatedPose.transform(estimatedPose.getOrientation());
 
-         estimatedAcceleration.set(estimatedLinearAccelerationWorldFrame,estimatedAngularAccelerationWorldFrame);
+            //  ANGULAR VELOCITY
 
+            estimatedVelocity.getAngularPart().scaleAdd(updateDT, angularAccelerationBodyFrame, estimatedVelocity.getAngularPart());
+            estimatedPose.transform(estimatedVelocity.getAngularPart());
 
+            estimatedAcceleration.set(estimatedLinearAccelerationWorldFrame, estimatedAngularAccelerationWorldFrame);
 
+            // Notes for the integration:
+            // For position: do everything in world
+            // For orientation:
+            // - compute acceleration in both world and body frames
+            // - double integrate in body frame to update orientation.
+            // - integrate acceleration to velocity in world to update velocity.
+            // - at the end estimated acceleration and velocity are expressed in world
+         }
 
-         // Notes for the integration:
-         // For position: do everything in world
-         // For orientation:
-         // - compute acceleration in both world and body frames
-         // - double integrate in body frame to update orientation.
-         // - integrate acceleration to velocity in world to update velocity.
-         // - at the end estimated acceleration and velocity are expressed in world
-
-
+         lastUpdateTime.set(time);
+         rawInputPose.set(inputPose);
+         lastInputTimestamp.set(inputTimestamp);
       }
-
 
       @Override
       public void predict(double time)
       {
-         if (time > nextTimeTriggerForDecay.getValue())
-         {
-            double alpha = Math.min(1.0, inputVelocityDecayFactor.getValue() + updateDT / inputVelocityDecayDuration.getValue());
-            inputVelocityDecayFactor.set(alpha);
-            estimatedDecayingVelocity.getLinearPart().interpolate(estimatedVelocity.getLinearPart(), EuclidCoreTools.zeroVector3D, alpha);
-            estimatedDecayingVelocity.getAngularPart().interpolate(estimatedVelocity.getAngularPart(), EuclidCoreTools.zeroVector3D, alpha);
-         }
-
-         KSTTools.integrateLinearVelocity(updateDT, estimatedPose.getPosition(), estimatedDecayingVelocity.getLinearPart(), estimatedPose.getPosition());
-         KSTTools.integrateAngularVelocity(updateDT,
-                                           estimatedPose.getOrientation(),
-                                           estimatedDecayingVelocity.getAngularPart(),
-                                           false,
-                                           estimatedPose.getOrientation());
+         KSTTools.integrateLinearVelocity(updateDT, estimatedPose.getPosition(), estimatedVelocity.getLinearPart(), estimatedPose.getPosition());
+         KSTTools.integrateAngularVelocity(updateDT, estimatedPose.getOrientation(), estimatedVelocity.getAngularPart(), false, estimatedPose.getOrientation());
       }
 
       @Override
@@ -388,7 +402,7 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
       @Override
       public SpatialVectorReadOnly getEstimatedVelocity()
       {
-         return estimatedDecayingVelocity;
+         return estimatedVelocity;
       }
    }
 
@@ -713,11 +727,5 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
       {
          return estimatedDecayingVelocity;
       }
-   }
-
-   @Override
-   public void initialize()
-   {
-
    }
 }
