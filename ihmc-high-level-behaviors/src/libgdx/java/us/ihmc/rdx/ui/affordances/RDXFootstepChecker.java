@@ -9,7 +9,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepPoseHeuristicChecker;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.ui.RDX3DPanelTooltip;
@@ -43,7 +43,7 @@ public class RDXFootstepChecker
                              ROS2SyncedRobotModel syncedRobot,
                              ControllerStatusTracker controllerStatusTracker,
                              SideDependentList<ConvexPolygon2D> footPolygons,
-                             FootstepPlannerParametersReadOnly footstepPlannerParameters)
+                             DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       this.syncedRobot = syncedRobot;
       this.controllerStatusTracker = controllerStatusTracker;

@@ -22,6 +22,7 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
    private final ActionSequenceState state;
    private final ImBooleanWrapper automaticExecutionCheckbox;
+   private final ImBooleanWrapper concurrencyEnabledCheckbox;
    private final Timer manualExecutionOverrideTimer = new Timer();
    private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
    private final List<RDXActionNode<?, ?>> actionChildren = new ArrayList<>();
@@ -40,6 +41,9 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
       automaticExecutionCheckbox = new ImBooleanWrapper(state::getAutomaticExecution,
                                                         state::setAutomaticExecution,
                                                         imBoolean -> ImGui.checkbox(labels.get("Autonomously"), imBoolean));
+      concurrencyEnabledCheckbox = new ImBooleanWrapper(state::getConcurrencyEnabled,
+                                                        state::setConcurrencyEnabled,
+                                                        imBoolean -> ImGui.checkbox(labels.get("Concurrency Enabled"), imBoolean));
    }
 
    @Override
@@ -164,6 +168,9 @@ public class RDXActionSequence extends RDXBehaviorTreeNode<ActionSequenceState, 
             ImGui.text("End of sequence.");
          }
       }
+
+      ImGui.sameLine();
+      concurrencyEnabledCheckbox.renderImGuiWidget();
 
       if (currentlyExecutingActions.isEmpty())
       {

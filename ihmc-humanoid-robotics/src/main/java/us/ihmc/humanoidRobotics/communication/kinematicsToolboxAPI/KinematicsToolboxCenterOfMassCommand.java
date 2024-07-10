@@ -109,6 +109,10 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
    @Override
    public boolean isCommandValid()
    {
+      if (desiredPosition.containsNaN())
+         return false;
+      if (hasDesiredVelocity && desiredVelocity.containsNaN())
+         return false;
       return true;
    }
 

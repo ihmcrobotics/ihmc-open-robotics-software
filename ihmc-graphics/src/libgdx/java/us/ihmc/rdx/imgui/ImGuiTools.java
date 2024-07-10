@@ -4,15 +4,31 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
-import imgui.*;
-import imgui.flag.*;
+import imgui.ImFont;
+import imgui.ImFontAtlas;
+import imgui.ImFontConfig;
+import imgui.ImFontGlyphRangesBuilder;
+import imgui.ImGui;
+import imgui.ImGuiIO;
+import imgui.ImVec2;
+import imgui.flag.ImGuiCol;
+import imgui.flag.ImGuiDataType;
+import imgui.flag.ImGuiFreeTypeBuilderFlags;
+import imgui.flag.ImGuiInputTextFlags;
+import imgui.flag.ImGuiKey;
 import imgui.internal.ImGuiContext;
-import imgui.type.*;
+import imgui.type.ImBoolean;
+import imgui.type.ImDouble;
+import imgui.type.ImFloat;
+import imgui.type.ImInt;
+import imgui.type.ImLong;
+import imgui.type.ImString;
 import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL41;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.string.StringTools;
 
 import java.io.ByteArrayOutputStream;
@@ -52,11 +68,11 @@ public class ImGuiTools
    public static final double SMALL_TO_MEDIUM_SCALE = 1.25;
    public static final double SMALL_TO_LARGE_SCALE = 2.4;
 
-   private static TIntObjectMap<ImFont> consoleFont = new TIntObjectHashMap<>();
-   private static TIntObjectMap<ImFont> smallFont = new TIntObjectHashMap<>();
-   private static TIntObjectMap<ImFont> smallBoldFont = new TIntObjectHashMap<>();
-   private static TIntObjectMap<ImFont> mediumFont = new TIntObjectHashMap<>();
-   private static TIntObjectMap<ImFont> bigFont = new TIntObjectHashMap<>();
+   private static final TIntObjectMap<ImFont> consoleFont = new TIntObjectHashMap<>();
+   private static final TIntObjectMap<ImFont> smallFont = new TIntObjectHashMap<>();
+   private static final TIntObjectMap<ImFont> smallBoldFont = new TIntObjectHashMap<>();
+   private static final TIntObjectMap<ImFont> mediumFont = new TIntObjectHashMap<>();
+   private static final TIntObjectMap<ImFont> bigFont = new TIntObjectHashMap<>();
 
    private static boolean userKeysHaveBeenMapped = false;
    private static int spaceKey;
@@ -444,6 +460,16 @@ public class ImGuiTools
       ImGui.newLine();
    }
 
+   public static void rightAlignText(String text)
+   {
+      float windowWidth = ImGui.getWindowContentRegionMaxX();
+      float textWidth = calcTextSizeX(text);
+      float cursorPosX = ImGui.getCursorPosX();
+      ImGui.setCursorPosX(windowWidth - textWidth);
+      ImGui.text(text);
+      ImGui.setCursorPosY(cursorPosX);
+   }
+
    public static float calcTextSizeX(String text)
    {
       ImGui.calcTextSize(calcTextSize, text);
@@ -478,14 +504,8 @@ public class ImGuiTools
       return label + "###" + thisObject.getClass().getName() + ":" + label;
    }
 
-   /** @deprecated Use ImGuiUniqueLabelMap instead. */
-   public static String uniqueIDOnly(Object thisObject, String label)
-   {
-      return "###" + thisObject.getClass().getName() + ":" + label;
-   }
-
    /**
-    * See https://github.com/ocornut/imgui/blob/master/docs/FONTS.md
+    * See <a href="https://github.com/ocornut/imgui/blob/master/docs/FONTS.md">FONTS.md</a>
     * and ImGuiGlfwFreeTypeDemo in this project
     */
    public static void setupFonts(ImGuiIO io)
@@ -608,7 +628,10 @@ public class ImGuiTools
 
    public static ImFont getConsoleFont()
    {
-      return consoleFont.get(CURRENT_FONT_SIZE);
+      ImFont font = consoleFont.get(CURRENT_FONT_SIZE);
+      if (!font.isLoaded()) // FIXME: Find issue and fix
+         LogTools.error("Console font %s size %d not loaded!".formatted(font.getDebugName(), CURRENT_FONT_SIZE));
+      return font;
    }
 
    public static ImFontAtlas getFontAtlas()
@@ -664,6 +687,7 @@ public class ImGuiTools
       downArrowKey = ImGui.getKeyIndex(ImGuiKey.DownArrow);
       leftArrowKey = ImGui.getKeyIndex(ImGuiKey.LeftArrow);
       rightArrowKey = ImGui.getKeyIndex(ImGuiKey.RightArrow);
+      userKeysHaveBeenMapped = true;
    }
 
    public static int getSpaceKey()

@@ -178,6 +178,11 @@ public class KinematicsToolboxRigidBodyCommand implements Command<KinematicsTool
    @Override
    public boolean isCommandValid()
    {
+      if (desiredPose.containsNaN())
+         return false;
+      if (hasDesiredVelocity && this.desiredVelocity.containsNaN())
+            return false;
+
       return true;
    }
 

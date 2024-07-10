@@ -302,7 +302,8 @@ public class AvatarSimulationFactory
                                                     contextDataFactory,
                                                     simulationOutputProcessor,
                                                     realtimeROS2Node.get(),
-                                                    gravity.get());
+                                                    gravity.get(),
+                                                    false);
    }
 
    private void setupStepGeneratorThread()
@@ -373,7 +374,7 @@ public class AvatarSimulationFactory
       HumanoidRobotControlTask controllerTask = new ControllerTask("Controller", controllerThread, controllerDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
       HumanoidRobotControlTask stepGeneratorTask = new StepGeneratorTask("StepGenerator", stepGeneratorThread, stepGeneratorDivisor, robotModel.getSimulateDT(), masterFullRobotModel);
 
-      AvatarSimulatedHandControlThread handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get());
+      AvatarSimulatedHandControlThread handControlThread = robotModel.createSimulatedHandController(realtimeROS2Node.get(), false);
       SimulatedHandControlTask handControlTask = null;
 
       if (handControlThread != null)

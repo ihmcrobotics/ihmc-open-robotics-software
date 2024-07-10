@@ -120,7 +120,8 @@ public class RDXVRContext
                                                                                                               RobotSide.RIGHT,
                                                                                                               vrPlayAreaYUpZBackFrame));
    private final Map<Integer, RDXVRBaseStation> baseStations = new HashMap<>();
-   private final Map<String, RDXVRTracker> trackers =  new HashMap<>();
+   private final Map<String, RDXVRTracker> trackers =  new HashMap<>(); // <serial number, tracker>
+   private final Map<String, String> savedTrackersRoleMap = new HashMap<>(); // <role, serial number>
    private final Map<String, String> trackersRoleMap = new HashMap<>(); // <role, serial number>
    private final SortedSet<String> availableTrackerRoles = new TreeSet<>()
    {
@@ -136,6 +137,8 @@ public class RDXVRContext
    private final List<String> newTrackerSerialNumber = new ArrayList<>();
    private final List<String> removedTrackerSerialNumber = new ArrayList<>();
    private final Notification rolesResetNotification = new Notification();
+   private final Notification loadingRolesNotification = new Notification();
+   private WorkspaceResourceFile trackerRolesFile;
 
    public void initSystem()
    {
@@ -184,6 +187,14 @@ public class RDXVRContext
          controller.initSystem();
       }
 
+      trackerRolesFile = new WorkspaceResourceFile(directory, "tracker_roles.json");
+      JSONFileTools.load(trackerRolesFile, node ->
+      {
+         for (String role : availableTrackerRoles)
+         {
+            savedTrackersRoleMap.put(role, node.get(role).asText());
+         }
+      });
       int[] deviceIndices = new int[5]; // maximum number of trackers per dongle
       IntBuffer trackerIndices = IntBuffer.wrap(deviceIndices);
       int numberOfTrackers = VRSystem.VRSystem_GetSortedTrackedDeviceIndicesOfClass(VR.ETrackedDeviceClass_TrackedDeviceClass_GenericTracker,
@@ -512,9 +523,45 @@ public class RDXVRContext
       rolesResetNotification.set();
    }
 
+   public void saveTrackerRolesToFile()
+   {
+      if (trackerRolesFile.isFileAccessAvailable())
+      {
+         LogTools.info("Saving tracker roles to file ...");
+         JSONFileTools.save(trackerRolesFile, jsonNode ->
+         {
+            for (String role : savedTrackersRoleMap.keySet())
+            {
+               jsonNode.put(role, trackersRoleMap.getOrDefault(role, ""));
+            }
+         });
+         LogTools.info("Saved to file");
+      }
+   }
+
+   public void loadTrackerRolesFromFile()
+   {
+      LogTools.info("Loading from file tracker roles");
+      resetTrackerRoles();
+      for (var roleMap : savedTrackersRoleMap.entrySet())
+      {
+         if (!roleMap.getValue().isEmpty() && trackers.containsKey(roleMap.getValue()))
+         {
+            trackersRoleMap.put(roleMap.getKey(), roleMap.getValue());
+            availableTrackerRoles.remove(roleMap.getKey());
+         }
+      }
+      loadingRolesNotification.set();
+   }
+
    public Notification getRolesResetNotification()
    {
       return rolesResetNotification;
+   }
+
+   public Notification getLoadingRolesNotification()
+   {
+      return loadingRolesNotification;
    }
 
    public List<String> getNewTrackersSerialNumbers()
@@ -529,6 +576,11 @@ public class RDXVRContext
       List<String> serialNumbers = new ArrayList<>(removedTrackerSerialNumber);
       removedTrackerSerialNumber.clear();
       return serialNumbers;
+   }
+
+   public Map<String, String> getTrackersRoleMap()
+   {
+      return trackersRoleMap;
    }
 
    public Collection<RDXVRBaseStation> getBaseStations()

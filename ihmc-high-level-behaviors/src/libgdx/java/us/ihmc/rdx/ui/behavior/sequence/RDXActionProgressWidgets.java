@@ -6,6 +6,7 @@ import imgui.flag.ImGuiCond;
 import imgui.internal.ImGui;
 import us.ihmc.behaviors.sequence.ActionNodeState;
 import us.ihmc.behaviors.sequence.actions.FootstepPlanActionState;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.crdt.CRDTUnidirectionalVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -26,6 +27,8 @@ public class RDXActionProgressWidgets
 {
    public static final float PROGRESS_BAR_HEIGHT = 18.0f;
    public static final float PLOT_HEIGHT = 40.0f;
+   public static final int MAX_WAYPOINTS = 500;
+   public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final RDXActionNode<?, ?> action;
    private final ImGuiUniqueLabelMap labels = new ImGuiUniqueLabelMap(getClass());
@@ -57,17 +60,22 @@ public class RDXActionProgressWidgets
    private int emptyPlotIndex;
    private double elapsedExecutionTime = -1.0;
    private boolean newlyExecuting = false;
-   private final MultipleWaypointsPositionTrajectoryGenerator positionTrajectoryGenerator
-         = new MultipleWaypointsPositionTrajectoryGenerator("Position", 500, ReferenceFrame.getWorldFrame(), new YoRegistry("DummyParent"));
-   private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator
-         = new MultipleWaypointsOrientationTrajectoryGenerator("Orientation", 500, ReferenceFrame.getWorldFrame(), new YoRegistry("DummyParent"));
-   private final MultipleWaypointsTrajectoryGenerator jointspaceTrajectoryGenerator
-         = new MultipleWaypointsTrajectoryGenerator("Jointspace", 500, new YoRegistry("DummyParent"));
+   private MultipleWaypointsPositionTrajectoryGenerator positionTrajectoryGenerator;
+   private MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryGenerator;
+   private MultipleWaypointsTrajectoryGenerator jointspaceTrajectoryGenerator;
    private boolean elapsedTimeIsValid;
 
    public RDXActionProgressWidgets(RDXActionNode<?, ?> action)
    {
       this.action = action;
+
+      ThreadTools.startAsDaemon(() -> // These guys take significant time to create so we create them on a thread
+      {
+         YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+         positionTrajectoryGenerator = new MultipleWaypointsPositionTrajectoryGenerator("Position", MAX_WAYPOINTS, worldFrame, registry);
+         orientationTrajectoryGenerator = new MultipleWaypointsOrientationTrajectoryGenerator("Orientation", MAX_WAYPOINTS, worldFrame, registry);
+         jointspaceTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator("Jointspace", MAX_WAYPOINTS, registry);
+      }, "CreateTrajectoryGenerators");
 
       setupPlot(positionErrorPlot, 0.1, currentPositionErrorPlotLine, desiredPositionErrorPlotLine);
       setupPlot(orientationErrorPlot, 45.0, currentOrientationPlotLine, desiredOrientationPlotLine);
@@ -149,7 +157,7 @@ public class RDXActionProgressWidgets
 
    public void renderPositionError(float dividedBarWidth, boolean renderAsPlots)
    {
-      if (!action.getState().getCommandedTrajectory().isEmpty())
+      if (!action.getState().getCommandedTrajectory().isEmpty() && positionTrajectoryGenerator != null)
       {
          if (elapsedTimeIsValid)
          {
@@ -206,7 +214,7 @@ public class RDXActionProgressWidgets
 
    public void renderOrientationError(float dividedBarWidth, boolean renderAsPlots)
    {
-      if (!action.getState().getCommandedTrajectory().isEmpty())
+      if (!action.getState().getCommandedTrajectory().isEmpty() && orientationTrajectoryGenerator != null)
       {
          if (elapsedTimeIsValid)
          {
@@ -263,7 +271,7 @@ public class RDXActionProgressWidgets
 
    public void renderJointspacePositionError(int jointIndex, float dividedBarWidth, boolean renderAsPlots)
    {
-      if (action.getState().getCommandedJointTrajectories().getNumberOfJoints() > jointIndex)
+      if (action.getState().getCommandedJointTrajectories().getNumberOfJoints() > jointIndex && jointspaceTrajectoryGenerator != null)
       {
          if (elapsedTimeIsValid)
          {

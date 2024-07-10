@@ -18,6 +18,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxCenterOfMassCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxRigidBodyCommand;
@@ -101,14 +103,14 @@ public class KSTStreamingState implements State
    private final YoFramePose3D lockChestPose = new YoFramePose3D("lockChestPose", worldFrame, registry);
    private final AlphaFilteredYoFramePose3D lockChestPoseFiltered;
 
-   private final YoDouble defaultArmMessageWeight = new YoDouble("defaultArmMessageWeight", registry);
-   private final YoDouble defaultNeckMessageWeight = new YoDouble("defaultNeckMessageWeight", registry);
-   private final YoVector3D defaultPelvisMessageLinearWeight = new YoVector3D("defaultPelvisMessageLinearWeight", registry);
-   private final YoVector3D defaultPelvisMessageAngularWeight = new YoVector3D("defaultPelvisMessageAngularWeight", registry);
-   private final YoVector3D defaultChestMessageAngularWeight = new YoVector3D("defaultChestMessageAngularWeight", registry);
+   private final YoDouble holdArmWeight = new YoDouble("holdArmWeight", registry);
+   private final YoDouble holdNeckWeight = new YoDouble("holdNeckWeight", registry);
+   private final YoVector3D holdPelvisLinearWeight = new YoVector3D("holdPelvisLinearWeight", registry);
+   private final YoVector3D holdPelvisAngularWeight = new YoVector3D("holdPelvisAngularWeight", registry);
+   private final YoVector3D holdChestAngularWeight = new YoVector3D("holdChestAngularWeight", registry);
 
-   private final YoDouble defaultPelvisMessageLockWeight = new YoDouble("defaultPelvisMessageLockWeight", registry);
-   private final YoDouble defaultChestMessageLockWeight = new YoDouble("defaultChestMessageLockWeight", registry);
+   private final YoDouble lockPelvisWeight = new YoDouble("lockPelvisWeight", registry);
+   private final YoDouble lockChestWeight = new YoDouble("lockChestWeight", registry);
 
    //   private final YoDouble preferredArmConfigWeight = new YoDouble("preferredArmConfigWeight", registry);
    //   private final SideDependentList<List<KinematicsToolboxOneDoFJointMessage>> preferredArmJointMessages = new SideDependentList<>();
@@ -141,8 +143,16 @@ public class KSTStreamingState implements State
    private final YoDouble defaultLinearRateLimit = new YoDouble("defaultLinearRateLimit", registry);
    private final YoDouble defaultAngularRateLimit = new YoDouble("defaultAngularRateLimit", registry);
 
-   private final YoDouble defaultLinearWeight = new YoDouble("defaultLinearWeight", registry);
-   private final YoDouble defaultAngularWeight = new YoDouble("defaultAngularWeight", registry);
+   private final YoVector3D defaultLinearWeight = new YoVector3D("defaultLinearWeight", registry);
+   private final YoVector3D defaultAngularWeight = new YoVector3D("defaultAngularWeight", registry);
+   private final YoVector3D defaultPelvisLinearWeight = new YoVector3D("defaultPelvisLinearWeight", registry);
+   private final YoVector3D defaultPelvisAngularWeight = new YoVector3D("defaultPelvisAngularWeight", registry);
+   private final YoVector3D defaultChestLinearWeight = new YoVector3D("defaultChestLinearWeight", registry);
+   private final YoVector3D defaultChestAngularWeight = new YoVector3D("defaultChestAngularWeight", registry);
+   private final YoVector3D defaultHandLinearWeight = new YoVector3D("defaultHandLinearWeight", registry);
+   private final YoVector3D defaultHandAngularWeight = new YoVector3D("defaultHandAngularWeight", registry);
+   private final Map<String, YoVector3D> defaultLinearWeightMap = new HashMap<>();
+   private final Map<String, YoVector3D> defaultAngularWeightMap = new HashMap<>();
 
    private final YoDouble streamingBlendingDuration = new YoDouble("streamingBlendingDuration", registry);
    private final KSTOutputDataReadOnly ikSolution;
@@ -212,17 +222,32 @@ public class KSTStreamingState implements State
       defaultJointVelocityWeight.set(parameters.getDefaultSolverConfiguration().getJointVelocityWeight());
       defaultJointAccelerationWeight.set(parameters.getDefaultSolverConfiguration().getJointAccelerationWeight());
 
-      defaultArmMessageWeight.set(parameters.getDefaultArmMessageWeight());
-      defaultNeckMessageWeight.set(parameters.getDefaultNeckMessageWeight());
-      defaultPelvisMessageLinearWeight.set(parameters.getDefaultPelvisMessageLinearWeight());
-      defaultPelvisMessageAngularWeight.set(parameters.getDefaultPelvisMessageAngularWeight());
-      defaultChestMessageAngularWeight.set(parameters.getDefaultChestMessageAngularWeight());
+      holdArmWeight.set(parameters.getHoldArmWeight());
+      holdNeckWeight.set(parameters.getHoldNeckWeight());
+      holdPelvisLinearWeight.set(parameters.getHoldPelvisLinearWeight());
+      holdPelvisAngularWeight.set(parameters.getHoldPelvisAngularWeight());
+      holdChestAngularWeight.set(parameters.getHoldChestAngularWeight());
 
-      defaultPelvisMessageLockWeight.set(parameters.getDefaultPelvisMessageLockWeight());
-      defaultChestMessageLockWeight.set(parameters.getDefaultChestMessageLockWeight());
+      lockPelvisWeight.set(parameters.getLockPelvisWeight());
+      lockChestWeight.set(parameters.getLockChestWeight());
 
       defaultLinearWeight.set(parameters.getDefaultLinearWeight());
       defaultAngularWeight.set(parameters.getDefaultAngularWeight());
+      defaultPelvisLinearWeight.set(parameters.getDefaultPelvisLinearWeight());
+      defaultPelvisAngularWeight.set(parameters.getDefaultPelvisAngularWeight());
+      defaultChestLinearWeight.set(parameters.getDefaultChestLinearWeight());
+      defaultChestAngularWeight.set(parameters.getDefaultChestAngularWeight());
+      defaultHandLinearWeight.set(parameters.getDefaultHandLinearWeight());
+      defaultHandAngularWeight.set(parameters.getDefaultHandAngularWeight());
+      defaultLinearWeightMap.put(pelvis.getName(), defaultPelvisLinearWeight);
+      defaultAngularWeightMap.put(pelvis.getName(), defaultPelvisAngularWeight);
+      defaultLinearWeightMap.put(chest.getName(), defaultChestLinearWeight);
+      defaultAngularWeightMap.put(chest.getName(), defaultChestAngularWeight);
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         defaultLinearWeightMap.put(hands.get(robotSide).getName(), defaultHandLinearWeight);
+         defaultAngularWeightMap.put(hands.get(robotSide).getName(), defaultHandAngularWeight);
+      }
       /*
        * TODO This was introduced to reduce the risk of shoulder flip on Valkyrie, but it seems that it is
        * impacting too much the task-space objectives and preventing the privileged configuration to kick
@@ -332,7 +357,7 @@ public class KSTStreamingState implements State
       for (int i = 0; i < neckJoints.length; i++)
       {
          defaultNeckJointMessages.get(i).setDesiredPosition(controllerFullRobotModel.getOneDoFJointByName(neckJoints[i].getName()).getQ());
-         defaultNeckJointMessages.get(i).setWeight(defaultNeckMessageWeight.getValue());
+         defaultNeckJointMessages.get(i).setWeight(holdNeckWeight.getValue());
       }
 
       // TODO change to using mid-feet z-up frame for initializing pelvis and chest
@@ -347,8 +372,8 @@ public class KSTStreamingState implements State
          defaultPelvisMessage.getDesiredOrientationInWorld().set(lockPelvisPoseFiltered.getOrientation());
          defaultPelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
          defaultPelvisMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
-         MessageTools.packWeightMatrix3DMessage(defaultPelvisMessageLockWeight.getValue(), defaultPelvisMessage.getLinearWeightMatrix());
-         MessageTools.packWeightMatrix3DMessage(defaultPelvisMessageLockWeight.getValue(), defaultPelvisMessage.getAngularWeightMatrix());
+         MessageTools.packWeightMatrix3DMessage(lockPelvisWeight.getValue(), defaultPelvisMessage.getLinearWeightMatrix());
+         MessageTools.packWeightMatrix3DMessage(lockPelvisWeight.getValue(), defaultPelvisMessage.getAngularWeightMatrix());
       }
       else
       {
@@ -358,8 +383,8 @@ public class KSTStreamingState implements State
          defaultPelvisMessage.getDesiredOrientationInWorld().setToYawOrientation(lockPelvisPose.getYaw());
          defaultPelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, true, worldFrame));
          defaultPelvisMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
-         MessageTools.packWeightMatrix3DMessage(defaultPelvisMessageLinearWeight, defaultPelvisMessage.getLinearWeightMatrix());
-         MessageTools.packWeightMatrix3DMessage(defaultPelvisMessageAngularWeight, defaultPelvisMessage.getAngularWeightMatrix());
+         MessageTools.packWeightMatrix3DMessage(holdPelvisLinearWeight, defaultPelvisMessage.getLinearWeightMatrix());
+         MessageTools.packWeightMatrix3DMessage(holdPelvisAngularWeight, defaultPelvisMessage.getAngularWeightMatrix());
       }
 
       lockChest.set(tools.getConfigurationCommand().isLockChest());
@@ -372,8 +397,8 @@ public class KSTStreamingState implements State
          defaultChestMessage.getDesiredOrientationInWorld().set(lockChestPoseFiltered.getOrientation());
          defaultChestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
          defaultChestMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
-         MessageTools.packWeightMatrix3DMessage(defaultChestMessageLockWeight.getValue(), defaultChestMessage.getLinearWeightMatrix());
-         MessageTools.packWeightMatrix3DMessage(defaultChestMessageLockWeight.getValue(), defaultChestMessage.getAngularWeightMatrix());
+         MessageTools.packWeightMatrix3DMessage(lockChestWeight.getValue(), defaultChestMessage.getLinearWeightMatrix());
+         MessageTools.packWeightMatrix3DMessage(lockChestWeight.getValue(), defaultChestMessage.getAngularWeightMatrix());
       }
       else
       {
@@ -384,7 +409,7 @@ public class KSTStreamingState implements State
          defaultChestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, false, worldFrame));
          defaultChestMessage.getAngularSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
          MessageTools.packWeightMatrix3DMessage(0.0, defaultChestMessage.getLinearWeightMatrix());
-         MessageTools.packWeightMatrix3DMessage(defaultChestMessageAngularWeight, defaultChestMessage.getAngularWeightMatrix());
+         MessageTools.packWeightMatrix3DMessage(holdChestAngularWeight, defaultChestMessage.getAngularWeightMatrix());
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -397,7 +422,7 @@ public class KSTStreamingState implements State
          for (int i = 0; i < joints.length; i++)
          {
             defaultMessages.get(i).setDesiredPosition(controllerFullRobotModel.getOneDoFJointByName(joints[i].getName()).getQ());
-            defaultMessages.get(i).setWeight(defaultArmMessageWeight.getValue());
+            defaultMessages.get(i).setWeight(holdArmWeight.getValue());
          }
       }
 
@@ -476,7 +501,9 @@ public class KSTStreamingState implements State
          {
             KinematicsToolboxRigidBodyCommand rigidBodyInput = latestInput.getInput(i);
             // Sets the user weights only if provided.
-            setDefaultWeightIfNeeded(rigidBodyInput.getSelectionMatrix(), rigidBodyInput.getWeightMatrix());
+            SelectionMatrix6D selectionMatrix = rigidBodyInput.getSelectionMatrix();
+            WeightMatrix6D weightMatrix = rigidBodyInput.getWeightMatrix();
+            setDefaultWeightsIfNeeded(rigidBodyInput, selectionMatrix, weightMatrix);
 
             // Update time for which each rigid body started being controlled.
             YoDouble startTime = rigidBodyControlStartTimeMap.get(rigidBodyInput.getEndEffector());
@@ -497,7 +524,7 @@ public class KSTStreamingState implements State
          {
             KinematicsToolboxCenterOfMassCommand centerOfMassInput = latestInput.getCenterOfMassInput();
             // TODO Maybe the CoM task should have its own default weight value.
-            setDefaultWeightIfNeeded(centerOfMassInput.getSelectionMatrix(), centerOfMassInput.getWeightMatrix(), defaultLinearWeight.getValue());
+            setDefaultWeightIfNeeded(centerOfMassInput.getSelectionMatrix(), centerOfMassInput.getWeightMatrix(), defaultLinearWeight);
             if (centerOfMassControlStartTime.isNaN())
                centerOfMassControlStartTime.set(timeInState);
             blendWeightMatrix(centerOfMassInput.getWeightMatrix(), timeInState, centerOfMassControlStartTime.getValue(), streamingBlendingDuration.getValue());
@@ -738,28 +765,34 @@ public class KSTStreamingState implements State
       return EuclidCoreTools.max(weightMatrix.getX(), weightMatrix.getY(), weightMatrix.getZ());
    }
 
-   private void setDefaultWeightIfNeeded(SelectionMatrix6D selectionMatrix, WeightMatrix6D weightMatrix)
+   private void setDefaultWeightsIfNeeded(KinematicsToolboxRigidBodyCommand rigidBodyInput, SelectionMatrix6D selectionMatrix, WeightMatrix6D weightMatrix)
    {
-      setDefaultWeightIfNeeded(selectionMatrix.getLinearPart(), weightMatrix.getLinearPart(), defaultLinearWeight.getValue());
-      setDefaultWeightIfNeeded(selectionMatrix.getAngularPart(), weightMatrix.getAngularPart(), defaultAngularWeight.getValue());
+      Vector3DReadOnly defaultLinearWeight = defaultLinearWeightMap.get(rigidBodyInput.getEndEffector().getName());
+      if (defaultLinearWeight == null)
+         defaultLinearWeight = this.defaultLinearWeight;
+      Vector3DReadOnly defaultAngularWeight = defaultAngularWeightMap.get(rigidBodyInput.getEndEffector().getName());
+      if (defaultAngularWeight == null)
+         defaultAngularWeight = this.defaultAngularWeight;
+      setDefaultWeightIfNeeded(selectionMatrix.getLinearPart(), weightMatrix.getLinearPart(), defaultLinearWeight);
+      setDefaultWeightIfNeeded(selectionMatrix.getAngularPart(), weightMatrix.getAngularPart(), defaultAngularWeight);
    }
 
-   private static void setDefaultWeightIfNeeded(SelectionMatrix3D selectionMatrix, WeightMatrix3D weightMatrix, double defaultWeight)
+   private static void setDefaultWeightIfNeeded(SelectionMatrix3D selectionMatrix, WeightMatrix3D weightMatrix, Tuple3DReadOnly defaultWeight)
    {
       if (selectionMatrix.isXSelected())
       {
          if (Double.isNaN(weightMatrix.getX()) || weightMatrix.getX() <= 0.0)
-            weightMatrix.setXAxisWeight(defaultWeight);
+            weightMatrix.setXAxisWeight(defaultWeight.getX());
       }
       if (selectionMatrix.isYSelected())
       {
          if (Double.isNaN(weightMatrix.getY()) || weightMatrix.getY() <= 0.0)
-            weightMatrix.setYAxisWeight(defaultWeight);
+            weightMatrix.setYAxisWeight(defaultWeight.getY());
       }
       if (selectionMatrix.isZSelected())
       {
          if (Double.isNaN(weightMatrix.getZ()) || weightMatrix.getZ() <= 0.0)
-            weightMatrix.setZAxisWeight(defaultWeight);
+            weightMatrix.setZAxisWeight(defaultWeight.getZ());
       }
    }
 

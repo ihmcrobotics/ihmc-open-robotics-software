@@ -1,19 +1,19 @@
 package us.ihmc.footstepPlanning.graphSearch.stepExpansion;
 
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class PartialExpansionManager
 {
-   private final FootstepPlannerParametersReadOnly parameters;
+   private final DefaultFootstepPlannerParametersReadOnly parameters;
    private final List<FootstepGraphNode> allChildNodes = new ArrayList<>();
 
    private int expansionCount = 0;
 
-   public PartialExpansionManager(FootstepPlannerParametersReadOnly parameters)
+   public PartialExpansionManager(DefaultFootstepPlannerParametersReadOnly parameters)
    {
       this.parameters = parameters;
    }
@@ -34,7 +34,7 @@ public class PartialExpansionManager
          return;
       }
 
-      int branchFactor = parameters.getMaximumBranchFactor();
+      int branchFactor = parameters.getMaxBranchFactor();
       int startIndex = branchFactor * expansionCount;
       int endIndex = Math.min(branchFactor * (expansionCount + 1), allChildNodes.size());
 
@@ -48,6 +48,6 @@ public class PartialExpansionManager
 
    public boolean finishedExpansion()
    {
-      return expansionCount * parameters.getMaximumBranchFactor() >= allChildNodes.size();
+      return expansionCount * parameters.getMaxBranchFactor() >= allChildNodes.size();
    }
 }

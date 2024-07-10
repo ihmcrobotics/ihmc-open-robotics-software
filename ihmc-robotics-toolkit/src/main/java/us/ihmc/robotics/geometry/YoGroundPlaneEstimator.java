@@ -64,12 +64,22 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
    @Override
    public void compute()
    {
-      super.compute();
+      compute(0.0);
+   }
+
+   /**
+    * Estimate the ground plane given the current list of ground contact points, accounting for yaw.
+    * @param yaw : yaw of ground plane relative to world
+    */
+   @Override
+   public void compute(double yaw)
+   {
+      super.compute(yaw);
 
       yoGroundPlaneNormal.set(getPlaneNormal());
       yoGroundPlanePoint.set(getPlanePoint());
 
-      yoGroundPlaneOrientation.setYawPitchRoll(0.0, getPitch(), getRoll());
+      yoGroundPlaneOrientation.setYawPitchRoll(yaw, getPitch(yaw), getRoll(yaw));
 
       groundPlaneVisualizer.update();
    }
@@ -81,12 +91,23 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
    @Override
    public void compute(List<? extends FramePoint3DReadOnly> contactPoints)
    {
-      super.compute(contactPoints);
+      compute(contactPoints, 0.0);
+   }
+
+   /**
+    * Set the list of ground contact points and compute the ground plane, accounting for yaw.
+    * @param contactPoints : list of ground contact points
+    * @param yaw : yaw of ground plane relative to world
+    */
+   @Override
+   public void compute(List<? extends FramePoint3DReadOnly> contactPoints, double yaw)
+   {
+      super.compute(contactPoints, yaw);
 
       yoGroundPlaneNormal.set(getPlaneNormal());
       yoGroundPlanePoint.set(getPlanePoint());
 
-      yoGroundPlaneOrientation.setYawPitchRoll(0.0, getPitch(), getRoll());
+      yoGroundPlaneOrientation.setYawPitchRoll(yaw, getPitch(yaw), getRoll(yaw));
 
       groundPlaneVisualizer.update();
    }
@@ -98,12 +119,23 @@ public class YoGroundPlaneEstimator extends GroundPlaneEstimator
    @Override
    public void compute(QuadrantDependentList<? extends FramePoint3DReadOnly> contactPoints)
    {
-      super.compute(contactPoints);
+      compute(contactPoints, 0.0);
+   }
+
+   /**
+    * Set the list of ground contact points and compute the ground plane, accounting for yaw.
+    * @param contactPoints : quadrant dependent list of contact points
+    * @param yaw : yaw of ground plane relative to world
+    */
+   @Override
+   public void compute(QuadrantDependentList<? extends FramePoint3DReadOnly> contactPoints, double yaw)
+   {
+      super.compute(contactPoints, yaw);
 
       yoGroundPlaneNormal.set(getPlaneNormal());
       yoGroundPlanePoint.set(getPlanePoint());
 
-      yoGroundPlaneOrientation.setYawPitchRoll(0.0, getPitch(), getRoll());
+      yoGroundPlaneOrientation.setYawPitchRoll(yaw, getPitch(yaw), getRoll(yaw));
 
       groundPlaneVisualizer.update();
    }

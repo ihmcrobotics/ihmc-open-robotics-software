@@ -91,7 +91,8 @@ public class CenterposeDetectionManager
                                                    detectedObjectPacket.getId(),
                                                    vertices,
                                                    detectedObjectPacket.getBoundingBox2dVertices(),
-                                                   true);
+                                                   true,
+                                                   sceneGraph.getCRDTInfo());
 
                modificationQueue.accept(new SceneGraphNodeAddition(centerposeNode, sceneGraph.getRootNode()));
                sceneGraph.getCenterposeDetectedMarkerIDToNodeMap().put(centerposeNode.getObjectID(), centerposeNode);

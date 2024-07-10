@@ -35,7 +35,7 @@ import perception_msgs.msg.dds.LidarScanMessage;
 import sensor_msgs.Image;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.ros2.ROS2PublisherBasics;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.StereoPointCloudCompression;
 import us.ihmc.communication.ros2.ROS2Helper;
@@ -62,6 +62,7 @@ import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2PublisherBasics;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.string.StringTools;
@@ -184,6 +185,9 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
    private FusedSensorHeadPointCloudMessage outputFusedROS2Message;
    private LZ4Compressor lz4Compressor;
 
+   private Thread publishImagesThread;
+   private volatile boolean publishImagesRunning;
+
    public RDXHighLevelDepthSensorSimulator(String sensorName,
                                            ReferenceFrame sensorFrame,
                                            LongSupplier timestampSupplier,
@@ -216,6 +220,9 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       this.imageHeight = imageHeight;
       this.publishRateHz.set(publishRateHz);
 
+      LogTools.info("Capping depth sensor simulator to 8Hz.");
+      this.publishRateHz.set(8.0);
+
       pointCloudRenderer.create(imageWidth * imageHeight);
 
       depthSensorSimulator.create(pointCloudRenderer.getVertexBuffer());
@@ -230,6 +237,20 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
 
       rgba8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC4, new BytePointer(depthSensorSimulator.getColorRGBA8Buffer()));
       rgb8Mat = new Mat(imageHeight, imageWidth, opencv_core.CV_8UC3, new BytePointer(depthSensorSimulator.getColorRGBA8Buffer()));
+
+      publishImagesThread = new Thread(() ->
+      {
+         publishImagesRunning = true;
+
+         while (publishImagesRunning)
+         {
+            publishImages();
+
+            long sleepTime = (long) (Conversions.hertzToSeconds(publishRateHz) * 1000);
+            ThreadTools.sleep(sleepTime);
+         }
+      }, getClass().getSimpleName() + "-ROSPublisher");
+      publishImagesThread.start();
    }
 
    public void setupForROS1Depth(RosNodeInterface ros1Node, String ros1DepthImageTopic, String ros1DepthCameraInfoTopic)
@@ -323,6 +344,7 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
       compressionParameters = new IntPointer(opencv_imgcodecs.IMWRITE_JPEG_QUALITY, 75);
    }
 
+   private long lastUpdateTimeMs;
    public void render(RDX3DScene scene)
    {
       if (sensorEnabled.get())
@@ -337,56 +359,68 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
          if (coordinateFrame != null)
             coordinateFrame.transform.set(gdxTransform);
 
-         if (renderPointCloudDirectly.get())
+         long now = System.currentTimeMillis();
+         long waitPeriodMs = (long) (Conversions.hertzToSeconds(publishRateHz.get()) * 1000);
+
+         if (now - lastUpdateTimeMs > waitPeriodMs)
          {
-            LibGDXTools.toLibGDX(color, pointColorFromPicker);
-            Color pointColor = useSensorColor.get() ? null : pointColorFromPicker;
-            depthSensorSimulator.render(scene, colorBasedOnWorldZ.get(), pointColor, pointSize.get());
-            pointCloudRenderer.updateMeshFastest(imageWidth * imageHeight);
-         }
-         else
-         {
-            depthSensorSimulator.render(scene);
-         }
-         double publishPeriod = Conversions.hertzToSeconds(publishRateHz.get());
-         if (throttler.run(publishPeriod))
-         {
-            if (ros1Node != null && ros1Node.isStarted())
+            if (renderPointCloudDirectly.get())
             {
-               if (publishDepthImageROS1.get())
-                  publishDepthImageROS1();
-               if (publishColorImageROS1.get())
-                  publishColorImageROS1();
-               if (publishPointCloudROS1.get())
-                  publishPointCloudROS1();
+               LibGDXTools.toLibGDX(color, pointColorFromPicker);
+               Color pointColor = useSensorColor.get() ? null : pointColorFromPicker;
+               depthSensorSimulator.render(scene, colorBasedOnWorldZ.get(), pointColor, pointSize.get());
+               pointCloudRenderer.updateMeshFastest(imageWidth * imageHeight);
+            }
+            else
+            {
+               depthSensorSimulator.render(scene);
             }
 
-            if (realtimeROS2Node != null)
-            {
-               if (publishColorImageROS2.get())
-                  publishColorImageROS2();
-            }
-
-            if (ros2Node != null)
-            {
-               if (publishDepthImageMessageROS2.get())
-                  publishROS2DepthImageMessage();
-               if (publishColorImageMessageROS2.get())
-                  publishROS2ColorImageMessage();
-            }
-         }
-         if (pointCloudMessageType != null && pointCloudMessageType.equals(FusedSensorHeadPointCloudMessage.class))
-            publishPeriod /= segmentationDivisor.get();
-         if (segmentedThrottler.run(publishPeriod)) // This one needs to potentially run faster to publish the segments
-         {
-            if (ros2Node != null)
-            {
-               if (publishPointCloudROS2.get())
-                  publishPointCloudROS2();
-            }
+            lastUpdateTimeMs = now;
          }
 
          tuning = false;
+      }
+   }
+
+   public void publishImages()
+   {
+      double publishPeriod = Conversions.hertzToSeconds(publishRateHz.get());
+      if (throttler.run(publishPeriod))
+      {
+         if (ros1Node != null && ros1Node.isStarted())
+         {
+            if (publishDepthImageROS1.get())
+               publishDepthImageROS1();
+            if (publishColorImageROS1.get())
+               publishColorImageROS1();
+            if (publishPointCloudROS1.get())
+               publishPointCloudROS1();
+         }
+
+         if (realtimeROS2Node != null)
+         {
+            if (publishColorImageROS2.get())
+               publishColorImageROS2();
+         }
+
+         if (ros2Node != null)
+         {
+            if (publishDepthImageMessageROS2.get())
+               publishROS2DepthImageMessage();
+            if (publishColorImageMessageROS2.get())
+               publishROS2ColorImageMessage();
+         }
+      }
+      if (pointCloudMessageType != null && pointCloudMessageType.equals(FusedSensorHeadPointCloudMessage.class))
+         publishPeriod /= segmentationDivisor.get();
+      if (segmentedThrottler.run(publishPeriod)) // This one needs to potentially run faster to publish the segments
+      {
+         if (ros2Node != null)
+         {
+            if (publishPointCloudROS2.get())
+               publishPointCloudROS2();
+         }
       }
    }
 
@@ -769,6 +803,16 @@ public class RDXHighLevelDepthSensorSimulator extends RDXPanel
 
    public void dispose()
    {
+      publishImagesRunning = false;
+      try
+      {
+         publishImagesThread.join();
+      }
+      catch (InterruptedException e)
+      {
+         e.printStackTrace();
+      }
+
       if (realtimeROS2Node != null)
          realtimeROS2Node.destroy();
       depthExecutor.destroy();

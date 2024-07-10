@@ -49,7 +49,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                                  DRCRobotModel robotModel,
                                  ROS2SyncedRobotModel syncedRobot)
    {
-      super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary));
+      super(new HandPoseActionState(id, crdtInfo, saveFileDirectory, referenceFrameLibrary, robotModel));
 
       state = getState();
       definition = getDefinition();
@@ -78,7 +78,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       if (state.getIsNextForExecution())
       {
          ChestOrientationActionState concurrentChestOrientationAction = null;
-         PelvisHeightPitchActionState concurrentPelvisHeightPitchAction = null;
+         PelvisHeightOrientationActionState concurrentPelvisHeightPitchAction = null;
 
          ActionSequenceExecutor actionSequenceExecutor = BehaviorTreeTools.findActionSequenceAncestor(this);
          if (actionSequenceExecutor != null)
@@ -93,7 +93,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                   {
                      concurrentChestOrientationAction = chestOrientationAction;
                   }
-                  if (actionChildren.get(i) instanceof PelvisHeightPitchActionState pelvisHeightPitchAction)
+                  if (actionChildren.get(i) instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
                   {
                      concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
                   }
@@ -106,7 +106,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
                {
                   concurrentChestOrientationAction = chestOrientationAction;
                }
-               if (currentlyExecutingAction.getState() instanceof PelvisHeightPitchActionState pelvisHeightPitchAction)
+               if (currentlyExecutingAction.getState() instanceof PelvisHeightOrientationActionState pelvisHeightPitchAction)
                {
                   concurrentPelvisHeightPitchAction = pelvisHeightPitchAction;
                }
@@ -312,7 +312,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
       JointspaceTrajectoryMessage jointspaceTrajectoryMessage = new JointspaceTrajectoryMessage();
       jointspaceTrajectoryMessage.getQueueingProperties().setExecutionMode(QueueableMessage.EXECUTION_MODE_OVERRIDE);
 
-      double[] jointAngles = new double[syncedRobot.getRobotModel().getJointMap().getArmJointNames(getDefinition().getSide()).length];
+      double[] jointAngles = new double[state.getNumberOfJoints()];
 
       if (definition.getUsePredefinedJointAngles())
          for (int i = 0; i < jointAngles.length; i++)

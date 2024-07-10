@@ -57,10 +57,9 @@ public class FootstepPlannerLoggerTest
       request.setAssumeFlatGround(false);
       request.setPlanBodyPath(true);
 
-      planningModule.getFootstepPlannerParameters().setMaximumStepZ(0.294);
+      planningModule.getFootstepPlannerParameters().setMaxStepZ(0.294);
       planningModule.getFootstepPlannerParameters().setYawWeight(0.17);
-      planningModule.getFootstepPlannerParameters().setMaximumStepZWhenSteppingUp(0.4);
-      planningModule.getFootstepPlannerParameters().setMaximumZPenetrationOnValleyRegions(1.0);
+      planningModule.getFootstepPlannerParameters().setMaxZPenetrationOnValleyRegions(1.0);
 
       planningModule.handleRequest(request);
 
@@ -77,7 +76,7 @@ public class FootstepPlannerLoggerTest
       // This number is arbitrary, just want to make sure things aren't slow when logging, important if re-planning in a loop
       long timeExpected = 150;
 
-      // Logging the footstep plans should not take to long, the timeExpected is arbitrary but it ensures that the logging doesn't take too long
+      // Logging the footstep plans should not take to long, the timeExpected is arbitrary, but it ensures that the logging doesn't take too long
       assertTrue(timeInMilliseconds < timeExpected, "Time taken was: " + timeInMilliseconds + ", and the time expected was " + timeExpected);
    }
 
@@ -97,10 +96,9 @@ public class FootstepPlannerLoggerTest
       request.setAssumeFlatGround(false);
       request.setPlanBodyPath(true);
 
-      planningModule.getFootstepPlannerParameters().setMaximumStepZ(0.294);
+      planningModule.getFootstepPlannerParameters().setMaxStepZ(0.294);
       planningModule.getFootstepPlannerParameters().setYawWeight(0.17);
-      planningModule.getFootstepPlannerParameters().setMaximumStepZWhenSteppingUp(0.4);
-      planningModule.getFootstepPlannerParameters().setMaximumZPenetrationOnValleyRegions(1.0);
+      planningModule.getFootstepPlannerParameters().setMaxZPenetrationOnValleyRegions(1.0);
 
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
 
@@ -123,6 +121,8 @@ public class FootstepPlannerLoggerTest
       FootstepPlannerMessageTools.copyParametersToPacket(expectedFootstepParameters, planningModule.getFootstepPlannerParameters());
       plannerOutput.setPacket(expectedOutputStatusPacket);
 
+      //TODO this test is broken because the outputStatus never sets the goal pose, but thats part of the message so it needs to be set in order for this test to pass
+      // or the goal pose needs to be changed, maybe removed because there should be a goal pose for each foot
       assertTrue(expectedRequestPacket.epsilonEquals(log.getRequestPacket(), 1e-5));
       assertTrue(expectedFootstepParameters.epsilonEquals(log.getFootstepParametersPacket(), 1e-5));
       assertTrue(expectedOutputStatusPacket.epsilonEquals(log.getStatusPacket(), 1e-5));

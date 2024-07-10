@@ -20,8 +20,6 @@ import java.util.concurrent.TimeUnit;
 
 public class PerceptionBasedContinuousHiking
 {
-   private ContinuousPlanner.PlanningMode mode = ContinuousPlanner.PlanningMode.FAST_HIKING;
-
    private final ROS2SyncedRobotModel syncedRobot;
    private final ROS2Helper ros2Helper;
    private ROS2StoredPropertySetGroup ros2PropertySetGroup;
@@ -54,7 +52,7 @@ public class PerceptionBasedContinuousHiking
                                                               syncedRobot::update);
 
       activePerceptionModule = new HumanoidActivePerceptionModule(perceptionTask.getConfigurationParameters());
-      activePerceptionModule.initializeContinuousPlannerSchedulingTask(robotModel, ros2Node, syncedRobot.getReferenceFrames(), continuousPlanningParameters, mode);
+      activePerceptionModule.initializeContinuousPlannerSchedulingTask(robotModel, ros2Node, syncedRobot.getReferenceFrames(), continuousPlanningParameters);
 
       ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.CONTINUOUS_WALKING_PARAMETERS, continuousPlanningParameters);
       ros2PropertySetGroup.registerStoredPropertySet(ContinuousWalkingAPI.FOOTSTEP_PLANNING_PARAMETERS, activePerceptionModule.getContinuousPlannerSchedulingTask().getContinuousPlanner().getFootstepPlannerParameters());

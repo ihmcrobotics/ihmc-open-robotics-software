@@ -15,7 +15,7 @@ public class PrimitiveRigidBodySceneNodeMessagePubSubType implements us.ihmc.pub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "828de5fa0c994e795b40b672de581749a22ab1251a4765bf593c43950a1a99d3";
+   		return "0bd8cbdb1c493de0ed9a6a15a5e9401e169008dc5e8900958cee3fe7d5d57463";
    }
    
    @Override

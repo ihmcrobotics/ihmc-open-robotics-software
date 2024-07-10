@@ -7,13 +7,11 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.internal.ImGui;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.bytedeco.opencv.opencv_core.Point;
 import org.bytedeco.opencv.opencv_core.Scalar;
 import perception_msgs.msg.dds.DetectedObjectPacket;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -32,12 +30,12 @@ import us.ihmc.rdx.sceneManager.RDXSceneLevel;
 import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelBuilder;
 import us.ihmc.rdx.tools.RDXModelInstance;
-import us.ihmc.rdx.ui.graphics.RDXVisualizer;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.Set;
 
-public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXVisualizer
+public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXROS2SingleTopicVisualizer<DetectedObjectPacket>
 {
    private final ROS2Topic<DetectedObjectPacket> topic;
    private final ROS2Input<DetectedObjectPacket> subscription;
@@ -62,7 +60,7 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXVisualizer
                                                      ROS2Topic<DetectedObjectPacket> topic,
                                                      RDXFocusBasedCamera camera)
    {
-      super(title + " (ROS 2)");
+      super(title);
       this.sensorFrame = sensorFrame;
       this.topic = topic;
       this.subscription = ros2Helper.subscribe(topic);
@@ -70,6 +68,12 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXVisualizer
       this.markerCoordinateFrameInstance = new RDXModelInstance(RDXModelBuilder.createCoordinateFrameInstance(0.2, Color.LIGHT_GRAY));
       this.sensorCoordinateFrameInstance = new RDXModelInstance(RDXModelBuilder.createCoordinateFrameInstance(0.4));
       this.camera = camera;
+   }
+
+   @Override
+   public void renderImGuiWidgets()
+   {
+
    }
 
    @Override
@@ -126,6 +130,8 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXVisualizer
             previousTextData.dispose();
          }
          previousTextData = text.setTextWithoutCache(objectType + " %.1f".formatted(confidence));
+
+         getFrequency().ping();
       }
 
       textPose.setToZero(camera.getCameraFrame());
@@ -136,13 +142,6 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXVisualizer
       textPose.getPosition().set(markerPose.getPosition());
 
       LibGDXTools.toLibGDX(textPose, tempTransform, text.getModelTransform());
-   }
-
-   @Override
-   public void renderImGuiWidgets()
-   {
-      super.renderImGuiWidgets();
-      ImGui.text(topic.getName());
    }
 
    @Override
@@ -181,5 +180,11 @@ public class RDXROS2DetectedObjectBoundingBoxVisualizer extends RDXVisualizer
       opencv_imgproc.line(rgba8Image, pointVertices[4], pointVertices[6], RED, 1, opencv_imgproc.LINE_8, 0);
       opencv_imgproc.line(rgba8Image, pointVertices[5], pointVertices[7], RED, 1, opencv_imgproc.LINE_8, 0);
       opencv_imgproc.line(rgba8Image, pointVertices[6], pointVertices[7], RED, 1, opencv_imgproc.LINE_8, 0);
+   }
+
+   @Override
+   public ROS2Topic<DetectedObjectPacket> getTopic()
+   {
+      return topic;
    }
 }

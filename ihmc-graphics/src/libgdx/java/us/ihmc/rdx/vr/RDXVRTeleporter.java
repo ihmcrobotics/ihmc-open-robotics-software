@@ -153,8 +153,10 @@ public class RDXVRTeleporter
           teleportIHMCZUpToIHMCZUpWorld.set(xyYawHeadsetToTeleportTransform);
           teleportIHMCZUpToIHMCZUpWorld.invert();
 
+          RigidBodyTransform cameraFramePlanarTransformToWorld = new RigidBodyTransform(robotCameraReferenceFrame.getTransformToWorldFrame());
+          cameraFramePlanarTransformToWorld.getRotation().setYawPitchRoll(cameraFramePlanarTransformToWorld.getRotation().getYaw(), 0.0, 0.0);
           // Transform teleportFrame based on camera frame
-          tempTransform.set(robotCameraReferenceFrame.getTransformToWorldFrame());
+          tempTransform.set(cameraFramePlanarTransformToWorld);
           tempTransform.transform(teleportIHMCZUpToIHMCZUpWorld);
        });
    }

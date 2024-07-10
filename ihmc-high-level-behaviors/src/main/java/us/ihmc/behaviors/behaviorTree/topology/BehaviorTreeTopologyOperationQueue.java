@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 
 /**
  * This interface just exists to provide a better name to what this is,
- * which gets passed down from BehaviorTree's modifyTree method and serves
+ * which gets passed down from BehaviorTree's modifyTreeTopology method and serves
  * to queue up tree modifications.
  * We are intentionally not checking the types in this class, because it gets
  * to complicated to use and doesn't add much value.

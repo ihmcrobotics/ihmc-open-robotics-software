@@ -15,11 +15,6 @@ public interface ContinuousHikingParametersReadOnly extends StoredPropertySetRea
       return get(enableContinuousWalking);
    }
 
-   default boolean getShortcutIsPressed()
-   {
-      return get(shortcutIsPressed);
-   }
-
    default boolean getStepPublisherEnabled()
    {
       return get(stepPublisherEnabled);
@@ -65,8 +60,18 @@ public interface ContinuousHikingParametersReadOnly extends StoredPropertySetRea
       return get(planningWithoutReferenceTimeout);
    }
 
+   default double getPercentThroughSwingToPlanTo()
+   {
+      return get(percentThroughSwingToPlanTo);
+   }
+
    default boolean getLogFootstepPlans()
    {
       return get(logFootstepPlans);
+   }
+
+   default double getNextWaypointDistanceMargin()
+   {
+      return get(nextWaypointDistanceMargin);
    }
 }

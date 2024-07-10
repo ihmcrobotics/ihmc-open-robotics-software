@@ -1,10 +1,5 @@
 package us.ihmc.rdx.vr;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import imgui.flag.ImGuiCol;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
@@ -15,13 +10,9 @@ import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.input.ImGui3DViewInput;
 import us.ihmc.rdx.input.ImGui3DViewPickResult;
 import us.ihmc.rdx.input.ImGuiMouseDragData;
-import us.ihmc.rdx.mesh.RDXMultiColorMeshBuilder;
-import us.ihmc.rdx.tools.LibGDXTools;
 import us.ihmc.rdx.tools.RDXModelInstance;
 import us.ihmc.rdx.ui.RDX3DPanel;
 import us.ihmc.rdx.ui.RDXBaseUI;
-import us.ihmc.rdx.ui.gizmo.DynamicLibGDXModel;
-import us.ihmc.rdx.ui.gizmo.RDXGizmoTools;
 import us.ihmc.robotics.interaction.SixDoFSelection;
 import us.ihmc.robotics.interaction.SphereRayIntersection;
 import us.ihmc.scs2.definition.visual.ColorDefinitions;
@@ -123,6 +114,7 @@ public class RDXVRTrackerRoleManager
       }
    }
 
+   //TODO extrapolate from this the set the trackerrolemanager role, os that it can be called
    private void renderTooltipAndContextMenu()
    {
       if (queuePopupToOpen)
@@ -181,6 +173,17 @@ public class RDXVRTrackerRoleManager
             ImGui.closeCurrentPopup();
          ImGui.endPopup();
       }
+   }
+
+   public void setActive(String roleToSet)
+   {
+      for (String role : roleActivationMap.keySet())
+      {
+         roleActivationMap.put(role, false);
+         changedColorRoleButton.put(role, false);
+      }
+      roleActivationMap.put(roleToSet, true);
+      changedColorRoleButton.put(roleToSet, true);
    }
 
    public void reset()

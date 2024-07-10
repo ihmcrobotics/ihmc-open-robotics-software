@@ -15,7 +15,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.rdx.imgui.ImGuiLabelMap;
@@ -44,7 +44,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    private ROS2SyncedRobotModel syncedRobot;
    private RobotSide currentFootStepSide;
    private RDXFootstepChecker stepChecker;
-   private FootstepPlannerParametersReadOnly footstepPlannerParameters;
+   private DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters;
    private ImGui3DViewInput latestInput;
    private RDXInteractableFootstepPlan footstepPlan;
    private boolean renderTooltip = false;
@@ -54,7 +54,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
    public void create(ROS2SyncedRobotModel syncedRobot,
                       RDXBaseUI baseUI,
                       RDXInteractableFootstepPlan footstepPlan,
-                      FootstepPlannerParametersReadOnly footstepPlannerParameters)
+                      DefaultFootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       this.syncedRobot = syncedRobot;
       this.baseUI = baseUI;
@@ -253,7 +253,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
       placeFootstep();
    }
 
-   public void checkAndPlaceFootstep()
+   public boolean checkAndPlaceFootstep()
    {
       // This allows us to check the current footstep being placed and flash that footstep if its unreasonable
       FramePose3DReadOnly candidateStepPose = getFootstepBeingPlacedPoseORLastFootstepPose();
@@ -269,10 +269,12 @@ public class RDXManualFootstepPlacement implements RenderableProvider
          // If safe to place footstep
          RDXInteractableFootstep addedStep = footstepPlan.getNextFootstep();
          addedStep.copyFrom(baseUI, footstepBeingPlaced);
+         return true;
       }
       else
       {
          LogTools.info("Footstep Rejected, unfeasible");
+         return false;
       }
    }
 
@@ -383,7 +385,7 @@ public class RDXManualFootstepPlacement implements RenderableProvider
                                                                              footstepPlan.getNumberOfFootsteps(),
                                                                              footstepBeingPlaced.getFootstepSide()));
 
-      boolean isReachable = footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose) < MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaximumStepReach();
+      boolean isReachable = footstepBeingPlaced.getFootPose().getPositionDistance(previousFootstepPose) < MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepReach();
       isReachable &= footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() < MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepZ();
       isReachable &= footstepBeingPlaced.getFootPose().getZ() - previousFootstepPose.getZ() > -MAX_DISTANCE_MULTIPLIER * footstepPlannerParameters.getMaxStepZ();
 

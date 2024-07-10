@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule;
 
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
 import us.ihmc.robotics.stateMachine.core.State;
 
 public class KSTSleepState implements State
@@ -25,7 +26,7 @@ public class KSTSleepState implements State
    {
       if (!ikController.hasBeenInitialized())
       {
-         tools.getCommandInputManager().clearAllCommands();
+         tools.getCommandInputManager().clearCommands(KinematicsStreamingToolboxInputCommand.class);
          ikController.update();
       }
    }

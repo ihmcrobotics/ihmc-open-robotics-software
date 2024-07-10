@@ -2,9 +2,6 @@ package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import perception_msgs.msg.dds.HeightMapMessage;
-import rosgraph_msgs.Log;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -14,7 +11,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerEnvironmentHandler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
@@ -22,15 +18,12 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverter;
-import us.ihmc.footstepPlanning.tools.PlanarRegionToHeightMapConverterTest;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
@@ -60,7 +53,7 @@ public class HeightMapFootstepCheckerTest
    @Test
    public void testSwingingThroughObstacle0()
    {
-      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
 
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.translate(-0.5, 0.5, 0.5);
@@ -142,7 +135,7 @@ public class HeightMapFootstepCheckerTest
    @Test
    public void testSwingingThroughObstacle1()
    {
-      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       double bodyGroundClearance = parameters.getBodyBoxBaseZ();
 
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
@@ -226,7 +219,7 @@ public class HeightMapFootstepCheckerTest
    {
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       FootstepSnapAndWiggler snapper = new TestSnapper(environmentHandler);
-      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, environmentHandler, snapper, null, registry);
 
       // the checker should check for limits in z-height, pitch, and roll.
@@ -247,7 +240,7 @@ public class HeightMapFootstepCheckerTest
    {
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       FootstepSnapAndWiggler snapper = new TestSnapper(environmentHandler);
-      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, environmentHandler, snapper, null, registry);
 
       DiscreteFootstep step0 = new DiscreteFootstep(0.0, -0.3, 0.0, RobotSide.RIGHT);
@@ -263,7 +256,7 @@ public class HeightMapFootstepCheckerTest
    public void testNodesOnSameSides()
    {
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
-      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, environmentHandler, new TestSnapper(environmentHandler), null, registry);
       DiscreteFootstep leftNode0 = new DiscreteFootstep(0.0, 0.0, 0.0, RobotSide.LEFT);
       DiscreteFootstep leftNode1 = new DiscreteFootstep(5.0, 0.0, 2.0, RobotSide.LEFT);
@@ -281,7 +274,7 @@ public class HeightMapFootstepCheckerTest
    @Test
    public void testTooHighNode()
    {
-      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters()
+      DefaultFootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters()
       {
          @Override
          public double getMaxStepZ()
@@ -332,7 +325,7 @@ public class HeightMapFootstepCheckerTest
    @Test
    public void testTooSmallFoothold()
    {
-      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
+      DefaultFootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       FootstepPlannerEnvironmentHandler environmentHandler = new FootstepPlannerEnvironmentHandler();
       FootstepSnapAndWiggler snapper = new TestSnapper(environmentHandler);
       HeightMapFootstepChecker checker = new HeightMapFootstepChecker(parameters, footPolygons, environmentHandler, snapper, null, registry);
@@ -345,7 +338,7 @@ public class HeightMapFootstepCheckerTest
       checker.setHeightMapData(heightMapData);
       environmentHandler.setHeightMap(heightMapData);
 
-      double minFoothold = parameters.getMinimumFootholdPercent();
+      double minFoothold = parameters.getMinFootholdPercent();
 
       DiscreteFootstep step0 = new DiscreteFootstep(0.0, 0.0, 0.0, RobotSide.LEFT);
       DiscreteFootstep step1 = new DiscreteFootstep(0.0, -0.2, 0.0, RobotSide.RIGHT);
@@ -386,11 +379,11 @@ public class HeightMapFootstepCheckerTest
    @Test
    public void testSnappingToIncline()
    {
-      FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters()
+      DefaultFootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters()
       {
          // don't use 45
          @Override
-         public double getMinimumSurfaceInclineRadians()
+         public double getMinSurfaceIncline()
          {
             return Math.toRadians(37.0);
          }
@@ -410,11 +403,11 @@ public class HeightMapFootstepCheckerTest
    @Test
    public void testSnapAndWiggleOnIncline()
    {
-      FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters()
+      DefaultFootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters()
       {
          // don't use 45
          @Override
-         public double getMinimumSurfaceInclineRadians()
+         public double getMinSurfaceIncline()
          {
             return Math.toRadians(37.0);
          }
@@ -431,7 +424,7 @@ public class HeightMapFootstepCheckerTest
       testSnappingToInclinedPlane(parameters, snapper, environmentHandler);
    }
 
-   public void testSnappingToInclinedPlane(FootstepPlannerParametersBasics parameters, FootstepSnapAndWiggler snapper, FootstepPlannerEnvironmentHandler environmentHandler)
+   public void testSnappingToInclinedPlane(DefaultFootstepPlannerParametersBasics parameters, FootstepSnapAndWiggler snapper, FootstepPlannerEnvironmentHandler environmentHandler)
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       ConvexPolygon2D polygon = new ConvexPolygon2D();
@@ -471,7 +464,7 @@ public class HeightMapFootstepCheckerTest
       double rotationAngle;
 
       // test a bunch of independent roll/pitch valid angles
-      for (rotationAngle = -parameters.getMinimumSurfaceInclineRadians() + barelyTooSteepEpsilon; rotationAngle < parameters.getMinimumSurfaceInclineRadians() - barelyTooSteepEpsilon; rotationAngle += 0.001)
+      for (rotationAngle = -parameters.getMinSurfaceIncline() + barelyTooSteepEpsilon; rotationAngle < parameters.getMinSurfaceIncline() - barelyTooSteepEpsilon; rotationAngle += 0.001)
       {
          transformToWorld.setIdentity();
          transformToWorld.appendRollRotation(rotationAngle);
@@ -497,7 +490,7 @@ public class HeightMapFootstepCheckerTest
       }
 
       // This should be false, as
-      for (rotationAngle = parameters.getMinimumSurfaceInclineRadians() + 0.001; rotationAngle < Math.toRadians(75); rotationAngle += 0.001)
+      for (rotationAngle = parameters.getMinSurfaceIncline() + 0.001; rotationAngle < Math.toRadians(75); rotationAngle += 0.001)
       {
          transformToWorld.setIdentity();
          transformToWorld.appendRollRotation(rotationAngle);
@@ -526,7 +519,7 @@ public class HeightMapFootstepCheckerTest
 //         assertEquals("rotation = " + rotationAngle, BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP, registry.getRejectionReason());
       }
 
-      for (rotationAngle = -Math.toRadians(75); rotationAngle < -parameters.getMinimumSurfaceInclineRadians(); rotationAngle += 0.001)
+      for (rotationAngle = -Math.toRadians(75); rotationAngle < -parameters.getMinSurfaceIncline(); rotationAngle += 0.001)
       {
          transformToWorld.setIdentity();
          transformToWorld.appendRollRotation(rotationAngle);
@@ -577,15 +570,15 @@ public class HeightMapFootstepCheckerTest
 
          double angleFromFlat = vertical.angle(normal);
 
-         if (Math.abs(angleFromFlat) > parameters.getMinimumSurfaceInclineRadians())
+         if (Math.abs(angleFromFlat) > parameters.getMinSurfaceIncline())
          {
-            String message = "actual rotation = " + angleFromFlat + ", allowed rotation = " + parameters.getMinimumSurfaceInclineRadians();
+            String message = "actual rotation = " + angleFromFlat + ", allowed rotation = " + parameters.getMinSurfaceIncline();
             assertFalse(nodeChecker.isStepValid(step2, step1, step0), message);
 //            boolean correctRejection = BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP == registry.getRejectionReason() ||
 //                                       BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP == registry.getRejectionReason();
 //            assertTrue(message, correctRejection);
          }
-         else if (Math.abs(angleFromFlat) < parameters.getMinimumSurfaceInclineRadians() - barelyTooSteepEpsilon)
+         else if (Math.abs(angleFromFlat) < parameters.getMinSurfaceIncline() - barelyTooSteepEpsilon)
          {
             assertTrue(nodeChecker.isStepValid(step2, step1, step0));
             //            assertEquals(null, registry.getRejectionReason());
@@ -606,10 +599,10 @@ public class HeightMapFootstepCheckerTest
       footstepPlannerParameters.setWiggleInsideDeltaTarget(wiggleTarget);
 
       double maxXYWiggle = 0.1;
-      footstepPlannerParameters.setMaximumXYWiggleDistance(maxXYWiggle);
+      footstepPlannerParameters.setMaxXYWiggleDistance(maxXYWiggle);
 
       double maxYawWiggle = 0.7;
-      footstepPlannerParameters.setMaximumYawWiggle(maxYawWiggle);
+      footstepPlannerParameters.setMaxYawWiggle(maxYawWiggle);
 
       double footLength = 0.2;
       double footWidth = 0.1;

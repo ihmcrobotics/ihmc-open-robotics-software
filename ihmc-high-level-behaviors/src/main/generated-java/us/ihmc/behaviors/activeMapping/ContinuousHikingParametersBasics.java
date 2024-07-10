@@ -13,11 +13,6 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
       set(ContinuousHikingParameters.enableContinuousWalking, enableContinuousWalking);
    }
 
-   default void setShortcutIsPressed(boolean shortcutIsPressed)
-   {
-      set(ContinuousHikingParameters.shortcutIsPressed, shortcutIsPressed);
-   }
-
    default void setStepPublisherEnabled(boolean stepPublisherEnabled)
    {
       set(ContinuousHikingParameters.stepPublisherEnabled, stepPublisherEnabled);
@@ -63,8 +58,18 @@ public interface ContinuousHikingParametersBasics extends ContinuousHikingParame
       set(ContinuousHikingParameters.planningWithoutReferenceTimeout, planningWithoutReferenceTimeout);
    }
 
+   default void setPercentThroughSwingToPlanTo(double percentThroughSwingToPlanTo)
+   {
+      set(ContinuousHikingParameters.percentThroughSwingToPlanTo, percentThroughSwingToPlanTo);
+   }
+
    default void setLogFootstepPlans(boolean logFootstepPlans)
    {
       set(ContinuousHikingParameters.logFootstepPlans, logFootstepPlans);
+   }
+
+   default void setNextWaypointDistanceMargin(double nextWaypointDistanceMargin)
+   {
+      set(ContinuousHikingParameters.nextWaypointDistanceMargin, nextWaypointDistanceMargin);
    }
 }

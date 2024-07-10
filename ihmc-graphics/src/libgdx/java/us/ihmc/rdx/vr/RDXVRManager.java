@@ -24,6 +24,7 @@ import us.ihmc.tools.time.FrequencyCalculator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class RDXVRManager
@@ -151,6 +152,7 @@ public class RDXVRManager
                // pollEventsFrequencyCalculator.ping();
                context.pollEvents(); // FIXME: Potential bug is that the poses get updated in the above thread while they're being used in here
 
+               // A tracker has disconnected
                List<String> removedTrackersSerialNumbers = context.getRemovedTrackersSerialNumbers();
                for (String removedSerialNumber : removedTrackersSerialNumbers)
                {
@@ -169,17 +171,39 @@ public class RDXVRManager
                   context.getTrackers().remove(removedSerialNumber);
                   LogTools.warn("Tracker {} removed", removedSerialNumber);
                }
+
+               // A new tracker has been detected
                List<String> newTrackersSerialNumbers = context.getNewTrackersSerialNumbers();
                for (String newSerialNumber : newTrackersSerialNumbers)
                {
                   trackerRoleManagers.add(new RDXVRTrackerRoleManager(context, context.getTrackers().get(newSerialNumber)));
                }
+
+               // A reset of roles has been triggered from the UI
                if (context.getRolesResetNotification().poll())
                {
                   for (var trackerRoleManager : trackerRoleManagers)
                   {
                      trackerRoleManager.reset();
                   }
+               }
+
+               // A loading of preset roles has been triggered from the UI
+               if (context.getLoadingRolesNotification().poll())
+               {
+                  var trackerRoleMap = context.getTrackersRoleMap();
+                  for (var trackerRole : trackerRoleMap.entrySet())
+                  {
+                     for (var trackerRoleManager : trackerRoleManagers)
+                     {
+                        // if serial numbers match
+                        if (trackerRole.getValue().equals(trackerRoleManager.getTrackerSerialNumber()))
+                        {
+                           trackerRoleManager.setActive(trackerRole.getKey());
+                        }
+                     }
+                  }
+                  LogTools.info("Loaded roles");
                }
             }
          }
@@ -373,5 +397,10 @@ public class RDXVRManager
    public RDXVRTeleporter getTeleporter()
    {
       return teleporter;
+   }
+
+   public List<RDXVRTrackerRoleManager> getTrackerRoleManagers()
+   {
+      return trackerRoleManagers;
    }
 }

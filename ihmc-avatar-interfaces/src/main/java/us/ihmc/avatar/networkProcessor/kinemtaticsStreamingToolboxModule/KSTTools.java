@@ -796,15 +796,36 @@ public class KSTTools
     */
    public static double computeJointMinAcceleration(double qMin, double q, double qDot, double dt)
    {
-      if (!Double.isInfinite(qMin))
-      {
-         double qDotMin = (qMin - q) / dt;
-         return 2.0 * (qDotMin - qDot) / dt;
-      }
+      return computeJointMinAcceleration(qMin, Double.NEGATIVE_INFINITY, q, qDot, dt);
+   }
+
+   /**
+    * Computes the minimum acceleration that can be applied to the joint to reach the minimum joint position limit.
+    *
+    * @param qMin    the minimum joint position limit.
+    * @param qDotMin the minimum joint velocity limit.
+    * @param q       the current joint position.
+    * @param qDot    the current joint velocity.
+    * @param dt      the time step.
+    * @return the minimum acceleration that can be applied to the joint to reach the minimum joint position limit.
+    */
+   public static double computeJointMinAcceleration(double qMin, double qDotMin, double q, double qDot, double dt)
+   {
+      double qDotMinPositionLimit;
+      if (Double.isFinite(qMin))
+         qDotMinPositionLimit = (qMin - q) / dt;
       else
-      {
+         qDotMinPositionLimit = Double.NEGATIVE_INFINITY;
+
+      if (Double.isFinite(qDotMin))
+         qDotMin = Math.max(qDotMin, qDotMinPositionLimit);
+      else
+         qDotMin = qDotMinPositionLimit;
+
+      if (Double.isFinite(qDotMin))
+         return 2.0 * (qDotMin - qDot) / dt;
+      else
          return Double.NEGATIVE_INFINITY;
-      }
    }
 
    /**
@@ -818,14 +839,35 @@ public class KSTTools
     */
    public static double computeJointMaxAcceleration(double qMax, double q, double qDot, double dt)
    {
-      if (!Double.isInfinite(qMax))
-      {
-         double qDotMax = (qMax - q) / dt;
-         return 2.0 * (qDotMax - qDot) / dt;
-      }
+      return computeJointMaxAcceleration(qMax, Double.POSITIVE_INFINITY, q, qDot, dt);
+   }
+
+   /**
+    * Computes the maximum acceleration that can be applied to the joint to reach the maximum joint position limit.
+    *
+    * @param qMax    the maximum joint position limit.
+    * @param qDotMax the maximum joint velocity limit.
+    * @param q       the current joint position.
+    * @param qDot    the current joint velocity.
+    * @param dt      the time step.
+    * @return the maximum acceleration that can be applied to the joint to reach the maximum joint position limit.
+    */
+   public static double computeJointMaxAcceleration(double qMax, double qDotMax, double q, double qDot, double dt)
+   {
+      double qDotMaxPositionLimit;
+      if (Double.isFinite(qMax))
+         qDotMaxPositionLimit = (qMax - q) / dt;
       else
-      {
+         qDotMaxPositionLimit = Double.POSITIVE_INFINITY;
+
+      if (Double.isFinite(qDotMax))
+         qDotMax = Math.min(qDotMax, qDotMaxPositionLimit);
+      else
+         qDotMax = qDotMaxPositionLimit;
+
+      if (Double.isFinite(qDotMax))
+         return 2.0 * (qDotMax - qDot) / dt;
+      else
          return Double.POSITIVE_INFINITY;
-      }
    }
 }

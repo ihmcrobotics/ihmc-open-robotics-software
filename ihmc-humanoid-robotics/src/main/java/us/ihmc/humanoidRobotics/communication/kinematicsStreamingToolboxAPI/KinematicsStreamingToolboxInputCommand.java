@@ -182,6 +182,14 @@ public class KinematicsStreamingToolboxInputCommand implements Command<Kinematic
    @Override
    public boolean isCommandValid()
    {
+      for (int i = 0; i < inputs.size(); i++)
+      {
+         if (!inputs.get(i).isCommandValid())
+            return false;
+      }
+      if (useCenterOfMassInput && !centerOfMassInput.isCommandValid())
+         return false;
+
       return true;
    }
 

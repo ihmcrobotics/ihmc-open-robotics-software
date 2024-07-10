@@ -262,7 +262,8 @@ public class WalkingCommandConsumer
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(HeadHybridJointspaceTaskspaceTrajectoryCommand.class))
       {
-         HeadHybridJointspaceTaskspaceTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(HeadHybridJointspaceTaskspaceTrajectoryCommand.class);
+         HeadHybridJointspaceTaskspaceTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(
+               HeadHybridJointspaceTaskspaceTrajectoryCommand.class);
          SO3TrajectoryControllerCommand taskspaceTrajectoryCommand = command.getTaskspaceTrajectoryCommand();
          JointspaceTrajectoryCommand jointspaceTrajectoryCommand = command.getJointspaceTrajectoryCommand();
          taskspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
@@ -271,46 +272,52 @@ public class WalkingCommandConsumer
       }
    }
 
-   public void consumeChestCommands()
+   public void consumeChestCommands(WalkingState currentState, boolean allowMotionRegardlessOfState)
    {
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(ChestTrajectoryCommand.class))
       {
          ChestTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(ChestTrajectoryCommand.class);
          SO3TrajectoryControllerCommand so3Trajectory = command.getSO3Trajectory();
          so3Trajectory.setSequenceId(command.getSequenceId());
-         chestManager.handleTaskspaceTrajectoryCommand(so3Trajectory);
+         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
+            chestManager.handleTaskspaceTrajectoryCommand(so3Trajectory);
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(SpineTrajectoryCommand.class))
       {
          SpineTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(SpineTrajectoryCommand.class);
          JointspaceTrajectoryCommand jointspaceTrajectory = command.getJointspaceTrajectory();
          jointspaceTrajectory.setSequenceId(command.getSequenceId());
-         chestManager.handleJointspaceTrajectoryCommand(jointspaceTrajectory);
+         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
+            chestManager.handleJointspaceTrajectoryCommand(jointspaceTrajectory);
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(SpineDesiredAccelerationsCommand.class))
       {
          SpineDesiredAccelerationsCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(SpineDesiredAccelerationsCommand.class);
          DesiredAccelerationsCommand desiredAccelerations = command.getDesiredAccelerations();
          desiredAccelerations.setSequenceId(command.getSequenceId());
-         chestManager.handleDesiredAccelerationsCommand(desiredAccelerations);
+         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
+            chestManager.handleDesiredAccelerationsCommand(desiredAccelerations);
       }
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(ChestHybridJointspaceTaskspaceTrajectoryCommand.class))
       {
-         ChestHybridJointspaceTaskspaceTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(ChestHybridJointspaceTaskspaceTrajectoryCommand.class);
+         ChestHybridJointspaceTaskspaceTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(
+               ChestHybridJointspaceTaskspaceTrajectoryCommand.class);
          SO3TrajectoryControllerCommand taskspaceTrajectoryCommand = command.getTaskspaceTrajectoryCommand();
          JointspaceTrajectoryCommand jointspaceTrajectoryCommand = command.getJointspaceTrajectoryCommand();
          taskspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
          jointspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
-         chestManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand);
+         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
+            chestManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand);
       }
    }
 
-   public void consumePelvisHeightCommands()
+   public void consumePelvisHeightCommands(WalkingState currentState, boolean allowMotionRegardlessOfState)
    {
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PelvisHeightTrajectoryCommand.class))
       {
          PelvisHeightTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(PelvisHeightTrajectoryCommand.class);
-         comHeightManager.handlePelvisHeightTrajectoryCommand(command);
+         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
+            comHeightManager.handlePelvisHeightTrajectoryCommand(command);
       }
    }
 
@@ -388,7 +395,8 @@ public class WalkingCommandConsumer
       List<HandWrenchTrajectoryCommand> handWrenchTrajectoryCommands = commandConsumerWithDelayBuffers.pollNewCommands(HandWrenchTrajectoryCommand.class);
       List<ArmTrajectoryCommand> armTrajectoryCommands = commandConsumerWithDelayBuffers.pollNewCommands(ArmTrajectoryCommand.class);
       List<ArmDesiredAccelerationsCommand> armDesiredAccelerationCommands = commandConsumerWithDelayBuffers.pollNewCommands(ArmDesiredAccelerationsCommand.class);
-      List<HandHybridJointspaceTaskspaceTrajectoryCommand> handHybridCommands = commandConsumerWithDelayBuffers.pollNewCommands(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
+      List<HandHybridJointspaceTaskspaceTrajectoryCommand> handHybridCommands = commandConsumerWithDelayBuffers.pollNewCommands(
+            HandHybridJointspaceTaskspaceTrajectoryCommand.class);
 
       boolean allowCommand = allowMotionRegardlessOfState || currentState.isStateSafeToConsumeManipulationCommands();
 
@@ -528,7 +536,8 @@ public class WalkingCommandConsumer
          {
             if (command.getLoad())
             {
-               handManagers.get(robotSide).load(command.getCoefficientOfFriction(), command.getContactPointInBodyFrame(), command.getContactNormalInWorldFrame());
+               handManagers.get(robotSide)
+                           .load(command.getCoefficientOfFriction(), command.getContactPointInBodyFrame(), command.getContactNormalInWorldFrame());
             }
             else
             {

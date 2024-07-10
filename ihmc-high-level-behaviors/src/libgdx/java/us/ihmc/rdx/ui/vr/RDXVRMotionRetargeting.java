@@ -139,7 +139,7 @@ public class RDXVRMotionRetargeting
          newPelvisFramePose.set(combinedTransformToWorld);
          // Zero roll orientation variation as it can lead to very unnatural motions (at least when in double support)
          newPelvisFramePose.changeFrame(initialPelvisFrame);
-         newPelvisFramePose.getRotation().setYawPitchRoll(newPelvisFramePose.getRotation().getYaw(), newPelvisFramePose.getRotation().getPitch(),0.0);
+         newPelvisFramePose.getRotation().setYawPitchRoll(newPelvisFramePose.getRotation().getYaw(), 0.0,0.0);
          newPelvisFramePose.changeFrame(ReferenceFrame.getWorldFrame());
          scaledPelvisFrame.update();
 

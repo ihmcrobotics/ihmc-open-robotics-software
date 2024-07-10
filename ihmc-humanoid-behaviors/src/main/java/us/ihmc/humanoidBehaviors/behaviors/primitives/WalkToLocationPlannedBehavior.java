@@ -9,7 +9,7 @@ import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationPlannedBehavior.WalkToLocationStates;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
@@ -51,7 +51,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    private boolean assumeFlatGround = true;
 
    public WalkToLocationPlannedBehavior(String robotName, ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-                                        WalkingControllerParameters walkingControllerParameters, FootstepPlannerParametersBasics footstepPlannerParameters,
+                                        WalkingControllerParameters walkingControllerParameters, DefaultFootstepPlannerParametersBasics footstepPlannerParameters,
                                         YoDouble yoTime)
    {
       super(robotName, "WalkToLocationBehavior", WalkToLocationStates.class, yoTime, ros2Node);
