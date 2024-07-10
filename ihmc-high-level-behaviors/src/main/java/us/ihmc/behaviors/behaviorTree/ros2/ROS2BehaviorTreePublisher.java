@@ -35,6 +35,8 @@ public class ROS2BehaviorTreePublisher
       }
 
       ros2PublishSubscribeAPI.publish(topic, behaviorTreeMessage);
+
+      behaviorTreeMessage.setSequenceId(behaviorTreeMessage.getSequenceId() + 1);
    }
 
    private void packTreeToMessage(BehaviorTreeNodeState behaviorTreeNode)

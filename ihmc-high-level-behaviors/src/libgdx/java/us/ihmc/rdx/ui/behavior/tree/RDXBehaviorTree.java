@@ -160,6 +160,7 @@ public class RDXBehaviorTree
    public void renderImGuiWidgets()
    {
       renderImGuiWidgetsPre();
+      ImGui.endMenuBar();
       renderImGuiWidgetsPost();
    }
 
@@ -171,8 +172,6 @@ public class RDXBehaviorTree
 
    protected void renderImGuiWidgetsPost()
    {
-      ImGui.endMenuBar();
-
       if (rootNode != null)
       {
          rootNode.renderExecutionControlAndProgressWidgets();

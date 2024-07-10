@@ -6,6 +6,7 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetectionResults;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerDetector;
 import us.ihmc.perception.opencv.OpenCVArUcoMarkerROS2Publisher;
+import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneObjectDefinitions;
 import us.ihmc.perception.sceneGraph.arUco.ArUcoSceneTools;
 import us.ihmc.perception.sceneGraph.ros2.ROS2SceneGraph;
@@ -44,7 +45,8 @@ public class RDXSceneGraphDemo
    private RDXSceneGraphUI sceneGraphUI;
    private RDXOpenCVArUcoMarkerDetectionUI openCVArUcoMarkerDetectionUI;
    /** Simulate an update rate more similar to what it would be on the robot. */
-   private final Throttler perceptionThottler = new Throttler().setFrequency(30.0);
+   private final Throttler perceptionThottler = new Throttler().setFrequency(SceneGraph.UPDATE_FREQUENCY);
+   private long sceneGraphUpdateIndex = 0;
 
    public RDXSceneGraphDemo()
    {
@@ -129,10 +131,14 @@ public class RDXSceneGraphDemo
             {
                arUcoMarkerPublisher.update();
 
-               onRobotSceneGraph.updateSubscription();
+               if (sceneGraphUpdateIndex % 2 == 0)
+                  onRobotSceneGraph.updateSubscription();
                ArUcoSceneTools.updateSceneGraph(arUcoMarkerDetectionResults, simulatedCamera.getSensorFrame(), onRobotSceneGraph);
                onRobotSceneGraph.updateOnRobotOnly(sensorPoseGizmo.getGizmoFrame());
-               onRobotSceneGraph.updatePublication();
+               if (sceneGraphUpdateIndex % 2 == 0)
+                  onRobotSceneGraph.updatePublication();
+
+               ++sceneGraphUpdateIndex;
             }
 
             sceneGraphUI.update();
