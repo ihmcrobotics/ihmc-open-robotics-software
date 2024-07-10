@@ -16,28 +16,31 @@ public class SplitFractionTools
 
    private static double combineTwoShifts(double desiredShift, double currentShift, double nominalShift)
    {
+      //clamping input values, incase we get negative values
+      desiredShift = clamp(desiredShift, 0.0, 1);
+      currentShift = clamp(currentShift, 0.0, 1);
+      nominalShift = clamp(nominalShift, 0.0, 1);
+
       if (currentShift == -1.0)
          return desiredShift;
 
       //transfer = desired, default = nominal
-
-      // TODO apply some clamps on the shifts
 
       if (desiredShift > nominalShift)
       {
          double desiredPercentShiftForward = (desiredShift - nominalShift) / (1.0 - nominalShift);
          double desiredShiftForward = desiredPercentShiftForward * (1.0 - currentShift);
 
-         // TODO clamp the output
-         return clamp ((currentShift + desiredShiftForward),0.01,0.99);
+         //clamping the output to stay within bounds
+         return clamp((currentShift + desiredShiftForward), 0.00001, 0.99999);
       }
       else
       {
          double desiredPercentShiftBackward = (nominalShift - desiredShift) / nominalShift;
          double desiredShiftBackward = desiredPercentShiftBackward * currentShift;
 
-         // TODO clamp the output
-         return clamp((currentShift - desiredShiftBackward),0.01,0.99);
+         //clamping the output to stay within bounds
+         return clamp((currentShift - desiredShiftBackward), 0.00001, 0.99999);
       }
    }
 }
