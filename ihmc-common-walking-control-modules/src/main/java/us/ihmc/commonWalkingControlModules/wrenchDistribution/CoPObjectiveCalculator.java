@@ -1,9 +1,11 @@
+
 package us.ihmc.commonWalkingControlModules.wrenchDistribution;
 
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.matrixlib.NativeMatrix;
 
 public class CoPObjectiveCalculator
 {
@@ -26,13 +28,19 @@ public class CoPObjectiveCalculator
       int tauYIndex = 1;
       CommonOps_DDRM.extractRow(wrenchJacobianInPlaneFrame, tauYIndex, singleCopRow);
       CommonOps_DDRM.add(desiredCoPInPlaneFrame.getX(), fzRow, 1.0, singleCopRow, singleCopRow);
-      CommonOps_DDRM.insert(singleCopRow, jacobianToPack, 0, 0);
+      if (jacobianToPack instanceof NativeMatrix jacobian)
+         jacobian.insert(singleCopRow, 0, 0);
+      else
+         CommonOps_DDRM.insert(singleCopRow, jacobianToPack, 0, 0);
 
       // [y_cop * J_fz - J_tx] * rho == 0
       int tauXIndex = 0;
       CommonOps_DDRM.extractRow(wrenchJacobianInPlaneFrame, tauXIndex, singleCopRow);
       CommonOps_DDRM.add(desiredCoPInPlaneFrame.getY(), fzRow, -1.0, singleCopRow, singleCopRow);
-      CommonOps_DDRM.insert(singleCopRow, jacobianToPack, 1, 0);
+      if (jacobianToPack instanceof NativeMatrix jacobian)
+         jacobian.insert(singleCopRow, 1, 0);
+      else
+         CommonOps_DDRM.insert(singleCopRow, jacobianToPack, 1, 0);
 
       objectiveToPack.zero();
    }
