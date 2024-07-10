@@ -1,14 +1,96 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation;
 
+import javafx.util.Pair;
 import org.junit.jupiter.api.Test;
-
-import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SplitFractionToolsTest
 {
    private static final double epsilon = 1e-8;
+   private double nominalShift = 0.0;
+   private double currentSplitFraction = 0.0;
+   private double desiredShift = 0.0;
+   private double actualSplitFraction = 0.0;
+   private double expectedForwardShift = 0.0;
+   private double expectedBackwardShift = 0.0;
+
+   public void calculateValues()
+   {
+      double percentShift = 0.0;
+      if (desiredShift > nominalShift)
+      {
+         percentShift = Math.abs(desiredShift - nominalShift) / (1 - nominalShift);
+      }
+      else
+      {
+         percentShift = Math.abs(desiredShift - nominalShift) / nominalShift;
+      }
+
+      actualSplitFraction = SplitFractionTools.appendSplitFraction(desiredShift, currentSplitFraction, nominalShift);
+      double expectedForwardShiftedSplitFraction = percentShift * (1 - currentSplitFraction);
+      double expectedBackwardShiftedSplitFraction = percentShift * currentSplitFraction;
+      expectedForwardShift = currentSplitFraction + expectedForwardShiftedSplitFraction;
+      expectedBackwardShift = currentSplitFraction - expectedBackwardShiftedSplitFraction;
+   }
+
+   @Test
+   public void testEqual()
+   {
+      nominalShift = 0.5;
+      currentSplitFraction = 0.5;
+      desiredShift = 0.5;
+      calculateValues();
+      assertEquals(expectedForwardShift, actualSplitFraction, epsilon);
+   }
+
+   @Test
+   public void testForward()
+   {
+      nominalShift = 0.5;
+      currentSplitFraction = 0.5;
+      desiredShift = 0.7;
+      calculateValues();
+      assertEquals(expectedForwardShift, actualSplitFraction, epsilon);
+   }
+
+   @Test
+   public void testBackward()
+   {
+      nominalShift = 0.7;
+      currentSplitFraction = 0.5;
+      desiredShift = 0.3;
+      calculateValues();
+      assertEquals(expectedBackwardShift, actualSplitFraction, epsilon);
+   }
+
+   @Test
+   public void testNegative()
+   {
+      nominalShift = -0.7;
+      currentSplitFraction = -0.5;
+      desiredShift = -0.3;
+      calculateValues();
+      assertEquals(expectedBackwardShift, actualSplitFraction, epsilon);
+   }
+
+   @Test
+   public void testRandom()
+   {
+      nominalShift = Math.random();
+      currentSplitFraction = Math.random();
+      desiredShift = Math.random();
+      System.out.printf("Values: %.2f, %.2f, %.2f\n", nominalShift, currentSplitFraction, desiredShift);
+      calculateValues();
+      if (desiredShift > nominalShift)
+      {
+         assertEquals(expectedForwardShift, actualSplitFraction, epsilon);
+      }
+      else
+      {
+         assertEquals(expectedBackwardShift, actualSplitFraction, epsilon);
+      }
+   }
    @Test
    public void testValuesStayInBounds()
    {
@@ -70,3 +152,5 @@ public class SplitFractionToolsTest
       // TODO tell it to try and do negative shifts
    }
 }
+
+

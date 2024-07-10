@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation;
 
+import static us.ihmc.commons.MathTools.clamp;
+
 public class SplitFractionTools
 {
    public static double appendSplitFraction(double desiredSplitFraction, double currentSplitFraction, double nominalSplitFraction)
@@ -17,6 +19,8 @@ public class SplitFractionTools
       if (currentShift == -1.0)
          return desiredShift;
 
+      //transfer = desired, default = nominal
+
       // TODO apply some clamps on the shifts
 
       if (desiredShift > nominalShift)
@@ -25,7 +29,7 @@ public class SplitFractionTools
          double desiredShiftForward = desiredPercentShiftForward * (1.0 - currentShift);
 
          // TODO clamp the output
-         return currentShift + desiredShiftForward;
+         return clamp ((currentShift + desiredShiftForward),0.01,0.99);
       }
       else
       {
@@ -33,7 +37,7 @@ public class SplitFractionTools
          double desiredShiftBackward = desiredPercentShiftBackward * currentShift;
 
          // TODO clamp the output
-         return currentShift - desiredShiftBackward;
+         return clamp((currentShift - desiredShiftBackward),0.01,0.99);
       }
    }
 }
