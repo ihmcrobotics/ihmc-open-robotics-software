@@ -5,6 +5,7 @@ import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.modification.SceneGraphNodeAddition;
 import us.ihmc.perception.sceneGraph.rigidBody.PredefinedRigidBodySceneNode;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
@@ -63,7 +64,10 @@ public final class DoorNodeTools
       return false;
    }
 
-   public static SceneNode addOpeningMechanismHelperNode(DoorNode doorNode, DoorOpeningMechanism openingMechanism, SceneGraph sceneGraph)
+   public static SceneNode addOpeningMechanismHelperNode(DoorNode doorNode,
+                                                         DoorOpeningMechanism openingMechanism,
+                                                         SceneGraph sceneGraph,
+                                                         SceneGraphModificationQueue modificationQueue)
    {
       String visualModelPath = DOOR_LEVER_HANDLE_VISUAL_MODEL_FILE_PATH;
       RigidBodyTransform modelToPoseTransform = new RigidBodyTransform();
@@ -100,7 +104,7 @@ public final class DoorNodeTools
                                                                   visualModelPath,
                                                                   modelToPoseTransform,
                                                                   sceneGraph.getCRDTInfo());
-      sceneGraph.modifyTree(modificationQueue -> modificationQueue.accept(new SceneGraphNodeAddition(doorHelperNode, sceneGraph.getRootNode())));
+      modificationQueue.accept(new SceneGraphNodeAddition(doorHelperNode, sceneGraph.getRootNode()));
       return doorHelperNode;
    }
 }

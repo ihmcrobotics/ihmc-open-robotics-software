@@ -11,6 +11,7 @@ import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 
 public class CenterposeNode extends DetectableSceneNode
 {
@@ -67,9 +68,9 @@ public class CenterposeNode extends DetectableSceneNode
    }
 
    @Override
-   public void update(SceneGraph sceneGraph)
+   public void update(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
-      super.update(sceneGraph);
+      super.update(sceneGraph, modificationQueue);
 
       setCurrentlyDetected(objectDetection.isStable());
       getNodeToParentFrameTransform().set(getMostRecentDetection().getPose());

@@ -18,6 +18,7 @@ import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
 import us.ihmc.perception.sceneGraph.SceneNode;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorOpeningMechanism.DoorOpeningMechanismType;
 import us.ihmc.perception.sceneGraph.rigidBody.doors.components.DoorPanel;
@@ -188,9 +189,9 @@ public class DoorNode extends DetectableSceneNode
    }
 
    @Override
-   public void update(SceneGraph sceneGraph)
+   public void update(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
-      super.update(sceneGraph);
+      super.update(sceneGraph, modificationQueue);
 
       // Calculate yaw, pitch, roll of opening mechanism pose based on door panel
       updateOpeningMechanismPoses();
@@ -202,7 +203,7 @@ public class DoorNode extends DetectableSceneNode
       {
          if (!openingMechanismToHelperNodeMap.containsKey(openingMechanism))
          {
-            SceneNode helperNode = DoorNodeTools.addOpeningMechanismHelperNode(this, openingMechanism, sceneGraph);
+            SceneNode helperNode = DoorNodeTools.addOpeningMechanismHelperNode(this, openingMechanism, sceneGraph, modificationQueue);
             openingMechanismToHelperNodeMap.put(openingMechanism, helperNode);
          }
       }
