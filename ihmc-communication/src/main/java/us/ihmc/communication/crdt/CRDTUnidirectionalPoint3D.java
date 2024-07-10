@@ -28,6 +28,9 @@ public class CRDTUnidirectionalPoint3D extends CRDTUnidirectionalMutableField<Po
 
    public void fromMessage(Point3D message)
    {
-      getValueInternal().set(message);
+      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
+      {
+         getValueInternal().set(message);
+      }
    }
 }

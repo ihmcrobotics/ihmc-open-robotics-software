@@ -73,12 +73,9 @@ public class OpenCLDepthImageSegmenter
 
       return new RawImage(depthImage.getSequenceNumber(),
                           depthImage.getAcquisitionTime(),
-                          depthImage.getImageWidth(),
-                          depthImage.getImageHeight(),
                           depthImage.getDepthDiscretization(),
                           segmentedDepthImageMat,
                           null,
-                          depthImage.getOpenCVType(),
                           depthImage.getFocalLengthX(),
                           depthImage.getFocalLengthY(),
                           depthImage.getPrincipalPointX(),

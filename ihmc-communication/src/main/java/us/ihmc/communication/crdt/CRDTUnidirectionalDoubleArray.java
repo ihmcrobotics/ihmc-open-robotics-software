@@ -34,9 +34,12 @@ public class CRDTUnidirectionalDoubleArray extends CRDTUnidirectionalMutableFiel
 
    public void fromMessage(double[] messageArray)
    {
-      for (int i = 0; i < getValueInternal().length; i++)
+      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
       {
-         getValueInternal()[i] = messageArray[i];
+         for (int i = 0; i < getValueInternal().length; i++)
+         {
+            getValueInternal()[i] = messageArray[i];
+         }
       }
    }
 }

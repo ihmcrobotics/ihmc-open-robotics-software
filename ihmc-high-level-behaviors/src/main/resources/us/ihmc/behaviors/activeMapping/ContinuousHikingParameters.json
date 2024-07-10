@@ -12,5 +12,5 @@
   "Planning without reference timeout" : 1.3,
   "Percent through swing to plan to" : 0.5,
   "Log footstep plans" : true,
-  "Next Waypoint Distance Margin" : 0.75
+  "Next Waypoint Distance Margin" : 0.6
 }

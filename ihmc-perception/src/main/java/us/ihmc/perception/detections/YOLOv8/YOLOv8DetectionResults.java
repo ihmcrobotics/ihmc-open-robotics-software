@@ -207,12 +207,9 @@ public class YOLOv8DetectionResults
    {
       return new RawImage(detectionImage.getSequenceNumber(),
                           detectionImage.getAcquisitionTime(),
-                          maskWidth,
-                          maskHeight,
                           -1.0f,
                           mat,
                           null,
-                          mat.type(),
                           maskFocalLengthX,
                           maskFocalLengthY,
                           maskPrincipalPointX,

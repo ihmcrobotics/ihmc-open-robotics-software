@@ -5,6 +5,7 @@ import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeExecutor;
 import us.ihmc.behaviors.sequence.ActionNodeExecutor;
+import us.ihmc.behaviors.sequence.actions.WaitDurationActionState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
@@ -61,8 +62,13 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
       DetectableSceneNode yoloDoorHandleNode = (DetectableSceneNode) sceneGraph.getNamesToNodesMap().get("YOLO door lever");
       StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX);
 
-      if (state.getSetStaticForGraspAction() != null && state.getSetStaticForGraspAction().getIsExecuting() ||
-          state.getSetStaticForApproachAction() != null && state.getSetStaticForApproachAction().getIsExecuting())
+      boolean shouldClearStaticHandles = false;
+      for (WaitDurationActionState action : state.getSetStaticForGraspActions())
+         shouldClearStaticHandles |= action.getIsExecuting();
+      for (WaitDurationActionState action : state.getSetStaticForApproachActions())
+         shouldClearStaticHandles |= action.getIsExecuting();
+
+      if (shouldClearStaticHandles)
       {
          for (String nodeName : sceneGraph.getNodeNameList())
          {

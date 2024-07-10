@@ -36,6 +36,9 @@ public class CRDTUnidirectionalDouble extends CRDTUnidirectionalField
 
    public void fromMessage(double value)
    {
-      this.value = value;
+      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
+      {
+         this.value = value;
+      }
    }
 }
