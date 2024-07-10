@@ -4,6 +4,7 @@ import ihmc_common_msgs.msg.dds.ConfirmableRequestMessage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
+import us.ihmc.log.LogTools;
 
 public class RequestConfirmFreezableTest
 {
@@ -96,9 +97,9 @@ public class RequestConfirmFreezableTest
          operatorNode.toMessage(message);
          operatorNode.getCRDTInfo().startNextUpdate();
 
-//         Assertions.assertEquals(1, message.getRequestNumbers().size());
-//         Assertions.assertEquals(i, message.getRequestNumbers().get(0));
-//         Assertions.assertEquals(0, message.getConfirmationNumbers().size());
+         Assertions.assertEquals(1, message.getRequestNumbers().size());
+         Assertions.assertEquals(i, message.getRequestNumbers().get(0));
+         Assertions.assertEquals(0, message.getConfirmationNumbers().size());
 
          robotNode.fromMessage(message);
 
@@ -110,9 +111,22 @@ public class RequestConfirmFreezableTest
          robotNode.toMessage(message);
          robotNode.getCRDTInfo().startNextUpdate();
 
-//         Assertions.assertEquals(1, message.getConfirmationNumbers().size());
-//         Assertions.assertEquals(i, message.getConfirmationNumbers().get(0));
-//         Assertions.assertEquals(0, message.getRequestNumbers().size());
+         Assertions.assertEquals(Math.min(maxFreezeDuration, i + 1), message.getConfirmationNumbers().size());
+
+         LogTools.info(message.getConfirmationNumbers());
+         for (int j = 0; j < message.getConfirmationNumbers().size(); j++)
+         {
+            if (i < maxFreezeDuration)
+            {
+               Assertions.assertEquals(j, message.getConfirmationNumbers().get(j));
+            }
+            else
+            {
+               Assertions.assertEquals(j + (i - maxFreezeDuration + 1), message.getConfirmationNumbers().get(j));
+            }
+         }
+
+         Assertions.assertEquals(0, message.getRequestNumbers().size());
 
          operatorNode.fromMessage(message);
 
@@ -121,11 +135,6 @@ public class RequestConfirmFreezableTest
          Assertions.assertEquals(i + 1, operatorNode.getNextRequestID());
          Assertions.assertEquals(0, robotNode.getNextRequestID());
       }
-
-
-
-//      oper
-
    }
 
    @Test
