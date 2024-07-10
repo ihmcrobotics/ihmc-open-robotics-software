@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryCo
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryBalanceManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControlManagerFactory;
@@ -33,7 +32,6 @@ public class RecoveryTransferState extends PushRecoveryState
    private final PushRecoveryControllerParameters pushRecoveryParameters;
    protected final CenterOfMassHeightManager comHeightManager;
    protected final PushRecoveryBalanceManager balanceManager;
-   protected final PelvisOrientationManager pelvisOrientationManager;
    protected final FeetManager feetManager;
 
    private final FramePoint2D capturePoint2d = new FramePoint2D();
@@ -69,7 +67,6 @@ public class RecoveryTransferState extends PushRecoveryState
       this.pushRecoveryParameters = pushRecoveryParameters;
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
-      pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
 
       transferToAndNextFootstepsData.setTransferToSide(transferToSide);
@@ -88,20 +85,11 @@ public class RecoveryTransferState extends PushRecoveryState
 
       failureDetectionControlModule.setNextFootstep(null);
 
-      pelvisOrientationManager.setTrajectoryTime(stepTiming.getTransferTime());
-
-      // In middle of walking or leaving foot pose, pelvis is good leave it like that.
-      pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
-
       double finalTransferTime = pushRecoveryParameters.getFinalTransferDurationForRecovery();
 
       currentTransferDuration.set(stepTiming.getTransferTime());
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.initializeICPPlanForTransfer();
-
-//      pelvisOrientationManager.setUpcomingFootstep(footsteps);
-      pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
-      pelvisOrientationManager.initializeTransfer();
    }
 
    @Override

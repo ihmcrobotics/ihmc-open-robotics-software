@@ -37,6 +37,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -61,6 +62,7 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientatio
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.scs2.sharedMemory.YoSharedBuffer;
@@ -1047,6 +1049,46 @@ public class EndToEndTestTools
       }
 
       return message;
+   }
+
+   public static FootstepDataListMessage generateInPlaceTurningFootsteps(ReferenceFrame midFootFrame, int numOfRotations, double turnAngle, double stepWidth)
+   {
+      FootstepDataListMessage footsteps = new FootstepDataListMessage();
+
+      PoseReferenceFrame turnedFrame = new PoseReferenceFrame("turnedFrame", midFootFrame);
+      FrameQuaternion rotation = new FrameQuaternion(midFootFrame);
+
+      int stepsToGenerate = (int) (2*numOfRotations * Math.PI / turnAngle);
+      RobotSide stepSide = RobotSide.LEFT;
+      for (int i = 0; i < stepsToGenerate; i++)
+      {
+         rotation.appendYawRotation(turnAngle);
+         turnedFrame.setOrientationAndUpdate(rotation);
+
+         FramePose3D footPose = new FramePose3D(turnedFrame);
+         footPose.setY(stepSide.negateIfRightSide(stepWidth / 2.0));
+
+         footPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+         FootstepDataMessage footstep = footsteps.getFootstepDataList().add();
+         footstep.getLocation().set(footPose.getPosition());
+         footstep.getOrientation().set(footPose.getOrientation());
+         footstep.setRobotSide(stepSide.toByte());
+
+         stepSide = stepSide.getOppositeSide();
+      }
+
+      FramePose3D footPose = new FramePose3D(turnedFrame);
+      footPose.setY(stepSide.negateIfRightSide(stepWidth / 2.0));
+
+      footPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FootstepDataMessage footstep = footsteps.getFootstepDataList().add();
+      footstep.getLocation().set(footPose.getPosition());
+      footstep.getOrientation().set(footPose.getOrientation());
+      footstep.setRobotSide(stepSide.toByte());
+
+      return footsteps;
    }
 
    public static Point3D yawAboutPoint(double yaw, Point3DReadOnly center, double x, double y, double z)

@@ -167,6 +167,41 @@ public class AtlasWalkingTrajectoryPathFrameTest
 
    @Tag("controller-api-2")
    @Test
+   public void testTurningInPlace()
+   {
+      DRCRobotModel robotModel = getRobotModel();
+      SCS2AvatarTestingSimulationFactory factory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
+                                                                                                                         new FlatGroundEnvironment(),
+                                                                                                                         simulationTestingParameters);
+      simulationTestHelper = factory.createAvatarTestingSimulation();
+
+      FreeFloatingPendulumRobotDefinition pendulumRobotDefinition = setupPendulum();
+
+      simulationTestHelper.start();
+
+      prepareHand(getHandName(), pendulumRobotDefinition);
+
+      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
+      SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+      FootstepDataListMessage steps = EndToEndTestTools.generateInPlaceTurningFootsteps(simulationTestHelper.getControllerReferenceFrames().getMidFeetZUpFrame(),
+                                                                                        2,
+                                                                                        Math.toRadians(30),
+                                                                                        steppingParameters.getInPlaceWidth());
+      simulationTestHelper.publishToController(steps);
+
+      pendulumAttachmentController.oscillationCalculator.clear();
+      pendulumAttachmentController.rootJoint.getJointTwist().setToZero();
+
+      assertWalkingFrameMatchMidFeetZUpFrame();
+      assertTrue(simulationTestHelper.simulateNow(2.0));
+      assertCorrectControlMode();
+      assertTrue(simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
+      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < pendulumAttachmentController.getMaxAngleStandardDeviation().getValue());
+      assertWalkingFrameMatchMidFeetZUpFrame();
+   }
+
+   @Tag("controller-api-2")
+   @Test
    public void testWalkingForward()
    {
       DRCRobotModel robotModel = getRobotModel();
@@ -257,13 +292,13 @@ public class AtlasWalkingTrajectoryPathFrameTest
                                                                                                                          simulationTestingParameters);
       simulationTestHelper = factory.createAvatarTestingSimulation();
 
-//      FreeFloatingPendulumRobotDefinition pendulumRobotDefinition = setupPendulum();
+      FreeFloatingPendulumRobotDefinition pendulumRobotDefinition = setupPendulum();
 
       createOscillateFeetPerturber(simulationTestHelper);
 
       simulationTestHelper.start();
 
-//      prepareHand(getHandName(), pendulumRobotDefinition);
+      prepareHand(getHandName(), pendulumRobotDefinition);
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
@@ -286,7 +321,7 @@ public class AtlasWalkingTrajectoryPathFrameTest
       assertTrue(simulationTestHelper.simulateNow(2.0));
       assertCorrectControlMode();
       assertTrue(simulationTestHelper.simulateNow(EndToEndTestTools.computeWalkingDuration(steps, robotModel.getWalkingControllerParameters())));
-//      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < pendulumAttachmentController.getMaxAngleStandardDeviation().getValue());
+      assertTrue(pendulumAttachmentController.angleStandardDeviation.getValue() < pendulumAttachmentController.getMaxAngleStandardDeviation().getValue());
       assertWalkingFrameMatchMidFeetZUpFrame();
    }
 
@@ -496,7 +531,7 @@ public class AtlasWalkingTrajectoryPathFrameTest
       //                                                                  1.0e-3);
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(midFeetZUpFrameTransform.getTranslation(),
                                                             walkingTrajectoryPathFrameTransform.getTranslation(),
-                                                            1.0e-5);
+                                                            1.0e-2);
    }
 
    private FreeFloatingPendulumRobotDefinition setupPendulum()

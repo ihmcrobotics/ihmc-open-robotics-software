@@ -107,9 +107,6 @@ public class StandingState extends WalkingState
 
       walkingMessageHandler.reportWalkingComplete();
 
-      if (pelvisOrientationManager != null)
-         pelvisOrientationManager.initializeStanding();
-
       failureDetectionControlModule.setNextFootstep(null);
       controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.STANDING);
    }
