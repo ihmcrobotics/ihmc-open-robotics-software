@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 public class DoorNode extends DetectableSceneNode
 {
    // Maximum distance one door component can be from another (squared meters)
-   public static final double DOOR_COMPONENT_DISTANCE_THRESHOLD = MathTools.square(1.5);
+   public static final double DOOR_COMPONENT_DISTANCE_THRESHOLD = MathTools.square(1.0);
    private static final Pose3D NAN_POSE = new Pose3D();
    static
    {
