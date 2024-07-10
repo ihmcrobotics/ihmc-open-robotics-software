@@ -81,14 +81,13 @@ public class RequestConfirmFreezable implements Freezable
       needToSendRequest.set();
    }
 
-   @Override
-   public void unfreeze()
+   /** internal and tests only */ void unfreeze()
    {
       boolean wasFrozen = crdtInfo.getUpdateNumber() < updateNumberToUnfreeze;
 
       updateNumberToUnfreeze = crdtInfo.getUpdateNumber();
 
-      boolean isFrozen = crdtInfo.getUpdateNumber() < updateNumberToUnfreeze;
+      isFrozen = crdtInfo.getUpdateNumber() < updateNumberToUnfreeze;
 
       if (wasFrozen != isFrozen)
          LogTools.debug("%s Update #%d: Frozen %b -> %b %s".formatted(crdtInfo.getActorDesignation(),
