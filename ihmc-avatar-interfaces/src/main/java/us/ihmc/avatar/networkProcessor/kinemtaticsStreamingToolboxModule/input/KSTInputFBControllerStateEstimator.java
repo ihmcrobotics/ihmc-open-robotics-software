@@ -199,8 +199,6 @@ public class KSTInputFBControllerStateEstimator implements KSTInputStateEstimato
    {
       private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-
-
       private final YoFramePose3D estimatedPose;
       private final YoFixedFrameSpatialVector estimatedVelocity;
       private final YoFixedFrameSpatialVector estimatedDecayingVelocity;
