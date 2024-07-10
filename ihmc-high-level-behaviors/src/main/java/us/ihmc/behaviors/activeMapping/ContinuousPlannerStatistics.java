@@ -56,8 +56,8 @@ public class ContinuousPlannerStatistics
    {
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       String logFileName = dateFormat.format(new Date()) + "_" + "ContinuousPlannerLog.txt";
-      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-      String filePath = IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY.resolve(logFileName).toString();
+      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      String filePath = IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY.resolve(logFileName).toString();
 
 //      perceptionDataLogger.openLogFile(IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.resolve(logFileName).toString());
 //      perceptionDataLogger.addLongChannel(PerceptionLoggerConstants.L515_SENSOR_TIME, 1, PerceptionLoggerConstants.DEFAULT_BLOCK_SIZE);
@@ -67,9 +67,9 @@ public class ContinuousPlannerStatistics
 
       try
       {
-         if(!Files.exists(IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY))
+         if(!Files.exists(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY))
          {
-            Files.createDirectory(IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY);
+            Files.createDirectory(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY);
          }
          if (!Files.exists(IHMCCommonPaths.TERRAIN_MAP_DIRECTORY.resolve(logFileName)))
          {

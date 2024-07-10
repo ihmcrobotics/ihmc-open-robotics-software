@@ -3,7 +3,6 @@ package us.ihmc.footstepPlanning.swing;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.WriteOption;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.IHMCCommonPaths;
 
@@ -26,14 +25,14 @@ public class SwingPlannerStatistics
    {
       SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       String logFileName = dateFormat.format(new Date()) + "_" + "ContinuousPlannerLog.txt";
-      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
-      String filePath = IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY.resolve(logFileName).toString();
+      FileTools.ensureDirectoryExists(Paths.get(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY_NAME), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
+      String filePath = IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY.resolve(logFileName).toString();
 
       try
       {
-         if(!Files.exists(IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY))
+         if(!Files.exists(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY))
          {
-            Files.createDirectory(IHMCCommonPaths.CONTINUOUS_PLANNING_DIRECTORY);
+            Files.createDirectory(IHMCCommonPaths.CONTINUOUS_HIKING_DIRECTORY);
          }
          if (!Files.exists(IHMCCommonPaths.TERRAIN_MAP_DIRECTORY.resolve(logFileName)))
          {
