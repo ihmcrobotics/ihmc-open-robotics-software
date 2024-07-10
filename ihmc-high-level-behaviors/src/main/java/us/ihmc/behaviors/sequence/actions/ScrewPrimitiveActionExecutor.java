@@ -470,8 +470,11 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          state.getCurrentPose().getValue().set(syncedHandControlPose);
          state.setPositionDistanceToGoalTolerance(definition.getPositionErrorTolerance());
          state.setOrientationDistanceToGoalTolerance(definition.getOrientationErrorTolerance());
-         state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getLinearPart());
-         state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getAngularPart());
+         if (syncedRobot.getHandWrenchCalculators().get(definition.getSide()) != null)
+         {
+            state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getLinearPart());
+            state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getAngularPart());
+         }
 
          if (meetsDesiredCompletionCriteria)
          {

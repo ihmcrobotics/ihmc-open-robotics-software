@@ -258,8 +258,11 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
    {
       trackingCalculator.computeExecutionTimings(state.getNominalExecutionDuration());
       state.setElapsedExecutionTime(trackingCalculator.getElapsedTime());
-      state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getLinearPart());
-      state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getAngularPart());
+      if (syncedRobot.getHandWrenchCalculators().get(definition.getSide()) != null)
+      {
+         state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getLinearPart());
+         state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getAngularPart());
+      }
 
       if (trackingCalculator.getHitTimeLimit())
       {
