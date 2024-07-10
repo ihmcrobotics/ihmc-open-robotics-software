@@ -2,25 +2,32 @@ package us.ihmc.rdx.ui.teleoperation;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.GoHomeMessage;
+import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
+import ihmc_common_msgs.msg.dds.SE3TrajectoryPointMessage;
 import imgui.ImGui;
 import us.ihmc.avatar.arm.PresetArmConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.ArrayList;
 
 //TODO move parameters of poses in Nadia
 public class RDXHumanoidDemoPoses extends RDXPanel
@@ -32,9 +39,30 @@ public class RDXHumanoidDemoPoses extends RDXPanel
    private final RDXTeleoperationParameters teleoperationParameters;
 
    private SideDependentList<double[]> armsConfiguration = new SideDependentList<>();
-   private YawPitchRoll chestOrientation;
-   private Point3D pelvisPosition;
+   private final YawPitchRoll chestOrientation;
+   private final YawPitchRoll pelvisOrientation;
+   private final Point3D pelvisPosition;
    private boolean usedFirstMode = false;
+
+   private final ArrayList<ChestTrajectoryMessage> chestTrajectoryMessagesToPublish = new ArrayList<>();
+   private final ArrayList<ArmTrajectoryMessage> armTrajectoryMessagesToPublish = new ArrayList<>();
+   private final ArrayList<PelvisTrajectoryMessage> pelvisTrajectoryMessagesToPublish = new ArrayList<>();
+   private final SideDependentList<FootTrajectoryMessage> footTrajectoryMessagesToPublish = new SideDependentList<>();
+
+   private static final double[] rightArmGreeting1 = {0.27, -1.00, -0.682, -2.24, -0.592, -0.61, -0.79};
+   private static final double[] rightArmGreeting2 = {0.253, -0.872, -1.22, -2.035, 0.073, -0.61, -0.839};
+   private static final double[] leftArmSquat = new double[] {-0.7, 0.8, 0.53, -1.9};
+   private static final double[] rightArmSquat = new double[] {-0.7, -0.8, -0.53, -1.9};
+
+   private static final double[] leftArmFlex1 = new double[] {0.71, 1.4, 1.12, -2.32};
+   private static final double[] rightArmFlex1 = new double[] {0.71, -1.4, -1.12, -2.32};
+   private static final double[] leftArmFlex2 = new double[] {0.02, 1.1, -0.96, -2.32};
+   private static final double[] rightArmFlex2 = new double[] {0.02, -1.1, 0.96, -2.32};
+
+   private static final double[] leftArmBallet1 = new double[] {-0.39, 2.21, 0.48, -2.32};
+   private static final double[] rightArmBallet1 = new double[] {0.02, -0.7, 0.44, -1.7};
+   private static final double[] leftArmBallet2 = new double[] {0.6, 0.8, -0.91, -1.84};
+   private static final double[] rightArmBallet2 = new double[] {-0.56, -0.31, -0.53, -2.24};
 
    public RDXHumanoidDemoPoses(DRCRobotModel robotModel,
                                ROS2SyncedRobotModel syncedRobot,
@@ -52,59 +80,86 @@ public class RDXHumanoidDemoPoses extends RDXPanel
       armsConfiguration.put(RobotSide.LEFT, robotModel.getPresetArmConfiguration(RobotSide.LEFT, PresetArmConfiguration.HOME));
       armsConfiguration.put(RobotSide.RIGHT, robotModel.getPresetArmConfiguration(RobotSide.RIGHT, PresetArmConfiguration.HOME));
       chestOrientation = new YawPitchRoll(0.0, 0.0, 0.0);
-      pelvisPosition = new Point3D(0.0, 0.0, 0.99);
+      pelvisOrientation = new YawPitchRoll(0.0, 0.0, 0.0);
+      pelvisPosition = new Point3D(0.0, 0.0, 1.08);
+   }
+
+   private static double[] quickCopy(double[] incoming)
+   {
+      double[] outgoing = new double[incoming.length];
+      System.arraycopy(incoming, 0, outgoing, 0, incoming.length);
+      return outgoing;
    }
 
    private void renderImGuiWidgets()
    {
       ImGui.text("Demo Poses: ");
       ImGui.sameLine();
+      // zero our poses
+      pelvisOrientation.setToZero();
+      pelvisPosition.setToZero();
+      pelvisPosition.setZ(1.08);
+      chestOrientation.setToZero();
+
+      double[] leftArm = quickCopy(robotModel.getPresetArmConfiguration(RobotSide.LEFT, PresetArmConfiguration.HOME));
+      double[] rightArm = quickCopy(robotModel.getPresetArmConfiguration(RobotSide.RIGHT, PresetArmConfiguration.HOME));
+      armsConfiguration.put(RobotSide.LEFT, leftArm);
+      armsConfiguration.put(RobotSide.RIGHT, rightArm);
+
+      chestTrajectoryMessagesToPublish.clear();
+      armTrajectoryMessagesToPublish.clear();
+      pelvisTrajectoryMessagesToPublish.clear();
+      footTrajectoryMessagesToPublish.clear();
+
       if (ImGui.button(labels.get("Home Pose")))
       {
-         armsConfiguration.replace(RobotSide.LEFT, robotModel.getPresetArmConfiguration(RobotSide.LEFT, PresetArmConfiguration.HOME));
-         armsConfiguration.replace(RobotSide.RIGHT, robotModel.getPresetArmConfiguration(RobotSide.RIGHT, PresetArmConfiguration.HOME));
-         chestOrientation = new YawPitchRoll(0.0, 0.0, 0.0);
-         pelvisPosition = new Point3D(0.0, 0.0, 1.08);
-         executePose(teleoperationParameters.getTrajectoryTime());
+         for (RobotSide robotSide : RobotSide.values)
+            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime());
+         appendChestOrientationToPublish(chestOrientation, teleoperationParameters.getTrajectoryTime());
+         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, teleoperationParameters.getTrajectoryTime());
+
+         publishPoses();
       }
       if (ImGui.button(labels.get("Greeting")))
       {
          if (usedFirstMode)
          {
-            armsConfiguration.put(RobotSide.LEFT, robotModel.getPresetArmConfiguration(RobotSide.LEFT, PresetArmConfiguration.HOME));
-            armsConfiguration.replace(RobotSide.RIGHT, new double[] {0.23, -0.95, -1.22, -1.76});
-            chestOrientation = new YawPitchRoll(0.0, 0.0, 0.0);
-            pelvisPosition = new Point3D(0.0, 0.0, 1.08);
-            executePose(1.0);
+            System.arraycopy(rightArmGreeting1, 0, rightArm, 0, Math.min(rightArm.length, rightArmGreeting1.length));
          }
          else
          {
-            armsConfiguration.put(RobotSide.LEFT, robotModel.getPresetArmConfiguration(RobotSide.LEFT, PresetArmConfiguration.HOME));
-            armsConfiguration.replace(RobotSide.RIGHT, new double[] {0.23, -0.63, -1.22, -1.52});
-            chestOrientation = new YawPitchRoll(0.0, 0.0, 0.0);
-            pelvisPosition = new Point3D(0.0, 0.0, 1.08);
-            executePose(1.0);
+            System.arraycopy(rightArmGreeting2, 0, rightArm, 0, Math.min(rightArm.length, rightArmGreeting2.length));
          }
+
+         armsConfiguration.put(RobotSide.RIGHT, rightArm);
+         for (RobotSide robotSide : RobotSide.values)
+            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), 1.0);
+         appendChestOrientationToPublish(chestOrientation, 1.0);
+         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, 1.0);
+
+         publishPoses();
+
          usedFirstMode = !usedFirstMode;
       }
 
       if (ImGui.button(labels.get("Squat")))
       {
-         if (usedFirstMode)
+         if (!usedFirstMode)
          {
-            armsConfiguration.replace(RobotSide.LEFT, robotModel.getPresetArmConfiguration(RobotSide.LEFT, PresetArmConfiguration.HOME));
-            armsConfiguration.replace(RobotSide.RIGHT, robotModel.getPresetArmConfiguration(RobotSide.RIGHT, PresetArmConfiguration.HOME));
-            chestOrientation = new YawPitchRoll(0.0, 0.0, 0.0);
-            pelvisPosition = new Point3D(0.0, 0.0, 1.08);
+            System.arraycopy(leftArmSquat, 0, leftArm, 0, Math.min(leftArm.length, leftArmSquat.length));
+            System.arraycopy(rightArmSquat, 0, rightArm, 0, Math.min(rightArm.length, rightArmSquat.length));
+            armsConfiguration.put(RobotSide.LEFT, leftArm);
+            armsConfiguration.put(RobotSide.RIGHT, rightArm);
+
+            pelvisOrientation.setToPitchOrientation(Math.toRadians(10.0));
+            pelvisPosition.setZ(0.78);
          }
-         else
-         {
-            armsConfiguration.put(RobotSide.LEFT, new double[] {-0.7, 0.8, 0.53, -1.9});
-            armsConfiguration.replace(RobotSide.RIGHT, new double[] {-0.7, -0.8, -0.53, -1.9});
-            chestOrientation = new YawPitchRoll(0.0, Math.toRadians(10), 0.0);
-            pelvisPosition = new Point3D(0.0, 0.0, 0.78);
-         }
-         executePose(teleoperationParameters.getTrajectoryTime());
+         for (RobotSide robotSide : RobotSide.values)
+            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime());
+         appendChestOrientationToPublish(chestOrientation, teleoperationParameters.getTrajectoryTime());
+         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, teleoperationParameters.getTrajectoryTime());
+
+         publishPoses();
          usedFirstMode = !usedFirstMode;
       }
 
@@ -112,19 +167,25 @@ public class RDXHumanoidDemoPoses extends RDXPanel
       {
          if (usedFirstMode)
          {
-            armsConfiguration.put(RobotSide.LEFT, new double[] {0.71, 1.4, 1.12, -2.32});
-            armsConfiguration.replace(RobotSide.RIGHT, new double[] {0.71, -1.4, -1.12, -2.32});
-            chestOrientation = new YawPitchRoll(0.0, 0.0, 0.0);
-            pelvisPosition = new Point3D(0.0, 0.0, 1.08);
+            System.arraycopy(leftArmFlex1, 0, leftArm, 0, Math.min(leftArm.length, leftArmFlex1.length));
+            System.arraycopy(rightArmFlex1, 0, rightArm, 0, Math.min(rightArm.length, rightArmFlex1.length));
          }
          else
          {
-            armsConfiguration.put(RobotSide.LEFT, new double[] {0.02, 1.1, -0.96, -2.32});
-            armsConfiguration.replace(RobotSide.RIGHT, new double[] {0.02, -1.1, 0.96, -2.32});
-            chestOrientation = new YawPitchRoll(0.0, Math.toRadians(35), 0.0);
-            pelvisPosition = new Point3D(0.0, 0.0, 1.0);
+            System.arraycopy(leftArmFlex2, 0, leftArm, 0, Math.min(leftArm.length, leftArmFlex2.length));
+            System.arraycopy(rightArmFlex2, 0, rightArm, 0, Math.min(rightArm.length, rightArmFlex2.length));
+
+            pelvisOrientation.setToPitchOrientation(Math.toRadians(35));
+            pelvisPosition.setZ(1.0);
          }
-         executePose(teleoperationParameters.getTrajectoryTime());
+         armsConfiguration.put(RobotSide.LEFT, leftArm);
+         armsConfiguration.put(RobotSide.RIGHT, rightArm);
+
+         for (RobotSide robotSide : RobotSide.values)
+            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime());
+         appendChestOrientationToPublish(chestOrientation, teleoperationParameters.getTrajectoryTime());
+         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, teleoperationParameters.getTrajectoryTime());
+         publishPoses();
          usedFirstMode = !usedFirstMode;
       }
 
@@ -132,64 +193,147 @@ public class RDXHumanoidDemoPoses extends RDXPanel
       {
          if (usedFirstMode)
          {
-            armsConfiguration.put(RobotSide.LEFT, new double[] {-0.39, 2.21, 0.48, -2.32});
-            armsConfiguration.replace(RobotSide.RIGHT, new double[] {0.02, -0.7, 0.44, -1.7});
-            chestOrientation = new YawPitchRoll(Math.toRadians(30), Math.toRadians(10), 0.0);
-            pelvisPosition = new Point3D(0.0, 0.0, 1.08);
+            System.arraycopy(leftArmBallet1, 0, leftArm, 0, Math.min(leftArm.length, leftArmBallet1.length));
+            System.arraycopy(rightArmBallet1, 0, rightArm, 0, Math.min(rightArm.length, rightArmBallet1.length));
+
+            chestOrientation.setToYawOrientation(Math.toRadians(30.0));
+            pelvisOrientation.setYaw(Math.toRadians(15));
+            pelvisOrientation.setPitch(Math.toRadians(10));
+
+            FramePose3D rightFootPose = new FramePose3D(syncedRobot.getReferenceFrames().getSoleZUpFrame(RobotSide.LEFT));
+            rightFootPose.setZ(0.2);
+            rightFootPose.setY(-0.5);
+            rightFootPose.appendYawRotation(Math.toRadians(30.0));
+            rightFootPose.appendPitchRotation(Math.toRadians(45.0));
+            rightFootPose.appendRollRotation(Math.toRadians(-25.0));
+
+            appendFootPoseToPublish(RobotSide.RIGHT, 0.5, rightFootPose);
          }
          else
          {
-            armsConfiguration.put(RobotSide.LEFT, new double[] {0.6, 0.8, -0.91, -1.84});
-            armsConfiguration.replace(RobotSide.RIGHT, new double[] {-0.56, -0.31, -0.53, -2.24});
-            chestOrientation = new YawPitchRoll(0.0, Math.toRadians(30), 0.0);
-            pelvisPosition = new Point3D(0.0, 0.0, 0.90);
+            System.arraycopy(leftArmBallet2, 0, leftArm, 0, Math.min(leftArm.length, leftArmBallet2.length));
+            System.arraycopy(rightArmBallet2, 0, rightArm, 0, Math.min(rightArm.length, rightArmBallet2.length));
+
+            chestOrientation.setToZero();
+            pelvisOrientation.setToPitchOrientation(Math.toRadians(30));
+            pelvisPosition.setZ(0.90);
          }
-         executePose(teleoperationParameters.getTrajectoryTime());
+
+         armsConfiguration.put(RobotSide.LEFT, leftArm);
+         armsConfiguration.put(RobotSide.RIGHT, rightArm);
+
+         for (RobotSide robotSide : RobotSide.values)
+            appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime());
+         appendChestOrientationToPublish(chestOrientation, teleoperationParameters.getTrajectoryTime());
+         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, teleoperationParameters.getTrajectoryTime());
+
+         publishPoses();
          usedFirstMode = !usedFirstMode;
       }
    }
 
-   public void executePose(double trajectoryTime)
+   private boolean isFootOffGround(RobotSide robotSide)
    {
-      for (RobotSide side : RobotSide.values())
+      return false;
+   }
+
+   private void setFootDown(RobotSide robotSide)
+   {
+
+   }
+
+
+   private void appendFootPoseToPublish(RobotSide robotSide, double moveDuration, FramePose3DReadOnly footPose)
+   {
+      if (footTrajectoryMessagesToPublish.get(robotSide) == null)
       {
-         ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
-                                                                                                     trajectoryTime,
-                                                                                                     armsConfiguration.get(side));
-         ros2ControllerHelper.publishToController(armTrajectoryMessage);
+         FootTrajectoryMessage footTrajectoryMessage = new FootTrajectoryMessage();
+         footTrajectoryMessage.setRobotSide(RobotSide.RIGHT.toByte());
+
+         footTrajectoryMessagesToPublish.put(robotSide, footTrajectoryMessage);
       }
 
-      FrameYawPitchRoll frameChestYawPitchRoll = new FrameYawPitchRoll(syncedRobot.getReferenceFrames().getChestFrame());
-      frameChestYawPitchRoll.changeFrame(syncedRobot.getReferenceFrames().getPelvisZUpFrame());
-      frameChestYawPitchRoll.set(chestOrientation);
-      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage();
-      chestTrajectoryMessage.getSo3Trajectory()
-                            .set(HumanoidMessageTools.createSO3TrajectoryMessage(trajectoryTime,
-                                                                                 frameChestYawPitchRoll,
-                                                                                 EuclidCoreTools.zeroVector3D,
-                                                                                 syncedRobot.getReferenceFrames().getPelvisZUpFrame()));
-      chestTrajectoryMessage.getSo3Trajectory().getSelectionMatrix().setXSelected(true);
-      chestTrajectoryMessage.getSo3Trajectory().getSelectionMatrix().setYSelected(true);
-      chestTrajectoryMessage.getSo3Trajectory().getSelectionMatrix().setZSelected(true);
-      ros2ControllerHelper.publishToController(chestTrajectoryMessage);
+      FootTrajectoryMessage footTrajectoryMessage = footTrajectoryMessagesToPublish.get(robotSide);
 
+      FramePose3D poseToPublish = new FramePose3D(footPose);
+      poseToPublish.changeFrame(ReferenceFrame.getWorldFrame());
+
+      double waypointTime;
+      if (!footTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
+         waypointTime = footTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().get(footTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().size() - 1).getTime();
+      else
+         waypointTime = 0.0;
+      waypointTime += moveDuration;
+
+      SE3TrajectoryPointMessage trajectoryPoint = footTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add();
+      trajectoryPoint.getPosition().set(footPose.getPosition());
+      trajectoryPoint.getOrientation().set(footPose.getOrientation());
+      trajectoryPoint.setTime(waypointTime);
+   }
+
+   private void appendPelvisOrientationToPublish(Orientation3DReadOnly pelvisOrientation, Point3DReadOnly pelvisPosition, double trajectoryDuration)
+   {
       FramePose3D pelvisPose = new FramePose3D(syncedRobot.getFullRobotModel().getPelvis().getBodyFixedFrame());
       pelvisPose.changeFrame(syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame());
       pelvisPose.getTranslation().setZ(pelvisPosition.getZ());
+      pelvisPose.getRotation().set(pelvisOrientation);
       pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
-      pelvisPose.getRotation().set(syncedRobot.getReferenceFrames().getMidFootZUpGroundFrame().getTransformToWorldFrame().getRotation());
 
-      PelvisTrajectoryMessage message = new PelvisTrajectoryMessage();
-      message.getSe3Trajectory()
-             .set(HumanoidMessageTools.createSE3TrajectoryMessage(trajectoryTime,
-                                                                  pelvisPose.getPosition(),
-                                                                  pelvisPose.getOrientation(),
-                                                                  ReferenceFrame.getWorldFrame()));
+      PelvisTrajectoryMessage pelvisMessage = new PelvisTrajectoryMessage();
+      pelvisMessage.getSe3Trajectory()
+                   .set(HumanoidMessageTools.createSE3TrajectoryMessage(trajectoryDuration,
+                                                                        pelvisPose.getPosition(),
+                                                                        pelvisPose.getOrientation(),
+                                                                        ReferenceFrame.getWorldFrame()));
       long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
-      message.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
-      message.getSe3Trajectory().getLinearSelectionMatrix().setXSelected(false);
-      message.getSe3Trajectory().getLinearSelectionMatrix().setYSelected(false);
-      message.getSe3Trajectory().getLinearSelectionMatrix().setZSelected(true);
-      ros2ControllerHelper.publishToController(message);
+      pelvisMessage.getSe3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
+      pelvisMessage.getSe3Trajectory().getLinearSelectionMatrix().setXSelected(false);
+      pelvisMessage.getSe3Trajectory().getLinearSelectionMatrix().setYSelected(false);
+      pelvisMessage.getSe3Trajectory().getLinearSelectionMatrix().setZSelected(true);
+   }
+
+   private void appendChestOrientationToPublish(Orientation3DReadOnly chestOrientation, double trajectoryDuration)
+   {
+      FrameQuaternion desiredChestOrientation = new FrameQuaternion(syncedRobot.getReferenceFrames().getPelvisFrame(), chestOrientation);
+      ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage();
+      chestTrajectoryMessage.getSo3Trajectory()
+                            .set(HumanoidMessageTools.createSO3TrajectoryMessage(trajectoryDuration,
+                                                                                 desiredChestOrientation,
+                                                                                 EuclidCoreTools.zeroVector3D,
+                                                                                 desiredChestOrientation.getReferenceFrame()));
+      chestTrajectoryMessage.getSo3Trajectory().getSelectionMatrix().setXSelected(true);
+      chestTrajectoryMessage.getSo3Trajectory().getSelectionMatrix().setYSelected(true);
+      chestTrajectoryMessage.getSo3Trajectory().getSelectionMatrix().setZSelected(true);
+
+      chestTrajectoryMessagesToPublish.add(chestTrajectoryMessage);
+   }
+
+   private void appendArmTrajectoryMessageToPublish(RobotSide side, double[] armConfiguration, double trajectoryDuration)
+   {
+      ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(side,
+                                                                                                  trajectoryDuration,
+                                                                                                  armConfiguration);
+      armTrajectoryMessagesToPublish.add(armTrajectoryMessage);
+   }
+
+   public void publishPoses()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (footTrajectoryMessagesToPublish.get(robotSide) != null)
+         {
+            ros2ControllerHelper.publishToController(footTrajectoryMessagesToPublish.get(robotSide));
+            ThreadTools.sleepSeconds(0.25);
+         }
+      }
+
+      while (!armTrajectoryMessagesToPublish.isEmpty())
+         ros2ControllerHelper.publishToController(armTrajectoryMessagesToPublish.remove(0));
+
+      while (!chestTrajectoryMessagesToPublish.isEmpty())
+         ros2ControllerHelper.publishToController(chestTrajectoryMessagesToPublish.remove(0));
+
+      while (!pelvisTrajectoryMessagesToPublish.isEmpty())
+         ros2ControllerHelper.publishToController(pelvisTrajectoryMessagesToPublish.remove(0));
    }
 }
