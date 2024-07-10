@@ -33,7 +33,6 @@ import us.ihmc.log.LogTools;
  * <p>
  * The {@link #unfreeze} method works by rewinding the "update number to unfreeze",
  * which was previously set to a higher number which served as the timeout.
- * Once there are no unconfirmed req or the timeout update
  * </p>
  *
  * <p>

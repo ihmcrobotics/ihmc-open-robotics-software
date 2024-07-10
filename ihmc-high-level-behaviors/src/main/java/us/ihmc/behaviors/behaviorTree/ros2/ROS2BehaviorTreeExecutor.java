@@ -25,10 +25,12 @@ public class ROS2BehaviorTreeExecutor extends BehaviorTreeExecutor
       ros2BehaviorTreeState = new ROS2BehaviorTreeState(getState(), this::setRootNode, ros2ControllerHelper);
    }
 
+   /** Expected to be called at the {@link ROS2BehaviorTreeState#SYNC_FREQUENCY} */
    public void update()
    {
       ros2BehaviorTreeState.updateSubscription();
 
+      // TODO: Consider updating this at a higher rate than the comms
       super.update();
 
       ros2BehaviorTreeState.updatePublication();
