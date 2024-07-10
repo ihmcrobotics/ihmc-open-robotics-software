@@ -1,4 +1,4 @@
-package us.ihmc.perception.YOLOv8;
+package us.ihmc.perception.detections.YOLOv8;
 
 import us.ihmc.perception.sceneGraph.rigidBody.primitive.PrimitiveRigidBodyShape;
 
@@ -73,6 +73,17 @@ public enum YOLOv8DetectionClass
       for (YOLOv8DetectionClass detectionClass : values())
       {
          if (detectionClass.getClassID() == classID)
+            return detectionClass;
+      }
+
+      return null;
+   }
+
+   public static YOLOv8DetectionClass fromName(String name)
+   {
+      for (YOLOv8DetectionClass detectionClass : values())
+      {
+         if (detectionClass.getDefaultNodeName().equalsIgnoreCase(name))
             return detectionClass;
       }
 

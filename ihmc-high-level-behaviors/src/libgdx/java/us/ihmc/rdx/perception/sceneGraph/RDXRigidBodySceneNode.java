@@ -84,18 +84,22 @@ public abstract class RDXRigidBodySceneNode extends RDXSceneNode
       return posePlacement;
    }
 
-   public void update(SceneGraphModificationQueue modificationQueue)
+   @Override
+   public void update(SceneGraph sceneGraph)
    {
       if (trackDetectedPoseChanged.poll())
       {
-         rigidBodySceneNode.setTrackInitialParent(trackDetectedPoseChanged.read(), modificationQueue);
-         // This modification is to get queued after a basic node one
-         // in order to subsequently update the UI node after the node
-         // has been moved.
-         // There can't be another modification added, so we pass null
-         // as the modification queue.
-         // That would cause an infinite loop.
-         modificationQueue.accept(() -> update(null));
+         sceneGraph.modifyTree(modificationQueue ->
+         {
+            rigidBodySceneNode.setTrackInitialParent(trackDetectedPoseChanged.read(), modificationQueue);
+            // This modification is to get queued after a basic node one
+            // in order to subsequently update the UI node after the node
+            // has been moved.
+            // There can't be another modification added, so we pass null
+            // as the modification queue.
+            // That would cause an infinite loop.
+            modificationQueue.accept(() -> update(null));
+         });
       }
 
       // Ensure gizmo frame is up to date

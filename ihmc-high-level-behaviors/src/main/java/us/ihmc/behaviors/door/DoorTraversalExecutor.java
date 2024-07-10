@@ -60,7 +60,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
       updateActionSubtree(this);
 
       DetectableSceneNode yoloDoorHandleNode = (DetectableSceneNode) sceneGraph.getNamesToNodesMap().get("YOLO door lever");
-      StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get(DoorNodeTools.DOOR_STATIC_HANDLE_NAME);
+      StaticRelativeSceneNode staticHandleClosedDoor = (StaticRelativeSceneNode) sceneGraph.getNamesToNodesMap().get(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX);
 
       boolean shouldClearStaticHandles = false;
       for (WaitDurationActionState action : state.getSetStaticForGraspActions())
@@ -72,7 +72,7 @@ public class DoorTraversalExecutor extends BehaviorTreeNodeExecutor<DoorTraversa
       {
          for (String nodeName : sceneGraph.getNodeNameList())
          {
-            if (nodeName.startsWith(DoorNodeTools.DOOR_STATIC_HANDLE_NAME))
+            if (nodeName.startsWith(DoorNodeTools.DOOR_HELPER_NODE_NAME_PREFIX))
             {
                if (sceneGraph.getNamesToNodesMap().get(nodeName) instanceof RigidBodySceneNode staticHandleNode)
                {

@@ -8,7 +8,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
-import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
+import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.ui.graphics.RDXVisualizer;
 import us.ihmc.tools.thread.Throttler;
@@ -17,6 +17,11 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+/*
+ *  FIXME: It doesn't make sense to have a visualizer for settings.
+ *  This is only meant to be a short-term solution
+ *  We should really make a better system to house settings for detections.
+ */
 public class RDXYOLOv8Settings extends RDXVisualizer
 {
    private static final String[] AVAILABLE_SENSORS = {"ZED", "D455"};
@@ -27,7 +32,7 @@ public class RDXYOLOv8Settings extends RDXVisualizer
    private final ImFloat confidenceThreshold = new ImFloat(0.8f);
    private final ImFloat nmsThreshold = new ImFloat(0.1f);
    private final ImFloat maskThreshold = new ImFloat(0.0f);
-   private final ImFloat candidateAcceptanceThreshold = new ImFloat(0.8f);
+   private final ImFloat outlierRejectionThreshold = new ImFloat(1.0f);
    private final ImInt selectedSensor = new ImInt(0); // 0 = ZED, 1 = Realsense
 
    private final Set<YOLOv8DetectionClass> targetDetections = new HashSet<>();
@@ -69,7 +74,7 @@ public class RDXYOLOv8Settings extends RDXVisualizer
          parametersChanged.set();
       if (ImGui.sliderFloat("maskThreshold", maskThreshold.getData(), -1.0f, 1.0f))
          parametersChanged.set();
-      if (ImGui.sliderFloat("candidateAcceptanceThreshold", candidateAcceptanceThreshold.getData(), 0.0f, 1.0f))
+      if (ImGui.sliderFloat("outlierThreshold", outlierRejectionThreshold.getData(), 0.0f, 10.0f))
          parametersChanged.set();
 
       if (ImGui.collapsingHeader("Target Detection Classes"))
@@ -113,7 +118,7 @@ public class RDXYOLOv8Settings extends RDXVisualizer
          message.setConfidenceThreshold(confidenceThreshold.get());
          message.setNonMaximumSuppressionThreshold(nmsThreshold.get());
          message.setSegmentationThreshold(maskThreshold.get());
-         message.setCandidateAcceptanceThreshold(candidateAcceptanceThreshold.get());
+         message.setOutlierThreshold(outlierRejectionThreshold.get());
 
          message.getTargetDetectionClasses().clear();
          for (YOLOv8DetectionClass targetDetection : targetDetections)

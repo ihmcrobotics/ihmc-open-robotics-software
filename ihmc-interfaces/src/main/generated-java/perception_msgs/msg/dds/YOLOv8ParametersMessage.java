@@ -7,6 +7,8 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
+       * TODO: Having these parameter/settings messages kinda sucks.
+       * Should try to get a better system.
        * Parameters for running YOLOv8
        */
 public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> implements Settable<YOLOv8ParametersMessage>, EpsilonComparable<YOLOv8ParametersMessage>
@@ -18,9 +20,10 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
    public float non_maximum_suppression_threshold_;
    public float segmentation_threshold_;
    /**
-            * Percentage of updates a candidate must be detected in to be accepted
+            * How much to shrink the object mask. Higher value = more shrinkage
             */
-   public float candidate_acceptance_threshold_;
+   public int erosion_kernel_radius_;
+   public float outlier_threshold_;
    /**
             * List of YOLOv8DetectionClass values that YOLO should detect
             */
@@ -46,7 +49,9 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
 
       segmentation_threshold_ = other.segmentation_threshold_;
 
-      candidate_acceptance_threshold_ = other.candidate_acceptance_threshold_;
+      erosion_kernel_radius_ = other.erosion_kernel_radius_;
+
+      outlier_threshold_ = other.outlier_threshold_;
 
       target_detection_classes_.set(other.target_detection_classes_);
    }
@@ -85,18 +90,27 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
    }
 
    /**
-            * Percentage of updates a candidate must be detected in to be accepted
+            * How much to shrink the object mask. Higher value = more shrinkage
             */
-   public void setCandidateAcceptanceThreshold(float candidate_acceptance_threshold)
+   public void setErosionKernelRadius(int erosion_kernel_radius)
    {
-      candidate_acceptance_threshold_ = candidate_acceptance_threshold;
+      erosion_kernel_radius_ = erosion_kernel_radius;
    }
    /**
-            * Percentage of updates a candidate must be detected in to be accepted
+            * How much to shrink the object mask. Higher value = more shrinkage
             */
-   public float getCandidateAcceptanceThreshold()
+   public int getErosionKernelRadius()
    {
-      return candidate_acceptance_threshold_;
+      return erosion_kernel_radius_;
+   }
+
+   public void setOutlierThreshold(float outlier_threshold)
+   {
+      outlier_threshold_ = outlier_threshold;
+   }
+   public float getOutlierThreshold()
+   {
+      return outlier_threshold_;
    }
 
 
@@ -132,7 +146,9 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.segmentation_threshold_, other.segmentation_threshold_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.candidate_acceptance_threshold_, other.candidate_acceptance_threshold_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.erosion_kernel_radius_, other.erosion_kernel_radius_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.outlier_threshold_, other.outlier_threshold_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.target_detection_classes_, other.target_detection_classes_, epsilon)) return false;
 
@@ -155,7 +171,9 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
 
       if(this.segmentation_threshold_ != otherMyClass.segmentation_threshold_) return false;
 
-      if(this.candidate_acceptance_threshold_ != otherMyClass.candidate_acceptance_threshold_) return false;
+      if(this.erosion_kernel_radius_ != otherMyClass.erosion_kernel_radius_) return false;
+
+      if(this.outlier_threshold_ != otherMyClass.outlier_threshold_) return false;
 
       if (!this.target_detection_classes_.equals(otherMyClass.target_detection_classes_)) return false;
 
@@ -174,8 +192,10 @@ public class YOLOv8ParametersMessage extends Packet<YOLOv8ParametersMessage> imp
       builder.append(this.non_maximum_suppression_threshold_);      builder.append(", ");
       builder.append("segmentation_threshold=");
       builder.append(this.segmentation_threshold_);      builder.append(", ");
-      builder.append("candidate_acceptance_threshold=");
-      builder.append(this.candidate_acceptance_threshold_);      builder.append(", ");
+      builder.append("erosion_kernel_radius=");
+      builder.append(this.erosion_kernel_radius_);      builder.append(", ");
+      builder.append("outlier_threshold=");
+      builder.append(this.outlier_threshold_);      builder.append(", ");
       builder.append("target_detection_classes=");
       builder.append(this.target_detection_classes_);
       builder.append("}");
