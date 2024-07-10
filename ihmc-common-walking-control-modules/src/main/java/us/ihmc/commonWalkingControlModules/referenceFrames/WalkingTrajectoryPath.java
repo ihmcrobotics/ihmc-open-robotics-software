@@ -28,7 +28,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
+import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.robotics.SCS2YoGraphicHolder;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.lists.YoPreallocatedList;
@@ -98,7 +100,10 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
    private final YoFramePoint3D currentPosition = new YoFramePoint3D(namePrefix + "CurrentPosition", worldFrame, registry);
    private final YoDouble currentYaw = new YoDouble(namePrefix + "CurrentYaw", registry);
    private final YoFrameVector3D currentLinearVelocity = new YoFrameVector3D(namePrefix + "CurrentLinearVelocity", worldFrame, registry);
+   private final YoFrameVector3D currentLinearAcceleration = new YoFrameVector3D(namePrefix + "CurrentLinearAcceleration", worldFrame, registry);
    private final YoDouble currentYawRate = new YoDouble(namePrefix + "CurrentYawRate", registry);
+   private final YoDouble currentYawAcceleration = new YoDouble(namePrefix + "CurrentYawAcceleration", registry);
+   private final YoDouble finalTransferDuration = new YoDouble(namePrefix + "FinalTransferDuration", registry);
 
    private final YoFrameVector3D initialLinearVelocity = new YoFrameVector3D(namePrefix + "InitialLinearVelocity", worldFrame, registry);
    private final YoDouble initialYawRate = new YoDouble(namePrefix + "InitialYawRate", registry);
@@ -131,6 +136,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
          twistRelativeToParentToPack.getAngularPart().set(0.0, 0.0, currentYawRate.getValue());
       }
    };
+   private final SpatialAcceleration walkingTrajectoryAcceleration = new SpatialAcceleration(walkingTrajectoryPathFrame, worldFrame, walkingTrajectoryPathFrame);
 
    private final DoubleParameter filterBreakFrequency;
 
@@ -220,7 +226,6 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
       footstepTimings.clear();
    }
 
-   double finalTransferDuration = 0.0;
    public void addFootsteps(WalkingMessageHandler walkingMessageHandler)
    {
       dirtyFootsteps = true;
@@ -235,7 +240,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
          walkingMessageHandler.peekFootstep(i, footsteps.add());
          walkingMessageHandler.peekTiming(i, footstepTimings.add());
       }
-      finalTransferDuration = walkingMessageHandler.getFinalTransferTime();
+      finalTransferDuration.set(walkingMessageHandler.getFinalTransferTime());
    }
 
    public void addFootstep(Footstep footstep, FootstepTiming footstepTiming)
@@ -260,6 +265,11 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
    public void setLastWaypointOpen(boolean isOpen)
    {
       isLastWaypointOpen.set(isOpen);
+   }
+
+   public void initializeFinalTransferDuration(double finalTransferDuration)
+   {
+      this.finalTransferDuration.set(finalTransferDuration);
    }
 
    private final SideDependentList<Pose3D> supportFootPoses = new SideDependentList<>(new Pose3D(), new Pose3D());
@@ -340,19 +350,25 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
          WaypointData firstWaypoint = waypoints.getFirst();
          currentPosition.set(firstWaypoint.position);
          currentLinearVelocity.set(initialLinearVelocity);
+         currentLinearAcceleration.setToZero();
          currentYaw.set(AngleTools.trimAngleMinusPiToPi(firstWaypoint.getYaw()));
          currentYawRate.set(initialYawRate.getValue());
+         currentYawAcceleration.set(0.0);
       }
       else
       {
          trajectoryManager.initialize(initialLinearVelocity, initialYawRate.getValue(), waypoints, isLastWaypointOpen.getValue());
          trajectoryManager.computePosition(currentTime, currentPosition);
          trajectoryManager.computeLinearVelocity(currentTime, currentLinearVelocity);
+         trajectoryManager.computeLinearAcceleration(currentTime, currentLinearAcceleration);
          currentYaw.set(AngleTools.trimAngleMinusPiToPi(trajectoryManager.computeYaw(currentTime)));
          currentYawRate.set(trajectoryManager.computeYawRate(currentTime));
+         currentYawAcceleration.set(trajectoryManager.computeYawAcceleration(currentTime));
       }
 
       walkingTrajectoryPathFrame.update();
+      walkingTrajectoryAcceleration.getLinearPart().setMatchingFrame(currentLinearAcceleration);
+      walkingTrajectoryAcceleration.getAngularPart().set(0.0, 0.0, currentYawAcceleration.getValue());
 
       updateViz();
 
@@ -401,7 +417,7 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
             if (i == 0)
                waypointDuration += 0.5 * footstepTimings.get(i).getTransferTime();
             if (i == footsteps.size() - 1)
-               waypointDuration += finalTransferDuration; // add the final transfer duration.
+               waypointDuration += finalTransferDuration.getValue(); // add the final transfer duration.
             else
                waypointDuration += 0.5 * footstepTimings.get(i + 1).getTransferTime();
             waypoint.time.set(previousWaypoint.time.getValue() + waypointDuration);
@@ -489,6 +505,11 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
    public MovingReferenceFrame getWalkingTrajectoryPathFrame()
    {
       return walkingTrajectoryPathFrame;
+   }
+
+   public SpatialAccelerationReadOnly getWalkingTrajectoryPathAcceleration()
+   {
+      return walkingTrajectoryAcceleration;
    }
 
    private static class WaypointData
@@ -648,9 +669,22 @@ public class WalkingTrajectoryPath implements SCS2YoGraphicHolder
          velocityToPack.scale(1.0 / totalDuration);
       }
 
+      public void computeLinearAcceleration(double time, Tuple3DBasics accelerationToPack)
+      {
+         accelerationToPack.setX(linearSolvers[0].computeAcceleration(time / totalDuration, linearSolutions[0]));
+         accelerationToPack.setY(linearSolvers[1].computeAcceleration(time / totalDuration, linearSolutions[1]));
+         accelerationToPack.setZ(linearSolvers[2].computeAcceleration(time / totalDuration, linearSolutions[2]));
+         accelerationToPack.scale(1.0 / (totalDuration * totalDuration));
+      }
+
       public double computeYawRate(double time)
       {
          return yawSolver.computeVelocity(time / totalDuration, yawSolution) / totalDuration;
+      }
+
+      public double computeYawAcceleration(double time)
+      {
+         return yawSolver.computeAcceleration(time / totalDuration, yawSolution) / (totalDuration * totalDuration);
       }
    }
 
