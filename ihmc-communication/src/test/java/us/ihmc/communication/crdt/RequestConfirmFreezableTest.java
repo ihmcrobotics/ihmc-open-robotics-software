@@ -4,7 +4,6 @@ import ihmc_common_msgs.msg.dds.ConfirmableRequestMessage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.log.LogTools;
 
 public class RequestConfirmFreezableTest
 {
@@ -89,7 +88,6 @@ public class RequestConfirmFreezableTest
          Assertions.assertEquals(0, robotNode.getNextRequestID());
       }
 
-
       for (int i = 0; i < 1000; i++)
       {
          operatorNode.freeze();
@@ -113,7 +111,6 @@ public class RequestConfirmFreezableTest
 
          Assertions.assertEquals(Math.min(maxFreezeDuration, i + 1), message.getConfirmationNumbers().size());
 
-         LogTools.info(message.getConfirmationNumbers());
          for (int j = 0; j < message.getConfirmationNumbers().size(); j++)
          {
             if (i < maxFreezeDuration)
@@ -149,14 +146,16 @@ public class RequestConfirmFreezableTest
 
       for (int i = 0; i < 1000; i++)
       {
-         operatorNode.toMessage(operatorToRobotMessage);
          robotNode.toMessage(robotToOperatorMessage);
+         robotNode.getCRDTInfo().startNextUpdate();
+         operatorNode.toMessage(operatorToRobotMessage);
+         operatorNode.getCRDTInfo().startNextUpdate();
 
          Assertions.assertFalse(operatorNode.isFrozen());
          Assertions.assertFalse(robotNode.isFrozen());
 
-         operatorNode.fromMessage(robotToOperatorMessage);
          robotNode.fromMessage(operatorToRobotMessage);
+         operatorNode.fromMessage(robotToOperatorMessage);
 
          Assertions.assertFalse(operatorNode.isFrozen());
          Assertions.assertFalse(robotNode.isFrozen());
@@ -165,16 +164,110 @@ public class RequestConfirmFreezableTest
       for (int i = 0; i < 1000; i++)
       {
          robotNode.toMessage(robotToOperatorMessage);
+         robotNode.getCRDTInfo().startNextUpdate();
          operatorNode.toMessage(operatorToRobotMessage);
+         operatorNode.getCRDTInfo().startNextUpdate();
+         robotNode.fromMessage(operatorToRobotMessage);
 
          Assertions.assertFalse(operatorNode.isFrozen());
          Assertions.assertFalse(robotNode.isFrozen());
 
          operatorNode.fromMessage(robotToOperatorMessage);
-         robotNode.fromMessage(operatorToRobotMessage);
 
          Assertions.assertFalse(operatorNode.isFrozen());
          Assertions.assertFalse(robotNode.isFrozen());
+      }
+
+      for (int i = 0; i < 1000; i++)
+      {
+         robotNode.toMessage(robotToOperatorMessage);
+         robotNode.getCRDTInfo().startNextUpdate();
+         robotNode.fromMessage(operatorToRobotMessage);
+         operatorNode.toMessage(operatorToRobotMessage);
+         operatorNode.getCRDTInfo().startNextUpdate();
+         operatorNode.fromMessage(robotToOperatorMessage);
+
+         Assertions.assertFalse(operatorNode.isFrozen());
+         Assertions.assertFalse(robotNode.isFrozen());
+      }
+
+      for (int i = 0; i < 1000; i++)
+      {
+         operatorNode.freeze();
+
+         for (int j = 0; j < 5; j++)
+         {
+            operatorNode.toMessage(operatorToRobotMessage);
+            operatorNode.getCRDTInfo().startNextUpdate();
+         }
+
+         for (int j = 0; j < 3; j++)
+         {
+            robotNode.fromMessage(operatorToRobotMessage);
+         }
+
+         Assertions.assertTrue(operatorNode.isFrozen());
+
+         for (int j = 0; j < 5; j++)
+         {
+            robotNode.toMessage(robotToOperatorMessage);
+            robotNode.getCRDTInfo().startNextUpdate();
+         }
+
+         Assertions.assertTrue(operatorNode.isFrozen());
+
+         operatorNode.fromMessage(robotToOperatorMessage);
+
+         Assertions.assertFalse(operatorNode.isFrozen());
+      }
+   }
+
+   @Test
+   public void testCrazyStuff()
+   {
+      int maxFreezeDuration = 15;
+      RequestConfirmFreezable operatorNode = createOperatorNode(maxFreezeDuration);
+      RequestConfirmFreezable robotNode = createRobotNode(maxFreezeDuration);
+
+      ConfirmableRequestMessage operatorToRobotMessage = new ConfirmableRequestMessage();
+      ConfirmableRequestMessage robotToOperatorMessage = new ConfirmableRequestMessage();
+
+      for (int i = 0; i < 1000; i++)
+      {
+         for (int j = 0; j < 7; j++)
+         {
+            operatorNode.freeze();
+         }
+
+         for (int j = 0; j < 9; j++)
+         {
+            operatorNode.toMessage(operatorToRobotMessage);
+            operatorNode.getCRDTInfo().startNextUpdate();
+
+            if (j % 3 == 0)
+               operatorNode.freeze();
+         }
+
+         for (int j = 0; j < 3; j++)
+         {
+            robotNode.fromMessage(operatorToRobotMessage);
+         }
+
+         Assertions.assertTrue(operatorNode.isFrozen());
+
+         for (int j = 0; j < 5; j++)
+         {
+            robotNode.toMessage(robotToOperatorMessage);
+            robotNode.getCRDTInfo().startNextUpdate();
+
+            robotNode.freeze();
+         }
+
+         Assertions.assertTrue(operatorNode.isFrozen());
+
+         operatorNode.fromMessage(robotToOperatorMessage);
+
+         Assertions.assertFalse(operatorNode.isFrozen());
       }
    }
 
