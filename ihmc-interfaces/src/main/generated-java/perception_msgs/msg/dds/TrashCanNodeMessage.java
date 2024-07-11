@@ -16,13 +16,12 @@ public class TrashCanNodeMessage extends Packet<TrashCanNodeMessage> implements 
             * The below transforms may be NaN if not determined
             */
    public us.ihmc.euclid.transform.QuaternionBasedTransform trash_can_to_world_transform_;
-   public us.ihmc.euclid.transform.QuaternionBasedTransform handle_to_world_transform_;
+   public double trash_can_yaw_;
 
    public TrashCanNodeMessage()
    {
       detectable_scene_node_ = new perception_msgs.msg.dds.DetectableSceneNodeMessage();
       trash_can_to_world_transform_ = new us.ihmc.euclid.transform.QuaternionBasedTransform();
-      handle_to_world_transform_ = new us.ihmc.euclid.transform.QuaternionBasedTransform();
    }
 
    public TrashCanNodeMessage(TrashCanNodeMessage other)
@@ -35,7 +34,8 @@ public class TrashCanNodeMessage extends Packet<TrashCanNodeMessage> implements 
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.staticCopy(other.detectable_scene_node_, detectable_scene_node_);
       geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.trash_can_to_world_transform_, trash_can_to_world_transform_);
-      geometry_msgs.msg.dds.TransformPubSubType.staticCopy(other.handle_to_world_transform_, handle_to_world_transform_);
+      trash_can_yaw_ = other.trash_can_yaw_;
+
    }
 
 
@@ -56,10 +56,13 @@ public class TrashCanNodeMessage extends Packet<TrashCanNodeMessage> implements 
       return trash_can_to_world_transform_;
    }
 
-
-   public us.ihmc.euclid.transform.QuaternionBasedTransform getHandleToWorldTransform()
+   public void setTrashCanYaw(double trash_can_yaw)
    {
-      return handle_to_world_transform_;
+      trash_can_yaw_ = trash_can_yaw;
+   }
+   public double getTrashCanYaw()
+   {
+      return trash_can_yaw_;
    }
 
 
@@ -82,7 +85,8 @@ public class TrashCanNodeMessage extends Packet<TrashCanNodeMessage> implements 
 
       if (!this.detectable_scene_node_.epsilonEquals(other.detectable_scene_node_, epsilon)) return false;
       if (!this.trash_can_to_world_transform_.epsilonEquals(other.trash_can_to_world_transform_, epsilon)) return false;
-      if (!this.handle_to_world_transform_.epsilonEquals(other.handle_to_world_transform_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.trash_can_yaw_, other.trash_can_yaw_, epsilon)) return false;
+
 
       return true;
    }
@@ -98,7 +102,8 @@ public class TrashCanNodeMessage extends Packet<TrashCanNodeMessage> implements 
 
       if (!this.detectable_scene_node_.equals(otherMyClass.detectable_scene_node_)) return false;
       if (!this.trash_can_to_world_transform_.equals(otherMyClass.trash_can_to_world_transform_)) return false;
-      if (!this.handle_to_world_transform_.equals(otherMyClass.handle_to_world_transform_)) return false;
+      if(this.trash_can_yaw_ != otherMyClass.trash_can_yaw_) return false;
+
 
       return true;
    }
@@ -113,8 +118,8 @@ public class TrashCanNodeMessage extends Packet<TrashCanNodeMessage> implements 
       builder.append(this.detectable_scene_node_);      builder.append(", ");
       builder.append("trash_can_to_world_transform=");
       builder.append(this.trash_can_to_world_transform_);      builder.append(", ");
-      builder.append("handle_to_world_transform=");
-      builder.append(this.handle_to_world_transform_);
+      builder.append("trash_can_yaw=");
+      builder.append(this.trash_can_yaw_);
       builder.append("}");
       return builder.toString();
    }

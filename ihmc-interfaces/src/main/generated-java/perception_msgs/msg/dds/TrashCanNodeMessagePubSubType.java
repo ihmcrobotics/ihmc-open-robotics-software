@@ -15,7 +15,7 @@ public class TrashCanNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "21fb0813d54e070740d341a118818a132c77de4171b81a25c86db53981332c0f";
+   		return "7ee42811b3b00f967b991119d183c1278c0d81b811d6d9e5db7ec799b88d966e";
    }
    
    @Override
@@ -56,7 +56,7 @@ public class TrashCanNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getMaxCdrSerializedSize(current_alignment);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       return current_alignment - initial_alignment;
@@ -75,7 +75,8 @@ public class TrashCanNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getCdrSerializedSize(data.getTrashCanToWorldTransform(), current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.TransformPubSubType.getCdrSerializedSize(data.getHandleToWorldTransform(), current_alignment);
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       return current_alignment - initial_alignment;
@@ -85,14 +86,16 @@ public class TrashCanNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.write(data.getDetectableSceneNode(), cdr);
       geometry_msgs.msg.dds.TransformPubSubType.write(data.getTrashCanToWorldTransform(), cdr);
-      geometry_msgs.msg.dds.TransformPubSubType.write(data.getHandleToWorldTransform(), cdr);
+      cdr.write_type_6(data.getTrashCanYaw());
+
    }
 
    public static void read(perception_msgs.msg.dds.TrashCanNodeMessage data, us.ihmc.idl.CDR cdr)
    {
       perception_msgs.msg.dds.DetectableSceneNodeMessagePubSubType.read(data.getDetectableSceneNode(), cdr);	
       geometry_msgs.msg.dds.TransformPubSubType.read(data.getTrashCanToWorldTransform(), cdr);	
-      geometry_msgs.msg.dds.TransformPubSubType.read(data.getHandleToWorldTransform(), cdr);	
+      data.setTrashCanYaw(cdr.read_type_6());
+      	
 
    }
 
@@ -103,8 +106,7 @@ public class TrashCanNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       ser.write_type_a("trash_can_to_world_transform", new geometry_msgs.msg.dds.TransformPubSubType(), data.getTrashCanToWorldTransform());
 
-      ser.write_type_a("handle_to_world_transform", new geometry_msgs.msg.dds.TransformPubSubType(), data.getHandleToWorldTransform());
-
+      ser.write_type_6("trash_can_yaw", data.getTrashCanYaw());
    }
 
    @Override
@@ -114,8 +116,7 @@ public class TrashCanNodeMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
       ser.read_type_a("trash_can_to_world_transform", new geometry_msgs.msg.dds.TransformPubSubType(), data.getTrashCanToWorldTransform());
 
-      ser.read_type_a("handle_to_world_transform", new geometry_msgs.msg.dds.TransformPubSubType(), data.getHandleToWorldTransform());
-
+      data.setTrashCanYaw(ser.read_type_6("trash_can_yaw"));
    }
 
    public static void staticCopy(perception_msgs.msg.dds.TrashCanNodeMessage src, perception_msgs.msg.dds.TrashCanNodeMessage dest)
