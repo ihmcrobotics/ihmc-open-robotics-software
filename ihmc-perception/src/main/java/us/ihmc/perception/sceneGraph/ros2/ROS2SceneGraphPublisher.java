@@ -182,7 +182,7 @@ public class ROS2SceneGraphPublisher
             sceneGraphMessage.getSceneTreeIndices().add(sceneGraphMessage.getTrashCanNodes().size());
             TrashCanNodeMessage trashCanNodeMessage = sceneGraphMessage.getTrashCanNodes().add();
             trashCanNodeMessage.getTrashCanToWorldTransform().set(trashCanNode.getTrashCanToWorldTransform());
-            trashCanNodeMessage.getHandleToWorldTransform().set(trashCanNode.getHandleToWorldTransform());
+            trashCanNodeMessage.setTrashCanYaw(trashCanNode.getYaw());
             detectableSceneNodeMessage = trashCanNodeMessage.getDetectableSceneNode();
          }
          else
