@@ -9,14 +9,12 @@ import javax.annotation.Nullable;
  */
 public enum YOLOv8DetectionClass
 {
-   TRASH_CAN(0, "YOLOTrashCan", null, null);
-
-//   DRILL(0, "YOLODrill", null, null),
-//   DOOR_LEVER(1, "YOLODoorLever", null, null),
-//   DOOR_KNOB(2, "YOLODoorKnob", null, null),
-//   DOOR_PUSH_BAR(3, "YOLOPushBar", null, null),
-//   DOOR_PULL_HANDLE(4, "YOLOPullHandle", null, null),
-//   DOOR_PANEL(5, "YOLODoorPanel", null, null);
+   DRILL(0, "YOLODrill", null, null),
+   DOOR_LEVER(1, "YOLODoorLever", null, null),
+   DOOR_KNOB(2, "YOLODoorKnob", null, null),
+   DOOR_PUSH_BAR(3, "YOLOPushBar", null, null),
+   DOOR_PULL_HANDLE(4, "YOLOPullHandle", null, null),
+   DOOR_PANEL(5, "YOLODoorPanel", null, null);
 
    private final int classID;
    private final String defaultNodeName;

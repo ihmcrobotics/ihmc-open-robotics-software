@@ -33,10 +33,10 @@ public class DoorOpeningMechanism
    {
       switch (yolOv8DetectionClass)
       {
-//         case DOOR_LEVER -> type = DoorOpeningMechanismType.LEVER_HANDLE;
-//         case DOOR_KNOB -> type = DoorOpeningMechanismType.KNOB;
-//         case DOOR_PULL_HANDLE -> type = DoorOpeningMechanismType.PULL_HANDLE;
-//         case DOOR_PUSH_BAR -> type = DoorOpeningMechanismType.PUSH_BAR;
+         case DOOR_LEVER -> type = DoorOpeningMechanismType.LEVER_HANDLE;
+         case DOOR_KNOB -> type = DoorOpeningMechanismType.KNOB;
+         case DOOR_PULL_HANDLE -> type = DoorOpeningMechanismType.PULL_HANDLE;
+         case DOOR_PUSH_BAR -> type = DoorOpeningMechanismType.PUSH_BAR;
          default -> type = DoorOpeningMechanismType.UNKNOWN;
       }
       this.doorSide = doorSide;
