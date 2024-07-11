@@ -133,7 +133,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
 
                if (initialHandFrame != null)
                {
-                  RecyclingArrayList<Pose3D> trajectoryPoses = state.getPreviewTrajectory().getValue();
+                  RecyclingArrayList<Pose3D> trajectoryPoses = state.getPreviewTrajectory().accessValue();
                   trajectoryPoses.clear();
                   Pose3D firstPose = trajectoryPoses.add();
                   workPose.setToZero(initialHandFrame);
@@ -233,7 +233,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                      state.getPreviewSolutionQuality().setValue(armIKSolver.getQuality());
                      for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
                      {
-                        state.getPreviewJointAngles().getValue()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
+                        state.getPreviewJointAngles().accessValue()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
                      }
                   }
                }
@@ -317,7 +317,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
       // Compute smooth trajectory and publish command
       if (state.getScrewFrame().isChildOfWorld())
       {
-         state.getCommandedTrajectory().getValue().clear();
+         state.getCommandedTrajectory().accessValue().clear();
 
          jointspaceOnlyTrajectoryMessage.setRobotSide(definition.getSide().toByte());
          jointspaceOnlyTrajectoryMessage.setForceExecution(true);
@@ -467,13 +467,13 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
          boolean meetsDesiredCompletionCriteria = trackingCalculator.isWithinPositionTolerance();
          meetsDesiredCompletionCriteria &= trackingCalculator.getTimeIsUp();
 
-         state.getCurrentPose().getValue().set(syncedHandControlPose);
+         state.getCurrentPose().accessValue().set(syncedHandControlPose);
          state.setPositionDistanceToGoalTolerance(definition.getPositionErrorTolerance());
          state.setOrientationDistanceToGoalTolerance(definition.getOrientationErrorTolerance());
          if (syncedRobot.getHandWrenchCalculators().get(definition.getSide()) != null)
          {
-            state.getForce().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getLinearPart());
-            state.getTorque().getValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getAngularPart());
+            state.getForce().accessValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getLinearPart());
+            state.getTorque().accessValue().set(syncedRobot.getHandWrenchCalculators().get(definition.getSide()).getFilteredWrench().getAngularPart());
          }
 
          if (meetsDesiredCompletionCriteria)

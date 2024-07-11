@@ -13,6 +13,7 @@ import us.ihmc.tools.io.WorkspaceResourceDirectory;
 
 public class ChestOrientationActionState extends ActionNodeState<ChestOrientationActionDefinition>
 {
+   private final ChestOrientationActionDefinition definition;
    private final CRDTDetachableReferenceFrame chestFrame;
    /**
     * This is the estimated goal pelvis frame as the robot executes a potential whole body action.
@@ -26,10 +27,12 @@ public class ChestOrientationActionState extends ActionNodeState<ChestOrientatio
    {
       super(id, new ChestOrientationActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
+      definition = getDefinition();
+
       chestFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
                                                     getDefinition().getCRDTParentFrameName(),
                                                     getDefinition().getChestToParentTransform());
-      goalPelvisToWorldTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.ROBOT, crdtInfo);
+      goalPelvisToWorldTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.ROBOT, definition);
       goalPelvisFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                                goalPelvisToWorldTransform.getValueReadOnly());
    }

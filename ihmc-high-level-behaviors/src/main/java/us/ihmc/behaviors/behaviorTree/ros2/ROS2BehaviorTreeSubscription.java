@@ -155,7 +155,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
 
       for (int i = 0; i < subscriptionNode.getChildren().size(); i++)
       {
-         anAncestorIsFrozen |= localNode.getState().isFrozen();
+         anAncestorIsFrozen |= localNode.getDefinition().isFrozen();
 
          T localChildNode = null;
          if (anAncestorIsFrozen)

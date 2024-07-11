@@ -22,6 +22,7 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
    public static final String APPROACH_FRONT = "Approach Front";
    public static final String APPROACH_RIGHT = "Approach Right";
 
+   private final TrashCanInteractionDefinition definition;
    private BehaviorTreeRootNodeState actionSequence;
    private WaitDurationActionState computeStanceAction;
    private WaitDurationActionState approachingLeftAction;
@@ -36,7 +37,9 @@ public class TrashCanInteractionState extends BehaviorTreeNodeState<TrashCanInte
    {
       super(id, new TrashCanInteractionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
-      stance = new CRDTUnidirectionalEnumField(ROS2ActorDesignation.ROBOT, crdtInfo, InteractionStance.FRONT);
+      definition = getDefinition();
+
+      stance = new CRDTUnidirectionalEnumField(ROS2ActorDesignation.ROBOT, definition, InteractionStance.FRONT);
    }
 
    @Override

@@ -55,7 +55,7 @@ public class BehaviorTreeState extends RequestConfirmFreezable
       if (node != null)
       {
          ++numberOfNodes;
-         if (node.getState().isFrozen())
+         if (node.getDefinition().isFrozen())
             ++numberOfFrozenNodes;
 
          for (Object child : node.getChildren())

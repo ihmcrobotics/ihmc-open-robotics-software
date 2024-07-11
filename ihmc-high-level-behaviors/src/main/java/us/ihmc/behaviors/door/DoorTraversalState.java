@@ -26,6 +26,8 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    public static final String POST_PULL_DOOR = "Post pull door evaluation";
    public static final String POST_GRASP_HANDLE = "Evaluate grasp";
 
+   private final DoorTraversalDefinition definition;
+
    @Nullable
    private DoorNode doorNode;
 
@@ -44,8 +46,10 @@ public class DoorTraversalState extends BehaviorTreeNodeState<DoorTraversalDefin
    {
       super(id, new DoorTraversalDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
-      doorHingeJointAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
-      doorHandleDistanceFromStart = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, 0.0);
+      definition = getDefinition();
+
+      doorHingeJointAngle = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, definition, Double.NaN);
+      doorHandleDistanceFromStart = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, definition, 0.0);
    }
 
    @Override

@@ -17,6 +17,7 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
    /** This limit is defined in the .msg file and limited to the size in the SE3TrajectoryMessage. */
    public static final int TRAJECTORY_SIZE_LIMIT = new ScrewPrimitiveActionStateMessage().getPreviewTrajectory().getCurrentCapacity();
 
+   private final ScrewPrimitiveActionDefinition definition;
    private final DetachableReferenceFrame screwFrame;
    private final CRDTUnidirectionalPoseList previewTrajectory;
    private final CRDTUnidirectionalVector3D force;
@@ -32,16 +33,18 @@ public class ScrewPrimitiveActionState extends ActionNodeState<ScrewPrimitiveAct
    {
       super(id, new ScrewPrimitiveActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
+      definition = getDefinition();
+
       screwFrame = new DetachableReferenceFrame(referenceFrameLibrary, getDefinition().getScrewAxisPoseInObjectFrame().getValueReadOnly());
-      previewTrajectory = new CRDTUnidirectionalPoseList(ROS2ActorDesignation.ROBOT, crdtInfo);
-      force = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
-      torque = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
-      previewTrajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, -1.0);
-      previewTrajectoryLinearVelocity = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, -1.0);
-      previewTrajectoryAngularVelocity = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, -1.0);
-      previewRequestedTime = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, crdtInfo, 1.0);
-      previewJointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS);
-      previewSolutionQuality = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, 0.0);
+      previewTrajectory = new CRDTUnidirectionalPoseList(ROS2ActorDesignation.ROBOT, definition);
+      force = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, definition);
+      torque = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, definition);
+      previewTrajectoryDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, definition, -1.0);
+      previewTrajectoryLinearVelocity = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, definition, -1.0);
+      previewTrajectoryAngularVelocity = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, definition, -1.0);
+      previewRequestedTime = new CRDTUnidirectionalDouble(ROS2ActorDesignation.OPERATOR, definition, 1.0);
+      previewJointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, definition, HandPoseActionDefinition.MAX_NUMBER_OF_JOINTS);
+      previewSolutionQuality = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, definition, 0.0);
    }
 
    @Override

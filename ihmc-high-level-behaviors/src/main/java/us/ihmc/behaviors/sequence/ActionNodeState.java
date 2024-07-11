@@ -2,7 +2,6 @@ package us.ihmc.behaviors.sequence;
 
 import behavior_msgs.msg.dds.ActionNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeNodeState;
-import us.ihmc.behaviors.behaviorTree.BehaviorTreeTools;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTUnidirectionalDouble;
@@ -12,7 +11,6 @@ import us.ihmc.communication.crdt.CRDTUnidirectionalOneDoFJointTrajectoryList;
 import us.ihmc.communication.crdt.CRDTUnidirectionalPose3D;
 import us.ihmc.communication.crdt.CRDTUnidirectionalSE3Trajectory;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
-import us.ihmc.log.LogTools;
 
 import java.util.List;
 
@@ -45,19 +43,19 @@ public abstract class ActionNodeState<D extends ActionNodeDefinition> extends Be
 
       this.definition = definition;
 
-      isNextForExecution = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
-      concurrencyRank = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, crdtInfo, 1);
-      canExecute = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, true);
-      isExecuting = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
-      failed = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, crdtInfo, false);
-      nominalExecutionDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
-      elapsedExecutionTime = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
-      commandedTrajectory = new CRDTUnidirectionalSE3Trajectory(ROS2ActorDesignation.ROBOT, crdtInfo);
-      currentPose = new CRDTUnidirectionalPose3D(ROS2ActorDesignation.ROBOT, crdtInfo);
-      commandedJointTrajectories = new CRDTUnidirectionalOneDoFJointTrajectoryList(ROS2ActorDesignation.ROBOT, crdtInfo);
-      currentJointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, SUPPORTED_NUMBER_OF_JOINTS);
-      positionDistanceToGoalTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
-      orientationDistanceToGoalTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      isNextForExecution = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, definition, false);
+      concurrencyRank = new CRDTUnidirectionalInteger(ROS2ActorDesignation.ROBOT, definition, 1);
+      canExecute = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, definition, true);
+      isExecuting = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, definition, false);
+      failed = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.ROBOT, definition, false);
+      nominalExecutionDuration = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, definition, Double.NaN);
+      elapsedExecutionTime = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, definition, Double.NaN);
+      commandedTrajectory = new CRDTUnidirectionalSE3Trajectory(ROS2ActorDesignation.ROBOT, definition);
+      currentPose = new CRDTUnidirectionalPose3D(ROS2ActorDesignation.ROBOT, definition);
+      commandedJointTrajectories = new CRDTUnidirectionalOneDoFJointTrajectoryList(ROS2ActorDesignation.ROBOT, definition);
+      currentJointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, definition, SUPPORTED_NUMBER_OF_JOINTS);
+      positionDistanceToGoalTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, definition, Double.NaN);
+      orientationDistanceToGoalTolerance = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, definition, Double.NaN);
    }
 
    public void toMessage(ActionNodeStateMessage message)

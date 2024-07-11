@@ -13,9 +13,11 @@ import java.util.function.Supplier;
  */
 public class CRDTUnidirectionalRecyclingArrayList<T> extends CRDTUnidirectionalMutableField<RecyclingArrayList<T>>
 {
-   public CRDTUnidirectionalRecyclingArrayList(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, Supplier<RecyclingArrayList<T>> valueSupplier)
+   public CRDTUnidirectionalRecyclingArrayList(ROS2ActorDesignation sideThatCanModify,
+                                               RequestConfirmFreezable requestConfirmFreezable,
+                                               Supplier<RecyclingArrayList<T>> valueSupplier)
    {
-      super(sideThatCanModify, crdtInfo, valueSupplier);
+      super(sideThatCanModify, requestConfirmFreezable, valueSupplier);
    }
 
    public T getValueReadOnly(int index)

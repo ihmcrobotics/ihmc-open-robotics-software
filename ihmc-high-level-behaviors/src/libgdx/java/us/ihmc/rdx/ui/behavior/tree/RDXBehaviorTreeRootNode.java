@@ -126,7 +126,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
             ImGui.beginDisabled();
          automaticExecutionCheckbox.renderImGuiWidget();
          if (automaticExecutionCheckbox.changed())
-            getState().freeze();
+            getDefinition().freeze();
          if (!canExecuteNextAction)
             ImGui.endDisabled();
 

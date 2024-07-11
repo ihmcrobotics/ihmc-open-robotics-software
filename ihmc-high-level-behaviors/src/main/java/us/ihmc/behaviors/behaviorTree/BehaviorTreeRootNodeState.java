@@ -20,6 +20,7 @@ import java.util.List;
 
 public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTreeRootNodeDefinition>
 {
+   private final BehaviorTreeRootNodeDefinition definition;
    private final CRDTBidirectionalBoolean automaticExecution;
    private final CRDTBidirectionalInteger executionNextIndex;
    private final CRDTUnidirectionalNotification manualExecutionRequested;
@@ -33,11 +34,13 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    {
       super(id, new BehaviorTreeRootNodeDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
-      automaticExecution = new CRDTBidirectionalBoolean(this, false);
-      executionNextIndex = new CRDTBidirectionalInteger(this, 0);
-      manualExecutionRequested = new CRDTUnidirectionalNotification(ROS2ActorDesignation.OPERATOR, crdtInfo, this);
-      concurrencyEnabled = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, crdtInfo, true);
-      nextActionRejectionTooltip = new CRDTUnidirectionalString(ROS2ActorDesignation.ROBOT, crdtInfo, "");
+      definition = getDefinition();
+
+      automaticExecution = new CRDTBidirectionalBoolean(definition, false);
+      executionNextIndex = new CRDTBidirectionalInteger(definition, 0);
+      manualExecutionRequested = new CRDTUnidirectionalNotification(ROS2ActorDesignation.OPERATOR, definition);
+      concurrencyEnabled = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, definition, true);
+      nextActionRejectionTooltip = new CRDTUnidirectionalString(ROS2ActorDesignation.ROBOT, definition, "");
    }
 
    @Override

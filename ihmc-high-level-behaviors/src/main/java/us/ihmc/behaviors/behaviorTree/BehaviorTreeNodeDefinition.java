@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalString;
+import us.ihmc.communication.crdt.RequestConfirmFreezable;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
@@ -19,7 +20,7 @@ import java.util.List;
 /**
  * The base definition of a behavior tree node.
  */
-public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTreeNodeDefinition>
+public class BehaviorTreeNodeDefinition extends RequestConfirmFreezable implements BehaviorTreeNode<BehaviorTreeNodeDefinition>
 {
    /**
     * The name of the node.
@@ -47,10 +48,12 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
 
    public BehaviorTreeNodeDefinition(CRDTInfo crdtInfo, WorkspaceResourceDirectory saveFileDirectory)
    {
+      super(crdtInfo);
+
       this.saveFileDirectory = saveFileDirectory;
 
-      name = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, "");
-      notes = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, crdtInfo, "");
+      name = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, "");
+      notes = new CRDTUnidirectionalString(ROS2ActorDesignation.OPERATOR, this, "");
    }
 
    /** Save as JSON file root node. */
@@ -143,6 +146,8 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
 
    public void toMessage(BehaviorTreeNodeDefinitionMessage message)
    {
+      toMessage(message.getConfirmableRequest());
+
       message.setName(name.toMessage());
       // message.setNotes(notes.toMessage());
       message.setNumberOfChildren(children.size());
@@ -150,6 +155,8 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
 
    public void fromMessage(BehaviorTreeNodeDefinitionMessage message)
    {
+      fromMessage(message.getConfirmableRequest()); // Unpack first, because this also unfreezes
+
       name.fromMessage(message.getNameAsString());
       // notes.fromMessage(message.getNotesAsString());
    }

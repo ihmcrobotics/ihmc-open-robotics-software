@@ -16,6 +16,7 @@ import static us.ihmc.behaviors.sequence.actions.HandPoseActionDefinition.MAX_NU
 
 public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinition>
 {
+   private final HandPoseActionDefinition definition;
    private final CRDTDetachableReferenceFrame palmFrame;
    /**
     * This is the estimated goal chest frame as the robot executes a potential whole body action.
@@ -38,16 +39,18 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
    {
       super(id, new HandPoseActionDefinition(crdtInfo, saveFileDirectory), crdtInfo);
 
+      definition = getDefinition();
+
       palmFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
                                                    getDefinition().getCRDTPalmParentFrameName(),
                                                    getDefinition().getPalmTransformToParent());
-      goalChestToWorldTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.ROBOT, crdtInfo);
+      goalChestToWorldTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.ROBOT, definition);
       goalChestFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                               goalChestToWorldTransform.getValueReadOnly());
-      force = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
-      torque = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
-      jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, MAX_NUMBER_OF_JOINTS);
-      solutionQuality = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
+      force = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, definition);
+      torque = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, definition);
+      jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, definition, MAX_NUMBER_OF_JOINTS);
+      solutionQuality = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, definition, Double.NaN);
 
       for (RobotSide side : RobotSide.values)
          numberOfJoints.put(side, robotModel.getJointMap().getArmJointNamesAsStrings(side).size());

@@ -10,9 +10,9 @@ public class CRDTUnidirectionalInteger extends CRDTUnidirectionalField
 {
    private int value;
 
-   public CRDTUnidirectionalInteger(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, int initialValue)
+   public CRDTUnidirectionalInteger(ROS2ActorDesignation sideThatCanModify, RequestConfirmFreezable requestConfirmFreezable, int initialValue)
    {
-      super(sideThatCanModify, crdtInfo);
+      super(sideThatCanModify, requestConfirmFreezable);
 
       value = initialValue;
    }
@@ -24,9 +24,12 @@ public class CRDTUnidirectionalInteger extends CRDTUnidirectionalField
 
    public void setValue(int value)
    {
-      checkActorCanModify();
+      if (this.value != value)
+      {
+         checkActorCanModifyAndFreeze();
 
-      this.value = value;
+         this.value = value;
+      }
    }
 
    public int toMessage()
@@ -36,7 +39,7 @@ public class CRDTUnidirectionalInteger extends CRDTUnidirectionalField
 
    public void fromMessage(int value)
    {
-      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
+      if (isNotFrozen())
       {
          this.value = value;
       }

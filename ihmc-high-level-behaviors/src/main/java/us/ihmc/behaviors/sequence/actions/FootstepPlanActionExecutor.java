@@ -184,8 +184,8 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       state.setNumberOfIncompleteFootsteps(0);
       for (RobotSide side : RobotSide.values)
       {
-         state.getCurrentFootPoses().get(side).getValue().set(syncedFeetPoses.get(side));
-         state.getDesiredFootPoses().get(side).getValue().clear();
+         state.getCurrentFootPoses().get(side).accessValue().set(syncedFeetPoses.get(side));
+         state.getDesiredFootPoses().get(side).accessValue().clear();
       }
       state.setPositionDistanceToGoalTolerance(POSITION_TOLERANCE);
       state.setOrientationDistanceToGoalTolerance(ORIENTATION_TOLERANCE);
@@ -378,7 +378,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
             commandedGoalFeetPoses.get(side).setIncludingFrame(syncedFeetPoses.get(side));
          }
 
-         state.getDesiredFootPoses().get(side).getValue().clear();
+         state.getDesiredFootPoses().get(side).accessValue().clear();
          state.getDesiredFootPoses().get(side).addTrajectoryPoint(syncedFeetPoses.get(side), 0.0);
       }
 
@@ -431,7 +431,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       state.setNumberOfIncompleteFootsteps(incompleteFootsteps);
       for (RobotSide side : RobotSide.values)
       {
-         state.getCurrentFootPoses().get(side).getValue().set(syncedFeetPoses.get(side));
+         state.getCurrentFootPoses().get(side).accessValue().set(syncedFeetPoses.get(side));
       }
    }
 }

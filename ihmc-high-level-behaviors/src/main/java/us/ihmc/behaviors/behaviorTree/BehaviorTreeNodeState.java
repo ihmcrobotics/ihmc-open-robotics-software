@@ -3,7 +3,6 @@ package us.ihmc.behaviors.behaviorTree;
 import behavior_msgs.msg.dds.BehaviorTreeNodeStateMessage;
 import us.ihmc.behaviors.behaviorTree.log.BehaviorTreeNodeMessageLogger;
 import us.ihmc.communication.crdt.CRDTInfo;
-import us.ihmc.communication.crdt.RequestConfirmFreezable;
 import us.ihmc.log.LogTools;
 
 import javax.annotation.Nullable;
@@ -15,7 +14,6 @@ import java.util.List;
  * The state layer is the layer that gets synchronized over the network.
  */
 public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
-      extends RequestConfirmFreezable
       implements BehaviorTreeNodeLayer<BehaviorTreeNodeState<?>, D, BehaviorTreeNodeState<D>, D>
 {
    private final D definition;
@@ -42,18 +40,14 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
 
    public BehaviorTreeNodeState(long id, D definition, CRDTInfo crdtInfo)
    {
-      super(crdtInfo);
-
       this.id = id;
       this.definition = definition;
 
-      logger = new BehaviorTreeNodeMessageLogger(crdtInfo);
+      logger = new BehaviorTreeNodeMessageLogger(definition);
    }
 
    public void toMessage(BehaviorTreeNodeStateMessage message)
    {
-      toMessage(message.getConfirmableRequest());
-
       message.setId(id);
       message.setIsActive(isActive);
 
@@ -62,8 +56,6 @@ public class BehaviorTreeNodeState<D extends BehaviorTreeNodeDefinition>
 
    public void fromMessage(BehaviorTreeNodeStateMessage message)
    {
-      fromMessage(message.getConfirmableRequest()); // Unpack first, because this also unfreezes
-
       if (id != message.getId())
          LogTools.error("IDs should match! {} != {}", id, message.getId());
 

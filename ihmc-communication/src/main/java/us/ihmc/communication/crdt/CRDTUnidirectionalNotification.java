@@ -14,11 +14,13 @@ public class CRDTUnidirectionalNotification
 
    private boolean isSet = false;
 
-   public CRDTUnidirectionalNotification(ROS2ActorDesignation sideThatCanSet, CRDTInfo crdtInfo, RequestConfirmFreezable requestConfirmFreezable)
+   public CRDTUnidirectionalNotification(ROS2ActorDesignation sideThatCanSet,
+                                         RequestConfirmFreezable requestConfirmFreezable)
    {
       this.sideThatCanSet = sideThatCanSet;
-      this.crdtInfo = crdtInfo;
       this.requestConfirmFreezable = requestConfirmFreezable;
+
+      crdtInfo = requestConfirmFreezable.getCRDTInfo();
    }
 
    public boolean poll()

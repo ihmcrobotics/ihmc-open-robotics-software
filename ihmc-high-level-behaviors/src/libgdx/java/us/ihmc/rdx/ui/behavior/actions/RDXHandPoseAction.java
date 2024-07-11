@@ -109,7 +109,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
       definition.setName("Hand pose");
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getPalmTransformToParent().getValue());
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), definition.getPalmTransformToParent().accessValue());
       poseGizmo.create(panel3D);
 
       trajectoryDurationWidget = new ImDoubleWrapper(definition::getTrajectoryDuration,
@@ -145,8 +145,8 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          int jointIndex = i;
          final MutableObject<ImGuiInputDouble> fancyInput = new MutableObject<>();
          final MutableObject<ImGuiSliderDouble> fancySlider = new MutableObject<>();
-         jointAngleWidgets[i] = new ImDoubleWrapper(() -> getDefinition().getJointAngles().getValue()[jointIndex],
-                                                    jointAngle -> getDefinition().getJointAngles().getValue()[jointIndex] = jointAngle,
+         jointAngleWidgets[i] = new ImDoubleWrapper(() -> getDefinition().getJointAngles().getValueReadOnly(jointIndex),
+                                                    jointAngle -> getDefinition().getJointAngles().accessValue()[jointIndex] = jointAngle,
          imDouble ->
          {
             if (fancyInput.getValue() == null)
@@ -268,18 +268,19 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             double[] jointAngles = syncedRobot.getRobotModel().getPresetArmConfiguration(getDefinition().getSide(), preset);
             for (int i = 0; i < jointAngles.length; i++)
             {
-               getDefinition().getJointAngles().getValue()[i] = jointAngles[i];
+               if (getDefinition().getJointAngles().getValueReadOnly(i) != jointAngles[i]) // Prevent freezing unecessarily
+                  getDefinition().getJointAngles().accessValue()[i] = jointAngles[i];
             }
          }
 
-         armMultiBodyGraphics.get(definition.getSide()).getHandControlFrame().getTransformToDesiredFrame(definition.getPalmTransformToParent().getValue(),
+         armMultiBodyGraphics.get(definition.getSide()).getHandControlFrame().getTransformToDesiredFrame(definition.getPalmTransformToParent().accessValue(),
                                                                                                          ReferenceFrame.getWorldFrame());
       }
       else if (state.getPalmFrame().isChildOfWorld())
       {
          for (int i = 0; i < state.getJointAngles().getLength(); i++)
          {
-            definition.getJointAngles().getValue()[i] = state.getJointAngles().getValueReadOnly(i);
+            definition.getJointAngles().accessValue()[i] = state.getJointAngles().getValueReadOnly(i);
          }
 
          if (poseGizmo.getPoseGizmo().getGizmoFrame() != state.getPalmFrame().getReferenceFrame())
@@ -396,9 +397,9 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
                {
                   OneDoFJointBasics syncedJoint = syncedRobot.getFullRobotModel().getArmJoint(getDefinition().getSide(), armJointNames[i]);
                   if (syncedJoint != null)
-                     getDefinition().getJointAngles().getValue()[i] = syncedJoint.getQ();
+                     getDefinition().getJointAngles().accessValue()[i] = syncedJoint.getQ();
                   else
-                     getDefinition().getJointAngles().getValue()[i] = 0.0;
+                     getDefinition().getJointAngles().accessValue()[i] = 0.0;
                }
             }
          }
@@ -435,7 +436,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             FramePose3D syncedPalmPose = new FramePose3D();
             syncedPalmPose.setToZero(syncedPalmFrame);
             syncedPalmPose.changeFrame(actionPalmFrame.getReferenceFrame().getParent());
-            palmTransformToParent.getValue().set(syncedPalmPose);
+            palmTransformToParent.accessValue().set(syncedPalmPose);
             actionPalmFrame.update();
          }
       }

@@ -69,7 +69,7 @@ public class RDXFootPoseAction extends RDXActionNode<FootPoseActionState, FootPo
 
       getDefinition().setName("Foot pose");
 
-      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getFootToParentTransform().getValue(), adjustGoalPose);
+      poseGizmo = new RDXSelectablePose3DGizmo(ReferenceFrame.getWorldFrame(), getDefinition().getFootToParentTransform().accessValue(), adjustGoalPose);
       poseGizmo.create(panel3D);
 
       parentFrameComboBox = new ImGuiReferenceFrameLibraryCombo("Parent frame",
