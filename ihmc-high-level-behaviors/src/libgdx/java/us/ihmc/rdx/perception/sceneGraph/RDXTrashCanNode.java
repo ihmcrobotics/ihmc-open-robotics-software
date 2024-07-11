@@ -34,6 +34,8 @@ public class RDXTrashCanNode extends RDXDetectableSceneNode
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool, Set<RDXSceneLevel> sceneLevels)
    {
+      super.getRenderables(renderables, pool, sceneLevels);
+
       if (!trashCanFrameGraphic.getFramePose3D().containsNaN())
          trashCanFrameGraphic.getRenderables(renderables, pool);
       if (!handleFrameGraphic.getFramePose3D().containsNaN())

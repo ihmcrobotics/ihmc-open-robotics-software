@@ -74,6 +74,8 @@ public class TrashCanNode extends DetectableSceneNode
    {
       super.update(sceneGraph, modificationQueue);
 
+      setCurrentlyDetected(trashCanDetection.isStable());
+
       Point3DReadOnly trashCanCentroid = trashCanDetection.getMostRecentPosition();
       Point3DReadOnly handleCentroid = computeHandleCentroid((YOLOv8InstantDetection) trashCanDetection.getMostRecentDetection());
 
