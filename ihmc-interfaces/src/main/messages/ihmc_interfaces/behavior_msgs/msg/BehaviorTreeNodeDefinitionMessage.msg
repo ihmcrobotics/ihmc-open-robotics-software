@@ -8,7 +8,7 @@
 string name
 
 # Long form notes about the node.
-string notes
+# string notes
 
 # Number of children
 uint16 number_of_children

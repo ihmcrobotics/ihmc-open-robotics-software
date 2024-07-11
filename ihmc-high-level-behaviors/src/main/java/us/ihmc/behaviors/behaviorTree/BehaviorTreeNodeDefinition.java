@@ -144,14 +144,14 @@ public class BehaviorTreeNodeDefinition implements BehaviorTreeNode<BehaviorTree
    public void toMessage(BehaviorTreeNodeDefinitionMessage message)
    {
       message.setName(name.toMessage());
-      message.setNotes(notes.toMessage());
+      // message.setNotes(notes.toMessage());
       message.setNumberOfChildren(children.size());
    }
 
    public void fromMessage(BehaviorTreeNodeDefinitionMessage message)
    {
       name.fromMessage(message.getNameAsString());
-      notes.fromMessage(message.getNotesAsString());
+      // notes.fromMessage(message.getNotesAsString());
    }
 
    public void setName(String name)
