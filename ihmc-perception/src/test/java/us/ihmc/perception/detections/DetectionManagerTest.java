@@ -1,10 +1,16 @@
 package us.ihmc.perception.detections;
 
+import org.bytedeco.opencv.global.opencv_core;
+import org.bytedeco.opencv.opencv_core.Mat;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
 import us.ihmc.perception.detections.centerPose.CenterPoseInstantDetection;
 
@@ -288,7 +294,14 @@ public class DetectionManagerTest
 
       for (int i = 0; i < numberToGenerate; ++i)
       {
-         YOLOv8InstantDetection testDetection  = new YOLOv8InstantDetection("detection_" + i, 1.0, new Pose3D(), now, new ArrayList<>());
+         YOLOv8InstantDetection testDetection = new YOLOv8InstantDetection("detection_" + i,
+                                                                           1.0,
+                                                                           new Pose3D(),
+                                                                           now,
+                                                                           createRawImage(now),
+                                                                           createRawImage(now),
+                                                                           createRawImage(now),
+                                                                           new ArrayList<>());
          testDetections.add(testDetection);
       }
 
@@ -313,4 +326,19 @@ public class DetectionManagerTest
 
       return testDetections;
    }
+
+   public static RawImage createRawImage(Instant now)
+   {
+      Mat mat = new Mat(10, 10, opencv_core.CV_8UC1);
+      return new RawImage(0,
+                          now,
+                          0.0f,
+                          mat,
+                          null,
+                          10.0f,
+                          10.0f,
+                          mat.cols() / 2.0f,
+                          mat.rows() / 2.0f,
+                          new FramePoint3D(ReferenceFrame.getWorldFrame()),
+                          new FrameQuaternion(ReferenceFrame.getWorldFrame()));   }
 }

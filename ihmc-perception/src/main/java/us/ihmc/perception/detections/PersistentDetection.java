@@ -14,6 +14,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.UUID;
@@ -77,7 +78,16 @@ public class PersistentDetection
    public void updateHistory(Instant now)
    {
       // Remove detections that are too old
-      detectionHistory.removeIf(detection -> detectionExpired(detection, now) && !detection.equals(getMostRecentDetection()));
+      Iterator<InstantDetection> historyIterator = detectionHistory.iterator();
+      while (historyIterator.hasNext())
+      {
+         InstantDetection instantDetection = historyIterator.next();
+         if (detectionExpired(instantDetection, now) && !instantDetection.equals(getMostRecentDetection()))
+         {
+            instantDetection.destroy();
+            historyIterator.remove();
+         }
+      }
 
       if (!isValid)
       {
@@ -249,6 +259,14 @@ public class PersistentDetection
    public boolean isReadyForDeletion()
    {
       return readyForDeletion;
+   }
+
+   public void destroy()
+   {
+      for (InstantDetection instantDetection : detectionHistory)
+      {
+         instantDetection.destroy();
+      }
    }
 
    public void setFilterAlpha(double filterAlpha)

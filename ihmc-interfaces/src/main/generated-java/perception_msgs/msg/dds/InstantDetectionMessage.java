@@ -23,6 +23,9 @@ public class InstantDetectionMessage extends Packet<InstantDetectionMessage> imp
    /**
             * YOLOv8InstantDetection fields:
             */
+   public perception_msgs.msg.dds.ImageMessage yolo_color_image_;
+   public perception_msgs.msg.dds.ImageMessage yolo_depth_image_;
+   public perception_msgs.msg.dds.ImageMessage yolo_object_mask_;
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D32>  yolo_object_point_cloud_;
    /**
             * CenterPoseInstantDetection fields:
@@ -37,6 +40,9 @@ public class InstantDetectionMessage extends Packet<InstantDetectionMessage> imp
       object_pose_ = new us.ihmc.euclid.geometry.Pose3D();
       detection_time_ = new ihmc_common_msgs.msg.dds.InstantMessage();
       persistent_detection_id_ = new ihmc_common_msgs.msg.dds.UUIDMessage();
+      yolo_color_image_ = new perception_msgs.msg.dds.ImageMessage();
+      yolo_depth_image_ = new perception_msgs.msg.dds.ImageMessage();
+      yolo_object_mask_ = new perception_msgs.msg.dds.ImageMessage();
       yolo_object_point_cloud_ = new us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D32> (511, new geometry_msgs.msg.dds.Point32PubSubType());
       center_pose_bounding_box_2d_vertices_ = new us.ihmc.euclid.tuple3D.Point3D[8];
 
@@ -72,6 +78,9 @@ public class InstantDetectionMessage extends Packet<InstantDetectionMessage> imp
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.object_pose_, object_pose_);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.staticCopy(other.detection_time_, detection_time_);
       ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.staticCopy(other.persistent_detection_id_, persistent_detection_id_);
+      perception_msgs.msg.dds.ImageMessagePubSubType.staticCopy(other.yolo_color_image_, yolo_color_image_);
+      perception_msgs.msg.dds.ImageMessagePubSubType.staticCopy(other.yolo_depth_image_, yolo_depth_image_);
+      perception_msgs.msg.dds.ImageMessagePubSubType.staticCopy(other.yolo_object_mask_, yolo_object_mask_);
       yolo_object_point_cloud_.set(other.yolo_object_point_cloud_);
       for(int i5 = 0; i5 < center_pose_bounding_box_2d_vertices_.length; ++i5)
       {
@@ -153,6 +162,24 @@ public class InstantDetectionMessage extends Packet<InstantDetectionMessage> imp
    /**
             * YOLOv8InstantDetection fields:
             */
+   public perception_msgs.msg.dds.ImageMessage getYoloColorImage()
+   {
+      return yolo_color_image_;
+   }
+
+
+   public perception_msgs.msg.dds.ImageMessage getYoloDepthImage()
+   {
+      return yolo_depth_image_;
+   }
+
+
+   public perception_msgs.msg.dds.ImageMessage getYoloObjectMask()
+   {
+      return yolo_object_mask_;
+   }
+
+
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D32>  getYoloObjectPointCloud()
    {
       return yolo_object_point_cloud_;
@@ -200,6 +227,9 @@ public class InstantDetectionMessage extends Packet<InstantDetectionMessage> imp
       if (!this.object_pose_.epsilonEquals(other.object_pose_, epsilon)) return false;
       if (!this.detection_time_.epsilonEquals(other.detection_time_, epsilon)) return false;
       if (!this.persistent_detection_id_.epsilonEquals(other.persistent_detection_id_, epsilon)) return false;
+      if (!this.yolo_color_image_.epsilonEquals(other.yolo_color_image_, epsilon)) return false;
+      if (!this.yolo_depth_image_.epsilonEquals(other.yolo_depth_image_, epsilon)) return false;
+      if (!this.yolo_object_mask_.epsilonEquals(other.yolo_object_mask_, epsilon)) return false;
       if (this.yolo_object_point_cloud_.size() != other.yolo_object_point_cloud_.size()) { return false; }
       else
       {
@@ -239,6 +269,9 @@ public class InstantDetectionMessage extends Packet<InstantDetectionMessage> imp
       if (!this.object_pose_.equals(otherMyClass.object_pose_)) return false;
       if (!this.detection_time_.equals(otherMyClass.detection_time_)) return false;
       if (!this.persistent_detection_id_.equals(otherMyClass.persistent_detection_id_)) return false;
+      if (!this.yolo_color_image_.equals(otherMyClass.yolo_color_image_)) return false;
+      if (!this.yolo_depth_image_.equals(otherMyClass.yolo_depth_image_)) return false;
+      if (!this.yolo_object_mask_.equals(otherMyClass.yolo_object_mask_)) return false;
       if (!this.yolo_object_point_cloud_.equals(otherMyClass.yolo_object_point_cloud_)) return false;
       for(int i13 = 0; i13 < center_pose_bounding_box_2d_vertices_.length; ++i13)
       {
@@ -270,6 +303,12 @@ public class InstantDetectionMessage extends Packet<InstantDetectionMessage> imp
       builder.append(this.detection_time_);      builder.append(", ");
       builder.append("persistent_detection_id=");
       builder.append(this.persistent_detection_id_);      builder.append(", ");
+      builder.append("yolo_color_image=");
+      builder.append(this.yolo_color_image_);      builder.append(", ");
+      builder.append("yolo_depth_image=");
+      builder.append(this.yolo_depth_image_);      builder.append(", ");
+      builder.append("yolo_object_mask=");
+      builder.append(this.yolo_object_mask_);      builder.append(", ");
       builder.append("yolo_object_point_cloud=");
       builder.append(this.yolo_object_point_cloud_);      builder.append(", ");
       builder.append("center_pose_bounding_box_2d_vertices=");

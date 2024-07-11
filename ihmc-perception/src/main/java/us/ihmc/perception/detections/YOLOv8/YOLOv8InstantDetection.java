@@ -4,6 +4,7 @@ import perception_msgs.msg.dds.InstantDetectionMessage;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
+import us.ihmc.perception.RawImage;
 import us.ihmc.perception.detections.InstantDetection;
 
 import java.time.Instant;
@@ -17,11 +18,21 @@ import java.util.List;
  */
 public class YOLOv8InstantDetection extends InstantDetection
 {
+   private final RawImage colorImage;
+   private final RawImage depthImage;
+   private final RawImage objectMask;
    private final List<Point3D32> objectPointCloud;
 
-   public YOLOv8InstantDetection(String detectedObjectClass, double confidence, Pose3D pose, Instant detectionTime, List<Point3D32> objectPointCloud)
+   public YOLOv8InstantDetection(String detectedObjectClass,
+                                 double confidence,
+                                 Pose3D pose,
+                                 Instant detectionTime,
+                                 RawImage colorImage,
+                                 RawImage objectMask,
+                                 RawImage depthImage,
+                                 List<Point3D32> objectPointCloud)
    {
-      this(detectedObjectClass, detectedObjectClass, confidence, pose, detectionTime, objectPointCloud);
+      this(detectedObjectClass, detectedObjectClass, confidence, pose, detectionTime, colorImage, objectMask, depthImage, objectPointCloud);
    }
 
    public YOLOv8InstantDetection(String detectedObjectClass,
@@ -29,15 +40,37 @@ public class YOLOv8InstantDetection extends InstantDetection
                                  double confidence,
                                  Pose3D pose,
                                  Instant detectionTime,
+                                 RawImage colorImage,
+                                 RawImage objectMask,
+                                 RawImage depthImage,
                                  List<Point3D32> objectPointCloud)
    {
       super(detectedObjectClass, detectedObjectName, confidence, pose, detectionTime);
+
+      this.colorImage = colorImage.get();
+      this.depthImage = depthImage.get();
+      this.objectMask = objectMask.get();
       this.objectPointCloud = objectPointCloud;
    }
 
    public List<Point3D32> getObjectPointCloud()
    {
       return objectPointCloud;
+   }
+
+   public RawImage getColorImage()
+   {
+      return colorImage;
+   }
+
+   public RawImage getDepthImage()
+   {
+      return objectMask;
+   }
+
+   public RawImage getObjectMask()
+   {
+      return objectMask;
    }
 
    @Override
@@ -50,6 +83,7 @@ public class YOLOv8InstantDetection extends InstantDetection
          Point3D32 point = message.getYoloObjectPointCloud().add();
          point.set(objectPointCloud.get(i));
       }
+      // TODO: Should pack images into message
    }
 
    public static YOLOv8InstantDetection fromMessage(InstantDetectionMessage message)
@@ -61,6 +95,18 @@ public class YOLOv8InstantDetection extends InstantDetection
                                         message.getConfidence(),
                                         message.getObjectPose(),
                                         MessageTools.toInstant(message.getDetectionTime()),
+                                        RawImage.fromMessage(message.getYoloColorImage()),
+                                        RawImage.fromMessage(message.getYoloDepthImage()),
+                                        RawImage.fromMessage(message.getYoloObjectMask()),
                                         objectPointCloud);
+   }
+
+   @Override
+   public void destroy()
+   {
+      super.destroy();
+      colorImage.release();
+      depthImage.release();
+      objectMask.release();
    }
 }

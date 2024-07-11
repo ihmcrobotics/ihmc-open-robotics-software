@@ -15,7 +15,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "b60dc0a79b15a15d2e9f3c265082ee070b7b76b87669267eb91fcebdc9789039";
+   		return "1ef095758fe1be9e596c4518cd767c20442b13185cf44ff5937d4e17e40a8cba";
    }
    
    @Override
@@ -87,6 +87,9 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
       {
           current_alignment += perception_msgs.msg.dds.DoorNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 200; ++i0)
+      {
+          current_alignment += perception_msgs.msg.dds.TrashCanNodeMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -159,6 +162,11 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       {
           current_alignment += perception_msgs.msg.dds.DoorNodeMessagePubSubType.getCdrSerializedSize(data.getDoorSceneNodes().get(i0), current_alignment);}
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      for(int i0 = 0; i0 < data.getTrashCanNodes().size(); ++i0)
+      {
+          current_alignment += perception_msgs.msg.dds.TrashCanNodeMessagePubSubType.getCdrSerializedSize(data.getTrashCanNodes().get(i0), current_alignment);}
+
 
       return current_alignment - initial_alignment;
    }
@@ -213,6 +221,10 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.write_type_e(data.getDoorSceneNodes());else
           throw new RuntimeException("door_scene_nodes field exceeds the maximum length");
 
+      if(data.getTrashCanNodes().size() <= 200)
+      cdr.write_type_e(data.getTrashCanNodes());else
+          throw new RuntimeException("trash_can_nodes field exceeds the maximum length");
+
    }
 
    public static void read(perception_msgs.msg.dds.SceneGraphMessage data, us.ihmc.idl.CDR cdr)
@@ -232,6 +244,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       cdr.read_type_e(data.getPrimitiveRigidBodySceneNodes());	
       cdr.read_type_e(data.getYoloSceneNodes());	
       cdr.read_type_e(data.getDoorSceneNodes());	
+      cdr.read_type_e(data.getTrashCanNodes());	
 
    }
 
@@ -251,6 +264,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.write_type_e("primitive_rigid_body_scene_nodes", data.getPrimitiveRigidBodySceneNodes());
       ser.write_type_e("yolo_scene_nodes", data.getYoloSceneNodes());
       ser.write_type_e("door_scene_nodes", data.getDoorSceneNodes());
+      ser.write_type_e("trash_can_nodes", data.getTrashCanNodes());
    }
 
    @Override
@@ -269,6 +283,7 @@ public class SceneGraphMessagePubSubType implements us.ihmc.pubsub.TopicDataType
       ser.read_type_e("primitive_rigid_body_scene_nodes", data.getPrimitiveRigidBodySceneNodes());
       ser.read_type_e("yolo_scene_nodes", data.getYoloSceneNodes());
       ser.read_type_e("door_scene_nodes", data.getDoorSceneNodes());
+      ser.read_type_e("trash_can_nodes", data.getTrashCanNodes());
    }
 
    public static void staticCopy(perception_msgs.msg.dds.SceneGraphMessage src, perception_msgs.msg.dds.SceneGraphMessage dest)
