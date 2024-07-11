@@ -233,7 +233,7 @@ public class ScrewPrimitiveActionExecutor extends ActionNodeExecutor<ScrewPrimit
                      state.getPreviewSolutionQuality().setValue(armIKSolver.getQuality());
                      for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
                      {
-                        state.getPreviewJointAngles().accessValue()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
+                        state.getPreviewJointAngles().setValue(i, armIKSolver.getSolutionOneDoFJoints()[i].getQ());
                      }
                   }
                }

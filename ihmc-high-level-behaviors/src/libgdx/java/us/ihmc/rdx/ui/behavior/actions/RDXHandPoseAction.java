@@ -146,7 +146,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
          final MutableObject<ImGuiInputDouble> fancyInput = new MutableObject<>();
          final MutableObject<ImGuiSliderDouble> fancySlider = new MutableObject<>();
          jointAngleWidgets[i] = new ImDoubleWrapper(() -> getDefinition().getJointAngles().getValueReadOnly(jointIndex),
-                                                    jointAngle -> getDefinition().getJointAngles().accessValue()[jointIndex] = jointAngle,
+                                                    jointAngle -> getDefinition().getJointAngles().setValue(jointIndex, jointAngle),
          imDouble ->
          {
             if (fancyInput.getValue() == null)
@@ -172,12 +172,31 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       usePredefinedJointAnglesWrapper = new ImBooleanWrapper(definition::getUsePredefinedJointAngles,
                                                              definition::setUsePredefinedJointAngles,
                                                              imBoolean ->
-                                                             {
-                                                                if (ImGui.checkbox(labels.get("Use Predefined Joint Angles"), imBoolean))
-                                                                {
-                                                                   definition.setPreset(null); // Preserve joint angles from before
-                                                                }
-                                                             });
+                        {
+                           if (ImGui.checkbox(labels.get("Use Predefined Joint Angles"), imBoolean))
+                           {
+                              definition.setPreset(null); // Preserve joint angles from before
+
+                              if (imBoolean.get()) // When switching into predefined, copy the latest preview joint angles to the definition
+                              {
+                                 for (int i = 0; i < state.getPreviewJointAngles().getLength(); i++)
+                                 {
+                                    definition.getJointAngles().accessValue()[i] = state.getPreviewJointAngles().getValueReadOnly(i);
+                                 }
+                              }
+                              else // When switching from predefined, keep the desired hand in the same place
+                              {
+                                 CRDTDetachableReferenceFrame actionPalmFrame = getState().getPalmFrame();
+                                 CRDTUnidirectionalRigidBodyTransform palmTransformToParent = definition.getPalmTransformToParent();
+                                 ReferenceFrame previewPalmFrame = armMultiBodyGraphics.get(definition.getSide()).getHandControlFrame();
+                                 FramePose3D previewPalmPose = new FramePose3D();
+                                 previewPalmPose.setToZero(previewPalmFrame);
+                                 previewPalmPose.changeFrame(actionPalmFrame.getReferenceFrame().getParent());
+                                 palmTransformToParent.accessValue().set(previewPalmPose);
+                                 actionPalmFrame.update();
+                              }
+                           }
+                        });
       jointSpaceControlWrapper = new ImBooleanWrapper(definition::getJointspaceOnly,
                                                       definition::setJointspaceOnly,
                                                       imBoolean -> {
@@ -268,21 +287,12 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             double[] jointAngles = syncedRobot.getRobotModel().getPresetArmConfiguration(getDefinition().getSide(), preset);
             for (int i = 0; i < jointAngles.length; i++)
             {
-               if (getDefinition().getJointAngles().getValueReadOnly(i) != jointAngles[i]) // Prevent freezing unecessarily
-                  getDefinition().getJointAngles().accessValue()[i] = jointAngles[i];
+               getDefinition().getJointAngles().setValue(i, jointAngles[i]);
             }
          }
-
-         armMultiBodyGraphics.get(definition.getSide()).getHandControlFrame().getTransformToDesiredFrame(definition.getPalmTransformToParent().accessValue(),
-                                                                                                         ReferenceFrame.getWorldFrame());
       }
       else if (state.getPalmFrame().isChildOfWorld())
       {
-         for (int i = 0; i < state.getJointAngles().getLength(); i++)
-         {
-            definition.getJointAngles().accessValue()[i] = state.getJointAngles().getValueReadOnly(i);
-         }
-
          if (poseGizmo.getPoseGizmo().getGizmoFrame() != state.getPalmFrame().getReferenceFrame())
          {
             poseGizmo.getPoseGizmo().setGizmoFrame(state.getPalmFrame().getReferenceFrame());
@@ -294,6 +304,11 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
 
          poseGizmo.getPoseGizmo().update();
          highlightModels.get(definition.getSide()).setPose(graphicFrame.getReferenceFrame());
+
+         if (poseGizmo.getPoseGizmo().getGizmoModifiedByUser().poll())
+         {
+            definition.getPalmTransformToParent().accessValue();
+         }
 
          if (poseGizmo.isSelected() || isMouseHovering)
          {
@@ -349,7 +364,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
       armMultiBodyGraphic.getFloatingJoint().getJointPose().set(state.getGoalChestToWorldTransform().getValueReadOnly());
       for (int i = 0; i < armMultiBodyGraphic.getJoints().length; i++)
       {
-         armMultiBodyGraphic.getJoints()[i].setQ(state.getJointAngles().getValueReadOnly(i));
+         armMultiBodyGraphic.getJoints()[i].setQ(state.getPreviewJointAngles().getValueReadOnly(i));
       }
       armMultiBodyGraphic.updateAfterModifyingConfiguration();
       armMultiBodyGraphic.setColor(RDXIKSolverColors.getColor(state.getSolutionQuality()));
@@ -382,7 +397,7 @@ public class RDXHandPoseAction extends RDXActionNode<HandPoseActionState, HandPo
             getDefinition().setPreset(currentConfiguration.get() == 0 ? null : PresetArmConfiguration.values()[currentConfiguration.get() - 1]);
          ImGui.popItemWidth();
 
-         if (getDefinition().getPreset() == null)
+         if (definition.getPreset() == null)
          {
             ArmJointName[] armJointNames = syncedRobot.getRobotModel().getJointMap().getArmJointNames(getDefinition().getSide());
             ImGui.pushItemWidth(80.0f);

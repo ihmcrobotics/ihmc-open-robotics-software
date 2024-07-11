@@ -156,7 +156,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
          state.setSolutionQuality(0.0);
          for (int i = 0; i < definition.getJointAngles().getLength(); i++)
          {
-            state.getJointAngles().accessValue()[i] = definition.getJointAngles().getValueReadOnly(i);
+            state.getPreviewJointAngles().accessValue()[i] = definition.getJointAngles().getValueReadOnly(i);
          }
       }
       else
@@ -174,7 +174,7 @@ public class HandPoseActionExecutor extends ActionNodeExecutor<HandPoseActionSta
             state.setSolutionQuality(armIKSolver.getQuality());
             for (int i = 0; i < armIKSolver.getSolutionOneDoFJoints().length; i++)
             {
-               state.getJointAngles().accessValue()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
+               state.getPreviewJointAngles().accessValue()[i] = armIKSolver.getSolutionOneDoFJoints()[i].getQ();
             }
          }
       }

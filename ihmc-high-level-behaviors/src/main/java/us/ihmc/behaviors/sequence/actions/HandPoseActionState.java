@@ -23,12 +23,12 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
     * This is used to compute joint angles that achieve the desired and previewed end pose
     * even when the pelvis and/or chest might also move.
     */
-   private final CRDTUnidirectionalRigidBodyTransform goalChestToWorldTransform;
+   private final CRDTStatusRigidBodyTransform goalChestToWorldTransform;
    private final ReferenceFrame goalChestFrame;
-   private final CRDTUnidirectionalVector3D force;
-   private final CRDTUnidirectionalVector3D torque;
-   private final CRDTUnidirectionalDoubleArray jointAngles;
-   private final CRDTUnidirectionalDouble solutionQuality;
+   private final CRDTStatusVector3D force;
+   private final CRDTStatusVector3D torque;
+   private final CRDTStatusDoubleArray previewJointAngles;
+   private final CRDTStatusDouble solutionQuality;
    private final SideDependentList<Integer> numberOfJoints = new SideDependentList<>();
 
    public HandPoseActionState(long id,
@@ -44,13 +44,13 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
       palmFrame = new CRDTDetachableReferenceFrame(referenceFrameLibrary,
                                                    getDefinition().getCRDTPalmParentFrameName(),
                                                    getDefinition().getPalmTransformToParent());
-      goalChestToWorldTransform = new CRDTUnidirectionalRigidBodyTransform(ROS2ActorDesignation.ROBOT, definition);
+      goalChestToWorldTransform = new CRDTStatusRigidBodyTransform(ROS2ActorDesignation.ROBOT, crdtInfo);
       goalChestFrame = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent(ReferenceFrame.getWorldFrame(),
                                                                                               goalChestToWorldTransform.getValueReadOnly());
-      force = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, definition);
-      torque = new CRDTUnidirectionalVector3D(ROS2ActorDesignation.ROBOT, definition);
-      jointAngles = new CRDTUnidirectionalDoubleArray(ROS2ActorDesignation.ROBOT, definition, MAX_NUMBER_OF_JOINTS);
-      solutionQuality = new CRDTUnidirectionalDouble(ROS2ActorDesignation.ROBOT, definition, Double.NaN);
+      force = new CRDTStatusVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
+      torque = new CRDTStatusVector3D(ROS2ActorDesignation.ROBOT, crdtInfo);
+      previewJointAngles = new CRDTStatusDoubleArray(ROS2ActorDesignation.ROBOT, crdtInfo, MAX_NUMBER_OF_JOINTS);
+      solutionQuality = new CRDTStatusDouble(ROS2ActorDesignation.ROBOT, crdtInfo, Double.NaN);
 
       for (RobotSide side : RobotSide.values)
          numberOfJoints.put(side, robotModel.getJointMap().getArmJointNamesAsStrings(side).size());
@@ -73,7 +73,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
       torque.toMessage(message.getTorque());
       for (int i = 0; i < MAX_NUMBER_OF_JOINTS; i++)
       {
-         jointAngles.toMessage(message.getJointAngles());
+         previewJointAngles.toMessage(message.getJointAngles());
       }
       message.setSolutionQuality(solutionQuality.toMessage());
    }
@@ -86,7 +86,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
 
       force.fromMessage(message.getForce());
       torque.fromMessage(message.getTorque());
-      jointAngles.fromMessage(message.getJointAngles());
+      previewJointAngles.fromMessage(message.getJointAngles());
       solutionQuality.fromMessage(message.getSolutionQuality());
       goalChestToWorldTransform.fromMessage(message.getGoalChestTransformToWorld());
       goalChestFrame.update();
@@ -97,7 +97,7 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
       return palmFrame;
    }
 
-   public CRDTUnidirectionalRigidBodyTransform getGoalChestToWorldTransform()
+   public CRDTStatusRigidBodyTransform getGoalChestToWorldTransform()
    {
       return goalChestToWorldTransform;
    }
@@ -107,19 +107,19 @@ public class HandPoseActionState extends ActionNodeState<HandPoseActionDefinitio
       return goalChestFrame;
    }
 
-   public CRDTUnidirectionalVector3D getForce()
+   public CRDTStatusVector3D getForce()
    {
       return force;
    }
 
-   public CRDTUnidirectionalVector3D getTorque()
+   public CRDTStatusVector3D getTorque()
    {
       return torque;
    }
 
-   public CRDTUnidirectionalDoubleArray getJointAngles()
+   public CRDTStatusDoubleArray getPreviewJointAngles()
    {
-      return jointAngles;
+      return previewJointAngles;
    }
 
    public int getNumberOfJoints()

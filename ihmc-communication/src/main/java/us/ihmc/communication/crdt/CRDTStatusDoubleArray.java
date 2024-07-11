@@ -7,11 +7,11 @@ import us.ihmc.communication.ros2.ROS2ActorDesignation;
  * and read-only for the others. The internal writeable instance is kept protected
  * from unchecked modifications.
  */
-public class CRDTUnidirectionalDoubleArray extends CRDTUnidirectionalMutableField<double[]>
+public class CRDTStatusDoubleArray extends CRDTStatusMutableField<double[]>
 {
-   public CRDTUnidirectionalDoubleArray(ROS2ActorDesignation sideThatCanModify, RequestConfirmFreezable requestConfirmFreezable, int arraySize)
+   public CRDTStatusDoubleArray(ROS2ActorDesignation sideThatCanModify, CRDTInfo crdtInfo, int arraySize)
    {
-      super(sideThatCanModify, requestConfirmFreezable, () -> new double[arraySize]);
+      super(sideThatCanModify, crdtInfo, () -> new double[arraySize]);
    }
 
    public double getValueReadOnly(int index)
@@ -19,11 +19,9 @@ public class CRDTUnidirectionalDoubleArray extends CRDTUnidirectionalMutableFiel
       return getValueInternal()[index];
    }
 
-   /** Use to prevent unecessary freezes. */
    public void setValue(int index, double value)
    {
-      if (getValueReadOnly(index) != value)
-         accessValue()[index] = value;
+      accessValue()[index] = value;
    }
 
    public int getLength()
@@ -41,7 +39,7 @@ public class CRDTUnidirectionalDoubleArray extends CRDTUnidirectionalMutableFiel
 
    public void fromMessage(double[] messageArray)
    {
-      if (isNotFrozen())
+      if (isModificationDisallowed()) // Ignore updates if we are the only side that can modify
       {
          for (int i = 0; i < getValueInternal().length; i++)
          {
