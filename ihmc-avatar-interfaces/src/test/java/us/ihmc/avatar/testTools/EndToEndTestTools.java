@@ -1051,7 +1051,7 @@ public class EndToEndTestTools
       return message;
    }
 
-   public static FootstepDataListMessage generateInPlaceTurningFootsteps(ReferenceFrame midFootFrame, int numOfRotations, double turnAngle, double stepWidth)
+   public static FootstepDataListMessage generateInPlaceTurningFootsteps(RobotSide startingRobotSide, ReferenceFrame midFootFrame, int numOfRotations, double turnAngle, double stepWidth)
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
@@ -1059,7 +1059,7 @@ public class EndToEndTestTools
       FrameQuaternion rotation = new FrameQuaternion(midFootFrame);
 
       int stepsToGenerate = (int) (2*numOfRotations * Math.PI / turnAngle);
-      RobotSide stepSide = RobotSide.LEFT;
+      RobotSide stepSide = startingRobotSide;
       for (int i = 0; i < stepsToGenerate; i++)
       {
          rotation.appendYawRotation(turnAngle);
