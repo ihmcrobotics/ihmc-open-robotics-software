@@ -78,12 +78,9 @@ public class OusterDepthImageRetriever
                   depthImage.release();
                depthImage = new RawImage(depthSequenceNumber++,
                                          ouster.getAquisitionInstant(),
-                                         ouster.getImageWidth(),
-                                         ouster.getImageHeight(),
                                          1.0f,
                                          depthExtractionKernel.getExtractedDepthImage().getBytedecoOpenCVMat().clone(),
                                          null,
-                                         opencv_core.CV_16UC1,
                                          ouster.getImageWidth() / (2.0f * (float) Math.PI),
                                          // These are nominal values approximated by Duncan & Tomasz
                                          ouster.getImageHeight() / ((float) Math.PI / 2.0f),

@@ -340,6 +340,7 @@ public class FootstepPlanActionExecutor extends ActionNodeExecutor<FootstepPlanA
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlanToExecute,
                                                                                                                     definition.getSwingDuration(),
                                                                                                                     definition.getTransferDuration());
+//      footstepDataListMessage.setTrustHeightOfFootsteps(false); // FIXME: This assumes flat ground
       double finalTransferDuration = 0.01; // We don't want any unecessary pauses at the end; but it can't be 0
       footstepDataListMessage.setFinalTransferDuration(finalTransferDuration);
       footstepDataListMessage.getQueueingProperties().setExecutionMode(definition.getExecutionMode().getValue().toByte());

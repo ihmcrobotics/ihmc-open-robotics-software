@@ -35,6 +35,7 @@ import us.ihmc.perception.HumanoidActivePerceptionModule;
 import us.ihmc.perception.heightMap.TerrainMapData;
 import us.ihmc.rdx.imgui.RDXPanel;
 import us.ihmc.rdx.input.ImGui3DViewInput;
+import us.ihmc.rdx.ui.RDXBaseUI;
 import us.ihmc.rdx.ui.RDXStoredPropertySetTuner;
 import us.ihmc.robotics.math.trajectories.interfaces.PolynomialReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -73,7 +74,8 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
    private final ImBoolean useAStarFootstepPlanner = new ImBoolean(true);
    private final ImBoolean useMonteCarloFootstepPlanner = new ImBoolean(false);
 
-   public RDXContinuousHikingPanel(ROS2Helper ros2Helper,
+   public RDXContinuousHikingPanel(RDXBaseUI baseUI,
+                                   ROS2Helper ros2Helper,
                                    DRCRobotModel robotModel,
                                    HumanoidActivePerceptionModule activePerceptionModule,
                                    ContinuousHikingParameters continuousHikingParameters,
@@ -103,7 +105,7 @@ public class RDXContinuousHikingPanel extends RDXPanel implements RenderableProv
          defaultContactPoints.put(robotSide, defaultFoothold);
       }
       StancePoseCalculator stancePoseCalculator = new StancePoseCalculator(defaultContactPoints);
-      stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(ros2Helper, stancePoseCalculator);
+      stancePoseSelectionPanel = new RDXStancePoseSelectionPanel(baseUI, ros2Helper, stancePoseCalculator);
       addChild(stancePoseSelectionPanel);
 
       terrainPlanningDebugger = new RDXTerrainPlanningDebugger(ros2Helper,

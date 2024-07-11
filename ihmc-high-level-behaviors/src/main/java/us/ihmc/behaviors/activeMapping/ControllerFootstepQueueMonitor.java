@@ -34,9 +34,6 @@ public class ControllerFootstepQueueMonitor
 
    private void footstepQueueStatusReceived(FootstepQueueStatusMessage footstepQueueStatusMessage)
    {
-      // Set the that controller queue size before getting the new one
-      statistics.setLastFootstepQueueLength(controllerQueueSize);
-
       controllerQueue = footstepQueueStatusMessage.getQueuedFootstepList();
       if (controllerQueueSize != footstepQueueStatusMessage.getQueuedFootstepList().size())
       {
@@ -44,6 +41,9 @@ public class ControllerFootstepQueueMonitor
          LogTools.info(message);
          statistics.appendString(message);
       }
+
+      // For the statistics set the that controller queue size before getting the new one
+      statistics.setLastFootstepQueueLength(controllerQueueSize);
       controllerQueueSize = footstepQueueStatusMessage.getQueuedFootstepList().size();
    }
 

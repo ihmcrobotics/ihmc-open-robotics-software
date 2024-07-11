@@ -24,6 +24,7 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    /** Reduce the communication update rate. */
    private final Throttler communicationThrottler = new Throttler().setFrequency(ROS2BehaviorTreeState.SYNC_FREQUENCY);
    private final ImGuiAveragedFrequencyText subscriptionFrequencyText = new ImGuiAveragedFrequencyText();
+   private final ImGuiAveragedFrequencyText publishFrequencyText = new ImGuiAveragedFrequencyText();
 
    public RDXROS2BehaviorTree(WorkspaceResourceDirectory treeFilesDirectory,
                               DRCRobotModel robotModel,
@@ -53,12 +54,17 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
    {
       boolean updateComms = communicationThrottler.run();
       if (updateComms)
+      {
          ros2BehaviorTreeState.updateSubscription();
+      }
 
       super.update();
 
       if (updateComms)
+      {
          ros2BehaviorTreeState.updatePublication();
+         publishFrequencyText.ping();
+      }
    }
 
    @Override
@@ -91,6 +97,14 @@ public class RDXROS2BehaviorTree extends RDXBehaviorTree
 
       ImGui.sameLine(ImGui.getWindowSizeX() - droppedTextWidth - rightMargin);
       ImGui.text("Dropped: %4d".formatted(ros2BehaviorTreeState.getBehaviorTreeSubscription().getMessageDropCount()));
+
+      ImGui.endMenuBar();
+
+      ImGui.text("CRDT#: Local: %d (%s)  Robot: %d  Out of order: %d"
+                       .formatted(getBehaviorTreeState().getCRDTInfo().getUpdateNumber(),
+                                  publishFrequencyText.getText(),
+                                  ros2BehaviorTreeState.getBehaviorTreeSubscription().getPreviousSequenceID(),
+                                  ros2BehaviorTreeState.getBehaviorTreeSubscription().getOutOfOrderCount()));
 
       super.renderImGuiWidgetsPost();
    }

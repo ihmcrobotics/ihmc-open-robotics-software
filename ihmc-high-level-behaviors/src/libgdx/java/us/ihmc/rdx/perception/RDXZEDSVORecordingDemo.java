@@ -6,7 +6,6 @@ import us.ihmc.communication.PerceptionAPI;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2Heartbeat;
 import us.ihmc.communication.ros2.ROS2Helper;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.perception.RawImage;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.rdx.Lwjgl3ApplicationAdapter;
@@ -34,7 +33,7 @@ public class RDXZEDSVORecordingDemo
    private static final String SVO_FILE_NAME = IHMCCommonPaths.PERCEPTION_LOGS_DIRECTORY.toAbsolutePath() + "/20240625_154000_ZEDRecording_Demo.svo2";
 
    private final RDXBaseUI baseUI = new RDXBaseUI();
-   private ROS2Node ros2Node;
+   private final ROS2Node ros2Node;
    private RDXPerceptionVisualizersPanel perceptionVisualizerPanel;
    private RDXZEDSVORecorderPanel recorderPanel;
 
@@ -51,7 +50,7 @@ public class RDXZEDSVORecordingDemo
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "zed_svo_recording_demo");
       ROS2Helper ros2Helper = new ROS2Helper(ros2Node);
 
-      zedColorDepthImageRetrieverSVO = new ZEDColorDepthImageRetrieverSVO(0, ReferenceFrame::getWorldFrame, null, null, ros2Helper, RECORD_MODE, SVO_FILE_NAME);
+      zedColorDepthImageRetrieverSVO = new ZEDColorDepthImageRetrieverSVO(0, () -> true, () -> true, ros2Helper, RECORD_MODE, SVO_FILE_NAME);
       zedColorDepthImageRetrieverSVO.start();
 
       zedColorDepthImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES,

@@ -10,9 +10,9 @@ import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.perception.RawImage;
-import us.ihmc.perception.YOLOv8.YOLOv8DetectionClass;
-import us.ihmc.perception.YOLOv8.YOLOv8DetectionResults;
-import us.ihmc.perception.YOLOv8.YOLOv8ObjectDetector;
+import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionClass;
+import us.ihmc.perception.detections.YOLOv8.YOLOv8DetectionResults;
+import us.ihmc.perception.detections.YOLOv8.YOLOv8ObjectDetector;
 import us.ihmc.perception.opencl.OpenCLDepthImageSegmenter;
 import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.pubsub.DomainFactory;
@@ -36,7 +36,7 @@ public class RDXYOLOv8PointCloudSegmentationDemo
    private static final float CONFIDENCE_THRESHOLD = 0.5f;
    private static final float NMS_THRESHOLD = 0.1f;
    private static final float MASK_THRESHOLD = 0.0f;
-   private static final YOLOv8DetectionClass OBJECT_TYPE = YOLOv8DetectionClass.DOOR_LEVER;
+   private static final YOLOv8DetectionClass OBJECT_TYPE = YOLOv8DetectionClass.DOOR_PANEL;
    private static final Random random = new Random();
 
    private final OpenCLPointCloudExtractor extractor = new OpenCLPointCloudExtractor();
@@ -58,8 +58,8 @@ public class RDXYOLOv8PointCloudSegmentationDemo
    {
       zedImageRetriever = new ZEDColorDepthImageRetriever(0,
                                                           ReferenceFrame::getWorldFrame,
-                                                          new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_DEPTH),
-                                                          new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_COLOR));
+                                                          new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_DEPTH)::isDemanded,
+                                                          new ROS2DemandGraphNode(ros2Helper, PerceptionAPI.REQUEST_ZED_COLOR)::isDemanded);
       zedImageRetriever.start();
       zedImagePublisher = new ZEDColorDepthImagePublisher(PerceptionAPI.ZED2_COLOR_IMAGES, PerceptionAPI.ZED2_DEPTH, PerceptionAPI.ZED2_CUT_OUT_DEPTH);
 
