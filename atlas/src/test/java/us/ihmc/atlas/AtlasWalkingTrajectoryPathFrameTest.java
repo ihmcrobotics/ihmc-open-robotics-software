@@ -193,8 +193,8 @@ public class AtlasWalkingTrajectoryPathFrameTest
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-      FootstepDataListMessage steps = EndToEndTestTools.generateInPlaceTurningFootsteps(simulationTestHelper.getControllerReferenceFrames()
-                                                                                                            .getMidFeetZUpFrame(),
+      FootstepDataListMessage steps = EndToEndTestTools.generateInPlaceTurningFootsteps(RobotSide.LEFT,
+                                                                                        simulationTestHelper.getControllerReferenceFrames().getMidFeetZUpFrame(),
                                                                                         2,
                                                                                         Math.toRadians(30),
                                                                                         steppingParameters.getInPlaceWidth());
@@ -397,7 +397,7 @@ public class AtlasWalkingTrajectoryPathFrameTest
                                                                                                                                            new Vector3D(0.1,
                                                                                                                                                         0.8,
                                                                                                                                                         0.0))));
-      FootstepDataListMessage footsteps = generateFootstepsForSteppingStonesB(cinderBlockPoses, getStepHeightOffset());
+      FootstepDataListMessage footsteps = generateFootstepsForSteppingStonesB(cinderBlockPoses, 0.0);
 
       DRCRobotModel robotModel = getRobotModel();
       SCS2AvatarTestingSimulationFactory factory = SCS2AvatarTestingSimulationFactory.createDefaultTestSimulationFactory(robotModel,
@@ -427,11 +427,6 @@ public class AtlasWalkingTrajectoryPathFrameTest
       assertWalkingFrameMatchMidFeetZUpFrame();
    }
 
-   public double getStepHeightOffset()
-   {
-      return 0.0;
-   }
-
    private static FootstepDataListMessage generateFootstepsForSteppingStonesB(List<? extends List<? extends Pose3DReadOnly>> cinderBlockPoses, double zOffset)
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
@@ -449,21 +444,22 @@ public class AtlasWalkingTrajectoryPathFrameTest
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(7).get(4), 0.0, 0.08, zOffset, yawOffset);
       addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(6).get(3), 0.0, -0.08, zOffset, yawOffset);
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(7).get(2), 0.0, 0.08, zOffset, yawOffset);
-      yawOffset = 0.75 * Math.PI;
+      yawOffset = 0.95 * Math.PI;
       addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(6).get(1), 0.0, 0.04, zOffset, yawOffset);
       yawOffset = Math.PI;
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(5).get(0), 0.0, 0.08, zOffset, yawOffset);
 
       addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(4).get(1), 0.0, 0.08, zOffset, yawOffset);
-      yawOffset = 0.85 * Math.PI;
+      yawOffset = 0.65 * Math.PI;
       addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(3).get(1), 0.02, -0.08, zOffset, yawOffset);
-      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(2).get(0), 0.0, 0.12, zOffset, yawOffset);
-      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(2).get(0), 0.0, -0.12, zOffset, yawOffset);
       yawOffset = Math.PI;
-      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(1).get(1), 0.0, -0.08, zOffset, yawOffset);
-      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(1).get(0), 0.0, 0.08, zOffset, yawOffset);
-      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(0).get(1), 0.0, -0.08, zOffset, yawOffset);
-      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(0).get(0), 0.0, 0.08, zOffset, yawOffset);
+      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(2).get(0), 0.0, 0.11, zOffset, yawOffset);
+//      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(2).get(0), 0.0, -0.12, zOffset, yawOffset);
+//      yawOffset = Math.PI;
+//      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(1).get(1), 0.0, -0.08, zOffset, yawOffset);
+//      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(1).get(0), 0.0, 0.08, zOffset, yawOffset);
+//      addFootstepFromCBPose(footsteps, RobotSide.LEFT, cinderBlockPoses.get(0).get(1), 0.0, -0.08, zOffset, yawOffset);
+//      addFootstepFromCBPose(footsteps, RobotSide.RIGHT, cinderBlockPoses.get(0).get(0), 0.0, 0.08, zOffset, yawOffset);
 
       return footsteps;
    }
