@@ -175,8 +175,8 @@ public class RDXHumanoidDemoPoses extends RDXPanel
             armsConfiguration.put(RobotSide.LEFT, leftArm);
             armsConfiguration.put(RobotSide.RIGHT, rightArm);
 
-            pelvisOrientation.setToPitchOrientation(Math.toRadians(10.0));
-            pelvisPosition.setZ(0.78);
+//            pelvisOrientation.setToPitchOrientation(Math.toRadians(10.0));
+            pelvisPosition.setZ(0.70);
          }
          for (RobotSide robotSide : RobotSide.values)
             appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), teleoperationParameters.getTrajectoryTime(), delay);
@@ -370,8 +370,8 @@ public class RDXHumanoidDemoPoses extends RDXPanel
 
          for (RobotSide robotSide : RobotSide.values)
             appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), duration);
-         appendChestOrientationToPublish(chestOrientation, duration);
-         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, duration);
+         appendChestOrientationToPublish(chestOrientation, duration, 0.05);
+         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, duration, 0.05);
 
          publishPoses();
       }
@@ -403,8 +403,8 @@ public class RDXHumanoidDemoPoses extends RDXPanel
 
          for (RobotSide robotSide : RobotSide.values)
             appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), duration);
-         appendChestOrientationToPublish(chestOrientation, duration);
-         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, duration);
+         appendChestOrientationToPublish(chestOrientation, duration, 0.05);
+         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, duration, 0.05);
 
          publishPoses();
       }
@@ -454,8 +454,8 @@ public class RDXHumanoidDemoPoses extends RDXPanel
 
          for (RobotSide robotSide : RobotSide.values)
             appendArmTrajectoryMessageToPublish(robotSide, armsConfiguration.get(robotSide), duration);
-         appendChestOrientationToPublish(chestOrientation, duration);
-         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, duration);
+         appendChestOrientationToPublish(chestOrientation, duration, 0.05);
+         appendPelvisOrientationToPublish(pelvisOrientation, pelvisPosition, duration, 0.05);
 
          publishPoses();
       }
