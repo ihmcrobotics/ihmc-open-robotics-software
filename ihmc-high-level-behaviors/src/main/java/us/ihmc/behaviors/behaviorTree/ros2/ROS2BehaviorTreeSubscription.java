@@ -26,6 +26,7 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
    private long numberOfMessagesReceived = 0;
    private long previousSequenceID = -1;
    private long messageDropCount = 0;
+   private long outOfOrderCount = 0;
    private int numberOfOnRobotNodes = 0;
    private final SwapReference<BehaviorTreeStateMessage> behaviorTreeStateMessageSwapReference;
    private final Notification recievedMessageNotification = new Notification();
@@ -48,13 +49,23 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
             messageRecievedCallback.run();
          }
 
-         long nextSequenceID = behaviorTreeStateMessage.getSequenceId();
-         if (previousSequenceID > -1)
+         long receivedSequenceID = behaviorTreeStateMessage.getSequenceId();
+         long expectedSequenceID = previousSequenceID + 1;
+         long difference = receivedSequenceID - expectedSequenceID;
+
+         if (Math.abs(difference) < ROS2BehaviorTreeState.SYNC_FREQUENCY) // Account for restarts
          {
-            long expectedSequenceID = previousSequenceID + 1;
-            messageDropCount += nextSequenceID - expectedSequenceID;
+            if (difference > 0)
+            {
+               messageDropCount += difference;
+            }
+            else if (difference < 0)
+            {
+               outOfOrderCount -= difference;
+            }
          }
-         previousSequenceID = nextSequenceID;
+
+         previousSequenceID = receivedSequenceID;
 
          recievedMessageNotification.set();
       });
@@ -208,9 +219,19 @@ public class ROS2BehaviorTreeSubscription<T extends BehaviorTreeNodeLayer<T, ?, 
       return numberOfMessagesReceived;
    }
 
+   public long getPreviousSequenceID()
+   {
+      return previousSequenceID;
+   }
+
    public long getMessageDropCount()
    {
-      return messageDropCount;
+      return messageDropCount - outOfOrderCount;
+   }
+
+   public long getOutOfOrderCount()
+   {
+      return outOfOrderCount;
    }
 
    public int getNumberOfOnRobotNodes()
