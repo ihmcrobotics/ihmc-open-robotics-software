@@ -4,17 +4,24 @@ import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.tools.IHMCCommonPaths;
 import us.ihmc.tools.io.WorkspaceResourceDirectory;
 import us.ihmc.tools.io.WorkspaceResourceFile;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class YOLOv8Tools
 {
+   public static final String CLASS_NAME_FILE_NAME = "class_names.yaml";
    private static final WorkspaceResourceDirectory POINT_CLOUD_DIRECTORY = new WorkspaceResourceDirectory(YOLOv8DetectionClass.class, "/yoloICPPointClouds/");
 
    public static List<Point3D32> filterOutliers(List<Point3D32> pointCloud, double zScoreThreshold, int numberOfSamples)
@@ -113,5 +120,67 @@ public class YOLOv8Tools
       centroid.scale(1.0 / numberOfPointsToUse);
 
       return centroid;
+   }
+
+   public static List<Path> getYoloModelDirectories()
+   {
+      return getYoloModelDirectories(IHMCCommonPaths.YOLO_MODELS_DIRECTORY);
+   }
+
+   public static List<Path> getYoloModelDirectories(Path baseDirectoryPath)
+   {
+      try (Stream<Path> directoryContents = Files.list(baseDirectoryPath))
+      {
+         return directoryContents.filter(YOLOv8Tools::isValidYOLOModelDirectory).toList();
+      }
+      catch (IOException e)
+      {
+         return null;
+      }
+   }
+
+   public static boolean isValidYOLOModelDirectory(Path yoloModelDirectory)
+   {
+      try (Stream<Path> onnxFiles = Files.list(yoloModelDirectory).filter(path -> path.getFileName().toString().endsWith(".onnx"));
+           Stream<Path> classNameFiles = Files.list(yoloModelDirectory).filter(path -> path.getFileName().toString().equals(CLASS_NAME_FILE_NAME)))
+      {
+         return onnxFiles.count() == 1 && classNameFiles.count() == 1;
+      }
+      catch (IOException e)
+      {
+         return false;
+      }
+   }
+
+   public static Path getONNXFile(Path yoloModelDirectory)
+   {
+      try (Stream<Path> directoryContents = Files.list(yoloModelDirectory))
+      {
+         Optional<Path> onnxFile = directoryContents.filter(path -> path.getFileName().toString().endsWith(".onnx")).findAny();
+         if (onnxFile.isPresent())
+            return onnxFile.get();
+
+         throw new IllegalArgumentException("Could not find an onnx file in %s".formatted(yoloModelDirectory.toString()));
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
+   }
+
+   public static Path getClassNamesFile(Path yoloModelDirectory)
+   {
+      try (Stream<Path> directoryContents = Files.list(yoloModelDirectory))
+      {
+         Optional<Path> classNamesFile = directoryContents.filter(path -> path.getFileName().endsWith(CLASS_NAME_FILE_NAME)).findAny();
+         if (classNamesFile.isPresent())
+            return classNamesFile.get();
+
+         throw new IllegalArgumentException("Could not find an class names file in %s".formatted(yoloModelDirectory.toString()));
+      }
+      catch (IOException e)
+      {
+         throw new RuntimeException(e);
+      }
    }
 }

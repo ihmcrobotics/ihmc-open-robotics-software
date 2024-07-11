@@ -4,11 +4,10 @@ import org.junit.jupiter.api.Test;
 
 public class YOLOv8ObjectDetectorTest
 {
-   private static final String
-
    @Test
-   public void testMultipleModels()
+   public void testInitialization()
    {
-
+      YOLOv8Model model = new YOLOv8Model(YOLOv8Tools.getYoloModelDirectories().get(0));
+      YOLOv8ObjectDetector objectDetector = new YOLOv8ObjectDetector(model);
    }
 }

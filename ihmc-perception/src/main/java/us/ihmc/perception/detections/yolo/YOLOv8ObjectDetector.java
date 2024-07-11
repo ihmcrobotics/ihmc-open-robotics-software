@@ -31,10 +31,11 @@ public class YOLOv8ObjectDetector
    private static final int NUMBER_OF_DETECTABLE_CLASSES = YOLOv8DetectionClass.values().length;
 
    private final Net yoloNet;
-   private final StringVector outputNames;
+   private final StringVector outputNames; // literally list of "output0", "output1", "output2"...
 
    private final AtomicBoolean isReady = new AtomicBoolean(true);
 
+   // TODO: Remove
    public YOLOv8ObjectDetector(String onnxFileName)
    {
       WorkspaceResourceDirectory directory = new WorkspaceResourceDirectory(getClass(), "/yolo/");
@@ -51,6 +52,24 @@ public class YOLOv8ObjectDetector
       {
          throw new RuntimeException(e);
       }
+      if (opencv_core.getCudaEnabledDeviceCount() > 0)
+      {
+         yoloNet.setPreferableBackend(opencv_dnn.DNN_BACKEND_CUDA);
+         yoloNet.setPreferableTarget(opencv_dnn.DNN_TARGET_CUDA);
+      }
+      else
+      {
+         yoloNet.setPreferableBackend(opencv_dnn.DNN_BACKEND_OPENCV);
+         yoloNet.setPreferableTarget(opencv_dnn.DNN_TARGET_CPU);
+      }
+
+      outputNames = yoloNet.getUnconnectedOutLayersNames();
+   }
+
+   public YOLOv8ObjectDetector(YOLOv8Model model)
+   {
+      yoloNet = opencv_dnn.readNetFromONNX(model.readONNXFile());
+
       if (opencv_core.getCudaEnabledDeviceCount() > 0)
       {
          yoloNet.setPreferableBackend(opencv_dnn.DNN_BACKEND_CUDA);
