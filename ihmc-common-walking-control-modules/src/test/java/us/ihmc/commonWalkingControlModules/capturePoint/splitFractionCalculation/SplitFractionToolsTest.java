@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.RandomNumbers;
 
 import java.util.Random;
 
@@ -81,15 +82,15 @@ public class SplitFractionToolsTest
    @Test
    public void testRandom()
    {
+      Random random = new Random(66);
       for (int i = 0; i < 1e5; i++)
       {
-         Random random = new Random(66);
          //generating random numbers between min and max
          double min = -100.0;
          double max = 100.0;
-         defaultSplitFraction = random.nextDouble() * (max - min) + min;
-         currentSplitFraction = random.nextDouble() * (max - min) + min;
-         transferSplitFraction = random.nextDouble() * (max - min) + min;
+         defaultSplitFraction = RandomNumbers.nextDouble(random, min, max);
+         currentSplitFraction = RandomNumbers.nextDouble(random, min, max);
+         transferSplitFraction = RandomNumbers.nextDouble(random, min, max);
          calculateValues();
          if (transferSplitFraction > defaultSplitFraction)
          {
