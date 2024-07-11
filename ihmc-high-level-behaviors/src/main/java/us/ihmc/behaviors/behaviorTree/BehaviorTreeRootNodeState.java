@@ -8,7 +8,6 @@ import us.ihmc.communication.crdt.CRDTBidirectionalInteger;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.CRDTUnidirectionalBoolean;
 import us.ihmc.communication.crdt.CRDTUnidirectionalNotification;
-import us.ihmc.communication.crdt.CRDTUnidirectionalString;
 import us.ihmc.communication.ros2.ROS2ActorDesignation;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SidedObject;
@@ -132,11 +131,6 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    public int getExecutionNextIndex()
    {
       return executionNextIndex.getValue();
-   }
-
-   public String getNextActionRejectionTooltip()
-   {
-      return nextActionRejectionTooltip.getValue();
    }
 
    public boolean getAutomaticExecution()
