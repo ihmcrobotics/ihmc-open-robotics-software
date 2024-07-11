@@ -15,7 +15,7 @@ public class ScrewPrimitiveActionStateMessagePubSubType implements us.ihmc.pubsu
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "34986b85c5efd8b6cbc8a3fe972a0861592d4af77c01ef358bf5ef35146d620e";
+   		return "10a5f9889ea8eb7d5c554479fb2cc6682a2614be160a54ce9f37a4e448b1352a";
    }
    
    @Override

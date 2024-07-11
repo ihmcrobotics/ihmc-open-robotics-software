@@ -15,7 +15,7 @@ public class ActionNodeDefinitionMessagePubSubType implements us.ihmc.pubsub.Top
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "59a7debeaa26e909b06b72ec9d46d595043929454a769f54ce620dd78130d9a9";
+   		return "5e834ca2e3e43dd373688712d596c3618c4636091cd9b65845002e5fd2f6d9d7";
    }
    
    @Override

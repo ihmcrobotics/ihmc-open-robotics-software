@@ -15,7 +15,7 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "290addff11186e07f828bfb8b172c31808fd91bb94874871e149d54075c854cd";
+   		return "9bb05f636bf00ff53f9dd4ccd6cb3b79baebd4459f5cfc916a0d35e5be8ccd90";
    }
    
    @Override
@@ -53,7 +53,6 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
       int initial_alignment = current_alignment;
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
@@ -71,8 +70,6 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getNotes().length() + 1;
-
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
 
@@ -86,10 +83,6 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
       cdr.write_type_d(data.getName());else
           throw new RuntimeException("name field exceeds the maximum length");
 
-      if(data.getNotes().length() <= 255)
-      cdr.write_type_d(data.getNotes());else
-          throw new RuntimeException("notes field exceeds the maximum length");
-
       cdr.write_type_3(data.getNumberOfChildren());
 
    }
@@ -97,7 +90,6 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
    public static void read(behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.read_type_d(data.getName());	
-      cdr.read_type_d(data.getNotes());	
       data.setNumberOfChildren(cdr.read_type_3());
       	
 
@@ -107,7 +99,6 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
    public final void serialize(behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_d("name", data.getName());
-      ser.write_type_d("notes", data.getNotes());
       ser.write_type_3("number_of_children", data.getNumberOfChildren());
    }
 
@@ -115,7 +106,6 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage data)
    {
       ser.read_type_d("name", data.getName());
-      ser.read_type_d("notes", data.getNotes());
       data.setNumberOfChildren(ser.read_type_3("number_of_children"));
    }
 

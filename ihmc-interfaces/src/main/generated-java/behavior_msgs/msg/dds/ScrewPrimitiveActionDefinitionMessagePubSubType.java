@@ -15,7 +15,7 @@ public class ScrewPrimitiveActionDefinitionMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "2702287f770d3992565d62e2d618da1f177ca11fd6f0d6dcf28bcee91888e8b5";
+   		return "3e240d2dd7e455b3577d6706c726c48a8b3be629c33d3467270c8c001847979c";
    }
    
    @Override

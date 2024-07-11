@@ -15,7 +15,7 @@ public class FootPoseActionStateMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "d9a908cc66de3543a79f3f0102b6eacd2601b30c5f847b6bc4d25947e1b9e79f";
+   		return "cc9075d06aad678f8cc4b763059f72f39c688943c6e98da8c19bd6b3ad1d9035";
    }
    
    @Override

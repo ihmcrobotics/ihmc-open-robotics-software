@@ -12,6 +12,8 @@ import us.ihmc.pubsub.TopicDataType;
        * in this message because ROS 2 messages cannot contain themselves.
        * Instead we use a depth first ordered list and number of children
        * to send trees over. This is contained in another higher level message.
+       * Long form notes about the node.
+       * string notes
        */
 public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDefinitionMessage> implements Settable<BehaviorTreeNodeDefinitionMessage>, EpsilonComparable<BehaviorTreeNodeDefinitionMessage>
 {
@@ -20,10 +22,6 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
             */
    public java.lang.StringBuilder name_;
    /**
-            * Long form notes about the node.
-            */
-   public java.lang.StringBuilder notes_;
-   /**
             * Number of children
             */
    public int number_of_children_;
@@ -31,7 +29,6 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
    public BehaviorTreeNodeDefinitionMessage()
    {
       name_ = new java.lang.StringBuilder(255);
-      notes_ = new java.lang.StringBuilder(255);
    }
 
    public BehaviorTreeNodeDefinitionMessage(BehaviorTreeNodeDefinitionMessage other)
@@ -44,9 +41,6 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
    {
       name_.setLength(0);
       name_.append(other.name_);
-
-      notes_.setLength(0);
-      notes_.append(other.notes_);
 
       number_of_children_ = other.number_of_children_;
 
@@ -74,30 +68,6 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
    public java.lang.StringBuilder getName()
    {
       return name_;
-   }
-
-   /**
-            * Long form notes about the node.
-            */
-   public void setNotes(java.lang.String notes)
-   {
-      notes_.setLength(0);
-      notes_.append(notes);
-   }
-
-   /**
-            * Long form notes about the node.
-            */
-   public java.lang.String getNotesAsString()
-   {
-      return getNotes().toString();
-   }
-   /**
-            * Long form notes about the node.
-            */
-   public java.lang.StringBuilder getNotes()
-   {
-      return notes_;
    }
 
    /**
@@ -135,8 +105,6 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.name_, other.name_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.notes_, other.notes_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_children_, other.number_of_children_, epsilon)) return false;
 
 
@@ -154,8 +122,6 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
 
       if (!us.ihmc.idl.IDLTools.equals(this.name_, otherMyClass.name_)) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.notes_, otherMyClass.notes_)) return false;
-
       if(this.number_of_children_ != otherMyClass.number_of_children_) return false;
 
 
@@ -170,8 +136,6 @@ public class BehaviorTreeNodeDefinitionMessage extends Packet<BehaviorTreeNodeDe
       builder.append("BehaviorTreeNodeDefinitionMessage {");
       builder.append("name=");
       builder.append(this.name_);      builder.append(", ");
-      builder.append("notes=");
-      builder.append(this.notes_);      builder.append(", ");
       builder.append("number_of_children=");
       builder.append(this.number_of_children_);
       builder.append("}");
