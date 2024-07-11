@@ -4,6 +4,9 @@
 # Instead we use a depth first ordered list and number of children
 # to send trees over. This is contained in another higher level message.
 
+# A mechanism for confirming and ending a freeze early
+ihmc_common_msgs/ConfirmableRequestMessage confirmable_request
+
 # The name of the node including .json if it's a JSON root node
 string name
 
