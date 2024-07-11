@@ -15,7 +15,7 @@ public class FootPoseActionDefinitionMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "eecd3d450c985d87891c1103880feb778d6eb731a082ec3618f2e148af567d9c";
+   		return "a39f1c05580b4d2216bf63f97b0f661845e046025261d785ecbfe39db48cde45";
    }
    
    @Override

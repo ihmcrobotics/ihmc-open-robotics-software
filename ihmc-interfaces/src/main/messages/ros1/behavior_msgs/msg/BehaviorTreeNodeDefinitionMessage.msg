@@ -6,6 +6,9 @@
 # Long form notes about the node.
 # string notes
 
+# A mechanism for confirming and ending a freeze early
+ihmc_common_msgs/ConfirmableRequestMessage confirmable_request
+
 # The name of the node including .json if it's a JSON root node
 string name
 

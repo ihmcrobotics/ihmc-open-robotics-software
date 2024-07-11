@@ -1,6 +1,7 @@
 #ifndef __behavior_msgs__msg__BehaviorTreeNodeDefinitionMessage__idl__
 #define __behavior_msgs__msg__BehaviorTreeNodeDefinitionMessage__idl__
 
+#include "ihmc_common_msgs/msg/./ConfirmableRequestMessage_.idl"
 module behavior_msgs
 {
   module msg
@@ -20,6 +21,10 @@ module behavior_msgs
       @TypeCode(type="behavior_msgs::msg::dds_::BehaviorTreeNodeDefinitionMessage_")
       struct BehaviorTreeNodeDefinitionMessage
       {
+        /**
+         * A mechanism for confirming and ending a freeze early
+         */
+        ihmc_common_msgs::msg::dds::ConfirmableRequestMessage confirmable_request;
         /**
          * The name of the node including .json if it's a JSON root node
          */

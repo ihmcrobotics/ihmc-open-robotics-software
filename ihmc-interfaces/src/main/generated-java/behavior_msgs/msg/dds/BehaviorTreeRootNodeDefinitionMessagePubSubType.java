@@ -15,7 +15,7 @@ public class BehaviorTreeRootNodeDefinitionMessagePubSubType implements us.ihmc.
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "0a57b54e67d96118c7ae84770f3107c41f12cd7f5361f611bed2e353a2da091a";
+   		return "870fc9371372bbec8267eab131f1c7d5ac3a24e2c688c5feeb54e7e435cf5a84";
    }
    
    @Override

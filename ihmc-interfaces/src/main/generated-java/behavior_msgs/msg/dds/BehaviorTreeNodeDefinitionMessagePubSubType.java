@@ -15,7 +15,7 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "9bb05f636bf00ff53f9dd4ccd6cb3b79baebd4459f5cfc916a0d35e5be8ccd90";
+   		return "5de090fbb6abf284742220856935c60049ac4335a81197831b63cfafe38b9cd4";
    }
    
    @Override
@@ -52,6 +52,8 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
 
@@ -68,6 +70,8 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.getCdrSerializedSize(data.getConfirmableRequest(), current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
 
       current_alignment += 2 + us.ihmc.idl.CDR.alignment(current_alignment, 2);
@@ -79,6 +83,7 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
 
    public static void write(behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
+      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.write(data.getConfirmableRequest(), cdr);
       if(data.getName().length() <= 255)
       cdr.write_type_d(data.getName());else
           throw new RuntimeException("name field exceeds the maximum length");
@@ -89,6 +94,7 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
 
    public static void read(behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage data, us.ihmc.idl.CDR cdr)
    {
+      ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType.read(data.getConfirmableRequest(), cdr);	
       cdr.read_type_d(data.getName());	
       data.setNumberOfChildren(cdr.read_type_3());
       	
@@ -98,6 +104,8 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void serialize(behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
+
       ser.write_type_d("name", data.getName());
       ser.write_type_3("number_of_children", data.getNumberOfChildren());
    }
@@ -105,6 +113,8 @@ public class BehaviorTreeNodeDefinitionMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, behavior_msgs.msg.dds.BehaviorTreeNodeDefinitionMessage data)
    {
+      ser.read_type_a("confirmable_request", new ihmc_common_msgs.msg.dds.ConfirmableRequestMessagePubSubType(), data.getConfirmableRequest());
+
       ser.read_type_d("name", data.getName());
       data.setNumberOfChildren(ser.read_type_3("number_of_children"));
    }
