@@ -15,7 +15,7 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final java.lang.String getDefinitionChecksum()
    {
-   		return "af750cbd004ae4bfc64172f67f7a4e6628326bea9351a7faf466eec0e6e6d2f9";
+   		return "7c898085303e81dc7b162eaf656d700b27ba8f7f140be03a6b8effaa931e855b";
    }
    
    @Override
@@ -62,6 +62,12 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += perception_msgs.msg.dds.ImageMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += perception_msgs.msg.dds.ImageMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += perception_msgs.msg.dds.ImageMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 511; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.Point32PubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -97,6 +103,12 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       current_alignment += ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.getCdrSerializedSize(data.getPersistentDetectionId(), current_alignment);
 
+      current_alignment += perception_msgs.msg.dds.ImageMessagePubSubType.getCdrSerializedSize(data.getYoloColorImage(), current_alignment);
+
+      current_alignment += perception_msgs.msg.dds.ImageMessagePubSubType.getCdrSerializedSize(data.getYoloDepthImage(), current_alignment);
+
+      current_alignment += perception_msgs.msg.dds.ImageMessagePubSubType.getCdrSerializedSize(data.getYoloObjectMask(), current_alignment);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getYoloObjectPointCloud().size(); ++i0)
       {
@@ -129,6 +141,9 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
       geometry_msgs.msg.dds.PosePubSubType.write(data.getObjectPose(), cdr);
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.write(data.getDetectionTime(), cdr);
       ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.write(data.getPersistentDetectionId(), cdr);
+      perception_msgs.msg.dds.ImageMessagePubSubType.write(data.getYoloColorImage(), cdr);
+      perception_msgs.msg.dds.ImageMessagePubSubType.write(data.getYoloDepthImage(), cdr);
+      perception_msgs.msg.dds.ImageMessagePubSubType.write(data.getYoloObjectMask(), cdr);
       if(data.getYoloObjectPointCloud().size() <= 511)
       cdr.write_type_e(data.getYoloObjectPointCloud());else
           throw new RuntimeException("yolo_object_point_cloud field exceeds the maximum length");
@@ -154,6 +169,9 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
       geometry_msgs.msg.dds.PosePubSubType.read(data.getObjectPose(), cdr);	
       ihmc_common_msgs.msg.dds.InstantMessagePubSubType.read(data.getDetectionTime(), cdr);	
       ihmc_common_msgs.msg.dds.UUIDMessagePubSubType.read(data.getPersistentDetectionId(), cdr);	
+      perception_msgs.msg.dds.ImageMessagePubSubType.read(data.getYoloColorImage(), cdr);	
+      perception_msgs.msg.dds.ImageMessagePubSubType.read(data.getYoloDepthImage(), cdr);	
+      perception_msgs.msg.dds.ImageMessagePubSubType.read(data.getYoloObjectMask(), cdr);	
       cdr.read_type_e(data.getYoloObjectPointCloud());	
       for(int i0 = 0; i0 < data.getCenterPoseBoundingBox2dVertices().length; ++i0)
       {
@@ -180,6 +198,12 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       ser.write_type_a("persistent_detection_id", new ihmc_common_msgs.msg.dds.UUIDMessagePubSubType(), data.getPersistentDetectionId());
 
+      ser.write_type_a("yolo_color_image", new perception_msgs.msg.dds.ImageMessagePubSubType(), data.getYoloColorImage());
+
+      ser.write_type_a("yolo_depth_image", new perception_msgs.msg.dds.ImageMessagePubSubType(), data.getYoloDepthImage());
+
+      ser.write_type_a("yolo_object_mask", new perception_msgs.msg.dds.ImageMessagePubSubType(), data.getYoloObjectMask());
+
       ser.write_type_e("yolo_object_point_cloud", data.getYoloObjectPointCloud());
       ser.write_type_f("center_pose_bounding_box_2d_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getCenterPoseBoundingBox2dVertices());
       ser.write_type_f("center_pose_bounding_box_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getCenterPoseBoundingBoxVertices());
@@ -196,6 +220,12 @@ public class InstantDetectionMessagePubSubType implements us.ihmc.pubsub.TopicDa
       ser.read_type_a("detection_time", new ihmc_common_msgs.msg.dds.InstantMessagePubSubType(), data.getDetectionTime());
 
       ser.read_type_a("persistent_detection_id", new ihmc_common_msgs.msg.dds.UUIDMessagePubSubType(), data.getPersistentDetectionId());
+
+      ser.read_type_a("yolo_color_image", new perception_msgs.msg.dds.ImageMessagePubSubType(), data.getYoloColorImage());
+
+      ser.read_type_a("yolo_depth_image", new perception_msgs.msg.dds.ImageMessagePubSubType(), data.getYoloDepthImage());
+
+      ser.read_type_a("yolo_object_mask", new perception_msgs.msg.dds.ImageMessagePubSubType(), data.getYoloObjectMask());
 
       ser.read_type_e("yolo_object_point_cloud", data.getYoloObjectPointCloud());
       ser.read_type_f("center_pose_bounding_box_2d_vertices", new geometry_msgs.msg.dds.PointPubSubType(), data.getCenterPoseBoundingBox2dVertices());

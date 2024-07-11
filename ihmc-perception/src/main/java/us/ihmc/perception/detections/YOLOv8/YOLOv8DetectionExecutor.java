@@ -136,11 +136,10 @@ public class YOLOv8DetectionExecutor
                                     opencv_imgproc.getStructuringElement(opencv_imgproc.CV_SHAPE_RECT,
                                                                          new Size(2 * erosionKernelRadius + 1, 2 * erosionKernelRadius + 1),
                                                                          new Point(erosionKernelRadius, erosionKernelRadius)));
-               erodedMask.copyTo(objectMask.getCpuImageMat()); // RawImage isn't designed for this, but it works... 10/10 wouldn't recommend.
-               objectMask.getGpuImageMat().upload(erodedMask);
+               RawImage erodedObjectMask = objectMask.replaceImage(erodedMask);
 
                // Get the segmented depth image
-               RawImage segmentedDepth = segmenter.removeBackground(depthImage, objectMask);
+               RawImage segmentedDepth = segmenter.removeBackground(depthImage, erodedObjectMask);
                // Get the point cloud
                List<Point3D32> pointCloud = extractor.extractPointCloud(segmentedDepth);
                // Filter out outliers from the point cloud
@@ -155,8 +154,12 @@ public class YOLOv8DetectionExecutor
                                                                                     simpleDetection.confidence(),
                                                                                     new Pose3D(centroid, new RotationMatrix()),
                                                                                     objectMask.getAcquisitionTime(),
+                                                                                    colorImage,
+                                                                                    depthImage,
+                                                                                    erodedObjectMask,
                                                                                     pointCloud);
                yoloInstantDetections.add(instantDetection);
+               erodedMask.release();
             }
 
             // Submit the callbacks to be processed

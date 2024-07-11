@@ -9,6 +9,9 @@ ihmc_common_msgs/InstantMessage detection_time
 ihmc_common_msgs/UUIDMessage persistent_detection_id
 
 # YOLOv8InstantDetection fields:
+perception_msgs/ImageMessage yolo_color_image
+perception_msgs/ImageMessage yolo_depth_image
+perception_msgs/ImageMessage yolo_object_mask
 geometry_msgs/Point32[<=511] yolo_object_point_cloud
 
 # CenterPoseInstantDetection fields:

@@ -169,7 +169,10 @@ public class DetectionManager
          {
             PersistentDetection detection = detectionIterator.next();
             if (detection.isReadyForDeletion())
+            {
+               detection.destroy();
                detectionIterator.remove();
+            }
             else
             {
                detection.updateHistory(now);
