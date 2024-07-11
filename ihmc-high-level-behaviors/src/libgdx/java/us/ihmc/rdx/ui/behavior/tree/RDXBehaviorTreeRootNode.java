@@ -1,13 +1,10 @@
 package us.ihmc.rdx.ui.behavior.tree;
 
-import com.badlogic.gdx.graphics.Color;
 import imgui.ImGui;
-import imgui.flag.ImGuiCol;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeDefinition;
 import us.ihmc.behaviors.behaviorTree.BehaviorTreeRootNodeState;
 import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.rdx.imgui.ImBooleanWrapper;
-import us.ihmc.rdx.imgui.ImGuiFlashingText;
 import us.ihmc.rdx.imgui.ImGuiTools;
 import us.ihmc.rdx.imgui.ImGuiUniqueLabelMap;
 import us.ihmc.rdx.ui.behavior.sequence.RDXActionNode;
@@ -25,7 +22,6 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
    private final ImBooleanWrapper automaticExecutionCheckbox;
    private final ImBooleanWrapper concurrencyEnabledCheckbox;
    private final Timer manualExecutionOverrideTimer = new Timer();
-   private final ImGuiFlashingText executionRejectionTooltipText = new ImGuiFlashingText(Color.RED.toIntBits());
    private final List<RDXActionNode<?, ?>> actionChildren = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> nextForExecutionActions = new ArrayList<>();
    private final List<RDXActionNode<?, ?>> currentlyExecutingActions = new ArrayList<>();
@@ -115,35 +111,26 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
       boolean endOfSequence = getState().getExecutionNextIndex() >= getState().getActionChildren().size();
       if (!endOfSequence)
       {
-         String nextActionRejectionTooltip = getState().getNextActionRejectionTooltip();
-         boolean canExecuteNextAction = nextActionRejectionTooltip.isEmpty();
-
          ImGui.sameLine();
          ImGui.text("Execute");
          ImGui.sameLine();
 
-         if (!canExecuteNextAction)
-            ImGui.beginDisabled();
          automaticExecutionCheckbox.renderImGuiWidget();
          if (automaticExecutionCheckbox.changed())
             getDefinition().freeze();
-         if (!canExecuteNextAction)
-            ImGui.endDisabled();
 
          ImGuiTools.previousWidgetTooltip("Enables autonomous execution. Will immediately start executing when checked.");
          if (!getState().getAutomaticExecution())
          {
             ImGui.sameLine();
 
-            if (!canExecuteNextAction)
-               ImGui.pushStyleColor(ImGuiCol.Button, Color.RED.toIntBits());
             boolean confirmationState = manualExecutionOverrideTimer.isRunning(5.0);
             boolean disableManuallyExecuteButton = getState().getManualExecutionRequested();
             if (disableManuallyExecuteButton)
                ImGui.beginDisabled();
             if (ImGui.button(labels.get(confirmationState ? "Manually (confirm)" : "Manually")))
             {
-               if (canExecuteNextAction || confirmationState)
+               if (confirmationState)
                {
                   getState().setManualExecutionRequested();
                }
@@ -154,14 +141,7 @@ public class RDXBehaviorTreeRootNode extends RDXBehaviorTreeNode<BehaviorTreeRoo
             }
             if (disableManuallyExecuteButton)
                ImGui.endDisabled();
-            if (!canExecuteNextAction)
-               ImGui.popStyleColor();
             ImGuiTools.previousWidgetTooltip("Executes the next action.");
-
-            if (!getState().getNextActionRejectionTooltip().isEmpty())
-            {
-               executionRejectionTooltipText.renderText(getState().getNextActionRejectionTooltip(), true);
-            }
          }
 
          if (endOfSequence)

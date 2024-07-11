@@ -25,7 +25,6 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    private final CRDTBidirectionalInteger executionNextIndex;
    private final CRDTUnidirectionalNotification manualExecutionRequested;
    private final CRDTUnidirectionalBoolean concurrencyEnabled;
-   private final CRDTUnidirectionalString nextActionRejectionTooltip;
 
    private transient final MutableInt actionIndex = new MutableInt();
    private final List<ActionNodeState<?>> actionChildren = new ArrayList<>();
@@ -40,7 +39,6 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
       executionNextIndex = new CRDTBidirectionalInteger(definition, 0);
       manualExecutionRequested = new CRDTUnidirectionalNotification(ROS2ActorDesignation.OPERATOR, definition);
       concurrencyEnabled = new CRDTUnidirectionalBoolean(ROS2ActorDesignation.OPERATOR, definition, true);
-      nextActionRejectionTooltip = new CRDTUnidirectionalString(ROS2ActorDesignation.ROBOT, definition, "");
    }
 
    @Override
@@ -79,7 +77,6 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
       message.setExecutionNextIndex(executionNextIndex.toMessage());
       message.setManualExecutionRequested(manualExecutionRequested.toMessage());
       message.setConcurrencyEnabled(concurrencyEnabled.toMessage());
-      message.setNextActionRejectionTooltip(nextActionRejectionTooltip.toMessage());
    }
 
    public void fromMessage(BehaviorTreeRootNodeStateMessage message)
@@ -92,7 +89,6 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
       executionNextIndex.fromMessage(message.getExecutionNextIndex());
       manualExecutionRequested.fromMessage(message.getManualExecutionRequested());
       concurrencyEnabled.fromMessage(message.getConcurrencyEnabled());
-      nextActionRejectionTooltip.fromMessage(message.getNextActionRejectionTooltipAsString());
    }
 
    @Nullable
@@ -136,11 +132,6 @@ public class BehaviorTreeRootNodeState extends BehaviorTreeNodeState<BehaviorTre
    public int getExecutionNextIndex()
    {
       return executionNextIndex.getValue();
-   }
-
-   public void setNextActionRejectionTooltip(String nextActionRejectionTooltip)
-   {
-      this.nextActionRejectionTooltip.setValue(nextActionRejectionTooltip);
    }
 
    public String getNextActionRejectionTooltip()
