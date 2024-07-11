@@ -177,7 +177,7 @@ public class TrashCanNode extends DetectableSceneNode
          trashCanHandleDepthImage.release();
 
          // Make sure we have points
-         if (handlePoints.isEmpty())
+         if (handlePoints.isEmpty() || handlePoints.size() < 32)
             return handleCentroid;
 
          handleCentroid = YOLOv8Tools.computeCentroidOfPointCloud(handlePoints, 128);
