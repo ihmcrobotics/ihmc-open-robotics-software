@@ -4,6 +4,7 @@ import us.ihmc.communication.crdt.CRDTInfo;
 import us.ihmc.communication.crdt.RequestConfirmFreezable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class SceneNode extends RequestConfirmFreezable
       this.nodeFrame = new MutableReferenceFrame(name, ReferenceFrame.getWorldFrame());
    }
 
-   public void update(SceneGraph sceneGraph)
+   public void update(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
 
    }

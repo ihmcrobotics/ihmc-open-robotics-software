@@ -9,6 +9,7 @@ import us.ihmc.perception.detections.PersistentDetection;
 import us.ihmc.perception.detections.YOLOv8.YOLOv8InstantDetection;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,9 +74,9 @@ public class YOLOv8Node extends DetectableSceneNode
    }
 
    @Override
-   public void update(SceneGraph sceneGraph)
+   public void update(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
-      super.update(sceneGraph);
+      super.update(sceneGraph, modificationQueue);
 
       setCurrentlyDetected(yoloDetection.isStable());
       setConfidence(getMostRecentDetection().getConfidence());

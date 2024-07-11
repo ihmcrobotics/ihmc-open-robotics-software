@@ -20,6 +20,7 @@ import us.ihmc.perception.opencl.OpenCLPointCloudExtractor;
 import us.ihmc.perception.opencv.OpenCVTools;
 import us.ihmc.perception.sceneGraph.DetectableSceneNode;
 import us.ihmc.perception.sceneGraph.SceneGraph;
+import us.ihmc.perception.sceneGraph.modification.SceneGraphModificationQueue;
 import us.ihmc.robotics.referenceFrames.MutableReferenceFrame;
 
 import java.util.List;
@@ -49,9 +50,9 @@ public class TrashCanNode extends DetectableSceneNode
 
    // on robot only
    @Override
-   public void update(SceneGraph sceneGraph)
+   public void update(SceneGraph sceneGraph, SceneGraphModificationQueue modificationQueue)
    {
-      super.update(sceneGraph);
+      super.update(sceneGraph, modificationQueue);
 
       Point3D32 handleCentroid = computeHandleCentroid((YOLOv8InstantDetection) trashCanDetection.getMostRecentDetection());
       Point3DReadOnly trashCanCentroid = trashCanDetection.getMostRecentPosition();

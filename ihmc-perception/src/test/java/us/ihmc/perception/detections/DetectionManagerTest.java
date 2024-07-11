@@ -331,7 +331,7 @@ public class DetectionManagerTest
    {
       Mat mat = new Mat(10, 10, opencv_core.CV_8UC1);
       return new RawImage(0,
-                          Instant.now(),
+                          now,
                           0.0f,
                           mat,
                           null,
